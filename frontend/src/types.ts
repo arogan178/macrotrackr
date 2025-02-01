@@ -25,6 +25,6 @@ export interface MacroInputs {
 
 export interface UserDetails {
   id: number;
-  username: string;
+  full_name: string;
   email: string;
 }

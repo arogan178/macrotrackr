@@ -3,7 +3,7 @@ import { cors } from "@elysiajs/cors";
 import { jwt } from "@elysiajs/jwt";
 import { Database } from "bun:sqlite";
 import { hash, verify } from "@node-rs/bcrypt";
-import jwt_secret from "./.env";
+// import jwt_secret from "./.env";
 
 const db = new Database("macro_tracker.db");
 
@@ -11,6 +11,7 @@ const db = new Database("macro_tracker.db");
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
+    full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -27,6 +28,8 @@ db.exec(`
 );
 `);
 
+db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+
 const app = new Elysia()
   .use(
     cors({
@@ -38,14 +41,18 @@ const app = new Elysia()
   .use(
     jwt({
       name: "jwt",
-      secret: process.env.JWT_SECRET || jwt_secret,
+      secret: process.env.JWT_SECRET || "your_secret_key",
       exp: "7d",
     })
   )
   // Auth endpoints
   .post("/api/auth/register", async ({ body, set, jwt }) => {
     try {
-      const { email, password } = body as { email: string; password: string };
+      const { email, password, fullName } = body as {
+        email: string;
+        password: string;
+        fullName: string;
+      };
 
       const existingUser = db
         .prepare("SELECT id FROM users WHERE email = ?")
@@ -56,14 +63,18 @@ const app = new Elysia()
         return { error: "User already exists" };
       }
 
-      const hashedPassword = await hash(password, 10); // Updated here
+      const hashedPassword = await hash(password, 10);
+      // Update SQL query to include fullName
       const result = db
-        .prepare("INSERT INTO users (email, password) VALUES (?, ?)")
-        .run(email, hashedPassword);
+        .prepare(
+          "INSERT INTO users (email, password, full_name) VALUES (?, ?, ?)"
+        )
+        .run(email, hashedPassword, fullName);
 
       const token = await jwt.sign({
-        userId: result.lastInsertRowid,
+        userId: Number(result.lastInsertRowid),
         email: email,
+        fullName: fullName, // Keep camelCase in JWT
       });
 
       return { token };
@@ -73,34 +84,57 @@ const app = new Elysia()
       return { error: "Registration failed" };
     }
   })
-  .post("/api/auth/login", async ({ body, set, jwt }) => {
-    try {
-      const { email, password } = body as { email: string; password: string };
 
-      const user = db
-        .prepare("SELECT id, password FROM users WHERE email = ?")
-        .get(email) as { id: number; password: string };
+  .post(
+    "/api/auth/login",
+    async ({ body, set, jwt }: { body: any; set: any; jwt: any }) => {
+      try {
+        const { email, password } = body as { email: string; password: string };
 
-      if (!user) {
-        set.status = 401;
-        return { error: "Invalid credentials" };
+        // Select fullName from database
+        const user = db
+          .prepare(
+            `
+        SELECT 
+          id, 
+          password, 
+          full_name AS fullName 
+        FROM users 
+        WHERE email = ?
+      `
+          )
+          .get(email) as {
+          id: number;
+          password: string;
+          fullName: string;
+        };
+
+        if (!user || !user.password) {
+          set.status = 401;
+          return { error: "User does not exist" };
+        }
+
+        const valid = await verify(password, user.password); // Updated here
+
+        if (!valid) {
+          set.status = 401;
+          return { error: "Invalid credentials" };
+        }
+
+        const token = await jwt.sign({
+          userId: user.id,
+          email,
+          fullName: user.fullName, // Use aliased property
+        });
+
+        return { token };
+      } catch (error) {
+        console.error("Login error:", error);
+        set.status = 500;
+        return { error: "Login failed" };
       }
-
-      const valid = await verify(password, user.password); // Updated here
-
-      if (!valid) {
-        set.status = 401;
-        return { error: "Invalid credentials" };
-      }
-
-      const token = await jwt.sign({ userId: user.id, email });
-      return { token };
-    } catch (error) {
-      console.error("Login error:", error);
-      set.status = 500;
-      return { error: "Login failed" };
     }
-  })
+  )
   // Protected routes
   .derive(async ({ jwt, request: { headers } }) => {
     const authHeader = headers.get("authorization");

@@ -1,4 +1,3 @@
-import { useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import MacroPieChart from "../components/MacroPieChart";
 import EntryTable from "../components/EntryTable";
@@ -19,7 +18,6 @@ export default function Overview() {
     calories: 0,
   });
 
-  const navigate = useNavigate();
   const [history, setHistory] = useState<MacroEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<UserDetails | null>(null);
@@ -54,13 +52,9 @@ export default function Overview() {
         },
       });
 
-      if (response.status === 401) {
+      if (!response.ok) {
         localStorage.removeItem("token");
         window.location.href = "/login";
-        return;
-      }
-
-      if (!response.ok) {
         throw new Error("Failed to load user: " + response.statusText);
       }
 
@@ -223,7 +217,7 @@ export default function Overview() {
   return (
     <div className="w-full max-w-4xl mx-auto p-2 sm:p-6 lg:p-8">
       <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between">
-        <span>Welcome Back {user?.username ? user.username : ""}</span>
+        <span>Welcome Back {user?.full_name ? user.full_name : ""}</span>
         <button
           onClick={handleLogout}
           className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"

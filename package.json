@@ -1,16 +1,5 @@
 {
   "dependencies": {
-    "@tailwindcss/forms": "^0.5.10"
-  },
-  "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.1",
-    "tailwindcss": "^4.0.3"
-  },
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "build:css": "tailwindcss -i ./src/index.css -o ./src/styles.css --watch"
+    "@tailwindcss/typography": "^0.5.16"
   }
 }

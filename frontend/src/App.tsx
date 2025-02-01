@@ -4,46 +4,47 @@ import {
   Route,
   Navigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import OverviewPage from "./pages/OverviewPage";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import AuthPage from "./pages/AuthPage";
 import { useEffect, useState } from "react";
+import "./index.css";
+// import "./App.css";
 
 function AuthHandler() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  // Check auth status
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsAuthenticated(!!token);
     setLoading(false);
-  }, []);
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+    // Add navigation effect
+    if (token && location.pathname === "/auth") {
+      navigate("/overview", { replace: true });
+    }
+  }, [location, navigate]);
 
-  // Allow access to auth pages when unauthenticated
-  if (
-    !isAuthenticated &&
-    !["/login", "/register"].includes(location.pathname)
-  ) {
-    return <Navigate to="/login" replace />;
-  }
+  if (loading) return <div>Loading...</div>;
 
-  // Redirect authenticated users away from auth pages
-  if (isAuthenticated && ["/login", "/register"].includes(location.pathname)) {
-    return <Navigate to="/overview" replace />;
+  if (!isAuthenticated && location.pathname !== "/auth") {
+    return <Navigate to="/auth" replace />;
   }
 
   return (
     <Routes>
       <Route path="/overview" element={<OverviewPage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/auth" element={<AuthPage />} />
+      <Route
+        path="*"
+        element={
+          <Navigate to={isAuthenticated ? "/overview" : "/auth"} replace />
+        }
+      />
     </Routes>
   );
 }
