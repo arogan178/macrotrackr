@@ -1,0 +1,20 @@
+{
+  "name": "backend",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "^1.2.0",
+    "@elysiajs/jwt": "^1.2.0",
+    "@node-rs/bcrypt": "^1.10.7",
+    "@types/recharts": "^1.8.29",
+    "elysia": "^1.2.10",
+    "react-hot-toast": "^2.5.1",
+    "recharts": "^2.15.0"
+  }
+}
