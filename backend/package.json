@@ -13,7 +13,7 @@
     "@elysiajs/jwt": "^1.2.0",
     "@node-rs/bcrypt": "^1.10.7",
     "@types/recharts": "^1.8.29",
-    "elysia": "^1.2.10",
+    "elysia": "^1.2.11",
     "react-hot-toast": "^2.5.1",
     "recharts": "^2.15.0"
   }
