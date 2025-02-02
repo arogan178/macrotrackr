@@ -6,6 +6,7 @@ export default function AuthPage() {
   const [fullName, setFullName] = useState(""); // added state for full name
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState(""); // new state
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();
@@ -17,6 +18,11 @@ export default function AuthPage() {
     e.preventDefault();
     setLoading(true);
     setError("");
+    if (mode === "register" && password !== confirmPassword) {
+      setError("Passwords do not match");
+      setLoading(false);
+      return;
+    }
     try {
       // Build payload and explicitly select the API endpoint based on mode
       const payload: { email: string; password: string; fullName?: string } = {
@@ -105,6 +111,25 @@ export default function AuthPage() {
               minLength={6}
             />
           </div>
+          {mode === "register" && (
+            <div>
+              <label className="block mb-2">Confirm Password</label>
+              <input
+                type="password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+          )}
+          {mode === "login" && (
+            <div className="text-right">
+              <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+                Forgot Password?
+              </a>
+            </div>
+          )}
           {/* Slide effect placeholder: additional fields can be animated here if needed */}
           <button
             type="submit"

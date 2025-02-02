@@ -159,7 +159,8 @@ const app = new Elysia()
           `
           SELECT 
             id, 
-            email, 
+            email,
+            full_name,
             strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at 
           FROM users 
           WHERE id = ?

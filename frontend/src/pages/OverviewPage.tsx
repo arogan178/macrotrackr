@@ -217,7 +217,9 @@ export default function Overview() {
   return (
     <div className="w-full max-w-4xl mx-auto p-2 sm:p-6 lg:p-8">
       <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between">
-        <span>Welcome Back {user?.full_name ? user.full_name : ""}</span>
+        <span>
+          Welcome Back {user?.full_name ? user.full_name.split(" ")[0] : ""}
+        </span>
         <button
           onClick={handleLogout}
           className="text-sm bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
