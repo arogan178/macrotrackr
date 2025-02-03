@@ -6,7 +6,7 @@ import {
   useLocation,
   useNavigate,
 } from "react-router-dom";
-import OverviewPage from "./pages/OverviewPage";
+import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import { useEffect, useState } from "react";
 import "./index.css";
@@ -25,7 +25,7 @@ function AuthHandler() {
 
     // Add navigation effect
     if (token && location.pathname === "/auth") {
-      navigate("/overview", { replace: true });
+      navigate("/home", { replace: true });
     }
   }, [location, navigate]);
 
@@ -37,13 +37,11 @@ function AuthHandler() {
 
   return (
     <Routes>
-      <Route path="/overview" element={<OverviewPage />} />
+      <Route path="/home" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route
         path="*"
-        element={
-          <Navigate to={isAuthenticated ? "/overview" : "/auth"} replace />
-        }
+        element={<Navigate to={isAuthenticated ? "/home" : "/auth"} replace />}
       />
     </Routes>
   );

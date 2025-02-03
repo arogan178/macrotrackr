@@ -52,7 +52,7 @@ export default function AuthPage() {
 
       const { token } = await response.json();
       localStorage.setItem("token", token);
-      navigate("/overview", { replace: true });
+      navigate("/home", { replace: true });
       window.location.reload(); // Force reload to update authentication state
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");

@@ -10,7 +10,7 @@ const COLORS = ["#22c55e", "#3b82f6", "#ef4444"]; // Green, Blue, Red
 
 export default function MacroPieChart({ totals }: { totals: MacroTotals }) {
   const data = [
-    { name: "Protein", value: totals.protein * 4 }, // Calories from protein
+    { name: "Protein", value: totals.protein * 4 },
     { name: "Carbs", value: totals.carbs * 4 },
     { name: "Fats", value: totals.fats * 9 },
   ];
@@ -24,8 +24,7 @@ export default function MacroPieChart({ totals }: { totals: MacroTotals }) {
             cx="50%"
             cy="50%"
             innerRadius={60}
-            outerRadius={80}
-            paddingAngle={5}
+            outerRadius={85}
             dataKey="value"
           >
             {data.map((_, index) => (
