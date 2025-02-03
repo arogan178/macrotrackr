@@ -179,17 +179,7 @@ const app = new Elysia()
     }
   })
   // Macro endpoints
-  .get("/api/macros/history", ({ userId }) => {
-    return db
-      .prepare(
-        `SELECT id, protein, carbs, fats, created_at 
-         FROM macro_entries 
-         WHERE user_id = ? 
-         ORDER BY created_at DESC`
-      )
-      .all(userId);
-  })
-  .get("/api/macro_entry", ({ userId }) => {
+  .get("/api/macro_entry/:unused?", ({ userId }) => {
     const result = db
       .prepare(
         `SELECT 
@@ -198,12 +188,23 @@ const app = new Elysia()
           COALESCE(SUM(fats), 0) AS fats
         FROM macro_entries
         WHERE user_id = ?
-        AND DATE(created_at) = DATE('now')`
+        AND DATE(created_at) = DATE('now', 'localtime')`
       )
       .get(userId) as { protein: number; carbs: number; fats: number };
 
     const calories = result.protein * 4 + result.carbs * 4 + result.fats * 9;
     return { ...result, calories };
+  })
+
+  .get("/api/macros/history/:unused?", ({ userId }) => {
+    return db
+      .prepare(
+        `SELECT id, protein, carbs, fats, created_at 
+          FROM macro_entries 
+          WHERE user_id = ? 
+          ORDER BY created_at DESC`
+      )
+      .all(userId);
   })
   .post("/api/macro_entry", ({ userId, body }) => {
     const { protein, carbs, fats } = body as Record<string, number>;

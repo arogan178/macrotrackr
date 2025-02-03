@@ -21,6 +21,28 @@ interface EntryTableProps {
   isDeleting: boolean;
 }
 
+const exportCSV = (history: MacroEntry[]) => {
+  const csvContent = [
+    "Date, Time, Protein (g), Carbs (g), Fats (g), Calories",
+    history
+      .map(
+        (entry) =>
+          `${new Date(entry.created_at).toLocaleDateString()},${new Date(
+            entry.created_at
+          ).toLocaleTimeString()},${entry.protein},${entry.carbs},${
+            entry.fats
+          },${entry.protein * 4 + entry.carbs * 4 + entry.fats * 9}`
+      )
+      .join("\n"),
+  ];
+  const blob = new Blob([csvContent.join("\n")], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "macro-entries.csv";
+  a.click();
+};
+
 export default function EntryTable({
   history,
   deleteEntry,
@@ -55,8 +77,17 @@ export default function EntryTable({
 
   return (
     <div className="mt-8">
-      <h2 className="text-lg sm:text-xl font-bold mb-4">Entry History</h2>
-
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-lg sm:text-xl font-bold">Entry History</h2>
+        {history.length > 0 && (
+          <button
+            onClick={() => exportCSV(history)}
+            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          >
+            Export CSV
+          </button>
+        )}
+      </div>
       {history.length === 0 ? (
         <div className="mt-8 text-center">
           <img
@@ -69,7 +100,7 @@ export default function EntryTable({
           </p>
         </div>
       ) : (
-        <div className="border rounded overflow-x-auto">
+        <div className="rounded overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
