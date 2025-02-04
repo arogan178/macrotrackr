@@ -24,7 +24,7 @@ export default function Overview() {
   const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<UserDetails | null>(null);
   const [isSaving, setIsSaving] = useState(false);
-  const [onEdit, setEditingEntry] = useState<MacroEntry | null>(null);
+  const [editingEntry, setEditingEntry] = useState<MacroEntry | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
@@ -325,6 +325,14 @@ export default function Overview() {
           isDeleting={isDeleting}
           isEditing={isEditing}
         />
+        {editingEntry && (
+          <EditModal
+            entry={editingEntry}
+            onSave={handleEdit}
+            onClose={() => setEditingEntry(null)}
+            isSaving={isEditing}
+          />
+        )}
       </div>
     </div>
   );
