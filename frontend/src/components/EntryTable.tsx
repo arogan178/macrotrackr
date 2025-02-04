@@ -1,11 +1,10 @@
 import { MacroEntry } from "../types";
-import { useEffect, useState } from "react";
-import { Fragment } from "react";
+import { useEffect, useState, Fragment } from "react";
 
 interface EntryTableProps {
   history: MacroEntry[];
   deleteEntry: (id: number) => void;
-  onEdit: (entry: MacroEntry) => void; // Changed from editEntry
+  onEdit: (entry: MacroEntry) => void;
   isDeleting: boolean;
   isEditing: boolean;
 }
@@ -13,12 +12,6 @@ interface EntryTableProps {
 interface GroupedEntries {
   date: string;
   entries: MacroEntry[];
-}
-
-interface EntryTableProps {
-  history: MacroEntry[];
-  deleteEntry: (id: number) => void;
-  isDeleting: boolean;
 }
 
 const exportCSV = (history: MacroEntry[]) => {

@@ -8,9 +8,10 @@ import {
 } from "react-router-dom";
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
+import SettingsPage from "./pages/SettingsPage";
+
 import { useEffect, useState } from "react";
 import "./index.css";
-// import "./App.css";
 
 function AuthHandler() {
   const location = useLocation();
@@ -39,6 +40,7 @@ function AuthHandler() {
     <Routes>
       <Route path="/home" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
+      <Route path="/settings" element={<SettingsPage />} />
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/auth"} replace />}

@@ -14,6 +14,7 @@ db.exec(`
     full_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
+    date_of_birth TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -41,7 +42,7 @@ const app = new Elysia()
   .use(
     jwt({
       name: "jwt",
-      secret: process.env.JWT_SECRET || "your_secret_key",
+      secret: process.env.JWT_SECRET!,
       exp: "7d",
     })
   )
@@ -219,6 +220,29 @@ const app = new Elysia()
 
     return { success: true };
   })
+  .delete("/api/macro_entry/:id", ({ params, userId }) => {
+    const id = Number(params.id);
+    db.prepare("DELETE FROM macro_entries WHERE id = ? AND user_id = ?").run(
+      id,
+      userId
+    );
+    return { success: true };
+  })
+  .put("/api/macro_entry/:id", ({ params, userId, body }) => {
+    const id = Number(params.id);
+    const { protein, carbs, fats } = body as Record<string, number>;
+
+    if ([protein, carbs, fats].some((val) => val < 0)) {
+      throw new Error("Invalid macro values");
+    }
+
+    db.prepare(
+      "UPDATE macro_entries SET protein = ?, carbs = ?, fats = ? WHERE id = ? AND user_id = ?"
+    ).run(protein, carbs, fats, id, userId);
+
+    return { success: true };
+  })
+
   .delete("/api/macro_entry/:id", ({ params, userId }) => {
     const id = Number(params.id);
     db.prepare("DELETE FROM macro_entries WHERE id = ? AND user_id = ?").run(
