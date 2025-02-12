@@ -62,100 +62,86 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      {" "}
-      {/* added container for centering */}
-      <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+      <div className="max-w-md w-full p-6 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-100">
           {mode === "login" ? "Login" : "Register"}
         </h2>
-        {error && <div className="mb-4 text-red-600">{error}</div>}
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-4 transition-all duration-300"
-        >
+        {error && <div className="mb-4 text-red-400 bg-red-900/50 p-3 rounded">{error}</div>}
+        <form onSubmit={handleSubmit} className="space-y-4 transition-all duration-300">
           {mode === "register" && (
             <div>
-              <label className="block mb-2">Full Name</label>
+              <label className="block mb-2 text-gray-300">Full Name</label>
               <input
                 type="text"
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
           )}
-          {/* ... Email Field ... */}
           <div>
-            <label className="block mb-2">Email</label>
+            <label className="block mb-2 text-gray-300">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
               required
             />
           </div>
-          {/* Conditionally render Full Name for register */}
-
-          {/* ... Password Field ... */}
           <div>
-            <label className="block mb-2">Password</label>
+            <label className="block mb-2 text-gray-300">Password</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
               required
               minLength={6}
             />
           </div>
           {mode === "register" && (
             <div>
-              <label className="block mb-2">Confirm Password</label>
+              <label className="block mb-2 text-gray-300">Confirm Password</label>
               <input
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full p-2 border rounded"
+                className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
                 required
               />
             </div>
           )}
           {mode === "login" && (
             <div className="text-right">
-              <a href="#" className="text-sm text-blue-600 hover:text-blue-800">
+              <a href="#" className="text-sm text-blue-400 hover:text-blue-300">
                 Forgot Password?
               </a>
             </div>
           )}
-          {/* Slide effect placeholder: additional fields can be animated here if needed */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-500 text-white p-2 rounded hover:bg-blue-600 disabled:opacity-50"
+            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
-            {loading
-              ? "Processing..."
-              : mode === "login"
-              ? "Login"
-              : "Register"}
+            {loading ? "Processing..." : mode === "login" ? "Login" : "Register"}
           </button>
         </form>
         <div className="mt-6 flex justify-center">
           <button
             onClick={toggleMode}
-            className="flex flex-col items-center space-y-1 text-blue-600 hover:text-blue-800 transition-colors"
+            className="flex flex-col items-center space-y-1 text-blue-400 hover:text-blue-300 transition-colors"
           >
             {mode === "login" ? (
               <>
-                <p className="text-sm text-gray-500">New User?</p>
+                <p className="text-sm text-gray-400">New User?</p>
                 <span className="font-semibold">Register</span>
               </>
             ) : (
               <>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-gray-400">
                   Already have an account?
                 </p>
                 <span className="font-semibold">Login</span>

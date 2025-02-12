@@ -37,23 +37,25 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
   };
 
   return (
-    <div className="p-4 rounded">
-      <div className="flex items-center">
-        <span>What did you eat today? </span>
-        <input
-          type="text"
-          className="border p-2 mr-2"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Enter food item..."
-        />
-        <button
-          onClick={handleSearch}
-          disabled={loading}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          {loading ? "Searching..." : "Search"}
-        </button>
+    <div className="p-4 rounded-lg bg-gray-800 border border-gray-700 mb-6">
+      <div className="flex flex-col sm:flex-row items-center gap-4">
+        <span className="text-gray-300">What did you eat today?</span>
+        <div className="flex-1 flex gap-2 w-full">
+          <input
+            type="text"
+            className="flex-1 border rounded px-3 py-2 bg-gray-700 border-gray-600 text-gray-100 focus:border-blue-500 focus:ring-blue-500"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Enter food item..."
+          />
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          >
+            {loading ? "Searching..." : "Search"}
+          </button>
+        </div>
       </div>
     </div>
   );
