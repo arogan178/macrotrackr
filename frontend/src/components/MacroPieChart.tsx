@@ -6,7 +6,7 @@ interface MacroTotals {
   fats: number;
 }
 
-const COLORS = ["#22c55e", "#3b82f6", "#ef4444"]; // Green, Blue, Red
+const COLORS = ["#22c55e", "#3b82f6", "#ef4444"]; // Vibrant green, blue, red
 
 export default function MacroPieChart({ totals }: { totals: MacroTotals }) {
   const data = [
@@ -26,6 +26,8 @@ export default function MacroPieChart({ totals }: { totals: MacroTotals }) {
             innerRadius={60}
             outerRadius={85}
             dataKey="value"
+            strokeWidth={2}
+            stroke="#1f2937"
           >
             {data.map((_, index) => (
               <Cell
@@ -37,14 +39,14 @@ export default function MacroPieChart({ totals }: { totals: MacroTotals }) {
         </PieChart>
       </ResponsiveContainer>
 
-      <div className="flex justify-center gap-4 mt-4">
+      <div className="flex justify-center gap-6 mt-6">
         {["Protein", "Carbs", "Fats"].map((label, index) => (
           <div key={label} className="flex items-center gap-2">
             <div
-              className="w-3 h-3 rounded-full"
+              className="w-4 h-4 rounded-full shadow-lg"
               style={{ backgroundColor: COLORS[index] }}
             />
-            <span>{label}</span>
+            <span className="text-gray-300">{label}</span>
           </div>
         ))}
       </div>

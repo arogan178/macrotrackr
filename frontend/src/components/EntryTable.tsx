@@ -71,11 +71,11 @@ export default function EntryTable({
   return (
     <div className="mt-8">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg sm:text-xl font-bold">Entry History</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-gray-100">Entry History</h2>
         {history.length > 0 && (
           <button
             onClick={() => exportCSV(history)}
-            className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
           >
             Export CSV
           </button>
@@ -85,88 +85,87 @@ export default function EntryTable({
         <div className="mt-8 text-center">
           <img
             src="/empty-state.svg"
-            className="mx-auto h-32 w-32 text-gray-400"
+            className="mx-auto h-32 w-32 opacity-50"
             alt="No entries"
           />
-          <p className="mt-1 text-sm text-gray-500">
+          <p className="mt-1 text-sm text-gray-400">
             Get started by logging your first meal
           </p>
         </div>
       ) : (
-        <div className="rounded overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+        <div className="rounded-lg overflow-x-auto border border-gray-700">
+          <table className="min-w-full divide-y divide-gray-700">
+            <thead className="bg-gray-800">
               <tr>
-                <th className="px-2 sm:px-4 py-2 text-left text-xs sm:text-sm">
+                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-300">
                   Time
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
                   Protein
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
                   Carbs
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
                   Fats
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
                   Calories
                 </th>
-                <th className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
                   Actions
                 </th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-gray-700">
               {history.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="text-center py-4">
+                  <td colSpan={6} className="text-center py-4 text-gray-400">
                     No entries yet. Add your first meal!
                   </td>
                 </tr>
               ) : (
                 groupedEntries.map((group) => (
                   <Fragment key={group.date}>
-                    <tr className="bg-gray-100">
+                    <tr className="bg-gray-800/50">
                       <td
                         colSpan={6}
-                        className="px-4 py-2 font-semibold text-sm sm:text-base"
+                        className="px-4 py-2 font-semibold text-sm sm:text-base text-gray-300"
                       >
                         {group.date}
                       </td>
                     </tr>
                     {group.entries.map((entry) => (
-                      <tr key={entry.id} className="hover:bg-gray-50">
-                        <td className="px-2 sm:px-4 py-2 text-xs sm:text-sm">
+                      <tr key={entry.id} className="bg-gray-800/20 hover:bg-gray-700/50 transition-colors">
+                        <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-300">
                           {new Date(entry.created_at).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
                         </td>
-                        <td className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
                           {entry.protein}g
                         </td>
-                        <td className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
                           {entry.carbs}g
                         </td>
-                        <td className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
+                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
                           {entry.fats}g
                         </td>
-                        <td className="px-2 sm:px-4 py-2 text-center text-xs sm:text-sm">
-                          {entry.protein * 4 + entry.carbs * 4 + entry.fats * 9}{" "}
-                          kcal
+                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
+                          {entry.protein * 4 + entry.carbs * 4 + entry.fats * 9} kcal
                         </td>
-                        <td className="px-2 sm:px-4 py-2 text-center">
+                        <td className="px-2 sm:px-4 py-3 text-center">
                           <button
                             onClick={() => onEdit(entry)}
-                            className="p-1 mr-2 rounded hover:bg-blue-500 hover:text-white transition-colors"
+                            className="p-1 mr-2 rounded hover:bg-blue-600 transition-colors"
                             aria-label="Edit entry"
                           >
                             ✏️
                           </button>
                           <button
                             onClick={() => deleteEntry(entry.id)}
-                            className="p-1 rounded hover:bg-red-500 hover:text-white transition-colors"
+                            className="p-1 rounded hover:bg-red-600 transition-colors"
                             disabled={isDeleting}
                             aria-label="Delete entry"
                           >

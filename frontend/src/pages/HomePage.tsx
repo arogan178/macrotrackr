@@ -207,10 +207,10 @@ export default function Overview() {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-gray-900">
       <Navbar />
       <div className="w-full p-2 sm:p-6 lg:p-8">
-        <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between text-gray-100">
           <span>
             Welcome Back {user?.full_name ? user.full_name.split(" ")[0] : ""}
           </span>
@@ -225,13 +225,12 @@ export default function Overview() {
           }
         />
         <form className="space-y-2" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
-            {/* Protein input */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="flex items-center justify-between sm:block">
-              <label htmlFor="protein">Protein (g):</label>
+              <label htmlFor="protein" className="text-gray-300">Protein (g):</label>
               <input
                 id="protein"
-                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-white"
+                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-gray-800 border-gray-600 text-gray-100"
                 type="number"
                 min="0"
                 value={inputs.protein}
@@ -243,12 +242,11 @@ export default function Overview() {
                 }
               />
             </div>
-            {/* Carbs Input */}
             <div className="flex items-center justify-between sm:block">
-              <label htmlFor="carbs">Carbs (g):</label>
+              <label htmlFor="carbs" className="text-gray-300">Carbs (g):</label>
               <input
                 id="carbs"
-                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-white"
+                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-gray-800 border-gray-600 text-gray-100"
                 type="number"
                 min="0"
                 value={inputs.carbs}
@@ -260,12 +258,11 @@ export default function Overview() {
                 }
               />
             </div>
-            {/* Fats Input */}
             <div className="flex items-center justify-between sm:block">
-              <label htmlFor="fats">Fats (g):</label>
+              <label htmlFor="fats" className="text-gray-300">Fats (g):</label>
               <input
                 id="fats"
-                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-white"
+                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-gray-800 border-gray-600 text-gray-100"
                 type="number"
                 min="0"
                 value={inputs.fats}
@@ -280,8 +277,8 @@ export default function Overview() {
             <div className="flex items-end justify-end">
               <button
                 type="submit"
-                className="w-full sm:w-auto bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50"
-                disabled={isSaving}
+                className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+                disabled={isSaving || (!Number(inputs.protein) && !Number(inputs.carbs) && !Number(inputs.fats))}
               >
                 {isSaving ? "Saving..." : "Save Entry"}
               </button>
@@ -290,32 +287,32 @@ export default function Overview() {
         </form>
 
         {error && (
-          <div className="mt-4 p-2 text-red-700 bg-red-100 rounded">
+          <div className="mt-4 p-2 text-red-400 bg-red-900/50 rounded">
             {error}
           </div>
         )}
 
         <div className="mt-4">
-          <h2 className="text-lg sm:text-xl font-bold">Today's Macros:</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-4 mt-2">
-            <div className="bg-gray-100 p-2 rounded">
-              <h3 className="font-semibold">Protein</h3>
-              <p>{totals.protein}g</p>
+          <h2 className="text-lg sm:text-xl font-bold text-gray-100">Today's Macros:</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
+            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+              <h3 className="font-semibold text-gray-300">Protein</h3>
+              <p className="text-gray-100">{totals.protein}g</p>
             </div>
-            <div className="bg-gray-100 p-2 rounded">
-              <h3 className="font-semibold">Carbs</h3>
-              <p>{totals.carbs}g</p>
+            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+              <h3 className="font-semibold text-gray-300">Carbs</h3>
+              <p className="text-gray-100">{totals.carbs}g</p>
             </div>
-            <div className="bg-gray-100 p-2 rounded">
-              <h3 className="font-semibold">Fats</h3>
-              <p>{totals.fats}g</p>
+            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+              <h3 className="font-semibold text-gray-300">Fats</h3>
+              <p className="text-gray-100">{totals.fats}g</p>
             </div>
           </div>
         </div>
 
-        <div className="mt-4 p-4 bg-blue-50 rounded">
-          <h3 className="font-bold text-lg">Calories</h3>
-          <p className="text-xl sm:text-2xl">{totals.calories} kcal</p>
+        <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
+          <h3 className="font-bold text-lg text-gray-100">Calories</h3>
+          <p className="text-xl sm:text-2xl text-gray-100">{totals.calories} kcal</p>
           <MacroPieChart totals={totals} />
         </div>
         <EntryTable
