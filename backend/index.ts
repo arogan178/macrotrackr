@@ -11,12 +11,24 @@ const db = new Database("macro_tracker.db");
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    full_name TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    date_of_birth TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);
+  );
+
+  CREATE TABLE IF NOT EXISTS user_details (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    date_of_birth TEXT,
+    height FLOAT,
+    weight FLOAT,
+    activity_level INTEGER CHECK(activity_level BETWEEN 1 AND 5),
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+  );
 
   CREATE TABLE IF NOT EXISTS macro_entries (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -26,7 +38,7 @@ db.exec(`
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
-);
+  );
 `);
 
 db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
@@ -47,13 +59,9 @@ const app = new Elysia()
     })
   )
   // Auth endpoints
-  .post("/api/auth/register", async ({ body, set, jwt }) => {
+  .post("/api/auth/validate-email", async ({ body, set }) => {
     try {
-      const { email, password, fullName } = body as {
-        email: string;
-        password: string;
-        fullName: string;
-      };
+      const { email } = body as { email: string };
 
       const existingUser = db
         .prepare("SELECT id FROM users WHERE email = ?")
@@ -61,24 +69,103 @@ const app = new Elysia()
 
       if (existingUser) {
         set.status = 400;
-        return { error: "User already exists" };
+        return { error: "Email already registered" };
       }
 
+      return { valid: true };
+    } catch (error) {
+      console.error("Email validation error:", error);
+      set.status = 500;
+      return { error: "Validation failed" };
+    }
+  })
+  
+  .post("/api/auth/register-complete", async ({ body, set, jwt }) => {
+    try {
+      const { 
+        email, 
+        password, 
+        firstName, 
+        lastName, 
+        dateOfBirth, 
+        height, 
+        weight, 
+        activityLevel 
+      } = body as {
+        email: string;
+        password: string;
+        firstName: string;
+        lastName: string;
+        dateOfBirth: string;
+        height: number;
+        weight: number;
+        activityLevel: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
+      };
+
+      // Double check email uniqueness
+      const existingUser = db
+        .prepare("SELECT id FROM users WHERE email = ?")
+        .get(email);
+
+      if (existingUser) {
+        set.status = 400;
+        return { error: "Email already registered" };
+      }
+
+      const activityLevelMap = {
+        'sedentary': 1,
+        'light': 2,
+        'moderate': 3,
+        'very': 4,
+        'extra': 5
+      };
+
       const hashedPassword = await hash(password, 10);
-      // Update SQL query to include fullName
-      const result = db
-        .prepare(
-          "INSERT INTO users (email, password, full_name) VALUES (?, ?, ?)"
-        )
-        .run(email, hashedPassword, fullName);
+      
+      // Use a transaction to ensure both user and details are created or neither is
+      db.exec('BEGIN TRANSACTION');
+      
+      try {
+        // Insert user
+        const userResult = db
+          .prepare(
+            "INSERT INTO users (email, password, first_name, last_name) VALUES (?, ?, ?, ?)"
+          )
+          .run(email, hashedPassword, firstName, lastName);
 
-      const token = await jwt.sign({
-        userId: Number(result.lastInsertRowid),
-        email: email,
-        fullName: fullName, // Keep camelCase in JWT
-      });
+        const userId = Number(userResult.lastInsertRowid);
 
-      return { token };
+        // Insert user details
+        db.prepare(`
+          INSERT INTO user_details (
+            user_id, 
+            date_of_birth, 
+            height, 
+            weight, 
+            activity_level
+          ) VALUES (?, ?, ?, ?, ?)
+        `).run(
+          userId,
+          dateOfBirth,
+          height,
+          weight,
+          activityLevelMap[activityLevel]
+        );
+
+        db.exec('COMMIT');
+
+        const token = await jwt.sign({
+          userId,
+          email,
+          firstName,
+          lastName
+        });
+
+        return { token };
+      } catch (error) {
+        db.exec('ROLLBACK');
+        throw error;
+      }
     } catch (error) {
       console.error("Registration error:", error);
       set.status = 500;
@@ -92,22 +179,25 @@ const app = new Elysia()
       try {
         const { email, password } = body as { email: string; password: string };
 
-        // Select fullName from database
         const user = db
           .prepare(
             `
-        SELECT 
-          id, 
-          password, 
-          full_name AS fullName 
-        FROM users 
-        WHERE email = ?
-      `
+            SELECT 
+              id, 
+              password, 
+              first_name,
+              last_name,
+              email
+            FROM users 
+            WHERE email = ?
+            `
           )
           .get(email) as {
           id: number;
           password: string;
-          fullName: string;
+          first_name: string;
+          last_name: string;
+          email: string;
         };
 
         if (!user || !user.password) {
@@ -115,7 +205,7 @@ const app = new Elysia()
           return { error: "User does not exist" };
         }
 
-        const valid = await verify(password, user.password); // Updated here
+        const valid = await verify(password, user.password);
 
         if (!valid) {
           set.status = 401;
@@ -124,8 +214,9 @@ const app = new Elysia()
 
         const token = await jwt.sign({
           userId: user.id,
-          email,
-          fullName: user.fullName, // Use aliased property
+          email: user.email,
+          firstName: user.first_name,
+          lastName: user.last_name
         });
 
         return { token };
@@ -159,12 +250,18 @@ const app = new Elysia()
         .prepare(
           `
           SELECT 
-            id, 
-            email,
-            full_name,
-            strftime('%Y-%m-%d %H:%M:%S', created_at) as created_at 
-          FROM users 
-          WHERE id = ?
+            u.id,
+            u.email,
+            u.first_name,
+            u.last_name,
+            ud.date_of_birth,
+            ud.height,
+            ud.weight,
+            ud.activity_level,
+            u.created_at
+          FROM users u
+          LEFT JOIN user_details ud ON u.id = ud.user_id
+          WHERE u.id = ?
         `
         )
         .get(userId);
@@ -242,28 +339,123 @@ const app = new Elysia()
 
     return { success: true };
   })
+  .put("/api/user/settings", ({ userId, body }) => {
+    const { first_name, last_name, email, date_of_birth, height, weight, activity_level } = body as {
+      first_name: string;
+      last_name: string;
+      email: string;
+      date_of_birth?: string;
+      height?: number;
+      weight?: number;
+      activity_level?: number;
+    };
+  
+    try {
+      // Update users table
+      const userUpdateFields = [];
+      const userParams = [];
+  
+      if (first_name) {
+        userUpdateFields.push("first_name = ?");
+        userParams.push(first_name);
+      }
+      if (last_name) {
+        userUpdateFields.push("last_name = ?");
+        userParams.push(last_name);
+      }
+      if (email) {
+        userUpdateFields.push("email = ?");
+        userParams.push(email);
+      }
 
-  .delete("/api/macro_entry/:id", ({ params, userId }) => {
-    const id = Number(params.id);
-    db.prepare("DELETE FROM macro_entries WHERE id = ? AND user_id = ?").run(
-      id,
-      userId
-    );
-    return { success: true };
-  })
-  .put("/api/macro_entry/:id", ({ params, userId, body }) => {
-    const id = Number(params.id);
-    const { protein, carbs, fats } = body as Record<string, number>;
+      userParams.push(userId);
+      
+      if (userUpdateFields.length > 0) {
+        db.prepare(
+          `UPDATE users SET ${userUpdateFields.join(", ")} WHERE id = ?`
+        ).run(...userParams);
+      }
 
-    if ([protein, carbs, fats].some((val) => val < 0)) {
-      throw new Error("Invalid macro values");
+      // Update user_details table
+      const detailsUpdateFields = [];
+      const detailsParams = [];
+
+      if (date_of_birth !== undefined) {
+        detailsUpdateFields.push("date_of_birth = ?");
+        detailsParams.push(date_of_birth || null);
+      }
+      if (height !== undefined) {
+        detailsUpdateFields.push("height = ?");
+        detailsParams.push(height || null);
+      }
+      if (weight !== undefined) {
+        detailsUpdateFields.push("weight = ?");
+        detailsParams.push(weight || null);
+      }
+      if (activity_level !== undefined) {
+        detailsUpdateFields.push("activity_level = ?");
+        detailsParams.push(activity_level || null);
+      }
+
+      if (detailsUpdateFields.length > 0) {
+        detailsUpdateFields.push("updated_at = CURRENT_TIMESTAMP");
+        detailsParams.push(userId);
+
+        const stmt = db.prepare(`
+          INSERT INTO user_details (user_id, ${detailsUpdateFields.map(f => f.split(' =')[0]).join(', ')})
+          VALUES (?, ${detailsUpdateFields.map(() => '?').join(', ')})
+          ON CONFLICT(user_id) DO UPDATE SET
+          ${detailsUpdateFields.join(', ')}
+          WHERE user_id = ?
+        `);
+
+        stmt.run(userId, ...detailsParams, userId);
+      }
+  
+      return { success: true };
+    } catch (error) {
+      console.error("Settings update error:", error);
+      throw new Error("Failed to update settings");
     }
+  })
+  .post("/api/user/complete-profile", async ({ body, userId, set }) => {
+    try {
+      const { dateOfBirth, height, weight, activityLevel } = body as {
+        dateOfBirth?: string;
+        height?: number;
+        weight?: number;
+        activityLevel?: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
+      };
 
-    db.prepare(
-      "UPDATE macro_entries SET protein = ?, carbs = ?, fats = ? WHERE id = ? AND user_id = ?"
-    ).run(protein, carbs, fats, id, userId);
+      const stmt = db.prepare(`
+        INSERT INTO user_details (user_id, date_of_birth, height, weight, activity_level)
+        VALUES (?, ?, ?, ?, ?)
+        ON CONFLICT(user_id) DO UPDATE SET
+          date_of_birth = COALESCE(?, date_of_birth),
+          height = COALESCE(?, height),
+          weight = COALESCE(?, weight),
+          activity_level = COALESCE(?, activity_level),
+          updated_at = CURRENT_TIMESTAMP
+      `);
 
-    return { success: true };
+      stmt.run(
+        userId,
+        dateOfBirth,
+        height,
+        weight,
+        activityLevel,
+        dateOfBirth,
+        height,
+        weight,
+        activityLevel
+      );
+
+      return { success: true };
+    } catch (error) {
+      console.error("Profile completion error:", error);
+      set.status = 500;
+      return { error: "Failed to complete profile" };
+    }
   })
   .listen(3000);
 
