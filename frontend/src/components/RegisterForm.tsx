@@ -16,6 +16,18 @@ type RegistrationData = {
 
 const STORAGE_KEY = 'registration_data';
 const STEP_STORAGE_KEY = 'registration_step';
+const MINIMUM_AGE = 16;
+
+const isOldEnough = (dateOfBirth: string) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age >= MINIMUM_AGE;
+};
 
 export default function RegisterForm() {
   const navigate = useNavigate();
@@ -104,6 +116,12 @@ export default function RegisterForm() {
   const handleStepTwo = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    if (!isOldEnough(formData.dateOfBirth)) {
+      setError(`You must be at least ${MINIMUM_AGE} years old to register.`);
+      return;
+    }
+
     setStep(3);
   };
 
