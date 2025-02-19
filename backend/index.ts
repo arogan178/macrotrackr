@@ -24,6 +24,7 @@ db.exec(`
     date_of_birth TEXT,
     height FLOAT,
     weight FLOAT,
+    gender TEXT CHECK(gender IN ('male', 'female')),
     activity_level INTEGER CHECK(activity_level BETWEEN 1 AND 5),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -89,7 +90,8 @@ const app = new Elysia()
         lastName, 
         dateOfBirth, 
         height, 
-        weight, 
+        weight,
+        gender,
         activityLevel 
       } = body as {
         email: string;
@@ -99,6 +101,7 @@ const app = new Elysia()
         dateOfBirth: string;
         height: number;
         weight: number;
+        gender: 'male' | 'female';
         activityLevel: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
       };
 
@@ -141,14 +144,16 @@ const app = new Elysia()
             user_id, 
             date_of_birth, 
             height, 
-            weight, 
+            weight,
+            gender,
             activity_level
-          ) VALUES (?, ?, ?, ?, ?)
+          ) VALUES (?, ?, ?, ?, ?, ?)
         `).run(
           userId,
           dateOfBirth,
           height,
           weight,
+          gender,
           activityLevelMap[activityLevel]
         );
 
@@ -259,6 +264,7 @@ const app = new Elysia()
             ud.date_of_birth,
             ud.height,
             ud.weight,
+            ud.gender,
             ud.activity_level,
             u.created_at
           FROM users u
@@ -342,13 +348,14 @@ const app = new Elysia()
     return { success: true };
   })
   .put("/api/user/settings", ({ userId, body }) => {
-    const { first_name, last_name, email, date_of_birth, height, weight, activity_level } = body as {
+    const { first_name, last_name, email, date_of_birth, height, weight, gender, activity_level } = body as {
       first_name: string;
       last_name: string;
       email: string;
       date_of_birth?: string;
       height?: number;
       weight?: number;
+      gender?: 'male' | 'female';
       activity_level?: number;
     };
   
@@ -382,6 +389,7 @@ const app = new Elysia()
       const dateOfBirthValue = date_of_birth === undefined ? null : date_of_birth;
       const heightValue = height === undefined ? null : height;
       const weightValue = weight === undefined ? null : weight;
+      const genderValue = gender === undefined ? null : gender;
       const activityLevelValue = activity_level === undefined ? null : activity_level;
 
       // Update user_details table
@@ -391,14 +399,16 @@ const app = new Elysia()
           date_of_birth,
           height,
           weight,
+          gender,
           activity_level,
           updated_at
         )
-        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
         ON CONFLICT(user_id) DO UPDATE SET
           date_of_birth = ?,
           height = ?,
           weight = ?,
+          gender = ?,
           activity_level = ?,
           updated_at = CURRENT_TIMESTAMP
         WHERE user_id = ?
@@ -407,10 +417,12 @@ const app = new Elysia()
         dateOfBirthValue,
         heightValue,
         weightValue,
+        genderValue,
         activityLevelValue,
         dateOfBirthValue,
         heightValue,
         weightValue,
+        genderValue,
         activityLevelValue,
         userId
       );

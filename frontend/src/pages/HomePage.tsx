@@ -234,8 +234,12 @@ export default function Overview() {
                 </p>
               </div>
               <div>
-                <span className="text-gray-400">Birth Date:</span>
-                <p className="text-gray-100">{user.date_of_birth || 'Not set'}</p>
+                <span className="text-gray-400">Age:</span>
+                <p className="text-gray-100">
+                  {user.date_of_birth
+                    ? new Date().getFullYear() - new Date(user.date_of_birth).getFullYear()
+                    : "Not set"}
+                </p>
               </div>
             </div>
           )}

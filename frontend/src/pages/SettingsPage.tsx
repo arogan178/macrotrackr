@@ -25,6 +25,7 @@ export default function SettingsPage() {
     date_of_birth: "",
     height: undefined,
     weight: undefined,
+    gender: undefined,
     activity_level: undefined,
   });
   const [originalSettings, setOriginalSettings] = useState<UserDetails | null>(null);
@@ -61,6 +62,7 @@ export default function SettingsPage() {
       settings.date_of_birth !== originalSettings.date_of_birth ||
       settings.height !== originalSettings.height ||
       settings.weight !== originalSettings.weight ||
+      settings.gender !== originalSettings.gender ||
       settings.activity_level !== originalSettings.activity_level
     );
   };
@@ -91,6 +93,7 @@ export default function SettingsPage() {
         date_of_birth: settings.date_of_birth,
         height: settings.height,
         weight: settings.weight,
+        gender: settings.gender,
         activity_level: settings.activity_level
       };
 
@@ -219,6 +222,24 @@ export default function SettingsPage() {
                   step="0.1"
                   min="0"
                 />
+              </div>
+
+              <div>
+                <label className="block mb-2 text-gray-300">Gender</label>
+                <select
+                  value={settings.gender || ''}
+                  onChange={(e) =>
+                    setSettings((prev) => ({
+                      ...prev,
+                      gender: (e.target.value as 'male' | 'female' | '') || undefined,
+                    }))
+                  }
+                  className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
+                >
+                  <option value="">Select gender</option>
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
               </div>
 
               <div>
