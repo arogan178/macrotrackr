@@ -3,6 +3,19 @@ import Navbar from "../components/Navbar";
 import { UserDetails } from "../types";
 import { getActivityLevelOptions } from "../utils/activityLevels";
 
+const MINIMUM_AGE = 16;
+
+const isOldEnough = (dateOfBirth: string) => {
+  const today = new Date();
+  const birthDate = new Date(dateOfBirth);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDifference = today.getMonth() - birthDate.getMonth();
+  if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age >= MINIMUM_AGE;
+};
+
 export default function SettingsPage() {
   const [settings, setSettings] = useState<UserDetails>({
     id: 0,
@@ -14,6 +27,7 @@ export default function SettingsPage() {
     weight: undefined,
     activity_level: undefined,
   });
+  const [originalSettings, setOriginalSettings] = useState<UserDetails | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -32,9 +46,23 @@ export default function SettingsPage() {
       if (!response.ok) throw new Error("Failed to fetch settings");
       const data = await response.json();
       setSettings(data);
-    } catch (err) {
-      setError("Failed to load settings");
+      setOriginalSettings(data);
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to load settings");
     }
+  };
+
+  const hasChanges = () => {
+    if (!originalSettings) return false;
+    return (
+      settings.first_name !== originalSettings.first_name ||
+      settings.last_name !== originalSettings.last_name ||
+      settings.email !== originalSettings.email ||
+      settings.date_of_birth !== originalSettings.date_of_birth ||
+      settings.height !== originalSettings.height ||
+      settings.weight !== originalSettings.weight ||
+      settings.activity_level !== originalSettings.activity_level
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -43,12 +71,24 @@ export default function SettingsPage() {
     setError("");
     setSuccess("");
 
+    if (!settings.date_of_birth) {
+      setError("Date of birth is required");
+      setLoading(false);
+      return;
+    }
+
+    if (!isOldEnough(settings.date_of_birth)) {
+      setError(`You must be at least ${MINIMUM_AGE} years old.`);
+      setLoading(false);
+      return;
+    }
+
     try {
       const payload = {
         first_name: settings.first_name,
         last_name: settings.last_name,
         email: settings.email,
-        date_of_birth: settings.date_of_birth || null,
+        date_of_birth: settings.date_of_birth,
         height: settings.height,
         weight: settings.weight,
         activity_level: settings.activity_level
@@ -75,8 +115,8 @@ export default function SettingsPage() {
       }
 
       setSuccess("Settings updated successfully!");
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update settings");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Failed to update settings");
     } finally {
       setLoading(false);
     }
@@ -206,8 +246,8 @@ export default function SettingsPage() {
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            disabled={loading || !hasChanges()}
+            className="w-full bg-blue-600 text-white p-2 rounded disabled:opacity-50 transition-colors"
           >
             {loading ? "Saving..." : "Save Changes"}
           </button>

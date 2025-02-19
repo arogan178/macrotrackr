@@ -235,7 +235,9 @@ const app = new Elysia()
     const token = authHeader.slice(7);
     const payload = await jwt.verify(token);
 
-    return { userId: payload?.userId as number | null };
+    if (!payload) return { userId: null };
+
+    return { userId: (payload as { userId: number }).userId };
   })
   .onBeforeHandle({ as: "global" }, ({ userId, set }) => {
     if (!userId) {
@@ -376,41 +378,42 @@ const app = new Elysia()
         ).run(...userParams);
       }
 
+      // Convert undefined values to null for SQLite
+      const dateOfBirthValue = date_of_birth === undefined ? null : date_of_birth;
+      const heightValue = height === undefined ? null : height;
+      const weightValue = weight === undefined ? null : weight;
+      const activityLevelValue = activity_level === undefined ? null : activity_level;
+
       // Update user_details table
-      const detailsUpdateFields = [];
-      const detailsParams = [];
-
-      if (date_of_birth !== undefined) {
-        detailsUpdateFields.push("date_of_birth = ?");
-        detailsParams.push(date_of_birth || null);
-      }
-      if (height !== undefined) {
-        detailsUpdateFields.push("height = ?");
-        detailsParams.push(height || null);
-      }
-      if (weight !== undefined) {
-        detailsUpdateFields.push("weight = ?");
-        detailsParams.push(weight || null);
-      }
-      if (activity_level !== undefined) {
-        detailsUpdateFields.push("activity_level = ?");
-        detailsParams.push(activity_level || null);
-      }
-
-      if (detailsUpdateFields.length > 0) {
-        detailsUpdateFields.push("updated_at = CURRENT_TIMESTAMP");
-        detailsParams.push(userId);
-
-        const stmt = db.prepare(`
-          INSERT INTO user_details (user_id, ${detailsUpdateFields.map(f => f.split(' =')[0]).join(', ')})
-          VALUES (?, ${detailsUpdateFields.map(() => '?').join(', ')})
-          ON CONFLICT(user_id) DO UPDATE SET
-          ${detailsUpdateFields.join(', ')}
-          WHERE user_id = ?
-        `);
-
-        stmt.run(userId, ...detailsParams, userId);
-      }
+      db.prepare(`
+        INSERT INTO user_details (
+          user_id,
+          date_of_birth,
+          height,
+          weight,
+          activity_level,
+          updated_at
+        )
+        VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+        ON CONFLICT(user_id) DO UPDATE SET
+          date_of_birth = ?,
+          height = ?,
+          weight = ?,
+          activity_level = ?,
+          updated_at = CURRENT_TIMESTAMP
+        WHERE user_id = ?
+      `).run(
+        userId,
+        dateOfBirthValue,
+        heightValue,
+        weightValue,
+        activityLevelValue,
+        dateOfBirthValue,
+        heightValue,
+        weightValue,
+        activityLevelValue,
+        userId
+      );
   
       return { success: true };
     } catch (error) {
@@ -424,8 +427,14 @@ const app = new Elysia()
         dateOfBirth?: string;
         height?: number;
         weight?: number;
-        activityLevel?: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
+        activityLevel?: number;
       };
+
+      // Convert undefined values to null for SQLite
+      const dateOfBirthValue = dateOfBirth === undefined ? null : dateOfBirth;
+      const heightValue = height === undefined ? null : height;
+      const weightValue = weight === undefined ? null : weight;
+      const activityLevelValue = activityLevel === undefined ? null : activityLevel;
 
       const stmt = db.prepare(`
         INSERT INTO user_details (user_id, date_of_birth, height, weight, activity_level)
@@ -440,14 +449,14 @@ const app = new Elysia()
 
       stmt.run(
         userId,
-        dateOfBirth,
-        height,
-        weight,
-        activityLevel,
-        dateOfBirth,
-        height,
-        weight,
-        activityLevel
+        dateOfBirthValue,
+        heightValue,
+        weightValue,
+        activityLevelValue,
+        dateOfBirthValue,
+        heightValue,
+        weightValue,
+        activityLevelValue
       );
 
       return { success: true };
