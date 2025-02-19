@@ -11,6 +11,7 @@ type RegistrationData = {
   dateOfBirth: string;
   height: number;
   weight: number;
+  gender: 'male' | 'female' | '';
   activityLevel: ActivityLevel | '';
 };
 
@@ -48,6 +49,7 @@ export default function RegisterForm() {
       dateOfBirth: '',
       height: 0,
       weight: 0,
+      gender: '',
       activityLevel: '',
     };
   });
@@ -143,6 +145,7 @@ export default function RegisterForm() {
           dateOfBirth: formData.dateOfBirth,
           height: parseFloat(formData.height.toString()),
           weight: parseFloat(formData.weight.toString()),
+          gender: formData.gender,
           activityLevel: formData.activityLevel,
         }),
       });
@@ -233,6 +236,20 @@ export default function RegisterForm() {
           className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
           required
         />
+      </div>
+      <div>
+        <label className="block mb-2 text-gray-300">Gender</label>
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
+          required
+        >
+          <option value="">Select gender</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
       </div>
       <div>
         <label className="block mb-2 text-gray-300">Height (cm)</label>

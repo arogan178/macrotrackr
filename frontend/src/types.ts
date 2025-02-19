@@ -32,6 +32,7 @@ export interface UserDetails {
   height?: number;
   weight?: number;
   activity_level?: number;
+  gender?: 'male' | 'female';
 }
 
 export interface RegistrationStep1 {
