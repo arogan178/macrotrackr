@@ -235,8 +235,11 @@ export default function SettingsPage() {
                     }))
                   }
                   className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
+                  required
                 >
-                  <option value="">Select gender</option>
+                  {!settings.gender && (
+                    <option value="" disabled className="text-gray-500">Select gender</option>
+                  )}
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                 </select>
@@ -253,8 +256,11 @@ export default function SettingsPage() {
                     }))
                   }
                   className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100 focus:border-blue-500 focus:ring-blue-500"
+                  required
                 >
-                  <option value="">Select activity level</option>
+                  {!settings.activity_level && (
+                    <option value="" disabled className="text-gray-500">Select activity level</option>
+                  )}
                   {getActivityLevelOptions().map((level, index) => (
                     <option key={level.value} value={index + 1}>
                       {level.label}
