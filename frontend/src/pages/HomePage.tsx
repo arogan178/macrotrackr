@@ -3,8 +3,10 @@ import MacroPieChart from "../components/MacroPieChart";
 import EntryTable from "../components/EntryTable";
 import EditModal from "../components/EditModal";
 import { MacroEntry, MacroTotals, MacroInputs, UserDetails } from "../types";
+import { getActivityLevelLabel } from "../utils/activityLevels";
 import Navbar from "../components/Navbar";
 import CalorieSearch from "../components/CalorieSearch";
+import { calculateBMR, calculateTDEE } from "../utils/calculations";
 
 export default function Overview() {
   const [inputs, setInputs] = useState<MacroInputs>({
@@ -206,15 +208,79 @@ export default function Overview() {
     }
   };
 
+  const calculateUserMetrics = () => {
+    if (!user?.weight || !user?.height || !user?.date_of_birth || !user?.gender || !user?.activity_level) {
+      return { bmr: 0, tdee: 0 };
+    }
+
+    const age = new Date().getFullYear() - new Date(user.date_of_birth).getFullYear();
+    const bmr = Math.round(calculateBMR(user.weight, user.height, age, user.gender));
+    const tdee = calculateTDEE(bmr, user.activity_level);
+
+    return { bmr, tdee };
+  };
+
+  const { bmr, tdee } = calculateUserMetrics();
+
   return (
     <div className="min-h-screen bg-gray-900">
       <Navbar />
       <div className="w-full p-2 sm:p-6 lg:p-8">
-        <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between text-gray-100">
-          <span>
-            Welcome Back {user?.full_name ? user.full_name.split(" ")[0] : ""}
-          </span>
-        </h1>
+        <div className="mb-6">
+          <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between text-gray-100">
+            <span>
+              Welcome Back {user?.first_name || ""}
+            </span>
+          </h1>
+          {user && (
+            <>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <div>
+                  <span className="text-gray-400">Height:</span>
+                  <p className="text-gray-100">{user.height ? `${user.height} cm` : 'Not set'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-400">Weight:</span>
+                  <p className="text-gray-100">{user.weight ? `${user.weight} kg` : 'Not set'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-400">Activity Level:</span>
+                  <p className="text-gray-100">
+                    {user.activity_level ? getActivityLevelLabel(user.activity_level) : 'Not set'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gray-400">Age:</span>
+                  <p className="text-gray-100">
+                    {user.date_of_birth
+                      ? new Date().getFullYear() - new Date(user.date_of_birth).getFullYear()
+                      : "Not set"}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gray-400">Gender:</span>
+                  <p className="text-gray-100">
+                    {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : "Not set"}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                  <h3 className="font-semibold text-gray-400 mb-1">Basal Metabolic Rate (BMR)</h3>
+                  <p className="text-2xl text-gray-100">{bmr ? `${bmr} kcal` : 'Complete your profile'}</p>
+                  <p className="text-sm text-gray-400 mt-1">Calories burned at complete rest</p>
+                </div>
+                <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                  <h3 className="font-semibold text-gray-400 mb-1">Total Daily Energy Expenditure (TDEE)</h3>
+                  <p className="text-2xl text-gray-100">{tdee ? `${tdee} kcal` : 'Complete your profile'}</p>
+                  <p className="text-sm text-gray-400 mt-1">Total daily calories burned with activity</p>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+
         <CalorieSearch
           onResult={(result: MacroInputs) =>
             setInputs({
