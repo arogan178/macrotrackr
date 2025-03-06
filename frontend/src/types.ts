@@ -25,6 +25,29 @@ export interface MacroInputs {
 
 export interface UserDetails {
   id: number;
-  full_name: string;
+  first_name: string;
+  last_name: string;
   email: string;
+  date_of_birth?: string;
+  height?: number;
+  weight?: number;
+  activity_level?: number;
+  gender?: 'male' | 'female';
+}
+
+export interface RegistrationStep1 {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface RegistrationStep2 {
+  dateOfBirth: string;
+  height: number;
+  weight: number;
+}
+
+export interface RegistrationStep3 {
+  activityLevel: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
 }
