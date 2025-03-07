@@ -167,203 +167,418 @@ export default function RegisterForm() {
     }
   };
 
-  const renderStepOne = () => (
-    <form onSubmit={handleStepOne} className="space-y-4">
-      <div>
-        <label className="block mb-2 text-gray-300">First Name</label>
+  const InputField = ({ 
+    label, 
+    name, 
+    type, 
+    value, 
+    onChange, 
+    required = true, 
+    min, 
+    step,
+    icon,
+    placeholder
+  }: { 
+    label: string;
+    name: string;
+    type: string;
+    value: string | number;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    required?: boolean;
+    min?: string;
+    step?: string;
+    icon?: React.ReactNode;
+    placeholder?: string;
+  }) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-300">
+        {label}
+      </label>
+      <div className="relative">
+        {icon && (
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-500">
+            {icon}
+          </div>
+        )}
         <input
-          type="text"
+          type={type}
+          name={name}
+          value={value}
+          onChange={onChange}
+          className={`w-full ${icon ? 'pl-10' : 'px-4'} py-3 bg-gray-700/70 border border-gray-600/70 rounded-lg text-gray-100 
+                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
+                   transition-all duration-200 shadow-sm`}
+          required={required}
+          min={min}
+          step={step}
+          placeholder={placeholder}
+        />
+      </div>
+    </div>
+  );
+
+  const SelectField = ({
+    label,
+    name,
+    value,
+    onChange,
+    options,
+    required = true
+  }: {
+    label: string;
+    name: string;
+    value: string;
+    onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+    options: { value: string; label: string }[];
+    required?: boolean;
+  }) => (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-300">
+        {label}
+      </label>
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="w-full px-4 py-3 bg-gray-700/70 border border-gray-600/70 rounded-lg text-gray-100 
+                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
+                 transition-all duration-200 shadow-sm appearance-none"
+        required={required}
+      >
+        <option value="">{`Select ${label.toLowerCase()}`}</option>
+        {options.map(option => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+
+  const renderStepOne = () => (
+    <form onSubmit={handleStepOne} className="space-y-5">
+      <div className="grid grid-cols-2 gap-4">
+        <InputField
+          label="First Name"
           name="firstName"
+          type="text"
           value={formData.firstName}
           onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
+          icon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          }
+          placeholder="John"
         />
-      </div>
-      <div>
-        <label className="block mb-2 text-gray-300">Last Name</label>
-        <input
-          type="text"
+        <InputField
+          label="Last Name"
           name="lastName"
+          type="text"
           value={formData.lastName}
           onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
+          icon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+          }
+          placeholder="Doe"
         />
       </div>
-      <div>
-        <label className="block mb-2 text-gray-300">Email</label>
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
-        />
-      </div>
-      <div>
-        <label className="block mb-2 text-gray-300">Password</label>
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
-          minLength={6}
-        />
-      </div>
+      <InputField
+        label="Email"
+        name="email"
+        type="email"
+        value={formData.email}
+        onChange={handleChange}
+        icon={
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+          </svg>
+        }
+        placeholder="your@email.com"
+      />
+      <InputField
+        label="Password"
+        name="password"
+        type="password"
+        value={formData.password}
+        onChange={handleChange}
+        icon={
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        }
+        placeholder="••••••••"
+      />
       <button
         type="submit"
         disabled={loading}
-        className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+        className="w-full py-3 rounded-lg font-medium text-white 
+                 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
+                 disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
+                 shadow-lg shadow-indigo-500/30"
       >
-        {loading ? 'Processing...' : 'Next'}
+        {loading ? (
+          <span className="flex items-center justify-center">
+            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            Processing...
+          </span>
+        ) : (
+          <span className="flex items-center justify-center">
+            Continue
+            <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+            </svg>
+          </span>
+        )}
       </button>
     </form>
   );
 
   const renderStepTwo = () => (
-    <form onSubmit={handleStepTwo} className="space-y-4">
-      <div>
-        <label className="block mb-2 text-gray-300">Date of Birth</label>
-        <input
-          type="date"
-          name="dateOfBirth"
-          value={formData.dateOfBirth}
-          onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
-        />
-      </div>
-      <div>
-        <label className="block mb-2 text-gray-300">Gender</label>
-        <select
-          name="gender"
-          value={formData.gender}
-          onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
-        >
-          <option value="">Select gender</option>
-          <option value="male">Male</option>
-          <option value="female">Female</option>
-        </select>
-      </div>
-      <div>
-        <label className="block mb-2 text-gray-300">Height (cm)</label>
-        <input
-          type="number"
+    <form onSubmit={handleStepTwo} className="space-y-5">
+      <InputField
+        label="Date of Birth"
+        name="dateOfBirth"
+        type="date"
+        value={formData.dateOfBirth}
+        onChange={handleChange}
+        icon={
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+        }
+      />
+
+      <SelectField
+        label="Gender"
+        name="gender"
+        value={formData.gender}
+        onChange={handleChange}
+        options={[
+          { value: 'male', label: 'Male' },
+          { value: 'female', label: 'Female' }
+        ]}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
+        <InputField
+          label="Height (cm)"
           name="height"
+          type="number"
           value={formData.height || ''}
           onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
           min="0"
           step="0.1"
+          icon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />
+            </svg>
+          }
+          placeholder="175"
         />
-      </div>
-      <div>
-        <label className="block mb-2 text-gray-300">Weight (kg)</label>
-        <input
-          type="number"
+
+        <InputField
+          label="Weight (kg)"
           name="weight"
+          type="number"
           value={formData.weight || ''}
           onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
           min="0"
           step="0.1"
+          icon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+            </svg>
+          }
+          placeholder="70"
         />
       </div>
-      <div className="flex gap-2">
+
+      <div className="flex gap-3 pt-2">
         <button
           type="button"
           onClick={() => handleBack(1)}
-          className="w-1/2 bg-gray-600 text-white p-2 rounded hover:bg-gray-700"
+          className="w-1/3 py-3 px-4 rounded-lg border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 transition-colors flex items-center justify-center"
         >
+          <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+          </svg>
           Back
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="w-1/2 bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-2/3 py-3 rounded-lg font-medium text-white 
+                   bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
+                   disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
+                   shadow-lg shadow-indigo-500/30 flex items-center justify-center"
         >
-          {loading ? 'Processing...' : 'Next'}
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Processing...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center">
+              Continue
+              <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+              </svg>
+            </span>
+          )}
         </button>
       </div>
     </form>
   );
 
   const renderStepThree = () => (
-    <form onSubmit={handleStepThree} className="space-y-4">
-      <div>
-        <label className="block mb-2 text-gray-300">Activity Level</label>
-        <select
-          name="activityLevel"
-          value={formData.activityLevel}
-          onChange={handleChange}
-          className="w-full p-2 bg-gray-700 border border-gray-600 rounded text-gray-100"
-          required
-        >
-          <option value="">Select activity level</option>
-          {getActivityLevelOptions().map(level => (
-            <option key={level.value} value={level.value}>
-              {level.label}
-            </option>
-          ))}
-        </select>
+    <form onSubmit={handleStepThree} className="space-y-5">
+      <div className="mb-4">
+        <h3 className="text-lg font-medium text-gray-200 mb-1">Almost there!</h3>
+        <p className="text-sm text-gray-400">
+          Please select your activity level to help us calculate your daily calorie needs.
+        </p>
       </div>
-      <div className="flex gap-2">
+      
+      <SelectField
+        label="Activity Level"
+        name="activityLevel"
+        value={formData.activityLevel}
+        onChange={handleChange}
+        options={getActivityLevelOptions()}
+      />
+      
+      <div className="space-y-3 mt-6">
+        <div className="flex items-center p-3 rounded-lg border border-indigo-500/20 bg-indigo-500/10">
+          <svg className="w-5 h-5 text-indigo-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p className="text-sm text-indigo-300">
+            Your activity level helps us calculate your daily energy requirements more accurately.
+          </p>
+        </div>
+      </div>
+
+      <div className="flex gap-3 pt-3">
         <button
           type="button"
           onClick={() => handleBack(2)}
-          className="w-1/2 bg-gray-600 text-white p-2 rounded hover:bg-gray-700"
+          className="w-1/3 py-3 px-4 rounded-lg border border-gray-600/50 text-gray-300 hover:bg-gray-700/50 transition-colors flex items-center justify-center"
         >
+          <svg className="mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12"></path>
+          </svg>
           Back
         </button>
         <button
           type="submit"
           disabled={loading}
-          className="w-1/2 bg-blue-600 text-white p-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          className="w-2/3 py-3 rounded-lg font-medium text-white 
+                   bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
+                   disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
+                   shadow-lg shadow-indigo-500/30 flex items-center justify-center"
         >
-          {loading ? 'Processing...' : 'Complete'}
+          {loading ? (
+            <span className="flex items-center justify-center">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Creating Account...
+            </span>
+          ) : (
+            <span className="flex items-center justify-center">
+              Complete Registration
+              <svg className="ml-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"></path>
+              </svg>
+            </span>
+          )}
         </button>
       </div>
     </form>
   );
 
+  // Step indicators with titles for better visual feedback
+  const stepInfo = [
+    { title: 'Account Info', icon: '👤' },
+    { title: 'Your Profile', icon: '📊' },
+    { title: 'Activity Level', icon: '🏃' }
+  ];
+
   return (
-    <div className="max-w-md w-full p-6 bg-gray-800 rounded-lg shadow-xl border border-gray-700">
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <div className="flex flex-1 space-x-1">
-            {[1, 2, 3].map((num) => (
-              <div
-                key={num}
-                className={`h-2 flex-1 rounded ${
-                  num <= step ? 'bg-blue-600' : 'bg-gray-600'
-                }`}
-              />
+    <div className="max-w-md w-full p-8 bg-gray-800/80 backdrop-blur-sm rounded-2xl shadow-xl border border-gray-700/50">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex-1 flex space-x-2">
+            {stepInfo.map((info, idx) => (
+              <div key={idx} className="flex-1 flex flex-col items-center">
+                <div className={`w-8 h-8 flex items-center justify-center rounded-full mb-1
+                      ${idx + 1 === step 
+                        ? 'bg-gradient-to-r from-indigo-600 to-blue-500 text-white border-2 border-white/20' 
+                        : idx + 1 < step 
+                          ? 'bg-indigo-500/50 text-white' 
+                          : 'bg-gray-700 text-gray-400'}`}>
+                  {idx + 1 < step ? (
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7"></path>
+                    </svg>
+                  ) : (
+                    idx + 1
+                  )}
+                </div>
+                <span className={`text-xs ${idx + 1 === step ? 'text-white' : 'text-gray-400'}`}>
+                  {info.title}
+                </span>
+                <div 
+                  className={`${idx < 2 ? 'block' : 'hidden'} h-0.5 w-full absolute mt-4
+                        ${idx + 1 < step ? 'bg-indigo-500' : 'bg-gray-700'}`}>
+                </div>
+              </div>
             ))}
           </div>
           <button
             onClick={handleCancel}
-            className="ml-4 text-sm text-gray-400 hover:text-gray-300"
+            className="text-sm text-gray-400 hover:text-gray-300 flex items-center"
+            type="button"
           >
+            <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
             Cancel
           </button>
         </div>
-        <h2 className="text-2xl font-bold text-center text-gray-100">
-          {step === 1 && 'Basic Information'}
-          {step === 2 && 'User Details'}
-          {step === 3 && 'Activity Level'}
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+          {step === 1 && 'Create Your Account'}
+          {step === 2 && 'Tell Us About Yourself'}
+          {step === 3 && 'Almost Done!'}
         </h2>
+        <p className="mt-1 text-gray-400 text-sm">
+          {step === 1 && 'Enter your basic details to get started'}
+          {step === 2 && 'This helps us customize your experience'}
+          {step === 3 && 'Just one more step to complete your profile'}
+        </p>
       </div>
+      
       {error && (
-        <div className="mb-4 text-red-400 bg-red-900/50 p-3 rounded">{error}</div>
+        <div className="mb-6 text-red-400 bg-red-900/50 p-4 rounded-lg border border-red-800/50 shadow-lg">
+          <div className="flex items-center">
+            <svg className="h-5 w-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            {error}
+          </div>
+        </div>
       )}
+      
       {step === 1 && renderStepOne()}
       {step === 2 && renderStepTwo()}
       {step === 3 && renderStepThree()}

@@ -69,116 +69,142 @@ export default function EntryTable({
   }, [history]);
 
   return (
-    <div className="mt-8">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-lg sm:text-xl font-bold text-gray-100">Entry History</h2>
+    <div>
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>
+          <p className="text-sm text-gray-400 mt-1">
+            {history.length} {history.length === 1 ? 'entry' : 'entries'} recorded
+          </p>
+        </div>
         {history.length > 0 && (
           <button
             onClick={() => exportCSV(history)}
-            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
+            className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
           >
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
             Export CSV
           </button>
         )}
       </div>
+      
       {history.length === 0 ? (
-        <div className="mt-8 text-center">
-          <img
-            src="/empty-state.svg"
-            className="mx-auto h-32 w-32 opacity-50"
-            alt="No entries"
-          />
-          <p className="mt-1 text-sm text-gray-400">
-            Get started by logging your first meal
+        <div className="py-16 flex flex-col items-center justify-center bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50">
+          <div className="w-20 h-20 mb-4 rounded-full bg-gray-700/70 flex items-center justify-center">
+            <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-medium text-gray-300">No entries yet</h3>
+          <p className="mt-2 text-sm text-gray-400 max-w-sm text-center">
+            Get started by logging your first meal using the form above
           </p>
         </div>
       ) : (
-        <div className="rounded-lg overflow-x-auto border border-gray-700">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-800">
-              <tr>
-                <th className="px-2 sm:px-4 py-3 text-left text-xs sm:text-sm font-medium text-gray-300">
-                  Time
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
-                  Protein
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
-                  Carbs
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
-                  Fats
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
-                  Calories
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm font-medium text-gray-300">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-700">
-              {history.length === 0 ? (
+        <div className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
                 <tr>
-                  <td colSpan={6} className="text-center py-4 text-gray-400">
-                    No entries yet. Add your first meal!
-                  </td>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+                    Time
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+                    <div className="flex items-center justify-center gap-1">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      Protein
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+                    <div className="flex items-center justify-center gap-1">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+                      Carbs
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+                    <div className="flex items-center justify-center gap-1">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      Fats
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+                    Calories
+                  </th>
+                  <th className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+                    Actions
+                  </th>
                 </tr>
-              ) : (
-                groupedEntries.map((group) => (
+              </thead>
+              <tbody>
+                {groupedEntries.map((group) => (
                   <Fragment key={group.date}>
-                    <tr className="bg-gray-800/50">
+                    <tr className="bg-indigo-600/10">
                       <td
                         colSpan={6}
-                        className="px-4 py-2 font-semibold text-sm sm:text-base text-gray-300"
+                        className="px-4 py-2 font-medium text-indigo-300 text-sm"
                       >
                         {group.date}
                       </td>
                     </tr>
                     {group.entries.map((entry) => (
-                      <tr key={entry.id} className="bg-gray-800/20 hover:bg-gray-700/50 transition-colors">
-                        <td className="px-2 sm:px-4 py-3 text-xs sm:text-sm text-gray-300">
+                      <tr key={entry.id} className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors">
+                        <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap">
                           {new Date(entry.created_at).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
                           {entry.protein}g
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
                           {entry.carbs}g
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
+                        <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
                           {entry.fats}g
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center text-xs sm:text-sm text-gray-300">
+                        <td className="px-4 py-3 text-center font-medium text-white">
                           {entry.protein * 4 + entry.carbs * 4 + entry.fats * 9} kcal
                         </td>
-                        <td className="px-2 sm:px-4 py-3 text-center">
-                          <button
-                            onClick={() => onEdit(entry)}
-                            className="p-1 mr-2 rounded hover:bg-blue-600 transition-colors"
-                            aria-label="Edit entry"
-                          >
-                            ✏️
-                          </button>
-                          <button
-                            onClick={() => deleteEntry(entry.id)}
-                            className="p-1 rounded hover:bg-red-600 transition-colors"
-                            disabled={isDeleting}
-                            aria-label="Delete entry"
-                          >
-                            {isDeleting ? "⏳" : "🗑️"}
-                          </button>
+                        <td className="px-4 py-3 text-center whitespace-nowrap">
+                          <div className="flex justify-center space-x-2">
+                            <button
+                              onClick={() => onEdit(entry)}
+                              className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
+                              aria-label="Edit entry"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => deleteEntry(entry.id)}
+                              className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
+                              disabled={isDeleting}
+                              aria-label="Delete entry"
+                            >
+                              {isDeleting ? (
+                                <svg className="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              ) : (
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                              )}
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))}
                   </Fragment>
-                ))
-              )}
-            </tbody>
-          </table>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
