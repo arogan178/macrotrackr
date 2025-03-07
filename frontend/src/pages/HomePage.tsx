@@ -1,20 +1,13 @@
 import { useState, useEffect } from "react";
-import MacroPieChart from "../components/MacroPieChart";
 import EntryTable from "../components/EntryTable";
 import EditModal from "../components/EditModal";
-import { MacroEntry, MacroTotals, MacroInputs, UserDetails } from "../types";
-import { getActivityLevelLabel } from "../utils/activityLevels";
+import { MacroEntry, MacroTotals, UserDetails } from "../types";
 import Navbar from "../components/Navbar";
-import CalorieSearch from "../components/CalorieSearch";
 import { calculateBMR, calculateTDEE } from "../utils/calculations";
+import MacroSummary from "../components/MacroSummary";
+import AddEntry from "../components/AddEntry";
 
 export default function Overview() {
-  const [inputs, setInputs] = useState<MacroInputs>({
-    protein: "",
-    carbs: "",
-    fats: "",
-  });
-
   const [totals, setTotals] = useState<MacroTotals>({
     protein: 0,
     carbs: 0,
@@ -23,7 +16,6 @@ export default function Overview() {
   });
 
   const [history, setHistory] = useState<MacroEntry[]>([]);
-  const [error, setError] = useState<string | null>(null);
   const [user, setUser] = useState<UserDetails | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [editingEntry, setEditingEntry] = useState<MacroEntry | null>(null);
@@ -54,13 +46,11 @@ export default function Overview() {
       fetchMacros();
     } catch (error) {
       console.error("Fetch user error:", error);
-      setError("Failed to load user details. Please try again later.");
     }
   };
 
   const fetchMacros = async () => {
     try {
-      setError(null);
       // Updated URL and added Authorization header
       const totalsResponse = await fetch(
         "http://localhost:3000/api/macro_entry",
@@ -98,12 +88,10 @@ export default function Overview() {
       setHistory(historyData);
     } catch (error) {
       console.error("Fetch macros error:", error);
-      setError(error instanceof Error ? error.message : "Failed to load data");
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (inputs: { protein: number; carbs: number; fats: number }) => {
     setIsSaving(true);
 
     try {
@@ -111,18 +99,12 @@ export default function Overview() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`, // Added header
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({
-          protein: Number(inputs.protein),
-          carbs: Number(inputs.carbs),
-          fats: Number(inputs.fats),
-        }),
+        body: JSON.stringify(inputs),
       });
 
       if (!response.ok) throw new Error("Failed to save");
-
-      setInputs({ protein: "", carbs: "", fats: "" });
       fetchMacros();
     } catch (error) {
       console.error("Save error:", error);
@@ -223,180 +205,128 @@ export default function Overview() {
   const { bmr, tdee } = calculateUserMetrics();
 
   return (
-    <div className="min-h-screen bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
-      <div className="w-full p-2 sm:p-6 lg:p-8">
-        <div className="mb-6">
-          <h1 className="text-xl sm:text-2xl font-bold mb-4 flex justify-between text-gray-100">
-            <span>
-              Welcome Back {user?.first_name || ""}
-            </span>
-          </h1>
+      <div className="relative">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(67,56,202,0.1),transparent_70%)] pointer-events-none"></div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
+          <div className="mb-6">
+            <div className="flex flex-col md:flex-row md:items-center gap-3">
+              <h1 className="text-2xl sm:text-3xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
+                Welcome back,
+                <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
+                  {user?.first_name || ''}
+                </span>
+              </h1>
+              <div className="flex md:ml-auto">
+                <div className="bg-gray-800/70 backdrop-blur-sm rounded-lg border border-gray-700/50 px-4 py-2 flex items-center gap-3">
+                  <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-sm text-gray-300">
+                    {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {user && (
-            <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-5 bg-gray-800 p-4 rounded-lg border border-gray-700">
-                <div>
-                  <span className="text-gray-400">Height:</span>
-                  <p className="text-gray-100">{user.height ? `${user.height} cm` : 'Not set'}</p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Weight:</span>
-                  <p className="text-gray-100">{user.weight ? `${user.weight} kg` : 'Not set'}</p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Activity Level:</span>
-                  <p className="text-gray-100">
-                    {user.activity_level ? getActivityLevelLabel(user.activity_level) : 'Not set'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Age:</span>
-                  <p className="text-gray-100">
-                    {user.date_of_birth
-                      ? new Date().getFullYear() - new Date(user.date_of_birth).getFullYear()
-                      : "Not set"}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-gray-400">Gender:</span>
-                  <p className="text-gray-100">
-                    {user.gender ? user.gender.charAt(0).toUpperCase() + user.gender.slice(1) : "Not set"}
-                  </p>
-                </div>
-              </div>
+            <div className="mb-8">
+              <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+                <div className="lg:col-span-4 flex flex-col h-full">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                    {/* BMR Panel */}
+                    <div className="bg-gray-800/70 backdrop-blur-sm p-5 rounded-2xl border border-gray-700/50 shadow-xl hover:bg-gray-800/80 transition-colors group">
+                      <div className="flex items-start gap-5">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-600/20 to-indigo-600/5 border border-indigo-500/20">
+                          <svg className="h-7 w-7 text-indigo-400 transform group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2 mb-1">
+                            <h3 className="font-medium text-gray-400 text-sm truncate">Basal Metabolic Rate</h3>
+                            <span className="text-xs text-indigo-400/80 whitespace-nowrap">(BMR)</span>
+                          </div>
+                          <p className="text-2xl font-bold text-white">
+                            {bmr ? (
+                              <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+                                {bmr} <span className="text-lg font-medium">kcal</span>
+                              </span>
+                            ) : (
+                              <span className="text-gray-500 text-lg">Complete profile</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                  <h3 className="font-semibold text-gray-400 mb-1">Basal Metabolic Rate (BMR)</h3>
-                  <p className="text-2xl text-gray-100">{bmr ? `${bmr} kcal` : 'Complete your profile'}</p>
-                  <p className="text-sm text-gray-400 mt-1">Calories burned at complete rest</p>
+                    {/* TDEE Panel */}
+                    <div className="bg-gray-800/70 backdrop-blur-sm p-5 rounded-2xl border border-gray-700/50 shadow-xl hover:bg-gray-800/80 transition-colors group">
+                      <div className="flex items-start gap-5">
+                        <div className="p-3 rounded-xl bg-gradient-to-br from-blue-600/20 to-blue-600/5 border border-blue-500/20">
+                          <svg className="h-7 w-7 text-blue-400 transform group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.519 4.674c.3.921-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.519-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.381-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-baseline gap-2 mb-1">
+                            <h3 className="font-medium text-gray-400 text-sm truncate">Total Daily Energy</h3>
+                            <span className="text-xs text-blue-400/80 whitespace-nowrap">(TDEE)</span>
+                          </div>
+                          <p className="text-2xl font-bold text-white">
+                            {tdee ? (
+                              <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+                                {tdee} <span className="text-lg font-medium">kcal</span>
+                              </span>
+                            ) : (
+                              <span className="text-gray-500 text-lg">Complete profile</span>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex-1">
+                    <AddEntry onSubmit={handleSubmit} isSaving={isSaving} />
+                  </div>
                 </div>
-                <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-                  <h3 className="font-semibold text-gray-400 mb-1">Total Daily Energy Expenditure (TDEE)</h3>
-                  <p className="text-2xl text-gray-100">{tdee ? `${tdee} kcal` : 'Complete your profile'}</p>
-                  <p className="text-sm text-gray-400 mt-1">Total daily calories burned with activity</p>
+
+                {/* Today's Summary - Right side */}
+                <div className="lg:col-span-2 flex flex-col h-full">
+                  <MacroSummary totals={totals} />
                 </div>
               </div>
-            </>
+            </div>
           )}
-        </div>
 
-        <CalorieSearch
-          onResult={(result: MacroInputs) =>
-            setInputs({
-              protein: Math.round(Number(result.protein)).toString(),
-              carbs: Math.round(Number(result.carbs)).toString(),
-              fats: Math.round(Number(result.fats)).toString(),
-            })
-          }
-        />
-        <form className="space-y-2" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="flex items-center justify-between sm:block">
-              <label htmlFor="protein" className="text-gray-300">Protein (g):</label>
-              <input
-                id="protein"
-                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-gray-800 border-gray-600 text-gray-100"
-                type="number"
-                min="0"
-                value={inputs.protein}
-                onChange={(e) =>
-                  setInputs((v: MacroInputs) => ({
-                    ...v,
-                    protein: e.target.value,
-                  }))
-                }
+          {/* History Section */}
+          <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden">
+            <div className="p-6">
+              <h2 className="text-lg font-semibold text-gray-200 mb-4">Nutrition History</h2>
+              <EntryTable
+                history={history}
+                deleteEntry={deleteEntry}
+                onEdit={setEditingEntry}
+                isDeleting={isDeleting}
+                isEditing={isEditing}
               />
-            </div>
-            <div className="flex items-center justify-between sm:block">
-              <label htmlFor="carbs" className="text-gray-300">Carbs (g):</label>
-              <input
-                id="carbs"
-                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-gray-800 border-gray-600 text-gray-100"
-                type="number"
-                min="0"
-                value={inputs.carbs}
-                onChange={(e) =>
-                  setInputs((v: MacroInputs) => ({
-                    ...v,
-                    carbs: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="flex items-center justify-between sm:block">
-              <label htmlFor="fats" className="text-gray-300">Fats (g):</label>
-              <input
-                id="fats"
-                className="border rounded px-2 py-1 ml-2 w-20 sm:w-24 bg-gray-800 border-gray-600 text-gray-100"
-                type="number"
-                min="0"
-                value={inputs.fats}
-                onChange={(e) =>
-                  setInputs((v: MacroInputs) => ({
-                    ...v,
-                    fats: e.target.value,
-                  }))
-                }
-              />
-            </div>
-            <div className="flex items-end justify-end">
-              <button
-                type="submit"
-                className="w-full sm:w-auto bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                disabled={isSaving || (!Number(inputs.protein) && !Number(inputs.carbs) && !Number(inputs.fats))}
-              >
-                {isSaving ? "Saving..." : "Save Entry"}
-              </button>
-            </div>
-          </div>
-        </form>
-
-        {error && (
-          <div className="mt-4 p-2 text-red-400 bg-red-900/50 rounded">
-            {error}
-          </div>
-        )}
-
-        <div className="mt-4">
-          <h2 className="text-lg sm:text-xl font-bold text-gray-100">Today's Macros:</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-              <h3 className="font-semibold text-gray-300">Protein</h3>
-              <p className="text-gray-100">{totals.protein}g</p>
-            </div>
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-              <h3 className="font-semibold text-gray-300">Carbs</h3>
-              <p className="text-gray-100">{totals.carbs}g</p>
-            </div>
-            <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-              <h3 className="font-semibold text-gray-300">Fats</h3>
-              <p className="text-gray-100">{totals.fats}g</p>
             </div>
           </div>
         </div>
-
-        <div className="mt-4 p-4 bg-gray-800 rounded-lg border border-gray-700">
-          <h3 className="font-bold text-lg text-gray-100">Calories</h3>
-          <p className="text-xl sm:text-2xl text-gray-100">{totals.calories} kcal</p>
-          <MacroPieChart totals={totals} />
-        </div>
-        <EntryTable
-          history={history}
-          deleteEntry={deleteEntry}
-          onEdit={setEditingEntry}
-          isDeleting={isDeleting}
-          isEditing={isEditing}
-        />
-        {editingEntry && (
-          <EditModal
-            entry={editingEntry}
-            onSave={handleEdit}
-            onClose={() => setEditingEntry(null)}
-            isSaving={isEditing}
-          />
-        )}
       </div>
+
+      {/* Edit Modal - Only render when editingEntry is not null */}
+      {editingEntry && (
+        <EditModal
+          entry={editingEntry}
+          onSave={handleEdit}
+          onClose={() => setEditingEntry(null)}
+          isSaving={isEditing}
+        />
+      )}
     </div>
   );
 }
