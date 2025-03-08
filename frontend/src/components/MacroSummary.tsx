@@ -1,10 +1,19 @@
-import { MacroTotals } from "../types";
+import { MacroTotals, MacroDistributionSettings } from "../types";
 
 interface MacroSummaryProps {
   totals: MacroTotals;
+  macroDistribution?: MacroDistributionSettings;
 }
 
-export default function MacroSummary({ totals }: MacroSummaryProps) {
+export default function MacroSummary({ totals, macroDistribution }: MacroSummaryProps) {
+  const defaultDistribution = {
+    proteinPercentage: 30,
+    carbsPercentage: 40, 
+    fatsPercentage: 30
+  };
+
+  const distribution = macroDistribution || defaultDistribution;
+  
   const totalCalories = totals.protein * 4 + totals.carbs * 4 + totals.fats * 9;
   const proteinPercent = totalCalories ? Math.round((totals.protein * 4 / totalCalories) * 100) : 0;
   const carbsPercent = totalCalories ? Math.round((totals.carbs * 4 / totalCalories) * 100) : 0;
@@ -16,33 +25,39 @@ export default function MacroSummary({ totals }: MacroSummaryProps) {
       grams: totals.protein,
       calories: totals.protein * 4,
       percent: proteinPercent,
+      targetPercent: distribution.proteinPercentage,
       color: "bg-green-500",
       textColor: "text-green-400",
       borderColor: "border-green-500/20",
       gradientFrom: "from-green-900/30",
-      barColor: "bg-green-500/80"
+      barColor: "bg-green-500/80",
+      targetBarColor: "bg-green-700/30"
     },
     {
       name: "Carbs",
       grams: totals.carbs,
       calories: totals.carbs * 4,
       percent: carbsPercent,
+      targetPercent: distribution.carbsPercentage,
       color: "bg-blue-500",
       textColor: "text-blue-400",
       borderColor: "border-blue-500/20",
       gradientFrom: "from-blue-900/30",
-      barColor: "bg-blue-500/80"
+      barColor: "bg-blue-500/80",
+      targetBarColor: "bg-blue-700/30"
     },
     {
       name: "Fats",
       grams: totals.fats,
       calories: totals.fats * 9,
       percent: fatsPercent,
+      targetPercent: distribution.fatsPercentage,
       color: "bg-red-500",
       textColor: "text-red-400",
       borderColor: "border-red-500/20",
       gradientFrom: "from-red-900/30",
-      barColor: "bg-red-500/80"
+      barColor: "bg-red-500/80",
+      targetBarColor: "bg-red-700/30"
     }
   ];
 
@@ -59,16 +74,32 @@ export default function MacroSummary({ totals }: MacroSummaryProps) {
           </div>
 
           {/* Stacked bar for overall macro split */}
-          <div className="h-2 w-full bg-gray-700/30 rounded-full overflow-hidden flex">
-            <div className="h-full bg-green-500/80 transition-all duration-500"
+          <div className="relative h-2 w-full bg-gray-700/30 rounded-full overflow-hidden">
+            <div className="absolute top-0 left-0 h-full bg-green-500/80 transition-all duration-500"
                  style={{ width: `${proteinPercent}%` }}
             />
-            <div className="h-full bg-blue-500/80 transition-all duration-500"
-                 style={{ width: `${carbsPercent}%` }}
+            <div className="absolute top-0 h-full bg-blue-500/80 transition-all duration-500"
+                 style={{ width: `${carbsPercent}%`, left: `${proteinPercent}%` }}
             />
-            <div className="h-full bg-red-500/80 transition-all duration-500"
-                 style={{ width: `${fatsPercent}%` }}
+            <div className="absolute top-0 h-full bg-red-500/80 transition-all duration-500"
+                 style={{ width: `${fatsPercent}%`, left: `${proteinPercent + carbsPercent}%` }}
             />
+          </div>
+          
+          {/* Target Percentages Legend */}
+          <div className="flex mt-2 justify-between text-xs">
+            <div className="flex items-center">
+              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
+              <span className="text-gray-400">{distribution.proteinPercentage}%</span>
+            </div>
+            <div className="flex items-center">
+              <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
+              <span className="text-gray-400">{distribution.carbsPercentage}%</span>
+            </div>
+            <div className="flex items-center">
+              <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>
+              <span className="text-gray-400">{distribution.fatsPercentage}%</span>
+            </div>
           </div>
         </div>
         
@@ -88,6 +119,12 @@ export default function MacroSummary({ totals }: MacroSummaryProps) {
               </div>
               
               <div className="relative h-2 rounded-full bg-gray-700/50 overflow-hidden">
+                {/* Target percentage background bar */}
+                <div 
+                  className={`absolute left-0 top-0 h-full ${macro.targetBarColor} transition-all duration-500`}
+                  style={{ width: `${macro.targetPercent}%` }}
+                ></div>
+                {/* Actual percentage bar */}
                 <div 
                   className={`absolute left-0 top-0 h-full ${macro.barColor} transition-all duration-500`}
                   style={{ width: `${macro.percent}%` }}
@@ -100,8 +137,10 @@ export default function MacroSummary({ totals }: MacroSummaryProps) {
                     {macro.calories} kcal
                   </span>
                 </div>
-                <div className="text-xs text-gray-400 flex items-center gap-1">
-                  <span>{macro.percent}% of daily calories</span>
+                <div className="flex items-center text-xs">
+                  <span className="text-gray-400">{macro.percent}% </span>
+                  <span className="text-gray-500 mx-1">•</span>
+                  <span className="text-gray-600">Target: {macro.targetPercent}%</span>
                 </div>
               </div>
             </div>

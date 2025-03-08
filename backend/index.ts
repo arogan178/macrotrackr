@@ -40,6 +40,21 @@ db.exec(`
     user_id INTEGER NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users(id)
   );
+  
+  CREATE TABLE IF NOT EXISTS macro_distribution (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER UNIQUE NOT NULL,
+    protein_percentage INTEGER NOT NULL DEFAULT 30,
+    carbs_percentage INTEGER NOT NULL DEFAULT 40,
+    fats_percentage INTEGER NOT NULL DEFAULT 30,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    CHECK (protein_percentage + carbs_percentage + fats_percentage = 100),
+    CHECK (protein_percentage >= 5 AND protein_percentage <= 70),
+    CHECK (carbs_percentage >= 5 AND carbs_percentage <= 70),
+    CHECK (fats_percentage >= 5 AND fats_percentage <= 70)
+  );
 `);
 
 db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
@@ -156,6 +171,21 @@ const app = new Elysia()
           gender,
           activityLevelMap[activityLevel]
         );
+        
+        // Insert default macro distribution
+        db.prepare(`
+          INSERT INTO macro_distribution (
+            user_id, 
+            protein_percentage, 
+            carbs_percentage, 
+            fats_percentage
+          ) VALUES (?, ?, ?, ?)
+        `).run(
+          userId,
+          30,
+          40,
+          30
+        );
 
         db.exec('COMMIT');
 
@@ -253,6 +283,7 @@ const app = new Elysia()
   // User endpoints
   .get("/api/user/me", ({ userId }) => {
     try {
+      // Get user and user details
       const user = db
         .prepare(
           `
@@ -273,12 +304,26 @@ const app = new Elysia()
         `
         )
         .get(userId);
-
+        
       if (!user) {
         throw new Error("User not found");
       }
+      
+      // Get macro distribution settings
+      const macroDistribution = db
+        .prepare(
+          `
+          SELECT 
+            protein_percentage AS proteinPercentage,
+            carbs_percentage AS carbsPercentage,
+            fats_percentage AS fatsPercentage
+          FROM macro_distribution
+          WHERE user_id = ?
+        `
+        )
+        .get(userId) || { proteinPercentage: 30, carbsPercentage: 40, fatsPercentage: 30 };
 
-      return user;
+      return { ...user, macro_distribution: macroDistribution };
     } catch (error) {
       console.error("User details error:", error);
       throw new Error("Failed to fetch user details");
@@ -348,7 +393,17 @@ const app = new Elysia()
     return { success: true };
   })
   .put("/api/user/settings", ({ userId, body }) => {
-    const { first_name, last_name, email, date_of_birth, height, weight, gender, activity_level } = body as {
+    const { 
+      first_name, 
+      last_name, 
+      email, 
+      date_of_birth, 
+      height, 
+      weight, 
+      gender, 
+      activity_level, 
+      macro_distribution 
+    } = body as {
       first_name: string;
       last_name: string;
       email: string;
@@ -357,75 +412,119 @@ const app = new Elysia()
       weight?: number;
       gender?: 'male' | 'female';
       activity_level?: number;
+      macro_distribution?: {
+        proteinPercentage: number;
+        carbsPercentage: number;
+        fatsPercentage: number;
+      };
     };
   
     try {
-      // Update users table
-      const userUpdateFields = [];
-      const userParams = [];
-  
-      if (first_name) {
-        userUpdateFields.push("first_name = ?");
-        userParams.push(first_name);
-      }
-      if (last_name) {
-        userUpdateFields.push("last_name = ?");
-        userParams.push(last_name);
-      }
-      if (email) {
-        userUpdateFields.push("email = ?");
-        userParams.push(email);
-      }
-
-      userParams.push(userId);
+      // Use a transaction to ensure all updates succeed or fail together
+      db.exec('BEGIN TRANSACTION');
       
-      if (userUpdateFields.length > 0) {
-        db.prepare(
-          `UPDATE users SET ${userUpdateFields.join(", ")} WHERE id = ?`
-        ).run(...userParams);
+      try {
+        // Update users table
+        const userUpdateFields = [];
+        const userParams = [];
+    
+        if (first_name) {
+          userUpdateFields.push("first_name = ?");
+          userParams.push(first_name);
+        }
+        if (last_name) {
+          userUpdateFields.push("last_name = ?");
+          userParams.push(last_name);
+        }
+        if (email) {
+          userUpdateFields.push("email = ?");
+          userParams.push(email);
+        }
+
+        userParams.push(userId);
+        
+        if (userUpdateFields.length > 0) {
+          db.prepare(
+            `UPDATE users SET ${userUpdateFields.join(", ")} WHERE id = ?`
+          ).run(...userParams);
+        }
+
+        // Convert undefined values to null for SQLite
+        const dateOfBirthValue = date_of_birth === undefined ? null : date_of_birth;
+        const heightValue = height === undefined ? null : height;
+        const weightValue = weight === undefined ? null : weight;
+        const genderValue = gender === undefined ? null : gender;
+        const activityLevelValue = activity_level === undefined ? null : activity_level;
+
+        // Update user_details table
+        db.prepare(`
+          INSERT INTO user_details (
+            user_id,
+            date_of_birth,
+            height,
+            weight,
+            gender,
+            activity_level,
+            updated_at
+          )
+          VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+          ON CONFLICT(user_id) DO UPDATE SET
+            date_of_birth = ?,
+            height = ?,
+            weight = ?,
+            gender = ?,
+            activity_level = ?,
+            updated_at = CURRENT_TIMESTAMP
+          WHERE user_id = ?
+        `).run(
+          userId,
+          dateOfBirthValue,
+          heightValue,
+          weightValue,
+          genderValue,
+          activityLevelValue,
+          dateOfBirthValue,
+          heightValue,
+          weightValue,
+          genderValue,
+          activityLevelValue,
+          userId
+        );
+        
+        // Update macro distribution if provided
+        if (macro_distribution) {
+          db.prepare(`
+            INSERT INTO macro_distribution (
+              user_id,
+              protein_percentage,
+              carbs_percentage,
+              fats_percentage,
+              updated_at
+            )
+            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            ON CONFLICT(user_id) DO UPDATE SET
+              protein_percentage = ?,
+              carbs_percentage = ?,
+              fats_percentage = ?,
+              updated_at = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+          `).run(
+            userId,
+            macro_distribution.proteinPercentage,
+            macro_distribution.carbsPercentage,
+            macro_distribution.fatsPercentage,
+            macro_distribution.proteinPercentage,
+            macro_distribution.carbsPercentage,
+            macro_distribution.fatsPercentage,
+            userId
+          );
+        }
+        
+        db.exec('COMMIT');
+      } catch (error) {
+        db.exec('ROLLBACK');
+        throw error;
       }
-
-      // Convert undefined values to null for SQLite
-      const dateOfBirthValue = date_of_birth === undefined ? null : date_of_birth;
-      const heightValue = height === undefined ? null : height;
-      const weightValue = weight === undefined ? null : weight;
-      const genderValue = gender === undefined ? null : gender;
-      const activityLevelValue = activity_level === undefined ? null : activity_level;
-
-      // Update user_details table
-      db.prepare(`
-        INSERT INTO user_details (
-          user_id,
-          date_of_birth,
-          height,
-          weight,
-          gender,
-          activity_level,
-          updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-        ON CONFLICT(user_id) DO UPDATE SET
-          date_of_birth = ?,
-          height = ?,
-          weight = ?,
-          gender = ?,
-          activity_level = ?,
-          updated_at = CURRENT_TIMESTAMP
-        WHERE user_id = ?
-      `).run(
-        userId,
-        dateOfBirthValue,
-        heightValue,
-        weightValue,
-        genderValue,
-        activityLevelValue,
-        dateOfBirthValue,
-        heightValue,
-        weightValue,
-        genderValue,
-        activityLevelValue,
-        userId
-      );
   
       return { success: true };
     } catch (error) {

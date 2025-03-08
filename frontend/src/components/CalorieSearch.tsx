@@ -58,11 +58,6 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           </svg>
           <h3 className="text-lg font-semibold text-gray-200">Food Search</h3>
         </div>
-        
-        <p className="text-gray-400 text-sm">
-          Enter food items to automatically calculate their macronutrients
-        </p>
-        
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">

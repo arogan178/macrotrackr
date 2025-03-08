@@ -296,7 +296,10 @@ export default function Overview() {
 
                 {/* Today's Summary - Right side */}
                 <div className="lg:col-span-2 flex flex-col h-full">
-                  <MacroSummary totals={totals} />
+                  <MacroSummary 
+                    totals={totals} 
+                    macroDistribution={user?.macro_distribution}
+                  />
                 </div>
               </div>
             </div>
