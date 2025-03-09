@@ -84,8 +84,10 @@ export default function MacroDistribution({
   const handleChange = (macro: "protein" | "carbs" | "fats", value: number) => {
     setIsAdjusting(macro);
     
-    // Ensure value is between 5 and 70
+    // Ensure value is between 5 and 70, and also ensure it doesn't exceed 90 (which would force others below 5%)
     value = Math.max(5, Math.min(70, value));
+    // If this value would force the sum of the other two macros below 10% (2 × 5%), cap it at 90%
+    value = Math.min(value, 90);
     
     const updatedDistribution = { ...distribution };
     const macroKey = macro === "protein" ? "proteinPercentage" : 
@@ -93,6 +95,9 @@ export default function MacroDistribution({
     
     // If all macros are unlocked, use simple scaling
     if (lockedMacros.length === 0) {
+      const oldValue = updatedDistribution[macroKey];
+      const change = value - oldValue;
+      
       // Get other macros
       const otherMacros = (["protein", "carbs", "fats"] as const).filter(m => m !== macro);
       const otherKeys = otherMacros.map(m => 
@@ -112,6 +117,12 @@ export default function MacroDistribution({
         otherKeys.forEach(key => {
           updatedDistribution[key] = Math.max(5, Math.round(updatedDistribution[key] * ratio));
         });
+        
+        // After ensuring minimums, adjust the current macro if needed
+        const newOtherTotal = updatedDistribution[otherKeys[0]] + updatedDistribution[otherKeys[1]];
+        if (newOtherTotal + value !== 100) {
+          updatedDistribution[macroKey] = 100 - newOtherTotal;
+        }
       } else {
         // If other values are 0, distribute evenly
         otherKeys.forEach(key => {
@@ -119,27 +130,32 @@ export default function MacroDistribution({
         });
       }
       
-      // Final adjustment to ensure we sum to 100
+      // Final check to ensure minimums and maximum
+      Object.keys(updatedDistribution).forEach(key => {
+        const typedKey = key as keyof typeof updatedDistribution;
+        updatedDistribution[typedKey] = Math.max(5, Math.min(70, updatedDistribution[typedKey]));
+      });
+      
+      // If after enforcing limits we're not at 100%, adjust proportionally
       const sum = updatedDistribution.proteinPercentage + 
                  updatedDistribution.carbsPercentage + 
                  updatedDistribution.fatsPercentage;
       
       if (sum !== 100) {
         const diff = 100 - sum;
-        // Add the difference to the larger of the other macros
-        const largerKey = updatedDistribution[otherKeys[0]] > updatedDistribution[otherKeys[1]] 
-          ? otherKeys[0] : otherKeys[1];
-        updatedDistribution[largerKey] += diff;
+        // Distribute the difference proportionally among all macros
+        const total = Object.values(updatedDistribution).reduce((a, b) => a + b, 0);
+        Object.keys(updatedDistribution).forEach(key => {
+          const typedKey = key as keyof typeof updatedDistribution;
+          const currentValue = updatedDistribution[typedKey];
+          const proportion = currentValue / total;
+          updatedDistribution[typedKey] = Math.max(5, Math.min(70, 
+            Math.round(currentValue + (diff * proportion))
+          ));
+        });
       }
-      
-      // Ensure minimum values
-      Object.keys(updatedDistribution).forEach(key => {
-        if (key === "proteinPercentage" || key === "carbsPercentage" || key === "fatsPercentage") {
-          updatedDistribution[key] = Math.max(5, updatedDistribution[key]);
-        }
-      });
     } else {
-      // Use existing logic for locked macros
+      // Use existing logic for locked macros with additional maximum constraint
       // Get the unlocked macros (excluding the one being adjusted)
       const unlockedMacros = (["protein", "carbs", "fats"] as const)
         .filter(m => m !== macro && !lockedMacros.includes(m));
