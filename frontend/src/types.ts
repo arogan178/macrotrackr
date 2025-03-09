@@ -27,6 +27,7 @@ export interface MacroDistributionSettings {
   proteinPercentage: number;
   carbsPercentage: number;
   fatsPercentage: number;
+  locked_macros?: string[];
 }
 
 export interface UserDetails {
