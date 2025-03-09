@@ -47,6 +47,7 @@ db.exec(`
     protein_percentage INTEGER NOT NULL DEFAULT 30,
     carbs_percentage INTEGER NOT NULL DEFAULT 40,
     fats_percentage INTEGER NOT NULL DEFAULT 30,
+    locked_macros TEXT DEFAULT '[]',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id),
@@ -316,14 +317,15 @@ const app = new Elysia()
           SELECT 
             protein_percentage AS proteinPercentage,
             carbs_percentage AS carbsPercentage,
-            fats_percentage AS fatsPercentage
+            fats_percentage AS fatsPercentage,
+            locked_macros
           FROM macro_distribution
           WHERE user_id = ?
         `
         )
-        .get(userId) || { proteinPercentage: 30, carbsPercentage: 40, fatsPercentage: 30 };
+        .get(userId) || { proteinPercentage: 30, carbsPercentage: 40, fatsPercentage: 30, locked_macros: '[]' };
 
-      return { ...user, macro_distribution: macroDistribution };
+      return { ...user, macro_distribution: {...macroDistribution, locked_macros: JSON.parse(macroDistribution.locked_macros)} };
     } catch (error) {
       console.error("User details error:", error);
       throw new Error("Failed to fetch user details");
@@ -416,6 +418,7 @@ const app = new Elysia()
         proteinPercentage: number;
         carbsPercentage: number;
         fatsPercentage: number;
+        locked_macros?: string[];
       };
     };
   
@@ -499,13 +502,15 @@ const app = new Elysia()
               protein_percentage,
               carbs_percentage,
               fats_percentage,
+              locked_macros,
               updated_at
             )
-            VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
+            VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
             ON CONFLICT(user_id) DO UPDATE SET
               protein_percentage = ?,
               carbs_percentage = ?,
               fats_percentage = ?,
+              locked_macros = ?,
               updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
           `).run(
@@ -513,9 +518,11 @@ const app = new Elysia()
             macro_distribution.proteinPercentage,
             macro_distribution.carbsPercentage,
             macro_distribution.fatsPercentage,
+            JSON.stringify(macro_distribution.locked_macros || []),
             macro_distribution.proteinPercentage,
             macro_distribution.carbsPercentage,
             macro_distribution.fatsPercentage,
+            JSON.stringify(macro_distribution.locked_macros || []),
             userId
           );
         }

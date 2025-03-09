@@ -1,11 +1,11 @@
 import { MacroTotals, MacroDistributionSettings } from "../types";
 
-interface MacroSummaryProps {
+interface DailySummaryProps {
   totals: MacroTotals;
   macroDistribution?: MacroDistributionSettings;
 }
 
-export default function MacroSummary({ totals, macroDistribution }: MacroSummaryProps) {
+export default function DailySummary({ totals, macroDistribution }: DailySummaryProps) {
   const defaultDistribution = {
     proteinPercentage: 30,
     carbsPercentage: 40, 

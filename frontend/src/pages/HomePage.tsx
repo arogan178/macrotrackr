@@ -4,7 +4,7 @@ import EditModal from "../components/EditModal";
 import { MacroEntry, MacroTotals, UserDetails } from "../types";
 import Navbar from "../components/Navbar";
 import { calculateBMR, calculateTDEE } from "../utils/calculations";
-import MacroSummary from "../components/MacroSummary";
+import DailySummary from "../components/DailySummary";
 import AddEntry from "../components/AddEntry";
 
 export default function Overview() {
@@ -296,7 +296,7 @@ export default function Overview() {
 
                 {/* Today's Summary - Right side */}
                 <div className="lg:col-span-2 flex flex-col h-full">
-                  <MacroSummary 
+                  <DailySummary
                     totals={totals} 
                     macroDistribution={user?.macro_distribution}
                   />
