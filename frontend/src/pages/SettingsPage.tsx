@@ -4,6 +4,8 @@ import MacroDistribution from "../components/MacroDistribution";
 import { UserDetails, MacroDistributionSettings } from "../types";
 import { getActivityLevelOptions } from "../utils/activityLevels";
 import FloatingNotification from "../components/FloatingNotification";
+import { TextField, NumberField, SelectField, InfoCard, TabButton, CardContainer } from "../components/FormComponents";
+import SaveButton from "../components/SaveButton";
 
 const MINIMUM_AGE = 16;
 
@@ -192,214 +194,108 @@ export default function SettingsPage() {
           
           {/* Settings Tabs */}
           <div className="flex border-b border-gray-700 mb-6">
-            <button 
+            <TabButton 
+              active={activeTab === "profile"}
               onClick={() => setActiveTab("profile")}
-              className={`py-3 px-6 font-medium text-sm focus:outline-none ${
-                activeTab === "profile" 
-                  ? "text-indigo-400 border-b-2 border-indigo-500" 
-                  : "text-gray-400 hover:text-gray-300"
-              }`}
             >
               Profile
-            </button>
-            <button 
+            </TabButton>
+            <TabButton
+              active={activeTab === "nutrition"}
               onClick={() => setActiveTab("nutrition")}
-              className={`py-3 px-6 font-medium text-sm focus:outline-none ${
-                activeTab === "nutrition" 
-                  ? "text-indigo-400 border-b-2 border-indigo-500" 
-                  : "text-gray-400 hover:text-gray-300"
-              }`}
             >
               Nutrition Goals
-            </button>
+            </TabButton>
           </div>
 
-          <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden">
+          <CardContainer>
             <form onSubmit={handleSubmit} className="p-6">
               {activeTab === "profile" ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">First Name</label>
-                      <input
-                        type="text"
-                        value={settings.first_name}
-                        onChange={(e) =>
-                          setSettings((prev) => ({ ...prev, first_name: e.target.value }))
-                        }
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm"
-                        required
-                      />
-                    </div>
+                    <TextField
+                      label="First Name"
+                      value={settings.first_name}
+                      onChange={(value) => setSettings(prev => ({ ...prev, first_name: value }))}
+                      required
+                    />
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Last Name</label>
-                      <input
-                        type="text"
-                        value={settings.last_name}
-                        onChange={(e) =>
-                          setSettings((prev) => ({ ...prev, last_name: e.target.value }))
-                        }
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm"
-                        required
-                      />
-                    </div>
+                    <TextField
+                      label="Last Name"
+                      value={settings.last_name}
+                      onChange={(value) => setSettings(prev => ({ ...prev, last_name: value }))}
+                      required
+                    />
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Email Address</label>
-                      <input
-                        type="email"
-                        value={settings.email}
-                        onChange={(e) =>
-                          setSettings((prev) => ({ ...prev, email: e.target.value }))
-                        }
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm"
-                        required
-                      />
-                    </div>
+                    <TextField
+                      label="Email Address"
+                      type="email"
+                      value={settings.email}
+                      onChange={(value) => setSettings(prev => ({ ...prev, email: value }))}
+                      required
+                    />
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Date of Birth</label>
-                      <input
-                        type="date"
-                        value={settings.date_of_birth || ''}
-                        onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            date_of_birth: e.target.value,
-                          }))
-                        }
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm pl-4 pr-4"
-                      />
-                    </div>
+                    <TextField
+                      label="Date of Birth"
+                      type="date"
+                      value={settings.date_of_birth || ''}
+                      onChange={(value) => setSettings(prev => ({ ...prev, date_of_birth: value }))}
+                    />
                   </div>
 
                   <div className="space-y-6">
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Height (cm)</label>
-                      <input
-                        type="number"
-                        value={settings.height || ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === '' || /^\d+$/.test(value)) {
-                            setSettings((prev) => ({
-                              ...prev,
-                              height: value ? Number(value) : undefined,
-                            }));
-                          }
-                        }}
-                        onKeyPress={(e) => {
-                          if (!/[0-9]/.test(e.key)) {
-                            e.preventDefault();
-                          }
-                        }}
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm pl-4 pr-4
-                               [&::-webkit-inner-spin-button]:appearance-none
-                               [&::-webkit-outer-spin-button]:appearance-none
-                               [-moz-appearance:textfield]"
-                        min="150"
-                        step="1"
-                        inputMode="numeric"
-                        pattern="[0-9]*"
-                      />
-                    </div>
+                    <NumberField
+                      label="Height (cm)"
+                      value={settings.height}
+                      onChange={(value) => setSettings(prev => ({ ...prev, height: value }))}
+                      min={150}
+                      step={1}
+                      unit="cm"
+                    />
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Weight (kg)</label>
-                      <input
-                        type="number"
-                        value={settings.weight || ''}
-                        onChange={(e) => {
-                          const value = e.target.value;
-                          if (value === '' || /^\d*\.?\d*$/.test(value)) {
-                            setSettings((prev) => ({
-                              ...prev,
-                              weight: value ? Number(value) : undefined,
-                            }));
-                          }
-                        }}
-                        onKeyPress={(e) => {
-                          if (!/[0-9.]/.test(e.key)) {
-                            e.preventDefault();
-                          }
-                        }}
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm pl-4 pr-4
-                               [&::-webkit-inner-spin-button]:appearance-none
-                               [&::-webkit-outer-spin-button]:appearance-none
-                               [-moz-appearance:textfield]"
-                        min="45"
-                        step="0.1"
-                        inputMode="numeric"
-                        pattern="[0-9]*\.?[0-9]*"
-                      />
-                    </div>
+                    <NumberField
+                      label="Weight (kg)"
+                      value={settings.weight}
+                      onChange={(value) => setSettings(prev => ({ ...prev, weight: value }))}
+                      min={45}
+                      step={0.1}
+                      unit="kg"
+                    />
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Gender</label>
-                      <select
-                        value={settings.gender || ''}
-                        onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            gender: (e.target.value as 'male' | 'female' | '') || undefined,
-                          }))
-                        }
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm appearance-none
-                               bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]
-                               bg-[length:2rem] bg-[right_0.75rem_center] bg-no-repeat"
-                      >
-                        <option value="">Select gender</option>
-                        <option value="male">Male</option>
-                        <option value="female">Female</option>
-                      </select>
-                    </div>
+                    <SelectField
+                      label="Gender"
+                      value={settings.gender || ''}
+                      onChange={(value) => setSettings(prev => ({ 
+                        ...prev, 
+                        gender: (value as 'male' | 'female' | '') || undefined 
+                      }))}
+                      options={[
+                        { value: 'male', label: 'Male' },
+                        { value: 'female', label: 'Female' }
+                      ]}
+                      placeholder="Select gender"
+                    />
 
-                    <div className="space-y-2">
-                      <label className="block text-sm font-medium text-gray-300">Activity Level</label>
-                      <select
-                        value={settings.activity_level || ''}
-                        onChange={(e) =>
-                          setSettings((prev) => ({
-                            ...prev,
-                            activity_level: e.target.value ? Number(e.target.value) : undefined,
-                          }))
-                        }
-                        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
-                               focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                               transition-all duration-200 shadow-sm appearance-none
-                               bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]
-                               bg-[length:2rem] bg-[right_0.75rem_center] bg-no-repeat"
-                      >
-                        <option value="">Select activity level</option>
-                        {getActivityLevelOptions().map((level, index) => (
-                          <option key={level.value} value={index + 1}>
-                            {level.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
+                    <SelectField
+                      label="Activity Level"
+                      value={settings.activity_level || ''}
+                      onChange={(value) => setSettings(prev => ({ 
+                        ...prev, 
+                        activity_level: value ? Number(value) : undefined 
+                      }))}
+                      options={getActivityLevelOptions().map((level, index) => ({
+                        value: index + 1,
+                        label: level.label
+                      }))}
+                      placeholder="Select activity level"
+                    />
                   </div>
                 </div>
               ) : (
                 <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
                   {/* Left side - Main content (4 cols) */}
                   <div className="lg:col-span-4 flex flex-col h-full">
-                    <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl p-6 h-full">
+                    <CardContainer className="p-6 h-full">
                       <div className="flex items-center justify-between mb-6">
                         <h3 className="text-lg font-semibold text-gray-200">Macro Distribution Settings</h3>
                         <div className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full">
@@ -418,88 +314,65 @@ export default function SettingsPage() {
                           onDistributionChange={handleMacroDistributionChange}
                         />
                       )}
-                    </div>
+                    </CardContainer>
                   </div>
 
                   {/* Right side - Info panel (2 cols) */}
                   <div className="lg:col-span-2 flex flex-col h-full">
-                    <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl p-6 h-full">
+                    <CardContainer className="p-6 h-full">
                       <h3 className="text-lg font-semibold text-gray-300 mb-4">Understanding Macros</h3>
                       <div className="space-y-4 flex-1">
                         {/* Protein Info */}
-                        <div className="bg-gradient-to-br from-green-900/30 to-gray-800/10 p-4 rounded-xl border border-green-500/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 rounded-full bg-green-500"></div>
-                            <h4 className="text-green-400 font-medium">Protein</h4>
-                          </div>
-                          <p className="text-sm text-gray-400">Essential for muscle repair and growth.</p>
-                        </div>
+                        <InfoCard 
+                          title="Protein" 
+                          description="Essential for muscle repair and growth."
+                          color="green"
+                        />
 
                         {/* Carbs Info */}
-                        <div className="bg-gradient-to-br from-blue-900/30 to-gray-800/10 p-4 rounded-xl border border-blue-500/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 rounded-full bg-blue-500"></div>
-                            <h4 className="text-blue-400 font-medium">Carbohydrates</h4>
-                          </div>
-                          <p className="text-sm text-gray-400">Your body's primary energy source.</p>
-                        </div>
+                        <InfoCard 
+                          title="Carbohydrates" 
+                          description="Your body's primary energy source."
+                          color="blue"
+                        />
 
                         {/* Fats Info */}
-                        <div className="bg-gradient-to-br from-red-900/30 to-gray-800/10 p-4 rounded-xl border border-red-500/20">
-                          <div className="flex items-center gap-2 mb-2">
-                            <div className="w-2 h-2 rounded-full bg-red-500"></div>
-                            <h4 className="text-red-400 font-medium">Fats</h4>
-                          </div>
-                          <p className="text-sm text-gray-400">Essential for hormone production and nutrient absorption. </p>
-                        </div>
+                        <InfoCard 
+                          title="Fats" 
+                          description="Essential for hormone production and nutrient absorption."
+                          color="red"
+                        />
 
                         {/* Daily Target Info */}
-                        <div className="mt-6 bg-gradient-to-br from-indigo-900/20 to-gray-800/10 p-4 rounded-xl border border-indigo-500/20">
-                          <div className="flex items-center gap-2 mb-2">
+                        <InfoCard
+                          title="Tips"
+                          color="indigo"
+                          icon={
                             <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            <h4 className="text-indigo-300 font-medium">Tips</h4>
-                          </div>
-                          <ul className="text-sm text-gray-400 space-y-2">
+                          }
+                        >
+                          <ul className="text-sm text-gray-400 space-y-2 mt-2">
                             <li>• For muscle growth keep protein between 20-35% </li>
                             <li>• Carbs work best at 45-65%</li>
                             <li>• Fats should stay between 20-35%</li>
                           </ul>
-                        </div>
+                        </InfoCard>
                       </div>
-                    </div>
+                    </CardContainer>
                   </div>
                 </div>
               )}
 
               <div className="mt-8 flex justify-end">
-                <button
-                  type="submit"
-                  disabled={loading || !hasChanges()}
-                  className="px-8 py-3 rounded-lg font-semibold text-white text-lg
-                         bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 
-                         hover:from-indigo-400 hover:via-blue-400 hover:to-indigo-500
-                         disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
-                         shadow-lg shadow-indigo-500/30 relative overflow-hidden
-                         before:absolute before:inset-0 before:bg-gradient-to-r 
-                         before:from-transparent before:via-white/10 before:to-transparent
-                         before:translate-x-[-200%] hover:before:translate-x-[200%]
-                         before:transition-transform before:duration-1000"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center">
-                      <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Saving...
-                    </span>
-                  ) : "Save Changes"}
-                </button>
+                <SaveButton 
+                  loading={loading}
+                  disabled={!hasChanges()}
+                />
               </div>
             </form>
-          </div>
+          </CardContainer>
         </div>
       </div>
     </div>
