@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getActivityLevelOptions } from '../utils/activityLevels';
 import type { ActivityLevel } from '../utils/activityLevels';
+import FloatingNotification from "./FloatingNotification";
 
 type RegistrationData = {
   firstName: string;
@@ -568,20 +569,12 @@ export default function RegisterForm() {
         </p>
       </div>
       
-      {error && (
-        <div className="mb-6 text-red-400 bg-red-900/50 p-4 rounded-lg border border-red-800/50 shadow-lg">
-          <div className="flex items-center">
-            <svg className="h-5 w-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            {error}
-          </div>
-        </div>
-      )}
+      <FloatingNotification error={error} />
       
       {step === 1 && renderStepOne()}
       {step === 2 && renderStepTwo()}
       {step === 3 && renderStepThree()}
+
     </div>
   );
 }

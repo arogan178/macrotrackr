@@ -3,6 +3,7 @@ import Navbar from "../components/Navbar";
 import MacroDistribution from "../components/MacroDistribution";
 import { UserDetails, MacroDistributionSettings } from "../types";
 import { getActivityLevelOptions } from "../utils/activityLevels";
+import FloatingNotification from "../components/FloatingNotification";
 
 const MINIMUM_AGE = 16;
 
@@ -147,7 +148,6 @@ export default function SettingsPage() {
         throw new Error(data.error || "Failed to update settings");
       }
 
-      // Update token if a new one was returned (email/name changes)
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
@@ -161,13 +161,24 @@ export default function SettingsPage() {
     }
   };
 
+  const handleClearMessages = () => {
+    setError("");
+    setSuccess("");
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
       <div className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(67,56,202,0.1),transparent_70%)] pointer-events-none"></div>
         
-        <div className="max-w-4xl mx-auto px-4 py-8 relative z-1">
+        <div className="max-w-4xl mx-auto px-4 py-8 relative">
+          <FloatingNotification 
+            error={error} 
+            success={success}
+            onClear={handleClearMessages} 
+          />
+
           <div className="flex items-center justify-between mb-8">
             <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
               Settings
@@ -178,28 +189,6 @@ export default function SettingsPage() {
               </span>
             </div>
           </div>
-
-          {error && (
-            <div className="mb-6 text-red-400 bg-red-900/50 p-4 rounded-lg border border-red-800/50 shadow-lg animate-appear">
-              <div className="flex items-center">
-                <svg className="h-5 w-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                {error}
-              </div>
-            </div>
-          )}
-          
-          {success && (
-            <div className="mb-6 text-green-400 bg-green-900/50 p-4 rounded-lg border border-green-800/50 shadow-lg animate-appear">
-              <div className="flex items-center">
-                <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                {success}
-              </div>
-            </div>
-          )}
           
           {/* Settings Tabs */}
           <div className="flex border-b border-gray-700 mb-6">

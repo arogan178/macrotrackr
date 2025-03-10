@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FloatingNotification from "./FloatingNotification";
 
 type CalorieSearchProps = {
   onResult: (macros: { protein: string; carbs: string; fats: string }) => void;
@@ -40,6 +41,10 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleClearMessages = () => {
+    setError("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -124,6 +129,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             Loaded nutrition data for "{lastQuery}"
           </div>
         )}
+        <FloatingNotification error={error} onClear={handleClearMessages} />
       </div>
     </div>
   );
