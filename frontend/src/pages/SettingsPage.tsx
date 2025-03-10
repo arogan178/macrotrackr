@@ -179,6 +179,7 @@ export default function SettingsPage() {
             error={error} 
             success={success}
             onClear={handleClearMessages} 
+            duration={1500}
           />
 
           <div className="flex items-center justify-between mb-8">
