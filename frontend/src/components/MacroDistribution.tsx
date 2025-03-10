@@ -101,7 +101,71 @@ export default function MacroDistribution({
     const isCurrentMacroLocked = lockedMacros.includes(macro);
     
     if (lockedMacros.length === 0) {
-      // ...existing logic for when no macros are locked...
+      // Set the clicked macro's value
+      updatedDistribution[macroKey] = value;
+      
+      // Get other macros
+      const otherMacros = (["protein", "carbs", "fats"] as const).filter(m => m !== macro);
+      const otherKeys = otherMacros.map(m => 
+        m === "protein" ? "proteinPercentage" :
+        m === "carbs" ? "carbsPercentage" : "fatsPercentage"
+      );
+      
+      // Calculate remaining percentage
+      const remainingTotal = 100 - value;
+      
+      // Get current values of other macros
+      const otherValues = otherKeys.map(key => updatedDistribution[key]);
+      const otherTotal = otherValues.reduce((sum, val) => sum + val, 0);
+      
+      if (otherTotal > 0) {
+        // Distribute the remaining percentage proportionally
+        const ratio = remainingTotal / otherTotal;
+        
+        // Calculate new values while preserving proportions
+        let newOtherValues = otherValues.map(val => Math.round(val * ratio));
+        
+        // Ensure minimum 5%
+        newOtherValues = newOtherValues.map(val => Math.max(5, val));
+        
+        // Check if we exceeded the remaining total
+        const newOtherTotal = newOtherValues.reduce((sum, val) => sum + val, 0);
+        
+        if (newOtherTotal !== remainingTotal) {
+          // Adjust the values to match the remaining total
+          const diff = newOtherTotal - remainingTotal;
+          
+          // If the difference is positive, we need to reduce values
+          if (diff > 0) {
+            // Find the larger value that we can reduce
+            if (newOtherValues[0] > newOtherValues[1] && newOtherValues[0] - diff >= 5) {
+              newOtherValues[0] -= diff;
+            } else if (newOtherValues[1] - diff >= 5) {
+              newOtherValues[1] -= diff;
+            } else {
+              // If we can't reduce either value, adjust both as much as possible
+              newOtherValues = [5, 5];
+              // And adjust the main value to make sum 100%
+              updatedDistribution[macroKey] = 90; // 100 - (5 + 5)
+            }
+          } else {
+            // If the difference is negative, add to the larger value
+            if (newOtherValues[0] >= newOtherValues[1]) {
+              newOtherValues[0] += Math.abs(diff);
+            } else {
+              newOtherValues[1] += Math.abs(diff);
+            }
+          }
+        }
+        
+        // Apply the calculated values
+        updatedDistribution[otherKeys[0]] = newOtherValues[0];
+        updatedDistribution[otherKeys[1]] = newOtherValues[1];
+      } else {
+        // If other values are 0, distribute evenly
+        updatedDistribution[otherKeys[0]] = Math.round(remainingTotal / 2);
+        updatedDistribution[otherKeys[1]] = remainingTotal - updatedDistribution[otherKeys[0]];
+      }
     } else {
       // Get the unlocked macros (excluding the one being adjusted)
       const unlockedMacros = (["protein", "carbs", "fats"] as const)
