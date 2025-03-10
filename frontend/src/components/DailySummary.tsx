@@ -86,19 +86,19 @@ export default function DailySummary({ totals, macroDistribution }: DailySummary
             />
           </div>
           
-          {/* Target Percentages Legend */}
+          {/* Current Percentages Legend - Updated to show actual percentages */}
           <div className="flex mt-2 justify-between text-xs">
             <div className="flex items-center">
               <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{distribution.proteinPercentage}%</span>
+              <span className="text-gray-400">{proteinPercent}%</span>
             </div>
             <div className="flex items-center">
               <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{distribution.carbsPercentage}%</span>
+              <span className="text-gray-400">{carbsPercent}%</span>
             </div>
             <div className="flex items-center">
               <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{distribution.fatsPercentage}%</span>
+              <span className="text-gray-400">{fatsPercent}%</span>
             </div>
           </div>
         </div>
