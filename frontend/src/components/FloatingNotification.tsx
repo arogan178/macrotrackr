@@ -31,6 +31,7 @@ export default function FloatingNotification({
   hideAutomatically = true
 }: FloatingNotificationProps) {
   const [internalNotifications, setInternalNotifications] = useState<NotificationContent[]>([]);
+  const [isLeaving, setIsLeaving] = useState(false);
 
   // Process incoming props into unified notifications array
   useEffect(() => {
@@ -47,28 +48,44 @@ export default function FloatingNotification({
     }
     
     if (newNotifications.length > 0) {
+      setIsLeaving(false);
       setInternalNotifications(newNotifications);
     }
   }, [success, error, warning, info, notifications]);
 
-  // Auto-clear messages with fade animations
+  // Handle auto-clear with animations
   useEffect(() => {
     if (internalNotifications.length > 0 && hideAutomatically) {
-      const timer = setTimeout(() => {
+      // Start fade out animation before clearing
+      const fadeOutTimer = setTimeout(() => {
+        setIsLeaving(true);
+      }, duration - 300); // Start fade out 300ms before removal
+
+      const clearTimer = setTimeout(() => {
         if (onClear) {
           onClear();
         }
         setInternalNotifications([]);
+        setIsLeaving(false);
       }, duration);
-      return () => clearTimeout(timer);
+
+      return () => {
+        clearTimeout(fadeOutTimer);
+        clearTimeout(clearTimer);
+      };
     }
   }, [internalNotifications, onClear, duration, hideAutomatically]);
 
   const clearNotifications = () => {
-    if (onClear) {
-      onClear();
-    }
-    setInternalNotifications([]);
+    setIsLeaving(true);
+    // Wait for fade out animation before clearing
+    setTimeout(() => {
+      if (onClear) {
+        onClear();
+      }
+      setInternalNotifications([]);
+      setIsLeaving(false);
+    }, 300);
   };
 
   if (internalNotifications.length === 0) return null;
@@ -81,7 +98,8 @@ export default function FloatingNotification({
         <NotificationItem 
           key={`${notification.type}-${index}`} 
           notification={notification} 
-          onClose={clearNotifications} 
+          onClose={clearNotifications}
+          isLeaving={isLeaving}
         />
       ))}
     </div>
@@ -91,9 +109,10 @@ export default function FloatingNotification({
 interface NotificationItemProps {
   notification: NotificationContent;
   onClose: () => void;
+  isLeaving: boolean;
 }
 
-function NotificationItem({ notification, onClose }: NotificationItemProps) {
+function NotificationItem({ notification, onClose, isLeaving }: NotificationItemProps) {
   const { type, message } = notification;
 
   const notificationStyles = {
@@ -145,7 +164,15 @@ function NotificationItem({ notification, onClose }: NotificationItemProps) {
   const style = notificationStyles[type];
 
   return (
-    <div className={`${style.text} ${style.bg} p-4 rounded-lg border ${style.border} shadow-xl animate-fade-in-out flex justify-between items-center`}>
+    <div 
+      className={`${style.text} ${style.bg} p-4 rounded-lg border ${style.border} shadow-xl
+                  transition-all duration-300 ease-in-out transform
+                  ${isLeaving 
+                    ? 'opacity-0 translate-y-2 scale-95' 
+                    : 'opacity-100 translate-y-0 scale-100'
+                  }
+                  flex justify-between items-center`}
+    >
       <div className="flex items-center">
         {style.icon}
         {message}

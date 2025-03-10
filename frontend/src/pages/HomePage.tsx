@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import EntryTable from "../components/EntryTable";
+import EntryHistory from "../components/EntryHistory";
 import EditModal from "../components/EditModal";
 import { MacroEntry, MacroTotals, UserDetails } from "../types";
 import Navbar from "../components/Navbar";
@@ -308,8 +308,7 @@ export default function Overview() {
           {/* History Section */}
           <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-200 mb-4">Nutrition History</h2>
-              <EntryTable
+              <EntryHistory
                 history={history}
                 deleteEntry={deleteEntry}
                 onEdit={setEditingEntry}
