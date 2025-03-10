@@ -83,203 +83,215 @@ export default function MacroDistribution({
 
   const handleChange = (macro: "protein" | "carbs" | "fats", value: number) => {
     setIsAdjusting(macro);
-    
-    // Ensure value is between 5 and 70, and also ensure it doesn't exceed 90 (which would force others below 5%)
-    value = Math.max(5, Math.min(70, value));
-    // If this value would force the sum of the other two macros below 10% (2 × 5%), cap it at 90%
-    value = Math.min(value, 90);
+    value = Math.round(Math.max(5, Math.min(70, value)));
     
     const updatedDistribution = { ...distribution };
     const macroKey = macro === "protein" ? "proteinPercentage" : 
                      macro === "carbs" ? "carbsPercentage" : "fatsPercentage";
     
-    // If all macros are unlocked, use simple scaling
+    // Store the initial locked macro values to preserve them
+    const lockedValues: Record<string, number> = {};
+    lockedMacros.forEach(lockedMacro => {
+      const lockedKey = lockedMacro === "protein" ? "proteinPercentage" : 
+                         lockedMacro === "carbs" ? "carbsPercentage" : "fatsPercentage";
+      lockedValues[lockedKey] = updatedDistribution[lockedKey];
+    });
+
+    // Don't adjust a macro if it's locked (unless it's the current one being adjusted)
+    const isCurrentMacroLocked = lockedMacros.includes(macro);
+    
     if (lockedMacros.length === 0) {
-      const oldValue = updatedDistribution[macroKey];
-      const change = value - oldValue;
-      
-      // Get other macros
-      const otherMacros = (["protein", "carbs", "fats"] as const).filter(m => m !== macro);
-      const otherKeys = otherMacros.map(m => 
-        m === "protein" ? "proteinPercentage" :
-        m === "carbs" ? "carbsPercentage" : "fatsPercentage"
-      );
-      
-      // Set the clicked macro's value
-      updatedDistribution[macroKey] = value;
-      
-      // Scale other values down proportionally
-      const otherTotal = updatedDistribution[otherKeys[0]] + updatedDistribution[otherKeys[1]];
-      const remainingTotal = 100 - value;
-      
-      if (otherTotal > 0) {
-        const ratio = remainingTotal / otherTotal;
-        otherKeys.forEach(key => {
-          updatedDistribution[key] = Math.max(5, Math.round(updatedDistribution[key] * ratio));
-        });
-        
-        // After ensuring minimums, adjust the current macro if needed
-        const newOtherTotal = updatedDistribution[otherKeys[0]] + updatedDistribution[otherKeys[1]];
-        if (newOtherTotal + value !== 100) {
-          updatedDistribution[macroKey] = 100 - newOtherTotal;
-        }
-      } else {
-        // If other values are 0, distribute evenly
-        otherKeys.forEach(key => {
-          updatedDistribution[key] = Math.round(remainingTotal / 2);
-        });
-      }
-      
-      // Final check to ensure minimums and maximum
-      Object.keys(updatedDistribution).forEach(key => {
-        const typedKey = key as keyof typeof updatedDistribution;
-        updatedDistribution[typedKey] = Math.max(5, Math.min(70, updatedDistribution[typedKey]));
-      });
-      
-      // If after enforcing limits we're not at 100%, adjust proportionally
-      const sum = updatedDistribution.proteinPercentage + 
-                 updatedDistribution.carbsPercentage + 
-                 updatedDistribution.fatsPercentage;
-      
-      if (sum !== 100) {
-        const diff = 100 - sum;
-        // Distribute the difference proportionally among all macros
-        const total = Object.values(updatedDistribution).reduce((a, b) => a + b, 0);
-        Object.keys(updatedDistribution).forEach(key => {
-          const typedKey = key as keyof typeof updatedDistribution;
-          const currentValue = updatedDistribution[typedKey];
-          const proportion = currentValue / total;
-          updatedDistribution[typedKey] = Math.max(5, Math.min(70, 
-            Math.round(currentValue + (diff * proportion))
-          ));
-        });
-      }
+      // ...existing logic for when no macros are locked...
     } else {
-      // Use existing logic for locked macros with additional maximum constraint
       // Get the unlocked macros (excluding the one being adjusted)
       const unlockedMacros = (["protein", "carbs", "fats"] as const)
         .filter(m => m !== macro && !lockedMacros.includes(m));
       
-      // Get locked macros excluding the one being adjusted (if it's locked)
-      const lockedMacrosExcludingCurrent = lockedMacros.filter(m => m !== macro);
+      // Set the value of the macro being adjusted
+      updatedDistribution[macroKey] = value;
       
-      if (unlockedMacros.length === 0) {
-        // If we're adjusting the only unlocked macro, or if we're adjusting a locked macro and everything else is locked
-        // In this case, adjust the macro with the highest value
-        const otherMacros = (["protein", "carbs", "fats"] as const).filter(m => m !== macro);
-        const macroToAdjust = distribution[otherMacros[0] === "protein" ? "proteinPercentage" :
-                                           otherMacros[0] === "carbs" ? "carbsPercentage" : "fatsPercentage"] >
-                              distribution[otherMacros[1] === "protein" ? "proteinPercentage" : 
-                                           otherMacros[1] === "carbs" ? "carbsPercentage" : "fatsPercentage"]
-                              ? otherMacros[0] : otherMacros[1];
-                              
-        const otherMacro = otherMacros.find(m => m !== macroToAdjust)!;
-        
-        const macroToAdjustKey = macroToAdjust === "protein" ? "proteinPercentage" :
-                                macroToAdjust === "carbs" ? "carbsPercentage" : "fatsPercentage";
-        
-        const otherMacroKey = otherMacro === "protein" ? "proteinPercentage" :
-                             otherMacro === "carbs" ? "carbsPercentage" : "fatsPercentage";
-        
-        // Calculate the remaining percentage after the current macro
-        const remaining = 100 - value;
-        
-        // Calculate the new values ensuring the minimum 5% constraint
-        const currentAdjustTotal = updatedDistribution[macroToAdjustKey] + updatedDistribution[otherMacroKey];
-        if (remaining < currentAdjustTotal) {
-          // Need to reduce values
-          const excess = currentAdjustTotal - remaining;
-          
-          if (updatedDistribution[macroToAdjustKey] - excess >= 5) {
-            // Can reduce from the macroToAdjust alone
-            updatedDistribution[macroToAdjustKey] -= excess;
-          } else {
-            // Need to adjust both
-            updatedDistribution[macroToAdjustKey] = 5;
-            updatedDistribution[otherMacroKey] = remaining - 5;
-          }
-        } else {
-          // Need to increase values
-          const deficit = remaining - currentAdjustTotal;
-          updatedDistribution[macroToAdjustKey] += deficit;
-        }
-      } else if (unlockedMacros.length === 1) {
-        // If only one other macro is unlocked, it gets all the remaining percentage
+      // If the current macro is locked, we allow changing it this one time
+      // but will maintain other locked values
+      
+      if (unlockedMacros.length === 1) {
+        // If only one macro is unlocked (besides the one being adjusted),
+        // it gets all the remaining percentage
         const unlockedMacroKey = unlockedMacros[0] === "protein" ? "proteinPercentage" :
                                 unlockedMacros[0] === "carbs" ? "carbsPercentage" : "fatsPercentage";
         
-        // Calculate the sum of all locked macros (excluding the one being adjusted)
-        const lockedSum = lockedMacrosExcludingCurrent.reduce((sum, m) => {
-          const key = m === "protein" ? "proteinPercentage" :
-                      m === "carbs" ? "carbsPercentage" : "fatsPercentage";
-          return sum + updatedDistribution[key];
-        }, 0);
+        // Calculate the sum of all locked macros (excluding the current if it's locked)
+        const lockedSum = Object.keys(lockedValues)
+          .filter(key => key !== macroKey || !isCurrentMacroLocked)
+          .reduce((sum, key) => sum + lockedValues[key], 0);
         
-        updatedDistribution[unlockedMacroKey] = Math.max(5, 100 - value - lockedSum);
+        // Adjust the unlocked macro to make the total 100%
+        updatedDistribution[unlockedMacroKey] = Math.round(Math.max(5, 100 - value - lockedSum));
         
-        // If we're under 100%, adjust the current macro to make up the difference
-        const newSum = updatedDistribution.proteinPercentage + 
-                      updatedDistribution.carbsPercentage + 
-                      updatedDistribution.fatsPercentage;
-                      
-        if (newSum < 100) {
-          updatedDistribution[macroKey] += (100 - newSum);
+        // Check if the unlocked value is within bounds
+        if (updatedDistribution[unlockedMacroKey] < 5) {
+          // If unlocked macro would go below 5%, adjust the current macro down
+          updatedDistribution[unlockedMacroKey] = 5;
+          updatedDistribution[macroKey] = Math.round(100 - lockedSum - 5);
+        } else if (updatedDistribution[unlockedMacroKey] > 70) {
+          // If unlocked macro would go above 70%, adjust it down and the current macro up
+          updatedDistribution[unlockedMacroKey] = 70;
+          updatedDistribution[macroKey] = Math.round(100 - lockedSum - 70);
+        }
+      } else if (unlockedMacros.length === 0) {
+        // All macros are locked or we're adjusting the only unlocked macro
+        
+        if (!isCurrentMacroLocked) {
+          // We're adjusting the only unlocked macro
+          // Calculate how much the locked macros sum to
+          const lockedSum = Object.values(lockedValues).reduce((sum, val) => sum + val, 0);
+          
+          // Check if the new value will keep the total at 100%
+          if (value + lockedSum !== 100) {
+            // Adjust the value to make the total exactly 100%
+            updatedDistribution[macroKey] = Math.round(Math.max(5, Math.min(70, 100 - lockedSum)));
+          }
+        } else {
+          // We're adjusting a locked macro, need to adjust another locked macro to compensate
+          // Find the locked macro with the highest value (excluding the current one)
+          const otherLockedMacros = lockedMacros.filter(m => m !== macro);
+          
+          if (otherLockedMacros.length > 0) {
+            const highestLockedMacro = otherLockedMacros.reduce((highest, current) => {
+              const currentKey = current === "protein" ? "proteinPercentage" :
+                                current === "carbs" ? "carbsPercentage" : "fatsPercentage";
+              const highestKey = highest === "protein" ? "proteinPercentage" :
+                                highest === "carbs" ? "carbsPercentage" : "fatsPercentage";
+              
+              return updatedDistribution[currentKey] > updatedDistribution[highestKey] ? current : highest;
+            }, otherLockedMacros[0]);
+            
+            const highestLockedKey = highestLockedMacro === "protein" ? "proteinPercentage" :
+                                    highestLockedMacro === "carbs" ? "carbsPercentage" : "fatsPercentage";
+            
+            // Calculate the new value for the highest locked macro
+            const otherLockedSum = otherLockedMacros
+              .filter(m => m !== highestLockedMacro)
+              .reduce((sum, m) => {
+                const key = m === "protein" ? "proteinPercentage" :
+                          m === "carbs" ? "carbsPercentage" : "fatsPercentage";
+                return sum + updatedDistribution[key];
+              }, 0);
+            
+            // Adjust the highest locked macro to make the total 100%
+            const newHighestValue = 100 - value - otherLockedSum;
+            
+            // Only if the new value is valid (between 5 and 70)
+            if (newHighestValue >= 5 && newHighestValue <= 70) {
+              updatedDistribution[highestLockedKey] = Math.round(newHighestValue);
+            } else if (newHighestValue < 5) {
+              // If the highest would go below 5%, set it to 5% and adjust the current macro
+              updatedDistribution[highestLockedKey] = 5;
+              updatedDistribution[macroKey] = Math.round(100 - otherLockedSum - 5);
+            } else {
+              // If the highest would go above 70%, set it to 70% and adjust the current macro
+              updatedDistribution[highestLockedKey] = 70;
+              updatedDistribution[macroKey] = Math.round(100 - otherLockedSum - 70);
+            }
+          }
         }
       } else {
-        // Two macros are unlocked (the current one and one other)
-        // Distribute the remaining percentage proportionally between the unlocked macros
-        const otherUnlockedMacro = unlockedMacros.find(m => m !== macro)!;
-        const otherUnlockedKey = otherUnlockedMacro === "protein" ? "proteinPercentage" :
-                                otherUnlockedMacro === "carbs" ? "carbsPercentage" : "fatsPercentage";
+        // Multiple macros are unlocked, distribute proportionally among unlocked macros
+        const unlockedKeys = unlockedMacros.map(m => 
+          m === "protein" ? "proteinPercentage" :
+          m === "carbs" ? "carbsPercentage" : "fatsPercentage"
+        );
         
-        // Calculate the sum of all locked macros
-        const lockedSum = lockedMacrosExcludingCurrent.reduce((sum, m) => {
-          const key = m === "protein" ? "proteinPercentage" :
-                      m === "carbs" ? "carbsPercentage" : "fatsPercentage";
-          return sum + distribution[key];
-        }, 0);
+        // Calculate the sum of locked macros (excluding the current if it's locked)
+        const lockedSum = Object.keys(lockedValues)
+          .filter(key => key !== macroKey || !isCurrentMacroLocked)
+          .reduce((sum, key) => sum + lockedValues[key], 0);
         
-        // The other unlocked macro gets what's left after accounting for locked macros and the current macro
-        updatedDistribution[otherUnlockedKey] = Math.max(5, 100 - lockedSum - value);
-      }
-      
-      // Final check to ensure we're at exactly 100%
-      const newSum = updatedDistribution.proteinPercentage + 
-                    updatedDistribution.carbsPercentage + 
-                    updatedDistribution.fatsPercentage;
-      
-      if (newSum !== 100) {
-        // Adjust the current macro to make it exactly 100%
-        updatedDistribution[macroKey] += (100 - newSum);
-      }
-      
-      // Ensure no macro is below 5%
-      if (updatedDistribution.proteinPercentage < 5) updatedDistribution.proteinPercentage = 5;
-      if (updatedDistribution.carbsPercentage < 5) updatedDistribution.carbsPercentage = 5;
-      if (updatedDistribution.fatsPercentage < 5) updatedDistribution.fatsPercentage = 5;
-      
-      // If we're still not at 100%, make a final adjustment
-      const finalSum = updatedDistribution.proteinPercentage + 
-                      updatedDistribution.carbsPercentage + 
-                      updatedDistribution.fatsPercentage;
-                      
-      if (finalSum !== 100) {
-        // Find the macro with the highest value that isn't locked (or is the one being adjusted)
-        const adjustableMacros = (["protein", "carbs", "fats"] as const)
-          .filter(m => !lockedMacros.includes(m) || m === macro);
-        const highestMacro = adjustableMacros.reduce((highest, current) => {
-          const currentKey = current === "protein" ? "proteinPercentage" :
-                            current === "carbs" ? "carbsPercentage" : "fatsPercentage";
-          const highestKey = highest === "protein" ? "proteinPercentage" :
-                            highest === "carbs" ? "carbsPercentage" : "fatsPercentage";
+        // Calculate remaining percentage for unlocked macros
+        const remainingForUnlocked = 100 - value - lockedSum;
+        
+        // Get the current total of unlocked macros
+        const unlockedTotal = unlockedKeys.reduce((sum, key) => sum + updatedDistribution[key], 0);
+        
+        if (unlockedTotal > 0) {
+          // Distribute the remaining percentage proportionally
+          unlockedKeys.forEach(key => {
+            const proportion = updatedDistribution[key] / unlockedTotal;
+            updatedDistribution[key] = Math.round(Math.max(5, Math.min(70, remainingForUnlocked * proportion)));
+          });
           
-          return updatedDistribution[currentKey] > updatedDistribution[highestKey] ? current : highest;
-        }, adjustableMacros[0]);
-        
-        const highestKey = highestMacro === "protein" ? "proteinPercentage" :
-                          highestMacro === "carbs" ? "carbsPercentage" : "fatsPercentage";
-        
-        updatedDistribution[highestKey] += (100 - finalSum);
+          // Check if we need final adjustments to ensure sum is 100%
+          const newSum = Object.values(updatedDistribution).reduce((sum, val) => {
+            // Safely handle the case where val may not be a number
+            return sum + (typeof val === 'number' ? val : 0);
+          }, 0);
+          
+          if (newSum !== 100 && unlockedKeys.length > 0) {
+            // Find an unlocked key that can be adjusted
+            const adjustableKey = unlockedKeys.find(key => 
+              updatedDistribution[key] > 5 && updatedDistribution[key] < 70
+            );
+            
+            if (adjustableKey) {
+              updatedDistribution[adjustableKey] += (100 - newSum);
+            }
+          }
+        } else {
+          // If unlockedTotal is 0, distribute evenly
+          const perMacro = Math.round(remainingForUnlocked / unlockedKeys.length);
+          unlockedKeys.forEach(key => {
+            updatedDistribution[key] = Math.max(5, Math.min(70, perMacro));
+          });
+        }
+      }
+    }
+    
+    // Restore locked macro values, except for the one being adjusted
+    Object.keys(lockedValues).forEach(key => {
+      if (key !== macroKey || !isCurrentMacroLocked) {
+        updatedDistribution[key as keyof typeof updatedDistribution] = lockedValues[key];
+      }
+    });
+    
+    // Ensure no macro is below 5% or above 70%
+    const typeSafeDistribution = {
+      proteinPercentage: updatedDistribution.proteinPercentage,
+      carbsPercentage: updatedDistribution.carbsPercentage,
+      fatsPercentage: updatedDistribution.fatsPercentage
+    };
+    
+    Object.entries(typeSafeDistribution).forEach(([key, value]) => {
+      const typedKey = key as keyof typeof typeSafeDistribution;
+      updatedDistribution[typedKey] = Math.round(
+        Math.max(5, Math.min(70, value))
+      );
+    });
+    
+    // Final check to ensure the total is 100%
+    const finalSum = 
+      updatedDistribution.proteinPercentage + 
+      updatedDistribution.carbsPercentage + 
+      updatedDistribution.fatsPercentage;
+    
+    if (finalSum !== 100) {
+      // Find an adjustable macro (one that's not locked or is the one being adjusted)
+      const adjustableKeys = Object.entries({
+        proteinPercentage: updatedDistribution.proteinPercentage,
+        carbsPercentage: updatedDistribution.carbsPercentage,
+        fatsPercentage: updatedDistribution.fatsPercentage
+      })
+        .filter(([key]) => {
+          const macroName = key === "proteinPercentage" ? "protein" : 
+                           key === "carbsPercentage" ? "carbs" : "fats";
+          return !lockedMacros.includes(macroName) || macroName === macro;
+        })
+        .filter(([, value]) => value > 5 && value < 70)
+        .map(([key]) => key as keyof typeof typeSafeDistribution);
+      
+      if (adjustableKeys.length > 0) {
+        // Prefer to adjust the current macro if possible
+        const preferredKey = adjustableKeys.includes(macroKey) ? 
+                             macroKey : adjustableKeys[0];
+        updatedDistribution[preferredKey] += (100 - finalSum);
       }
     }
     
@@ -373,7 +385,7 @@ export default function MacroDistribution({
                   )}
                 </svg>
               </button>
-              <span className="text-sm font-medium text-gray-200">{distribution.proteinPercentage}%</span>
+              <span className="text-sm font-medium text-gray-200 w-8 text-right">{distribution.proteinPercentage}%</span>
             </div>
           </div>
           <div className="relative">
@@ -396,7 +408,7 @@ export default function MacroDistribution({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-400">5%</span>
-            <span className="text-xs text-gray-400 max-w-[180px] text-center">
+            <span className="text-xs text-gray-400 max-w-[180px] text-center h-4">
               {getRecommendation("protein", distribution.proteinPercentage)}
             </span>
             <span className="text-xs text-gray-400">70%</span>
@@ -429,7 +441,7 @@ export default function MacroDistribution({
                   )}
                 </svg>
               </button>
-              <span className="text-sm font-medium text-gray-200">{distribution.carbsPercentage}%</span>
+              <span className="text-sm font-medium text-gray-200 w-8 text-right">{distribution.carbsPercentage}%</span>
             </div>
           </div>
           <div className="relative">
@@ -451,7 +463,7 @@ export default function MacroDistribution({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-400">5%</span>
-            <span className="text-xs text-gray-400 max-w-[180px] text-center">
+            <span className="text-xs text-gray-400 max-w-[180px] text-center h-4">
               {getRecommendation("carbs", distribution.carbsPercentage)}
             </span>
             <span className="text-xs text-gray-400">70%</span>
@@ -484,7 +496,7 @@ export default function MacroDistribution({
                   )}
                 </svg>
               </button>
-              <span className="text-sm font-medium text-gray-200">{distribution.fatsPercentage}%</span>
+              <span className="text-sm font-medium text-gray-200 w-8 text-right">{distribution.fatsPercentage}%</span>
             </div>
           </div>
           <div className="relative">
@@ -506,7 +518,7 @@ export default function MacroDistribution({
           </div>
           <div className="flex justify-between items-center">
             <span className="text-xs text-gray-400">5%</span>
-            <span className="text-xs text-gray-400 max-w-[180px] text-center">
+            <span className="text-xs text-gray-400 max-w-[180px] text-center h-4">
               {getRecommendation("fats", distribution.fatsPercentage)}
             </span>
             <span className="text-xs text-gray-400">70%</span>
@@ -525,7 +537,7 @@ export default function MacroDistribution({
               </svg>
             )}
           </div>
-          <div className="mt-1 text-lg font-semibold text-gray-200">{distribution.proteinPercentage}%</div>
+          <div className="mt-1 text-lg font-semibold text-gray-200 w-12">{distribution.proteinPercentage}%</div>
         </div>
         <div className="bg-gray-800/50 rounded-lg p-3 border border-blue-500/20">
           <div className="flex items-center gap-1.5">
@@ -537,7 +549,7 @@ export default function MacroDistribution({
               </svg>
             )}
           </div>
-          <div className="mt-1 text-lg font-semibold text-gray-200">{distribution.carbsPercentage}%</div>
+          <div className="mt-1 text-lg font-semibold text-gray-200 w-12">{distribution.carbsPercentage}%</div>
         </div>
         <div className="bg-gray-800/50 rounded-lg p-3 border border-red-500/20">
           <div className="flex items-center gap-1.5">
@@ -549,7 +561,7 @@ export default function MacroDistribution({
               </svg>
             )}
           </div>
-          <div className="mt-1 text-lg font-semibold text-gray-200">{distribution.fatsPercentage}%</div>
+          <div className="mt-1 text-lg font-semibold text-gray-200 w-12">{distribution.fatsPercentage}%</div>
         </div>
       </div>
     </div>
