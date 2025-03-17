@@ -1,10 +1,59 @@
-import { useState } from "react";
-import { MacroInputs } from "../types";
+import { useState, useCallback, useEffect } from "react";
+import { MacroEntry } from "../types";
+import LoadingSpinner from "./LoadingSpinner";
 import CalorieSearch from "./CalorieSearch";
 
+interface MacroInputs {
+  protein: string;
+  carbs: string;
+  fats: string;
+}
+
 interface AddEntryProps {
-  onSubmit: (inputs: { protein: number; carbs: number; fats: number }) => Promise<void>;
+  onSubmit: (inputs: { protein: number; carbs: number; fats: number }) => void;
   isSaving: boolean;
+}
+
+function MacroInput({
+  id,
+  label,
+  value,
+  onChange,
+  color,
+  caloriesPerGram
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  color: string;
+  caloriesPerGram: number;
+}) {
+  const calories = Number(value) * caloriesPerGram;
+  
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center justify-between">
+        <label htmlFor={id} className="block text-sm font-medium text-gray-300">
+          {label} (g)
+        </label>
+        {Number(value) > 0 && (
+          <span className={`text-xs ${color}`}>
+            {Math.round(calories)} kcal
+          </span>
+        )}
+      </div>
+      <input
+        id={id}
+        type="number"
+        className="w-full px-4 py-3 rounded-xl bg-gray-700/50 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500/70 focus:border-indigo-500/70 focus:outline-none transition-all"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        min="0"
+        placeholder="0"
+      />
+    </div>
+  );
 }
 
 export default function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
@@ -14,22 +63,49 @@ export default function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
     fats: "",
   });
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const [totalCalories, setTotalCalories] = useState(0);
+
+  useEffect(() => {
+    // Calculate calories whenever inputs change
+    const protein = Number(inputs.protein) || 0;
+    const carbs = Number(inputs.carbs) || 0;
+    const fats = Number(inputs.fats) || 0;
+    
+    setTotalCalories(protein * 4 + carbs * 4 + fats * 9);
+  }, [inputs]);
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    await onSubmit({
-      protein: Number(inputs.protein),
-      carbs: Number(inputs.carbs),
-      fats: Number(inputs.fats),
-    });
-    setInputs({ protein: "", carbs: "", fats: "" });
+    
+    const macros = {
+      protein: Number(inputs.protein) || 0,
+      carbs: Number(inputs.carbs) || 0,
+      fats: Number(inputs.fats) || 0,
+    };
+    
+    // Prevent empty submissions
+    if (macros.protein === 0 && macros.carbs === 0 && macros.fats === 0) return;
+    
+    onSubmit(macros);
+    
+    // Only reset inputs if submission was successful (assuming isSaving becomes false on success)
+    if (!isSaving) {
+      setInputs({ protein: "", carbs: "", fats: "" });
+    }
   };
 
+  const handleInputChange = useCallback((field: keyof MacroInputs, value: string) => {
+    setInputs(prev => ({ ...prev, [field]: value }));
+  }, []);
+
+  const hasValues = Boolean(
+    Number(inputs.protein) || Number(inputs.carbs) || Number(inputs.fats)
+  );
+
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden h-full">
-      <div className="p-6 flex flex-col h-full">
-        <h2 className="text-lg font-semibold text-gray-200 mb-4">Add Entry</h2>
-        {/* Remove the focus ring from the container div and adjust margins */}
-        <div>
+    <div className="bg-gray-800/70 backdrop-blur-sm p-5 rounded-2xl border border-gray-700/50 shadow-xl h-full flex flex-col transition-all duration-300 hover:border-gray-600/50">
+      <h2 className="text-lg font-medium text-gray-200 mb-4">Add Nutrition Entry</h2>
+      <div>
           <CalorieSearch onResult={result => 
             setInputs({
               protein: Math.round(Number(result.protein)).toString(),
@@ -38,100 +114,63 @@ export default function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             })
           } />
         </div>
+      <form className="mt-6 flex-1 flex flex-col justify-end pb-5" onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
+          <MacroInput 
+            id="protein"
+            label="Protein"
+            value={inputs.protein}
+            onChange={(value) => handleInputChange('protein', value)}
+            color="text-green-400"
+            caloriesPerGram={4}
+          />
+          
+          <MacroInput 
+            id="carbs"
+            label="Carbs"
+            value={inputs.carbs}
+            onChange={(value) => handleInputChange('carbs', value)}
+            color="text-blue-400"
+            caloriesPerGram={4}
+          />
+          
+          <MacroInput 
+            id="fats"
+            label="Fats"
+            value={inputs.fats}
+            onChange={(value) => handleInputChange('fats', value)}
+            color="text-red-400"
+            caloriesPerGram={9}
+          />
+        </div>
 
-        <form className="mt-6 flex-1 flex flex-col justify-end pb-5" onSubmit={handleSubmit}>
-          <div className="grid grid-cols-4 gap-6">
-            {/* Protein Input */}
-            <div className="space-y-2 group">
-              <label className="block text-sm font-medium text-gray-300 group-focus-within:text-indigo-400 transition-colors">
-                Protein (g)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  className="w-full px-4 py-3 bg-gray-700/70 border-2 border-gray-600/50 rounded-xl text-gray-100 
-                           focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none
-                           transition-all duration-200 shadow-sm group-hover:border-gray-500/50"
-                  value={inputs.protein}
-                  onChange={(e) => setInputs(v => ({ ...v, protein: e.target.value }))}
-                  min="0"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            {/* Carbs Input */}
-            <div className="space-y-2 group">
-              <label className="block text-sm font-medium text-gray-300 group-focus-within:text-indigo-400 transition-colors">
-                Carbs (g)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  className="w-full px-4 py-3 bg-gray-700/70 border-2 border-gray-600/50 rounded-xl text-gray-100 
-                           focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none
-                           transition-all duration-200 shadow-sm group-hover:border-gray-500/50"
-                  value={inputs.carbs}
-                  onChange={(e) => setInputs(v => ({ ...v, carbs: e.target.value }))}
-                  min="0"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            {/* Fats Input */}
-            <div className="space-y-2 group">
-              <label className="block text-sm font-medium text-gray-300 group-focus-within:text-indigo-400 transition-colors">
-                Fats (g)
-              </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  className="w-full px-4 py-3 bg-gray-700/70 border-2 border-gray-600/50 rounded-xl text-gray-100 
-                           focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none
-                           transition-all duration-200 shadow-sm group-hover:border-gray-500/50"
-                  value={inputs.fats}
-                  onChange={(e) => setInputs(v => ({ ...v, fats: e.target.value }))}
-                  min="0"
-                  placeholder="0"
-                />
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="space-y-2">
-              <label className="block text-sm font-medium text-transparent select-none">&nbsp;</label>
-              <button
-                type="submit"
-                disabled={isSaving || (!Number(inputs.protein) && !Number(inputs.carbs) && !Number(inputs.fats))}
-                className="w-full px-4 py-3 rounded-xl font-medium text-white 
-                         bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
-                         disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]
-                         shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2
-                         focus:ring-2 focus:ring-indigo-500/50 focus:outline-none relative
-                         before:absolute before:inset-0 before:bg-black/10 before:rounded-xl"
-              >
-                {isSaving ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Saving...
-                  </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <span>Add Entry</span>
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </form>
-      </div>
+        {/* Submit Button */}
+        <div className="space-y-2">
+          <button
+            type="submit"
+            disabled={isSaving || !hasValues}
+            className="w-full px-4 py-3 rounded-xl font-medium text-white 
+                     bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
+                     disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]
+                     shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2
+                     focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
+          >
+            {isSaving ? (
+              <>
+                <LoadingSpinner size="sm" color="text-white" />
+                <span>Saving...</span>
+              </>
+            ) : (
+              <>
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                </svg>
+                <span>Save Entry</span>
+              </>
+            )}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
