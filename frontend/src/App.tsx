@@ -9,6 +9,7 @@ import {
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import SettingsPage from "./pages/SettingsPage";
+import ReportingPage from "./pages/ReportingPage";
 
 import { useEffect, useState } from "react";
 import "./index.css";
@@ -41,6 +42,7 @@ function AuthHandler() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/reporting" element={<ReportingPage />} />
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/auth"} replace />}
