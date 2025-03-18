@@ -14,7 +14,7 @@ export default function DailySummary({ totals, macroDistribution }: DailySummary
 
   const distribution = macroDistribution || defaultDistribution;
   
-  const totalCalories = totals.protein * 4 + totals.carbs * 4 + totals.fats * 9;
+  const totalCalories = Math.round(totals.protein * 4 + totals.carbs * 4 + totals.fats * 9);
   const proteinPercent = totalCalories ? Math.round((totals.protein * 4 / totalCalories) * 100) : 0;
   const carbsPercent = totalCalories ? Math.round((totals.carbs * 4 / totalCalories) * 100) : 0;
   const fatsPercent = totalCalories ? Math.round((totals.fats * 9 / totalCalories) * 100) : 0;
@@ -23,7 +23,7 @@ export default function DailySummary({ totals, macroDistribution }: DailySummary
     {
       name: "Protein",
       grams: totals.protein,
-      calories: totals.protein * 4,
+      calories: Math.round(totals.protein * 4),
       percent: proteinPercent,
       targetPercent: distribution.proteinPercentage,
       color: "bg-green-500",
@@ -36,7 +36,7 @@ export default function DailySummary({ totals, macroDistribution }: DailySummary
     {
       name: "Carbs",
       grams: totals.carbs,
-      calories: totals.carbs * 4,
+      calories: Math.round(totals.carbs * 4),
       percent: carbsPercent,
       targetPercent: distribution.carbsPercentage,
       color: "bg-blue-500",
@@ -49,7 +49,7 @@ export default function DailySummary({ totals, macroDistribution }: DailySummary
     {
       name: "Fats",
       grams: totals.fats,
-      calories: totals.fats * 9,
+      calories: Math.round(totals.fats * 9),
       percent: fatsPercent,
       targetPercent: distribution.fatsPercentage,
       color: "bg-red-500",

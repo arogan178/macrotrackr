@@ -1,6 +1,4 @@
 import { useState } from "react";
-import FloatingNotification from "./FloatingNotification";
-
 type CalorieSearchProps = {
   onResult: (macros: { protein: string; carbs: string; fats: string }) => void;
 };
@@ -114,7 +112,6 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             {error}
           </div>
         )}
-        <FloatingNotification error={error} onClear={handleClearMessages} />
       </div>
     </div>
   );

@@ -3,11 +3,13 @@ type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
 export interface MacroEntry {
   id: number;
+  created_at: string;
   protein: number;
   carbs: number;
   fats: number;
-  created_at: string;
   meal_type: MealType;
+  foodName?: string; // New field
+  time?: string;     // New field
 }
 
 export interface MacroTotals {
