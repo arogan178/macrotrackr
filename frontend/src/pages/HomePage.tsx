@@ -1,180 +1,41 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useEffect } from "react";
 import EntryHistory from "../components/EntryHistory";
 import EditModal from "../components/EditModal";
-import { MacroEntry, MacroTotals, UserDetails } from "../types";
 import Navbar from "../components/Navbar";
-import { calculateBMR, calculateTDEE } from "../utils/calculations";
 import DailySummary from "../components/DailySummary";
 import AddEntry from "../components/AddEntry";
 import FloatingNotification from "../components/FloatingNotification";
-import { apiService } from "../utils/api-service";
 import CardMetricsPanel from "../components/CardMetricsPanel";
+import { useAppState } from "../store/app-state";
 
 export default function Overview() {
-  // State management
-  const [totals, setTotals] = useState<MacroTotals>({
-    protein: 0,
-    carbs: 0,
-    fats: 0,
-    calories: 0,
-  });
-
-  const [history, setHistory] = useState<MacroEntry[]>([]);
-  const [user, setUser] = useState<UserDetails | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [editingEntry, setEditingEntry] = useState<MacroEntry | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [notification, setNotification] = useState<string | null>(null);
+  // Get state and actions from our store
+  const {
+    user,
+    history,
+    totals,
+    isLoading,
+    isSaving,
+    isEditing,
+    isDeleting,
+    error,
+    notification,
+    editingEntry,
+    userMetrics,
+    fetchUserDetails,
+    addEntry,
+    updateEntry,
+    deleteEntry,
+    setEditingEntry,
+    clearNotification,
+    clearError
+  } = useAppState();
 
   // Fetch user details on component mount
   useEffect(() => {
     fetchUserDetails();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // API interactions
-  const fetchUserDetails = async () => {
-    setIsLoading(true);
-    setError(null);
-    
-    try {
-      const userData = await apiService.user.getProfile();
-      setUser(userData);
-      await fetchMacros();
-    } catch (error) {
-      console.error("Fetch user error:", error);
-      setError(error instanceof Error ? error.message : "Failed to load user data");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const fetchMacros = async () => {
-    try {
-      const [totalsData, historyData] = await Promise.all([
-        apiService.macros.getDailyTotals(),
-        apiService.macros.getHistory(),
-      ]);
-      
-      setTotals(totalsData);
-      setHistory(historyData);
-    } catch (error) {
-      console.error("Fetch macros error:", error);
-      setError(error instanceof Error ? error.message : "Failed to load nutrition data");
-    }
-  };
-
-  // Event handlers
-  const handleSubmit = useCallback(async (inputs: { protein: number; carbs: number; fats: number }) => {
-    setIsSaving(true);
-    setError(null);
-
-    try {
-      await apiService.macros.addEntry(inputs);
-      await fetchMacros();
-      setNotification("Entry saved successfully!");
-    } catch (error) {
-      console.error("Save error:", error);
-      setError(error instanceof Error ? error.message : "Failed to save macro entry");
-    } finally {
-      setIsSaving(false);
-    }
-  }, []);
-
-  const deleteEntry = useCallback(async (id: number) => {
-    setIsDeleting(true);
-    setError(null);
-    
-    try {
-      // Optimistic UI update - store the entry before deletion
-      const deletedEntry = history.find((entry) => entry.id === id);
-      const today = new Date().toDateString();
-      
-      // Update UI immediately
-      setHistory((prev) => prev.filter((entry) => entry.id !== id));
-      
-      if (
-        deletedEntry &&
-        new Date(deletedEntry.created_at).toDateString() === today
-      ) {
-        setTotals((prev) => ({
-          protein: prev.protein - deletedEntry.protein,
-          carbs: prev.carbs - deletedEntry.carbs,
-          fats: prev.fats - deletedEntry.fats,
-          calories:
-            prev.calories -
-            (deletedEntry.protein * 4 +
-              deletedEntry.carbs * 4 +
-              deletedEntry.fats * 9),
-        }));
-      }
-      
-      // Make the API call
-      await apiService.macros.deleteEntry(id);
-      setNotification("Entry deleted successfully");
-    } catch (error) {
-      console.error("Delete error:", error);
-      setError(error instanceof Error ? error.message : "Failed to delete entry");
-      
-      // If there was an error, refresh data to restore state
-      fetchMacros();
-    } finally {
-      setIsDeleting(false);
-    }
-  }, [history]);
-
-  const handleEdit = useCallback(async (updatedEntry: MacroEntry) => {
-    setIsEditing(true);
-    setError(null);
-    
-    try {
-      const { id, protein, carbs, fats } = updatedEntry;
-      await apiService.macros.updateEntry(id, { protein, carbs, fats });
-      
-      setEditingEntry(null);
-      await fetchMacros();
-      setNotification("Entry updated successfully");
-    } catch (error) {
-      console.error("Update error:", error);
-      setError(error instanceof Error ? error.message : "Failed to update entry");
-    } finally {
-      setIsEditing(false);
-    }
-  }, []);
-
-  // Computed values
-  const userMetrics = useMemo(() => {
-    if (!user?.weight || !user?.height || !user?.date_of_birth || !user?.gender || !user?.activity_level) {
-      return { bmr: 0, tdee: 0 };
-    }
-
-    const age = new Date().getFullYear() - new Date(user.date_of_birth).getFullYear();
-    const bmr = Math.round(calculateBMR(user.weight, user.height, age, user.gender));
-    const tdee = calculateTDEE(bmr, user.activity_level);
-
-    return { bmr, tdee };
-  }, [user]);
-
-  // Clear notifications after 5 seconds
-  useEffect(() => {
-    if (notification) {
-      const timer = setTimeout(() => {
-        setNotification(null);
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [notification]);
-  
-  useEffect(() => {
-    if (error) {
-      const timer = setTimeout(() => {
-        setError(null);
-      }, 8000);
-      return () => clearTimeout(timer);
-    }
-  }, [error]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -185,7 +46,7 @@ export default function Overview() {
         <FloatingNotification 
           message={notification} 
           type="success" 
-          onClose={() => setNotification(null)} 
+          onClose={clearNotification} 
         />
       )}
       
@@ -193,7 +54,7 @@ export default function Overview() {
         <FloatingNotification 
           message={error} 
           type="error" 
-          onClose={() => setError(null)} 
+          onClose={clearError} 
         />
       )}
       
@@ -242,7 +103,7 @@ export default function Overview() {
                       </div>
                     </div>
                   ) : (
-                    <AddEntry onSubmit={handleSubmit} isSaving={isSaving} />
+                    <AddEntry onSubmit={addEntry} isSaving={isSaving} />
                   )}
                 </div>
               </div>
@@ -301,7 +162,7 @@ export default function Overview() {
       {editingEntry && (
         <EditModal
           entry={editingEntry}
-          onSave={handleEdit}
+          onSave={updateEntry}
           onClose={() => setEditingEntry(null)}
           isSaving={isEditing}
         />
