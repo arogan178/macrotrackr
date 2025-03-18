@@ -1,176 +1,147 @@
-import { useState, useCallback, useEffect } from "react";
-import { MacroEntry } from "../types";
-import LoadingSpinner from "./LoadingSpinner";
+import { useState, useCallback, memo } from "react";
+import { NumberField, CardContainer } from "./FormComponents";
 import CalorieSearch from "./CalorieSearch";
 
-interface MacroInputs {
-  protein: string;
-  carbs: string;
-  fats: string;
-}
-
 interface AddEntryProps {
-  onSubmit: (inputs: { protein: number; carbs: number; fats: number }) => void;
+  onSubmit: (entry: { protein: number; carbs: number; fats: number }) => Promise<void>;
   isSaving: boolean;
 }
 
-function MacroInput({
-  id,
-  label,
-  value,
-  onChange,
-  color,
-  caloriesPerGram
-}: {
-  id: string;
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  color: string;
-  caloriesPerGram: number;
-}) {
-  const calories = Number(value) * caloriesPerGram;
+function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
+  const [protein, setProtein] = useState<number | undefined>(undefined);
+  const [carbs, setCarbs] = useState<number | undefined>(undefined);
+  const [fats, setFats] = useState<number | undefined>(undefined);
+  const [searchResult, setSearchResult] = useState<string | null>(null);
   
-  return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label htmlFor={id} className="block text-sm font-medium text-gray-300">
-          {label} (g)
-        </label>
-        {Number(value) > 0 && (
-          <span className={`text-xs ${color}`}>
-            {Math.round(calories)} kcal
-          </span>
-        )}
-      </div>
-      <input
-        id={id}
-        type="number"
-        className="w-full px-4 py-3 rounded-xl bg-gray-700/50 border border-gray-600 text-white placeholder-gray-400 focus:ring-2 focus:ring-indigo-500/70 focus:border-indigo-500/70 focus:outline-none transition-all"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        min="0"
-        placeholder="0"
-      />
-    </div>
-  );
-}
-
-export default function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
-  const [inputs, setInputs] = useState<MacroInputs>({
-    protein: "",
-    carbs: "",
-    fats: "",
-  });
-
-  const [totalCalories, setTotalCalories] = useState(0);
-
-  useEffect(() => {
-    // Calculate calories whenever inputs change
-    const protein = Number(inputs.protein) || 0;
-    const carbs = Number(inputs.carbs) || 0;
-    const fats = Number(inputs.fats) || 0;
-    
-    setTotalCalories(protein * 4 + carbs * 4 + fats * 9);
-  }, [inputs]);
-
-  const handleSubmit = (e: React.FormEvent) => {
+  // Calculate calories dynamically and round to whole numbers
+  const calories = Math.round((protein || 0) * 4 + (carbs || 0) * 4 + (fats || 0) * 9);
+  
+  // Check if all fields are 0 (invalid submission)
+  const allFieldsAreZero = protein === 0 && carbs === 0 && fats === 0;
+  
+  // Check if any field is undefined (incomplete form)
+  const anyFieldIsUndefined = protein === undefined || carbs === undefined || fats === undefined;
+  
+  // Form is valid if no field is undefined and not all fields are 0
+  const isFormValid = !anyFieldIsUndefined && !allFieldsAreZero;
+  
+  // Handle result from CalorieSearch
+  const handleSearchResult = useCallback(({ protein: p, carbs: c, fats: f }) => {
+    setProtein(parseFloat(p));
+    setCarbs(parseFloat(c));
+    setFats(parseFloat(f));
+    // setSearchResult(`Found: ${p}g protein, ${c}g carbs, ${f}g fat`);
+  }, []);
+  
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const macros = {
-      protein: Number(inputs.protein) || 0,
-      carbs: Number(inputs.carbs) || 0,
-      fats: Number(inputs.fats) || 0,
-    };
-    
-    // Prevent empty submissions
-    if (macros.protein === 0 && macros.carbs === 0 && macros.fats === 0) return;
-    
-    onSubmit(macros);
-    
-    // Only reset inputs if submission was successful (assuming isSaving becomes false on success)
-    if (!isSaving) {
-      setInputs({ protein: "", carbs: "", fats: "" });
+    // Validation: check for undefined values or all zeros
+    if (anyFieldIsUndefined || allFieldsAreZero) {
+      return; // Invalid submission
     }
-  };
-
-  const handleInputChange = useCallback((field: keyof MacroInputs, value: string) => {
-    setInputs(prev => ({ ...prev, [field]: value }));
-  }, []);
-
-  const hasValues = Boolean(
-    Number(inputs.protein) || Number(inputs.carbs) || Number(inputs.fats)
-  );
-
+    
+    // At this point we know all fields have valid numbers (including potentially some zeros)
+    await onSubmit({ 
+      protein: protein as number, 
+      carbs: carbs as number, 
+      fats: fats as number 
+    });
+    
+    // Reset form after submission
+    setProtein(undefined);
+    setCarbs(undefined);
+    setFats(undefined);
+    // setSearchResult(null);
+  }, [protein, carbs, fats, onSubmit, anyFieldIsUndefined, allFieldsAreZero]);
+  
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm p-5 rounded-2xl border border-gray-700/50 shadow-xl h-full flex flex-col transition-all duration-300 hover:border-gray-600/50">
-      <h2 className="text-lg font-medium text-gray-200 mb-4">Add Nutrition Entry</h2>
-      <div>
-          <CalorieSearch onResult={result => 
-            setInputs({
-              protein: Math.round(Number(result.protein)).toString(),
-              carbs: Math.round(Number(result.carbs)).toString(),
-              fats: Math.round(Number(result.fats)).toString(),
-            })
-          } />
-        </div>
-      <form className="mt-6 flex-1 flex flex-col justify-end pb-5" onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mb-8">
-          <MacroInput 
-            id="protein"
-            label="Protein"
-            value={inputs.protein}
-            onChange={(value) => handleInputChange('protein', value)}
-            color="text-green-400"
-            caloriesPerGram={4}
-          />
+    <CardContainer>
+      <div className="p-5">
+        <h2 className="text-lg font-medium text-gray-200 mb-4">Add Today's Macros</h2>
+        
+        {/* Food Search Feature */}
+        <div className="mb-6">
+          <CalorieSearch onResult={handleSearchResult} />
           
-          <MacroInput 
-            id="carbs"
-            label="Carbs"
-            value={inputs.carbs}
-            onChange={(value) => handleInputChange('carbs', value)}
-            color="text-blue-400"
-            caloriesPerGram={4}
-          />
-          
-          <MacroInput 
-            id="fats"
-            label="Fats"
-            value={inputs.fats}
-            onChange={(value) => handleInputChange('fats', value)}
-            color="text-red-400"
-            caloriesPerGram={9}
-          />
+          {searchResult && (
+            <div className="mt-3 text-sm text-green-400 flex items-center">
+              <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+              {searchResult}
+            </div>
+          )}
         </div>
-
-        {/* Submit Button */}
-        <div className="space-y-2">
-          <button
-            type="submit"
-            disabled={isSaving || !hasValues}
-            className="w-full px-4 py-3 rounded-xl font-medium text-white 
-                     bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
-                     disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]
-                     shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2
-                     focus:ring-2 focus:ring-indigo-500/50 focus:outline-none"
-          >
-            {isSaving ? (
-              <>
-                <LoadingSpinner size="sm" color="text-white" />
-                <span>Saving...</span>
-              </>
-            ) : (
-              <>
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                </svg>
-                <span>Save Entry</span>
-              </>
+        
+        <form onSubmit={handleSubmit}>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <NumberField
+              label="Protein"
+              value={protein}
+              onChange={setProtein}
+              min={0}
+              max={500}
+              step={0.1}
+              unit="g"
+            />
+            
+            <NumberField
+              label="Carbs"
+              value={carbs}
+              onChange={setCarbs}
+              min={0}
+              max={500}
+              step={0.1}
+              unit="g"
+            />
+            
+            <NumberField
+              label="Fats"
+              value={fats}
+              onChange={setFats}
+              min={0}
+              max={500}
+              step={0.1}
+              unit="g"
+            />
+          </div>
+          
+          <div className="mt-5 flex justify-between items-center">
+            <div className="text-sm text-gray-400">
+              Total Calories: <span className="text-indigo-400 font-medium">{calories}</span>
+            </div>
+            
+            {allFieldsAreZero && (
+              <div className="text-sm text-red-400 mr-4">
+                At least one macro value must be greater than 0
+              </div>
             )}
-          </button>
-        </div>
-      </form>
-    </div>
+            
+            <button
+              type="submit"
+              disabled={isSaving || !isFormValid}
+              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800/50 
+                        disabled:text-gray-400 rounded-lg shadow-md transition-colors
+                        text-white font-medium flex items-center"
+            >
+              {isSaving ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Saving...
+                </>
+              ) : (
+                <>Add Entry</>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </CardContainer>
   );
 }
+
+export default memo(AddEntry);

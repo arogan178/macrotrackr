@@ -24,7 +24,7 @@ const exportCSV = (history: MacroEntry[]) => {
             entry.created_at
           ).toLocaleTimeString()},${entry.protein},${entry.carbs},${
             entry.fats
-          },${entry.protein * 4 + entry.carbs * 4 + entry.fats * 9}`
+          },${Math.round(entry.protein * 4 + entry.carbs * 4 + entry.fats * 9)}`
       )
       .join("\n"),
   ];
@@ -193,11 +193,11 @@ export default function EntryHistory({
                         {group.entries.reduce((acc, entry) => acc + entry.fats, 0)}g
                       </td>
                       <td className="px-4 py-2.5 text-center font-semibold text-white">
-                        {group.entries.reduce(
+                        {Math.round(group.entries.reduce(
                           (acc, entry) =>
                             acc + entry.protein * 4 + entry.carbs * 4 + entry.fats * 9,
                           0
-                        )}{" "}
+                        ))}{" "}
                         kcal
                       </td>
                       <td className="px-4 py-2.5 text-center">
@@ -239,7 +239,7 @@ export default function EntryHistory({
                           {entry.fats}g
                         </td>
                         <td className="px-4 py-3 text-center font-medium text-white">
-                          {entry.protein * 4 + entry.carbs * 4 + entry.fats * 9} kcal
+                          {Math.round(entry.protein * 4 + entry.carbs * 4 + entry.fats * 9)} kcal
                         </td>
                         <td className="px-4 py-3 text-center whitespace-nowrap">
                           <div className="flex justify-center space-x-2">

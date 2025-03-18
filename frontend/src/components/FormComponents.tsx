@@ -7,6 +7,8 @@ interface TextFieldProps {
   onChange: (value: string) => void;
   required?: boolean;
   type?: "text" | "email" | "password" | "date";
+  error?: string;
+  helperText?: string;
 }
 
 export function TextField({
@@ -14,7 +16,9 @@ export function TextField({
   value,
   onChange,
   required = false,
-  type = "text"
+  type = "text",
+  error,
+  helperText
 }: TextFieldProps) {
   return (
     <div className="space-y-2">
@@ -23,11 +27,17 @@ export function TextField({
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
+        className={`w-full px-5 py-3.5 bg-gray-700/70 border-2 ${error ? 'border-red-500/70' : 'border-gray-600/70'} rounded-lg text-gray-100 
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                transition-all duration-200 shadow-sm"
+                transition-all duration-200 shadow-sm`}
         required={required}
       />
+      {error && (
+        <p className="mt-1 text-sm text-red-400">{error}</p>
+      )}
+      {helperText && !error && (
+        <p className="mt-1 text-sm text-gray-400">{helperText}</p>
+      )}
     </div>
   );
 }
@@ -42,6 +52,7 @@ interface NumberFieldProps {
   step?: number;
   required?: boolean;
   unit?: string;
+  error?: string;
 }
 
 export function NumberField({
@@ -52,7 +63,8 @@ export function NumberField({
   max,
   step = 1,
   required = false,
-  unit
+  unit,
+  error
 }: NumberFieldProps) {
   return (
     <div className="space-y-2">
@@ -60,22 +72,23 @@ export function NumberField({
       <div className="relative">
         <input
           type="number"
-          value={value || ''}
+          value={value === 0 ? '0' : value || ''}
           onChange={(e) => {
             const val = e.target.value;
             if (val === '' || /^-?\d*\.?\d*$/.test(val)) {
-              onChange(val ? Number(val) : undefined);
+              // Fix: Check explicitly for empty string instead of using falsy check
+              onChange(val === '' ? undefined : Number(val));
             }
           }}
           min={min}
           max={max}
           step={step}
-          className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
+          className={`w-full px-5 py-3.5 bg-gray-700/70 border-2 ${error ? 'border-red-500/70' : 'border-gray-600/70'} rounded-lg text-gray-100 
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
                   transition-all duration-200 shadow-sm pl-4 pr-4
                   [&::-webkit-inner-spin-button]:appearance-none
                   [&::-webkit-outer-spin-button]:appearance-none
-                  [-moz-appearance:textfield]"
+                  [-moz-appearance:textfield]`}
           required={required}
         />
         {unit && (
@@ -84,6 +97,9 @@ export function NumberField({
           </div>
         )}
       </div>
+      {error && (
+        <p className="mt-1 text-sm text-red-400">{error}</p>
+      )}
     </div>
   );
 }
@@ -97,10 +113,11 @@ interface SelectOption {
 interface SelectFieldProps {
   label: string;
   value: string | number | undefined;
-  onChange: (value: any) => void;
+  onChange: (value: string | number) => void;
   options: SelectOption[];
   placeholder?: string;
   required?: boolean;
+  error?: string;
 }
 
 export function SelectField({
@@ -109,7 +126,8 @@ export function SelectField({
   onChange,
   options,
   placeholder = "Select an option",
-  required = false
+  required = false,
+  error
 }: SelectFieldProps) {
   return (
     <div className="space-y-2">
@@ -117,11 +135,11 @@ export function SelectField({
       <select
         value={value || ''}
         onChange={(e) => onChange(e.target.value)}
-        className="w-full px-5 py-3.5 bg-gray-700/70 border-2 border-gray-600/70 rounded-lg text-gray-100 
+        className={`w-full px-5 py-3.5 bg-gray-700/70 border-2 ${error ? 'border-red-500/70' : 'border-gray-600/70'} rounded-lg text-gray-100 
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
                 transition-all duration-200 shadow-sm appearance-none
                 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]
-                bg-[length:2rem] bg-[right_0.75rem_center] bg-no-repeat"
+                bg-[length:2rem] bg-[right_0.75rem_center] bg-no-repeat`}
         required={required}
       >
         <option value="">{placeholder}</option>
@@ -131,6 +149,9 @@ export function SelectField({
           </option>
         ))}
       </select>
+      {error && (
+        <p className="mt-1 text-sm text-red-400">{error}</p>
+      )}
     </div>
   );
 }
