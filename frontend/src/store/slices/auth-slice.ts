@@ -1,82 +1,83 @@
 import { StateCreator } from "zustand";
 import type { ActivityLevel } from "../../utils/activityLevels";
-import { isOldEnough } from "../../utils/validation";
+import {
+  validateRegistrationStep1,
+  validateRegistrationStep2,
+  validateRegistrationStep3,
+} from "../../utils/validation";
+import { apiService } from "../../utils/api-service";
+import { getErrorMessage } from "../../utils/error-handling";
 
-type RegistrationData = {
+interface RegisterData {
   firstName: string;
   lastName: string;
   email: string;
   password: string;
   dateOfBirth: string;
-  height: number;
-  weight: number;
+  height: number | undefined;
+  weight: number | undefined;
   gender: "male" | "female" | "";
   activityLevel: ActivityLevel | "";
-};
+  step: number;
+}
 
 export interface AuthSlice {
-  // State
   auth: {
     email: string;
     password: string;
     isLoading: boolean;
-    error: string;
+    error: string | null;
+    isAuthenticated: boolean;
+    register: RegisterData;
   };
-  registrationData: RegistrationData;
   isLoading: boolean;
   error: string;
 
-  // Actions
+  // Authentication methods
   setAuthEmail: (email: string) => void;
   setAuthPassword: (password: string) => void;
-  clearAuthError: () => void;
-  login: (email: string, password: string) => Promise<string>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => void;
+  clearAuthError: () => void;
 
-  // Registration actions
-  setRegistrationData: (
-    updater: (prev: RegistrationData) => RegistrationData
+  // Registration methods
+  setRegisterField: <K extends keyof Omit<RegisterData, "step">>(
+    field: K,
+    value: RegisterData[K]
   ) => void;
-  clearRegistrationData: () => void;
-  setError: (error: string) => void;
-  register: (data: any) => Promise<void>;
-  validateEmail: (email: string) => Promise<{ valid: boolean }>;
-
-  // Helper functions
-  isOldEnough: (dateOfBirth: string) => boolean;
+  setRegisterStep: (step: number) => void;
+  validateEmail: () => Promise<boolean>;
+  validateRegisterStep: (step: number) => Promise<boolean>;
+  submitRegistration: () => Promise<void>;
+  resetRegistration: () => void;
 }
 
-const initialRegistrationData: RegistrationData = {
+const initialRegisterData: RegisterData = {
   firstName: "",
   lastName: "",
   email: "",
   password: "",
   dateOfBirth: "",
-  height: 0,
-  weight: 0,
+  height: undefined,
+  weight: undefined,
   gender: "",
   activityLevel: "",
+  step: 1,
 };
 
 export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
-  // State
   auth: {
     email: "",
     password: "",
     isLoading: false,
-    error: "",
+    error: null,
+    isAuthenticated: false,
+    register: { ...initialRegisterData },
   },
-  registrationData: JSON.parse(
-    localStorage.getItem("registration_data") ||
-      JSON.stringify(initialRegistrationData)
-  ),
   isLoading: false,
   error: "",
 
-  // Use imported function instead of redefining
-  isOldEnough,
-
-  // Actions
+  // Authentication methods
   setAuthEmail: (email) =>
     set((state) => ({
       auth: { ...state.auth, email },
@@ -87,41 +88,27 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
       auth: { ...state.auth, password },
     })),
 
-  clearAuthError: () =>
-    set((state) => ({
-      auth: { ...state.auth, error: "" },
-    })),
-
   login: async (email, password) => {
-    set((state) => ({ auth: { ...state.auth, isLoading: true, error: "" } }));
-
+    set((state) => ({ auth: { ...state.auth, isLoading: true, error: null } }));
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Login failed");
-      }
-
-      const { token } = await response.json();
+      const { token } = await apiService.auth.login(email, password);
       localStorage.setItem("token", token);
 
-      set((state) => ({ auth: { ...state.auth, isLoading: false } }));
+      set((state) => ({
+        auth: { ...state.auth, isLoading: false, isAuthenticated: true },
+      }));
 
       // Fetch user data after successful login
       await get().fetchUserDetails?.();
 
       return token;
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
       set((state) => ({
-        auth: { ...state.auth, error: errorMessage, isLoading: false },
+        auth: {
+          ...state.auth,
+          isLoading: false,
+          error: getErrorMessage(err),
+        },
       }));
       throw err;
     }
@@ -130,95 +117,188 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
   logout: () => {
     localStorage.removeItem("token");
     set((state) => ({
-      auth: { ...state.auth, email: "", password: "" },
+      auth: {
+        ...state.auth,
+        isAuthenticated: false,
+        email: "",
+        password: "",
+      },
       user: null,
-      // Reset other user-specific states as needed
     }));
   },
 
-  // Registration actions
-  setRegistrationData: (updater) => {
-    set((state) => {
-      const newData = updater(state.registrationData);
-      localStorage.setItem("registration_data", JSON.stringify(newData));
-      return { registrationData: newData };
-    });
-  },
+  clearAuthError: () =>
+    set((state) => ({
+      auth: { ...state.auth, error: null },
+    })),
 
-  clearRegistrationData: () => {
-    localStorage.removeItem("registration_data");
-    localStorage.removeItem("registration_step");
-    set({ registrationData: initialRegistrationData });
-  },
+  // Registration methods
+  setRegisterField: (field, value) =>
+    set((state) => ({
+      auth: {
+        ...state.auth,
+        register: {
+          ...state.auth.register,
+          [field]: value,
+        },
+      },
+    })),
 
-  setError: (error) => set({ error }),
+  setRegisterStep: (step) =>
+    set((state) => ({
+      auth: {
+        ...state.auth,
+        register: {
+          ...state.auth.register,
+          step,
+        },
+      },
+    })),
 
-  register: async (data) => {
-    set({ isLoading: true, error: "" });
+  validateEmail: async () => {
+    const { auth } = get();
+    set((state) => ({ auth: { ...state.auth, isLoading: true, error: null } }));
 
     try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/register-complete",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email,
-            password: data.password,
-            dateOfBirth: data.dateOfBirth,
-            height: parseFloat(data.height.toString()),
-            weight: parseFloat(data.weight.toString()),
-            gender: data.gender || "male", // Default to male if not provided
-            activityLevel: data.activityLevel,
-          }),
-        }
+      const { valid } = await apiService.auth.validateEmail(
+        auth.register.email
       );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Registration failed");
+      set((state) => ({ auth: { ...state.auth, isLoading: false } }));
+
+      if (!valid) {
+        set((state) => ({
+          auth: {
+            ...state.auth,
+            error: "This email is already in use",
+          },
+        }));
       }
 
-      const { token } = await response.json();
+      return valid;
+    } catch (err) {
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          isLoading: false,
+          error: getErrorMessage(err),
+        },
+      }));
+      return false;
+    }
+  },
+
+  validateRegisterStep: async (step) => {
+    const { auth } = get();
+    const { register } = auth;
+
+    // Step 1 validation
+    if (step === 1) {
+      const errors = validateRegistrationStep1(register);
+
+      if (Object.keys(errors).length > 0) {
+        set((state) => ({
+          auth: {
+            ...state.auth,
+            error:
+              Object.values(errors)[0] || "Please fill in all required fields",
+          },
+        }));
+        return false;
+      }
+
+      return await get().validateEmail();
+    }
+
+    // Step 2 validation
+    if (step === 2) {
+      const errors = validateRegistrationStep2(register);
+
+      if (Object.keys(errors).length > 0) {
+        set((state) => ({
+          auth: {
+            ...state.auth,
+            error:
+              Object.values(errors)[0] || "Please fill in all required fields",
+          },
+        }));
+        return false;
+      }
+
+      return true;
+    }
+
+    // Step 3 validation
+    if (step === 3) {
+      const errors = validateRegistrationStep3(register);
+
+      if (Object.keys(errors).length > 0) {
+        set((state) => ({
+          auth: {
+            ...state.auth,
+            error:
+              Object.values(errors)[0] || "Please select an activity level",
+          },
+        }));
+        return false;
+      }
+
+      return true;
+    }
+
+    return false;
+  },
+
+  submitRegistration: async () => {
+    const { auth } = get();
+    set((state) => ({ auth: { ...state.auth, isLoading: true, error: null } }));
+
+    try {
+      const { register } = auth;
+      const userData = {
+        firstName: register.firstName,
+        lastName: register.lastName,
+        email: register.email,
+        password: register.password,
+        dateOfBirth: register.dateOfBirth,
+        height: register.height,
+        weight: register.weight,
+        gender: register.gender,
+        activityLevel: register.activityLevel,
+      };
+
+      const { token } = await apiService.auth.register(userData);
       localStorage.setItem("token", token);
 
-      // Clear registration data after successful registration
-      get().clearRegistrationData();
+      // Reset registration data and set authenticated
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          isLoading: false,
+          isAuthenticated: true,
+          register: { ...initialRegisterData },
+        },
+      }));
 
-      // Refresh user data after successful registration
+      // Fetch user data after successful registration
       await get().fetchUserDetails?.();
-
-      set({ isLoading: false });
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "An error occurred";
-      set({ error: errorMessage, isLoading: false });
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          isLoading: false,
+          error: getErrorMessage(err),
+        },
+      }));
       throw err;
     }
   },
 
-  // Email validation
-  validateEmail: async (email) => {
-    try {
-      const response = await fetch(
-        "http://localhost:3000/api/auth/validate-email",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }
-      );
-
-      if (!response.ok) {
-        return { valid: false };
-      }
-
-      return { valid: true };
-    } catch (err) {
-      set({ error: "Email validation failed" });
-      return { valid: false };
-    }
-  },
+  resetRegistration: () =>
+    set((state) => ({
+      auth: {
+        ...state.auth,
+        register: { ...initialRegisterData },
+      },
+    })),
 });
