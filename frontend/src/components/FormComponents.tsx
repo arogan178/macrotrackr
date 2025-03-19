@@ -9,6 +9,10 @@ interface TextFieldProps {
   type?: "text" | "email" | "password" | "date";
   error?: string;
   helperText?: string;
+  placeholder?: string;
+  minLength?: number;
+  maxLength?: number;
+  textOnly?: boolean;
 }
 
 export function TextField({
@@ -18,26 +22,51 @@ export function TextField({
   required = false,
   type = "text",
   error,
-  helperText
+  helperText,
+  placeholder = "",
+  minLength = 2,
+  maxLength = 16,
+  textOnly = false,
 }: TextFieldProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+
+    // If textOnly is true, filter out non-alphabetic characters
+    if (textOnly && newValue !== "") {
+      const textOnlyValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+      onChange(textOnlyValue);
+    } else {
+      onChange(newValue);
+    }
+  };
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-5 py-3.5 bg-gray-700/70 border-2 ${error ? 'border-red-500/70' : 'border-gray-600/70'} rounded-lg text-gray-100 
+        onChange={handleChange}
+        placeholder={placeholder}
+        minLength={minLength}
+        maxLength={maxLength}
+        className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+          error ? "border-red-500/70" : "border-gray-600/70"
+        } rounded-lg text-gray-100 
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                transition-all duration-200 shadow-sm`}
+                transition-all duration-200 shadow-sm
+                placeholder:text-gray-500`}
         required={required}
       />
-      {error && (
-        <p className="mt-1 text-sm text-red-400">{error}</p>
+      {maxLength && value.length === maxLength && !error && (
+        <p className="text-xs text-gray-500">
+          {`Maximum ${maxLength} characters reached`}
+        </p>
       )}
       {helperText && !error && (
-        <p className="mt-1 text-sm text-gray-400">{helperText}</p>
+        <p className="text-xs text-gray-500">{helperText}</p>
       )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
@@ -53,6 +82,8 @@ interface NumberFieldProps {
   required?: boolean;
   unit?: string;
   error?: string;
+  placeholder?: number;
+  maxDigits?: number;
 }
 
 export function NumberField({
@@ -64,32 +95,88 @@ export function NumberField({
   step = 1,
   required = false,
   unit,
-  error
-}: NumberFieldProps) {
+  error,
+  maxDigits = 3,
+  placeholder = 0,
+}: NumberFieldProps & { maxDigits?: number }) {
+  // Handle input validation for numbers only
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+
+    // Only allow valid numeric patterns
+    if (val === "" || /^-?\d*\.?\d*$/.test(val)) {
+      // Check max digits constraint
+      if (maxDigits && val.replace(/[^0-9]/g, "").length > maxDigits) {
+        return;
+      }
+
+      // Convert to number or undefined if empty
+      onChange(val === "" ? undefined : Number(val));
+    }
+  };
+
+  // Handle keydown to prevent invalid characters
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Allow: backspace, delete, tab, escape, enter, decimal point, minus sign (for negative numbers)
+    const allowedKeys = [
+      "Backspace",
+      "Delete",
+      "Tab",
+      "Escape",
+      "Enter",
+      ".",
+      "-",
+      "ArrowLeft",
+      "ArrowRight",
+      "ArrowUp",
+      "ArrowDown",
+    ];
+
+    // Allow number keys
+    if (/\d/.test(e.key)) {
+      return;
+    }
+
+    // Block input if not a number and not in allowedKeys
+    if (!allowedKeys.includes(e.key)) {
+      e.preventDefault();
+    }
+
+    // Only allow one decimal point
+    if (e.key === "." && e.currentTarget.value.includes(".")) {
+      e.preventDefault();
+    }
+
+    // Only allow minus at the beginning
+    if (e.key === "-" && e.currentTarget.value !== "") {
+      e.preventDefault();
+    }
+  };
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
       <div className="relative">
         <input
           type="number"
-          value={value === 0 ? '0' : value || ''}
-          onChange={(e) => {
-            const val = e.target.value;
-            if (val === '' || /^-?\d*\.?\d*$/.test(val)) {
-              // Fix: Check explicitly for empty string instead of using falsy check
-              onChange(val === '' ? undefined : Number(val));
-            }
-          }}
+          value={value === 0 ? "0" : value || ""}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
           min={min}
           max={max}
           step={step}
-          className={`w-full px-5 py-3.5 bg-gray-700/70 border-2 ${error ? 'border-red-500/70' : 'border-gray-600/70'} rounded-lg text-gray-100 
+          className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+            error ? "border-red-500/70" : "border-gray-600/70"
+          } rounded-lg text-gray-100 
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                  transition-all duration-200 shadow-sm pl-4 pr-4
+                  transition-all duration-200 shadow-sm pl-4 ${
+                    unit ? "pr-10" : "pr-4"
+                  }
                   [&::-webkit-inner-spin-button]:appearance-none
                   [&::-webkit-outer-spin-button]:appearance-none
                   [-moz-appearance:textfield]`}
           required={required}
+          placeholder={placeholder.toString()}
         />
         {unit && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -97,9 +184,7 @@ export function NumberField({
           </div>
         )}
       </div>
-      {error && (
-        <p className="mt-1 text-sm text-red-400">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
     </div>
   );
 }
@@ -127,15 +212,17 @@ export function SelectField({
   options,
   placeholder = "Select an option",
   required = false,
-  error
+  error,
 }: SelectFieldProps) {
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
       <select
-        value={value || ''}
+        value={value || ""}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-5 py-3.5 bg-gray-700/70 border-2 ${error ? 'border-red-500/70' : 'border-gray-600/70'} rounded-lg text-gray-100 
+        className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+          error ? "border-red-500/70" : "border-gray-600/70"
+        } rounded-lg text-gray-100 
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
                 transition-all duration-200 shadow-sm appearance-none
                 bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2020%2020%22%20fill%3D%22%239ca3af%22%3E%3Cpath%20fill-rule%3D%22evenodd%22%20d%3D%22M5.293%207.293a1%201%200%20011.414%200L10%2010.586l3.293-3.293a1%201%200%20111.414%201.414l-4%204a1%201%200%2001-1.414%200l-4-4a1%201%200%20010-1.414z%22%20clip-rule%3D%22evenodd%22%2F%3E%3C%2Fsvg%3E')]
@@ -149,9 +236,7 @@ export function SelectField({
           </option>
         ))}
       </select>
-      {error && (
-        <p className="mt-1 text-sm text-red-400">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
     </div>
   );
 }
@@ -165,43 +250,43 @@ interface InfoCardProps {
   children?: React.ReactNode;
 }
 
-export function InfoCard({ 
-  title, 
-  description, 
+export function InfoCard({
+  title,
+  description,
   color = "indigo",
   icon,
-  children 
+  children,
 }: InfoCardProps) {
   const colorMap = {
     green: {
       bg: "from-green-900/30 to-gray-800/10",
       border: "border-green-500/20",
       text: "text-green-400",
-      dot: "bg-green-500"
+      dot: "bg-green-500",
     },
     blue: {
       bg: "from-blue-900/30 to-gray-800/10",
       border: "border-blue-500/20",
       text: "text-blue-400",
-      dot: "bg-blue-500"
+      dot: "bg-blue-500",
     },
     red: {
       bg: "from-red-900/30 to-gray-800/10",
       border: "border-red-500/20",
       text: "text-red-400",
-      dot: "bg-red-500"
+      dot: "bg-red-500",
     },
     indigo: {
       bg: "from-indigo-900/30 to-gray-800/10",
       border: "border-indigo-500/20",
       text: "text-indigo-400",
-      dot: "bg-indigo-500"
+      dot: "bg-indigo-500",
     },
     purple: {
       bg: "from-purple-900/30 to-gray-800/10",
       border: "border-purple-500/20",
       text: "text-purple-400",
-      dot: "bg-purple-500"
+      dot: "bg-purple-500",
     },
   };
 
@@ -229,11 +314,11 @@ interface TabButtonProps {
 
 export function TabButton({ active, onClick, children }: TabButtonProps) {
   return (
-    <button 
+    <button
       onClick={onClick}
       className={`py-3 px-6 font-medium text-sm focus:outline-none ${
-        active 
-          ? "text-indigo-400 border-b-2 border-indigo-500" 
+        active
+          ? "text-indigo-400 border-b-2 border-indigo-500"
           : "text-gray-400 hover:text-gray-300"
       }`}
     >
@@ -248,9 +333,14 @@ interface CardContainerProps {
   className?: string;
 }
 
-export function CardContainer({ children, className = "" }: CardContainerProps) {
+export function CardContainer({
+  children,
+  className = "",
+}: CardContainerProps) {
   return (
-    <div className={`bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden ${className}`}>
+    <div
+      className={`bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden ${className}`}
+    >
       {children}
     </div>
   );
