@@ -12,7 +12,7 @@ import SettingsPage from "./pages/SettingsPage";
 import ReportingPage from "./pages/ReportingPage";
 
 import { useEffect, useState } from "react";
-import "./index.css";
+import "./app.css";
 
 function AuthHandler() {
   const location = useLocation();
