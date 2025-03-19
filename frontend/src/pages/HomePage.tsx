@@ -2,10 +2,10 @@ import { useEffect, memo } from "react";
 import Navbar from "../components/Navbar";
 import FloatingNotification from "../components/FloatingNotification";
 import { CardContainer, InfoCard } from "../components/FormComponents";
-import EntryHistory from "../components/EntryHistory";
+import EntryHistory from "../components/EntryHistoryPanel";
 import EditModal from "../components/EditModal";
-import DailySummary from "../components/DailySummary";
-import AddEntry from "../components/AddEntry";
+import DailySummary from "../components/DailySummaryPanel";
+import AddEntry from "../components/AddEntryForm";
 import CardMetricsPanel from "../components/CardMetricsPanel";
 import { useAppState } from "../store/app-state";
 
@@ -29,7 +29,7 @@ export default function HomePage() {
     deleteEntry,
     setEditingEntry,
     clearNotification,
-    clearError
+    clearError,
   } = useAppState();
 
   // Fetch user details on component mount
@@ -40,42 +40,39 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
-      
+
       {/* Notification system */}
       {notification && (
-        <FloatingNotification 
-          message={notification} 
-          type="success" 
-          onClose={clearNotification} 
+        <FloatingNotification
+          message={notification}
+          type="success"
+          onClose={clearNotification}
           duration={5000}
         />
       )}
-      
+
       {error && (
-        <FloatingNotification 
-          message={error} 
-          type="error" 
+        <FloatingNotification
+          message={error}
+          type="error"
           onClose={clearError}
-          duration={5000} 
+          duration={5000}
         />
       )}
-      
+
       <div className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(67,56,202,0.1),transparent_70%)] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          <PageHeader 
-            firstName={user?.first_name} 
-            isLoading={isLoading} 
-          />
+          <PageHeader firstName={user?.first_name} isLoading={isLoading} />
 
           <div className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
-                <CardMetricsPanel 
-                  bmr={userMetrics.bmr} 
-                  tdee={userMetrics.tdee} 
-                  isLoading={isLoading} 
+                <CardMetricsPanel
+                  bmr={userMetrics.bmr}
+                  tdee={userMetrics.tdee}
+                  isLoading={isLoading}
                 />
 
                 {/* Add Entry Section */}
@@ -95,7 +92,7 @@ export default function HomePage() {
                 ) : (
                   user && (
                     <DailySummary
-                      totals={totals} 
+                      totals={totals}
                       macroDistribution={user?.macro_distribution}
                     />
                   )
@@ -137,29 +134,45 @@ export default function HomePage() {
 }
 
 // Extracted components for better organization
-const PageHeader = memo(({ firstName, isLoading }: { firstName?: string, isLoading: boolean }) => (
-  <div className="mb-6">
-    <div className="flex flex-col md:flex-row md:items-center gap-3">
-      <h1 className="text-2xl sm:text-3xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
-        Welcome back,
-        <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
-          {isLoading ? '...' : firstName || 'User'}
-        </span>
-      </h1>
-      <div className="flex md:ml-auto">
-        <InfoCard 
-          title={new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}
-          color="indigo"
-          icon={
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-            </svg>
-          }
-        />
+const PageHeader = memo(
+  ({ firstName, isLoading }: { firstName?: string; isLoading: boolean }) => (
+    <div className="mb-6">
+      <div className="flex flex-col md:flex-row md:items-center gap-3">
+        <h1 className="text-2xl sm:text-3xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
+          Welcome back,
+          <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
+            {isLoading ? "..." : firstName || "User"}
+          </span>
+        </h1>
+        <div className="flex md:ml-auto">
+          <InfoCard
+            title={new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              month: "short",
+              day: "numeric",
+            })}
+            color="indigo"
+            icon={
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            }
+          />
+        </div>
       </div>
     </div>
-  </div>
-));
+  )
+);
 
 // Loading skeleton components
 const AddEntryLoadingSkeleton = () => (
