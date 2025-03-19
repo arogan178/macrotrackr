@@ -129,7 +129,7 @@ export const WeightIcon = createIcon(({ className }) => (
 
 export const InfoIcon = createIcon(({ className }) => (
   <svg
-    className={className}
+    className="w-5 h-5"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -144,26 +144,9 @@ export const InfoIcon = createIcon(({ className }) => (
   </svg>
 ));
 
-export const ArrowLeftIcon = createIcon(({ className }) => (
+export const ForwardIcon = createIcon(({ className }) => (
   <svg
-    className={className}
-    fill="none"
-    stroke="currentColor"
-    viewBox="0 0 24 24"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M11 17l-5-5m0 0l5-5m-5 5h12"
-    />
-  </svg>
-));
-
-export const ArrowRightIcon = createIcon(({ className }) => (
-  <svg
-    className={className}
+    className="ml-2 h-5 w-5"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -174,13 +157,30 @@ export const ArrowRightIcon = createIcon(({ className }) => (
       strokeLinejoin="round"
       strokeWidth={2}
       d="M13 7l5 5m0 0l-5 5m5-5H6"
-    />
+    ></path>
+  </svg>
+));
+
+export const BackIcon = createIcon(({ className }) => (
+  <svg
+    className="mr-2 h-5 w-5"
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M11 17l-5-5m0 0l5-5m-5 5h12"
+    ></path>
   </svg>
 ));
 
 export const CheckIcon = createIcon(({ className }) => (
   <svg
-    className={className}
+    className="ml-2 h-5 w-5"
     fill="none"
     stroke="currentColor"
     viewBox="0 0 24 24"
@@ -191,7 +191,7 @@ export const CheckIcon = createIcon(({ className }) => (
       strokeLinejoin="round"
       strokeWidth={2}
       d="M5 13l4 4L19 7"
-    />
+    ></path>
   </svg>
 ));
 
