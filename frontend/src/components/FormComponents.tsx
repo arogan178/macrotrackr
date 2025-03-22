@@ -1,4 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
+import LoadingSpinner from "./LoadingSpinner";
+import { EyeIcon, EyeSlashIcon } from "./Icons";
+import {
+  TEXT_FIELD_DEFAULT_MIN_LENGTH,
+  TEXT_FIELD_DEFAULT_MAX_LENGTH,
+  NUMBER_FIELD_ALLOWED_KEYS,
+} from "../utils/constants";
 
 /* Text Input Field Component */
 interface TextFieldProps {
@@ -24,10 +31,12 @@ export function TextField({
   error,
   helperText,
   placeholder = "",
-  minLength = 2,
-  maxLength = 16,
+  minLength = TEXT_FIELD_DEFAULT_MIN_LENGTH,
+  maxLength = TEXT_FIELD_DEFAULT_MAX_LENGTH,
   textOnly = false,
 }: TextFieldProps) {
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
@@ -40,24 +49,49 @@ export function TextField({
     }
   };
 
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevShow) => !prevShow);
+  };
+
+  // Determine actual input type based on password visibility state
+  const inputType =
+    type === "password" ? (showPassword ? "text" : "password") : type;
+
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
-      <input
-        type={type}
-        value={value}
-        onChange={handleChange}
-        placeholder={placeholder}
-        minLength={minLength}
-        maxLength={maxLength}
-        className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
-          error ? "border-red-500/70" : "border-gray-600/70"
-        } rounded-lg text-gray-100 
-                focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-                transition-all duration-200 shadow-sm
-                placeholder:text-gray-500`}
-        required={required}
-      />
+      <div className="relative">
+        <input
+          type={inputType}
+          value={value}
+          onChange={handleChange}
+          placeholder={placeholder}
+          minLength={minLength}
+          maxLength={maxLength}
+          className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+            error ? "border-red-500/70" : "border-gray-600/70"
+          } rounded-lg text-gray-100 
+                  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
+                  transition-all duration-200 shadow-sm
+                  placeholder:text-gray-500 ${
+                    type === "password" ? "pr-10" : ""
+                  }`}
+          required={required}
+        />
+        {type === "password" && (
+          <button
+            type="button"
+            onClick={togglePasswordVisibility}
+            className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none ${
+              !value ? "opacity-0" : ""
+            }`}
+            aria-label={showPassword ? "Hide password" : "Show password"}
+            disabled={!value}
+          >
+            {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+          </button>
+        )}
+      </div>
       {maxLength && value.length === maxLength && !error && (
         <p className="text-xs text-gray-500">
           {`Maximum ${maxLength} characters reached`}
@@ -117,28 +151,13 @@ export function NumberField({
 
   // Handle keydown to prevent invalid characters
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    // Allow: backspace, delete, tab, escape, enter, decimal point, minus sign (for negative numbers)
-    const allowedKeys = [
-      "Backspace",
-      "Delete",
-      "Tab",
-      "Escape",
-      "Enter",
-      ".",
-      "-",
-      "ArrowLeft",
-      "ArrowRight",
-      "ArrowUp",
-      "ArrowDown",
-    ];
-
     // Allow number keys
     if (/\d/.test(e.key)) {
       return;
     }
 
     // Block input if not a number and not in allowedKeys
-    if (!allowedKeys.includes(e.key)) {
+    if (!NUMBER_FIELD_ALLOWED_KEYS.includes(e.key)) {
       e.preventDefault();
     }
 
@@ -195,7 +214,7 @@ interface SelectOption {
   label: string;
 }
 
-interface SelectFieldProps {
+interface DropdownProps {
   label: string;
   value: string | number | undefined;
   onChange: (value: string | number) => void;
@@ -205,7 +224,7 @@ interface SelectFieldProps {
   error?: string;
 }
 
-export function SelectField({
+export function Dropdown({
   label,
   value,
   onChange,
@@ -213,7 +232,7 @@ export function SelectField({
   placeholder = "Select an option",
   required = false,
   error,
-}: SelectFieldProps) {
+}: DropdownProps) {
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
@@ -343,5 +362,58 @@ export function CardContainer({
     >
       {children}
     </div>
+  );
+}
+
+/* Form Button Component */
+interface FormButtonProps {
+  isLoading: boolean;
+  loadingText?: string;
+  text: string | React.ReactNode;
+  onClick?: () => void;
+  type?: "button" | "submit";
+  variant?: "primary" | "secondary";
+  icon?: React.ReactNode;
+  className?: string;
+}
+
+export function FormButton({
+  isLoading,
+  loadingText = "Processing...",
+  text,
+  onClick,
+  type = "button",
+  variant = "primary",
+  icon,
+  className = "",
+}: FormButtonProps) {
+  const baseClasses =
+    "py-3 rounded-lg font-medium flex items-center justify-center";
+  const primaryClasses = `${baseClasses} text-white bg-gradient-to-r from-indigo-600 to-blue-500 
+                          hover:from-indigo-500 hover:to-blue-400 shadow-lg shadow-indigo-500/30`;
+  const secondaryClasses = `${baseClasses} border border-gray-600/50 text-gray-300 hover:bg-gray-700/50`;
+
+  const buttonClasses =
+    variant === "primary" ? primaryClasses : secondaryClasses;
+
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      disabled={isLoading}
+      className={`${buttonClasses} disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02] ${className}`}
+    >
+      {isLoading ? (
+        <span className="flex items-center justify-center">
+          <LoadingSpinner />
+          {loadingText}
+        </span>
+      ) : (
+        <span className="flex items-center justify-center">
+          {icon}
+          {text}
+        </span>
+      )}
+    </button>
   );
 }

@@ -1,15 +1,11 @@
 // Type definitions
-export type Gender = 'male' | 'female';
+export type Gender = "male" | "female";
 
-export enum ActivityLevel {
-  Sedentary = 1,
-  Light = 2,
-  Moderate = 3,
-  VeryActive = 4,
-  ExtraActive = 5
-}
+// Updated activity types
+export type ExerciseFrequency = "none" | "low" | "medium" | "high";
+export type NonExerciseActivity = "sedentary" | "moderate" | "very_active";
 
-export type WeightGoal = 'lose' | 'maintain' | 'gain';
+export type WeightGoal = "lose" | "maintain" | "gain";
 
 export type MacroDistribution = {
   protein: number;
@@ -17,20 +13,29 @@ export type MacroDistribution = {
   fat: number;
 };
 
-// Activity level multipliers for TDEE
-const activityMultipliers: Record<ActivityLevel, number> = {
-  [ActivityLevel.Sedentary]: 1.2,   // Sedentary (little to no exercise)
-  [ActivityLevel.Light]: 1.375,     // Light (exercise 1-3 days/week)
-  [ActivityLevel.Moderate]: 1.55,   // Moderate (exercise 3-5 days/week)
-  [ActivityLevel.VeryActive]: 1.725, // Very Active (exercise 6-7 days/week)
-  [ActivityLevel.ExtraActive]: 1.9   // Extra Active (very intense exercise daily)
+// Exercise frequency multipliers
+const exerciseMultipliers: Record<ExerciseFrequency, number> = {
+  none: 1.0, // 0 times per week
+  low: 1.2, // 1-3 times per week
+  medium: 1.35, // 4-6 times per week
+  high: 1.5, // 7+ times per week
+};
+
+// Non-exercise activity multipliers
+const nonExerciseMultipliers: Record<NonExerciseActivity, number> = {
+  sedentary: 1.2, // Mostly sedentary - less than 5k steps
+  moderate: 1.35, // Moderately active - 5k-10k steps
+  very_active: 1.5, // Very active - 15k+ steps
 };
 
 // Goal-based macro distributions
-const macroDistributions: Record<WeightGoal, { protein: number, fat: number, carbs: number }> = {
+const macroDistributions: Record<
+  WeightGoal,
+  { protein: number; fat: number; carbs: number }
+> = {
   lose: { protein: 0.4, fat: 0.3, carbs: 0.3 },
   gain: { protein: 0.3, fat: 0.25, carbs: 0.45 },
-  maintain: { protein: 0.3, fat: 0.3, carbs: 0.4 }
+  maintain: { protein: 0.3, fat: 0.3, carbs: 0.4 },
 };
 
 /**
@@ -50,23 +55,35 @@ export function calculateBMR(
   if (!weight || !height || !age || !gender) return 0;
 
   const baseCalculation = 10 * weight + 6.25 * height - 5 * age;
-  return gender === 'male' ? baseCalculation + 5 : baseCalculation - 161;
+  return gender === "male" ? baseCalculation + 5 : baseCalculation - 161;
 }
 
 /**
- * Calculates Total Daily Energy Expenditure (TDEE)
+ * Calculates Total Daily Energy Expenditure (TDEE) based on exercise frequency and non-exercise activity
  * @param bmr - Basal Metabolic Rate
- * @param activityLevel - Level of physical activity
+ * @param exerciseFrequency - How often the person exercises
+ * @param nonExerciseActivity - Activity level outside of structured exercise
  * @returns TDEE in calories per day
  */
 export function calculateTDEE(
   bmr: number,
-  activityLevel: ActivityLevel
+  exerciseFrequency: ExerciseFrequency,
+  nonExerciseActivity: NonExerciseActivity
 ): number {
-  if (!bmr || !activityLevel) return 0;
-  
-  const multiplier = activityMultipliers[activityLevel] || activityMultipliers[ActivityLevel.Sedentary];
-  return Math.round(bmr * multiplier);
+  if (!bmr) return 0;
+
+  // Get multipliers for both activity types
+  const exerciseMultiplier =
+    exerciseMultipliers[exerciseFrequency] || exerciseMultipliers.none;
+  const nonExerciseMultiplier =
+    nonExerciseMultipliers[nonExerciseActivity] ||
+    nonExerciseMultipliers.sedentary;
+
+  // Calculate TDEE with weighted average of both multipliers (60% non-exercise, 40% exercise)
+  const combinedMultiplier =
+    nonExerciseMultiplier * 0.6 + exerciseMultiplier * 0.4;
+
+  return Math.round(bmr * combinedMultiplier);
 }
 
 /**
@@ -75,16 +92,13 @@ export function calculateTDEE(
  * @param goal - Weight management goal
  * @returns Daily calorie goal
  */
-export function calculateCalorieGoal(
-  tdee: number,
-  goal: WeightGoal
-): number {
+export function calculateCalorieGoal(tdee: number, goal: WeightGoal): number {
   if (!tdee) return 0;
-  
+
   const adjustmentFactors = {
-    lose: 0.8,     // 20% deficit
+    lose: 0.8, // 20% deficit
     maintain: 1.0, // no change
-    gain: 1.1      // 10% surplus
+    gain: 1.1, // 10% surplus
   };
 
   return Math.round(tdee * adjustmentFactors[goal]);
@@ -101,15 +115,18 @@ export function calculateMacros(
   goal: WeightGoal
 ): MacroDistribution {
   if (!calorieGoal) return { protein: 0, carbs: 0, fat: 0 };
-  
-  const { protein: proteinPercentage, carbs: carbsPercentage, fat: fatPercentage } = 
-    macroDistributions[goal] || macroDistributions.maintain;
-  
+
+  const {
+    protein: proteinPercentage,
+    carbs: carbsPercentage,
+    fat: fatPercentage,
+  } = macroDistributions[goal] || macroDistributions.maintain;
+
   // Protein and carbs have 4 calories per gram, fat has 9 calories per gram
   return {
     protein: Math.round((calorieGoal * proteinPercentage) / 4),
     carbs: Math.round((calorieGoal * carbsPercentage) / 4),
-    fat: Math.round((calorieGoal * fatPercentage) / 9)
+    fat: Math.round((calorieGoal * fatPercentage) / 9),
   };
 }
 
@@ -119,7 +136,8 @@ export function calculateMacros(
  * @param height - Height in cm
  * @param age - Age in years
  * @param gender - 'male' or 'female'
- * @param activityLevel - Level of physical activity
+ * @param exerciseFrequency - How often the person exercises
+ * @param nonExerciseActivity - Activity level outside of structured exercise
  * @param goal - Weight management goal
  * @returns Complete nutrition profile with BMR, TDEE, calorie goal and macros
  */
@@ -128,18 +146,19 @@ export function calculateNutritionProfile(
   height: number,
   age: number,
   gender: Gender,
-  activityLevel: ActivityLevel,
+  exerciseFrequency: ExerciseFrequency,
+  nonExerciseActivity: NonExerciseActivity,
   goal: WeightGoal
 ) {
   const bmr = calculateBMR(weight, height, age, gender);
-  const tdee = calculateTDEE(bmr, activityLevel);
+  const tdee = calculateTDEE(bmr, exerciseFrequency, nonExerciseActivity);
   const calorieGoal = calculateCalorieGoal(tdee, goal);
   const macros = calculateMacros(calorieGoal, goal);
-  
+
   return {
     bmr,
     tdee,
     calorieGoal,
-    macros
+    macros,
   };
 }

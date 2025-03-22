@@ -1,5 +1,14 @@
 import { MacroEntry } from "../types";
 import { useEffect, useState, Fragment } from "react";
+import {
+  ExportIcon,
+  ChevronDownIcon,
+  ChevronUpIcon,
+  EditIcon,
+  TrashIcon,
+  LoadingSpinnerIcon,
+  PlusCircleIcon,
+} from "./Icons";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
@@ -100,20 +109,7 @@ export default function EntryHistory({
             onClick={() => exportCSV(history)}
             className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
           >
-            <svg
-              className="w-4 h-4 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-              />
-            </svg>
+            <ExportIcon className="w-4 h-4 mr-2" />
             Export CSV
           </button>
         )}
@@ -122,20 +118,7 @@ export default function EntryHistory({
       {history.length === 0 ? (
         <div className="py-16 flex flex-col items-center justify-center bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50">
           <div className="w-20 h-20 mb-4 rounded-full bg-gray-700/70 flex items-center justify-center">
-            <svg
-              className="w-10 h-10 text-gray-500"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={1.5}
-                d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <PlusCircleIcon className="w-10 h-10 text-gray-500" />
           </div>
           <h3 className="text-lg font-medium text-gray-300">No entries yet</h3>
           <p className="mt-2 text-sm text-gray-400 max-w-sm text-center">
@@ -186,21 +169,11 @@ export default function EntryHistory({
                     >
                       <td className="px-4 py-2.5 font-semibold text-indigo-300 text-sm">
                         <div className="flex items-center gap-2">
-                          <svg
-                            className={`w-4 h-4 transform transition-transform ${
-                              collapsedDates.has(group.date) ? "-rotate-90" : ""
-                            }`}
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 9l-7 7-7-7"
-                            />
-                          </svg>
+                          {collapsedDates.has(group.date) ? (
+                            <ChevronDownIcon className="w-4 h-4 -rotate-90 transform transition-transform" />
+                          ) : (
+                            <ChevronDownIcon className="w-4 h-4 transform transition-transform" />
+                          )}
                           {group.date}
                           <span className="text-xs text-indigo-400/70 font-normal">
                             ({group.entries.length}{" "}
@@ -244,23 +217,11 @@ export default function EntryHistory({
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         <div className="opacity-0 group-hover:opacity-100 transition-opacity">
-                          <svg
-                            className="w-4 h-4 text-indigo-400 mx-auto"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d={
-                                collapsedDates.has(group.date)
-                                  ? "M19 9l-7 7-7-7"
-                                  : "M19 15l-7-7-7 7"
-                              }
-                            />
-                          </svg>
+                          <ChevronDownIcon
+                            className={`w-4 h-4 transform transition-transform ${
+                              collapsedDates.has(group.date) ? "-rotate-90" : ""
+                            }`}
+                          />
                         </div>
                       </td>
                     </tr>
@@ -300,19 +261,7 @@ export default function EntryHistory({
                                 className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
                                 aria-label="Edit entry"
                               >
-                                <svg
-                                  className="w-4 h-4"
-                                  fill="none"
-                                  stroke="currentColor"
-                                  viewBox="0 0 24 24"
-                                >
-                                  <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                                  />
-                                </svg>
+                                <EditIcon className="w-4 h-4" />
                               </button>
                               <button
                                 onClick={() => deleteEntry(entry.id)}
@@ -321,40 +270,9 @@ export default function EntryHistory({
                                 aria-label="Delete entry"
                               >
                                 {isDeleting ? (
-                                  <svg
-                                    className="animate-spin w-4 h-4"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <circle
-                                      className="opacity-25"
-                                      cx="12"
-                                      cy="12"
-                                      r="10"
-                                      stroke="currentColor"
-                                      strokeWidth="4"
-                                    ></circle>
-                                    <path
-                                      className="opacity-75"
-                                      fill="currentColor"
-                                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                                    ></path>
-                                  </svg>
+                                  <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
                                 ) : (
-                                  <svg
-                                    className="w-4 h-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    viewBox="0 0 24 24"
-                                  >
-                                    <path
-                                      strokeLinecap="round"
-                                      strokeLinejoin="round"
-                                      strokeWidth={2}
-                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                                    />
-                                  </svg>
+                                  <TrashIcon className="w-4 h-4" />
                                 )}
                               </button>
                             </div>
