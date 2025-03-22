@@ -1,6 +1,7 @@
 import { useState, useCallback, memo } from "react";
 import { NumberField, CardContainer } from "./FormComponents";
 import CalorieSearch from "./CalorieSearchForm";
+import { CheckMarkIcon } from "./Icons";
 
 interface AddEntryProps {
   onSubmit: (entry: {
@@ -81,19 +82,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
 
           {searchResult && (
             <div className="mt-3 text-sm text-green-400 flex items-center">
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+              <CheckMarkIcon className="w-4 h-4 mr-1" />
               {searchResult}
             </div>
           )}
