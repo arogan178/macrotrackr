@@ -8,11 +8,12 @@ import { useBeforeUnload } from "../hooks/useBeforeUnload";
 import ProfileForm from "../components/settings/ProfileForm";
 import NutritionGoalsForm from "../components/settings/NutritionGoalsForm";
 import { useAppState } from "../store/app-state";
+import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 
 export default function SettingsPage() {
-  const { 
-    settings, 
-    isLoading, 
+  const {
+    settings,
+    isLoading,
     error,
     successMessage,
     formErrors,
@@ -23,29 +24,39 @@ export default function SettingsPage() {
     saveSettings,
     clearMessages,
     resetSettings,
-    fetchSettings
+    fetchSettings,
   } = useAppState();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "nutrition">("profile");
+  const [activeTab, setActiveTab] = useState<"profile" | "nutrition">(
+    "profile"
+  );
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingTabChange, setPendingTabChange] = useState<"profile" | "nutrition" | null>(null);
-  
+  const [pendingTabChange, setPendingTabChange] = useState<
+    "profile" | "nutrition" | null
+  >(null);
+
   // Fetch settings on component mount
   useEffect(() => {
     fetchSettings();
   }, [fetchSettings]); // Added fetchSettings to dependency array
-  
-  // Warn user before leaving page with unsaved changes
-  useBeforeUnload(hasSettingsChanges, "You have unsaved changes. Are you sure you want to leave?");
 
-  const handleTabChange = useCallback((tab: "profile" | "nutrition") => {
-    if (hasSettingsChanges) {
-      setPendingTabChange(tab);
-      setShowConfirmModal(true);
-    } else {
-      setActiveTab(tab);
-    }
-  }, [hasSettingsChanges]);
+  // Warn user before leaving page with unsaved changes
+  useBeforeUnload(
+    hasSettingsChanges,
+    "You have unsaved changes. Are you sure you want to leave?"
+  );
+
+  const handleTabChange = useCallback(
+    (tab: "profile" | "nutrition") => {
+      if (hasSettingsChanges) {
+        setPendingTabChange(tab);
+        setShowConfirmModal(true);
+      } else {
+        setActiveTab(tab);
+      }
+    },
+    [hasSettingsChanges]
+  );
 
   const confirmTabChange = useCallback(() => {
     if (pendingTabChange) {
@@ -62,38 +73,41 @@ export default function SettingsPage() {
     setShowConfirmModal(false);
   }, []);
 
-  const handleSubmit = useCallback(async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validateSettingsForm()) return;
-    await saveSettings();
-  }, [validateSettingsForm, saveSettings]);
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validateSettingsForm()) return;
+      await saveSettings();
+    },
+    [validateSettingsForm, saveSettings]
+  );
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
       <div className="relative">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(67,56,202,0.1),transparent_70%)] pointer-events-none"></div>
-        
+
         <div className="max-w-4xl mx-auto px-4 py-8 relative">
           {successMessage && (
-            <FloatingNotification 
-              message={successMessage} 
-              type="success" 
-              onClose={clearMessages} 
-              duration={3000} 
+            <FloatingNotification
+              message={successMessage}
+              type="success"
+              onClose={clearMessages}
+              duration={3000}
             />
           )}
-          
+
           {error && (
-            <FloatingNotification 
-              message={error} 
-              type="error" 
-              onClose={clearMessages} 
-              duration={3000} 
+            <FloatingNotification
+              message={error}
+              type="error"
+              onClose={clearMessages}
+              duration={3000}
             />
           )}
-          
-          <ConfirmationModal 
+
+          <ConfirmationModal
             isOpen={showConfirmModal}
             title="Unsaved Changes"
             message="You have unsaved changes that will be lost. Do you want to continue?"
@@ -104,36 +118,34 @@ export default function SettingsPage() {
           />
 
           <PageHeader hasChanges={hasSettingsChanges} />
-          
+
           <div className="flex border-b border-gray-700 mb-6">
-            <TabButton 
+            <TabButton
               active={activeTab === "profile"}
               onClick={() => handleTabChange("profile")}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
+              <UserIcon className="w-4 h-4 mr-2" />
               Profile
             </TabButton>
             <TabButton
               active={activeTab === "nutrition"}
               onClick={() => handleTabChange("nutrition")}
             >
-              <svg className="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h8m-8 6h16" />
-              </svg>
+              <MenuIcon className="w-4 h-4 mr-2" />
               Nutrition Goals
             </TabButton>
           </div>
 
           {/* Fix: Check if settings is null or if we're still loading */}
           {isLoading || !settings ? (
-            <LoadingSpinner />
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinnerIcon className="h-12 w-12 animate-spin text-indigo-500" />
+            </div>
           ) : (
             <CardContainer>
               <form onSubmit={handleSubmit} className="p-6">
                 {activeTab === "profile" ? (
-                  <ProfileForm 
+                  <ProfileForm
                     settings={settings}
                     updateSetting={updateSetting}
                     formErrors={formErrors}
@@ -146,9 +158,11 @@ export default function SettingsPage() {
                 )}
 
                 <div className="mt-8 flex justify-end">
-                  <SaveButton 
+                  <SaveButton
                     loading={isSaving}
-                    disabled={!hasSettingsChanges || Object.keys(formErrors).length > 0}
+                    disabled={
+                      !hasSettingsChanges || Object.keys(formErrors).length > 0
+                    }
                   />
                 </div>
               </form>
@@ -173,14 +187,12 @@ const PageHeader = ({ hasChanges }: { hasChanges: boolean }) => (
         </span>
       )}
       <span className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-medium">
-        {new Date().toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' })}
+        {new Date().toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        })}
       </span>
     </div>
-  </div>
-);
-
-const LoadingSpinner = () => (
-  <div className="flex justify-center items-center h-64">
-    <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
   </div>
 );

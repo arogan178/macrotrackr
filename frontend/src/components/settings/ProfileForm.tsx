@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { UserDetails } from "../../types";
-import { TextField, NumberField, SelectField } from "../FormComponents";
+import { TextField, NumberField, Dropdown } from "../FormComponents";
 import { getActivityLevelOptions } from "../../utils/activityLevels";
 
 interface ProfileFormProps {
@@ -57,7 +57,6 @@ function ProfileForm({
           onChange={(value) => updateSetting("date_of_birth", value)}
           required
           error={getFieldError("date_of_birth")}
-          // helperText={`Must be at least ${MINIMUM_AGE} years old`}
         />
       </div>
 
@@ -84,7 +83,7 @@ function ProfileForm({
           error={getFieldError("weight")}
         />
 
-        <SelectField
+        <Dropdown
           label="Gender"
           value={settings.gender || "male"}
           onChange={(value) =>
@@ -98,7 +97,7 @@ function ProfileForm({
           required
         />
 
-        <SelectField
+        <Dropdown
           label="Activity Level"
           value={settings.activity_level || 1}
           onChange={(value) => updateSetting("activity_level", Number(value))}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LockIcon, UnlockIcon } from "./Icons";
 
 interface MacroSliderProps {
   name: string;
@@ -21,10 +22,12 @@ export default function MacroSlider({
   onToggleLock,
   disabled = false,
   min = 5,
-  max = 70
+  max = 70,
 }: MacroSliderProps) {
-  const [recommendationText, setRecommendationText] = useState(getRecommendation(name.toLowerCase() as "protein" | "carbs" | "fats", value));
-  
+  const [recommendationText, setRecommendationText] = useState(
+    getRecommendation(name.toLowerCase() as "protein" | "carbs" | "fats", value)
+  );
+
   const colorConfig = {
     green: {
       bg: "bg-green-500",
@@ -43,17 +46,22 @@ export default function MacroSlider({
       focus: "focus:ring-red-500/50",
       textLocked: "text-red-400",
       bgLocked: "bg-red-900/30",
-    }
+    },
   };
-  
+
   const { bg, focus, textLocked, bgLocked } = colorConfig[color];
-  
+
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const newValue = parseInt(e.target.value);
     onChange(newValue);
-    setRecommendationText(getRecommendation(name.toLowerCase() as "protein" | "carbs" | "fats", newValue));
+    setRecommendationText(
+      getRecommendation(
+        name.toLowerCase() as "protein" | "carbs" | "fats",
+        newValue
+      )
+    );
   }
-  
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between">
@@ -63,34 +71,34 @@ export default function MacroSlider({
         </div>
         <div className="flex items-center gap-2">
           {onToggleLock && (
-            <button 
-              onClick={onToggleLock} 
-              className={`p-1.5 rounded-full ${isLocked 
-                ? `${textLocked} ${bgLocked}` 
-                : 'text-gray-500 hover:text-gray-300'}`}
+            <button
+              onClick={onToggleLock}
+              className={`p-1.5 rounded-full ${
+                isLocked
+                  ? `${textLocked} ${bgLocked}`
+                  : "text-gray-500 hover:text-gray-300"
+              }`}
               aria-label={isLocked ? `Unlock ${name}` : `Lock ${name}`}
               title={isLocked ? `Unlock ${name}` : `Lock ${name}`}
             >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                {isLocked ? (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                ) : (
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"
-                    d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />
-                )}
-              </svg>
+              {isLocked ? (
+                <LockIcon className="w-3.5 h-3.5" />
+              ) : (
+                <UnlockIcon className="w-3.5 h-3.5" />
+              )}
             </button>
           )}
-          <span className="text-sm font-medium text-gray-200 w-8 text-right">{value}%</span>
+          <span className="text-sm font-medium text-gray-200 w-8 text-right">
+            {value}%
+          </span>
         </div>
       </div>
-      
+
       <div className="relative">
-        <input 
-          type="range" 
-          min={min} 
-          max={max} 
+        <input
+          type="range"
+          min={min}
+          max={max}
           step="1"
           value={value}
           onChange={handleChange}
@@ -101,10 +109,10 @@ export default function MacroSlider({
                    [&::-webkit-slider-thumb]:h-4 
                    [&::-webkit-slider-thumb]:${bg} 
                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
-                   ${disabled || (isLocked && !disabled) ? 'opacity-50' : ''}`}
+                   ${disabled || (isLocked && !disabled) ? "opacity-50" : ""}`}
         />
       </div>
-      
+
       <div className="flex justify-between items-center">
         <span className="text-xs text-gray-400">{min}%</span>
         <span className="text-xs text-gray-400 max-w-[180px] text-center h-4">
@@ -116,7 +124,10 @@ export default function MacroSlider({
   );
 }
 
-function getRecommendation(macro: "protein" | "carbs" | "fats", value: number): string {
+function getRecommendation(
+  macro: "protein" | "carbs" | "fats",
+  value: number
+): string {
   if (macro === "protein") {
     if (value < 15) return "Consider increasing for muscle maintenance";
     if (value > 35) return "High protein intake";
@@ -139,7 +150,12 @@ interface MacroBadgeProps {
   isLocked?: boolean;
 }
 
-export function MacroBadge({ name, value, color, isLocked = false }: MacroBadgeProps) {
+export function MacroBadge({
+  name,
+  value,
+  color,
+  isLocked = false,
+}: MacroBadgeProps) {
   const colorConfig = {
     green: {
       border: "border-green-500/20",
@@ -152,23 +168,33 @@ export function MacroBadge({ name, value, color, isLocked = false }: MacroBadgeP
     red: {
       border: "border-red-500/20",
       iconColor: "text-red-500",
-    }
+    },
   };
-  
+
   const { border, iconColor } = colorConfig[color];
-  
+
   return (
     <div className={`bg-gray-800/50 rounded-lg p-3 border ${border}`}>
       <div className="flex items-center gap-1.5">
         <div className={`w-2 h-2 rounded-full bg-${color}-500`}></div>
         <span className="text-xs text-gray-400">{name}</span>
         {isLocked && (
-          <svg className={`w-3 h-3 ${iconColor}`} viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+          <svg
+            className={`w-3 h-3 ${iconColor}`}
+            viewBox="0 0 20 20"
+            fill="currentColor"
+          >
+            <path
+              fillRule="evenodd"
+              d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+              clipRule="evenodd"
+            />
           </svg>
         )}
       </div>
-      <div className="mt-1 text-lg font-semibold text-gray-200 w-12">{value}%</div>
+      <div className="mt-1 text-lg font-semibold text-gray-200 w-12">
+        {value}%
+      </div>
     </div>
   );
 }
