@@ -16,7 +16,7 @@ import {
 } from "../Icons";
 import { USER_MINIMUM_AGE } from "../../utils/constants";
 import { getActivityLevelOptions } from "../../utils/activityLevels";
-import { useAppState } from "../../store/app-state";
+import { useStore } from "../../store/store";
 
 // Step indicator component
 interface StepIndicatorProps {
@@ -119,7 +119,7 @@ export function StepOne() {
     setRegisterField,
     validateRegisterStep,
     setRegisterStep,
-  } = useAppState();
+  } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -197,7 +197,7 @@ export function StepTwo() {
     setRegisterField,
     validateRegisterStep,
     setRegisterStep,
-  } = useAppState();
+  } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
@@ -297,7 +297,7 @@ export function StepThree() {
     setRegisterStep,
     validateRegisterStep,
     submitRegistration,
-  } = useAppState();
+  } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

@@ -10,6 +10,7 @@ import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import SettingsPage from "./pages/SettingsPage";
 import ReportingPage from "./pages/ReportingPage";
+import NotificationManager from "./components/NotificationManager";
 
 import { useEffect, useState } from "react";
 import "./app.css";
@@ -54,6 +55,8 @@ function AuthHandler() {
 export default function App() {
   return (
     <Router>
+      {/* Include NotificationManager at the top level */}
+      <NotificationManager />
       <AuthHandler />
     </Router>
   );

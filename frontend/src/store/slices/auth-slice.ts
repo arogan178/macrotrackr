@@ -7,6 +7,7 @@ import {
 } from "../../utils/validation";
 import { apiService } from "../../utils/api-service";
 import { getErrorMessage } from "../../utils/error-handling";
+import { securelyStoreToken, removeToken } from "../../utils/token-storage";
 
 interface RegisterData {
   firstName: string;
@@ -22,16 +23,13 @@ interface RegisterData {
 }
 
 export interface AuthSlice {
-  auth: {
-    email: string;
-    password: string;
-    isLoading: boolean;
-    error: string | null;
-    isAuthenticated: boolean;
-    register: RegisterData;
-  };
-  isLoading: boolean;
-  error: string;
+  // Authentication state - flattened from nested auth object
+  email: string;
+  password: string;
+  isAuthLoading: boolean;
+  authError: string | null;
+  isAuthenticated: boolean;
+  register: RegisterData;
 
   // Authentication methods
   setAuthEmail: (email: string) => void;
@@ -66,195 +64,160 @@ const initialRegisterData: RegisterData = {
 };
 
 export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
-  auth: {
-    email: "",
-    password: "",
-    isLoading: false,
-    error: null,
-    isAuthenticated: false,
-    register: { ...initialRegisterData },
-  },
-  isLoading: false,
-  error: "",
+  // Flattened authentication state
+  email: "",
+  password: "",
+  isAuthLoading: false,
+  authError: null,
+  isAuthenticated: false,
+  register: { ...initialRegisterData },
 
   // Authentication methods
-  setAuthEmail: (email) =>
-    set((state) => ({
-      auth: { ...state.auth, email },
-    })),
+  setAuthEmail: (email) => set({ email }),
 
-  setAuthPassword: (password) =>
-    set((state) => ({
-      auth: { ...state.auth, password },
-    })),
+  setAuthPassword: (password) => set({ password }),
 
   login: async (email, password) => {
-    set((state) => ({ auth: { ...state.auth, isLoading: true, error: null } }));
-    try {
-      const { token } = await apiService.auth.login(email, password);
-      localStorage.setItem("token", token);
+    set({ isAuthLoading: true, authError: null });
 
-      set((state) => ({
-        auth: { ...state.auth, isLoading: false, isAuthenticated: true },
-      }));
+    try {
+      const response = await apiService.auth.login(email, password);
+
+      // Validate response
+      if (!response || !response.token) {
+        throw new Error("Invalid response from server");
+      }
+
+      // Store token securely
+      securelyStoreToken(response.token);
+
+      set({
+        isAuthLoading: false,
+        isAuthenticated: true,
+      });
 
       // Fetch user data after successful login
       await get().fetchUserDetails?.();
 
-      return token;
+      return response.token;
     } catch (err) {
-      set((state) => ({
-        auth: {
-          ...state.auth,
-          isLoading: false,
-          error: getErrorMessage(err),
-        },
-      }));
+      // Handle specific error types
+      let errorMessage = getErrorMessage(err);
+
+      // Enhance error message based on error type or response
+      if (errorMessage.includes("401") || errorMessage.includes("403")) {
+        errorMessage = "Invalid email or password. Please try again.";
+      } else if (errorMessage.includes("network")) {
+        errorMessage =
+          "Network error. Please check your connection and try again.";
+      }
+
+      set({
+        isAuthLoading: false,
+        authError: errorMessage,
+      });
+
       throw err;
     }
   },
 
   logout: () => {
-    localStorage.removeItem("token");
-    set((state) => ({
-      auth: {
-        ...state.auth,
-        isAuthenticated: false,
-        email: "",
-        password: "",
-      },
+    // Remove token securely
+    removeToken();
+
+    set({
+      isAuthenticated: false,
+      email: "",
+      password: "",
       user: null,
-    }));
+    });
   },
 
-  clearAuthError: () =>
-    set((state) => ({
-      auth: { ...state.auth, error: null },
-    })),
+  clearAuthError: () => set({ authError: null }),
 
   // Registration methods
-  setRegisterField: (field, value) =>
-    set((state) => ({
-      auth: {
-        ...state.auth,
-        register: {
-          ...state.auth.register,
-          [field]: value,
-        },
-      },
-    })),
+  setRegisterField: (field, value) => {
+    set((state) => {
+      // Create a deep copy of register data to avoid mutation
+      const updatedRegister = JSON.parse(JSON.stringify(state.register));
+      updatedRegister[field] = value;
 
-  setRegisterStep: (step) =>
-    set((state) => ({
-      auth: {
-        ...state.auth,
-        register: {
-          ...state.auth.register,
-          step,
-        },
-      },
-    })),
+      return { register: updatedRegister };
+    });
+  },
+
+  setRegisterStep: (step) => {
+    set((state) => {
+      // Create a deep copy of register data
+      const updatedRegister = JSON.parse(JSON.stringify(state.register));
+      updatedRegister.step = step;
+
+      return { register: updatedRegister };
+    });
+  },
 
   validateEmail: async () => {
-    const { auth } = get();
-    set((state) => ({ auth: { ...state.auth, isLoading: true, error: null } }));
+    const { register } = get();
+    set({ isAuthLoading: true, authError: null });
 
     try {
-      const { valid } = await apiService.auth.validateEmail(
-        auth.register.email
-      );
-
-      set((state) => ({ auth: { ...state.auth, isLoading: false } }));
+      const { valid } = await apiService.auth.validateEmail(register.email);
+      set({ isAuthLoading: false });
 
       if (!valid) {
-        set((state) => ({
-          auth: {
-            ...state.auth,
-            error: "This email is already in use",
-          },
-        }));
+        set({ authError: "This email is already in use" });
       }
 
       return valid;
     } catch (err) {
-      set((state) => ({
-        auth: {
-          ...state.auth,
-          isLoading: false,
-          error: getErrorMessage(err),
-        },
-      }));
+      const errorMessage = getErrorMessage(err);
+      set({
+        isAuthLoading: false,
+        authError: `Email validation failed: ${errorMessage}`,
+      });
       return false;
     }
   },
 
   validateRegisterStep: async (step) => {
-    const { auth } = get();
-    const { register } = auth;
+    const { register } = get();
+    let errors = {};
 
-    // Step 1 validation
-    if (step === 1) {
-      const errors = validateRegistrationStep1(register);
-
-      if (Object.keys(errors).length > 0) {
-        set((state) => ({
-          auth: {
-            ...state.auth,
-            error:
-              Object.values(errors)[0] || "Please fill in all required fields",
-          },
-        }));
+    // Step validation using utility functions
+    switch (step) {
+      case 1:
+        errors = validateRegistrationStep1(register);
+        if (Object.keys(errors).length === 0) {
+          return await get().validateEmail();
+        }
+        break;
+      case 2:
+        errors = validateRegistrationStep2(register);
+        break;
+      case 3:
+        errors = validateRegistrationStep3(register);
+        break;
+      default:
+        set({ authError: "Invalid step" });
         return false;
-      }
-
-      return await get().validateEmail();
     }
 
-    // Step 2 validation
-    if (step === 2) {
-      const errors = validateRegistrationStep2(register);
-
-      if (Object.keys(errors).length > 0) {
-        set((state) => ({
-          auth: {
-            ...state.auth,
-            error:
-              Object.values(errors)[0] || "Please fill in all required fields",
-          },
-        }));
-        return false;
-      }
-
-      return true;
+    if (Object.keys(errors).length > 0) {
+      const errorMessage =
+        Object.values(errors)[0] || "Please fill all required fields correctly";
+      set({ authError: errorMessage });
+      return false;
     }
 
-    // Step 3 validation
-    if (step === 3) {
-      const errors = validateRegistrationStep3(register);
-
-      if (Object.keys(errors).length > 0) {
-        set((state) => ({
-          auth: {
-            ...state.auth,
-            error:
-              Object.values(errors)[0] || "Please select an activity level",
-          },
-        }));
-        return false;
-      }
-
-      return true;
-    }
-
-    return false;
+    return true;
   },
 
   submitRegistration: async () => {
-    const { auth } = get();
-    set((state) => ({ auth: { ...state.auth, isLoading: true, error: null } }));
+    const { register } = get();
+    set({ isAuthLoading: true, authError: null });
 
     try {
-      const { register } = auth;
+      // Create a cleaned-up userData object from register data
       const userData = {
         firstName: register.firstName,
         lastName: register.lastName,
@@ -267,38 +230,49 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
         activityLevel: register.activityLevel,
       };
 
-      const { token } = await apiService.auth.register(userData);
-      localStorage.setItem("token", token);
+      const response = await apiService.auth.register(userData);
+
+      // Validate response
+      if (!response || !response.token) {
+        throw new Error("Invalid response from server");
+      }
+
+      // Store token securely
+      securelyStoreToken(response.token);
 
       // Reset registration data and set authenticated
-      set((state) => ({
-        auth: {
-          ...state.auth,
-          isLoading: false,
-          isAuthenticated: true,
-          register: { ...initialRegisterData },
-        },
-      }));
+      set({
+        isAuthLoading: false,
+        isAuthenticated: true,
+        register: JSON.parse(JSON.stringify(initialRegisterData)),
+      });
 
       // Fetch user data after successful registration
       await get().fetchUserDetails?.();
     } catch (err) {
-      set((state) => ({
-        auth: {
-          ...state.auth,
-          isLoading: false,
-          error: getErrorMessage(err),
-        },
-      }));
+      // Handle specific error types for registration
+      let errorMessage = getErrorMessage(err);
+
+      if (
+        errorMessage.includes("email") ||
+        errorMessage.includes("already exists")
+      ) {
+        errorMessage =
+          "This email is already registered. Please use a different email.";
+      } else if (errorMessage.includes("password")) {
+        errorMessage =
+          "Password doesn't meet requirements. Please use a stronger password.";
+      }
+
+      set({
+        isAuthLoading: false,
+        authError: errorMessage,
+      });
+
       throw err;
     }
   },
 
   resetRegistration: () =>
-    set((state) => ({
-      auth: {
-        ...state.auth,
-        register: { ...initialRegisterData },
-      },
-    })),
+    set({ register: JSON.parse(JSON.stringify(initialRegisterData)) }),
 });
