@@ -7,7 +7,7 @@ import ConfirmationModal from "../components/ConfirmationModal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
 import ProfileForm from "../components/settings/ProfileForm";
 import NutritionGoalsForm from "../components/settings/NutritionGoalsForm";
-import { useAppState } from "../store/app-state";
+import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 
 export default function SettingsPage() {
@@ -25,7 +25,7 @@ export default function SettingsPage() {
     clearMessages,
     resetSettings,
     fetchSettings,
-  } = useAppState();
+  } = useStore();
 
   const [activeTab, setActiveTab] = useState<"profile" | "nutrition">(
     "profile"

@@ -1,13 +1,12 @@
 import { memo } from "react";
-import { useAppState } from "../store/app-state";
 import FloatingNotification from "./FloatingNotification";
-
+import { useStore } from "../store/store";
 /**
  * Global notification manager that renders notifications from the app state
  * This component should be mounted once near the root of your application
  */
 function NotificationManager() {
-  const { notifications, hideNotification } = useAppState();
+  const { notifications, hideNotification } = useStore();
 
   return (
     <div className="fixed top-0 left-0 right-0 z-50 flex flex-col items-center pointer-events-none">
