@@ -1,21 +1,19 @@
 import { create } from "zustand";
 import { createUserSlice, UserSlice } from "./slices/user-slice";
 import { createMacrosSlice, MacrosSlice } from "./slices/macros-slice";
-import { createSettingsSlice, SettingsSlice } from "./slices/settings-slice";
 import { createAuthSlice, AuthSlice } from "./slices/auth-slice";
 import { createUISlice, UISlice } from "./slices/ui-slice";
 import { devtools } from "zustand/middleware";
 
 // Combine all slices into one store
-type AppState = UserSlice & MacrosSlice & SettingsSlice & AuthSlice & UISlice;
+type Store = UserSlice & MacrosSlice & AuthSlice & UISlice;
 
 // Create the store with all slices and devtools for better debugging
-export const useAppState = create<AppState>()(
+export const useStore = create<Store>()(
   devtools(
     (...a) => ({
       ...createUserSlice(...a),
       ...createMacrosSlice(...a),
-      ...createSettingsSlice(...a),
       ...createAuthSlice(...a),
       ...createUISlice(...a),
     }),
@@ -30,7 +28,7 @@ if (typeof window !== "undefined") {
   if (token) {
     // Fetch user data when app initializes with valid token
     setTimeout(() => {
-      useAppState.getState().fetchUserDetails?.();
+      useStore.getState().fetchUserDetails?.();
     }, 0);
   }
 }

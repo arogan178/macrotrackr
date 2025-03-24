@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { CardContainer } from "../FormComponents";
-import { useAppState } from "../../store/app-state";
+import { useStore } from "../../store/store";
 import FloatingNotification from "../FloatingNotification";
 import {
   StepOne,
@@ -15,7 +15,7 @@ function RegisterForm() {
     auth: { register, error },
     resetRegistration,
     clearAuthError,
-  } = useAppState();
+  } = useStore();
 
   // Reset registration data when component unmounts
   useEffect(() => {

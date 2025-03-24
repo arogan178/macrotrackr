@@ -7,7 +7,7 @@ import EditModal from "../components/EditModal";
 import DailySummary from "../components/DailySummaryPanel";
 import AddEntry from "../components/AddEntryForm";
 import CardMetricsPanel from "../components/CardMetricsPanel";
-import { useAppState } from "../store/app-state";
+import { useStore } from "../store/store";
 
 export default function HomePage() {
   // Get state and actions from our store
@@ -30,7 +30,7 @@ export default function HomePage() {
     setEditingEntry,
     clearNotification,
     clearError,
-  } = useAppState();
+  } = useStore();
 
   // Fetch user details on component mount
   useEffect(() => {

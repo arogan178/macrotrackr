@@ -20,20 +20,20 @@ export default function DailySummary({
   const totalCalories = Math.round(
     totals.protein * 4 + totals.carbs * 4 + totals.fats * 9
   );
-  const proteinPercent = totalCalories
-    ? Math.round(((totals.protein * 4) / totalCalories) * 100)
-    : 0;
-  const carbsPercent = totalCalories
-    ? Math.round(((totals.carbs * 4) / totalCalories) * 100)
-    : 0;
-  const fatsPercent = totalCalories
-    ? Math.round(((totals.fats * 9) / totalCalories) * 100)
-    : 0;
+  const proteinPercent = Math.round(
+    totalCalories ? ((totals.protein * 4) / totalCalories) * 100 : 0
+  );
+  const carbsPercent = Math.round(
+    totalCalories ? ((totals.carbs * 4) / totalCalories) * 100 : 0
+  );
+  const fatsPercent = Math.round(
+    totalCalories ? ((totals.fats * 9) / totalCalories) * 100 : 0
+  );
 
   const macroData = [
     {
       name: "Protein",
-      grams: totals.protein,
+      grams: (totals.protein || 0).toFixed(1),
       calories: Math.round(totals.protein * 4),
       percent: proteinPercent,
       targetPercent: distribution.proteinPercentage,
@@ -46,7 +46,7 @@ export default function DailySummary({
     },
     {
       name: "Carbs",
-      grams: totals.carbs,
+      grams: (totals.carbs || 0).toFixed(1),
       calories: Math.round(totals.carbs * 4),
       percent: carbsPercent,
       targetPercent: distribution.carbsPercentage,
@@ -59,7 +59,7 @@ export default function DailySummary({
     },
     {
       name: "Fats",
-      grams: totals.fats,
+      grams: (totals.fats || 0).toFixed(1),
       calories: Math.round(totals.fats * 9),
       percent: fatsPercent,
       targetPercent: distribution.fatsPercentage,

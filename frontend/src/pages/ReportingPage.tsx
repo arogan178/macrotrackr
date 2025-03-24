@@ -13,7 +13,7 @@ import {
   Legend,
   ChartOptions,
 } from "chart.js";
-import { useAppState } from "../store/app-state";
+import { useStore } from "../store/store";
 
 // Register Chart.js components
 ChartJS.register(
@@ -43,7 +43,7 @@ export default function ReportingPage() {
   });
 
   // Get history data from app state
-  const { history, isLoading, error, fetchUserDetails } = useAppState();
+  const { history, isLoading, error, fetchUserDetails } = useStore();
 
   // Fetch user details and history on component mount
   useEffect(() => {

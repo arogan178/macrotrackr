@@ -3,7 +3,7 @@ import RegisterForm from "../components/auth/RegisterForm";
 import FloatingNotification from "../components/FloatingNotification";
 import LoginForm from "../components/auth/LoginForm";
 import ButtonModeToggle from "../components/auth/ButtonModeToggle";
-import { useAppState } from "../store/app-state";
+import { useStore } from "../store/store";
 
 // Animation style objects
 const styles = {
@@ -39,7 +39,7 @@ export default function AuthPage() {
   const {
     auth: { error },
     clearAuthError,
-  } = useAppState();
+  } = useStore();
 
   const formContainerRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLDivElement>(null);

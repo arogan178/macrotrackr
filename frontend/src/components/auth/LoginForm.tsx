@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CardContainer, TextField } from "../FormComponents";
-import { useAppState } from "../../store/app-state";
+import { useStore } from "../../store/store";
 import LoadingSpinner from "../LoadingSpinner";
 import { CalorieIcon } from "../Icons";
 
@@ -12,7 +12,7 @@ function FormLogin() {
     setAuthEmail,
     setAuthPassword,
     login,
-  } = useAppState();
+  } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
