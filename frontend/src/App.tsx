@@ -9,9 +9,11 @@ import {
 import HomePage from "./pages/HomePage";
 import AuthPage from "./pages/AuthPage";
 import SettingsPage from "./pages/SettingsPage";
+import ReportingPage from "./pages/ReportingPage";
+import NotificationManager from "./components/NotificationManager";
 
 import { useEffect, useState } from "react";
-import "./index.css";
+import "./app.css";
 
 function AuthHandler() {
   const location = useLocation();
@@ -41,6 +43,7 @@ function AuthHandler() {
       <Route path="/home" element={<HomePage />} />
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/settings" element={<SettingsPage />} />
+      <Route path="/reporting" element={<ReportingPage />} />
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/auth"} replace />}
@@ -52,6 +55,8 @@ function AuthHandler() {
 export default function App() {
   return (
     <Router>
+      {/* Include NotificationManager at the top level */}
+      <NotificationManager />
       <AuthHandler />
     </Router>
   );

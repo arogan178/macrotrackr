@@ -1,13 +1,20 @@
 // types.ts
-type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+export type MealType = "breakfast 🍳" | "lunch 🍗" | "dinner 🍽️" | "snack 🧃";
+
+// Constant array of all possible meal types for selection options
+export const MEAL_TYPES: MealType[] = ["breakfast 🍳", "lunch 🍗", "dinner 🍽️", "snack 🧃"];
 
 export interface MacroEntry {
   id: number;
+  created_at: string;
   protein: number;
   carbs: number;
   fats: number;
-  created_at: string;
-  meal_type: MealType;
+  meal_type: MealType;  // Changed from optional to required
+  meal_name: string;    // Added new required field
+  entry_date: string;
+  entry_time: string   // Added new required field
+  foodName?: string;    // Kept for backward compatibility
 }
 
 export interface MacroTotals {
@@ -39,9 +46,12 @@ export interface UserDetails {
   height?: number;
   weight?: number;
   activity_level?: number;
-  gender?: 'male' | 'female';
+  gender?: "male" | "female";
   macro_distribution?: MacroDistributionSettings;
 }
+
+export type Gender = "Male" | "Female" 
+export const GENDER: Gender[] = ["Male", "Female"]
 
 export interface RegistrationStep1 {
   firstName: string;
@@ -57,5 +67,5 @@ export interface RegistrationStep2 {
 }
 
 export interface RegistrationStep3 {
-  activityLevel: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
+  activityLevel: "sedentary" | "light" | "moderate" | "very" | "extra";
 }
