@@ -13,13 +13,15 @@ interface TextFieldProps {
   value: string;
   onChange: (value: string) => void;
   required?: boolean;
-  type?: "text" | "email" | "password" | "date";
+  type?: "text" | "email" | "password";
   error?: string;
   helperText?: string;
   placeholder?: string;
   minLength?: number;
   maxLength?: number;
   textOnly?: boolean;
+  icon?: React.ReactNode;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export function TextField({
@@ -34,6 +36,8 @@ export function TextField({
   minLength = TEXT_FIELD_DEFAULT_MIN_LENGTH,
   maxLength = TEXT_FIELD_DEFAULT_MAX_LENGTH,
   textOnly = false,
+  icon,
+  onKeyDown,
 }: TextFieldProps) {
   const [showPassword, setShowPassword] = useState(false);
 
@@ -61,21 +65,27 @@ export function TextField({
     <div className="space-y-2">
       <label className="block text-sm font-medium text-gray-300">{label}</label>
       <div className="relative">
+        {icon && (
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+            {icon}
+          </div>
+        )}
         <input
           type={inputType}
           value={value}
           onChange={handleChange}
+          onKeyDown={onKeyDown}
           placeholder={placeholder}
           minLength={minLength}
           maxLength={maxLength}
-          className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+          className={`w-full px-4 py-2 bg-gray-700/70 border-2 ${
             error ? "border-red-500/70" : "border-gray-600/70"
           } rounded-lg text-gray-100 
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
                   transition-all duration-200 shadow-sm
                   placeholder:text-gray-500 ${
                     type === "password" ? "pr-10" : ""
-                  }`}
+                  } ${icon ? "pl-10" : ""}`}
           required={required}
         />
         {type === "password" && (
@@ -100,6 +110,49 @@ export function TextField({
       {helperText && !error && (
         <p className="text-xs text-gray-500">{helperText}</p>
       )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+/* Date Input Field Component */
+interface DateFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  error?: string;
+  minDate?: string;
+  maxDate?: string;
+}
+
+export function DateField({
+  label,
+  value,
+  onChange,
+  required = false,
+  error,
+}: DateFieldProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-300">{label}</label>
+      <div className="relative">
+        <input
+          type="date"
+          value={value}
+          onChange={handleChange}
+          className={`w-full px-4 py-2 bg-gray-700/70 border-2 ${
+            error ? "border-red-500/70" : "border-gray-600/70"
+          } rounded-lg text-gray-100 
+                  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
+                  transition-all duration-200 shadow-sm`}
+          required={required}
+        />
+      </div>
       {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
@@ -184,7 +237,7 @@ export function NumberField({
           min={min}
           max={max}
           step={step}
-          className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+          className={`w-full px-4 py-2 bg-gray-700/70 border-2 ${
             error ? "border-red-500/70" : "border-gray-600/70"
           } rounded-lg text-gray-100 
                   focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
@@ -204,6 +257,52 @@ export function NumberField({
         )}
       </div>
       {error && <p className="mt-1 text-sm text-red-400">{error}</p>}
+    </div>
+  );
+}
+
+/* Time Input Field Component */
+interface TimeFieldProps {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  required?: boolean;
+  error?: string;
+  helperText?: string;
+}
+
+export function TimeField({
+  label,
+  value,
+  onChange,
+  required = false,
+  error,
+  helperText,
+}: TimeFieldProps) {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(e.target.value);
+  };
+
+  return (
+    <div className="space-y-2">
+      <label className="block text-sm font-medium text-gray-300">{label}</label>
+      <div className="relative">
+        <input
+          type="time"
+          value={value}
+          onChange={handleChange}
+          className={`w-full px-4 py-2 bg-gray-700/70 border-2 ${
+            error ? "border-red-500/70" : "border-gray-600/70"
+          } rounded-lg text-gray-100 
+                  focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
+                  transition-all duration-200 shadow-sm`}
+          required={required}
+        />
+      </div>
+      {helperText && !error && (
+        <p className="text-xs text-gray-500">{helperText}</p>
+      )}
+      {error && <p className="text-xs text-red-400">{error}</p>}
     </div>
   );
 }
@@ -229,7 +328,6 @@ export function Dropdown({
   value,
   onChange,
   options,
-  placeholder = "Select an option",
   required = false,
   error,
 }: DropdownProps) {
@@ -239,7 +337,7 @@ export function Dropdown({
       <select
         value={value || ""}
         onChange={(e) => onChange(e.target.value)}
-        className={`w-full px-4 py-2.5 bg-gray-700/70 border-2 ${
+        className={`w-full px-4 py-2 bg-gray-700/70 border-2 ${
           error ? "border-red-500/70" : "border-gray-600/70"
         } rounded-lg text-gray-100 
                 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
@@ -248,7 +346,6 @@ export function Dropdown({
                 bg-[length:2rem] bg-[right_0.75rem_center] bg-no-repeat`}
         required={required}
       >
-        <option value="">{placeholder}</option>
         {options.map((option) => (
           <option key={option.value} value={option.value}>
             {option.label}

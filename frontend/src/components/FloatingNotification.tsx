@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { NotificationType } from "../store/slices/ui-slice";
+import { NotificationType } from "../store/uiStore";
 
 export interface FloatingNotificationProps {
   message: string;
@@ -206,7 +206,7 @@ function FloatingNotification({
 
   return (
     <div
-      className={`fixed top-6 left-1/2 -translate-x-1/2 z-50 max-w-md w-11/12 sm:w-96 
+      className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-11/12 sm:w-96 
                  transition-all duration-500 ease-in-out transform
                  ${
                    isVisible && !isLeaving
@@ -234,7 +234,7 @@ function FloatingNotification({
         {/* Close button */}
         <button
           onClick={handleClose}
-          className="p-3 text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/20 self-start"
+          className="p-3 h-full flex items-center justify-center text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/20"
           aria-label="Close notification"
         >
           <svg
@@ -253,7 +253,7 @@ function FloatingNotification({
         </button>
 
         {/* Progress timer bar */}
-        {duration > 0 && (
+        {duration > 0 && autoClose && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 overflow-hidden">
             <div
               ref={progressRef}

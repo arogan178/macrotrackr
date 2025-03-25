@@ -1,13 +1,13 @@
 import { StateCreator } from "zustand";
-import type { ActivityLevel } from "../../utils/activityLevels";
+import type { ActivityLevel } from "../utils/activityLevels";
 import {
   validateRegistrationStep1,
   validateRegistrationStep2,
   validateRegistrationStep3,
-} from "../../utils/validation";
-import { apiService } from "../../utils/api-service";
-import { getErrorMessage } from "../../utils/error-handling";
-import { securelyStoreToken, removeToken } from "../../utils/token-storage";
+} from "../utils/validation";
+import { apiService } from "../utils/api-service";
+import { getErrorMessage } from "../utils/error-handling";
+import { securelyStoreToken, removeToken } from "../utils/token-storage";
 
 interface RegisterData {
   firstName: string;

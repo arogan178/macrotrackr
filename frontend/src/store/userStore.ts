@@ -1,10 +1,10 @@
 import { StateCreator } from "zustand";
-import { apiService } from "../../utils/api-service";
+import { apiService } from "../utils/api-service";
 import { UserDetails, MacroDistributionSettings } from "../../types";
-import { calculateBMR, calculateTDEE } from "../../utils/calculations";
-import { getErrorMessage } from "../../utils/error-handling";
-import { USER_MINIMUM_AGE } from "../../utils/constants";
-import { isOldEnough, validateUserSettings } from "../../utils/validation";
+import { calculateBMR, calculateTDEE } from "../utils/calculations";
+import { getErrorMessage } from "../utils/error-handling";
+import { USER_MINIMUM_AGE } from "../utils/constants";
+import { isOldEnough, validateUserSettings } from "../utils/validation";
 
 export interface UserSlice {
   // Constants
