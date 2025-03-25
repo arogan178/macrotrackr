@@ -1,191 +1,270 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from "react";
+import { NotificationType } from "../store/uiStore";
 
-type NotificationType = 'success' | 'error' | 'warning' | 'info';
-
-interface NotificationContent {
+export interface FloatingNotificationProps {
   message: string;
   type: NotificationType;
-}
-
-interface FloatingNotificationProps {
-  error?: string;
-  success?: string;
-  warning?: string;
-  info?: string;
-  notifications?: NotificationContent[];
-  onClear?: () => void;
-  position?: 'top' | 'bottom';
-  duration?: number;
-  hideAutomatically?: boolean;
-}
-
-export default function FloatingNotification({ 
-  error, 
-  success,
-  warning,
-  info,
-  notifications,
-  onClear,
-  position = 'top',
-  duration = 3000,
-  hideAutomatically = true
-}: FloatingNotificationProps) {
-  const [internalNotifications, setInternalNotifications] = useState<NotificationContent[]>([]);
-  const [isLeaving, setIsLeaving] = useState(false);
-
-  // Process incoming props into unified notifications array
-  useEffect(() => {
-    const newNotifications: NotificationContent[] = [];
-    
-    if (success) newNotifications.push({ message: success, type: 'success' });
-    if (error) newNotifications.push({ message: error, type: 'error' });
-    if (warning) newNotifications.push({ message: warning, type: 'warning' });
-    if (info) newNotifications.push({ message: info, type: 'info' });
-    
-    // Add explicitly provided notifications array if available
-    if (notifications && notifications.length > 0) {
-      newNotifications.push(...notifications);
-    }
-    
-    if (newNotifications.length > 0) {
-      setIsLeaving(false);
-      setInternalNotifications(newNotifications);
-    }
-  }, [success, error, warning, info, notifications]);
-
-  // Handle auto-clear with animations
-  useEffect(() => {
-    if (internalNotifications.length > 0 && hideAutomatically) {
-      // Start fade out animation before clearing
-      const fadeOutTimer = setTimeout(() => {
-        setIsLeaving(true);
-      }, duration - 300); // Start fade out 300ms before removal
-
-      const clearTimer = setTimeout(() => {
-        if (onClear) {
-          onClear();
-        }
-        setInternalNotifications([]);
-        setIsLeaving(false);
-      }, duration);
-
-      return () => {
-        clearTimeout(fadeOutTimer);
-        clearTimeout(clearTimer);
-      };
-    }
-  }, [internalNotifications, onClear, duration, hideAutomatically]);
-
-  const clearNotifications = () => {
-    setIsLeaving(true);
-    // Wait for fade out animation before clearing
-    setTimeout(() => {
-      if (onClear) {
-        onClear();
-      }
-      setInternalNotifications([]);
-      setIsLeaving(false);
-    }, 300);
-  };
-
-  if (internalNotifications.length === 0) return null;
-
-  const positionClass = position === 'top' ? 'top-24' : 'bottom-8';
-
-  return (
-    <div className={`fixed ${positionClass} left-1/2 -translate-x-1/2 w-full max-w-md z-50 px-4 space-y-2 pointer-events-auto`}>
-      {internalNotifications.map((notification, index) => (
-        <NotificationItem 
-          key={`${notification.type}-${index}`} 
-          notification={notification} 
-          onClose={clearNotifications}
-          isLeaving={isLeaving}
-        />
-      ))}
-    </div>
-  );
-}
-
-interface NotificationItemProps {
-  notification: NotificationContent;
   onClose: () => void;
-  isLeaving: boolean;
+  duration?: number;
+  autoClose?: boolean;
 }
 
-function NotificationItem({ notification, onClose, isLeaving }: NotificationItemProps) {
-  const { type, message } = notification;
+function FloatingNotification({
+  message,
+  type = "info",
+  onClose,
+  duration = 5000,
+  autoClose = true,
+}: FloatingNotificationProps) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLeaving, setIsLeaving] = useState(false);
+  const progressRef = useRef<HTMLDivElement>(null);
+  const timerRef = useRef<number | null>(null);
+  const animationStartedRef = useRef(false);
 
-  const notificationStyles = {
+  // Memoize handleClose to prevent unnecessary effect re-runs
+  const handleClose = useCallback(() => {
+    // Clear any pending timers to avoid duplicate closes
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
+    }
+
+    setIsLeaving(true);
+
+    // Only trigger the actual onClose after fade-out animation completes
+    setTimeout(() => {
+      onClose();
+    }, 500); // Animation duration for exit
+  }, [onClose]);
+
+  // Handle mount animation
+  useEffect(() => {
+    // Small delay to ensure mount animation works
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 10);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Apply CSS animation to the progress bar and synchronize with auto-close
+  useEffect(() => {
+    // Only proceed if the notification is visible, has a duration, and animation hasn't started
+    if (
+      !isVisible ||
+      duration <= 0 ||
+      !progressRef.current ||
+      animationStartedRef.current ||
+      !autoClose
+    )
+      return;
+
+    animationStartedRef.current = true;
+    const progressEl = progressRef.current;
+
+    // Set up the animation programmatically for better control
+    progressEl.style.transition = `width ${duration}ms linear`;
+
+    // Ensure we start at full width
+    progressEl.style.width = "100%";
+
+    // Force a reflow to make sure the initial state is rendered
+    void progressEl.offsetWidth;
+
+    // Small delay to ensure proper render sequence
+    const startAnimation = () => {
+      if (progressEl) {
+        progressEl.style.width = "0%";
+
+        // Set up the auto-close timer to match exactly with animation end
+        timerRef.current = window.setTimeout(() => {
+          if (!isLeaving) {
+            handleClose();
+          }
+        }, duration);
+      }
+    };
+
+    const animationTimer = setTimeout(startAnimation, 20);
+
+    return () => {
+      clearTimeout(animationTimer);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, [isVisible, duration, isLeaving, handleClose, autoClose]); // Added autoClose to dependencies
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
+      }
+    };
+  }, []);
+
+  // Icon components for better readability
+  const SuccessIcon = () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M5 13l4 4L19 7"
+      />
+    </svg>
+  );
+
+  const ErrorIcon = () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M6 18L18 6M6 6l12 12"
+      />
+    </svg>
+  );
+
+  const WarningIcon = () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+      />
+    </svg>
+  );
+
+  const InfoIcon = () => (
+    <svg
+      className="w-5 h-5"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+    >
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth={2}
+        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+      />
+    </svg>
+  );
+
+  // Style mappings for notification types
+  const styles = {
     success: {
-      bg: "bg-green-900/90",
-      border: "border-green-800",
-      text: "text-green-400",
-      icon: (
-        <svg className="h-5 w-5 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
-        </svg>
-      )
+      bg: "bg-gradient-to-r from-green-900/90 to-green-800/90",
+      border: "border-green-500/30",
+      icon: "text-green-400",
+      progress: "bg-green-500/50",
+      component: <SuccessIcon />,
     },
     error: {
-      bg: "bg-red-900/90",
-      border: "border-red-800",
-      text: "text-red-400",
-      icon: (
-        <svg className="h-5 w-5 mr-2 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
+      bg: "bg-gradient-to-r from-red-900/90 to-red-800/90",
+      border: "border-red-500/30",
+      icon: "text-red-400",
+      progress: "bg-red-500/50",
+      component: <ErrorIcon />,
     },
     warning: {
-      bg: "bg-amber-900/90",
-      border: "border-amber-800",
-      text: "text-amber-400",
-      icon: (
-        <svg className="h-5 w-5 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-        </svg>
-      )
+      bg: "bg-gradient-to-r from-yellow-700/90 to-amber-700/90",
+      border: "border-yellow-500/30",
+      icon: "text-yellow-400",
+      progress: "bg-yellow-500/50",
+      component: <WarningIcon />,
     },
     info: {
-      bg: "bg-blue-900/90",
-      border: "border-blue-800",
-      text: "text-blue-400",
-      icon: (
-        <svg className="h-5 w-5 mr-2 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      )
-    }
+      bg: "bg-gradient-to-r from-blue-900/90 to-blue-800/90",
+      border: "border-blue-500/30",
+      icon: "text-blue-400",
+      progress: "bg-blue-500/50",
+      component: <InfoIcon />,
+    },
   };
 
-  const style = notificationStyles[type];
+  const { bg, border, icon, progress, component } = styles[type];
 
   return (
-    <div 
-      className={`${style.text} ${style.bg} p-4 rounded-lg border ${style.border} shadow-xl
-                  transition-all duration-300 ease-in-out transform
-                  ${isLeaving 
-                    ? 'opacity-0 translate-y-2 scale-95' 
-                    : 'opacity-100 translate-y-0 scale-100'
-                  }
-                  flex justify-between items-center`}
+    <div
+      className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-11/12 sm:w-96 
+                 transition-all duration-500 ease-in-out transform
+                 ${
+                   isVisible && !isLeaving
+                     ? "opacity-100 translate-y-0"
+                     : "opacity-0 -translate-y-4"
+                 }
+                 ${isLeaving ? "opacity-0 -translate-y-4" : ""}`}
+      role="alert"
+      aria-live="assertive"
     >
-      <div className="flex items-center">
-        {style.icon}
-        {message}
-      </div>
-      <button 
-        onClick={onClose}
-        className="ml-3 text-gray-400 hover:text-white transition-colors"
-        aria-label="Close notification"
+      <div
+        className={`flex items-center rounded-lg shadow-xl backdrop-blur-sm 
+                     ${bg} border ${border} overflow-hidden`}
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
+        {/* Icon section */}
+        <div className={`${icon} p-4 flex items-center justify-center`}>
+          {component}
+        </div>
+
+        {/* Content area */}
+        <div className="py-3 px-4 flex-1">
+          <p className="text-white font-medium text-sm">{message}</p>
+        </div>
+
+        {/* Close button */}
+        <button
+          onClick={handleClose}
+          className="p-3 h-full flex items-center justify-center text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/20"
+          aria-label="Close notification"
+        >
+          <svg
+            className="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        </button>
+
+        {/* Progress timer bar */}
+        {duration > 0 && autoClose && (
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 overflow-hidden">
+            <div
+              ref={progressRef}
+              className={`h-full ${progress}`}
+              style={{ width: "100%" }}
+            ></div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+export default FloatingNotification;
