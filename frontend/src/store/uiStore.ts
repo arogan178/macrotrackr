@@ -4,7 +4,7 @@ import {
   DEFAULT_NOTIFICATION_AUTO_CLOSE,
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
-} from "../../utils/constants";
+} from "../utils/constants";
 
 export type NotificationType = "success" | "error" | "info" | "warning";
 

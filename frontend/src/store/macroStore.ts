@@ -1,7 +1,7 @@
 import { StateCreator } from "zustand";
-import { apiService } from "../../utils/api-service";
+import { apiService } from "../utils/api-service";
 import { MacroEntry, MacroTotals } from "../../types";
-import { getErrorMessage } from "../../utils/error-handling";
+import { getErrorMessage } from "../utils/error-handling";
 
 export interface MacrosSlice {
   // State
