@@ -1,13 +1,30 @@
 import { useState, useCallback, memo } from "react";
-import { NumberField, CardContainer } from "./FormComponents";
+import {
+  NumberField,
+  CardContainer,
+  TimeField,
+  Dropdown,
+  DateField,
+  TextField,
+} from "./FormComponents";
 import CalorieSearch from "./CalorieSearchForm";
 import { CheckMarkIcon } from "./Icons";
+import { MealType, MEAL_TYPES } from "../store/types";
+
+// Helper function to capitalize first letter of a string
+function capitalizeFirstLetter(string: string): string {
+  return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
 interface AddEntryProps {
   onSubmit: (entry: {
     protein: number;
     carbs: number;
     fats: number;
+    mealType: MealType;
+    mealName: string;
+    date: string;
+    time: string;
   }) => Promise<void>;
   isSaving: boolean;
 }
@@ -17,6 +34,23 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [carbs, setCarbs] = useState<number | undefined>(undefined);
   const [fats, setFats] = useState<number | undefined>(undefined);
   const [searchResult, setSearchResult] = useState<string | null>(null);
+  // Update meal type state to use MealType
+  const [mealType, setMealType] = useState<MealType>("breakfast 🍳");
+  const [mealName, setMealName] = useState<string>("");
+
+  // Default date is today
+  const [date, setDate] = useState<string>(
+    new Date().toISOString().split("T")[0]
+  );
+
+  // Default time is current time
+  const [time, setTime] = useState<string>(
+    new Date().toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })
+  );
 
   // Calculate calories dynamically and round to whole numbers
   const calories = Math.round(
@@ -30,16 +64,18 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const anyFieldIsUndefined =
     protein === undefined || carbs === undefined || fats === undefined;
 
-  // Form is valid if no field is undefined and not all fields are 0
-  const isFormValid = !anyFieldIsUndefined && !allFieldsAreZero;
+  // Form is valid if no field is undefined, not all fields are 0, and meal name is provided
+  const isFormValid =
+    !anyFieldIsUndefined && !allFieldsAreZero && mealName.trim() !== "";
 
   // Handle result from CalorieSearch
   const handleSearchResult = useCallback(
-    ({ protein: p, carbs: c, fats: f }) => {
+    ({ protein: p, carbs: c, fats: f, name }) => {
       setProtein(parseFloat(p));
       setCarbs(parseFloat(c));
       setFats(parseFloat(f));
-      // setSearchResult(`Found: ${p}g protein, ${c}g carbs, ${f}g fat`);
+      setMealName(name);
+      setSearchResult(`Found: ${name} - ${p}g protein, ${c}g carbs, ${f}g fat`);
     },
     []
   );
@@ -48,25 +84,42 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      // Validation: check for undefined values or all zeros
-      if (anyFieldIsUndefined || allFieldsAreZero) {
+      // Validation: check for undefined values, all zeros, or missing meal name
+      if (anyFieldIsUndefined || allFieldsAreZero || !mealName.trim()) {
         return; // Invalid submission
       }
 
-      // At this point we know all fields have valid numbers (including potentially some zeros)
+      // At this point we know all fields have valid values
       await onSubmit({
         protein: protein as number,
         carbs: carbs as number,
         fats: fats as number,
+        mealType,
+        mealName,
+        date,
+        time, // Include time in submission
       });
 
       // Reset form after submission
       setProtein(undefined);
       setCarbs(undefined);
       setFats(undefined);
-      // setSearchResult(null);
+      setMealName("");
+      setSearchResult(null);
+      // We don't reset mealType, date and time as they're likely to be reused
     },
-    [protein, carbs, fats, onSubmit, anyFieldIsUndefined, allFieldsAreZero]
+    [
+      protein,
+      carbs,
+      fats,
+      mealType,
+      mealName,
+      date,
+      time,
+      onSubmit,
+      anyFieldIsUndefined,
+      allFieldsAreZero,
+    ]
   );
 
   return (
@@ -89,6 +142,47 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
         </div>
 
         <form onSubmit={handleSubmit}>
+          {/* Meal name field */}
+          <div className="mb-4">
+            <TextField
+              label="Meal Name"
+              value={mealName}
+              onChange={(value) => setMealName(value)}
+              placeholder="e.g. Chicken Salad"
+              required
+            />
+          </div>
+          {/* Date and meal type row */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div>
+              <DateField
+                label="Date"
+                value={date}
+                onChange={setDate}
+                required
+              />
+            </div>
+            <div>
+              <TimeField
+                label="Time"
+                value={time}
+                onChange={setTime}
+                required
+              />
+            </div>
+            <div>
+              <Dropdown
+                label="Meal Type"
+                options={MEAL_TYPES.map((type) => ({
+                  value: type,
+                  label: capitalizeFirstLetter(type),
+                }))}
+                value={mealType}
+                onChange={(value) => setMealType(value as MealType)}
+              />
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <NumberField
               label="Protein"
@@ -130,6 +224,12 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             {allFieldsAreZero && (
               <div className="text-sm text-red-400 mr-4">
                 At least one macro value must be greater than 0
+              </div>
+            )}
+
+            {!mealName.trim() && protein !== undefined && (
+              <div className="text-sm text-red-400 mr-4">
+                Please provide a meal name
               </div>
             )}
 

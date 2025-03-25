@@ -37,7 +37,7 @@ export default function AuthPage() {
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [visibleMode, setVisibleMode] = useState<"login" | "register">("login");
   const {
-    auth: { error },
+    authError, // Using authError instead of auth.error
     clearAuthError,
   } = useStore();
 
@@ -103,7 +103,7 @@ export default function AuthPage() {
   }, [clearAuthError, isTransitioning, mode]);
 
   return (
-    <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-black">
+    <div className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       {/* Background decorative elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
       <div className="absolute inset-0 overflow-hidden">
@@ -115,9 +115,9 @@ export default function AuthPage() {
 
       <div className="w-full max-w-md relative z-10 px-4">
         {/* Error notification */}
-        {error && (
+        {authError && ( // Using authError instead of error
           <FloatingNotification
-            message={error}
+            message={authError}
             type="error"
             onClose={clearAuthError}
             duration={5000}

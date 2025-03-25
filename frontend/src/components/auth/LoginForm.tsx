@@ -1,18 +1,14 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CardContainer, TextField } from "../FormComponents";
-import { useStore } from "../../store/store";
 import LoadingSpinner from "../LoadingSpinner";
 import { CalorieIcon } from "../Icons";
+import { useStore } from "../../store/store";
 
 function FormLogin() {
   const navigate = useNavigate();
-  const {
-    auth: { email, password, isLoading },
-    setAuthEmail,
-    setAuthPassword,
-    login,
-  } = useStore();
+  const { email, password, isLoading, setAuthEmail, setAuthPassword, login } =
+    useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {

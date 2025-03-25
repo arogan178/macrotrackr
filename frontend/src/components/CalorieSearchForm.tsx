@@ -5,9 +5,15 @@ import {
   LoadingSpinnerIcon,
   WarningIcon,
 } from "./Icons";
+import { TextField } from "./FormComponents";
 
 type CalorieSearchProps = {
-  onResult: (macros: { protein: string; carbs: string; fats: string }) => void;
+  onResult: (macros: {
+    protein: string;
+    carbs: string;
+    fats: string;
+    name: string;
+  }) => void;
 };
 
 export default function CalorieSearch({ onResult }: CalorieSearchProps) {
@@ -15,6 +21,11 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [lastQuery, setLastQuery] = useState("");
+
+  const handleQueryChange = (value: string) => {
+    if (value.length === 0) setQuery("");
+    else setQuery(value.charAt(0).toUpperCase() + value.slice(1));
+  };
 
   const handleSearch = async () => {
     if (!query) return;
@@ -35,6 +46,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           protein: String(first.protein_g),
           carbs: String(first.carbohydrates_total_g),
           fats: String(first.fat_total_g),
+          name: query, // Use the query as the name
         });
         setLastQuery(query);
       } else {
@@ -48,10 +60,6 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     }
   };
 
-  const handleClearMessages = () => {
-    setError("");
-  };
-
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -60,57 +68,49 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
   };
 
   return (
-    <div className="bg-gradient-to-r from-indigo-900/20 to-blue-900/20 rounded-xl border border-indigo-500/20">
-      <div className="p-5 flex flex-col gap-4">
-        <div className="flex flex-col sm:flex-row gap-4 mt-2">
-          <div className="relative flex-1">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <SearchIcon className="w-5 h-5 text-gray-500 group-focus-within:text-indigo-400 transition-colors" />
-            </div>
-            <div className="group w-full">
-              <input
-                type="text"
-                className="w-full pl-10 px-4 py-3 bg-gray-700/70 border-2 border-gray-600/50 rounded-xl text-gray-100 
-                         focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none
-                         transition-all duration-200 shadow-sm group-hover:border-gray-500/50"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                onKeyDown={handleKeyDown}
-                placeholder="e.g. 1 apple, 100g chicken breast"
-              />
-            </div>
-          </div>
+    <div className="flex flex-col gap-3">
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <TextField
+            label="Search for food"
+            value={query}
+            onChange={handleQueryChange}
+            onKeyDown={handleKeyDown}
+            placeholder="e.g. 1 apple, 100g chicken breast"
+            icon={<SearchIcon className="w-5 h-5" />}
+            maxLength={50}
+          />
+        </div>
+        <div className="flex items-end">
           <button
             onClick={handleSearch}
             disabled={loading || !query}
-            className="px-6 py-3 rounded-xl font-medium text-white whitespace-nowrap
-                     bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
-                     disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-[1.02]
-                     shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2
-                     focus:ring-2 focus:ring-indigo-500/50 focus:outline-none relative
-                     before:absolute before:inset-0 before:bg-black/10 before:rounded-xl"
+            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800/50 
+                        disabled:text-gray-400 rounded-lg shadow-md transition-colors
+                        text-white font-medium flex items-center min-w-[160px] justify-center"
+            type="button"
           >
             {loading ? (
               <span className="flex items-center justify-center">
-                <LoadingSpinnerIcon className="w-4 h-4 -ml-1 mr-2 animate-spin" />
-                Searching...
+                <LoadingSpinnerIcon className="mr-2 animate-spin" />
+                Searching
               </span>
             ) : (
-              <>
+              <span className="flex items-center justify-center">
                 <span>Search</span>
-                <ArrowRightIcon className="w-4 h-4" />
-              </>
+                <ArrowRightIcon className="w-4 h-4 ml-1" />
+              </span>
             )}
           </button>
         </div>
-
-        {error && (
-          <div className="mt-2 text-red-400 text-sm flex items-center gap-2">
-            <WarningIcon className="w-4 h-4" />
-            {error}
-          </div>
-        )}
       </div>
+
+      {error && (
+        <div className="text-red-400 text-sm flex items-center gap-2">
+          <WarningIcon className="w-4 h-4" />
+          {error}
+        </div>
+      )}
     </div>
   );
 }

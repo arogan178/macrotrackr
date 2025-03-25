@@ -7,7 +7,7 @@ import { hash, verify } from "@node-rs/bcrypt";
 
 const db = new Database("macro_tracker.db");
 
-// Initialize database
+// Initialize database with basic tables
 db.exec(`
   CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -58,6 +58,45 @@ db.exec(`
   );
 `);
 
+// Check if meal_type column exists in macro_entries table
+const mealTypeExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'meal_type');
+if (!mealTypeExists) {
+  console.log("Adding meal_type column to macro_entries table");
+  db.exec("ALTER TABLE macro_entries ADD COLUMN meal_type TEXT DEFAULT 'breakfast'");
+}
+
+// Check if meal_name column exists in macro_entries table
+const mealNameExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'meal_name');
+if (!mealNameExists) {
+  console.log("Adding meal_name column to macro_entries table");
+  db.exec("ALTER TABLE macro_entries ADD COLUMN meal_name TEXT DEFAULT ''");
+}
+
+// Check if entry_date column exists in macro_entries table
+const entryDateExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'entry_date');
+if (!entryDateExists) {
+  console.log("Adding entry_date column to macro_entries table");
+  // Add column without default value
+  db.exec("ALTER TABLE macro_entries ADD COLUMN entry_date DATE");
+  
+  // Update existing rows to use the date part of created_at
+  console.log("Updating existing entries with dates from created_at");
+  db.exec("UPDATE macro_entries SET entry_date = DATE(created_at)");
+}
+
+// Check if entry_time column exists in macro_entries table
+const entryTimeExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'entry_time');
+if (!entryTimeExists) {
+  console.log("Adding entry_time column to macro_entries table");
+  db.exec("ALTER TABLE macro_entries ADD COLUMN entry_time TEXT");
+  
+  // Set default times for existing entries
+  console.log("Updating existing entries with default time");
+  db.exec("UPDATE macro_entries SET entry_time = '12:00' WHERE entry_time IS NULL");
+}
+
+// Create indexes for performance
+db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)");
 db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
 
 const app = new Elysia()
@@ -341,7 +380,7 @@ const app = new Elysia()
           COALESCE(SUM(fats), 0) AS fats
         FROM macro_entries
         WHERE user_id = ?
-        AND DATE(created_at) = DATE('now', 'localtime')`
+        AND DATE(entry_date) = DATE('now', 'localtime')`
       )
       .get(userId) as { protein: number; carbs: number; fats: number };
 
@@ -352,23 +391,42 @@ const app = new Elysia()
   .get("/api/macros/history/:unused?", ({ userId }) => {
     return db
       .prepare(
-        `SELECT id, protein, carbs, fats, created_at 
-          FROM macro_entries 
-          WHERE user_id = ? 
-          ORDER BY created_at DESC`
+        `SELECT 
+          id, 
+          protein, 
+          carbs, 
+          fats, 
+          meal_type, 
+          meal_name, 
+          entry_date,
+          entry_time, 
+          created_at 
+        FROM macro_entries 
+        WHERE user_id = ? 
+        ORDER BY entry_date DESC, entry_time DESC, created_at DESC`
       )
       .all(userId);
   })
   .post("/api/macro_entry", ({ userId, body }) => {
-    const { protein, carbs, fats } = body as Record<string, number>;
+    const { protein, carbs, fats, mealType, mealName, date, time } = body as {
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: string;
+      mealName: string;
+      date: string;
+      time: string; // Added time parameter
+    };
 
     if ([protein, carbs, fats].some((val) => val < 0)) {
       throw new Error("Invalid macro values");
     }
 
     db.prepare(
-      "INSERT INTO macro_entries (protein, carbs, fats, user_id) VALUES (?, ?, ?, ?)"
-    ).run(protein, carbs, fats, userId);
+      `INSERT INTO macro_entries 
+        (protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, user_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    ).run(protein, carbs, fats, mealType, mealName, date, time, userId);
 
     return { success: true };
   })
@@ -382,15 +440,44 @@ const app = new Elysia()
   })
   .put("/api/macro_entry/:id", ({ params, userId, body }) => {
     const id = Number(params.id);
-    const { protein, carbs, fats } = body as Record<string, number>;
+    const { protein, carbs, fats, mealType, mealName, date } = body as {
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType?: string;
+      mealName?: string;
+      date?: string;
+    };
 
     if ([protein, carbs, fats].some((val) => val < 0)) {
       throw new Error("Invalid macro values");
     }
 
+    const updateFields = ["protein = ?", "carbs = ?", "fats = ?"];
+    const queryParams = [protein, carbs, fats]; // Changed variable name from params to queryParams
+
+    if (mealType) {
+      updateFields.push("meal_type = ?");
+      queryParams.push(mealType);
+    }
+    
+    if (mealName) {
+      updateFields.push("meal_name = ?");
+      queryParams.push(mealName);
+    }
+    
+    if (date) {
+      updateFields.push("entry_date = ?");
+      queryParams.push(date);
+    }
+
+    queryParams.push(id, userId); // Using queryParams instead of params
+
     db.prepare(
-      "UPDATE macro_entries SET protein = ?, carbs = ?, fats = ? WHERE id = ? AND user_id = ?"
-    ).run(protein, carbs, fats, id, userId);
+      `UPDATE macro_entries 
+       SET ${updateFields.join(", ")} 
+       WHERE id = ? AND user_id = ?`
+    ).run(...queryParams); // Using queryParams instead of params
 
     return { success: true };
   })
