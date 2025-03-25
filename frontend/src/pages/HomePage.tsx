@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import EntryTable from "../components/EntryTable";
+import EntryHistory from "../components/EntryHistory";
 import EditModal from "../components/EditModal";
 import { MacroEntry, MacroTotals, UserDetails } from "../types";
 import Navbar from "../components/Navbar";
 import { calculateBMR, calculateTDEE } from "../utils/calculations";
-import MacroSummary from "../components/MacroSummary";
+import DailySummary from "../components/DailySummary";
 import AddEntry from "../components/AddEntry";
 
 export default function Overview() {
@@ -296,7 +296,10 @@ export default function Overview() {
 
                 {/* Today's Summary - Right side */}
                 <div className="lg:col-span-2 flex flex-col h-full">
-                  <MacroSummary totals={totals} />
+                  <DailySummary
+                    totals={totals} 
+                    macroDistribution={user?.macro_distribution}
+                  />
                 </div>
               </div>
             </div>
@@ -305,8 +308,7 @@ export default function Overview() {
           {/* History Section */}
           <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden">
             <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-200 mb-4">Nutrition History</h2>
-              <EntryTable
+              <EntryHistory
                 history={history}
                 deleteEntry={deleteEntry}
                 onEdit={setEditingEntry}
