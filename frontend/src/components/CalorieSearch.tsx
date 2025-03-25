@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FloatingNotification from "./FloatingNotification";
 
 type CalorieSearchProps = {
   onResult: (macros: { protein: string; carbs: string; fats: string }) => void;
@@ -42,6 +43,10 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     }
   };
 
+  const handleClearMessages = () => {
+    setError("");
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -58,11 +63,6 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           </svg>
           <h3 className="text-lg font-semibold text-gray-200">Food Search</h3>
         </div>
-        
-        <p className="text-gray-400 text-sm">
-          Enter food items to automatically calculate their macronutrients
-        </p>
-        
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="relative flex-1">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -129,6 +129,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             Loaded nutrition data for "{lastQuery}"
           </div>
         )}
+        <FloatingNotification error={error} onClear={handleClearMessages} />
       </div>
     </div>
   );

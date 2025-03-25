@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FloatingNotification from "./FloatingNotification";
 
 type AuthMode = "login" | "register";
 type AuthFormProps = {
@@ -25,12 +26,16 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
     }
   };
 
+  const handleClearMessages = () => {
+    setError("");
+  };
+
   return (
     <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold mb-6 text-center">
         {mode === "login" ? "Login" : "Register"}
       </h2>
-      {error && <div className="mb-4 text-red-600">{error}</div>}
+      <FloatingNotification error={error} onClear={handleClearMessages} />
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block mb-2">Email</label>
