@@ -23,6 +23,13 @@ export interface MacroInputs {
   fats: string;
 }
 
+export interface MacroDistributionSettings {
+  proteinPercentage: number;
+  carbsPercentage: number;
+  fatsPercentage: number;
+  locked_macros?: string[];
+}
+
 export interface UserDetails {
   id: number;
   first_name: string;
@@ -33,6 +40,7 @@ export interface UserDetails {
   weight?: number;
   activity_level?: number;
   gender?: 'male' | 'female';
+  macro_distribution?: MacroDistributionSettings;
 }
 
 export interface RegistrationStep1 {

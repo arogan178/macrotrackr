@@ -39,7 +39,7 @@ export default function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
           } />
         </div>
 
-        <form className="mt-6 flex-1 flex flex-col justify-end" onSubmit={handleSubmit}>
+        <form className="mt-6 flex-1 flex flex-col justify-end pb-5" onSubmit={handleSubmit}>
           <div className="grid grid-cols-4 gap-6">
             {/* Protein Input */}
             <div className="space-y-2 group">
