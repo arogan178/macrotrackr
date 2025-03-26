@@ -1,5 +1,5 @@
 import { useState } from "react";
-import FloatingNotification from "@/components/FloatingNotification";
+import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 
 type AuthMode = "login" | "register";
 type AuthFormProps = {

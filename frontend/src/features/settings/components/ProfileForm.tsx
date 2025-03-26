@@ -1,116 +1,101 @@
-import { memo } from "react";
-import { UserDetails } from "@/store/types";
-import { TextField, NumberField, Dropdown } from "@/components/FormComponents";
-import { getActivityLevelOptions } from "@/utils/activityLevels";
+import {
+  TextField,
+  NumberField,
+  Dropdown,
+  DateField,
+} from "@/components/form/index";
+import { UserSettings, Gender } from "../types";
+import { GENDER_OPTIONS, ACTIVITY_LEVELS } from "../constants";
 
 interface ProfileFormProps {
-  settings: UserDetails;
-  updateSetting: <K extends keyof UserDetails>(
+  settings: UserSettings;
+  updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserDetails[K]
+    value: UserSettings[K]
   ) => void;
   formErrors: Record<string, string>;
 }
 
-function ProfileForm({
+export default function ProfileForm({
   settings,
   updateSetting,
   formErrors,
 }: ProfileFormProps) {
-  const getFieldError = (field: string) => formErrors[field] || "";
-
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <div className="space-y-6">
-        <TextField
-          label="First Name"
-          value={settings.first_name}
-          onChange={(value) => updateSetting("first_name", value)}
-          required
-          error={getFieldError("first_name")}
-          placeholder="John"
-        />
+      <TextField
+        label="First Name"
+        value={settings.first_name || ""}
+        onChange={(value) => updateSetting("first_name", value)}
+        error={formErrors.first_name}
+        required
+      />
 
-        <TextField
-          label="Last Name"
-          value={settings.last_name}
-          onChange={(value) => updateSetting("last_name", value)}
-          required
-          error={getFieldError("last_name")}
-          placeholder="Doe"
-        />
+      <TextField
+        label="Last Name"
+        value={settings.last_name || ""}
+        onChange={(value) => updateSetting("last_name", value)}
+        error={formErrors.last_name}
+        required
+      />
 
-        <TextField
-          label="Email Address"
-          type="email"
-          value={settings.email}
-          onChange={(value) => updateSetting("email", value)}
-          required
-          error={getFieldError("email")}
-          placeholder="your@email.com"
-        />
+      <TextField
+        label="Email"
+        value={settings.email || ""}
+        type="email"
+        onChange={(value) => updateSetting("email", value)}
+        error={formErrors.email}
+        required
+      />
 
-        <TextField
-          label="Date of Birth"
-          type="date"
-          value={settings.date_of_birth || ""}
-          onChange={(value) => updateSetting("date_of_birth", value)}
-          required
-          error={getFieldError("date_of_birth")}
-        />
-      </div>
+      <DateField
+        label="Date of Birth"
+        value={settings.date_of_birth || ""}
+        onChange={(value) => updateSetting("date_of_birth", value)}
+        error={formErrors.date_of_birth}
+        required
+      />
 
-      <div className="space-y-6">
-        <NumberField
-          label="Height (cm)"
-          value={settings.height}
-          onChange={(value) => updateSetting("height", value)}
-          min={150}
-          max={250}
-          step={1}
-          unit="cm"
-          error={getFieldError("height")}
-        />
+      <NumberField
+        label="Height (cm)"
+        value={settings.height}
+        onChange={(value) => updateSetting("height", value || 0)}
+        error={formErrors.height}
+        unit="cm"
+        required
+      />
 
-        <NumberField
-          label="Weight (kg)"
-          value={settings.weight}
-          onChange={(value) => updateSetting("weight", value)}
-          min={30}
-          max={300}
-          step={0.1}
-          unit="kg"
-          error={getFieldError("weight")}
-        />
+      <NumberField
+        label="Weight (kg)"
+        value={settings.weight}
+        onChange={(value) => updateSetting("weight", value || 0)}
+        error={formErrors.weight}
+        unit="kg"
+        required
+      />
 
-        <Dropdown
-          label="Gender"
-          value={settings.gender || "male"}
-          onChange={(value) =>
-            updateSetting("gender", value as "male" | "female")
-          }
-          options={[
-            { value: "male", label: "Male" },
-            { value: "female", label: "Female" },
-          ]}
-          error={getFieldError("gender")}
-          required
-        />
+      <Dropdown
+        label="Gender"
+        value={settings.gender || ""}
+        onChange={(value) => updateSetting("gender", value as Gender)}
+        options={GENDER_OPTIONS}
+        error={formErrors.gender}
+        required
+      />
 
-        <Dropdown
-          label="Activity Level"
-          value={settings.activity_level || 1}
-          onChange={(value) => updateSetting("activity_level", Number(value))}
-          options={getActivityLevelOptions().map((level, index) => ({
-            value: index + 1,
-            label: level.label,
-          }))}
-          error={getFieldError("activity_level")}
-          required
-        />
-      </div>
+      <Dropdown
+        label="Activity Level"
+        value={settings.activity_level || ""}
+        onChange={(value) => updateSetting("activity_level", value)}
+        options={Object.entries(ACTIVITY_LEVELS).map(
+          ([, { label, value }]) => ({
+            value,
+            label,
+          })
+        )}
+        error={formErrors.activity_level}
+        required
+      />
     </div>
   );
 }
-
-export default memo(ProfileForm);

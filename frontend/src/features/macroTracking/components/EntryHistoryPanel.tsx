@@ -7,8 +7,8 @@ import {
   LoadingSpinnerIcon,
   PlusCircleIcon,
 } from "@/components/Icons";
-import ConfirmationModal from "@/components/ConfirmationModal";
-import { MacroEntry } from "../types";
+import Modal from "@/components/Modal";
+import { MacroEntry } from "@/store/types";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
@@ -383,8 +383,13 @@ export default function EntryHistory({
       )}
 
       {/* Add ConfirmationModal component */}
-      <ConfirmationModal
+      <Modal
+        variant="confirmation"
         isOpen={isDeleteModalOpen}
+        onClose={() => {
+          setIsDeleteModalOpen(false);
+          setDateToDelete(null);
+        }}
         title="Delete Entries"
         message={`Are you sure you want to delete all entries for ${
           dateToDelete ? formatDate(dateToDelete) : ""
@@ -392,10 +397,6 @@ export default function EntryHistory({
         confirmLabel="Delete All"
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
-        onCancel={() => {
-          setIsDeleteModalOpen(false);
-          setDateToDelete(null);
-        }}
         isDanger={true}
       />
     </div>

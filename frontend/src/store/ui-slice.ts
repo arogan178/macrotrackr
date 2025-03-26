@@ -4,9 +4,8 @@ import {
   DEFAULT_NOTIFICATION_AUTO_CLOSE,
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
-} from "../utils/constants";
-
-export type NotificationType = "success" | "error" | "info" | "warning";
+} from "@/features/notifications/constants";
+import { NotificationType } from "@/features/notifications/types";
 
 export interface Notification {
   id: string;
@@ -35,16 +34,16 @@ export interface UISlice {
   clearAllNotifications: () => void;
 }
 
-export const createUISlice: StateCreator<UISlice & any> = (set, get) => ({
+export const createUISlice: StateCreator<UISlice> = (set, get) => ({
   // Initial state
   notifications: [],
   activeTimeouts: {},
 
   // Actions
   showNotification: (
-    message,
+    message: string,
     type = DEFAULT_NOTIFICATION_TYPE,
-    options = {}
+    options: { duration?: number; autoClose?: boolean } = {}
   ) => {
     const {
       duration = DEFAULT_NOTIFICATION_DURATION,
@@ -66,7 +65,7 @@ export const createUISlice: StateCreator<UISlice & any> = (set, get) => ({
       createdAt: timestamp,
     };
 
-    set((state) => {
+    set((state: UISlice) => {
       // Create a new array with the new notification
       let updatedNotifications = [...state.notifications, notification];
 
@@ -102,8 +101,8 @@ export const createUISlice: StateCreator<UISlice & any> = (set, get) => ({
     return id;
   },
 
-  hideNotification: (id) => {
-    set((state) => {
+  hideNotification: (id: string) => {
+    set((state: UISlice) => {
       // Clear the timeout to prevent memory leaks
       if (state.activeTimeouts[id]) {
         window.clearTimeout(state.activeTimeouts[id]);
@@ -114,14 +113,16 @@ export const createUISlice: StateCreator<UISlice & any> = (set, get) => ({
       delete activeTimeouts[id];
 
       return {
-        notifications: state.notifications.filter((n) => n.id !== id),
+        notifications: state.notifications.filter(
+          (n: Notification) => n.id !== id
+        ),
         activeTimeouts,
       };
     });
   },
 
   clearAllNotifications: () => {
-    set((state) => {
+    set((state: UISlice) => {
       // Clear all active timeouts to prevent memory leaks
       Object.values(state.activeTimeouts).forEach((timeoutId) => {
         window.clearTimeout(timeoutId as number);
