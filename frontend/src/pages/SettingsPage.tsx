@@ -1,12 +1,14 @@
 import { useState, useEffect, useCallback } from "react";
-import Navbar from "../components/Navbar";
+import { Navbar } from "../features/layout/components";
 import FloatingNotification from "../components/FloatingNotification";
 import { TabButton, CardContainer } from "../components/FormComponents";
 import SaveButton from "../components/SaveButton";
 import ConfirmationModal from "../components/ConfirmationModal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
-import ProfileForm from "../components/settings/ProfileForm";
-import NutritionGoalsForm from "../components/settings/NutritionGoalsForm";
+import {
+  ProfileForm,
+  NutritionGoalsForm,
+} from "../features/settings/components";
 import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 

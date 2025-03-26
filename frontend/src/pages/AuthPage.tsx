@@ -1,9 +1,11 @@
 import { useState, useCallback, useRef } from "react";
-import RegisterForm from "../components/auth/RegisterForm";
-import FloatingNotification from "../components/FloatingNotification";
-import LoginForm from "../components/auth/LoginForm";
-import ButtonModeToggle from "../components/auth/ButtonModeToggle";
-import { useStore } from "../store/store";
+import {
+  LoginForm,
+  ButtonModeToggle,
+  RegisterForm,
+} from "@/features/auth/components/index";
+import FloatingNotification from "@/components/FloatingNotification";
+import { useStore } from "@/store/store";
 
 // Animation style objects
 const styles = {

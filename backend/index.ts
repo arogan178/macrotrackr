@@ -3,7 +3,7 @@ import { cors } from "@elysiajs/cors";
 import { jwt } from "@elysiajs/jwt";
 import { Database } from "bun:sqlite";
 import { hash, verify } from "@node-rs/bcrypt";
-// import jwt_secret from "./.env";
+// import jwt_secret from "@/.env";
 
 const db = new Database("macro_tracker.db");
 
@@ -59,44 +59,62 @@ db.exec(`
 `);
 
 // Check if meal_type column exists in macro_entries table
-const mealTypeExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'meal_type');
+const mealTypeExists = db
+  .prepare("PRAGMA table_info(macro_entries)")
+  .all()
+  .some((col) => col.name === "meal_type");
 if (!mealTypeExists) {
   console.log("Adding meal_type column to macro_entries table");
-  db.exec("ALTER TABLE macro_entries ADD COLUMN meal_type TEXT DEFAULT 'breakfast'");
+  db.exec(
+    "ALTER TABLE macro_entries ADD COLUMN meal_type TEXT DEFAULT 'breakfast'"
+  );
 }
 
 // Check if meal_name column exists in macro_entries table
-const mealNameExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'meal_name');
+const mealNameExists = db
+  .prepare("PRAGMA table_info(macro_entries)")
+  .all()
+  .some((col) => col.name === "meal_name");
 if (!mealNameExists) {
   console.log("Adding meal_name column to macro_entries table");
   db.exec("ALTER TABLE macro_entries ADD COLUMN meal_name TEXT DEFAULT ''");
 }
 
 // Check if entry_date column exists in macro_entries table
-const entryDateExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'entry_date');
+const entryDateExists = db
+  .prepare("PRAGMA table_info(macro_entries)")
+  .all()
+  .some((col) => col.name === "entry_date");
 if (!entryDateExists) {
   console.log("Adding entry_date column to macro_entries table");
   // Add column without default value
   db.exec("ALTER TABLE macro_entries ADD COLUMN entry_date DATE");
-  
+
   // Update existing rows to use the date part of created_at
   console.log("Updating existing entries with dates from created_at");
   db.exec("UPDATE macro_entries SET entry_date = DATE(created_at)");
 }
 
 // Check if entry_time column exists in macro_entries table
-const entryTimeExists = db.prepare("PRAGMA table_info(macro_entries)").all().some(col => col.name === 'entry_time');
+const entryTimeExists = db
+  .prepare("PRAGMA table_info(macro_entries)")
+  .all()
+  .some((col) => col.name === "entry_time");
 if (!entryTimeExists) {
   console.log("Adding entry_time column to macro_entries table");
   db.exec("ALTER TABLE macro_entries ADD COLUMN entry_time TEXT");
-  
+
   // Set default times for existing entries
   console.log("Updating existing entries with default time");
-  db.exec("UPDATE macro_entries SET entry_time = '12:00' WHERE entry_time IS NULL");
+  db.exec(
+    "UPDATE macro_entries SET entry_time = '12:00' WHERE entry_time IS NULL"
+  );
 }
 
 // Create indexes for performance
-db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)");
+db.exec(
+  "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
+);
 db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
 
 const app = new Elysia()
@@ -135,19 +153,19 @@ const app = new Elysia()
       return { error: "Validation failed" };
     }
   })
-  
+
   .post("/api/auth/register-complete", async ({ body, set, jwt }) => {
     try {
-      const { 
-        email, 
-        password, 
-        firstName, 
-        lastName, 
-        dateOfBirth, 
-        height, 
+      const {
+        email,
+        password,
+        firstName,
+        lastName,
+        dateOfBirth,
+        height,
         weight,
         gender,
-        activityLevel 
+        activityLevel,
       } = body as {
         email: string;
         password: string;
@@ -156,8 +174,8 @@ const app = new Elysia()
         dateOfBirth: string;
         height: number;
         weight: number;
-        gender: 'male' | 'female';
-        activityLevel: 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
+        gender: "male" | "female";
+        activityLevel: "sedentary" | "light" | "moderate" | "very" | "extra";
       };
 
       // Double check email uniqueness
@@ -171,18 +189,18 @@ const app = new Elysia()
       }
 
       const activityLevelMap = {
-        'sedentary': 1,
-        'light': 2,
-        'moderate': 3,
-        'very': 4,
-        'extra': 5
+        sedentary: 1,
+        light: 2,
+        moderate: 3,
+        very: 4,
+        extra: 5,
       };
 
       const hashedPassword = await hash(password, 10);
-      
+
       // Use a transaction to ensure both user and details are created or neither is
-      db.exec('BEGIN TRANSACTION');
-      
+      db.exec("BEGIN TRANSACTION");
+
       try {
         // Insert user
         const userResult = db
@@ -194,7 +212,8 @@ const app = new Elysia()
         const userId = Number(userResult.lastInsertRowid);
 
         // Insert user details
-        db.prepare(`
+        db.prepare(
+          `
           INSERT INTO user_details (
             user_id, 
             date_of_birth, 
@@ -203,7 +222,8 @@ const app = new Elysia()
             gender,
             activity_level
           ) VALUES (?, ?, ?, ?, ?, ?)
-        `).run(
+        `
+        ).run(
           userId,
           dateOfBirth,
           height,
@@ -211,34 +231,31 @@ const app = new Elysia()
           gender,
           activityLevelMap[activityLevel]
         );
-        
+
         // Insert default macro distribution
-        db.prepare(`
+        db.prepare(
+          `
           INSERT INTO macro_distribution (
             user_id, 
             protein_percentage, 
             carbs_percentage, 
             fats_percentage
           ) VALUES (?, ?, ?, ?)
-        `).run(
-          userId,
-          30,
-          40,
-          30
-        );
+        `
+        ).run(userId, 30, 40, 30);
 
-        db.exec('COMMIT');
+        db.exec("COMMIT");
 
         const token = await jwt.sign({
           userId,
           email,
           firstName,
-          lastName
+          lastName,
         });
 
         return { token };
       } catch (error) {
-        db.exec('ROLLBACK');
+        db.exec("ROLLBACK");
         throw error;
       }
     } catch (error) {
@@ -291,7 +308,7 @@ const app = new Elysia()
           userId: user.id,
           email: user.email,
           firstName: user.first_name,
-          lastName: user.last_name
+          lastName: user.last_name,
         });
 
         return { token };
@@ -344,11 +361,11 @@ const app = new Elysia()
         `
         )
         .get(userId);
-        
+
       if (!user) {
         throw new Error("User not found");
       }
-      
+
       // Get macro distribution settings
       const macroDistribution = db
         .prepare(
@@ -362,9 +379,20 @@ const app = new Elysia()
           WHERE user_id = ?
         `
         )
-        .get(userId) || { proteinPercentage: 30, carbsPercentage: 40, fatsPercentage: 30, locked_macros: '[]' };
+        .get(userId) || {
+        proteinPercentage: 30,
+        carbsPercentage: 40,
+        fatsPercentage: 30,
+        locked_macros: "[]",
+      };
 
-      return { ...user, macro_distribution: {...macroDistribution, locked_macros: JSON.parse(macroDistribution.locked_macros)} };
+      return {
+        ...user,
+        macro_distribution: {
+          ...macroDistribution,
+          locked_macros: JSON.parse(macroDistribution.locked_macros),
+        },
+      };
     } catch (error) {
       console.error("User details error:", error);
       throw new Error("Failed to fetch user details");
@@ -460,12 +488,12 @@ const app = new Elysia()
       updateFields.push("meal_type = ?");
       queryParams.push(mealType);
     }
-    
+
     if (mealName) {
       updateFields.push("meal_name = ?");
       queryParams.push(mealName);
     }
-    
+
     if (date) {
       updateFields.push("entry_date = ?");
       queryParams.push(date);
@@ -482,16 +510,16 @@ const app = new Elysia()
     return { success: true };
   })
   .put("/api/user/settings", ({ userId, body }) => {
-    const { 
-      first_name, 
-      last_name, 
-      email, 
-      date_of_birth, 
-      height, 
-      weight, 
-      gender, 
-      activity_level, 
-      macro_distribution 
+    const {
+      first_name,
+      last_name,
+      email,
+      date_of_birth,
+      height,
+      weight,
+      gender,
+      activity_level,
+      macro_distribution,
     } = body as {
       first_name: string;
       last_name: string;
@@ -499,7 +527,7 @@ const app = new Elysia()
       date_of_birth?: string;
       height?: number;
       weight?: number;
-      gender?: 'male' | 'female';
+      gender?: "male" | "female";
       activity_level?: number;
       macro_distribution?: {
         proteinPercentage: number;
@@ -508,16 +536,16 @@ const app = new Elysia()
         locked_macros?: string[];
       };
     };
-  
+
     try {
       // Use a transaction to ensure all updates succeed or fail together
-      db.exec('BEGIN TRANSACTION');
-      
+      db.exec("BEGIN TRANSACTION");
+
       try {
         // Update users table
         const userUpdateFields = [];
         const userParams = [];
-    
+
         if (first_name) {
           userUpdateFields.push("first_name = ?");
           userParams.push(first_name);
@@ -532,7 +560,7 @@ const app = new Elysia()
         }
 
         userParams.push(userId);
-        
+
         if (userUpdateFields.length > 0) {
           db.prepare(
             `UPDATE users SET ${userUpdateFields.join(", ")} WHERE id = ?`
@@ -540,14 +568,17 @@ const app = new Elysia()
         }
 
         // Convert undefined values to null for SQLite
-        const dateOfBirthValue = date_of_birth === undefined ? null : date_of_birth;
+        const dateOfBirthValue =
+          date_of_birth === undefined ? null : date_of_birth;
         const heightValue = height === undefined ? null : height;
         const weightValue = weight === undefined ? null : weight;
         const genderValue = gender === undefined ? null : gender;
-        const activityLevelValue = activity_level === undefined ? null : activity_level;
+        const activityLevelValue =
+          activity_level === undefined ? null : activity_level;
 
         // Update user_details table
-        db.prepare(`
+        db.prepare(
+          `
           INSERT INTO user_details (
             user_id,
             date_of_birth,
@@ -566,7 +597,8 @@ const app = new Elysia()
             activity_level = ?,
             updated_at = CURRENT_TIMESTAMP
           WHERE user_id = ?
-        `).run(
+        `
+        ).run(
           userId,
           dateOfBirthValue,
           heightValue,
@@ -580,10 +612,11 @@ const app = new Elysia()
           activityLevelValue,
           userId
         );
-        
+
         // Update macro distribution if provided
         if (macro_distribution) {
-          db.prepare(`
+          db.prepare(
+            `
             INSERT INTO macro_distribution (
               user_id,
               protein_percentage,
@@ -600,7 +633,8 @@ const app = new Elysia()
               locked_macros = ?,
               updated_at = CURRENT_TIMESTAMP
             WHERE user_id = ?
-          `).run(
+          `
+          ).run(
             userId,
             macro_distribution.proteinPercentage,
             macro_distribution.carbsPercentage,
@@ -613,13 +647,13 @@ const app = new Elysia()
             userId
           );
         }
-        
-        db.exec('COMMIT');
+
+        db.exec("COMMIT");
       } catch (error) {
-        db.exec('ROLLBACK');
+        db.exec("ROLLBACK");
         throw error;
       }
-  
+
       return { success: true };
     } catch (error) {
       console.error("Settings update error:", error);
@@ -639,7 +673,8 @@ const app = new Elysia()
       const dateOfBirthValue = dateOfBirth === undefined ? null : dateOfBirth;
       const heightValue = height === undefined ? null : height;
       const weightValue = weight === undefined ? null : weight;
-      const activityLevelValue = activityLevel === undefined ? null : activityLevel;
+      const activityLevelValue =
+        activityLevel === undefined ? null : activityLevel;
 
       const stmt = db.prepare(`
         INSERT INTO user_details (user_id, date_of_birth, height, weight, activity_level)
