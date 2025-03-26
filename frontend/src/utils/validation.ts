@@ -1,9 +1,9 @@
-import { USER_MINIMUM_AGE } from "./constants";
+import { USER_MINIMUM_AGE } from "@/utils/constants";
 import {
   RegistrationStep1,
   RegistrationStep2,
   RegistrationStep3,
-} from "../types";
+} from "@/store/types";
 /**
  * Validates if a user is old enough based on their date of birth
  */

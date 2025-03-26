@@ -5,7 +5,7 @@ import {
   TEXT_FIELD_DEFAULT_MIN_LENGTH,
   TEXT_FIELD_DEFAULT_MAX_LENGTH,
   NUMBER_FIELD_ALLOWED_KEYS,
-} from "../utils/constants";
+} from "@/utils/constants";
 
 /* Text Input Field Component */
 interface TextFieldProps {

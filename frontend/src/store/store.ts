@@ -1,8 +1,8 @@
 import { create } from "zustand";
-import { createUserSlice, UserSlice } from "./userStore";
-import { createMacrosSlice, MacrosSlice } from "./macroStore";
-import { createAuthSlice, AuthSlice } from "./authStore";
-import { createUISlice, UISlice } from "./uiStore";
+import { createUserSlice, UserSlice } from "./user-slice";
+import { createMacrosSlice, MacrosSlice } from "./macro-slice";
+import { createAuthSlice, AuthSlice } from "./auth-slice";
+import { createUISlice, UISlice } from "./ui-slice";
 import { devtools } from "zustand/middleware";
 
 // Combine all slices into one store
