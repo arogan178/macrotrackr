@@ -5,7 +5,7 @@ import {
   LoadingSpinnerIcon,
   WarningIcon,
 } from "@/components/Icons";
-import { TextField } from "@/components/FormComponents";
+import { TextField } from "@/components/form/index";
 
 type CalorieSearchProps = {
   onResult: (macros: {

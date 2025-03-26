@@ -6,7 +6,8 @@ import {
   Dropdown,
   NumberField,
   InfoCard,
-} from "@/components/FormComponents";
+  DateField,
+} from "@/components/form/index";
 import {
   ForwardIcon,
   BackIcon,
@@ -14,8 +15,9 @@ import {
   InfoIcon,
   CheckMarkIcon,
 } from "@/components/Icons";
+import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/features/settings/constants";
+
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-import { getActivityLevelOptions } from "@/utils/activityLevels";
 import { useStore } from "@/store/store";
 
 // Step indicator component
@@ -214,9 +216,8 @@ export function StepTwo() {
     <StepFormWrapper>
       <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
         <div className="space-y-5 flex-1">
-          <TextField
+          <DateField
             label="Date of Birth"
-            type="date"
             value={register.dateOfBirth}
             onChange={(value) => setRegisterField("dateOfBirth", value)}
             required={true}
@@ -229,10 +230,7 @@ export function StepTwo() {
             onChange={(value) =>
               setRegisterField("gender", value as "male" | "female")
             }
-            options={[
-              { value: "male", label: "Male" },
-              { value: "female", label: "Female" },
-            ]}
+            options={GENDER_OPTIONS}
             required={true}
           />
 
@@ -276,6 +274,7 @@ export function StepTwo() {
             />
             <FormButton
               type="submit"
+              variant="primary"
               isLoading={isLoading}
               text="Continue"
               icon={<ForwardIcon />}
@@ -318,8 +317,15 @@ export function StepThree() {
           <Dropdown
             label="How active are you on a typical week?"
             value={register.activityLevel}
-            onChange={(value) => setRegisterField("activityLevel", value)}
-            options={getActivityLevelOptions()}
+            onChange={(value) =>
+              setRegisterField("activityLevel", Number(value))
+            }
+            options={Object.entries(ACTIVITY_LEVELS).map(
+              ([key, { label }]) => ({
+                value: Number(key),
+                label,
+              })
+            )}
             required={true}
           />
 
@@ -348,7 +354,7 @@ export function StepThree() {
               type="submit"
               isLoading={isLoading}
               loadingText="Creating Account..."
-              text="Complete Registration"
+              text="Finish"
               icon={<CheckIcon />}
               className="w-2/3"
             />

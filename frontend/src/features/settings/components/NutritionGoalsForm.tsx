@@ -1,17 +1,16 @@
 import { memo } from "react";
 import {
-  UserDetails,
+  UserSettings,
   MacroDistributionSettings,
-} from "@/features/macroTracking/types";
-import { MacroDistribution } from "@/features/macroTracking/components";
-import { InfoCard, CardContainer } from "@/components/FormComponents";
+} from "@/features/settings/types";
+import { InfoCard, CardContainer } from "@/components/form/index";
 import { InfoIcon } from "@/components/Icons";
 
 interface NutritionGoalsFormProps {
-  settings: UserDetails;
-  updateSetting: <K extends keyof UserDetails>(
+  settings: UserSettings;
+  updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserDetails[K]
+    value: UserSettings[K]
   ) => void;
 }
 
