@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { NotificationType } from "../store/uiStore";
+import { NotificationType } from "@/store/ui-slice";
 import { CheckIcon, CloseIcon, WarningIcon, InfoIcon } from "./Icons";
 
 export interface FloatingNotificationProps {

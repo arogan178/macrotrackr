@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
+import Navbar from "../features/layout/components/Navbar";
 import { MacroEntry, MacroTotals } from "../types";
 import { Line } from "react-chartjs-2";
 import {
