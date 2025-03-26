@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import { NotificationType } from "../store/uiStore";
+import { CheckIcon, CloseIcon, WarningIcon, InfoIcon } from "./Icons";
 
 export interface FloatingNotificationProps {
   message: string;
@@ -94,7 +95,7 @@ function FloatingNotification({
         clearTimeout(timerRef.current);
       }
     };
-  }, [isVisible, duration, isLeaving, handleClose, autoClose]); // Added autoClose to dependencies
+  }, [isVisible, duration, isLeaving, handleClose, autoClose]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -105,71 +106,6 @@ function FloatingNotification({
     };
   }, []);
 
-  // Icon components for better readability
-  const SuccessIcon = () => (
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M5 13l4 4L19 7"
-      />
-    </svg>
-  );
-
-  const ErrorIcon = () => (
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M6 18L18 6M6 6l12 12"
-      />
-    </svg>
-  );
-
-  const WarningIcon = () => (
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      viewBox="0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-      />
-    </svg>
-  );
-
-  const InfoIcon = () => (
-    <svg
-      className="w-5 h-5"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-    >
-      <path
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        strokeWidth={2}
-        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-      />
-    </svg>
-  );
-
   // Style mappings for notification types
   const styles = {
     success: {
@@ -177,28 +113,28 @@ function FloatingNotification({
       border: "border-green-500/30",
       icon: "text-green-400",
       progress: "bg-green-500/50",
-      component: <SuccessIcon />,
+      component: <CheckIcon className="w-5 h-5" />,
     },
     error: {
       bg: "bg-gradient-to-r from-red-900/90 to-red-800/90",
       border: "border-red-500/30",
       icon: "text-red-400",
       progress: "bg-red-500/50",
-      component: <ErrorIcon />,
+      component: <CloseIcon className="w-5 h-5" />,
     },
     warning: {
       bg: "bg-gradient-to-r from-yellow-700/90 to-amber-700/90",
       border: "border-yellow-500/30",
       icon: "text-yellow-400",
       progress: "bg-yellow-500/50",
-      component: <WarningIcon />,
+      component: <WarningIcon className="w-5 h-5" />,
     },
     info: {
       bg: "bg-gradient-to-r from-blue-900/90 to-blue-800/90",
       border: "border-blue-500/30",
       icon: "text-blue-400",
       progress: "bg-blue-500/50",
-      component: <InfoIcon />,
+      component: <InfoIcon className="w-5 h-5" />,
     },
   };
 
@@ -237,19 +173,7 @@ function FloatingNotification({
           className="p-3 h-full flex items-center justify-center text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/20"
           aria-label="Close notification"
         >
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
+          <CloseIcon className="w-4 h-4" />
         </button>
 
         {/* Progress timer bar */}
