@@ -1,15 +1,18 @@
 import { StateCreator } from "zustand";
 import { apiService } from "../utils/api-service";
-import { UserDetails, MacroDistributionSettings } from "../../types";
-import { calculateBMR, calculateTDEE } from "../utils/calculations";
+import {
+  UserDetails,
+  MacroDistributionSettings,
+} from "@/features/settings/types";
+import {
+  calculateBMR,
+  calculateTDEE,
+  calculateAge,
+} from "@/features/settings/calculations";
 import { getErrorMessage } from "../utils/error-handling";
-import { USER_MINIMUM_AGE } from "../utils/constants";
-import { isOldEnough, validateUserSettings } from "../utils/validation";
+import { validateUserSettings } from "../features/settings/utils/validation";
 
 export interface UserSlice {
-  // Constants
-  USER_MINIMUM_AGE: number;
-
   // User state
   user: UserDetails | null;
   userMetrics: { bmr: number; tdee: number };
@@ -41,21 +44,14 @@ export interface UserSlice {
   saveSettings: () => Promise<void>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
-
-  // Helper functions
-  isOldEnough: (dateOfBirth: string) => boolean;
 }
 
 export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
-  // Constants
-  USER_MINIMUM_AGE,
-
   // User state
   user: null,
   userMetrics: { bmr: 0, tdee: 0 },
   isLoading: false,
   error: null,
-
   // Settings state
   settings: null,
   originalSettings: null,
@@ -66,16 +62,13 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
   formErrors: {},
   hasSettingsChanges: false,
 
-  // Use imported function instead of redefining
-  isOldEnough,
-
   // User actions
   fetchUserDetails: async () => {
     set({ isLoading: true, error: null });
 
     try {
       const userData = await apiService.user.getProfile();
-
+      const age = calculateAge(userData.date_of_birth);
       // Calculate metrics right after fetching user data
       let bmr = 0;
       let tdee = 0;
@@ -87,9 +80,6 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
         userData?.gender &&
         userData?.activity_level
       ) {
-        const age =
-          new Date().getFullYear() -
-          new Date(userData.date_of_birth).getFullYear();
         bmr = Math.round(
           calculateBMR(userData.weight, userData.height, age, userData.gender)
         );

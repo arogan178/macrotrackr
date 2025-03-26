@@ -6,10 +6,10 @@ import {
   Dropdown,
   DateField,
   TextField,
-} from "@/components/FormComponents";
+} from "@/components/form/index";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { CheckMarkIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import { MealType, MEAL_TYPES } from "@/store/types";
+import { MealType, MEAL_TYPES } from "../types";
 
 // Helper function to capitalize first letter of a string
 function capitalizeFirstLetter(string: string): string {

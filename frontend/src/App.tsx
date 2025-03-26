@@ -10,10 +10,9 @@ import HomePage from "@/pages/HomePage";
 import AuthPage from "@/pages/AuthPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ReportingPage from "@/pages/ReportingPage";
-import NotificationManager from "@/components/NotificationManager";
+import NotificationManager from "@/features/notifications/components/NotificationManager";
 
 import { useEffect, useState } from "react";
-import "./app.css";
 
 function AuthHandler() {
   const location = useLocation();

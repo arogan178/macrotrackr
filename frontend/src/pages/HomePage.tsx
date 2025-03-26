@@ -1,15 +1,15 @@
 import { useEffect, memo } from "react";
-import { Navbar } from "../features/layout/components";
-import FloatingNotification from "../components/FloatingNotification";
-import { CardContainer } from "../components/FormComponents";
+import { Navbar } from "@/features/layout/components";
+import { FloatingNotification } from "@/features/notifications/components";
+import { CardContainer } from "@/components/form/index";
 import {
   EntryHistoryPanel,
   DailySummaryPanel,
   AddEntryForm,
   EditModal,
-} from "../features/macroTracking/components";
-import { CardMetricsPanel } from "../features/dashboard/components";
-import { useStore } from "../store/store";
+} from "@/features/macroTracking/components";
+import { CardMetricsPanel } from "@/features/dashboard/components";
+import { useStore } from "@/store/store";
 
 export default function HomePage() {
   // Get state and actions from our store
@@ -75,8 +75,8 @@ export default function HomePage() {
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
                 <CardMetricsPanel
-                  bmr={userMetrics.bmr}
-                  tdee={userMetrics.tdee}
+                  bmr={userMetrics?.bmr}
+                  tdee={userMetrics?.tdee}
                   isLoading={isLoading}
                 />
 

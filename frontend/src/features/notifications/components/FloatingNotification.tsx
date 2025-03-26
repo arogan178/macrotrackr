@@ -1,6 +1,11 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { NotificationType } from "@/store/ui-slice";
-import { CheckIcon, CloseIcon, WarningIcon, InfoIcon } from "./Icons";
+import { NotificationType } from "../types";
+import {
+  CheckIcon,
+  CloseIcon,
+  WarningIcon,
+  InfoIcon,
+} from "@/components/Icons";
 
 export interface FloatingNotificationProps {
   message: string;

@@ -4,7 +4,7 @@ import {
   ButtonModeToggle,
   RegisterForm,
 } from "@/features/auth/components/index";
-import FloatingNotification from "@/components/FloatingNotification";
+import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import { useStore } from "@/store/store";
 
 // Animation style objects
