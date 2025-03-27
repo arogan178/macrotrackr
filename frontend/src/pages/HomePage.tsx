@@ -1,13 +1,15 @@
 import { useEffect, memo } from "react";
-import Navbar from "../components/Navbar";
-import FloatingNotification from "../components/FloatingNotification";
-import { CardContainer, InfoCard } from "../components/FormComponents";
-import EntryHistory from "../components/EntryHistoryPanel";
-import EditModal from "../components/EditModal";
-import DailySummary from "../components/DailySummaryPanel";
-import AddEntry from "../components/AddEntryForm";
-import CardMetricsPanel from "../components/CardMetricsPanel";
-import { useStore } from "../store/store";
+import { Navbar } from "@/features/layout/components";
+import { FloatingNotification } from "@/features/notifications/components";
+import { CardContainer } from "@/components/form/index";
+import {
+  EntryHistoryPanel,
+  DailySummaryPanel,
+  AddEntryForm,
+  EditModal,
+} from "@/features/macroTracking/components";
+import { CardMetricsPanel } from "@/features/dashboard/components";
+import { useStore } from "@/store/store";
 
 export default function HomePage() {
   // Get state and actions from our store
@@ -20,7 +22,7 @@ export default function HomePage() {
     isEditing,
     isDeleting,
     error,
-    notification,
+    notifications,
     editingEntry,
     userMetrics,
     fetchUserDetails,
@@ -28,26 +30,29 @@ export default function HomePage() {
     updateEntry,
     deleteEntry,
     setEditingEntry,
-    clearNotification,
-    clearError,
+    hideNotification,
+    clearAllNotifications,
   } = useStore();
 
   // Fetch user details on component mount
   useEffect(() => {
     fetchUserDetails();
-  }, [fetchUserDetails]); // Added fetchUserDetails to dependencies
+  }, [fetchUserDetails]);
+
+  // Get the latest notification
+  const latestNotification = notifications?.[notifications.length - 1];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
 
       {/* Notification system */}
-      {notification && (
+      {latestNotification && (
         <FloatingNotification
-          message={notification}
-          type="success"
-          onClose={clearNotification}
-          duration={5000}
+          message={latestNotification.message}
+          type={latestNotification.type}
+          onClose={() => hideNotification(latestNotification.id)}
+          duration={latestNotification.duration}
         />
       )}
 
@@ -55,7 +60,7 @@ export default function HomePage() {
         <FloatingNotification
           message={error}
           type="error"
-          onClose={clearError}
+          onClose={clearAllNotifications}
           duration={5000}
         />
       )}
@@ -70,8 +75,8 @@ export default function HomePage() {
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
                 <CardMetricsPanel
-                  bmr={userMetrics.bmr}
-                  tdee={userMetrics.tdee}
+                  bmr={userMetrics?.bmr}
+                  tdee={userMetrics?.tdee}
                   isLoading={isLoading}
                 />
 
@@ -80,7 +85,7 @@ export default function HomePage() {
                   {isLoading ? (
                     <AddEntryLoadingSkeleton />
                   ) : (
-                    <AddEntry onSubmit={addEntry} isSaving={isSaving} />
+                    <AddEntryForm onSubmit={addEntry} isSaving={isSaving} />
                   )}
                 </div>
               </div>
@@ -91,7 +96,7 @@ export default function HomePage() {
                   <DailySummaryLoadingSkeleton />
                 ) : (
                   user && (
-                    <DailySummary
+                    <DailySummaryPanel
                       totals={totals}
                       macroDistribution={user?.macro_distribution}
                     />
@@ -107,7 +112,7 @@ export default function HomePage() {
               {isLoading ? (
                 <HistoryLoadingSkeleton />
               ) : (
-                <EntryHistory
+                <EntryHistoryPanel
                   history={history}
                   deleteEntry={deleteEntry}
                   onEdit={setEditingEntry}
