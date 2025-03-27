@@ -1,11 +1,11 @@
 import { create } from "zustand";
-import { createUserSlice, UserSlice } from "./userStore";
-import { createMacrosSlice, MacrosSlice } from "./macroStore";
-import { createAuthSlice, AuthSlice } from "./authStore";
-import { createUISlice, UISlice } from "./uiStore";
 import { devtools } from "zustand/middleware";
+import { createUserSlice, UserSlice } from "./user-slice";
+import { createMacrosSlice, MacrosSlice } from "./macro-slice";
+import { createAuthSlice, AuthSlice } from "./auth-slice";
+import { createUISlice, UISlice } from "./ui-slice";
 
-// Combine all slices into one store
+// Define the combined store type
 type Store = UserSlice & MacrosSlice & AuthSlice & UISlice;
 
 // Create the store with all slices and devtools for better debugging
@@ -26,9 +26,14 @@ if (typeof window !== "undefined") {
   // Restore auth state from localStorage if available
   const token = localStorage.getItem("token");
   if (token) {
-    // Fetch user data when app initializes with valid token
+    // Set authentication state immediately
+    useStore.setState({ isAuthenticated: true });
+
+    // Fetch user details and settings when app initializes with valid token
     setTimeout(() => {
-      useStore.getState().fetchUserDetails?.();
+      const store = useStore.getState();
+      store.fetchUserDetails();
+      store.fetchSettings();
     }, 0);
   }
 }
