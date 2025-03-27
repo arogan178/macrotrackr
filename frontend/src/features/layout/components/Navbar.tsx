@@ -40,7 +40,7 @@ const Navbar: React.FC = () => {
   };
 
   return (
-    <nav className="p-3 flex justify-between items-center sticky top-0 z-10 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-lg">
+    <nav className="p-3 flex justify-between items-center sticky top-0 z-999 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-lg">
       <div className="flex items-center">
         <span className="text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-4">
           HealthyLife

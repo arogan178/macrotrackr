@@ -174,7 +174,7 @@ const app = new Elysia()
         dateOfBirth: string;
         height: number;
         weight: number;
-        gender: "male" | "female";
+        gender: "male" | "female" | "";
         activityLevel: "sedentary" | "light" | "moderate" | "very" | "extra";
       };
 
@@ -186,6 +186,18 @@ const app = new Elysia()
       if (existingUser) {
         set.status = 400;
         return { error: "Email already registered" };
+      }
+
+      // Validate required fields
+      if (!email || !password || !firstName || !lastName) {
+        set.status = 400;
+        return { error: "Missing required fields" };
+      }
+
+      // Validate gender - must be either 'male' or 'female'
+      if (gender !== "male" && gender !== "female") {
+        set.status = 400;
+        return { error: "Gender must be either 'male' or 'female'" };
       }
 
       const activityLevelMap = {

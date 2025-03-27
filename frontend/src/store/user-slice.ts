@@ -1,9 +1,7 @@
 import { StateCreator } from "zustand";
 import { apiService } from "../utils/api-service";
-import {
-  UserDetails,
-  MacroDistributionSettings,
-} from "@/features/settings/types";
+import { UserSettings } from "@/features/settings/types";
+import { MacroTargetSettings } from "@/features/macroTracking/types";
 import {
   calculateBMR,
   calculateTDEE,
@@ -14,14 +12,14 @@ import { validateUserSettings } from "../features/settings/utils/validation";
 
 export interface UserSlice {
   // User state
-  user: UserDetails | null;
+  user: UserSettings | null;
   userMetrics: { bmr: number; tdee: number };
   isLoading: boolean;
   error: string | null;
 
   // Settings state
-  settings: UserDetails | null;
-  originalSettings: UserDetails | null;
+  settings: UserSettings | null;
+  originalSettings: UserSettings | null;
   isSettingsLoading: boolean;
   isSaving: boolean;
   settingsError: string | null;
@@ -35,11 +33,11 @@ export interface UserSlice {
 
   // Settings actions
   fetchSettings: () => Promise<void>;
-  updateSetting: <K extends keyof UserDetails>(
+  updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserDetails[K]
+    value: UserSettings[K]
   ) => void;
-  updateMacroDistribution: (distribution: MacroDistributionSettings) => void;
+  updateMacroDistribution: (distribution: MacroTargetSettings) => void;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   resetSettings: () => void;
@@ -69,6 +67,15 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
     try {
       const userData = await apiService.user.getProfile();
       const age = calculateAge(userData.date_of_birth);
+      // Convert activity_level to number if it's a string
+      if (
+        typeof userData.activity_level === "string" &&
+        userData.activity_level
+      ) {
+        userData.activity_level = getActivityLevelFromString(
+          userData.activity_level as ActivityLevel
+        );
+      }
       // Calculate metrics right after fetching user data
       let bmr = 0;
       let tdee = 0;
@@ -113,6 +120,13 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
     try {
       const data = await apiService.user.getProfile();
 
+      // Convert activity_level to number if it's a string
+      if (typeof data.activity_level === "string" && data.activity_level) {
+        data.activity_level = getActivityLevelFromString(
+          data.activity_level as ActivityLevel
+        );
+      }
+
       // If no macro distribution is set, provide default values
       if (!data.macro_distribution) {
         data.macro_distribution = {
@@ -142,9 +156,9 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
     }
   },
 
-  updateSetting: <K extends keyof UserDetails>(
+  updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserDetails[K]
+    value: UserSettings[K]
   ) => {
     set((state) => {
       if (!state.settings) return state;
@@ -156,7 +170,7 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
       // Check for changes against original settings
       let hasChanges = false;
       if (state.originalSettings) {
-        const keys = Object.keys(updatedSettings) as Array<keyof UserDetails>;
+        const keys = Object.keys(updatedSettings) as Array<keyof UserSettings>;
 
         hasChanges = keys.some(
           (k) =>
@@ -172,7 +186,7 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
     });
   },
 
-  updateMacroDistribution: (distribution: MacroDistributionSettings) => {
+  updateMacroDistribution: (distribution: MacroTargetSettings) => {
     set((state) => {
       if (!state.settings) return state;
 

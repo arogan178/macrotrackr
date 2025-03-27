@@ -5,10 +5,7 @@ import { TabButton, CardContainer } from "../components/form/index";
 import SaveButton from "../components/SaveButton";
 import Modal from "../components/Modal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
-import {
-  ProfileForm,
-  NutritionGoalsForm,
-} from "../features/settings/components";
+import { ProfileForm, MacroTargetsForm } from "../features/settings/components";
 import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 
@@ -135,7 +132,7 @@ export default function SettingsPage() {
               onClick={() => handleTabChange("nutrition")}
             >
               <MenuIcon className="w-4 h-4 mr-2" />
-              Nutrition Goals
+              Macro Targets
             </TabButton>
           </div>
 
@@ -153,7 +150,7 @@ export default function SettingsPage() {
                     formErrors={formErrors}
                   />
                 ) : (
-                  <NutritionGoalsForm
+                  <MacroTargetsForm
                     settings={settings}
                     updateSetting={updateSetting}
                   />

@@ -32,3 +32,10 @@ export interface MacroInputs {
   carbs: string;
   fats: string;
 }
+
+export interface MacroTargetSettings {
+  proteinPercentage: number;
+  carbsPercentage: number;
+  fatsPercentage: number;
+  locked_macros?: string[];
+}
