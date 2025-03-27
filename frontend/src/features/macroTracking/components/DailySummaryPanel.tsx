@@ -1,12 +1,12 @@
-import { MacroTotals, MacroTargetSettings } from "../types";
+import { MacroDailyTotals, MacroTargetSettings } from "../types";
 
 interface DailySummaryProps {
-  totals: MacroTotals;
+  macroDailyTotals?: MacroDailyTotals; // Updated type from MacroTotals to MacroDailyTotals
   macroDistribution?: MacroTargetSettings;
 }
 
 export default function DailySummary({
-  totals,
+  macroDailyTotals,
   macroDistribution,
 }: DailySummaryProps) {
   const defaultDistribution = {
@@ -15,26 +15,33 @@ export default function DailySummary({
     fatsPercentage: 30,
   };
 
+  // Create default empty values to handle undefined totals
+  const safeTotal = macroDailyTotals || {
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+    calories: 0,
+  };
   const distribution = macroDistribution || defaultDistribution;
 
   const totalCalories = Math.round(
-    totals.protein * 4 + totals.carbs * 4 + totals.fats * 9
+    safeTotal.protein * 4 + safeTotal.carbs * 4 + safeTotal.fats * 9
   );
   const proteinPercent = Math.round(
-    totalCalories ? ((totals.protein * 4) / totalCalories) * 100 : 0
+    totalCalories ? ((safeTotal.protein * 4) / totalCalories) * 100 : 0
   );
   const carbsPercent = Math.round(
-    totalCalories ? ((totals.carbs * 4) / totalCalories) * 100 : 0
+    totalCalories ? ((safeTotal.carbs * 4) / totalCalories) * 100 : 0
   );
   const fatsPercent = Math.round(
-    totalCalories ? ((totals.fats * 9) / totalCalories) * 100 : 0
+    totalCalories ? ((safeTotal.fats * 9) / totalCalories) * 100 : 0
   );
 
   const macroData = [
     {
       name: "Protein",
-      grams: (totals.protein || 0).toFixed(1),
-      calories: Math.round(totals.protein * 4),
+      grams: (safeTotal.protein || 0).toFixed(1),
+      calories: Math.round(safeTotal.protein * 4),
       percent: proteinPercent,
       targetPercent: distribution.proteinPercentage,
       color: "bg-green-500",
@@ -46,8 +53,8 @@ export default function DailySummary({
     },
     {
       name: "Carbs",
-      grams: (totals.carbs || 0).toFixed(1),
-      calories: Math.round(totals.carbs * 4),
+      grams: (safeTotal.carbs || 0).toFixed(1),
+      calories: Math.round(safeTotal.carbs * 4),
       percent: carbsPercent,
       targetPercent: distribution.carbsPercentage,
       color: "bg-blue-500",
@@ -59,8 +66,8 @@ export default function DailySummary({
     },
     {
       name: "Fats",
-      grams: (totals.fats || 0).toFixed(1),
-      calories: Math.round(totals.fats * 9),
+      grams: (safeTotal.fats || 0).toFixed(1),
+      calories: Math.round(safeTotal.fats * 9),
       percent: fatsPercent,
       targetPercent: distribution.fatsPercentage,
       color: "bg-red-500",

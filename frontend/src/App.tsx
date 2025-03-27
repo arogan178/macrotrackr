@@ -10,6 +10,7 @@ import HomePage from "@/pages/HomePage";
 import AuthPage from "@/pages/AuthPage";
 import SettingsPage from "@/pages/SettingsPage";
 import ReportingPage from "@/pages/ReportingPage";
+import GoalsPage from "@/pages/GoalsPage";
 import NotificationManager from "@/features/notifications/components/NotificationManager";
 
 import { useEffect, useState } from "react";
@@ -43,6 +44,7 @@ function AuthHandler() {
       <Route path="/auth" element={<AuthPage />} />
       <Route path="/settings" element={<SettingsPage />} />
       <Route path="/reporting" element={<ReportingPage />} />
+      <Route path="/goals" element={<GoalsPage />} />
       <Route
         path="*"
         element={<Navigate to={isAuthenticated ? "/home" : "/auth"} replace />}

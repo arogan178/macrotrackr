@@ -1,12 +1,12 @@
 import { StateCreator } from "zustand";
-import { apiService } from "../utils/api-service";
-import { MacroEntry, MacroTotals } from "../../types";
-import { getErrorMessage } from "../utils/error-handling";
+import { apiService } from "@/utils/api-service";
+import { MacroEntry, MacroDailyTotals } from "../types";
+import { getErrorMessage } from "@/utils/error-handling";
 
 export interface MacrosSlice {
   // State
   history: MacroEntry[];
-  totals: MacroTotals;
+  macroDailyTotals: MacroDailyTotals;
   editingEntry: MacroEntry | null;
   isLoading: boolean;
   isSaving: boolean;
@@ -15,7 +15,7 @@ export interface MacrosSlice {
   error: string | null;
 
   // Actions
-  fetchMacros: () => Promise<void>;
+  fetchMacroData: () => Promise<void>; // Renamed from fetchMacros to avoid collision
   addEntry: (entry: {
     protein: number;
     carbs: number;
@@ -31,7 +31,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
   get
 ) => ({
   history: [],
-  totals: {
+  macroDailyTotals: {
     protein: 0,
     carbs: 0,
     fats: 0,
@@ -44,17 +44,26 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
   isDeleting: false,
   error: null,
 
-  fetchMacros: async () => {
+  fetchMacroData: async () => {
+    // Renamed from fetchMacros
     set({ isLoading: true, error: null });
 
     try {
-      const [totalsData, historyData] = await Promise.all([
+      const [macroDailyTotals, historyData] = await Promise.all([
         apiService.macros.getDailyTotals(),
         apiService.macros.getHistory(),
       ]);
 
+      // Properly structure totals data with the expected property names
+      const formattedTotals: macroDailyTotals = {
+        protein: macroDailyTotals.protein || 0,
+        carbs: macroDailyTotals.carbs || 0,
+        fats: macroDailyTotals.fats || 0,
+        calories: macroDailyTotals.calories || 0,
+      };
+
       set({
-        totals: totalsData,
+        macroDailyTotals: formattedTotals,
         history: historyData,
         isLoading: false,
       });
@@ -78,7 +87,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
 
     try {
       const result = await apiService.macros.addEntry(inputs);
-      await get().fetchMacros();
+      await get().fetchMacroData(); // Update reference here
 
       // Use UI slice for notification management if available
       if (get().showNotification) {
@@ -128,7 +137,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
 
       // Reset editing state and refresh macros to get accurate totals
       set({ editingEntry: null });
-      await get().fetchMacros();
+      await get().fetchMacroData(); // Update reference here
 
       // Use UI slice for notification management if available
       if (get().showNotification) {
@@ -150,7 +159,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       }
 
       // Refresh data to revert optimistic update on error
-      await get().fetchMacros();
+      await get().fetchMacroData(); // Update reference here
 
       throw error;
     } finally {
@@ -171,7 +180,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       await apiService.macros.deleteEntry(id);
 
       // Fetch updated totals from the API instead of calculating locally
-      await get().fetchMacros();
+      await get().fetchMacroData(); // Update reference here
 
       // Use UI slice for notification management if available
       if (get().showNotification) {
@@ -191,7 +200,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       }
 
       // Refresh data to restore state if API call failed
-      await get().fetchMacros();
+      await get().fetchMacroData(); // Update reference here
 
       throw error;
     } finally {
