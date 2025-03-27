@@ -1,12 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
-import Navbar from "../components/Navbar";
-import FloatingNotification from "../components/FloatingNotification";
-import { TabButton, CardContainer } from "../components/FormComponents";
+import { Navbar } from "../features/layout/components";
+import FloatingNotification from "../features/notifications/components/FloatingNotification";
+import { TabButton, CardContainer } from "../components/form/index";
 import SaveButton from "../components/SaveButton";
-import ConfirmationModal from "../components/ConfirmationModal";
+import Modal from "../components/Modal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
-import ProfileForm from "../components/settings/ProfileForm";
-import NutritionGoalsForm from "../components/settings/NutritionGoalsForm";
+import { ProfileForm, MacroTargetsForm } from "../features/settings/components";
 import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 
@@ -38,7 +37,7 @@ export default function SettingsPage() {
   // Fetch settings on component mount
   useEffect(() => {
     fetchSettings();
-  }, [fetchSettings]); // Added fetchSettings to dependency array
+  }, [fetchSettings]);
 
   // Warn user before leaving page with unsaved changes
   useBeforeUnload(
@@ -107,14 +106,15 @@ export default function SettingsPage() {
             />
           )}
 
-          <ConfirmationModal
+          <Modal
+            variant="confirmation"
             isOpen={showConfirmModal}
+            onClose={cancelTabChange}
             title="Unsaved Changes"
             message="You have unsaved changes that will be lost. Do you want to continue?"
             confirmLabel="Discard Changes"
             cancelLabel="Keep Editing"
             onConfirm={confirmTabChange}
-            onCancel={cancelTabChange}
           />
 
           <PageHeader hasChanges={hasSettingsChanges} />
@@ -132,11 +132,10 @@ export default function SettingsPage() {
               onClick={() => handleTabChange("nutrition")}
             >
               <MenuIcon className="w-4 h-4 mr-2" />
-              Nutrition Goals
+              Macro Targets
             </TabButton>
           </div>
 
-          {/* Fix: Check if settings is null or if we're still loading */}
           {isLoading || !settings ? (
             <div className="flex justify-center items-center h-64">
               <LoadingSpinnerIcon className="h-12 w-12 animate-spin text-indigo-500" />
@@ -151,7 +150,7 @@ export default function SettingsPage() {
                     formErrors={formErrors}
                   />
                 ) : (
-                  <NutritionGoalsForm
+                  <MacroTargetsForm
                     settings={settings}
                     updateSetting={updateSetting}
                   />
