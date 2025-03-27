@@ -16,6 +16,7 @@ import {
   CheckMarkIcon,
 } from "@/components/Icons";
 import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/features/settings/constants";
+import { Gender } from "@/features/settings/types";
 
 import { USER_MINIMUM_AGE } from "@/utils/constants";
 import { useStore } from "@/store/store";
@@ -227,9 +228,7 @@ export function StepTwo() {
           <Dropdown
             label="Gender"
             value={register.gender}
-            onChange={(value) =>
-              setRegisterField("gender", value as "male" | "female")
-            }
+            onChange={(value) => setRegisterField("gender", value as Gender)}
             options={GENDER_OPTIONS}
             required={true}
           />

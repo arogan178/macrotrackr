@@ -1,12 +1,11 @@
 import { memo } from "react";
-import {
-  UserSettings,
-  MacroDistributionSettings,
-} from "@/features/settings/types";
+import { UserSettings } from "../types";
+import { MacroTargetSettings } from "@/features/macroTracking/types";
 import { InfoCard, CardContainer } from "@/components/form/index";
 import { InfoIcon } from "@/components/Icons";
+import MacroDistribution from "./MacroDistribution";
 
-interface NutritionGoalsFormProps {
+interface MacroTargetsFormProps {
   settings: UserSettings;
   updateSetting: <K extends keyof UserSettings>(
     key: K,
@@ -14,13 +13,8 @@ interface NutritionGoalsFormProps {
   ) => void;
 }
 
-function NutritionGoalsForm({
-  settings,
-  updateSetting,
-}: NutritionGoalsFormProps) {
-  const handleMacroDistributionChange = (
-    distribution: MacroDistributionSettings
-  ) => {
+function MacroTargetsForm({ settings, updateSetting }: MacroTargetsFormProps) {
+  const handleMacroDistributionChange = (distribution: MacroTargetSettings) => {
     updateSetting("macro_distribution", distribution);
   };
 
@@ -96,4 +90,4 @@ function NutritionGoalsForm({
   );
 }
 
-export default memo(NutritionGoalsForm);
+export default memo(MacroTargetsForm);

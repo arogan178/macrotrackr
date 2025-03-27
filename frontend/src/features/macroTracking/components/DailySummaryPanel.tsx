@@ -1,8 +1,8 @@
-import { MacroTotals, MacroDistributionSettings } from "../types";
+import { MacroTotals, MacroTargetSettings } from "../types";
 
 interface DailySummaryProps {
   totals: MacroTotals;
-  macroDistribution?: MacroDistributionSettings;
+  macroDistribution?: MacroTargetSettings;
 }
 
 export default function DailySummary({

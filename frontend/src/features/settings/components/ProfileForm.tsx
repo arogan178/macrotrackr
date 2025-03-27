@@ -4,8 +4,12 @@ import {
   Dropdown,
   DateField,
 } from "@/components/form/index";
-import { UserSettings, Gender } from "../types";
-import { GENDER_OPTIONS, ACTIVITY_LEVELS } from "../constants";
+import { UserSettings, Gender, ActivityLevel } from "@/features/settings/types";
+import {
+  GENDER_OPTIONS,
+  ACTIVITY_LEVELS,
+  getActivityLevelFromString,
+} from "../constants";
 
 interface ProfileFormProps {
   settings: UserSettings;
@@ -21,6 +25,20 @@ export default function ProfileForm({
   updateSetting,
   formErrors,
 }: ProfileFormProps) {
+  // This function helps convert between numeric values in the database and string values in the UI
+  function getActivityLevelOptions() {
+    return Object.entries(ACTIVITY_LEVELS).map(([key, { label }]) => ({
+      value: Number(key), // Use numeric keys for values
+      label,
+    }));
+  }
+
+  // Convert string activity level to number if needed
+  const activityLevelValue =
+    typeof settings.activity_level === "string" && settings.activity_level
+      ? getActivityLevelFromString(settings.activity_level as ActivityLevel)
+      : settings.activity_level;
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <TextField
@@ -85,14 +103,9 @@ export default function ProfileForm({
 
       <Dropdown
         label="Activity Level"
-        value={settings.activity_level || ""}
-        onChange={(value) => updateSetting("activity_level", value)}
-        options={Object.entries(ACTIVITY_LEVELS).map(
-          ([, { label, value }]) => ({
-            value,
-            label,
-          })
-        )}
+        value={activityLevelValue || ""} // Use the converted numeric value
+        onChange={(value) => updateSetting("activity_level", Number(value))} // Ensure we store as number
+        options={getActivityLevelOptions()}
         error={formErrors.activity_level}
         required
       />

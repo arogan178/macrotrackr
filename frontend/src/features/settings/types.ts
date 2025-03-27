@@ -1,18 +1,12 @@
 import { CALORIE_ADJUSTMENT_FACTORS } from "./constants";
+import { MacroTargetSettings } from "@/features/macroTracking/types";
 
 // Single consolidated type for all activity/exercise levels
 export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
 
-export interface MacroDistributionSettings {
-  proteinPercentage: number;
-  carbsPercentage: number;
-  fatsPercentage: number;
-  locked_macros?: string[];
-}
-
 export type Gender = "male" | "female";
 
-export interface UserDetails {
+export interface UserSettings {
   id: number;
   first_name: string;
   last_name: string;
@@ -22,7 +16,7 @@ export interface UserDetails {
   weight?: number;
   activity_level?: ActivityLevel;
   gender?: Gender;
-  macro_distribution?: MacroDistributionSettings;
+  macro_distribution?: MacroTargetSettings;
 }
 export type WeightGoal = keyof typeof CALORIE_ADJUSTMENT_FACTORS;
 export type MacroDistribution = {
