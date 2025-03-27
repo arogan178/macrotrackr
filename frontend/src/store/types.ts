@@ -35,7 +35,7 @@
 //   fats: string;
 // }
 
-// export interface MacroDistributionSettings {
+// export interface MacroTargetSettings {
 //   proteinPercentage: number;
 //   carbsPercentage: number;
 //   fatsPercentage: number;
@@ -52,7 +52,7 @@
 //   weight?: number;
 //   activity_level?: number;
 //   gender?: "male" | "female";
-//   macro_distribution?: MacroDistributionSettings;
+//   macro_distribution?: MacroTargetSettings;
 // }
 
 // export type Gender = "Male" | "Female";
