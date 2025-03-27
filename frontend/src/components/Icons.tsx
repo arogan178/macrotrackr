@@ -30,9 +30,13 @@ import {
   Flame,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Unlock,
   Menu,
   Star,
+  Target,
+  Goal,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -95,7 +99,11 @@ export const ArrowRightIcon = createIcon(ArrowRight);
 export const DownloadIcon = createIcon(Download);
 export const ChevronDownIcon = createIcon(ChevronDown);
 export const ChevronUpIcon = createIcon(ChevronUp);
+export const ChevronLeftIcon = createIcon(ChevronLeft);
+export const ChevronRightIcon = createIcon(ChevronRight);
 export const LockIcon = createIcon(Lock);
 export const UnlockIcon = createIcon(Unlock);
 export const MenuIcon = createIcon(Menu);
 export const StarIcon = createIcon(Star);
+export const GoalsIcon = createIcon(Goal);
+export const TargetIcon = createIcon(Target);

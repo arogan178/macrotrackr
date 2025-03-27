@@ -16,7 +16,7 @@ export default function HomePage() {
   const {
     user,
     history,
-    totals,
+    macroDailyTotals,
     isLoading,
     isSaving,
     isEditing,
@@ -26,6 +26,7 @@ export default function HomePage() {
     editingEntry,
     userMetrics,
     fetchUserDetails,
+    fetchMacroData,
     addEntry,
     updateEntry,
     deleteEntry,
@@ -34,10 +35,11 @@ export default function HomePage() {
     clearAllNotifications,
   } = useStore();
 
-  // Fetch user details on component mount
+  // Fetch user details and macros on component mount
   useEffect(() => {
     fetchUserDetails();
-  }, [fetchUserDetails]);
+    fetchMacroData();
+  }, [fetchUserDetails, fetchMacroData]);
 
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
@@ -97,7 +99,7 @@ export default function HomePage() {
                 ) : (
                   user && (
                     <DailySummaryPanel
-                      totals={totals}
+                      macroDailyTotals={macroDailyTotals}
                       macroDistribution={user?.macro_distribution}
                     />
                   )
