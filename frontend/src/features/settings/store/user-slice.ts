@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { apiService } from "../utils/api-service";
+import { apiService } from "@/utils/api-service";
 import { UserSettings } from "@/features/settings/types";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
 import {
@@ -7,8 +7,8 @@ import {
   calculateTDEE,
   calculateAge,
 } from "@/features/settings/calculations";
-import { getErrorMessage } from "../utils/error-handling";
-import { validateUserSettings } from "../features/settings/utils/validation";
+import { getErrorMessage } from "@/utils/error-handling";
+import { validateUserSettings } from "../utils/validation";
 
 export interface UserSlice {
   // User state
@@ -99,7 +99,10 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
         userMetrics: { bmr, tdee },
       });
 
-      await get().fetchMacros?.();
+      // Only call fetchMacros if it exists and is a function
+      if (typeof get().fetchMacros === "function") {
+        await get().fetchMacros();
+      }
     } catch (error) {
       console.error("Fetch user error:", error);
       const errorMessage = getErrorMessage(error);

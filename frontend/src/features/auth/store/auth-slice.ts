@@ -4,7 +4,7 @@ import {
   validateRegistrationStep1,
   validateRegistrationStep2,
   validateRegistrationStep3,
-} from "@/features/auth/utils/validation";
+} from "../utils/validation";
 import { apiService } from "@/utils/api-service";
 import { getErrorMessage } from "@/utils/error-handling";
 import { securelyStoreToken, removeToken } from "@/utils/token-storage";

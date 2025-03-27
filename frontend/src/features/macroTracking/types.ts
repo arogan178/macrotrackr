@@ -21,10 +21,11 @@ export interface MacroEntry {
   foodName?: string;
 }
 
-export interface MacroTotals {
+export interface MacroDailyTotals {
   protein: number;
   carbs: number;
   fats: number;
+  calories: number;
 }
 
 export interface MacroInputs {

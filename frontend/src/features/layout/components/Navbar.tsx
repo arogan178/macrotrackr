@@ -5,6 +5,7 @@ import {
   ReportingIcon2,
   SettingsIcon,
   LogoutIcon,
+  GoalsIcon,
 } from "@/components/Icons";
 
 const Navbar: React.FC = () => {
@@ -28,6 +29,10 @@ const Navbar: React.FC = () => {
     navigate("/reporting");
   };
 
+  const handleGoals = () => {
+    navigate("/goals");
+  };
+
   const getButtonClass = (path: string) => {
     const baseClass =
       "px-4 py-1.5 font-medium rounded-lg transition-all duration-200 flex items-center";
@@ -49,6 +54,10 @@ const Navbar: React.FC = () => {
           <button className={getButtonClass("/home")} onClick={handleHome}>
             <HomeIcon className="w-5 h-5 mr-2" />
             Home
+          </button>
+          <button className={getButtonClass("/goals")} onClick={handleGoals}>
+            <GoalsIcon className="w-5 h-5 mr-2" />
+            Goals
           </button>
           <button
             className={getButtonClass("/reporting")}
