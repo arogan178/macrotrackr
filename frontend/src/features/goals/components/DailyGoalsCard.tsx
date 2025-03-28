@@ -15,6 +15,7 @@ export default function DailyGoalsCard({
   adjustedCalorieIntake,
   userWeight = 70,
 }: DailyGoalsCardProps) {
+  // Always use TDEE if there's no adjustedCalorieIntake set
   const targetCalories = adjustedCalorieIntake || tdee;
 
   // Add validation to ensure all required properties exist
