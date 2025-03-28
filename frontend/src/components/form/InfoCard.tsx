@@ -1,5 +1,5 @@
-import { InfoCardProps } from "./types";
-import { colorMap } from "./constants";
+import { InfoCardProps } from "../utils/types";
+import { colorMap } from "../utils/constants";
 
 export function InfoCard({
   title,

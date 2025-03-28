@@ -8,7 +8,7 @@ import {
   PlusCircleIcon,
 } from "@/components/Icons";
 import Modal from "@/components/Modal";
-import { MacroEntry } from "@/store/types";
+import { MacroEntry } from "../types";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
@@ -384,13 +384,13 @@ export default function EntryHistory({
 
       {/* Add ConfirmationModal component */}
       <Modal
-        variant="confirmation"
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setDateToDelete(null);
         }}
         title="Delete Entries"
+        variant="confirmation"
         message={`Are you sure you want to delete all entries for ${
           dateToDelete ? formatDate(dateToDelete) : ""
         }? This action cannot be undone.`}

@@ -1,5 +1,5 @@
 import React from "react";
-import { FormButtonProps } from "./types";
+import { FormButtonProps } from "../utils/types";
 import LoadingSpinner from "../LoadingSpinner";
 
 export function FormButton({

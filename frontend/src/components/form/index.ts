@@ -20,4 +20,4 @@ export type {
   TabButtonProps,
   CardContainerProps,
   FormButtonProps,
-} from "./types";
+} from "../utils/types";

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import MacroSlider, { MacroBadge } from "./MacroSlider";
-import { InfoCard } from "@/components/form/index";
+import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
 
 interface Distribution {

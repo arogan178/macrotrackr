@@ -32,38 +32,22 @@ export default function ProgressBar({
   // Ensure progress is between 0 and 100
   const safeProgress = Math.min(Math.max(progress, 0), 100);
 
-  const getHeightClass = () => {
-    switch (height) {
-      case "sm":
-        return "h-1";
-      case "lg":
-        return "h-4";
-      default:
-        return "h-2";
-    }
-  };
-
-  const getColorClass = () => {
-    switch (color) {
-      case "red":
-        return "bg-red-500";
-      case "blue":
-        return "bg-blue-500";
-      case "green":
-        return "bg-green-500";
-      default:
-        return "bg-indigo-500";
-    }
-  };
-
   return (
-    <div
-      className={`w-full ${getHeightClass()} bg-gray-700/50 rounded-full overflow-hidden`}
-    >
+    <div className={`relative ${className}`}>
       <div
-        className={`${getHeightClass()} ${getColorClass()} rounded-full transition-all duration-500`}
-        style={{ width: `${safeProgress}%` }}
-      />
+        className={`w-full ${heightMap[height]} bg-gray-700/50 rounded-full overflow-hidden`}
+      >
+        <div
+          className={`${heightMap[height]} ${colorMap[color]} rounded-full transition-all duration-500`}
+          style={{ width: `${safeProgress}%` }}
+        />
+      </div>
+
+      {showPercentage && (
+        <div className="absolute right-0 top-0 transform -translate-y-full -translate-x-1 text-xs text-gray-400">
+          {Math.round(safeProgress)}%
+        </div>
+      )}
     </div>
   );
 }

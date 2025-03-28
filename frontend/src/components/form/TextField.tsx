@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { TextFieldProps } from "./types";
-import { formStyles } from "./styles";
+import { TextFieldProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 import { EyeIcon, EyeSlashIcon } from "../Icons";
 
 export function TextField({

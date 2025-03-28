@@ -1,5 +1,5 @@
-import { DropdownProps } from "./types";
-import { formStyles } from "./styles";
+import { DropdownProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
 export function Dropdown({
   label,

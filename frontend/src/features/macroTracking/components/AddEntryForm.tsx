@@ -6,7 +6,7 @@ import {
   Dropdown,
   DateField,
   TextField,
-} from "@/components/form/index";
+} from "@/components/form";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { CheckMarkIcon, LoadingSpinnerIcon } from "@/components/Icons";
 import { MealType, MEAL_TYPES } from "../types";
