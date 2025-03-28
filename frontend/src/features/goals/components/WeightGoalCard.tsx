@@ -18,9 +18,13 @@ export default function WeightGoalCard({
   weightRemaining = 0,
   insight = "You're on track with your weight goals. Keep going!",
 }: WeightGoalCardProps) {
+  // Get today's date in YYYY-MM-DD format for the starting date
+  const todayString = new Date().toISOString().split("T")[0];
+
   const [formValues, setFormValues] = useState<WeightGoalFormValues>({
     currentWeight,
-    targetWeight: targetWeight || currentWeight,
+    targetWeight: targetWeight || undefined, // Make target weight empty by default
+    startDate: startDate || todayString, // Set today as the default starting date
   });
   const [isEditing, setIsEditing] = useState(mode === "create");
   const [hasChanges, setHasChanges] = useState(false);
@@ -51,9 +55,10 @@ export default function WeightGoalCard({
   useEffect(() => {
     setFormValues({
       currentWeight,
-      targetWeight: targetWeight || currentWeight,
+      targetWeight: targetWeight || undefined, // Make target weight empty by default
+      startDate: startDate || todayString, // Set today as the default starting date
     });
-  }, [currentWeight, targetWeight]);
+  }, [currentWeight, targetWeight, startDate, todayString]);
 
   useEffect(() => {
     // Check if values have changed from props
@@ -82,9 +87,12 @@ export default function WeightGoalCard({
   };
 
   const handleSave = () => {
+    if (!formValues.targetWeight) return; // Don't save if target weight is empty
+
     onSave({
       ...formValues,
       adjustedCalorieIntake: calorieIntake,
+      startDate: formValues.startDate || todayString, // Ensure starting date is set
     });
     setIsEditing(false);
   };
@@ -94,13 +102,16 @@ export default function WeightGoalCard({
   };
 
   // Format dates for display
-  const formattedStartDate = startDate
-    ? new Date(startDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "Not set";
+  const formattedStartDate =
+    formValues.startDate || startDate
+      ? new Date(
+          formValues.startDate || startDate || todayString
+        ).toLocaleDateString("en-US", {
+          month: "short",
+          day: "numeric",
+          year: "numeric",
+        })
+      : "Not set";
 
   const formattedTargetDate = targetDate
     ? new Date(targetDate).toLocaleDateString("en-US", {
@@ -115,6 +126,15 @@ export default function WeightGoalCard({
         year: "numeric",
       })
     : "Not set";
+
+  // Determine if it's a weight loss, gain, or maintenance goal
+  const isWeightLoss =
+    formValues.currentWeight > (formValues.targetWeight || 0);
+  const isWeightGain =
+    formValues.currentWeight < (formValues.targetWeight || 0);
+  const isMaintenance =
+    formValues.currentWeight === formValues.targetWeight &&
+    formValues.targetWeight !== undefined;
 
   // If we're in edit mode, show the form
   if (isEditing) {
@@ -148,7 +168,7 @@ export default function WeightGoalCard({
               label="Target Weight (kg)"
               value={formValues.targetWeight}
               onChange={(value) =>
-                setFormValues({ ...formValues, targetWeight: value || 0 })
+                setFormValues({ ...formValues, targetWeight: value })
               }
               min={30}
               max={300}
@@ -157,8 +177,8 @@ export default function WeightGoalCard({
               helperText="Your goal weight in kilograms"
             />
 
-            {/* Calorie Intake Adjustment */}
-            {tdee && calorieIntake !== undefined && (
+            {/* Calorie Intake Adjustment - Now shows for maintenance goals too */}
+            {tdee && calorieIntake !== undefined && formValues.targetWeight && (
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <label className="block text-sm font-medium text-gray-200">
@@ -172,8 +192,20 @@ export default function WeightGoalCard({
                 <div className="relative">
                   <input
                     type="range"
-                    min={Math.max(tdee - 1000, 1200)} // Minimum safe calorie intake
-                    max={tdee + 500}
+                    min={
+                      isWeightLoss
+                        ? Math.max(tdee - 1000, 1200)
+                        : isMaintenance
+                        ? tdee - 300
+                        : tdee
+                    }
+                    max={
+                      isWeightLoss
+                        ? tdee
+                        : isMaintenance
+                        ? tdee + 300
+                        : tdee + 500
+                    }
                     step={50}
                     value={calorieIntake}
                     onChange={(e) =>
@@ -182,13 +214,29 @@ export default function WeightGoalCard({
                     className="appearance-none w-full h-2 bg-gray-700 rounded-lg outline-none cursor-pointer"
                   />
                   <div className="flex justify-between text-xs text-gray-400 mt-1">
-                    <span>Faster</span>
-                    <span>TDEE ({tdee})</span>
-                    <span>Slower</span>
+                    {isWeightLoss ? (
+                      <>
+                        <span>Faster</span>
+                        <span>TDEE ({tdee})</span>
+                        <span>Slower</span>
+                      </>
+                    ) : isMaintenance ? (
+                      <>
+                        <span>Less calories</span>
+                        <span>TDEE ({tdee})</span>
+                        <span>More calories</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>Slower</span>
+                        <span>TDEE ({tdee})</span>
+                        <span>Faster</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
-                {calculatedTargetDate && (
+                {calculatedTargetDate && !isMaintenance && (
                   <div className="bg-gray-700/30 p-3 rounded-lg mt-3">
                     <p className="text-sm text-gray-300">
                       <span className="font-medium">
@@ -198,6 +246,23 @@ export default function WeightGoalCard({
                     <p className="text-xs text-gray-400 mt-1">
                       Expected change: {weeklyWeightChange?.toFixed(2) || 0} kg
                       per week
+                    </p>
+                  </div>
+                )}
+
+                {isMaintenance && (
+                  <div className="bg-gray-700/30 p-3 rounded-lg mt-3">
+                    <p className="text-sm text-gray-300">
+                      <span className="font-medium">Maintenance Goal</span>
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      You're aiming to maintain your current weight with{" "}
+                      {calorieIntake < tdee
+                        ? "slightly fewer"
+                        : calorieIntake > tdee
+                        ? "slightly more"
+                        : "the same"}{" "}
+                      calories than your TDEE
                     </p>
                   </div>
                 )}
@@ -218,7 +283,7 @@ export default function WeightGoalCard({
             <FormButton
               type="button"
               variant="primary"
-              disabled={!hasChanges || isLoading}
+              disabled={!hasChanges || isLoading || !formValues.targetWeight} // Disable button when target weight is empty
               isLoading={isLoading}
               onClick={handleSave}
             >
