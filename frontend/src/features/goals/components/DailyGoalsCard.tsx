@@ -1,5 +1,4 @@
-import { CardContainer } from "@/components/form";
-import { EditIcon, CalorieIcon, GoalsIcon } from "@/components/Icons";
+import { CalorieIcon } from "@/components/Icons";
 import ProgressBar from "./ProgressBar";
 import { MacroDailyTotals } from "@/features/macroTracking/types";
 
@@ -30,7 +29,7 @@ export default function DailyGoalsCard({
     <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden transform transition-all duration-300 hover:shadow-xl hover:-translate-y-1 h-full">
       <div className="bg-gradient-to-r from-indigo-900/30 to-transparent p-6 h-full">
         <div className="flex items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-200">Daily Goals</h2>
+          <h2 className="text-xl font-semibold text-gray-200">Daily Targets</h2>
           <div className="ml-auto bg-indigo-500/20 p-1.5 rounded-full">
             <svg
               className="w-4 h-4 text-indigo-300"

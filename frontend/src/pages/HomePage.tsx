@@ -1,7 +1,7 @@
 import { useEffect, memo } from "react";
 import { Navbar } from "@/features/layout/components";
 import { FloatingNotification } from "@/features/notifications/components";
-import { CardContainer } from "@/components/form/index";
+import { CardContainer } from "@/components/form";
 import {
   EntryHistoryPanel,
   DailySummaryPanel,

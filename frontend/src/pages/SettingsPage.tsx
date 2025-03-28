@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { Navbar } from "../features/layout/components";
 import FloatingNotification from "../features/notifications/components/FloatingNotification";
-import { TabButton, CardContainer } from "../components/form/index";
+import { TabButton, CardContainer } from "../components/form";
 import SaveButton from "../components/SaveButton";
 import Modal from "../components/Modal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
@@ -26,12 +26,12 @@ export default function SettingsPage() {
     fetchSettings,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "nutrition">(
+  const [activeTab, setActiveTab] = useState<"profile" | "macro targets">(
     "profile"
   );
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<
-    "profile" | "nutrition" | null
+    "profile" | "macro targets" | null
   >(null);
 
   // Fetch settings on component mount
@@ -46,7 +46,7 @@ export default function SettingsPage() {
   );
 
   const handleTabChange = useCallback(
-    (tab: "profile" | "nutrition") => {
+    (tab: "profile" | "macro targets") => {
       if (hasSettingsChanges) {
         setPendingTabChange(tab);
         setShowConfirmModal(true);
@@ -107,14 +107,15 @@ export default function SettingsPage() {
           )}
 
           <Modal
-            variant="confirmation"
             isOpen={showConfirmModal}
             onClose={cancelTabChange}
             title="Unsaved Changes"
+            variant="confirmation"
             message="You have unsaved changes that will be lost. Do you want to continue?"
             confirmLabel="Discard Changes"
             cancelLabel="Keep Editing"
             onConfirm={confirmTabChange}
+            isDanger={true}
           />
 
           <PageHeader hasChanges={hasSettingsChanges} />
@@ -128,8 +129,8 @@ export default function SettingsPage() {
               Profile
             </TabButton>
             <TabButton
-              active={activeTab === "nutrition"}
-              onClick={() => handleTabChange("nutrition")}
+              active={activeTab === "macro targets"}
+              onClick={() => handleTabChange("macro targets")}
             >
               <MenuIcon className="w-4 h-4 mr-2" />
               Macro Targets

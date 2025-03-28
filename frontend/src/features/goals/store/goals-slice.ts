@@ -1,8 +1,6 @@
 import { StateCreator } from "zustand";
 import { WeightGoals, WeightGoalFormValues } from "../types";
-import { apiService } from "@/utils/api-service";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
-import { MacroTotals } from "@/features/macroTracking/types";
 
 export interface GoalsSlice {
   weightGoals: WeightGoals | null;
@@ -37,6 +35,29 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       error: null,
     })),
 
+  // resetGoals: async () => {
+  //   try {
+  //     set({ isLoading: true });
+  //     // API call to reset goals would go here
+  //     // await api.resetGoals();
+
+  //     // Reset local state
+  //     set({
+  //       weightGoals: null,
+  //       // Reset any other goals-related state
+  //       isLoading: false,
+  //     });
+
+  //     // Refetch necessary data
+  //     get().fetchUserDetails();
+  //     get().fetchMacroData();
+  //   } catch (error) {
+  //     set({
+  //       error: "Failed to reset goals. Please try again.",
+  //       isLoading: false,
+  //     });
+  //   }
+  // },
   createWeightGoal: (formValues, tdee) => {
     const { currentWeight, targetWeight, targetDate } = formValues;
 

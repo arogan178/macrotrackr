@@ -7,7 +7,7 @@ import {
   NumberField,
   InfoCard,
   DateField,
-} from "@/components/form/index";
+} from "@/components/form";
 import {
   ForwardIcon,
   BackIcon,

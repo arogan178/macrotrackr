@@ -1,6 +1,6 @@
 import React from "react";
-import { DateFieldProps } from "./types";
-import { formStyles } from "./styles";
+import { DateFieldProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
 export function DateField({
   label,

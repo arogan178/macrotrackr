@@ -37,9 +37,11 @@ import {
   Star,
   Target,
   Goal,
+  CheckCircle,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
+import { create } from "zustand";
 
 // Base icon type with common props
 interface IconProps extends Omit<LucideProps, "size"> {
@@ -107,3 +109,5 @@ export const MenuIcon = createIcon(Menu);
 export const StarIcon = createIcon(Star);
 export const GoalsIcon = createIcon(Goal);
 export const TargetIcon = createIcon(Target);
+export const BarChartIcon = createIcon(BarChart);
+export const CheckCircleIcon = createIcon(CheckCircle);
