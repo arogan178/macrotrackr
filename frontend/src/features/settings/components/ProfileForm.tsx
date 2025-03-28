@@ -1,15 +1,6 @@
-import {
-  TextField,
-  NumberField,
-  Dropdown,
-  DateField,
-} from "@/components/form/index";
+import { TextField, NumberField, Dropdown, DateField } from "@/components/form";
 import { UserSettings, Gender, ActivityLevel } from "@/features/settings/types";
-import {
-  GENDER_OPTIONS,
-  ACTIVITY_LEVELS,
-  getActivityLevelFromString,
-} from "../constants";
+import { GENDER_OPTIONS, ACTIVITY_LEVELS } from "../constants";
 
 interface ProfileFormProps {
   settings: UserSettings;
@@ -74,6 +65,15 @@ export default function ProfileForm({
         required
       />
 
+      <Dropdown
+        label="Gender"
+        value={settings.gender || ""}
+        onChange={(value) => updateSetting("gender", value as Gender)}
+        options={GENDER_OPTIONS}
+        error={formErrors.gender}
+        required
+      />
+
       <NumberField
         label="Height (cm)"
         value={settings.height}
@@ -89,15 +89,6 @@ export default function ProfileForm({
         onChange={(value) => updateSetting("weight", value || 0)}
         error={formErrors.weight}
         unit="kg"
-        required
-      />
-
-      <Dropdown
-        label="Gender"
-        value={settings.gender || ""}
-        onChange={(value) => updateSetting("gender", value as Gender)}
-        options={GENDER_OPTIONS}
-        error={formErrors.gender}
         required
       />
 

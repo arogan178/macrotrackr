@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { CardContainer, TextField } from "@/components/form/index";
+import { CardContainer, TextField } from "@/components/form";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { CalorieIcon } from "@/components/Icons";
 import { useStore } from "@/store/store";

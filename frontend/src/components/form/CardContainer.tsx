@@ -1,5 +1,5 @@
-import { CardContainerProps } from "./types";
-import { formStyles } from "./styles";
+import { CardContainerProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
 export function CardContainer({
   children,

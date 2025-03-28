@@ -25,10 +25,10 @@ type Store = AuthSlice &
   GoalsSlice;
 
 // Create store with all slices
-export const useStore = create<Store>((...a) => ({
-  ...createAuthSlice(...a),
-  ...createUserSlice(...a),
-  ...createNotificationSlice(...a),
-  ...createMacrosSlice(...a),
-  ...createGoalsSlice(...a),
+export const useStore = create<Store>((set, get) => ({
+  ...createAuthSlice(set, get),
+  ...createUserSlice(set, get),
+  ...createNotificationSlice(set, get),
+  ...createMacrosSlice(set, get),
+  ...createGoalsSlice(set, get),
 }));

@@ -3,3 +3,7 @@ export { default as GoalSummaryCard } from "./GoalSummaryCard";
 export { default as DailyGoalsCard } from "./DailyGoalsCard";
 export { default as GoalInsightCard } from "./GoalInsightCard";
 export { default as ProgressBar } from "./ProgressBar";
+export { default as GoalsLoadingSkeleton } from "./GoalsLoadingSkeleton";
+export { default as ActiveGoalsContent } from "./ActiveGoalsContent";
+export { default as AchievementsContent } from "./AchievementsContent";
+export { default as HabitGoalCard } from "./HabitGoalCard";

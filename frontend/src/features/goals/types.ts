@@ -34,7 +34,14 @@ export interface WeightGoalCardProps {
   targetWeight: number;
   tdee: number;
   isLoading?: boolean;
-  onSave: (goals: WeightGoalFormValues) => void;
+  onSave: (values: WeightGoalFormValues) => void;
+  className?: string;
+  mode?: "create" | "view";
+  startDate?: string | Date;
+  targetDate?: string | Date;
+  progressPercentage?: number;
+  weightRemaining?: number;
+  insight?: string;
 }
 
 export interface GoalSummaryCardProps {

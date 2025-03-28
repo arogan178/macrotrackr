@@ -1,7 +1,7 @@
 import React from "react";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
-import { NumberFieldProps } from "./types";
-import { formStyles } from "./styles";
+import { NumberFieldProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
 export function NumberField({
   label,

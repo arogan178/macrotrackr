@@ -1,0 +1,1 @@
+export { useGoalData } from "./use-goal-data";

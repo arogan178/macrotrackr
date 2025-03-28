@@ -1,5 +1,5 @@
-import { TabButtonProps } from "./types";
-import { formStyles } from "./styles";
+import { TabButtonProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
 export function TabButton({ active, onClick, children }: TabButtonProps) {
   return (

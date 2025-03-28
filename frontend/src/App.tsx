@@ -12,7 +12,6 @@ import SettingsPage from "@/pages/SettingsPage";
 import ReportingPage from "@/pages/ReportingPage";
 import GoalsPage from "@/pages/GoalsPage";
 import NotificationManager from "@/features/notifications/components/NotificationManager";
-
 import { useEffect, useState } from "react";
 
 function AuthHandler() {

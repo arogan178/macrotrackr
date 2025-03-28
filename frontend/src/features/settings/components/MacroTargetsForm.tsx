@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { UserSettings } from "../types";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
-import { InfoCard, CardContainer } from "@/components/form/index";
+import { InfoCard, CardContainer } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
 import MacroDistribution from "./MacroDistribution";
 

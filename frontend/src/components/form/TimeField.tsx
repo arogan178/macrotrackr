@@ -1,6 +1,6 @@
 import React from "react";
-import { TimeFieldProps } from "./types";
-import { formStyles } from "./styles";
+import { TimeFieldProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
 export function TimeField({
   label,
