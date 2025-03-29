@@ -1,0 +1,265 @@
+import { CalorieIcon, ChevronRightIcon, EditIcon } from "@/components/Icons";
+import ProgressBar from "@/components/ProgressBar";
+import { MacroDailyTotals } from "@/features/macroTracking/types";
+import { WeightGoals } from "../types";
+import MacroNutrient from "./MacroNutrient";
+
+interface WeightGoalStatusProps {
+  currentWeight: number;
+  targetWeight: number;
+  tdee: number;
+  macroDailyTotals: MacroDailyTotals;
+  weightGoals: WeightGoals;
+  onEdit: () => void;
+}
+
+function WeightGoalStatus({
+  currentWeight,
+  targetWeight,
+  tdee,
+  macroDailyTotals,
+  weightGoals,
+  onEdit,
+}: WeightGoalStatusProps) {
+  // Calculate progress percentage
+  const weightDifference = Math.abs(targetWeight - currentWeight);
+  const initialDifference = Math.abs(
+    targetWeight - (weightGoals?.currentWeight || currentWeight)
+  );
+  const progressPercentage =
+    initialDifference > 0
+      ? Math.min(
+          100,
+          Math.round(
+            ((initialDifference - weightDifference) / initialDifference) * 100
+          )
+        )
+      : 0;
+
+  // Determine if it's a weight loss, gain, or maintenance goal
+  const isWeightLoss = weightGoals.weightGoal === "lose";
+  const isWeightGain = weightGoals.weightGoal === "gain";
+  const isMaintenance = weightGoals.weightGoal === "maintain";
+
+  // Calculate target calories
+  const targetCalories = weightGoals?.adjustedCalorieIntake || tdee;
+
+  // For display
+  const goalTypeLabel = isWeightLoss
+    ? "Weight Loss"
+    : isWeightGain
+    ? "Weight Gain"
+    : "Weight Maintenance";
+
+  const goalColor = isWeightLoss ? "indigo" : isWeightGain ? "green" : "blue";
+
+  // Format dates for display
+  const formattedStartDate = weightGoals?.startDate
+    ? new Date(weightGoals.startDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : "Today";
+
+  const formattedTargetDate = weightGoals?.targetDate
+    ? new Date(weightGoals.targetDate).toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
+    : "Not set";
+
+  return (
+    <div className="p-6">
+      {/* Header with goal type and edit button */}
+      <div className="flex justify-between items-center mb-6">
+        <div className="flex items-center">
+          <div className={`p-2 rounded-lg bg-${goalColor}-600/20 mr-3`}>
+            <CalorieIcon className={`w-5 h-5 text-${goalColor}-400`} />
+          </div>
+          <div>
+            <h2 className="text-xl font-semibold text-gray-200">
+              {goalTypeLabel} Plan
+            </h2>
+            <p className="text-sm text-gray-400">
+              Started {formattedStartDate} • Target {formattedTargetDate}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={onEdit}
+          className="p-2 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
+          aria-label="Edit weight goal"
+        >
+          <EditIcon className="text-gray-300" />
+        </button>
+      </div>
+
+      {/* Goal progress visual */}
+      <div className="mb-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
+          <div className="flex items-baseline space-x-3 mb-2 md:mb-0">
+            <span className="text-2xl font-bold text-gray-200">
+              {currentWeight} kg
+            </span>
+            <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+            <span className="text-xl text-gray-400">{targetWeight} kg</span>
+            {!isMaintenance && (
+              <span className={`text-${goalColor}-400 ml-1 text-sm`}>
+                ({isWeightLoss ? "-" : "+"}
+                {Math.abs(targetWeight - currentWeight).toFixed(1)} kg)
+              </span>
+            )}
+          </div>
+          <div className="flex items-center">
+            <div className="w-16 h-16 relative rounded-full flex items-center justify-center bg-gray-700/50">
+              <div className="absolute inset-0">
+                <svg width="64" height="64" viewBox="0 0 64 64">
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="24"
+                    fill="none"
+                    stroke="#374151"
+                    strokeWidth="6"
+                  />
+                  <circle
+                    cx="32"
+                    cy="32"
+                    r="24"
+                    fill="none"
+                    stroke={isWeightLoss ? "#6366F1" : "#10B981"}
+                    strokeWidth="6"
+                    strokeDasharray="150.8"
+                    strokeDashoffset={
+                      150.8 - (150.8 * progressPercentage) / 100
+                    }
+                    transform="rotate(-90 32 32)"
+                  />
+                </svg>
+              </div>
+              <span className="text-lg font-bold text-gray-200">
+                {progressPercentage}%
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mb-1">
+          <div
+            className={`h-full rounded-full bg-${goalColor}-500`}
+            style={{ width: `${progressPercentage}%` }}
+          ></div>
+        </div>
+        <div className="flex justify-between text-xs text-gray-400">
+          <span>Start: {weightGoals?.currentWeight || currentWeight} kg</span>
+          <span>Target: {targetWeight} kg</span>
+        </div>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {/* Weekly Rate */}
+        <div className="bg-gray-700/30 rounded-lg p-3">
+          <p className="text-xs text-gray-400 mb-1">Weekly Rate</p>
+          <p className="text-lg font-medium text-gray-200">
+            {isMaintenance
+              ? "Maintain weight"
+              : `${isWeightLoss ? "-" : "+"}${Math.abs(
+                  weightGoals.weeklyChange || 0
+                ).toFixed(2)} kg/week`}
+          </p>
+        </div>
+
+        {/* Time Remaining */}
+        <div className="bg-gray-700/30 rounded-lg p-3">
+          <p className="text-xs text-gray-400 mb-1">Time Remaining</p>
+          <p className="text-lg font-medium text-gray-200">
+            {isMaintenance
+              ? "Ongoing"
+              : `${weightGoals.calculatedWeeks || 0} weeks`}
+          </p>
+        </div>
+
+        {/* Daily Deficit/Surplus */}
+        <div className="bg-gray-700/30 rounded-lg p-3">
+          <p className="text-xs text-gray-400 mb-1">
+            {isWeightLoss
+              ? "Daily Deficit"
+              : isWeightGain
+              ? "Daily Surplus"
+              : "TDEE"}
+          </p>
+          <p className="text-lg font-medium text-gray-200">
+            {isMaintenance
+              ? `${tdee} kcal`
+              : `${Math.abs(
+                  tdee - (weightGoals?.adjustedCalorieIntake || tdee)
+                )} kcal`}
+          </p>
+        </div>
+      </div>
+
+      {/* Nutrition section */}
+      <div className="mb-2">
+        <h3 className="font-medium text-gray-200 mb-3">Daily Nutrition</h3>
+
+        {/* Calories progress */}
+        <div className="mb-4">
+          <div className="flex justify-between items-center mb-1">
+            <div className="flex items-center gap-2">
+              <CalorieIcon className="w-4 h-4 text-indigo-400" />
+              <span className="text-sm text-gray-200">Calories</span>
+            </div>
+            <div className="text-sm">
+              <span className="text-gray-200">
+                {Math.round(macroDailyTotals.calories)}
+              </span>
+              <span className="text-gray-500"> / </span>
+              <span className="text-gray-400">
+                {Math.round(targetCalories)}
+              </span>
+            </div>
+          </div>
+          <ProgressBar
+            progress={Math.min(
+              Math.round((macroDailyTotals.calories / targetCalories) * 100),
+              100
+            )}
+            color="indigo"
+            height="sm"
+          />
+        </div>
+
+        {/* Macros Grid */}
+        <div className="grid grid-cols-3 gap-3">
+          {/* Protein */}
+          <MacroNutrient
+            label="Protein"
+            current={macroDailyTotals.protein}
+            target={Math.round(currentWeight * 2)}
+            color="green"
+          />
+
+          {/* Carbs */}
+          <MacroNutrient
+            label="Carbs"
+            current={macroDailyTotals.carbs}
+            target={Math.round((targetCalories * 0.5) / 4)}
+            color="blue"
+          />
+
+          {/* Fats */}
+          <MacroNutrient
+            label="Fats"
+            current={macroDailyTotals.fats}
+            target={Math.round((targetCalories * 0.25) / 9)}
+            color="red"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default WeightGoalStatus;
