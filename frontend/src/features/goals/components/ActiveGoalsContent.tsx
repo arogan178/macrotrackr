@@ -1,4 +1,4 @@
-import { WeightGoalCard, GoalSummaryCard, DailyGoalsCard } from "./";
+import { WeightProgressCard, WeightDetailsCard, DailyGoalsCard } from "./";
 import HabitGoalCard from "./HabitGoalCard";
 import { WeightGoalFormValues } from "../types";
 import { MacroDailyTotals } from "@/features/macroTracking/types";
@@ -33,7 +33,7 @@ function ActiveGoalsContent({
     <div className="space-y-8">
       {/* Top Row: Goal Management and Daily Targets (50/50 split) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <WeightGoalCard
+        <WeightProgressCard
           currentWeight={userWeight || 0}
           targetWeight={targetWeight || userWeight || 0}
           tdee={tdee}
@@ -53,7 +53,7 @@ function ActiveGoalsContent({
 
       {/* Middle Row: Goal Summary (only shown if weightGoals exists) */}
       {weightGoals ? (
-        <GoalSummaryCard goalData={weightGoals} tdee={tdee} />
+        <WeightDetailsCard goalData={weightGoals} tdee={tdee} />
       ) : (
         <CardContainer className="w-full">
           <EmptyState

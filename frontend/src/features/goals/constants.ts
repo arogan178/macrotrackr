@@ -14,3 +14,11 @@ export const CALORIES_PER_GRAM = {
   carbs: 4,
   fats: 9,
 } as const;
+
+// Constants for weight and calorie calculations
+export const CALORIES_PER_KG_FAT = 7700; // Approximately 7700 calories per kg of body fat
+export const MIN_SAFE_DAILY_DEFICIT = 500; // Minimum safe daily calorie deficit
+export const MAX_SAFE_DAILY_DEFICIT = 1000; // Maximum safe daily calorie deficit
+export const MIN_WEEKLY_WEIGHT_LOSS = 0.5; // Minimum recommended weight loss per week (kg)
+export const MAX_WEEKLY_WEIGHT_LOSS = 1.0; // Maximum recommended weight loss per week (kg)
+export const DEFAULT_TARGET_WEEKS = 12; // Default timeframe for goal calculations

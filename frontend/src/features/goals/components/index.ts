@@ -1,7 +1,6 @@
-export { default as WeightGoalCard } from "./WeightGoalCard";
-export { default as GoalSummaryCard } from "./GoalSummaryCard";
+export { default as WeightProgressCard } from "./WeightProgressCard";
+export { default as WeightDetailsCard } from "./WeightDetailsCard";
 export { default as DailyGoalsCard } from "./DailyGoalsCard";
-export { default as GoalInsightCard } from "./GoalInsightCard";
 export { default as ProgressBar } from "./ProgressBar";
 export { default as GoalsLoadingSkeleton } from "./GoalsLoadingSkeleton";
 export { default as ActiveGoalsContent } from "./ActiveGoalsContent";
