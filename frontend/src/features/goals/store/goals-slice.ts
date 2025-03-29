@@ -35,63 +35,61 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       error: null,
     })),
 
-  // resetGoals: async () => {
-  //   try {
-  //     set({ isLoading: true });
-  //     // API call to reset goals would go here
-  //     // await api.resetGoals();
-
-  //     // Reset local state
-  //     set({
-  //       weightGoals: null,
-  //       // Reset any other goals-related state
-  //       isLoading: false,
-  //     });
-
-  //     // Refetch necessary data
-  //     get().fetchUserDetails();
-  //     get().fetchMacroData();
-  //   } catch (error) {
-  //     set({
-  //       error: "Failed to reset goals. Please try again.",
-  //       isLoading: false,
-  //     });
-  //   }
-  // },
   createWeightGoal: (formValues, tdee) => {
-    const { currentWeight, targetWeight, targetDate } = formValues;
+    const { 
+      currentWeight, 
+      targetWeight, 
+      startDate,
+      targetDate,
+      adjustedCalorieIntake: customCalorieIntake,
+      weeklyChange: customWeeklyChange,
+      calculatedWeeks: customCalculatedWeeks,
+      weightGoal: customWeightGoal
+    } = formValues;
 
-    // Determine weight goal type (lose, maintain, gain)
-    let weightGoal: "lose" | "maintain" | "gain" = "maintain";
-    if (targetWeight < currentWeight) {
-      weightGoal = "lose";
-    } else if (targetWeight > currentWeight) {
-      weightGoal = "gain";
+    // Determine weight goal type (lose, maintain, gain) if not provided
+    let weightGoal = customWeightGoal || "maintain";
+    if (!customWeightGoal) {
+      if (targetWeight < currentWeight) {
+        weightGoal = "lose";
+      } else if (targetWeight > currentWeight) {
+        weightGoal = "gain";
+      }
     }
 
-    // Calculate adjusted calorie intake based on goal
-    const adjustedCalorieIntake = tdee + CALORIE_ADJUSTMENT_FACTORS[weightGoal];
+    // Use provided calorie intake or calculate based on goal
+    const adjustedCalorieIntake = customCalorieIntake || 
+      tdee + CALORIE_ADJUSTMENT_FACTORS[weightGoal];
 
-    // Calculate weeks to goal if target date is provided
-    let calculatedWeeks, weeklyChange, dailyDeficit;
-    if (targetDate) {
+    // Use provided values or calculate if not provided
+    let calculatedWeeks = customCalculatedWeeks;
+    let weeklyChange = customWeeklyChange;
+    let dailyDeficit;
+
+    // If we don't have calculated weeks or weekly change but have a target date, calculate them
+    if ((!calculatedWeeks || !weeklyChange) && targetDate) {
       const today = new Date();
       const targetDateObj = new Date(targetDate);
       const diffTime = Math.abs(targetDateObj.getTime() - today.getTime());
       calculatedWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
 
-      // Calculate weekly change and daily deficit
+      // Calculate weekly change
       const weightDifference = Math.abs(targetWeight - currentWeight);
       weeklyChange = weightDifference / calculatedWeeks;
+    }
+
+    // Calculate daily deficit based on weekly change
+    if (weeklyChange) {
       dailyDeficit =
         ((weightGoal === "lose" ? -1 : 1) * (weeklyChange * 7700)) / 7; // 7700 calories ≈ 1kg
     }
 
-    // Create the weight goals object
+    // Create the weight goals object with all available data
     const weightGoals: WeightGoals = {
       currentWeight,
       targetWeight,
       weightGoal,
+      startDate,
       targetDate,
       adjustedCalorieIntake,
       calculatedWeeks,

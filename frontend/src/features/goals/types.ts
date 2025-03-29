@@ -25,8 +25,13 @@ export interface TimeToGoalCalculation {
 
 export interface WeightGoalFormValues {
   currentWeight: number;
-  targetWeight: number;
+  targetWeight: number | undefined;
+  startDate?: string;
   targetDate?: string;
+  adjustedCalorieIntake?: number;
+  weeklyChange?: number;
+  calculatedWeeks?: number;
+  weightGoal?: WeightGoal;
 }
 
 export interface WeightGoalCardProps {
@@ -44,7 +49,7 @@ export interface WeightGoalCardProps {
   insight?: string;
 }
 
-export interface GoalSummaryCardProps {
+export interface WeightDetailsCardProps {
   goalData: WeightGoals;
   tdee: number;
 }
