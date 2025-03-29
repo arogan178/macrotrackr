@@ -1,7 +1,12 @@
 import { MacroDailyTotals, MacroTargetSettings } from "../types";
+import { calculateCalories } from "@/utils/nutrition";
+import {
+  MacroDistributionBar,
+  MacroDistributionLegend,
+} from "@/components/nutrition";
 
 interface DailySummaryProps {
-  macroDailyTotals?: MacroDailyTotals; // Updated type from MacroTotals to MacroDailyTotals
+  macroDailyTotals?: MacroDailyTotals;
   macroDistribution?: MacroTargetSettings;
 }
 
@@ -24,25 +29,19 @@ export default function DailySummary({
   };
   const distribution = macroDistribution || defaultDistribution;
 
-  const totalCalories = Math.round(
-    safeTotal.protein * 4 + safeTotal.carbs * 4 + safeTotal.fats * 9
+  // Using the shared utility for calorie calculation
+  const calculatedCalories = calculateCalories(
+    safeTotal.protein,
+    safeTotal.carbs,
+    safeTotal.fats
   );
-  const proteinPercent = Math.round(
-    totalCalories ? ((safeTotal.protein * 4) / totalCalories) * 100 : 0
-  );
-  const carbsPercent = Math.round(
-    totalCalories ? ((safeTotal.carbs * 4) / totalCalories) * 100 : 0
-  );
-  const fatsPercent = Math.round(
-    totalCalories ? ((safeTotal.fats * 9) / totalCalories) * 100 : 0
-  );
+  const totalCalories = safeTotal.calories || calculatedCalories;
 
   const macroData = [
     {
       name: "Protein",
       grams: (safeTotal.protein || 0).toFixed(1),
       calories: Math.round(safeTotal.protein * 4),
-      percent: proteinPercent,
       targetPercent: distribution.proteinPercentage,
       color: "bg-green-500",
       textColor: "text-green-400",
@@ -55,7 +54,6 @@ export default function DailySummary({
       name: "Carbs",
       grams: (safeTotal.carbs || 0).toFixed(1),
       calories: Math.round(safeTotal.carbs * 4),
-      percent: carbsPercent,
       targetPercent: distribution.carbsPercentage,
       color: "bg-blue-500",
       textColor: "text-blue-400",
@@ -68,7 +66,6 @@ export default function DailySummary({
       name: "Fats",
       grams: (safeTotal.fats || 0).toFixed(1),
       calories: Math.round(safeTotal.fats * 9),
-      percent: fatsPercent,
       targetPercent: distribution.fatsPercentage,
       color: "bg-red-500",
       textColor: "text-red-400",
@@ -95,40 +92,24 @@ export default function DailySummary({
             </div>
           </div>
 
-          {/* Stacked bar for overall macro split */}
-          <div className="relative h-2 w-full bg-gray-700/30 rounded-full overflow-hidden">
-            <div
-              className="absolute top-0 left-0 h-full bg-green-500/80 transition-all duration-500"
-              style={{ width: `${proteinPercent}%` }}
-            />
-            <div
-              className="absolute top-0 h-full bg-blue-500/80 transition-all duration-500"
-              style={{ width: `${carbsPercent}%`, left: `${proteinPercent}%` }}
-            />
-            <div
-              className="absolute top-0 h-full bg-red-500/80 transition-all duration-500"
-              style={{
-                width: `${fatsPercent}%`,
-                left: `${proteinPercent + carbsPercent}%`,
-              }}
-            />
-          </div>
+          {/* Using shared MacroDistributionBar component */}
+          <MacroDistributionBar
+            macros={{
+              protein: safeTotal.protein,
+              carbs: safeTotal.carbs,
+              fats: safeTotal.fats,
+            }}
+          />
 
-          {/* Current Percentages Legend */}
-          <div className="flex mt-2 justify-between text-xs">
-            <div className="flex items-center">
-              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{proteinPercent}%</span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{carbsPercent}%</span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{fatsPercent}%</span>
-            </div>
-          </div>
+          {/* Using shared MacroDistributionLegend component */}
+          <MacroDistributionLegend
+            macros={{
+              protein: safeTotal.protein,
+              carbs: safeTotal.carbs,
+              fats: safeTotal.fats,
+            }}
+            className="mt-2"
+          />
         </div>
 
         <div className="space-y-4">
@@ -151,16 +132,21 @@ export default function DailySummary({
                 </div>
               </div>
 
+              {/* Rest of the component remains largely the same */}
               <div className="relative h-2 rounded-full bg-gray-700/50 overflow-hidden">
-                {/* Target percentage background bar */}
                 <div
                   className={`absolute left-0 top-0 h-full ${macro.targetBarColor} transition-all duration-500`}
                   style={{ width: `${macro.targetPercent}%` }}
                 ></div>
-                {/* Actual percentage bar */}
                 <div
                   className={`absolute left-0 top-0 h-full ${macro.barColor} transition-all duration-500`}
-                  style={{ width: `${macro.percent}%` }}
+                  style={{
+                    width: `${calculateBarWidth(
+                      totalCalories,
+                      macro.calories,
+                      macro.targetPercent
+                    )}%`,
+                  }}
                 ></div>
               </div>
 
@@ -171,7 +157,9 @@ export default function DailySummary({
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
-                  <span className="text-gray-400">{macro.percent}% </span>
+                  <span className="text-gray-400">
+                    {calculateMacroPercent(totalCalories, macro.calories)}%{" "}
+                  </span>
                   <span className="text-gray-500 mx-1">•</span>
                   <span className="text-gray-600">
                     Target: {macro.targetPercent}%
@@ -184,4 +172,18 @@ export default function DailySummary({
       </div>
     </div>
   );
+}
+
+// Helper functions
+function calculateMacroPercent(total: number, value: number): number {
+  return total ? Math.round((value / total) * 100) : 0;
+}
+
+function calculateBarWidth(
+  total: number,
+  value: number,
+  targetPercent: number
+): number {
+  const percent = calculateMacroPercent(total, value);
+  return percent;
 }
