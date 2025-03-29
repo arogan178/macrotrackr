@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Navbar from "../features/layout/components/Navbar";
-import { MacroEntry, MacroTotals } from "@/features/macroTracking/types";
+import { MacroDailyTotals } from "@/features/macroTracking/types";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -75,7 +75,7 @@ export default function ReportingPage() {
     (range: string) => {
       // Process raw data into chart-friendly format
       const today = new Date();
-      const dates: { [key: string]: MacroTotals } = {};
+      const dates: { [key: string]: MacroDailyTotals } = {};
 
       let startDate: Date;
       switch (range) {
@@ -154,9 +154,9 @@ export default function ReportingPage() {
 
   const processDataForCustomDateRange = (startDate: Date, endDate: Date) => {
     // Similar to processDataForCharts but with custom date range
-    const dates: { [key: string]: MacroTotals } = {};
+    const dates: { [key: string]: MacroDailyTotals } = {};
     const dateLabels: string[] = [];
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
 
     while (currentDate <= endDate) {
       const dateString = currentDate.toISOString().split("T")[0];
