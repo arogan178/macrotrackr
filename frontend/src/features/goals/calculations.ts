@@ -1,12 +1,7 @@
+import {CALORIES_PER_KG_FAT, DEFAULT_TARGET_WEEKS, MIN_WEEKLY_WEIGHT_LOSS, MAX_WEEKLY_WEIGHT_LOSS} from "./constants";
 import type { TimeToGoalCalculation, WeightGoals } from "./types";
 
-// Constants for weight and calorie calculations
-const CALORIES_PER_KG_FAT = 7700; // Approximately 7700 calories per kg of body fat
-const MIN_SAFE_DAILY_DEFICIT = 500; // Minimum safe daily calorie deficit
-const MAX_SAFE_DAILY_DEFICIT = 1000; // Maximum safe daily calorie deficit
-const MIN_WEEKLY_WEIGHT_LOSS = 0.5; // Minimum recommended weight loss per week (kg)
-const MAX_WEEKLY_WEIGHT_LOSS = 1.0; // Maximum recommended weight loss per week (kg)
-const DEFAULT_TARGET_WEEKS = 12; // Default timeframe for goal calculations
+
 
 /**
  * Calculate the time to reach the goal weight based on current and target weights
@@ -15,32 +10,26 @@ const DEFAULT_TARGET_WEEKS = 12; // Default timeframe for goal calculations
 export function calculateTimeToGoal(
   currentWeight: number,
   targetWeight: number,
-  dailyCalorieDeficit: number
+  dailyCalorieChange: number
 ): TimeToGoalCalculation {
   const weightDifference = Math.abs(currentWeight - targetWeight);
   const isWeightLoss = currentWeight > targetWeight;
 
-  // Ensure daily deficit is within safe limits
-  const adjustedDailyDeficit = Math.min(
-    Math.max(dailyCalorieDeficit, MIN_SAFE_DAILY_DEFICIT),
-    MAX_SAFE_DAILY_DEFICIT
-  );
+  // Calculate weekly deficit/surplus and expected weight change - use the provided value directly
+  const weeklyCalorieChange = dailyCalorieChange * 7;
+  const expectedWeightChangePerWeek = weeklyCalorieChange / CALORIES_PER_KG_FAT;
 
-  // Calculate weekly deficit and expected weight change
-  const weeklyCalorieDeficit = adjustedDailyDeficit * 7;
-  const expectedWeightLossPerWeek = weeklyCalorieDeficit / CALORIES_PER_KG_FAT;
-
-  // Calculate weeks to goal
-  const weeksToGoal = weightDifference / expectedWeightLossPerWeek;
+  // Calculate weeks to goal - same formula works for both loss and gain
+  const weeksToGoal = weightDifference / expectedWeightChangePerWeek;
 
   return {
     weeksToGoal: Math.ceil(weeksToGoal),
     dailyCalorieDeficit: isWeightLoss
-      ? adjustedDailyDeficit
-      : -adjustedDailyDeficit,
+      ? dailyCalorieChange
+      : -dailyCalorieChange, // Negative for surplus (weight gain)
     expectedWeightLossPerWeek: isWeightLoss
-      ? expectedWeightLossPerWeek
-      : -expectedWeightLossPerWeek,
+      ? expectedWeightChangePerWeek
+      : -expectedWeightChangePerWeek, // Negative for weight gain
   };
 }
 
@@ -113,24 +102,45 @@ export function calculateAdjustedCalorieIntake(
  * @param tdee - Total Daily Energy Expenditure
  * @param currentWeight - Current weight in kg
  * @param targetWeight - Target weight in kg
+ * @param customCalorieIntake - Optional: User-specified daily calorie intake
  * @returns Complete weight goals with calculations
  */
 export function generateWeightGoalCalculations(
   tdee: number,
   currentWeight: number,
-  targetWeight: number
+  targetWeight: number,
+  customCalorieIntake?: number
 ): Partial<WeightGoals> {
-  const adjustedCalorieIntake = calculateAdjustedCalorieIntake(
-    tdee,
-    currentWeight,
-    targetWeight
-  );
+  // If custom calorie intake is provided, use it
+  const adjustedCalorieIntake = customCalorieIntake !== undefined 
+    ? customCalorieIntake 
+    : calculateAdjustedCalorieIntake(tdee, currentWeight, targetWeight);
 
   const calorieDeficit = tdee - adjustedCalorieIntake;
+  const isWeightLoss = currentWeight > targetWeight;
+  
+  // For maintenance goals (same weight), set calculatedWeeks to 0
+  if (currentWeight === targetWeight) {
+    return {
+      currentWeight,
+      targetWeight,
+      weightGoal: "maintain",
+      adjustedCalorieIntake,
+      targetDate: new Date().toISOString().split("T")[0], // Today's date
+      calculatedWeeks: 0,
+      weeklyChange: 0,
+      dailyDeficit: calorieDeficit,
+    };
+  }
+  
+  // Calculate the effective calorie change (deficit for weight loss, surplus for weight gain)
+  const effectiveCalorieChange = Math.abs(calorieDeficit);
+  
+  // Get time to goal calculations
   const { weeksToGoal, expectedWeightLossPerWeek } = calculateTimeToGoal(
     currentWeight,
     targetWeight,
-    Math.abs(calorieDeficit)
+    effectiveCalorieChange
   );
 
   // Calculate estimated completion date

@@ -45,17 +45,9 @@ export default function GoalsPage() {
   const handleSaveGoal = (formValues: WeightGoalFormValues) => {
     if (!userMetrics?.tdee) return;
 
-    // Add today's date as the starting date
-    const today = new Date().toISOString().split("T")[0];
-
-    // Pass all form values including adjustedCalorieIntake if provided
-    createWeightGoal(
-      {
-        ...formValues,
-        startDate: today,
-      },
-      userMetrics.tdee
-    );
+    // Pass all the calculated values directly to the createWeightGoal function
+    // This now includes targetDate, calculatedWeeks, weeklyChange, and weightGoal type
+    createWeightGoal(formValues, userMetrics.tdee);
   };
 
   // Handler for resetting goals

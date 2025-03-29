@@ -41,7 +41,6 @@ import {
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
-import { create } from "zustand";
 
 // Base icon type with common props
 interface IconProps extends Omit<LucideProps, "size"> {
