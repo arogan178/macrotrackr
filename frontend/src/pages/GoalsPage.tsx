@@ -2,14 +2,23 @@ import { useState, useEffect } from "react";
 import { Navbar } from "@/features/layout/components";
 import {
   GoalsLoadingSkeleton,
-  ActiveGoalsContent,
   AchievementsContent,
+  WeightGoalDashboard,
+  HabitTracker,
 } from "@/features/goals/components";
 import { WeightGoalFormValues } from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
-import { TabButton } from "@/components/form";
 import { useStore } from "@/store/store";
-import { GoalsIcon, StarIcon, PlusIcon } from "@/components/Icons";
+import { useGoalData } from "@/features/goals/hooks";
+import { TabButton } from "@/components/form";
+import {
+  GoalsIcon,
+  StarIcon,
+  PlusIcon,
+  CalendarIcon,
+  CheckIcon,
+  BarChartIcon,
+} from "@/components/Icons";
 import Modal from "@/components/Modal";
 
 export default function GoalsPage() {
@@ -17,6 +26,11 @@ export default function GoalsPage() {
   const [activeTab, setActiveTab] = useState<"active" | "achieved">("active");
   // State for reset goals modal
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  // State for add habit modal (future implementation)
+  const [isAddHabitModalOpen, setIsAddHabitModalOpen] = useState(false);
+
+  // Get mock data - in a real app this would come from an API
+  const goalData = useGoalData();
 
   // Get state and actions from store
   const {
@@ -46,7 +60,6 @@ export default function GoalsPage() {
     if (!userMetrics?.tdee) return;
 
     // Pass all the calculated values directly to the createWeightGoal function
-    // This now includes targetDate, calculatedWeeks, weeklyChange, and weightGoal type
     createWeightGoal(formValues, userMetrics.tdee);
   };
 
@@ -55,6 +68,35 @@ export default function GoalsPage() {
     resetGoals();
     setIsResetModalOpen(false);
   };
+
+  // Handler for adding a new habit (stub for future implementation)
+  const handleAddHabit = () => {
+    setIsAddHabitModalOpen(true);
+    // Future implementation: Show modal to add new habit
+  };
+
+  // Map habit goals data from the useGoalData hook
+  const habitGoals = goalData.streakGoals.map((goal) => ({
+    id: goal.id,
+    title: goal.name,
+    icon: renderIcon(goal.icon),
+    current: goal.current,
+    target: goal.target,
+    progress: goal.progress,
+    accentColor: getAccentColor(goal.id) as "indigo" | "blue" | "green",
+    isComplete: goal.progress >= 100,
+  }));
+
+  // Helper function to get accent color based on habit ID
+  function getAccentColor(id: number) {
+    const colors = ["indigo", "blue", "green", "purple"];
+    return colors[(id - 1) % colors.length];
+  }
+
+  // Helper function to render the appropriate icon component
+  function renderIcon(IconComponent: any) {
+    return <IconComponent className="w-4 h-4" />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -90,62 +132,52 @@ export default function GoalsPage() {
         <div className="absolute top-24 -right-32 w-72 h-72 bg-purple-600/10 rounded-full filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-          {/* Page Header - Updated with left/right sections */}
-          <div className="flex justify-between items-start mb-8">
+          {/* Page Header */}
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
             {/* Left Section */}
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight">
-                  Your Goals
-                </h1>
-                <p className="text-gray-400 max-w-2xl">
-                  Track your progress and stay motivated
-                </p>
-              </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
+                Your Goals
+              </h1>
+              <p className="text-gray-400 max-w-2xl">
+                Track your progress and stay motivated on your health journey
+              </p>
+            </div>
 
-              {/* Tab Navigation moved into left section */}
-              <div className="flex flex-wrap space-x-1">
+            {/* Right Section */}
+            <div className="flex items-center gap-3">
+              {/* Tab Navigation */}
+              <div className="flex space-x-1 p-1 bg-gray-800/60 rounded-lg">
                 <TabButton
                   active={activeTab === "active"}
                   onClick={() => setActiveTab("active")}
+                  className="text-sm px-3 py-1.5"
                 >
                   <span className="flex items-center">
-                    <GoalsIcon
-                      size="sm"
-                      className={`mr-2 ${
-                        activeTab === "active" ? "text-white" : "text-gray-400"
-                      }`}
-                    />
-                    Active Goals
+                    <GoalsIcon size="sm" className="mr-1.5" />
+                    Active
                   </span>
                 </TabButton>
                 <TabButton
                   active={activeTab === "achieved"}
                   onClick={() => setActiveTab("achieved")}
+                  className="text-sm px-3 py-1.5"
                 >
                   <span className="flex items-center">
-                    <StarIcon
-                      size="sm"
-                      className={`mr-2 ${
-                        activeTab === "achieved"
-                          ? "text-white"
-                          : "text-gray-400"
-                      }`}
-                    />
+                    <StarIcon size="sm" className="mr-1.5" />
                     Achievements
                   </span>
                 </TabButton>
               </div>
-            </div>
 
-            {/* Right Section */}
-            <div>
+              {/* Action Button */}
               <button
-                className="px-5 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-bold transition-colors duration-200 flex items-center"
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors duration-200 flex items-center"
                 onClick={() => setIsResetModalOpen(true)}
               >
-                Create New Goals
-                <PlusIcon size="sm" className="ml-2" />
+                <PlusIcon size="sm" className="mr-1.5" />
+                <span className="hidden sm:inline">Create New Goal</span>
+                <span className="sm:hidden">New</span>
               </button>
             </div>
           </div>
@@ -154,21 +186,45 @@ export default function GoalsPage() {
           {isLoading ? (
             <GoalsLoadingSkeleton />
           ) : activeTab === "active" ? (
-            <ActiveGoalsContent
-              userWeight={user?.weight}
-              targetWeight={weightGoals?.targetWeight}
-              tdee={userMetrics?.tdee || 0}
-              macroDailyTotals={
-                macroDailyTotals || {
-                  protein: 0,
-                  carbs: 0,
-                  fats: 0,
-                  calories: 0,
+            <div className="space-y-6">
+              {/* Weight Goal Dashboard */}
+              <WeightGoalDashboard
+                currentWeight={user?.weight || 0}
+                targetWeight={weightGoals?.targetWeight || user?.weight || 0}
+                tdee={userMetrics?.tdee || 0}
+                macroDailyTotals={
+                  macroDailyTotals || {
+                    protein: 0,
+                    carbs: 0,
+                    fats: 0,
+                    calories: 0,
+                  }
                 }
-              }
-              weightGoals={weightGoals || null}
-              onSaveGoal={handleSaveGoal}
-            />
+                weightGoals={weightGoals}
+                onSave={handleSaveGoal}
+                isLoading={isLoading}
+              />
+
+              {/* Habit Tracker */}
+              <HabitTracker habits={habitGoals} onAddHabit={handleAddHabit} />
+
+              {/* Recent Stats Section - Optional feature to show additional metrics */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {["Weekly Average", "Monthly Trend", "Progress Insights"].map(
+                  (title, i) => (
+                    <div
+                      key={i}
+                      className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 hover:bg-gray-800/60 transition-colors duration-200"
+                    >
+                      <h3 className="text-sm font-medium text-gray-300 mb-2">
+                        {title}
+                      </h3>
+                      <p className="text-xs text-gray-400">Coming soon</p>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
           ) : (
             <AchievementsContent />
           )}
