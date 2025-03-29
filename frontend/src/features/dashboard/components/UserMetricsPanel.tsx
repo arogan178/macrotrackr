@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { UserIcon, StarIcon } from "@/components/Icons";
 
-interface MetricsPanelProps {
+interface UserMetricsPanelProps {
   bmr: number;
   tdee: number;
   isLoading?: boolean;
@@ -95,7 +95,11 @@ function LoadingSkeleton() {
   );
 }
 
-function CardMetricsPanel({ bmr, tdee, isLoading = false }: MetricsPanelProps) {
+function UserMetricsPanel({
+  bmr,
+  tdee,
+  isLoading = false,
+}: UserMetricsPanelProps) {
   if (isLoading) return <LoadingSkeleton />;
 
   return (
@@ -119,4 +123,4 @@ function CardMetricsPanel({ bmr, tdee, isLoading = false }: MetricsPanelProps) {
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export default memo(CardMetricsPanel);
+export default memo(UserMetricsPanel);
