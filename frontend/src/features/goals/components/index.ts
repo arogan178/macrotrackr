@@ -1,17 +1,13 @@
-
-export { default as ProgressBar } from "../../../components/ProgressBar";
-export { default as GoalsLoadingSkeleton } from "./GoalsLoadingSkeleton";
-
+// Export all components from the goals feature
 export { default as AchievementsContent } from "./AchievementsContent";
-
-// New consolidated components
-export { default as WeightGoalDashboard } from "./WeightGoalDashboard";
+export { default as GoalsLoadingSkeleton } from "./GoalsLoadingSkeleton";
+export { default as GoalsModeToggle } from "./GoalsModeToggle";
 export { default as HabitTracker } from "./HabitTracker";
+export { default as WeightGoalDashboard } from "./WeightGoalDashboard";
+export { default as WeightGoalForm } from "./WeightGoalForm";
+export { default as WeightGoalStatus } from "./WeightGoalStatus";
+export { default as MacroNutrient } from "./MacroNutrient";
 
-
-// To be removed: old components
-// export { default as HabitGoalCard } from "./HabitGoalCard";
-// export { default as WeightProgressCard } from "./WeightProgressCard";
-// export { default as WeightDetailsCard } from "./WeightDetailsCard";
-// export { default as DailyGoalsCard } from "./DailyGoalsCard";
-// export { default as ActiveGoalsContent } from "./ActiveGoalsContent";
+// Import ProgressBar from shared components
+// This is re-exported for convenience
+export { default as ProgressBar } from "../../../components/ProgressBar";

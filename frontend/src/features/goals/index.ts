@@ -1,12 +1,17 @@
-// Export components
+// Export component API
 export * from "./components";
 
-// Export types
+// Export hooks API
+export * from "./hooks";
+
+// Export core types
 export * from "./types";
 
-// Export calculations
+// Export calculation functions
 export * from "./calculations";
 
+// Export constants
+export * from "./constants";
+
 // Export store
-export { createGoalsSlice } from "./store/goals-slice";
-export type { GoalsSlice } from "./store/goals-slice";
+export * from "./store";
