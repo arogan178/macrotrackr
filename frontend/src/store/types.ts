@@ -22,13 +22,6 @@
 //   foodName?: string; // Kept for backward compatibility
 // }
 
-// export interface MacroTotals {
-//   protein: number;
-//   carbs: number;
-//   fats: number;
-//   calories: number;
-// }
-
 // export interface MacroInputs {
 //   protein: string;
 //   carbs: string;
