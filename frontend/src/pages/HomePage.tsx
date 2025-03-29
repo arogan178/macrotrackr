@@ -8,7 +8,7 @@ import {
   AddEntryForm,
   EditModal,
 } from "@/features/macroTracking/components";
-import { CardMetricsPanel } from "@/features/dashboard/components";
+import { UserMetricsPanel } from "@/features/dashboard/components";
 import { useStore } from "@/store/store";
 
 export default function HomePage() {
@@ -76,7 +76,7 @@ export default function HomePage() {
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
-                <CardMetricsPanel
+                <UserMetricsPanel
                   bmr={userMetrics?.bmr}
                   tdee={userMetrics?.tdee}
                   isLoading={isLoading}
