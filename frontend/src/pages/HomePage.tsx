@@ -103,7 +103,10 @@ export default function HomePage() {
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
                       macroDistribution={macroTargets?.macro_distribution}
-                      targetCalories={weightGoals?.adjustedCalorieIntake}
+                      targetCalories={
+                        weightGoals?.adjustedCalorieIntake ??
+                        nutritionProfile?.tdee
+                      }
                     />
                   )
                 )}
