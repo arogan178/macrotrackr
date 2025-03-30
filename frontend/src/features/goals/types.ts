@@ -1,4 +1,5 @@
 import { CALORIE_ADJUSTMENT_FACTORS } from "./constants";
+import { MacroTargetSettings } from "@/features/macroTracking/types";
 
 export interface WeightGoals {
   currentWeight: number;
@@ -11,8 +12,13 @@ export interface WeightGoals {
   dailyDeficit?: number;
 }
 
+export interface MacroTargets {
+  macro_distribution: MacroTargetSettings;
+}
+
 export interface GoalsState {
   weightGoals: WeightGoals | null;
+  macroTargets: MacroTargets | null;
   isLoading: boolean;
   error: string | null;
 }
