@@ -1,9 +1,11 @@
 import { CalorieIcon, ChevronRightIcon, EditIcon } from "@/components/Icons";
 import ProgressBar from "@/components/ProgressBar";
-import { MacroDailyTotals } from "@/features/macroTracking/types";
+import {
+  MacroDailyTotals,
+  MacroTargetSettings,
+} from "@/features/macroTracking/types";
 import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
-import { useStore } from "@/store/store";
 
 interface WeightGoalStatusProps {
   currentWeight: number;
@@ -13,6 +15,7 @@ interface WeightGoalStatusProps {
   weightGoals: WeightGoals;
   onEdit: () => void;
   targetCalories?: number;
+  macroDistribution?: MacroTargetSettings;
 }
 
 function WeightGoalStatus({
@@ -23,10 +26,10 @@ function WeightGoalStatus({
   weightGoals,
   onEdit,
   targetCalories,
+  macroDistribution,
 }: WeightGoalStatusProps) {
-  // Get the user's macro distribution from the store
-  const { nutritionProfile } = useStore();
-  const macroDistribution = nutritionProfile?.macro_distribution || {
+  // Use the provided macro distribution or fall back to default
+  const distribution = macroDistribution || {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
@@ -83,13 +86,13 @@ function WeightGoalStatus({
 
   // Calculate target grams for each macro based on target calories and distribution
   const targetProteinGrams = Math.round(
-    (effectiveTargetCalories * macroDistribution.proteinPercentage) / 100 / 4
+    (effectiveTargetCalories * distribution.proteinPercentage) / 100 / 4
   );
   const targetCarbsGrams = Math.round(
-    (effectiveTargetCalories * macroDistribution.carbsPercentage) / 100 / 4
+    (effectiveTargetCalories * distribution.carbsPercentage) / 100 / 4
   );
   const targetFatsGrams = Math.round(
-    (effectiveTargetCalories * macroDistribution.fatsPercentage) / 100 / 9
+    (effectiveTargetCalories * distribution.fatsPercentage) / 100 / 9
   );
 
   return (

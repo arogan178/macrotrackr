@@ -35,8 +35,9 @@ export default function GoalsPage() {
   // Get state and actions from store
   const {
     user,
-    userMetrics,
+    nutritionProfile,
     weightGoals,
+    macroTargets,
     macroDailyTotals,
     isLoading,
     error,
@@ -57,10 +58,10 @@ export default function GoalsPage() {
 
   // Handler for saving weight goal
   const handleSaveGoal = (formValues: WeightGoalFormValues) => {
-    if (!userMetrics?.tdee) return;
+    if (!nutritionProfile?.tdee) return;
 
     // Pass all the calculated values directly to the createWeightGoal function
-    createWeightGoal(formValues, userMetrics.tdee);
+    createWeightGoal(formValues, nutritionProfile.tdee);
   };
 
   // Handler for resetting goals
@@ -189,7 +190,7 @@ export default function GoalsPage() {
               <WeightGoalDashboard
                 currentWeight={user?.weight || 0}
                 targetWeight={weightGoals?.targetWeight || user?.weight || 0}
-                tdee={userMetrics?.tdee || 0}
+                tdee={nutritionProfile?.tdee || 0}
                 macroDailyTotals={
                   macroDailyTotals || {
                     protein: 0,
@@ -201,6 +202,8 @@ export default function GoalsPage() {
                 weightGoals={weightGoals}
                 onSave={handleSaveGoal}
                 isLoading={isLoading}
+                targetCalories={macroTargets?.target_calories}
+                macroDistribution={macroTargets?.macro_distribution}
               />
 
               {/* Habit Tracker */}

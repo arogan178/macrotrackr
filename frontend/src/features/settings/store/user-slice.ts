@@ -3,8 +3,8 @@ import { apiService } from "@/utils/api-service";
 import {
   UserSettings,
   UserNutritionalProfile,
+  ActivityLevel,
 } from "@/features/settings/types";
-import { MacroTargetSettings } from "@/features/macroTracking/types";
 import {
   calculateBMR,
   calculateTDEE,
@@ -42,7 +42,6 @@ export interface UserSlice {
     key: K,
     value: UserSettings[K]
   ) => void;
-  updateMacroDistribution: (distribution: MacroTargetSettings) => void;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   resetSettings: () => void;
@@ -264,39 +263,6 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
     });
   },
 
-  updateMacroDistribution: (distribution: MacroTargetSettings) => {
-    set((state) => {
-      if (!state.nutritionSettings) return state;
-
-      // Create a deep copy of nutrition settings first
-      const nutritionSettingsCopy = JSON.parse(
-        JSON.stringify(state.nutritionSettings)
-      );
-
-      // Update the macro_distribution property
-      nutritionSettingsCopy.macro_distribution = distribution;
-
-      // Check if there are changes compared to original
-      let hasChanges = state.hasSettingsChanges;
-
-      if (state.originalNutritionSettings?.macro_distribution) {
-        const origDist = state.originalNutritionSettings.macro_distribution;
-
-        const macroChanged =
-          JSON.stringify(distribution) !== JSON.stringify(origDist);
-        hasChanges = macroChanged || hasChanges;
-      } else {
-        // Original has no macro distribution, so this is a change
-        hasChanges = true;
-      }
-
-      return {
-        nutritionSettings: nutritionSettingsCopy,
-        hasSettingsChanges: hasChanges,
-      };
-    });
-  },
-
   validateSettingsForm: () => {
     const state = get();
     if (!state.settings) return false;
@@ -353,13 +319,52 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
         settingsSuccess: "Settings updated successfully!",
       });
 
-      // Show notification if UI slice is available
-      if (state.showNotification) {
-        state.showNotification("Settings updated successfully!", "success");
+      // Immediately update user and nutrition profile with new data to avoid needing a refresh
+      // Calculate new nutrition metrics based on updated settings
+      const age = calculateAge(state.settings.date_of_birth || "");
+      let bmr = 0;
+      let tdee = 0;
+
+      if (
+        state.settings.weight &&
+        state.settings.height &&
+        state.settings.date_of_birth &&
+        state.settings.gender &&
+        state.settings.activity_level
+      ) {
+        bmr = Math.round(
+          calculateBMR(
+            state.settings.weight,
+            state.settings.height,
+            age,
+            state.settings.gender
+          )
+        );
+        tdee = Math.round(calculateTDEE(bmr, state.settings.activity_level));
       }
 
-      // Refresh user details to update any dependent data
-      await state.fetchUserDetails();
+      // Update the user profile immediately without a full server fetch
+      set({
+        user: JSON.parse(JSON.stringify(state.settings)),
+        nutritionProfile: {
+          ...state.nutritionSettings,
+          bmr,
+          tdee,
+        },
+      });
+
+      // Show notification if UI slice is available, but only here to prevent duplicates
+      if (state.showNotification) {
+        // Use a uniquely identifiable message to help with deduplication
+        state.showNotification("Settings saved successfully!", "success", {
+          // Add a unique identifier to this notification context
+          context: "settings-save",
+        });
+      }
+
+      // Refresh user details in the background to ensure server consistency
+      // But we don't need to wait for it since we've already updated locally
+      state.fetchUserDetails().catch(console.error);
     } catch (error) {
       console.error("Save settings error:", error);
       const errorMessage = getErrorMessage(error);
