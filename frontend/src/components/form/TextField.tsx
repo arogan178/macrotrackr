@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import { memo } from "react";
 import { TextFieldProps } from "../utils/types";
 import { formStyles } from "../utils/styles";
 import { EyeIcon, EyeSlashIcon } from "../Icons";
+import { useState } from "react";
 
-export function TextField({
+function TextField({
   label,
   value,
   onChange,
@@ -86,3 +87,5 @@ export function TextField({
     </div>
   );
 }
+
+export default memo(TextField);

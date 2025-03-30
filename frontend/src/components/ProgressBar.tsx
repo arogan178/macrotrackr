@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 
 interface ProgressBarProps {
   progress: number; // 0-100
@@ -22,7 +22,7 @@ const heightMap = {
   lg: "h-3",
 };
 
-export default function ProgressBar({
+function ProgressBar({
   progress,
   color = "blue",
   height = "md",
@@ -51,3 +51,5 @@ export default function ProgressBar({
     </div>
   );
 }
+
+export default memo(ProgressBar);

@@ -36,18 +36,18 @@ export const BUTTON_VARIANTS = {
   SECONDARY: "secondary",
   DANGER: "danger",
   SUCCESS: "success",
-  GHOST: "ghost"
+  GHOST: "ghost",
 } as const;
 
 export const BUTTON_SIZES = {
   SM: "sm",
   MD: "md",
-  LG: "lg"
+  LG: "lg",
 } as const;
 
 export const ICON_POSITIONS = {
   LEFT: "left",
-  RIGHT: "right"
+  RIGHT: "right",
 } as const;
 
 export const DEFAULT_LOADING_TEXT = "Processing...";

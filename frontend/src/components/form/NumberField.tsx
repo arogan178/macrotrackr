@@ -1,9 +1,9 @@
-import React from "react";
+import { memo } from "react";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
 import { NumberFieldProps } from "../utils/types";
 import { formStyles } from "../utils/styles";
 
-export function NumberField({
+function NumberField({
   label,
   value,
   onChange,
@@ -72,3 +72,5 @@ export function NumberField({
     </div>
   );
 }
+
+export default memo(NumberField);
