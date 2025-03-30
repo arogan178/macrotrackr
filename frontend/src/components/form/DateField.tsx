@@ -1,8 +1,8 @@
-import React from "react";
+import { memo } from "react";
 import { DateFieldProps } from "../utils/types";
 import { formStyles } from "../utils/styles";
 
-export function DateField({
+function DateField({
   label,
   value,
   onChange,
@@ -33,3 +33,5 @@ export function DateField({
     </div>
   );
 }
+
+export default memo(DateField);

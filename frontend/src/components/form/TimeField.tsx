@@ -1,8 +1,8 @@
-import React from "react";
+import { memo } from "react";
 import { TimeFieldProps } from "../utils/types";
 import { formStyles } from "../utils/styles";
 
-export function TimeField({
+function TimeField({
   label,
   value,
   onChange,
@@ -37,3 +37,5 @@ export function TimeField({
     </div>
   );
 }
+
+export default memo(TimeField);
