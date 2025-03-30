@@ -7,15 +7,27 @@ import { useStore } from "@/store/store";
 
 function FormLogin() {
   const navigate = useNavigate();
-  const { email, password, isLoading, setAuthEmail, setAuthPassword, login } =
-    useStore();
+  const {
+    auth: { email, password, isLoading, error },
+    setAuthEmail,
+    setAuthPassword,
+    login,
+  } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      await login(email, password);
-      navigate("/home", { replace: true });
-      window.location.reload();
+      try {
+        console.log("Login attempt with:", { email, password: "••••••" });
+        await login(email, password);
+
+        // Give a small delay before navigation to ensure token is properly stored
+        setTimeout(() => {
+          navigate("/home", { replace: true });
+        }, 100);
+      } catch (error) {
+        console.error("Login failed:", error);
+      }
     },
     [email, password, login, navigate]
   );
@@ -49,6 +61,7 @@ function FormLogin() {
           required={true}
           placeholder="••••••••"
         />
+        {error && <div className="text-red-500 text-sm">{error}</div>}
         <div className="text-right">
           <a
             href="#"
