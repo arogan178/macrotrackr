@@ -1,9 +1,11 @@
 import { StateCreator } from "zustand";
-import { WeightGoals, WeightGoalFormValues } from "../types";
+import { WeightGoals, WeightGoalFormValues, MacroTargets } from "../types";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
+import { MacroTargetSettings } from "@/features/macroTracking/types";
 
 export interface GoalsSlice {
   weightGoals: WeightGoals | null;
+  macroTargets: MacroTargets | null;
   isLoading: boolean;
   error: string | null;
   macroDailyTotals: {
@@ -12,10 +14,19 @@ export interface GoalsSlice {
     carbs: number;
     fats: number;
   } | null;
+
+  // Weight goals actions
   setWeightGoals: (goals: WeightGoals) => void;
   createWeightGoal: (formValues: WeightGoalFormValues, tdee: number) => void;
   updateAdjustedCalorieIntake: (calories: number) => void;
   setTargetDate: (date: string) => void;
+
+  // Nutritional goals actions
+  setMacroTargets: (goals: MacroTargets) => void;
+  updateTargetCalories: (calories: number) => void;
+  updateMacroDistribution: (distribution: MacroTargetSettings) => void;
+
+  // Common actions
   setLoading: (loading: boolean) => void;
   setError: (error: string) => void;
   clearError: () => void;
@@ -24,6 +35,7 @@ export interface GoalsSlice {
 
 export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
   weightGoals: null,
+  macroTargets: null,
   isLoading: false,
   error: null,
   macroDailyTotals: null,
@@ -36,15 +48,15 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
     })),
 
   createWeightGoal: (formValues, tdee) => {
-    const { 
-      currentWeight, 
-      targetWeight, 
+    const {
+      currentWeight,
+      targetWeight,
       startDate,
       targetDate,
       adjustedCalorieIntake: customCalorieIntake,
       weeklyChange: customWeeklyChange,
       calculatedWeeks: customCalculatedWeeks,
-      weightGoal: customWeightGoal
+      weightGoal: customWeightGoal,
     } = formValues;
 
     // Determine weight goal type (lose, maintain, gain) if not provided
@@ -58,8 +70,8 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
     }
 
     // Use provided calorie intake or calculate based on goal
-    const adjustedCalorieIntake = customCalorieIntake || 
-      tdee + CALORIE_ADJUSTMENT_FACTORS[weightGoal];
+    const adjustedCalorieIntake =
+      customCalorieIntake || tdee + CALORIE_ADJUSTMENT_FACTORS[weightGoal];
 
     // Use provided values or calculate if not provided
     let calculatedWeeks = customCalculatedWeeks;
@@ -139,10 +151,56 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       error: null,
     })),
 
+  setMacroTargets: (goals) =>
+    set((state) => ({
+      ...state,
+      macroTargets: goals,
+      error: null,
+    })),
+
+  updateTargetCalories: (calories) =>
+    set((state) => ({
+      ...state,
+      macroTargets: state.macroTargets
+        ? { ...state.macroTargets, target_calories: calories }
+        : {
+            target_calories: calories,
+            macro_distribution: {
+              proteinPercentage: 30,
+              carbsPercentage: 40,
+              fatsPercentage: 30,
+            },
+          },
+    })),
+
+  updateMacroDistribution: (distribution) =>
+    set((state) => {
+      // If no nutrition goals exist yet, create with defaults
+      if (!state.macroTargets) {
+        return {
+          ...state,
+          macroTargets: {
+            target_calories: state.weightGoals?.adjustedCalorieIntake || 2000,
+            macro_distribution: distribution,
+          },
+        };
+      }
+
+      // Otherwise update the existing macro distribution
+      return {
+        ...state,
+        macroTargets: {
+          ...state.macroTargets,
+          macro_distribution: distribution,
+        },
+      };
+    }),
+
   resetGoals: () =>
     set((state) => ({
       ...state,
       weightGoals: null,
+      macroTargets: null,
       error: null,
       isLoading: false,
     })),

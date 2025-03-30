@@ -1,22 +1,19 @@
-import { memo } from "react";
-import { UserSettings } from "../types";
+import { memo, useCallback } from "react";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
 import { InfoCard, CardContainer } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
 import MacroDistribution from "./MacroDistribution";
+import { useStore } from "@/store/store";
 
-interface MacroTargetsFormProps {
-  settings: UserSettings;
-  updateSetting: <K extends keyof UserSettings>(
-    key: K,
-    value: UserSettings[K]
-  ) => void;
-}
+function MacroTargetsForm() {
+  const { macroTargets, updateMacroDistribution } = useStore();
 
-function MacroTargetsForm({ settings, updateSetting }: MacroTargetsFormProps) {
-  const handleMacroDistributionChange = (distribution: MacroTargetSettings) => {
-    updateSetting("macro_distribution", distribution);
-  };
+  const handleMacroDistributionChange = useCallback(
+    (distribution: MacroTargetSettings) => {
+      updateMacroDistribution(distribution);
+    },
+    [updateMacroDistribution]
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
@@ -38,9 +35,9 @@ function MacroTargetsForm({ settings, updateSetting }: MacroTargetsFormProps) {
             macro targets based on your calorie needs.
           </p>
 
-          {settings.macro_distribution && (
+          {macroTargets?.macro_distribution && (
             <MacroDistribution
-              initialValues={settings.macro_distribution}
+              initialValues={macroTargets.macro_distribution}
               onDistributionChange={handleMacroDistributionChange}
             />
           )}

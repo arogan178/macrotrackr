@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { WeightGoalFormValues, WeightGoals } from "../types";
-import { MacroDailyTotals } from "@/features/macroTracking/types";
+import {
+  MacroDailyTotals,
+  MacroTargetSettings,
+} from "@/features/macroTracking/types";
 import WeightGoalForm from "./WeightGoalForm";
 import WeightGoalStatus from "./WeightGoalStatus";
 
@@ -13,6 +16,8 @@ interface WeightGoalDashboardProps {
   isLoading?: boolean;
   onSave: (values: WeightGoalFormValues) => void;
   className?: string;
+  targetCalories?: number;
+  macroDistribution?: MacroTargetSettings;
 }
 
 function WeightGoalDashboard({
@@ -24,6 +29,8 @@ function WeightGoalDashboard({
   isLoading = false,
   onSave,
   className = "",
+  targetCalories,
+  macroDistribution,
 }: WeightGoalDashboardProps) {
   const [isEditing, setIsEditing] = useState(!weightGoals);
 
@@ -36,8 +43,9 @@ function WeightGoalDashboard({
     setIsEditing(!isEditing);
   };
 
-  // Calculate the target calories based on weight goals or fall back to TDEE
-  const targetCalories = weightGoals?.adjustedCalorieIntake || tdee;
+  // Calculate the target calories based on provided target or weight goals or fall back to TDEE
+  const effectiveTargetCalories =
+    targetCalories || weightGoals?.adjustedCalorieIntake || tdee;
 
   return (
     <div
@@ -61,7 +69,8 @@ function WeightGoalDashboard({
           macroDailyTotals={macroDailyTotals}
           weightGoals={weightGoals!}
           onEdit={toggleEdit}
-          targetCalories={targetCalories}
+          targetCalories={effectiveTargetCalories}
+          macroDistribution={macroDistribution}
         />
       )}
     </div>

@@ -13,15 +13,15 @@ export default function SettingsPage() {
   const {
     settings,
     isLoading,
-    error,
-    successMessage,
+    settingsError: error,
+    settingsSuccess: successMessage,
     formErrors,
     hasSettingsChanges,
     isSaving,
     validateSettingsForm,
     updateSetting,
     saveSettings,
-    clearMessages,
+    clearSettingsMessages: clearMessages,
     resetSettings,
     fetchSettings,
   } = useStore();
@@ -77,6 +77,7 @@ export default function SettingsPage() {
       e.preventDefault();
       if (!validateSettingsForm()) return;
       await saveSettings();
+      // No need to show a local notification here since the store will handle it
     },
     [validateSettingsForm, saveSettings]
   );
@@ -88,6 +89,7 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
 
         <div className="max-w-4xl mx-auto px-4 py-8 relative">
+          {/* Only render notification if it comes from the store */}
           {successMessage && (
             <FloatingNotification
               message={successMessage}

@@ -15,7 +15,9 @@ export default function HomePage() {
   // Get state and actions from our store
   const {
     user,
+    macroTargets,
     nutritionProfile,
+    weightGoals,
     history,
     macroDailyTotals,
     isLoading,
@@ -100,8 +102,8 @@ export default function HomePage() {
                   user && (
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
-                      macroDistribution={nutritionProfile?.macro_distribution}
-                      targetCalories={nutritionProfile?.target_calories}
+                      macroDistribution={macroTargets?.macro_distribution}
+                      targetCalories={weightGoals?.adjustedCalorieIntake}
                     />
                   )
                 )}
