@@ -33,9 +33,9 @@ const exportCSV = (history: MacroEntry[]) => {
             entry.entry_date || new Date(entry.created_at).toLocaleDateString()
           },${new Date(entry.created_at).toLocaleTimeString()},${
             entry.meal_type || ""
-          },${entry.foodName || entry.meal_name || ""},${entry.protein.toFixed(
-            1
-          )},${entry.carbs.toFixed(1)},${entry.fats.toFixed(1)},${Math.round(
+          },${entry.foodName || entry.meal_name || ""},${entry.protein},${
+            entry.carbs
+          },${entry.fats},${Math.round(
             entry.protein * 4 + entry.carbs * 4 + entry.fats * 9
           )}`
       )
@@ -267,21 +267,30 @@ export default function EntryHistory({
                       {/* Use explicit widths to avoid shifting content */}
                       <td className="px-4 py-2.5"></td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-green-400">
-                        {group.entries
-                          .reduce((acc, entry) => acc + (entry.protein || 0), 0)
-                          .toFixed(1)}
+                        {Math.round(
+                          group.entries.reduce(
+                            (acc, entry) => acc + (entry.protein || 0),
+                            0
+                          )
+                        )}
                         g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-blue-400">
-                        {group.entries
-                          .reduce((acc, entry) => acc + (entry.carbs || 0), 0)
-                          .toFixed(1)}
+                        {Math.round(
+                          group.entries.reduce(
+                            (acc, entry) => acc + (entry.carbs || 0),
+                            0
+                          )
+                        )}
                         g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-red-400">
-                        {group.entries
-                          .reduce((acc, entry) => acc + (entry.fats || 0), 0)
-                          .toFixed(1)}
+                        {Math.round(
+                          group.entries.reduce(
+                            (acc, entry) => acc + (entry.fats || 0),
+                            0
+                          )
+                        )}
                         g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-white">
@@ -333,13 +342,13 @@ export default function EntryHistory({
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
-                            {(entry.protein || 0).toFixed(1)}g
+                            {Math.round(entry.protein) || 0}g
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
-                            {(entry.carbs || 0).toFixed(1)}g
+                            {Math.round(entry.carbs) || 0}g
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
-                            {(entry.fats || 0).toFixed(1)}g
+                            {Math.round(entry.fats) || 0}g
                           </td>
                           <td className="px-4 py-3 text-center font-medium text-white">
                             {Math.round(
