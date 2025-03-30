@@ -12,24 +12,35 @@ function FormLogin() {
     setAuthEmail,
     setAuthPassword,
     login,
+    showNotification,
   } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
       try {
-        console.log("Login attempt with:", { email, password: "••••••" });
         await login(email, password);
+
+        // Show success notification
+        showNotification("Login successful", "success");
 
         // Give a small delay before navigation to ensure token is properly stored
         setTimeout(() => {
           navigate("/home", { replace: true });
         }, 100);
       } catch (error) {
-        console.error("Login failed:", error);
+        // Display floating notification for login error
+        if (error instanceof Error) {
+          showNotification(error.message || "Login failed", "error");
+        } else {
+          showNotification(
+            "Login failed. Please check your credentials.",
+            "error"
+          );
+        }
       }
     },
-    [email, password, login, navigate]
+    [email, password, login, navigate, showNotification]
   );
 
   return (
@@ -61,7 +72,6 @@ function FormLogin() {
           required={true}
           placeholder="••••••••"
         />
-        {error && <div className="text-red-500 text-sm">{error}</div>}
         <div className="text-right">
           <a
             href="#"

@@ -282,11 +282,6 @@ const app = new Elysia()
     async ({ body, set, jwt }: { body: any; set: any; jwt: any }) => {
       try {
         const { email, password } = body as { email: string; password: string };
-        console.log("Login attempt with email:", email);
-
-        // Get all users for debugging
-        const allUsers = db.prepare("SELECT email FROM users").all();
-        console.log("Available users in database:", allUsers);
 
         const user = db
           .prepare(
@@ -309,15 +304,12 @@ const app = new Elysia()
           email: string;
         };
 
-        console.log("User found:", user ? "Yes" : "No");
-
         if (!user || !user.password) {
           set.status = 401;
           return { error: "User does not exist" };
         }
 
         const valid = await verify(password, user.password);
-        console.log("Password verification:", valid ? "Success" : "Failed");
 
         if (!valid) {
           set.status = 401;
@@ -349,42 +341,25 @@ const app = new Elysia()
     ];
 
     if (authExemptPaths.includes(path)) {
-      console.log(`Auth path exempt: ${path}`);
       return { userId: "exempt" };
     }
 
     const authHeader = headers.get("authorization");
-    console.log(
-      `Auth header for ${path}:`,
-      authHeader ? authHeader.substring(0, 20) + "..." : "Missing"
-    );
 
     if (!authHeader?.startsWith("Bearer ")) {
-      console.log("Auth header does not start with Bearer");
       return { userId: null };
     }
 
     const token = authHeader.slice(7);
-    console.log("Verifying token...");
     try {
       const payload = await jwt.verify(token);
-      console.log(
-        "JWT Payload:",
-        payload ? JSON.stringify(payload).substring(0, 50) + "..." : "Invalid"
-      );
 
       if (!payload) {
-        console.log("JWT verification failed - no payload");
         return { userId: null };
       }
 
-      console.log(
-        "JWT verification successful, userId:",
-        (payload as any).userId
-      );
       return { userId: (payload as { userId: number }).userId };
     } catch (error) {
-      console.error("JWT verification error:", error);
       return { userId: null };
     }
   })
@@ -397,11 +372,9 @@ const app = new Elysia()
     ];
 
     if (authExemptPaths.includes(path) || userId === "exempt") {
-      console.log(`Auth check skipped for: ${path}`);
       return;
     }
 
-    console.log("UserId in request:", userId);
     if (!userId) {
       set.status = 401;
       return { error: "Unauthorized" };
