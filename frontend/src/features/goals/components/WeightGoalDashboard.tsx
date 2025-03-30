@@ -36,6 +36,9 @@ function WeightGoalDashboard({
     setIsEditing(!isEditing);
   };
 
+  // Calculate the target calories based on weight goals or fall back to TDEE
+  const targetCalories = weightGoals?.adjustedCalorieIntake || tdee;
+
   return (
     <div
       className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden ${className}`}
@@ -58,6 +61,7 @@ function WeightGoalDashboard({
           macroDailyTotals={macroDailyTotals}
           weightGoals={weightGoals!}
           onEdit={toggleEdit}
+          targetCalories={targetCalories}
         />
       )}
     </div>
