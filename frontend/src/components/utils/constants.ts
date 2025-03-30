@@ -34,6 +34,20 @@ export const colorMap = {
 export const BUTTON_VARIANTS = {
   PRIMARY: "primary",
   SECONDARY: "secondary",
+  DANGER: "danger",
+  SUCCESS: "success",
+  GHOST: "ghost"
+} as const;
+
+export const BUTTON_SIZES = {
+  SM: "sm",
+  MD: "md",
+  LG: "lg"
+} as const;
+
+export const ICON_POSITIONS = {
+  LEFT: "left",
+  RIGHT: "right"
 } as const;
 
 export const DEFAULT_LOADING_TEXT = "Processing...";

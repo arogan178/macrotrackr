@@ -133,25 +133,27 @@ export default function Modal(props: ModalProps) {
           </div>
         </div>
 
-        <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse gap-3">
-          <button
-            type="button"
-            onClick={onConfirm}
-            className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold shadow-sm sm:w-auto ${
-              isDanger
-                ? "bg-red-500 hover:bg-red-600 focus:ring-red-500"
-                : "bg-indigo-500 hover:bg-indigo-600 focus:ring-indigo-500"
-            } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800`}
-          >
-            {confirmLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="mt-3 inline-flex w-full justify-center rounded-md bg-gray-700 px-3 py-2 text-sm font-semibold text-gray-300 shadow-sm ring-1 ring-inset ring-gray-600 hover:bg-gray-600 sm:mt-0 sm:w-auto"
-          >
-            {cancelLabel}
-          </button>
+        <div className="flex justify-end gap-3 mt-6">
+          {cancelLabel && (
+            <FormButton
+              variant="secondary"
+              onClick={onClose}
+              size="md"
+              ariaLabel="Cancel"
+            >
+              {cancelLabel}
+            </FormButton>
+          )}
+          {confirmLabel && (
+            <FormButton
+              variant={isDanger ? "danger" : "primary"}
+              onClick={onConfirm}
+              size="md"
+              ariaLabel={confirmLabel}
+            >
+              {confirmLabel}
+            </FormButton>
+          )}
         </div>
       </>
     );
@@ -172,19 +174,23 @@ export default function Modal(props: ModalProps) {
 
         <div className="mt-6 flex justify-end gap-3">
           <FormButton
-            text="Cancel"
-            onClick={onClose}
             variant="secondary"
-            isLoading={false}
-          />
+            onClick={onClose}
+            size="md"
+            ariaLabel="Cancel"
+          >
+            Cancel
+          </FormButton>
           {onSave && (
             <FormButton
-              text="Save"
               onClick={onSave}
-              isLoading={false}
               disabled={saveDisabled}
-              className={saveDisabled ? "opacity-50 cursor-not-allowed" : ""}
-            />
+              variant="primary"
+              size="md"
+              ariaLabel="Save"
+            >
+              Save
+            </FormButton>
           )}
         </div>
       </>

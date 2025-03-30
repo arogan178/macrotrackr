@@ -298,7 +298,12 @@ function WeightGoalForm({
 
       <div className="flex justify-end gap-3">
         {weightGoals && (
-          <FormButton type="button" variant="secondary" onClick={onCancel}>
+          <FormButton
+            type="button"
+            variant="secondary"
+            onClick={onCancel}
+            size="md"
+          >
             Cancel
           </FormButton>
         )}
@@ -308,6 +313,7 @@ function WeightGoalForm({
           disabled={!hasChanges || isLoading || !formValues.targetWeight}
           isLoading={isLoading}
           onClick={handleSave}
+          size="md"
         >
           {!weightGoals ? "Calculate Goal" : "Update Goal"}
         </FormButton>
