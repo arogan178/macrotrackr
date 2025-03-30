@@ -183,10 +183,12 @@ export function StepOne() {
           <FormButton
             type="submit"
             isLoading={isLoading}
-            text="Continue"
+            fullWidth={true}
+            iconPosition="right"
             icon={<ForwardIcon />}
-            className="w-full"
-          />
+          >
+            Continue
+          </FormButton>
         </div>
       </form>
     </StepFormWrapper>
@@ -267,18 +269,24 @@ export function StepTwo() {
               variant="secondary"
               onClick={() => setRegisterStep(1)}
               isLoading={isLoading}
-              text="Back"
+              iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
-            />
+              size="md"
+            >
+              Back
+            </FormButton>
             <FormButton
               type="submit"
               variant="primary"
               isLoading={isLoading}
-              text="Continue"
+              iconPosition="right"
               icon={<ForwardIcon />}
               className="w-2/3"
-            />
+              size="md"
+            >
+              Continue
+            </FormButton>
           </div>
         </div>
       </form>
@@ -345,18 +353,25 @@ export function StepThree() {
               variant="secondary"
               onClick={() => setRegisterStep(2)}
               isLoading={isLoading}
-              text="Back"
+              iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
-            />
+              size="md"
+            >
+              Back
+            </FormButton>
             <FormButton
               type="submit"
+              variant="primary"
               isLoading={isLoading}
               loadingText="Creating Account..."
-              text="Finish"
+              iconPosition="right"
               icon={<CheckIcon />}
               className="w-2/3"
-            />
+              size="md"
+            >
+              Finish
+            </FormButton>
           </div>
         </div>
       </form>

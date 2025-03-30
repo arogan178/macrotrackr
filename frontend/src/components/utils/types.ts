@@ -1,5 +1,11 @@
 import { ReactNode } from "react";
 
+// Define common type aliases for better type safety
+type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost";
+type ButtonSize = "sm" | "md" | "lg";
+type ButtonType = "button" | "submit" | "reset";
+type IconPosition = "left" | "right";
+
 export interface BaseFieldProps {
   label: string;
   required?: boolean;
@@ -74,12 +80,31 @@ export interface CardContainerProps {
 }
 
 export interface FormButtonProps {
-  isLoading: boolean;
-  loadingText?: string;
-  text: string | ReactNode;
-  onClick?: () => void;
-  type?: "button" | "submit";
-  variant?: "primary" | "secondary";
+  children?: ReactNode;
+  text?: string;
+  type?: ButtonType;
+  variant?: ButtonVariant;
+  size?: ButtonSize;
   icon?: ReactNode;
+  iconPosition?: IconPosition;
+  isLoading?: boolean;
+  loadingText?: string;
+  disabled?: boolean;
   className?: string;
+  onClick?: () => void;
+  fullWidth?: boolean;
+  ariaLabel?: string;
+}
+
+export interface LoadingSpinnerProps {
+  size?: "sm" | "md" | "lg";
+  color?: string;
+  label?: string;
+}
+
+export interface SaveButtonProps {
+  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  loading?: boolean;
+  disabled?: boolean;
+  children?: ReactNode;
 }
