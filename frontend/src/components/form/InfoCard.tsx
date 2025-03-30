@@ -1,7 +1,8 @@
+import { memo } from "react";
 import { InfoCardProps } from "../utils/types";
 import { colorMap } from "../utils/constants";
 
-export function InfoCard({
+function InfoCard({
   title,
   description,
   color = "indigo",
@@ -22,3 +23,5 @@ export function InfoCard({
     </div>
   );
 }
+
+export default memo(InfoCard);
