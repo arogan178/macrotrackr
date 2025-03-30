@@ -15,6 +15,7 @@ export default function HomePage() {
   // Get state and actions from our store
   const {
     user,
+    nutritionProfile,
     history,
     macroDailyTotals,
     isLoading,
@@ -24,7 +25,6 @@ export default function HomePage() {
     error,
     notifications,
     editingEntry,
-    userMetrics,
     fetchUserDetails,
     fetchMacroData,
     addEntry,
@@ -77,8 +77,8 @@ export default function HomePage() {
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
                 <UserMetricsPanel
-                  bmr={userMetrics?.bmr}
-                  tdee={userMetrics?.tdee}
+                  bmr={nutritionProfile?.bmr}
+                  tdee={nutritionProfile?.tdee}
                   isLoading={isLoading}
                 />
 
@@ -100,7 +100,8 @@ export default function HomePage() {
                   user && (
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
-                      macroDistribution={user?.macro_distribution}
+                      macroDistribution={nutritionProfile?.macro_distribution}
+                      targetCalories={nutritionProfile?.target_calories}
                     />
                   )
                 )}

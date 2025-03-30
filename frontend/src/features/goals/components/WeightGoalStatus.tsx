@@ -3,6 +3,7 @@ import ProgressBar from "@/components/ProgressBar";
 import { MacroDailyTotals } from "@/features/macroTracking/types";
 import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
+import { useStore } from "@/store/store";
 
 interface WeightGoalStatusProps {
   currentWeight: number;
@@ -11,6 +12,7 @@ interface WeightGoalStatusProps {
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals;
   onEdit: () => void;
+  targetCalories?: number;
 }
 
 function WeightGoalStatus({
@@ -20,7 +22,16 @@ function WeightGoalStatus({
   macroDailyTotals,
   weightGoals,
   onEdit,
+  targetCalories,
 }: WeightGoalStatusProps) {
+  // Get the user's macro distribution from the store
+  const { nutritionProfile } = useStore();
+  const macroDistribution = nutritionProfile?.macro_distribution || {
+    proteinPercentage: 30,
+    carbsPercentage: 40,
+    fatsPercentage: 30,
+  };
+
   // Calculate progress percentage
   const weightDifference = Math.abs(targetWeight - currentWeight);
   const initialDifference = Math.abs(
@@ -41,8 +52,9 @@ function WeightGoalStatus({
   const isWeightGain = weightGoals.weightGoal === "gain";
   const isMaintenance = weightGoals.weightGoal === "maintain";
 
-  // Calculate target calories
-  const targetCalories = weightGoals?.adjustedCalorieIntake || tdee;
+  // Use the provided target calories or fall back to adjustedCalorieIntake or tdee
+  const effectiveTargetCalories =
+    targetCalories || weightGoals?.adjustedCalorieIntake || tdee;
 
   // For display
   const goalTypeLabel = isWeightLoss
@@ -68,6 +80,17 @@ function WeightGoalStatus({
         year: "numeric",
       })
     : "Not set";
+
+  // Calculate target grams for each macro based on target calories and distribution
+  const targetProteinGrams = Math.round(
+    (effectiveTargetCalories * macroDistribution.proteinPercentage) / 100 / 4
+  );
+  const targetCarbsGrams = Math.round(
+    (effectiveTargetCalories * macroDistribution.carbsPercentage) / 100 / 4
+  );
+  const targetFatsGrams = Math.round(
+    (effectiveTargetCalories * macroDistribution.fatsPercentage) / 100 / 9
+  );
 
   return (
     <div className="p-6">
@@ -217,13 +240,15 @@ function WeightGoalStatus({
               </span>
               <span className="text-gray-500"> / </span>
               <span className="text-gray-400">
-                {Math.round(targetCalories)}
+                {Math.round(effectiveTargetCalories)}
               </span>
             </div>
           </div>
           <ProgressBar
             progress={Math.min(
-              Math.round((macroDailyTotals.calories / targetCalories) * 100),
+              Math.round(
+                (macroDailyTotals.calories / effectiveTargetCalories) * 100
+              ),
               100
             )}
             color="indigo"
@@ -237,7 +262,7 @@ function WeightGoalStatus({
           <MacroNutrient
             label="Protein"
             current={macroDailyTotals.protein}
-            target={Math.round(currentWeight * 2)}
+            target={targetProteinGrams}
             color="green"
           />
 
@@ -245,7 +270,7 @@ function WeightGoalStatus({
           <MacroNutrient
             label="Carbs"
             current={macroDailyTotals.carbs}
-            target={Math.round((targetCalories * 0.5) / 4)}
+            target={targetCarbsGrams}
             color="blue"
           />
 
@@ -253,7 +278,7 @@ function WeightGoalStatus({
           <MacroNutrient
             label="Fats"
             current={macroDailyTotals.fats}
-            target={Math.round((targetCalories * 0.25) / 9)}
+            target={targetFatsGrams}
             color="red"
           />
         </div>

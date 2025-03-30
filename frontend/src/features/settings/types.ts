@@ -15,7 +15,7 @@ export interface UserSettings {
   weight?: number;
   activity_level?: ActivityLevel;
   gender?: Gender;
-  macro_distribution?: MacroTargetSettings;
+  // macro_distribution removed and moved to UserNutritionalProfile
 }
 
 export type MacroDistribution = {
@@ -24,6 +24,17 @@ export type MacroDistribution = {
   fats: number;
 };
 
+export interface UserNutritionalProfile {
+  id?: number;
+  user_id?: number;
+  bmr: number;
+  tdee: number;
+  target_calories: number;
+  macro_distribution?: MacroTargetSettings;
+  macros?: MacroDistribution;
+}
+
+// Keeping NutritionProfile for backward compatibility
 export interface NutritionProfile {
   id?: number;
   user?: number;
