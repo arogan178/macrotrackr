@@ -151,7 +151,6 @@ export default function GoalsPage() {
                 <TabButton
                   active={activeTab === "active"}
                   onClick={() => setActiveTab("active")}
-                  className="text-sm px-3 py-1.5"
                 >
                   <span className="flex items-center">
                     <GoalsIcon size="sm" className="mr-1.5" />
@@ -161,7 +160,6 @@ export default function GoalsPage() {
                 <TabButton
                   active={activeTab === "achieved"}
                   onClick={() => setActiveTab("achieved")}
-                  className="text-sm px-3 py-1.5"
                 >
                   <span className="flex items-center">
                     <StarIcon size="sm" className="mr-1.5" />
