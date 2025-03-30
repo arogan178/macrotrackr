@@ -1,4 +1,3 @@
-import React from "react";
 import { FormButtonProps } from "../utils/types";
 import LoadingSpinner from "../LoadingSpinner";
 
