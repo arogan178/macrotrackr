@@ -2,51 +2,62 @@
  * API Service - Centralizes API calls and standardizes error handling
  */
 
-import {
-  getActivityLevelValue,
-  getActivityLevelFromString,
-} from "@/features/settings/constants";
+import { getActivityLevelFromString } from "@/features/settings/constants";
 import { Gender, ActivityLevel } from "@/features/settings/types";
+import { getToken } from "./token-storage";
 
-const API_BASE_URL = "http://localhost:3000";
+// API base URL - should be configured based on environment
+const API_BASE_URL = "http://localhost:3000"; // Adjust as needed
 
-// Define types for registration data
+// TypeScript interface for registration data
 interface RegistrationData {
-  email: string;
-  password: string;
   firstName: string;
   lastName: string;
-  dateOfBirth: string;
-  height: number;
-  weight: number;
-  gender: Gender;
-  activityLevel: ActivityLevel;
+  email: string;
+  password: string;
+  dateOfBirth?: string;
+  height?: number;
+  weight?: number;
+  gender?: Gender;
+  activityLevel?: number;
 }
 
 /**
- * Handles API response and performs common error processing
+ * Handles API responses and standardizes error handling
  */
-async function handleResponse<T>(
-  response: Response,
-  isAuthAttempt = false
-): Promise<T> {
-  if (!response.ok) {
-    // Handle authentication errors - skip session expiration handling for auth attempts
-    if (response.status === 401 && !isAuthAttempt) {
-      localStorage.removeItem("token");
-      window.location.href = "/login";
-      throw new Error("Session expired. Please login again.");
+async function handleResponse(response: Response, isAuthRequest = false) {
+  if (response.ok) {
+    // For empty responses (like DELETE operations)
+    if (response.status === 204) {
+      return { success: true };
     }
-
-    // Try to extract error details from the response
-    const errorData = await response.json().catch(() => ({
-      message: `Request failed with status ${response.status}`,
-    }));
-
-    throw new Error(errorData.message || `API error: ${response.statusText}`);
+    return await response.json();
   }
 
-  return response.json() as Promise<T>;
+  // Handle specific error status codes
+  if (response.status === 401) {
+    throw new Error("API error: Unauthorized");
+  }
+
+  if (response.status === 403) {
+    throw new Error("API error: Forbidden");
+  }
+
+  if (response.status === 404) {
+    throw new Error("API error: Resource not found");
+  }
+
+  try {
+    // Try to parse error response as JSON
+    const errorData = await response.json();
+    if (errorData && errorData.error) {
+      throw new Error(errorData.error);
+    }
+    throw new Error(`API error: ${response.statusText}`);
+  } catch (e) {
+    // If error response isn't valid JSON
+    throw new Error(`API error: ${response.statusText}`);
+  }
 }
 
 /**
@@ -54,10 +65,21 @@ async function handleResponse<T>(
  */
 function getHeaders(includeContentType = true) {
   const headers: Record<string, string> = {};
-  const token = localStorage.getItem("token");
+
+  // Use token-storage utility instead of direct localStorage access
+  const token = getToken();
+  console.log("API Service - Token retrieved for request:", !!token);
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
+    console.log(
+      "Authorization header added:",
+      `Bearer ${token.substring(0, 10)}...`
+    );
+  } else {
+    console.log(
+      "No token available for request, sending unauthenticated request"
+    );
   }
 
   if (includeContentType) {
