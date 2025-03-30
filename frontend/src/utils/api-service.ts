@@ -68,18 +68,9 @@ function getHeaders(includeContentType = true) {
 
   // Use token-storage utility instead of direct localStorage access
   const token = getToken();
-  console.log("API Service - Token retrieved for request:", !!token);
 
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
-    console.log(
-      "Authorization header added:",
-      `Bearer ${token.substring(0, 10)}...`
-    );
-  } else {
-    console.log(
-      "No token available for request, sending unauthenticated request"
-    );
   }
 
   if (includeContentType) {

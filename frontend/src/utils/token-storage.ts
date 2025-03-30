@@ -19,8 +19,6 @@ const isWebCryptoSupported =
  * to localStorage with some additional protection.
  */
 export function securelyStoreToken(token: string): void {
-  console.log("Storing token:", token ? "Token exists" : "No token provided");
-
   if (isWebCryptoSupported) {
     // In a real implementation, this would use the Web Crypto API
     // to encrypt the token before storing it
@@ -33,10 +31,6 @@ export function securelyStoreToken(token: string): void {
     localStorage.setItem("token_stored_at", Date.now().toString());
   }
 
-  // Verify token was stored
-  const storedToken = localStorage.getItem("token");
-  console.log("Token stored successfully:", storedToken === token);
-
   // For production, consider setting httpOnly cookies with a server-side API
 }
 
@@ -44,19 +38,13 @@ export function securelyStoreToken(token: string): void {
  * Retrieves the stored authentication token
  */
 export function getToken(): string | null {
-  if (!isLocalStorageAvailable()) {
-    console.log("localStorage not available");
-    return null;
-  }
+  if (!isLocalStorageAvailable()) return null;
 
   const token = localStorage.getItem("token");
   const storedAt = localStorage.getItem("token_stored_at");
 
-  console.log("Retrieved token:", token ? "Token exists" : "No token found");
-
   // Check if token has expired (e.g., after 24 hours)
   if (token && storedAt && isTokenExpired(storedAt)) {
-    console.log("Token has expired, removing");
     removeToken();
     return null;
   }
