@@ -1,5 +1,3 @@
-import { MacroTargetSettings } from "@/features/macroTracking/types";
-
 // Single consolidated type for all activity/exercise levels
 export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
 
