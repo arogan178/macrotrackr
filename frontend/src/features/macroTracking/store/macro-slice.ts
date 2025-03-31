@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 import { apiService } from "@/utils/api-service";
-import { MacroEntry, MacroDailyTotals } from "../types";
+import { MacroEntry, MacroDailyTotals, MealType } from "../types";
 import { getErrorMessage } from "@/utils/error-handling";
 
 export interface MacrosSlice {
@@ -20,6 +20,10 @@ export interface MacrosSlice {
     protein: number;
     carbs: number;
     fats: number;
+    mealType: MealType;
+    mealName: string;
+    entry_date: string;
+    entry_time: string;
   }) => Promise<void>;
   updateEntry: (entry: MacroEntry) => Promise<void>;
   deleteEntry: (id: number) => Promise<void>;
@@ -55,7 +59,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       ]);
 
       // Properly structure totals data with the expected property names
-      const formattedTotals: macroDailyTotals = {
+      const formattedTotals: MacroDailyTotals = {
         protein: macroDailyTotals.protein || 0,
         carbs: macroDailyTotals.carbs || 0,
         fats: macroDailyTotals.fats || 0,
@@ -86,8 +90,24 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
     set({ isSaving: true, error: null });
 
     try {
-      const result = await apiService.macros.addEntry(inputs);
-      await get().fetchMacroData(); // Update reference here
+      // // Remove emojis from meal type and format it to match backend schema expectations
+      // const cleanMealType = inputs.mealType
+      //   .replace(/🍳|🍗|🍽️|🧃/g, "") // Remove all emojis
+      //   .trim(); // Remove extra spaces
+
+      // Send to API with the expected field names from the backend schema
+      // and preserve decimal values (no rounding)
+      const result = await apiService.macros.addEntry({
+        protein: inputs.protein, // Keep decimal value
+        carbs: inputs.carbs, // Keep decimal value
+        fats: inputs.fats, // Keep decimal value
+        mealType: inputs.mealType, // Use cleaned meal type string
+        mealName: inputs.mealName,
+        entry_date: inputs.entry_date,
+        entry_time: inputs.entry_time,
+      });
+
+      await get().fetchMacroData();
 
       // Use UI slice for notification management if available
       if (get().showNotification) {
@@ -128,16 +148,16 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
 
       set({ history: updatedHistory });
 
-      // Make API call
+      // Make API call - preserve decimal values
       const result = await apiService.macros.updateEntry(id, {
-        protein,
-        carbs,
-        fats,
+        protein, // Keep decimal value
+        carbs, // Keep decimal value
+        fats, // Keep decimal value
       });
 
       // Reset editing state and refresh macros to get accurate totals
       set({ editingEntry: null });
-      await get().fetchMacroData(); // Update reference here
+      await get().fetchMacroData();
 
       // Use UI slice for notification management if available
       if (get().showNotification) {
@@ -159,7 +179,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       }
 
       // Refresh data to revert optimistic update on error
-      await get().fetchMacroData(); // Update reference here
+      await get().fetchMacroData();
 
       throw error;
     } finally {
@@ -180,7 +200,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       await apiService.macros.deleteEntry(id);
 
       // Fetch updated totals from the API instead of calculating locally
-      await get().fetchMacroData(); // Update reference here
+      await get().fetchMacroData();
 
       // Use UI slice for notification management if available
       if (get().showNotification) {
@@ -200,7 +220,7 @@ export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
       }
 
       // Refresh data to restore state if API call failed
-      await get().fetchMacroData(); // Update reference here
+      await get().fetchMacroData();
 
       throw error;
     } finally {
