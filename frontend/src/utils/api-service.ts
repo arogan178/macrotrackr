@@ -4,6 +4,7 @@
 
 import { getActivityLevelFromString } from "@/features/settings/constants";
 import { Gender, ActivityLevel } from "@/features/settings/types";
+import { WeightGoals, MacroTargets } from "@/features/goals/types";
 import { getToken } from "./token-storage";
 
 // API base URL - should be configured based on environment
@@ -21,6 +22,10 @@ interface RegistrationData {
   gender?: Gender;
   activityLevel?: number;
 }
+
+// TypeScript interfaces for goals API requests
+interface SaveWeightGoalRequest extends WeightGoals {}
+interface SaveMacroTargetsRequest extends MacroTargets {}
 
 /**
  * Handles API responses and standardizes error handling
@@ -263,6 +268,54 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/macro_entry/${id}`, {
         method: "DELETE",
         headers: getHeaders(false),
+      });
+      return handleResponse(response);
+    },
+  },
+
+  // Goals endpoints
+  goals: {
+    // Get the user's weight goals
+    getWeightGoals: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
+        headers: getHeaders(false),
+      });
+      return handleResponse(response);
+    },
+
+    // Save weight goals
+    saveWeightGoals: async (weightGoals: SaveWeightGoalRequest) => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(weightGoals),
+      });
+      return handleResponse(response);
+    },
+
+    // Get the user's macro targets
+    getMacroTargets: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
+        headers: getHeaders(false),
+      });
+      return handleResponse(response);
+    },
+
+    // Save macro targets
+    saveMacroTargets: async (macroTargets: SaveMacroTargetsRequest) => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(macroTargets),
+      });
+      return handleResponse(response);
+    },
+
+    // Reset all goals
+    resetGoals: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/reset`, {
+        method: "POST",
+        headers: getHeaders(),
       });
       return handleResponse(response);
     },

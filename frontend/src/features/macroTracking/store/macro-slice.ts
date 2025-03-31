@@ -3,7 +3,7 @@ import { apiService } from "@/utils/api-service";
 import { MacroEntry, MacroDailyTotals } from "../types";
 import { getErrorMessage } from "@/utils/error-handling";
 
-export interface MacrosSlice {
+export interface MacroSlice {
   // State
   history: MacroEntry[];
   macroDailyTotals: MacroDailyTotals;
@@ -26,10 +26,7 @@ export interface MacrosSlice {
   setEditingEntry: (entry: MacroEntry | null) => void;
 }
 
-export const createMacrosSlice: StateCreator<MacrosSlice & any> = (
-  set,
-  get
-) => ({
+export const createMacroSlice: StateCreator<MacroSlice & any> = (set, get) => ({
   history: [],
   macroDailyTotals: {
     protein: 0,

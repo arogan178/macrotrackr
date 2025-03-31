@@ -29,6 +29,8 @@ export default function HomePage() {
     editingEntry,
     fetchUserDetails,
     fetchMacroData,
+    fetchWeightGoals,
+    fetchMacroTargets,
     addEntry,
     updateEntry,
     deleteEntry,
@@ -37,11 +39,15 @@ export default function HomePage() {
     clearAllNotifications,
   } = useStore();
 
-  // Fetch user details and macros on component mount
+  // Fetch user details, macros, and persisted goals on component mount
   useEffect(() => {
     fetchUserDetails();
     fetchMacroData();
-  }, [fetchUserDetails, fetchMacroData]);
+
+    // Fetch saved goals data to ensure we have the latest values
+    fetchWeightGoals();
+    fetchMacroTargets();
+  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTargets]);
 
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
