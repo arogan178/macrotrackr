@@ -26,7 +26,7 @@ function AppContent() {
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/reporting" element={<ReportingPage />} />
-          <Route path="/auth" element={<AuthPage />} />
+          <Route path="/login" element={<AuthPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
