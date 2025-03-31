@@ -12,7 +12,7 @@ interface WeightGoalStatusProps {
   targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
-  weightGoals: WeightGoals;
+  weightGoals: WeightGoals | null;
   onEdit: () => void;
   targetCalories?: number;
   macroDistribution?: MacroTargetSettings;
@@ -51,9 +51,10 @@ function WeightGoalStatus({
       : 0;
 
   // Determine if it's a weight loss, gain, or maintenance goal
-  const isWeightLoss = weightGoals.weightGoal === "lose";
-  const isWeightGain = weightGoals.weightGoal === "gain";
-  const isMaintenance = weightGoals.weightGoal === "maintain";
+  const weightGoal = weightGoals?.weightGoal || "maintain";
+  const isWeightLoss = weightGoal === "lose";
+  const isWeightGain = weightGoal === "gain";
+  const isMaintenance = weightGoal === "maintain";
 
   // Use the provided target calories or fall back to adjustedCalorieIntake or tdee
   const effectiveTargetCalories =
@@ -94,6 +95,12 @@ function WeightGoalStatus({
   const targetFatsGrams = Math.round(
     (effectiveTargetCalories * distribution.fatsPercentage) / 100 / 9
   );
+
+  // Get weekly change with fallback
+  const weeklyChange = weightGoals?.weeklyChange || 0;
+
+  // Get calculated weeks with fallback
+  const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
 
   return (
     <div className="p-6">
@@ -191,9 +198,9 @@ function WeightGoalStatus({
           <p className="text-lg font-medium text-gray-200">
             {isMaintenance
               ? "Maintain weight"
-              : `${isWeightLoss ? "-" : "+"}${Math.abs(
-                  weightGoals.weeklyChange || 0
-                ).toFixed(2)} kg/week`}
+              : `${isWeightLoss ? "-" : "+"}${Math.abs(weeklyChange).toFixed(
+                  2
+                )} kg/week`}
           </p>
         </div>
 
@@ -201,9 +208,7 @@ function WeightGoalStatus({
         <div className="bg-gray-700/30 rounded-lg p-3">
           <p className="text-xs text-gray-400 mb-1">Time Remaining</p>
           <p className="text-lg font-medium text-gray-200">
-            {isMaintenance
-              ? "Ongoing"
-              : `${weightGoals.calculatedWeeks || 0} weeks`}
+            {isMaintenance ? "Ongoing" : `${calculatedWeeks} weeks`}
           </p>
         </div>
 
