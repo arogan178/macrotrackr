@@ -17,7 +17,7 @@ export interface Notification {
   context?: string; // Optional context identifier for grouping notifications
 }
 
-export interface UISlice {
+export interface NotificationSlice {
   // Notification state
   notifications: Notification[];
   activeTimeouts: Record<string, number>;
@@ -42,7 +42,10 @@ export interface UISlice {
 // Notification dedupe timeout (in ms)
 const NOTIFICATION_DEDUPE_TIMEOUT = 5000;
 
-export const createUISlice: StateCreator<UISlice> = (set, get) => ({
+export const createNotificationSlice: StateCreator<NotificationSlice> = (
+  set,
+  get
+) => ({
   // Initial state
   notifications: [],
   activeTimeouts: {},
@@ -120,7 +123,7 @@ export const createUISlice: StateCreator<UISlice> = (set, get) => ({
       context, // Store the context if provided
     };
 
-    set((state: UISlice) => {
+    set((state: NotificationSlice) => {
       // Create a new array with the new notification
       let updatedNotifications = [...state.notifications, notification];
 
@@ -171,7 +174,7 @@ export const createUISlice: StateCreator<UISlice> = (set, get) => ({
   },
 
   hideNotification: (id: string) => {
-    set((state: UISlice) => {
+    set((state: NotificationSlice) => {
       // Clear the timeout to prevent memory leaks
       if (state.activeTimeouts[id]) {
         window.clearTimeout(state.activeTimeouts[id]);
@@ -206,7 +209,7 @@ export const createUISlice: StateCreator<UISlice> = (set, get) => ({
   },
 
   clearNotificationsByContext: (context: string) => {
-    set((state: UISlice) => {
+    set((state: NotificationSlice) => {
       const notificationId = state.notificationContexts[context];
       if (notificationId) {
         // Clear the timeout for this notification
@@ -235,7 +238,7 @@ export const createUISlice: StateCreator<UISlice> = (set, get) => ({
   },
 
   clearAllNotifications: () => {
-    set((state: UISlice) => {
+    set((state: NotificationSlice) => {
       // Clear all active timeouts to prevent memory leaks
       Object.values(state.activeTimeouts).forEach((timeoutId) => {
         window.clearTimeout(timeoutId as number);

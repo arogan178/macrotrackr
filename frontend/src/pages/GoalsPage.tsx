@@ -45,6 +45,8 @@ export default function GoalsPage() {
     clearError,
     fetchUserDetails,
     fetchMacroData,
+    fetchWeightGoals,
+    fetchMacroTargets,
     resetGoals,
   } = useStore();
 
@@ -54,7 +56,17 @@ export default function GoalsPage() {
       fetchUserDetails();
     }
     fetchMacroData();
-  }, [user, fetchUserDetails, fetchMacroData]);
+
+    // Fetch persisted goals data
+    fetchWeightGoals();
+    fetchMacroTargets();
+  }, [
+    user,
+    fetchUserDetails,
+    fetchMacroData,
+    fetchWeightGoals,
+    fetchMacroTargets,
+  ]);
 
   // Handler for saving weight goal
   const handleSaveGoal = (formValues: WeightGoalFormValues) => {
