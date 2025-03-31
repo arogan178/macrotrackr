@@ -1,30 +1,43 @@
 import { create } from "zustand";
+import { devtools } from "zustand/middleware";
 import {
-  createUserSlice,
   UserSlice,
+  createUserSlice,
 } from "@/features/settings/store/user-slice";
-import { createAuthSlice, AuthSlice } from "@/features/auth/store/auth-slice";
 import {
-  createMacrosSlice,
-  MacrosSlice,
+  MacroSlice,
+  createMacroSlice,
 } from "@/features/macroTracking/store/macro-slice";
 import {
-  createUISlice,
-  UISlice,
-} from "@/features/notifications/store/ui-slice";
-import {
-  createGoalsSlice,
   GoalsSlice,
+  createGoalsSlice,
 } from "@/features/goals/store/goals-slice";
+import { AuthSlice, createAuthSlice } from "@/features/auth/store/auth-slice";
+import {
+  NotificationSlice,
+  createNotificationSlice,
+} from "@/features/notifications/store/notification-slice";
 
-// Define the store type by combining all slices
-export type Store = UserSlice & AuthSlice & MacrosSlice & UISlice & GoalsSlice;
+// Combine all slice types
+export type StoreState = UserSlice &
+  MacroSlice &
+  GoalsSlice &
+  AuthSlice &
+  NotificationSlice;
 
 // Create the store with all slices
-export const useStore = create<Store>((...args) => ({
-  ...createUserSlice(...args),
-  ...createAuthSlice(...args),
-  ...createMacrosSlice(...args),
-  ...createUISlice(...args),
-  ...createGoalsSlice(...args),
-}));
+export const useStore = create<StoreState>()(
+  devtools((...a) => ({
+    ...createUserSlice(...a),
+    ...createMacroSlice(...a),
+    ...createGoalsSlice(...a),
+    ...createAuthSlice(...a),
+    ...createNotificationSlice(...a),
+  }))
+);
+
+// Method to reset the entire store for testing purposes
+export const resetStore = () => {
+  const { reset: resetAuth } = useStore.getState();
+  resetAuth();
+};
