@@ -5,6 +5,7 @@ export interface WeightGoals {
   currentWeight: number;
   targetWeight: number;
   weightGoal: WeightGoal;
+  startDate?: string;
   targetDate?: string;
   adjustedCalorieIntake?: number;
   calculatedWeeks?: number;
