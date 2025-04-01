@@ -14,7 +14,7 @@ interface WeightGoalStatusProps {
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | null;
   onEdit: () => void;
-  targetCalories?: number;
+  calorieTarget?: number;
   macroTarget?: MacroTargetSettings;
 }
 
@@ -25,7 +25,7 @@ function WeightGoalStatus({
   macroDailyTotals,
   weightGoals,
   onEdit,
-  targetCalories,
+  calorieTarget,
   macroTarget,
 }: WeightGoalStatusProps) {
   // Use the provided macro target or fall back to default
@@ -56,9 +56,9 @@ function WeightGoalStatus({
   const isWeightGain = weightGoal === "gain";
   const isMaintenance = weightGoal === "maintain";
 
-  // Use the provided target calories or fall back to adjustedCalorieIntake or tdee
-  const effectiveTargetCalories =
-    targetCalories || weightGoals?.adjustedCalorieIntake || tdee;
+  // Use the provided calorie target or fall back to weight goals target or tdee
+  const effectiveCalorieTarget =
+    calorieTarget || weightGoals?.calorieTarget || tdee;
 
   // For display
   const goalTypeLabel = isWeightLoss
@@ -87,13 +87,13 @@ function WeightGoalStatus({
 
   // Calculate target grams for each macro based on target calories and target
   const targetProteinGrams = Math.round(
-    (effectiveTargetCalories * target.proteinPercentage) / 100 / 4
+    (effectiveCalorieTarget * target.proteinPercentage) / 100 / 4
   );
   const targetCarbsGrams = Math.round(
-    (effectiveTargetCalories * target.carbsPercentage) / 100 / 4
+    (effectiveCalorieTarget * target.carbsPercentage) / 100 / 4
   );
   const targetFatsGrams = Math.round(
-    (effectiveTargetCalories * target.fatsPercentage) / 100 / 9
+    (effectiveCalorieTarget * target.fatsPercentage) / 100 / 9
   );
 
   // Get weekly change with fallback
@@ -234,9 +234,7 @@ function WeightGoalStatus({
           <p className="text-lg font-medium text-gray-200">
             {isMaintenance
               ? `${tdee} kcal`
-              : `${Math.abs(
-                  tdee - (weightGoals?.adjustedCalorieIntake || tdee)
-                )} kcal`}
+              : `${Math.abs(tdee - (weightGoals?.calorieTarget || tdee))} kcal`}
           </p>
         </div>
       </div>
@@ -258,14 +256,14 @@ function WeightGoalStatus({
               </span>
               <span className="text-gray-500"> / </span>
               <span className="text-gray-400">
-                {Math.round(effectiveTargetCalories)}
+                {Math.round(effectiveCalorieTarget)}
               </span>
             </div>
           </div>
           <ProgressBar
             progress={Math.min(
               Math.round(
-                (macroDailyTotals.calories / effectiveTargetCalories) * 100
+                (macroDailyTotals.calories / effectiveCalorieTarget) * 100
               ),
               100
             )}

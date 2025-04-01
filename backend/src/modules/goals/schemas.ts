@@ -2,49 +2,31 @@
 import { t } from "elysia";
 
 // --- Reusable Primitives ---
-const PositiveNumber = t.Number({ minimum: 0 });
 const PositiveNumberOrNull = t.Nullable(t.Number({ minimum: 0 }));
 const PositiveIntegerOrNull = t.Nullable(t.Integer({ minimum: 0 }));
-const DateString = t.String({ format: "date" });
 const DateStringOrNull = t.Nullable(t.String({ format: "date" }));
-const MacroPercentage = t.Integer({ minimum: 5, maximum: 70 });
-
-// --- Macro Targeta (similar to user settings) ---
-// This is used within the Macro Target schema below
-const MacroTargetSchema = t.Object(
-  {
-    proteinPercentage: t.Integer({ minimum: 5, maximum: 70 }),
-    carbsPercentage: t.Integer({ minimum: 5, maximum: 70 }),
-    fatsPercentage: t.Integer({ minimum: 5, maximum: 70 }),
-  },
-  {
-    // Validator for sum = 100
-    // *** ADDED Explicit type for the 'value' parameter ***
-    validator: (value: {
-      proteinPercentage: number;
-      carbsPercentage: number;
-      fatsPercentage: number;
-    }) => {
-      // Check if the sum of percentages equals 100
-      if (
-        value.proteinPercentage +
-          value.carbsPercentage +
-          value.fatsPercentage !==
-        100
-      ) {
-        // Return error message if validation fails
-        return "Macro percentages must sum to 100.";
-      }
-      // Return true if validation passes
-      return true;
-    },
-  }
-);
+// Removed MacroPercentage as it's moved
 
 // --- Exported Goal Schemas ---
-// Defines schemas directly without using t.Ref for simplicity during development.
+// Now only contains schemas related to Weight Goals
 export const GoalSchemas = {
-  // Schema for the response when getting weight goals
+  // Schema for Weight Goals data (API structure - camelCase)
+  weightGoalData: t.Object({
+    currentWeight: PositiveNumberOrNull,
+    targetWeight: PositiveNumberOrNull,
+    weightGoal: t.Nullable(
+      t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
+    ),
+    startDate: DateStringOrNull,
+    targetDate: DateStringOrNull,
+    adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
+    calculatedWeeks: PositiveIntegerOrNull,
+    weeklyChange: t.Nullable(t.Number()),
+    dailyChange: t.Nullable(t.Number()), // Renamed field
+  }),
+
+  // --- Request/Response Schemas for Weight Goals ---
+
   getWeightGoalResponse: t.Nullable(
     t.Object({
       currentWeight: PositiveNumberOrNull,
@@ -54,32 +36,27 @@ export const GoalSchemas = {
       ),
       startDate: DateStringOrNull,
       targetDate: DateStringOrNull,
-      adjustedCalorieIntake: PositiveNumberOrNull,
+      adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
       calculatedWeeks: PositiveIntegerOrNull,
       weeklyChange: t.Nullable(t.Number()),
-      dailyChange: t.Nullable(t.Number()),
+      dailyChange: t.Nullable(t.Number()), // Renamed field
     })
   ),
-
-  // Schema for updating weight goals
   updateWeightGoalBody: t.Object({
-    currentWeight: PositiveNumber,
-    targetWeight: PositiveNumberOrNull,
-    weightGoal: t.Union([
-      t.Literal("lose"),
-      t.Literal("maintain"),
-      t.Literal("gain"),
-    ]),
-    startDate: DateString,
+    currentWeight: PositiveNumberOrNull,
+    targetWeight: PositiveNumberOrNull, // Allow null for initial set? Let's keep PositiveNumberOrNull
+    weightGoal: t.Nullable(
+      t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
+    ), // Allow null? Let's keep Nullable
+    startDate: DateStringOrNull,
     targetDate: DateStringOrNull,
-    adjustedCalorieIntake: PositiveNumberOrNull,
+    adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()),
+    dailyChange: t.Nullable(t.Number()), // Renamed field
   }),
-
-  // Schema for the response when updating weight goals
   updateWeightGoalResponse: t.Object({
+    // Response after update
     currentWeight: PositiveNumberOrNull,
     targetWeight: PositiveNumberOrNull,
     weightGoal: t.Nullable(
@@ -87,51 +64,13 @@ export const GoalSchemas = {
     ),
     startDate: DateStringOrNull,
     targetDate: DateStringOrNull,
-    adjustedCalorieIntake: PositiveNumberOrNull,
+    adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()),
+    dailyChange: t.Nullable(t.Number()), // Renamed field
   }),
 
-  // Schema for the response when getting macro target
-  getMacroTargetResponse: t.Nullable(
-    t.Object({
-      targetCalories: t.Nullable(PositiveNumber),
-      macroTarget: t.Nullable(
-        t.Object({
-          proteinPercentage: MacroPercentage,
-          carbsPercentage: MacroPercentage,
-          fatsPercentage: MacroPercentage,
-        })
-      ),
-    })
-  ),
-
-  // Schema for updating macro target
-  updateMacroTargetBody: t.Object({
-    targetCalories: t.Nullable(PositiveNumber),
-    macroTarget: t.Nullable(
-      t.Object({
-        proteinPercentage: MacroPercentage,
-        carbsPercentage: MacroPercentage,
-        fatsPercentage: MacroPercentage,
-      })
-    ),
-  }),
-
-  // Schema for the response when updating macro target
-  updateMacroTargetResponse: t.Object({
-    targetCalories: t.Nullable(PositiveNumber),
-    macroTarget: t.Nullable(
-      t.Object({
-        proteinPercentage: MacroPercentage,
-        carbsPercentage: MacroPercentage,
-        fatsPercentage: MacroPercentage,
-      })
-    ),
-  }),
-
-  // Schema for the response when resetting goals
+  // Schema for resetting goals
   resetResponse: t.Object({
     success: t.Boolean(),
   }),

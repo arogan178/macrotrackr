@@ -1,3 +1,5 @@
+import { MacroTargetPercentages } from "../settings/types";
+
 // Define the type for the clean meal values (used in state and sent to API)
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
@@ -42,8 +44,8 @@ export interface MacroInputs {
 }
 
 export interface MacroTargetSettings {
-  proteinPercentage: number;
-  carbsPercentage: number;
-  fatsPercentage: number;
-  locked_macros?: string[];
+  proteinPercentage: MacroTargetPercentages["proteinPercentage"];
+  carbsPercentage: MacroTargetPercentages["carbsPercentage"];
+  fatsPercentage: MacroTargetPercentages["fatsPercentage"];
+  lockedMacros?: MacroTargetPercentages["lockedMacros"];
 }

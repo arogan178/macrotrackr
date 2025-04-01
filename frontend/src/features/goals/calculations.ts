@@ -70,14 +70,14 @@ export function calculateRecommendedDeficit(
 }
 
 /**
- * Calculate adjusted calorie intake based on TDEE and weight goal
+ * Calculate calorie target based on TDEE and weight goal
  * @param tdee - Total Daily Energy Expenditure (maintenance calories)
  * @param currentWeight - Current weight in kg
  * @param targetWeight - Target weight in kg
  * @param targetWeeks - Optional: Desired timeframe in weeks (defaults to 12)
- * @returns Adjusted daily calorie intake to achieve goal
+ * @returns Daily calorie target to achieve goal
  */
-export function calculateAdjustedCalorieIntake(
+export function calculateCalorieTarget(
   tdee: number,
   currentWeight: number,
   targetWeight: number,
@@ -115,12 +115,12 @@ export function generateWeightGoalCalculations(
   customCalorieIntake?: number
 ): Partial<WeightGoals> {
   // If custom calorie intake is provided, use it
-  const adjustedCalorieIntake =
+  const calorieTarget =
     customCalorieIntake !== undefined
       ? customCalorieIntake
-      : calculateAdjustedCalorieIntake(tdee, currentWeight, targetWeight);
+      : calculateCalorieTarget(tdee, currentWeight, targetWeight);
 
-  const calorieDeficit = tdee - adjustedCalorieIntake;
+  const calorieDeficit = tdee - calorieTarget;
   const isWeightLoss = currentWeight > targetWeight;
 
   // For maintenance goals (same weight), set calculatedWeeks to 0
@@ -129,7 +129,7 @@ export function generateWeightGoalCalculations(
       currentWeight,
       targetWeight,
       weightGoal: "maintain",
-      adjustedCalorieIntake,
+      calorieTarget,
       targetDate: new Date().toISOString().split("T")[0], // Today's date
       calculatedWeeks: 0,
       weeklyChange: 0,
@@ -160,7 +160,7 @@ export function generateWeightGoalCalculations(
         : currentWeight < targetWeight
         ? "gain"
         : "maintain",
-    adjustedCalorieIntake,
+    calorieTarget,
     targetDate: targetDate.toISOString().split("T")[0],
     calculatedWeeks: weeksToGoal,
     weeklyChange: expectedWeightLossPerWeek,
