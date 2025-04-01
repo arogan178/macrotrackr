@@ -62,7 +62,7 @@ export function initializeSchema(db: Database) {
             weight_goal TEXT CHECK(weight_goal IN ('lose', 'maintain', 'gain')), -- Type of goal
             start_date TEXT, -- YYYY-MM-DD
             target_date TEXT, -- YYYY-MM-DD
-            adjusted_calorie_intake REAL, -- Recommended calories for goal
+            calorie_target REAL, -- Recommended calories for goal
             calculated_weeks INTEGER, -- Estimated duration
             weekly_change REAL, -- Estimated kg/week change
             daily_change REAL, --  Estimated calorie deficit/surplus per day
@@ -75,7 +75,6 @@ export function initializeSchema(db: Database) {
         CREATE TABLE IF NOT EXISTS macro_targets (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              user_id INTEGER UNIQUE NOT NULL,
-             target_calories REAL, -- Target calories (can be different from weight goal adjusted intake)
              protein_percentage INTEGER DEFAULT 30,
              carbs_percentage INTEGER DEFAULT 40,
              fats_percentage INTEGER DEFAULT 30,

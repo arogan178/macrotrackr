@@ -52,6 +52,10 @@ export default function HomePage() {
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
 
+  // Determine the calorie target - prioritize weight goals target if available, otherwise use TDEE
+  const effectiveCalorieTarget =
+    weightGoals?.calorieTarget || nutritionProfile?.tdee;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
@@ -108,11 +112,8 @@ export default function HomePage() {
                   user && (
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget?.macroTarget}
-                      targetCalories={
-                        weightGoals?.adjustedCalorieIntake ??
-                        nutritionProfile?.tdee
-                      }
+                      macroTarget={macroTarget}
+                      calorieTarget={effectiveCalorieTarget}
                     />
                   )
                 )}

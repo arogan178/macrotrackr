@@ -6,13 +6,13 @@ import ProgressBar from "@/components/ProgressBar";
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
   macroTarget?: MacroTargetSettings;
-  targetCalories?: number;
+  calorieTarget?: number;
 }
 
 export default function DailySummary({
   macroDailyTotals,
   macroTarget,
-  targetCalories,
+  calorieTarget,
 }: DailySummaryProps) {
   const defaultTarget = {
     proteinPercentage: 30,
@@ -36,17 +36,17 @@ export default function DailySummary({
     safeTotal.fats
   );
   const totalCalories = safeTotal.calories || calculatedCalories;
-  const dailyTargetCalories = targetCalories || totalCalories || 2000;
+  const dailyCalorieTarget = calorieTarget || 0;
 
-  // Calculate target grams for each macro based on targetCalories and target
+  // Calculate target grams for each macro based on calorie target and target percentages
   const targetProteinGrams = Math.round(
-    (dailyTargetCalories * target.proteinPercentage) / 100 / 4
+    (dailyCalorieTarget * target.proteinPercentage) / 100 / 4
   );
   const targetCarbsGrams = Math.round(
-    (dailyTargetCalories * target.carbsPercentage) / 100 / 4
+    (dailyCalorieTarget * target.carbsPercentage) / 100 / 4
   );
   const targetFatsGrams = Math.round(
-    (dailyTargetCalories * target.fatsPercentage) / 100 / 9
+    (dailyCalorieTarget * target.fatsPercentage) / 100 / 9
   );
 
   // Calculate completion percentages for each macro
@@ -64,7 +64,7 @@ export default function DailySummary({
   );
   const calorieCompletionPercent = Math.min(
     100,
-    Math.round((totalCalories / dailyTargetCalories) * 100) || 0
+    Math.round((totalCalories / dailyCalorieTarget) * 100) || 0
   );
 
   // Calculate total calories from each macro
@@ -149,7 +149,7 @@ export default function DailySummary({
               <div className="text-xs text-gray-400">
                 <span>of </span>
                 <span className="font-medium text-gray-300">
-                  {dailyTargetCalories}
+                  {dailyCalorieTarget}
                 </span>
                 <span> kcal</span>
 
@@ -180,14 +180,9 @@ export default function DailySummary({
           {/* Using shared MacroTargetLegend component with corrected percentage values */}
           <MacroTargetLegend
             macros={{
-              protein: proteinCalories,
-              carbs: carbsCalories,
-              fats: fatsCalories,
-            }}
-            percentages={{
-              protein: proteinPercent,
-              carbs: carbsPercent,
-              fats: fatsPercent,
+              protein: safeTotal.protein,
+              carbs: safeTotal.carbs,
+              fats: safeTotal.fats,
             }}
             className="mt-2"
           />

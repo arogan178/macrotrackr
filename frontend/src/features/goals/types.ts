@@ -5,16 +5,15 @@ export interface WeightGoals {
   currentWeight: number;
   targetWeight: number;
   weightGoal: WeightGoal;
-  startDate?: string;
-  targetDate?: string;
-  adjustedCalorieIntake?: number;
-  calculatedWeeks?: number;
-  weeklyChange?: number;
-  dailyChange?: number;
+  startDate: string; // Required field with proper format
+  targetDate: string; // Required field with proper format
+  calorieTarget: number; // Changed from adjustedCalorieIntake to match backend
+  calculatedWeeks: number;
+  weeklyChange: number;
+  dailyChange: number;
 }
 
 export interface MacroTarget {
-  targetCalories?: number;
   macroTarget?: MacroTargetSettings;
 }
 
@@ -36,7 +35,7 @@ export interface WeightGoalFormValues {
   targetWeight: number | undefined;
   startDate?: string;
   targetDate?: string;
-  adjustedCalorieIntake?: number;
+  calorieTarget?: number;
   weeklyChange?: number;
   calculatedWeeks?: number;
   weightGoal?: WeightGoal;
