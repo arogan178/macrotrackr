@@ -104,10 +104,10 @@ export const authRoutes = (
               // 4. Insert default macro target settings
               db.prepare(
                 `
-                        INSERT INTO macro_target (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
-                        VALUES (?, ?, ?, ?, ?)
-                    `
-              ).run(userId, 30, 40, 30, "[]"); // Default values, locked_macros as JSON string
+    INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
+    VALUES (?, 30, 40, 30, '[]')
+`
+              ).run(userId);
 
               return { userId, email, firstName, lastName }; // Return data needed for JWT signing
             });

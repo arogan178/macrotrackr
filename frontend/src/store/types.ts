@@ -37,15 +37,15 @@
 
 // export interface UserDetails {
 //   id: number;
-//   first_name: string;
-//   last_name: string;
+//   firstName: string;
+//   lastName: string;
 //   email: string;
-//   date_of_birth?: string;
+//   dateOfBirth?: string;
 //   height?: number;
 //   weight?: number;
-//   activity_level?: number;
+//   activityLevel?: number;
 //   gender?: "male" | "female";
-//   macro_target?: MacroTargetSettings;
+//   macroTarget?: MacroTargetSettings;
 // }
 
 // export type Gender = "Male" | "Female";

@@ -214,8 +214,8 @@ export default function GoalsPage() {
                 weightGoals={weightGoals}
                 onSave={handleSaveGoal}
                 isLoading={isLoading}
-                targetCalories={macroTarget?.target_calories}
-                macroTarget={macroTarget?.macro_target}
+                targetCalories={macroTarget?.targetCalories}
+                macroTarget={macroTarget?.macroTarget}
               />
 
               {/* Habit Tracker */}

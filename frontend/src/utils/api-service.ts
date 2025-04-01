@@ -5,13 +5,13 @@
 
 // Assuming these imports exist and work as intended in your frontend structure
 import { getActivityLevelFromString } from "@/features/settings/constants";
-import { Gender, ActivityLevel } from "@/features/settings/types";
+import { ActivityLevel } from "@/features/settings/types"; // Assuming Gender is 'male' | 'female'
 import { getToken } from "./token-storage"; // Assuming this utility correctly retrieves the JWT
 
 // API base URL - should be configured based on environment
 const API_BASE_URL = "http://localhost:3000"; // Ensure this matches your backend port
 
-// --- Interfaces for Payloads and Responses (align with backend Zod schemas) ---
+// --- Interfaces for Payloads and Responses (align with backend Zod schemas - camelCase) ---
 
 // Based on src/modules/auth/schemas.ts -> AuthSchemas.register
 interface RegistrationDataPayload {
@@ -22,26 +22,56 @@ interface RegistrationDataPayload {
   dateOfBirth: string; // YYYY-MM-DD
   height: number;
   weight: number;
-  gender: Gender;
+  gender: "male" | "female"; // Use specific literals
   activityLevel: number; // 1-5
 }
 
-// Based on src/modules/user/schemas.ts -> UserSchemas.userSettingsUpdate
-// Using Partial as most fields are optional for update
-type UserSettingsPayload = Partial<{
-  first_name: string;
-  last_name: string;
-  email: string;
-  date_of_birth: string | null; // YYYY-MM-DD or null
-  height: number | null;
-  weight: number | null;
-  gender: "male" | "female" | null;
-  activity_level: number | null; // 1-5 or null
-  macro_target: {
+// Based on src/modules/goals/schemas.ts -> GoalSchemas.updateWeightGoalBody
+// Note: Backend schema uses camelCase
+type WeightGoalPayload = {
+  currentWeight: number | null;
+  targetWeight: number | null;
+  weightGoal: "lose" | "maintain" | "gain" | null;
+  startDate: string | null; // YYYY-MM-DD
+  targetDate: string | null; // YYYY-MM-DD
+  adjustedCalorieIntake: number | null;
+  calculatedWeeks: number | null;
+  weeklyChange: number | null;
+  dailyDeficit: number | null;
+};
+
+// Based on src/modules/goals/schemas.ts -> GoalSchemas.updateMacroTargetBody
+// Note: Backend schema uses camelCase
+type MacroTargetPayload = {
+  targetCalories: number | null;
+  // Use consistent camelCase naming as defined in backend GoalSchemas
+  macroTarget: {
     proteinPercentage: number;
     carbsPercentage: number;
     fatsPercentage: number;
-    locked_macros: Array<"protein" | "carbs" | "fats">;
+  } | null;
+};
+
+// Based on src/modules/user/schemas.ts -> UserSchemas.userSettingsUpdate
+// Using Partial as most fields are optional for update. Ensure keys are camelCase.
+type UserSettingsPayload = Partial<{
+  firstName: string;
+  lastName: string;
+  email: string;
+  dateOfBirth: string | null;
+  height: number | null;
+  weight: number | null;
+  gender: "male" | "female" | null;
+  activityLevel: number | null;
+  // Use consistent camelCase naming as defined in backend UserSchemas/GoalSchemas
+  macroTarget: {
+    // Changed from macroTarget
+    proteinPercentage: number;
+    carbsPercentage: number;
+    fatsPercentage: number;
+    // NOTE: locked_macros was defined in backend UserSchemas.macroTargetSettings
+    // Add it here if the frontend needs to send it. Assuming it's part of the target object.
+    lockedMacros?: Array<"protein" | "carbs" | "fats">; // Changed from locked_macros
   } | null;
 }>;
 
@@ -50,8 +80,8 @@ interface MacroEntryCreatePayload {
   protein: number;
   carbs: number;
   fats: number;
-  meal_type: "breakfast" | "lunch" | "dinner" | "snack";
-  meal_name?: string; // Optional
+  mealType: "breakfast" | "lunch" | "dinner" | "snack"; // Changed from meal_type
+  mealName?: string; // Changed from meal_name (optional already)
   entry_date: string; // YYYY-MM-DD
   entry_time: string; // HH:MM or HH:MM:SS
 }
@@ -86,31 +116,48 @@ class ApiError extends Error {
 
 /**
  * Handles API responses, parses JSON, and standardizes error handling.
- * Updated to parse the new backend error structure.
+ * Updated to handle valid null/empty responses for 200 OK status.
  */
 async function handleResponse(response: Response): Promise<any> {
-  // Handle successful responses
+  // Handle successful responses (2xx status codes)
   if (response.ok) {
-    // Handle No Content responses (e.g., successful DELETE)
+    // Handle specific 204 No Content responses
     if (response.status === 204) {
       return { success: true }; // Return a simple success indicator
     }
-    // Try to parse successful JSON response
+
+    // Try to parse successful JSON response, but handle potential null/empty body for 200 OK
     try {
-      const data = await response.json();
-      // Explicitly return null if the backend returns null
-      // This ensures null is handled as a valid response, not an error
-      return data;
+      // Clone the response to read the text without consuming the body for json()
+      // This prevents errors if the body is truly empty or just 'null' text
+      const responseBodyText = await response.clone().text();
+      if (!responseBodyText) {
+        // If the body is empty, return null
+        return null;
+      }
+      // If body is not empty, attempt to parse as JSON
+      // This will correctly parse valid JSON including the value `null`
+      return await response.json();
     } catch (e) {
-      // Handle cases where response is OK but not valid JSON (shouldn't happen often with APIs)
-      console.error("API Success Response is not valid JSON:", e);
-      throw new Error("Received an invalid response from the server.");
+      // If response.json() fails *even though status is OK*
+      console.warn("API Success Response (2xx) could not be parsed as JSON:", {
+        status: response.status,
+        error: e,
+      });
+      // Assume a valid 'null' or empty response was intended for 200 OK status
+      if (response.status === 200) {
+        return null;
+      }
+      // For other 2xx statuses with unparsable bodies, it's unexpected
+      throw new Error(
+        "Received an invalid or unparsable response from the server."
+      );
     }
   }
 
-  // Handle error responses (response.ok is false)
+  // Handle error responses (response.ok is false - 4xx, 5xx status codes)
   let errorPayload: ApiErrorResponse | null = null;
-  let errorMessage = `API error: ${response.statusText}`; // Default message
+  let errorMessage = `API error (${response.status}): ${response.statusText}`; // Default message includes status
   let errorCode = `HTTP_${response.status}`; // Default code
   let errorDetails: any = undefined;
 
@@ -151,13 +198,10 @@ function getHeaders(includeContentType = true): Record<string, string> {
 }
 
 /**
- * Normalizes registration data from the frontend form to match the backend payload structure.
+ * Normalizes registration data from the frontend form to match the backend payload structure (camelCase).
  * Validation should happen primarily in the form before calling the API.
  */
 function normalizeRegistrationData(userData: any): RegistrationDataPayload {
-  // Backend expects: firstName, lastName, email, password, dateOfBirth (string),
-  // height (number), weight (number), gender ('male'|'female'), activityLevel (number 1-5)
-
   // Ensure required fields are present (basic check, form should handle this)
   if (
     !userData.firstName ||
@@ -173,9 +217,7 @@ function normalizeRegistrationData(userData: any): RegistrationDataPayload {
     lastName: userData.lastName,
     email: userData.email,
     password: userData.password,
-    // Ensure date format if provided (form validation preferred)
-    dateOfBirth: userData.dateOfBirth, // Assuming it's already YYYY-MM-DD string
-    // Ensure numbers if provided (form validation preferred)
+    dateOfBirth: userData.dateOfBirth, // Assuming YYYY-MM-DD string
     height: userData.height !== undefined ? Number(userData.height) : undefined,
     weight: userData.weight !== undefined ? Number(userData.weight) : undefined,
   };
@@ -198,34 +240,32 @@ function normalizeRegistrationData(userData: any): RegistrationDataPayload {
       throw new Error("Invalid gender value provided.");
     }
   } else {
-    throw new Error("Gender is required for registration."); // Example: Make gender required
+    throw new Error("Gender is required for registration.");
   }
 
   // Normalize activityLevel to number 1-5
   if (userData.activityLevel !== undefined) {
+    let level: number | undefined = undefined;
     if (
       typeof userData.activityLevel === "number" ||
       !isNaN(Number(userData.activityLevel))
     ) {
-      const level = Number(userData.activityLevel);
-      if (level >= 1 && level <= 5) {
-        normalized.activityLevel = level;
-      } else {
-        throw new Error("Activity level must be between 1 and 5.");
-      }
+      level = Number(userData.activityLevel);
     } else if (typeof userData.activityLevel === "string") {
-      // Use the imported helper function if it converts string ("sedentary") to number (1)
-      normalized.activityLevel = getActivityLevelFromString(
+      level = getActivityLevelFromString(
         userData.activityLevel as ActivityLevel
       );
-      if (normalized.activityLevel < 1 || normalized.activityLevel > 5) {
-        throw new Error("Invalid activity level string provided.");
-      }
+    }
+
+    if (level !== undefined && level >= 1 && level <= 5) {
+      normalized.activityLevel = level;
     } else {
-      throw new Error("Invalid activity level value provided.");
+      throw new Error(
+        "Invalid or out-of-range activity level provided (must be 1-5)."
+      );
     }
   } else {
-    throw new Error("Activity Level is required for registration."); // Example: Make activity level required
+    throw new Error("Activity Level is required for registration.");
   }
 
   // Ensure all required fields for the backend payload are present after normalization
@@ -244,48 +284,72 @@ function normalizeRegistrationData(userData: any): RegistrationDataPayload {
 
 /**
  * Normalizes settings data before sending to the backend.
- * Ensures activity_level is a number (1-5).
+ * Ensures activityLevel is a number (1-5).
+ * Assumes input 'settings' object uses camelCase keys matching UserSettingsPayload.
  */
-function normalizeSettingsData(settings: any): UserSettingsPayload {
-  const normalizedSettings: UserSettingsPayload = { ...settings };
+function normalizeSettingsData(
+  settings: UserSettingsPayload
+): UserSettingsPayload {
+  // Create a copy to avoid modifying the original object, ensure only valid keys are passed
+  const normalizedSettings: UserSettingsPayload = {};
 
-  // Normalize activity_level if present in the update payload
-  if (
-    normalizedSettings.activity_level !== undefined &&
-    normalizedSettings.activity_level !== null
-  ) {
+  // Copy/normalize known fields from UserSettingsPayload definition
+  if (settings.firstName !== undefined)
+    normalizedSettings.firstName = settings.firstName;
+  if (settings.lastName !== undefined)
+    normalizedSettings.lastName = settings.lastName;
+  if (settings.email !== undefined) normalizedSettings.email = settings.email;
+  if (settings.dateOfBirth !== undefined)
+    normalizedSettings.dateOfBirth = settings.dateOfBirth; // Allow null
+  if (settings.height !== undefined)
+    normalizedSettings.height =
+      settings.height !== null ? Number(settings.height) : null; // Allow null
+  if (settings.weight !== undefined)
+    normalizedSettings.weight =
+      settings.weight !== null ? Number(settings.weight) : null; // Allow null
+  if (settings.gender !== undefined)
+    normalizedSettings.gender = settings.gender; // Allow null
+  if (settings.macroTarget !== undefined)
+    normalizedSettings.macroTarget = settings.macroTarget; // Allow null
+
+  // Normalize activityLevel if present in the update payload
+  if (settings.activityLevel !== undefined && settings.activityLevel !== null) {
+    let level: number | undefined = undefined;
     if (
-      typeof normalizedSettings.activity_level === "number" ||
-      !isNaN(Number(normalizedSettings.activity_level))
+      typeof settings.activityLevel === "number" ||
+      !isNaN(Number(settings.activityLevel))
     ) {
-      const level = Number(normalizedSettings.activity_level);
-      if (level >= 1 && level <= 5) {
-        normalizedSettings.activity_level = level;
-      } else {
-        throw new Error("Activity level must be between 1 and 5.");
-      }
-    } else if (typeof normalizedSettings.activity_level === "string") {
-      normalizedSettings.activity_level = getActivityLevelFromString(
-        normalizedSettings.activity_level as ActivityLevel
+      level = Number(settings.activityLevel);
+    } else if (typeof settings.activityLevel === "string") {
+      level = getActivityLevelFromString(
+        settings.activityLevel as ActivityLevel
       );
-      if (
-        normalizedSettings.activity_level < 1 ||
-        normalizedSettings.activity_level > 5
-      ) {
-        throw new Error("Invalid activity level string provided.");
-      }
-    } else {
-      throw new Error("Invalid activity level value provided.");
     }
+
+    if (level !== undefined && level >= 1 && level <= 5) {
+      normalizedSettings.activityLevel = level;
+    } else {
+      throw new Error(
+        "Invalid or out-of-range activity level provided (must be 1-5)."
+      );
+    }
+  } else if (settings.activityLevel === null) {
+    normalizedSettings.activityLevel = null; // Explicitly allow setting to null
   }
 
-  // Note: Backend uses snake_case (e.g., first_name), ensure payload keys match
-  // If frontend uses camelCase (e.g., firstName), map them here or ensure consistency
-  // Example mapping (if needed):
-  // if (settings.firstName !== undefined) normalizedSettings.first_name = settings.firstName;
-  // if (settings.lastName !== undefined) normalizedSettings.last_name = settings.lastName;
-  // etc.
-  // Assuming for now that the 'settings' object passed in already uses snake_case keys matching the backend.
+  // Add normalization for macroTarget percentages if needed (e.g., ensure integers)
+  if (normalizedSettings.macroTarget) {
+    normalizedSettings.macroTarget.proteinPercentage = Math.round(
+      normalizedSettings.macroTarget.proteinPercentage
+    );
+    normalizedSettings.macroTarget.carbsPercentage = Math.round(
+      normalizedSettings.macroTarget.carbsPercentage
+    );
+    normalizedSettings.macroTarget.fatsPercentage = Math.round(
+      normalizedSettings.macroTarget.fatsPercentage
+    );
+    // Ensure sum is 100? Backend validator handles this.
+  }
 
   return normalizedSettings;
 }
@@ -299,33 +363,40 @@ export const apiService = {
     /** Fetches the current authenticated user's profile */
     getProfile: async () => {
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-        headers: getHeaders(false), // No Content-Type needed for GET
+        headers: getHeaders(false),
       });
-      return handleResponse(response); // Returns parsed profile data or throws ApiError
+      return handleResponse(response);
     },
 
     /** Updates user settings */
     updateSettings: async (settings: UserSettingsPayload) => {
+      // Normalize ensures correct types and potentially maps keys if needed
       const normalizedSettings = normalizeSettingsData(settings);
       const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify(normalizedSettings),
+        body: JSON.stringify(normalizedSettings), // Send camelCase payload
       });
-      return handleResponse(response); // Returns { success: true } or throws ApiError
+      return handleResponse(response);
     },
 
-    /** Completes user profile */
-    completeProfile: async (profileData: any) => {
+    /** Completes user profile (assuming payload matches ProfileCompletion schema) */
+    completeProfile: async (profileData: {
+      dateOfBirth?: string | null;
+      height?: number | null;
+      weight?: number | null;
+      activityLevel?: number | null;
+    }) => {
+      // Add normalization if needed, similar to normalizeSettingsData
       const response = await fetch(
         `${API_BASE_URL}/api/user/complete-profile`,
         {
           method: "POST",
           headers: getHeaders(),
-          body: JSON.stringify(profileData),
+          body: JSON.stringify(profileData), // Send camelCase payload
         }
       );
-      return handleResponse(response); // Returns { success: true } or throws ApiError
+      return handleResponse(response);
     },
   },
 
@@ -338,37 +409,26 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify({ email, password }),
       });
-      // Returns { token: "..." } or throws ApiError
       return handleResponse(response);
     },
 
     /** Registers a new user */
     register: async (userData: any) => {
-      // Accept raw form data
       try {
-        // Normalize data to the specific payload format expected by the backend
         const normalizedData = normalizeRegistrationData(userData);
-
-        const response = await fetch(
-          `${API_BASE_URL}/api/auth/register`, // *** UPDATED PATH ***
-          {
-            method: "POST",
-            headers: getHeaders(),
-            body: JSON.stringify(normalizedData),
-          }
-        );
-        // Returns { token: "..." } or throws ApiError
+        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(normalizedData), // Send camelCase payload
+        });
         return handleResponse(response);
       } catch (error) {
-        // Catch normalization errors or re-throw API errors
         if (error instanceof ApiError) {
-          throw error; // Re-throw ApiError from handleResponse
+          throw error;
         } else if (error instanceof Error) {
-          // Throw as a generic client-side validation/normalization error
-          // Wrap it in ApiError for consistency if desired, or handle differently
-          throw new ApiError(error.message, 400, "VALIDATION_ERROR"); // Example
+          throw new ApiError(error.message, 400, "VALIDATION_ERROR");
         }
-        throw error; // Re-throw unknown errors
+        throw error;
       }
     },
 
@@ -379,7 +439,6 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify({ email }),
       });
-      // Returns { valid: true } or throws ApiError (e.g., 409 Conflict)
       return handleResponse(response);
     },
   },
@@ -388,13 +447,9 @@ export const apiService = {
   macros: {
     /** Gets the sum of macros consumed today */
     getDailyTotals: async () => {
-      const response = await fetch(
-        `${API_BASE_URL}/api/macros/today`, // *** UPDATED PATH ***
-        {
-          headers: getHeaders(false),
-        }
-      );
-      // Returns { protein, carbs, fats, calories } or throws ApiError
+      const response = await fetch(`${API_BASE_URL}/api/macros/today`, {
+        headers: getHeaders(false),
+      });
       return handleResponse(response);
     },
 
@@ -403,51 +458,51 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/macros/history`, {
         headers: getHeaders(false),
       });
-      // Returns array of macro entries or throws ApiError
       return handleResponse(response);
     },
 
     /** Adds a new macro entry */
     addEntry: async (entry: MacroEntryCreatePayload) => {
-      // *** UPDATED SIGNATURE ***
-      // Ensure payload matches backend schema requirements
-      const response = await fetch(
-        `${API_BASE_URL}/api/macros`, // *** UPDATED PATH ***
-        {
-          method: "POST",
-          headers: getHeaders(),
-          body: JSON.stringify(entry), // Send the full entry object
-        }
-      );
-      // Returns the newly created macro entry object or throws ApiError
+      // Ensure payload keys are camelCase as per interface
+      const payload = {
+        ...entry,
+        mealType: entry.mealType, // Ensure camelCase if input was different
+        mealName: entry.mealName,
+      };
+      const response = await fetch(`${API_BASE_URL}/api/macros`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(payload), // Send camelCase payload
+      });
       return handleResponse(response);
     },
 
     /** Updates an existing macro entry */
     updateEntry: async (id: number, entry: MacroEntryUpdatePayload) => {
-      // *** UPDATED SIGNATURE ***
-      const response = await fetch(
-        `${API_BASE_URL}/api/macros/${id}`, // *** UPDATED PATH ***
-        {
-          method: "PUT",
-          headers: getHeaders(),
-          body: JSON.stringify(entry), // Send partial or full update data
-        }
-      );
-      // Returns the updated macro entry object or throws ApiError
+      // Ensure payload keys are camelCase as per interface
+      const payload: MacroEntryUpdatePayload = {};
+      if (entry.protein !== undefined) payload.protein = entry.protein;
+      if (entry.carbs !== undefined) payload.carbs = entry.carbs;
+      if (entry.fats !== undefined) payload.fats = entry.fats;
+      if (entry.mealType !== undefined) payload.mealType = entry.mealType; // camelCase
+      if (entry.mealName !== undefined) payload.mealName = entry.mealName; // camelCase
+      if (entry.entry_date !== undefined) payload.entry_date = entry.entry_date;
+      if (entry.entry_time !== undefined) payload.entry_time = entry.entry_time;
+
+      const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(payload), // Send camelCase payload
+      });
       return handleResponse(response);
     },
 
     /** Deletes a specific macro entry */
     deleteEntry: async (id: number) => {
-      const response = await fetch(
-        `${API_BASE_URL}/api/macros/${id}`, // *** UPDATED PATH ***
-        {
-          method: "DELETE",
-          headers: getHeaders(false), // No Content-Type needed for DELETE
-        }
-      );
-      // Returns { success: true } or throws ApiError
+      const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(false),
+      });
       return handleResponse(response);
     },
   },
@@ -457,21 +512,23 @@ export const apiService = {
     /** Gets weight goals from the API */
     getWeightGoals: async () => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-        headers: getHeaders(),
+        headers: getHeaders(false), // Use getHeaders(false) for GET
       });
-      // If not found (404), return null instead of throwing an error
-      if (response.status === 404) {
-        return null;
-      }
+      // handleResponse now correctly returns null for 200 OK with empty/null body
+      // The check for 404 is now redundant if the backend returns null on 404 via the schema.
+      // However, keeping it doesn't hurt if the backend might return 404 directly sometimes.
+      // Let's rely on handleResponse for consistency.
+      // if (response.status === 404) { return null; } // Can likely remove this line
       return handleResponse(response);
     },
 
     /** Saves weight goals to the API */
-    saveWeightGoals: async (weightGoals: any) => {
+    saveWeightGoals: async (weightGoals: WeightGoalPayload) => {
+      // Added specific type
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify(weightGoals),
+        body: JSON.stringify(weightGoals), // Send camelCase payload
       });
       return handleResponse(response);
     },
@@ -479,21 +536,25 @@ export const apiService = {
     /** Gets macro target from the API */
     getMacroTarget: async () => {
       const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
-        headers: getHeaders(),
+        headers: getHeaders(false), // Use getHeaders(false) for GET
       });
-      // If not found (404), return null instead of throwing an error
-      if (response.status === 404) {
-        return null;
-      }
+      // Rely on handleResponse for null/empty 200 OK
+      // if (response.status === 404) { return null; } // Can likely remove this line
       return handleResponse(response);
     },
 
     /** Saves macro target to the API */
-    saveMacroTarget: async (macroTarget: any) => {
+    saveMacroTarget: async (macroTarget: MacroTargetPayload) => {
+      // Added specific type, use macroTarget naming
+      // Ensure payload uses camelCase 'macroTarget' key
+      const payload = {
+        targetCalories: macroTarget.targetCalories,
+        macroTarget: macroTarget.macroTarget,
+      };
       const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify(macroTarget),
+        body: JSON.stringify(payload), // Send camelCase payload
       });
       return handleResponse(response);
     },
@@ -502,33 +563,9 @@ export const apiService = {
     resetGoals: async () => {
       const response = await fetch(`${API_BASE_URL}/api/goals/reset`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: getHeaders(false), // No body, so no Content-Type needed
       });
       return handleResponse(response);
     },
   },
 };
-
-// Example usage (in your components/hooks):
-/*
-async function handleLogin(email, password) {
-  try {
-    const data = await apiService.auth.login(email, password);
-    saveToken(data.token); // Assuming saveToken exists
-    // Redirect user or update UI state
-  } catch (error) {
-    if (error instanceof ApiError) {
-      console.error(`API Error (${error.status} - ${error.code}): ${error.message}`);
-      // Display specific error message to user based on error.code or error.status
-      if (error.status === 401) {
-        // Show "Invalid credentials" message
-      } else {
-        // Show generic error message
-      }
-    } else {
-      console.error("An unexpected error occurred:", error);
-      // Show generic error message
-    }
-  }
-}
-*/
