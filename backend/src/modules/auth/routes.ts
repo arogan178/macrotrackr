@@ -101,10 +101,10 @@ export const authRoutes = (
                     `
               ).run(userId, dateOfBirth, height, weight, gender, activityLevel);
 
-              // 4. Insert default macro distribution settings
+              // 4. Insert default macro target settings
               db.prepare(
                 `
-                        INSERT INTO macro_distribution (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
+                        INSERT INTO macro_target (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
                         VALUES (?, ?, ?, ?, ?)
                     `
               ).run(userId, 30, 40, 30, "[]"); // Default values, locked_macros as JSON string

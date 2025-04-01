@@ -15,7 +15,7 @@ export interface UserSettings {
   gender?: Gender;
 }
 
-export type MacroDistribution = {
+export type MacroTarget = {
   protein: number;
   carbs: number;
   fats: number;
@@ -36,5 +36,5 @@ export interface NutritionProfile {
   bmr: number;
   tdee: number;
   calorieGoal: number;
-  macros?: MacroDistribution;
+  macros?: MacroTarget;
 }

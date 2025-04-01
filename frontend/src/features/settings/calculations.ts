@@ -1,9 +1,4 @@
-import {
-  Gender,
-  ActivityLevel,
-  MacroDistribution,
-  NutritionProfile,
-} from "./types";
+import { Gender, ActivityLevel, MacroTarget, NutritionProfile } from "./types";
 import { ACTIVITY_LEVELS } from "./constants";
 
 // Pure calculation functions - independent of domain-specific types
@@ -22,10 +17,22 @@ function calculateBMRValue(
   age: number,
   isMale: boolean
 ): number {
-  if (!weight || !height || !age) return 0;
+  // Add proper validation to avoid negative values
+  if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
+    return 0;
+  }
 
-  const baseCalculation = 10 * weight + 6.25 * height - 5 * age;
-  return isMale ? baseCalculation + 5 : baseCalculation - 161;
+  // Ensure we're using the correct formula with reasonable constraints
+  const safeWeight = Math.max(30, Math.min(300, weight)); // Limit weight to realistic range
+  const safeHeight = Math.max(100, Math.min(250, height)); // Limit height to realistic range
+  const safeAge = Math.min(120, Math.max(1, age)); // Limit age to realistic range
+
+  // Mifflin-St Jeor Equation
+  const baseCalculation = 10 * safeWeight + 6.25 * safeHeight - 5 * safeAge;
+  const bmr = isMale ? baseCalculation + 5 : baseCalculation - 161;
+
+  // Ensure BMR is always positive and reasonable
+  return Math.max(500, bmr); // Minimum realistic BMR
 }
 
 /**
@@ -55,7 +62,7 @@ function calculateMacrosValue(
   proteinPercentage: number,
   carbsPercentage: number,
   fatsPercentage: number
-): MacroDistribution {
+): MacroTarget {
   if (!calorieGoal) return { protein: 0, carbs: 0, fats: 0 };
 
   return {
@@ -167,14 +174,14 @@ export function calculateTDEEByActivityLevel(
 // }
 
 /**
- * Calculate macros for a given calorie goal and distribution
+ * Calculate macros for a given calorie goal and target
  */
 export function calculateMacros(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
   fatPercentage: number
-): MacroDistribution {
+): MacroTarget {
   return calculateMacrosValue(
     calorieGoal,
     proteinPercentage,

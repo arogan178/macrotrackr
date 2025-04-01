@@ -2,13 +2,16 @@
 import { t } from "elysia";
 
 // --- Reusable Primitives ---
+const PositiveNumber = t.Number({ minimum: 0 });
 const PositiveNumberOrNull = t.Nullable(t.Number({ minimum: 0 }));
 const PositiveIntegerOrNull = t.Nullable(t.Integer({ minimum: 0 }));
+const DateString = t.String({ format: "date" });
 const DateStringOrNull = t.Nullable(t.String({ format: "date" }));
+const MacroPercentage = t.Integer({ minimum: 5, maximum: 70 });
 
-// --- Macro Distribution Schema (similar to user settings) ---
-// This is used within the Macro Targets schema below
-const MacroDistributionSchema = t.Object(
+// --- Macro Targeta (similar to user settings) ---
+// This is used within the Macro Target schema below
+const MacroTargetSchema = t.Object(
   {
     proteinPercentage: t.Integer({ minimum: 5, maximum: 70 }),
     carbsPercentage: t.Integer({ minimum: 5, maximum: 70 }),
@@ -54,41 +57,28 @@ export const GoalSchemas = {
       adjustedCalorieIntake: PositiveNumberOrNull,
       calculatedWeeks: PositiveIntegerOrNull,
       weeklyChange: t.Nullable(t.Number()),
-      dailyDeficit: t.Nullable(t.Number()),
+      dailyChange: t.Nullable(t.Number()),
     })
   ),
 
-  // Schema for the request body when updating weight goals
+  // Schema for updating weight goals
   updateWeightGoalBody: t.Object({
-    currentWeight: PositiveNumberOrNull,
+    currentWeight: PositiveNumber,
     targetWeight: PositiveNumberOrNull,
-    weightGoal: t.Nullable(
-      t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
-    ),
-    startDate: DateStringOrNull,
+    weightGoal: t.Union([
+      t.Literal("lose"),
+      t.Literal("maintain"),
+      t.Literal("gain"),
+    ]),
+    startDate: DateString,
     targetDate: DateStringOrNull,
     adjustedCalorieIntake: PositiveNumberOrNull,
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
-    dailyDeficit: t.Nullable(t.Number()),
+    dailyChange: t.Nullable(t.Number()),
   }),
 
-  // Schema for the response when getting macro targets
-  getMacroTargetResponse: t.Nullable(
-    t.Object({
-      targetCalories: PositiveNumberOrNull,
-      macroDistribution: t.Nullable(MacroDistributionSchema), // Use nested schema directly
-    })
-  ),
-
-  // Schema for the request body when updating macro targets
-  updateMacroTargetBody: t.Object({
-    targetCalories: PositiveNumberOrNull,
-    macroDistribution: t.Nullable(MacroDistributionSchema), // Use nested schema directly
-  }),
-
-  // Schema for the response after successfully updating weight goals
-  // (Often the same as the GET response, returning the updated object)
+  // Schema for the response when updating weight goals
   updateWeightGoalResponse: t.Object({
     currentWeight: PositiveNumberOrNull,
     targetWeight: PositiveNumberOrNull,
@@ -100,21 +90,49 @@ export const GoalSchemas = {
     adjustedCalorieIntake: PositiveNumberOrNull,
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
-    dailyDeficit: t.Nullable(t.Number()),
+    dailyChange: t.Nullable(t.Number()),
   }),
 
-  // Schema for the response after successfully updating macro targets
-  // (Often the same as the GET response, returning the updated object)
+  // Schema for the response when getting macro target
+  getMacroTargetResponse: t.Nullable(
+    t.Object({
+      targetCalories: t.Nullable(PositiveNumber),
+      macroTarget: t.Nullable(
+        t.Object({
+          proteinPercentage: MacroPercentage,
+          carbsPercentage: MacroPercentage,
+          fatsPercentage: MacroPercentage,
+        })
+      ),
+    })
+  ),
+
+  // Schema for updating macro target
+  updateMacroTargetBody: t.Object({
+    targetCalories: t.Nullable(PositiveNumber),
+    macroTarget: t.Nullable(
+      t.Object({
+        proteinPercentage: MacroPercentage,
+        carbsPercentage: MacroPercentage,
+        fatsPercentage: MacroPercentage,
+      })
+    ),
+  }),
+
+  // Schema for the response when updating macro target
   updateMacroTargetResponse: t.Object({
-    targetCalories: PositiveNumberOrNull,
-    macroDistribution: t.Nullable(MacroDistributionSchema),
+    targetCalories: t.Nullable(PositiveNumber),
+    macroTarget: t.Nullable(
+      t.Object({
+        proteinPercentage: MacroPercentage,
+        carbsPercentage: MacroPercentage,
+        fatsPercentage: MacroPercentage,
+      })
+    ),
   }),
 
-  // Generic success response for reset
+  // Schema for the response when resetting goals
   resetResponse: t.Object({
     success: t.Boolean(),
   }),
 };
-
-// Note: The version using t.Ref ('GoalSchemas') and the alternative export
-// ('ActiveGoalSchemas = GoalSchemasAlt') have been removed for simplicity.

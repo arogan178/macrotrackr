@@ -120,7 +120,7 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
         bmr,
         tdee,
         target_calories: userData.target_calories || tdee,
-        macro_distribution: userData.macro_distribution || {
+        macro_target: userData.macro_target || {
           proteinPercentage: 30,
           carbsPercentage: 40,
           fatsPercentage: 30,
@@ -201,7 +201,7 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
         bmr,
         tdee,
         target_calories: data.target_calories || tdee,
-        macro_distribution: data.macro_distribution || {
+        macro_target: data.macro_target || {
           proteinPercentage: 30,
           carbsPercentage: 40,
           fatsPercentage: 30,
@@ -299,7 +299,7 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
         gender: state.settings.gender,
         activity_level: state.settings.activity_level,
         // Nutrition data from nutritionSettings
-        macro_distribution: state.nutritionSettings.macro_distribution,
+        macro_target: state.nutritionSettings.macro_target,
         target_calories: state.nutritionSettings.target_calories,
       };
 

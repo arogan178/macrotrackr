@@ -20,8 +20,8 @@ export interface MacroSlice {
     protein: number;
     carbs: number;
     fats: number;
-    mealType: MealType;
-    mealName: string;
+    meal_type: MealType;
+    meal_name: string;
     entry_date: string;
     entry_time: string;
   }) => Promise<void>;
@@ -87,19 +87,14 @@ export const createMacroSlice: StateCreator<MacroSlice & any> = (set, get) => ({
     set({ isSaving: true, error: null });
 
     try {
-      // // Remove emojis from meal type and format it to match backend schema expectations
-      // const cleanMealType = inputs.mealType
-      //   .replace(/🍳|🍗|🍽️|🧃/g, "") // Remove all emojis
-      //   .trim(); // Remove extra spaces
-
       // Send to API with the expected field names from the backend schema
       // and preserve decimal values (no rounding)
       const result = await apiService.macros.addEntry({
         protein: inputs.protein, // Keep decimal value
         carbs: inputs.carbs, // Keep decimal value
         fats: inputs.fats, // Keep decimal value
-        mealType: inputs.mealType, // Use cleaned meal type string
-        mealName: inputs.mealName,
+        meal_type: inputs.meal_type, // Use cleaned meal type string
+        meal_name: inputs.meal_name,
         entry_date: inputs.entry_date,
         entry_time: inputs.entry_time,
       });

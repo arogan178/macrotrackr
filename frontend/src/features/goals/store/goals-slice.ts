@@ -1,12 +1,12 @@
 import { StateCreator } from "zustand";
-import { WeightGoals, WeightGoalFormValues, MacroTargets } from "../types";
+import { WeightGoals, WeightGoalFormValues, MacroTarget } from "../types";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
 import { apiService } from "@/utils/api-service";
 
 export interface GoalsSlice {
   weightGoals: WeightGoals | null;
-  macroTargets: MacroTargets | null;
+  macroTarget: MacroTarget | null;
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
@@ -28,10 +28,10 @@ export interface GoalsSlice {
   setTargetDate: (date: string) => Promise<void>;
 
   // Nutritional goals actions
-  fetchMacroTargets: () => Promise<void>;
-  setMacroTargets: (goals: MacroTargets) => void;
+  fetchMacroTarget: () => Promise<void>;
+  setMacroTarget: (goals: MacroTarget) => void;
   updateTargetCalories: (calories: number) => Promise<void>;
-  updateMacroDistribution: (distribution: MacroTargetSettings) => Promise<void>;
+  updateMacroTarget: (target: MacroTargetSettings) => Promise<void>;
 
   // Common actions
   setLoading: (loading: boolean) => void;
@@ -43,7 +43,7 @@ export interface GoalsSlice {
 
 export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
   weightGoals: null,
-  macroTargets: null,
+  macroTarget: null,
   isLoading: false,
   isSaving: false,
   error: null,
@@ -110,8 +110,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       // Use provided values or calculate if not provided
       let calculatedWeeks = customCalculatedWeeks;
       let weeklyChange = customWeeklyChange;
-      let dailyDeficit;
-
+      let dailyChange;
       // If we don't have calculated weeks or weekly change but have a target date, calculate them
       if ((!calculatedWeeks || !weeklyChange) && targetDate) {
         const today = new Date();
@@ -124,9 +123,9 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
         weeklyChange = weightDifference / calculatedWeeks;
       }
 
-      // Calculate daily deficit based on weekly change
+      // Calculate daily change based on weekly change
       if (weeklyChange) {
-        dailyDeficit =
+        dailyChange =
           ((weightGoal === "lose" ? -1 : 1) * (weeklyChange * 7700)) / 7; // 7700 calories ≈ 1kg
       }
 
@@ -140,37 +139,37 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
         adjustedCalorieIntake,
         calculatedWeeks,
         weeklyChange,
-        dailyDeficit,
+        dailyChange,
       };
 
       // Save to the backend
       await apiService.goals.saveWeightGoals(weightGoals);
 
-      // Calculate macro distribution based on the new calorie target
-      const defaultMacroDistribution = {
+      // Calculate macro target based on the new calorie target
+      const defaultMacroTarget = {
         proteinPercentage: 30,
         carbsPercentage: 40,
         fatsPercentage: 30,
       };
 
-      // Try to save macro targets as well
+      // Try to save macro target as well
       try {
-        await apiService.goals.saveMacroTargets({
+        await apiService.goals.saveMacroTarget({
           target_calories: adjustedCalorieIntake,
-          macro_distribution: defaultMacroDistribution,
+          macro_target: defaultMacroTarget,
         });
 
-        // Update state with the new macro targets
+        // Update state with the new macro target
         set((state) => ({
           ...state,
-          macroTargets: {
-            macro_distribution: defaultMacroDistribution,
+          macroTarget: {
+            macro_target: defaultMacroTarget,
             target_calories: adjustedCalorieIntake,
           },
         }));
       } catch (macroError) {
-        console.error("Error saving macro targets:", macroError);
-        // Continue with weight goals even if macro targets fail
+        console.error("Error saving macro target:", macroError);
+        // Continue with weight goals even if macro target fail
       }
 
       // Update state with the new weight goals
@@ -308,13 +307,13 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       error: null,
     })),
 
-  fetchMacroTargets: async () => {
+  fetchMacroTarget: async () => {
     try {
       set((state) => ({ ...state, isLoading: true, error: null }));
-      const macroTargets = await apiService.goals.getMacroTargets();
+      const macroTarget = await apiService.goals.getMacroTarget();
       set((state) => ({
         ...state,
-        macroTargets,
+        macroTarget,
         isLoading: false,
       }));
     } catch (error) {
@@ -324,16 +323,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
         error:
           error instanceof Error
             ? error.message
-            : "Failed to fetch macro targets",
+            : "Failed to fetch macro target",
       }));
-      console.error("Error fetching macro targets:", error);
+      console.error("Error fetching macro target:", error);
     }
   },
 
-  setMacroTargets: (goals) =>
+  setMacroTarget: (goals) =>
     set((state) => ({
       ...state,
-      macroTargets: goals,
+      macroTarget: goals,
       error: null,
     })),
 
@@ -341,13 +340,13 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
     try {
       set((state) => ({ ...state, isSaving: true, error: null }));
 
-      // Get current macro targets or create new ones
-      const currentMacroTargets = get().macroTargets;
-      const updatedMacroTargets = currentMacroTargets
-        ? { ...currentMacroTargets, target_calories: calories }
+      // Get current macro target or create new ones
+      const currentMacroTarget = get().macroTarget;
+      const updatedMacroTarget = currentMacroTarget
+        ? { ...currentMacroTarget, target_calories: calories }
         : {
             target_calories: calories,
-            macro_distribution: {
+            macro_target: {
               proteinPercentage: 30,
               carbsPercentage: 40,
               fatsPercentage: 30,
@@ -355,12 +354,12 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
           };
 
       // Save to backend
-      await apiService.goals.saveMacroTargets(updatedMacroTargets);
+      await apiService.goals.saveMacroTarget(updatedMacroTarget);
 
       // Update state
       set((state) => ({
         ...state,
-        macroTargets: updatedMacroTargets,
+        macroTarget: updatedMacroTarget,
         isSaving: false,
       }));
 
@@ -384,36 +383,36 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
     }
   },
 
-  updateMacroDistribution: async (distribution) => {
+  updateMacroTarget: async (target) => {
     try {
       set((state) => ({ ...state, isSaving: true, error: null }));
 
-      // Get current macro targets or create new ones with defaults
-      const { macroTargets, weightGoals } = get();
-      const updatedMacroTargets = !macroTargets
+      // Get current macro target or create new ones with defaults
+      const { macroTarget, weightGoals } = get();
+      const updatedMacroTarget = !macroTarget
         ? {
             target_calories: weightGoals?.adjustedCalorieIntake || 2000,
-            macro_distribution: distribution,
+            macro_target: target,
           }
         : {
-            ...macroTargets,
-            macro_distribution: distribution,
+            ...macroTarget,
+            macro_target: target,
           };
 
       // Save to backend
-      await apiService.goals.saveMacroTargets(updatedMacroTargets);
+      await apiService.goals.saveMacroTarget(updatedMacroTarget);
 
       // Update state
       set((state) => ({
         ...state,
-        macroTargets: updatedMacroTargets,
+        macroTarget: updatedMacroTarget,
         isSaving: false,
       }));
 
       // Show success notification
       if (get().addNotification) {
         get().addNotification({
-          message: "Macro distribution updated successfully!",
+          message: "Macro target updated successfully!",
           type: "success",
         });
       }
@@ -423,10 +422,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
         error:
           error instanceof Error
             ? error.message
-            : "Failed to update macro distribution",
+            : "Failed to update macro target",
         isSaving: false,
       }));
-      console.error("Error updating macro distribution:", error);
+      console.error("Error updating macro target:", error);
     }
   },
 
@@ -441,7 +440,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       set((state) => ({
         ...state,
         weightGoals: null,
-        macroTargets: null,
+        macroTarget: null,
         isLoading: false,
       }));
 

@@ -37,7 +37,7 @@ type UserSettingsPayload = Partial<{
   weight: number | null;
   gender: "male" | "female" | null;
   activity_level: number | null; // 1-5 or null
-  macro_distribution: {
+  macro_target: {
     proteinPercentage: number;
     carbsPercentage: number;
     fatsPercentage: number;
@@ -50,8 +50,8 @@ interface MacroEntryCreatePayload {
   protein: number;
   carbs: number;
   fats: number;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
-  mealName?: string; // Optional
+  meal_type: "breakfast" | "lunch" | "dinner" | "snack";
+  meal_name?: string; // Optional
   entry_date: string; // YYYY-MM-DD
   entry_time: string; // HH:MM or HH:MM:SS
 }
@@ -97,7 +97,10 @@ async function handleResponse(response: Response): Promise<any> {
     }
     // Try to parse successful JSON response
     try {
-      return await response.json();
+      const data = await response.json();
+      // Explicitly return null if the backend returns null
+      // This ensures null is handled as a valid response, not an error
+      return data;
     } catch (e) {
       // Handle cases where response is OK but not valid JSON (shouldn't happen often with APIs)
       console.error("API Success Response is not valid JSON:", e);
@@ -473,8 +476,8 @@ export const apiService = {
       return handleResponse(response);
     },
 
-    /** Gets macro targets from the API */
-    getMacroTargets: async () => {
+    /** Gets macro target from the API */
+    getMacroTarget: async () => {
       const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
         headers: getHeaders(),
       });
@@ -485,12 +488,12 @@ export const apiService = {
       return handleResponse(response);
     },
 
-    /** Saves macro targets to the API */
-    saveMacroTargets: async (macroTargets: any) => {
+    /** Saves macro target to the API */
+    saveMacroTarget: async (macroTarget: any) => {
       const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify(macroTargets),
+        body: JSON.stringify(macroTarget),
       });
       return handleResponse(response);
     },
