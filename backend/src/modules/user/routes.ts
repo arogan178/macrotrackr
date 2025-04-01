@@ -85,7 +85,6 @@ export const userRoutes = (app: Elysia) =>
             let macroTargetMapped: MacroTargetPercentages | null = null;
 
             // Check if macro distribution data exists before parsing/mapping
-            // Use a key field like protein_percentage to check existence
             if (dbResult.protein_percentage !== null) {
               const lockedMacrosJson = dbResult.locked_macros;
               console.log(
@@ -106,12 +105,11 @@ export const userRoutes = (app: Elysia) =>
                   );
                 }
               }
-              // Construct the nested object using camelCase keys
               macroTargetMapped = {
                 proteinPercentage: dbResult.protein_percentage,
                 carbsPercentage: dbResult.carbs_percentage,
                 fatsPercentage: dbResult.fats_percentage,
-                lockedMacros: parsedLockedMacros, // Use camelCase key
+                lockedMacros: parsedLockedMacros,
               };
             } else {
               console.log("[GET /user/me] No macro distribution data found.");
@@ -129,11 +127,11 @@ export const userRoutes = (app: Elysia) =>
               weight: dbResult.weight,
               gender: dbResult.gender,
               activityLevel: dbResult.activity_level,
-              macroTarget: macroTargetMapped, // Use the mapped object (or null) and camelCase key
+              macroTarget: macroTargetMapped,
             };
             console.log("[GET /user/me] Mapped API response:", apiResponse);
 
-            return apiResponse; // Return the mapped camelCase object
+            return apiResponse;
           } catch (error) {
             console.error("[GET /user/me] Handler error:", error);
             if (error instanceof Error && set.status === 404) throw error;
@@ -142,7 +140,6 @@ export const userRoutes = (app: Elysia) =>
           }
         },
         {
-          // Response schema expects camelCase and macroTarget
           response: UserSchemas.userDetailsResponse,
           detail: {
             summary: "Get current authenticated user's profile and settings",
@@ -151,7 +148,7 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      // PUT /settings Handler - Updated to handle macroTarget
+      // PUT /settings Handler - Updated UPSERT syntax
       .put(
         "/settings",
         ({
@@ -163,7 +160,6 @@ export const userRoutes = (app: Elysia) =>
           body: typeof UserSchemas.userSettingsUpdate.static;
         }) => {
           const {
-            // Destructure camelCase fields, including macroTarget
             firstName,
             lastName,
             email,
@@ -172,13 +168,13 @@ export const userRoutes = (app: Elysia) =>
             weight,
             gender,
             activityLevel,
-            macroTarget, // Renamed from macroDistribution
+            macroTarget,
           } = body;
 
           const transaction = db.transaction(() => {
             // 1. Update users table (same as before)
-            const userUpdateFields: string[] = []; /* ... */
-            const userParams: (string | number | null)[] = []; /* ... */
+            const userUpdateFields: string[] = [];
+            const userParams: (string | number | null)[] = [];
             if (firstName !== undefined) {
               userUpdateFields.push("first_name = ?");
               userParams.push(firstName);
@@ -188,7 +184,16 @@ export const userRoutes = (app: Elysia) =>
               userParams.push(lastName);
             }
             if (email !== undefined) {
-              /* ... email check ... */ userUpdateFields.push("email = ?");
+              const existing = db
+                .prepare("SELECT id FROM users WHERE email = ? AND id != ?")
+                .get(email, user.userId);
+              if (existing) {
+                set.status = 400;
+                throw new Error(
+                  "Email address is already in use by another account."
+                );
+              }
+              userUpdateFields.push("email = ?");
               userParams.push(email);
             }
             if (userUpdateFields.length > 0) {
@@ -198,8 +203,21 @@ export const userRoutes = (app: Elysia) =>
               ).run(...userParams);
             }
 
-            // 2. Update user_details table (UPSERT - same as before)
-            const detailsUpsertQuery = `INSERT INTO user_details (...) VALUES (...) ON CONFLICT(...) DO UPDATE SET ...`; // Use snake_case cols
+            // 2. Update or Insert user_details table (UPSERT)
+            // *** REMOVED redundant WHERE clause from DO UPDATE ***
+            const detailsUpsertQuery = `
+                INSERT INTO user_details (
+                    user_id, date_of_birth, height, weight, gender, activity_level, updated_at
+                )
+                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                ON CONFLICT(user_id) DO UPDATE SET
+                    date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
+                    height = COALESCE(excluded.height, user_details.height),
+                    weight = COALESCE(excluded.weight, user_details.weight),
+                    gender = COALESCE(excluded.gender, user_details.gender),
+                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
+                    updated_at = CURRENT_TIMESTAMP;
+            `;
             db.prepare(detailsUpsertQuery).run(
               user.userId,
               nullify(dateOfBirth),
@@ -210,9 +228,8 @@ export const userRoutes = (app: Elysia) =>
             );
 
             // 3. Update or Insert macro_targets if macroTarget is provided
-            // Check the camelCase variable from body
             if (macroTarget !== undefined && macroTarget !== null) {
-              // Use snake_case column names for the macro_targets table
+              // *** REMOVED redundant WHERE clause from DO UPDATE ***
               const distUpsertQuery = `
                     INSERT INTO macro_targets (
                         user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros, updated_at
@@ -223,24 +240,21 @@ export const userRoutes = (app: Elysia) =>
                         carbs_percentage = excluded.carbs_percentage,
                         fats_percentage = excluded.fats_percentage,
                         locked_macros = excluded.locked_macros,
-                        updated_at = CURRENT_TIMESTAMP
-                    WHERE user_id = excluded.user_id;
+                        updated_at = CURRENT_TIMESTAMP;
                 `;
-              // Pass camelCase values from body.macroTarget, stringify lockedMacros
               db.prepare(distUpsertQuery).run(
                 user.userId,
-                macroTarget.proteinPercentage, // Access camelCase properties
+                macroTarget.proteinPercentage,
                 macroTarget.carbsPercentage,
                 macroTarget.fatsPercentage,
-                JSON.stringify(macroTarget.lockedMacros || []) // Access camelCase, stringify
+                JSON.stringify(macroTarget.lockedMacros || [])
               );
             } else if (macroTarget === null) {
-              // Handle explicit null: delete existing distribution settings for the user
               db.prepare("DELETE FROM macro_targets WHERE user_id = ?").run(
                 user.userId
               );
             }
-          }); // End of transaction definition
+          });
 
           try {
             transaction();
@@ -263,7 +277,7 @@ export const userRoutes = (app: Elysia) =>
           }
         },
         {
-          body: UserSchemas.userSettingsUpdate, // Expects camelCase with macroTarget
+          body: UserSchemas.userSettingsUpdate,
           response: {
             200: t.Object({ success: t.Boolean(), message: t.String() }),
           },
@@ -287,9 +301,19 @@ export const userRoutes = (app: Elysia) =>
         }) => {
           const { dateOfBirth, height, weight, activityLevel } = body;
           try {
-            const stmt = db.prepare(
-              `INSERT INTO user_details (...) VALUES (...) ON CONFLICT(...) DO UPDATE SET ...`
-            ); // Use snake_case cols
+            // *** REMOVED redundant WHERE clause from DO UPDATE ***
+            const stmt = db.prepare(`
+                  INSERT INTO user_details (
+                      user_id, date_of_birth, height, weight, activity_level, updated_at
+                  )
+                  VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                  ON CONFLICT(user_id) DO UPDATE SET
+                      date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
+                      height = COALESCE(excluded.height, user_details.height),
+                      weight = COALESCE(excluded.weight, user_details.weight),
+                      activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
+                      updated_at = CURRENT_TIMESTAMP;
+              `);
             stmt.run(
               user.userId,
               nullify(dateOfBirth),
