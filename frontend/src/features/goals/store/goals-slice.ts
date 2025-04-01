@@ -8,6 +8,7 @@ export interface GoalsSlice {
   weightGoals: WeightGoals | null;
   macroTargets: MacroTargets | null;
   isLoading: boolean;
+  isSaving: boolean;
   error: string | null;
   macroDailyTotals: {
     calories: number;
@@ -34,6 +35,7 @@ export interface GoalsSlice {
 
   // Common actions
   setLoading: (loading: boolean) => void;
+  setSaving: (saving: boolean) => void;
   setError: (error: string) => void;
   clearError: () => void;
   resetGoals: () => Promise<void>;
@@ -43,18 +45,18 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
   weightGoals: null,
   macroTargets: null,
   isLoading: false,
+  isSaving: false,
   error: null,
   macroDailyTotals: null,
 
   fetchWeightGoals: async () => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isLoading: true, error: null }));
       const weightGoals = await apiService.goals.getWeightGoals();
       set((state) => ({
         ...state,
         weightGoals,
         isLoading: false,
-        error: null,
       }));
     } catch (error) {
       set((state) => ({
@@ -65,6 +67,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
             ? error.message
             : "Failed to fetch weight goals",
       }));
+      console.error("Error fetching weight goals:", error);
     }
   },
 
@@ -76,92 +79,128 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
     })),
 
   createWeightGoal: async (formValues, tdee) => {
-    const {
-      currentWeight,
-      targetWeight,
-      startDate,
-      targetDate,
-      adjustedCalorieIntake: customCalorieIntake,
-      weeklyChange: customWeeklyChange,
-      calculatedWeeks: customCalculatedWeeks,
-      weightGoal: customWeightGoal,
-    } = formValues;
-
-    // Determine weight goal type (lose, maintain, gain) if not provided
-    let weightGoal = customWeightGoal || "maintain";
-    if (!customWeightGoal) {
-      if (targetWeight < currentWeight) {
-        weightGoal = "lose";
-      } else if (targetWeight > currentWeight) {
-        weightGoal = "gain";
-      }
-    }
-
-    // Use provided calorie intake or calculate based on goal
-    const adjustedCalorieIntake =
-      customCalorieIntake || tdee + CALORIE_ADJUSTMENT_FACTORS[weightGoal];
-
-    // Use provided values or calculate if not provided
-    let calculatedWeeks = customCalculatedWeeks;
-    let weeklyChange = customWeeklyChange;
-    let dailyDeficit;
-
-    // If we don't have calculated weeks or weekly change but have a target date, calculate them
-    if ((!calculatedWeeks || !weeklyChange) && targetDate) {
-      const today = new Date();
-      const targetDateObj = new Date(targetDate);
-      const diffTime = Math.abs(targetDateObj.getTime() - today.getTime());
-      calculatedWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
-
-      // Calculate weekly change
-      const weightDifference = Math.abs(targetWeight - currentWeight);
-      weeklyChange = weightDifference / calculatedWeeks;
-    }
-
-    // Calculate daily deficit based on weekly change
-    if (weeklyChange) {
-      dailyDeficit =
-        ((weightGoal === "lose" ? -1 : 1) * (weeklyChange * 7700)) / 7; // 7700 calories ≈ 1kg
-    }
-
-    // Create the weight goals object with all available data
-    const weightGoals: WeightGoals = {
-      currentWeight,
-      targetWeight,
-      weightGoal,
-      startDate,
-      targetDate,
-      adjustedCalorieIntake,
-      calculatedWeeks,
-      weeklyChange,
-      dailyDeficit,
-    };
-
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isSaving: true, error: null }));
+
+      const {
+        currentWeight,
+        targetWeight,
+        startDate,
+        targetDate,
+        adjustedCalorieIntake: customCalorieIntake,
+        weeklyChange: customWeeklyChange,
+        calculatedWeeks: customCalculatedWeeks,
+        weightGoal: customWeightGoal,
+      } = formValues;
+
+      // Determine weight goal type (lose, maintain, gain) if not provided
+      let weightGoal = customWeightGoal || "maintain";
+      if (!customWeightGoal) {
+        if (targetWeight < currentWeight) {
+          weightGoal = "lose";
+        } else if (targetWeight > currentWeight) {
+          weightGoal = "gain";
+        }
+      }
+
+      // Use provided calorie intake or calculate based on goal
+      const adjustedCalorieIntake =
+        customCalorieIntake || tdee + CALORIE_ADJUSTMENT_FACTORS[weightGoal];
+
+      // Use provided values or calculate if not provided
+      let calculatedWeeks = customCalculatedWeeks;
+      let weeklyChange = customWeeklyChange;
+      let dailyDeficit;
+
+      // If we don't have calculated weeks or weekly change but have a target date, calculate them
+      if ((!calculatedWeeks || !weeklyChange) && targetDate) {
+        const today = new Date();
+        const targetDateObj = new Date(targetDate);
+        const diffTime = Math.abs(targetDateObj.getTime() - today.getTime());
+        calculatedWeeks = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+
+        // Calculate weekly change
+        const weightDifference = Math.abs(targetWeight - currentWeight);
+        weeklyChange = weightDifference / calculatedWeeks;
+      }
+
+      // Calculate daily deficit based on weekly change
+      if (weeklyChange) {
+        dailyDeficit =
+          ((weightGoal === "lose" ? -1 : 1) * (weeklyChange * 7700)) / 7; // 7700 calories ≈ 1kg
+      }
+
+      // Create the weight goals object with all available data
+      const weightGoals: WeightGoals = {
+        currentWeight,
+        targetWeight,
+        weightGoal,
+        startDate,
+        targetDate,
+        adjustedCalorieIntake,
+        calculatedWeeks,
+        weeklyChange,
+        dailyDeficit,
+      };
+
       // Save to the backend
       await apiService.goals.saveWeightGoals(weightGoals);
+
+      // Calculate macro distribution based on the new calorie target
+      const defaultMacroDistribution = {
+        proteinPercentage: 30,
+        carbsPercentage: 40,
+        fatsPercentage: 30,
+      };
+
+      // Try to save macro targets as well
+      try {
+        await apiService.goals.saveMacroTargets({
+          target_calories: adjustedCalorieIntake,
+          macro_distribution: defaultMacroDistribution,
+        });
+
+        // Update state with the new macro targets
+        set((state) => ({
+          ...state,
+          macroTargets: {
+            macro_distribution: defaultMacroDistribution,
+            target_calories: adjustedCalorieIntake,
+          },
+        }));
+      } catch (macroError) {
+        console.error("Error saving macro targets:", macroError);
+        // Continue with weight goals even if macro targets fail
+      }
 
       // Update state with the new weight goals
       set((state) => ({
         ...state,
         weightGoals,
-        error: null,
-        isLoading: false,
+        isSaving: false,
       }));
+
+      // Show success notification (if notification system is available in the store)
+      if (get().addNotification) {
+        get().addNotification({
+          message: "Weight goal saved successfully!",
+          type: "success",
+        });
+      }
     } catch (error) {
       set((state) => ({
         ...state,
         error:
           error instanceof Error ? error.message : "Failed to save weight goal",
-        isLoading: false,
+        isSaving: false,
       }));
+      console.error("Error creating weight goal:", error);
     }
   },
 
   updateAdjustedCalorieIntake: async (calories) => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isSaving: true, error: null }));
 
       // Get current weight goals and update the calories
       const currentWeightGoals = get().weightGoals;
@@ -179,8 +218,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       set((state) => ({
         ...state,
         weightGoals: updatedWeightGoals,
-        isLoading: false,
+        isSaving: false,
       }));
+
+      // Show success notification
+      if (get().addNotification) {
+        get().addNotification({
+          message: "Calorie intake updated successfully!",
+          type: "success",
+        });
+      }
     } catch (error) {
       set((state) => ({
         ...state,
@@ -188,14 +235,15 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
           error instanceof Error
             ? error.message
             : "Failed to update calorie intake",
-        isLoading: false,
+        isSaving: false,
       }));
+      console.error("Error updating calorie intake:", error);
     }
   },
 
   setTargetDate: async (date) => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isSaving: true, error: null }));
 
       // Get current weight goals and update the target date
       const currentWeightGoals = get().weightGoals;
@@ -213,8 +261,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       set((state) => ({
         ...state,
         weightGoals: updatedWeightGoals,
-        isLoading: false,
+        isSaving: false,
       }));
+
+      // Show success notification
+      if (get().addNotification) {
+        get().addNotification({
+          message: "Target date updated successfully!",
+          type: "success",
+        });
+      }
     } catch (error) {
       set((state) => ({
         ...state,
@@ -222,8 +278,9 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
           error instanceof Error
             ? error.message
             : "Failed to update target date",
-        isLoading: false,
+        isSaving: false,
       }));
+      console.error("Error updating target date:", error);
     }
   },
 
@@ -231,6 +288,12 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
     set((state) => ({
       ...state,
       isLoading: loading,
+    })),
+
+  setSaving: (saving) =>
+    set((state) => ({
+      ...state,
+      isSaving: saving,
     })),
 
   setError: (error) =>
@@ -247,13 +310,12 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
 
   fetchMacroTargets: async () => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isLoading: true, error: null }));
       const macroTargets = await apiService.goals.getMacroTargets();
       set((state) => ({
         ...state,
         macroTargets,
         isLoading: false,
-        error: null,
       }));
     } catch (error) {
       set((state) => ({
@@ -264,6 +326,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
             ? error.message
             : "Failed to fetch macro targets",
       }));
+      console.error("Error fetching macro targets:", error);
     }
   },
 
@@ -276,7 +339,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
 
   updateTargetCalories: async (calories) => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isSaving: true, error: null }));
 
       // Get current macro targets or create new ones
       const currentMacroTargets = get().macroTargets;
@@ -298,8 +361,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       set((state) => ({
         ...state,
         macroTargets: updatedMacroTargets,
-        isLoading: false,
+        isSaving: false,
       }));
+
+      // Show success notification
+      if (get().addNotification) {
+        get().addNotification({
+          message: "Target calories updated successfully!",
+          type: "success",
+        });
+      }
     } catch (error) {
       set((state) => ({
         ...state,
@@ -307,14 +378,15 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
           error instanceof Error
             ? error.message
             : "Failed to update target calories",
-        isLoading: false,
+        isSaving: false,
       }));
+      console.error("Error updating target calories:", error);
     }
   },
 
   updateMacroDistribution: async (distribution) => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isSaving: true, error: null }));
 
       // Get current macro targets or create new ones with defaults
       const { macroTargets, weightGoals } = get();
@@ -335,8 +407,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       set((state) => ({
         ...state,
         macroTargets: updatedMacroTargets,
-        isLoading: false,
+        isSaving: false,
       }));
+
+      // Show success notification
+      if (get().addNotification) {
+        get().addNotification({
+          message: "Macro distribution updated successfully!",
+          type: "success",
+        });
+      }
     } catch (error) {
       set((state) => ({
         ...state,
@@ -344,14 +424,15 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
           error instanceof Error
             ? error.message
             : "Failed to update macro distribution",
-        isLoading: false,
+        isSaving: false,
       }));
+      console.error("Error updating macro distribution:", error);
     }
   },
 
   resetGoals: async () => {
     try {
-      set((state) => ({ ...state, isLoading: true }));
+      set((state) => ({ ...state, isLoading: true, error: null }));
 
       // Call the API to reset goals
       await apiService.goals.resetGoals();
@@ -361,15 +442,23 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
         ...state,
         weightGoals: null,
         macroTargets: null,
-        error: null,
         isLoading: false,
       }));
+
+      // Show success notification
+      if (get().addNotification) {
+        get().addNotification({
+          message: "Goals reset successfully!",
+          type: "success",
+        });
+      }
     } catch (error) {
       set((state) => ({
         ...state,
         error: error instanceof Error ? error.message : "Failed to reset goals",
         isLoading: false,
       }));
+      console.error("Error resetting goals:", error);
     }
   },
 });

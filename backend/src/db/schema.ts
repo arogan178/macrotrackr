@@ -14,6 +14,7 @@ export function initializeSchema(db: Database) {
 
   // Initialize database tables
   db.exec(`
+        -- Users Table --
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             first_name TEXT NOT NULL,
@@ -23,33 +24,36 @@ export function initializeSchema(db: Database) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
+        -- User Details Table --
         CREATE TABLE IF NOT EXISTS user_details (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
             date_of_birth TEXT, -- Store as ISO 8601 string 'YYYY-MM-DD'
-            height REAL, -- Use REAL for floating point numbers (e.g., cm or inches)
-            weight REAL, -- Use REAL for floating point numbers (e.g., kg or lbs)
+            height REAL,
+            weight REAL,
             gender TEXT CHECK(gender IN ('male', 'female')),
-            activity_level INTEGER CHECK(activity_level BETWEEN 1 AND 5), -- 1: Sedentary, 5: Extra Active
+            activity_level INTEGER CHECK(activity_level BETWEEN 1 AND 5),
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- If user is deleted, delete details
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
+        -- Macro Entries Table --
         CREATE TABLE IF NOT EXISTS macro_entries (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER NOT NULL,
-            protein REAL NOT NULL CHECK(protein >= 0),
-            carbs REAL NOT NULL CHECK(carbs >= 0),
-            fats REAL NOT NULL CHECK(fats >= 0),
-            meal_type TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')), -- Added CHECK constraint
+            protein REAL NOT NULL CHECK(protein >= 0.0),
+            carbs REAL NOT NULL CHECK(carbs >= 0.0),
+            fats REAL NOT NULL CHECK(fats >= 0.0),
+            meal_type TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
             meal_name TEXT DEFAULT '',
             entry_date TEXT NOT NULL, -- Store as ISO 8601 string 'YYYY-MM-DD'
             entry_time TEXT NOT NULL, -- Store as ISO 8601 string 'HH:MM:SS' or 'HH:MM'
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE -- If user is deleted, delete entries
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
+        -- Macro Distribution Settings Table --
         CREATE TABLE IF NOT EXISTS macro_distribution (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
@@ -59,21 +63,50 @@ export function initializeSchema(db: Database) {
             locked_macros TEXT DEFAULT '[]', -- Store as JSON array string '["protein", "fats"]'
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE, -- If user is deleted, delete distribution
-            -- Constraints ensure data integrity at the DB level
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             CHECK (protein_percentage + carbs_percentage + fats_percentage = 100),
             CHECK (protein_percentage >= 5 AND protein_percentage <= 70),
             CHECK (carbs_percentage >= 5 AND carbs_percentage <= 70),
             CHECK (fats_percentage >= 5 AND fats_percentage <= 70)
         );
+
+        -- *** NEW: Weight Goals Table *** --
+        CREATE TABLE IF NOT EXISTS weight_goals (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            current_weight REAL,
+            target_weight REAL,
+            weight_goal TEXT CHECK(weight_goal IN ('lose', 'maintain', 'gain')), -- Type of goal
+            start_date TEXT, -- YYYY-MM-DD
+            target_date TEXT, -- YYYY-MM-DD
+            adjusted_calorie_intake REAL, -- Recommended calories for goal
+            calculated_weeks INTEGER, -- Estimated duration
+            weekly_change REAL, -- Estimated kg/week change
+            daily_deficit REAL, -- Estimated calorie deficit/surplus per day
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        -- *** NEW: Macro Targets Table *** --
+        -- Combines target calories and distribution settings
+        CREATE TABLE IF NOT EXISTS macro_targets (
+             id INTEGER PRIMARY KEY AUTOINCREMENT,
+             user_id INTEGER UNIQUE NOT NULL,
+             target_calories REAL, -- Target calories (can be different from weight goal adjusted intake)
+             -- Store distribution as JSON text, similar to user settings
+             macro_distribution TEXT DEFAULT '{}', -- e.g., '{"proteinPercentage":30,"carbsPercentage":40,"fatsPercentage":30}'
+             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
-  // This is a basic approach. For complex migrations, consider a dedicated library.
-  // NOTE: This simple logic doesn't handle *changing* column types (INTEGER -> REAL).
-  // If you have existing data, a more robust migration script might be needed
-  // to ALTER TABLE... or create a new table, copy data, drop old, rename new.
-  // For a fresh DB or development, simply updating the CREATE TABLE is often sufficient.
+  // This only adds columns, it doesn't create the new tables if they are missing
+  // after the initial run. Best to delete the DB file during development if
+  // adding new tables via CREATE TABLE IF NOT EXISTS after the DB exists.
 
   const checkAndAddColumn = (
     tableName: string,
@@ -81,7 +114,6 @@ export function initializeSchema(db: Database) {
     columnDefinition: string,
     updateLogic?: string
   ) => {
-    // Check if column exists using PRAGMA table_info
     const columnExists = db
       .prepare(
         `SELECT COUNT(*) as count FROM pragma_table_info(?) WHERE name = ?`
@@ -93,9 +125,7 @@ export function initializeSchema(db: Database) {
         `    ➕ Adding column '${columnName}' to table '${tableName}'...`
       );
       try {
-        // Add the column
         db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnDefinition}`);
-        // Optionally run an update script for existing rows
         if (updateLogic) {
           console.log(
             `       🔄 Running update logic for new column '${columnName}'...`
@@ -111,7 +141,7 @@ export function initializeSchema(db: Database) {
     }
   };
 
-  // Apply necessary column additions (idempotent)
+  // Apply necessary column additions for existing tables (idempotent)
   checkAndAddColumn(
     "macro_entries",
     "meal_type",
@@ -137,6 +167,13 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+  // Add indexes for new tables if needed, e.g., on user_id
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
+  );
 
   console.log("✅ Database schema initialized successfully.");
 }
