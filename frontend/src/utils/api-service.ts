@@ -6,7 +6,7 @@
 // Assuming these imports exist and work as intended in your frontend structure
 import { getActivityLevelFromString } from "@/features/settings/constants";
 import { Gender, ActivityLevel } from "@/features/settings/types";
-import { getToken, removeToken } from "./token-storage"; // Assuming this utility correctly retrieves the JWT
+import { getToken } from "./token-storage"; // Assuming this utility correctly retrieves the JWT
 
 // API base URL - should be configured based on environment
 const API_BASE_URL = "http://localhost:3000"; // Ensure this matches your backend port
@@ -22,7 +22,7 @@ interface RegistrationDataPayload {
   dateOfBirth: string; // YYYY-MM-DD
   height: number;
   weight: number;
-  gender: "male" | "female";
+  gender: Gender;
   activityLevel: number; // 1-5
 }
 
