@@ -40,8 +40,8 @@ const macroEntryBase = t.Object({
   protein: MacroValueSchema,
   carbs: MacroValueSchema,
   fats: MacroValueSchema,
-  mealType: MealTypeSchema,
-  mealName: t.Optional(t.String({ default: "" })), // Optional meal name, defaults to empty string
+  meal_type: MealTypeSchema,
+  meal_name: t.Optional(t.String({ default: "" })), // Optional meal name, defaults to empty string
   entry_date: DateSchema, // Use entry_date consistently
   entry_time: TimeSchema, // Use entry_time consistently
 });
@@ -62,8 +62,8 @@ export const MacroSchemas = {
     protein: MacroValueSchema,
     carbs: MacroValueSchema,
     fats: MacroValueSchema,
-    mealType: MealTypeSchema,
-    mealName: t.Optional(t.String()),
+    meal_type: MealTypeSchema,
+    meal_name: t.Optional(t.String()),
     entry_date: DateSchema,
     entry_time: TimeSchema,
     created_at: t.Union([t.Date(), t.String()]),

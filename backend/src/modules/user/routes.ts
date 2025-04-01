@@ -41,10 +41,10 @@ export const userRoutes = (app: Elysia) =>
               throw new Error("User data not found.");
             }
 
-            // Fetch macro distribution settings
+            // Fetch macro target settings
             const macroDistQuery = `
                         SELECT protein_percentage, carbs_percentage, fats_percentage, locked_macros
-                        FROM macro_distribution
+                        FROM macro_target
                         WHERE user_id = ?
                     `;
             const macroDistData = db
@@ -56,8 +56,8 @@ export const userRoutes = (app: Elysia) =>
               locked_macros: string; // JSON string from DB
             } | null;
 
-            // Parse macro distribution or set to null if not found
-            const macroDistribution = macroDistData
+            // Parse macro target or set to null if not found
+            const macroTarget = macroDistData
               ? {
                   proteinPercentage: macroDistData.protein_percentage,
                   carbsPercentage: macroDistData.carbs_percentage,
@@ -71,7 +71,7 @@ export const userRoutes = (app: Elysia) =>
 
             return {
               ...userData, // Spread basic user and details fields
-              macro_distribution: macroDistribution, // Add parsed distribution settings
+              macro_target: macroTarget, // Add parsed target settings
             };
           } catch (error) {
             // Re-throw if it's the specific 404 error we threw
@@ -107,7 +107,7 @@ export const userRoutes = (app: Elysia) =>
             weight,
             gender,
             activity_level,
-            macro_distribution,
+            macro_target,
           } = body;
 
           // Use a transaction for atomic updates across multiple tables
@@ -172,13 +172,13 @@ export const userRoutes = (app: Elysia) =>
               nullify(activity_level)
             );
 
-            // 3. Update or Insert macro_distribution if provided in the body
-            if (macro_distribution !== undefined) {
+            // 3. Update or Insert macro_target if provided in the body
+            if (macro_target !== undefined) {
               // Schema validation already ensures sum=100 and ranges, but double check here if needed
               if (
-                macro_distribution.proteinPercentage +
-                  macro_distribution.carbsPercentage +
-                  macro_distribution.fatsPercentage !==
+                macro_target.proteinPercentage +
+                  macro_target.carbsPercentage +
+                  macro_target.fatsPercentage !==
                 100
               ) {
                 set.status = 400; // Bad Request
@@ -188,7 +188,7 @@ export const userRoutes = (app: Elysia) =>
               }
 
               const distUpsertQuery = `
-                            INSERT INTO macro_distribution (
+                            INSERT INTO macro_target (
                                 user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros, updated_at
                             )
                             VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
@@ -202,15 +202,15 @@ export const userRoutes = (app: Elysia) =>
                         `;
               db.prepare(distUpsertQuery).run(
                 user.userId,
-                macro_distribution.proteinPercentage,
-                macro_distribution.carbsPercentage,
-                macro_distribution.fatsPercentage,
-                JSON.stringify(macro_distribution.locked_macros || []) // Store as JSON string
+                macro_target.proteinPercentage,
+                macro_target.carbsPercentage,
+                macro_target.fatsPercentage,
+                JSON.stringify(macro_target.locked_macros || []) // Store as JSON string
               );
             }
-            // If macro_distribution is explicitly set to null in the request, handle deletion/reset if desired
-            // else if (macro_distribution === null) {
-            //     db.prepare("DELETE FROM macro_distribution WHERE user_id = ?").run(user.userId);
+            // If macro_target is explicitly set to null in the request, handle deletion/reset if desired
+            // else if (macro_target === null) {
+            //     db.prepare("DELETE FROM macro_target WHERE user_id = ?").run(user.userId);
             // }
           }); // End of transaction definition
 

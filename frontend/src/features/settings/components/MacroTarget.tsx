@@ -3,33 +3,33 @@ import MacroSlider, { MacroBadge } from "./MacroSlider";
 import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
 
-interface Distribution {
+interface Target {
   proteinPercentage: number;
   carbsPercentage: number;
   fatsPercentage: number;
 }
 
-interface MacroDistributionProps {
-  initialValues?: Distribution & {
+interface MacroTargetProps {
+  initialValues?: Target & {
     locked_macros?: string[];
   };
-  onDistributionChange: (
-    distribution: Distribution & {
+  onTargetChange: (
+    target: Target & {
       locked_macros?: ("protein" | "carbs" | "fats")[];
     }
   ) => void;
 }
 
-export default function MacroDistribution({
+export default function MacroTarget({
   initialValues = {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
     locked_macros: [],
   },
-  onDistributionChange,
-}: MacroDistributionProps) {
-  const [distribution, setDistribution] = useState<Distribution>(initialValues);
+  onTargetChange,
+}: MacroTargetProps) {
+  const [target, setTarget] = useState<Target>(initialValues);
   const [isAdjusting, setIsAdjusting] = useState<
     "protein" | "carbs" | "fats" | null
   >(null);
@@ -46,7 +46,7 @@ export default function MacroDistribution({
   // Sync with initial values when they change
   useEffect(() => {
     if (initialValues && !isAdjusting) {
-      setDistribution(initialValues);
+      setTarget(initialValues);
       setLockedMacros(
         (initialValues.locked_macros || []).filter(
           (m): m is "protein" | "carbs" | "fats" =>
@@ -59,29 +59,27 @@ export default function MacroDistribution({
   // Make sure percentages always sum to 100
   useEffect(() => {
     const sum =
-      distribution.proteinPercentage +
-      distribution.carbsPercentage +
-      distribution.fatsPercentage;
+      target.proteinPercentage + target.carbsPercentage + target.fatsPercentage;
     if (sum !== 100 && !isAdjusting) {
       // Adjust to make sum 100%
-      const adjusted = { ...distribution };
+      const adjusted = { ...target };
       if (sum > 100) {
         // Reduce the largest percentage to make sum 100
-        const largest = Object.entries(distribution).reduce((a, b) =>
+        const largest = Object.entries(target).reduce((a, b) =>
           a[1] > b[1] ? a : b
-        )[0] as keyof Distribution;
+        )[0] as keyof Target;
         adjusted[largest] -= sum - 100;
       } else {
         // Increase the smallest percentage to make sum 100
-        const smallest = Object.entries(distribution).reduce((a, b) =>
+        const smallest = Object.entries(target).reduce((a, b) =>
           a[1] < b[1] ? a : b
-        )[0] as keyof Distribution;
+        )[0] as keyof Target;
         adjusted[smallest] += 100 - sum;
       }
-      setDistribution(adjusted);
-      onDistributionChange({ ...adjusted, locked_macros: lockedMacros });
+      setTarget(adjusted);
+      onTargetChange({ ...adjusted, locked_macros: lockedMacros });
     }
-  }, [distribution, isAdjusting, onDistributionChange, lockedMacros]);
+  }, [target, isAdjusting, onTargetChange, lockedMacros]);
 
   // Toggle lock status for a macro
   const toggleLock = (macro: "protein" | "carbs" | "fats") => {
@@ -97,14 +95,14 @@ export default function MacroDistribution({
       }
     }
     setLockedMacros(newLockedMacros);
-    onDistributionChange({ ...distribution, locked_macros: newLockedMacros });
+    onTargetChange({ ...target, locked_macros: newLockedMacros });
   };
 
   const handleChange = (macro: "protein" | "carbs" | "fats", value: number) => {
     setIsAdjusting(macro);
     value = Math.round(Math.max(5, Math.min(70, value)));
 
-    const updatedDistribution: Distribution = { ...distribution };
+    const updatedTarget: Target = { ...target };
     const macroKey =
       macro === "protein"
         ? "proteinPercentage"
@@ -121,8 +119,7 @@ export default function MacroDistribution({
           : lockedMacro === "carbs"
           ? "carbsPercentage"
           : "fatsPercentage";
-      lockedValues[lockedKey] =
-        updatedDistribution[lockedKey as keyof Distribution];
+      lockedValues[lockedKey] = updatedTarget[lockedKey as keyof Target];
     });
 
     // Don't adjust a macro if it's locked (unless it's the current one being adjusted)
@@ -130,7 +127,7 @@ export default function MacroDistribution({
 
     if (lockedMacros.length === 0) {
       // Set the clicked macro's value
-      updatedDistribution[macroKey] = value;
+      updatedTarget[macroKey] = value;
 
       // Get other macros
       const otherMacros = (["protein", "carbs", "fats"] as const).filter(
@@ -142,13 +139,13 @@ export default function MacroDistribution({
           : m === "carbs"
           ? "carbsPercentage"
           : "fatsPercentage"
-      ) as Array<keyof Distribution>;
+      ) as Array<keyof Target>;
 
       // Calculate remaining percentage
       const remainingTotal = 100 - value;
 
       // Get current values of other macros
-      const otherValues = otherKeys.map((key) => updatedDistribution[key]);
+      const otherValues = otherKeys.map((key) => updatedTarget[key]);
       const otherTotal = otherValues.reduce((sum, val) => sum + val, 0);
 
       if (otherTotal > 0) {
@@ -182,7 +179,7 @@ export default function MacroDistribution({
               // If we can't reduce either value, adjust both as much as possible
               newOtherValues = [5, 5];
               // And adjust the main value to make sum 100%
-              updatedDistribution[macroKey] = 90; // 100 - (5 + 5)
+              updatedTarget[macroKey] = 90; // 100 - (5 + 5)
             }
           } else {
             // If the difference is negative, add to the larger value
@@ -195,13 +192,13 @@ export default function MacroDistribution({
         }
 
         // Apply the calculated values
-        updatedDistribution[otherKeys[0]] = newOtherValues[0];
-        updatedDistribution[otherKeys[1]] = newOtherValues[1];
+        updatedTarget[otherKeys[0]] = newOtherValues[0];
+        updatedTarget[otherKeys[1]] = newOtherValues[1];
       } else {
         // If other values are 0, distribute evenly
-        updatedDistribution[otherKeys[0]] = Math.round(remainingTotal / 2);
-        updatedDistribution[otherKeys[1]] =
-          remainingTotal - updatedDistribution[otherKeys[0]];
+        updatedTarget[otherKeys[0]] = Math.round(remainingTotal / 2);
+        updatedTarget[otherKeys[1]] =
+          remainingTotal - updatedTarget[otherKeys[0]];
       }
     } else {
       const unlockedMacros = (["protein", "carbs", "fats"] as const).filter(
@@ -209,7 +206,7 @@ export default function MacroDistribution({
       );
 
       // Set the value of the macro being adjusted
-      updatedDistribution[macroKey] = value;
+      updatedTarget[macroKey] = value;
 
       if (unlockedMacros.length === 1) {
         const unlockedMacroKey =
@@ -223,17 +220,16 @@ export default function MacroDistribution({
           .filter((key) => key !== macroKey || !isCurrentMacroLocked)
           .reduce((sum, key) => sum + lockedValues[key], 0);
 
-        updatedDistribution[unlockedMacroKey as keyof Distribution] =
-          Math.round(Math.max(5, 100 - value - lockedSum));
+        updatedTarget[unlockedMacroKey as keyof Target] = Math.round(
+          Math.max(5, 100 - value - lockedSum)
+        );
 
-        if (updatedDistribution[unlockedMacroKey as keyof Distribution] < 5) {
-          updatedDistribution[unlockedMacroKey as keyof Distribution] = 5;
-          updatedDistribution[macroKey] = Math.round(100 - lockedSum - 5);
-        } else if (
-          updatedDistribution[unlockedMacroKey as keyof Distribution] > 70
-        ) {
-          updatedDistribution[unlockedMacroKey as keyof Distribution] = 70;
-          updatedDistribution[macroKey] = Math.round(100 - lockedSum - 70);
+        if (updatedTarget[unlockedMacroKey as keyof Target] < 5) {
+          updatedTarget[unlockedMacroKey as keyof Target] = 5;
+          updatedTarget[macroKey] = Math.round(100 - lockedSum - 5);
+        } else if (updatedTarget[unlockedMacroKey as keyof Target] > 70) {
+          updatedTarget[unlockedMacroKey as keyof Target] = 70;
+          updatedTarget[macroKey] = Math.round(100 - lockedSum - 70);
         }
       } else if (unlockedMacros.length === 0) {
         if (!isCurrentMacroLocked) {
@@ -243,7 +239,7 @@ export default function MacroDistribution({
           );
 
           if (value + lockedSum !== 100) {
-            updatedDistribution[macroKey] = Math.round(
+            updatedTarget[macroKey] = Math.round(
               Math.max(5, Math.min(70, 100 - lockedSum))
             );
           }
@@ -266,8 +262,8 @@ export default function MacroDistribution({
                     ? "carbsPercentage"
                     : "fatsPercentage";
 
-                return updatedDistribution[currentKey as keyof Distribution] >
-                  updatedDistribution[highestKey as keyof Distribution]
+                return updatedTarget[currentKey as keyof Target] >
+                  updatedTarget[highestKey as keyof Target]
                   ? current
                   : highest;
               },
@@ -290,24 +286,20 @@ export default function MacroDistribution({
                     : m === "carbs"
                     ? "carbsPercentage"
                     : "fatsPercentage";
-                return sum + updatedDistribution[key as keyof Distribution];
+                return sum + updatedTarget[key as keyof Target];
               }, 0);
 
             const newHighestValue = 100 - value - otherLockedSum;
 
             if (newHighestValue >= 5 && newHighestValue <= 70) {
-              updatedDistribution[highestLockedKey as keyof Distribution] =
+              updatedTarget[highestLockedKey as keyof Target] =
                 Math.round(newHighestValue);
             } else if (newHighestValue < 5) {
-              updatedDistribution[highestLockedKey as keyof Distribution] = 5;
-              updatedDistribution[macroKey] = Math.round(
-                100 - otherLockedSum - 5
-              );
+              updatedTarget[highestLockedKey as keyof Target] = 5;
+              updatedTarget[macroKey] = Math.round(100 - otherLockedSum - 5);
             } else {
-              updatedDistribution[highestLockedKey as keyof Distribution] = 70;
-              updatedDistribution[macroKey] = Math.round(
-                100 - otherLockedSum - 70
-              );
+              updatedTarget[highestLockedKey as keyof Target] = 70;
+              updatedTarget[macroKey] = Math.round(100 - otherLockedSum - 70);
             }
           }
         }
@@ -318,7 +310,7 @@ export default function MacroDistribution({
             : m === "carbs"
             ? "carbsPercentage"
             : "fatsPercentage"
-        ) as Array<keyof Distribution>;
+        ) as Array<keyof Target>;
 
         const lockedSum = Object.keys(lockedValues)
           .filter((key) => key !== macroKey || !isCurrentMacroLocked)
@@ -327,31 +319,30 @@ export default function MacroDistribution({
         const remainingForUnlocked = 100 - value - lockedSum;
 
         const unlockedTotal = unlockedKeys.reduce(
-          (sum, key) => sum + updatedDistribution[key],
+          (sum, key) => sum + updatedTarget[key],
           0
         );
 
         if (unlockedTotal > 0) {
           unlockedKeys.forEach((key) => {
-            const proportion = updatedDistribution[key] / unlockedTotal;
-            updatedDistribution[key] = Math.round(
+            const proportion = updatedTarget[key] / unlockedTotal;
+            updatedTarget[key] = Math.round(
               Math.max(5, Math.min(70, remainingForUnlocked * proportion))
             );
           });
 
-          const newSum = Object.values(updatedDistribution).reduce(
+          const newSum = Object.values(updatedTarget).reduce(
             (sum, val) => sum + val,
             0
           );
 
           if (newSum !== 100 && unlockedKeys.length > 0) {
             const adjustableKey = unlockedKeys.find(
-              (key) =>
-                updatedDistribution[key] > 5 && updatedDistribution[key] < 70
+              (key) => updatedTarget[key] > 5 && updatedTarget[key] < 70
             );
 
             if (adjustableKey) {
-              updatedDistribution[adjustableKey] += 100 - newSum;
+              updatedTarget[adjustableKey] += 100 - newSum;
             }
           }
         } else {
@@ -359,7 +350,7 @@ export default function MacroDistribution({
             remainingForUnlocked / unlockedKeys.length
           );
           unlockedKeys.forEach((key) => {
-            updatedDistribution[key] = Math.max(5, Math.min(70, perMacro));
+            updatedTarget[key] = Math.max(5, Math.min(70, perMacro));
           });
         }
       }
@@ -368,18 +359,18 @@ export default function MacroDistribution({
     // Restore locked macro values, except for the one being adjusted
     Object.keys(lockedValues).forEach((key) => {
       if (key !== macroKey || !isCurrentMacroLocked) {
-        updatedDistribution[key as keyof Distribution] = lockedValues[key];
+        updatedTarget[key as keyof Target] = lockedValues[key];
       }
     });
 
     // Final check to ensure the total is 100%
     const finalSum =
-      updatedDistribution.proteinPercentage +
-      updatedDistribution.carbsPercentage +
-      updatedDistribution.fatsPercentage;
+      updatedTarget.proteinPercentage +
+      updatedTarget.carbsPercentage +
+      updatedTarget.fatsPercentage;
 
     if (finalSum !== 100) {
-      const adjustableKeys = Object.entries(updatedDistribution)
+      const adjustableKeys = Object.entries(updatedTarget)
         .filter(([key]) => {
           const macroName =
             key === "proteinPercentage"
@@ -390,21 +381,19 @@ export default function MacroDistribution({
           return !lockedMacros.includes(macroName) || macroName === macro;
         })
         .filter(([, value]) => value > 5 && value < 70)
-        .map(([key]) => key as keyof Distribution);
+        .map(([key]) => key as keyof Target);
 
       if (adjustableKeys.length > 0) {
-        const preferredKey = adjustableKeys.includes(
-          macroKey as keyof Distribution
-        )
+        const preferredKey = adjustableKeys.includes(macroKey as keyof Target)
           ? macroKey
           : adjustableKeys[0];
-        updatedDistribution[preferredKey] += 100 - finalSum;
+        updatedTarget[preferredKey] += 100 - finalSum;
       }
     }
 
-    setDistribution(updatedDistribution);
-    onDistributionChange({
-      ...updatedDistribution,
+    setTarget(updatedTarget);
+    onTargetChange({
+      ...updatedTarget,
       locked_macros: lockedMacros,
     });
     setTimeout(() => setIsAdjusting(null), 100);
@@ -413,9 +402,7 @@ export default function MacroDistribution({
   return (
     <div className="space-y-6 py-2">
       <div className="flex justify-between items-center">
-        <h3 className="text-md font-medium text-gray-200">
-          Macro Distribution
-        </h3>
+        <h3 className="text-md font-medium text-gray-200">Macro Target</h3>
         <div className="flex items-center">
           <button
             onClick={() => setHelpVisible(!helpVisible)}
@@ -448,22 +435,20 @@ export default function MacroDistribution({
       <div className="relative h-2 mb-6 rounded-full overflow-hidden bg-gray-700/30">
         <div
           className="absolute top-0 left-0 h-2 bg-gradient-to-r from-green-500 to-green-600"
-          style={{ width: `${distribution.proteinPercentage}%` }}
+          style={{ width: `${target.proteinPercentage}%` }}
         ></div>
         <div
           className="absolute top-0 h-2 bg-gradient-to-r from-blue-500 to-blue-600"
           style={{
-            width: `${distribution.carbsPercentage}%`,
-            left: `${distribution.proteinPercentage}%`,
+            width: `${target.carbsPercentage}%`,
+            left: `${target.proteinPercentage}%`,
           }}
         ></div>
         <div
           className="absolute top-0 h-2 bg-gradient-to-r from-red-500 to-red-600"
           style={{
-            width: `${distribution.fatsPercentage}%`,
-            left: `${
-              distribution.proteinPercentage + distribution.carbsPercentage
-            }%`,
+            width: `${target.fatsPercentage}%`,
+            left: `${target.proteinPercentage + target.carbsPercentage}%`,
           }}
         ></div>
       </div>
@@ -472,7 +457,7 @@ export default function MacroDistribution({
         {/* Protein Slider */}
         <MacroSlider
           name="Protein"
-          value={distribution.proteinPercentage}
+          value={target.proteinPercentage}
           onChange={(value) => handleChange("protein", value)}
           color="green"
           isLocked={lockedMacros.includes("protein")}
@@ -483,7 +468,7 @@ export default function MacroDistribution({
         {/* Carbs Slider */}
         <MacroSlider
           name="Carbs"
-          value={distribution.carbsPercentage}
+          value={target.carbsPercentage}
           onChange={(value) => handleChange("carbs", value)}
           color="blue"
           isLocked={lockedMacros.includes("carbs")}
@@ -494,7 +479,7 @@ export default function MacroDistribution({
         {/* Fats Slider */}
         <MacroSlider
           name="Fats"
-          value={distribution.fatsPercentage}
+          value={target.fatsPercentage}
           onChange={(value) => handleChange("fats", value)}
           color="red"
           isLocked={lockedMacros.includes("fats")}
@@ -507,7 +492,7 @@ export default function MacroDistribution({
         {/* Protein Badge */}
         <MacroBadge
           name="Protein"
-          value={distribution.proteinPercentage}
+          value={target.proteinPercentage}
           color="green"
           isLocked={lockedMacros.includes("protein")}
         />
@@ -515,7 +500,7 @@ export default function MacroDistribution({
         {/* Carbs Badge */}
         <MacroBadge
           name="Carbs"
-          value={distribution.carbsPercentage}
+          value={target.carbsPercentage}
           color="blue"
           isLocked={lockedMacros.includes("carbs")}
         />
@@ -523,7 +508,7 @@ export default function MacroDistribution({
         {/* Fats Badge */}
         <MacroBadge
           name="Fats"
-          value={distribution.fatsPercentage}
+          value={target.fatsPercentage}
           color="red"
           isLocked={lockedMacros.includes("fats")}
         />

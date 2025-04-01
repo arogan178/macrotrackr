@@ -37,7 +37,7 @@ export default function GoalsPage() {
     user,
     nutritionProfile,
     weightGoals,
-    macroTargets,
+    macroTarget,
     macroDailyTotals,
     isLoading,
     error,
@@ -46,7 +46,7 @@ export default function GoalsPage() {
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
-    fetchMacroTargets,
+    fetchMacroTarget,
     resetGoals,
   } = useStore();
 
@@ -59,13 +59,13 @@ export default function GoalsPage() {
 
     // Fetch persisted goals data
     fetchWeightGoals();
-    fetchMacroTargets();
+    fetchMacroTarget();
   }, [
     user,
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
-    fetchMacroTargets,
+    fetchMacroTarget,
   ]);
 
   // Handler for saving weight goal
@@ -214,8 +214,8 @@ export default function GoalsPage() {
                 weightGoals={weightGoals}
                 onSave={handleSaveGoal}
                 isLoading={isLoading}
-                targetCalories={macroTargets?.target_calories}
-                macroDistribution={macroTargets?.macro_distribution}
+                targetCalories={macroTarget?.target_calories}
+                macroTarget={macroTarget?.macro_target}
               />
 
               {/* Habit Tracker */}

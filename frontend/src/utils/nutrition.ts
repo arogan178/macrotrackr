@@ -49,9 +49,9 @@ export function calculateMacroPercentages(
 }
 
 /**
- * Calculate macronutrient targets based on total calories and distribution percentages
+ * Calculate macronutrient target based on total calories and target percentages
  */
-export function calculateMacroTargets(
+export function calculateMacroTarget(
   totalCalories: number,
   proteinPercentage: number,
   carbsPercentage: number,

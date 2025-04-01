@@ -1,23 +1,20 @@
 import { MacroDailyTotals, MacroTargetSettings } from "../types";
 import { calculateCalories } from "@/utils/nutrition";
-import {
-  MacroDistributionBar,
-  MacroDistributionLegend,
-} from "@/components/nutrition";
+import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
 import ProgressBar from "@/components/ProgressBar";
 
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
-  macroDistribution?: MacroTargetSettings;
+  macroTarget?: MacroTargetSettings;
   targetCalories?: number;
 }
 
 export default function DailySummary({
   macroDailyTotals,
-  macroDistribution,
+  macroTarget,
   targetCalories,
 }: DailySummaryProps) {
-  const defaultDistribution = {
+  const defaultTarget = {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
@@ -30,7 +27,7 @@ export default function DailySummary({
     fats: 0,
     calories: 0,
   };
-  const distribution = macroDistribution || defaultDistribution;
+  const target = macroTarget || defaultTarget;
 
   // Using the shared utility for calorie calculation
   const calculatedCalories = calculateCalories(
@@ -41,15 +38,15 @@ export default function DailySummary({
   const totalCalories = safeTotal.calories || calculatedCalories;
   const dailyTargetCalories = targetCalories || totalCalories || 2000;
 
-  // Calculate target grams for each macro based on targetCalories and distribution
+  // Calculate target grams for each macro based on targetCalories and target
   const targetProteinGrams = Math.round(
-    (dailyTargetCalories * distribution.proteinPercentage) / 100 / 4
+    (dailyTargetCalories * target.proteinPercentage) / 100 / 4
   );
   const targetCarbsGrams = Math.round(
-    (dailyTargetCalories * distribution.carbsPercentage) / 100 / 4
+    (dailyTargetCalories * target.carbsPercentage) / 100 / 4
   );
   const targetFatsGrams = Math.round(
-    (dailyTargetCalories * distribution.fatsPercentage) / 100 / 9
+    (dailyTargetCalories * target.fatsPercentage) / 100 / 9
   );
 
   // Calculate completion percentages for each macro
@@ -95,7 +92,7 @@ export default function DailySummary({
       grams: Math.round(safeTotal.protein || 0),
       targetGrams: targetProteinGrams,
       calories: proteinCalories,
-      targetPercent: distribution.proteinPercentage,
+      targetPercent: target.proteinPercentage,
       actualPercent: proteinPercent,
       color: "bg-green-500",
       textColor: "text-green-400",
@@ -110,7 +107,7 @@ export default function DailySummary({
       grams: Math.round(safeTotal.carbs || 0),
       targetGrams: targetCarbsGrams,
       calories: carbsCalories,
-      targetPercent: distribution.carbsPercentage,
+      targetPercent: target.carbsPercentage,
       actualPercent: carbsPercent,
       color: "bg-blue-500",
       textColor: "text-blue-400",
@@ -125,7 +122,7 @@ export default function DailySummary({
       grams: Math.round(safeTotal.fats || 0),
       targetGrams: targetFatsGrams,
       calories: fatsCalories,
-      targetPercent: distribution.fatsPercentage,
+      targetPercent: target.fatsPercentage,
       actualPercent: fatsPercent,
       color: "bg-red-500",
       textColor: "text-red-400",
@@ -171,8 +168,8 @@ export default function DailySummary({
             className="mb-4"
           />
 
-          {/* Using shared MacroDistributionBar component with corrected distribution values */}
-          <MacroDistributionBar
+          {/* Using shared MacroTargetBar component with corrected target values */}
+          <MacroTargetBar
             macros={{
               protein: proteinCalories,
               carbs: carbsCalories,
@@ -180,8 +177,8 @@ export default function DailySummary({
             }}
           />
 
-          {/* Using shared MacroDistributionLegend component with corrected percentage values */}
-          <MacroDistributionLegend
+          {/* Using shared MacroTargetLegend component with corrected percentage values */}
+          <MacroTargetLegend
             macros={{
               protein: proteinCalories,
               carbs: carbsCalories,

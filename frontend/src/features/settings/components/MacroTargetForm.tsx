@@ -2,17 +2,17 @@ import { memo, useCallback } from "react";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
 import { InfoCard, CardContainer } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
-import MacroDistribution from "./MacroDistribution";
+import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
 
-function MacroTargetsForm() {
-  const { macroTargets, updateMacroDistribution } = useStore();
+function MacroTargetForm() {
+  const { macroTarget, updateMacroTarget } = useStore();
 
-  const handleMacroDistributionChange = useCallback(
-    (distribution: MacroTargetSettings) => {
-      updateMacroDistribution(distribution);
+  const handleMacroTargetChange = useCallback(
+    (target: MacroTargetSettings) => {
+      updateMacroTarget(target);
     },
-    [updateMacroDistribution]
+    [updateMacroTarget]
   );
 
   return (
@@ -22,23 +22,23 @@ function MacroTargetsForm() {
         <CardContainer className="p-6 h-full">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-semibold text-gray-200">
-              Macro Distribution Settings
+              Macro Target Settings
             </h3>
             <div className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full">
-              <span className="text-sm text-indigo-300">Daily Targets</span>
+              <span className="text-sm text-indigo-300">Daily Target</span>
             </div>
           </div>
 
           <p className="text-gray-400 text-sm mb-6">
-            Adjust the sliders below to set your preferred macronutrient
-            distribution. These percentages will be used to calculate your daily
-            macro targets based on your calorie needs.
+            Adjust the sliders below to set your preferred macronutrient target.
+            These percentages will be used to calculate your daily macro target
+            based on your calorie needs.
           </p>
 
-          {macroTargets?.macro_distribution && (
-            <MacroDistribution
-              initialValues={macroTargets.macro_distribution}
-              onDistributionChange={handleMacroDistributionChange}
+          {macroTarget?.macro_target && (
+            <MacroTarget
+              initialValues={macroTarget.macro_target}
+              onTargetChange={handleMacroTargetChange}
             />
           )}
         </CardContainer>
@@ -87,4 +87,4 @@ function MacroTargetsForm() {
   );
 }
 
-export default memo(MacroTargetsForm);
+export default memo(MacroTargetForm);

@@ -5,7 +5,7 @@ import { TabButton, CardContainer } from "../components/form";
 import SaveButton from "../components/SaveButton";
 import Modal from "../components/Modal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
-import { ProfileForm, MacroTargetsForm } from "../features/settings/components";
+import { ProfileForm, MacroTargetForm } from "../features/settings/components";
 import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 
@@ -26,12 +26,12 @@ export default function SettingsPage() {
     fetchSettings,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "macro targets">(
+  const [activeTab, setActiveTab] = useState<"profile" | "macro target">(
     "profile"
   );
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<
-    "profile" | "macro targets" | null
+    "profile" | "macro target" | null
   >(null);
 
   // Fetch settings on component mount
@@ -46,7 +46,7 @@ export default function SettingsPage() {
   );
 
   const handleTabChange = useCallback(
-    (tab: "profile" | "macro targets") => {
+    (tab: "profile" | "macro target") => {
       if (hasSettingsChanges) {
         setPendingTabChange(tab);
         setShowConfirmModal(true);
@@ -131,11 +131,11 @@ export default function SettingsPage() {
               Profile
             </TabButton>
             <TabButton
-              active={activeTab === "macro targets"}
-              onClick={() => handleTabChange("macro targets")}
+              active={activeTab === "macro target"}
+              onClick={() => handleTabChange("macro target")}
             >
               <MenuIcon className="w-4 h-4 mr-2" />
-              Macro Targets
+              Macro Target
             </TabButton>
           </div>
 
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                     formErrors={formErrors}
                   />
                 ) : (
-                  <MacroTargetsForm
+                  <MacroTargetForm
                     settings={settings}
                     updateSetting={updateSetting}
                   />

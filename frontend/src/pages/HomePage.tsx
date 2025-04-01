@@ -15,7 +15,7 @@ export default function HomePage() {
   // Get state and actions from our store
   const {
     user,
-    macroTargets,
+    macroTarget,
     nutritionProfile,
     weightGoals,
     history,
@@ -30,7 +30,7 @@ export default function HomePage() {
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
-    fetchMacroTargets,
+    fetchMacroTarget,
     addEntry,
     updateEntry,
     deleteEntry,
@@ -46,8 +46,8 @@ export default function HomePage() {
 
     // Fetch saved goals data to ensure we have the latest values
     fetchWeightGoals();
-    fetchMacroTargets();
-  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTargets]);
+    fetchMacroTarget();
+  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTarget]);
 
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
@@ -108,7 +108,7 @@ export default function HomePage() {
                   user && (
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
-                      macroDistribution={macroTargets?.macro_distribution}
+                      macroTarget={macroTarget?.macro_target}
                       targetCalories={
                         weightGoals?.adjustedCalorieIntake ??
                         nutritionProfile?.tdee

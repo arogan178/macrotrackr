@@ -84,8 +84,8 @@ export const macroRoutes = (app: Elysia) =>
             const query = `
                         SELECT
                             id, protein, carbs, fats,
-                            meal_type AS mealType, -- Alias for camelCase consistency
-                            meal_name AS mealName, -- Alias for camelCase consistency
+                            meal_type,
+                            meal_name,
                             entry_date, entry_time, created_at
                         FROM macro_entries
                         WHERE user_id = ?
@@ -122,8 +122,8 @@ export const macroRoutes = (app: Elysia) =>
             protein,
             carbs,
             fats,
-            mealType,
-            mealName,
+            meal_type,
+            meal_name,
             entry_date,
             entry_time,
           } = body;
@@ -132,7 +132,7 @@ export const macroRoutes = (app: Elysia) =>
                         INSERT INTO macro_entries
                             (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time)
                         VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                        RETURNING id, protein, carbs, fats, meal_type as mealType, meal_name as mealName, entry_date, entry_time, created_at
+                        RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at
                     `;
             // Execute insert and return the newly created row
             const result = db
@@ -142,8 +142,8 @@ export const macroRoutes = (app: Elysia) =>
                 protein,
                 carbs,
                 fats,
-                mealType,
-                mealName ?? "",
+                meal_type,
+                meal_name ?? "",
                 entry_date,
                 entry_time
               ); // Use nullish coalescing for optional mealName
@@ -238,8 +238,8 @@ export const macroRoutes = (app: Elysia) =>
           if (body.protein !== undefined) updates.protein = body.protein;
           if (body.carbs !== undefined) updates.carbs = body.carbs;
           if (body.fats !== undefined) updates.fats = body.fats;
-          if (body.mealType !== undefined) updates.meal_type = body.mealType; // Map camelCase to snake_case
-          if (body.mealName !== undefined) updates.meal_name = body.mealName;
+          if (body.meal_type !== undefined) updates.meal_type = body.meal_type; // Map camelCase to snake_case
+          if (body.meal_name !== undefined) updates.meal_name = body.meal_name;
           if (body.entry_date !== undefined)
             updates.entry_date = body.entry_date;
           if (body.entry_time !== undefined)
@@ -263,7 +263,7 @@ export const macroRoutes = (app: Elysia) =>
                         UPDATE macro_entries
                         SET ${setClause}
                         WHERE id = ? AND user_id = ?
-                        RETURNING id, protein, carbs, fats, meal_type as mealType, meal_name as mealName, entry_date, entry_time, created_at
+                        RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at
                     `;
             // Perform the update and return the updated row
             const result = db.prepare(query).get(...queryParams);

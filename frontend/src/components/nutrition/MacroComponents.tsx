@@ -29,10 +29,7 @@ interface MacroBarProps {
 /**
  * Renders a stacked bar representing macro distribution
  */
-export function MacroDistributionBar({
-  macros,
-  className = "",
-}: MacroBarProps) {
+export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
   const { proteinPercent, carbsPercent, fatsPercent } =
     calculateMacroPercentages(macros.protein, macros.carbs, macros.fats);
 
@@ -67,7 +64,7 @@ interface MacroLegendProps {
 /**
  * Renders a legend for macro distribution
  */
-export function MacroDistributionLegend({
+export function MacroTargetLegend({
   macros,
   className = "",
 }: MacroLegendProps) {

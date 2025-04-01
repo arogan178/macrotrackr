@@ -15,7 +15,7 @@ interface WeightGoalStatusProps {
   weightGoals: WeightGoals | null;
   onEdit: () => void;
   targetCalories?: number;
-  macroDistribution?: MacroTargetSettings;
+  macroTarget?: MacroTargetSettings;
 }
 
 function WeightGoalStatus({
@@ -26,10 +26,10 @@ function WeightGoalStatus({
   weightGoals,
   onEdit,
   targetCalories,
-  macroDistribution,
+  macroTarget,
 }: WeightGoalStatusProps) {
-  // Use the provided macro distribution or fall back to default
-  const distribution = macroDistribution || {
+  // Use the provided macro target or fall back to default
+  const target = macroTarget || {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
@@ -85,15 +85,15 @@ function WeightGoalStatus({
       })
     : "Not set";
 
-  // Calculate target grams for each macro based on target calories and distribution
+  // Calculate target grams for each macro based on target calories and target
   const targetProteinGrams = Math.round(
-    (effectiveTargetCalories * distribution.proteinPercentage) / 100 / 4
+    (effectiveTargetCalories * target.proteinPercentage) / 100 / 4
   );
   const targetCarbsGrams = Math.round(
-    (effectiveTargetCalories * distribution.carbsPercentage) / 100 / 4
+    (effectiveTargetCalories * target.carbsPercentage) / 100 / 4
   );
   const targetFatsGrams = Math.round(
-    (effectiveTargetCalories * distribution.fatsPercentage) / 100 / 9
+    (effectiveTargetCalories * target.fatsPercentage) / 100 / 9
   );
 
   // Get weekly change with fallback
@@ -135,59 +135,69 @@ function WeightGoalStatus({
             <span className="text-2xl font-bold text-gray-200">
               {currentWeight} kg
             </span>
-            <ChevronRightIcon className="w-4 h-4 text-gray-500" />
-            <span className="text-xl text-gray-400">{targetWeight} kg</span>
             {!isMaintenance && (
-              <span className={`text-${goalColor}-400 ml-1 text-sm`}>
-                ({isWeightLoss ? "-" : "+"}
-                {Math.abs(targetWeight - currentWeight).toFixed(1)} kg)
-              </span>
+              <>
+                <ChevronRightIcon className="w-4 h-4 text-gray-500" />
+                <span className="text-xl text-gray-400">{targetWeight} kg</span>
+                <span className={`text-${goalColor}-400 ml-1 text-sm`}>
+                  ({isWeightLoss ? "-" : "+"}
+                  {Math.abs(targetWeight - currentWeight).toFixed(1)} kg)
+                </span>
+              </>
             )}
           </div>
-          <div className="flex items-center">
-            <div className="w-16 h-16 relative rounded-full flex items-center justify-center bg-gray-700/50">
-              <div className="absolute inset-0">
-                <svg width="64" height="64" viewBox="0 0 64 64">
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="24"
-                    fill="none"
-                    stroke="#374151"
-                    strokeWidth="6"
-                  />
-                  <circle
-                    cx="32"
-                    cy="32"
-                    r="24"
-                    fill="none"
-                    stroke={isWeightLoss ? "#6366F1" : "#10B981"}
-                    strokeWidth="6"
-                    strokeDasharray="150.8"
-                    strokeDashoffset={
-                      150.8 - (150.8 * progressPercentage) / 100
-                    }
-                    transform="rotate(-90 32 32)"
-                  />
-                </svg>
+          {!isMaintenance && (
+            <div className="flex items-center">
+              <div className="w-16 h-16 relative rounded-full flex items-center justify-center bg-gray-700/50">
+                <div className="absolute inset-0">
+                  <svg width="64" height="64" viewBox="0 0 64 64">
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="24"
+                      fill="none"
+                      stroke="#374151"
+                      strokeWidth="6"
+                    />
+                    <circle
+                      cx="32"
+                      cy="32"
+                      r="24"
+                      fill="none"
+                      stroke={isWeightLoss ? "#6366F1" : "#10B981"}
+                      strokeWidth="6"
+                      strokeDasharray="150.8"
+                      strokeDashoffset={
+                        150.8 - (150.8 * progressPercentage) / 100
+                      }
+                      transform="rotate(-90 32 32)"
+                    />
+                  </svg>
+                </div>
+                <span className="text-lg font-bold text-gray-200">
+                  {progressPercentage}%
+                </span>
               </div>
-              <span className="text-lg font-bold text-gray-200">
-                {progressPercentage}%
-              </span>
             </div>
-          </div>
+          )}
         </div>
 
-        <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mb-1">
-          <div
-            className={`h-full rounded-full bg-${goalColor}-500`}
-            style={{ width: `${progressPercentage}%` }}
-          ></div>
-        </div>
-        <div className="flex justify-between text-xs text-gray-400">
-          <span>Start: {weightGoals?.currentWeight || currentWeight} kg</span>
-          <span>Target: {targetWeight} kg</span>
-        </div>
+        {!isMaintenance && (
+          <>
+            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mb-1">
+              <div
+                className={`h-full rounded-full bg-${goalColor}-500`}
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <div className="flex justify-between text-xs text-gray-400">
+              <span>
+                Start: {weightGoals?.currentWeight || currentWeight} kg
+              </span>
+              <span>Target: {targetWeight} kg</span>
+            </div>
+          </>
+        )}
       </div>
 
       {/* Stats Grid */}
