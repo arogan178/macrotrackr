@@ -5,6 +5,13 @@ import { InfoIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
 
+// Default macro values (30/40/30 split)
+const DEFAULT_MACRO_TARGET = {
+  proteinPercentage: 30,
+  carbsPercentage: 40,
+  fatsPercentage: 30,
+};
+
 function MacroTargetForm() {
   const { macroTarget, updateMacroTarget } = useStore();
 
@@ -14,6 +21,9 @@ function MacroTargetForm() {
     },
     [updateMacroTarget]
   );
+
+  // Use macroTarget from store or fallback to defaults
+  const macroTargetValues = macroTarget?.macroTarget || DEFAULT_MACRO_TARGET;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
@@ -35,12 +45,11 @@ function MacroTargetForm() {
             based on your calorie needs.
           </p>
 
-          {macroTarget?.macroTarget && (
-            <MacroTarget
-              initialValues={macroTarget.macroTarget}
-              onTargetChange={handleMacroTargetChange}
-            />
-          )}
+          {/* Always render MacroTarget with valid values */}
+          <MacroTarget
+            initialValues={macroTargetValues}
+            onTargetChange={handleMacroTargetChange}
+          />
         </CardContainer>
       </div>
 

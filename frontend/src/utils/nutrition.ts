@@ -23,7 +23,7 @@ export function calculateCalories(
 /**
  * Calculate macronutrient percentages from gram values
  */
-export function calculateMacroPercentages(
+export function calculateCaloriePercentages(
   protein: number,
   carbs: number,
   fats: number
