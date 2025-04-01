@@ -6,7 +6,7 @@
 // Assuming these imports exist and work as intended in your frontend structure
 import { getActivityLevelFromString } from "@/features/settings/constants";
 import { Gender, ActivityLevel } from "@/features/settings/types";
-import { getToken } from "./token-storage"; // Assuming this utility correctly retrieves the JWT
+import { getToken, removeToken } from "./token-storage"; // Assuming this utility correctly retrieves the JWT
 
 // API base URL - should be configured based on environment
 const API_BASE_URL = "http://localhost:3000"; // Ensure this matches your backend port
@@ -311,6 +311,19 @@ export const apiService = {
       });
       return handleResponse(response); // Returns { success: true } or throws ApiError
     },
+
+    /** Completes user profile */
+    completeProfile: async (profileData: any) => {
+      const response = await fetch(
+        `${API_BASE_URL}/api/user/complete-profile`,
+        {
+          method: "POST",
+          headers: getHeaders(),
+          body: JSON.stringify(profileData),
+        }
+      );
+      return handleResponse(response); // Returns { success: true } or throws ApiError
+    },
   },
 
   // Authentication endpoints
@@ -432,6 +445,62 @@ export const apiService = {
         }
       );
       // Returns { success: true } or throws ApiError
+      return handleResponse(response);
+    },
+  },
+
+  // Goals endpoints
+  goals: {
+    /** Gets weight goals from the API */
+    getWeightGoals: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
+        headers: getHeaders(),
+      });
+      // If not found (404), return null instead of throwing an error
+      if (response.status === 404) {
+        return null;
+      }
+      return handleResponse(response);
+    },
+
+    /** Saves weight goals to the API */
+    saveWeightGoals: async (weightGoals: any) => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(weightGoals),
+      });
+      return handleResponse(response);
+    },
+
+    /** Gets macro targets from the API */
+    getMacroTargets: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
+        headers: getHeaders(),
+      });
+      // If not found (404), return null instead of throwing an error
+      if (response.status === 404) {
+        return null;
+      }
+      return handleResponse(response);
+    },
+
+    /** Saves macro targets to the API */
+    saveMacroTargets: async (macroTargets: any) => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/macros`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(macroTargets),
+      });
+      return handleResponse(response);
+    },
+
+    /** Resets all goals */
+    resetGoals: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/reset`, {
+        method: "POST",
+        headers: getHeaders(),
+      });
       return handleResponse(response);
     },
   },
