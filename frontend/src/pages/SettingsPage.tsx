@@ -5,7 +5,7 @@ import { TabButton, CardContainer } from "../components/form";
 import SaveButton from "../components/SaveButton";
 import Modal from "../components/Modal";
 import { useBeforeUnload } from "../hooks/useBeforeUnload";
-import { ProfileForm, MacroTargetForm } from "../features/settings/components";
+import { ProfileForm, MacroTargetForm } from "@/features/settings/components";
 import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
 
@@ -153,10 +153,7 @@ export default function SettingsPage() {
                     formErrors={formErrors}
                   />
                 ) : (
-                  <MacroTargetForm
-                    settings={settings}
-                    updateSetting={updateSetting}
-                  />
+                  <MacroTargetForm />
                 )}
 
                 <div className="mt-8 flex justify-end">

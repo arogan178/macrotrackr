@@ -18,8 +18,7 @@ import { validateUserSettings } from "../utils/validation"; // Adjust path
 // Define UserSlice interface if not already fully defined
 export interface UserSlice {
   user: UserSettings | null;
-  // This only holds BMR/TDEE now, based on user_types_corrected
-  nutritionProfile: UserNutritionalProfile | null;
+  nutritionProfile: UserNutritionalProfile | null; // This only holds BMR/TDEE now
   // Macro target percentages might live elsewhere (e.g., goals slice) or directly here
   // Let's add it here for now for simplicity, but consider separating later
   macroTarget: MacroTargetPercentages | null;
@@ -59,11 +58,19 @@ export const createUserSlice: StateCreator<
   // Initial states...
   user: null,
   nutritionProfile: null,
-  macroTarget: null, // Initialize macroTarget state
+  macroTarget: {
+    proteinPercentage: 30,
+    carbsPercentage: 40,
+    fatsPercentage: 30,
+  }, // Default macro target (30/40/30)
   isLoading: false,
   error: null,
   settings: null,
-  settingsMacroTarget: null, // Initialize settings macroTarget
+  settingsMacroTarget: {
+    proteinPercentage: 30,
+    carbsPercentage: 40,
+    fatsPercentage: 30,
+  }, // Default settings macro target
   originalSettings: null,
   originalSettingsMacroTarget: null,
   isSettingsLoading: false,
