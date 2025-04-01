@@ -17,7 +17,7 @@ interface WeightGoalDashboardProps {
   onSave: (values: WeightGoalFormValues) => void;
   className?: string;
   targetCalories?: number;
-  macroDistribution?: MacroTargetSettings;
+  macroTarget?: MacroTargetSettings;
 }
 
 function WeightGoalDashboard({
@@ -30,7 +30,7 @@ function WeightGoalDashboard({
   onSave,
   className = "",
   targetCalories,
-  macroDistribution,
+  macroTarget,
 }: WeightGoalDashboardProps) {
   const [isEditing, setIsEditing] = useState(!weightGoals);
 
@@ -70,7 +70,7 @@ function WeightGoalDashboard({
           weightGoals={weightGoals!}
           onEdit={toggleEdit}
           targetCalories={effectiveTargetCalories}
-          macroDistribution={macroDistribution}
+          macroTarget={macroTarget}
         />
       )}
     </div>

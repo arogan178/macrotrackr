@@ -1,6 +1,10 @@
 import { TextField, NumberField, Dropdown, DateField } from "@/components/form";
 import { UserSettings, Gender, ActivityLevel } from "@/features/settings/types";
-import { GENDER_OPTIONS, ACTIVITY_LEVELS } from "../constants";
+import {
+  GENDER_OPTIONS,
+  ACTIVITY_LEVELS,
+  getActivityLevelFromString,
+} from "../constants";
 
 interface ProfileFormProps {
   settings: UserSettings;
@@ -29,6 +33,20 @@ export default function ProfileForm({
     typeof settings.activity_level === "string" && settings.activity_level
       ? getActivityLevelFromString(settings.activity_level as ActivityLevel)
       : settings.activity_level;
+
+  // Ensure weight is a valid positive number
+  const handleWeightChange = (value: number | undefined) => {
+    // Don't allow undefined, negative or zero weights
+    const validWeight = value && value > 0 ? value : undefined;
+    updateSetting("weight", validWeight);
+  };
+
+  // Ensure height is a valid positive number
+  const handleHeightChange = (value: number | undefined) => {
+    // Don't allow undefined, negative or zero heights
+    const validHeight = value && value > 0 ? value : undefined;
+    updateSetting("height", validHeight);
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -77,8 +95,11 @@ export default function ProfileForm({
       <NumberField
         label="Height (cm)"
         value={settings.height}
-        onChange={(value) => updateSetting("height", value || 0)}
+        onChange={handleHeightChange}
         error={formErrors.height}
+        min={100}
+        max={250}
+        step={1}
         unit="cm"
         required
       />
@@ -86,8 +107,11 @@ export default function ProfileForm({
       <NumberField
         label="Weight (kg)"
         value={settings.weight}
-        onChange={(value) => updateSetting("weight", value || 0)}
+        onChange={handleWeightChange}
         error={formErrors.weight}
+        min={30}
+        max={300}
+        step={0.1}
         unit="kg"
         required
       />

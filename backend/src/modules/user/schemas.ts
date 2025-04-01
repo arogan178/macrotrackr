@@ -16,8 +16,8 @@ const OptionalActivityLevel = t.Optional(
   t.Union([t.Numeric({ minimum: 1, maximum: 5 }), t.Null()])
 );
 
-// Define the structure for macro distribution settings
-const MacroDistributionSettingsSchema = t.Object(
+// Define the structure for macro target settings
+const MacroTargetSettingsSchema = t.Object(
   {
     proteinPercentage: t.Integer({
       minimum: 5,
@@ -73,8 +73,8 @@ export const UserSchemas = {
     weight: t.Nullable(t.Number()),
     gender: t.Nullable(t.Union([t.Literal("male"), t.Literal("female")])),
     activity_level: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
-    // Macro distribution settings
-    macro_distribution: t.Nullable(MacroDistributionSettingsSchema), // Can be null if not set
+    // Macro target settings
+    macro_target: t.Nullable(MacroTargetSettingsSchema), // Can be null if not set
   }),
 
   // Schema for updating user settings
@@ -89,8 +89,8 @@ export const UserSchemas = {
     weight: OptionalPositiveNumber,
     gender: OptionalGender,
     activity_level: OptionalActivityLevel,
-    // Macro distribution (optional update)
-    macro_distribution: t.Optional(MacroDistributionSettingsSchema), // Use the defined schema
+    // Macro target (optional update)
+    macro_target: t.Optional(MacroTargetSettingsSchema), // Use the defined schema
   }),
 
   // Schema for the simplified profile completion endpoint

@@ -53,8 +53,8 @@ export function initializeSchema(db: Database) {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
-        -- Macro Distribution Settings Table --
-        CREATE TABLE IF NOT EXISTS macro_distribution (
+        -- Macro Target Settings Table --
+        CREATE TABLE IF NOT EXISTS macro_target (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
             protein_percentage INTEGER NOT NULL DEFAULT 30,
@@ -88,14 +88,14 @@ export function initializeSchema(db: Database) {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
-        -- *** NEW: Macro Targets Table *** --
-        -- Combines target calories and distribution settings
-        CREATE TABLE IF NOT EXISTS macro_targets (
+        -- *** NEW: Macro Target Table *** --
+        -- Combines target calories and target settings
+        CREATE TABLE IF NOT EXISTS macro_target (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              user_id INTEGER UNIQUE NOT NULL,
              target_calories REAL, -- Target calories (can be different from weight goal adjusted intake)
-             -- Store distribution as JSON text, similar to user settings
-             macro_distribution TEXT DEFAULT '{}', -- e.g., '{"proteinPercentage":30,"carbsPercentage":40,"fatsPercentage":30}'
+             -- Store target as JSON text, similar to user settings
+             macro_target TEXT DEFAULT '{}', -- e.g., '{"proteinPercentage":30,"carbsPercentage":40,"fatsPercentage":30}'
              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -172,7 +172,7 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
   );
   db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
+    "CREATE INDEX IF NOT EXISTS idx_macro_target_user ON macro_target(user_id)"
   );
 
   console.log("✅ Database schema initialized successfully.");

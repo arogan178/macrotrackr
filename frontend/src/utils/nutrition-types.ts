@@ -17,9 +17,9 @@ export interface MacroNutrientsWithCalories extends MacroNutrients {
 }
 
 /**
- * Macro distribution settings with percentages
+ * Macro target settings with percentages
  */
-export interface MacroDistributionSettings {
+export interface MacroTargetSettings {
   proteinPercentage: number;
   carbsPercentage: number;
   fatsPercentage: number;
@@ -27,9 +27,9 @@ export interface MacroDistributionSettings {
 }
 
 /**
- * Macro targets in grams
+ * Macro target in grams
  */
-export interface MacroTargets {
+export interface MacroTarget {
   proteinTarget: number;
   carbsTarget: number;
   fatsTarget: number;

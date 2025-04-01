@@ -2,7 +2,7 @@
 import { Elysia } from "elysia"; // Removed unused 't' import
 import { db } from "../../db";
 // Import the simplified schemas
-import { GoalSchemas } from "./schemas";
+import { GoalSchemas } from "./schemas"; // NOTE: This file will also need renaming internally
 import type { AuthenticatedContext } from "../../middleware/auth";
 
 // Define types for DB results (snake_case) for clarity and type safety
@@ -18,16 +18,17 @@ type WeightGoalFromDB = {
   adjusted_calorie_intake: number | null;
   calculated_weeks: number | null;
   weekly_change: number | null;
-  daily_deficit: number | null;
+  daily_change: number | null;
   created_at: string; // Assuming DATETIME maps to string from DB driver
   updated_at: string;
 };
 
+// NOTE: This type definition needs updating to reflect the column rename in schema.ts
 type MacroTargetFromDB = {
   id: number;
   user_id: number;
   target_calories: number | null;
-  macro_distribution: string; // JSON string from DB
+  macro_target: string; // *** RENAMED from macro_distribution *** JSON string from DB
   created_at: string;
   updated_at: string;
 };
@@ -50,10 +51,11 @@ export const goalRoutes = (app: Elysia) =>
             // Bun's get() might return undefined if no row found
             const weightGoalsResult = db.prepare(query).get(user.userId) as
               | WeightGoalFromDB
-              | undefined;
+              | undefined
+              | null;
 
-            // Use strict check for undefined
-            if (weightGoalsResult === undefined) {
+            // Use strict check for undefined or null
+            if (weightGoalsResult === undefined || weightGoalsResult === null) {
               // Return null if no goals found, matching the response schema t.Nullable(...)
               return null;
             }
@@ -71,7 +73,7 @@ export const goalRoutes = (app: Elysia) =>
               adjustedCalorieIntake: weightGoals.adjusted_calorie_intake,
               calculatedWeeks: weightGoals.calculated_weeks,
               weeklyChange: weightGoals.weekly_change,
-              dailyDeficit: weightGoals.daily_deficit,
+              dailyChange: weightGoals.daily_change,
             };
           } catch (error) {
             console.error("Error fetching weight goals:", error);
@@ -113,7 +115,7 @@ export const goalRoutes = (app: Elysia) =>
               adjustedCalorieIntake,
               calculatedWeeks,
               weeklyChange,
-              dailyDeficit,
+              dailyChange,
             } = body;
 
             // Use UPSERT logic (INSERT ON CONFLICT DO UPDATE)
@@ -121,7 +123,7 @@ export const goalRoutes = (app: Elysia) =>
             const upsertQuery = `
                 INSERT INTO weight_goals (
                     user_id, current_weight, target_weight, weight_goal, start_date, target_date,
-                    adjusted_calorie_intake, calculated_weeks, weekly_change, daily_deficit, updated_at
+                    adjusted_calorie_intake, calculated_weeks, weekly_change, daily_change, updated_at
                 ) VALUES (
                     ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP
                 )
@@ -134,7 +136,7 @@ export const goalRoutes = (app: Elysia) =>
                     adjusted_calorie_intake = excluded.adjusted_calorie_intake,
                     calculated_weeks = excluded.calculated_weeks,
                     weekly_change = excluded.weekly_change,
-                    daily_deficit = excluded.daily_deficit,
+                    daily_change = excluded.daily_change,
                     updated_at = CURRENT_TIMESTAMP
                 RETURNING *; -- Return the inserted/updated row
             `;
@@ -152,7 +154,7 @@ export const goalRoutes = (app: Elysia) =>
                 adjustedCalorieIntake,
                 calculatedWeeks,
                 weeklyChange,
-                dailyDeficit
+                dailyChange
               ) as WeightGoalFromDB | undefined;
 
             // Check if UPSERT succeeded (it should return the row)
@@ -176,7 +178,7 @@ export const goalRoutes = (app: Elysia) =>
               adjustedCalorieIntake: savedGoal.adjusted_calorie_intake,
               calculatedWeeks: savedGoal.calculated_weeks,
               weeklyChange: savedGoal.weekly_change,
-              dailyDeficit: savedGoal.daily_deficit,
+              dailyChange: savedGoal.daily_change,
             };
           } catch (error) {
             console.error("Error saving weight goals:", error);
@@ -199,64 +201,89 @@ export const goalRoutes = (app: Elysia) =>
         }
       )
 
-      // --- Get Macro Targets ---
+      // --- Get Macro Target ---
       .get(
         "/macros",
         ({ user, set, db }: AuthenticatedContext) => {
           try {
-            const query = "SELECT * FROM macro_targets WHERE user_id = ?";
-            const macroTargetsResult = db.prepare(query).get(user.userId) as
+            // NOTE: Table name needs to match schema.ts (macro_target)
+            const query = "SELECT * FROM macro_target WHERE user_id = ?";
+            const macroTargetResult = db.prepare(query).get(user.userId) as
               | MacroTargetFromDB
-              | undefined;
+              | undefined
+              | null;
 
-            // Use strict check for undefined
-            if (macroTargetsResult === undefined) {
+            // Use strict check for undefined or null
+            if (macroTargetResult === undefined || macroTargetResult === null) {
               return null; // Return null if not found
             }
-            // Type assertion is safe after check
-            const macroTargets = macroTargetsResult;
 
-            // Safely parse the JSON stored in macro_distribution column
-            let macroDistributionParsed = null; // Default to null
+            // Type assertion is safe after check
+            const macroTarget = macroTargetResult;
+
+            // Safely parse the JSON stored in macro_target column
+            let macroTargetParsed: {
+              proteinPercentage: number;
+              carbsPercentage: number;
+              fatsPercentage: number;
+            } | null = null; // Default to null
+
             try {
               // Use default empty object string if DB value is null/empty
-              const jsonString = macroTargets.macro_distribution || "{}";
-              macroDistributionParsed = JSON.parse(jsonString);
-              // Optional: Add validation here to ensure parsed object matches MacroDistributionSchema structure
+              const jsonString = macroTarget.macro_target || "{}";
+              const parsedJson = JSON.parse(jsonString);
+
+              // Ensure the parsed object has all required properties with default values if missing
+              macroTargetParsed = {
+                proteinPercentage:
+                  typeof parsedJson.proteinPercentage === "number"
+                    ? parsedJson.proteinPercentage
+                    : 30,
+                carbsPercentage:
+                  typeof parsedJson.carbsPercentage === "number"
+                    ? parsedJson.carbsPercentage
+                    : 40,
+                fatsPercentage:
+                  typeof parsedJson.fatsPercentage === "number"
+                    ? parsedJson.fatsPercentage
+                    : 30,
+              };
             } catch (parseError) {
-              console.error(
-                "Error parsing macro_distribution JSON:",
-                parseError
-              );
-              // Keep macroDistributionParsed as null if parsing fails
-              // Consider logging or throwing a 500 if parsing is critical
-              // set.status = 500; throw new Error("Failed to parse macro distribution data.");
+              console.error("Error parsing macro_target JSON:", parseError);
+              // Provide default values if parsing fails
+              macroTargetParsed = {
+                proteinPercentage: 30,
+                carbsPercentage: 40,
+                fatsPercentage: 30,
+              };
             }
 
-            // Return the formatted response (camelCase)
+            // Return the formatted response (camelCase) with default targetCalories if null
             return {
-              targetCalories: macroTargets.target_calories,
-              macroDistribution: macroDistributionParsed,
+              targetCalories: macroTarget.target_calories || 0,
+              macroTarget: macroTargetParsed,
             };
           } catch (error) {
-            console.error("Error fetching macro targets:", error);
+            console.error("Error fetching macro target:", error);
             set.status = 500;
-            throw new Error("Failed to fetch macro targets"); // Use throw
+            throw new Error("Failed to fetch macro target"); // Use throw
           }
         },
         {
+          // NOTE: This schema needs updating in schemas.ts
           response: GoalSchemas.getMacroTargetResponse, // Apply response schema
           detail: {
-            summary: "Get the user's macro targets",
+            summary: "Get the user's macro target",
             tags: ["Goals"],
           },
         }
       )
 
-      // --- Save/Update Macro Targets (UPSERT) ---
+      // --- Save/Update Macro Target (UPSERT) ---
       .put(
         "/macros",
         // Define handler type with context and typed body (camelCase)
+        // NOTE: Schema needs updating in schemas.ts
         ({
           user,
           body,
@@ -267,74 +294,80 @@ export const goalRoutes = (app: Elysia) =>
         }) => {
           try {
             // Destructure camelCase from validated body (now typed correctly)
-            const { targetCalories, macroDistribution } = body;
+            // *** RENAMED variable ***
+            const { targetCalories, macroTarget } = body;
 
-            // Convert macro_distribution object to a JSON string for storage, handle null/undefined
-            // Ensure the object structure matches MacroDistributionSchema before stringifying
-            const macroDistributionJson = macroDistribution
-              ? JSON.stringify(macroDistribution)
+            // Convert macro_target object to a JSON string for storage, handle null/undefined
+            // Ensure the object structure matches MacroTargetSchema before stringifying
+            // *** RENAMED variable ***
+            const macroTargetJson = macroTarget
+              ? JSON.stringify(macroTarget)
               : "{}";
 
             // UPSERT logic
+            // NOTE: Column name needs updating in schema.ts
             const upsertQuery = `
-                INSERT INTO macro_targets (user_id, target_calories, macro_distribution, updated_at)
+                INSERT INTO macro_target (user_id, target_calories, macro_target, updated_at)
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP)
                 ON CONFLICT(user_id) DO UPDATE SET
                     target_calories = excluded.target_calories,
-                    macro_distribution = excluded.macro_distribution,
+                    macro_target = excluded.macro_target,
                     updated_at = CURRENT_TIMESTAMP
                 RETURNING *;
             `;
 
             // Execute UPSERT
+            // *** RENAMED variable ***
             const savedTargetResult = db
               .prepare(upsertQuery)
-              .get(user.userId, targetCalories, macroDistributionJson) as
+              .get(user.userId, targetCalories, macroTargetJson) as
               | MacroTargetFromDB
               | undefined;
 
             if (savedTargetResult === undefined) {
               set.status = 500;
               throw new Error(
-                "Failed to save macro targets or retrieve result."
+                "Failed to save macro target or retrieve result."
               );
             }
             // Type assertion is safe after check
             const savedTarget = savedTargetResult;
 
-            // Parse distribution back for response consistency
-            let macroDistributionParsed = null;
+            // Parse target back for response consistency
+            let macroTargetParsed = null;
             try {
-              macroDistributionParsed = JSON.parse(
-                savedTarget.macro_distribution || "{}"
-              );
+              // *** RENAMED property ***
+              macroTargetParsed = JSON.parse(savedTarget.macro_target || "{}");
             } catch (parseError) {
+              // *** RENAMED log message ***
               console.error(
-                "Error parsing saved macro_distribution JSON:",
+                "Error parsing saved macro_target JSON:",
                 parseError
               );
-              macroDistributionParsed = null; // Or handle differently
+              macroTargetParsed = null; // Or handle differently
             }
 
             set.status = 200; // OK
             // Return camelCase response
+            // *** RENAMED property ***
             return {
               targetCalories: savedTarget.target_calories,
-              macroDistribution: macroDistributionParsed,
+              macroTarget: macroTargetParsed,
             };
           } catch (error) {
-            console.error("Error saving macro targets:", error);
+            console.error("Error saving macro target:", error);
             if (!set.status || set.status === 200) {
               set.status = 500;
             }
-            throw new Error("Failed to save macro targets"); // Use throw
+            throw new Error("Failed to save macro target"); // Use throw
           }
         },
         {
+          // NOTE: Schemas need updating in schemas.ts
           body: GoalSchemas.updateMacroTargetBody, // Apply body schema (camelCase)
           response: GoalSchemas.updateMacroTargetResponse, // Apply response schema (camelCase)
           detail: {
-            summary: "Save or update the user's macro targets",
+            summary: "Save or update the user's macro target",
             tags: ["Goals"],
           },
         }
@@ -350,7 +383,8 @@ export const goalRoutes = (app: Elysia) =>
               db.prepare("DELETE FROM weight_goals WHERE user_id = ?").run(
                 user.userId
               );
-              db.prepare("DELETE FROM macro_targets WHERE user_id = ?").run(
+              // NOTE: Table name needs to match schema.ts (macro_target)
+              db.prepare("DELETE FROM macro_target WHERE user_id = ?").run(
                 user.userId
               );
             })(); // Immediately invoke transaction
