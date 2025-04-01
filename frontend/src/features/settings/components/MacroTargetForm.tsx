@@ -35,9 +35,9 @@ function MacroTargetForm() {
             based on your calorie needs.
           </p>
 
-          {macroTarget?.macro_target && (
+          {macroTarget?.macroTarget && (
             <MacroTarget
-              initialValues={macroTarget.macro_target}
+              initialValues={macroTarget.macroTarget}
               onTargetChange={handleMacroTargetChange}
             />
           )}

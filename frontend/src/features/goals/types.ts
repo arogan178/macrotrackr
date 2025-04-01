@@ -4,7 +4,7 @@ import { MacroTargetSettings } from "@/features/macroTracking/types";
 export interface WeightGoals {
   currentWeight: number;
   targetWeight: number;
-  weightGoal: WeightGoalType;
+  weightGoal: WeightGoal;
   startDate?: string;
   targetDate?: string;
   adjustedCalorieIntake?: number;
@@ -14,8 +14,8 @@ export interface WeightGoals {
 }
 
 export interface MacroTarget {
-  target_calories?: number;
-  macro_target?: MacroTargetSettings;
+  targetCalories?: number;
+  macroTarget?: MacroTargetSettings;
 }
 
 export interface GoalsState {

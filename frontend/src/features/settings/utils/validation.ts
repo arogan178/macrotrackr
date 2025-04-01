@@ -14,14 +14,14 @@ export function validateUserSettings(settings: any): Record<string, string> {
   }
 
   // Name validation
-  if (settings?.first_name && settings.first_name.length < 2) {
-    errors.first_name = "First name must be at least 2 characters";
+  if (settings?.firstName && settings.firstName.length < 2) {
+    errors.firstName = "First name must be at least 2 characters";
   }
 
   // Date of birth validation
-  if (settings?.date_of_birth) {
-    if (!isOldEnough(settings.date_of_birth)) {
-      errors.date_of_birth = `You must be at least ${USER_MINIMUM_AGE} years old`;
+  if (settings?.dateOfBirth) {
+    if (!isOldEnough(settings.dateOfBirth)) {
+      errors.dateOfBirth = `You must be at least ${USER_MINIMUM_AGE} years old`;
     }
   }
 

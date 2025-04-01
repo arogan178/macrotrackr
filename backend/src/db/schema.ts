@@ -53,24 +53,7 @@ export function initializeSchema(db: Database) {
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
-        -- Macro Target Settings Table --
-        CREATE TABLE IF NOT EXISTS macro_target (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER UNIQUE NOT NULL,
-            protein_percentage INTEGER NOT NULL DEFAULT 30,
-            carbs_percentage INTEGER NOT NULL DEFAULT 40,
-            fats_percentage INTEGER NOT NULL DEFAULT 30,
-            locked_macros TEXT DEFAULT '[]', -- Store as JSON array string '["protein", "fats"]'
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            CHECK (protein_percentage + carbs_percentage + fats_percentage = 100),
-            CHECK (protein_percentage >= 5 AND protein_percentage <= 70),
-            CHECK (carbs_percentage >= 5 AND carbs_percentage <= 70),
-            CHECK (fats_percentage >= 5 AND fats_percentage <= 70)
-        );
-
-        -- *** NEW: Weight Goals Table *** --
+        -- Weight Goals Table --
         CREATE TABLE IF NOT EXISTS weight_goals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
@@ -82,32 +65,33 @@ export function initializeSchema(db: Database) {
             adjusted_calorie_intake REAL, -- Recommended calories for goal
             calculated_weeks INTEGER, -- Estimated duration
             weekly_change REAL, -- Estimated kg/week change
-            daily_deficit REAL, -- Estimated calorie deficit/surplus per day
+            daily_change REAL, --  Estimated calorie deficit/surplus per day
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
 
-        -- *** NEW: Macro Target Table *** --
-        -- Combines target calories and target settings
-        CREATE TABLE IF NOT EXISTS macro_target (
+        -- Macro Targets Table --
+        CREATE TABLE IF NOT EXISTS macro_targets (
              id INTEGER PRIMARY KEY AUTOINCREMENT,
              user_id INTEGER UNIQUE NOT NULL,
              target_calories REAL, -- Target calories (can be different from weight goal adjusted intake)
-             -- Store target as JSON text, similar to user settings
-             macro_target TEXT DEFAULT '{}', -- e.g., '{"proteinPercentage":30,"carbsPercentage":40,"fatsPercentage":30}'
+             protein_percentage INTEGER DEFAULT 30,
+             carbs_percentage INTEGER DEFAULT 40,
+             fats_percentage INTEGER DEFAULT 30,
+             locked_macros TEXT DEFAULT '[]', -- Store as JSON array string '["protein", "fats"]'
+             macro_target TEXT DEFAULT '{}', -- Legacy JSON field for backward compatibility
              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+             CHECK (protein_percentage + carbs_percentage + fats_percentage = 100),
+             CHECK (protein_percentage >= 5 AND protein_percentage <= 70),
+             CHECK (carbs_percentage >= 5 AND carbs_percentage <= 70),
+             CHECK (fats_percentage >= 5 AND fats_percentage <= 70)
         );
-
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
-  // This only adds columns, it doesn't create the new tables if they are missing
-  // after the initial run. Best to delete the DB file during development if
-  // adding new tables via CREATE TABLE IF NOT EXISTS after the DB exists.
-
   const checkAndAddColumn = (
     tableName: string,
     columnName: string,
@@ -167,12 +151,11 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
-  // Add indexes for new tables if needed, e.g., on user_id
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
   );
   db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_target_user ON macro_target(user_id)"
+    "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
   );
 
   console.log("✅ Database schema initialized successfully.");

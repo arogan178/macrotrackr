@@ -22,8 +22,8 @@ export interface RegistrationStep3 {
 export interface AuthUser {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  firstName: string;
+  lastName: string;
 }
 
 // Combined registration data type
