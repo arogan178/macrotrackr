@@ -30,9 +30,9 @@ export default function ProfileForm({
 
   // Convert string activity level to number if needed
   const activityLevelValue =
-    typeof settings.activity_level === "string" && settings.activity_level
-      ? getActivityLevelFromString(settings.activity_level as ActivityLevel)
-      : settings.activity_level;
+    typeof settings.activityLevel === "string" && settings.activityLevel
+      ? getActivityLevelFromString(settings.activityLevel as ActivityLevel)
+      : settings.activityLevel;
 
   // Ensure weight is a valid positive number
   const handleWeightChange = (value: number | undefined) => {
@@ -52,17 +52,17 @@ export default function ProfileForm({
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       <TextField
         label="First Name"
-        value={settings.first_name || ""}
-        onChange={(value) => updateSetting("first_name", value)}
-        error={formErrors.first_name}
+        value={settings.firstName || ""}
+        onChange={(value) => updateSetting("firstName", value)}
+        error={formErrors.firstName}
         required
       />
 
       <TextField
         label="Last Name"
-        value={settings.last_name || ""}
-        onChange={(value) => updateSetting("last_name", value)}
-        error={formErrors.last_name}
+        value={settings.lastName || ""}
+        onChange={(value) => updateSetting("lastName", value)}
+        error={formErrors.lastName}
         required
       />
 
@@ -77,9 +77,9 @@ export default function ProfileForm({
 
       <DateField
         label="Date of Birth"
-        value={settings.date_of_birth || ""}
-        onChange={(value) => updateSetting("date_of_birth", value)}
-        error={formErrors.date_of_birth}
+        value={settings.dateOfBirth || ""}
+        onChange={(value) => updateSetting("dateOfBirth", value)}
+        error={formErrors.dateOfBirth}
         required
       />
 
@@ -119,9 +119,9 @@ export default function ProfileForm({
       <Dropdown
         label="Activity Level"
         value={activityLevelValue || ""} // Use the converted numeric value
-        onChange={(value) => updateSetting("activity_level", Number(value))} // Ensure we store as number
+        onChange={(value) => updateSetting("activityLevel", Number(value))} // Ensure we store as number
         options={getActivityLevelOptions()}
-        error={formErrors.activity_level}
+        error={formErrors.activityLevel}
         required
       />
     </div>

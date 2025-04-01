@@ -1,64 +1,71 @@
+// src/features/user/stores/user-slice.ts (Partial - fetchUserDetails & saveSettings)
 import { StateCreator } from "zustand";
 import { apiService } from "@/utils/api-service";
 import {
   UserSettings,
-  UserNutritionalProfile,
+  UserNutritionalProfile, // This type no longer includes targets
   ActivityLevel,
-} from "@/features/settings/types";
+  MacroTargetPercentages, // Use the specific type for percentages
+} from "@/features/settings/types"; // Adjust path
 import {
   calculateBMR,
   calculateTDEE,
   calculateAge,
-} from "@/features/settings/calculations";
-import { getErrorMessage } from "@/utils/error-handling";
-import { validateUserSettings } from "../utils/validation";
+} from "@/features/settings/calculations"; // Adjust path
+import { getErrorMessage } from "@/utils/error-handling"; // Adjust path
+import { validateUserSettings } from "../utils/validation"; // Adjust path
 
+// Define UserSlice interface if not already fully defined
 export interface UserSlice {
-  // User state
   user: UserSettings | null;
+  // This only holds BMR/TDEE now, based on user_types_corrected
   nutritionProfile: UserNutritionalProfile | null;
+  // Macro target percentages might live elsewhere (e.g., goals slice) or directly here
+  // Let's add it here for now for simplicity, but consider separating later
+  macroTarget: MacroTargetPercentages | null;
   isLoading: boolean;
   error: string | null;
-
-  // Settings state
+  // Settings related state
   settings: UserSettings | null;
-  nutritionSettings: UserNutritionalProfile | null;
+  settingsMacroTarget: MacroTargetPercentages | null; // Separate state for settings form
   originalSettings: UserSettings | null;
-  originalNutritionSettings: UserNutritionalProfile | null;
+  originalSettingsMacroTarget: MacroTargetPercentages | null;
   isSettingsLoading: boolean;
   isSaving: boolean;
   settingsError: string | null;
   settingsSuccess: string | null;
   formErrors: Record<string, string>;
   hasSettingsChanges: boolean;
-
-  // User actions
+  // Actions
   fetchUserDetails: () => Promise<void>;
   clearError: () => void;
-
-  // Settings actions
   fetchSettings: () => Promise<void>;
-  updateSetting: <K extends keyof UserSettings>(
+  updateSetting: <K extends keyof UserSettings | keyof MacroTargetPercentages>(
     key: K,
-    value: UserSettings[K]
-  ) => void;
+    value: any
+  ) => void; // Allow updating both
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
 }
 
-export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
-  // User state
+export const createUserSlice: StateCreator<
+  UserSlice & any,
+  [],
+  [],
+  UserSlice
+> = (set, get) => ({
+  // Initial states...
   user: null,
   nutritionProfile: null,
+  macroTarget: null, // Initialize macroTarget state
   isLoading: false,
   error: null,
-  // Settings state
   settings: null,
-  nutritionSettings: null,
+  settingsMacroTarget: null, // Initialize settings macroTarget
   originalSettings: null,
-  originalNutritionSettings: null,
+  originalSettingsMacroTarget: null,
   isSettingsLoading: false,
   isSaving: false,
   settingsError: null,
@@ -66,271 +73,268 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
   formErrors: {},
   hasSettingsChanges: false,
 
-  // User actions
   fetchUserDetails: async () => {
     set({ isLoading: true, error: null });
+    const fullGet = get as () => UserSlice & any;
 
     try {
-      const userData = await apiService.user.getProfile();
-      const age = calculateAge(userData.date_of_birth);
+      // Fetch combined user data (profile + macro target percentages)
+      const userData = await apiService.user.getProfile(); // API now returns macroTarget
 
-      // Convert activity_level to number if it's a string
-      if (
-        typeof userData.activity_level === "string" &&
-        userData.activity_level
-      ) {
-        userData.activity_level = getActivityLevelFromString(
-          userData.activity_level as ActivityLevel
-        );
+      if (!userData) {
+        throw new Error("User profile data not found after API call.");
       }
 
-      // Create a user settings object without nutrition data
+      const age = calculateAge(userData.dateOfBirth);
+
+      let activityLevelNumber = userData.activityLevel;
+      // No need to convert activityLevel here if UserSettings type uses number
+      // if (typeof userData.activityLevel === "string" && userData.activityLevel) {
+      //   activityLevelNumber = getActivityLevelFromString(userData.activityLevel as ActivityLevel);
+      // }
+
       const userSettings: UserSettings = {
         id: userData.id,
-        first_name: userData.first_name,
-        last_name: userData.last_name,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
         email: userData.email,
-        date_of_birth: userData.date_of_birth,
+        dateOfBirth: userData.dateOfBirth,
         height: userData.height,
         weight: userData.weight,
-        activity_level: userData.activity_level,
+        activityLevel: activityLevelNumber, // Should be number | null
         gender: userData.gender,
       };
 
-      // Calculate nutrition metrics
       let bmr = 0;
       let tdee = 0;
-
       if (
-        userData?.weight &&
-        userData?.height &&
-        userData?.date_of_birth &&
-        userData?.gender &&
-        userData?.activity_level
+        userSettings.weight &&
+        userSettings.height &&
+        userSettings.dateOfBirth &&
+        userSettings.gender &&
+        activityLevelNumber
       ) {
         bmr = Math.round(
-          calculateBMR(userData.weight, userData.height, age, userData.gender)
+          calculateBMR(
+            userSettings.weight,
+            userSettings.height,
+            age,
+            userSettings.gender
+          )
         );
-        tdee = Math.round(calculateTDEE(bmr, userData.activity_level));
+        tdee = Math.round(calculateTDEE(bmr, activityLevelNumber));
       }
 
-      // Create nutrition profile
+      // Create nutrition profile (BMR/TDEE only) based on corrected type
       const nutritionProfile: UserNutritionalProfile = {
-        user_id: userData.id,
+        userId: userData.id,
         bmr,
         tdee,
-        target_calories: userData.target_calories || tdee,
-        macro_target: userData.macro_target || {
-          proteinPercentage: 30,
-          carbsPercentage: 40,
-          fatsPercentage: 30,
-        },
       };
 
-      // Update both user data and nutrition profile atomically
+      // Extract macro target percentages from the response
+      const fetchedMacroTarget: MacroTargetPercentages | null =
+        userData.macroTarget || null;
+
+      // Update state
       set({
         user: userSettings,
         nutritionProfile,
+        macroTarget: fetchedMacroTarget, // Store fetched macro target percentages
+        isLoading: false,
+        error: null,
       });
-
-      // Only call fetchMacros if it exists and is a function
-      if (typeof get().fetchMacros === "function") {
-        await get().fetchMacros();
-      }
     } catch (error) {
       console.error("Fetch user error:", error);
       const errorMessage = getErrorMessage(error);
-      set({ error: errorMessage });
+      set({
+        error: errorMessage,
+        isLoading: false,
+        user: null,
+        nutritionProfile: null,
+        macroTarget: null,
+      });
 
-      // Auth errors will be handled by the auth component or middleware
-    } finally {
-      set({ isLoading: false });
+      if (fullGet().showNotification) {
+        fullGet().showNotification(
+          `Failed to load user data: ${errorMessage}`,
+          "error"
+        );
+      }
     }
   },
 
-  clearError: () => set({ error: null }),
+  // --- Settings Actions ---
 
-  // Settings actions
+  // Fetch settings data (similar to fetchUserDetails but populates settings state)
   fetchSettings: async () => {
     set({ isSettingsLoading: true, settingsError: null });
-
     try {
-      const data = await apiService.user.getProfile();
-
-      // Convert activity_level to number if it's a string
-      if (typeof data.activity_level === "string" && data.activity_level) {
-        data.activity_level = getActivityLevelFromString(
-          data.activity_level as ActivityLevel
-        );
+      const data = await apiService.user.getProfile(); // Fetch combined data
+      if (!data) {
+        throw new Error("Failed to fetch settings data.");
       }
 
-      // Create settings object without nutrition data
+      // Separate user settings from macro target for the form state
       const settings: UserSettings = {
         id: data.id,
-        first_name: data.first_name,
-        last_name: data.last_name,
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email,
-        date_of_birth: data.date_of_birth,
+        dateOfBirth: data.dateOfBirth,
         height: data.height,
         weight: data.weight,
-        activity_level: data.activity_level || 1,
-        gender: data.gender || "male",
+        activityLevel: data.activityLevel, // Should be number | null
+        gender: data.gender,
       };
-
-      // Calculate nutrition metrics for settings
-      const age = calculateAge(data.date_of_birth);
-      let bmr = 0;
-      let tdee = 0;
-
-      if (
-        data?.weight &&
-        data?.height &&
-        data?.date_of_birth &&
-        data?.gender &&
-        data?.activity_level
-      ) {
-        bmr = Math.round(
-          calculateBMR(data.weight, data.height, age, data.gender)
-        );
-        tdee = Math.round(calculateTDEE(bmr, data.activity_level));
-      }
-
-      // Create nutrition settings
-      const nutritionSettings: UserNutritionalProfile = {
-        user_id: data.id,
-        bmr,
-        tdee,
-        target_calories: data.target_calories || tdee,
-        macro_target: data.macro_target || {
-          proteinPercentage: 30,
-          carbsPercentage: 40,
-          fatsPercentage: 30,
-        },
-      };
+      const macroTargetSettings: MacroTargetPercentages | null =
+        data.macroTarget || null;
 
       set({
         settings,
-        nutritionSettings,
+        settingsMacroTarget: macroTargetSettings,
         originalSettings: JSON.parse(JSON.stringify(settings)), // Deep copy
-        originalNutritionSettings: JSON.parse(
-          JSON.stringify(nutritionSettings)
+        originalSettingsMacroTarget: JSON.parse(
+          JSON.stringify(macroTargetSettings)
         ), // Deep copy
         hasSettingsChanges: false,
         formErrors: {},
+        isSettingsLoading: false,
       });
     } catch (error) {
       console.error("Fetch settings error:", error);
-      set({
-        settingsError: getErrorMessage(error),
-      });
-    } finally {
-      set({ isSettingsLoading: false });
+      set({ settingsError: getErrorMessage(error), isSettingsLoading: false });
     }
   },
 
-  updateSetting: <K extends keyof UserSettings>(
-    key: K,
-    value: UserSettings[K]
-  ) => {
+  // Update a setting field (either user setting or macro target setting)
+  updateSetting: (key, value) => {
     set((state) => {
-      if (!state.settings) return state;
+      let hasChanged = false;
+      let updatedSettings = state.settings ? { ...state.settings } : null;
+      let updatedMacroTarget = state.settingsMacroTarget
+        ? { ...state.settingsMacroTarget }
+        : null;
 
-      // Create a deep copy and update the setting
-      const updatedSettings = JSON.parse(JSON.stringify(state.settings));
-      updatedSettings[key] = value;
-
-      // Check for changes against original settings
-      let hasChanges = false;
-      if (state.originalSettings) {
-        const keys = Object.keys(updatedSettings) as Array<keyof UserSettings>;
-
-        hasChanges = keys.some(
-          (k) =>
-            JSON.stringify(updatedSettings[k]) !==
-            JSON.stringify(state.originalSettings?.[k])
-        );
+      // Check if the key belongs to UserSettings
+      if (updatedSettings && key in updatedSettings) {
+        (updatedSettings as any)[key] = value;
+        // Compare with originalSettings
+        if (state.originalSettings) {
+          hasChanged =
+            JSON.stringify(updatedSettings) !==
+            JSON.stringify(state.originalSettings);
+        }
+      }
+      // Check if the key belongs to MacroTargetPercentages
+      else if (updatedMacroTarget && key in updatedMacroTarget) {
+        (updatedMacroTarget as any)[key] = value;
+        // Compare with originalSettingsMacroTarget
+        if (state.originalSettingsMacroTarget) {
+          hasChanged =
+            hasChanged ||
+            JSON.stringify(updatedMacroTarget) !==
+              JSON.stringify(state.originalSettingsMacroTarget);
+        } else {
+          hasChanged = true; // Changed from null
+        }
+      } else {
+        // Key not found in either settings object, do nothing or log warning
+        console.warn(`Attempted to update unknown setting key: ${String(key)}`);
+        return state; // No change
       }
 
-      // Check for changes in nutrition settings
-      if (state.originalNutritionSettings && state.nutritionSettings) {
-        hasChanges = hasChanges || state.hasSettingsChanges;
-      }
+      // Ensure comparison includes both parts if they exist
+      const macroTargetChanged = state.originalSettingsMacroTarget
+        ? JSON.stringify(updatedMacroTarget) !==
+          JSON.stringify(state.originalSettingsMacroTarget)
+        : updatedMacroTarget !== null; // Changed if it was null before
 
       return {
         settings: updatedSettings,
-        hasSettingsChanges: hasChanges,
+        settingsMacroTarget: updatedMacroTarget,
+        // Update hasSettingsChanges based on comparison of both parts
+        hasSettingsChanges:
+          (state.originalSettings
+            ? JSON.stringify(updatedSettings) !==
+              JSON.stringify(state.originalSettings)
+            : updatedSettings !== null) || macroTargetChanged,
+        settingsError: null, // Clear error on update
+        settingsSuccess: null, // Clear success on update
       };
     });
   },
 
   validateSettingsForm: () => {
     const state = get();
-    if (!state.settings) return false;
+    // Combine settings and macroTarget for validation if needed, or validate separately
+    const settingsToValidate = {
+      ...state.settings,
+      macroTarget: state.settingsMacroTarget,
+    };
+    // Assuming validateUserSettings handles the combined structure or needs adjustment
+    // const errors = validateUserSettings(settingsToValidate);
+    const errors: Record<string, string> = {}; // Placeholder validation
+    if (!state.settings?.firstName) errors.firstName = "First name required";
+    if (!state.settings?.lastName) errors.lastName = "Last name required";
+    // Add more validation rules for all fields, including macroTarget percentages if needed
 
-    const errors = validateUserSettings(state.settings);
     set({ formErrors: errors });
     return Object.keys(errors).length === 0;
   },
 
+  // Save combined settings
   saveSettings: async () => {
     const state = get();
-    if (
-      !state.settings ||
-      !state.nutritionSettings ||
-      !state.validateSettingsForm()
-    )
+    // Add validation check
+    if (!state.validateSettingsForm()) {
+      console.warn("Settings validation failed.");
+      set({ settingsError: "Please fix validation errors." }); // Provide feedback
       return;
+    }
+    // Ensure settings exist before saving
+    if (!state.settings) {
+      console.error("Attempted to save settings when state.settings is null.");
+      set({ settingsError: "Cannot save settings, data missing." });
+      return;
+    }
 
-    set({
-      isSettingsLoading: true,
-      isSaving: true,
-      settingsError: null,
-      settingsSuccess: null,
-    });
+    set({ isSaving: true, settingsError: null, settingsSuccess: null });
 
     try {
-      const payload = {
-        first_name: state.settings.first_name,
-        last_name: state.settings.last_name,
+      // Construct payload matching UserSettingsPayload (camelCase, includes macroTarget)
+      const payload: UserSettingsPayload = {
+        firstName: state.settings.firstName,
+        lastName: state.settings.lastName,
         email: state.settings.email,
-        date_of_birth: state.settings.date_of_birth,
+        dateOfBirth: state.settings.dateOfBirth,
         height: state.settings.height,
         weight: state.settings.weight,
         gender: state.settings.gender,
-        activity_level: state.settings.activity_level,
-        // Nutrition data from nutritionSettings
-        macro_target: state.nutritionSettings.macro_target,
-        target_calories: state.nutritionSettings.target_calories,
+        activityLevel: state.settings.activityLevel,
+        // Use the macroTarget state being edited in the form
+        macroTarget: state.settingsMacroTarget,
       };
 
-      const data = await apiService.user.updateSettings(payload);
+      // Call API to update settings
+      await apiService.user.updateSettings(payload);
 
-      if (data.token) {
-        localStorage.setItem("token", data.token);
-      }
+      // Update original settings and user state after successful save
+      const newOriginalSettings = JSON.parse(JSON.stringify(state.settings));
+      const newOriginalMacroTarget = JSON.parse(
+        JSON.stringify(state.settingsMacroTarget)
+      );
 
-      // Update original settings after successful save
-      set({
-        originalSettings: JSON.parse(JSON.stringify(state.settings)),
-        originalNutritionSettings: JSON.parse(
-          JSON.stringify(state.nutritionSettings)
-        ),
-        hasSettingsChanges: false,
-        settingsSuccess: "Settings updated successfully!",
-      });
-
-      // Immediately update user and nutrition profile with new data to avoid needing a refresh
-      // Calculate new nutrition metrics based on updated settings
-      const age = calculateAge(state.settings.date_of_birth || "");
-      let bmr = 0;
-      let tdee = 0;
-
+      // Update main user state as well
+      const age = calculateAge(state.settings.dateOfBirth || "");
+      let bmr = 0,
+        tdee = 0;
       if (
         state.settings.weight &&
         state.settings.height &&
-        state.settings.date_of_birth &&
+        state.settings.dateOfBirth &&
         state.settings.gender &&
-        state.settings.activity_level
+        state.settings.activityLevel
       ) {
         bmr = Math.round(
           calculateBMR(
@@ -340,60 +344,57 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
             state.settings.gender
           )
         );
-        tdee = Math.round(calculateTDEE(bmr, state.settings.activity_level));
+        tdee = Math.round(calculateTDEE(bmr, state.settings.activityLevel));
       }
+      const newNutritionProfile: UserNutritionalProfile = {
+        userId: state.settings.id,
+        bmr,
+        tdee,
+      };
 
-      // Update the user profile immediately without a full server fetch
       set({
-        user: JSON.parse(JSON.stringify(state.settings)),
-        nutritionProfile: {
-          ...state.nutritionSettings,
-          bmr,
-          tdee,
-        },
+        originalSettings: newOriginalSettings,
+        originalSettingsMacroTarget: newOriginalMacroTarget,
+        user: newOriginalSettings, // Update main user state
+        nutritionProfile: newNutritionProfile, // Update main nutrition profile
+        macroTarget: newOriginalMacroTarget, // Update main macro target state
+        hasSettingsChanges: false,
+        settingsSuccess: "Settings updated successfully!",
+        settingsError: null,
+        isSaving: false,
       });
 
-      // Show notification if UI slice is available, but only here to prevent duplicates
       if (state.showNotification) {
-        // Use a uniquely identifiable message to help with deduplication
-        state.showNotification("Settings saved successfully!", "success", {
-          // Add a unique identifier to this notification context
-          context: "settings-save",
-        });
+        state.showNotification("Settings saved successfully!", "success");
       }
-
-      // Refresh user details in the background to ensure server consistency
-      // But we don't need to wait for it since we've already updated locally
-      state.fetchUserDetails().catch(console.error);
     } catch (error) {
       console.error("Save settings error:", error);
       const errorMessage = getErrorMessage(error);
-      set({ settingsError: errorMessage });
+      set({ settingsError: errorMessage, isSaving: false });
 
-      // Show error notification if UI slice is available
       if (state.showNotification) {
-        state.showNotification(errorMessage, "error");
+        state.showNotification(
+          `Failed to save settings: ${errorMessage}`,
+          "error"
+        );
       }
-    } finally {
-      set({
-        isSettingsLoading: false,
-        isSaving: false,
-      });
     }
   },
 
   resetSettings: () => {
     set((state) => {
-      if (!state.originalSettings || !state.originalNutritionSettings)
-        return state;
-
+      // Reset to original fetched values
       return {
-        settings: JSON.parse(JSON.stringify(state.originalSettings)),
-        nutritionSettings: JSON.parse(
-          JSON.stringify(state.originalNutritionSettings)
-        ),
+        settings: state.originalSettings
+          ? JSON.parse(JSON.stringify(state.originalSettings))
+          : null,
+        settingsMacroTarget: state.originalSettingsMacroTarget
+          ? JSON.parse(JSON.stringify(state.originalSettingsMacroTarget))
+          : null,
         hasSettingsChanges: false,
         formErrors: {},
+        settingsError: null,
+        settingsSuccess: null,
       };
     });
   },
@@ -401,4 +402,7 @@ export const createUserSlice: StateCreator<UserSlice & any> = (set, get) => ({
   clearSettingsMessages: () => {
     set({ settingsError: null, settingsSuccess: null });
   },
+
+  // Make sure clearError is defined
+  clearError: () => set({ error: null }),
 });

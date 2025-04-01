@@ -125,8 +125,19 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
 
       // Calculate daily change based on weekly change
       if (weeklyChange) {
-        dailyChange =
-          ((weightGoal === "lose" ? -1 : 1) * (weeklyChange * 7700)) / 7; // 7700 calories ≈ 1kg
+        // For weight loss goals, dailyChange should be the absolute calorie value needed
+        // This represents the actual calorie change needed regardless of deficit/surplus
+        const calorieChangePerDay = (weeklyChange * 7700) / 7; // 7700 calories ≈ 1kg
+
+        // Use the absolute value to ensure it's a positive number for the backend
+        // The backend interprets the diet context based on weightGoal type
+        dailyChange = Math.abs(calorieChangePerDay);
+      } else if (currentWeight === targetWeight) {
+        // For maintenance goals, set daily change to the absolute difference between TDEE and adjusted intake
+        dailyChange = Math.abs(tdee - adjustedCalorieIntake);
+      } else {
+        // Fallback: if no weekly change but weights differ, use a default value
+        dailyChange = 0;
       }
 
       // Create the weight goals object with all available data
@@ -138,7 +149,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
         targetDate,
         adjustedCalorieIntake,
         calculatedWeeks,
-        weeklyChange,
+        weeklyChange: weeklyChange || 0, // Ensure weeklyChange is at least 0
         dailyChange,
       };
 
@@ -155,16 +166,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       // Try to save macro target as well
       try {
         await apiService.goals.saveMacroTarget({
-          target_calories: adjustedCalorieIntake,
-          macro_target: defaultMacroTarget,
+          targetCalories: adjustedCalorieIntake,
+          macroTarget: defaultMacroTarget,
         });
 
         // Update state with the new macro target
-        set((state) => ({
+        set((state: GoalsSlice) => ({
           ...state,
           macroTarget: {
-            macro_target: defaultMacroTarget,
-            target_calories: adjustedCalorieIntake,
+            targetCalories: adjustedCalorieIntake,
+            macroTarget: defaultMacroTarget,
           },
         }));
       } catch (macroError) {
@@ -343,10 +354,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       // Get current macro target or create new ones
       const currentMacroTarget = get().macroTarget;
       const updatedMacroTarget = currentMacroTarget
-        ? { ...currentMacroTarget, target_calories: calories }
+        ? { ...currentMacroTarget, targetCalories: calories }
         : {
-            target_calories: calories,
-            macro_target: {
+            targetCalories: calories,
+            macroTarget: {
               proteinPercentage: 30,
               carbsPercentage: 40,
               fatsPercentage: 30,
@@ -391,12 +402,12 @@ export const createGoalsSlice: StateCreator<GoalsSlice & any> = (set, get) => ({
       const { macroTarget, weightGoals } = get();
       const updatedMacroTarget = !macroTarget
         ? {
-            target_calories: weightGoals?.adjustedCalorieIntake || 2000,
-            macro_target: target,
+            targetCalories: weightGoals?.adjustedCalorieIntake || 2000,
+            macroTarget: target,
           }
         : {
             ...macroTarget,
-            macro_target: target,
+            macroTarget: target,
           };
 
       // Save to backend

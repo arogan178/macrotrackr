@@ -78,7 +78,7 @@ export default function HomePage() {
       <div className="relative min-h-screen ">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          <PageHeader firstName={user?.first_name} isLoading={isLoading} />
+          <PageHeader firstName={user?.firstName} isLoading={isLoading} />
 
           <div className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
@@ -108,7 +108,7 @@ export default function HomePage() {
                   user && (
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget?.macro_target}
+                      macroTarget={macroTarget?.macroTarget}
                       targetCalories={
                         weightGoals?.adjustedCalorieIntake ??
                         nutritionProfile?.tdee

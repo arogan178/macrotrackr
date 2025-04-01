@@ -28,7 +28,7 @@ type MacroTargetFromDB = {
   id: number;
   user_id: number;
   target_calories: number | null;
-  macro_target: string; // *** RENAMED from macro_distribution *** JSON string from DB
+  macro_target: string; // *** RENAMED from macro_target *** JSON string from DB
   created_at: string;
   updated_at: string;
 };
@@ -207,7 +207,7 @@ export const goalRoutes = (app: Elysia) =>
         ({ user, set, db }: AuthenticatedContext) => {
           try {
             // NOTE: Table name needs to match schema.ts (macro_target)
-            const query = "SELECT * FROM macro_target WHERE user_id = ?";
+            const query = "SELECT * FROM macro_targets WHERE user_id = ?";
             const macroTargetResult = db.prepare(query).get(user.userId) as
               | MacroTargetFromDB
               | undefined
@@ -307,7 +307,7 @@ export const goalRoutes = (app: Elysia) =>
             // UPSERT logic
             // NOTE: Column name needs updating in schema.ts
             const upsertQuery = `
-                INSERT INTO macro_target (user_id, target_calories, macro_target, updated_at)
+                INSERT INTO macro_targets (user_id, target_calories, macro_target, updated_at)
                 VALUES (?, ?, ?, CURRENT_TIMESTAMP)
                 ON CONFLICT(user_id) DO UPDATE SET
                     target_calories = excluded.target_calories,
@@ -384,7 +384,7 @@ export const goalRoutes = (app: Elysia) =>
                 user.userId
               );
               // NOTE: Table name needs to match schema.ts (macro_target)
-              db.prepare("DELETE FROM macro_target WHERE user_id = ?").run(
+              db.prepare("DELETE FROM macro_targets WHERE user_id = ?").run(
                 user.userId
               );
             })(); // Immediately invoke transaction
