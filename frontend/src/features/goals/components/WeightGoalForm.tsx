@@ -33,7 +33,7 @@ function WeightGoalForm({
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-    weightGoals?.adjustedCalorieIntake
+    weightGoals?.calorieTarget
   );
   const [calculatedTargetDate, setCalculatedTargetDate] = useState<
     string | undefined
@@ -53,7 +53,7 @@ function WeightGoalForm({
         formValues.currentWeight,
         formValues.targetWeight
       );
-      setCalorieIntake(calculations.adjustedCalorieIntake);
+      setCalorieIntake(calculations.calorieTarget);
       setCalculatedTargetDate(calculations.targetDate);
       setWeeklyWeightChange(calculations.weeklyChange);
       setCalculatedWeeks(calculations.calculatedWeeks);
@@ -73,7 +73,7 @@ function WeightGoalForm({
     const isDifferent =
       formValues.currentWeight !== currentWeight ||
       formValues.targetWeight !== targetWeight ||
-      calorieIntake !== weightGoals?.adjustedCalorieIntake;
+      calorieIntake !== weightGoals?.calorieTarget;
 
     setHasChanges(isDifferent);
   }, [formValues, currentWeight, targetWeight, calorieIntake, weightGoals]);
@@ -105,7 +105,7 @@ function WeightGoalForm({
     // Create a complete goal object with all the calculated values
     const completeGoal = {
       ...formValues,
-      adjustedCalorieIntake: calorieIntake,
+      calorieTarget: calorieIntake,
       startDate: formValues.startDate || todayString,
       targetDate: calculatedTargetDate,
       weeklyChange: weeklyWeightChange,
