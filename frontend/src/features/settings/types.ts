@@ -44,16 +44,3 @@ export interface UserNutritionalProfile {
   tdee: number;
   // targetCalories might also belong in goals state
 }
-
-// --- Deprecated / Consider Removing ---
-// Keeping NutritionProfile for backward compatibility? Review if still needed.
-/*
-export interface NutritionProfile {
-  id?: number;
-  user?: number;
-  bmr: number;
-  tdee: number;
-  calorieGoal: number; // Likely belongs in goals state
-  macros?: MacroTargetGrams; // Uses grams type
-}
-*/

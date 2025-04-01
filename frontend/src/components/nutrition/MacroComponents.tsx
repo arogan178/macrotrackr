@@ -1,5 +1,5 @@
 import React from "react";
-import { calculateMacroPercentages } from "@/utils/nutrition";
+import { calculateCaloriePercentages } from "@/utils/nutrition";
 import { MacroNutrients } from "@/utils/nutrition-types";
 
 // Default color configuration for macros
@@ -31,7 +31,7 @@ interface MacroBarProps {
  */
 export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
   const { proteinPercent, carbsPercent, fatsPercent } =
-    calculateMacroPercentages(macros.protein, macros.carbs, macros.fats);
+    calculateCaloriePercentages(macros.protein, macros.carbs, macros.fats);
 
   return (
     <div
@@ -69,7 +69,7 @@ export function MacroTargetLegend({
   className = "",
 }: MacroLegendProps) {
   const { proteinPercent, carbsPercent, fatsPercent } =
-    calculateMacroPercentages(macros.protein, macros.carbs, macros.fats);
+    calculateCaloriePercentages(macros.protein, macros.carbs, macros.fats);
 
   return (
     <div className={`flex justify-between text-xs ${className}`}>

@@ -1,4 +1,9 @@
-import { Gender, ActivityLevel, MacroTarget, NutritionProfile } from "./types";
+import {
+  Gender,
+  ActivityLevel,
+  MacroTargetGrams,
+  MacroTargetPercentages,
+} from "./types";
 import { ACTIVITY_LEVELS } from "./constants";
 
 // Pure calculation functions - independent of domain-specific types
@@ -62,7 +67,7 @@ function calculateMacrosValue(
   proteinPercentage: number,
   carbsPercentage: number,
   fatsPercentage: number
-): MacroTarget {
+): MacroTargetGrams {
   if (!calorieGoal) return { protein: 0, carbs: 0, fats: 0 };
 
   return {
@@ -181,7 +186,7 @@ export function calculateMacros(
   proteinPercentage: number,
   carbsPercentage: number,
   fatPercentage: number
-): MacroTarget {
+): MacroTargetGrams {
   return calculateMacrosValue(
     calorieGoal,
     proteinPercentage,
