@@ -76,7 +76,6 @@ export const macroRoutes = (app: Elysia) =>
             `[GET /macros/target] Fetching target for user ID: ${user.userId}`
           );
           try {
-            // Select all columns from macro_targets
             const query = "SELECT * FROM macro_targets WHERE user_id = ?";
             const macroTargetResult = db.prepare(query).get(user.userId) as
               | MacroTargetFromDB
@@ -86,18 +85,22 @@ export const macroRoutes = (app: Elysia) =>
               macroTargetResult
             );
 
-            // Use strict check for undefined
-            if (macroTargetResult === undefined) {
+            // If no row exists or is null, apply default values
+            if (!macroTargetResult) {
               console.log(
-                "[GET /macros/target] No macro target row found, returning null."
+                "[GET /macros/target] No macro target row found, using defaults."
               );
-              return null; // Return null if not found
+              return {
+                macroTarget: {
+                  proteinPercentage: 30,
+                  carbsPercentage: 40,
+                  fatsPercentage: 30,
+                  lockedMacros: [],
+                },
+              };
             }
 
-            // Get the dedicated percentage fields directly
             const macroTarget = macroTargetResult;
-
-            // Parse locked_macros array
             let lockedMacros: string[] = [];
             try {
               lockedMacros = JSON.parse(macroTarget.locked_macros || "[]");
@@ -107,8 +110,6 @@ export const macroRoutes = (app: Elysia) =>
                 error
               );
             }
-
-            // Map database fields to API response format using camelCase
             const macroTargetData = {
               proteinPercentage: macroTarget.protein_percentage,
               carbsPercentage: macroTarget.carbs_percentage,
@@ -116,7 +117,6 @@ export const macroRoutes = (app: Elysia) =>
               lockedMacros: Array.isArray(lockedMacros) ? lockedMacros : [],
             };
 
-            // Return the formatted response with macro target data
             return {
               macroTarget: macroTargetData,
             };
