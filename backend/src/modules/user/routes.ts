@@ -112,7 +112,7 @@ export const userRoutes = (app: Elysia) =>
                 lockedMacros: parsedLockedMacros,
               };
             } else {
-              console.log("[GET /user/me] No macro distribution data found.");
+              console.log("[GET /user/me] No macro targets found.");
             }
 
             // Map DB result (snake_case) to API response (camelCase)

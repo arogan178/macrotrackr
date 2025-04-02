@@ -79,7 +79,6 @@ export function initializeSchema(db: Database) {
              carbs_percentage INTEGER DEFAULT 40,
              fats_percentage INTEGER DEFAULT 30,
              locked_macros TEXT DEFAULT '[]', -- Store as JSON array string '["protein", "fats"]'
-             macro_target TEXT DEFAULT '{}', -- Legacy JSON field for backward compatibility
              created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
              updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
              FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

@@ -5,10 +5,8 @@ import { t } from "elysia";
 const PositiveNumberOrNull = t.Nullable(t.Number({ minimum: 0 }));
 const PositiveIntegerOrNull = t.Nullable(t.Integer({ minimum: 0 }));
 const DateStringOrNull = t.Nullable(t.String({ format: "date" }));
-// Removed MacroPercentage as it's moved
 
 // --- Exported Goal Schemas ---
-// Now only contains schemas related to Weight Goals
 export const GoalSchemas = {
   // Schema for Weight Goals data (API structure - camelCase)
   weightGoalData: t.Object({
@@ -19,7 +17,7 @@ export const GoalSchemas = {
     ),
     startDate: DateStringOrNull,
     targetDate: DateStringOrNull,
-    adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
+    calorieTarget: PositiveNumberOrNull, // Renamed field
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
     dailyChange: t.Nullable(t.Number()), // Renamed field
@@ -36,7 +34,7 @@ export const GoalSchemas = {
       ),
       startDate: DateStringOrNull,
       targetDate: DateStringOrNull,
-      adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
+      calorieTarget: PositiveNumberOrNull, // Renamed field
       calculatedWeeks: PositiveIntegerOrNull,
       weeklyChange: t.Nullable(t.Number()),
       dailyChange: t.Nullable(t.Number()), // Renamed field
@@ -50,10 +48,10 @@ export const GoalSchemas = {
     ), // Allow null? Let's keep Nullable
     startDate: DateStringOrNull,
     targetDate: DateStringOrNull,
-    adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
+    calorieTarget: PositiveNumberOrNull,
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()), // Renamed field
+    dailyChange: t.Nullable(t.Number()),
   }),
   updateWeightGoalResponse: t.Object({
     // Response after update
@@ -64,10 +62,10 @@ export const GoalSchemas = {
     ),
     startDate: DateStringOrNull,
     targetDate: DateStringOrNull,
-    adjustedCalorieTarget: PositiveNumberOrNull, // Renamed field
+    calorieTarget: PositiveNumberOrNull,
     calculatedWeeks: PositiveIntegerOrNull,
     weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()), // Renamed field
+    dailyChange: t.Nullable(t.Number()),
   }),
 
   // Schema for resetting goals
