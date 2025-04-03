@@ -1,9 +1,10 @@
-import { memo, useCallback } from "react";
+import { memo, useCallback, useState, useEffect } from "react";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
 import { InfoCard, CardContainer } from "@/components/form";
-import { InfoIcon } from "@/components/Icons";
+import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
+import SaveButton from "@/components/SaveButton";
 
 // Default macro values (30/40/30 split)
 const DEFAULT_MACRO_TARGET = {
@@ -13,17 +14,77 @@ const DEFAULT_MACRO_TARGET = {
 };
 
 function MacroTargetForm() {
-  const { macroTarget, updateMacroTargetPercentages } = useStore();
+  const { macroTarget, updateMacroTargetPercentages, isTargetSaving } =
+    useStore();
 
+  // Local state for edited values
+  const [localTarget, setLocalTarget] = useState<MacroTargetSettings | null>(
+    null
+  );
+  const [hasChanges, setHasChanges] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Initialize local target from store values
+  useEffect(() => {
+    if (macroTarget && !localTarget) {
+      setLocalTarget(macroTarget);
+    } else if (!localTarget) {
+      setLocalTarget(DEFAULT_MACRO_TARGET);
+    }
+  }, [macroTarget, localTarget]);
+
+  // Handle local changes from the slider component
   const handleMacroTargetChange = useCallback(
     (target: MacroTargetSettings) => {
-      updateMacroTargetPercentages(target);
+      setLocalTarget(target);
+      // Compare with original values to determine if we have changes
+      if (macroTarget) {
+        const hasChanges =
+          target.proteinPercentage !== macroTarget.proteinPercentage ||
+          target.carbsPercentage !== macroTarget.carbsPercentage ||
+          target.fatsPercentage !== macroTarget.fatsPercentage;
+        setHasChanges(hasChanges);
+      } else {
+        setHasChanges(true);
+      }
+
+      // Clear success message when changes are made
+      if (saveSuccess) {
+        setSaveSuccess(false);
+      }
     },
-    [updateMacroTargetPercentages]
+    [macroTarget, saveSuccess]
   );
 
-  // Use macroTarget from store or fallback to defaults
-  const macroTargetValues = macroTarget || DEFAULT_MACRO_TARGET;
+  // Save changes to the backend
+  const handleSaveChanges = useCallback(() => {
+    if (localTarget && hasChanges) {
+      updateMacroTargetPercentages(localTarget)
+        .then(() => {
+          setSaveSuccess(true);
+          setHasChanges(false);
+          // Clear success message after 3 seconds
+          setTimeout(() => setSaveSuccess(false), 3000);
+        })
+        .catch(() => {
+          // Error handling is done in the store
+        });
+    }
+  }, [localTarget, hasChanges, updateMacroTargetPercentages]);
+
+  // Reset to original values
+  const handleReset = useCallback(() => {
+    if (macroTarget) {
+      setLocalTarget(macroTarget);
+    } else {
+      setLocalTarget(DEFAULT_MACRO_TARGET);
+    }
+    setHasChanges(false);
+    setSaveSuccess(false);
+  }, [macroTarget]);
+
+  // Use local target values for rendering
+  const displayValues = localTarget || DEFAULT_MACRO_TARGET;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
@@ -47,9 +108,43 @@ function MacroTargetForm() {
 
           {/* Always render MacroTarget with valid values */}
           <MacroTarget
-            initialValues={macroTargetValues}
+            initialValues={displayValues}
             onTargetChange={handleMacroTargetChange}
           />
+
+          {/* Save/Reset Controls */}
+          <div className="flex justify-between items-center mt-8">
+            {saveSuccess && (
+              <div className="text-green-400 text-sm flex items-center">
+                <CheckMarkIcon className="w-4 h-4 mr-1" />
+                Settings saved successfully
+              </div>
+            )}
+            {!saveSuccess && hasChanges && (
+              <div className="text-yellow-400 text-sm">
+                You have unsaved changes
+              </div>
+            )}
+            {!saveSuccess && !hasChanges && <div />}{" "}
+            {/* Empty div for spacing */}
+            <div className="flex gap-4">
+              {hasChanges && (
+                <button
+                  onClick={handleReset}
+                  className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                >
+                  Reset
+                </button>
+              )}
+              <SaveButton
+                onClick={handleSaveChanges}
+                isLoading={isTargetSaving}
+                disabled={!hasChanges}
+              >
+                Save Targets
+              </SaveButton>
+            </div>
+          </div>
         </CardContainer>
       </div>
 
