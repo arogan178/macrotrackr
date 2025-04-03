@@ -13,17 +13,17 @@ const DEFAULT_MACRO_TARGET = {
 };
 
 function MacroTargetForm() {
-  const { macroTarget, updateMacroTarget } = useStore();
+  const { macroTarget, updateMacroTargetPercentages } = useStore();
 
   const handleMacroTargetChange = useCallback(
     (target: MacroTargetSettings) => {
-      updateMacroTarget(target);
+      updateMacroTargetPercentages(target);
     },
-    [updateMacroTarget]
+    [updateMacroTargetPercentages]
   );
 
   // Use macroTarget from store or fallback to defaults
-  const macroTargetValues = macroTarget?.macroTarget || DEFAULT_MACRO_TARGET;
+  const macroTargetValues = macroTarget || DEFAULT_MACRO_TARGET;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
