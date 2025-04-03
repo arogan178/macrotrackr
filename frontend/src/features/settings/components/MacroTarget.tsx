@@ -462,7 +462,7 @@ export default function MacroTarget({
           color="green"
           isLocked={lockedMacros.includes("protein")}
           onToggleLock={() => toggleLock("protein")}
-          disabled={isAdjusting !== null && isAdjusting !== "protein"}
+          disabled={false} // updated: allow simultaneous slider adjustment
         />
 
         {/* Carbs Slider */}
@@ -473,7 +473,7 @@ export default function MacroTarget({
           color="blue"
           isLocked={lockedMacros.includes("carbs")}
           onToggleLock={() => toggleLock("carbs")}
-          disabled={isAdjusting !== null && isAdjusting !== "carbs"}
+          disabled={false} // updated
         />
 
         {/* Fats Slider */}
@@ -484,7 +484,7 @@ export default function MacroTarget({
           color="red"
           isLocked={lockedMacros.includes("fats")}
           onToggleLock={() => toggleLock("fats")}
-          disabled={isAdjusting !== null && isAdjusting !== "fats"}
+          disabled={false} // updated
         />
       </div>
 
