@@ -5,6 +5,7 @@ import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
 import SaveButton from "@/components/SaveButton";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 // Default macro values (30/40/30 split)
 const DEFAULT_MACRO_TARGET = {
@@ -14,8 +15,13 @@ const DEFAULT_MACRO_TARGET = {
 };
 
 function MacroTargetForm() {
-  const { macroTarget, updateMacroTargetPercentages, isTargetSaving } =
-    useStore();
+  const {
+    macroTarget,
+    updateMacroTargetPercentages,
+    isTargetSaving,
+    isTargetLoading,
+    fetchMacroTarget,
+  } = useStore();
 
   // Local state for edited values
   const [localTarget, setLocalTarget] = useState<MacroTargetSettings | null>(
@@ -26,23 +32,32 @@ function MacroTargetForm() {
 
   // Initialize local target from store values
   useEffect(() => {
-    if (macroTarget && !localTarget) {
+    // Only set default values after we know loading is complete and no data was found
+    if (macroTarget) {
       setLocalTarget(macroTarget);
-    } else if (!localTarget) {
-      setLocalTarget(DEFAULT_MACRO_TARGET);
+      setHasChanges(false);
+    } else if (!localTarget && !isTargetLoading) {
+      // Explicitly fetch data if macroTarget is null and not currently loading
+      fetchMacroTarget();
+      // Don't set localTarget to defaults here - let the loading state show
     }
-  }, [macroTarget, localTarget]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [macroTarget, isTargetLoading]); // Add isTargetLoading as dependency
 
   // Handle local changes from the slider component
   const handleMacroTargetChange = useCallback(
     (target: MacroTargetSettings) => {
       setLocalTarget(target);
-      // Compare with original values to determine if we have changes
+
       if (macroTarget) {
         const hasChanges =
           target.proteinPercentage !== macroTarget.proteinPercentage ||
           target.carbsPercentage !== macroTarget.carbsPercentage ||
-          target.fatsPercentage !== macroTarget.fatsPercentage;
+          target.fatsPercentage !== macroTarget.fatsPercentage ||
+          // Check for differences in lockedMacros arrays
+          JSON.stringify(target.lockedMacros || []) !==
+            JSON.stringify(macroTarget.lockedMacros || []);
+
         setHasChanges(hasChanges);
       } else {
         setHasChanges(true);
@@ -83,6 +98,10 @@ function MacroTargetForm() {
     setSaveSuccess(false);
   }, [macroTarget]);
 
+  // Only use displayValues when we actually have a localTarget
+  // This ensures we don't render the form with default values while loading
+  const hasValidValues = localTarget !== null;
+
   // Use local target values for rendering
   const displayValues = localTarget || DEFAULT_MACRO_TARGET;
 
@@ -106,40 +125,93 @@ function MacroTargetForm() {
             based on your calorie needs.
           </p>
 
-          {/* Always render MacroTarget with valid values */}
-          <MacroTarget
-            initialValues={displayValues}
-            onTargetChange={handleMacroTargetChange}
-          />
+          {/* Show skeleton loader when loading or when we don't have valid values yet */}
+          {isTargetLoading || !hasValidValues ? (
+            <div className="space-y-10">
+              {/* Skeleton for the stacked bar */}
+              <div className="relative h-2 mb-6 rounded-full overflow-hidden bg-gray-700/30 animate-pulse" />
+
+              {/* Skeleton for sliders */}
+              <div className="space-y-8">
+                {/* Protein slider skeleton */}
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
+                    <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
+                  </div>
+                  <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
+                </div>
+
+                {/* Carbs slider skeleton */}
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
+                    <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
+                  </div>
+                  <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
+                </div>
+
+                {/* Fats slider skeleton */}
+                <div className="space-y-2">
+                  <div className="flex justify-between">
+                    <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
+                    <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
+                  </div>
+                  <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
+                </div>
+              </div>
+
+              {/* Skeleton for badges */}
+              <div className="grid grid-cols-3 gap-2 pt-5">
+                <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+                <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+                <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+              </div>
+            </div>
+          ) : (
+            <MacroTarget
+              initialValues={displayValues}
+              onTargetChange={handleMacroTargetChange}
+            />
+          )}
 
           {/* Save/Reset Controls */}
           <div className="flex justify-between items-center mt-8">
-            {saveSuccess && (
-              <div className="text-green-400 text-sm flex items-center">
-                <CheckMarkIcon className="w-4 h-4 mr-1" />
-                Settings saved successfully
+            {isTargetLoading ? (
+              <div className="text-gray-400 text-sm flex items-center">
+                <LoadingSpinner size="sm" color="text-gray-400" />
+                <span className="ml-2">Loading your saved targets...</span>
               </div>
+            ) : (
+              <>
+                {saveSuccess && (
+                  <div className="text-green-400 text-sm flex items-center">
+                    <CheckMarkIcon className="w-4 h-4 mr-1" />
+                    Settings saved successfully
+                  </div>
+                )}
+                {!saveSuccess && hasChanges && (
+                  <div className="text-yellow-400 text-sm">
+                    You have unsaved changes
+                  </div>
+                )}
+                {!saveSuccess && !hasChanges && <div />}
+              </>
             )}
-            {!saveSuccess && hasChanges && (
-              <div className="text-yellow-400 text-sm">
-                You have unsaved changes
-              </div>
-            )}
-            {!saveSuccess && !hasChanges && <div />}{" "}
-            {/* Empty div for spacing */}
             <div className="flex gap-4">
               {hasChanges && (
                 <button
                   onClick={handleReset}
                   className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                  disabled={isTargetLoading || isTargetSaving}
                 >
                   Reset
                 </button>
               )}
               <SaveButton
                 onClick={handleSaveChanges}
-                isLoading={isTargetSaving}
-                disabled={!hasChanges}
+                loading={isTargetSaving}
+                disabled={!hasChanges || isTargetLoading}
               >
                 Save Targets
               </SaveButton>

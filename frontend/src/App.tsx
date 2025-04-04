@@ -13,6 +13,15 @@ const ReportingPage = React.lazy(() => import("./pages/ReportingPage"));
 const AuthPage = React.lazy(() => import("./pages/AuthPage"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 
+// Loading fallback for lazy-loaded components
+function LoadingFallback() {
+  return (
+    <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+      <LoadingSpinner size="lg" />
+    </div>
+  );
+}
+
 function AppContent() {
   // This hook will manage notifications across route changes
   useNotificationManager();
@@ -31,15 +40,6 @@ function AppContent() {
         </Routes>
       </Suspense>
     </ErrorBoundary>
-  );
-}
-
-// Loading fallback for lazy-loaded components
-function LoadingFallback() {
-  return (
-    <div className="min-h-screen bg-gray-900 flex justify-center items-center">
-      <LoadingSpinner size="lg" />
-    </div>
   );
 }
 

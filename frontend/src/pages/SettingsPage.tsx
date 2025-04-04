@@ -85,10 +85,10 @@ export default function SettingsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
-      <div className="relative min-h-screen">
+      <div className="relative min-h-screen ">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
 
-        <div className="max-w-4xl mx-auto px-4 py-8 relative">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
           {/* Only render notification if it comes from the store */}
           {successMessage && (
             <FloatingNotification
@@ -144,28 +144,26 @@ export default function SettingsPage() {
               <LoadingSpinnerIcon className="h-12 w-12 animate-spin text-indigo-500" />
             </div>
           ) : (
-            <CardContainer>
-              <form onSubmit={handleSubmit} className="p-6">
-                {activeTab === "profile" ? (
-                  <ProfileForm
-                    settings={settings}
-                    updateSetting={updateSetting}
-                    formErrors={formErrors}
-                  />
-                ) : (
-                  <MacroTargetForm />
-                )}
+            <form onSubmit={handleSubmit} className="p-6">
+              {activeTab === "profile" ? (
+                <ProfileForm
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  formErrors={formErrors}
+                />
+              ) : (
+                <MacroTargetForm />
+              )}
 
-                <div className="mt-8 flex justify-end">
-                  <SaveButton
-                    loading={isSaving}
-                    disabled={
-                      !hasSettingsChanges || Object.keys(formErrors).length > 0
-                    }
-                  />
-                </div>
-              </form>
-            </CardContainer>
+              <div className="mt-8 flex justify-end">
+                <SaveButton
+                  loading={isSaving}
+                  disabled={
+                    !hasSettingsChanges || Object.keys(formErrors).length > 0
+                  }
+                />
+              </div>
+            </form>
           )}
         </div>
       </div>

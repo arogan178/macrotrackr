@@ -31,6 +31,7 @@ export interface UserSlice {
   originalSettingsMacroTarget: MacroTargetPercentages | null;
   isSettingsLoading: boolean;
   isSaving: boolean;
+  isTargetSaving: boolean; // New state for macro target saving
   settingsError: string | null;
   settingsSuccess: string | null;
   formErrors: Record<string, string>;
@@ -45,6 +46,9 @@ export interface UserSlice {
   ) => void; // Allow updating both
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
+  updateMacroTargetPercentages: (
+    macroTarget: MacroTargetPercentages
+  ) => Promise<boolean>; // New action
   resetSettings: () => void;
   clearSettingsMessages: () => void;
 }
@@ -75,6 +79,7 @@ export const createUserSlice: StateCreator<
   originalSettingsMacroTarget: null,
   isSettingsLoading: false,
   isSaving: false,
+  isTargetSaving: false, // New state for macro target saving
   settingsError: null,
   settingsSuccess: null,
   formErrors: {},
@@ -309,7 +314,7 @@ export const createUserSlice: StateCreator<
     set({ isSaving: true, settingsError: null, settingsSuccess: null });
 
     try {
-      // Construct payload matching UserSettingsPayload (camelCase, includes macroTarget)
+      // Construct payload matching UserSettingsPayload (camelCase, no macroTarget)
       const payload: UserSettingsPayload = {
         firstName: state.settings.firstName,
         lastName: state.settings.lastName,
@@ -319,8 +324,7 @@ export const createUserSlice: StateCreator<
         weight: state.settings.weight,
         gender: state.settings.gender,
         activityLevel: state.settings.activityLevel,
-        // Use the macroTarget state being edited in the form
-        macroTarget: state.settingsMacroTarget,
+        // macroTarget removed from payload as it should be handled separately
       };
 
       // Call API to update settings
@@ -385,6 +389,52 @@ export const createUserSlice: StateCreator<
           "error"
         );
       }
+    }
+  },
+
+  // Save macro target percentages separately via the correct endpoint
+  updateMacroTargetPercentages: async (macroTarget: MacroTargetPercentages) => {
+    const state = get();
+    set({ isTargetSaving: true, settingsError: null });
+
+    try {
+      // Use the specific macro target endpoint
+      await apiService.macros.saveMacroTargetPercentages({ macroTarget });
+
+      // Update the store after successful save
+      const newOriginalMacroTarget = JSON.parse(JSON.stringify(macroTarget));
+
+      set({
+        originalSettingsMacroTarget: newOriginalMacroTarget,
+        settingsMacroTarget: newOriginalMacroTarget,
+        macroTarget: newOriginalMacroTarget, // Also update the main state
+        hasSettingsChanges: false, // Reset changes flag
+        isTargetSaving: false,
+        settingsSuccess: "Macro targets updated successfully!",
+      });
+
+      if (state.showNotification) {
+        state.showNotification("Macro targets saved successfully!", "success");
+      }
+
+      return true;
+    } catch (error) {
+      console.error("Save macro targets error:", error);
+      const errorMessage = getErrorMessage(error);
+
+      set({
+        settingsError: errorMessage,
+        isTargetSaving: false,
+      });
+
+      if (state.showNotification) {
+        state.showNotification(
+          `Failed to save macro targets: ${errorMessage}`,
+          "error"
+        );
+      }
+
+      return false;
     }
   },
 
