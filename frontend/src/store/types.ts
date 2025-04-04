@@ -15,8 +15,8 @@
 //   protein: number;
 //   carbs: number;
 //   fats: number;
-//   meal_type: MealType; // Changed from optional to required
-//   meal_name: string; // Added new required field
+//   mealType: MealType; // Changed from optional to required
+//   mealName: string; // Added new required field
 //   entry_date: string;
 //   entry_time: string; // Added new required field
 //   foodName?: string; // Kept for backward compatibility
