@@ -21,8 +21,8 @@ interface AddEntryProps {
     protein: number;
     carbs: number;
     fats: number;
-    meal_Type: MealType;
-    meal_Name: string;
+    mealType: MealType;
+    mealName: string;
     entry_date: string;
     entry_time: string;
   }) => Promise<void>;
@@ -34,8 +34,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [carbs, setCarbs] = useState<number | undefined>(undefined);
   const [fats, setFats] = useState<number | undefined>(undefined);
   const [searchResult, setSearchResult] = useState<string | null>(null);
-  const [meal_type, setMealType] = useState<MealType>("breakfast");
-  const [meal_name, setMealName] = useState<string>("");
+  const [mealType, setMealType] = useState<MealType>("breakfast");
+  const [mealName, setMealName] = useState<string>("");
 
   // Default date is today
   const [entry_date, setEntryDate] = useState<string>(
@@ -65,7 +65,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
 
   // Form is valid if no field is undefined, not all fields are 0, and meal name is provided
   const isFormValid =
-    !anyFieldIsUndefined && !allFieldsAreZero && meal_name.trim() !== "";
+    !anyFieldIsUndefined && !allFieldsAreZero && mealName.trim() !== "";
 
   // Handle result from CalorieSearch
   const handleSearchResult = useCallback(
@@ -93,7 +93,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
     async (e: React.FormEvent) => {
       e.preventDefault();
 
-      if (anyFieldIsUndefined || allFieldsAreZero || !meal_name.trim()) {
+      if (anyFieldIsUndefined || allFieldsAreZero || !mealName.trim()) {
         return;
       }
 
@@ -101,8 +101,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
         protein: protein as number,
         carbs: carbs as number,
         fats: fats as number,
-        meal_type,
-        meal_name,
+        mealType,
+        mealName,
         entry_date,
         entry_time,
       });
@@ -117,8 +117,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       protein,
       carbs,
       fats,
-      meal_type,
-      meal_name,
+      mealType,
+      mealName,
       entry_date,
       entry_time,
       onSubmit,
@@ -151,7 +151,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
           <div className="mb-4">
             <TextField
               label="Meal Name"
-              value={meal_name}
+              value={mealName}
               onChange={(value) => setMealName(value)}
               placeholder="e.g. Chicken Salad"
               required
@@ -185,8 +185,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
                   // If you still need capitalization, apply it to option.display here:
                   // label: capitalizeFirstLetter(option.display)
                 }))}
-                // The value prop should be bound to your state variable holding the clean meal_type
-                value={meal_type} // e.g., "breakfast"
+                // The value prop should be bound to your state variable holding the clean mealType
+                value={mealType} // e.g., "breakfast"
                 // The onChange handler receives the clean value directly from the dropdown option's value
                 onChange={(value) => setMealType(value as MealType)} // value will be "breakfast", "lunch", etc.
               />
@@ -237,7 +237,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               </div>
             )}
 
-            {!meal_name.trim() && protein !== undefined && (
+            {!mealName.trim() && protein !== undefined && (
               <div className="text-sm text-red-400 mr-4">
                 Please provide a meal name
               </div>

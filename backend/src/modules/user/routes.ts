@@ -1,19 +1,14 @@
 // src/modules/user/routes.ts
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
-// Import schemas that now use macroTarget and camelCase
 import { UserSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-// Import the specific type for percentages if needed, or rely on schema inference
-// Assuming MacroTargetPercentages is defined in schemas.ts or types
-import type { MacroTargetPercentages } from "./schemas"; // Adjust import path if needed
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
   value === undefined || value === null ? null : value;
 
 // DB Result Type for the JOIN query in GET /me (snake_case)
-// Fetches from users, user_details, and macro_targets
 type UserMeQueryResult = {
   id: number;
   email: string;
@@ -25,11 +20,6 @@ type UserMeQueryResult = {
   weight: number | null;
   gender: "male" | "female" | null;
   activity_level: number | null;
-  // Fields from macro_targets table (snake_case)
-  protein_percentage: number | null;
-  carbs_percentage: number | null;
-  fats_percentage: number | null;
-  locked_macros: string | null; // JSON string
 };
 
 // API Response Type (camelCase) - Matches UserSchemas.userDetailsResponse
@@ -44,7 +34,6 @@ type UserMeApiResponse = {
   weight: number | null;
   gender: "male" | "female" | null;
   activityLevel: number | null;
-  macroTarget: MacroTargetPercentages | null; // Use the specific type
 };
 
 export const userRoutes = (app: Elysia) =>
@@ -59,15 +48,12 @@ export const userRoutes = (app: Elysia) =>
             `[GET /user/me] Fetching details for user ID: ${user.userId}`
           );
           try {
-            // Fetch user base info, details, and macro distribution settings
             const query = `
                 SELECT
                     u.id, u.email, u.first_name, u.last_name, u.created_at,
-                    ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level,
-                    md.protein_percentage, md.carbs_percentage, md.fats_percentage, md.locked_macros
+                    ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                 FROM users u
                 LEFT JOIN user_details ud ON u.id = ud.user_id
-                LEFT JOIN macro_targets md ON u.id = md.user_id
                 WHERE u.id = ?
             `;
             const dbResult = db.prepare(query).get(user.userId) as
@@ -79,40 +65,6 @@ export const userRoutes = (app: Elysia) =>
               console.log("[GET /user/me] User not found in DB.");
               set.status = 404;
               throw new Error("User data not found.");
-            }
-
-            let parsedLockedMacros: Array<"protein" | "carbs" | "fats"> = [];
-            let macroTargetMapped: MacroTargetPercentages | null = null;
-
-            // Check if macro distribution data exists before parsing/mapping
-            if (dbResult.protein_percentage !== null) {
-              const lockedMacrosJson = dbResult.locked_macros;
-              console.log(
-                "[GET /user/me] Raw locked_macros JSON:",
-                lockedMacrosJson
-              );
-              if (lockedMacrosJson) {
-                try {
-                  parsedLockedMacros = JSON.parse(lockedMacrosJson);
-                  console.log(
-                    "[GET /user/me] Parsed locked_macros:",
-                    parsedLockedMacros
-                  );
-                } catch (e) {
-                  console.error(
-                    "[GET /user/me] Failed to parse locked_macros JSON:",
-                    e
-                  );
-                }
-              }
-              macroTargetMapped = {
-                proteinPercentage: dbResult.protein_percentage,
-                carbsPercentage: dbResult.carbs_percentage,
-                fatsPercentage: dbResult.fats_percentage,
-                lockedMacros: parsedLockedMacros,
-              };
-            } else {
-              console.log("[GET /user/me] No macro targets found.");
             }
 
             // Map DB result (snake_case) to API response (camelCase)
@@ -127,7 +79,6 @@ export const userRoutes = (app: Elysia) =>
               weight: dbResult.weight,
               gender: dbResult.gender,
               activityLevel: dbResult.activity_level,
-              macroTarget: macroTargetMapped,
             };
             console.log("[GET /user/me] Mapped API response:", apiResponse);
 
@@ -168,7 +119,6 @@ export const userRoutes = (app: Elysia) =>
             weight,
             gender,
             activityLevel,
-            macroTarget,
           } = body;
 
           const transaction = db.transaction(() => {
@@ -226,34 +176,6 @@ export const userRoutes = (app: Elysia) =>
               nullify(gender),
               nullify(activityLevel)
             );
-
-            // 3. Update or Insert macro_targets if macroTarget is provided
-            if (macroTarget !== undefined && macroTarget !== null) {
-              // *** REMOVED redundant WHERE clause from DO UPDATE ***
-              const distUpsertQuery = `
-                    INSERT INTO macro_targets (
-                        user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros, updated_at
-                    )
-                    VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                    ON CONFLICT(user_id) DO UPDATE SET
-                        protein_percentage = excluded.protein_percentage,
-                        carbs_percentage = excluded.carbs_percentage,
-                        fats_percentage = excluded.fats_percentage,
-                        locked_macros = excluded.locked_macros,
-                        updated_at = CURRENT_TIMESTAMP;
-                `;
-              db.prepare(distUpsertQuery).run(
-                user.userId,
-                macroTarget.proteinPercentage,
-                macroTarget.carbsPercentage,
-                macroTarget.fatsPercentage,
-                JSON.stringify(macroTarget.lockedMacros || [])
-              );
-            } else if (macroTarget === null) {
-              db.prepare("DELETE FROM macro_targets WHERE user_id = ?").run(
-                user.userId
-              );
-            }
           });
 
           try {

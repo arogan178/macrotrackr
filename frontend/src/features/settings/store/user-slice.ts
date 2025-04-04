@@ -40,10 +40,7 @@ export interface UserSlice {
   fetchUserDetails: () => Promise<void>;
   clearError: () => void;
   fetchSettings: () => Promise<void>;
-  updateSetting: <K extends keyof UserSettings | keyof MacroTargetPercentages>(
-    key: K,
-    value: any
-  ) => void; // Allow updating both
+  updateSetting: <K extends keyof UserSettings>(key: K, value: any) => void; // Allow updating user settings only
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   updateMacroTargetPercentages: (
@@ -90,8 +87,8 @@ export const createUserSlice: StateCreator<
     const fullGet = get as () => UserSlice & any;
 
     try {
-      // Fetch combined user data (profile + macro target percentages)
-      const userData = await apiService.user.getProfile(); // API now returns macroTarget
+      // Fetch user profile data (no longer includes macroTarget)
+      const userData = await apiService.user.getUserDetails();
 
       if (!userData) {
         throw new Error("User profile data not found after API call.");
@@ -100,10 +97,6 @@ export const createUserSlice: StateCreator<
       const age = calculateAge(userData.dateOfBirth);
 
       let activityLevelNumber = userData.activityLevel;
-      // No need to convert activityLevel here if UserSettings type uses number
-      // if (typeof userData.activityLevel === "string" && userData.activityLevel) {
-      //   activityLevelNumber = getActivityLevelFromString(userData.activityLevel as ActivityLevel);
-      // }
 
       const userSettings: UserSettings = {
         id: userData.id,
@@ -144,18 +137,33 @@ export const createUserSlice: StateCreator<
         tdee,
       };
 
-      // Extract macro target percentages from the response
-      const fetchedMacroTarget: MacroTargetPercentages | null =
-        userData.macroTarget || null;
+      // Macro target needs to be fetched separately now
+      try {
+        // Fetch macro target separately using the dedicated endpoint
+        const macroTargetResponse = await apiService.macros.getMacroTarget();
+        const fetchedMacroTarget = macroTargetResponse?.macroTarget || null;
 
-      // Update state
-      set({
-        user: userSettings,
-        nutritionProfile,
-        macroTarget: fetchedMacroTarget, // Store fetched macro target percentages
-        isLoading: false,
-        error: null,
-      });
+        // Update state with all fetched data
+        set({
+          user: userSettings,
+          nutritionProfile,
+          macroTarget: fetchedMacroTarget, // Store fetched macro target percentages
+          isLoading: false,
+          error: null,
+        });
+      } catch (macroError) {
+        console.error("Error fetching macro target:", macroError);
+
+        // Still update user and nutrition data even if macro target fetch fails
+        set({
+          user: userSettings,
+          nutritionProfile,
+          // Keep existing macro target or default to prevent UI issues
+          macroTarget: get().macroTarget,
+          isLoading: false,
+          error: null,
+        });
+      }
     } catch (error) {
       console.error("Fetch user error:", error);
       const errorMessage = getErrorMessage(error);
@@ -178,16 +186,14 @@ export const createUserSlice: StateCreator<
 
   // --- Settings Actions ---
 
-  // Fetch settings data (similar to fetchUserDetails but populates settings state)
+  // Fetch settings data (
   fetchSettings: async () => {
     set({ isSettingsLoading: true, settingsError: null });
     try {
-      const data = await apiService.user.getProfile(); // Fetch combined data
+      const data = await apiService.user.getUserDetails();
       if (!data) {
         throw new Error("Failed to fetch settings data.");
       }
-
-      // Separate user settings from macro target for the form state
       const settings: UserSettings = {
         id: data.id,
         firstName: data.firstName,
@@ -219,86 +225,51 @@ export const createUserSlice: StateCreator<
     }
   },
 
-  // Update a setting field (either user setting or macro target setting)
+  // Update a user setting field only (macro targets handled separately)
   updateSetting: (key, value) => {
     set((state) => {
-      let hasChanged = false;
+      // Only handle updates to user settings, not macro targets
       let updatedSettings = state.settings ? { ...state.settings } : null;
-      let updatedMacroTarget = state.settingsMacroTarget
-        ? { ...state.settingsMacroTarget }
-        : null;
 
       // Check if the key belongs to UserSettings
       if (updatedSettings && key in updatedSettings) {
         (updatedSettings as any)[key] = value;
-        // Compare with originalSettings
-        if (state.originalSettings) {
-          hasChanged =
-            JSON.stringify(updatedSettings) !==
-            JSON.stringify(state.originalSettings);
-        }
-      }
-      // Check if the key belongs to MacroTargetPercentages
-      else if (updatedMacroTarget && key in updatedMacroTarget) {
-        (updatedMacroTarget as any)[key] = value;
-        // Compare with originalSettingsMacroTarget
-        if (state.originalSettingsMacroTarget) {
-          hasChanged =
-            hasChanged ||
-            JSON.stringify(updatedMacroTarget) !==
-              JSON.stringify(state.originalSettingsMacroTarget);
-        } else {
-          hasChanged = true; // Changed from null
-        }
+
+        // Calculate if settings have changed compared to original
+        const hasChanged = state.originalSettings
+          ? JSON.stringify(updatedSettings) !==
+            JSON.stringify(state.originalSettings)
+          : updatedSettings !== null;
+
+        return {
+          settings: updatedSettings,
+          hasSettingsChanges: hasChanged,
+          settingsError: null, // Clear error on update
+          settingsSuccess: null, // Clear success on update
+        };
       } else {
-        // Key not found in either settings object, do nothing or log warning
+        // Key not found in settings object, do nothing or log warning
         console.warn(`Attempted to update unknown setting key: ${String(key)}`);
         return state; // No change
       }
-
-      // Ensure comparison includes both parts if they exist
-      const macroTargetChanged = state.originalSettingsMacroTarget
-        ? JSON.stringify(updatedMacroTarget) !==
-          JSON.stringify(state.originalSettingsMacroTarget)
-        : updatedMacroTarget !== null; // Changed if it was null before
-
-      return {
-        settings: updatedSettings,
-        settingsMacroTarget: updatedMacroTarget,
-        // Update hasSettingsChanges based on comparison of both parts
-        hasSettingsChanges:
-          (state.originalSettings
-            ? JSON.stringify(updatedSettings) !==
-              JSON.stringify(state.originalSettings)
-            : updatedSettings !== null) || macroTargetChanged,
-        settingsError: null, // Clear error on update
-        settingsSuccess: null, // Clear success on update
-      };
     });
   },
 
   validateSettingsForm: () => {
     const state = get();
-    // Combine settings and macroTarget for validation if needed, or validate separately
-    const settingsToValidate = {
-      ...state.settings,
-      macroTarget: state.settingsMacroTarget,
-    };
-    // Assuming validateUserSettings handles the combined structure or needs adjustment
-    // const errors = validateUserSettings(settingsToValidate);
+    // Only validate user settings, not macro targets
     const errors: Record<string, string> = {}; // Placeholder validation
     if (!state.settings?.firstName) errors.firstName = "First name required";
     if (!state.settings?.lastName) errors.lastName = "Last name required";
-    // Add more validation rules for all fields, including macroTarget percentages if needed
+    // Add more validation rules for user settings fields only
 
     set({ formErrors: errors });
     return Object.keys(errors).length === 0;
   },
 
-  // Save combined settings
+  // Save user settings only (no macro targets)
   saveSettings: async () => {
     const state = get();
-    // Add validation check
     if (!state.validateSettingsForm()) {
       console.warn("Settings validation failed.");
       set({ settingsError: "Please fix validation errors." }); // Provide feedback
@@ -324,7 +295,6 @@ export const createUserSlice: StateCreator<
         weight: state.settings.weight,
         gender: state.settings.gender,
         activityLevel: state.settings.activityLevel,
-        // macroTarget removed from payload as it should be handled separately
       };
 
       // Call API to update settings
@@ -332,11 +302,8 @@ export const createUserSlice: StateCreator<
 
       // Update original settings and user state after successful save
       const newOriginalSettings = JSON.parse(JSON.stringify(state.settings));
-      const newOriginalMacroTarget = JSON.parse(
-        JSON.stringify(state.settingsMacroTarget)
-      );
 
-      // Update main user state as well
+      // Recalculate nutrition profile based on updated settings
       const age = calculateAge(state.settings.dateOfBirth || "");
       let bmr = 0,
         tdee = 0;
@@ -365,11 +332,9 @@ export const createUserSlice: StateCreator<
 
       set({
         originalSettings: newOriginalSettings,
-        originalSettingsMacroTarget: newOriginalMacroTarget,
         user: newOriginalSettings, // Update main user state
         nutritionProfile: newNutritionProfile, // Update main nutrition profile
-        macroTarget: newOriginalMacroTarget, // Update main macro target state
-        hasSettingsChanges: false,
+        hasSettingsChanges: false, // Only checking user settings changes now
         settingsSuccess: "Settings updated successfully!",
         settingsError: null,
         isSaving: false,
