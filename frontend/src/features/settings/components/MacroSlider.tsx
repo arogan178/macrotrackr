@@ -73,6 +73,7 @@ export default function MacroSlider({
           {onToggleLock && (
             <button
               onClick={onToggleLock}
+              type="button"
               className={`p-1.5 rounded-full ${
                 isLocked
                   ? `${textLocked} ${bgLocked}`
