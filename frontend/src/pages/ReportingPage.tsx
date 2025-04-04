@@ -123,9 +123,10 @@ export default function ReportingPage() {
           return;
         }
 
-        const entryDate = new Date(entry.created_at)
-          .toISOString()
-          .split("T")[0];
+        // Use entry_date instead of created_at for aggregating data
+        const entryDate =
+          entry.entry_date ||
+          new Date(entry.created_at).toISOString().split("T")[0];
         if (dates[entryDate]) {
           dates[entryDate].protein += entry.protein;
           dates[entryDate].carbs += entry.carbs;
@@ -171,7 +172,9 @@ export default function ReportingPage() {
     }
 
     history.forEach((entry) => {
-      const entryDate = new Date(entry.created_at).toISOString().split("T")[0];
+      const entryDate =
+        entry.entry_date ||
+        new Date(entry.created_at).toISOString().split("T")[0];
       if (dates[entryDate]) {
         dates[entryDate].protein += entry.protein;
         dates[entryDate].carbs += entry.carbs;

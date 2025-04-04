@@ -245,8 +245,8 @@ function normalizeRegistrationData(userData: any): RegistrationDataPayload {
 export const apiService = {
   // User endpoints
   user: {
-    /** Fetches the current authenticated user's profile (no goal info) */
-    getProfile: async () => {
+    /** Fetches the current authenticated user's profile */
+    getUserDetails: async () => {
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
         headers: getHeaders(false),
       });

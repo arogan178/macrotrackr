@@ -23,8 +23,8 @@ export interface MacroEntry {
   protein: number;
   carbs: number;
   fats: number;
-  meal_type: MealType;
-  meal_name: string;
+  mealType: MealType;
+  mealName: string;
   entry_date: string;
   entry_time: string;
   foodName?: string;

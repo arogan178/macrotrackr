@@ -32,8 +32,8 @@ const exportCSV = (history: MacroEntry[]) => {
           `${
             entry.entry_date || new Date(entry.created_at).toLocaleDateString()
           },${new Date(entry.created_at).toLocaleTimeString()},${
-            entry.meal_type || ""
-          },${entry.foodName || entry.meal_name || ""},${entry.protein},${
+            entry.mealType || ""
+          },${entry.foodName || entry.mealName || ""},${entry.protein},${
             entry.carbs
           },${entry.fats},${Math.round(
             entry.protein * 4 + entry.carbs * 4 + entry.fats * 9
@@ -104,7 +104,7 @@ export default function EntryHistory({
 
   useEffect(() => {
     const grouped = history.reduce((acc, entry) => {
-      // Use entry_date if available, otherwise use created_at
+      // Always use entry_date if available, only fall back to created_at if missing
       const dateStr = entry.entry_date || entry.created_at;
       // Format date consistently using the helper
       const dateKey = formatEntryDate(dateStr);
@@ -330,13 +330,13 @@ export default function EntryHistory({
                           <td className="px-4 py-3 text-sm text-gray-300 text-center">
                             <div>
                               <span className="font-medium text-indigo-300">
-                                {entry.meal_type
-                                  ? capitalizeFirstLetter(entry.meal_type)
+                                {entry.mealType
+                                  ? capitalizeFirstLetter(entry.mealType)
                                   : ""}
                               </span>
-                              {entry.foodName || entry.meal_name ? (
+                              {entry.foodName || entry.mealName ? (
                                 <span className="text-gray-400 block text-xs mt-0.5">
-                                  {entry.foodName || entry.meal_name}
+                                  {entry.foodName || entry.mealName}
                                 </span>
                               ) : null}
                             </div>
