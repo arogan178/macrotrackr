@@ -24,6 +24,9 @@ interface FormModalProps extends BaseModalProps {
   variant: "form";
   onSave?: () => void;
   saveDisabled?: boolean;
+  saveLabel?: string;
+  cancelLabel?: string;
+  hideDefaultButtons?: boolean;
 }
 
 type ModalProps = ConfirmationModalProps | FormModalProps;
@@ -160,7 +163,14 @@ export default function Modal(props: ModalProps) {
   };
 
   const renderFormContent = (props: FormModalProps) => {
-    const { children, onSave, saveDisabled } = props;
+    const {
+      children,
+      onSave,
+      saveDisabled,
+      saveLabel = "Save",
+      cancelLabel = "Cancel",
+      hideDefaultButtons = false,
+    } = props;
 
     return (
       <>
@@ -172,27 +182,29 @@ export default function Modal(props: ModalProps) {
 
         {children}
 
-        <div className="mt-6 flex justify-end gap-3">
-          <FormButton
-            variant="secondary"
-            onClick={onClose}
-            size="md"
-            ariaLabel="Cancel"
-          >
-            Cancel
-          </FormButton>
-          {onSave && (
+        {!hideDefaultButtons && (
+          <div className="mt-6 flex justify-end gap-3">
             <FormButton
-              onClick={onSave}
-              disabled={saveDisabled}
-              variant="primary"
+              variant="secondary"
+              onClick={onClose}
               size="md"
-              ariaLabel="Save"
+              ariaLabel={cancelLabel}
             >
-              Save
+              {cancelLabel}
             </FormButton>
-          )}
-        </div>
+            {onSave && (
+              <FormButton
+                onClick={onSave}
+                disabled={saveDisabled}
+                variant="primary"
+                size="md"
+                ariaLabel={saveLabel}
+              >
+                {saveLabel}
+              </FormButton>
+            )}
+          </div>
+        )}
       </>
     );
   };

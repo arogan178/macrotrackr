@@ -36,9 +36,19 @@ import {
   Unlock,
   Menu,
   Star,
-  Target,
   Goal,
+  Dumbbell,
   CheckCircle,
+  Target,
+  Award,
+  Heart,
+  Book,
+  Coffee,
+  Droplet,
+  Moon,
+  Sun,
+  MoreVertical,
+  SmilePlus,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -104,3 +114,13 @@ export const GoalsIcon = createIcon(Goal);
 export const TargetIcon = createIcon(Target);
 export const BarChartIcon = createIcon(BarChart);
 export const CheckCircleIcon = createIcon(CheckCircle);
+export const DumbBellIcon = createIcon(Dumbbell);
+export const AwardIcon = createIcon(Award);
+export const HeartIcon = createIcon(Heart);
+export const BookIcon = createIcon(Book);
+export const CoffeeIcon = createIcon(Coffee);
+export const DropletIcon = createIcon(Droplet);
+export const MoonIcon = createIcon(Moon);
+export const SunIcon = createIcon(Sun);
+export const MoreVerticalIcon = createIcon(MoreVertical);
+export const SmilePlusIcon = createIcon(SmilePlus);

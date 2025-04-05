@@ -1,8 +1,11 @@
 // Export all components from the goals feature
-export { default as AchievementsContent } from "./AchievementsContent";
-export { default as GoalsLoadingSkeleton } from "./GoalsLoadingSkeleton";
-export { default as GoalsModeToggle } from "./GoalsModeToggle";
 export { default as HabitTracker } from "./HabitTracker";
+export { default as AddHabitModal } from "./AddHabitModal";
+export { default as EditHabitModal } from "./EditHabitModal";
+export { default as HabitForm } from "./HabitForm";
+export { default as HabitActions } from "./HabitActions";
+export { default as GoalsLoadingSkeleton } from "./GoalsLoadingSkeleton";
+export { default as AchievementsContent } from "./AchievementsContent";
 export { default as WeightGoalDashboard } from "./WeightGoalDashboard";
 export { default as WeightGoalForm } from "./WeightGoalForm";
 export { default as WeightGoalStatus } from "./WeightGoalStatus";

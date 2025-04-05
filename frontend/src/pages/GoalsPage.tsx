@@ -5,11 +5,16 @@ import {
   AchievementsContent,
   WeightGoalDashboard,
   HabitTracker,
+  AddHabitModal,
+  EditHabitModal,
 } from "@/features/goals/components";
-import { WeightGoalFormValues } from "@/features/goals/types";
+import {
+  WeightGoalFormValues,
+  HabitGoalFormValues,
+  HabitGoal,
+} from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
-import { useGoalData } from "@/features/goals/hooks";
 import { TabButton } from "@/components/form";
 import { GoalsIcon, StarIcon, PlusIcon } from "@/components/Icons";
 import Modal from "@/components/Modal";
@@ -19,11 +24,14 @@ export default function GoalsPage() {
   const [activeTab, setActiveTab] = useState<"active" | "achieved">("active");
   // State for reset goals modal
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  // State for add habit modal (future implementation)
+  // State for add habit modal
   const [isAddHabitModalOpen, setIsAddHabitModalOpen] = useState(false);
-
-  // Get mock data - in a real app this would come from an API
-  const goalData = useGoalData();
+  // State for edit habit modal
+  const [isEditHabitModalOpen, setIsEditHabitModalOpen] = useState(false);
+  // State for the habit being edited
+  const [currentEditHabit, setCurrentEditHabit] = useState<HabitGoal | null>(
+    null
+  );
 
   // Get state and actions from store
   const {
@@ -32,14 +40,24 @@ export default function GoalsPage() {
     weightGoals,
     macroTarget,
     macroDailyTotals,
+    habitGoals,
     isLoading,
+    isLoadingHabits,
     error,
+    habitError,
     createWeightGoal,
     clearError,
+    clearHabitError,
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
     fetchMacroTarget,
+    fetchHabitGoals,
+    addHabitGoal,
+    updateHabitGoal,
+    incrementHabitProgress,
+    completeHabitGoal,
+    deleteHabitGoal,
     resetGoals,
   } = useStore();
 
@@ -53,12 +71,14 @@ export default function GoalsPage() {
     // Fetch persisted goals data
     fetchWeightGoals();
     fetchMacroTarget();
+    fetchHabitGoals();
   }, [
     user,
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
     fetchMacroTarget,
+    fetchHabitGoals,
   ]);
 
   // Handler for saving weight goal
@@ -75,43 +95,52 @@ export default function GoalsPage() {
     setIsResetModalOpen(false);
   };
 
+  // Handler for adding a new habit
   const handleAddHabit = () => {
     setIsAddHabitModalOpen(true);
-    // Future implementation: Show modal to add new habit
   };
 
-  // Map habit goals data from the useGoalData hook
-  const habitGoals = goalData.streakGoals.map((goal) => ({
-    id: goal.id,
-    title: goal.name,
-    icon: renderIcon(goal.icon),
-    current: goal.current,
-    target: goal.target,
-    progress: goal.progress,
-    accentColor: getAccentColor(goal.id) as "indigo" | "blue" | "green",
-    isComplete: goal.progress >= 100,
-  }));
+  // Handler for editing a habit
+  const handleEditHabit = (id: string) => {
+    const habitToEdit = habitGoals?.find((habit) => habit.id === id) || null;
+    if (habitToEdit) {
+      setCurrentEditHabit(habitToEdit);
+      setIsEditHabitModalOpen(true);
+    }
+  };
 
-  // Helper function to get accent color based on habit ID
-  function getAccentColor(id: number) {
-    const colors = ["indigo", "blue", "green", "purple"];
-    return colors[(id - 1) % colors.length];
-  }
+  // Handle submitting a new habit goal
+  const handleSubmitHabit = async (values: HabitGoalFormValues) => {
+    await addHabitGoal(values);
+    setIsAddHabitModalOpen(false);
+  };
 
-  // Helper function to render the appropriate icon component
-  function renderIcon(IconComponent: any) {
-    return <IconComponent className="w-4 h-4" />;
-  }
+  // Handle updating an existing habit
+  const handleUpdateHabit = async (id: string, values: HabitGoalFormValues) => {
+    await updateHabitGoal(id, values);
+    setIsEditHabitModalOpen(false);
+    setCurrentEditHabit(null);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
 
+      {/* Show notifications for errors */}
       {error && (
         <FloatingNotification
           message={error}
           type="error"
           onClose={clearError}
+          duration={5000}
+        />
+      )}
+
+      {habitError && (
+        <FloatingNotification
+          message={habitError}
+          type="error"
+          onClose={clearHabitError}
           duration={5000}
         />
       )}
@@ -128,6 +157,24 @@ export default function GoalsPage() {
         onConfirm={handleResetGoals}
         isDanger={true}
         size="md"
+      />
+
+      {/* Add Habit Modal */}
+      <AddHabitModal
+        isOpen={isAddHabitModalOpen}
+        onClose={() => setIsAddHabitModalOpen(false)}
+        onSubmit={handleSubmitHabit}
+      />
+
+      {/* Edit Habit Modal */}
+      <EditHabitModal
+        isOpen={isEditHabitModalOpen}
+        onClose={() => {
+          setIsEditHabitModalOpen(false);
+          setCurrentEditHabit(null);
+        }}
+        onSubmit={handleUpdateHabit}
+        habit={currentEditHabit}
       />
 
       <div className="relative min-h-screen pb-12 overflow-hidden">
@@ -210,8 +257,16 @@ export default function GoalsPage() {
                 macroTarget={macroTarget?.macroTarget}
               />
 
-              {/* Habit Tracker */}
-              <HabitTracker habits={habitGoals} onAddHabit={handleAddHabit} />
+              {/* Habit Tracker - Now with edit functionality */}
+              <HabitTracker
+                habits={habitGoals || []}
+                isLoading={isLoadingHabits}
+                onAddHabit={handleAddHabit}
+                onIncrementHabit={incrementHabitProgress}
+                onCompleteHabit={completeHabitGoal}
+                onEditHabit={handleEditHabit}
+                onDeleteHabit={deleteHabitGoal}
+              />
 
               {/* Recent Stats Section - Optional feature to show additional metrics */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
