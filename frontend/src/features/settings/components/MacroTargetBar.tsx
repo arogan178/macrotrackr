@@ -1,4 +1,4 @@
-import React from "react";
+import { memo } from "react";
 import { MacroTargetState } from "../types";
 
 interface MacroTargetBarProps {
@@ -36,4 +36,4 @@ function MacroTargetBar({ target, className = "" }: MacroTargetBarProps) {
   );
 }
 
-export default React.memo(MacroTargetBar);
+export default memo(MacroTargetBar);
