@@ -188,7 +188,7 @@ function HabitCard({
             >
               {renderIcon()}
             </div>
-            <h4 className="font-medium text-gray-200">{title}</h4>
+            <h4 className="font-medium text-gray-200 mr-2">{title}</h4>
           </div>
 
           {isComplete && (

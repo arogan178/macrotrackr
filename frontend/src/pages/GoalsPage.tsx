@@ -5,8 +5,7 @@ import {
   AchievementsContent,
   WeightGoalDashboard,
   HabitTracker,
-  AddHabitModal,
-  EditHabitModal,
+  HabitModal, // Using the unified HabitModal
 } from "@/features/goals/components";
 import {
   WeightGoalFormValues,
@@ -24,14 +23,12 @@ export default function GoalsPage() {
   const [activeTab, setActiveTab] = useState<"active" | "achieved">("active");
   // State for reset goals modal
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  // State for add habit modal
-  const [isAddHabitModalOpen, setIsAddHabitModalOpen] = useState(false);
-  // State for edit habit modal
-  const [isEditHabitModalOpen, setIsEditHabitModalOpen] = useState(false);
+  // State for habit modal
+  const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
   // State for the habit being edited
-  const [currentEditHabit, setCurrentEditHabit] = useState<HabitGoal | null>(
-    null
-  );
+  const [currentHabit, setCurrentHabit] = useState<HabitGoal | null>(null);
+  // State for modal mode (add or edit)
+  const [habitModalMode, setHabitModalMode] = useState<"add" | "edit">("add");
 
   // Get state and actions from store
   const {
@@ -97,29 +94,40 @@ export default function GoalsPage() {
 
   // Handler for adding a new habit
   const handleAddHabit = () => {
-    setIsAddHabitModalOpen(true);
+    setCurrentHabit(null);
+    setHabitModalMode("add");
+    setIsHabitModalOpen(true);
   };
 
   // Handler for editing a habit
   const handleEditHabit = (id: string) => {
     const habitToEdit = habitGoals?.find((habit) => habit.id === id) || null;
     if (habitToEdit) {
-      setCurrentEditHabit(habitToEdit);
-      setIsEditHabitModalOpen(true);
+      setCurrentHabit(habitToEdit);
+      setHabitModalMode("edit");
+      setIsHabitModalOpen(true);
     }
   };
 
-  // Handle submitting a new habit goal
-  const handleSubmitHabit = async (values: HabitGoalFormValues) => {
-    await addHabitGoal(values);
-    setIsAddHabitModalOpen(false);
+  // Unified handler for submitting and updating habits
+  const handleSubmitHabit = async (
+    values: HabitGoalFormValues,
+    habitId?: string
+  ) => {
+    if (habitModalMode === "edit" && habitId) {
+      await updateHabitGoal(habitId, values);
+    } else {
+      await addHabitGoal(values);
+    }
+
+    setIsHabitModalOpen(false);
+    setCurrentHabit(null);
   };
 
-  // Handle updating an existing habit
-  const handleUpdateHabit = async (id: string, values: HabitGoalFormValues) => {
-    await updateHabitGoal(id, values);
-    setIsEditHabitModalOpen(false);
-    setCurrentEditHabit(null);
+  // Handler for closing the habit modal
+  const handleCloseHabitModal = () => {
+    setIsHabitModalOpen(false);
+    setCurrentHabit(null);
   };
 
   return (
@@ -159,22 +167,13 @@ export default function GoalsPage() {
         size="md"
       />
 
-      {/* Add Habit Modal */}
-      <AddHabitModal
-        isOpen={isAddHabitModalOpen}
-        onClose={() => setIsAddHabitModalOpen(false)}
+      {/* Unified Habit Modal */}
+      <HabitModal
+        isOpen={isHabitModalOpen}
+        onClose={handleCloseHabitModal}
         onSubmit={handleSubmitHabit}
-      />
-
-      {/* Edit Habit Modal */}
-      <EditHabitModal
-        isOpen={isEditHabitModalOpen}
-        onClose={() => {
-          setIsEditHabitModalOpen(false);
-          setCurrentEditHabit(null);
-        }}
-        onSubmit={handleUpdateHabit}
-        habit={currentEditHabit}
+        habit={currentHabit}
+        mode={habitModalMode}
       />
 
       <div className="relative min-h-screen pb-12 overflow-hidden">
