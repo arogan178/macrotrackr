@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { PROGRESS_BAR_COLORS, PROGRESS_BAR_HEIGHTS } from "./utils/constants";
 
 interface ProgressBarProps {
   progress: number; // 0-100
@@ -7,20 +8,6 @@ interface ProgressBarProps {
   showPercentage?: boolean;
   className?: string;
 }
-
-const colorMap = {
-  blue: "bg-blue-500",
-  green: "bg-green-500",
-  red: "bg-red-500",
-  indigo: "bg-indigo-500",
-  purple: "bg-purple-500",
-};
-
-const heightMap = {
-  sm: "h-1",
-  md: "h-2",
-  lg: "h-3",
-};
 
 function ProgressBar({
   progress,
@@ -35,10 +22,10 @@ function ProgressBar({
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`w-full ${heightMap[height]} bg-gray-700/50 rounded-full overflow-hidden`}
+        className={`w-full ${PROGRESS_BAR_HEIGHTS[height]} bg-gray-700/50 rounded-full overflow-hidden`}
       >
         <div
-          className={`${heightMap[height]} ${colorMap[color]} rounded-full transition-all duration-500`}
+          className={`${PROGRESS_BAR_HEIGHTS[height]} ${PROGRESS_BAR_COLORS[color]} rounded-full transition-all duration-500`}
           style={{ width: `${safeProgress}%` }}
         />
       </div>

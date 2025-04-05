@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { InfoCardProps } from "../utils/types";
-import { colorMap } from "../utils/constants";
+import { COLOR_MAP } from "../utils/constants";
 
 function InfoCard({
   title,
@@ -9,7 +9,7 @@ function InfoCard({
   icon,
   children,
 }: InfoCardProps) {
-  const { bg, border, text, dot } = colorMap[color];
+  const { bg, border, text, dot } = COLOR_MAP[color];
 
   return (
     <div className={`bg-gradient-to-br ${bg} p-4 rounded-xl border ${border}`}>
