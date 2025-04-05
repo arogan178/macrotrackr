@@ -1,18 +1,18 @@
 import { StateCreator } from "zustand";
-// Assuming WeightGoals, WeightGoalFormValues are correctly defined in ../types
+// Import HabitSlice and createHabitSlice
+import { HabitSlice, createHabitSlice } from "./habit-slice";
 import { WeightGoals, WeightGoalFormValues } from "../types";
-import { CALORIE_ADJUSTMENT_FACTORS } from "../constants"; // Adjust path as needed
-import { apiService } from "@/utils/api-service"; // Adjust path as needed
-import { getErrorMessage } from "@/utils/error-handling"; // Adjust path as needed
+import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
+import { apiService } from "@/utils/api-service";
+import { getErrorMessage } from "@/utils/error-handling";
 
-// Define the slice interface - REMOVED macroTarget state and related actions
-export interface GoalsSlice {
+// Define the slice interface - Updated to include HabitSlice
+export interface GoalsSlice extends HabitSlice {
   // State
   weightGoals: WeightGoals | null;
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
-  // macroDailyTotals removed as it likely belongs in macros slice or calculated elsewhere
 
   // Actions
   fetchWeightGoals: () => Promise<void>;
@@ -47,9 +47,11 @@ export const createGoalsSlice: StateCreator<
   [],
   GoalsSlice
 > = (set, get) => ({
+  // Include the habit slice
+  ...createHabitSlice(set, get),
+
   // Initial State
   weightGoals: null,
-  // macroTarget: null, // REMOVED
   isLoading: false,
   isSaving: false,
   error: null,
@@ -87,7 +89,7 @@ export const createGoalsSlice: StateCreator<
         targetWeight,
         startDate,
         targetDate,
-        calorieTarget: customCalorieTarget, // Use calorieTarget (renamed from adjustedCalorieIntake)
+        calorieTarget: customCalorieTarget,
         weeklyChange: customWeeklyChange,
         calculatedWeeks: customCalculatedWeeks,
         weightGoal: customWeightGoal,
@@ -111,7 +113,7 @@ export const createGoalsSlice: StateCreator<
 
       let calculatedWeeks = customCalculatedWeeks ?? 1;
       let weeklyChange = customWeeklyChange ?? 0;
-      let dailyChange = 0; // Use dailyChange (renamed from dailyChange)
+      let dailyChange = 0;
 
       if (
         (calculatedWeeks <= 1 || weeklyChange === 0) &&
@@ -145,7 +147,6 @@ export const createGoalsSlice: StateCreator<
       }
 
       const weightGoalsPayload: WeightGoals = {
-        // Ensure WeightGoals type uses calorieTarget and dailyChange
         currentWeight,
         targetWeight,
         weightGoal,
@@ -154,15 +155,13 @@ export const createGoalsSlice: StateCreator<
         calorieTarget: calorieTarget,
         calculatedWeeks,
         weeklyChange,
-        dailyChange, // Use dailyChange
+        dailyChange,
       };
 
-      // Save only weight goals to the backend
       const savedWeightGoal = await apiService.goals.saveWeightGoals(
         weightGoalsPayload
       );
 
-      // Update state with the saved/returned weight goals
       set({ weightGoals: savedWeightGoal, isSaving: false, error: null });
 
       if (fullGet().addNotification) {
@@ -193,7 +192,7 @@ export const createGoalsSlice: StateCreator<
     }
     if (currentWeightGoals[key] === value) {
       return;
-    } // No change
+    }
 
     set({ isSaving: true, error: null });
     const fullGet = get as () => FullGoalsState;
@@ -235,9 +234,9 @@ export const createGoalsSlice: StateCreator<
     const fullGet = get as () => FullGoalsState;
     try {
       await apiService.goals.resetGoals();
-      // Only reset weightGoals here
+      await get().resetHabitGoals(); // Call resetHabitGoals from habit-slice
       set({ weightGoals: null, isLoading: false, error: null });
-      // Note: macroTarget state is now managed in macros-slice
+
       if (fullGet().addNotification) {
         fullGet().addNotification({
           message: "Goals reset successfully!",

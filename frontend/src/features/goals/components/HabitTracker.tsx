@@ -1,43 +1,65 @@
-import { ReactNode } from "react";
-import ProgressBar from "../../../components/ProgressBar";
+import ProgressBar from "@/components/ProgressBar";
+import { HabitGoal } from "../types";
+import HabitActions from "./HabitActions";
+import {
+  CalendarIcon,
+  CheckCircleIcon,
+  TargetIcon,
+  AwardIcon,
+  HeartIcon,
+  BookIcon,
+  CoffeeIcon,
+  DropletIcon,
+  DumbBellIcon,
+  MoonIcon,
+  SunIcon,
+  PlusIcon,
+  CheckIcon,
+} from "@/components/Icons";
 
-interface HabitGoalProps {
-  id: number;
-  title: string;
-  icon: ReactNode;
-  current: number;
-  target: number;
-  progress: number;
-  accentColor?: "indigo" | "blue" | "green" | "purple";
-  isComplete?: boolean;
-}
+import { PROGRESS_BAR_COLORS } from "@/components/utils/constants";
+
+// Map of icon names to their components
+const ICON_MAP = {
+  calendar: CalendarIcon,
+  "check-circle": CheckCircleIcon,
+  target: TargetIcon,
+  award: AwardIcon,
+  heart: HeartIcon,
+  book: BookIcon,
+  coffee: CoffeeIcon,
+  droplet: DropletIcon,
+  dumbbell: DumbBellIcon,
+  moon: MoonIcon,
+  sun: SunIcon,
+};
 
 interface HabitTrackerProps {
-  habits: HabitGoalProps[];
+  habits: HabitGoal[];
+  isLoading?: boolean;
   onAddHabit?: () => void;
+  onIncrementHabit?: (id: string) => Promise<void>;
+  onCompleteHabit?: (id: string) => Promise<void>;
+  onEditHabit?: (id: string) => void;
+  onDeleteHabit?: (id: string) => Promise<void>;
 }
 
-function HabitTracker({ habits, onAddHabit }: HabitTrackerProps) {
+function HabitTracker({
+  habits,
+  isLoading = false,
+  onAddHabit,
+  onIncrementHabit,
+  onCompleteHabit,
+  onEditHabit,
+  onDeleteHabit,
+}: HabitTrackerProps) {
   return (
-    <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden">
+    <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg">
       <div className="p-5">
         {/* Header with title and add button */}
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-200 flex items-center">
-            <svg
-              className="w-5 h-5 mr-2 text-purple-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
+            <CheckCircleIcon size="md" className="mr-2 text-purple-400" />
             Habit Goals
           </h3>
 
@@ -46,26 +68,34 @@ function HabitTracker({ habits, onAddHabit }: HabitTrackerProps) {
               onClick={onAddHabit}
               className="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg"
             >
-              <svg
-                className="w-3.5 h-3.5 mr-1.5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
+              <PlusIcon size="sm" className="mr-1.5" />
               Add Habit
             </button>
           )}
         </div>
 
-        {habits.length === 0 ? (
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-gray-700/30 rounded-lg overflow-hidden"
+              >
+                <div className="bg-gradient-to-r from-gray-600/20 to-gray-600/5 p-3">
+                  <div className="flex items-center mb-2">
+                    <div className="w-8 h-8 rounded-lg bg-gray-600/30 animate-pulse mr-2"></div>
+                    <div className="h-5 w-24 bg-gray-600/30 animate-pulse rounded"></div>
+                  </div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <div className="h-6 w-16 bg-gray-600/30 animate-pulse rounded"></div>
+                    <div className="h-4 w-8 bg-gray-600/30 animate-pulse rounded"></div>
+                  </div>
+                  <div className="h-2 bg-gray-600/30 animate-pulse rounded-full"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : habits.length === 0 ? (
           <div className="bg-gray-700/30 rounded-lg p-8 text-center">
             <p className="text-gray-400 mb-3">No habit goals set yet</p>
             {onAddHabit && (
@@ -80,7 +110,14 @@ function HabitTracker({ habits, onAddHabit }: HabitTrackerProps) {
         ) : (
           <div className="space-y-4">
             {habits.map((habit) => (
-              <HabitCard key={habit.id} {...habit} />
+              <HabitCard
+                key={habit.id}
+                habit={habit}
+                onIncrement={onIncrementHabit}
+                onComplete={onCompleteHabit}
+                onEdit={onEditHabit}
+                onDelete={onDeleteHabit}
+              />
             ))}
           </div>
         )}
@@ -89,15 +126,32 @@ function HabitTracker({ habits, onAddHabit }: HabitTrackerProps) {
   );
 }
 
+interface HabitCardProps {
+  habit: HabitGoal;
+  onIncrement?: (id: string) => Promise<void>;
+  onComplete?: (id: string) => Promise<void>;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => Promise<void>;
+}
+
 function HabitCard({
-  title,
-  icon,
-  current,
-  target,
-  progress,
-  accentColor = "indigo",
-  isComplete = false,
-}: Omit<HabitGoalProps, "id">) {
+  habit,
+  onIncrement,
+  onComplete,
+  onEdit,
+  onDelete,
+}: HabitCardProps) {
+  const {
+    id,
+    title,
+    iconName,
+    current,
+    target,
+    progress,
+    accentColor = "indigo",
+    isComplete = false,
+  } = habit;
+
   const getGradientClass = (color: string) => {
     const gradients = {
       indigo: "from-indigo-500/20 to-indigo-500/5",
@@ -118,35 +172,44 @@ function HabitCard({
     return colors[color as keyof typeof colors] || colors.indigo;
   };
 
+  // Render the icon based on iconName
+  const renderIcon = () => {
+    const IconComponent = ICON_MAP[iconName] || TargetIcon;
+    return <IconComponent size="sm" />;
+  };
+
   return (
-    <div className="bg-gray-700/30 rounded-lg overflow-hidden">
+    <div className="bg-gray-700/30 rounded-lg">
       <div className={`bg-gradient-to-r ${getGradientClass(accentColor)} p-3`}>
-        <div className="flex items-center mb-2">
-          <div
-            className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
-          >
-            {icon}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <div
+              className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
+            >
+              {renderIcon()}
+            </div>
+            <h4 className="font-medium text-gray-200">{title}</h4>
           </div>
-          <h4 className="font-medium text-gray-200">{title}</h4>
 
           {isComplete && (
-            <span className="ml-auto text-xs text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded-full">
-              <svg
-                className="w-3 h-3"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M5 13l4 4L19 7"
-                />
-              </svg>
+            <span className="text-xs text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded-full">
+              <CheckIcon size="sm" />
               Complete
             </span>
+          )}
+
+          {/* Actions menu - only show if handlers are provided */}
+          {(onIncrement || onComplete || onEdit || onDelete) && (
+            <div className="ml-auto">
+              <HabitActions
+                habitId={id}
+                isComplete={isComplete}
+                onIncrement={onIncrement || (async () => {})}
+                onComplete={onComplete || (async () => {})}
+                onEdit={onEdit}
+                onDelete={onDelete || (async () => {})}
+              />
+            </div>
           )}
         </div>
 

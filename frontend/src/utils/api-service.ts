@@ -97,6 +97,20 @@ class ApiError extends Error {
   }
 }
 
+// Habit Goal Payload
+type HabitGoalPayload = {
+  id: string;
+  title: string;
+  iconName: string;
+  current: number;
+  target: number;
+  progress: number;
+  accentColor?: "indigo" | "blue" | "green" | "purple";
+  isComplete?: boolean;
+  createdAt: string;
+  completedAt?: string;
+};
+
 // --- Helper Functions ---
 /**
  * Handles API responses, parses JSON, and standardizes error handling.
@@ -430,6 +444,89 @@ export const apiService = {
         headers: getHeaders(false),
       });
       return handleResponse(response);
+    },
+
+    /** Gets all habit goals */
+    getHabitGoals: async (): Promise<HabitGoalPayload[]> => {
+      // For now, simulate API call with local storage until backend is ready
+      try {
+        const storedHabits = localStorage.getItem("habit_goals");
+        return storedHabits ? JSON.parse(storedHabits) : [];
+      } catch (error) {
+        console.error("Error fetching habit goals from storage:", error);
+        return [];
+      }
+    },
+
+    /** Saves a new habit goal */
+    saveHabitGoal: async (
+      habitGoal: HabitGoalPayload
+    ): Promise<HabitGoalPayload> => {
+      // For now, simulate API call with local storage until backend is ready
+      try {
+        const storedHabits = localStorage.getItem("habit_goals");
+        const habits = storedHabits ? JSON.parse(storedHabits) : [];
+        habits.push(habitGoal);
+        localStorage.setItem("habit_goals", JSON.stringify(habits));
+        return habitGoal;
+      } catch (error) {
+        console.error("Error saving habit goal to storage:", error);
+        throw new ApiError("Failed to save habit goal", 500, "STORAGE_ERROR");
+      }
+    },
+
+    /** Updates an existing habit goal */
+    updateHabitGoal: async (
+      id: string,
+      habitGoal: HabitGoalPayload
+    ): Promise<HabitGoalPayload> => {
+      // For now, simulate API call with local storage until backend is ready
+      try {
+        const storedHabits = localStorage.getItem("habit_goals");
+        const habits = storedHabits ? JSON.parse(storedHabits) : [];
+        const index = habits.findIndex((h: HabitGoalPayload) => h.id === id);
+
+        if (index === -1) {
+          throw new ApiError("Habit goal not found", 404, "NOT_FOUND");
+        }
+
+        habits[index] = habitGoal;
+        localStorage.setItem("habit_goals", JSON.stringify(habits));
+        return habitGoal;
+      } catch (error) {
+        console.error("Error updating habit goal in storage:", error);
+        if (error instanceof ApiError) {
+          throw error;
+        }
+        throw new ApiError("Failed to update habit goal", 500, "STORAGE_ERROR");
+      }
+    },
+
+    /** Deletes a habit goal */
+    deleteHabitGoal: async (id: string): Promise<void> => {
+      // For now, simulate API call with local storage until backend is ready
+      try {
+        const storedHabits = localStorage.getItem("habit_goals");
+        const habits = storedHabits ? JSON.parse(storedHabits) : [];
+        const updatedHabits = habits.filter(
+          (h: HabitGoalPayload) => h.id !== id
+        );
+        localStorage.setItem("habit_goals", JSON.stringify(updatedHabits));
+      } catch (error) {
+        console.error("Error deleting habit goal from storage:", error);
+        throw new ApiError("Failed to delete habit goal", 500, "STORAGE_ERROR");
+      }
+    },
+
+    /** Reset all habit goals */
+    resetHabitGoals: async (): Promise<void> => {
+      // For now, simulate API call with local storage until backend is ready
+      try {
+        localStorage.removeItem("habit_goals");
+      } catch (error) {
+        console.error("Error resetting habit goals in storage:", error);
+        throw new ApiError("Failed to reset habit goals", 500, "STORAGE_ERROR");
+      }
     },
   },
 };
