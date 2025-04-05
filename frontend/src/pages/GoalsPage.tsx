@@ -11,14 +11,7 @@ import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
 import { useGoalData } from "@/features/goals/hooks";
 import { TabButton } from "@/components/form";
-import {
-  GoalsIcon,
-  StarIcon,
-  PlusIcon,
-  CalendarIcon,
-  CheckIcon,
-  BarChartIcon,
-} from "@/components/Icons";
+import { GoalsIcon, StarIcon, PlusIcon } from "@/components/Icons";
 import Modal from "@/components/Modal";
 
 export default function GoalsPage() {

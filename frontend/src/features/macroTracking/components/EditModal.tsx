@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
-import { MacroEntry } from "@/types";
+import { MacroEntry } from "@/features/macroTracking/types";
 import { TextField, NumberField } from "@/components/form";
 
 interface EditModalProps {
@@ -22,7 +22,7 @@ export default function EditModal({
   // Validate form whenever entry changes
   useEffect(() => {
     const isValid =
-      editedEntry.name.trim() !== "" &&
+      editedEntry.mealName.trim() !== "" &&
       editedEntry.protein >= 0 &&
       editedEntry.carbs >= 0 &&
       editedEntry.fats >= 0;
@@ -33,7 +33,7 @@ export default function EditModal({
   const handleInputChange = (field: keyof MacroEntry, value: string) => {
     setEditedEntry((prev) => ({
       ...prev,
-      [field]: field === "name" ? value : Number(value) || 0,
+      [field]: field === "mealName" ? value : Number(value) || 0,
     }));
   };
 
@@ -65,8 +65,8 @@ export default function EditModal({
       <div className="space-y-4">
         <TextField
           label="Food Name"
-          value={String(editedEntry.name)}
-          onChange={(e) => handleInputChange("name", e.target.value)}
+          value={String(editedEntry.mealName)}
+          onChange={(e) => handleInputChange("mealName", e.target.value)}
           placeholder="Enter food name"
           required
         />
