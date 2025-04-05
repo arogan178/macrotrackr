@@ -1,4 +1,3 @@
-import React from "react";
 import { calculateCaloriePercentages } from "@/utils/nutrition";
 import { MacroNutrients } from "@/utils/nutrition-types";
 
