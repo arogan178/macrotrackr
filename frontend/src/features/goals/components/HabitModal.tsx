@@ -3,28 +3,32 @@ import Modal from "@/components/Modal";
 import { HabitGoal, HabitGoalFormValues } from "../types";
 import HabitForm from "./HabitForm";
 
-interface EditHabitModalProps {
+interface HabitModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (id: string, values: HabitGoalFormValues) => Promise<void>;
-  habit: HabitGoal | null;
+  onSubmit: (values: HabitGoalFormValues, habitId?: string) => Promise<void>;
+  habit?: HabitGoal | null;
+  mode: "add" | "edit";
 }
 
-function EditHabitModal({
+function HabitModal({
   isOpen,
   onClose,
   onSubmit,
   habit,
-}: EditHabitModalProps) {
+  mode,
+}: HabitModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formValues, setFormValues] = useState<HabitGoalFormValues | null>(
     null
   );
   const [isFormValid, setIsFormValid] = useState(false);
 
-  // Convert habit to form values when opened
+  const isEditMode = mode === "edit";
+
+  // Convert habit to form values when opened in edit mode
   useEffect(() => {
-    if (habit) {
+    if (isEditMode && habit) {
       const initialValues: HabitGoalFormValues = {
         title: habit.title,
         iconName: habit.iconName,
@@ -33,7 +37,7 @@ function EditHabitModal({
       };
       setFormValues(initialValues);
     }
-  }, [habit]);
+  }, [habit, isEditMode]);
 
   const handleFormChange = (values: HabitGoalFormValues, valid: boolean) => {
     setFormValues(values);
@@ -41,29 +45,42 @@ function EditHabitModal({
   };
 
   const handleSave = async () => {
-    if (!formValues || !isFormValid || !habit) return;
+    if (!formValues || !isFormValid) return;
+    if (isEditMode && !habit) return;
 
     setIsSubmitting(true);
     try {
-      await onSubmit(habit.id, formValues);
+      // In edit mode, pass the habit ID; in add mode, just pass the values
+      await onSubmit(formValues, isEditMode ? habit?.id : undefined);
       onClose();
     } catch (error) {
-      console.error("Error updating habit goal:", error);
+      console.error(
+        `Error ${isEditMode ? "updating" : "submitting"} habit goal:`,
+        error
+      );
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  // Determine the title and save button label based on the mode
+  const modalTitle = isEditMode ? "Edit Habit Goal" : "Add New Habit Goal";
+  const saveLabel = isSubmitting
+    ? "Saving..."
+    : isEditMode
+    ? "Save Changes"
+    : "Save Habit";
+
   return (
     <Modal
       isOpen={isOpen}
       onClose={!isSubmitting ? onClose : undefined}
-      title="Edit Habit Goal"
+      title={modalTitle}
       size="md"
       variant="form"
       onSave={handleSave}
       saveDisabled={!isFormValid || isSubmitting}
-      saveLabel={isSubmitting ? "Saving..." : "Save Changes"}
+      saveLabel={saveLabel}
     >
       <HabitForm
         initialValues={formValues || undefined}
@@ -75,4 +92,4 @@ function EditHabitModal({
   );
 }
 
-export default EditHabitModal;
+export default HabitModal;
