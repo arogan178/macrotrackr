@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { ICON_SIZES } from "./utils/constants";
 import {
   User,
   Mail,
@@ -47,13 +48,6 @@ interface IconProps extends Omit<LucideProps, "size"> {
   size?: "sm" | "md" | "lg";
 }
 
-// Size mappings for consistent icon sizing
-const sizeClasses = {
-  sm: "w-4 h-4",
-  md: "w-5 h-5",
-  lg: "w-6 h-6",
-};
-
 // HOC to apply consistent styling to all icons
 function createIcon(Icon: LucideIcon) {
   return memo(function IconWrapper({
@@ -61,7 +55,7 @@ function createIcon(Icon: LucideIcon) {
     size = "md",
     ...props
   }: IconProps) {
-    const sizeClass = sizeClasses[size] || sizeClasses.md;
+    const sizeClass = ICON_SIZES[size] || ICON_SIZES.md;
     return <Icon className={`${sizeClass} ${className}`} {...props} />;
   });
 }

@@ -12,6 +12,7 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
+  Filler,
 } from "chart.js";
 import { useStore } from "../store/store";
 import Modal from "../components/Modal";
@@ -24,7 +25,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 export default function ReportingPage() {
@@ -101,7 +103,7 @@ export default function ReportingPage() {
 
       // Initialize all dates in range with zero values
       const dateLabels: string[] = [];
-      let currentDate = new Date(startDate);
+      const currentDate = new Date(startDate);
 
       while (currentDate <= today) {
         const dateString = currentDate.toISOString().split("T")[0];
@@ -243,7 +245,7 @@ export default function ReportingPage() {
         titleFont: {
           family: "'Inter', sans-serif",
           size: 14,
-          weight: "600",
+          weight: "bold",
         },
         footerFont: {
           family: "'Inter', sans-serif",
