@@ -75,7 +75,6 @@ export default function GoalsPage() {
     setIsResetModalOpen(false);
   };
 
-  // Handler for adding a new habit (stub for future implementation)
   const handleAddHabit = () => {
     setIsAddHabitModalOpen(true);
     // Future implementation: Show modal to add new habit

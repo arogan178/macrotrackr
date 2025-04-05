@@ -382,7 +382,6 @@ export const apiService = {
       return handleResponse(response);
     },
 
-    // --- Macro Target Percentage Endpoints ---
     /** Gets ONLY macro target percentages object */
     getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {

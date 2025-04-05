@@ -1,25 +1,6 @@
 import { calculateCaloriePercentages } from "@/utils/nutrition";
 import { MacroNutrients } from "@/utils/nutrition-types";
 
-// Default color configuration for macros
-export const DEFAULT_MACRO_COLORS = {
-  protein: {
-    color: "bg-green-500",
-    bgColor: "bg-green-500/80",
-    textColor: "text-green-400",
-  },
-  carbs: {
-    color: "bg-blue-500",
-    bgColor: "bg-blue-500/80",
-    textColor: "text-blue-400",
-  },
-  fats: {
-    color: "bg-red-500",
-    bgColor: "bg-red-500/80",
-    textColor: "text-red-400",
-  },
-};
-
 interface MacroBarProps {
   macros: MacroNutrients;
   className?: string;
