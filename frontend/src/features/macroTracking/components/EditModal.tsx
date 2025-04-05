@@ -66,7 +66,7 @@ export default function EditModal({
         <TextField
           label="Food Name"
           value={String(editedEntry.mealName)}
-          onChange={(e) => handleInputChange("mealName", e.target.value)}
+          onChange={(value) => handleInputChange("mealName", value)}
           placeholder="Enter food name"
           required
         />
