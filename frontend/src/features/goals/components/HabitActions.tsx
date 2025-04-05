@@ -109,15 +109,15 @@ function HabitActions({
         <MoreVerticalIcon size="sm" />
       </button>
 
-      {/* Dropdown menu - Fix positioning to overlap container */}
+      {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute z-50 right-0 top-full mt-1 py-1 w-36 rounded-lg shadow-lg bg-gray-800/90 backdrop-blur-sm border border-gray-700/40 text-sm">
+        <div className="absolute z-50 right-0 top-full mt-1 py-0.5 w-32 rounded-md shadow-lg bg-gray-800/90 backdrop-blur-sm border border-gray-700/40 text-xs">
           {onEdit && (
             <button
               onClick={handleEdit}
-              className="w-full text-left px-4 py-2 flex items-center hover:bg-gray-700/50 text-gray-200"
+              className="w-full text-left px-3 py-1.5 flex items-center hover:bg-gray-700/50 text-gray-200"
             >
-              <EditIcon size="sm" className="mr-2" />
+              <EditIcon size="sm" className="mr-1.5" />
               Edit
             </button>
           )}
@@ -125,9 +125,9 @@ function HabitActions({
           <button
             onClick={handleDelete}
             disabled={isActionInProgress}
-            className="w-full text-left px-4 py-2 flex items-center hover:bg-gray-700/50 text-red-400"
+            className="w-full text-left px-3 py-1.5 flex items-center hover:bg-gray-700/50 text-red-400"
           >
-            <TrashIcon size="sm" className="mr-2" />
+            <TrashIcon size="sm" className="mr-1.5" />
             Delete
           </button>
         </div>
