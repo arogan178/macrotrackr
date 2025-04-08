@@ -4,14 +4,10 @@ import {
   GoalsLoadingSkeleton,
   AchievementsContent,
   WeightGoalDashboard,
-  HabitTracker,
-  HabitModal, // Using the unified HabitModal
 } from "@/features/goals/components";
-import {
-  WeightGoalFormValues,
-  HabitGoalFormValues,
-  HabitGoal,
-} from "@/features/goals/types";
+import { HabitTracker, HabitModal } from "@/features/habits/components";
+import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types";
+import { WeightGoalFormValues } from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
 import { TabButton } from "@/components/form";
@@ -37,24 +33,24 @@ export default function GoalsPage() {
     weightGoals,
     macroTarget,
     macroDailyTotals,
-    habitGoals,
-    isLoading,
-    isLoadingHabits,
-    error,
-    habitError,
+    habits, // Updated property from the habits slice
+    isLoading: goalsLoading,
+    isSaving: goalsSaving,
+    error: goalsError,
+    isLoading: habitsLoading, // Updated property from the habits slice
+    error: habitsError, // Updated property from the habits slice
     createWeightGoal,
     clearError,
-    clearHabitError,
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
     fetchMacroTarget,
-    fetchHabitGoals,
-    addHabitGoal,
-    updateHabitGoal,
+    fetchHabits,
+    addHabit,
+    updateHabit,
     incrementHabitProgress,
-    completeHabitGoal,
-    deleteHabitGoal,
+    completeHabit,
+    deleteHabit,
     resetGoals,
   } = useStore();
 
@@ -68,14 +64,14 @@ export default function GoalsPage() {
     // Fetch persisted goals data
     fetchWeightGoals();
     fetchMacroTarget();
-    fetchHabitGoals();
+    fetchHabits();
   }, [
     user,
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
     fetchMacroTarget,
-    fetchHabitGoals,
+    fetchHabits,
   ]);
 
   // Handler for saving weight goal
@@ -101,7 +97,7 @@ export default function GoalsPage() {
 
   // Handler for editing a habit
   const handleEditHabit = (id: string) => {
-    const habitToEdit = habitGoals?.find((habit) => habit.id === id) || null;
+    const habitToEdit = habits?.find((habit) => habit.id === id) || null;
     if (habitToEdit) {
       setCurrentHabit(habitToEdit);
       setHabitModalMode("edit");
@@ -115,9 +111,9 @@ export default function GoalsPage() {
     habitId?: string
   ) => {
     if (habitModalMode === "edit" && habitId) {
-      await updateHabitGoal(habitId, values);
+      await updateHabit(habitId, values);
     } else {
-      await addHabitGoal(values);
+      await addHabit(values);
     }
 
     setIsHabitModalOpen(false);
@@ -135,20 +131,20 @@ export default function GoalsPage() {
       <Navbar />
 
       {/* Show notifications for errors */}
-      {error && (
+      {goalsError && (
         <FloatingNotification
-          message={error}
+          message={goalsError}
           type="error"
           onClose={clearError}
           duration={5000}
         />
       )}
 
-      {habitError && (
+      {habitsError && (
         <FloatingNotification
-          message={habitError}
+          message={habitsError}
           type="error"
-          onClose={clearHabitError}
+          onClose={clearError}
           duration={5000}
         />
       )}
@@ -232,7 +228,7 @@ export default function GoalsPage() {
           </div>
 
           {/* Main Content */}
-          {isLoading ? (
+          {goalsLoading ? (
             <GoalsLoadingSkeleton />
           ) : activeTab === "active" ? (
             <div className="space-y-6">
@@ -251,20 +247,20 @@ export default function GoalsPage() {
                 }
                 weightGoals={weightGoals}
                 onSave={handleSaveGoal}
-                isLoading={isLoading}
+                isLoading={goalsLoading}
                 targetCalories={macroTarget?.targetCalories}
                 macroTarget={macroTarget?.macroTarget}
               />
 
-              {/* Habit Tracker - Now with edit functionality */}
+              {/* Habit Tracker - Using habits array instead of habitGoals */}
               <HabitTracker
-                habits={habitGoals || []}
-                isLoading={isLoadingHabits}
+                habits={habits || []}
+                isLoading={habitsLoading}
                 onAddHabit={handleAddHabit}
                 onIncrementHabit={incrementHabitProgress}
-                onCompleteHabit={completeHabitGoal}
+                onCompleteHabit={completeHabit}
                 onEditHabit={handleEditHabit}
-                onDeleteHabit={deleteHabitGoal}
+                onDeleteHabit={deleteHabit}
               />
 
               {/* Recent Stats Section - Optional feature to show additional metrics */}

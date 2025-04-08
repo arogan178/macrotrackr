@@ -55,7 +55,7 @@ function HabitModal({
       onClose();
     } catch (error) {
       console.error(
-        `Error ${isEditMode ? "updating" : "submitting"} habit goal:`,
+        `Error ${isEditMode ? "updating" : "submitting"} habit:`,
         error
       );
     } finally {
@@ -64,17 +64,19 @@ function HabitModal({
   };
 
   // Determine the title and save button label based on the mode
-  const modalTitle = isEditMode ? "Edit Habit Goal" : "Add New Habit Goal";
+  const modalTitle = isEditMode ? "Edit Habit" : "Add New Habit";
   const saveLabel = isSubmitting
     ? "Saving..."
     : isEditMode
     ? "Save Changes"
     : "Save Habit";
 
+  const handleClose = isSubmitting ? () => {} : onClose;
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={!isSubmitting ? onClose : undefined}
+      onClose={handleClose}
       title={modalTitle}
       size="md"
       variant="form"
@@ -85,7 +87,6 @@ function HabitModal({
       <HabitForm
         initialValues={formValues || undefined}
         onChange={handleFormChange}
-        isSubmitting={isSubmitting}
         hideButtons
       />
     </Modal>
