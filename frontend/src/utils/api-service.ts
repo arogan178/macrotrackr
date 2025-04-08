@@ -445,9 +445,9 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-
-    /** Gets all habit goals */
-    getHabitGoals: async (): Promise<HabitGoalPayload[]> => {
+  },
+  habits: {
+    getHabit: async (): Promise<HabitGoalPayload[]> => {
       // For now, simulate API call with local storage until backend is ready
       try {
         const storedHabits = localStorage.getItem("habit_goals");
@@ -459,7 +459,7 @@ export const apiService = {
     },
 
     /** Saves a new habit goal */
-    saveHabitGoal: async (
+    saveHabit: async (
       habitGoal: HabitGoalPayload
     ): Promise<HabitGoalPayload> => {
       // For now, simulate API call with local storage until backend is ready
@@ -476,7 +476,7 @@ export const apiService = {
     },
 
     /** Updates an existing habit goal */
-    updateHabitGoal: async (
+    updateHabit: async (
       id: string,
       habitGoal: HabitGoalPayload
     ): Promise<HabitGoalPayload> => {
@@ -503,7 +503,7 @@ export const apiService = {
     },
 
     /** Deletes a habit goal */
-    deleteHabitGoal: async (id: string): Promise<void> => {
+    deleteHabit: async (id: string): Promise<void> => {
       // For now, simulate API call with local storage until backend is ready
       try {
         const storedHabits = localStorage.getItem("habit_goals");
@@ -519,7 +519,7 @@ export const apiService = {
     },
 
     /** Reset all habit goals */
-    resetHabitGoals: async (): Promise<void> => {
+    resetHabit: async (): Promise<void> => {
       // For now, simulate API call with local storage until backend is ready
       try {
         localStorage.removeItem("habit_goals");
