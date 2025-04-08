@@ -1,3 +1,4 @@
+// The updated HabitForm.tsx, removing isSubmitting prop since it's not used
 import { useState, useMemo, useEffect } from "react";
 import { HabitGoalFormValues } from "../types";
 import { TextField, NumberField } from "@/components/form";
@@ -14,7 +15,6 @@ import {
   MoonIcon,
   SunIcon,
 } from "@/components/Icons";
-import { ICON_SIZES } from "@/components/utils/constants";
 
 const AVAILABLE_ICONS = {
   calendar: CalendarIcon,
@@ -28,31 +28,23 @@ const AVAILABLE_ICONS = {
   dumbbell: DumbBellIcon,
   moon: MoonIcon,
   sun: SunIcon,
-};
+} as const;
 
 const COLOR_OPTIONS = [
   { value: "indigo", label: "Indigo", class: "bg-indigo-500" },
   { value: "blue", label: "Blue", class: "bg-blue-500" },
   { value: "green", label: "Green", class: "bg-green-500" },
   { value: "purple", label: "Purple", class: "bg-purple-500" },
-];
+] as const;
 
 interface HabitFormProps {
   onSubmit?: (values: HabitGoalFormValues) => void;
   onChange?: (values: HabitGoalFormValues, isValid: boolean) => void;
-  onCancel?: () => void;
-  isSubmitting?: boolean;
   initialValues?: Partial<HabitGoalFormValues>;
   hideButtons?: boolean;
 }
 
-function HabitForm({
-  onSubmit,
-  onChange,
-  onCancel,
-  isSubmitting = false,
-  initialValues,
-}: HabitFormProps) {
+function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
   const [formValues, setFormValues] = useState<HabitGoalFormValues>({
     title: initialValues?.title || "",
     iconName: initialValues?.iconName || "target",
@@ -80,7 +72,12 @@ function HabitForm({
     }
   }, [formValues, isFormValid, onChange]);
 
-  const handleChange = (field: keyof HabitGoalFormValues, value: any) => {
+  const handleChange = (
+    field: keyof HabitGoalFormValues,
+    value: string | number | undefined
+  ) => {
+    if (value === undefined) return;
+
     setFormValues((prev) => ({ ...prev, [field]: value }));
 
     // Clear error when field is changed
@@ -128,7 +125,6 @@ function HabitForm({
       <div>
         <TextField
           label="Habit Title"
-          id="habit-title"
           value={formValues.title}
           onChange={(value) => handleChange("title", value)}
           placeholder="Enter a title for your habit"
@@ -141,12 +137,10 @@ function HabitForm({
       <div>
         <NumberField
           label="Target"
-          id="habit-target"
           value={formValues.target}
           onChange={(value) => handleChange("target", value)}
           min={1}
           max={100}
-          placeholder="How many times to complete this habit"
           error={errors.target}
           required
         />

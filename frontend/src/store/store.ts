@@ -17,13 +17,18 @@ import {
   NotificationSlice,
   createNotificationSlice,
 } from "@/features/notifications/store/notification-slice";
+import {
+  HabitsSlice,
+  createHabitsSlice,
+} from "@/features/habits/store/habits-slice";
 
 // Combine all slice types
 export type StoreState = UserSlice &
   MacrosSlice &
   GoalsSlice &
   AuthSlice &
-  NotificationSlice;
+  NotificationSlice &
+  HabitsSlice;
 
 // Create the store with all slices
 export const useStore = create<StoreState>()(
@@ -33,6 +38,7 @@ export const useStore = create<StoreState>()(
     ...createGoalsSlice(...a),
     ...createAuthSlice(...a),
     ...createNotificationSlice(...a),
+    ...createHabitsSlice(...a),
   }))
 );
 

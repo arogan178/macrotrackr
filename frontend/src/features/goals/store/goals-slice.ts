@@ -1,13 +1,11 @@
 import { StateCreator } from "zustand";
-// Import HabitSlice and createHabitSlice
-import { HabitSlice, createHabitSlice } from "./habit-slice";
 import { WeightGoals, WeightGoalFormValues } from "../types";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 import { apiService } from "@/utils/api-service";
 import { getErrorMessage } from "@/utils/error-handling";
 
-// Define the slice interface - Updated to include HabitSlice
-export interface GoalsSlice extends HabitSlice {
+// Define the slice interface - Removed HabitSlice extension
+export interface GoalsSlice {
   // State
   weightGoals: WeightGoals | null;
   isLoading: boolean;
@@ -39,17 +37,15 @@ type FullGoalsState = GoalsSlice & {
     message: string;
     type: "success" | "error" | "info" | "warning";
   }) => void;
+
+  // Reference to habits slice actions for coordination
+  resetHabits?: () => Promise<void>;
 };
 
-export const createGoalsSlice: StateCreator<
-  GoalsSlice & any,
-  [],
-  [],
-  GoalsSlice
-> = (set, get) => ({
-  // Include the habit slice
-  ...createHabitSlice(set, get),
-
+export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
+  set,
+  get
+) => ({
   // Initial State
   weightGoals: null,
   isLoading: false,
@@ -234,7 +230,12 @@ export const createGoalsSlice: StateCreator<
     const fullGet = get as () => FullGoalsState;
     try {
       await apiService.goals.resetGoals();
-      await get().resetHabitGoals(); // Call resetHabitGoals from habit-slice
+
+      // Call resetHabits from habits slice if available
+      if (fullGet().resetHabits) {
+        await fullGet().resetHabits();
+      }
+
       set({ weightGoals: null, isLoading: false, error: null });
 
       if (fullGet().addNotification) {
