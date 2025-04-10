@@ -447,86 +447,55 @@ export const apiService = {
     },
   },
   habits: {
+    /** Get all habit goals */
     getHabit: async (): Promise<HabitGoalPayload[]> => {
-      // For now, simulate API call with local storage until backend is ready
-      try {
-        const storedHabits = localStorage.getItem("habit_goals");
-        return storedHabits ? JSON.parse(storedHabits) : [];
-      } catch (error) {
-        console.error("Error fetching habit goals from storage:", error);
-        return [];
-      }
+      const response = await fetch(`${API_BASE_URL}/api/habits`, {
+        headers: getHeaders(false),
+      });
+      return handleResponse(response);
     },
 
     /** Saves a new habit goal */
     saveHabit: async (
       habitGoal: HabitGoalPayload
     ): Promise<HabitGoalPayload> => {
-      // For now, simulate API call with local storage until backend is ready
-      try {
-        const storedHabits = localStorage.getItem("habit_goals");
-        const habits = storedHabits ? JSON.parse(storedHabits) : [];
-        habits.push(habitGoal);
-        localStorage.setItem("habit_goals", JSON.stringify(habits));
-        return habitGoal;
-      } catch (error) {
-        console.error("Error saving habit goal to storage:", error);
-        throw new ApiError("Failed to save habit goal", 500, "STORAGE_ERROR");
-      }
+      const response = await fetch(`${API_BASE_URL}/api/habits`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(habitGoal),
+      });
+      return handleResponse(response);
     },
 
     /** Updates an existing habit goal */
     updateHabit: async (
       id: string,
       habitGoal: HabitGoalPayload
-    ): Promise<HabitGoalPayload> => {
-      // For now, simulate API call with local storage until backend is ready
-      try {
-        const storedHabits = localStorage.getItem("habit_goals");
-        const habits = storedHabits ? JSON.parse(storedHabits) : [];
-        const index = habits.findIndex((h: HabitGoalPayload) => h.id === id);
-
-        if (index === -1) {
-          throw new ApiError("Habit goal not found", 404, "NOT_FOUND");
-        }
-
-        habits[index] = habitGoal;
-        localStorage.setItem("habit_goals", JSON.stringify(habits));
-        return habitGoal;
-      } catch (error) {
-        console.error("Error updating habit goal in storage:", error);
-        if (error instanceof ApiError) {
-          throw error;
-        }
-        throw new ApiError("Failed to update habit goal", 500, "STORAGE_ERROR");
-      }
+    ): Promise<{ success: boolean }> => {
+      const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(habitGoal),
+      });
+      return handleResponse(response);
     },
 
     /** Deletes a habit goal */
-    deleteHabit: async (id: string): Promise<void> => {
-      // For now, simulate API call with local storage until backend is ready
-      try {
-        const storedHabits = localStorage.getItem("habit_goals");
-        const habits = storedHabits ? JSON.parse(storedHabits) : [];
-        const updatedHabits = habits.filter(
-          (h: HabitGoalPayload) => h.id !== id
-        );
-        localStorage.setItem("habit_goals", JSON.stringify(updatedHabits));
-      } catch (error) {
-        console.error("Error deleting habit goal from storage:", error);
-        throw new ApiError("Failed to delete habit goal", 500, "STORAGE_ERROR");
-      }
+    deleteHabit: async (id: string): Promise<{ success: boolean }> => {
+      const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+      });
+      return handleResponse(response);
     },
 
     /** Reset all habit goals */
-    resetHabit: async (): Promise<void> => {
-      // For now, simulate API call with local storage until backend is ready
-      try {
-        localStorage.removeItem("habit_goals");
-      } catch (error) {
-        console.error("Error resetting habit goals in storage:", error);
-        throw new ApiError("Failed to reset habit goals", 500, "STORAGE_ERROR");
-      }
+    resetHabit: async (): Promise<{ success: boolean }> => {
+      const response = await fetch(`${API_BASE_URL}/api/habits`, {
+        method: "DELETE",
+        headers: getHeaders(),
+      });
+      return handleResponse(response);
     },
   },
 };
