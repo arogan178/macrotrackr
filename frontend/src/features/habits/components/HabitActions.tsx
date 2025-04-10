@@ -87,7 +87,6 @@ function HabitActions({
           <PlusCircleIcon size="sm" />
         </button>
       )}
-
       {/* Mark complete button - moved outside menu */}
       {!isComplete && (
         <button
@@ -98,17 +97,28 @@ function HabitActions({
         >
           <CheckIcon size="sm" />
         </button>
-      )}
-
-      {/* More actions menu button */}
-      <button
-        onClick={() => setIsMenuOpen(!isMenuOpen)}
-        className="p-1.5 rounded-full text-gray-300 hover:text-gray-100 hover:bg-gray-600/50"
-        title="More actions"
-      >
-        <MoreVerticalIcon size="sm" />
-      </button>
-
+      )}{" "}
+      {/* Delete button - outside menu for completed habits */}
+      {isComplete && (
+        <button
+          onClick={handleDelete}
+          disabled={isActionInProgress}
+          className="p-1.5 rounded-full text-red-400 hover:bg-red-400/10"
+          title="Delete habit"
+        >
+          <TrashIcon size="sm" />
+        </button>
+      )}{" "}
+      {/* More actions menu button - only show for incomplete habits */}
+      {!isComplete && (
+        <button
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+          className="p-1.5 rounded-full text-gray-300 hover:text-gray-100 hover:bg-gray-600/50"
+          title="More actions"
+        >
+          <MoreVerticalIcon size="sm" />
+        </button>
+      )}{" "}
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
         <div className="absolute z-50 right-0 top-full mt-1 py-0.5 w-32 rounded-md shadow-lg bg-gray-800/90 backdrop-blur-sm border border-gray-700/40 text-xs">
@@ -122,14 +132,17 @@ function HabitActions({
             </button>
           )}
 
-          <button
-            onClick={handleDelete}
-            disabled={isActionInProgress}
-            className="w-full text-left px-3 py-1.5 flex items-center hover:bg-gray-700/50 text-red-400"
-          >
-            <TrashIcon size="sm" className="mr-1.5" />
-            Delete
-          </button>
+          {/* Only show delete in dropdown if habit is NOT completed */}
+          {!isComplete && (
+            <button
+              onClick={handleDelete}
+              disabled={isActionInProgress}
+              className="w-full text-left px-3 py-1.5 flex items-center hover:bg-gray-700/50 text-red-400"
+            >
+              <TrashIcon size="sm" className="mr-1.5" />
+              Delete
+            </button>
+          )}
         </div>
       )}
     </div>
