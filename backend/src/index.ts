@@ -10,7 +10,8 @@ import { authMiddleware } from "./middleware/auth"; // Import authentication mid
 import { authRoutes } from "./modules/auth/routes";
 import { userRoutes } from "./modules/user/routes";
 import { macroRoutes } from "./modules/macros/routes";
-import { goalRoutes } from "./modules/goals/routes"; // Import placeholder goal routes
+import { goalRoutes } from "./modules/goals/routes";
+import { habitRoutes } from "./modules/habits/routes"; // Import habit routes
 
 console.log("🚀 Starting Elysia server...");
 
@@ -57,13 +58,13 @@ const app = new Elysia()
   // Apply the auth middleware globally. It handles JWT verification and attaches 'user' to context.
   // It also enforces authentication for non-exempt routes.
   .use(authMiddleware)
-
   // --- Mount Routes from Modules ---
   // Pass the app instance to the route functions to attach their specific routes/groups
   .use(authRoutes)
   .use(userRoutes)
   .use(macroRoutes)
-  .use(goalRoutes) // Mount placeholder goal routes
+  .use(goalRoutes)
+  .use(habitRoutes) // Mount habit routes
 
   // --- Root/Health Check Endpoint ---
   .get(

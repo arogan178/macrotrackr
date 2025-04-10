@@ -95,7 +95,6 @@ export const createHabitsSlice: StateCreator<
       });
     }
   },
-
   // --- Update Action ---
   updateHabit: async (id: string, values: HabitGoalFormValues) => {
     set({ isLoading: true, error: null });
@@ -109,6 +108,11 @@ export const createHabitsSlice: StateCreator<
 
       if (habitIndex === -1) {
         throw new Error("Habit not found");
+      }
+
+      // Prevent editing of completed habits
+      if (currentHabits[habitIndex].isComplete) {
+        throw new Error("Completed habits cannot be edited");
       }
 
       const existingHabit = currentHabits[habitIndex];
@@ -151,10 +155,10 @@ export const createHabitsSlice: StateCreator<
       });
     }
   },
-
   // --- Increment Progress Action ---
   incrementHabitProgress: async (id: string) => {
-    set({ isLoading: true, error: null });
+    // Don't set global loading state to avoid full UI refresh
+    set({ error: null });
     const fullGet = get as () => FullState;
 
     try {
@@ -180,16 +184,17 @@ export const createHabitsSlice: StateCreator<
         completedAt: isComplete ? new Date().toISOString() : undefined,
       };
 
-      await apiService.habits.updateHabit(id, updatedHabit);
-
-      // Update local state
+      // Update local state FIRST (optimistic update)
+      // This gives immediate visual feedback
       const updatedHabits = [...currentHabits];
       updatedHabits[habitIndex] = updatedHabit;
 
       set({
         habits: updatedHabits,
-        isLoading: false,
       });
+
+      // Then update in the backend without blocking the UI
+      await apiService.habits.updateHabit(id, updatedHabit);
 
       if (isComplete) {
         fullGet().addNotification?.({
@@ -200,7 +205,10 @@ export const createHabitsSlice: StateCreator<
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error incrementing habit progress:", error);
-      set({ error: errorMessage, isLoading: false });
+
+      // On error, revert to original state by refetching habits
+      set({ error: errorMessage });
+      get().fetchHabits();
     }
   },
 

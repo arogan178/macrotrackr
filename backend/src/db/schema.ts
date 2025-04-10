@@ -69,23 +69,37 @@ export function initializeSchema(db: Database) {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-        );
-
+        );        
         -- Macro Targets Table --
         CREATE TABLE IF NOT EXISTS macro_targets (
-             id INTEGER PRIMARY KEY AUTOINCREMENT,
-             user_id INTEGER UNIQUE NOT NULL,
-             protein_percentage INTEGER DEFAULT 30,
-             carbs_percentage INTEGER DEFAULT 40,
-             fats_percentage INTEGER DEFAULT 30,
-             locked_macros TEXT DEFAULT '[]', -- Store as JSON array string '["protein", "fats"]'
-             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-             CHECK (protein_percentage + carbs_percentage + fats_percentage = 100),
-             CHECK (protein_percentage >= 5 AND protein_percentage <= 70),
-             CHECK (carbs_percentage >= 5 AND carbs_percentage <= 70),
-             CHECK (fats_percentage >= 5 AND fats_percentage <= 70)
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER UNIQUE NOT NULL,
+            protein_percentage INTEGER DEFAULT 30,
+            carbs_percentage INTEGER DEFAULT 40,
+            fats_percentage INTEGER DEFAULT 30,
+            locked_macros TEXT DEFAULT '[]', -- Store as JSON array string '["protein", "fats"]'
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+            CHECK (protein_percentage + carbs_percentage + fats_percentage = 100),
+            CHECK (protein_percentage >= 5 AND protein_percentage <= 70),
+            CHECK (carbs_percentage >= 5 AND carbs_percentage <= 70),
+            CHECK (fats_percentage >= 5 AND fats_percentage <= 70)
+        );
+
+        -- Habits Table --
+        CREATE TABLE IF NOT EXISTS habits (
+            id TEXT PRIMARY KEY NOT NULL,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            icon_name TEXT NOT NULL,
+            current INTEGER NOT NULL DEFAULT 0,
+            target INTEGER NOT NULL DEFAULT 1,
+            accent_color TEXT CHECK(accent_color IN ('indigo', 'blue', 'green', 'purple')),
+            is_complete INTEGER NOT NULL DEFAULT 0, -- SQLite boolean (0=false, 1=true)
+            created_at TEXT NOT NULL, -- Store as ISO 8601 date-time string
+            completed_at TEXT, -- Store as ISO 8601 date-time string, NULL until completed
+            FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
     `);
 
@@ -142,13 +156,13 @@ export function initializeSchema(db: Database) {
     "TEXT",
     "UPDATE macro_entries SET entry_time = '12:00:00' WHERE entry_time IS NULL"
   );
-
   // --- Indexes for Performance ---
   console.log("    ⚡ Creating indexes...");
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits(user_id)");
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
   );
