@@ -19,16 +19,31 @@ function NumberField({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
-    if (val === "" || /^-?\d*\.?\d*$/.test(val)) {
+    // Handle empty input properly
+    if (val === "") {
+      onChange(undefined);
+      return;
+    }
+
+    // Check if it's a valid number pattern
+    if (/^-?\d*\.?\d*$/.test(val)) {
       if (maxDigits && val.replace(/[^0-9]/g, "").length > maxDigits) {
         return;
       }
 
-      onChange(val === "" ? undefined : Number(val));
+      onChange(Number(val));
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    // Always allow Backspace, Delete, and navigation keys
+    if (
+      ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+    ) {
+      return;
+    }
+
+    // Allow digits
     if (/\d/.test(e.key)) {
       return;
     }
