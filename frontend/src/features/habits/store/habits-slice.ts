@@ -108,14 +108,18 @@ export const createHabitsSlice: StateCreator<
 
       if (habitIndex === -1) {
         throw new Error("Habit not found");
-      }
-
-      // Prevent editing of completed habits
+      } // Prevent editing of completed habits
       if (currentHabits[habitIndex].isComplete) {
         throw new Error("Completed habits cannot be edited");
       }
 
       const existingHabit = currentHabits[habitIndex];
+
+      // Prevent decreasing the target below the current value
+      if (values.target < existingHabit.current) {
+        throw new Error("Target cannot be lower than current progress");
+      }
+
       const updatedHabit: HabitGoal = {
         ...existingHabit,
         title: values.title,
