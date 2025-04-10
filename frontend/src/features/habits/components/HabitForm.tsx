@@ -71,14 +71,18 @@ function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
       onChange(formValues, isFormValid);
     }
   }, [formValues, isFormValid, onChange]);
-
   const handleChange = (
     field: keyof HabitGoalFormValues,
     value: string | number | undefined
   ) => {
-    if (value === undefined) return;
-
-    setFormValues((prev) => ({ ...prev, [field]: value }));
+    // Allow undefined value during editing (allows clearing the field)
+    setFormValues((prev) => {
+      // For the target field, use undefined during editing but default to 1 for validation
+      if (field === "target" && value === undefined) {
+        return { ...prev, [field]: undefined as unknown as number };
+      }
+      return { ...prev, [field]: value };
+    });
 
     // Clear error when field is changed
     if (errors[field]) {
