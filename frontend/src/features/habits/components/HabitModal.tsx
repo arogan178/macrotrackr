@@ -1,7 +1,15 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Modal from "@/components/Modal";
 import { HabitGoal, HabitGoalFormValues } from "../types";
 import HabitForm from "./HabitForm";
+
+// Default values for a new habit
+const DEFAULT_HABIT_VALUES: HabitGoalFormValues = {
+  title: "",
+  iconName: "target",
+  target: 10,
+  accentColor: "indigo",
+};
 
 interface HabitModalProps {
   isOpen: boolean;
@@ -19,47 +27,82 @@ function HabitModal({
   mode,
 }: HabitModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formValues, setFormValues] = useState<HabitGoalFormValues | null>(
-    null
-  );
+  // State lifted from HabitForm
+  const [formValues, setFormValues] =
+    useState<HabitGoalFormValues>(DEFAULT_HABIT_VALUES);
+  const [errors, setErrors] = useState<
+    Partial<Record<keyof HabitGoalFormValues, string>>
+  >({});
   const [isFormValid, setIsFormValid] = useState(false);
 
   const isEditMode = mode === "edit";
 
-  // Convert habit to form values when opened in edit mode
-  useEffect(() => {
-    if (isEditMode && habit) {
-      const initialValues: HabitGoalFormValues = {
-        title: habit.title,
-        iconName: habit.iconName,
-        target: habit.target,
-        accentColor: habit.accentColor || "indigo",
-      };
-      setFormValues(initialValues);
+  // Validation function
+  const validateForm = useCallback((values: HabitGoalFormValues) => {
+    const newErrors: Partial<Record<keyof HabitGoalFormValues, string>> = {};
+    if (!values.title.trim()) {
+      newErrors.title = "Title is required";
     }
-  }, [habit, isEditMode]);
+    if (values.target <= 0) {
+      newErrors.target = "Target must be greater than 0";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }, []);
 
-  const handleFormChange = (values: HabitGoalFormValues, valid: boolean) => {
-    setFormValues(values);
-    setIsFormValid(valid);
+  // Initialize/Reset form state when modal opens or habit/mode changes
+  useEffect(() => {
+    if (isOpen) {
+      let initialValues = DEFAULT_HABIT_VALUES;
+      if (isEditMode && habit) {
+        initialValues = {
+          title: habit.title,
+          iconName: habit.iconName,
+          target: habit.target,
+          accentColor: habit.accentColor || "indigo",
+        };
+      }
+      setFormValues(initialValues);
+      setIsFormValid(validateForm(initialValues)); // Validate initial values
+      setErrors({}); // Clear previous errors
+      setIsSubmitting(false); // Reset submitting state
+    } else {
+      // Optionally reset when closing, though key prop might handle this
+      // setFormValues(DEFAULT_HABIT_VALUES);
+      // setErrors({});
+      // setIsFormValid(false);
+    }
+  }, [isOpen, habit, mode, isEditMode, validateForm]);
+
+  // Handler passed down to HabitForm
+  const handleFormChange = (
+    field: keyof HabitGoalFormValues,
+    value: string | number
+  ) => {
+    setFormValues((prevValues) => {
+      const newValues = { ...prevValues, [field]: value };
+      setIsFormValid(validateForm(newValues)); // Re-validate on change
+      return newValues;
+    });
   };
 
   const handleSave = async () => {
-    if (!formValues || !isFormValid) return;
-    if (isEditMode && !habit) return;
+    if (!isFormValid || isSubmitting) return;
+    if (isEditMode && !habit) return; // Should not happen if logic is correct
 
     setIsSubmitting(true);
     try {
-      // In edit mode, pass the habit ID; in add mode, just pass the values
       await onSubmit(formValues, isEditMode ? habit?.id : undefined);
-      onClose();
+      // onClose(); // onSubmit should handle closing
     } catch (error) {
       console.error(
         `Error ${isEditMode ? "updating" : "submitting"} habit:`,
         error
       );
+      // Optionally show an error message to the user here
     } finally {
-      setIsSubmitting(false);
+      // Don't reset submitting state here if onClose is called in onSubmit
+      // setIsSubmitting(false);
     }
   };
 
@@ -71,12 +114,10 @@ function HabitModal({
     ? "Save Changes"
     : "Save Habit";
 
-  const handleClose = isSubmitting ? () => {} : onClose;
-
   return (
     <Modal
       isOpen={isOpen}
-      onClose={handleClose}
+      onClose={onClose} // Use the original onClose prop
       title={modalTitle}
       size="md"
       variant="form"
@@ -84,10 +125,13 @@ function HabitModal({
       saveDisabled={!isFormValid || isSubmitting}
       saveLabel={saveLabel}
     >
+      {/* Pass state and handlers down to the controlled HabitForm */}
       <HabitForm
-        initialValues={formValues || undefined}
+        values={formValues}
         onChange={handleFormChange}
-        hideButtons
+        errors={errors}
+        // Pass the current progress from the original habit when editing
+        currentProgress={isEditMode ? habit?.current : 0}
       />
     </Modal>
   );
