@@ -5,5 +5,6 @@ export { default as WeightGoalDashboard } from "./WeightGoalDashboard";
 export { default as WeightGoalForm } from "./WeightGoalForm";
 export { default as WeightGoalStatus } from "./WeightGoalStatus";
 export { default as MacroNutrient } from "./MacroNutrient";
+export { default as WeightGoalModal } from "./WeightGoalModal";
 
 export { default as ProgressBar } from "../../../components/ProgressBar";
