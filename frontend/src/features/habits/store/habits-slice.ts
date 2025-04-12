@@ -264,23 +264,28 @@ export const createHabitsSlice: StateCreator<
 
   // --- Delete Action ---
   deleteHabit: async (id: string) => {
-    set({ isLoading: true, error: null });
+    // Remove global loading state change
+    set({ error: null });
     const fullGet = get as () => FullState;
+    const currentHabits = get().habits;
+    const habitToDelete = currentHabits.find((habit) => habit.id === id);
+
+    if (!habitToDelete) {
+      console.warn("Attempted to delete non-existent habit:", id);
+      return; // Habit already gone or never existed
+    }
+
+    // Optimistic Update: Remove locally first
+    const updatedHabits = currentHabits.filter(
+      (habit: HabitGoal) => habit.id !== id
+    );
+    set({ habits: updatedHabits });
 
     try {
+      // Attempt to delete from backend
       await apiService.habits.deleteHabit(id);
 
-      // Update local state
-      const currentHabits = get().habits;
-      const updatedHabits = currentHabits.filter(
-        (habit: HabitGoal) => habit.id !== id
-      );
-
-      set({
-        habits: updatedHabits,
-        isLoading: false,
-      });
-
+      // API call successful, notify user
       fullGet().addNotification?.({
         message: "Habit deleted successfully",
         type: "info",
@@ -288,7 +293,15 @@ export const createHabitsSlice: StateCreator<
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error deleting habit:", error);
-      set({ error: errorMessage, isLoading: false });
+
+      // Revert optimistic update on error by re-fetching
+      set({ error: errorMessage });
+      get().fetchHabits(); // Refetch to get the correct state
+
+      fullGet().addNotification?.({
+        message: `Failed to delete habit: ${errorMessage}`,
+        type: "error",
+      });
     }
   },
 
