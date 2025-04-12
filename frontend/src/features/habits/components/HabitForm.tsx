@@ -1,5 +1,5 @@
 // The updated HabitForm.tsx, removing isSubmitting prop since it's not used
-import { useState, useMemo, useEffect } from "react";
+import { useMemo } from "react";
 import { HabitGoalFormValues } from "../types";
 import { TextField, NumberField } from "@/components/form";
 import {
@@ -38,101 +38,59 @@ const COLOR_OPTIONS = [
 ] as const;
 
 interface HabitFormProps {
-  onSubmit?: (values: HabitGoalFormValues) => void;
-  onChange?: (values: HabitGoalFormValues, isValid: boolean) => void;
-  initialValues?: Partial<HabitGoalFormValues>;
-  hideButtons?: boolean;
+  // Changed: Accept current values as a prop
+  values: HabitGoalFormValues;
+  // Changed: Accept a single onChange handler for all fields
+  onChange: (field: keyof HabitGoalFormValues, value: string | number) => void;
+  // Changed: Accept errors as a prop
+  errors: Partial<Record<keyof HabitGoalFormValues, string>>;
+  // Add prop for current progress when editing
+  currentProgress?: number;
 }
 
-function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
-  const [formValues, setFormValues] = useState<HabitGoalFormValues>({
-    title: initialValues?.title || "",
-    iconName: initialValues?.iconName || "target",
-    target: initialValues?.target || 7,
-    accentColor: initialValues?.accentColor || "indigo",
-  });
-
-  const [errors, setErrors] = useState<
-    Partial<Record<keyof HabitGoalFormValues, string>>
-  >({});
-
-  // Calculate form validity
-  const isFormValid = useMemo(() => {
-    return (
-      !!formValues.title.trim() &&
-      formValues.target > 0 &&
-      Object.keys(errors).length === 0
-    );
-  }, [formValues, errors]);
-
-  // Send form values and validation state to parent if onChange is provided
-  useEffect(() => {
-    if (onChange) {
-      onChange(formValues, isFormValid);
-    }
-  }, [formValues, isFormValid, onChange]);
+function HabitForm({
+  values,
+  onChange,
+  errors,
+  currentProgress = 0, // Default to 0 if not provided
+}: HabitFormProps) {
   const handleChange = (
     field: keyof HabitGoalFormValues,
-    value: string | number | undefined
+    value: string | number | undefined // Allow undefined temporarily from NumberField
   ) => {
-    // Allow undefined value during editing (allows clearing the field)
-    setFormValues((prev) => {
-      // For the target field, use undefined during editing but default to 1 for validation
-      if (field === "target" && value === undefined) {
-        return { ...prev, [field]: undefined as unknown as number };
-      }
-      return { ...prev, [field]: value };
-    });
-
-    // Clear error when field is changed
-    if (errors[field]) {
-      setErrors((prev) => ({ ...prev, [field]: undefined }));
-    }
-  };
-
-  const validate = (): boolean => {
-    const newErrors: Partial<Record<keyof HabitGoalFormValues, string>> = {};
-
-    if (!formValues.title.trim()) {
-      newErrors.title = "Title is required";
-    }
-
-    if (!formValues.target || formValues.target <= 0) {
-      newErrors.target = "Target must be greater than zero";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (validate() && onSubmit) {
-      onSubmit(formValues);
+    // Ensure target is never undefined or less than 1 when passed up
+    if (field === "target") {
+      onChange(field, Math.max(1, Number(value) || 1));
+    } else {
+      onChange(field, value as string | number); // Type assertion needed here
     }
   };
 
   const selectedIcon = useMemo(() => {
     const IconComponent =
-      AVAILABLE_ICONS[formValues.iconName as keyof typeof AVAILABLE_ICONS];
+      AVAILABLE_ICONS[values.iconName as keyof typeof AVAILABLE_ICONS];
     return IconComponent ? (
       <IconComponent size="sm" />
     ) : (
       <TargetIcon size="sm" />
     );
-  }, [formValues.iconName]);
+  }, [values.iconName]);
+
+  const previewProgressPercentage = useMemo(() => {
+    if (values.target <= 0) return 0;
+    return Math.min(100, Math.round((currentProgress / values.target) * 100));
+  }, [currentProgress, values.target]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
       {/* Title field */}
       <div>
         <TextField
           label="Habit Title"
-          value={formValues.title}
+          value={values.title} // Use prop value
           onChange={(value) => handleChange("title", value)}
           placeholder="Enter a title for your habit"
-          error={errors.title}
+          error={errors.title} // Use prop error
           required
         />
       </div>
@@ -141,11 +99,11 @@ function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
       <div>
         <NumberField
           label="Target"
-          value={formValues.target}
-          onChange={(value) => handleChange("target", value)}
+          value={values.target} // Use prop value
+          onChange={(value) => handleChange("target", value)} // Pass undefined directly
           min={1}
           max={100}
-          error={errors.target}
+          error={errors.target} // Use prop error
           required
         />
         <p className="text-xs text-gray-400 mt-1">
@@ -164,8 +122,8 @@ function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
               key={key}
               type="button"
               className={`p-3 rounded-lg flex items-center justify-center ${
-                formValues.iconName === key
-                  ? `bg-${formValues.accentColor}-500/20 border border-${formValues.accentColor}-500/50`
+                values.iconName === key // Use prop value
+                  ? `bg-${values.accentColor}-500/20 border border-${values.accentColor}-500/50`
                   : "bg-gray-700/40 hover:bg-gray-700/60"
               }`}
               onClick={() => handleChange("iconName", key)}
@@ -173,8 +131,8 @@ function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
               <IconComponent
                 size="sm"
                 className={
-                  formValues.iconName === key
-                    ? `text-${formValues.accentColor}-400`
+                  values.iconName === key // Use prop value
+                    ? `text-${values.accentColor}-400`
                     : "text-gray-300"
                 }
               />
@@ -194,7 +152,7 @@ function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
               key={color.value}
               type="button"
               className={`w-8 h-8 rounded-full ${color.class} ${
-                formValues.accentColor === color.value
+                values.accentColor === color.value // Use prop value
                   ? "ring-2 ring-white ring-opacity-60"
                   : "opacity-70 hover:opacity-100"
               }`}
@@ -210,39 +168,44 @@ function HabitForm({ onSubmit, onChange, initialValues }: HabitFormProps) {
         <p className="text-sm font-medium text-gray-300 mb-2">Preview</p>
         <div className={`bg-gray-700/30 rounded-lg overflow-hidden`}>
           <div
-            className={`bg-gradient-to-r from-${formValues.accentColor}-500/20 to-${formValues.accentColor}-500/5 p-3`}
+            className={`bg-gradient-to-r from-${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
           >
             <div className="flex items-center mb-2">
               <div
-                className={`p-1.5 rounded-lg text-${formValues.accentColor}-400 bg-${formValues.accentColor}-400/10 mr-2`}
+                className={`p-1.5 rounded-lg text-${values.accentColor}-400 bg-${values.accentColor}-400/10 mr-2`}
               >
                 {selectedIcon}
               </div>
               <h4 className="font-medium text-gray-200">
-                {formValues.title || "Habit Title"}
+                {values.title || "Habit Title"}
               </h4>
             </div>
 
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold text-gray-200">0</span>
-                <span className="text-gray-400 text-sm">
-                  / {formValues.target}
+                {/* Use currentProgress prop here */}
+                <span className="text-xl font-bold text-gray-200">
+                  {currentProgress}
                 </span>
+                <span className="text-gray-400 text-sm">/ {values.target}</span>
               </div>
-              <span className="text-sm text-gray-400">0%</span>
+              {/* Use calculated preview percentage */}
+              <span className="text-sm text-gray-400">
+                {previewProgressPercentage}%
+              </span>
             </div>
 
             <div className="w-full h-2 bg-gray-700/60 rounded-full overflow-hidden">
               <div
-                className={`h-full bg-${formValues.accentColor}-500 rounded-full`}
-                style={{ width: "0%" }}
+                className={`h-full bg-${values.accentColor}-500 rounded-full`}
+                /* Use calculated preview percentage for width */
+                style={{ width: `${previewProgressPercentage}%` }}
               ></div>
             </div>
           </div>
         </div>
       </div>
-    </form>
+    </div>
   );
 }
 
