@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react"; // Import motion components
 import { Navbar } from "@/features/layout/components";
 import {
   GoalsLoadingSkeleton,
@@ -33,11 +34,11 @@ export default function GoalsPage() {
     weightGoals,
     macroTarget,
     macroDailyTotals,
-    habits, // Updated property from the habits slice
+    habits,
     isLoading: goalsLoading,
     error: goalsError,
-    isLoading: habitsLoading, // Updated property from the habits slice
-    error: habitsError, // Updated property from the habits slice
+    isLoading: habitsLoading,
+    error: habitsError,
     createWeightGoal,
     clearError,
     fetchUserDetails,
@@ -149,30 +150,41 @@ export default function GoalsPage() {
       )}
 
       {/* Reset Goals Confirmation Modal */}
-      <Modal
-        isOpen={isResetModalOpen}
-        onClose={() => setIsResetModalOpen(false)}
-        title="Reset Goals"
-        variant="confirmation"
-        message="This will reset all your current goals and progress. Are you sure you want to continue?"
-        confirmLabel="Reset Goals"
-        cancelLabel="Cancel"
-        onConfirm={handleResetGoals}
-        isDanger={true}
-        size="md"
-      />
+      <AnimatePresence>
+        {isResetModalOpen && (
+          <Modal
+            key="reset-modal" // Add key for AnimatePresence
+            isOpen={isResetModalOpen}
+            onClose={() => setIsResetModalOpen(false)}
+            title="Reset Goals"
+            variant="confirmation"
+            message="This will reset all your current goals and progress. Are you sure you want to continue?"
+            confirmLabel="Reset Goals"
+            cancelLabel="Cancel"
+            onConfirm={handleResetGoals}
+            isDanger={true}
+            size="md"
+          />
+        )}
+      </AnimatePresence>
 
       {/* Unified Habit Modal */}
-      <HabitModal
-        key={
-          habitModalMode === "edit" && currentHabit ? currentHabit.id : "add"
-        }
-        isOpen={isHabitModalOpen}
-        onClose={handleCloseHabitModal}
-        onSubmit={handleSubmitHabit}
-        habit={currentHabit}
-        mode={habitModalMode}
-      />
+      <AnimatePresence>
+        {isHabitModalOpen && (
+          <HabitModal
+            key={
+              habitModalMode === "edit" && currentHabit
+                ? `habit-modal-${currentHabit.id}`
+                : "habit-modal-add"
+            } // Ensure unique key for AnimatePresence
+            isOpen={isHabitModalOpen}
+            onClose={handleCloseHabitModal}
+            onSubmit={handleSubmitHabit}
+            habit={currentHabit}
+            mode={habitModalMode}
+          />
+        )}
+      </AnimatePresence>
 
       <div className="relative min-h-screen pb-12 overflow-hidden">
         {/* Background effects - contained within parent with overflow-hidden */}
@@ -229,64 +241,87 @@ export default function GoalsPage() {
             </div>
           </div>
 
-          {/* Main Content - Removed top-level loading check */}
-          {activeTab === "active" ? (
-            <div className="space-y-6">
-              {/* Weight Goal Dashboard - Pass goalsLoading */}
-              <WeightGoalDashboard
-                currentWeight={user?.weight || 0}
-                targetWeight={weightGoals?.targetWeight || user?.weight || 0}
-                tdee={nutritionProfile?.tdee || 0}
-                macroDailyTotals={
-                  macroDailyTotals || {
-                    protein: 0,
-                    carbs: 0,
-                    fats: 0,
-                    calories: 0,
-                  }
-                }
-                weightGoals={weightGoals}
-                onSave={handleSaveGoal}
-                // Pass goalsLoading directly
-                isLoading={goalsLoading}
-                targetCalories={macroTarget?.macroTarget?.targetCalories ?? 0}
-                // Pass the nested macroTarget object (MacroTargetSettings)
-                macroTarget={macroTarget?.macroTarget ?? undefined}
-              />
+          {/* Main Content Area with Animation */}
+          <div className="mt-8 relative">
+            {" "}
+            {/* Added relative positioning for AnimatePresence */}
+            <AnimatePresence mode="wait">
+              {" "}
+              {/* Use mode="wait" for smoother transitions */}
+              <motion.div
+                key={activeTab} // Key change triggers animation
+                initial={{ opacity: 0, y: 10 }} // Initial state (slightly below and faded out)
+                animate={{ opacity: 1, y: 0 }} // Animate to fully visible and original position
+                exit={{ opacity: 0, y: -10 }} // Exit state (slightly above and faded out)
+                transition={{ duration: 0.2 }} // Animation duration
+                // Removed absolute positioning to let content flow naturally
+              >
+                {activeTab === "active" ? (
+                  <div className="space-y-6">
+                    {/* Weight Goal Dashboard - Pass goalsLoading */}
+                    <WeightGoalDashboard
+                      currentWeight={user?.weight || 0}
+                      targetWeight={
+                        weightGoals?.targetWeight || user?.weight || 0
+                      }
+                      tdee={nutritionProfile?.tdee || 0}
+                      macroDailyTotals={
+                        macroDailyTotals || {
+                          protein: 0,
+                          carbs: 0,
+                          fats: 0,
+                          calories: 0,
+                        }
+                      }
+                      weightGoals={weightGoals}
+                      onSave={handleSaveGoal}
+                      // Pass goalsLoading directly
+                      isLoading={goalsLoading}
+                      targetCalories={
+                        macroTarget?.macroTarget?.targetCalories ?? 0
+                      }
+                      // Pass the nested macroTarget object (MacroTargetSettings)
+                      macroTarget={macroTarget?.macroTarget ?? undefined}
+                    />
 
-              {/* Habit Tracker - Pass habitsLoading */}
-              <HabitTracker
-                habits={habits || []}
-                // Pass habitsLoading directly
-                isLoading={habitsLoading}
-                onAddHabit={handleAddHabit}
-                onIncrementHabit={incrementHabitProgress}
-                onCompleteHabit={completeHabit}
-                onEditHabit={handleEditHabit}
-                onDeleteHabit={deleteHabit}
-              />
+                    {/* Habit Tracker - Pass habitsLoading */}
+                    <HabitTracker
+                      habits={habits || []}
+                      // Pass habitsLoading directly
+                      isLoading={habitsLoading}
+                      onAddHabit={handleAddHabit}
+                      onIncrementHabit={incrementHabitProgress}
+                      onCompleteHabit={completeHabit}
+                      onEditHabit={handleEditHabit}
+                      onDeleteHabit={deleteHabit}
+                    />
 
-              {/* Recent Stats Section - Keep as is for now */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {["Weekly Average", "Monthly Trend", "Progress Insights"].map(
-                  (title, i) => (
-                    <div
-                      key={i}
-                      className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 hover:bg-gray-800/60 transition-colors duration-200"
-                    >
-                      <h3 className="text-sm font-medium text-gray-300 mb-2">
-                        {title}
-                      </h3>
-                      <p className="text-xs text-gray-400">Coming soon</p>
+                    {/* Recent Stats Section - Keep as is for now */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      {[
+                        "Weekly Average",
+                        "Monthly Trend",
+                        "Progress Insights",
+                      ].map((title, i) => (
+                        <div
+                          key={i}
+                          className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 hover:bg-gray-800/60 transition-colors duration-200"
+                        >
+                          <h3 className="text-sm font-medium text-gray-300 mb-2">
+                            {title}
+                          </h3>
+                          <p className="text-xs text-gray-400">Coming soon</p>
+                        </div>
+                      ))}
                     </div>
-                  )
+                  </div>
+                ) : (
+                  // AchievementsContent handles its own loading/empty states internally (or will)
+                  <AchievementsContent />
                 )}
-              </div>
-            </div>
-          ) : (
-            // AchievementsContent handles its own loading/empty states internally (or will)
-            <AchievementsContent />
-          )}
+              </motion.div>
+            </AnimatePresence>
+          </div>
         </div>
       </div>
     </div>
