@@ -36,6 +36,10 @@ function WeightGoalModal({
     // Modal closure is handled in GoalsPage
   };
 
+  // Provide a default value for targetWeight if it's undefined
+  const initialTargetWeight =
+    weightGoals?.targetWeight ?? targetWeight ?? currentWeight;
+
   return (
     <Modal
       isOpen={isOpen} // Passed to the base Modal
@@ -47,7 +51,7 @@ function WeightGoalModal({
     >
       <WeightGoalForm
         currentWeight={currentWeight}
-        targetWeight={weightGoals?.targetWeight ?? targetWeight}
+        targetWeight={initialTargetWeight} // Use the calculated initial value
         tdee={tdee}
         weightGoals={weightGoals}
         isLoading={isLoading}

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence } from "motion/react"; // Keep AnimatePresence for tab transitions
 import { Navbar } from "@/features/layout/components";
 import {
   AchievementsContent,
@@ -22,13 +22,11 @@ export default function GoalsPage() {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   // State for habit modal
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
-  // State for the habit being edited
   const [currentHabit, setCurrentHabit] = useState<HabitGoal | null>(null);
-  // State for modal mode (add or edit)
   const [habitModalMode, setHabitModalMode] = useState<"add" | "edit">("add");
   const [isWeightGoalModalOpen, setIsWeightGoalModalOpen] = useState(false);
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
-    useState(false); // State for delete confirmation
+    useState(false);
 
   // Get state and actions from store
   const {
@@ -92,6 +90,13 @@ export default function GoalsPage() {
     setIsWeightGoalModalOpen(true);
   };
 
+  // Handler to close the habit modal
+  const handleCloseHabitModal = () => {
+    setIsHabitModalOpen(false);
+    // Resetting currentHabit immediately is fine here
+    setCurrentHabit(null);
+  };
+
   // Handler to close the weight goal modal
   const handleCloseWeightGoalModal = () => {
     console.log("Closing weight goal modal..."); // DEBUG
@@ -136,12 +141,6 @@ export default function GoalsPage() {
     setCurrentHabit(null);
   };
 
-  // Handler for closing the habit modal
-  const handleCloseHabitModal = () => {
-    setIsHabitModalOpen(false);
-    setCurrentHabit(null);
-  };
-
   // Handler to open the delete confirmation modal
   const handleOpenDeleteConfirmModal = () => {
     setIsDeleteConfirmModalOpen(true);
@@ -181,11 +180,11 @@ export default function GoalsPage() {
         />
       )}
 
-      {/* Reset Goals Confirmation Modal */}
+      {/* Reset Goals Confirmation Modal (uses AnimatePresence correctly) */}
       <AnimatePresence>
         {isResetModalOpen && (
           <Modal
-            key="reset-modal" // Add key for AnimatePresence
+            key="reset-modal"
             isOpen={isResetModalOpen}
             onClose={() => setIsResetModalOpen(false)}
             title="Reset Goals"
@@ -200,7 +199,7 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* Delete Weight Goal Confirmation Modal */}
+      {/* Delete Weight Goal Confirmation Modal (uses AnimatePresence correctly) */}
       <AnimatePresence>
         {isDeleteConfirmModalOpen && (
           <Modal
@@ -219,16 +218,16 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* Unified Habit Modal */}
+      {/* Unified Habit Modal - Wrap conditional render in AnimatePresence */}
       <AnimatePresence>
         {isHabitModalOpen && (
           <HabitModal
             key={
               habitModalMode === "edit" && currentHabit
-                ? `habit-modal-${currentHabit.id}`
+                ? `habit-modal-edit-${currentHabit.id}`
                 : "habit-modal-add"
-            } // Ensure unique key for AnimatePresence
-            isOpen={isHabitModalOpen}
+            }
+            isOpen={isHabitModalOpen} // Still needed by HabitModal internally
             onClose={handleCloseHabitModal}
             onSubmit={handleSubmitHabit}
             habit={currentHabit}
@@ -237,21 +236,22 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* Weight Goal Modal - Removed outer AnimatePresence */}
-      {isWeightGoalModalOpen && (
-        <WeightGoalModal
-          key="weight-goal-modal"
-          isOpen={isWeightGoalModalOpen}
-          onClose={handleCloseWeightGoalModal}
-          onSave={handleSaveGoal}
-          currentWeight={user?.weight || 0}
-          // Pass targetWeight from goals if available, otherwise from user (or 0)
-          targetWeight={weightGoals?.targetWeight ?? user?.weight}
-          tdee={nutritionProfile?.tdee || 0}
-          weightGoals={weightGoals}
-          isLoading={goalsLoading} // Pass loading state for save button
-        />
-      )}
+      {/* Weight Goal Modal - Wrap conditional render in AnimatePresence */}
+      <AnimatePresence>
+        {isWeightGoalModalOpen && (
+          <WeightGoalModal
+            key="weight-goal-modal" // Consistent key
+            isOpen={isWeightGoalModalOpen} // Still needed by WeightGoalModal internally
+            onClose={handleCloseWeightGoalModal}
+            onSave={handleSaveGoal}
+            currentWeight={user?.weight || 0}
+            targetWeight={weightGoals?.targetWeight ?? user?.weight}
+            tdee={nutritionProfile?.tdee || 0}
+            weightGoals={weightGoals}
+            isLoading={goalsLoading}
+          />
+        )}
+      </AnimatePresence>
 
       <div className="relative min-h-screen pb-12 overflow-hidden">
         {/* Background effects - contained within parent with overflow-hidden */}
@@ -298,13 +298,9 @@ export default function GoalsPage() {
             </div>
           </div>
 
-          {/* Main Content Area with Animation */}
+          {/* Main Content Area with Animation for Tab Switching */}
           <div className="mt-8 relative">
-            {" "}
-            {/* Added relative positioning for AnimatePresence */}
             <AnimatePresence mode="wait">
-              {" "}
-              {/* Use mode="wait" for smoother transitions */}
               <motion.div
                 key={activeTab} // Key change triggers animation
                 initial={{ opacity: 0, y: 10 }} // Initial state (slightly below and faded out)
