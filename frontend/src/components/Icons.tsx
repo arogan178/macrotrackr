@@ -124,3 +124,4 @@ export const MoonIcon = createIcon(Moon);
 export const SunIcon = createIcon(Sun);
 export const MoreVerticalIcon = createIcon(MoreVertical);
 export const SmilePlusIcon = createIcon(SmilePlus);
+export const XIcon = createIcon(X);

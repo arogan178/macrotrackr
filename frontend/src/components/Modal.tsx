@@ -1,14 +1,15 @@
-import { useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
-import { WarningIcon, InfoIcon } from "./Icons";
-import { FormButton } from "./form";
+import { ReactNode, useEffect, useRef, memo, useState } from "react";
+import ReactDOM from "react-dom"; // Import ReactDOM for portals
+import { motion } from "motion/react";
+import { XIcon } from "./Icons";
+import SaveButton from "./SaveButton";
 
 interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
-  children?: React.ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
+  children?: ReactNode;
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
 }
 
 interface ConfirmationModalProps extends BaseModalProps {
@@ -31,12 +32,27 @@ interface FormModalProps extends BaseModalProps {
 
 type ModalProps = ConfirmationModalProps | FormModalProps;
 
-export default function Modal(props: ModalProps) {
-  const { isOpen, onClose, title, size = "md" } = props;
+function Modal({
+  isOpen,
+  onClose,
+  title,
+  size = "md",
+  variant,
+  message,
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  onConfirm,
+  isDanger = false,
+  children,
+  onSave,
+  saveDisabled,
+  saveLabel = "Save",
+  hideDefaultButtons = false,
+}: ModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
-  const initialFocusRef = useRef<HTMLElement | null>(null);
+  const modalRoot = document.getElementById("modal-root"); // Get the portal target
 
-  // Handle escape key press to close modal
+  // Handle escape key press and body scroll lock
   useEffect(() => {
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === "Escape" && isOpen) {
@@ -44,208 +60,195 @@ export default function Modal(props: ModalProps) {
       }
     }
 
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    if (isOpen) {
+      document.body.classList.add("modal-open");
+      window.addEventListener("keydown", handleKeyDown);
+    } else {
+      document.body.classList.remove("modal-open");
+    }
+
+    // Cleanup function
+    return () => {
+      document.body.classList.remove("modal-open"); // Ensure class is removed on unmount
+      window.removeEventListener("keydown", handleKeyDown);
+    };
   }, [isOpen, onClose]);
 
-  // Focus trap & scroll lock
-  useEffect(() => {
-    if (isOpen) {
-      // Save current active element to restore focus later
-      initialFocusRef.current = document.activeElement as HTMLElement;
-      document.body.style.overflow = "hidden";
+  // Get variant specific styles - Restore default header/footer backgrounds
+  const getVariantStyles = (variant: string) => {
+    // Define default styles matching the base content background
+    const defaultStyles = {
+      header: "bg-gray-800/80",
+      footer: "bg-gray-800/80",
+      confirmButton: "",
+    };
 
-      // Set up focus trap without initial focus stealing
-      const handleTabKey = (e: KeyboardEvent) => {
-        if (e.key === "Tab" && modalRef.current) {
-          const focusableElements = modalRef.current.querySelectorAll(
-            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-          );
-
-          if (!focusableElements.length) return;
-
-          const firstElement = focusableElements[0] as HTMLElement;
-          const lastElement = focusableElements[
-            focusableElements.length - 1
-          ] as HTMLElement;
-
-          if (e.shiftKey && document.activeElement === firstElement) {
-            e.preventDefault();
-            lastElement.focus();
-          } else if (!e.shiftKey && document.activeElement === lastElement) {
-            e.preventDefault();
-            firstElement.focus();
-          }
-        }
-      };
-
-      window.addEventListener("keydown", handleTabKey);
-      return () => {
-        window.removeEventListener("keydown", handleTabKey);
-        document.body.style.overflow = "";
-        // Restore focus to previous element when modal closes
-        initialFocusRef.current?.focus();
-      };
-    } else {
-      document.body.style.overflow = "";
+    switch (variant) {
+      case "confirmation":
+        return {
+          // Use default header/footer for uniform look, override only confirm button
+          ...defaultStyles,
+          confirmButton: isDanger
+            ? "bg-red-600 text-white hover:bg-red-700"
+            : "bg-indigo-600 text-white hover:bg-indigo-700",
+        };
+      case "form":
+        return {
+          ...defaultStyles, // Use default header/footer
+          // confirmButton style might not be needed if SaveButton is always used
+          confirmButton: "bg-blue-600 text-white hover:bg-blue-700",
+        };
+      default:
+        return defaultStyles;
     }
-  }, [isOpen]);
-
-  if (!isOpen) return null;
-
-  // Size classes for the modal
-  const sizeClasses = {
-    sm: "max-w-sm",
-    md: "max-w-md",
-    lg: "max-w-lg",
-    xl: "max-w-xl",
-  }[size];
-
-  const renderConfirmationContent = (props: ConfirmationModalProps) => {
-    const {
-      message,
-      confirmLabel = "Confirm",
-      cancelLabel = "Cancel",
-      onConfirm,
-      isDanger = false,
-    } = props;
-
-    return (
-      <>
-        <div className="sm:flex sm:items-start">
-          {isDanger ? (
-            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-900/20 sm:mx-0 sm:h-10 sm:w-10">
-              <WarningIcon className="h-6 w-6 text-red-400" />
-            </div>
-          ) : (
-            <div className="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-indigo-900/20 sm:mx-0 sm:h-10 sm:w-10">
-              <InfoIcon className="h-6 w-6 text-indigo-400" />
-            </div>
-          )}
-
-          <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-            <h3
-              className="text-lg font-semibold leading-6 text-gray-200"
-              id="modal-title"
-            >
-              {title}
-            </h3>
-            <div className="mt-2">
-              <p className="text-sm text-gray-400">{message}</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-6">
-          {cancelLabel && (
-            <FormButton
-              variant="secondary"
-              onClick={onClose}
-              size="md"
-              ariaLabel="Cancel"
-            >
-              {cancelLabel}
-            </FormButton>
-          )}
-          {confirmLabel && (
-            <FormButton
-              variant={isDanger ? "danger" : "primary"}
-              onClick={onConfirm}
-              size="md"
-              ariaLabel={confirmLabel}
-            >
-              {confirmLabel}
-            </FormButton>
-          )}
-        </div>
-      </>
-    );
   };
 
-  const renderFormContent = (props: FormModalProps) => {
-    const {
-      children,
-      onSave,
-      saveDisabled,
-      saveLabel = "Save",
-      cancelLabel = "Cancel",
-      hideDefaultButtons = false,
-    } = props;
+  // Base styles for the modal container
+  const baseContainerStyles =
+    "fixed inset-0 z-50 flex items-center justify-center p-4";
 
-    return (
-      <>
-        <div className="mb-4">
-          <h3 className="text-lg font-medium text-gray-200" id="modal-title">
+  // Base styles for the modal content
+  const baseContentStyles =
+    "bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-2xl border border-gray-700/50 flex flex-col overflow-hidden";
+
+  // Size styles
+  const sizeStyles = {
+    sm: "max-w-sm w-full",
+    md: "max-w-md w-full",
+    lg: "max-w-lg w-full",
+    xl: "max-w-xl w-full",
+    "2xl": "max-w-2xl w-full",
+  }[size];
+
+  const variantStyles = getVariantStyles(variant);
+
+  // Animation variants for motion.div
+  const modalVariants = {
+    hidden: {
+      opacity: 0,
+      scale: 0.95,
+      y: 20,
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: {
+        duration: 0.2,
+        ease: "easeOut",
+      },
+    },
+    exit: {
+      opacity: 0,
+      scale: 0.95,
+      y: 20,
+      transition: {
+        duration: 0.15,
+        ease: "easeIn",
+      },
+    },
+  };
+
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.2 } },
+    exit: { opacity: 0, transition: { duration: 0.15 } },
+  };
+
+  // State to manage mounting for portal
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+    return () => setIsMounted(false);
+  }, []);
+
+  // Prevent rendering if not open or not mounted or portal root not found
+  if (!isOpen || !isMounted || !modalRoot) return null;
+
+  // Use ReactDOM.createPortal to render the modal into #modal-root
+  return ReactDOM.createPortal(
+    <div
+      className={`${baseContainerStyles}`}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      {/* Backdrop with animation */}
+      <motion.div
+        className="absolute inset-0 bg-black/60"
+        variants={backdropVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        onClick={onClose} // Close on backdrop click
+      />
+
+      {/* Modal Content with animation */}
+      <motion.div
+        ref={modalRef}
+        className={`${baseContentStyles} ${sizeStyles} relative`}
+        variants={modalVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        role="document"
+      >
+        {/* Header */}
+        <div
+          className={`flex items-center justify-between p-4 border-b border-gray-700/50 ${variantStyles.header}`}
+        >
+          <h2 id="modal-title" className="text-lg font-medium text-gray-100">
             {title}
-          </h3>
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+            aria-label="Close modal"
+          >
+            <XIcon size="md" />
+          </button>
         </div>
 
-        {children}
+        {/* Body */}
+        <div className="p-5 flex-grow overflow-y-auto">
+          {message && <p className="text-sm text-gray-300 mb-4">{message}</p>}
+          {children}
+        </div>
 
-        {!hideDefaultButtons && (
-          <div className="mt-6 flex justify-end gap-3">
-            <FormButton
-              variant="secondary"
+        {/* Footer */}
+        {(onSave || onConfirm || variant === "confirmation") && (
+          <div
+            className={`flex justify-end gap-3 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
+          >
+            <button
               onClick={onClose}
-              size="md"
-              ariaLabel={cancelLabel}
+              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
             >
               {cancelLabel}
-            </FormButton>
-            {onSave && (
-              <FormButton
+            </button>
+            {variant === "form" && onSave && (
+              <SaveButton
                 onClick={onSave}
                 disabled={saveDisabled}
-                variant="primary"
-                size="md"
-                ariaLabel={saveLabel}
+                label={saveLabel}
+              />
+            )}
+            {variant === "confirmation" && onConfirm && (
+              <button
+                onClick={onConfirm}
+                // Apply confirmButton style directly
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${variantStyles.confirmButton}`}
               >
-                {saveLabel}
-              </FormButton>
+                {confirmLabel}
+              </button>
             )}
           </div>
         )}
-      </>
-    );
-  };
-
-  const renderContent = () => {
-    switch (props.variant) {
-      case "confirmation":
-        return renderConfirmationContent(props);
-      case "form":
-        return renderFormContent(props);
-      default:
-        return null;
-    }
-  };
-
-  return createPortal(
-    <div
-      className="fixed inset-0 z-50 overflow-y-auto"
-      role="dialog"
-      aria-labelledby="modal-title"
-      aria-modal="true"
-    >
-      <div className="flex min-h-screen items-center justify-center px-4">
-        {/* Backdrop */}
-        <div
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-          onClick={onClose}
-        />
-
-        {/* Modal */}
-        <div
-          ref={modalRef}
-          className={`relative z-50 w-full ${sizeClasses} transform rounded-2xl bg-gray-800/90 p-6 shadow-xl transition-all duration-300 ease-out ${
-            isOpen ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-          }`}
-          tabIndex={-1}
-        >
-          {renderContent()}
-        </div>
-      </div>
+      </motion.div>
     </div>,
-    document.body
+    modalRoot // Target element for the portal
   );
 }
+
+export default memo(Modal);

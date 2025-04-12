@@ -191,58 +191,60 @@ function HabitCard({
   };
 
   return (
-    <div className="bg-gray-700/30 rounded-lg">
-      <div
-        className={`bg-gradient-to-r ${getGradientClass(accentColor)} p-3`}
-      ></div>
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center">
-          <div
-            className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
-          >
-            {renderIcon()}
+    // Add overflow-hidden to the outer container
+    <div className="bg-gray-700/30 rounded-lg overflow-hidden">
+      {/* Move all card content INSIDE the gradient div */}
+      <div className={`bg-gradient-to-r ${getGradientClass(accentColor)} p-3`}>
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center">
+            <div
+              className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
+            >
+              {renderIcon()}
+            </div>
+            <h4 className="font-medium text-gray-200 mr-2">{title}</h4>
           </div>
-          <h4 className="font-medium text-gray-200 mr-2">{title}</h4>
+
+          {isComplete && (
+            <span className="text-xs text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded-full">
+              <CheckIcon size="sm" />
+              Complete
+            </span>
+          )}
+
+          {/* Actions menu - only show if handlers are provided */}
+          {(onIncrement || onComplete || onEdit || onDelete) && (
+            <div className="ml-auto">
+              <HabitActions
+                habitId={id}
+                isComplete={isComplete}
+                onIncrement={onIncrement || (async () => {})}
+                onComplete={onComplete || (async () => {})}
+                onEdit={onEdit}
+                onDelete={onDelete || (async () => {})}
+              />
+            </div>
+          )}
         </div>
 
-        {isComplete && (
-          <span className="text-xs text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded-full">
-            <CheckIcon size="sm" />
-            Complete
-          </span>
-        )}
-
-        {/* Actions menu - only show if handlers are provided */}
-        {(onIncrement || onComplete || onEdit || onDelete) && (
-          <div className="ml-auto">
-            <HabitActions
-              habitId={id}
-              isComplete={isComplete}
-              onIncrement={onIncrement || (async () => {})}
-              onComplete={onComplete || (async () => {})}
-              onEdit={onEdit}
-              onDelete={onDelete || (async () => {})}
-            />
+        <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-baseline gap-1">
+            <span className="text-xl font-bold text-gray-200">{current}</span>
+            <span className="text-gray-400 text-sm">/ {target}</span>
           </div>
-        )}
-      </div>
 
-      <div className="flex items-center justify-between mb-1.5">
-        <div className="flex items-baseline gap-1">
-          <span className="text-xl font-bold text-gray-200">{current}</span>
-          <span className="text-gray-400 text-sm">/ {target}</span>
+          {!isComplete && (
+            <span className="text-sm text-gray-400">{progress}%</span>
+          )}
         </div>
 
-        {!isComplete && (
-          <span className="text-sm text-gray-400">{progress}%</span>
-        )}
-      </div>
-
-      <ProgressBar
-        progress={progress}
-        color={isComplete ? "green" : accentColor}
-        height="sm"
-      />
+        <ProgressBar
+          progress={progress}
+          color={isComplete ? "green" : accentColor}
+          height="sm"
+        />
+      </div>{" "}
+      {/* Close the gradient div */}
     </div>
   );
 }
