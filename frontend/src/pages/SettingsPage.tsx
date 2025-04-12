@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, ReactNode } from "react";
 import { Navbar } from "../features/layout/components";
 import FloatingNotification from "../features/notifications/components/FloatingNotification";
 import { TabButton, CardContainer } from "../components/form";
@@ -8,6 +8,36 @@ import { useBeforeUnload } from "../hooks/useBeforeUnload";
 import { ProfileForm, MacroTargetForm } from "@/features/settings/components";
 import { useStore } from "../store/store";
 import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
+
+// --- Modified PageHeader Component ---
+// Now accepts tabs as children to render them on the right
+const PageHeader = ({
+  hasChanges,
+  children, // Accept children (the tabs)
+}: {
+  hasChanges: boolean;
+  children: ReactNode; // Define children prop
+}) => (
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+    {/* Left Side: Title */}
+    <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
+      Settings
+    </h1>
+    {/* Right Side: Badges and Tabs */}
+    <div className="flex items-center gap-3">
+      {/* Badges */}
+      <div className="flex space-x-2">
+        {hasChanges && (
+          <span className="px-3 py-1 bg-yellow-600/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm font-medium">
+            Unsaved Changes
+          </span>
+        )}
+      </div>
+      {/* Render Tabs passed as children */}
+      {children}
+    </div>
+  </div>
+);
 
 export default function SettingsPage() {
   const {
@@ -120,24 +150,34 @@ export default function SettingsPage() {
             isDanger={true}
           />
 
-          <PageHeader hasChanges={hasSettingsChanges} />
-
-          <div className="flex border-b border-gray-700 mb-6">
-            <TabButton
-              active={activeTab === "profile"}
-              onClick={() => handleTabChange("profile")}
+          {/* Pass Tabs into the updated PageHeader */}
+          <PageHeader hasChanges={hasSettingsChanges}>
+            {/* Tab Navigation Container - Moved inside header */}
+            <div
+              className="flex space-x-1 p-1 bg-gray-800/60 rounded-lg" // Style similar to GoalsPage
+              role="tablist"
+              aria-label="Settings Tabs"
             >
-              <UserIcon className="w-4 h-4 mr-2" />
-              Profile
-            </TabButton>
-            <TabButton
-              active={activeTab === "macro target"}
-              onClick={() => handleTabChange("macro target")}
-            >
-              <MenuIcon className="w-4 h-4 mr-2" />
-              Macro Target
-            </TabButton>
-          </div>
+              <TabButton
+                active={activeTab === "profile"}
+                onClick={() => handleTabChange("profile")}
+              >
+                <span className="flex items-center">
+                  <UserIcon size="sm" className="mr-1.5" />
+                  Profile
+                </span>
+              </TabButton>
+              <TabButton
+                active={activeTab === "macro target"}
+                onClick={() => handleTabChange("macro target")}
+              >
+                <span className="flex items-center">
+                  <MenuIcon size="sm" className="mr-1.5" />
+                  Macro Target
+                </span>
+              </TabButton>
+            </div>
+          </PageHeader>
 
           {isLoading || !settings ? (
             <div className="flex justify-center items-center h-64">
@@ -170,26 +210,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
-// Extracted components
-const PageHeader = ({ hasChanges }: { hasChanges: boolean }) => (
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8">
-    <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight mb-4 sm:mb-0">
-      Settings
-    </h1>
-    <div className="flex space-x-2">
-      {hasChanges && (
-        <span className="px-3 py-1 bg-yellow-600/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm font-medium">
-          Unsaved Changes
-        </span>
-      )}
-      <span className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-medium">
-        {new Date().toLocaleDateString("en-US", {
-          day: "numeric",
-          month: "short",
-          year: "numeric",
-        })}
-      </span>
-    </div>
-  </div>
-);

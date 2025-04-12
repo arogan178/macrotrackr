@@ -23,6 +23,7 @@ export interface GoalsSlice {
     key: K,
     value: WeightGoals[K]
   ) => Promise<void>;
+  deleteWeightGoal: () => Promise<void>; // Add delete action
   setLoading: (loading: boolean) => void;
   setSaving: (saving: boolean) => void;
   setError: (error: string | null) => void;
@@ -219,41 +220,42 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     }
   },
 
-  // --- Common Actions ---
-  setLoading: (loading) => set({ isLoading: loading }),
-  setSaving: (saving) => set({ isSaving: saving }),
-  setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
-
-  resetGoals: async () => {
-    set({ isLoading: true, error: null });
+  // --- Delete Action ---
+  deleteWeightGoal: async () => {
+    set({ isSaving: true, error: null });
     const fullGet = get as () => FullGoalsState;
     try {
-      await apiService.goals.resetGoals();
-
-      // Call resetHabits from habits slice if available
-      if (fullGet().resetHabits) {
-        await fullGet().resetHabits();
-      }
-
-      set({ weightGoals: null, isLoading: false, error: null });
+      await apiService.goals.deleteWeightGoals(); // Call API service
+      set({ weightGoals: null, isSaving: false, error: null });
 
       if (fullGet().addNotification) {
         fullGet().addNotification({
-          message: "Goals reset successfully!",
+          message: "Weight goal deleted successfully!",
           type: "success",
         });
       }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
-      console.error("Error resetting goals:", error);
-      set({ error: errorMessage, isLoading: false });
+      console.error("Error deleting weight goal:", error);
+      set({ error: errorMessage, isSaving: false });
       if (fullGet().addNotification) {
         fullGet().addNotification({
-          message: `Failed to reset goals: ${errorMessage}`,
+          message: `Failed to delete weight goal: ${errorMessage}`,
           type: "error",
         });
       }
     }
+  },
+
+  // --- State Management Actions ---
+  setLoading: (loading) => set({ isLoading: loading }),
+  setSaving: (saving) => set({ isSaving: saving }),
+  setError: (error) => set({ error }),
+  clearError: () => set({ error: null }),
+
+  // --- Reset Action ---
+  resetGoals: async () => {
+    set({ weightGoals: null, error: null, isLoading: false, isSaving: false });
+    // Optionally, refetch or perform other cleanup
   },
 });

@@ -1,4 +1,9 @@
-import { CalorieIcon, ChevronRightIcon, EditIcon } from "@/components/Icons";
+import {
+  CalorieIcon,
+  ChevronRightIcon,
+  EditIcon,
+  TrashIcon, // Import TrashIcon
+} from "@/components/Icons";
 import ProgressBar from "@/components/ProgressBar";
 import {
   MacroDailyTotals,
@@ -14,6 +19,7 @@ interface WeightGoalStatusProps {
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | null;
   onEdit: () => void;
+  onDelete: () => void; // Add onDelete prop
   calorieTarget?: number;
   macroTarget?: MacroTargetSettings;
 }
@@ -25,6 +31,7 @@ function WeightGoalStatus({
   macroDailyTotals,
   weightGoals,
   onEdit,
+  onDelete, // Destructure onDelete
   calorieTarget,
   macroTarget,
 }: WeightGoalStatusProps) {
@@ -104,7 +111,7 @@ function WeightGoalStatus({
 
   return (
     <div className="p-6">
-      {/* Header with goal type and edit button */}
+      {/* Header with goal type and edit/delete buttons */}
       <div className="flex justify-between items-center mb-6">
         <div className="flex items-center">
           <div className={`p-2 rounded-lg bg-${goalColor}-600/20 mr-3`}>
@@ -119,13 +126,24 @@ function WeightGoalStatus({
             </p>
           </div>
         </div>
-        <button
-          onClick={onEdit}
-          className="p-2 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
-          aria-label="Edit weight goal"
-        >
-          <EditIcon className="text-gray-300" />
-        </button>
+        <div className="flex items-center gap-2">
+          {" "}
+          {/* Add gap for buttons */}
+          <button
+            onClick={onEdit}
+            className="p-2 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
+            aria-label="Edit weight goal"
+          >
+            <EditIcon className="text-gray-300" />
+          </button>
+          <button
+            onClick={onDelete} // Call onDelete handler
+            className="p-2 rounded-full bg-red-900/30 hover:bg-red-900/50 transition-colors"
+            aria-label="Delete weight goal"
+          >
+            <TrashIcon className="text-red-400" />
+          </button>
+        </div>
       </div>
 
       {/* Goal progress visual */}

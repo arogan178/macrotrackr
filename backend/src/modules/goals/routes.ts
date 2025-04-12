@@ -193,7 +193,7 @@ export const goalRoutes = (app: Elysia) =>
 
       // --- Reset Goals ---
       .post(
-        "/reset",
+        "/delete",
         ({ user, set, db }: AuthenticatedContext) => {
           try {
             db.transaction(() => {
