@@ -438,8 +438,8 @@ export const apiService = {
       return handleResponse(response);
     },
     /** Resets all goals */
-    resetGoals: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/goals/reset`, {
+    deleteWeightGoals: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/delete`, {
         method: "POST",
         headers: getHeaders(false),
       });

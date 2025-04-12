@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react"; // Import motion components
+import { motion, AnimatePresence } from "motion/react";
 import { Navbar } from "@/features/layout/components";
 import {
-  GoalsLoadingSkeleton,
   AchievementsContent,
   WeightGoalDashboard,
+  WeightGoalModal,
 } from "@/features/goals/components";
 import { HabitTracker, HabitModal } from "@/features/habits/components";
 import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types";
@@ -26,6 +26,9 @@ export default function GoalsPage() {
   const [currentHabit, setCurrentHabit] = useState<HabitGoal | null>(null);
   // State for modal mode (add or edit)
   const [habitModalMode, setHabitModalMode] = useState<"add" | "edit">("add");
+  const [isWeightGoalModalOpen, setIsWeightGoalModalOpen] = useState(false);
+  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
+    useState(false); // State for delete confirmation
 
   // Get state and actions from store
   const {
@@ -51,6 +54,7 @@ export default function GoalsPage() {
     incrementHabitProgress,
     completeHabit,
     deleteHabit,
+    deleteWeightGoal, // Add deleteWeightGoal action
     resetGoals,
   } = useStore();
 
@@ -74,12 +78,24 @@ export default function GoalsPage() {
     fetchHabits,
   ]);
 
-  // Handler for saving weight goal
-  const handleSaveGoal = (formValues: WeightGoalFormValues) => {
+  // Updated handler for saving weight goal - now also closes modal
+  const handleSaveGoal = async (formValues: WeightGoalFormValues) => {
     if (!nutritionProfile?.tdee) return;
+    console.log("Saving weight goal:", formValues); // DEBUG
+    await createWeightGoal(formValues, nutritionProfile.tdee);
+    handleCloseWeightGoalModal(); // Use the close handler
+  };
 
-    // Pass all the calculated values directly to the createWeightGoal function
-    createWeightGoal(formValues, nutritionProfile.tdee);
+  // Handler to open the weight goal modal
+  const handleOpenWeightGoalModal = () => {
+    console.log("Opening weight goal modal..."); // DEBUG
+    setIsWeightGoalModalOpen(true);
+  };
+
+  // Handler to close the weight goal modal
+  const handleCloseWeightGoalModal = () => {
+    console.log("Closing weight goal modal..."); // DEBUG
+    setIsWeightGoalModalOpen(false);
   };
 
   // Handler for resetting goals
@@ -126,6 +142,22 @@ export default function GoalsPage() {
     setCurrentHabit(null);
   };
 
+  // Handler to open the delete confirmation modal
+  const handleOpenDeleteConfirmModal = () => {
+    setIsDeleteConfirmModalOpen(true);
+  };
+
+  // Handler to close the delete confirmation modal
+  const handleCloseDeleteConfirmModal = () => {
+    setIsDeleteConfirmModalOpen(false);
+  };
+
+  // Handler to confirm and execute weight goal deletion
+  const handleDeleteWeightGoalConfirmed = async () => {
+    await deleteWeightGoal();
+    handleCloseDeleteConfirmModal();
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
@@ -168,6 +200,25 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
+      {/* Delete Weight Goal Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteConfirmModalOpen && (
+          <Modal
+            key="delete-weight-goal-confirm-modal"
+            isOpen={isDeleteConfirmModalOpen}
+            onClose={handleCloseDeleteConfirmModal}
+            title="Delete Weight Goal"
+            variant="confirmation"
+            message="Are you sure you want to delete your current weight goal? This action cannot be undone."
+            confirmLabel="Delete Goal"
+            cancelLabel="Cancel"
+            onConfirm={handleDeleteWeightGoalConfirmed}
+            isDanger={true}
+            size="md"
+          />
+        )}
+      </AnimatePresence>
+
       {/* Unified Habit Modal */}
       <AnimatePresence>
         {isHabitModalOpen && (
@@ -185,6 +236,22 @@ export default function GoalsPage() {
           />
         )}
       </AnimatePresence>
+
+      {/* Weight Goal Modal - Removed outer AnimatePresence */}
+      {isWeightGoalModalOpen && (
+        <WeightGoalModal
+          key="weight-goal-modal"
+          isOpen={isWeightGoalModalOpen}
+          onClose={handleCloseWeightGoalModal}
+          onSave={handleSaveGoal}
+          currentWeight={user?.weight || 0}
+          // Pass targetWeight from goals if available, otherwise from user (or 0)
+          targetWeight={weightGoals?.targetWeight ?? user?.weight}
+          tdee={nutritionProfile?.tdee || 0}
+          weightGoals={weightGoals}
+          isLoading={goalsLoading} // Pass loading state for save button
+        />
+      )}
 
       <div className="relative min-h-screen pb-12 overflow-hidden">
         {/* Background effects - contained within parent with overflow-hidden */}
@@ -226,18 +293,8 @@ export default function GoalsPage() {
                     <StarIcon size="sm" className="mr-1.5" />
                     Achievements
                   </span>
-                </TabButton>
+                </TabButton>{" "}
               </div>
-
-              {/* Action Button */}
-              <button
-                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white font-medium transition-colors duration-200 flex items-center"
-                onClick={() => setIsResetModalOpen(true)}
-              >
-                <PlusIcon size="sm" className="mr-1.5" />
-                <span className="hidden sm:inline">Create New Goal</span>
-                <span className="sm:hidden">New</span>
-              </button>
             </div>
           </div>
 
@@ -258,12 +315,11 @@ export default function GoalsPage() {
               >
                 {activeTab === "active" ? (
                   <div className="space-y-6">
-                    {/* Weight Goal Dashboard - Pass goalsLoading */}
+                    {/* Weight Goal Dashboard - Updated props */}
                     <WeightGoalDashboard
                       currentWeight={user?.weight || 0}
-                      targetWeight={
-                        weightGoals?.targetWeight || user?.weight || 0
-                      }
+                      // Pass targetWeight from goals if available, otherwise from user (or 0)
+                      targetWeight={weightGoals?.targetWeight ?? user?.weight}
                       tdee={nutritionProfile?.tdee || 0}
                       macroDailyTotals={
                         macroDailyTotals || {
@@ -274,20 +330,18 @@ export default function GoalsPage() {
                         }
                       }
                       weightGoals={weightGoals}
-                      onSave={handleSaveGoal}
-                      // Pass goalsLoading directly
                       isLoading={goalsLoading}
+                      onOpenModal={handleOpenWeightGoalModal} // Pass modal opener
+                      onDelete={handleOpenDeleteConfirmModal} // Pass delete confirm modal opener
                       targetCalories={
                         macroTarget?.macroTarget?.targetCalories ?? 0
                       }
-                      // Pass the nested macroTarget object (MacroTargetSettings)
                       macroTarget={macroTarget?.macroTarget ?? undefined}
                     />
 
-                    {/* Habit Tracker - Pass habitsLoading */}
+                    {/* Habit Tracker - No changes needed here */}
                     <HabitTracker
                       habits={habits || []}
-                      // Pass habitsLoading directly
                       isLoading={habitsLoading}
                       onAddHabit={handleAddHabit}
                       onIncrementHabit={incrementHabitProgress}
