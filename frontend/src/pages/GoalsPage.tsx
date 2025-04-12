@@ -35,7 +35,6 @@ export default function GoalsPage() {
     macroDailyTotals,
     habits, // Updated property from the habits slice
     isLoading: goalsLoading,
-    isSaving: goalsSaving,
     error: goalsError,
     isLoading: habitsLoading, // Updated property from the habits slice
     error: habitsError, // Updated property from the habits slice
@@ -165,6 +164,9 @@ export default function GoalsPage() {
 
       {/* Unified Habit Modal */}
       <HabitModal
+        key={
+          habitModalMode === "edit" && currentHabit ? currentHabit.id : "add"
+        }
         isOpen={isHabitModalOpen}
         onClose={handleCloseHabitModal}
         onSubmit={handleSubmitHabit}
@@ -248,8 +250,10 @@ export default function GoalsPage() {
                 weightGoals={weightGoals}
                 onSave={handleSaveGoal}
                 isLoading={goalsLoading}
-                targetCalories={macroTarget?.targetCalories}
-                macroTarget={macroTarget?.macroTarget}
+                // Access targetCalories from the nested macroTarget object
+                targetCalories={macroTarget?.macroTarget?.targetCalories ?? 0}
+                // Pass the nested macroTarget object (MacroTargetSettings)
+                macroTarget={macroTarget?.macroTarget ?? undefined}
               />
 
               {/* Habit Tracker - Using habits array instead of habitGoals */}
