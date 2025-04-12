@@ -229,12 +229,10 @@ export default function GoalsPage() {
             </div>
           </div>
 
-          {/* Main Content */}
-          {goalsLoading ? (
-            <GoalsLoadingSkeleton />
-          ) : activeTab === "active" ? (
+          {/* Main Content - Removed top-level loading check */}
+          {activeTab === "active" ? (
             <div className="space-y-6">
-              {/* Weight Goal Dashboard */}
+              {/* Weight Goal Dashboard - Pass goalsLoading */}
               <WeightGoalDashboard
                 currentWeight={user?.weight || 0}
                 targetWeight={weightGoals?.targetWeight || user?.weight || 0}
@@ -249,16 +247,17 @@ export default function GoalsPage() {
                 }
                 weightGoals={weightGoals}
                 onSave={handleSaveGoal}
+                // Pass goalsLoading directly
                 isLoading={goalsLoading}
-                // Access targetCalories from the nested macroTarget object
                 targetCalories={macroTarget?.macroTarget?.targetCalories ?? 0}
                 // Pass the nested macroTarget object (MacroTargetSettings)
                 macroTarget={macroTarget?.macroTarget ?? undefined}
               />
 
-              {/* Habit Tracker - Using habits array instead of habitGoals */}
+              {/* Habit Tracker - Pass habitsLoading */}
               <HabitTracker
                 habits={habits || []}
+                // Pass habitsLoading directly
                 isLoading={habitsLoading}
                 onAddHabit={handleAddHabit}
                 onIncrementHabit={incrementHabitProgress}
@@ -267,7 +266,7 @@ export default function GoalsPage() {
                 onDeleteHabit={deleteHabit}
               />
 
-              {/* Recent Stats Section - Optional feature to show additional metrics */}
+              {/* Recent Stats Section - Keep as is for now */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {["Weekly Average", "Monthly Trend", "Progress Insights"].map(
                   (title, i) => (
@@ -285,6 +284,7 @@ export default function GoalsPage() {
               </div>
             </div>
           ) : (
+            // AchievementsContent handles its own loading/empty states internally (or will)
             <AchievementsContent />
           )}
         </div>

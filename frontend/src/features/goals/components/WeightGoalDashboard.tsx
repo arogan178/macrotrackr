@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { WeightGoalFormValues, WeightGoals } from "../types";
 import {
   MacroDailyTotals,
@@ -32,7 +32,22 @@ function WeightGoalDashboard({
   targetCalories,
   macroTarget,
 }: WeightGoalDashboardProps) {
+  // Initialize isEditing based on the initial presence of weightGoals
   const [isEditing, setIsEditing] = useState(!weightGoals);
+
+  // Add useEffect to sync isEditing state with weightGoals prop changes
+  useEffect(() => {
+    // If weightGoals data arrives (is not null) and we are currently editing,
+    // switch back to the status view.
+    // Don't switch if weightGoals becomes null (e.g., on reset), allow staying in edit mode.
+    if (weightGoals && isEditing) {
+      setIsEditing(false);
+    }
+    // If weightGoals is null and we are NOT editing, switch to edit mode (initial setup)
+    else if (!weightGoals && !isEditing) {
+      setIsEditing(true);
+    }
+  }, [weightGoals]); // Dependency array includes weightGoals
 
   const handleSave = (values: WeightGoalFormValues) => {
     onSave(values);

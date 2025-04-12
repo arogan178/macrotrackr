@@ -1,6 +1,7 @@
 import ProgressBar from "@/components/ProgressBar";
 import { HabitGoal } from "../types";
 import HabitActions from "./HabitActions";
+import EmptyState from "@/components/EmptyState"; // Import EmptyState
 import {
   CalendarIcon,
   CheckCircleIcon,
@@ -61,7 +62,8 @@ function HabitTracker({
             Habit Goals
           </h3>
 
-          {onAddHabit && (
+          {/* Only show Add button in header if NOT showing empty state */}
+          {onAddHabit && habits.length > 0 && (
             <button
               onClick={onAddHabit}
               className="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg"
@@ -94,17 +96,28 @@ function HabitTracker({
             ))}
           </div>
         ) : habits.length === 0 ? (
-          <div className="bg-gray-700/30 rounded-lg p-8 text-center">
-            <p className="text-gray-400 mb-3">No habit goals set yet</p>
-            {onAddHabit && (
-              <button
-                onClick={onAddHabit}
-                className="text-sm font-medium text-indigo-400 hover:text-indigo-300"
-              >
-                Add your first habit goal
-              </button>
-            )}
-          </div>
+          // Use EmptyState component
+          <EmptyState
+            title="Start Building Habits"
+            message="Add your first habit goal to begin tracking your progress."
+            icon={
+              <div className="rounded-full bg-gray-800 p-4 inline-block">
+                <CheckCircleIcon className="h-10 w-10 text-gray-500" />
+              </div>
+            }
+            action={
+              onAddHabit
+                ? {
+                    label: "Add First Habit",
+                    onClick: onAddHabit,
+                    variant: "primary",
+                    icon: <PlusIcon size="sm" />,
+                  }
+                : undefined
+            }
+            size="md"
+            className="bg-gray-700/30 rounded-lg"
+          />
         ) : (
           <div className="space-y-4">
             {habits.map((habit) => (
@@ -179,56 +192,57 @@ function HabitCard({
 
   return (
     <div className="bg-gray-700/30 rounded-lg">
-      <div className={`bg-gradient-to-r ${getGradientClass(accentColor)} p-3`}>
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center">
-            <div
-              className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
-            >
-              {renderIcon()}
-            </div>
-            <h4 className="font-medium text-gray-200 mr-2">{title}</h4>
+      <div
+        className={`bg-gradient-to-r ${getGradientClass(accentColor)} p-3`}
+      ></div>
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center">
+          <div
+            className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
+          >
+            {renderIcon()}
           </div>
-
-          {isComplete && (
-            <span className="text-xs text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded-full">
-              <CheckIcon size="sm" />
-              Complete
-            </span>
-          )}
-
-          {/* Actions menu - only show if handlers are provided */}
-          {(onIncrement || onComplete || onEdit || onDelete) && (
-            <div className="ml-auto">
-              <HabitActions
-                habitId={id}
-                isComplete={isComplete}
-                onIncrement={onIncrement || (async () => {})}
-                onComplete={onComplete || (async () => {})}
-                onEdit={onEdit}
-                onDelete={onDelete || (async () => {})}
-              />
-            </div>
-          )}
+          <h4 className="font-medium text-gray-200 mr-2">{title}</h4>
         </div>
 
-        <div className="flex items-center justify-between mb-1.5">
-          <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-gray-200">{current}</span>
-            <span className="text-gray-400 text-sm">/ {target}</span>
+        {isComplete && (
+          <span className="text-xs text-green-400 flex items-center gap-1 bg-green-400/10 px-2 py-0.5 rounded-full">
+            <CheckIcon size="sm" />
+            Complete
+          </span>
+        )}
+
+        {/* Actions menu - only show if handlers are provided */}
+        {(onIncrement || onComplete || onEdit || onDelete) && (
+          <div className="ml-auto">
+            <HabitActions
+              habitId={id}
+              isComplete={isComplete}
+              onIncrement={onIncrement || (async () => {})}
+              onComplete={onComplete || (async () => {})}
+              onEdit={onEdit}
+              onDelete={onDelete || (async () => {})}
+            />
           </div>
-
-          {!isComplete && (
-            <span className="text-sm text-gray-400">{progress}%</span>
-          )}
-        </div>
-
-        <ProgressBar
-          progress={progress}
-          color={isComplete ? "green" : accentColor}
-          height="sm"
-        />
+        )}
       </div>
+
+      <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-baseline gap-1">
+          <span className="text-xl font-bold text-gray-200">{current}</span>
+          <span className="text-gray-400 text-sm">/ {target}</span>
+        </div>
+
+        {!isComplete && (
+          <span className="text-sm text-gray-400">{progress}%</span>
+        )}
+      </div>
+
+      <ProgressBar
+        progress={progress}
+        color={isComplete ? "green" : accentColor}
+        height="sm"
+      />
     </div>
   );
 }
