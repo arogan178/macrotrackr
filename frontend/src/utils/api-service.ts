@@ -439,8 +439,8 @@ export const apiService = {
     },
     /** Resets all goals */
     deleteWeightGoals: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/goals/delete`, {
-        method: "POST",
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
+        method: "DELETE",
         headers: getHeaders(false),
       });
       return handleResponse(response);

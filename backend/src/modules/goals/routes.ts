@@ -192,17 +192,14 @@ export const goalRoutes = (app: Elysia) =>
       )
 
       // --- Reset Goals ---
-      .post(
-        "/delete",
+      .delete(
+        "/weight",
         ({ user, set, db }: AuthenticatedContext) => {
           try {
             db.transaction(() => {
               db.prepare("DELETE FROM weight_goals WHERE user_id = ?").run(
                 user.userId
               );
-              db.prepare("DELETE FROM macro_targets WHERE user_id = ?").run(
-                user.userId
-              ); // Correct table name
             })();
             set.status = 200;
             return { success: true };
