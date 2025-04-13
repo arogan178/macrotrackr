@@ -5,6 +5,7 @@ import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/api-service"; // Assuming this path alias works
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { getErrorMessage } from "@/utils/error-handling"; // Import error handler
+import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
 
 interface LogWeightModalProps {
   isOpen: boolean;
@@ -23,16 +24,15 @@ function LogWeightModal({
   const error = useStore((state) => state.error); // Use the error state from the goals slice
   const clearError = useStore((state) => state.clearError);
 
-  const [date, setDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
-  ); // Default to today
+  const today = new Date().toISOString().split("T")[0]; // Get today's date in YYYY-MM-DD format
+  const [date, setDate] = useState<string>(today); // Default to today
   const [weight, setWeight] = useState<number | string>(initialWeight || "");
   const [formError, setFormError] = useState<string | null>(null);
 
   // Reset form and clear errors when modal opens or closes
   useEffect(() => {
     if (isOpen) {
-      setDate(new Date().toISOString().split("T")[0]);
+      setDate(today); // Reset to today on open
       setWeight(initialWeight || "");
       setFormError(null);
       // Check if clearError is defined before calling
@@ -41,27 +41,44 @@ function LogWeightModal({
       }
     }
     // Keep clearError in dependency array if it might change, though it usually shouldn't
-  }, [isOpen, initialWeight, clearError]);
+  }, [isOpen, initialWeight, clearError, today]); // Add today to dependencies
 
   function validateForm(): boolean {
+    setFormError(null); // Clear previous error
+
+    // Date validation (redundant if max is set, but good practice)
     if (!date) {
       setFormError("Date is required.");
       return false;
     }
-    const weightNum = Number(weight);
-    if (isNaN(weightNum) || weightNum <= 0) {
-      setFormError("Please enter a valid positive weight.");
+    if (date > today) {
+      setFormError("Date cannot be in the future.");
       return false;
     }
-    setFormError(null);
-    return true;
+
+    // Weight validation
+    const weightNum = Number(weight);
+    if (isNaN(weightNum)) {
+      setFormError("Please enter a valid weight.");
+      return false;
+    }
+    if (weightNum < USER_MINIMUM_WEIGHT) {
+      setFormError(`Weight must be at least ${USER_MINIMUM_WEIGHT} kg.`);
+      return false;
+    }
+    if (weightNum > USER_MAXIMUM_WEIGHT) {
+      setFormError(`Weight cannot exceed ${USER_MAXIMUM_WEIGHT} kg.`);
+      return false;
+    }
+
+    return true; // Validation passed
   }
 
   // Refined handleSubmit
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     clearError(); // Clear previous store errors
-    setFormError(null); // Clear previous form errors
+    // setFormError(null); // Moved clearing to validateForm
 
     if (!validateForm()) {
       return; // Validation failed, formError is set
@@ -94,9 +111,10 @@ function LogWeightModal({
           label="Date"
           id="log-date"
           value={date}
-          onChange={(e) => setDate(e.target.value)}
+          onChange={(e) => setDate(e)}
           required
           disabled={isSaving}
+          max={today} // Set max attribute to prevent future dates
         />
         <NumberField
           label="Weight (kg)"
@@ -107,9 +125,10 @@ function LogWeightModal({
             setWeight(newValue === undefined ? "" : newValue)
           }
           required
-          min={0}
+          min={USER_MINIMUM_WEIGHT} // Set min attribute for browser validation hint
+          max={USER_MAXIMUM_WEIGHT} // Set max attribute for browser validation hint
           step={0.1}
-          placeholder="e.g., 75.5"
+          placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
           disabled={isSaving}
         />
 

@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { WeightGoalFormValues, WeightGoals } from "../types";
+import { useState } from "react";
+import { WeightGoals } from "../types";
 import {
   MacroDailyTotals,
   MacroTargetSettings,
@@ -7,17 +7,16 @@ import {
 import WeightGoalStatus from "./WeightGoalStatus";
 import EmptyState from "@/components/EmptyState";
 import { LoadingSpinnerIcon, TargetIcon } from "@/components/Icons";
+import LogWeightModal from "./LogWeightModal"; // Import the modal
 
 interface WeightGoalDashboardProps {
   startingWeight: number;
-  targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | null;
   isLoading?: boolean;
   onOpenModal: () => void;
   onDelete: () => void;
-  onLogWeight: () => void; // NEW: Add onLogWeight prop
   className?: string;
   targetCalories?: number;
   macroTarget?: MacroTargetSettings;
@@ -25,21 +24,31 @@ interface WeightGoalDashboardProps {
 
 function WeightGoalDashboard({
   startingWeight,
-  targetWeight,
   tdee,
   macroDailyTotals,
   weightGoals,
   isLoading = false,
   onOpenModal,
   onDelete,
-  onLogWeight, // NEW: Destructure onLogWeight
   className = "",
   targetCalories,
   macroTarget,
 }: WeightGoalDashboardProps) {
+  // State for Log Weight Modal
+  const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
+
+  // Handlers for Log Weight Modal
+  function handleOpenLogWeightModal() {
+    setIsLogWeightModalOpen(true);
+  }
+
+  function handleCloseLogWeightModal() {
+    setIsLogWeightModalOpen(false);
+  }
+
   // Calculate the target calories based on provided target or weight goals or fall back to TDEE
   const effectiveTargetCalories =
-    targetCalories || weightGoals?.adjustedCalorieIntake || tdee;
+    targetCalories || weightGoals?.calorieTarget || tdee;
 
   // Loading State
   if (isLoading) {
@@ -78,22 +87,32 @@ function WeightGoalDashboard({
 
   // Status View (when weightGoals exist)
   return (
-    <div
-      className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden ${className}`}
-    >
-      <WeightGoalStatus
-        startingWeight={startingWeight}
-        targetWeight={weightGoals.targetWeight}
-        tdee={tdee}
-        macroDailyTotals={macroDailyTotals}
-        weightGoals={weightGoals}
-        onEdit={onOpenModal}
-        onDelete={onDelete}
-        onLogWeight={onLogWeight} // NEW: Pass onLogWeight down
-        targetCalories={effectiveTargetCalories}
-        macroTarget={macroTarget}
+    <>
+      <div
+        className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden ${className}`}
+      >
+        <WeightGoalStatus
+          startingWeight={startingWeight}
+          targetWeight={weightGoals.targetWeight}
+          tdee={tdee}
+          macroDailyTotals={macroDailyTotals}
+          weightGoals={weightGoals}
+          onEdit={onOpenModal}
+          onDelete={onDelete}
+          onLogWeight={handleOpenLogWeightModal} // Pass the open handler
+          targetCalories={effectiveTargetCalories}
+          macroTarget={macroTarget}
+        />
+      </div>
+
+      {/* Render the Log Weight Modal */}
+      <LogWeightModal
+        isOpen={isLogWeightModalOpen}
+        onClose={handleCloseLogWeightModal}
+        // Optionally pass initialWeight if available, e.g., from latest log
+        // initialWeight={latestWeightLog?.weight}
       />
-    </div>
+    </>
   );
 }
 

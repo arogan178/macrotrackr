@@ -132,23 +132,24 @@ function WeightGoalForm({
 
   return (
     <div className="p-6">
-      <div className="flex items-center mb-5">
+      {/* <div className="flex items-center mb-5">
         <div className="p-2 rounded-lg bg-indigo-600/20 mr-3">
           <GoalsIcon className="w-5 h-5 text-indigo-400" />
         </div>
         <h2 className="text-xl font-semibold text-gray-200">
           {!weightGoals ? "Set Your Weight Goal" : "Edit Weight Goal"}
         </h2>
-      </div>
+      </div> */}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         <NumberField
-          label="Current Weight (kg)"
+          label="Starting Weight"
           value={formValues.startingWeight}
           // Restore onChange handler
           onChange={(value) =>
             setFormValues({ ...formValues, startingWeight: value || 0 })
           }
+          unit="kg"
           min={30}
           max={300}
           step={0.1}
@@ -163,11 +164,12 @@ function WeightGoalForm({
         />
 
         <NumberField
-          label="Target Weight (kg)"
+          label="Target Weight"
           value={formValues.targetWeight}
           onChange={(value) =>
             setFormValues({ ...formValues, targetWeight: value })
           }
+          unit="kg"
           min={30}
           max={300}
           step={0.1}
