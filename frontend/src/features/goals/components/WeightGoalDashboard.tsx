@@ -16,7 +16,8 @@ interface WeightGoalDashboardProps {
   weightGoals: WeightGoals | null;
   isLoading?: boolean;
   onOpenModal: () => void;
-  onDelete: () => void; // Add onDelete prop
+  onDelete: () => void;
+  onLogWeight: () => void; // NEW: Add onLogWeight prop
   className?: string;
   targetCalories?: number;
   macroTarget?: MacroTargetSettings;
@@ -30,7 +31,8 @@ function WeightGoalDashboard({
   weightGoals,
   isLoading = false,
   onOpenModal,
-  onDelete, // Destructure onDelete
+  onDelete,
+  onLogWeight, // NEW: Destructure onLogWeight
   className = "",
   targetCalories,
   macroTarget,
@@ -86,7 +88,8 @@ function WeightGoalDashboard({
         macroDailyTotals={macroDailyTotals}
         weightGoals={weightGoals}
         onEdit={onOpenModal}
-        onDelete={onDelete} // Pass onDelete down
+        onDelete={onDelete}
+        onLogWeight={onLogWeight} // NEW: Pass onLogWeight down
         targetCalories={effectiveTargetCalories}
         macroTarget={macroTarget}
       />

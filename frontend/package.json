@@ -9,13 +9,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babel/helper-compilation-targets": "^7.27.0",
     "@tailwindcss/vite": "^4.0.3",
     "cssnano": "^7.0.6",
     "lucide-react": "^0.484.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5",
-    "recharts": "^2.15.1"
+    "recharts": "^2.15.2"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",

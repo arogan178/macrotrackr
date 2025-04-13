@@ -101,6 +101,16 @@ export function initializeSchema(db: Database) {
             completed_at TEXT, -- Store as ISO 8601 date-time string, NULL until completed
             FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
+
+        -- NEW: Weight Log Table --
+        CREATE TABLE IF NOT EXISTS weight_log (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL, -- Changed to INTEGER to match users.id
+          date TEXT NOT NULL, -- Store as ISO string (YYYY-MM-DD)
+          weight REAL NOT NULL, -- Use REAL for floating-point numbers
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
@@ -168,6 +178,10 @@ export function initializeSchema(db: Database) {
   );
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
+  );
+  // NEW: Index for weight_log
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_date ON weight_log(user_id, date)"
   );
 
   console.log("✅ Database schema initialized successfully.");
