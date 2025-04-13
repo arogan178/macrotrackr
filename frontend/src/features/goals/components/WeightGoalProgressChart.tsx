@@ -189,7 +189,7 @@ function WeightGoalProgressChart() {
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-medium text-gray-200">Weight Progress</h3>
         <div className="text-sm text-gray-400">
-          {chartData.length} entries •{" "}
+          {/* {chartData.length} entries •{" "} */}
           {chartData.length > 0 && (
             <span>
               {new Date(chartData[0].fullDate).toLocaleDateString()} -{" "}
