@@ -100,7 +100,7 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      // PUT /settings Handler - Changed to always INSERT weight log
+      // PUT /settings Handler - Ensure conditional INSERT for weight log
       .put(
         "/settings",
         ({
@@ -122,110 +122,164 @@ export const userRoutes = (app: Elysia) =>
             activityLevel,
           } = body;
 
-          const transaction = db.transaction(() => {
-            // 1. Update users table (remains the same)
-            const userUpdateFields: string[] = [];
-            const userParams: (string | number | null)[] = [];
-            if (firstName !== undefined) {
-              userUpdateFields.push("first_name = ?");
-              userParams.push(firstName);
-            }
-            if (lastName !== undefined) {
-              userUpdateFields.push("last_name = ?");
-              userParams.push(lastName);
-            }
-            if (email !== undefined) {
-              const existing = db
-                .prepare("SELECT id FROM users WHERE email = ? AND id != ?")
-                .get(email, user.userId);
-              if (existing) {
-                set.status = 400;
-                throw new Error(
-                  "Email address is already in use by another account."
+          try {
+            // Define the transaction content
+            const transactionLogic = () => {
+              // --- START: Fetch current weight BEFORE update ---
+              let currentWeightInDb: number | null = null;
+              const currentDetails = db
+                .prepare("SELECT weight FROM user_details WHERE user_id = ?")
+                .get(user.userId) as { weight: number | null } | undefined;
+              if (currentDetails) {
+                currentWeightInDb = currentDetails.weight;
+              }
+              console.log(
+                `[PUT /user/settings] Current weight in DB for user ${user.userId}: ${currentWeightInDb}`
+              );
+              // --- END: Fetch current weight BEFORE update ---
+
+              // 1. Update users table
+              const userUpdateFields: string[] = [];
+              const userParams: (string | number | null)[] = [];
+              if (firstName !== undefined) {
+                userUpdateFields.push("first_name = ?");
+                userParams.push(firstName);
+              }
+              if (lastName !== undefined) {
+                userUpdateFields.push("last_name = ?");
+                userParams.push(lastName);
+              }
+              if (email !== undefined) {
+                const existing = db
+                  .prepare("SELECT id FROM users WHERE email = ? AND id != ?")
+                  .get(email, user.userId);
+                if (existing) {
+                  set.status = 400;
+                  throw new Error(
+                    "Email address is already in use by another account."
+                  );
+                }
+                userUpdateFields.push("email = ?");
+                userParams.push(email);
+              }
+              if (userUpdateFields.length > 0) {
+                userParams.push(user.userId);
+                db.prepare(
+                  `UPDATE users SET ${userUpdateFields.join(", ")} WHERE id = ?`
+                ).run(...userParams);
+              }
+
+              // 2. Update or Insert user_details table (UPSERT)
+              const detailsUpsertQuery = `
+                  INSERT INTO user_details (
+                      user_id, date_of_birth, height, weight, gender, activity_level, updated_at
+                  )
+                  VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                  ON CONFLICT(user_id) DO UPDATE SET
+                      date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
+                      height = COALESCE(excluded.height, user_details.height),
+                      weight = COALESCE(excluded.weight, user_details.weight),
+                      gender = COALESCE(excluded.gender, user_details.gender),
+                      activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
+                      updated_at = CURRENT_TIMESTAMP;
+              `;
+              db.prepare(detailsUpsertQuery).run(
+                user.userId,
+                nullify(dateOfBirth),
+                nullify(height),
+                nullify(weight), // Use weight from body
+                nullify(gender),
+                nullify(activityLevel)
+              );
+
+              // 3. Conditionally INSERT a new weight log entry
+              const newWeightProvided = weight !== undefined && weight !== null;
+              const weightHasChanged =
+                newWeightProvided && weight !== currentWeightInDb;
+
+              if (weightHasChanged) {
+                const logDate = new Date().toISOString().split("T")[0]; // Today's date
+                const logId = generateId();
+                const insertWeightLogQuery = `
+                    INSERT INTO weight_log (id, user_id, date, weight)
+                    VALUES (?, ?, ?, ?);
+                `;
+                db.prepare(insertWeightLogQuery).run(
+                  logId,
+                  user.userId,
+                  logDate,
+                  weight // Use the new weight from the body
+                );
+                console.log(
+                  `[PUT /user/settings] Weight changed. Inserted new weight log for user ${user.userId}.`
+                );
+              } else if (newWeightProvided) {
+                console.log(
+                  `[PUT /user/settings] Weight provided but not changed. No weight log entry added for user ${user.userId}.`
+                );
+              } else {
+                console.log(
+                  `[PUT /user/settings] Weight not provided or null. No weight log entry added for user ${user.userId}.`
                 );
               }
-              userUpdateFields.push("email = ?");
-              userParams.push(email);
-            }
-            if (userUpdateFields.length > 0) {
-              userParams.push(user.userId);
-              db.prepare(
-                `UPDATE users SET ${userUpdateFields.join(", ")} WHERE id = ?`
-              ).run(...userParams);
-            }
 
-            // 2. Update or Insert user_details table (UPSERT)
-            const detailsUpsertQuery = `
-                INSERT INTO user_details (
-                    user_id, date_of_birth, height, weight, gender, activity_level, updated_at
-                )
-                VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ON CONFLICT(user_id) DO UPDATE SET
-                    date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
-                    height = COALESCE(excluded.height, user_details.height),
-                    weight = COALESCE(excluded.weight, user_details.weight),
-                    gender = COALESCE(excluded.gender, user_details.gender),
-                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
-                    updated_at = CURRENT_TIMESTAMP;
-            `;
-            db.prepare(detailsUpsertQuery).run(
-              user.userId,
-              nullify(dateOfBirth),
-              nullify(height),
-              nullify(weight), // Use weight from body
-              nullify(gender),
-              nullify(activityLevel)
-            );
+              // If transaction reaches here without error
+              return {
+                success: true,
+                message: "Settings updated successfully.",
+              };
+            };
 
-            // 3. Always INSERT a new weight log entry if weight was provided
-            if (weight !== undefined && weight !== null) {
-              const logDate = new Date().toISOString().split("T")[0]; // Today's date
-              const logId = generateId();
-              // Use simple INSERT now, no ON CONFLICT
-              const insertWeightLogQuery = `
-                  INSERT INTO weight_log (id, user_id, date, weight)
-                  VALUES (?, ?, ?, ?);
-              `;
-              db.prepare(insertWeightLogQuery).run(
-                logId,
-                user.userId,
-                logDate,
-                weight
-              );
-              console.log(
-                `[PUT /user/settings] INSERTED new weight log for user ${user.userId} on ${logDate} with weight ${weight}`
-              );
-            } else if (weight === null) {
-              console.log(
-                `[PUT /user/settings] Weight set to null for user ${user.userId}, no weight log entry added.`
-              );
-            }
-          });
-
-          try {
-            transaction();
+            // Execute the transaction
+            const result = db.transaction(transactionLogic)();
             set.status = 200;
-            return { success: true, message: "Settings updated successfully." };
+            return result; // Return the success object from the transaction
           } catch (error) {
-            if (
-              error instanceof Error &&
-              (set.status === 400 || set.status === 409)
-            )
-              throw error;
             console.error(
-              `Error updating settings for user ${user.userId}:`,
+              "[PUT /user/settings] Handler/Transaction error:",
               error
             );
-            if (!set.status || set.status === 200) {
-              set.status = 500;
+
+            // Determine status code and error message
+            let statusCode = 500;
+            let errorCode = "INTERNAL_SERVER_ERROR";
+            let errorMessage =
+              "Failed to update settings due to an internal error.";
+
+            if (error instanceof Error) {
+              // Check if status was set to 400 inside the transaction (e.g., email conflict)
+              if (set.status === 400) {
+                statusCode = 400;
+                errorCode = "VALIDATION_ERROR"; // Or a more specific code if available
+                errorMessage = error.message; // Use the specific error message
+              } else {
+                // Keep default 500 for other errors
+                errorMessage = error.message || errorMessage; // Use error message if available
+              }
+            } else {
+              // Handle non-Error throws if necessary
+              errorMessage = "An unexpected error occurred.";
             }
-            throw new Error("Failed to update settings");
+
+            // Set the response status
+            set.status = statusCode;
+
+            // Return a formatted error object matching UserSchemas.errorResponse
+            // Ensure UserSchemas.errorResponse has 'code' and 'message' fields
+            return {
+              code: errorCode,
+              message: errorMessage,
+            };
           }
         },
         {
           body: UserSchemas.userSettingsUpdate,
           response: {
+            // Define responses for known success/error cases
             200: t.Object({ success: t.Boolean(), message: t.String() }),
+            400: t.Object({ code: t.String(), message: t.String() }), // For email conflict etc.
+            // No explicit 500 schema needed here, as we manually return
+            // an object matching errorResponse in the catch block.
           },
           detail: {
             summary: "Update user profile and settings",
