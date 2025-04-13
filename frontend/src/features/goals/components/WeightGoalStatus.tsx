@@ -16,13 +16,14 @@ import {
 import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
 import { motion } from "motion/react"; // Import motion
+import React from "react"; // Import React for useEffect
 
 interface WeightGoalStatusProps {
-  startingWeight: number;
+  startingWeight: number; // This should represent the *current* weight
   targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
-  weightGoals: WeightGoals | null;
+  weightGoals: WeightGoals | null; // This object holds the specific goal details
   onEdit: () => void;
   onDelete: () => void;
   onLogWeight: () => void;
@@ -67,7 +68,7 @@ function formatDate(
 }
 
 function WeightGoalStatus({
-  startingWeight, // Current weight, potentially updated
+  startingWeight, // Current weight, potentially updated from logs
   targetWeight,
   tdee,
   macroDailyTotals,
@@ -78,11 +79,14 @@ function WeightGoalStatus({
   targetCalories,
   macroTarget,
 }: WeightGoalStatusProps) {
-  const initialStartingWeight = weightGoals?.startingWeight || startingWeight; // Use goal's start weight if available
+  // Use the starting weight *from the goal object* if the goal exists.
+  // Otherwise, fall back to the current weight (though this case might indicate no active goal).
+  const goalStartingWeight = weightGoals?.startingWeight ?? startingWeight;
 
+  // Progress should be calculated based on the *current* weight vs the goal's start/target.
   const progressPercentage = calculateProgress(
-    startingWeight,
-    initialStartingWeight,
+    startingWeight, // Use the current weight for progress calculation
+    goalStartingWeight, // Use the goal's defined starting weight
     targetWeight
   );
 
@@ -138,7 +142,7 @@ function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-4 sm:p-6 bg-gray-800/50 rounded-xl border border-gray-700/50 shadow-lg" // Added subtle background and border
+      className="p-4 sm:p-6 bg-gray-800/50 rounded-xl border border-gray-700/50 shadow-lg"
     >
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
@@ -186,6 +190,7 @@ function WeightGoalStatus({
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3">
           <div className="flex items-baseline space-x-2">
+            {/* Display the CURRENT weight */}
             <span className="text-2xl font-bold text-gray-100">
               {startingWeight.toFixed(1)} kg
             </span>
@@ -195,9 +200,10 @@ function WeightGoalStatus({
                 <span className="text-xl text-gray-400">
                   {targetWeight.toFixed(1)} kg
                 </span>
+                {/* Display the difference relative to the GOAL's starting weight */}
                 <span className={`${goalTextColor} ml-1 text-sm font-medium`}>
                   ({isWeightLoss ? "↓" : "↑"}
-                  {Math.abs(targetWeight - initialStartingWeight).toFixed(1)} kg
+                  {Math.abs(targetWeight - goalStartingWeight).toFixed(1)} kg
                   goal)
                 </span>
               </>
@@ -218,23 +224,23 @@ function WeightGoalStatus({
 
         {!isMaintenance && (
           <>
-            {/* Use the existing ProgressBar component */}
             <ProgressBar
-              progress={progressPercentage}
+              progress={progressPercentage} // Use the calculated progress
               color={goalColor}
-              height="md" // Slightly thicker bar
-              showLabel={false} // Label is shown above now
+              height="md"
+              showLabel={false}
               className="mb-1"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
-              <span>Start: {initialStartingWeight.toFixed(1)} kg</span>
+              {/* Display the GOAL's starting weight here */}
+              <span>Start: {goalStartingWeight.toFixed(1)} kg</span>
               <span>Target: {targetWeight.toFixed(1)} kg</span>
             </div>
           </>
         )}
       </div>
 
-      {/* Stats Grid - Improved Styling and Icons */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Weekly Rate */}
         <div

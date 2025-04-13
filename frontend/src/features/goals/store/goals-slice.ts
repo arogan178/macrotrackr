@@ -189,7 +189,8 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         ...goalDetails,
       };
 
-      const savedWeightGoal = await apiService.goals.setWeightGoal(payload);
+      // Call the renamed API service function
+      const savedWeightGoal = await apiService.goals.createWeightGoal(payload);
 
       set({ weightGoals: savedWeightGoal, isSaving: false, error: null });
 
