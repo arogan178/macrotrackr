@@ -57,7 +57,7 @@ export function initializeSchema(db: Database) {
         CREATE TABLE IF NOT EXISTS weight_goals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_id INTEGER UNIQUE NOT NULL,
-            current_weight REAL,
+            starting_weight REAL,
             target_weight REAL,
             weight_goal TEXT CHECK(weight_goal IN ('lose', 'maintain', 'gain')), -- Type of goal
             start_date TEXT, -- YYYY-MM-DD
@@ -182,6 +182,10 @@ export function initializeSchema(db: Database) {
   // NEW: Index for weight_log
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_log_user_date ON weight_log(user_id, date)"
+  );
+  // Add index on created_at for finding the latest entry efficiently
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)"
   );
 
   console.log("✅ Database schema initialized successfully.");

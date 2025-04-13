@@ -13,7 +13,7 @@ import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
 
 interface WeightGoalStatusProps {
-  currentWeight: number;
+  startingWeight: number;
   targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
@@ -25,7 +25,7 @@ interface WeightGoalStatusProps {
 }
 
 function WeightGoalStatus({
-  currentWeight,
+  startingWeight,
   targetWeight,
   tdee,
   macroDailyTotals,
@@ -43,9 +43,9 @@ function WeightGoalStatus({
   };
 
   // Calculate progress percentage
-  const weightDifference = Math.abs(targetWeight - currentWeight);
+  const weightDifference = Math.abs(targetWeight - startingWeight);
   const initialDifference = Math.abs(
-    targetWeight - (weightGoals?.currentWeight || currentWeight)
+    targetWeight - (weightGoals?.startingWeight || startingWeight)
   );
   const progressPercentage =
     initialDifference > 0
@@ -151,7 +151,7 @@ function WeightGoalStatus({
         <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
           <div className="flex items-baseline space-x-3 mb-2 md:mb-0">
             <span className="text-2xl font-bold text-gray-200">
-              {currentWeight} kg
+              {startingWeight} kg
             </span>
             {!isMaintenance && (
               <>
@@ -159,7 +159,7 @@ function WeightGoalStatus({
                 <span className="text-xl text-gray-400">{targetWeight} kg</span>
                 <span className={`text-${goalColor}-400 ml-1 text-sm`}>
                   ({isWeightLoss ? "-" : "+"}
-                  {Math.abs(targetWeight - currentWeight).toFixed(1)} kg)
+                  {Math.abs(targetWeight - startingWeight).toFixed(1)} kg)
                 </span>
               </>
             )}
@@ -210,7 +210,7 @@ function WeightGoalStatus({
             </div>
             <div className="flex justify-between text-xs text-gray-400">
               <span>
-                Start: {weightGoals?.currentWeight || currentWeight} kg
+                Start: {weightGoals?.startingWeight || startingWeight} kg
               </span>
               <span>Target: {targetWeight} kg</span>
             </div>

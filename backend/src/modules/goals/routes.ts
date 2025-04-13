@@ -1,19 +1,17 @@
 // src/modules/goals/routes.ts
 import { Elysia, NotFoundError, t } from "elysia"; // Import NotFoundError and t
-import { db } from "../../db";
+import { db } from "@/db";
 // Import the simplified schemas
 import { GoalSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../middleware/auth";
-// Import the specific type for percentages if needed
-import type { MacroTargetPercentages } from "../macros/schemas";
-import { generateId } from "../../../../frontend/src/utils/id-generator"; // Import ID generator
+import type { AuthenticatedContext } from "@/middleware/auth";
+import { generateId } from "@/utils/id-generator"; // Import ID generator
 
 // Define types for DB results (snake_case) for clarity and type safety
 // These should match the columns defined in src/db/schema.ts
 type WeightGoalFromDB = {
   id: number;
   user_id: number;
-  current_weight: number | null;
+  starting_weight: number | null;
   target_weight: number | null;
   weight_goal: "lose" | "maintain" | "gain" | null;
   start_date: string | null;
@@ -45,7 +43,7 @@ export const goalRoutes = (app: Elysia) =>
       // --- Get Weight Goals ---
       .get(
         "/weight",
-        // Use AuthenticatedContext for type safety in handler signature
+        // Destructure context directly in the parameter list
         ({ user, set, db }: AuthenticatedContext) => {
           console.log(
             `[GET /goals/weight] Handler started for user ${user.userId}`
@@ -53,7 +51,7 @@ export const goalRoutes = (app: Elysia) =>
           try {
             // Select using renamed column calorie_target, daily_change
             const query =
-              "SELECT id, user_id, current_weight, target_weight, weight_goal, start_date, target_date, calorie_target, calculated_weeks, weekly_change, daily_change, created_at, updated_at FROM weight_goals WHERE user_id = ?";
+              "SELECT id, user_id, starting_weight, target_weight, weight_goal, start_date, target_date, calorie_target, calculated_weeks, weekly_change, daily_change, created_at, updated_at FROM weight_goals WHERE user_id = ?";
             console.log("[GET /goals/weight] Preparing query..."); // LOGGING
             const statement = db.prepare(query);
             console.log("[GET /goals/weight] Executing query..."); // LOGGING
@@ -77,7 +75,7 @@ export const goalRoutes = (app: Elysia) =>
             console.log("[GET /goals/weight] Mapping result to camelCase..."); // LOGGING
             // Map snake_case from DB to camelCase for API response
             const apiResponse = {
-              currentWeight: dbGoal.current_weight,
+              startingWeight: dbGoal.starting_weight,
               targetWeight: dbGoal.target_weight,
               weightGoal: dbGoal.weight_goal,
               startDate: dbGoal.start_date,
@@ -112,89 +110,142 @@ export const goalRoutes = (app: Elysia) =>
       // --- Save/Update Weight Goals (UPSERT) ---
       .put(
         "/weight",
-        // Define handler type with context and typed body (camelCase from schema)
         ({
           user,
           body,
           set,
           db,
         }: AuthenticatedContext & {
-          body: typeof GoalSchemas.updateWeightGoalBody.static;
+          /* ... */
         }) => {
-          try {
-            // Destructure camelCase, using renamed field
+          const transaction = db.transaction(() => {
             const {
-              currentWeight,
+              startingWeight,
               targetWeight,
               weightGoal,
               startDate,
               targetDate,
-              calorieTarget, // RENAMED
+              calorieTarget,
               calculatedWeeks,
               weeklyChange,
-              dailyChange, // RENAMED dailyChange
+              dailyChange,
             } = body;
 
-            // UPSERT logic for weight_goals table
-            // Use renamed calorie_target and daily_change columns
-            const upsertQuery = `
+            // Check if a goal already exists for this user
+            const existingGoalQuery =
+              "SELECT id FROM weight_goals WHERE user_id = ?";
+            const existingGoal = db
+              .prepare(existingGoalQuery)
+              .get(user.userId) as { id: number } | undefined;
+            const isCreating = !existingGoal;
+
+            let savedGoalResult: WeightGoalFromDB | undefined;
+
+            if (isCreating) {
+              // --- CREATION LOGIC ---
+              const insertQuery = `
                 INSERT INTO weight_goals (
-                    user_id, current_weight, target_weight, weight_goal, start_date, target_date,
+                    user_id, starting_weight, target_weight, weight_goal, start_date, target_date,
                     calorie_target, calculated_weeks, weekly_change, daily_change, updated_at
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-                ON CONFLICT(user_id) DO UPDATE SET
-                    current_weight = excluded.current_weight, target_weight = excluded.target_weight,
-                    weight_goal = excluded.weight_goal, start_date = excluded.start_date, target_date = excluded.target_date,
-                    calorie_target = excluded.calorie_target, -- RENAMED
-                    calculated_weeks = excluded.calculated_weeks, weekly_change = excluded.weekly_change,
-                    daily_change = excluded.daily_change, updated_at = CURRENT_TIMESTAMP -- RENAMED
                 RETURNING *;
-            `;
-            const savedGoalResult = db.prepare(upsertQuery).get(
-              user.userId,
-              currentWeight,
-              targetWeight,
-              weightGoal,
-              startDate,
-              targetDate,
-              calorieTarget, // RENAMED
-              calculatedWeeks,
-              weeklyChange,
-              dailyChange // RENAMED
-            ) as WeightGoalFromDB | undefined;
+              `;
+              savedGoalResult = db.prepare(insertQuery).get(
+                user.userId,
+                startingWeight, // Use startingWeight from body
+                targetWeight,
+                weightGoal,
+                startDate,
+                targetDate,
+                calorieTarget,
+                calculatedWeeks,
+                weeklyChange,
+                dailyChange
+              ) as WeightGoalFromDB | undefined;
 
-            if (savedGoalResult === undefined) {
-              set.status = 500;
-              throw new Error(
-                "Failed to save weight goals or retrieve result."
-              );
+              if (!savedGoalResult) {
+                throw new Error("Failed to create weight goals.");
+              }
+
+              // Update user_details.weight ONLY on creation with startingWeight
+              // DO NOT update weight_log here anymore
+              if (startingWeight !== null && startingWeight !== undefined) {
+                const updateUserDetailQuery = `
+                  UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
+                  WHERE user_id = ?
+                `;
+                db.prepare(updateUserDetailQuery).run(
+                  startingWeight,
+                  user.userId
+                );
+                console.log(
+                  `[PUT /goals/weight - CREATE] Updated user_details weight for user ${user.userId} to ${startingWeight}`
+                );
+              }
+            } else {
+              // --- UPDATE LOGIC ---
+              // IMPORTANT: Do NOT update starting_weight here
+              const updateQuery = `
+                UPDATE weight_goals SET
+                    target_weight = ?, weight_goal = ?, start_date = ?, target_date = ?,
+                    calorie_target = ?, calculated_weeks = ?, weekly_change = ?, daily_change = ?,
+                    updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+                RETURNING *;
+              `;
+              savedGoalResult = db.prepare(updateQuery).get(
+                targetWeight,
+                weightGoal,
+                startDate,
+                targetDate,
+                calorieTarget,
+                calculatedWeeks,
+                weeklyChange,
+                dailyChange,
+                user.userId // WHERE clause parameter
+              ) as WeightGoalFromDB | undefined;
+
+              if (!savedGoalResult) {
+                // This might happen if the user_id somehow doesn't exist, though unlikely
+                // due to the initial check. Or if the RETURNING clause fails.
+                throw new Error(
+                  "Failed to update weight goals or retrieve result."
+                );
+              }
+              // NOTE: We do NOT update user_details.weight or weight_log during a goal *update*
+              // based on startingWeight, as startingWeight is immutable after creation.
             }
-            const savedGoal = savedGoalResult;
 
-            // Map response to camelCase, using renamed field
+            return savedGoalResult; // Return the created/updated goal
+          });
+
+          try {
+            const savedGoal = transaction(); // Execute the transaction
+
             set.status = 200;
             return {
-              currentWeight: savedGoal.current_weight,
+              startingWeight: savedGoal.starting_weight, // Return the actual starting_weight from DB
               targetWeight: savedGoal.target_weight,
               weightGoal: savedGoal.weight_goal,
               startDate: savedGoal.start_date,
               targetDate: savedGoal.target_date,
-              calorieTarget: savedGoal.calorie_target, // RENAMED
+              calorieTarget: savedGoal.calorie_target,
               calculatedWeeks: savedGoal.calculated_weeks,
               weeklyChange: savedGoal.weekly_change,
-              dailyChange: savedGoal.daily_change, // RENAMED
+              dailyChange: savedGoal.daily_change,
             };
-          } catch (error) {
-            console.error("[PUT /goals/weight] CAUGHT ERROR:", error); // LOGGING
-            if (!set.status || set.status < 400) set.status = 500;
-            throw new Error("Failed to save weight goals");
+          } catch (error: any) {
+            console.error("[PUT /goals/weight] TRANSACTION ERROR:", error); // LOGGING
+            set.status = 500;
+            throw new Error(error.message || "Failed to save weight goals");
           }
         },
         {
           body: GoalSchemas.updateWeightGoalBody,
           response: GoalSchemas.updateWeightGoalResponse,
           detail: {
-            summary: "Save or update the user's weight goals",
+            summary:
+              "Save (create) or update the user's weight goals. Starting weight is set only on creation.",
             tags: ["Goals"],
           },
         }
@@ -203,6 +254,7 @@ export const goalRoutes = (app: Elysia) =>
       // --- Reset Goals ---
       .delete(
         "/weight",
+        // Destructure context directly
         ({ user, set, db }: AuthenticatedContext) => {
           try {
             db.transaction(() => {
@@ -230,14 +282,15 @@ export const goalRoutes = (app: Elysia) =>
       // --- Get Weight Log History ---
       .get(
         "/weight-log",
+        // Destructure context directly
         ({ user, set, db }: AuthenticatedContext) => {
           try {
             const query =
               "SELECT id, date, weight FROM weight_log WHERE user_id = ? ORDER BY date DESC";
-            // Type assertion needed as .all() returns any[] by default with better-sqlite3
+            // Type assertion needed as .all() returns any[] by default
             const logs = db.prepare(query).all(user.userId) as Omit<
               WeightLogFromDB,
-              "user_id"
+              "user_id" | "created_at" // Adjust Omit if needed based on DB type
             >[];
 
             // Schema expects an array, even if empty. `all` returns an empty array if no rows match.
@@ -266,45 +319,69 @@ export const goalRoutes = (app: Elysia) =>
           set,
           db,
         }: AuthenticatedContext & {
-          body: typeof GoalSchemas.addWeightLogBody.static;
+          /* ... */
         }) => {
-          try {
+          // Use a transaction
+          const transaction = db.transaction(() => {
             const { date, weight } = body;
             const newId = generateId(); // Generate a unique ID
 
-            const insertQuery =
-              "INSERT INTO weight_log (id, user_id, date, weight) VALUES (?, ?, ?, ?)";
-            db.prepare(insertQuery).run(newId, user.userId, date, weight);
+            // 1. Always INSERT a new weight_log entry
+            // Use simple INSERT now, no ON CONFLICT
+            const insertWeightLogQuery = `
+              INSERT INTO weight_log (id, user_id, date, weight)
+              VALUES (?, ?, ?, ?);
+            `;
+            db.prepare(insertWeightLogQuery).run(
+              newId,
+              user.userId,
+              date,
+              weight
+            );
+            console.log(
+              `[POST /goals/weight-log] INSERTED new weight log for user ${user.userId} on ${date} with weight ${weight}`
+            );
+
+            // We still need the ID we just inserted
+            const finalId = newId;
+
+            // 2. Update user_details.weight to this new weight
+            const updateUserDetailQuery = `
+              UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ?
+            `;
+            db.prepare(updateUserDetailQuery).run(weight, user.userId);
 
             // Construct the response object matching the schema
-            const responseEntry = {
-              id: newId,
-              userId: user.userId, // Include userId in the response as per schema
+            return {
+              id: finalId,
+              userId: user.userId.toString(), // Ensure userId is string as per schema
               date: date,
               weight: weight,
             };
+          });
 
-            set.status = 201; // Created
+          try {
+            const responseEntry = transaction(); // Execute transaction
+            set.status = 201; // Created (or 200 OK if updated)
             return responseEntry;
-          } catch (error) {
-            console.error("[POST /goals/weight-log] CAUGHT ERROR:", error);
+          } catch (error: any) {
+            console.error("[POST /goals/weight-log] TRANSACTION ERROR:", error);
             set.status = 500;
-            // Consider more specific error handling (e.g., UNIQUE constraint violation if logging same date?)
-            // For now, a generic 500 is returned.
-            throw new Error("Failed to add weight log entry");
+            throw new Error(error.message || "Failed to add weight log entry");
           }
         },
         {
           body: GoalSchemas.addWeightLogBody, // Validate request body
           response: GoalSchemas.addWeightLogResponse, // Format response
           detail: {
-            summary: "Add a new weight log entry",
+            summary: "Add/Update a weight log entry and update user details",
             tags: ["Goals", "Weight Log"],
           },
         }
       )
 
-      // --- (Optional) Delete Weight Log Entry ---
+      // --- Delete Weight Log Entry ---
       .delete(
         "/weight-log/:id",
         ({
@@ -313,35 +390,64 @@ export const goalRoutes = (app: Elysia) =>
           set,
           db,
         }: AuthenticatedContext & { params: { id: string } }) => {
-          try {
+          // Use a transaction
+          const transaction = db.transaction(() => {
             const { id } = params;
+
+            // 1. Delete the specified entry
             const deleteQuery =
               "DELETE FROM weight_log WHERE id = ? AND user_id = ?";
-            const result = db.prepare(deleteQuery).run(id, user.userId);
+            const deleteResult = db.prepare(deleteQuery).run(id, user.userId);
 
-            if (result.changes === 0) {
+            if (deleteResult.changes === 0) {
               // No row was deleted, either ID doesn't exist or doesn't belong to user
               throw new NotFoundError(
                 "Weight log entry not found or access denied."
               );
             }
 
-            set.status = 200; // OK (or 204 No Content)
-            return { success: true };
+            // 2. Find the new latest weight log entry for the user
+            // Order by date DESC, then created_at DESC to get the true latest
+            const findLatestQuery = `
+              SELECT weight FROM weight_log
+              WHERE user_id = ?
+              ORDER BY date DESC, created_at DESC
+              LIMIT 1
+            `;
+            const latestEntry = db.prepare(findLatestQuery).get(user.userId) as
+              | { weight: number }
+              | undefined;
+
+            // 3. Update user_details.weight
+            const newWeight = latestEntry?.weight ?? null; // Set to null if no entries remain
+            const updateUserDetailQuery = `
+              UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
+              WHERE user_id = ?
+            `;
+            db.prepare(updateUserDetailQuery).run(newWeight, user.userId);
+            console.log(
+              `[DELETE /goals/weight-log/:id] Updated user_details weight for user ${user.userId} to ${newWeight}`
+            );
+
+            return { success: true }; // Indicate successful deletion and update
+          });
+
+          try {
+            const result = transaction(); // Execute transaction
+            set.status = 200; // OK
+            return result;
           } catch (error) {
             // Handle specific NotFoundError thrown above
             if (error instanceof NotFoundError) {
               set.status = 404;
-              // Return a structured error response matching the schema
               return { code: "NOT_FOUND", message: error.message };
             }
             // Handle other potential errors
             console.error(
-              "[DELETE /goals/weight-log/:id] CAUGHT ERROR:",
+              "[DELETE /goals/weight-log/:id] TRANSACTION ERROR:",
               error
             );
             set.status = 500;
-            // Return a structured error response matching the schema
             return {
               code: "INTERNAL_SERVER_ERROR",
               message: "Failed to delete weight log entry",
@@ -356,7 +462,8 @@ export const goalRoutes = (app: Elysia) =>
             500: t.Object({ code: t.String(), message: t.String() }),
           },
           detail: {
-            summary: "Delete a specific weight log entry",
+            summary:
+              "Delete a specific weight log entry and update user details",
             tags: ["Goals", "Weight Log"],
           },
         }

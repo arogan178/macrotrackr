@@ -264,7 +264,7 @@ export default function GoalsPage() {
             isOpen={isWeightGoalModalOpen} // Still needed by WeightGoalModal internally
             onClose={handleCloseWeightGoalModal}
             onSave={handleSaveGoal}
-            currentWeight={user?.weight || 0}
+            startingWeight={user?.weight || 0}
             targetWeight={weightGoals?.targetWeight ?? user?.weight}
             tdee={nutritionProfile?.tdee || 0}
             weightGoals={weightGoals}
@@ -333,7 +333,7 @@ export default function GoalsPage() {
                   <div className="space-y-6">
                     {/* Weight Goal Dashboard - Updated props */}
                     <WeightGoalDashboard
-                      currentWeight={user?.weight || 0}
+                      startingWeight={user?.weight || 0}
                       // Pass targetWeight from goals if available, otherwise from user (or 0)
                       targetWeight={weightGoals?.targetWeight ?? user?.weight}
                       tdee={nutritionProfile?.tdee || 0}

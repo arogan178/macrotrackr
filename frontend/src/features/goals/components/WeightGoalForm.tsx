@@ -5,7 +5,7 @@ import { WeightGoalFormValues } from "../types";
 import { generateWeightGoalCalculations } from "../calculations";
 
 interface WeightGoalFormProps {
-  currentWeight: number;
+  startingWeight: number;
   targetWeight: number;
   tdee: number;
   weightGoals: any | null;
@@ -15,7 +15,7 @@ interface WeightGoalFormProps {
 }
 
 function WeightGoalForm({
-  currentWeight,
+  startingWeight,
   targetWeight,
   tdee,
   weightGoals, // If this exists, we are editing
@@ -27,7 +27,7 @@ function WeightGoalForm({
   const todayString = new Date().toISOString().split("T")[0];
 
   const [formValues, setFormValues] = useState<WeightGoalFormValues>({
-    currentWeight,
+    startingWeight,
     targetWeight: targetWeight || undefined,
     startDate: todayString,
   });
@@ -47,10 +47,10 @@ function WeightGoalForm({
 
   // Calculate default calorie intake based on TDEE and weight goals
   useEffect(() => {
-    if (tdee && formValues.currentWeight && formValues.targetWeight) {
+    if (tdee && formValues.startingWeight && formValues.targetWeight) {
       const calculations = generateWeightGoalCalculations(
         tdee,
-        formValues.currentWeight,
+        formValues.startingWeight,
         formValues.targetWeight
       );
       setCalorieIntake(calculations.calorieTarget);
@@ -58,35 +58,35 @@ function WeightGoalForm({
       setWeeklyWeightChange(calculations.weeklyChange);
       setCalculatedWeeks(calculations.calculatedWeeks);
     }
-  }, [tdee, formValues.currentWeight, formValues.targetWeight]);
+  }, [tdee, formValues.startingWeight, formValues.targetWeight]);
 
   useEffect(() => {
     setFormValues({
-      currentWeight,
+      startingWeight,
       targetWeight: targetWeight || undefined,
       startDate: weightGoals?.startDate || todayString,
     });
-  }, [currentWeight, targetWeight, weightGoals, todayString]);
+  }, [startingWeight, targetWeight, weightGoals, todayString]);
 
   useEffect(() => {
     // Check if values have changed from props
     const isDifferent =
-      formValues.currentWeight !== currentWeight ||
+      formValues.startingWeight !== startingWeight ||
       formValues.targetWeight !== targetWeight ||
       calorieIntake !== weightGoals?.calorieTarget;
 
     setHasChanges(isDifferent);
-  }, [formValues, currentWeight, targetWeight, calorieIntake, weightGoals]);
+  }, [formValues, startingWeight, targetWeight, calorieIntake, weightGoals]);
 
   // Update calculations when calorie intake changes
   const handleCalorieIntakeChange = (value: number | undefined) => {
     setCalorieIntake(value);
 
-    if (value && tdee && formValues.currentWeight && formValues.targetWeight) {
+    if (value && tdee && formValues.startingWeight && formValues.targetWeight) {
       // Generate new calculations based on the adjusted calorie intake
       const calculations = generateWeightGoalCalculations(
         tdee,
-        formValues.currentWeight,
+        formValues.startingWeight,
         formValues.targetWeight,
         value
       );
@@ -111,9 +111,9 @@ function WeightGoalForm({
       weeklyChange: weeklyWeightChange,
       calculatedWeeks: calculatedWeeks,
       weightGoal:
-        formValues.currentWeight > formValues.targetWeight
+        formValues.startingWeight > formValues.targetWeight
           ? "lose"
-          : formValues.currentWeight < formValues.targetWeight
+          : formValues.startingWeight < formValues.targetWeight
           ? "gain"
           : "maintain",
     };
@@ -123,11 +123,11 @@ function WeightGoalForm({
 
   // Determine if it's a weight loss, gain, or maintenance goal
   const isWeightLoss =
-    formValues.currentWeight > (formValues.targetWeight || 0);
+    formValues.startingWeight > (formValues.targetWeight || 0);
   const isWeightGain =
-    formValues.currentWeight < (formValues.targetWeight || 0);
+    formValues.startingWeight < (formValues.targetWeight || 0);
   const isMaintenance =
-    formValues.currentWeight === formValues.targetWeight &&
+    formValues.startingWeight === formValues.targetWeight &&
     formValues.targetWeight !== undefined;
 
   return (
@@ -144,10 +144,10 @@ function WeightGoalForm({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         <NumberField
           label="Current Weight (kg)"
-          value={formValues.currentWeight}
+          value={formValues.startingWeight}
           // Restore onChange handler
           onChange={(value) =>
-            setFormValues({ ...formValues, currentWeight: value || 0 })
+            setFormValues({ ...formValues, startingWeight: value || 0 })
           }
           min={30}
           max={300}
