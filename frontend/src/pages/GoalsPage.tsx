@@ -1,10 +1,12 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react"; // Keep AnimatePresence for tab transitions
+import { motion, AnimatePresence } from "motion/react";
 import { Navbar } from "@/features/layout/components";
 import {
   AchievementsContent,
   WeightGoalDashboard,
   WeightGoalModal,
+  LogWeightModal, // NEW: Import LogWeightModal
+  WeightGoalProgressChart, // NEW: Import WeightGoalProgressChart
 } from "@/features/goals/components";
 import { HabitTracker, HabitModal } from "@/features/habits/components";
 import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types";
@@ -27,6 +29,7 @@ export default function GoalsPage() {
   const [isWeightGoalModalOpen, setIsWeightGoalModalOpen] = useState(false);
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
     useState(false);
+  const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false); // NEW: State for Log Weight Modal
 
   // Get state and actions from store
   const {
@@ -52,8 +55,10 @@ export default function GoalsPage() {
     incrementHabitProgress,
     completeHabit,
     deleteHabit,
-    deleteWeightGoal, // Add deleteWeightGoal action
+    deleteWeightGoal,
     resetGoals,
+    fetchWeightLog, // NEW: Get fetchWeightLog action
+    weightLog, // NEW: Get weightLog state for chart
   } = useStore();
 
   // Fetch user details and macros on component mount if needed
@@ -67,6 +72,7 @@ export default function GoalsPage() {
     fetchWeightGoals();
     fetchMacroTarget();
     fetchHabits();
+    fetchWeightLog(); // NEW: Fetch weight log data
   }, [
     user,
     fetchUserDetails,
@@ -74,6 +80,7 @@ export default function GoalsPage() {
     fetchWeightGoals,
     fetchMacroTarget,
     fetchHabits,
+    fetchWeightLog, // NEW: Add fetchWeightLog to dependency array
   ]);
 
   // Updated handler for saving weight goal - now also closes modal
@@ -86,21 +93,22 @@ export default function GoalsPage() {
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
-    console.log("Opening weight goal modal..."); // DEBUG
     setIsWeightGoalModalOpen(true);
-  };
-
-  // Handler to close the habit modal
-  const handleCloseHabitModal = () => {
-    setIsHabitModalOpen(false);
-    // Resetting currentHabit immediately is fine here
-    setCurrentHabit(null);
   };
 
   // Handler to close the weight goal modal
   const handleCloseWeightGoalModal = () => {
-    console.log("Closing weight goal modal..."); // DEBUG
     setIsWeightGoalModalOpen(false);
+  };
+
+  // NEW: Handler to open the log weight modal
+  const handleOpenLogWeightModal = () => {
+    setIsLogWeightModalOpen(true);
+  };
+
+  // NEW: Handler to close the log weight modal
+  const handleCloseLogWeightModal = () => {
+    setIsLogWeightModalOpen(false);
   };
 
   // Handler for resetting goals
@@ -236,7 +244,19 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* Weight Goal Modal - Wrap conditional render in AnimatePresence */}
+      {/* NEW: Log Weight Modal */}
+      <AnimatePresence>
+        {isLogWeightModalOpen && (
+          <LogWeightModal
+            key="log-weight-modal"
+            isOpen={isLogWeightModalOpen}
+            onClose={handleCloseLogWeightModal}
+            initialWeight={user?.weight} // Pass current weight as initial value
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Weight Goal Modal */}
       <AnimatePresence>
         {isWeightGoalModalOpen && (
           <WeightGoalModal
@@ -329,11 +349,15 @@ export default function GoalsPage() {
                       isLoading={goalsLoading}
                       onOpenModal={handleOpenWeightGoalModal} // Pass modal opener
                       onDelete={handleOpenDeleteConfirmModal} // Pass delete confirm modal opener
+                      onLogWeight={handleOpenLogWeightModal} // NEW: Pass log weight modal opener
                       targetCalories={
                         macroTarget?.macroTarget?.targetCalories ?? 0
                       }
                       macroTarget={macroTarget?.macroTarget ?? undefined}
                     />
+
+                    {/* NEW: Weight Progress Chart */}
+                    <WeightGoalProgressChart />
 
                     {/* Habit Tracker - No changes needed here */}
                     <HabitTracker

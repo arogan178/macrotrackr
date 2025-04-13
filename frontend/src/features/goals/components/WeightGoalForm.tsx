@@ -18,7 +18,7 @@ function WeightGoalForm({
   currentWeight,
   targetWeight,
   tdee,
-  weightGoals,
+  weightGoals, // If this exists, we are editing
   isLoading = false,
   onSave,
   onCancel,
@@ -145,6 +145,7 @@ function WeightGoalForm({
         <NumberField
           label="Current Weight (kg)"
           value={formValues.currentWeight}
+          // Restore onChange handler
           onChange={(value) =>
             setFormValues({ ...formValues, currentWeight: value || 0 })
           }
@@ -152,7 +153,13 @@ function WeightGoalForm({
           max={300}
           step={0.1}
           required
-          helperText="Your current weight in kilograms"
+          // Disable only if editing an existing goal (weightGoals is not null)
+          disabled={!!weightGoals}
+          helperText={
+            !!weightGoals
+              ? "From your latest weight log entry"
+              : "Your starting weight for this goal"
+          }
         />
 
         <NumberField

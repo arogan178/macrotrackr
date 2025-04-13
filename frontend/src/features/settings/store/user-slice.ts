@@ -48,6 +48,9 @@ export interface UserSlice {
   ) => Promise<boolean>; // New action
   resetSettings: () => void;
   clearSettingsMessages: () => void;
+
+  // --- NEW ACTION for Weight Log ---
+  updateCurrentUserWeight: (newWeight: number) => void;
 }
 
 export const createUserSlice: StateCreator<
@@ -423,6 +426,20 @@ export const createUserSlice: StateCreator<
 
   clearSettingsMessages: () => {
     set({ settingsError: null, settingsSuccess: null });
+  },
+
+  // --- NEW ACTION Implementation ---
+  updateCurrentUserWeight: (newWeight) => {
+    set((state) => ({
+      // Update the weight in the main user object
+      user: state.user ? { ...state.user, weight: newWeight } : null,
+      // Also update the weight in the settings form state if it exists
+      settings: state.settings
+        ? { ...state.settings, weight: newWeight }
+        : null,
+    }));
+    // No API call needed here, as the primary weight update happens via goals/weight-log
+    // This action just keeps the frontend state consistent.
   },
 
   // Make sure clearError is defined

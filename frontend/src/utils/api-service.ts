@@ -38,6 +38,19 @@ type WeightGoalPayload = {
   dailyChange: number | null;
 };
 
+// --- NEW Weight Log Interfaces ---
+interface WeightLogEntry {
+  id: string;
+  date: string; // YYYY-MM-DD
+  weight: number;
+}
+
+interface AddWeightLogPayload {
+  date: string; // YYYY-MM-DD
+  weight: number;
+}
+// --- END NEW Weight Log Interfaces ---
+
 // Type for the macro target percentages object
 type MacroTargetPercentagesObject = {
   proteinPercentage: number;
@@ -445,6 +458,48 @@ export const apiService = {
       });
       return handleResponse(response);
     },
+
+    // --- NEW Weight Log Endpoints ---
+    /** Fetches the user's weight log history */
+    getWeightLog: async (): Promise<WeightLogEntry[]> => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
+        headers: getHeaders(false),
+      });
+      // The backend returns an array, potentially empty, matching WeightLogEntry[]
+      return handleResponse(response);
+    },
+
+    /** Adds a new weight log entry */
+    addWeightLogEntry: async (
+      payload: AddWeightLogPayload
+    ): Promise<WeightLogEntry> => {
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(payload),
+      });
+      // Backend returns the created entry including the generated ID and userId
+      // We only need id, date, weight for the frontend state usually
+      const fullEntry = await handleResponse(response);
+      return {
+        id: fullEntry.id,
+        date: fullEntry.date,
+        weight: fullEntry.weight,
+      };
+    },
+
+    /** Deletes a specific weight log entry */
+    deleteWeightLogEntry: async (id: string): Promise<{ success: boolean }> => {
+      const response = await fetch(
+        `${API_BASE_URL}/api/goals/weight-log/${id}`,
+        {
+          method: "DELETE",
+          headers: getHeaders(false),
+        }
+      );
+      return handleResponse(response);
+    },
+    // --- END NEW Weight Log Endpoints ---
   },
   habits: {
     /** Get all habit goals */
