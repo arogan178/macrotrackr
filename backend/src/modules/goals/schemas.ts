@@ -1,113 +1,91 @@
 // src/modules/goals/schemas.ts
 import { t } from "elysia";
 
-// --- Reusable Primitives ---
-const PositiveNumberOrNull = t.Nullable(t.Number({ minimum: 0 }));
-const PositiveIntegerOrNull = t.Nullable(t.Integer({ minimum: 0 }));
-const DateStringOrNull = t.Nullable(t.String({ format: "date" }));
-// Add reusable DateString for required dates
-const DateString = t.String({
-  format: "date",
-  default: new Date().toISOString().split("T")[0],
-}); // YYYY-MM-DD
+// Define valid weight goal types
+const WeightGoalEnum = t.Union(
+  [t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")],
+  { default: "maintain" } // Optional: Provide a default
+);
 
-// --- Exported Goal Schemas --- //
+// --- Base Properties (used in response) ---
+const BaseWeightGoalProperties = {
+  startingWeight: t.Nullable(t.Number()), // Starting weight is part of the goal record
+  targetWeight: t.Nullable(t.Number()),
+  weightGoal: t.Nullable(WeightGoalEnum),
+  startDate: t.Nullable(t.String({ format: "date" })), // ISO 8601 date string YYYY-MM-DD
+  targetDate: t.Nullable(t.String({ format: "date" })), // ISO 8601 date string YYYY-MM-DD
+  calorieTarget: t.Nullable(t.Number()),
+  calculatedWeeks: t.Nullable(t.Number()),
+  weeklyChange: t.Nullable(t.Number()),
+  dailyChange: t.Nullable(t.Number()),
+};
+
+// --- GET Response ---
+const getWeightGoalResponse = t.Nullable(t.Object(BaseWeightGoalProperties));
+
+// --- POST (Create) Body ---
+// Requires startingWeight
+const createWeightGoalBody = t.Object({
+  startingWeight: t.Number(), // Explicitly require startingWeight for creation
+  targetWeight: t.Nullable(t.Number()),
+  weightGoal: t.Nullable(WeightGoalEnum),
+  startDate: t.Nullable(t.String({ format: "date" })),
+  targetDate: t.Nullable(t.String({ format: "date" })),
+  calorieTarget: t.Nullable(t.Number()),
+  calculatedWeeks: t.Nullable(t.Number()),
+  weeklyChange: t.Nullable(t.Number()),
+  dailyChange: t.Nullable(t.Number()),
+});
+
+// --- PUT (Update) Body ---
+// Does NOT include startingWeight, as it shouldn't be changed
+const updateWeightGoalBody = t.Object({
+  targetWeight: t.Nullable(t.Number()),
+  weightGoal: t.Nullable(WeightGoalEnum),
+  startDate: t.Nullable(t.String({ format: "date" })),
+  targetDate: t.Nullable(t.String({ format: "date" })),
+  calorieTarget: t.Nullable(t.Number()),
+  calculatedWeeks: t.Nullable(t.Number()),
+  weeklyChange: t.Nullable(t.Number()),
+  dailyChange: t.Nullable(t.Number()),
+});
+
+// --- POST/PUT Response (same structure) ---
+const weightGoalResponse = t.Object(BaseWeightGoalProperties);
+
+// --- Reset Response ---
+const resetResponse = t.Object({ success: t.Boolean() });
+
+// --- Weight Log Schemas ---
+const WeightLogEntry = t.Object({
+  id: t.String(),
+  date: t.String({ format: "date" }), // YYYY-MM-DD
+  weight: t.Number(),
+});
+
+const getWeightLogResponse = t.Array(WeightLogEntry);
+
+const addWeightLogBody = t.Object({
+  date: t.String({ format: "date" }),
+  weight: t.Number(),
+});
+
+// Response includes the generated ID and user ID
+const addWeightLogResponse = t.Object({
+  id: t.String(),
+  userId: t.String(), // Assuming user ID is treated as string in API
+  date: t.String({ format: "date" }),
+  weight: t.Number(),
+});
+
+// --- Export ---
 export const GoalSchemas = {
-  // Schema for Weight Goals data (API structure - camelCase)
-  weightGoalData: t.Object({
-    startingWeight: PositiveNumberOrNull,
-    targetWeight: PositiveNumberOrNull,
-    weightGoal: t.Nullable(
-      t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
-    ),
-    startDate: DateStringOrNull,
-    targetDate: DateStringOrNull,
-    calorieTarget: PositiveNumberOrNull, // Renamed field
-    calculatedWeeks: PositiveIntegerOrNull,
-    weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()), // Renamed field
-  }),
-
-  // --- Request/Response Schemas for Weight Goals ---
-
-  getWeightGoalResponse: t.Nullable(
-    t.Object({
-      startingWeight: PositiveNumberOrNull,
-      targetWeight: PositiveNumberOrNull,
-      weightGoal: t.Nullable(
-        t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
-      ),
-      startDate: DateStringOrNull,
-      targetDate: DateStringOrNull,
-      calorieTarget: PositiveNumberOrNull, // Renamed field
-      calculatedWeeks: PositiveIntegerOrNull,
-      weeklyChange: t.Nullable(t.Number()),
-      dailyChange: t.Nullable(t.Number()), // Renamed field
-    })
-  ),
-  updateWeightGoalBody: t.Object({
-    targetWeight: t.Nullable(t.Number()),
-    weightGoal: t.Nullable(
-      t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
-    ),
-    startDate: t.Nullable(t.String({ format: "date" })), // Assuming YYYY-MM-DD
-    targetDate: t.Nullable(t.String({ format: "date" })), // Assuming YYYY-MM-DD
-    calorieTarget: t.Nullable(t.Number()),
-    calculatedWeeks: t.Nullable(t.Number()),
-    weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()),
-  }),
-  updateWeightGoalResponse: t.Object({
-    // Ensure response includes startingWeight
-    startingWeight: t.Nullable(t.Number()),
-    targetWeight: t.Nullable(t.Number()),
-    weightGoal: t.Nullable(
-      t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
-    ),
-    startDate: t.Nullable(t.String()),
-    targetDate: t.Nullable(t.String()),
-    calorieTarget: t.Nullable(t.Number()),
-    calculatedWeeks: t.Nullable(t.Number()),
-    weeklyChange: t.Nullable(t.Number()),
-    dailyChange: t.Nullable(t.Number()),
-  }),
-
-  // Schema for resetting goals
-  resetResponse: t.Object({
-    success: t.Boolean(),
-  }),
-
-  // --- Weight Log Schemas ---
-
-  // Schema for a single weight log entry (used in responses)
-  weightLogEntry: t.Object({
-    id: t.String(),
-    userId: t.String(), // Included in POST response, maybe not GET
-    date: DateString,
-    weight: t.Number({ minimum: 0 }),
-  }),
-
-  // Schema for the request body when adding a new weight log entry
-  addWeightLogBody: t.Object({
-    date: DateString, // Date for the new entry
-    weight: t.Number({ minimum: 0 }), // Weight for the new entry
-  }),
-
-  // Schema for the response after successfully adding a weight log entry
-  addWeightLogResponse: t.Object({
-    id: t.String(),
-    userId: t.String(),
-    date: DateString,
-    weight: t.Number({ minimum: 0 }),
-  }),
-
-  // Schema for the response when fetching the weight log history
-  getWeightLogResponse: t.Array(
-    t.Object({
-      id: t.String(),
-      // userId is usually not needed when fetching for the logged-in user
-      date: DateString,
-      weight: t.Number({ minimum: 0 }),
-    })
-  ),
+  getWeightGoalResponse,
+  createWeightGoalBody, // ADDED
+  updateWeightGoalBody,
+  weightGoalResponse, // RENAMED (used for POST/PUT response)
+  resetResponse,
+  getWeightLogResponse,
+  addWeightLogBody,
+  addWeightLogResponse,
 };
