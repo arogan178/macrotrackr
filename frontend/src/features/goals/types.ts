@@ -3,6 +3,7 @@ import { MacroTargetSettings } from "@/features/macroTracking/types";
 
 export interface WeightGoals {
   startingWeight: number;
+  currentWeight: number;
   targetWeight: number;
   weightGoal: WeightGoal;
   startDate: string;
