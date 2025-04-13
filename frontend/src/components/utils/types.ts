@@ -32,15 +32,20 @@ export interface DateFieldProps extends BaseFieldProps {
   maxDate?: string;
 }
 
-export interface NumberFieldProps extends BaseFieldProps {
-  value: number | undefined;
+export interface NumberFieldProps {
+  label: string;
+  value: number | undefined | string; // Allow string for intermediate input state
   onChange: (value: number | undefined) => void;
   min?: number;
   max?: number;
   step?: number;
+  required?: boolean;
   unit?: string;
-  placeholder?: number;
+  error?: string | null;
   maxDigits?: number;
+  placeholder?: number | string; // Allow string placeholder
+  disabled?: boolean; // Add disabled prop
+  helperText?: string; // Add helperText prop
 }
 
 export interface TimeFieldProps extends BaseFieldProps {

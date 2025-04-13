@@ -1,48 +1,64 @@
 import Modal from "@/components/Modal";
 import WeightGoalForm from "./WeightGoalForm";
 import { WeightGoalFormValues, WeightGoals } from "../types";
-import { useEffect } from "react"; // Add useEffect for logging
+import { useEffect } from "react";
+import { useStore } from "@/store/store"; // Import useStore
 
 interface WeightGoalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (values: WeightGoalFormValues) => void;
+  // onSave: (values: WeightGoalFormValues) => void; // REMOVED - Handled internally now
   startingWeight: number;
-  targetWeight?: number; // Optional initial target weight
+  targetWeight?: number;
   tdee: number;
-  weightGoals: WeightGoals | null; // Pass existing goals for editing
-  isLoading?: boolean; // Loading state for the save button
+  weightGoals: WeightGoals | null; // Used to determine create vs update
+  // isLoading?: boolean; // REMOVED - Get from store
 }
 
 function WeightGoalModal({
   isOpen,
   onClose,
-  onSave,
+  // onSave, // REMOVED
   startingWeight,
   targetWeight,
   tdee,
-  weightGoals,
-  isLoading = false,
-}: WeightGoalModalProps) {
-  // Add log to see if the component renders and receives the correct isOpen prop
+  weightGoals, // Keep this to know if editing
+}: // isLoading = false, // REMOVED
+WeightGoalModalProps) {
+  // Get actions and state from store
+  const createWeightGoal = useStore((state) => state.createWeightGoal);
+  const updateWeightGoal = useStore((state) => state.updateWeightGoal);
+  const isSaving = useStore((state) => state.isSaving); // Get saving state
+
   useEffect(() => {
     if (isOpen) {
-      console.log("WeightGoalModal rendered and open."); // DEBUG
+      console.log("WeightGoalModal rendered and open.");
     }
   }, [isOpen]);
 
-  const handleSave = (values: WeightGoalFormValues) => {
-    onSave(values);
-    // Modal closure is handled in GoalsPage
+  const handleSave = async (values: WeightGoalFormValues) => {
+    try {
+      if (weightGoals) {
+        // If weightGoals exists, we are updating
+        await updateWeightGoal(values, tdee);
+      } else {
+        // Otherwise, we are creating
+        await createWeightGoal(values, tdee);
+      }
+      onClose(); // Close modal on success
+    } catch (error) {
+      // Error is handled and displayed by the slice/notification system
+      console.error("Save failed in WeightGoalModal:", error);
+      // Optionally keep modal open on error, or handle specific errors
+    }
   };
 
-  // Provide a default value for targetWeight if it's undefined
   const initialTargetWeight =
     weightGoals?.targetWeight ?? targetWeight ?? startingWeight;
 
   return (
     <Modal
-      isOpen={isOpen} // Passed to the base Modal
+      isOpen={isOpen}
       onClose={onClose}
       title={weightGoals ? "Edit Weight Goal" : "Set Weight Goal"}
       variant="form"
@@ -51,11 +67,11 @@ function WeightGoalModal({
     >
       <WeightGoalForm
         startingWeight={startingWeight}
-        targetWeight={initialTargetWeight} // Use the calculated initial value
+        targetWeight={initialTargetWeight}
         tdee={tdee}
-        weightGoals={weightGoals}
-        isLoading={isLoading}
-        onSave={handleSave}
+        weightGoals={weightGoals} // Pass existing goals to form for disabling startingWeight
+        isLoading={isSaving} // Pass saving state from store
+        onSave={handleSave} // Pass the correct handler
         onCancel={onClose}
       />
     </Modal>

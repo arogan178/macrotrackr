@@ -36,10 +36,6 @@ export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
       .decorate("db", db)
-      // --- Removed problematic .derive call ---
-      // The authMiddleware ensures 'user' is present in handlers.
-      // Handler signatures will destructure the correct context provided by Elysia.
-
       // --- Get Weight Goals ---
       .get(
         "/weight",
@@ -107,7 +103,9 @@ export const goalRoutes = (app: Elysia) =>
         }
       )
 
-      // --- Save/Update Weight Goals (UPSERT) ---
+      // --- Save/Update Weight Goals ---
+      // This route now primarily handles UPDATES, but will CREATE if no goal exists,
+      // fetching starting weight from user_details for creation.
       .put(
         "/weight",
         ({
@@ -116,11 +114,11 @@ export const goalRoutes = (app: Elysia) =>
           set,
           db,
         }: AuthenticatedContext & {
-          /* ... */
+          body: typeof GoalSchemas.updateWeightGoalBody.static; // Use the schema type
         }) => {
           const transaction = db.transaction(() => {
+            // Destructure payload (startingWeight is NOT expected from body anymore)
             const {
-              startingWeight,
               targetWeight,
               weightGoal,
               startDate,
@@ -133,16 +131,42 @@ export const goalRoutes = (app: Elysia) =>
 
             // Check if a goal already exists for this user
             const existingGoalQuery =
-              "SELECT id FROM weight_goals WHERE user_id = ?";
+              "SELECT id, starting_weight FROM weight_goals WHERE user_id = ?"; // Fetch starting_weight too
             const existingGoal = db
               .prepare(existingGoalQuery)
-              .get(user.userId) as { id: number } | undefined;
+              .get(user.userId) as
+              | { id: number; starting_weight: number | null }
+              | undefined;
             const isCreating = !existingGoal;
 
             let savedGoalResult: WeightGoalFromDB | undefined;
+            let effectiveStartingWeight: number | null = null;
 
             if (isCreating) {
               // --- CREATION LOGIC ---
+              // Fetch current weight from user_details to use as starting_weight
+              const userDetailsQuery =
+                "SELECT weight FROM user_details WHERE user_id = ?";
+              const userDetails = db
+                .prepare(userDetailsQuery)
+                .get(user.userId) as { weight: number | null } | undefined;
+
+              effectiveStartingWeight = userDetails?.weight ?? null; // Use fetched weight or null
+
+              if (effectiveStartingWeight === null) {
+                // Optional: Decide if a goal can be created without a starting weight.
+                // If not, throw an error.
+                console.warn(
+                  `[PUT /goals/weight - CREATE] User ${user.userId} has no weight in user_details. Cannot set starting_weight.`
+                );
+                // Depending on requirements, you might throw an error here:
+                // throw new Error("Cannot create weight goal without a current weight record.");
+              }
+
+              console.log(
+                `[PUT /goals/weight - CREATE] Using starting weight: ${effectiveStartingWeight} for user ${user.userId}`
+              );
+
               const insertQuery = `
                 INSERT INTO weight_goals (
                     user_id, starting_weight, target_weight, weight_goal, start_date, target_date,
@@ -152,7 +176,7 @@ export const goalRoutes = (app: Elysia) =>
               `;
               savedGoalResult = db.prepare(insertQuery).get(
                 user.userId,
-                startingWeight, // Use startingWeight from body
+                effectiveStartingWeight, // Use fetched starting weight
                 targetWeight,
                 weightGoal,
                 startDate,
@@ -166,24 +190,14 @@ export const goalRoutes = (app: Elysia) =>
               if (!savedGoalResult) {
                 throw new Error("Failed to create weight goals.");
               }
-
-              // Update user_details.weight ONLY on creation with startingWeight
-              // DO NOT update weight_log here anymore
-              if (startingWeight !== null && startingWeight !== undefined) {
-                const updateUserDetailQuery = `
-                  UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
-                  WHERE user_id = ?
-                `;
-                db.prepare(updateUserDetailQuery).run(
-                  startingWeight,
-                  user.userId
-                );
-                console.log(
-                  `[PUT /goals/weight - CREATE] Updated user_details weight for user ${user.userId} to ${startingWeight}`
-                );
-              }
+              // No need to update user_details.weight here as we just read from it.
             } else {
               // --- UPDATE LOGIC ---
+              effectiveStartingWeight = existingGoal.starting_weight; // Use the existing starting weight
+              console.log(
+                `[PUT /goals/weight - UPDATE] Updating goal for user ${user.userId}. Starting weight remains ${effectiveStartingWeight}`
+              );
+
               // IMPORTANT: Do NOT update starting_weight here
               const updateQuery = `
                 UPDATE weight_goals SET
@@ -206,14 +220,16 @@ export const goalRoutes = (app: Elysia) =>
               ) as WeightGoalFromDB | undefined;
 
               if (!savedGoalResult) {
-                // This might happen if the user_id somehow doesn't exist, though unlikely
-                // due to the initial check. Or if the RETURNING clause fails.
                 throw new Error(
                   "Failed to update weight goals or retrieve result."
                 );
               }
-              // NOTE: We do NOT update user_details.weight or weight_log during a goal *update*
-              // based on startingWeight, as startingWeight is immutable after creation.
+              // NOTE: We do NOT update user_details.weight during a goal *update*.
+            }
+
+            // Ensure the result includes the correct starting weight for the response mapping
+            if (savedGoalResult) {
+              savedGoalResult.starting_weight = effectiveStartingWeight;
             }
 
             return savedGoalResult; // Return the created/updated goal
@@ -222,9 +238,15 @@ export const goalRoutes = (app: Elysia) =>
           try {
             const savedGoal = transaction(); // Execute the transaction
 
+            if (!savedGoal) {
+              // Handle case where transaction might fail silently (though unlikely with throws)
+              throw new Error("Transaction failed to return saved goal data.");
+            }
+
             set.status = 200;
+            // Map response using data from savedGoalResult (which includes the correct starting_weight)
             return {
-              startingWeight: savedGoal.starting_weight, // Return the actual starting_weight from DB
+              startingWeight: savedGoal.starting_weight, // Return the actual starting_weight used/kept
               targetWeight: savedGoal.target_weight,
               weightGoal: savedGoal.weight_goal,
               startDate: savedGoal.start_date,
@@ -241,11 +263,12 @@ export const goalRoutes = (app: Elysia) =>
           }
         },
         {
-          body: GoalSchemas.updateWeightGoalBody,
-          response: GoalSchemas.updateWeightGoalResponse,
+          // Update the body schema to NOT expect startingWeight
+          body: GoalSchemas.updateWeightGoalBody, // Ensure this schema in schemas.ts omits startingWeight
+          response: GoalSchemas.updateWeightGoalResponse, // Ensure this schema includes startingWeight
           detail: {
             summary:
-              "Save (create) or update the user's weight goals. Starting weight is set only on creation.",
+              "Update the user's weight goals. Creates a new goal if none exists, using current weight as starting weight.",
             tags: ["Goals"],
           },
         }
