@@ -445,10 +445,10 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    /** Sets (Creates) a new weight goal */
-    setWeightGoal: async (weightGoals: SetWeightGoalPayload) => {
+    /** Creates a new weight goal */ // Renamed and method changed
+    createWeightGoal: async (weightGoals: SetWeightGoalPayload) => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-        method: "PUT",
+        method: "POST", // Changed to POST
         headers: getHeaders(),
         body: JSON.stringify(weightGoals), // Send full payload including startingWeight
       });
@@ -468,7 +468,7 @@ export const apiService = {
         dailyChange: weightGoals.dailyChange,
       };
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-        method: "PUT",
+        method: "PUT", // Ensure method is PUT
         headers: getHeaders(),
         body: JSON.stringify(payload), // Send payload *without* startingWeight
       });
