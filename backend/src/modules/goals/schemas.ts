@@ -15,7 +15,7 @@ const DateString = t.String({
 export const GoalSchemas = {
   // Schema for Weight Goals data (API structure - camelCase)
   weightGoalData: t.Object({
-    currentWeight: PositiveNumberOrNull,
+    startingWeight: PositiveNumberOrNull,
     targetWeight: PositiveNumberOrNull,
     weightGoal: t.Nullable(
       t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
@@ -32,7 +32,7 @@ export const GoalSchemas = {
 
   getWeightGoalResponse: t.Nullable(
     t.Object({
-      currentWeight: PositiveNumberOrNull,
+      startingWeight: PositiveNumberOrNull,
       targetWeight: PositiveNumberOrNull,
       weightGoal: t.Nullable(
         t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
@@ -46,7 +46,7 @@ export const GoalSchemas = {
     })
   ),
   updateWeightGoalBody: t.Object({
-    currentWeight: PositiveNumberOrNull,
+    startingWeight: PositiveNumberOrNull,
     targetWeight: PositiveNumberOrNull, // Allow null for initial set? Let's keep PositiveNumberOrNull
     weightGoal: t.Nullable(
       t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
@@ -60,7 +60,7 @@ export const GoalSchemas = {
   }),
   updateWeightGoalResponse: t.Object({
     // Response after update
-    currentWeight: PositiveNumberOrNull,
+    startingWeight: PositiveNumberOrNull,
     targetWeight: PositiveNumberOrNull,
     weightGoal: t.Nullable(
       t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])

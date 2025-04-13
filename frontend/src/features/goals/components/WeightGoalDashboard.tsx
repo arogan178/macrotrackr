@@ -9,7 +9,7 @@ import EmptyState from "@/components/EmptyState";
 import { LoadingSpinnerIcon, TargetIcon } from "@/components/Icons";
 
 interface WeightGoalDashboardProps {
-  currentWeight: number;
+  startingWeight: number;
   targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
@@ -24,7 +24,7 @@ interface WeightGoalDashboardProps {
 }
 
 function WeightGoalDashboard({
-  currentWeight,
+  startingWeight,
   targetWeight,
   tdee,
   macroDailyTotals,
@@ -82,7 +82,7 @@ function WeightGoalDashboard({
       className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden ${className}`}
     >
       <WeightGoalStatus
-        currentWeight={currentWeight}
+        startingWeight={startingWeight}
         targetWeight={weightGoals.targetWeight}
         tdee={tdee}
         macroDailyTotals={macroDailyTotals}

@@ -27,7 +27,7 @@ interface RegistrationDataPayload {
 // Payload for PUT /api/goals/weight
 // Uses calorieTarget based on latest DB schema
 type WeightGoalPayload = {
-  currentWeight: number | null;
+  startingWeight: number | null;
   targetWeight: number | null;
   weightGoal: "lose" | "maintain" | "gain" | null;
   startDate: string | null;
