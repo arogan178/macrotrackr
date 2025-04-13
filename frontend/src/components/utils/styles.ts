@@ -13,6 +13,8 @@ export const formStyles = {
     numberInput: `[&::-webkit-inner-spin-button]:appearance-none
                   [&::-webkit-outer-spin-button]:appearance-none
                   [-moz-appearance:textfield]`,
+    disabled:
+      "bg-gray-600/40 border-gray-500/50 text-gray-400 cursor-not-allowed opacity-70",
   },
   error: "text-xs text-red-400",
   helper: "text-xs text-gray-500",

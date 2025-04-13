@@ -24,19 +24,22 @@ interface RegistrationDataPayload {
   activityLevel: number;
 }
 
-// Payload for PUT /api/goals/weight
-// Uses calorieTarget based on latest DB schema
-type WeightGoalPayload = {
-  startingWeight: number | null;
+// Payload for PUT /api/goals/weight (CREATE)
+type SetWeightGoalPayload = {
+  startingWeight: number; // Required for creation
   targetWeight: number | null;
   weightGoal: "lose" | "maintain" | "gain" | null;
   startDate: string | null;
   targetDate: string | null;
-  calorieTarget: number | null; // The single target calorie value
+  calorieTarget: number | null;
   calculatedWeeks: number | null;
   weeklyChange: number | null;
   dailyChange: number | null;
 };
+
+// Payload for PUT /api/goals/weight (UPDATE)
+// Omits startingWeight
+type UpdateWeightGoalPayload = Omit<SetWeightGoalPayload, "startingWeight">;
 
 // --- NEW Weight Log Interfaces ---
 interface WeightLogEntry {
@@ -435,18 +438,39 @@ export const apiService = {
   // Goals endpoints
   goals: {
     /** Gets weight goals (including calorieTarget) */
-    getWeightGoals: async (): Promise<WeightGoalPayload | null> => {
+    getWeightGoals: async (): Promise<SetWeightGoalPayload | null> => {
+      // Return type might need adjustment based on backend response
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         headers: getHeaders(false),
       });
       return handleResponse(response);
     },
-    /** Saves weight goals (including calorieTarget) */
-    saveWeightGoals: async (weightGoals: WeightGoalPayload) => {
+    /** Sets (Creates) a new weight goal */
+    setWeightGoal: async (weightGoals: SetWeightGoalPayload) => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify(weightGoals),
+        body: JSON.stringify(weightGoals), // Send full payload including startingWeight
+      });
+      return handleResponse(response);
+    },
+    /** Updates an existing weight goal (omits startingWeight) */
+    updateWeightGoal: async (weightGoals: UpdateWeightGoalPayload) => {
+      // Explicitly create payload without startingWeight
+      const payload: UpdateWeightGoalPayload = {
+        targetWeight: weightGoals.targetWeight,
+        weightGoal: weightGoals.weightGoal,
+        startDate: weightGoals.startDate,
+        targetDate: weightGoals.targetDate,
+        calorieTarget: weightGoals.calorieTarget,
+        calculatedWeeks: weightGoals.calculatedWeeks,
+        weeklyChange: weightGoals.weeklyChange,
+        dailyChange: weightGoals.dailyChange,
+      };
+      const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(payload), // Send payload *without* startingWeight
       });
       return handleResponse(response);
     },

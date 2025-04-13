@@ -8,8 +8,8 @@ interface WeightGoalFormProps {
   startingWeight: number;
   targetWeight: number;
   tdee: number;
-  weightGoals: any | null;
-  isLoading?: boolean;
+  weightGoals: any | null; // If this exists, we are editing
+  isLoading?: boolean; // Prop received from modal (bound to store's isSaving)
   onSave: (values: WeightGoalFormValues) => void;
   onCancel?: () => void;
 }
@@ -18,8 +18,8 @@ function WeightGoalForm({
   startingWeight,
   targetWeight,
   tdee,
-  weightGoals, // If this exists, we are editing
-  isLoading = false,
+  weightGoals,
+  isLoading = false, // Use the prop passed from the modal
   onSave,
   onCancel,
 }: WeightGoalFormProps) {
@@ -102,9 +102,9 @@ function WeightGoalForm({
   const handleSave = () => {
     if (!formValues.targetWeight) return;
 
-    // Create a complete goal object with all the calculated values
     const completeGoal = {
-      ...formValues,
+      startingWeight: formValues.startingWeight, // Ensure startingWeight is included from form state
+      targetWeight: formValues.targetWeight,
       calorieTarget: calorieIntake,
       startDate: formValues.startDate || todayString,
       targetDate: calculatedTargetDate,
@@ -156,11 +156,6 @@ function WeightGoalForm({
           required
           // Disable only if editing an existing goal (weightGoals is not null)
           disabled={!!weightGoals}
-          helperText={
-            !!weightGoals
-              ? "From your latest weight log entry"
-              : "Your starting weight for this goal"
-          }
         />
 
         <NumberField
@@ -174,7 +169,6 @@ function WeightGoalForm({
           max={300}
           step={0.1}
           required
-          helperText="Your goal weight in kilograms"
         />
       </div>
 
@@ -319,12 +313,13 @@ function WeightGoalForm({
         <FormButton
           type="button"
           variant="primary"
-          disabled={!hasChanges || isLoading || !formValues.targetWeight}
-          isLoading={isLoading}
+          disabled={!hasChanges || isLoading || !formValues.targetWeight} // Use isLoading prop
+          isLoading={isLoading} // Pass isLoading prop to button
           onClick={handleSave}
           size="md"
         >
-          {!weightGoals ? "Calculate Goal" : "Update Goal"}
+          {!weightGoals ? "Set Goal" : "Update Goal"}{" "}
+          {/* Adjusted button text */}
         </FormButton>
       </div>
     </div>

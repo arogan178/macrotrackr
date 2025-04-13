@@ -46,29 +46,29 @@ export const GoalSchemas = {
     })
   ),
   updateWeightGoalBody: t.Object({
-    startingWeight: PositiveNumberOrNull,
-    targetWeight: PositiveNumberOrNull, // Allow null for initial set? Let's keep PositiveNumberOrNull
+    // startingWeight: t.Optional(t.Nullable(t.Number())), // REMOVE or keep optional if needed for other reasons, but route logic ignores it
+    targetWeight: t.Nullable(t.Number()),
     weightGoal: t.Nullable(
       t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
-    ), // Allow null? Let's keep Nullable
-    startDate: DateStringOrNull,
-    targetDate: DateStringOrNull,
-    calorieTarget: PositiveNumberOrNull,
-    calculatedWeeks: PositiveIntegerOrNull,
+    ),
+    startDate: t.Nullable(t.String({ format: "date" })), // Assuming YYYY-MM-DD
+    targetDate: t.Nullable(t.String({ format: "date" })), // Assuming YYYY-MM-DD
+    calorieTarget: t.Nullable(t.Number()),
+    calculatedWeeks: t.Nullable(t.Number()),
     weeklyChange: t.Nullable(t.Number()),
     dailyChange: t.Nullable(t.Number()),
   }),
   updateWeightGoalResponse: t.Object({
-    // Response after update
-    startingWeight: PositiveNumberOrNull,
-    targetWeight: PositiveNumberOrNull,
+    // Ensure response includes startingWeight
+    startingWeight: t.Nullable(t.Number()),
+    targetWeight: t.Nullable(t.Number()),
     weightGoal: t.Nullable(
       t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
     ),
-    startDate: DateStringOrNull,
-    targetDate: DateStringOrNull,
-    calorieTarget: PositiveNumberOrNull,
-    calculatedWeeks: PositiveIntegerOrNull,
+    startDate: t.Nullable(t.String()),
+    targetDate: t.Nullable(t.String()),
+    calorieTarget: t.Nullable(t.Number()),
+    calculatedWeeks: t.Nullable(t.Number()),
     weeklyChange: t.Nullable(t.Number()),
     dailyChange: t.Nullable(t.Number()),
   }),
