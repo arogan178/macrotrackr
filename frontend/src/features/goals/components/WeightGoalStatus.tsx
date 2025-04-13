@@ -3,7 +3,10 @@ import {
   ChevronRightIcon,
   EditIcon,
   TrashIcon,
-  WeightIcon, // Import WeightIcon
+  WeightIcon,
+  CalendarIcon, // Added for Time Remaining
+  TrendingUpIcon, // Added for Weekly Rate
+  TargetIcon, // Added for Daily Deficit/Surplus
 } from "@/components/Icons";
 import ProgressBar from "@/components/ProgressBar";
 import {
@@ -12,6 +15,7 @@ import {
 } from "@/features/macroTracking/types";
 import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
+import { motion } from "motion/react"; // Import motion
 
 interface WeightGoalStatusProps {
   startingWeight: number;
@@ -22,13 +26,48 @@ interface WeightGoalStatusProps {
   onEdit: () => void;
   onDelete: () => void;
   onLogWeight: () => void;
-  // Add targetCalories prop
-  targetCalories?: number; // Renamed from calorieTarget for consistency with dashboard
+  targetCalories?: number;
   macroTarget?: MacroTargetSettings;
 }
 
+// Helper to calculate progress percentage safely
+function calculateProgress(
+  current: number,
+  start: number,
+  target: number
+): number {
+  if (start === target) return 0; // Avoid division by zero if start equals target
+  const totalDifference = Math.abs(target - start);
+  const currentDifference = Math.abs(target - current);
+  // Ensure progress doesn't exceed 100% or go below 0%
+  const progress = Math.max(
+    0,
+    Math.min(
+      100,
+      ((totalDifference - currentDifference) / totalDifference) * 100
+    )
+  );
+  return Math.round(progress);
+}
+
+// Helper to format dates
+function formatDate(
+  dateString: string | undefined | null,
+  options?: Intl.DateTimeFormatOptions
+): string {
+  if (!dateString) return "Not set";
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    month: "short",
+    day: "numeric",
+  };
+  return new Date(dateString).toLocaleDateString("en-US", {
+    ...defaultOptions,
+    ...options,
+  });
+}
+
 function WeightGoalStatus({
-  startingWeight,
+  startingWeight, // Current weight, potentially updated
   targetWeight,
   tdee,
   macroDailyTotals,
@@ -36,269 +75,254 @@ function WeightGoalStatus({
   onEdit,
   onDelete,
   onLogWeight,
-  // Destructure targetCalories
   targetCalories,
   macroTarget,
 }: WeightGoalStatusProps) {
-  // Use the provided macro target or fall back to default
-  const target = macroTarget || {
-    proteinPercentage: 30,
-    carbsPercentage: 40,
-    fatsPercentage: 30,
-  };
+  const initialStartingWeight = weightGoals?.startingWeight || startingWeight; // Use goal's start weight if available
 
-  // Calculate progress percentage
-  const weightDifference = Math.abs(targetWeight - startingWeight);
-  const initialDifference = Math.abs(
-    targetWeight - (weightGoals?.startingWeight || startingWeight)
+  const progressPercentage = calculateProgress(
+    startingWeight,
+    initialStartingWeight,
+    targetWeight
   );
-  const progressPercentage =
-    initialDifference > 0
-      ? Math.min(
-          100,
-          Math.round(
-            ((initialDifference - weightDifference) / initialDifference) * 100
-          )
-        )
-      : 0;
 
-  // Determine if it's a weight loss, gain, or maintenance goal
   const weightGoal = weightGoals?.weightGoal || "maintain";
   const isWeightLoss = weightGoal === "lose";
   const isWeightGain = weightGoal === "gain";
   const isMaintenance = weightGoal === "maintain";
 
-  // Use the provided calorie target or fall back to weight goals target or tdee
-  // Use the new targetCalories prop
   const effectiveCalorieTarget =
     targetCalories || weightGoals?.calorieTarget || tdee;
 
-  // For display
   const goalTypeLabel = isWeightLoss
     ? "Weight Loss"
     : isWeightGain
     ? "Weight Gain"
-    : "Weight Maintenance";
+    : "Maintenance";
 
   const goalColor = isWeightLoss ? "indigo" : isWeightGain ? "green" : "blue";
+  const goalTextColor = `text-${goalColor}-400`;
+  const goalBgColorLight = `bg-${goalColor}-600/10`; // Lighter background
+  const goalBgColorHover = `bg-${goalColor}-600/20`; // Slightly darker on hover
+  const goalBorderColor = `border-${goalColor}-500`;
+  const goalRingColor = `ring-${goalColor}-500`;
 
-  // Format dates for display
-  const formattedStartDate = weightGoals?.startDate
-    ? new Date(weightGoals.startDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-      })
-    : "Today";
+  const formattedStartDate = formatDate(weightGoals?.startDate);
+  const formattedTargetDate = formatDate(weightGoals?.targetDate, {
+    year: "numeric",
+  });
 
-  const formattedTargetDate = weightGoals?.targetDate
-    ? new Date(weightGoals.targetDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
-    : "Not set";
+  // Use provided macro target or default percentages
+  const targetPercentages = macroTarget || {
+    proteinPercentage: 30,
+    carbsPercentage: 40,
+    fatsPercentage: 30,
+  };
 
-  // Calculate target grams for each macro based on target calories and target
   const targetProteinGrams = Math.round(
-    (effectiveCalorieTarget * target.proteinPercentage) / 100 / 4
+    (effectiveCalorieTarget * targetPercentages.proteinPercentage) / 100 / 4
   );
   const targetCarbsGrams = Math.round(
-    (effectiveCalorieTarget * target.carbsPercentage) / 100 / 4
+    (effectiveCalorieTarget * targetPercentages.carbsPercentage) / 100 / 4
   );
   const targetFatsGrams = Math.round(
-    (effectiveCalorieTarget * target.fatsPercentage) / 100 / 9
+    (effectiveCalorieTarget * targetPercentages.fatsPercentage) / 100 / 9
   );
 
-  // Get weekly change with fallback
   const weeklyChange = weightGoals?.weeklyChange || 0;
-
-  // Get calculated weeks with fallback
   const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
+  const dailyDifference = Math.abs(tdee - (weightGoals?.calorieTarget || tdee));
 
   return (
-    <div className="p-6">
-      {/* Header with goal type and edit/delete buttons */}
-      <div className="flex justify-between items-center mb-6">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      className="p-4 sm:p-6 bg-gray-800/50 rounded-xl border border-gray-700/50 shadow-lg" // Added subtle background and border
+    >
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div className="flex items-center">
-          <div className={`p-2 rounded-lg bg-${goalColor}-600/20 mr-3`}>
-            <CalorieIcon className={`w-5 h-5 text-${goalColor}-400`} />
+          <div className={`p-2.5 rounded-lg ${goalBgColorLight} mr-3`}>
+            {/* Use WeightIcon for weight goals */}
+            <WeightIcon className={`w-6 h-6 ${goalTextColor}`} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-gray-200">
+            <h2 className="text-xl font-semibold text-gray-100">
               {goalTypeLabel} Plan
             </h2>
             <p className="text-sm text-gray-400">
-              Started {formattedStartDate} • Target {formattedTargetDate}
+              {formattedStartDate} → {formattedTargetDate}
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          {/* Add Log Weight Button */}
+        <div className="flex items-center gap-2 self-end sm:self-center">
           <button
             onClick={onLogWeight}
-            className="p-2 rounded-full bg-blue-900/30 hover:bg-blue-900/50 transition-colors flex items-center gap-1.5 text-sm px-3"
+            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500"
             aria-label="Log current weight"
           >
-            <WeightIcon className="text-blue-400 h-4 w-4" />
-            <span className="text-blue-300 font-medium">Log Weight</span>
+            <WeightIcon className="h-4 w-4" />
+            <span>Log Weight</span>
           </button>
-          {/* Existing Edit Button */}
           <button
             onClick={onEdit}
-            className="p-2 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-full text-gray-400 hover:text-gray-100 bg-gray-700/50 hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500"
             aria-label="Edit weight goal"
           >
-            <EditIcon className="text-gray-300" />
+            <EditIcon className="w-4 h-4" />
           </button>
-          {/* Existing Delete Button */}
           <button
             onClick={onDelete}
-            className="p-2 rounded-full bg-red-900/30 hover:bg-red-900/50 transition-colors"
+            className="p-2 rounded-full text-red-400 hover:text-red-300 bg-red-900/30 hover:bg-red-900/50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500"
             aria-label="Delete weight goal"
           >
-            <TrashIcon className="text-red-400" />
+            <TrashIcon className="w-4 h-4" />
           </button>
         </div>
       </div>
 
-      {/* Goal progress visual */}
+      {/* Goal Progress Visual */}
       <div className="mb-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-          <div className="flex items-baseline space-x-3 mb-2 md:mb-0">
-            <span className="text-2xl font-bold text-gray-200">
-              {startingWeight} kg
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3">
+          <div className="flex items-baseline space-x-2">
+            <span className="text-2xl font-bold text-gray-100">
+              {startingWeight.toFixed(1)} kg
             </span>
             {!isMaintenance && (
               <>
-                <ChevronRightIcon className="w-4 h-4 text-gray-500" />
-                <span className="text-xl text-gray-400">{targetWeight} kg</span>
-                <span className={`text-${goalColor}-400 ml-1 text-sm`}>
-                  ({isWeightLoss ? "-" : "+"}
-                  {Math.abs(targetWeight - startingWeight).toFixed(1)} kg)
+                <ChevronRightIcon className="w-4 h-4 text-gray-500 shrink-0" />
+                <span className="text-xl text-gray-400">
+                  {targetWeight.toFixed(1)} kg
+                </span>
+                <span className={`${goalTextColor} ml-1 text-sm font-medium`}>
+                  ({isWeightLoss ? "↓" : "↑"}
+                  {Math.abs(targetWeight - initialStartingWeight).toFixed(1)} kg
+                  goal)
                 </span>
               </>
             )}
+            {isMaintenance && (
+              <span className="text-lg text-gray-400">Maintaining Weight</span>
+            )}
           </div>
           {!isMaintenance && (
-            <div className="flex items-center">
-              <div className="w-16 h-16 relative rounded-full flex items-center justify-center bg-gray-700/50">
-                <div className="absolute inset-0">
-                  <svg width="64" height="64" viewBox="0 0 64 64">
-                    <circle
-                      cx="32"
-                      cy="32"
-                      r="24"
-                      fill="none"
-                      stroke="#374151"
-                      strokeWidth="6"
-                    />
-                    <circle
-                      cx="32"
-                      cy="32"
-                      r="24"
-                      fill="none"
-                      stroke={isWeightLoss ? "#6366F1" : "#10B981"}
-                      strokeWidth="6"
-                      strokeDasharray="150.8"
-                      strokeDashoffset={
-                        150.8 - (150.8 * progressPercentage) / 100
-                      }
-                      transform="rotate(-90 32 32)"
-                    />
-                  </svg>
-                </div>
-                <span className="text-lg font-bold text-gray-200">
-                  {progressPercentage}%
-                </span>
-              </div>
+            <div className="flex items-center gap-2 self-end sm:self-center">
+              <span className="text-sm text-gray-400">Progress:</span>
+              <span className="text-lg font-semibold text-gray-100">
+                {progressPercentage}%
+              </span>
             </div>
           )}
         </div>
 
         {!isMaintenance && (
           <>
-            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden mb-1">
-              <div
-                className={`h-full rounded-full bg-${goalColor}-500`}
-                style={{ width: `${progressPercentage}%` }}
-              ></div>
-            </div>
-            <div className="flex justify-between text-xs text-gray-400">
-              <span>
-                Start: {weightGoals?.startingWeight || startingWeight} kg
-              </span>
-              <span>Target: {targetWeight} kg</span>
+            {/* Use the existing ProgressBar component */}
+            <ProgressBar
+              progress={progressPercentage}
+              color={goalColor}
+              height="md" // Slightly thicker bar
+              showLabel={false} // Label is shown above now
+              className="mb-1"
+            />
+            <div className="flex justify-between text-xs text-gray-400 mt-1">
+              <span>Start: {initialStartingWeight.toFixed(1)} kg</span>
+              <span>Target: {targetWeight.toFixed(1)} kg</span>
             </div>
           </>
         )}
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Improved Styling and Icons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         {/* Weekly Rate */}
-        <div className="bg-gray-700/30 rounded-lg p-3">
-          <p className="text-xs text-gray-400 mb-1">Weekly Rate</p>
-          <p className="text-lg font-medium text-gray-200">
-            {isMaintenance
-              ? "Maintain weight"
-              : `${isWeightLoss ? "-" : "+"}${Math.abs(weeklyChange).toFixed(
-                  2
-                )} kg/week`}
-          </p>
+        <div
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg p-3 border ${goalBorderColor}/30`}
+        >
+          <TrendingUpIcon
+            className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`}
+          />
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Weekly Rate</p>
+            <p className="text-base font-medium text-gray-100">
+              {isMaintenance
+                ? "Maintenance"
+                : `${isWeightLoss ? "↓" : "↑"} ${Math.abs(weeklyChange).toFixed(
+                    2
+                  )} kg/week`}
+            </p>
+          </div>
         </div>
 
         {/* Time Remaining */}
-        <div className="bg-gray-700/30 rounded-lg p-3">
-          <p className="text-xs text-gray-400 mb-1">Time Remaining</p>
-          <p className="text-lg font-medium text-gray-200">
-            {isMaintenance ? "Ongoing" : `${calculatedWeeks} weeks`}
-          </p>
+        <div
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg p-3 border ${goalBorderColor}/30`}
+        >
+          <CalendarIcon
+            className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`}
+          />
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">Est. Duration</p>
+            <p className="text-base font-medium text-gray-100">
+              {isMaintenance ? "Ongoing" : `${calculatedWeeks} weeks`}
+            </p>
+          </div>
         </div>
 
         {/* Daily Deficit/Surplus */}
-        <div className="bg-gray-700/30 rounded-lg p-3">
-          <p className="text-xs text-gray-400 mb-1">
-            {isWeightLoss
-              ? "Daily Deficit"
-              : isWeightGain
-              ? "Daily Surplus"
-              : "TDEE"}
-          </p>
-          <p className="text-lg font-medium text-gray-200">
-            {isMaintenance
-              ? `${tdee} kcal`
-              : `${Math.abs(tdee - (weightGoals?.calorieTarget || tdee))} kcal`}
-          </p>
+        <div
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg p-3 border ${goalBorderColor}/30`}
+        >
+          <TargetIcon className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`} />
+          <div>
+            <p className="text-xs text-gray-400 mb-0.5">
+              {isWeightLoss
+                ? "Daily Deficit"
+                : isWeightGain
+                ? "Daily Surplus"
+                : "Est. TDEE"}
+            </p>
+            <p className="text-base font-medium text-gray-100">
+              {isMaintenance ? `${tdee} kcal` : `${dailyDifference} kcal`}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Nutrition section */}
-      <div className="mb-2">
-        <h3 className="font-medium text-gray-200 mb-3">Daily Nutrition</h3>
+      <div>
+        <h3 className="font-semibold text-lg text-gray-100 mb-4">
+          Daily Nutrition Target
+        </h3>
 
         {/* Calories progress */}
-        <div className="mb-4">
-          <div className="flex justify-between items-center mb-1">
+        <div className="mb-5">
+          <div className="flex justify-between items-center mb-1.5">
             <div className="flex items-center gap-2">
               <CalorieIcon className="w-4 h-4 text-indigo-400" />
-              <span className="text-sm text-gray-200">Calories</span>
+              <span className="text-sm font-medium text-gray-200">
+                Calories
+              </span>
             </div>
             <div className="text-sm">
-              <span className="text-gray-200">
+              <span className="font-medium text-gray-100">
                 {Math.round(macroDailyTotals.calories)}
               </span>
-              <span className="text-gray-500"> / </span>
+              <span className="text-gray-500 mx-1">/</span>
               <span className="text-gray-400">
-                {Math.round(effectiveCalorieTarget)}
+                {Math.round(effectiveCalorieTarget)} kcal
               </span>
             </div>
           </div>
           <ProgressBar
             progress={Math.min(
-              Math.round(
-                (macroDailyTotals.calories / effectiveCalorieTarget) * 100
-              ),
-              100
+              100, // Cap progress at 100% visually
+              effectiveCalorieTarget > 0
+                ? Math.round(
+                    (macroDailyTotals.calories / effectiveCalorieTarget) * 100
+                  )
+                : 0
             )}
             color="indigo"
             height="sm"
@@ -306,24 +330,19 @@ function WeightGoalStatus({
         </div>
 
         {/* Macros Grid */}
-        <div className="grid grid-cols-3 gap-3">
-          {/* Protein */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <MacroNutrient
             label="Protein"
             current={macroDailyTotals.protein}
             target={targetProteinGrams}
             color="green"
           />
-
-          {/* Carbs */}
           <MacroNutrient
             label="Carbs"
             current={macroDailyTotals.carbs}
             target={targetCarbsGrams}
             color="blue"
           />
-
-          {/* Fats */}
           <MacroNutrient
             label="Fats"
             current={macroDailyTotals.fats}
@@ -332,7 +351,7 @@ function WeightGoalStatus({
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

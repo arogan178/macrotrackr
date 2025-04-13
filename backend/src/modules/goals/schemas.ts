@@ -46,7 +46,6 @@ export const GoalSchemas = {
     })
   ),
   updateWeightGoalBody: t.Object({
-    // startingWeight: t.Optional(t.Nullable(t.Number())), // REMOVE or keep optional if needed for other reasons, but route logic ignores it
     targetWeight: t.Nullable(t.Number()),
     weightGoal: t.Nullable(
       t.Union([t.Literal("lose"), t.Literal("maintain"), t.Literal("gain")])
