@@ -1,11 +1,12 @@
 // src/modules/goals/routes.ts
-import { Elysia } from "elysia";
+import { Elysia, NotFoundError, t } from "elysia"; // Import NotFoundError and t
 import { db } from "../../db";
 // Import the simplified schemas
 import { GoalSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
 // Import the specific type for percentages if needed
 import type { MacroTargetPercentages } from "../macros/schemas";
+import { generateId } from "../../../../frontend/src/utils/id-generator"; // Import ID generator
 
 // Define types for DB results (snake_case) for clarity and type safety
 // These should match the columns defined in src/db/schema.ts
@@ -23,6 +24,14 @@ type WeightGoalFromDB = {
   daily_change: number | null; // RENAMED
   created_at: string; // Assuming DATETIME maps to string from DB driver
   updated_at: string;
+};
+
+// Type for Weight Log entry from DB
+type WeightLogFromDB = {
+  id: string;
+  user_id: string;
+  date: string; // YYYY-MM-DD
+  weight: number;
 };
 
 export const goalRoutes = (app: Elysia) =>
@@ -214,6 +223,141 @@ export const goalRoutes = (app: Elysia) =>
           detail: {
             summary: "Reset all goals (weight & macro) for the user",
             tags: ["Goals"],
+          },
+        }
+      )
+
+      // --- Get Weight Log History ---
+      .get(
+        "/weight-log",
+        ({ user, set, db }: AuthenticatedContext) => {
+          try {
+            const query =
+              "SELECT id, date, weight FROM weight_log WHERE user_id = ? ORDER BY date DESC";
+            // Type assertion needed as .all() returns any[] by default with better-sqlite3
+            const logs = db.prepare(query).all(user.userId) as Omit<
+              WeightLogFromDB,
+              "user_id"
+            >[];
+
+            // Schema expects an array, even if empty. `all` returns an empty array if no rows match.
+            return logs;
+          } catch (error) {
+            console.error("[GET /goals/weight-log] CAUGHT ERROR:", error);
+            set.status = 500;
+            throw new Error("Failed to fetch weight log history");
+          }
+        },
+        {
+          response: GoalSchemas.getWeightLogResponse, // Use the new schema
+          detail: {
+            summary: "Get the user's weight log history",
+            tags: ["Goals", "Weight Log"],
+          },
+        }
+      )
+
+      // --- Add Weight Log Entry ---
+      .post(
+        "/weight-log",
+        ({
+          user,
+          body,
+          set,
+          db,
+        }: AuthenticatedContext & {
+          body: typeof GoalSchemas.addWeightLogBody.static;
+        }) => {
+          try {
+            const { date, weight } = body;
+            const newId = generateId(); // Generate a unique ID
+
+            const insertQuery =
+              "INSERT INTO weight_log (id, user_id, date, weight) VALUES (?, ?, ?, ?)";
+            db.prepare(insertQuery).run(newId, user.userId, date, weight);
+
+            // Construct the response object matching the schema
+            const responseEntry = {
+              id: newId,
+              userId: user.userId, // Include userId in the response as per schema
+              date: date,
+              weight: weight,
+            };
+
+            set.status = 201; // Created
+            return responseEntry;
+          } catch (error) {
+            console.error("[POST /goals/weight-log] CAUGHT ERROR:", error);
+            set.status = 500;
+            // Consider more specific error handling (e.g., UNIQUE constraint violation if logging same date?)
+            // For now, a generic 500 is returned.
+            throw new Error("Failed to add weight log entry");
+          }
+        },
+        {
+          body: GoalSchemas.addWeightLogBody, // Validate request body
+          response: GoalSchemas.addWeightLogResponse, // Format response
+          detail: {
+            summary: "Add a new weight log entry",
+            tags: ["Goals", "Weight Log"],
+          },
+        }
+      )
+
+      // --- (Optional) Delete Weight Log Entry ---
+      .delete(
+        "/weight-log/:id",
+        ({
+          user,
+          params,
+          set,
+          db,
+        }: AuthenticatedContext & { params: { id: string } }) => {
+          try {
+            const { id } = params;
+            const deleteQuery =
+              "DELETE FROM weight_log WHERE id = ? AND user_id = ?";
+            const result = db.prepare(deleteQuery).run(id, user.userId);
+
+            if (result.changes === 0) {
+              // No row was deleted, either ID doesn't exist or doesn't belong to user
+              throw new NotFoundError(
+                "Weight log entry not found or access denied."
+              );
+            }
+
+            set.status = 200; // OK (or 204 No Content)
+            return { success: true };
+          } catch (error) {
+            // Handle specific NotFoundError thrown above
+            if (error instanceof NotFoundError) {
+              set.status = 404;
+              // Return a structured error response matching the schema
+              return { code: "NOT_FOUND", message: error.message };
+            }
+            // Handle other potential errors
+            console.error(
+              "[DELETE /goals/weight-log/:id] CAUGHT ERROR:",
+              error
+            );
+            set.status = 500;
+            // Return a structured error response matching the schema
+            return {
+              code: "INTERNAL_SERVER_ERROR",
+              message: "Failed to delete weight log entry",
+            };
+          }
+        },
+        {
+          // Define possible responses using t
+          response: {
+            200: t.Object({ success: t.Boolean() }),
+            404: t.Object({ code: t.String(), message: t.String() }),
+            500: t.Object({ code: t.String(), message: t.String() }),
+          },
+          detail: {
+            summary: "Delete a specific weight log entry",
+            tags: ["Goals", "Weight Log"],
           },
         }
       )

@@ -1,13 +1,18 @@
 import { StateCreator } from "zustand";
 import { WeightGoals, WeightGoalFormValues } from "../types";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
-import { apiService } from "@/utils/api-service";
+import {
+  apiService,
+  WeightLogEntry,
+  AddWeightLogPayload,
+} from "@/utils/api-service";
 import { getErrorMessage } from "@/utils/error-handling";
 
-// Define the slice interface - Removed HabitSlice extension
+// Define the slice interface
 export interface GoalsSlice {
   // State
   weightGoals: WeightGoals | null;
+  weightLog: WeightLogEntry[]; // NEW: Add weight log state
   isLoading: boolean;
   isSaving: boolean;
   error: string | null;
@@ -23,12 +28,17 @@ export interface GoalsSlice {
     key: K,
     value: WeightGoals[K]
   ) => Promise<void>;
-  deleteWeightGoal: () => Promise<void>; // Add delete action
+  deleteWeightGoal: () => Promise<void>;
   setLoading: (loading: boolean) => void;
   setSaving: (saving: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
   resetGoals: () => Promise<void>;
+
+  // NEW: Weight Log Actions
+  fetchWeightLog: () => Promise<void>;
+  addWeightLogEntry: (payload: AddWeightLogPayload) => Promise<void>;
+  deleteWeightLogEntry: (id: string) => Promise<void>;
 }
 
 // Define the type for the full state for use with get()
@@ -41,6 +51,9 @@ type FullGoalsState = GoalsSlice & {
 
   // Reference to habits slice actions for coordination
   resetHabits?: () => Promise<void>;
+
+  // Reference to user slice action
+  updateCurrentUserWeight?: (newWeight: number) => void;
 };
 
 export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
@@ -49,6 +62,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 ) => ({
   // Initial State
   weightGoals: null,
+  weightLog: [], // NEW: Initialize weight log state
   isLoading: false,
   isSaving: false,
   error: null,
@@ -161,6 +175,25 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       set({ weightGoals: savedWeightGoal, isSaving: false, error: null });
 
+      // NEW: Add initial weight log entry if currentWeight is provided
+      if (weightGoalsPayload.currentWeight !== null) {
+        const initialLogPayload: AddWeightLogPayload = {
+          date:
+            weightGoalsPayload.startDate ||
+            new Date().toISOString().split("T")[0],
+          weight: weightGoalsPayload.currentWeight,
+        };
+        // Call addWeightLogEntry internally, but don't set saving state again
+        // Error handling for this initial log is less critical, maybe just log it
+        try {
+          await get().addWeightLogEntry(initialLogPayload);
+          console.log("Initial weight log entry added.");
+        } catch (logError) {
+          console.error("Failed to add initial weight log entry:", logError);
+          // Optionally notify user, but goal creation was successful
+        }
+      }
+
       if (fullGet().addNotification) {
         fullGet().addNotification({
           message: "Weight goal saved successfully!",
@@ -180,7 +213,6 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     }
   },
 
-  // Generic function to update a single field and save weight goals
   updateWeightGoalField: async (key, value) => {
     const currentWeightGoals = get().weightGoals;
     if (!currentWeightGoals) {
@@ -226,7 +258,8 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     const fullGet = get as () => FullGoalsState;
     try {
       await apiService.goals.deleteWeightGoals(); // Call API service
-      set({ weightGoals: null, isSaving: false, error: null });
+      // NEW: Clear weight log when goal is deleted
+      set({ weightGoals: null, weightLog: [], isSaving: false, error: null });
 
       if (fullGet().addNotification) {
         fullGet().addNotification({
@@ -255,7 +288,111 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
   // --- Reset Action ---
   resetGoals: async () => {
-    set({ weightGoals: null, error: null, isLoading: false, isSaving: false });
+    // NEW: Clear weight log on reset
+    set({
+      weightGoals: null,
+      weightLog: [],
+      error: null,
+      isLoading: false,
+      isSaving: false,
+    });
     // Optionally, refetch or perform other cleanup
+  },
+
+  // --- NEW: Weight Log Actions ---
+  fetchWeightLog: async () => {
+    set({ isLoading: true, error: null });
+    const fullGet = get as () => FullGoalsState;
+    try {
+      const logData = await apiService.goals.getWeightLog();
+      // Ensure data is sorted by date descending (API should already do this, but good practice)
+      const sortedLog = logData.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+      );
+      set({ weightLog: sortedLog, isLoading: false });
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      console.error("Error fetching weight log:", error);
+      set({ isLoading: false, error: errorMessage });
+      if (fullGet().addNotification) {
+        fullGet().addNotification({
+          message: `Failed to load weight log: ${errorMessage}`,
+          type: "error",
+        });
+      }
+    }
+  },
+
+  addWeightLogEntry: async (payload: AddWeightLogPayload) => {
+    set({ isSaving: true, error: null });
+    const fullGet = get as () => FullGoalsState;
+    try {
+      const savedEntry = await apiService.goals.addWeightLogEntry(payload);
+
+      set((state) => ({
+        // Add new entry and re-sort
+        weightLog: [...(state.weightLog || []), savedEntry].sort(
+          (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+        ),
+        // Update current weight in the goals slice
+        weightGoals: state.weightGoals
+          ? { ...state.weightGoals, currentWeight: savedEntry.weight }
+          : null,
+        isSaving: false,
+      }));
+
+      // Update current weight in the user slice
+      if (fullGet().updateCurrentUserWeight) {
+        fullGet().updateCurrentUserWeight(savedEntry.weight);
+      }
+
+      if (fullGet().addNotification) {
+        fullGet().addNotification({
+          message: "Weight logged successfully!",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      console.error("Error adding weight log entry:", error);
+      set({ error: errorMessage, isSaving: false });
+      if (fullGet().addNotification) {
+        fullGet().addNotification({
+          message: `Failed to log weight: ${errorMessage}`,
+          type: "error",
+        });
+      }
+      // Re-throw or handle specific errors if needed
+      throw error; // Re-throw to allow modal to handle closing logic
+    }
+  },
+
+  deleteWeightLogEntry: async (id: string) => {
+    set({ isSaving: true, error: null });
+    const fullGet = get as () => FullGoalsState;
+    try {
+      await apiService.goals.deleteWeightLogEntry(id);
+      set((state) => ({
+        weightLog: state.weightLog.filter((entry) => entry.id !== id),
+        isSaving: false,
+      }));
+
+      if (fullGet().addNotification) {
+        fullGet().addNotification({
+          message: "Weight log entry deleted.",
+          type: "success",
+        });
+      }
+    } catch (error) {
+      const errorMessage = getErrorMessage(error);
+      console.error("Error deleting weight log entry:", error);
+      set({ error: errorMessage, isSaving: false });
+      if (fullGet().addNotification) {
+        fullGet().addNotification({
+          message: `Failed to delete entry: ${errorMessage}`,
+          type: "error",
+        });
+      }
+    }
   },
 });

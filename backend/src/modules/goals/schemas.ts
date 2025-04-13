@@ -5,8 +5,13 @@ import { t } from "elysia";
 const PositiveNumberOrNull = t.Nullable(t.Number({ minimum: 0 }));
 const PositiveIntegerOrNull = t.Nullable(t.Integer({ minimum: 0 }));
 const DateStringOrNull = t.Nullable(t.String({ format: "date" }));
+// Add reusable DateString for required dates
+const DateString = t.String({
+  format: "date",
+  default: new Date().toISOString().split("T")[0],
+}); // YYYY-MM-DD
 
-// --- Exported Goal Schemas ---
+// --- Exported Goal Schemas --- //
 export const GoalSchemas = {
   // Schema for Weight Goals data (API structure - camelCase)
   weightGoalData: t.Object({
@@ -72,4 +77,38 @@ export const GoalSchemas = {
   resetResponse: t.Object({
     success: t.Boolean(),
   }),
+
+  // --- Weight Log Schemas ---
+
+  // Schema for a single weight log entry (used in responses)
+  weightLogEntry: t.Object({
+    id: t.String(),
+    userId: t.String(), // Included in POST response, maybe not GET
+    date: DateString,
+    weight: t.Number({ minimum: 0 }),
+  }),
+
+  // Schema for the request body when adding a new weight log entry
+  addWeightLogBody: t.Object({
+    date: DateString, // Date for the new entry
+    weight: t.Number({ minimum: 0 }), // Weight for the new entry
+  }),
+
+  // Schema for the response after successfully adding a weight log entry
+  addWeightLogResponse: t.Object({
+    id: t.String(),
+    userId: t.String(),
+    date: DateString,
+    weight: t.Number({ minimum: 0 }),
+  }),
+
+  // Schema for the response when fetching the weight log history
+  getWeightLogResponse: t.Array(
+    t.Object({
+      id: t.String(),
+      // userId is usually not needed when fetching for the logged-in user
+      date: DateString,
+      weight: t.Number({ minimum: 0 }),
+    })
+  ),
 };
