@@ -11,12 +11,12 @@ import type { TimeToGoalCalculation, WeightGoals } from "./types";
  * and daily calorie deficit
  */
 export function calculateTimeToGoal(
-  currentWeight: number,
+  startingWeight: number,
   targetWeight: number,
   dailyCalorieChange: number
 ): TimeToGoalCalculation {
-  const weightDifference = Math.abs(currentWeight - targetWeight);
-  const isWeightLoss = currentWeight > targetWeight;
+  const weightDifference = Math.abs(startingWeight - targetWeight);
+  const isWeightLoss = startingWeight > targetWeight;
 
   // Calculate weekly deficit/surplus and expected weight change - use the provided value directly
   const weeklyCalorieChange = dailyCalorieChange * 7;
@@ -38,22 +38,22 @@ export function calculateTimeToGoal(
 
 /**
  * Calculate the recommended daily calorie deficit based on weight difference and target timeframe
- * @param currentWeight - Current weight in kg
+ * @param startingWeight - Current weight in kg
  * @param targetWeight - Target weight in kg
  * @param targetWeeks - Desired number of weeks to reach goal
  * @returns Recommended daily calorie deficit/surplus (positive for weight loss, negative for gain)
  */
 export function calculateRecommendedDeficit(
-  currentWeight: number,
+  startingWeight: number,
   targetWeight: number,
   targetWeeks: number = DEFAULT_TARGET_WEEKS
 ): number {
-  if (!currentWeight || !targetWeight || targetWeeks <= 0) {
+  if (!startingWeight || !targetWeight || targetWeeks <= 0) {
     return 0;
   }
 
-  const weightDifference = Math.abs(currentWeight - targetWeight);
-  const isWeightLoss = currentWeight > targetWeight;
+  const weightDifference = Math.abs(startingWeight - targetWeight);
+  const isWeightLoss = startingWeight > targetWeight;
   const weeklyWeightLoss = weightDifference / targetWeeks;
 
   // Ensure weekly weight loss is within safe limits
@@ -72,24 +72,24 @@ export function calculateRecommendedDeficit(
 /**
  * Calculate calorie target based on TDEE and weight goal
  * @param tdee - Total Daily Energy Expenditure (maintenance calories)
- * @param currentWeight - Current weight in kg
+ * @param startingWeight - Current weight in kg
  * @param targetWeight - Target weight in kg
  * @param targetWeeks - Optional: Desired timeframe in weeks (defaults to 12)
  * @returns Daily calorie target to achieve goal
  */
 export function calculateCalorieTarget(
   tdee: number,
-  currentWeight: number,
+  startingWeight: number,
   targetWeight: number,
   targetWeeks?: number
 ): number {
   // Validate inputs
-  if (!tdee || tdee < 1000 || !currentWeight || !targetWeight) {
+  if (!tdee || tdee < 1000 || !startingWeight || !targetWeight) {
     return tdee; // Return original TDEE if invalid inputs
   }
 
   const recommendedDeficit = calculateRecommendedDeficit(
-    currentWeight,
+    startingWeight,
     targetWeight,
     targetWeeks || DEFAULT_TARGET_WEEKS
   );
@@ -103,14 +103,14 @@ export function calculateCalorieTarget(
 /**
  * Generate complete weight goal calculations based on user inputs
  * @param tdee - Total Daily Energy Expenditure
- * @param currentWeight - Current weight in kg
+ * @param startingWeight - Current weight in kg
  * @param targetWeight - Target weight in kg
  * @param customCalorieIntake - Optional: User-specified daily calorie intake
  * @returns Complete weight goals with calculations
  */
 export function generateWeightGoalCalculations(
   tdee: number,
-  currentWeight: number,
+  startingWeight: number,
   targetWeight: number,
   customCalorieIntake?: number
 ): Partial<WeightGoals> {
@@ -118,15 +118,15 @@ export function generateWeightGoalCalculations(
   const calorieTarget =
     customCalorieIntake !== undefined
       ? customCalorieIntake
-      : calculateCalorieTarget(tdee, currentWeight, targetWeight);
+      : calculateCalorieTarget(tdee, startingWeight, targetWeight);
 
   const calorieDeficit = tdee - calorieTarget;
-  const isWeightLoss = currentWeight > targetWeight;
+  const isWeightLoss = startingWeight > targetWeight;
 
   // For maintenance goals (same weight), set calculatedWeeks to 0
-  if (currentWeight === targetWeight) {
+  if (startingWeight === targetWeight) {
     return {
-      currentWeight,
+      startingWeight,
       targetWeight,
       weightGoal: "maintain",
       calorieTarget,
@@ -142,7 +142,7 @@ export function generateWeightGoalCalculations(
 
   // Get time to goal calculations
   const { weeksToGoal, expectedWeightLossPerWeek } = calculateTimeToGoal(
-    currentWeight,
+    startingWeight,
     targetWeight,
     effectiveCalorieChange
   );
@@ -152,12 +152,12 @@ export function generateWeightGoalCalculations(
   targetDate.setDate(targetDate.getDate() + weeksToGoal * 7);
 
   return {
-    currentWeight,
+    startingWeight,
     targetWeight,
     weightGoal:
-      currentWeight > targetWeight
+      startingWeight > targetWeight
         ? "lose"
-        : currentWeight < targetWeight
+        : startingWeight < targetWeight
         ? "gain"
         : "maintain",
     calorieTarget,

@@ -2,7 +2,7 @@ import { CALORIE_ADJUSTMENT_FACTORS } from "./constants";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
 
 export interface WeightGoals {
-  currentWeight: number;
+  startingWeight: number;
   targetWeight: number;
   weightGoal: WeightGoal;
   startDate: string;
@@ -31,7 +31,7 @@ export interface TimeToGoalCalculation {
 }
 
 export interface WeightGoalFormValues {
-  currentWeight: number;
+  startingWeight: number;
   targetWeight: number | undefined;
   startDate?: string;
   targetDate?: string;
@@ -42,7 +42,7 @@ export interface WeightGoalFormValues {
 }
 
 export interface WeightGoalCardProps {
-  currentWeight: number;
+  startingWeight: number;
   targetWeight: number;
   tdee: number;
   isLoading?: boolean;

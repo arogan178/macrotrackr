@@ -96,7 +96,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     const fullGet = get as () => FullGoalsState;
     try {
       const {
-        currentWeight,
+        startingWeight,
         targetWeight,
         startDate,
         targetDate,
@@ -107,9 +107,9 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       } = formValues;
 
       let weightGoal = customWeightGoal || "maintain";
-      if (!customWeightGoal && currentWeight && targetWeight) {
-        if (targetWeight < currentWeight) weightGoal = "lose";
-        else if (targetWeight > currentWeight) weightGoal = "gain";
+      if (!customWeightGoal && startingWeight && targetWeight) {
+        if (targetWeight < startingWeight) weightGoal = "lose";
+        else if (targetWeight > startingWeight) weightGoal = "gain";
       }
 
       const today = new Date();
@@ -129,7 +129,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       if (
         (calculatedWeeks <= 1 || weeklyChange === 0) &&
         targetDate &&
-        currentWeight &&
+        startingWeight &&
         targetWeight
       ) {
         const targetDateObj = new Date(targetDate);
@@ -138,19 +138,19 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
           1,
           Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7))
         );
-        const weightDifference = Math.abs(targetWeight - currentWeight);
+        const weightDifference = Math.abs(targetWeight - startingWeight);
         weeklyChange =
           calculatedWeeks > 0 ? weightDifference / calculatedWeeks : 0;
       }
       if (
         weeklyChange &&
         weightGoal !== "maintain" &&
-        currentWeight &&
+        startingWeight &&
         targetWeight
       ) {
         const calorieChangePerKg = 7700;
         const totalCalorieDiff =
-          (targetWeight - currentWeight) * calorieChangePerKg;
+          (targetWeight - startingWeight) * calorieChangePerKg;
         const totalDays = calculatedWeeks * 7;
         dailyChange = totalDays > 0 ? totalCalorieDiff / totalDays : 0;
       } else {
@@ -158,7 +158,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       }
 
       const weightGoalsPayload: WeightGoals = {
-        currentWeight,
+        startingWeight,
         targetWeight,
         weightGoal,
         startDate: startDate || formattedToday,
@@ -175,13 +175,13 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       set({ weightGoals: savedWeightGoal, isSaving: false, error: null });
 
-      // NEW: Add initial weight log entry if currentWeight is provided
-      if (weightGoalsPayload.currentWeight !== null) {
+      // NEW: Add initial weight log entry if startingWeight is provided
+      if (weightGoalsPayload.startingWeight !== null) {
         const initialLogPayload: AddWeightLogPayload = {
           date:
             weightGoalsPayload.startDate ||
             new Date().toISOString().split("T")[0],
-          weight: weightGoalsPayload.currentWeight,
+          weight: weightGoalsPayload.startingWeight,
         };
         // Call addWeightLogEntry internally, but don't set saving state again
         // Error handling for this initial log is less critical, maybe just log it
@@ -214,19 +214,19 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   },
 
   updateWeightGoalField: async (key, value) => {
-    const currentWeightGoals = get().weightGoals;
-    if (!currentWeightGoals) {
+    const startingWeightGoals = get().weightGoals;
+    if (!startingWeightGoals) {
       console.warn("Cannot update field, no current weight goals exist.");
       return;
     }
-    if (currentWeightGoals[key] === value) {
+    if (startingWeightGoals[key] === value) {
       return;
     }
 
     set({ isSaving: true, error: null });
     const fullGet = get as () => FullGoalsState;
 
-    const updatedWeightGoals = { ...currentWeightGoals, [key]: value };
+    const updatedWeightGoals = { ...startingWeightGoals, [key]: value };
 
     try {
       const savedWeightGoal = await apiService.goals.saveWeightGoals(
@@ -336,7 +336,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         ),
         // Update current weight in the goals slice
         weightGoals: state.weightGoals
-          ? { ...state.weightGoals, currentWeight: savedEntry.weight }
+          ? { ...state.weightGoals, startingWeight: savedEntry.weight }
           : null,
         isSaving: false,
       }));

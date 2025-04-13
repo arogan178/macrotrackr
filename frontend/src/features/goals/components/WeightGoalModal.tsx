@@ -7,7 +7,7 @@ interface WeightGoalModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (values: WeightGoalFormValues) => void;
-  currentWeight: number;
+  startingWeight: number;
   targetWeight?: number; // Optional initial target weight
   tdee: number;
   weightGoals: WeightGoals | null; // Pass existing goals for editing
@@ -18,7 +18,7 @@ function WeightGoalModal({
   isOpen,
   onClose,
   onSave,
-  currentWeight,
+  startingWeight,
   targetWeight,
   tdee,
   weightGoals,
@@ -38,7 +38,7 @@ function WeightGoalModal({
 
   // Provide a default value for targetWeight if it's undefined
   const initialTargetWeight =
-    weightGoals?.targetWeight ?? targetWeight ?? currentWeight;
+    weightGoals?.targetWeight ?? targetWeight ?? startingWeight;
 
   return (
     <Modal
@@ -50,7 +50,7 @@ function WeightGoalModal({
       size="lg"
     >
       <WeightGoalForm
-        currentWeight={currentWeight}
+        startingWeight={startingWeight}
         targetWeight={initialTargetWeight} // Use the calculated initial value
         tdee={tdee}
         weightGoals={weightGoals}

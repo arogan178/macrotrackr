@@ -1,8 +1,9 @@
 // src/modules/user/routes.ts
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
+import { db } from "@/db";
 import { UserSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import type { AuthenticatedContext } from "@/middleware/auth";
+import { generateId } from "@/utils/id-generator"; // Import ID generator from backend utils
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -40,7 +41,7 @@ export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
     group
       .decorate("db", db)
-      // GET /me Handler - Updated Query and Mapping
+      // GET /me Handler - (remains the same)
       .get(
         "/me",
         ({ db, user, set }: AuthenticatedContext): UserMeApiResponse | null => {
@@ -99,7 +100,7 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      // PUT /settings Handler - Updated UPSERT syntax
+      // PUT /settings Handler - Changed to always INSERT weight log
       .put(
         "/settings",
         ({
@@ -116,13 +117,13 @@ export const userRoutes = (app: Elysia) =>
             email,
             dateOfBirth,
             height,
-            weight,
+            weight, // Get weight from body
             gender,
             activityLevel,
           } = body;
 
           const transaction = db.transaction(() => {
-            // 1. Update users table (same as before)
+            // 1. Update users table (remains the same)
             const userUpdateFields: string[] = [];
             const userParams: (string | number | null)[] = [];
             if (firstName !== undefined) {
@@ -154,7 +155,6 @@ export const userRoutes = (app: Elysia) =>
             }
 
             // 2. Update or Insert user_details table (UPSERT)
-            // *** REMOVED redundant WHERE clause from DO UPDATE ***
             const detailsUpsertQuery = `
                 INSERT INTO user_details (
                     user_id, date_of_birth, height, weight, gender, activity_level, updated_at
@@ -172,10 +172,34 @@ export const userRoutes = (app: Elysia) =>
               user.userId,
               nullify(dateOfBirth),
               nullify(height),
-              nullify(weight),
+              nullify(weight), // Use weight from body
               nullify(gender),
               nullify(activityLevel)
             );
+
+            // 3. Always INSERT a new weight log entry if weight was provided
+            if (weight !== undefined && weight !== null) {
+              const logDate = new Date().toISOString().split("T")[0]; // Today's date
+              const logId = generateId();
+              // Use simple INSERT now, no ON CONFLICT
+              const insertWeightLogQuery = `
+                  INSERT INTO weight_log (id, user_id, date, weight)
+                  VALUES (?, ?, ?, ?);
+              `;
+              db.prepare(insertWeightLogQuery).run(
+                logId,
+                user.userId,
+                logDate,
+                weight
+              );
+              console.log(
+                `[PUT /user/settings] INSERTED new weight log for user ${user.userId} on ${logDate} with weight ${weight}`
+              );
+            } else if (weight === null) {
+              console.log(
+                `[PUT /user/settings] Weight set to null for user ${user.userId}, no weight log entry added.`
+              );
+            }
           });
 
           try {
@@ -210,7 +234,7 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      // POST /complete-profile Handler (remains the same)
+      // POST /complete-profile Handler - Changed to always INSERT weight log
       .post(
         "/complete-profile",
         ({
@@ -221,9 +245,11 @@ export const userRoutes = (app: Elysia) =>
         }: AuthenticatedContext & {
           body: typeof UserSchemas.profileCompletion.static;
         }) => {
-          const { dateOfBirth, height, weight, activityLevel } = body;
-          try {
-            // *** REMOVED redundant WHERE clause from DO UPDATE ***
+          const { dateOfBirth, height, weight, activityLevel } = body; // Get weight from body
+
+          // Use a transaction for atomicity
+          const transaction = db.transaction(() => {
+            // 1. Upsert user_details
             const stmt = db.prepare(`
                   INSERT INTO user_details (
                       user_id, date_of_birth, height, weight, activity_level, updated_at
@@ -240,9 +266,33 @@ export const userRoutes = (app: Elysia) =>
               user.userId,
               nullify(dateOfBirth),
               nullify(height),
-              nullify(weight),
+              nullify(weight), // Use weight from body
               nullify(activityLevel)
             );
+
+            // 2. Always INSERT a new weight log entry if weight was provided
+            if (weight !== undefined && weight !== null) {
+              const logDate = new Date().toISOString().split("T")[0]; // Today's date
+              const logId = generateId();
+              // Use simple INSERT now, no ON CONFLICT
+              const insertWeightLogQuery = `
+                  INSERT INTO weight_log (id, user_id, date, weight)
+                  VALUES (?, ?, ?, ?);
+              `;
+              db.prepare(insertWeightLogQuery).run(
+                logId,
+                user.userId,
+                logDate,
+                weight
+              );
+              console.log(
+                `[POST /user/complete-profile] INSERTED new weight log for user ${user.userId} on ${logDate} with weight ${weight}`
+              );
+            }
+          });
+
+          try {
+            transaction(); // Execute transaction
             set.status = 200;
             return { success: true, message: "Profile details updated." };
           } catch (error) {
