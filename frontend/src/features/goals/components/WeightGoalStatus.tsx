@@ -2,7 +2,8 @@ import {
   CalorieIcon,
   ChevronRightIcon,
   EditIcon,
-  TrashIcon, // Import TrashIcon
+  TrashIcon,
+  WeightIcon, // Import WeightIcon
 } from "@/components/Icons";
 import ProgressBar from "@/components/ProgressBar";
 import {
@@ -19,8 +20,10 @@ interface WeightGoalStatusProps {
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | null;
   onEdit: () => void;
-  onDelete: () => void; // Add onDelete prop
-  calorieTarget?: number;
+  onDelete: () => void;
+  onLogWeight: () => void;
+  // Add targetCalories prop
+  targetCalories?: number; // Renamed from calorieTarget for consistency with dashboard
   macroTarget?: MacroTargetSettings;
 }
 
@@ -31,8 +34,10 @@ function WeightGoalStatus({
   macroDailyTotals,
   weightGoals,
   onEdit,
-  onDelete, // Destructure onDelete
-  calorieTarget,
+  onDelete,
+  onLogWeight,
+  // Destructure targetCalories
+  targetCalories,
   macroTarget,
 }: WeightGoalStatusProps) {
   // Use the provided macro target or fall back to default
@@ -64,8 +69,9 @@ function WeightGoalStatus({
   const isMaintenance = weightGoal === "maintain";
 
   // Use the provided calorie target or fall back to weight goals target or tdee
+  // Use the new targetCalories prop
   const effectiveCalorieTarget =
-    calorieTarget || weightGoals?.calorieTarget || tdee;
+    targetCalories || weightGoals?.calorieTarget || tdee;
 
   // For display
   const goalTypeLabel = isWeightLoss
@@ -127,8 +133,16 @@ function WeightGoalStatus({
           </div>
         </div>
         <div className="flex items-center gap-2">
-          {" "}
-          {/* Add gap for buttons */}
+          {/* Add Log Weight Button */}
+          <button
+            onClick={onLogWeight}
+            className="p-2 rounded-full bg-blue-900/30 hover:bg-blue-900/50 transition-colors flex items-center gap-1.5 text-sm px-3"
+            aria-label="Log current weight"
+          >
+            <WeightIcon className="text-blue-400 h-4 w-4" />
+            <span className="text-blue-300 font-medium">Log Weight</span>
+          </button>
+          {/* Existing Edit Button */}
           <button
             onClick={onEdit}
             className="p-2 rounded-full bg-gray-700/50 hover:bg-gray-700 transition-colors"
@@ -136,8 +150,9 @@ function WeightGoalStatus({
           >
             <EditIcon className="text-gray-300" />
           </button>
+          {/* Existing Delete Button */}
           <button
-            onClick={onDelete} // Call onDelete handler
+            onClick={onDelete}
             className="p-2 rounded-full bg-red-900/30 hover:bg-red-900/50 transition-colors"
             aria-label="Delete weight goal"
           >
