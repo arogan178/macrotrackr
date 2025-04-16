@@ -1,55 +1,111 @@
+import { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
-import { NumberField } from "@/components/form/index";
+import { MacroEntry } from "@/features/macroTracking/types";
+import { TextField, NumberField } from "@/components/form";
 
 interface EditModalProps {
-  isOpen: boolean;
+  entry: MacroEntry;
+  onSave: (entry: MacroEntry) => void;
   onClose: () => void;
-  title: string;
-  value: number;
-  onChange: (value: number | undefined) => void;
-  onSave: () => void;
-  unit?: string;
-  error?: string;
-  maxDigits?: number;
+  isSaving: boolean;
 }
 
 export default function EditModal({
-  isOpen,
-  onClose,
-  title,
-  value,
-  onChange,
+  entry,
   onSave,
-  unit,
-  error,
-  maxDigits,
+  onClose,
+  isSaving,
 }: EditModalProps) {
-  const handleChange = (newValue: number | undefined) => {
-    // Only call onChange when we have a valid number
-    if (typeof newValue === "number") {
-      onChange(newValue);
-    }
+  const [editedEntry, setEditedEntry] = useState<MacroEntry>({ ...entry });
+  const [formValid, setFormValid] = useState(true);
+
+  // Validate form whenever entry changes
+  useEffect(() => {
+    const isValid =
+      editedEntry.mealName.trim() !== "" &&
+      editedEntry.protein >= 0 &&
+      editedEntry.carbs >= 0 &&
+      editedEntry.fats >= 0;
+
+    setFormValid(isValid);
+  }, [editedEntry]);
+
+  const handleInputChange = (field: keyof MacroEntry, value: string) => {
+    setEditedEntry((prev) => ({
+      ...prev,
+      [field]: field === "mealName" ? value : Number(value) || 0,
+    }));
+  };
+
+  const handleNumberChange = (
+    field: keyof MacroEntry,
+    value: number | undefined
+  ) => {
+    setEditedEntry((prev) => ({
+      ...prev,
+      [field]: value ?? 0,
+    }));
+  };
+
+  const handleSave = () => {
+    if (!formValid) return;
+    onSave(editedEntry);
   };
 
   return (
     <Modal
-      variant="form"
-      isOpen={isOpen}
+      isOpen={true}
       onClose={onClose}
-      title={title}
-      onSave={onSave}
-      saveDisabled={!!error}
+      title="Edit Nutrition Entry"
+      variant="form"
+      onSave={handleSave}
+      saveDisabled={!formValid || isSaving}
+      size="md"
     >
-      <div className="py-4">
-        <NumberField
-          label="Value"
-          value={value}
-          onChange={handleChange}
-          error={error}
-          unit={unit}
+      <div className="space-y-4">
+        <TextField
+          label="Food Name"
+          value={String(editedEntry.mealName)}
+          onChange={(value) => handleInputChange("mealName", value)}
+          placeholder="Enter food name"
           required
-          maxDigits={maxDigits}
         />
+        <div className="grid grid-cols-3 gap-4">
+          <NumberField
+            label="Protein (g)"
+            value={editedEntry.protein}
+            onChange={(value) => handleNumberChange("protein", value)}
+            min={0}
+            step={0.1}
+          />
+          <NumberField
+            label="Carbs (g)"
+            value={editedEntry.carbs}
+            onChange={(value) => handleNumberChange("carbs", value)}
+            min={0}
+            step={0.1}
+          />
+          <NumberField
+            label="Fats (g)"
+            value={editedEntry.fats}
+            onChange={(value) => handleNumberChange("fats", value)}
+            min={0}
+            step={0.1}
+          />
+        </div>
+
+        <div className="mt-2 text-sm">
+          <div className="flex justify-between text-gray-400">
+            <span>Total Calories:</span>
+            <span className="font-medium text-white">
+              {Math.round(
+                editedEntry.protein * 4 +
+                  editedEntry.carbs * 4 +
+                  editedEntry.fats * 9
+              )}
+            </span>
+          </div>
+        </div>
       </div>
     </Modal>
   );

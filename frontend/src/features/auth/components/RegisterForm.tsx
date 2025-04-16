@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { CardContainer } from "@/components/form/index";
+import { CardContainer } from "@/components/form";
 import { useStore } from "@/store/store";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import {

@@ -11,7 +11,7 @@ interface ErrorBoundaryState {
   error?: Error;
 }
 
-export default class ErrorBoundary extends Component<
+export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
@@ -64,3 +64,6 @@ export default class ErrorBoundary extends Component<
     return this.props.children;
   }
 }
+
+// Also export as default for backward compatibility
+export default ErrorBoundary;

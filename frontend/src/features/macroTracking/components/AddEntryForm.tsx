@@ -6,10 +6,10 @@ import {
   Dropdown,
   DateField,
   TextField,
-} from "@/components/form/index";
+} from "@/components/form";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { CheckMarkIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import { MealType, MEAL_TYPES } from "../types";
+import { MealType, MEAL_TYPE_OPTIONS } from "../types";
 
 // Helper function to capitalize first letter of a string
 function capitalizeFirstLetter(string: string): string {
@@ -23,8 +23,8 @@ interface AddEntryProps {
     fats: number;
     mealType: MealType;
     mealName: string;
-    date: string;
-    time: string;
+    entry_date: string;
+    entry_time: string;
   }) => Promise<void>;
   isSaving: boolean;
 }
@@ -34,16 +34,16 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [carbs, setCarbs] = useState<number | undefined>(undefined);
   const [fats, setFats] = useState<number | undefined>(undefined);
   const [searchResult, setSearchResult] = useState<string | null>(null);
-  const [mealType, setMealType] = useState<MealType>("breakfast 🍳");
+  const [mealType, setMealType] = useState<MealType>("breakfast");
   const [mealName, setMealName] = useState<string>("");
 
   // Default date is today
-  const [date, setDate] = useState<string>(
+  const [entry_date, setEntryDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
 
   // Default time is current time
-  const [time, setTime] = useState<string>(
+  const [entry_time, setEntryTime] = useState<string>(
     new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -103,8 +103,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
         fats: fats as number,
         mealType,
         mealName,
-        date,
-        time,
+        entry_date,
+        entry_time,
       });
 
       setProtein(undefined);
@@ -119,8 +119,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       fats,
       mealType,
       mealName,
-      date,
-      time,
+      entry_date,
+      entry_time,
       onSubmit,
       anyFieldIsUndefined,
       allFieldsAreZero,
@@ -162,28 +162,33 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             <div>
               <DateField
                 label="Date"
-                value={date}
-                onChange={setDate}
+                value={entry_date}
+                onChange={setEntryDate}
                 required
               />
             </div>
             <div>
               <TimeField
                 label="Time"
-                value={time}
-                onChange={setTime}
+                value={entry_time}
+                onChange={setEntryTime}
                 required
               />
             </div>
             <div>
               <Dropdown
                 label="Meal Type"
-                options={MEAL_TYPES.map((type) => ({
-                  value: type,
-                  label: capitalizeFirstLetter(type),
+                // Map over the new options array
+                options={MEAL_TYPE_OPTIONS.map((option) => ({
+                  value: option.value, // The value associated with the option (e.g., "breakfast")
+                  label: option.display, // The text displayed in the dropdown (e.g., "Breakfast 🍳")
+                  // If you still need capitalization, apply it to option.display here:
+                  // label: capitalizeFirstLetter(option.display)
                 }))}
-                value={mealType}
-                onChange={(value) => setMealType(value as MealType)}
+                // The value prop should be bound to your state variable holding the clean mealType
+                value={mealType} // e.g., "breakfast"
+                // The onChange handler receives the clean value directly from the dropdown option's value
+                onChange={(value) => setMealType(value as MealType)} // value will be "breakfast", "lunch", etc.
               />
             </div>
           </div>

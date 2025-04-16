@@ -1,7 +1,23 @@
 {
-  "name": "backend",
-  "module": "index.ts",
+  "name": "macro-tracker-backend",
+  "version": "1.0.0",
+  "description": "Backend API for Macro Tracker application",
+  "module": "src/index.ts",
   "type": "module",
+  "scripts": {
+    "start": "bun run src/index.ts",
+    "dev": "bun --watch src/index.ts",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "elysia",
+    "bun",
+    "macros",
+    "tracker",
+    "api"
+  ],
+  "author": "",
+  "license": "ISC",
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -9,12 +25,11 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@elysiajs/cors": "^1.2.0",
-    "@elysiajs/jwt": "^1.2.0",
-    "@node-rs/bcrypt": "^1.10.7",
-    "@types/recharts": "^1.8.29",
-    "elysia": "^1.2.11",
-    "react-hot-toast": "^2.5.1",
-    "recharts": "^2.15.0"
+    "@elysiajs/cors": "^1.0.2",
+    "@elysiajs/jwt": "^1.0.2",
+    "@elysiajs/swagger": "^1.0.3",
+    "@node-rs/bcrypt": "^1.7.3",
+    "elysia": "1.2.25", 
+    "zod": "^3.23.8"
   }
 }

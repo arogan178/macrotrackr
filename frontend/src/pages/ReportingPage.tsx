@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Navbar from "../features/layout/components/Navbar";
-import { MacroEntry, MacroTotals } from "../types";
+import { MacroDailyTotals } from "@/features/macroTracking/types";
 import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -12,8 +12,10 @@ import {
   Tooltip,
   Legend,
   ChartOptions,
+  Filler,
 } from "chart.js";
 import { useStore } from "../store/store";
+import Modal from "../components/Modal";
 
 // Register Chart.js components
 ChartJS.register(
@@ -23,7 +25,8 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
+  Filler
 );
 
 export default function ReportingPage() {
@@ -41,51 +44,124 @@ export default function ReportingPage() {
     carbs: [],
     fats: [],
   });
+  const [showCustomDateModal, setShowCustomDateModal] = useState(false);
+  const [customStartDate, setCustomStartDate] = useState<string>("");
+  const [customEndDate, setCustomEndDate] = useState<string>("");
+  const [dataProcessed, setDataProcessed] = useState(false);
 
   // Get history data from app state
-  const { history, isLoading, error, fetchUserDetails } = useStore();
+  const { history, isLoading, error, fetchUserDetails, fetchMacroData } =
+    useStore();
 
   // Fetch user details and history on component mount
   useEffect(() => {
-    fetchUserDetails();
-  }, [fetchUserDetails]);
+    async function loadData() {
+      await fetchUserDetails();
+      await fetchMacroData(); // Add this to explicitly fetch macro history data
+    }
+    loadData();
+  }, [fetchUserDetails, fetchMacroData]);
 
   // Process data when history or date range changes
   useEffect(() => {
-    if (history.length > 0) {
+    if (history && history.length > 0) {
+      console.log("Processing data with history length:", history.length);
       processDataForCharts(dateRange);
+      setDataProcessed(true);
+    } else if (!isLoading) {
+      console.log("No history data available or still loading");
     }
-  }, [history, dateRange]);
+  }, [history, dateRange, isLoading]);
 
-  const processDataForCharts = (range: string) => {
-    // Process raw data into chart-friendly format
-    const today = new Date();
-    const dates: { [key: string]: MacroTotals } = {};
+  const processDataForCharts = useCallback(
+    (range: string) => {
+      // Process raw data into chart-friendly format
+      const today = new Date();
+      const dates: { [key: string]: MacroDailyTotals } = {};
 
-    let startDate: Date;
-    switch (range) {
-      case "week":
-        startDate = new Date(today);
-        startDate.setDate(today.getDate() - 7);
-        break;
-      case "month":
-        startDate = new Date(today);
-        startDate.setMonth(today.getMonth() - 1);
-        break;
-      case "3months":
-        startDate = new Date(today);
-        startDate.setMonth(today.getMonth() - 3);
-        break;
-      default:
-        startDate = new Date(today);
-        startDate.setDate(today.getDate() - 7);
-    }
+      let startDate: Date;
+      switch (range) {
+        case "week":
+          startDate = new Date(today);
+          startDate.setDate(today.getDate() - 7);
+          break;
+        case "month":
+          startDate = new Date(today);
+          startDate.setMonth(today.getMonth() - 1);
+          break;
+        case "3months":
+          startDate = new Date(today);
+          startDate.setMonth(today.getMonth() - 3);
+          break;
+        case "custom":
+          // Custom range is handled separately
+          return;
+        default:
+          startDate = new Date(today);
+          startDate.setDate(today.getDate() - 7);
+      }
 
-    // Initialize all dates in range with zero values
+      // Initialize all dates in range with zero values
+      const dateLabels: string[] = [];
+      const currentDate = new Date(startDate);
+
+      while (currentDate <= today) {
+        const dateString = currentDate.toISOString().split("T")[0];
+        dateLabels.push(dateString);
+        dates[dateString] = {
+          protein: 0,
+          carbs: 0,
+          fats: 0,
+          calories: 0,
+        };
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      // Aggregate data by date - log if nothing found to catch issues
+      let entriesProcessed = 0;
+      history.forEach((entry) => {
+        if (!entry.created_at) {
+          console.warn("Entry missing created_at timestamp", entry);
+          return;
+        }
+
+        // Use entry_date instead of created_at for aggregating data
+        const entryDate =
+          entry.entry_date ||
+          new Date(entry.created_at).toISOString().split("T")[0];
+        if (dates[entryDate]) {
+          dates[entryDate].protein += entry.protein;
+          dates[entryDate].carbs += entry.carbs;
+          dates[entryDate].fats += entry.fats;
+          dates[entryDate].calories +=
+            entry.protein * 4 + entry.carbs * 4 + entry.fats * 9;
+          entriesProcessed++;
+        }
+      });
+
+      console.log(
+        `Processed ${entriesProcessed} entries from ${history.length} total entries`
+      );
+
+      // Prepare data for charts
+      setAggregatedData({
+        labels: dateLabels.map((date) => formatDate(date)),
+        calories: dateLabels.map((date) => dates[date].calories),
+        protein: dateLabels.map((date) => dates[date].protein),
+        carbs: dateLabels.map((date) => dates[date].carbs),
+        fats: dateLabels.map((date) => dates[date].fats),
+      });
+    },
+    [history]
+  );
+
+  const processDataForCustomDateRange = (startDate: Date, endDate: Date) => {
+    // Similar to processDataForCharts but with custom date range
+    const dates: { [key: string]: MacroDailyTotals } = {};
     const dateLabels: string[] = [];
-    let currentDate = new Date(startDate);
+    const currentDate = new Date(startDate);
 
-    while (currentDate <= today) {
+    while (currentDate <= endDate) {
       const dateString = currentDate.toISOString().split("T")[0];
       dateLabels.push(dateString);
       dates[dateString] = {
@@ -97,9 +173,10 @@ export default function ReportingPage() {
       currentDate.setDate(currentDate.getDate() + 1);
     }
 
-    // Aggregate data by date
     history.forEach((entry) => {
-      const entryDate = new Date(entry.created_at).toISOString().split("T")[0];
+      const entryDate =
+        entry.entry_date ||
+        new Date(entry.created_at).toISOString().split("T")[0];
       if (dates[entryDate]) {
         dates[entryDate].protein += entry.protein;
         dates[entryDate].carbs += entry.carbs;
@@ -109,7 +186,6 @@ export default function ReportingPage() {
       }
     });
 
-    // Prepare data for charts
     setAggregatedData({
       labels: dateLabels.map((date) => formatDate(date)),
       calories: dateLabels.map((date) => dates[date].calories),
@@ -117,6 +193,19 @@ export default function ReportingPage() {
       carbs: dateLabels.map((date) => dates[date].carbs),
       fats: dateLabels.map((date) => dates[date].fats),
     });
+  };
+
+  const handleApplyCustomDateRange = () => {
+    const start = new Date(customStartDate);
+    const end = new Date(customEndDate);
+
+    if (start > end) {
+      // Show error notification
+      return;
+    }
+
+    processDataForCustomDateRange(start, end);
+    setShowCustomDateModal(false);
   };
 
   const formatDate = (dateStr: string): string => {
@@ -156,7 +245,7 @@ export default function ReportingPage() {
         titleFont: {
           family: "'Inter', sans-serif",
           size: 14,
-          weight: "600",
+          weight: "bold",
         },
         footerFont: {
           family: "'Inter', sans-serif",
@@ -314,6 +403,30 @@ export default function ReportingPage() {
             </div>
           )}
 
+          {/* Debug info for development */}
+          {!isLoading && !error && history?.length === 0 && (
+            <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
+              <div className="flex items-center">
+                <svg
+                  className="h-5 w-5 mr-2 text-yellow-500"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+                No nutrition history found. Add some entries to see your
+                reporting data.
+              </div>
+            </div>
+          )}
+
           {/* Date Range Selection */}
           <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-6">
             <div className="flex flex-wrap items-center justify-between gap-4">
@@ -351,6 +464,16 @@ export default function ReportingPage() {
                     onClick={() => setDateRange("3months")}
                   >
                     90 Days
+                  </button>
+                  <button
+                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                      dateRange === "custom"
+                        ? "bg-indigo-900/50 text-indigo-100 shadow-sm"
+                        : "text-gray-400 hover:text-gray-300"
+                    }`}
+                    onClick={() => setShowCustomDateModal(true)}
+                  >
+                    Custom
                   </button>
                 </div>
               </div>
@@ -428,6 +551,29 @@ export default function ReportingPage() {
                       <p className="text-gray-400">Loading data...</p>
                     </div>
                   </div>
+                ) : history?.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center text-center">
+                      <svg
+                        className="w-16 h-16 text-gray-600 mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        ></path>
+                      </svg>
+                      <p className="text-gray-400 max-w-md">
+                        No data available to display. Start adding nutrition
+                        entries to see your calorie tracking over time.
+                      </p>
+                    </div>
+                  </div>
                 ) : (
                   <Line options={chartOptions} data={calorieChartData} />
                 )}
@@ -444,6 +590,29 @@ export default function ReportingPage() {
                     <div className="flex flex-col items-center">
                       <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 mb-3"></div>
                       <p className="text-gray-400">Loading data...</p>
+                    </div>
+                  </div>
+                ) : history?.length === 0 ? (
+                  <div className="flex items-center justify-center h-full">
+                    <div className="flex flex-col items-center text-center">
+                      <svg
+                        className="w-16 h-16 text-gray-600 mb-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="1.5"
+                          d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                        ></path>
+                      </svg>
+                      <p className="text-gray-400 max-w-md">
+                        No data available to display. Start adding nutrition
+                        entries to see your macronutrient tracking over time.
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -467,53 +636,91 @@ export default function ReportingPage() {
                 </div>
               </div>
             ) : (
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg border border-indigo-500/20 bg-indigo-900/10">
-                  <h3 className="text-md font-medium text-indigo-300 mb-2">
-                    Consistency Analysis
-                  </h3>
-                  <p className="text-gray-300">
-                    {aggregatedData.calories.filter((cal) => cal > 0).length}{" "}
-                    out of {aggregatedData.labels.length} days had tracked
-                    nutrition data.
-                    {aggregatedData.calories.filter((cal) => cal > 0).length /
-                      aggregatedData.labels.length >=
-                    0.7
-                      ? " Great job maintaining consistency in your tracking!"
-                      : " Try to log your nutrition more consistently for better insights."}
-                  </p>
-                </div>
+              <>
+                <div className="space-y-4">
+                  <div className="p-4 rounded-lg border border-indigo-500/20 bg-indigo-900/10">
+                    <h3 className="text-md font-medium text-indigo-300 mb-2">
+                      Consistency Analysis
+                    </h3>
+                    <p className="text-gray-300">
+                      {aggregatedData.calories.filter((cal) => cal > 0).length}{" "}
+                      out of {aggregatedData.labels.length} days had tracked
+                      nutrition data.
+                      {aggregatedData.calories.filter((cal) => cal > 0).length /
+                        aggregatedData.labels.length >=
+                      0.7
+                        ? " Great job maintaining consistency in your tracking!"
+                        : " Try to log your nutrition more consistently for better insights."}
+                    </p>
+                  </div>
 
-                <div className="p-4 rounded-lg border border-green-500/20 bg-green-900/10">
-                  <h3 className="text-md font-medium text-green-300 mb-2">
-                    Protein Intake
-                  </h3>
-                  <p className="text-gray-300">
-                    Your average daily protein intake is {averages.protein}g.
-                    {averages.protein >= 120
-                      ? " You're doing great with protein intake!"
-                      : " Consider increasing your protein intake for better muscle recovery and growth."}
-                  </p>
-                </div>
+                  <div className="p-4 rounded-lg border border-green-500/20 bg-green-900/10">
+                    <h3 className="text-md font-medium text-green-300 mb-2">
+                      Protein Intake
+                    </h3>
+                    <p className="text-gray-300">
+                      Your average daily protein intake is {averages.protein}g.
+                      {averages.protein >= 120
+                        ? " You're doing great with protein intake!"
+                        : " Consider increasing your protein intake for better muscle recovery and growth."}
+                    </p>
+                  </div>
 
-                <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-900/10">
-                  <h3 className="text-md font-medium text-blue-300 mb-2">
-                    Carbohydrate Patterns
-                  </h3>
-                  <p className="text-gray-300">
-                    Your average daily carbohydrate intake is {averages.carbs}g.
-                    {Math.max(...aggregatedData.carbs) -
-                      Math.min(...aggregatedData.carbs.filter((c) => c > 0)) >
-                    100
-                      ? " Your carbohydrate intake varies significantly day to day. Consider more consistency for stable energy levels."
-                      : " Your carbohydrate intake is relatively consistent, which helps maintain stable energy levels."}
-                  </p>
+                  <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-900/10">
+                    <h3 className="text-md font-medium text-blue-300 mb-2">
+                      Carbohydrate Patterns
+                    </h3>
+                    <p className="text-gray-300">
+                      Your average daily carbohydrate intake is {averages.carbs}
+                      g.
+                      {Math.max(...aggregatedData.carbs) -
+                        Math.min(...aggregatedData.carbs.filter((c) => c > 0)) >
+                      100
+                        ? " Your carbohydrate intake varies significantly day to day. Consider more consistency for stable energy levels."
+                        : " Your carbohydrate intake is relatively consistent, which helps maintain stable energy levels."}
+                    </p>
+                  </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>
       </div>
+
+      {/* Custom Date Range Modal */}
+      <Modal
+        isOpen={showCustomDateModal}
+        onClose={() => setShowCustomDateModal(false)}
+        title="Custom Date Range"
+        variant="form"
+        onSave={handleApplyCustomDateRange}
+        size="sm"
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              Start Date
+            </label>
+            <input
+              type="date"
+              className="w-full rounded-md bg-gray-700 border-gray-600 text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
+              value={customStartDate}
+              onChange={(e) => setCustomStartDate(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">
+              End Date
+            </label>
+            <input
+              type="date"
+              className="w-full rounded-md bg-gray-700 border-gray-600 text-gray-200 focus:ring-indigo-500 focus:border-indigo-500"
+              value={customEndDate}
+              onChange={(e) => setCustomEndDate(e.target.value)}
+            />
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

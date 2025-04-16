@@ -1,14 +1,8 @@
-import { ReactNode } from "react";
+import { memo } from "react";
 import { LoadingSpinnerIcon } from "./Icons";
+import { SaveButtonProps } from "./utils/types";
 
-interface SaveButtonProps {
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  loading?: boolean;
-  disabled?: boolean;
-  children?: ReactNode;
-}
-
-export default function SaveButton({
+function SaveButton({
   onClick,
   loading = false,
   disabled = false,
@@ -28,6 +22,7 @@ export default function SaveButton({
                before:from-transparent before:via-white/10 before:to-transparent
                before:translate-x-[-200%] hover:before:translate-x-[200%]
                before:transition-transform before:duration-1000"
+      aria-busy={loading}
     >
       {loading ? (
         <span className="flex items-center justify-center">
@@ -40,3 +35,5 @@ export default function SaveButton({
     </button>
   );
 }
+
+export default memo(SaveButton);
