@@ -1,22 +1,25 @@
 import { useEffect, memo } from "react";
 import { Navbar } from "@/features/layout/components";
 import { FloatingNotification } from "@/features/notifications/components";
-import { CardContainer } from "@/components/form/index";
+import { CardContainer } from "@/components/form";
 import {
   EntryHistoryPanel,
   DailySummaryPanel,
   AddEntryForm,
   EditModal,
 } from "@/features/macroTracking/components";
-import { CardMetricsPanel } from "@/features/dashboard/components";
+import { UserMetricsPanel } from "@/features/dashboard/components";
 import { useStore } from "@/store/store";
 
 export default function HomePage() {
   // Get state and actions from our store
   const {
     user,
+    macroTarget,
+    nutritionProfile,
+    weightGoals,
     history,
-    totals,
+    macroDailyTotals,
     isLoading,
     isSaving,
     isEditing,
@@ -24,8 +27,10 @@ export default function HomePage() {
     error,
     notifications,
     editingEntry,
-    userMetrics,
     fetchUserDetails,
+    fetchMacroData,
+    fetchWeightGoals,
+    fetchMacroTarget,
     addEntry,
     updateEntry,
     deleteEntry,
@@ -34,13 +39,22 @@ export default function HomePage() {
     clearAllNotifications,
   } = useStore();
 
-  // Fetch user details on component mount
+  // Fetch user details, macros, and persisted goals on component mount
   useEffect(() => {
     fetchUserDetails();
-  }, [fetchUserDetails]);
+    fetchMacroData();
+
+    // Fetch saved goals data to ensure we have the latest values
+    fetchWeightGoals();
+    fetchMacroTarget();
+  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTarget]);
 
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
+
+  // Determine the calorie target - prioritize weight goals target if available, otherwise use TDEE
+  const effectiveCalorieTarget =
+    weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -68,15 +82,15 @@ export default function HomePage() {
       <div className="relative min-h-screen ">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          <PageHeader firstName={user?.first_name} isLoading={isLoading} />
+          <PageHeader firstName={user?.firstName} isLoading={isLoading} />
 
           <div className="mb-8">
             <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
-                <CardMetricsPanel
-                  bmr={userMetrics?.bmr}
-                  tdee={userMetrics?.tdee}
+                <UserMetricsPanel
+                  bmr={nutritionProfile?.bmr}
+                  tdee={nutritionProfile?.tdee}
                   isLoading={isLoading}
                 />
 
@@ -97,8 +111,9 @@ export default function HomePage() {
                 ) : (
                   user && (
                     <DailySummaryPanel
-                      totals={totals}
-                      macroDistribution={user?.macro_distribution}
+                      macroDailyTotals={macroDailyTotals}
+                      macroTarget={macroTarget}
+                      calorieTarget={effectiveCalorieTarget}
                     />
                   )
                 )}

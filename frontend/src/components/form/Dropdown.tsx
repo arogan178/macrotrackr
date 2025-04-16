@@ -1,7 +1,8 @@
-import { DropdownProps } from "./types";
-import { formStyles } from "./styles";
+import { memo } from "react";
+import { DropdownProps } from "../utils/types";
+import { formStyles } from "../utils/styles";
 
-export function Dropdown({
+function Dropdown({
   label,
   value,
   onChange,
@@ -34,3 +35,5 @@ export function Dropdown({
     </div>
   );
 }
+
+export default memo(Dropdown);

@@ -1,4 +1,10 @@
-import { USER_MINIMUM_AGE } from "@/utils/constants";
+import {
+  USER_MINIMUM_AGE,
+  USER_MINIMUM_HEIGHT,
+  USER_MAXIMUM_HEIGHT,
+  USER_MINIMUM_WEIGHT,
+  USER_MAXIMUM_WEIGHT,
+} from "@/utils/constants";
 import { isOldEnough } from "@/utils/validation";
 
 /**
@@ -14,25 +20,33 @@ export function validateUserSettings(settings: any): Record<string, string> {
   }
 
   // Name validation
-  if (settings?.first_name && settings.first_name.length < 2) {
-    errors.first_name = "First name must be at least 2 characters";
+  if (settings?.firstName && settings.firstName.length < 2) {
+    errors.firstName = "First name must be at least 2 characters";
   }
 
   // Date of birth validation
-  if (settings?.date_of_birth) {
-    if (!isOldEnough(settings.date_of_birth)) {
-      errors.date_of_birth = `You must be at least ${USER_MINIMUM_AGE} years old`;
+  if (settings?.dateOfBirth) {
+    if (!isOldEnough(settings.dateOfBirth)) {
+      errors.dateOfBirth = `You must be at least ${USER_MINIMUM_AGE} years old`;
     }
   }
 
   // Height validation
-  if (settings?.height && (settings.height < 120 || settings.height > 250)) {
-    errors.height = "Please enter a valid height (120-250 cm)";
+  if (
+    settings?.height &&
+    (settings.height < USER_MINIMUM_HEIGHT ||
+      settings.height > USER_MAXIMUM_HEIGHT)
+  ) {
+    errors.height = `Please enter a valid height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`;
   }
 
   // Weight validation
-  if (settings?.weight && (settings.weight < 30 || settings.weight > 300)) {
-    errors.weight = "Please enter a valid weight (30-300 kg)";
+  if (
+    settings?.weight &&
+    (settings.weight < USER_MINIMUM_WEIGHT ||
+      settings.weight > USER_MAXIMUM_WEIGHT)
+  ) {
+    errors.weight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
   }
 
   return errors;

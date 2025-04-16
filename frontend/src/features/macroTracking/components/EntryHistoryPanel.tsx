@@ -8,7 +8,7 @@ import {
   PlusCircleIcon,
 } from "@/components/Icons";
 import Modal from "@/components/Modal";
-import { MacroEntry } from "@/store/types";
+import { MacroEntry } from "../types";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
@@ -32,10 +32,10 @@ const exportCSV = (history: MacroEntry[]) => {
           `${
             entry.entry_date || new Date(entry.created_at).toLocaleDateString()
           },${new Date(entry.created_at).toLocaleTimeString()},${
-            entry.meal_type || ""
-          },${entry.foodName || entry.meal_name || ""},${entry.protein.toFixed(
-            1
-          )},${entry.carbs.toFixed(1)},${entry.fats.toFixed(1)},${Math.round(
+            entry.mealType || ""
+          },${entry.foodName || entry.mealName || ""},${entry.protein},${
+            entry.carbs
+          },${entry.fats},${Math.round(
             entry.protein * 4 + entry.carbs * 4 + entry.fats * 9
           )}`
       )
@@ -104,7 +104,7 @@ export default function EntryHistory({
 
   useEffect(() => {
     const grouped = history.reduce((acc, entry) => {
-      // Use entry_date if available, otherwise use created_at
+      // Always use entry_date if available, only fall back to created_at if missing
       const dateStr = entry.entry_date || entry.created_at;
       // Format date consistently using the helper
       const dateKey = formatEntryDate(dateStr);
@@ -267,21 +267,30 @@ export default function EntryHistory({
                       {/* Use explicit widths to avoid shifting content */}
                       <td className="px-4 py-2.5"></td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-green-400">
-                        {group.entries
-                          .reduce((acc, entry) => acc + (entry.protein || 0), 0)
-                          .toFixed(1)}
+                        {Math.round(
+                          group.entries.reduce(
+                            (acc, entry) => acc + (entry.protein || 0),
+                            0
+                          )
+                        )}
                         g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-blue-400">
-                        {group.entries
-                          .reduce((acc, entry) => acc + (entry.carbs || 0), 0)
-                          .toFixed(1)}
+                        {Math.round(
+                          group.entries.reduce(
+                            (acc, entry) => acc + (entry.carbs || 0),
+                            0
+                          )
+                        )}
                         g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-red-400">
-                        {group.entries
-                          .reduce((acc, entry) => acc + (entry.fats || 0), 0)
-                          .toFixed(1)}
+                        {Math.round(
+                          group.entries.reduce(
+                            (acc, entry) => acc + (entry.fats || 0),
+                            0
+                          )
+                        )}
                         g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-white">
@@ -321,25 +330,25 @@ export default function EntryHistory({
                           <td className="px-4 py-3 text-sm text-gray-300 text-center">
                             <div>
                               <span className="font-medium text-indigo-300">
-                                {entry.meal_type
-                                  ? capitalizeFirstLetter(entry.meal_type)
+                                {entry.mealType
+                                  ? capitalizeFirstLetter(entry.mealType)
                                   : ""}
                               </span>
-                              {entry.foodName || entry.meal_name ? (
+                              {entry.foodName || entry.mealName ? (
                                 <span className="text-gray-400 block text-xs mt-0.5">
-                                  {entry.foodName || entry.meal_name}
+                                  {entry.foodName || entry.mealName}
                                 </span>
                               ) : null}
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
-                            {(entry.protein || 0).toFixed(1)}g
+                            {Math.round(entry.protein) || 0}g
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
-                            {(entry.carbs || 0).toFixed(1)}g
+                            {Math.round(entry.carbs) || 0}g
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
-                            {(entry.fats || 0).toFixed(1)}g
+                            {Math.round(entry.fats) || 0}g
                           </td>
                           <td className="px-4 py-3 text-center font-medium text-white">
                             {Math.round(
@@ -384,13 +393,13 @@ export default function EntryHistory({
 
       {/* Add ConfirmationModal component */}
       <Modal
-        variant="confirmation"
         isOpen={isDeleteModalOpen}
         onClose={() => {
           setIsDeleteModalOpen(false);
           setDateToDelete(null);
         }}
         title="Delete Entries"
+        variant="confirmation"
         message={`Are you sure you want to delete all entries for ${
           dateToDelete ? formatDate(dateToDelete) : ""
         }? This action cannot be undone.`}

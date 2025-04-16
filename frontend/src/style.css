@@ -81,6 +81,11 @@ a:hover {
   background-color: rgb(156 163 175); /* gray-400 */
 }
 
+/* Class to disable body scroll when modal is open */
+body.modal-open {
+  overflow: hidden;
+}
+
 @keyframes fade-in-out {
   0% {
     opacity: 0;

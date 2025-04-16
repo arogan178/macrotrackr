@@ -15,18 +15,11 @@
 //   protein: number;
 //   carbs: number;
 //   fats: number;
-//   meal_type: MealType; // Changed from optional to required
-//   meal_name: string; // Added new required field
+//   mealType: MealType; // Changed from optional to required
+//   mealName: string; // Added new required field
 //   entry_date: string;
 //   entry_time: string; // Added new required field
 //   foodName?: string; // Kept for backward compatibility
-// }
-
-// export interface MacroTotals {
-//   protein: number;
-//   carbs: number;
-//   fats: number;
-//   calories: number;
 // }
 
 // export interface MacroInputs {
@@ -44,15 +37,15 @@
 
 // export interface UserDetails {
 //   id: number;
-//   first_name: string;
-//   last_name: string;
+//   firstName: string;
+//   lastName: string;
 //   email: string;
-//   date_of_birth?: string;
+//   dateOfBirth?: string;
 //   height?: number;
 //   weight?: number;
-//   activity_level?: number;
+//   activityLevel?: number;
 //   gender?: "male" | "female";
-//   macro_distribution?: MacroTargetSettings;
+//   macroTarget?: MacroTargetSettings;
 // }
 
 // export type Gender = "Male" | "Female";
