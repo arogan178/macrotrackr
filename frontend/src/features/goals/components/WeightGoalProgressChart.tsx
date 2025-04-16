@@ -57,29 +57,38 @@ function WeightGoalProgressChart() {
   const chartData = React.useMemo(() => {
     const log = Array.isArray(weightLog) ? weightLog : [];
 
-    return (
-      [...log]
-        // Filter out entries with invalid timestamps first
-        .filter(
-          (entry) => entry.timestamp && isValid(parseISO(entry.timestamp))
-        )
-        // Sort by timestamp ascending
-        .sort(
-          (a, b) =>
-            parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime()
-        )
-        .map((entry) => {
-          const entryDate = parseISO(entry.timestamp);
-          return {
-            // Format for X-axis label (e.g., "Apr 14")
-            date: format(entryDate, "MMM d"),
-            weight: entry.weight,
-            // Keep the full ISO timestamp for tooltip formatting
-            fullDate: entry.timestamp,
-            id: entry.id,
-          };
-        })
-    );
+    // Group by date (YYYY-MM-DD), average weights for each day
+    const grouped: Record<
+      string,
+      { weights: number[]; ids: string[]; timestamps: string[] }
+    > = {};
+    log.forEach((entry) => {
+      if (!entry.timestamp || !isValid(parseISO(entry.timestamp))) return;
+      const dateKey = format(parseISO(entry.timestamp), "yyyy-MM-dd");
+      if (!grouped[dateKey])
+        grouped[dateKey] = { weights: [], ids: [], timestamps: [] };
+      grouped[dateKey].weights.push(entry.weight);
+      grouped[dateKey].ids.push(entry.id);
+      grouped[dateKey].timestamps.push(entry.timestamp);
+    });
+
+    // Convert to array, sorted by date ascending
+    return Object.entries(grouped)
+      .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
+      .map(([dateKey, { weights, ids, timestamps }]) => {
+        const avgWeight =
+          weights.reduce((sum, w) => sum + w, 0) / (weights.length || 1);
+        // Use the earliest timestamp for tooltip (for consistency)
+        const sortedTimestamps = [...timestamps].sort(
+          (a, b) => parseISO(a).getTime() - parseISO(b).getTime()
+        );
+        return {
+          date: format(parseISO(dateKey), "MMM d"),
+          weight: avgWeight,
+          fullDate: sortedTimestamps[0],
+          id: ids[0], // Use first id for key
+        };
+      });
   }, [weightLog]);
 
   // Loading state

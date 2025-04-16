@@ -236,8 +236,8 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       await get().fetchWeightLog();
 
       // --- Step 4: Update User Slice (if log entry succeeded) ---
-      if (savedLogEntry && fullGet().updateUserWeight) {
-        fullGet().updateUserWeight(savedLogEntry.weight);
+      if (savedLogEntry && fullGet().updateCurrentUserWeight?.call) {
+        fullGet().updateCurrentUserWeight(savedLogEntry.weight);
       }
 
       // --- Step 5: Success Notification ---
@@ -287,14 +287,18 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         ...goalDetails,
       };
 
-      const savedWeightGoal = await apiService.goals.updateWeightGoal(payload);
+      // If updateWeightGoal expects two arguments, pass tdee as second argument
+      const savedWeightGoal = await apiService.goals.updateWeightGoal(
+        payload,
+        tdee
+      );
 
       set({ weightGoals: savedWeightGoal, isSaving: false, error: null });
 
       // --- Fetch latest weight log to ensure UI is up to date ---
       await get().fetchWeightLog();
 
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: "Weight goal updated successfully!",
           type: "success",
@@ -304,7 +308,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error updating weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: `Failed to update weight goal: ${errorMessage}`,
           type: "error",
@@ -323,7 +327,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // NEW: Clear weight log when goal is deleted
       set({ weightGoals: null, weightLog: [], isSaving: false, error: null });
 
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: "Weight goal deleted successfully!",
           type: "success",
@@ -333,7 +337,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error deleting weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: `Failed to delete weight goal: ${errorMessage}`,
           type: "error",
@@ -345,7 +349,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   // --- State Management Actions ---
   setLoading: (loading) => set({ isLoading: loading }),
   setSaving: (saving) => set({ isSaving: saving }),
-  setError: (error) => set({ error: null }), // Clear error on set
+  setError: (error) => set({ error }),
   clearError: () => set({ error: null }),
 
   // --- Reset Action ---
@@ -377,7 +381,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error fetching weight log:", error);
       set({ isLoading: false, error: errorMessage });
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: `Failed to load weight log: ${errorMessage}`,
           type: "error",
@@ -406,11 +410,11 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       // Ensure user slice is updated correctly here too
       const fullGet = get as () => FullGoalsState;
-      if (fullGet().updateUserWeight) {
-        fullGet().updateUserWeight(savedEntry.weight);
+      if (fullGet().updateCurrentUserWeight) {
+        fullGet().updateCurrentUserWeight(savedEntry.weight);
       }
 
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: "Weight logged successfully!",
           type: "success",
@@ -420,7 +424,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error adding weight log entry:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: `Failed to log weight: ${errorMessage}`,
           type: "error",
@@ -455,11 +459,11 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       });
 
       // Update user slice ONLY if a latest weight exists
-      if (fullGet().updateUserWeight && newLatestWeight !== null) {
+      if (fullGet().updateCurrentUserWeight && newLatestWeight !== null) {
         console.log(
           `[GoalsSlice] Deleting log entry, updating user weight to: ${newLatestWeight}`
         );
-        fullGet().updateUserWeight(newLatestWeight);
+        fullGet().updateCurrentUserWeight(newLatestWeight);
       } else {
         console.log(
           "[GoalsSlice] Deleting last log entry, NOT updating user weight in store."
@@ -468,7 +472,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       }
 
       // Notification
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: "Weight log entry deleted.",
           type: "success",
@@ -478,7 +482,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error(`Error deleting weight log entry with id ${id}:`, error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification) {
+      if (fullGet().addNotification?.call) {
         fullGet().addNotification({
           message: `Failed to delete entry: ${errorMessage}`,
           type: "error",
