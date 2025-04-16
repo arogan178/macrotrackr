@@ -5,8 +5,8 @@ import {
   AchievementsContent,
   WeightGoalDashboard,
   WeightGoalModal,
-  LogWeightModal, // NEW: Import LogWeightModal
-  WeightGoalProgressChart, // NEW: Import WeightGoalProgressChart
+  LogWeightModal,
+  WeightProgressTabs, // Import the new Tabs component
 } from "@/features/goals/components";
 import { HabitTracker, HabitModal } from "@/features/habits/components";
 import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types";
@@ -14,7 +14,7 @@ import { WeightGoalFormValues } from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
 import { TabButton } from "@/components/form";
-import { GoalsIcon, StarIcon, PlusIcon } from "@/components/Icons";
+import { GoalsIcon, StarIcon } from "@/components/Icons";
 import Modal from "@/components/Modal";
 
 export default function GoalsPage() {
@@ -57,8 +57,7 @@ export default function GoalsPage() {
     deleteHabit,
     deleteWeightGoal,
     resetGoals,
-    fetchWeightLog, // NEW: Get fetchWeightLog action
-    weightLog, // NEW: Get weightLog state for chart
+    fetchWeightLog, // Keep fetchWeightLog
   } = useStore();
 
   // Fetch user details and macros on component mount if needed
@@ -356,8 +355,8 @@ export default function GoalsPage() {
                       macroTarget={macroTarget?.macroTarget ?? undefined}
                     />
 
-                    {/* NEW: Weight Progress Chart */}
-                    <WeightGoalProgressChart />
+                    {/* Replace Chart and List with Tabs */}
+                    <WeightProgressTabs />
 
                     {/* Habit Tracker - No changes needed here */}
                     <HabitTracker

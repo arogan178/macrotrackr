@@ -59,23 +59,33 @@ const resetResponse = t.Object({ success: t.Boolean() });
 // --- Weight Log Schemas ---
 const WeightLogEntry = t.Object({
   id: t.String(),
-  date: t.String({ format: "date" }), // YYYY-MM-DD
+  timestamp: t.String({ format: "date-time" }), // Changed from date to timestamp (ISO 8601)
   weight: t.Number(),
 });
 
 const getWeightLogResponse = t.Array(WeightLogEntry);
 
 const addWeightLogBody = t.Object({
-  date: t.String({ format: "date" }),
+  timestamp: t.String({ format: "date-time" }), // Changed from date to timestamp
   weight: t.Number(),
 });
 
 // Response includes the generated ID and user ID
 const addWeightLogResponse = t.Object({
   id: t.String(),
-  userId: t.String(), // Assuming user ID is treated as string in API
-  date: t.String({ format: "date" }),
+  userId: t.String(),
+  timestamp: t.String({ format: "date-time" }), // Changed from date to timestamp
   weight: t.Number(),
+});
+
+// --- DELETE Weight Log ---
+const deleteWeightLogParams = t.Object({
+  id: t.String(), // ID of the weight log entry to delete
+});
+
+const deleteWeightLogResponse = t.Object({
+  success: t.Boolean(),
+  id: t.String(), // Return the ID of the deleted item for frontend updates
 });
 
 // --- Export ---
@@ -88,4 +98,6 @@ export const GoalSchemas = {
   getWeightLogResponse,
   addWeightLogBody,
   addWeightLogResponse,
+  deleteWeightLogParams, // ADDED
+  deleteWeightLogResponse, // ADDED
 };

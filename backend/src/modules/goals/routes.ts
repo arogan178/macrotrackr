@@ -26,9 +26,10 @@ type WeightGoalFromDB = {
 // Type for Weight Log entry from DB
 type WeightLogFromDB = {
   id: string;
-  user_id: string;
-  date: string; // YYYY-MM-DD
+  user_id: string; // Keep as string if that's how it's consistently used
+  timestamp: string; // Changed from date to timestamp
   weight: number;
+  created_at: string; // Added created_at if it's selected
 };
 
 export const goalRoutes = (app: Elysia) =>
@@ -372,13 +373,14 @@ export const goalRoutes = (app: Elysia) =>
         // Destructure context directly
         ({ user, set, db }: AuthenticatedContext) => {
           try {
+            // Use 'timestamp' instead of 'date'
             const query =
-              "SELECT id, date, weight FROM weight_log WHERE user_id = ? ORDER BY date DESC";
+              "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
             // Type assertion needed as .all() returns any[] by default
             const logs = db.prepare(query).all(user.userId) as Omit<
               WeightLogFromDB,
               "user_id" | "created_at" // Adjust Omit if needed based on DB type
-            >[];
+            >;
 
             // Schema expects an array, even if empty. `all` returns an empty array if no rows match.
             return logs;
@@ -406,27 +408,27 @@ export const goalRoutes = (app: Elysia) =>
           set,
           db,
         }: AuthenticatedContext & {
-          /* ... */
+          body: typeof GoalSchemas.addWeightLogBody.static; // Schema needs update
         }) => {
           // Use a transaction
           const transaction = db.transaction(() => {
-            const { date, weight } = body;
+            // Use 'timestamp' from body
+            const { timestamp, weight } = body;
             const newId = generateId(); // Generate a unique ID
 
-            // 1. Always INSERT a new weight_log entry
-            // Use simple INSERT now, no ON CONFLICT
+            // Use 'timestamp' in INSERT query
             const insertWeightLogQuery = `
-              INSERT INTO weight_log (id, user_id, date, weight)
+              INSERT INTO weight_log (id, user_id, timestamp, weight)
               VALUES (?, ?, ?, ?);
             `;
             db.prepare(insertWeightLogQuery).run(
               newId,
               user.userId,
-              date,
+              timestamp, // Use timestamp
               weight
             );
             console.log(
-              `[POST /goals/weight-log] INSERTED new weight log for user ${user.userId} on ${date} with weight ${weight}`
+              `[POST /goals/weight-log] INSERTED new weight log for user ${user.userId} at ${timestamp} with weight ${weight}`
             );
 
             // We still need the ID we just inserted
@@ -443,7 +445,7 @@ export const goalRoutes = (app: Elysia) =>
             return {
               id: finalId,
               userId: user.userId.toString(), // Ensure userId is string as per schema
-              date: date,
+              timestamp: timestamp, // Use timestamp
               weight: weight,
             };
           });
@@ -459,8 +461,8 @@ export const goalRoutes = (app: Elysia) =>
           }
         },
         {
-          body: GoalSchemas.addWeightLogBody, // Validate request body
-          response: GoalSchemas.addWeightLogResponse, // Format response
+          body: GoalSchemas.addWeightLogBody, // Schema needs update
+          response: GoalSchemas.addWeightLogResponse, // Schema needs update
           detail: {
             summary: "Add/Update a weight log entry and update user details",
             tags: ["Goals", "Weight Log"],
@@ -476,74 +478,114 @@ export const goalRoutes = (app: Elysia) =>
           params,
           set,
           db,
-        }: AuthenticatedContext & { params: { id: string } }) => {
+        }: AuthenticatedContext & {
+          params: typeof GoalSchemas.deleteWeightLogParams.static;
+        }) => {
           const transaction = db.transaction(() => {
-            const { id } = params;
+            const entryIdToDelete = params.id;
 
-            // 1. Delete the specified entry
-            const deleteQuery =
-              "DELETE FROM weight_log WHERE id = ? AND user_id = ?";
-            const deleteResult = db.prepare(deleteQuery).run(id, user.userId);
+            // 1. Verify the entry exists and belongs to the user
+            const findEntryQuery = `
+              SELECT id FROM weight_log WHERE id = ? AND user_id = ?
+            `;
+            const deletedEntry = db
+              .prepare(findEntryQuery)
+              .get(entryIdToDelete, user.userId) as { id: string } | undefined;
+
+            if (!deletedEntry) {
+              set.status = 404; // Use set.status inside transaction
+              throw new Error("Weight log entry not found or access denied.");
+            }
+
+            // 2. Delete the specific weight log entry
+            const deleteQuery = "DELETE FROM weight_log WHERE id = ?";
+            const deleteResult = db.prepare(deleteQuery).run(entryIdToDelete);
+            console.log(
+              `[DELETE /goals/weight-log/:id] Deleted entry ${entryIdToDelete} for user ${user.userId}. Changes: ${deleteResult.changes}`
+            );
 
             if (deleteResult.changes === 0) {
-              // No row was deleted, either ID doesn't exist or doesn't belong to user
-              // Use standard Error if NotFoundError is unavailable
+              // Should not happen if findEntryQuery succeeded, but good practice
+              set.status = 404;
               throw new Error(
-                "Weight log entry not found or not owned by user."
+                "Failed to delete entry, might have been deleted already."
               );
             }
 
-            // 2. Find the new latest weight log entry for the user
-            // Order by date DESC, then created_at DESC to get the true latest
+            // 3. Find the NEW latest weight log entry AFTER deletion
             const findLatestQuery = `
-              SELECT weight FROM weight_log
+              SELECT weight, timestamp FROM weight_log
               WHERE user_id = ?
-              ORDER BY date DESC, created_at DESC
+              ORDER BY timestamp DESC, id DESC
               LIMIT 1
             `;
             const latestEntry = db.prepare(findLatestQuery).get(user.userId) as
-              | { weight: number }
+              | { weight: number; timestamp: string }
+              | null // Explicitly type as potentially null
               | undefined;
-
-            // 3. Update user_details.weight
-            const newWeight = latestEntry?.weight ?? null; // Set to null if no entries remain
-            const updateUserDetailQuery = `
-              UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
-              WHERE user_id = ?
-            `;
-            db.prepare(updateUserDetailQuery).run(newWeight, user.userId);
             console.log(
-              `[DELETE /goals/weight-log/:id] Updated user_details weight for user ${user.userId} to ${newWeight}`
+              `[DELETE /goals/weight-log/:id] Found latest remaining entry:`,
+              latestEntry
             );
 
-            return { success: true }; // Indicate successful deletion and update
+            // 4. Update user_details.weight ONLY IF other entries remain
+            // Change the check to handle null correctly
+            if (latestEntry) {
+              // This checks for both null and undefined
+              // An entry still exists, update user_details with its weight
+              const newLatestWeight = latestEntry.weight;
+              const updateUserDetailQuery = `
+                UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+              `;
+              db.prepare(updateUserDetailQuery).run(
+                newLatestWeight,
+                user.userId
+              );
+              console.log(
+                `[DELETE /goals/weight-log/:id] Updated user_details.weight to ${newLatestWeight} for user ${user.userId}`
+              );
+            } else {
+              // No entries remain (latestEntry is null or undefined).
+              // DO NOT update user_details.weight.
+              console.log(
+                `[DELETE /goals/weight-log/:id] No remaining entries for user ${user.userId}. user_details.weight NOT updated.`
+              );
+            }
+
+            // Return success with the ID of the deleted item
+            return { success: true, id: deletedEntry.id }; // Ensure deletedEntry is defined from step 1
           });
 
           try {
-            transaction(); // Execute transaction
-            set.status = 200; // OK
-            return { success: true };
+            const result = transaction();
+            set.status = 200;
+            return result;
           } catch (error: any) {
-            // Check error message or type for not found
-            if (error.message?.includes("not found")) {
-              set.status = 404;
-              return { code: "NOT_FOUND", message: error.message };
-            }
             console.error(
-              "[DELETE /goals/weight-log/:id] TRANSACTION ERROR:",
+              `[DELETE /goals/weight-log/:id] Transaction error for user ${user.userId}, entry ${params.id}:`,
               error
             );
-            set.status = 500;
-            return {
-              code: "INTERNAL_SERVER_ERROR",
-              message: error.message || "Failed to delete weight log entry",
-            };
+            // Use status set within transaction if available (e.g., 404)
+            if (set.status && set.status !== 200) {
+              return {
+                code: set.status === 404 ? "NOT_FOUND" : "TRANSACTION_ERROR",
+                message: error.message,
+              };
+            } else {
+              // Default to 500 if no specific status was set
+              set.status = 500;
+              return {
+                code: "INTERNAL_SERVER_ERROR",
+                message: error.message || "Failed to delete weight log entry",
+              };
+            }
           }
         },
         {
-          // Define possible responses using t
+          params: GoalSchemas.deleteWeightLogParams, // Validate URL parameter
           response: {
-            200: t.Object({ success: t.Boolean() }),
+            200: GoalSchemas.deleteWeightLogResponse, // Use the specific success response schema
             404: t.Object({ code: t.String(), message: t.String() }),
             500: t.Object({ code: t.String(), message: t.String() }),
           },

@@ -106,7 +106,7 @@ export function initializeSchema(db: Database) {
         CREATE TABLE IF NOT EXISTS weight_log (
           id TEXT PRIMARY KEY,
           user_id INTEGER NOT NULL, -- Changed to INTEGER to match users.id
-          date TEXT NOT NULL, -- Store as ISO string (YYYY-MM-DD)
+          timestamp TEXT NOT NULL, -- Store as ISO string (YYYY-MM-DD)
           weight REAL NOT NULL, -- Use REAL for floating-point numbers
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -179,9 +179,9 @@ export function initializeSchema(db: Database) {
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
   );
-  // NEW: Index for weight_log
+  // NEW: Index for weight_log - Use 'timestamp' instead of 'date'
   db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_date ON weight_log(user_id, date)"
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp ON weight_log(user_id, timestamp)"
   );
   // Add index on created_at for finding the latest entry efficiently
   db.exec(
