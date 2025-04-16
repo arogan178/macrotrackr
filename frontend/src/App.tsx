@@ -6,12 +6,18 @@ import { useNotificationManager } from "@/features/notifications/hooks/useNotifi
 import "./style.css";
 
 // Lazy-loaded pages for better performance
-const HomePage = React.lazy(() => import("./pages/HomePage"));
-const SettingsPage = React.lazy(() => import("./pages/SettingsPage"));
-const GoalsPage = React.lazy(() => import("./pages/GoalsPage"));
-const ReportingPage = React.lazy(() => import("./pages/ReportingPage"));
-const AuthPage = React.lazy(() => import("./pages/AuthPage"));
+const HomePage = React.lazy(
+  () => import("./features/macroTracking/pages/HomePage")
+);
+const SettingsPage = React.lazy(
+  () => import("@/features/settings/pages/SettingsPage")
+);
+const GoalsPage = React.lazy(() => import("@/features/goals/pages/GoalsPage"));
+const AuthPage = React.lazy(() => import("@/features/auth/pages/AuthPage"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
+const ReportingPage = React.lazy(
+  () => import("@/features/reporting/pages/ReportingPage")
+); // Updated path
 
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {
@@ -34,8 +40,8 @@ function AppContent() {
           <Route path="/home" element={<HomePage />} />
           <Route path="/settings" element={<SettingsPage />} />
           <Route path="/goals" element={<GoalsPage />} />
-          <Route path="/reporting" element={<ReportingPage />} />
           <Route path="/login" element={<AuthPage />} />
+          <Route path="/reporting" element={<ReportingPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
