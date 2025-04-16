@@ -260,8 +260,7 @@ function WeightGoalProgressChart() {
           </span>
         )}
       </div>
-
-      {/* Chart Component */}
+      {/* Chart Component */}{" "}
       <div className="flex-grow">
         <LineChartComponent
           data={chartData}
@@ -269,6 +268,7 @@ function WeightGoalProgressChart() {
           isLoading={isLoading}
           error={error}
           emptyState={emptyStateComponent}
+          showNoDataMessage={chartData.length === 0}
           tooltipContent={<WeightCustomTooltip />}
           chartElements={chartElements}
           xAxisProps={xAxisProps}
