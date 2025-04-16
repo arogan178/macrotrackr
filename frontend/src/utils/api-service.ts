@@ -7,8 +7,15 @@
 import { getActivityLevelFromString } from "@/features/settings/constants"; // Adjust path as needed
 import { ActivityLevel } from "@/features/settings/types"; // Adjust path as needed
 import { getToken } from "./token-storage"; // Adjust path as needed
+import { WeightGoalFormValues } from "@/features/goals/types";
+import {
+  calculateCalorieTarget,
+  calculateWeeklyChange,
+  calculateWeeksToGoal
+} from "@/features/goals/calculations";
 
-const API_BASE_URL = "http://localhost:3000"; // Ensure this matches your backend port
+// API Base URL and Response Types
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // --- Interfaces for Payloads and Responses (camelCase) ---
 
@@ -41,18 +48,18 @@ type SetWeightGoalPayload = {
 // Omits startingWeight
 type UpdateWeightGoalPayload = Omit<SetWeightGoalPayload, "startingWeight">;
 
-// --- NEW Weight Log Interfaces ---
-interface WeightLogEntry {
+// --- Weight Log Interfaces ---
+export interface WeightLogEntry {
   id: string;
-  date: string; // YYYY-MM-DD
+  timestamp: string; // ISO 8601 string
   weight: number;
 }
 
-interface AddWeightLogPayload {
-  date: string; // YYYY-MM-DD
+export interface AddWeightLogPayload {
+  timestamp: string; // ISO 8601 string
   weight: number;
 }
-// --- END NEW Weight Log Interfaces ---
+// --- END Weight Log Interfaces ---
 
 // Type for the macro target percentages object
 type MacroTargetPercentagesObject = {
@@ -445,32 +452,38 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    /** Creates a new weight goal */ // Renamed and method changed
-    createWeightGoal: async (weightGoals: SetWeightGoalPayload) => {
+    /** Creates new weight goals */
+    createWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
+      // Calculate the complete goal data including calorie targets
+      const payload = {
+        ...goals,
+        calorieTarget: goals.calorieTarget ?? calculateCalorieTarget(tdee, goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
+        weeklyChange: goals.weeklyChange ?? calculateWeeklyChange(goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
+        calculatedWeeks: goals.calculatedWeeks ?? calculateWeeksToGoal(goals.startingWeight, goals.targetWeight ?? goals.startingWeight)
+      };
+
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-        method: "POST", // Changed to POST
+        method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify(weightGoals), // Send full payload including startingWeight
+        body: JSON.stringify(payload),
       });
       return handleResponse(response);
     },
-    /** Updates an existing weight goal (omits startingWeight) */
-    updateWeightGoal: async (weightGoals: UpdateWeightGoalPayload) => {
-      // Explicitly create payload without startingWeight
-      const payload: UpdateWeightGoalPayload = {
-        targetWeight: weightGoals.targetWeight,
-        weightGoal: weightGoals.weightGoal,
-        startDate: weightGoals.startDate,
-        targetDate: weightGoals.targetDate,
-        calorieTarget: weightGoals.calorieTarget,
-        calculatedWeeks: weightGoals.calculatedWeeks,
-        weeklyChange: weightGoals.weeklyChange,
-        dailyChange: weightGoals.dailyChange,
+
+    /** Updates existing weight goals */
+    updateWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
+      // Calculate the complete goal data including calorie targets
+      const payload = {
+        ...goals,
+        calorieTarget: goals.calorieTarget ?? calculateCalorieTarget(tdee, goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
+        weeklyChange: goals.weeklyChange ?? calculateWeeklyChange(goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
+        calculatedWeeks: goals.calculatedWeeks ?? calculateWeeksToGoal(goals.startingWeight, goals.targetWeight ?? goals.startingWeight)
       };
+
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-        method: "PUT", // Ensure method is PUT
+        method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify(payload), // Send payload *without* startingWeight
+        body: JSON.stringify(payload),
       });
       return handleResponse(response);
     },
@@ -502,18 +515,19 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify(payload),
       });
-      // Backend returns the created entry including the generated ID and userId
-      // We only need id, date, weight for the frontend state usually
+      // Backend returns the created entry including id, timestamp, and weight
       const fullEntry = await handleResponse(response);
       return {
         id: fullEntry.id,
-        date: fullEntry.date,
+        timestamp: fullEntry.timestamp,
         weight: fullEntry.weight,
       };
     },
 
     /** Deletes a specific weight log entry */
-    deleteWeightLogEntry: async (id: string): Promise<{ success: boolean }> => {
+    deleteWeightLogEntry: async (
+      id: string
+    ): Promise<{ success: boolean; id: string }> => {
       const response = await fetch(
         `${API_BASE_URL}/api/goals/weight-log/${id}`,
         {
@@ -521,6 +535,7 @@ export const apiService = {
           headers: getHeaders(false),
         }
       );
+      // Backend now returns { success: true, id: 'deleted_id' }
       return handleResponse(response);
     },
     // --- END NEW Weight Log Endpoints ---

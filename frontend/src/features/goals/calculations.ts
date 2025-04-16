@@ -70,34 +70,41 @@ export function calculateRecommendedDeficit(
 }
 
 /**
- * Calculate calorie target based on TDEE and weight goal
- * @param tdee - Total Daily Energy Expenditure (maintenance calories)
- * @param startingWeight - Current weight in kg
- * @param targetWeight - Target weight in kg
- * @param targetWeeks - Optional: Desired timeframe in weeks (defaults to 12)
- * @returns Daily calorie target to achieve goal
+ * Calculate weekly weight change based on weights
+ */
+export function calculateWeeklyChange(
+  startingWeight: number,
+  targetWeight: number
+): number {
+  const timeCalc = calculateTimeToGoal(startingWeight, targetWeight, 500); // Use default 500 calorie deficit/surplus
+  return timeCalc.expectedWeightLossPerWeek;
+}
+
+/**
+ * Calculate calorie target based on TDEE and weight goals
  */
 export function calculateCalorieTarget(
   tdee: number,
   startingWeight: number,
-  targetWeight: number,
-  targetWeeks?: number
+  targetWeight: number
 ): number {
-  // Validate inputs
-  if (!tdee || tdee < 1000 || !startingWeight || !targetWeight) {
-    return tdee; // Return original TDEE if invalid inputs
+  if (startingWeight === targetWeight) {
+    return tdee; // Maintenance
   }
 
-  const recommendedDeficit = calculateRecommendedDeficit(
-    startingWeight,
-    targetWeight,
-    targetWeeks || DEFAULT_TARGET_WEEKS
-  );
+  // For weight loss (deficit) or weight gain (surplus)
+  return startingWeight > targetWeight ? tdee - 500 : tdee + 500;
+}
 
-  const adjustedIntake = tdee - recommendedDeficit;
-
-  // Ensure the adjusted intake isn't dangerously low
-  return Math.max(Math.round(adjustedIntake), 1200);
+/**
+ * Calculate weeks to goal based on weights and calorie change
+ */
+export function calculateWeeksToGoal(
+  startingWeight: number,
+  targetWeight: number
+): number {
+  const timeCalc = calculateTimeToGoal(startingWeight, targetWeight, 500); // Use default 500 calorie deficit/surplus
+  return timeCalc.weeksToGoal;
 }
 
 /**
