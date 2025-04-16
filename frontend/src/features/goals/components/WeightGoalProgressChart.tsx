@@ -15,22 +15,25 @@ import { useStore } from "@/store/store";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import EmptyState from "@/components/EmptyState";
 import { BarChartIcon } from "@/components/Icons";
+import { format, isValid, parseISO } from "date-fns"; // Import date-fns functions
 
-// Custom Tooltip Component with improved styling
+// Update CustomTooltip to use the timestamp (fullDate)
 function CustomTooltip({ active, payload, label }: any) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+    const entryDate = parseISO(data.fullDate); // Parse the timestamp
+    const isValidDate = isValid(entryDate);
+
     return (
       <div className="backdrop-blur-lg bg-gray-800/90 border border-gray-700/50 rounded-lg p-3 shadow-lg">
         <div className="text-base font-medium text-gray-200 mb-1">
-          {new Date(data.fullDate).toLocaleDateString("en-US", {
-            weekday: "short",
-            year: "numeric",
-            month: "short",
-            day: "numeric",
-          })}
+          {/* Format the parsed date */}{" "}
+          {isValidDate
+            ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
+            : "Invalid Date"}
         </div>
         <div className="flex items-center gap-2 mt-1">
+          {/* Use appropriate color based on goal? Or keep consistent? */}
           <div className="w-3 h-3 rounded-full bg-indigo-500" />
           <span className="text-sm text-gray-300">
             Weight:{" "}
@@ -54,56 +57,45 @@ function WeightGoalProgressChart() {
   const chartData = React.useMemo(() => {
     const log = Array.isArray(weightLog) ? weightLog : [];
 
-    // Helper to extract timestamp from ID
-    const getTimestampFromId = (id: string): number => {
-      try {
-        const parts = id.split("_");
-        return parts.length > 1 ? parseInt(parts[1], 10) : 0;
-      } catch (e) {
-        return 0;
-      }
-    };
-
-    return [...log]
-      .sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-
-        // Primary sort: Date
-        if (dateA !== dateB) {
-          return dateA - dateB; // Ascending order by date
-        }
-
-        // Secondary sort: Timestamp from ID (ascending)
-        const timestampA = getTimestampFromId(a.id);
-        const timestampB = getTimestampFromId(b.id);
-        return timestampA - timestampB;
-      })
-      .map((entry) => ({
-        date: new Date(entry.date).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-        }),
-        weight: entry.weight,
-        fullDate: entry.date,
-        id: entry.id,
-      }));
+    return (
+      [...log]
+        // Filter out entries with invalid timestamps first
+        .filter(
+          (entry) => entry.timestamp && isValid(parseISO(entry.timestamp))
+        )
+        // Sort by timestamp ascending
+        .sort(
+          (a, b) =>
+            parseISO(a.timestamp).getTime() - parseISO(b.timestamp).getTime()
+        )
+        .map((entry) => {
+          const entryDate = parseISO(entry.timestamp);
+          return {
+            // Format for X-axis label (e.g., "Apr 14")
+            date: format(entryDate, "MMM d"),
+            weight: entry.weight,
+            // Keep the full ISO timestamp for tooltip formatting
+            fullDate: entry.timestamp,
+            id: entry.id,
+          };
+        })
+    );
   }, [weightLog]);
 
-  // Loading state with improved styling
+  // Loading state
   if (isLoading) {
     return (
-      <div className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg p-6 h-80 flex flex-col items-center justify-center">
+      <div className="h-80 flex flex-col items-center justify-center">
         <LoadingSpinner className="h-10 w-10 text-indigo-400" />
         <p className="text-gray-400 mt-3">Loading your weight data...</p>
       </div>
     );
   }
 
-  // Error state with improved styling
+  // Error state
   if (error) {
     return (
-      <div className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg p-6 h-80">
+      <div className="h-80">
         <div className="flex flex-col items-center justify-center h-full">
           <div className="text-red-400 mb-3">
             <svg
@@ -130,10 +122,10 @@ function WeightGoalProgressChart() {
     );
   }
 
-  // Empty state with improved styling
+  // Empty state
   if (!chartData || chartData.length === 0) {
     return (
-      <div className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg p-6 h-80">
+      <div className="h-80">
         <EmptyState
           title="Track Your Progress"
           message="Start logging your weight to see your progress charted over time."
@@ -159,8 +151,8 @@ function WeightGoalProgressChart() {
 
   // Calculate Y-axis domain with appropriate padding
   const weights = chartData.map((d) => d.weight);
-  const minWeight = Math.min(...weights);
-  const maxWeight = Math.max(...weights);
+  const minWeight = weights.length > 0 ? Math.min(...weights) : 0; // Handle empty array
+  const maxWeight = weights.length > 0 ? Math.max(...weights) : 0; // Handle empty array
   const targetWeight = weightGoals?.targetWeight;
 
   // Calculate appropriate Y domain with padding
@@ -185,20 +177,18 @@ function WeightGoalProgressChart() {
   };
 
   return (
-    <div className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 shadow-lg p-6 h-96 flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-medium text-gray-200">Weight Progress</h3>
-        <div className="text-sm text-gray-400">
-          {/* {chartData.length} entries •{" "} */}
-          {chartData.length > 0 && (
-            <span>
-              {new Date(chartData[0].fullDate).toLocaleDateString()} -{" "}
-              {new Date(
-                chartData[chartData.length - 1].fullDate
-              ).toLocaleDateString()}
-            </span>
-          )}
-        </div>
+    <div className="h-96 flex flex-col">
+      <div className="text-sm text-gray-400">
+        {chartData.length > 0 && (
+          <span>
+            {/* Format the first and last dates using parseISO */}
+            {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
+            {format(
+              parseISO(chartData[chartData.length - 1].fullDate),
+              "MMM d, yyyy"
+            )}
+          </span>
+        )}
       </div>
 
       <div className="flex-grow">
@@ -285,7 +275,7 @@ function WeightGoalProgressChart() {
             />
 
             <Tooltip
-              content={<CustomTooltip />}
+              content={<CustomTooltip />} // Ensure CustomTooltip uses fullDate (timestamp)
               cursor={{ stroke: "rgba(255,255,255,0.2)" }}
             />
 

@@ -1,6 +1,10 @@
 import { CALORIE_ADJUSTMENT_FACTORS } from "./constants";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
+import { WeightGoalFormValues } from "@/utils/api-service";
 
+export type WeightGoal = keyof typeof CALORIE_ADJUSTMENT_FACTORS;
+
+// Interface for the fully formed weight goals with required fields
 export interface WeightGoals {
   startingWeight: number;
   currentWeight: number;
@@ -12,6 +16,19 @@ export interface WeightGoals {
   calculatedWeeks: number;
   weeklyChange: number;
   dailyChange: number;
+}
+
+// Interface for API responses that can have nullable fields
+export interface WeightGoalsResponse {
+  startingWeight: number;
+  targetWeight: number | null;
+  weightGoal: WeightGoal | null;
+  startDate: string | null;
+  targetDate: string | null;
+  calorieTarget: number | null;
+  calculatedWeeks: number | null;
+  weeklyChange: number | null;
+  dailyChange: number | null;
 }
 
 export interface MacroTarget {
@@ -31,35 +48,5 @@ export interface TimeToGoalCalculation {
   expectedWeightLossPerWeek: number;
 }
 
-export interface WeightGoalFormValues {
-  startingWeight: number;
-  targetWeight: number | undefined;
-  startDate?: string;
-  targetDate?: string;
-  calorieTarget?: number;
-  weeklyChange?: number;
-  calculatedWeeks?: number;
-  weightGoal?: WeightGoal;
-}
-
-export interface WeightGoalCardProps {
-  startingWeight: number;
-  targetWeight: number;
-  tdee: number;
-  isLoading?: boolean;
-  onSave: (values: WeightGoalFormValues) => void;
-  className?: string;
-  mode?: "create" | "view";
-  startDate?: string | Date;
-  targetDate?: string | Date;
-  progressPercentage?: number;
-  weightRemaining?: number;
-  insight?: string;
-}
-
-export interface WeightDetailsCardProps {
-  goalData: WeightGoals;
-  tdee: number;
-}
-
-export type WeightGoal = keyof typeof CALORIE_ADJUSTMENT_FACTORS;
+// Re-export WeightGoalFormValues from api-service.ts
+export type { WeightGoalFormValues };
