@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, memo, useState } from "react";
 import ReactDOM from "react-dom"; // Import ReactDOM for portals
 import { motion } from "motion/react";
 import { XIcon } from "./Icons";
-import SaveButton from "./SaveButton";
+import SaveButton from "./form/SaveButton";
 
 interface BaseModalProps {
   isOpen: boolean;
