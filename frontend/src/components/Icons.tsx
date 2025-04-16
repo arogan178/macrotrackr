@@ -51,6 +51,8 @@ import {
   SmilePlus,
   CalendarHeart,
   TrendingUp,
+  TrendingDown,
+  Lightbulb,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -73,7 +75,9 @@ function createIcon(Icon: LucideIcon) {
 }
 
 // Export all icon components
+export const LightBulbIcon = createIcon(Lightbulb);
 export const TrendingUpIcon = createIcon(TrendingUp);
+export const TrendingDownIcon = createIcon(TrendingDown);
 export const CalendarHeartIcon = createIcon(CalendarHeart);
 export const UserIcon = createIcon(User);
 export const EmailIcon = createIcon(Mail);

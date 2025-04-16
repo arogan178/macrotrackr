@@ -1,25 +1,20 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence } from "motion/react";
 import { Navbar } from "@/features/layout/components";
 import {
-  AchievementsContent,
   WeightGoalDashboard,
   WeightGoalModal,
   LogWeightModal,
-  WeightProgressTabs, // Import the new Tabs component
+  WeightProgressTabs,
 } from "@/features/goals/components";
 import { HabitTracker, HabitModal } from "@/features/habits/components";
 import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types";
 import { WeightGoalFormValues } from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
-import { TabButton } from "@/components/form";
-import { GoalsIcon, StarIcon } from "@/components/Icons";
 import Modal from "@/components/Modal";
 
 export default function GoalsPage() {
-  // State for tab navigation
-  const [activeTab, setActiveTab] = useState<"active" | "achieved">("active");
   // State for reset goals modal
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   // State for habit modal
@@ -29,7 +24,7 @@ export default function GoalsPage() {
   const [isWeightGoalModalOpen, setIsWeightGoalModalOpen] = useState(false);
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
     useState(false);
-  const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false); // NEW: State for Log Weight Modal
+  const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
 
   // Get state and actions from store
   const {
@@ -57,7 +52,7 @@ export default function GoalsPage() {
     deleteHabit,
     deleteWeightGoal,
     resetGoals,
-    fetchWeightLog, // Keep fetchWeightLog
+    fetchWeightLog,
   } = useStore();
 
   // Fetch user details and macros on component mount if needed
@@ -71,7 +66,7 @@ export default function GoalsPage() {
     fetchWeightGoals();
     fetchMacroTarget();
     fetchHabits();
-    fetchWeightLog(); // NEW: Fetch weight log data
+    fetchWeightLog();
   }, [
     user,
     fetchUserDetails,
@@ -79,15 +74,15 @@ export default function GoalsPage() {
     fetchWeightGoals,
     fetchMacroTarget,
     fetchHabits,
-    fetchWeightLog, // NEW: Add fetchWeightLog to dependency array
+    fetchWeightLog,
   ]);
 
-  // Updated handler for saving weight goal - now also closes modal
+  // Updated handler for saving weight goal
   const handleSaveGoal = async (formValues: WeightGoalFormValues) => {
     if (!nutritionProfile?.tdee) return;
-    console.log("Saving weight goal:", formValues); // DEBUG
+    console.log("Saving weight goal:", formValues);
     await createWeightGoal(formValues, nutritionProfile.tdee);
-    handleCloseWeightGoalModal(); // Use the close handler
+    handleCloseWeightGoalModal();
   };
 
   // Handler to open the weight goal modal
@@ -100,12 +95,12 @@ export default function GoalsPage() {
     setIsWeightGoalModalOpen(false);
   };
 
-  // NEW: Handler to open the log weight modal
+  // Handler to open the log weight modal
   const handleOpenLogWeightModal = () => {
     setIsLogWeightModalOpen(true);
   };
 
-  // NEW: Handler to close the log weight modal
+  // Handler to close the log weight modal
   const handleCloseLogWeightModal = () => {
     setIsLogWeightModalOpen(false);
   };
@@ -131,6 +126,12 @@ export default function GoalsPage() {
       setHabitModalMode("edit");
       setIsHabitModalOpen(true);
     }
+  };
+
+  // Handler for closing habit modal
+  const handleCloseHabitModal = () => {
+    setIsHabitModalOpen(false);
+    setCurrentHabit(null);
   };
 
   // Unified handler for submitting and updating habits
@@ -164,6 +165,9 @@ export default function GoalsPage() {
     handleCloseDeleteConfirmModal();
   };
 
+  // Get the safe target weight value for components
+  const safeTargetWeight = weightGoals?.targetWeight || user?.weight || 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
@@ -187,7 +191,7 @@ export default function GoalsPage() {
         />
       )}
 
-      {/* Reset Goals Confirmation Modal (uses AnimatePresence correctly) */}
+      {/* Reset Goals Confirmation Modal */}
       <AnimatePresence>
         {isResetModalOpen && (
           <Modal
@@ -206,7 +210,7 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* Delete Weight Goal Confirmation Modal (uses AnimatePresence correctly) */}
+      {/* Delete Weight Goal Confirmation Modal */}
       <AnimatePresence>
         {isDeleteConfirmModalOpen && (
           <Modal
@@ -225,7 +229,7 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* Unified Habit Modal - Wrap conditional render in AnimatePresence */}
+      {/* Unified Habit Modal */}
       <AnimatePresence>
         {isHabitModalOpen && (
           <HabitModal
@@ -234,7 +238,7 @@ export default function GoalsPage() {
                 ? `habit-modal-edit-${currentHabit.id}`
                 : "habit-modal-add"
             }
-            isOpen={isHabitModalOpen} // Still needed by HabitModal internally
+            isOpen={isHabitModalOpen}
             onClose={handleCloseHabitModal}
             onSubmit={handleSubmitHabit}
             habit={currentHabit}
@@ -243,14 +247,14 @@ export default function GoalsPage() {
         )}
       </AnimatePresence>
 
-      {/* NEW: Log Weight Modal */}
+      {/* Log Weight Modal */}
       <AnimatePresence>
         {isLogWeightModalOpen && (
           <LogWeightModal
             key="log-weight-modal"
             isOpen={isLogWeightModalOpen}
             onClose={handleCloseLogWeightModal}
-            initialWeight={user?.weight} // Pass current weight as initial value
+            initialWeight={user?.weight}
           />
         )}
       </AnimatePresence>
@@ -259,12 +263,12 @@ export default function GoalsPage() {
       <AnimatePresence>
         {isWeightGoalModalOpen && (
           <WeightGoalModal
-            key="weight-goal-modal" // Consistent key
-            isOpen={isWeightGoalModalOpen} // Still needed by WeightGoalModal internally
+            key="weight-goal-modal"
+            isOpen={isWeightGoalModalOpen}
             onClose={handleCloseWeightGoalModal}
             onSave={handleSaveGoal}
             startingWeight={user?.weight || 0}
-            targetWeight={weightGoals?.targetWeight ?? user?.weight}
+            targetWeight={safeTargetWeight}
             tdee={nutritionProfile?.tdee || 0}
             weightGoals={weightGoals}
             isLoading={goalsLoading}
@@ -273,7 +277,7 @@ export default function GoalsPage() {
       </AnimatePresence>
 
       <div className="relative min-h-screen pb-12 overflow-hidden">
-        {/* Background effects - contained within parent with overflow-hidden */}
+        {/* Background effects */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none" />
         <div className="absolute top-40 -left-32 w-64 h-64 bg-indigo-600/10 rounded-full filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
         <div className="absolute top-24 -right-32 w-72 h-72 bg-purple-600/10 rounded-full filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
@@ -290,110 +294,47 @@ export default function GoalsPage() {
                 Track your progress and stay motivated on your health journey
               </p>
             </div>
-
-            {/* Right Section */}
-            <div className="flex items-center gap-3">
-              {/* Tab Navigation */}
-              <div className="flex space-x-1 p-1 bg-gray-800/60 rounded-lg">
-                <TabButton
-                  active={activeTab === "active"}
-                  onClick={() => setActiveTab("active")}
-                >
-                  <span className="flex items-center">
-                    <GoalsIcon size="sm" className="mr-1.5" />
-                    Active
-                  </span>
-                </TabButton>
-                <TabButton
-                  active={activeTab === "achieved"}
-                  onClick={() => setActiveTab("achieved")}
-                >
-                  <span className="flex items-center">
-                    <StarIcon size="sm" className="mr-1.5" />
-                    Achievements
-                  </span>
-                </TabButton>{" "}
-              </div>
-            </div>
           </div>
 
-          {/* Main Content Area with Animation for Tab Switching */}
+          {/* Main Content Area */}
           <div className="mt-8 relative">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeTab} // Key change triggers animation
-                initial={{ opacity: 0, y: 10 }} // Initial state (slightly below and faded out)
-                animate={{ opacity: 1, y: 0 }} // Animate to fully visible and original position
-                exit={{ opacity: 0, y: -10 }} // Exit state (slightly above and faded out)
-                transition={{ duration: 0.2 }} // Animation duration
-                // Removed absolute positioning to let content flow naturally
-              >
-                {activeTab === "active" ? (
-                  <div className="space-y-6">
-                    {/* Weight Goal Dashboard - Updated props */}
-                    <WeightGoalDashboard
-                      startingWeight={user?.weight || 0}
-                      // Pass targetWeight from goals if available, otherwise from user (or 0)
-                      targetWeight={weightGoals?.targetWeight ?? user?.weight}
-                      tdee={nutritionProfile?.tdee || 0}
-                      macroDailyTotals={
-                        macroDailyTotals || {
-                          protein: 0,
-                          carbs: 0,
-                          fats: 0,
-                          calories: 0,
-                        }
-                      }
-                      weightGoals={weightGoals}
-                      isLoading={goalsLoading}
-                      onOpenModal={handleOpenWeightGoalModal} // Pass modal opener
-                      onDelete={handleOpenDeleteConfirmModal} // Pass delete confirm modal opener
-                      onLogWeight={handleOpenLogWeightModal} // NEW: Pass log weight modal opener
-                      targetCalories={
-                        macroTarget?.macroTarget?.targetCalories ?? 0
-                      }
-                      macroTarget={macroTarget?.macroTarget ?? undefined}
-                    />
+            <div className="space-y-6">
+              {/* Weight Goal Dashboard */}
+              <WeightGoalDashboard
+                startingWeight={user?.weight || 0}
+                targetWeight={safeTargetWeight}
+                tdee={nutritionProfile?.tdee || 0}
+                macroDailyTotals={
+                  macroDailyTotals || {
+                    protein: 0,
+                    carbs: 0,
+                    fats: 0,
+                    calories: 0,
+                  }
+                }
+                weightGoals={weightGoals}
+                isLoading={goalsLoading}
+                onOpenModal={handleOpenWeightGoalModal}
+                onDelete={handleOpenDeleteConfirmModal}
+                onLogWeight={handleOpenLogWeightModal}
+                targetCalories={macroTarget?.macroTarget?.targetCalories || 0}
+                macroTarget={macroTarget?.macroTarget}
+              />
 
-                    {/* Replace Chart and List with Tabs */}
-                    <WeightProgressTabs />
+              {/* Weight Progress Tabs */}
+              <WeightProgressTabs />
 
-                    {/* Habit Tracker - No changes needed here */}
-                    <HabitTracker
-                      habits={habits || []}
-                      isLoading={habitsLoading}
-                      onAddHabit={handleAddHabit}
-                      onIncrementHabit={incrementHabitProgress}
-                      onCompleteHabit={completeHabit}
-                      onEditHabit={handleEditHabit}
-                      onDeleteHabit={deleteHabit}
-                    />
-
-                    {/* Recent Stats Section - Keep as is for now */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      {[
-                        "Weekly Average",
-                        "Monthly Trend",
-                        "Progress Insights",
-                      ].map((title, i) => (
-                        <div
-                          key={i}
-                          className="bg-gray-800/40 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 hover:bg-gray-800/60 transition-colors duration-200"
-                        >
-                          <h3 className="text-sm font-medium text-gray-300 mb-2">
-                            {title}
-                          </h3>
-                          <p className="text-xs text-gray-400">Coming soon</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                ) : (
-                  // AchievementsContent handles its own loading/empty states internally (or will)
-                  <AchievementsContent />
-                )}
-              </motion.div>
-            </AnimatePresence>
+              {/* Habit Tracker */}
+              <HabitTracker
+                habits={habits || []}
+                isLoading={habitsLoading}
+                onAddHabit={handleAddHabit}
+                onIncrementHabit={incrementHabitProgress}
+                onCompleteHabit={completeHabit}
+                onEditHabit={handleEditHabit}
+                onDeleteHabit={deleteHabit}
+              />
+            </div>
           </div>
         </div>
       </div>
