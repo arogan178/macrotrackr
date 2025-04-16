@@ -1,1 +1,1 @@
-export { default as CardMetricsPanel } from "./CardMetricsPanel";
+export { default as UserMetricsPanel } from "./UserMetricsPanel";

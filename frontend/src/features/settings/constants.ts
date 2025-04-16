@@ -46,13 +46,6 @@ export const ACTIVITY_LEVELS: Record<
   },
 };
 
-// Calorie adjustment factors based on goal
-export const CALORIE_ADJUSTMENT_FACTORS: Record<string, number> = {
-  lose: 0.9, // 10% deficit
-  maintain: 1.0, // no change
-  gain: 1.1, // 10% surplus
-};
-
 // Essential helper functions (keep these for convenience)
 export function getActivityLevelLabel(level: number): string {
   return ACTIVITY_LEVELS[level]?.label || "Unknown";

@@ -1,23 +1,46 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { CardContainer, TextField } from "@/components/form/index";
+import { CardContainer, TextField } from "@/components/form";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { CalorieIcon } from "@/components/Icons";
 import { useStore } from "@/store/store";
 
 function FormLogin() {
   const navigate = useNavigate();
-  const { email, password, isLoading, setAuthEmail, setAuthPassword, login } =
-    useStore();
+  const {
+    auth: { email, password, isLoading, error },
+    setAuthEmail,
+    setAuthPassword,
+    login,
+    showNotification,
+  } = useStore();
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
       e.preventDefault();
-      await login(email, password);
-      navigate("/home", { replace: true });
-      window.location.reload();
+      try {
+        await login(email, password);
+
+        // Show success notification
+        showNotification("Login successful", "success");
+
+        // Give a small delay before navigation to ensure token is properly stored
+        setTimeout(() => {
+          navigate("/home", { replace: true });
+        }, 100);
+      } catch (error) {
+        // Display floating notification for login error
+        if (error instanceof Error) {
+          showNotification(error.message || "Login failed", "error");
+        } else {
+          showNotification(
+            "Login failed. Please check your credentials.",
+            "error"
+          );
+        }
+      }
     },
-    [email, password, login, navigate]
+    [email, password, login, navigate, showNotification]
   );
 
   return (

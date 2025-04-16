@@ -1,74 +1,136 @@
-import { MacroTotals, MacroTargetSettings } from "../types";
+import { MacroDailyTotals, MacroTargetSettings } from "../types";
+import { calculateCalories } from "@/utils/nutrition";
+import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
+import ProgressBar from "@/components/ProgressBar";
 
 interface DailySummaryProps {
-  totals: MacroTotals;
-  macroDistribution?: MacroTargetSettings;
+  macroDailyTotals?: MacroDailyTotals;
+  macroTarget?: MacroTargetSettings;
+  calorieTarget?: number;
 }
 
 export default function DailySummary({
-  totals,
-  macroDistribution,
+  macroDailyTotals,
+  macroTarget,
+  calorieTarget,
 }: DailySummaryProps) {
-  const defaultDistribution = {
+  const defaultTarget = {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
   };
 
-  const distribution = macroDistribution || defaultDistribution;
+  // Create default empty values to handle undefined totals
+  const safeTotal = macroDailyTotals || {
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+    calories: 0,
+  };
+  const target = macroTarget || defaultTarget;
 
-  const totalCalories = Math.round(
-    totals.protein * 4 + totals.carbs * 4 + totals.fats * 9
+  // Using the shared utility for calorie calculation
+  const calculatedCalories = calculateCalories(
+    safeTotal.protein,
+    safeTotal.carbs,
+    safeTotal.fats
   );
-  const proteinPercent = Math.round(
-    totalCalories ? ((totals.protein * 4) / totalCalories) * 100 : 0
+  const totalCalories = safeTotal.calories || calculatedCalories;
+  const dailyCalorieTarget = calorieTarget || 0;
+
+  // Calculate target grams for each macro based on calorie target and target percentages
+  const targetProteinGrams = Math.round(
+    (dailyCalorieTarget * target.proteinPercentage) / 100 / 4
   );
-  const carbsPercent = Math.round(
-    totalCalories ? ((totals.carbs * 4) / totalCalories) * 100 : 0
+  const targetCarbsGrams = Math.round(
+    (dailyCalorieTarget * target.carbsPercentage) / 100 / 4
   );
-  const fatsPercent = Math.round(
-    totalCalories ? ((totals.fats * 9) / totalCalories) * 100 : 0
+  const targetFatsGrams = Math.round(
+    (dailyCalorieTarget * target.fatsPercentage) / 100 / 9
   );
+
+  // Calculate completion percentages for each macro
+  const proteinCompletionPercent = Math.min(
+    100,
+    Math.round((safeTotal.protein / targetProteinGrams) * 100) || 0
+  );
+  const carbsCompletionPercent = Math.min(
+    100,
+    Math.round((safeTotal.carbs / targetCarbsGrams) * 100) || 0
+  );
+  const fatsCompletionPercent = Math.min(
+    100,
+    Math.round((safeTotal.fats / targetFatsGrams) * 100) || 0
+  );
+  const calorieCompletionPercent = Math.min(
+    100,
+    Math.round((totalCalories / dailyCalorieTarget) * 100) || 0
+  );
+
+  // Calculate total calories from each macro
+  const proteinCalories = Math.round(safeTotal.protein * 4);
+  const carbsCalories = Math.round(safeTotal.carbs * 4);
+  const fatsCalories = Math.round(safeTotal.fats * 9);
+  const totalMacroCalories = proteinCalories + carbsCalories + fatsCalories;
+
+  // Calculate actual percentages of total calories for each macro
+  const proteinPercent =
+    totalMacroCalories === 0
+      ? 0
+      : Math.round((proteinCalories / totalMacroCalories) * 100);
+  const carbsPercent =
+    totalMacroCalories === 0
+      ? 0
+      : Math.round((carbsCalories / totalMacroCalories) * 100);
+  // To ensure percentages add up to 100%, calculate fats as the remaining percentage
+  const fatsPercent =
+    totalMacroCalories === 0 ? 0 : 100 - proteinPercent - carbsPercent;
 
   const macroData = [
     {
       name: "Protein",
-      grams: (totals.protein || 0).toFixed(1),
-      calories: Math.round(totals.protein * 4),
-      percent: proteinPercent,
-      targetPercent: distribution.proteinPercentage,
+      grams: Math.round(safeTotal.protein || 0),
+      targetGrams: targetProteinGrams,
+      calories: proteinCalories,
+      targetPercent: target.proteinPercentage,
+      actualPercent: proteinPercent,
       color: "bg-green-500",
       textColor: "text-green-400",
       borderColor: "border-green-500/20",
       gradientFrom: "from-green-900/30",
       barColor: "bg-green-500/80",
       targetBarColor: "bg-green-700/30",
+      completionPercent: proteinCompletionPercent,
     },
     {
       name: "Carbs",
-      grams: (totals.carbs || 0).toFixed(1),
-      calories: Math.round(totals.carbs * 4),
-      percent: carbsPercent,
-      targetPercent: distribution.carbsPercentage,
+      grams: Math.round(safeTotal.carbs || 0),
+      targetGrams: targetCarbsGrams,
+      calories: carbsCalories,
+      targetPercent: target.carbsPercentage,
+      actualPercent: carbsPercent,
       color: "bg-blue-500",
       textColor: "text-blue-400",
       borderColor: "border-blue-500/20",
       gradientFrom: "from-blue-900/30",
       barColor: "bg-blue-500/80",
       targetBarColor: "bg-blue-700/30",
+      completionPercent: carbsCompletionPercent,
     },
     {
       name: "Fats",
-      grams: (totals.fats || 0).toFixed(1),
-      calories: Math.round(totals.fats * 9),
-      percent: fatsPercent,
-      targetPercent: distribution.fatsPercentage,
+      grams: Math.round(safeTotal.fats || 0),
+      targetGrams: targetFatsGrams,
+      calories: fatsCalories,
+      targetPercent: target.fatsPercentage,
+      actualPercent: fatsPercent,
       color: "bg-red-500",
       textColor: "text-red-400",
       borderColor: "border-red-500/20",
       gradientFrom: "from-red-900/30",
       barColor: "bg-red-500/80",
       targetBarColor: "bg-red-700/30",
+      completionPercent: fatsCompletionPercent,
     },
   ];
 
@@ -84,44 +146,46 @@ export default function DailySummary({
               <div className="text-2xl font-bold text-white">
                 {totalCalories}
               </div>
-              <div className="text-xs text-gray-400">Total kcal</div>
+              <div className="text-xs text-gray-400">
+                <span>of </span>
+                <span className="font-medium text-gray-300">
+                  {dailyCalorieTarget}
+                </span>
+                <span> kcal</span>
+
+                <span className="ml-1 font-medium text-indigo-400">
+                  ({calorieCompletionPercent}%)
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Stacked bar for overall macro split */}
-          <div className="relative h-2 w-full bg-gray-700/30 rounded-full overflow-hidden">
-            <div
-              className="absolute top-0 left-0 h-full bg-green-500/80 transition-all duration-500"
-              style={{ width: `${proteinPercent}%` }}
-            />
-            <div
-              className="absolute top-0 h-full bg-blue-500/80 transition-all duration-500"
-              style={{ width: `${carbsPercent}%`, left: `${proteinPercent}%` }}
-            />
-            <div
-              className="absolute top-0 h-full bg-red-500/80 transition-all duration-500"
-              style={{
-                width: `${fatsPercent}%`,
-                left: `${proteinPercent + carbsPercent}%`,
-              }}
-            />
-          </div>
+          {/* Calories progress bar */}
+          <ProgressBar
+            progress={calorieCompletionPercent}
+            color="indigo"
+            height="md"
+            className="mb-4"
+          />
 
-          {/* Current Percentages Legend */}
-          <div className="flex mt-2 justify-between text-xs">
-            <div className="flex items-center">
-              <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{proteinPercent}%</span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{carbsPercent}%</span>
-            </div>
-            <div className="flex items-center">
-              <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-              <span className="text-gray-400">{fatsPercent}%</span>
-            </div>
-          </div>
+          {/* Using shared MacroTargetBar component with corrected target values */}
+          <MacroTargetBar
+            macros={{
+              protein: proteinCalories,
+              carbs: carbsCalories,
+              fats: fatsCalories,
+            }}
+          />
+
+          {/* Using shared MacroTargetLegend component with corrected percentage values */}
+          <MacroTargetLegend
+            macros={{
+              protein: safeTotal.protein,
+              carbs: safeTotal.carbs,
+              fats: safeTotal.fats,
+            }}
+            className="mt-2"
+          />
         </div>
 
         <div className="space-y-4">
@@ -141,33 +205,35 @@ export default function DailySummary({
                   <span className="text-sm font-bold text-white">
                     {macro.grams}g
                   </span>
+                  <span className="text-xs text-gray-400 ml-1">
+                    / {macro.targetGrams}g
+                  </span>
                 </div>
               </div>
 
-              <div className="relative h-2 rounded-full bg-gray-700/50 overflow-hidden">
-                {/* Target percentage background bar */}
-                <div
-                  className={`absolute left-0 top-0 h-full ${macro.targetBarColor} transition-all duration-500`}
-                  style={{ width: `${macro.targetPercent}%` }}
-                ></div>
-                {/* Actual percentage bar */}
-                <div
-                  className={`absolute left-0 top-0 h-full ${macro.barColor} transition-all duration-500`}
-                  style={{ width: `${macro.percent}%` }}
-                ></div>
-              </div>
+              {/* Progress toward target grams */}
+              <ProgressBar
+                progress={macro.completionPercent}
+                color={
+                  macro.name.toLowerCase() === "protein"
+                    ? "green"
+                    : macro.name.toLowerCase() === "carbs"
+                    ? "blue"
+                    : "red"
+                }
+                height="md"
+                className="mb-3"
+              />
 
-              <div className="flex items-center justify-between mt-2">
+              <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`text-xs ${macro.textColor}`}>
                     {macro.calories} kcal
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
-                  <span className="text-gray-400">{macro.percent}% </span>
-                  <span className="text-gray-500 mx-1">•</span>
-                  <span className="text-gray-600">
-                    Target: {macro.targetPercent}%
+                  <span className={`text-xs ${macro.textColor} ml-1`}>
+                    {macro.completionPercent}%
                   </span>
                 </div>
               </div>

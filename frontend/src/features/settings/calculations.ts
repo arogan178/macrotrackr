@@ -1,11 +1,10 @@
 import {
   Gender,
   ActivityLevel,
-  WeightGoal,
-  MacroDistribution,
-  NutritionProfile,
+  MacroTargetGrams,
+  MacroTargetPercentages,
 } from "./types";
-import { ACTIVITY_LEVELS, CALORIE_ADJUSTMENT_FACTORS } from "./constants";
+import { ACTIVITY_LEVELS } from "./constants";
 
 // Pure calculation functions - independent of domain-specific types
 /**
@@ -23,10 +22,22 @@ function calculateBMRValue(
   age: number,
   isMale: boolean
 ): number {
-  if (!weight || !height || !age) return 0;
+  // Add proper validation to avoid negative values
+  if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
+    return 0;
+  }
 
-  const baseCalculation = 10 * weight + 6.25 * height - 5 * age;
-  return isMale ? baseCalculation + 5 : baseCalculation - 161;
+  // Ensure we're using the correct formula with reasonable constraints
+  const safeWeight = Math.max(30, Math.min(300, weight)); // Limit weight to realistic range
+  const safeHeight = Math.max(100, Math.min(250, height)); // Limit height to realistic range
+  const safeAge = Math.min(120, Math.max(1, age)); // Limit age to realistic range
+
+  // Mifflin-St Jeor Equation
+  const baseCalculation = 10 * safeWeight + 6.25 * safeHeight - 5 * safeAge;
+  const bmr = isMale ? baseCalculation + 5 : baseCalculation - 161;
+
+  // Ensure BMR is always positive and reasonable
+  return Math.max(500, bmr); // Minimum realistic BMR
 }
 
 /**
@@ -55,14 +66,14 @@ function calculateMacrosValue(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
-  fatPercentage: number
-): MacroDistribution {
-  if (!calorieGoal) return { protein: 0, carbs: 0, fat: 0 };
+  fatsPercentage: number
+): MacroTargetGrams {
+  if (!calorieGoal) return { protein: 0, carbs: 0, fats: 0 };
 
   return {
     protein: Math.round((calorieGoal * proteinPercentage) / 4),
     carbs: Math.round((calorieGoal * carbsPercentage) / 4),
-    fat: Math.round((calorieGoal * fatPercentage) / 9),
+    fats: Math.round((calorieGoal * fatsPercentage) / 9),
   };
 }
 
@@ -125,57 +136,57 @@ export function calculateTDEEByActivityLevel(
   return calculateTDEEValue(bmr, multiplier);
 }
 
-/**
- * Calculates daily calorie goal based on TDEE and weight goal
- * @param tdee - Total Daily Energy Expenditure
- * @param goal - Weight management goal
- * @returns Daily calorie goal
- */
-export function calculateCalorieGoal(tdee: number, goal: WeightGoal): number {
-  const adjustmentFactor =
-    CALORIE_ADJUSTMENT_FACTORS[goal] || CALORIE_ADJUSTMENT_FACTORS.maintain;
-  return calculateCalorieGoalValue(tdee, adjustmentFactor);
-}
+// /**
+//  * Calculates daily calorie goal based on TDEE and weight goal
+//  * @param tdee - Total Daily Energy Expenditure
+//  * @param goal - Weight management goal
+//  * @returns Daily calorie goal
+//  */
+// export function calculateCalorieGoal(tdee: number, goal: WeightGoal): number {
+//   const adjustmentFactor =
+//     CALORIE_ADJUSTMENT_FACTORS[goal] || CALORIE_ADJUSTMENT_FACTORS.maintain;
+//   return calculateCalorieGoalValue(tdee, adjustmentFactor);
+// }
+
+// /**
+//  * Calculates full nutrition profile from basic user information
+//  * @param weight - Weight in kg
+//  * @param height - Height in cm
+//  * @param age - Age in years
+//  * @param gender - 'male' or 'female'
+//  * @param exerciseFrequency - How often the person exercises
+//  * @param goal - Weight management goal
+//  * @returns Complete nutrition profile with BMR, TDEE, calorie goal and macros
+//  */
+
+// export function calculateNutritionProfile(
+//   weight: number,
+//   height: number,
+//   age: number,
+//   gender: Gender,
+//   activityLevel: ActivityLevel,
+//   goal: WeightGoal
+// ): NutritionProfile {
+//   const bmr = calculateBMR(weight, height, age, gender);
+//   const tdee = calculateTDEE(bmr, activityLevel);
+//   const calorieGoal = calculateCalorieGoal(tdee, goal);
+
+//   return {
+//     bmr,
+//     tdee,
+//     calorieGoal,
+//   };
+// }
 
 /**
- * Calculates full nutrition profile from basic user information
- * @param weight - Weight in kg
- * @param height - Height in cm
- * @param age - Age in years
- * @param gender - 'male' or 'female'
- * @param exerciseFrequency - How often the person exercises
- * @param goal - Weight management goal
- * @returns Complete nutrition profile with BMR, TDEE, calorie goal and macros
- */
-
-export function calculateNutritionProfile(
-  weight: number,
-  height: number,
-  age: number,
-  gender: Gender,
-  activityLevel: ActivityLevel,
-  goal: WeightGoal
-): NutritionProfile {
-  const bmr = calculateBMR(weight, height, age, gender);
-  const tdee = calculateTDEE(bmr, activityLevel);
-  const calorieGoal = calculateCalorieGoal(tdee, goal);
-
-  return {
-    bmr,
-    tdee,
-    calorieGoal,
-  };
-}
-
-/**
- * Calculate macros for a given calorie goal and distribution
+ * Calculate macros for a given calorie goal and target
  */
 export function calculateMacros(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
   fatPercentage: number
-): MacroDistribution {
+): MacroTargetGrams {
   return calculateMacrosValue(
     calorieGoal,
     proteinPercentage,

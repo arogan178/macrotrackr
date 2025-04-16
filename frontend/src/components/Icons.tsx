@@ -1,4 +1,5 @@
 import { memo } from "react";
+import { ICON_SIZES } from "./utils/constants";
 import {
   User,
   Mail,
@@ -30,9 +31,28 @@ import {
   Flame,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
+  ChevronRight,
   Unlock,
   Menu,
   Star,
+  Goal,
+  Dumbbell,
+  CheckCircle,
+  Target,
+  Award,
+  Heart,
+  Book,
+  Coffee,
+  Droplet,
+  Moon,
+  Sun,
+  MoreVertical,
+  SmilePlus,
+  CalendarHeart,
+  TrendingUp,
+  TrendingDown,
+  Lightbulb,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -42,13 +62,6 @@ interface IconProps extends Omit<LucideProps, "size"> {
   size?: "sm" | "md" | "lg";
 }
 
-// Size mappings for consistent icon sizing
-const sizeClasses = {
-  sm: "w-4 h-4",
-  md: "w-5 h-5",
-  lg: "w-6 h-6",
-};
-
 // HOC to apply consistent styling to all icons
 function createIcon(Icon: LucideIcon) {
   return memo(function IconWrapper({
@@ -56,12 +69,16 @@ function createIcon(Icon: LucideIcon) {
     size = "md",
     ...props
   }: IconProps) {
-    const sizeClass = sizeClasses[size] || sizeClasses.md;
+    const sizeClass = ICON_SIZES[size] || ICON_SIZES.md;
     return <Icon className={`${sizeClass} ${className}`} {...props} />;
   });
 }
 
 // Export all icon components
+export const LightBulbIcon = createIcon(Lightbulb);
+export const TrendingUpIcon = createIcon(TrendingUp);
+export const TrendingDownIcon = createIcon(TrendingDown);
+export const CalendarHeartIcon = createIcon(CalendarHeart);
 export const UserIcon = createIcon(User);
 export const EmailIcon = createIcon(Mail);
 export const PasswordIcon = createIcon(Lock);
@@ -95,7 +112,24 @@ export const ArrowRightIcon = createIcon(ArrowRight);
 export const DownloadIcon = createIcon(Download);
 export const ChevronDownIcon = createIcon(ChevronDown);
 export const ChevronUpIcon = createIcon(ChevronUp);
+export const ChevronLeftIcon = createIcon(ChevronLeft);
+export const ChevronRightIcon = createIcon(ChevronRight);
 export const LockIcon = createIcon(Lock);
 export const UnlockIcon = createIcon(Unlock);
 export const MenuIcon = createIcon(Menu);
 export const StarIcon = createIcon(Star);
+export const GoalsIcon = createIcon(Goal);
+export const TargetIcon = createIcon(Target);
+export const BarChartIcon = createIcon(BarChart);
+export const CheckCircleIcon = createIcon(CheckCircle);
+export const DumbBellIcon = createIcon(Dumbbell);
+export const AwardIcon = createIcon(Award);
+export const HeartIcon = createIcon(Heart);
+export const BookIcon = createIcon(Book);
+export const CoffeeIcon = createIcon(Coffee);
+export const DropletIcon = createIcon(Droplet);
+export const MoonIcon = createIcon(Moon);
+export const SunIcon = createIcon(Sun);
+export const MoreVerticalIcon = createIcon(MoreVertical);
+export const SmilePlusIcon = createIcon(SmilePlus);
+export const XIcon = createIcon(X);

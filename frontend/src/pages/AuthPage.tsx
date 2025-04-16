@@ -3,7 +3,7 @@ import {
   LoginForm,
   ButtonModeToggle,
   RegisterForm,
-} from "@/features/auth/components/index";
+} from "@/features/auth/components";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import { useStore } from "@/store/store";
 
