@@ -1,6 +1,6 @@
 import React from "react";
 import { useStore } from "@/store/store";
-import LineChartComponent from "@/components/reporting/LineChartComponent";
+import LineChartComponent from "@/components/chart/LineChartComponent";
 import EmptyState from "@/components/EmptyState";
 import { BarChartIcon } from "@/components/Icons";
 import { format, isValid, parseISO } from "date-fns";

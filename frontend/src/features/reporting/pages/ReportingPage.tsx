@@ -3,7 +3,15 @@ import Navbar from "@/features/layout/components/Navbar";
 import { MacroDailyTotals } from "@/features/macroTracking/types";
 import { useStore } from "@/store/store";
 import Modal from "@/components/Modal";
-import LineChartComponent from "@/components/reporting/LineChartComponent";
+import LineChartComponent from "@/components/chart/enLineChartComponent";
+import ReportingPageSkeleton from "../components/ReportingPageSkeleton";
+import MealTimeBreakdown from "../components/MealTimeBreakdown";
+import NutrientDensityVisualization from "../components/NutrientDensityVisualization";
+import EnhancedInsights from "../components/EnhancedInsights";
+import { motion } from "motion/react";
+import DateRangeSelector from "../../../components/chart/DateRangeSelector";
+import MacroSummaryStats from "../components/MacroSummaryStats";
+import NutritionInsights from "../components/NutritionInsights";
 
 export default function ReportingPage() {
   const [dateRange, setDateRange] = useState<string>("week");
@@ -22,21 +30,31 @@ export default function ReportingPage() {
   const [dataProcessed, setDataProcessed] = useState(false);
 
   // Get history data from app state
-  const { history, isLoading, error, fetchUserDetails, fetchMacroData } =
-    useStore();
+  const {
+    history,
+    isLoading,
+    error,
+    fetchUserDetails,
+    fetchMacroData,
+    fetchWeightGoals,
+  } = useStore();
 
   // Fetch user details and history on component mount
   useEffect(() => {
     async function loadData() {
       await fetchUserDetails();
       await fetchMacroData();
+      await fetchWeightGoals();
     }
     loadData();
-  }, [fetchUserDetails, fetchMacroData]);
-
+  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals]);
   // Wrap formatDate in useCallback to prevent it from changing on every render
   const formatDate = useCallback((dateStr: string): string => {
-    const date = new Date(dateStr);
+    // Ensure consistent date handling by explicitly parsing the ISO string as local
+    const [year, month, day] = dateStr.split("-").map(Number);
+    // Create date using local components to avoid timezone issues
+    const date = new Date(year, month - 1, day);
+
     // Add error handling for invalid dates if necessary
     if (isNaN(date.getTime())) {
       return "Invalid Date";
@@ -56,8 +74,10 @@ export default function ReportingPage() {
 
       const today = new Date();
       const dates: { [key: string]: MacroDailyTotals } = {};
-
       let startDate: Date;
+      // Set today to end of day to ensure today's data is included
+      today.setHours(23, 59, 59, 999);
+
       switch (range) {
         case "week":
           startDate = new Date(today);
@@ -66,12 +86,10 @@ export default function ReportingPage() {
         case "month":
           startDate = new Date(today);
           startDate.setMonth(today.getMonth() - 1);
-          startDate.setDate(startDate.getDate() + 1); // Adjust for 30 days including today
           break;
         case "3months":
           startDate = new Date(today);
           startDate.setMonth(today.getMonth() - 3);
-          startDate.setDate(startDate.getDate() + 1); // Adjust for 90 days including today
           break;
         case "custom":
           // Custom range is handled separately
@@ -80,16 +98,19 @@ export default function ReportingPage() {
           startDate = new Date(today);
           startDate.setDate(today.getDate() - 6);
       }
-      startDate.setHours(0, 0, 0, 0); // Normalize start date
-
-      // Initialize all dates in range with zero values
+      startDate.setHours(0, 0, 0, 0); // Normalize start date      // Initialize all dates in range with zero values
       const dateLabels: string[] = [];
       const currentDate = new Date(startDate);
       const endDate = new Date(today);
       endDate.setHours(23, 59, 59, 999); // Normalize end date
 
       while (currentDate <= endDate) {
-        const dateString = currentDate.toISOString().split("T")[0];
+        // Generate date string in local timezone to avoid UTC conversion issues
+        const year = currentDate.getFullYear();
+        const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+        const day = currentDate.getDate().toString().padStart(2, "0");
+        const dateString = `${year}-${month}-${day}`;
+
         dateLabels.push(dateString);
         dates[dateString] = {
           protein: 0,
@@ -108,10 +129,23 @@ export default function ReportingPage() {
           return;
         }
 
-        const entryDateStr =
-          entry.entry_date ||
-          new Date(entry.created_at).toISOString().split("T")[0];
-        const entryDate = new Date(entryDateStr + "T00:00:00"); // Ensure date comparison is correct
+        // --- Updated Date String Logic ---
+        let entryDateStr: string;
+        if (entry.entry_date) {
+          entryDateStr = entry.entry_date; // Assuming 'YYYY-MM-DD'
+        } else {
+          // Use local date parts from created_at to avoid timezone shifts
+          const createdAtDate = new Date(entry.created_at);
+          const year = createdAtDate.getFullYear();
+          const month = (createdAtDate.getMonth() + 1)
+            .toString()
+            .padStart(2, "0");
+          const day = createdAtDate.getDate().toString().padStart(2, "0");
+          entryDateStr = `${year}-${month}-${day}`;
+        }
+        // --- End Updated Logic ---
+
+        const entryDate = new Date(entryDateStr + "T00:00:00"); // Local midnight
 
         if (
           entryDate >= startDate &&
@@ -184,10 +218,27 @@ export default function ReportingPage() {
       }
 
       history.forEach((entry) => {
-        const entryDateStr =
-          entry.entry_date ||
-          new Date(entry.created_at).toISOString().split("T")[0];
-        const entryDate = new Date(entryDateStr + "T00:00:00");
+        if (!entry.created_at) {
+          console.warn("Entry missing created_at timestamp", entry);
+          return;
+        }
+        // --- Updated Date String Logic ---
+        let entryDateStr: string;
+        if (entry.entry_date) {
+          entryDateStr = entry.entry_date; // Assuming 'YYYY-MM-DD'
+        } else {
+          // Use local date parts from created_at to avoid timezone shifts
+          const createdAtDate = new Date(entry.created_at);
+          const year = createdAtDate.getFullYear();
+          const month = (createdAtDate.getMonth() + 1)
+            .toString()
+            .padStart(2, "0");
+          const day = createdAtDate.getDate().toString().padStart(2, "0");
+          entryDateStr = `${year}-${month}-${day}`;
+        }
+        // --- End Updated Logic ---
+
+        const entryDate = new Date(entryDateStr + "T00:00:00"); // Local midnight
 
         if (
           entryDate >= startDate &&
@@ -309,6 +360,8 @@ export default function ReportingPage() {
   const showNoDataMessage =
     !isLoading && dataProcessed && aggregatedData.length === 0;
 
+  if (isLoading) return <ReportingPageSkeleton />;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-300">
       <Navbar />
@@ -316,10 +369,10 @@ export default function ReportingPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
           <div className="mb-6">
-            <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
               Nutrition Reports
             </h1>
-            <p className="text-gray-400 mt-2">
+            <p className="text-gray-400 mt-2 text-sm sm:text-base">
               Track your nutrition trends and progress over time
             </p>
           </div>
@@ -370,120 +423,34 @@ export default function ReportingPage() {
             </div>
           )}
 
-          {/* Date Range Selection */}
-          <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-6">
-            <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center">
-                <span className="text-gray-300 font-medium mr-3">
-                  Time Period:
-                </span>
-                <div className="flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50">
-                  <button
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      dateRange === "week"
-                        ? "bg-indigo-900/50 text-indigo-100 shadow-sm"
-                        : "text-gray-400 hover:text-gray-300"
-                    }`}
-                    onClick={() => setDateRange("week")}
-                  >
-                    7 Days
-                  </button>
-                  <button
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      dateRange === "month"
-                        ? "bg-indigo-900/50 text-indigo-100 shadow-sm"
-                        : "text-gray-400 hover:text-gray-300"
-                    }`}
-                    onClick={() => setDateRange("month")}
-                  >
-                    30 Days
-                  </button>
-                  <button
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      dateRange === "3months"
-                        ? "bg-indigo-900/50 text-indigo-100 shadow-sm"
-                        : "text-gray-400 hover:text-gray-300"
-                    }`}
-                    onClick={() => setDateRange("3months")}
-                  >
-                    90 Days
-                  </button>
-                  <button
-                    className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
-                      dateRange === "custom"
-                        ? "bg-indigo-900/50 text-indigo-100 shadow-sm"
-                        : "text-gray-400 hover:text-gray-300"
-                    }`}
-                    onClick={() => setShowCustomDateModal(true)}
-                  >
-                    Custom
-                  </button>
-                </div>
-              </div>
-
-              <button
-                onClick={downloadCSV}
-                disabled={aggregatedData.length === 0 || isLoading} // Disable if no data or loading
-                className="px-4 py-2 bg-indigo-700/60 hover:bg-indigo-700/80 text-indigo-100 rounded-lg text-sm font-medium flex items-center transition-all duration-200 border border-indigo-600/30 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                <svg
-                  className="w-4 h-4 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                  ></path>
-                </svg>
-                Export CSV
-              </button>
-            </div>
-          </div>
+          {/* Date Range Selector */}
+          <DateRangeSelector
+            currentRange={dateRange}
+            onRangeChange={setDateRange}
+            onCustomRangeClick={() => setShowCustomDateModal(true)}
+            onExportClick={downloadCSV}
+            isExportDisabled={aggregatedData.length === 0 || isLoading}
+          />
 
           {/* Summary Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5 flex flex-col">
-              <span className="text-sm text-gray-400 mb-1">
-                Avg. Daily Calories
-              </span>
-              <span className="text-2xl font-bold text-white">
-                {isLoading ? "-" : averages.calories}
-              </span>
+          <MacroSummaryStats data={aggregatedData} />
+
+          {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <div className="order-2 md:order-1">
+              <MealTimeBreakdown data={aggregatedData} />
             </div>
-            <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5 flex flex-col">
-              <span className="text-sm text-gray-400 mb-1">
-                Avg. Daily Protein
-              </span>
-              <span className="text-2xl font-bold text-green-400">
-                {isLoading ? "-" : `${averages.protein}g`}
-              </span>
-            </div>
-            <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5 flex flex-col">
-              <span className="text-sm text-gray-400 mb-1">
-                Avg. Daily Carbs
-              </span>
-              <span className="text-2xl font-bold text-blue-400">
-                {isLoading ? "-" : `${averages.carbs}g`}
-              </span>
-            </div>
-            <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5 flex flex-col">
-              <span className="text-sm text-gray-400 mb-1">
-                Avg. Daily Fats
-              </span>
-              <span className="text-2xl font-bold text-red-400">
-                {isLoading ? "-" : `${averages.fats}g`}
-              </span>
+            <div className="order-1 md:order-2">
+              <NutrientDensityVisualization data={aggregatedData} />
             </div>
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 gap-6 mb-6">
-            <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5">
+            <motion.div
+              layout
+              className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-5"
+            >
               <h2 className="text-lg font-semibold text-gray-200 mb-4">
                 Calorie Intake
               </h2>
@@ -491,13 +458,15 @@ export default function ReportingPage() {
                 <LineChartComponent
                   data={aggregatedData}
                   lines={calorieChartLines}
-                  isLoading={isLoading || !dataProcessed} // Show loading until data is processed
+                  isLoading={isLoading || !dataProcessed}
                   showNoDataMessage={showNoDataMessage}
                 />
               </div>
-            </div>
-
-            <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5">
+            </motion.div>
+            <motion.div
+              layout
+              className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-5"
+            >
               <h2 className="text-lg font-semibold text-gray-200 mb-4">
                 Macronutrient Intake
               </h2>
@@ -505,95 +474,28 @@ export default function ReportingPage() {
                 <LineChartComponent
                   data={aggregatedData}
                   lines={macroChartLines}
-                  isLoading={isLoading || !dataProcessed} // Show loading until data is processed
+                  isLoading={isLoading || !dataProcessed}
                   showNoDataMessage={showNoDataMessage}
                 />
               </div>
-            </div>
+            </motion.div>
           </div>
 
-          {/* Additional Insights */}
-          <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-5">
-            <h2 className="text-lg font-semibold text-gray-200 mb-4">
-              Nutrition Insights
-            </h2>
-            {isLoading || !dataProcessed ? ( // Show loading until data is processed
-              <div className="flex items-center justify-center h-40">
-                <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 mb-3"></div>
-                  <p className="text-gray-400">Loading insights...</p>
-                </div>
-              </div>
-            ) : showNoDataMessage ? (
-              <div className="flex items-center justify-center h-40">
-                <p className="text-gray-400 text-center">
-                  No insights available due to lack of data.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="space-y-4">
-                  {/* Consistency Analysis */}
-                  <div className="p-4 rounded-lg border border-indigo-500/20 bg-indigo-900/10">
-                    <h3 className="text-md font-medium text-indigo-300 mb-2">
-                      Consistency Analysis
-                    </h3>
-                    <p className="text-gray-300">
-                      {aggregatedData.filter((d) => d.calories > 0).length} out
-                      of {aggregatedData.length} days had tracked nutrition
-                      data.
-                      {aggregatedData.filter((d) => d.calories > 0).length /
-                        aggregatedData.length >=
-                      0.7
-                        ? " Great job maintaining consistency in your tracking!"
-                        : " Try to log your nutrition more consistently for better insights."}
-                    </p>
-                  </div>
+          {/* Enhanced Insights (correlation, streaks, quality score) */}
+          <EnhancedInsights
+            aggregatedData={aggregatedData}
+            averages={averages}
+            isLoading={isLoading}
+          />
 
-                  {/* Protein Intake */}
-                  <div className="p-4 rounded-lg border border-green-500/20 bg-green-900/10">
-                    <h3 className="text-md font-medium text-green-300 mb-2">
-                      Protein Intake
-                    </h3>
-                    <p className="text-gray-300">
-                      Your average daily protein intake is {averages.protein}g.
-                      {averages.protein === 0
-                        ? " No protein data tracked."
-                        : averages.protein >= 120
-                        ? " You're doing great with protein intake!"
-                        : " Consider increasing your protein intake for better muscle recovery and growth."}
-                    </p>
-                  </div>
-
-                  {/* Carbohydrate Patterns */}
-                  <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-900/10">
-                    <h3 className="text-md font-medium text-blue-300 mb-2">
-                      Carbohydrate Patterns
-                    </h3>
-                    <p className="text-gray-300">
-                      Your average daily carbohydrate intake is {averages.carbs}
-                      g.
-                      {averages.carbs === 0
-                        ? " No carbohydrate data tracked."
-                        : (() => {
-                            const trackedCarbs = aggregatedData
-                              .map((d) => d.carbs)
-                              .filter((c) => c > 0);
-                            if (trackedCarbs.length < 2)
-                              return " Not enough data for pattern analysis.";
-                            const variation =
-                              Math.max(...trackedCarbs) -
-                              Math.min(...trackedCarbs);
-                            return variation > 100
-                              ? " Your carbohydrate intake varies significantly day to day. Consider more consistency for stable energy levels."
-                              : " Your carbohydrate intake is relatively consistent, which helps maintain stable energy levels.";
-                          })()}
-                    </p>
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
+          {/* Nutrition Insights */}
+          <NutritionInsights
+            isLoading={isLoading}
+            dataProcessed={dataProcessed}
+            showNoDataMessage={showNoDataMessage}
+            aggregatedData={aggregatedData}
+            averages={averages}
+          />
         </div>
       </div>
 
