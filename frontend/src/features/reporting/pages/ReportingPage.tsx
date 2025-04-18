@@ -3,7 +3,7 @@ import Navbar from "@/features/layout/components/Navbar";
 import { MacroDailyTotals } from "@/features/macroTracking/types";
 import { useStore } from "@/store/store";
 import Modal from "@/components/Modal";
-import LineChartComponent from "@/components/chart/enLineChartComponent";
+import LineChartComponent from "@/components/chart/LineChartComponent";
 import ReportingPageSkeleton from "../components/ReportingPageSkeleton";
 import MealTimeBreakdown from "../components/MealTimeBreakdown";
 import NutrientDensityVisualization from "../components/NutrientDensityVisualization";
