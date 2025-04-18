@@ -13,12 +13,13 @@ import {
   YAxisProps,
 } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
-import LoadingSpinner from "../../../components/LoadingSpinner"; // Corrected path
+import LoadingSpinner from "@/components/LoadingSpinner"; // Corrected path
 import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import { ChartDataPoint, LineConfig } from "../types"; // Corrected path
+import { ChartDataPoint, LineConfig } from "../utils/types"; // Use the correct path for your types
+import { DefaultTooltip } from "./chart-helpers";
 
 interface LineChartComponentProps {
   data: ChartDataPoint[]; // Use imported type
@@ -38,33 +39,6 @@ interface LineChartComponentProps {
   height?: string | number; // Allow specifying height
   showNoDataMessage?: boolean; // Added prop to control default message visibility
 }
-
-// Default Tooltip Component (can be overridden by props)
-const DefaultTooltip = ({
-  active,
-  payload,
-  label,
-}: TooltipProps<ValueType, NameType>) => {
-  if (active && payload && payload.length) {
-    return (
-      <div className="bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 shadow-lg text-sm">
-        <p className="label text-gray-200 font-semibold mb-1">{`${label}`}</p>
-        {payload.map((entry) => (
-          <p
-            key={`tooltip-${entry.dataKey}`}
-            className="intro"
-            style={{ color: entry.color || entry.stroke }}
-          >
-            {`${entry.name || entry.dataKey}: ${
-              entry.value?.toLocaleString() ?? "N/A"
-            }`}
-          </p>
-        ))}
-      </div>
-    );
-  }
-  return null;
-};
 
 const LineChartComponent: React.FC<LineChartComponentProps> = ({
   data,
