@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { DateRangeOption, DATE_RANGE_OPTIONS } from "../types";
+import { DATE_RANGE_OPTIONS } from "../utils/constants";
+import { motion } from "motion/react"; // Import motion
 
 interface DateRangeSelectorProps {
   currentRange: string;
@@ -17,7 +17,12 @@ export default function DateRangeSelector({
   isExportDisabled,
 }: DateRangeSelectorProps) {
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 mb-6">
+    // Wrap with motion.div and add layout prop
+    <motion.div
+      layout // Add layout for smooth transition
+      className="sticky top-20 z-30 bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-700/50 p-4 mb-6 shadow-xl transition-all duration-300"
+      // Increased top to 20, slightly increased blur/opacity for sticky state
+    >
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center">
           <span className="text-gray-300 font-medium mr-3">Time Period:</span>
@@ -66,6 +71,6 @@ export default function DateRangeSelector({
           Export CSV
         </button>
       </div>
-    </div>
+    </motion.div>
   );
 }
