@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import {
   BarChart,
   Bar,
@@ -150,7 +150,8 @@ function NutrientDensityVisualization({
   data,
 }: NutrientDensityVisualizationProps) {
   const macroTarget = useStore((state) => state.macroTarget);
-  const [chartHeight, setChartHeight] = useState(150); // Adjusted default height
+  // Set a fixed chart height for consistency across all ranges
+  const chartHeight = 220;
 
   const TARGET_MACROS = useMemo(
     () =>
@@ -161,16 +162,6 @@ function NutrientDensityVisualization({
       },
     [macroTarget]
   );
-
-  useEffect(() => {
-    const baseHeight = 150;
-    const itemHeight = 26; // Adjusted item height
-    const newHeight = Math.max(
-      baseHeight,
-      Math.min(data.length * itemHeight, 220) // Adjusted max height
-    );
-    setChartHeight(newHeight);
-  }, [data]);
 
   const chartData = useMemo(() => {
     const lastWeekData = data.slice(-7);
