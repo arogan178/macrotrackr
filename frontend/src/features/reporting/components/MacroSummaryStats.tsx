@@ -1,28 +1,16 @@
 import React, { useMemo } from "react";
 import { useStore } from "@/store/store";
 
-// Enhanced colors with gradient definitions
+// Enhanced colors - simplified
 const COLORS = {
   protein: {
     base: "#34d399", // green-400
-    gradient: ["#10b981", "#34d399"] as [string, string],
-    light: "#d1fae5", // green-100
   },
   carbs: {
     base: "#60a5fa", // blue-400
-    gradient: ["#3b82f6", "#60a5fa"] as [string, string],
-    light: "#dbeafe", // blue-100
   },
   fats: {
     base: "#f87171", // red-400
-    gradient: ["#ef4444", "#f87171"] as [string, string],
-    light: "#fee2e2", // red-100
-  },
-  background: {
-    gradient: ["rgba(17, 24, 39, 0.8)", "rgba(31, 41, 55, 0.7)"] as [
-      string,
-      string
-    ],
   },
 };
 
@@ -36,23 +24,6 @@ interface MacroSummaryStatsProps {
     carbs: number;
     fats: number;
   }[];
-}
-
-function getMacroPercentages(entry: MacroSummaryStatsProps["data"][0]) {
-  const { protein, carbs, fats, calories } = entry;
-  if (!calories || calories === 0)
-    return { proteinPct: 0, carbsPct: 0, fatsPct: 0 };
-  const proteinCals = protein * 4;
-  const carbsCals = carbs * 4;
-  const fatsCals = fats * 9;
-  const totalMacroCals = proteinCals + carbsCals + fatsCals;
-  const divisor = totalMacroCals > 0 ? totalMacroCals : calories;
-  if (divisor === 0) return { proteinPct: 0, carbsPct: 0, fatsPct: 0 };
-  return {
-    proteinPct: Math.round((proteinCals / divisor) * 100),
-    carbsPct: Math.round((carbsCals / divisor) * 100),
-    fatsPct: Math.round((fatsCals / divisor) * 100),
-  };
 }
 
 // Modified function to accept calorieTarget for percentage calculation
@@ -104,16 +75,12 @@ const MacroSummaryItem = React.memo(
     avgGrams,
     targetPercentage,
     targetGrams,
-  }: // todayPercentage,
-  // todayGrams,
-  {
+  }: {
     type: MacroType;
     avgPercentage: number;
     avgGrams: number;
     targetPercentage: number;
     targetGrams: number;
-    todayPercentage: number;
-    todayGrams: string;
   }) => {
     const percentageDelta = avgPercentage - targetPercentage;
     const gramDelta = avgGrams - targetGrams;
@@ -229,28 +196,13 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
     // Dependency updated
   }, [data, effectiveCalorieTarget]);
 
-  // Last day entry (for 'Today' row - kept but not displayed for now)
-  const lastDayEntry = data.length ? data[data.length - 1] : null;
-  const todayMacros = useMemo(() => {
-    if (!lastDayEntry) return null;
-    const { proteinPct, carbsPct, fatsPct } = getMacroPercentages(lastDayEntry);
-    return {
-      protein: proteinPct,
-      carbs: carbsPct,
-      fats: fatsPct,
-      gProtein: lastDayEntry.protein.toFixed(1),
-      gCarbs: lastDayEntry.carbs.toFixed(1),
-      gFats: lastDayEntry.fats.toFixed(1),
-    };
-  }, [lastDayEntry]);
-
-  if (!(macroAvg && todayMacros)) return null;
+  if (!macroAvg) return null; // Updated early return condition
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
       {/* Macro Panels */}
       {/* "bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden" */}
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-lg rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
         <div className="flex-1 text-xs flex flex-col justify-between h-full">
           <div className="flex items-center justify-between mb-2">
             <span className="font-semibold text-sm text-gray-300">
@@ -288,33 +240,27 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
           </div>
         </div>
       </div>
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-lg rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
         <MacroSummaryItem
           type="protein"
-          todayPercentage={todayMacros.protein}
-          todayGrams={todayMacros.gProtein}
           avgPercentage={macroAvg.protein}
           avgGrams={macroAvg.gProtein}
           targetPercentage={TARGET_MACROS.proteinPercentage}
           targetGrams={targetGrams.protein}
         />
       </div>
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-lg rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
         <MacroSummaryItem
           type="carbs"
-          todayPercentage={todayMacros.carbs}
-          todayGrams={todayMacros.gCarbs}
           avgPercentage={macroAvg.carbs}
           avgGrams={macroAvg.gCarbs}
           targetPercentage={TARGET_MACROS.carbsPercentage}
           targetGrams={targetGrams.carbs}
         />
       </div>
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-lg rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
         <MacroSummaryItem
           type="fats"
-          todayPercentage={todayMacros.fats}
-          todayGrams={todayMacros.gFats}
           avgPercentage={macroAvg.fats}
           avgGrams={macroAvg.gFats}
           targetPercentage={TARGET_MACROS.fatsPercentage}
