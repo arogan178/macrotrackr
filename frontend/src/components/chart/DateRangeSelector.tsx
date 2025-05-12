@@ -26,14 +26,14 @@ export default function DateRangeSelector({
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center">
           <span className="text-gray-300 font-medium mr-3">Time Period:</span>
-          <div className="flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50">
+          <div className="relative flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50">
             {DATE_RANGE_OPTIONS.map((option) => (
               <button
                 key={option.value}
-                className={`px-4 py-1.5 rounded-md text-sm font-medium transition-all ${
+                className={`relative px-4 py-1.5 rounded-md text-sm font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 ${
                   currentRange === option.value
-                    ? "bg-indigo-900/50 text-indigo-100 shadow-sm"
-                    : "text-gray-400 hover:text-gray-300"
+                    ? "text-white" // Active text color from TabButton
+                    : "text-gray-300 hover:bg-gray-700/50 hover:text-white" // Inactive text and hover from TabButton
                 }`}
                 onClick={() =>
                   option.value === "custom"
@@ -42,7 +42,14 @@ export default function DateRangeSelector({
                 }
                 aria-label={`Set time period to ${option.label}`}
               >
-                {option.label}
+                <span className="relative z-10">{option.label}</span>
+                {currentRange === option.value && (
+                  <motion.div
+                    className="absolute inset-0 bg-indigo-600 rounded-md shadow-md" // Active background from TabButton
+                    layoutId="activeRangeHighlight"
+                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
+                  />
+                )}
               </button>
             ))}
           </div>

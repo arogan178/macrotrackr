@@ -14,7 +14,10 @@ import MacroSummaryStats from "../components/MacroSummaryStats";
 import NutritionInsights from "../components/NutritionInsights";
 
 export default function ReportingPage() {
+  // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
+  // Note: We no longer need a separate numericDateRange state as we calculate
+  // numeric values on demand using mapDateRangeToNumeric
   const [aggregatedData, setAggregatedData] = useState<
     {
       name: string; // Recharts uses 'name' for the x-axis label
@@ -100,37 +103,21 @@ export default function ReportingPage() {
         return;
       }
 
-      const today = new Date();
       const dates: { [key: string]: MacroDailyTotals } = {};
-      let startDate: Date;
-      // Set today to end of day to ensure today's data is included
-      today.setHours(23, 59, 59, 999);
 
-      switch (range) {
-        case "week":
-          startDate = new Date(today);
-          startDate.setDate(today.getDate() - 6); // Adjust for 7 days including today
-          break;
-        case "month":
-          startDate = new Date(today);
-          startDate.setMonth(today.getMonth() - 1);
-          break;
-        case "3months":
-          startDate = new Date(today);
-          startDate.setMonth(today.getMonth() - 3);
-          break;
-        case "custom":
-          // Custom range is handled separately
-          return;
-        default:
-          startDate = new Date(today);
-          startDate.setDate(today.getDate() - 6);
-      }
-      startDate.setHours(0, 0, 0, 0); // Normalize start date      // Initialize all dates in range with zero values
+      // Use our helper function to get consistent date calculations
+      const { startDate: startDateStr, endDate: endDateStr } =
+        getDateRangeISOStrings(range);
+
+      const startDate = new Date(startDateStr);
+      startDate.setHours(0, 0, 0, 0); // Normalize start date to beginning of day
+
+      const endDate = new Date(endDateStr);
+      endDate.setHours(23, 59, 59, 999); // Set to end of day to ensure today's data is included
+
+      // Initialize all dates in range with zero values
       const dateLabels: string[] = [];
       const currentDate = new Date(startDate);
-      const endDate = new Date(today);
-      endDate.setHours(23, 59, 59, 999); // Normalize end date
 
       while (currentDate <= endDate) {
         // Generate date string in local timezone to avoid UTC conversion issues
@@ -206,122 +193,84 @@ export default function ReportingPage() {
     },
     [history, formatDate] // Now depends on the stable formatDate function
   );
-
   // Process data when history or date range changes
   useEffect(() => {
     if (history && history.length > 0) {
-      console.log("Processing data with history length:", history.length);
       processDataForCharts(dateRange);
       setDataProcessed(true);
     } else if (!isLoading) {
-      console.log("No history data available or still loading");
       setAggregatedData([]); // Clear data if no history
       setDataProcessed(true); // Mark as processed even if empty
     }
     // Include processDataForCharts in the dependency array
-  }, [history, dateRange, isLoading, processDataForCharts]);
-
-  const processDataForCustomDateRange = useCallback(
-    (startDate: Date, endDate: Date) => {
-      if (!history || history.length === 0) {
-        setAggregatedData([]);
-        return;
-      }
-
-      const dates: { [key: string]: MacroDailyTotals } = {};
-      const dateLabels: string[] = [];
-      const currentDate = new Date(startDate);
-      endDate.setHours(23, 59, 59, 999); // Include the end date fully
-
-      while (currentDate <= endDate) {
-        const dateString = currentDate.toISOString().split("T")[0];
-        dateLabels.push(dateString);
-        dates[dateString] = {
-          protein: 0,
-          carbs: 0,
-          fats: 0,
-          calories: 0,
-        };
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
-      history.forEach((entry) => {
-        if (!entry.created_at) {
-          console.warn("Entry missing created_at timestamp", entry);
-          return;
-        }
-        // --- Updated Date String Logic ---
-        let entryDateStr: string;
-        if (entry.entry_date) {
-          entryDateStr = entry.entry_date; // Assuming 'YYYY-MM-DD'
-        } else {
-          // Use local date parts from created_at to avoid timezone shifts
-          const createdAtDate = new Date(entry.created_at);
-          const year = createdAtDate.getFullYear();
-          const month = (createdAtDate.getMonth() + 1)
-            .toString()
-            .padStart(2, "0");
-          const day = createdAtDate.getDate().toString().padStart(2, "0");
-          entryDateStr = `${year}-${month}-${day}`;
-        }
-        // --- End Updated Logic ---
-
-        const entryDate = new Date(entryDateStr + "T00:00:00"); // Local midnight
-
-        if (
-          entryDate >= startDate &&
-          entryDate <= endDate &&
-          dates[entryDateStr]
-        ) {
-          dates[entryDateStr].protein += entry.protein;
-          dates[entryDateStr].carbs += entry.carbs;
-          dates[entryDateStr].fats += entry.fats;
-          dates[entryDateStr].calories +=
-            entry.protein * 4 + entry.carbs * 4 + entry.fats * 9;
-        }
-      });
-
-      const chartData = dateLabels.map((date) => ({
-        name: formatDate(date), // Use 'name' for x-axis label
-        calories: dates[date].calories,
-        protein: dates[date].protein,
-        carbs: dates[date].carbs,
-        fats: dates[date].fats,
-      }));
-
-      setAggregatedData(chartData);
-    },
-    [history, formatDate]
-  ); // Now depends on the stable formatDate function
-
-  const handleApplyCustomDateRange = useCallback(() => {
+  }, [history, dateRange, isLoading, processDataForCharts]); // We've refactored to use processDataForCharts directly with the 'custom' range
+  // instead of having a separate custom date processing function
+  /**
+   * Validates and applies custom date range selection
+   * Uses improved error handling and avoids redundant date parsing
+   */ const handleApplyCustomDateRange = useCallback(() => {
     if (!customStartDate || !customEndDate) {
       // Add user feedback (e.g., toast notification)
       console.error("Please select both start and end dates.");
       return;
     }
+
+    // Parse dates once
     const start = new Date(customStartDate);
     const end = new Date(customEndDate);
-    start.setHours(0, 0, 0, 0); // Normalize start date
-    end.setHours(23, 59, 59, 999); // Normalize end date
 
+    // Validate date order
     if (start > end) {
-      // Add user feedback
       console.error("Start date cannot be after end date.");
       return;
     }
 
-    setDateRange("custom"); // Set the range state
-    // Ensure processDataForCustomDateRange is defined before calling
-    if (processDataForCustomDateRange) {
-      const start = new Date(customStartDate);
-      const end = new Date(customEndDate);
-      start.setHours(0, 0, 0, 0); // Normalize start date
-      end.setHours(23, 59, 59, 999); // Normalize end date
-      processDataForCustomDateRange(start, end);
-    }
+    // Set to custom range mode
+    setDateRange("custom");
+
+    // We don't need to call processDataForCharts here because the dateRange change
+    // will trigger the useEffect that calls processDataForCharts
+
+    // Close the modal
     setShowCustomDateModal(false);
-  }, [customStartDate, customEndDate, processDataForCustomDateRange]); // Added dependency
+  }, [customStartDate, customEndDate]);
+  /**
+   * Centralized helper function to convert a date range string ('week', 'month', '3months', 'custom')
+   * into corresponding ISO date strings (YYYY-MM-DD) for startDate and endDate.
+   *
+   * This function provides consistent date range calculations across all components,
+   * regardless of whether they need exact date strings (like MealTimeBreakdown) or
+   * numeric day counts (like NutrientDensityVisualization).
+   *
+   * Advantages:
+   * - Single source of truth for date range calculations
+   * - DRY code that's easier to maintain
+   * - Consistent handling of custom date ranges
+   * - Properly handles timezone issues by working with local date strings
+   *
+   * @param range The date range identifier ('week', 'month', '3months', 'custom')
+   * @returns An object with startDate and endDate as ISO strings (YYYY-MM-DD)
+   */ const getDateRangeISOStrings = useCallback(
+    (range: string): { startDate: string; endDate: string } => {
+      // For custom range, use the custom dates directly
+      if (range === "custom" && customStartDate && customEndDate) {
+        return { startDate: customStartDate, endDate: customEndDate };
+      }
+
+      // For standard ranges, calculate dates
+      const today = new Date();
+      const endDate = today.toISOString().split("T")[0]; // Today as ISO string
+
+      // Calculate start date based on numeric range
+      const days = mapDateRangeToNumeric(range);
+      const start = new Date(today);
+      start.setDate(today.getDate() - (days - 1)); // Subtract days-1 to include today
+      const startDate = start.toISOString().split("T")[0];
+
+      return { startDate, endDate };
+    },
+    [customStartDate, customEndDate, mapDateRangeToNumeric]
+  );
 
   const calculateAverages = () => {
     if (aggregatedData.length === 0)
@@ -404,7 +353,6 @@ export default function ReportingPage() {
               Track your nutrition trends and progress over time
             </p>
           </div>
-
           {error && (
             <div className="mb-6 text-red-400 bg-red-900/50 p-4 rounded-lg border border-red-800/50 shadow-lg">
               <div className="flex items-center">
@@ -426,7 +374,6 @@ export default function ReportingPage() {
               </div>
             </div>
           )}
-
           {/* Debug info for development - Adjusted condition */}
           {!isLoading && !error && history?.length === 0 && dataProcessed && (
             <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
@@ -450,7 +397,6 @@ export default function ReportingPage() {
               </div>
             </div>
           )}
-
           {/* Date Range Selector */}
           <DateRangeSelector
             currentRange={dateRange}
@@ -459,23 +405,34 @@ export default function ReportingPage() {
             onExportClick={downloadCSV}
             isExportDisabled={aggregatedData.length === 0 || isLoading}
           />
-
           {/* Summary Stats */}
           <MacroSummaryStats data={aggregatedData} />
-
-          {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
+          {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}{" "}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             <div className="order-2 md:order-1">
-              <MealTimeBreakdown data={aggregatedData} />
+              {" "}
+              {/* 
+                MealTimeBreakdown works with raw history data and needs exact ISO date strings
+                to properly filter entries. It doesn't care about the numeric range value.
+              */}{" "}
+              <MealTimeBreakdown
+                history={history}
+                {...getDateRangeISOStrings(dateRange)}
+              />
             </div>
             <div className="order-1 md:order-2">
+              {" "}
+              {/* 
+                NutrientDensityVisualization works with pre-aggregated data and uses numeric range
+                for visualization purposes, not for data filtering. That's why it takes selectedRange
+                as a number (7, 30, 90) instead of ISO date strings.
+              */}
               <NutrientDensityVisualization
                 data={aggregatedData}
-                selectedRange={mapDateRangeToNumeric(dateRange)} // Pass the mapped selectedRange
+                selectedRange={mapDateRangeToNumeric(dateRange)}
               />
             </div>
           </div>
-
           {/* Charts */}
           <div className="grid grid-cols-1 gap-3 mb-4">
             <motion.div
@@ -511,14 +468,12 @@ export default function ReportingPage() {
               </div>
             </motion.div>
           </div>
-
           {/* Enhanced Insights (correlation, streaks, quality score) */}
           <EnhancedInsights
             aggregatedData={aggregatedData}
             averages={averages}
             isLoading={isLoading}
           />
-
           {/* Nutrition Insights */}
           <NutritionInsights
             isLoading={isLoading}
