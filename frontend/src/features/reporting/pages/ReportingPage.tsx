@@ -29,6 +29,34 @@ export default function ReportingPage() {
   const [customEndDate, setCustomEndDate] = useState<string>("");
   const [dataProcessed, setDataProcessed] = useState(false);
 
+  // Helper function to map dateRange string to number for selectedRange prop
+  const mapDateRangeToNumeric = (range: string): 7 | 30 | 90 => {
+    switch (range) {
+      case "week":
+        return 7;
+      case "month":
+        return 30;
+      case "3months":
+        return 90;
+      // Handle "custom" range if needed, or default
+      case "custom":
+        // Determine the number of days for custom range if you want to pass it
+        // For now, let's default or decide on a specific behavior
+        if (customStartDate && customEndDate) {
+          const start = new Date(customStartDate);
+          const end = new Date(customEndDate);
+          const diffTime = Math.abs(end.getTime() - start.getTime());
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both start and end day
+          if (diffDays <= 7) return 7;
+          if (diffDays <= 30) return 30;
+          return 90; // Or handle larger custom ranges differently
+        }
+        return 7; // Default for custom if dates not set
+      default:
+        return 7; // Default to 7 days
+    }
+  };
+
   // Get history data from app state
   const {
     history,
@@ -436,17 +464,20 @@ export default function ReportingPage() {
           <MacroSummaryStats data={aggregatedData} />
 
           {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             <div className="order-2 md:order-1">
               <MealTimeBreakdown data={aggregatedData} />
             </div>
             <div className="order-1 md:order-2">
-              <NutrientDensityVisualization data={aggregatedData} />
+              <NutrientDensityVisualization
+                data={aggregatedData}
+                selectedRange={mapDateRangeToNumeric(dateRange)} // Pass the mapped selectedRange
+              />
             </div>
           </div>
 
           {/* Charts */}
-          <div className="grid grid-cols-1 gap-6 mb-6">
+          <div className="grid grid-cols-1 gap-3 mb-4">
             <motion.div
               layout
               className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-5"
