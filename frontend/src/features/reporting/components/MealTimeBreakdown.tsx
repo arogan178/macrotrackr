@@ -11,31 +11,12 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { motion } from "motion/react"; // Ensure motion is imported
+import { ChartCard, StatSelector } from "../../../components/chart";
+import { MEAL_COLORS, getUnitForStat } from "../../../utils/chart-colors";
 
 // Define meal types and their display order
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
 type MealType = (typeof MEAL_TYPES)[number];
-
-// Colors for different meal types with gradients
-const MEAL_COLORS = {
-  breakfast: {
-    base: "#60a5fa", // blue-400
-    gradient: ["#3b82f6", "#60a5fa"] as [string, string],
-  },
-  lunch: {
-    base: "#34d399", // green-400
-    gradient: ["#10b981", "#34d399"] as [string, string],
-  },
-  dinner: {
-    base: "#f87171", // red-400
-    gradient: ["#ef4444", "#f87171"] as [string, string],
-  },
-  snack: {
-    base: "#a78bfa", // purple-400
-    gradient: ["#8b5cf6", "#a78bfa"] as [string, string],
-  },
-};
 
 interface MealTimeBreakdownProps {
   history: MacroEntry[];
@@ -240,239 +221,177 @@ function MealTimeBreakdown({
     return calculateMealTypeDistribution(filteredHistory, selectedStat);
   }, [filteredHistory, selectedStat]);
 
-  // Get the unit suffix based on the selected stat
-  const getUnit = () => {
-    switch (selectedStat) {
-      case "calories":
-        return "kcal";
-      case "protein":
-      case "carbs":
-      case "fats":
-        return "g";
-      default:
-        return "";
-    }
-  };
-
   if (!filteredHistory || filteredHistory.length === 0) {
     return (
-      <div className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-5 h-64 flex items-center justify-center">
-        <div className="text-gray-400">No meal data for selected period.</div>
-      </div>
+      <ChartCard
+        title="Meal Distribution"
+        isEmpty={true}
+        emptyMessage="No meal data for selected period."
+      >
+        <div />
+      </ChartCard>
     );
   }
 
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="bg-gray-800/70 rounded-xl border border-gray-700/30 p-3 shadow-lg h-full flex flex-col"
-    >
-      {/* Header with title and stat selector */}{" "}
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-semibold text-white">
-          Meal Distribution
-        </h3>
-        <div className="relative flex flex-wrap space-x-1 p-0.5 bg-gray-700/60 rounded-lg">
-          {["calories", "protein", "carbs", "fats", "count"].map((stat) => {
-            // Map stat to appropriate color
-            let bgColor = "bg-indigo-600"; // Default for calories
-            if (stat === "protein") bgColor = "bg-green-600";
-            if (stat === "carbs") bgColor = "bg-blue-600";
-            if (stat === "fats") bgColor = "bg-red-600";
-            if (stat === "count") bgColor = "bg-purple-600";
+  // Create gradient definitions for chart
+  const gradientDefs = (
+    <defs>
+      {MEAL_TYPES.map((mealType) => {
+        const color = MEAL_COLORS[mealType];
+        return (
+          <linearGradient
+            key={`color-${mealType}`}
+            id={`color-${mealType}`}
+            x1="1"
+            y1="0"
+            x2="0"
+            y2="0"
+          >
+            <stop offset="0%" stopColor={color.gradient[0]} stopOpacity={0.8} />
+            <stop
+              offset="100%"
+              stopColor={color.gradient[1]}
+              stopOpacity={0.8}
+            />
+          </linearGradient>
+        );
+      })}
+    </defs>
+  );
+  // Custom chart label component
+  const renderPercentageLabel = (props: any) => {
+    const { x, y, width, value, height } = props;
+    const xPos = typeof x === "number" ? x : 0;
+    const yPos = typeof y === "number" ? y : 0;
+    const widthVal = typeof width === "number" ? width : 0;
+    const heightVal = typeof height === "number" ? height : 0;
+    const percent =
+      typeof value === "number" ? value : parseInt(value || "0", 10);
 
-            return (
-              <button
-                key={stat}
-                onClick={() => setSelectedStat(stat)}
-                className={`relative px-2 py-0.5 rounded text-xs font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 ${
-                  selectedStat === stat
-                    ? "text-white"
-                    : "text-gray-300 hover:bg-gray-600/50 hover:text-white"
-                }`}
-              >
-                <span className="relative z-10">
-                  {stat.charAt(0).toUpperCase() + stat.slice(1)}
-                </span>
-                {selectedStat === stat && (
-                  <motion.div
-                    className={`absolute inset-0 rounded shadow-md ${bgColor}`}
-                    layoutId="mealStatHighlight"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-      {/* Main content */}
-      <div className="flex-1">
-        {mealTypeDistribution.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%" minHeight={150}>
-            <BarChart
-              layout="vertical"
-              data={mealTypeDistribution}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 0,
-                bottom: 5,
-              }}
-              barSize={20}
-            >
-              <defs>
-                {MEAL_TYPES.map((mealType) => {
-                  const color = MEAL_COLORS[mealType];
-                  return (
-                    <linearGradient
-                      key={`color-${mealType}`}
-                      id={`color-${mealType}`}
-                      x1="1"
-                      y1="0"
-                      x2="0"
-                      y2="0"
-                    >
-                      <stop
-                        offset="0%"
-                        stopColor={color.gradient[0]}
-                        stopOpacity={0.8}
-                      />
-                      <stop
-                        offset="100%"
-                        stopColor={color.gradient[1]}
-                        stopOpacity={0.8}
-                      />
-                    </linearGradient>
-                  );
-                })}
-              </defs>
-              <CartesianGrid
-                strokeDasharray="5 5"
-                opacity={0.1}
-                horizontal={true}
-                vertical={false}
-              />
-              <XAxis
-                type="number"
-                domain={[0, "dataMax"]}
-                tickFormatter={(value) =>
-                  `${Math.round(value)}${
-                    selectedStat === "count" ? "" : " " + getUnit()
-                  }`
-                }
-                tick={{ fill: "#9ca3af", fontSize: 10 }}
-              />
-              <YAxis
-                dataKey="name"
-                type="category"
-                tick={{ fill: "#d1d5db", fontSize: 12 }}
-                axisLine={false}
-                tickLine={false}
-                width={70}
-              />
-              <Tooltip
-                content={(props) => CustomTooltip({ ...props, selectedStat })}
-                cursor={{ fill: "rgba(110,118,145,0.1)" }}
-                wrapperStyle={{ outline: "none" }}
-              />
-              <Legend
-                height={14}
-                iconSize={10}
-                iconType="circle"
-                verticalAlign="bottom"
-                align="center"
-                wrapperStyle={{
-                  fontSize: 12,
-                  paddingTop: 2,
-                }}
-                payload={MEAL_TYPES.map((mealType) => ({
-                  id: mealType,
-                  value: formatMealType(mealType),
-                  type: "circle",
-                  color: MEAL_COLORS[mealType].base,
-                }))}
-                formatter={(value) => (
-                  <span className="text-gray-300 capitalize ml-1">{value}</span>
-                )}
-              />{" "}
-              <Bar
-                dataKey="value"
-                name="Meal Distribution"
-                fill="#8884d8"
-                radius={[0, 10, 10, 0]}
-                label={false}
-              >
-                {" "}
-                {mealTypeDistribution.map((_, index) => {
-                  const mealType = MEAL_TYPES[index];
-                  return (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={`url(#color-${mealType})`}
-                    />
-                  );
-                })}
-                <LabelList
-                  dataKey="percentage"
-                  position="insideRight"
-                  content={(props) => {
-                    const { x, y, width, value, height } = props;
-                    const xPos = typeof x === "number" ? x : 0;
-                    const yPos = typeof y === "number" ? y : 0;
-                    const widthVal = typeof width === "number" ? width : 0;
-                    const heightVal = typeof height === "number" ? height : 0;
-                    const percent =
-                      typeof value === "number"
-                        ? value
-                        : parseInt(value || "0", 10);
-                    return (
-                      <text
-                        x={xPos + widthVal - 10}
-                        y={yPos + heightVal / 2}
-                        fill="#fff"
-                        fontSize={12}
-                        fontWeight="bold"
-                        textAnchor="end"
-                        dominantBaseline="central"
-                        style={{ opacity: percent > 0 ? 0.92 : 0 }}
-                      >
-                        {percent}%
-                      </text>
-                    );
-                  }}
-                />
-              </Bar>
-            </BarChart>
-          </ResponsiveContainer>
-        ) : (
-          <div className="h-full flex items-center justify-center">
-            <div className="text-gray-400 text-center">
-              <p>No meal data available</p>
-              <p className="text-sm mt-1">
-                Add entries with meal types to see your distribution
-              </p>
-            </div>
-          </div>
-        )}{" "}
-      </div>
-    </motion.div>
+    // Skip rendering labels for very small values (less than 5%)
+    if (percent < 5) return null;
+
+    // Calculate minimum width threshold to avoid overlap with Y-axis
+    const minWidth = 50; // Minimum width to display label without overlapping
+
+    // Only show label if the bar is wide enough
+    if (widthVal < minWidth) return null;
+
+    return (
+      <text
+        x={xPos + widthVal - 10}
+        y={yPos + heightVal / 2}
+        fill="#fff"
+        fontSize={12}
+        fontWeight="bold"
+        textAnchor="end"
+        dominantBaseline="central"
+        style={{ opacity: percent > 0 ? 0.92 : 0 }}
+      >
+        {percent}%
+      </text>
+    );
+  };
+
+  return (
+    <ChartCard
+      title="Meal Distribution"
+      action={
+        <StatSelector
+          selectedStat={selectedStat}
+          onStatChange={setSelectedStat}
+          availableStats={["calories", "protein", "carbs", "fats", "count"]}
+        />
+      }
+    >
+      {" "}
+      <ResponsiveContainer width="100%" height="100%" minHeight={300}>
+        <BarChart
+          layout="vertical"
+          data={mealTypeDistribution}
+          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+          barSize={25}
+        >
+          {" "}
+          {gradientDefs}
+          <CartesianGrid
+            strokeDasharray="3 3"
+            opacity={0.1}
+            horizontal={false}
+          />
+          <XAxis
+            type="number"
+            domain={[0, "dataMax"]}
+            tickFormatter={(value) =>
+              `${Math.round(value)}${
+                selectedStat === "count"
+                  ? ""
+                  : " " + getUnitForStat(selectedStat)
+              }`
+            }
+            tick={{ fill: "#9ca3af", fontSize: 10 }}
+          />{" "}
+          <YAxis
+            dataKey="name"
+            type="category"
+            tick={{ fill: "#d1d5db", fontSize: 12 }}
+            axisLine={true}
+            tickLine={true}
+            width={70}
+            interval={0} // Force display of all tick labels
+          />
+          <Tooltip
+            content={CustomTooltip}
+            cursor={{ fill: "rgba(110,118,145,0.1)" }}
+            wrapperStyle={{ outline: "none" }}
+          />
+          <Legend
+            height={14}
+            iconSize={10}
+            iconType="circle"
+            verticalAlign="bottom"
+            align="center"
+            wrapperStyle={{ fontSize: 12, paddingTop: 2 }}
+            payload={MEAL_TYPES.map((mealType) => ({
+              id: mealType,
+              value: formatMealType(mealType),
+              type: "circle",
+              color: MEAL_COLORS[mealType].base,
+            }))}
+            formatter={(value) => (
+              <span className="text-gray-300 capitalize ml-1">{value}</span>
+            )}
+          />
+          <Bar
+            dataKey="value"
+            name="Meal Distribution"
+            fill="#8884d8"
+            radius={[0, 20, 20, 0]}
+            label={false}
+          >
+            {mealTypeDistribution.map((_, index) => {
+              const mealType = MEAL_TYPES[index];
+              return (
+                <Cell key={`cell-${index}`} fill={`url(#color-${mealType})`} />
+              );
+            })}
+            <LabelList
+              dataKey="percentage"
+              position="insideRight"
+              content={renderPercentageLabel}
+            />
+          </Bar>
+        </BarChart>
+      </ResponsiveContainer>
+    </ChartCard>
   );
 }
 
-// Custom tooltip component
+// Custom tooltip component (keeping for now due to type compatibility issues)
 const CustomTooltip = ({ active, payload, selectedStat }: any) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const unit =
-      selectedStat === "calories"
-        ? "kcal"
-        : selectedStat === "count"
-        ? ""
-        : "g";
+    const unit = getUnitForStat(selectedStat || "calories");
 
     return (
       <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
