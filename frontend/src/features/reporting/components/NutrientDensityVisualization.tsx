@@ -245,7 +245,7 @@ function NutrientDensityVisualization({
   selectedRange,
 }: NutrientDensityVisualizationProps) {
   // Set a fixed chart height for consistency across all ranges
-  const chartHeight = 220;
+  const chartHeight = 250;
 
   // Calculate the optimal number of items to display based on the range
   const displayLimit = useMemo(() => {
@@ -488,9 +488,9 @@ function NutrientDensityVisualization({
           <BarChart
             data={chartData}
             layout="vertical"
-            margin={{ top: 0, right: 15, left: 0, bottom: 10 }} // Adjusted margins
+            margin={{ top: 15, right: 15, left: -10, bottom: 10 }} // Adjusted margins
             barCategoryGap="25%" // Adjusted gap
-            barSize={16} // Adjusted bar size - increased from 10 to 16
+            barSize={18} // Adjusted bar size - increased from 10 to 18
           >
             <defs>
               {Object.entries(COLORS).map(([key, color]) => {
@@ -528,21 +528,19 @@ function NutrientDensityVisualization({
             <XAxis
               type="number"
               domain={[0, 100]}
-              tick={{ fill: "#9ca3af", fontSize: 10 }} // Adjusted tick style
-              axisLine={false} // Hide axis line
-              tickLine={false}
+              tick={{ fill: "#9ca3af", fontSize: 10 }}
               tickFormatter={(v) => `${v}%`}
               interval="preserveStartEnd"
               tickCount={5}
-            />{" "}
+            />
             <YAxis
               dataKey="name"
               type="category"
-              tick={{ fill: "#d1d5db", fontSize: 12 }} // Adjusted tick style
+              tick={{ fill: "#d1d5db", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
-              width={75} // Increased width to prevent clipping (from 60)
-              interval={0} // Show all ticks
+              width={75}
+              interval={0}
             />
             <Tooltip
               content={<DefaultTooltip />}
@@ -592,26 +590,25 @@ function NutrientDensityVisualization({
             />
             <Legend
               iconType="circle"
-              iconSize={6}
+              iconSize={10}
               verticalAlign="bottom"
               align="center"
-              height={14}
+              height={12}
               wrapperStyle={{
-                fontSize: 14,
+                fontSize: 12,
                 paddingTop: 2,
               }}
               formatter={(value) => (
                 <span className="text-gray-300 capitalize ml-1">{value}</span>
               )}
             />
-            {/* Reference lines removed for cleaner look, can be added back if needed */}
             <Bar
               dataKey="protein"
               stackId="a"
               fill={`url(#colorprotein)`}
-              radius={[10, 0, 0, 10]} // Smaller radius
+              radius={[10, 0, 0, 10]}
               name="Protein"
-              animationDuration={1000} // Faster animation
+              animationDuration={1000}
             >
               <LabelList content={<PercentageLabel />} dataKey="protein" />
             </Bar>

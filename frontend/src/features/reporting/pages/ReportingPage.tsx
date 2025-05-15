@@ -407,21 +407,19 @@ export default function ReportingPage() {
           />
           {/* Summary Stats */}
           <MacroSummaryStats data={aggregatedData} />
-          {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}{" "}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="order-2 md:order-1">
-              {" "}
               {/* 
                 MealTimeBreakdown works with raw history data and needs exact ISO date strings
                 to properly filter entries. It doesn't care about the numeric range value.
-              */}{" "}
+              */}
               <MealTimeBreakdown
                 history={history}
                 {...getDateRangeISOStrings(dateRange)}
               />
             </div>
             <div className="order-1 md:order-2">
-              {" "}
               {/* 
                 NutrientDensityVisualization works with pre-aggregated data and uses numeric range
                 for visualization purposes, not for data filtering. That's why it takes selectedRange
@@ -434,12 +432,12 @@ export default function ReportingPage() {
             </div>
           </div>
           {/* Charts */}
-          <div className="grid grid-cols-1 gap-3 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <motion.div
               layout
               className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-5"
             >
-              <h2 className="text-lg font-semibold text-gray-200 mb-4">
+              <h2 className="text-lg font-semibold text-gray-200 mb-6">
                 Calorie Intake
               </h2>
               <div className="h-80">
@@ -455,7 +453,7 @@ export default function ReportingPage() {
               layout
               className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-5"
             >
-              <h2 className="text-lg font-semibold text-gray-200 mb-4">
+              <h2 className="text-lg font-semibold text-gray-200 mb-6">
                 Macronutrient Intake
               </h2>
               <div className="h-80">
@@ -469,11 +467,13 @@ export default function ReportingPage() {
             </motion.div>
           </div>
           {/* Enhanced Insights (correlation, streaks, quality score) */}
-          <EnhancedInsights
-            aggregatedData={aggregatedData}
-            averages={averages}
-            isLoading={isLoading}
-          />
+          <div className="mb-6">
+            <EnhancedInsights
+              aggregatedData={aggregatedData}
+              averages={averages}
+              isLoading={isLoading}
+            />
+          </div>
           {/* Nutrition Insights */}
           <NutritionInsights
             isLoading={isLoading}
@@ -495,7 +495,6 @@ export default function ReportingPage() {
         size="sm"
       >
         <div className="space-y-4 p-1">
-          {" "}
           {/* Added padding */}
           <div>
             <label
