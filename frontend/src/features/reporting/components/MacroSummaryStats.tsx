@@ -199,7 +199,7 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
   if (!macroAvg) return null; // Updated early return condition
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       {/* Macro Panels */}
       {/* "bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden" */}
       <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
