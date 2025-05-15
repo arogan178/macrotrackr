@@ -9,6 +9,7 @@ import {
   Tooltip,
   LabelList,
   Cell,
+  Legend,
 } from "recharts";
 import { motion } from "motion/react"; // Ensure motion is imported
 
@@ -269,15 +270,18 @@ function MealTimeBreakdown({
       transition={{ duration: 0.4 }}
       className="bg-gray-800/70 rounded-xl border border-gray-700/30 p-3 shadow-lg h-full flex flex-col"
     >
-      {/* Header with title and stat selector */}
+      {/* Header with title and stat selector */}{" "}
       <div className="flex items-center justify-between mb-2">
         <h3 className="text-base font-semibold text-white">
           Meal Distribution
         </h3>
-        <div className="relative flex space-x-1 p-0.5 bg-gray-700/60 rounded-lg">
-          {["calories", "protein", "count"].map((stat) => {
+        <div className="relative flex flex-wrap space-x-1 p-0.5 bg-gray-700/60 rounded-lg">
+          {["calories", "protein", "carbs", "fats", "count"].map((stat) => {
+            // Map stat to appropriate color
             let bgColor = "bg-indigo-600"; // Default for calories
             if (stat === "protein") bgColor = "bg-green-600";
+            if (stat === "carbs") bgColor = "bg-blue-600";
+            if (stat === "fats") bgColor = "bg-red-600";
             if (stat === "count") bgColor = "bg-purple-600";
 
             return (
@@ -305,7 +309,6 @@ function MealTimeBreakdown({
           })}
         </div>
       </div>
-
       {/* Main content */}
       <div className="flex-1">
         {mealTypeDistribution.length > 0 ? (
@@ -358,17 +361,15 @@ function MealTimeBreakdown({
                 domain={[0, "dataMax"]}
                 tickFormatter={(value) =>
                   `${Math.round(value)}${
-                    selectedStat === "count" ? "" : getUnit()
+                    selectedStat === "count" ? "" : " " + getUnit()
                   }`
                 }
+                tick={{ fill: "#9ca3af", fontSize: 10 }}
               />
               <YAxis
                 dataKey="name"
                 type="category"
-                tick={{
-                  fill: "#d1d5db",
-                  fontSize: 12,
-                }}
+                tick={{ fill: "#d1d5db", fontSize: 12 }}
                 axisLine={false}
                 tickLine={false}
                 width={70}
@@ -378,8 +379,34 @@ function MealTimeBreakdown({
                 cursor={{ fill: "rgba(110,118,145,0.1)" }}
                 wrapperStyle={{ outline: "none" }}
               />
-
-              <Bar dataKey="value" fill="#8884d8" radius={[0, 10, 10, 0]}>
+              <Legend
+                height={14}
+                iconSize={10}
+                iconType="circle"
+                verticalAlign="bottom"
+                align="center"
+                wrapperStyle={{
+                  fontSize: 12,
+                  paddingTop: 2,
+                }}
+                payload={MEAL_TYPES.map((mealType) => ({
+                  id: mealType,
+                  value: formatMealType(mealType),
+                  type: "circle",
+                  color: MEAL_COLORS[mealType].base,
+                }))}
+                formatter={(value) => (
+                  <span className="text-gray-300 capitalize ml-1">{value}</span>
+                )}
+              />{" "}
+              <Bar
+                dataKey="value"
+                name="Meal Distribution"
+                fill="#8884d8"
+                radius={[0, 10, 10, 0]}
+                label={false}
+              >
+                {" "}
                 {mealTypeDistribution.map((_, index) => {
                   const mealType = MEAL_TYPES[index];
                   return (
@@ -430,24 +457,7 @@ function MealTimeBreakdown({
               </p>
             </div>
           </div>
-        )}
-      </div>
-
-      {/* Legend */}
-      <div className="mt-2 flex justify-center">
-        <div className="flex flex-wrap justify-center gap-3 text-sm">
-          {MEAL_TYPES.map((mealType) => (
-            <div key={mealType} className="flex items-center">
-              <span
-                className="w-3 h-3 rounded-full inline-block mr-1"
-                style={{ backgroundColor: MEAL_COLORS[mealType].base }}
-              ></span>
-              <span className="text-gray-300 text-xs">
-                {formatMealType(mealType)}
-              </span>
-            </div>
-          ))}
-        </div>
+        )}{" "}
       </div>
     </motion.div>
   );
