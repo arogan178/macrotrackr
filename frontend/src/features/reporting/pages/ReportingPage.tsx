@@ -1,14 +1,15 @@
 import { useState, useEffect } from "react";
 import Navbar from "@/features/layout/components/Navbar";
 import { useStore } from "@/store/store";
-import LineChartComponent from "@/components/chart/LineChartComponent";
-import ReportingPageSkeleton from "../components/ReportingPageSkeleton";
-import MealTimeBreakdown from "../components/MealTimeBreakdown";
-import NutrientDensityVisualization from "../components/NutrientDensityVisualization";
-import UnifiedInsights from "../components/UnifiedInsights";
+import { LineChartComponent, DateRangeSelector } from "@/components/chart";
+import {
+  UnifiedInsights,
+  NutrientDensityVisualization,
+  MealTimeBreakdown,
+  ReportingPageSkeleton,
+  MacroSummaryStats,
+} from "../components";
 import { motion } from "motion/react";
-import DateRangeSelector from "@/components/chart/DateRangeSelector";
-import MacroSummaryStats from "../components/MacroSummaryStats";
 import { useReportingLogic } from "../hooks/useReportingLogic";
 
 export default function ReportingPage() {
@@ -145,10 +146,12 @@ export default function ReportingPage() {
                 NutrientDensityVisualization works with pre-aggregated data and uses numeric range
                 for visualization purposes, not for data filtering. That's why it takes selectedRange
                 as a number (7, 30, 90) instead of ISO date strings.
-              */}
+              */}{" "}
               <NutrientDensityVisualization
                 data={aggregatedData}
                 selectedRange={mapDateRangeToNumeric(dateRange)}
+                isLoading={isLoading}
+                dataProcessed={dataProcessed}
               />
             </div>
           </div>

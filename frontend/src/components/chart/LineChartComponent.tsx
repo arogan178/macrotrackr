@@ -21,6 +21,41 @@ import {
 import { ChartDataPoint, LineConfig } from "../utils/types"; // Use the correct path for your types
 import { DefaultTooltip } from "./chart-helpers";
 
+// Custom dot component that adapts based on data length and hides when value is 0
+const CustomDot = (props: any) => {
+  const { cx, cy, payload, dataKey, r = 2, dataLength = 0 } = props;
+  const value = payload?.[dataKey];
+
+  // Don't render dot if value is 0 or null/undefined
+  if (!value || value === 0) {
+    return null;
+  }
+
+  // Hide dots completely for very long datasets (90+ days) to reduce clutter
+  if (dataLength > 60) {
+    return null;
+  }
+
+  // Adaptive dot size based on data length
+  let dotSize = r;
+  if (dataLength > 30) {
+    dotSize = Math.max(1, r * 0.7); // Smaller dots for 30-60 days
+  } else if (dataLength > 15) {
+    dotSize = Math.max(1.5, r * 0.85); // Slightly smaller for 15-30 days
+  }
+
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={dotSize}
+      fill={props.fill || props.stroke}
+      stroke={props.stroke}
+      strokeWidth="0"
+    />
+  );
+};
+
 interface LineChartComponentProps {
   data: ChartDataPoint[]; // Use imported type
   lines: LineConfig[]; // Use imported type
@@ -60,13 +95,21 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   // Assign the component or element directly
   const TooltipContent = tooltipContent || DefaultTooltip;
 
+  // Adaptive interval based on data length
+  const getAdaptiveInterval = (dataLength: number) => {
+    if (dataLength > 60) return Math.floor(dataLength / 8); // Show ~8 ticks for 90+ days
+    if (dataLength > 30) return Math.floor(dataLength / 6); // Show ~6 ticks for 30-60 days
+    if (dataLength > 15) return Math.floor(dataLength / 5); // Show ~5 ticks for 15-30 days
+    return "preserveStartEnd"; // Show all ticks for shorter periods
+  };
+
   const defaultXAxisProps: Partial<XAxisProps> = {
     dataKey: "name",
     tick: { fill: "#9ca3af", fontSize: 11 },
     axisLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     tickLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     padding: { left: 10, right: 10 },
-    interval: "preserveStartEnd",
+    interval: hasData ? getAdaptiveInterval(data.length) : "preserveStartEnd",
     height: 30, // Default height, can be overridden
     ...xAxisProps, // Merge user props
   };
@@ -209,22 +252,19 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={margin}>
             {/* Inject custom elements like <defs> */}
-            {chartElements}
-
+            {chartElements}{" "}
             <CartesianGrid
               strokeDasharray="3 3"
               stroke="rgba(75, 85, 99, 0.2)"
+              opacity={data.length > 60 ? 0.1 : 0.2}
             />
-
             <XAxis {...defaultXAxisProps} />
             <YAxis {...defaultYAxisProps} />
-
             <Tooltip
               // Pass the component/element directly to the content prop
               content={TooltipContent}
               cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
             />
-
             {showLegend && (
               <Legend
                 iconSize={10}
@@ -233,21 +273,44 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   <span className="text-gray-400">{value}</span>
                 )}
               />
-            )}
+            )}{" "}
+            {lines.map((line) => {
+              // Adaptive styling based on data length
+              const dataLength = data.length;
+              const adaptiveStrokeWidth =
+                dataLength > 60
+                  ? 1.5
+                  : dataLength > 30
+                  ? 2
+                  : line.strokeWidth || 2;
+              const adaptiveActiveDot =
+                dataLength > 60
+                  ? { r: 4 }
+                  : dataLength > 30
+                  ? { r: 5 }
+                  : line.activeDot ?? { r: 6 };
 
-            {lines.map((line) => (
-              <Line
-                key={line.dataKey}
-                type={line.type || "monotone"}
-                dataKey={line.dataKey}
-                name={line.name}
-                stroke={line.color || "#8884d8"} // Default color if not provided
-                strokeWidth={line.strokeWidth || 2}
-                activeDot={line.activeDot ?? { r: 6 }}
-                dot={line.dot ?? { r: 2 }}
-                connectNulls={line.connectNulls ?? false}
-              />
-            ))}
+              return (
+                <Line
+                  key={line.dataKey}
+                  type={line.type || "monotone"}
+                  dataKey={line.dataKey}
+                  name={line.name}
+                  stroke={line.color || "#8884d8"} // Default color if not provided
+                  strokeWidth={adaptiveStrokeWidth}
+                  activeDot={adaptiveActiveDot}
+                  dot={
+                    line.dot ?? (
+                      <CustomDot
+                        dataKey={line.dataKey}
+                        dataLength={dataLength}
+                      />
+                    )
+                  }
+                  connectNulls={line.connectNulls ?? false}
+                />
+              );
+            })}
           </LineChart>
         </ResponsiveContainer>
       </div>
