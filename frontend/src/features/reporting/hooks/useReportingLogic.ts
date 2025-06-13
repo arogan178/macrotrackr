@@ -17,8 +17,6 @@ const formatDate = (dateStr: string): string => {
 export function useReportingLogic(
   history: MacroEntry[] | null,
   dateRange: string,
-  customStartDate: string,
-  customEndDate: string,
   isLoadingExternal: boolean // To know if history is loading vs. empty
 ) {
   const [aggregatedData, setAggregatedData] = useState<
@@ -32,38 +30,21 @@ export function useReportingLogic(
   >([]);
   const [dataProcessed, setDataProcessed] = useState(false);
 
-  const mapDateRangeToNumeric = useCallback(
-    (range: string): 7 | 30 | 90 => {
-      switch (range) {
-        case "week":
-          return 7;
-        case "month":
-          return 30;
-        case "3months":
-          return 90;
-        case "custom":
-          if (customStartDate && customEndDate) {
-            const start = new Date(customStartDate);
-            const end = new Date(customEndDate);
-            const diffTime = Math.abs(end.getTime() - start.getTime());
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-            if (diffDays <= 7) return 7;
-            if (diffDays <= 30) return 30;
-            return 90;
-          }
-          return 7; // Default for custom if dates not set
-        default:
-          return 7;
-      }
-    },
-    [customStartDate, customEndDate]
-  );
+  const mapDateRangeToNumeric = useCallback((range: string): 7 | 30 | 90 => {
+    switch (range) {
+      case "week":
+        return 7;
+      case "month":
+        return 30;
+      case "3months":
+        return 90;
+      default:
+        return 7;
+    }
+  }, []);
 
   const getDateRangeISOStrings = useCallback(
     (range: string): { startDate: string; endDate: string } => {
-      if (range === "custom" && customStartDate && customEndDate) {
-        return { startDate: customStartDate, endDate: customEndDate };
-      }
       const today = new Date();
       const endDateStr = today.toISOString().split("T")[0];
       const days = mapDateRangeToNumeric(range);
@@ -72,7 +53,7 @@ export function useReportingLogic(
       const startDateStr = startDateObj.toISOString().split("T")[0];
       return { startDate: startDateStr, endDate: endDateStr };
     },
-    [customStartDate, customEndDate, mapDateRangeToNumeric]
+    [mapDateRangeToNumeric]
   );
 
   const processDataForCharts = useCallback(
@@ -231,16 +212,12 @@ export function useReportingLogic(
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.setAttribute("href", url);
-    const rangeSuffix =
-      dateRange === "custom"
-        ? `${customStartDate}_to_${customEndDate}`
-        : dateRange;
-    link.setAttribute("download", `nutrition_data_${rangeSuffix}.csv`);
+    link.setAttribute("download", `nutrition_data_${dateRange}.csv`);
     link.style.visibility = "hidden";
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-  }, [aggregatedData, dateRange, customStartDate, customEndDate]);
+  }, [aggregatedData, dateRange]);
 
   return {
     aggregatedData,
