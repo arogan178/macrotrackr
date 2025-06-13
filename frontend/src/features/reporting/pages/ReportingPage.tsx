@@ -14,7 +14,6 @@ import { useReportingLogic } from "../hooks/useReportingLogic";
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
-
   // Get history data from app state
   const {
     history,
@@ -23,6 +22,7 @@ export default function ReportingPage() {
     fetchUserDetails,
     fetchMacroData,
     fetchWeightGoals,
+    macroTarget,
   } = useStore();
 
   // Use the reporting logic hook to handle all data processing
@@ -189,11 +189,13 @@ export default function ReportingPage() {
           </div>{" "}
           {/* Unified Insights Dashboard */}
           <div className="mb-6">
+            {" "}
             <UnifiedInsights
               aggregatedData={aggregatedData}
               averages={averages}
               isLoading={isLoading}
               showNoDataMessage={showNoDataMessage}
+              macroTarget={macroTarget}
             />
           </div>
         </div>

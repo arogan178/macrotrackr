@@ -18,30 +18,36 @@ interface NutritionAverage {
   fats: number;
 }
 
+interface MacroTargetPercentages {
+  proteinPercentage: number;
+  carbsPercentage: number;
+  fatsPercentage: number;
+}
+
 interface UnifiedInsightsProps {
   aggregatedData: AggregatedDataPoint[];
   averages: NutritionAverage;
   isLoading: boolean;
   showNoDataMessage?: boolean;
+  macroTarget?: MacroTargetPercentages | null;
 }
 
 // Component helper
 const getScoreColor = (score: number) =>
   score > 70 ? "bg-green-400" : score > 40 ? "bg-yellow-400" : "bg-red-400";
 
-const getStrokeColor = (score: number) =>
-  score > 70 ? "#10B981" : score > 40 ? "#FBBF24" : "#F87171";
-
 const TrendIcon = ({ direction }: { direction: string }) => {
   const isUp = direction === "up";
   const color =
     direction === "stable"
       ? "text-gray-400"
+      : direction === "insufficient"
+      ? "text-gray-500"
       : isUp
       ? "text-red-400"
       : "text-green-400";
 
-  if (direction === "stable") return null;
+  if (direction === "stable" || direction === "insufficient") return null;
 
   return (
     <svg
@@ -85,15 +91,28 @@ const calculateConsistencyScore = (data: AggregatedDataPoint[]): number => {
   return Math.round(frequencyScore + consistencyScore);
 };
 
-const calculateMacroBalance = (averages: NutritionAverage) => {
+const calculateMacroBalance = (
+  averages: NutritionAverage,
+  macroTarget?: MacroTargetPercentages | null
+) => {
   const total = averages.protein + averages.carbs + averages.fats;
 
+  // Use default targets if no user target is provided
+  const defaultTarget = {
+    proteinPercentage: 30,
+    carbsPercentage: 40,
+    fatsPercentage: 30,
+  };
+  const target = macroTarget || defaultTarget;
+
+  const idealRatioString = `${target.proteinPercentage}/${target.carbsPercentage}/${target.fatsPercentage}`;
   if (!averages || total === 0) {
     return {
       score: 0,
-      idealRatio: "30/40/30",
+      idealRatio: idealRatioString,
       currentRatio: "0/0/0",
-      recommendations: "Start tracking your nutrition to see recommendations.",
+      recommendations:
+        "Start logging your meals to get personalized macro balance insights!",
     };
   }
 
@@ -103,25 +122,43 @@ const calculateMacroBalance = (averages: NutritionAverage) => {
     Math.round((averages.fats / total) * 100),
   ];
 
-  const [idealProtein, idealCarbs, idealFats] = [30, 40, 30];
+  const [idealProtein, idealCarbs, idealFats] = [
+    target.proteinPercentage,
+    target.carbsPercentage,
+    target.fatsPercentage,
+  ];
   const totalDiff =
     Math.abs(proteinPct - idealProtein) +
     Math.abs(carbsPct - idealCarbs) +
     Math.abs(fatsPct - idealFats);
 
   const score = Math.max(0, 100 - totalDiff * 1.5);
-
-  let recommendations = "Your macro balance is optimal.";
+  let recommendations = "Excellent! Your macro balance is right on target.";
   if (totalDiff > 10) {
     const suggestions = [];
-    if (proteinPct < 25) suggestions.push("Increase protein intake");
-    if (proteinPct > 35) suggestions.push("Consider reducing protein slightly");
-    if (carbsPct < 35) suggestions.push("Increase carbohydrate intake");
-    if (carbsPct > 45) suggestions.push("Reduce carbohydrate intake");
-    if (fatsPct < 25) suggestions.push("Include more healthy fats");
-    if (fatsPct > 35) suggestions.push("Reduce fat intake");
+    const proteinTolerance = Math.max(5, idealProtein * 0.2); // 20% tolerance or minimum 5%
+    const carbsTolerance = Math.max(5, idealCarbs * 0.2);
+    const fatsTolerance = Math.max(5, idealFats * 0.2);
 
-    recommendations = suggestions.join(". ") + ".";
+    if (proteinPct < idealProtein - proteinTolerance)
+      suggestions.push("try adding more protein-rich foods");
+    if (proteinPct > idealProtein + proteinTolerance)
+      suggestions.push("consider balancing protein with other macros");
+    if (carbsPct < idealCarbs - carbsTolerance)
+      suggestions.push(
+        "include more healthy carbs like fruits and whole grains"
+      );
+    if (carbsPct > idealCarbs + carbsTolerance)
+      suggestions.push("balance carbs with more protein and healthy fats");
+    if (fatsPct < idealFats - fatsTolerance)
+      suggestions.push("add healthy fats like nuts, avocado, or olive oil");
+    if (fatsPct > idealFats + fatsTolerance)
+      suggestions.push("balance fats with lean proteins and complex carbs");
+
+    recommendations =
+      suggestions.length > 0
+        ? `To optimize your macro balance, ${suggestions.join(", and ")}.`
+        : "You're close to your target! Small adjustments will help you reach optimal balance.";
   }
 
   return {
@@ -138,7 +175,7 @@ const calculateTrend = (
 ) => {
   if (!data?.length || data.length < 5) {
     return {
-      direction: "stable" as const,
+      direction: "insufficient" as const,
       percentage: 0,
       message: "Need at least 5 days of data to analyze trends.",
     };
@@ -155,9 +192,9 @@ const calculateTrend = (
 
   if (!firstDays.length || !lastDays.length) {
     return {
-      direction: "stable" as const,
+      direction: "insufficient" as const,
       percentage: 0,
-      message: "Insufficient data to calculate trends.",
+      message: "Not enough data points to calculate trends.",
     };
   }
 
@@ -167,9 +204,9 @@ const calculateTrend = (
 
   if (firstAvg === 0) {
     return {
-      direction: "stable" as const,
+      direction: "insufficient" as const,
       percentage: 0,
-      message: "Unable to calculate percentage change.",
+      message: "Unable to calculate percentage change from zero baseline.",
     };
   }
 
@@ -193,33 +230,42 @@ const calculateTrend = (
 const calculateDataQuality = (data: AggregatedDataPoint[]) => {
   if (!data?.length) {
     return {
-      streak: 0,
+      daysLogged: 0,
+      totalDaysInPeriod: 0,
       completionRate: 0,
-      message: "Start tracking your nutrition to see insights.",
+      message:
+        "Ready to start your nutrition journey? Begin logging your meals to track your progress!",
     };
   }
 
+  // Count days with actual logged data in the selected period
   const daysWithData = data.filter((d) => d.calories > 0).length;
-  const completionRate = Math.round((daysWithData / data.length) * 100);
-  const streak = data.length;
+  const totalDaysInPeriod = data.length;
+  const completionRate = Math.round((daysWithData / totalDaysInPeriod) * 100);
 
   const message =
     completionRate >= 90
-      ? "Excellent tracking consistency!"
+      ? "Outstanding consistency! You're building excellent tracking habits."
       : completionRate >= 70
-      ? "Good tracking habits. Keep it up!"
+      ? "Great job keeping up with your nutrition tracking!"
       : completionRate >= 50
-      ? "Try to log your nutrition more consistently."
-      : "Regular tracking will help provide better insights.";
+      ? "You're on the right track! Try logging more consistently for better insights."
+      : "Every entry counts! More consistent tracking will unlock powerful insights about your nutrition patterns.";
 
-  return { streak, completionRate, message };
+  return {
+    daysLogged: daysWithData,
+    totalDaysInPeriod,
+    completionRate,
+    message,
+  };
 };
 
 const calculateNutrientDensity = (averages: NutritionAverage) => {
   if (!averages?.calories) {
     return {
       score: 0,
-      message: "Start tracking to see nutrient density score.",
+      message:
+        "Start tracking your meals to discover your nutrition quality score!",
     };
   }
 
@@ -228,12 +274,12 @@ const calculateNutrientDensity = (averages: NutritionAverage) => {
 
   const message =
     score >= 80
-      ? "Excellent nutrient density with high protein quality."
+      ? "Fantastic! Your diet has excellent protein quality and nutrient density."
       : score >= 60
-      ? "Good nutrient profile with adequate protein."
+      ? "Great work! You're maintaining good nutritional quality in your meals."
       : score >= 40
-      ? "Consider including more protein-rich foods."
-      : "Focus on more nutrient-dense food choices.";
+      ? "Consider adding more protein-rich foods to boost your nutrition quality."
+      : "Focus on nutrient-dense foods like lean proteins, vegetables, and whole grains for better nutrition quality.";
 
   return { score, message };
 };
@@ -249,7 +295,6 @@ const MetricCard = ({
   textColor,
   delay = 0,
   children,
-  variant = "default",
 }: {
   title: string;
   value: string | number;
@@ -260,21 +305,18 @@ const MetricCard = ({
   textColor: string;
   delay?: number;
   children?: React.ReactNode;
-  variant?: "default" | "compact";
 }) => (
   <motion.div
     initial={{ opacity: 0, y: 10 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.3, delay }}
-    className={`rounded-lg ${bgGradient} p-4 ${borderColor} ${
-      variant === "compact" ? "min-h-[140px]" : "min-h-[120px]"
-    } flex flex-col`}
+    className={`rounded-lg ${bgGradient} p-4 ${borderColor} min-h-[120px] flex flex-col`}
   >
     <div className="flex items-center justify-between mb-2">
       <h3 className={`text-sm font-medium ${textColor}`}>{title}</h3>
       <div className={`h-2 w-2 rounded-full ${getScoreColor(score)}`} />
-    </div>
-    <div className="flex items-end justify-between mb-2">
+    </div>{" "}
+    <div className="flex items-center justify-between mb-2">
       <span className="text-2xl font-bold text-white">{value}</span>
       <span className={`text-xs ${textColor}/70`}>{subtitle}</span>
     </div>
@@ -297,6 +339,8 @@ const TrendDisplay = ({
         <span className="text-gray-200">
           {trend.direction === "stable"
             ? "Stable"
+            : trend.direction === "insufficient"
+            ? "Insufficient data"
             : `${trend.percentage}% ${
                 trend.direction === "up" ? "increase" : "decrease"
               }`}
@@ -332,6 +376,7 @@ function UnifiedInsights({
   averages,
   isLoading,
   showNoDataMessage = false,
+  macroTarget,
 }: UnifiedInsightsProps) {
   // Calculate all insights metrics in one pass
   const insights = useMemo(() => {
@@ -340,13 +385,13 @@ function UnifiedInsights({
     }
     return {
       consistencyScore: calculateConsistencyScore(aggregatedData),
-      macroBalance: calculateMacroBalance(averages),
+      macroBalance: calculateMacroBalance(averages, macroTarget),
       caloriesTrend: calculateTrend(aggregatedData, "calories"),
       proteinTrend: calculateTrend(aggregatedData, "protein"),
       dataQuality: calculateDataQuality(aggregatedData),
       nutrientDensity: calculateNutrientDensity(averages),
     };
-  }, [aggregatedData, averages, isLoading]);
+  }, [aggregatedData, averages, isLoading, macroTarget]);
 
   // Handle loading state
   if (isLoading) {
@@ -356,14 +401,21 @@ function UnifiedInsights({
       </div>
     );
   }
-
   // Handle no data state
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
       <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 flex items-center justify-center text-gray-400 text-center shadow-xl min-h-[250px]">
-        <div>
-          <p className="mb-2 text-xl font-semibold">Nutrition Insights</p>
-          <p>Log more nutrition data to unlock detailed insights</p>
+        <div className="space-y-3">
+          <div className="text-4xl">📊</div>
+          <div>
+            <p className="mb-2 text-xl font-semibold text-gray-200">
+              Ready for Insights!
+            </p>
+            <p className="text-gray-400 max-w-md">
+              Start logging your meals to unlock personalized nutrition
+              insights, trends, and recommendations tailored just for you.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -404,15 +456,13 @@ function UnifiedInsights({
     dataQuality,
     nutrientDensity,
   } = insights;
-
   return (
     <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 shadow-xl">
       <h2 className="text-lg font-semibold text-gray-200 mb-6">
         Comprehensive Nutrition Insights
-      </h2>{" "}
+      </h2>
       {/* Top metrics grid - key performance indicators */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-        {" "}
         {/* Consistency Score */}
         <MetricCard
           title="Consistency Score"
@@ -441,9 +491,10 @@ function UnifiedInsights({
                 }`}
                 style={{ width: `${consistencyScore}%` }}
               />
-            </div>{" "}
+            </div>
           </div>
         </MetricCard>
+
         {/* Macro Balance */}
         <MetricCard
           title="Macro Balance"
@@ -488,10 +539,11 @@ function UnifiedInsights({
                     {labels[idx]}: {pct}%
                   </span>
                 );
-              })}
+              })}{" "}
             </div>
           </div>
         </MetricCard>
+
         {/* Nutrient Density */}
         <MetricCard
           title="Nutrient Density"
@@ -502,48 +554,29 @@ function UnifiedInsights({
           borderColor="border border-emerald-700/30"
           textColor="text-emerald-300"
           delay={0.2}
-          variant="compact"
         >
-          {/* Compact circular progress and description */}
-          <div className="flex items-center justify-between">
-            <div className="text-xs text-emerald-300/70">
-              Based on protein quality
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs text-emerald-300/70">
+              <span>Protein quality</span>
+              <span>Macro balance</span>
             </div>
-            <div className="relative">
-              <svg className="w-10 h-10 -rotate-90" viewBox="0 0 40 40">
-                {/* Background circle */}
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke="#444"
-                  strokeWidth="3"
-                />
-                {/* Progress arc */}
-                <circle
-                  cx="20"
-                  cy="20"
-                  r="16"
-                  fill="none"
-                  stroke={getStrokeColor(nutrientDensity.score)}
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeDasharray={`${
-                    (nutrientDensity.score / 100) * 100.53
-                  } 100.53`}
-                  className="transition-all duration-1000"
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-semibold text-white">
-                  {nutrientDensity.score}%
-                </span>
-              </div>
-            </div>
+            {/* Progress bar showing nutrient density score */}
+            <div className="w-full bg-gray-800 rounded-full h-1.5">
+              <div
+                className={`h-1.5 rounded-full transition-all duration-1000 ${
+                  nutrientDensity.score > 70
+                    ? "bg-emerald-400"
+                    : nutrientDensity.score > 40
+                    ? "bg-yellow-400"
+                    : "bg-red-400"
+                }`}
+                style={{ width: `${nutrientDensity.score}%` }}
+              />
+            </div>{" "}
           </div>
         </MetricCard>
-      </div>{" "}
+      </div>
+
       {/* At a Glance - Quick daily averages */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -562,14 +595,14 @@ function UnifiedInsights({
                 {item.value}
                 {item.unit}
               </span>
-              <span className="text-gray-400 text-xs mt-1">{item.label}</span>
+              <span className="text-gray-400 text-xs mt-1">{item.label}</span>{" "}
             </div>
           ))}
         </div>
       </motion.div>
+
       {/* Detailed insights section */}
       <div className="space-y-4">
-        {" "}
         {/* Trend Analysis */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -621,15 +654,16 @@ function UnifiedInsights({
                   strokeWidth="2"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
-              </svg>
+              </svg>{" "}
               <span>
-                {dataQuality.streak} day{dataQuality.streak !== 1 ? "s" : ""}{" "}
+                {dataQuality.daysLogged}/{dataQuality.totalDaysInPeriod} days
                 logged
               </span>
             </div>
-          </div>
+          </div>{" "}
           <p className="text-gray-400 text-sm mt-2">{dataQuality.message}</p>
-        </motion.div>{" "}
+        </motion.div>
+
         {/* Recommendations */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -677,7 +711,6 @@ function UnifiedInsights({
                 </svg>
               }
             />
-
             <ActionCard
               title="Food Quality"
               bgColor="bg-emerald-900/50"
@@ -697,18 +730,17 @@ function UnifiedInsights({
                   />
                 </svg>
               }
-            />
-
+            />{" "}
             {averages.protein < 100 && (
               <ActionCard
-                title="Protein Intake"
+                title="Protein Goals"
                 bgColor="bg-green-900/50"
                 message={
                   averages.protein === 0
-                    ? "Start tracking your protein intake for muscle recovery recommendations."
+                    ? "Ready to optimize your protein intake? Start tracking to get personalized muscle recovery recommendations!"
                     : averages.protein >= 120
-                    ? "Your protein intake is excellent for muscle recovery and growth."
-                    : "Consider increasing your protein intake to at least 1.6g per kg of bodyweight."
+                    ? "Excellent protein intake! You're supporting optimal muscle recovery and growth."
+                    : "Great start! Consider boosting your protein to about 1.6g per kg of body weight for optimal muscle support."
                 }
                 icon={
                   <svg
@@ -726,15 +758,14 @@ function UnifiedInsights({
                   </svg>
                 }
               />
-            )}
-
+            )}{" "}
             <ActionCard
               title="Next Steps"
               bgColor="bg-blue-900/50"
               message={
                 dataQuality.completionRate < 70
-                  ? "Focus on consistent tracking for more accurate insights."
-                  : "Continue your tracking consistency and work on addressing macro balance."
+                  ? "Keep building that tracking habit! More consistent logging will unlock deeper insights into your nutrition patterns."
+                  : "You're doing great with consistency! Continue tracking and fine-tune your macro balance for optimal results."
               }
               icon={
                 <svg
