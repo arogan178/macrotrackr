@@ -7,7 +7,7 @@ import {
   NutrientIcon,
   ProteinIcon,
   ClipboardIcon,
-} from "./insights-icons";
+} from "@/components/Icons";
 
 interface RecommendationsSectionProps {
   insights: InsightsData;
