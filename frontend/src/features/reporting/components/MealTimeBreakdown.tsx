@@ -189,10 +189,10 @@ function MealTimeBreakdown({
       </text>
     );
   };
-
   return (
     <ChartCard
       title="Meal Distribution"
+      className="h-[300px]"
       action={
         <StatSelector
           selectedStat={selectedStat}
