@@ -107,7 +107,6 @@ const MacroSummaryItem = React.memo(
                   value={avgGrams}
                   toFixedValue={1}
                   suffix="g"
-                  flipChart={false}
                   duration={0.8}
                 />
               </span>
@@ -117,7 +116,6 @@ const MacroSummaryItem = React.memo(
                   value={avgPercentage}
                   toFixedValue={0}
                   suffix="%"
-                  flipChart={false}
                   duration={0.6}
                 />
                 )
@@ -133,7 +131,6 @@ const MacroSummaryItem = React.memo(
                   value={targetGrams}
                   toFixedValue={1}
                   suffix="g"
-                  flipChart={false}
                   duration={0.8}
                 />
               </span>
@@ -143,7 +140,6 @@ const MacroSummaryItem = React.memo(
                   value={targetPercentage}
                   toFixedValue={0}
                   suffix="%"
-                  flipChart={false}
                   duration={0.6}
                 />
                 )
@@ -165,7 +161,6 @@ const MacroSummaryItem = React.memo(
                 toFixedValue={1}
                 suffix="g"
                 prefix={gramDelta >= 0 ? "+" : ""}
-                flipChart={false}
                 duration={0.8}
               />
             </span>
@@ -180,7 +175,6 @@ const MacroSummaryItem = React.memo(
                 toFixedValue={0}
                 suffix="%"
                 prefix={percentageDelta >= 0 ? "+" : ""}
-                flipChart={false}
                 duration={0.6}
               />
               )
@@ -261,7 +255,6 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
                   value={avgCalories}
                   toFixedValue={0}
                   suffix=" kcal"
-                  flipChart={false}
                   duration={0.8}
                 />
               </span>
@@ -273,7 +266,6 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
                   value={effectiveCalorieTarget}
                   toFixedValue={0}
                   suffix=" kcal"
-                  flipChart={false}
                   duration={0.8}
                 />
               </span>
@@ -293,7 +285,6 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
                 toFixedValue={0}
                 suffix=" kcal"
                 prefix={avgCalories - effectiveCalorieTarget >= 0 ? "+" : ""}
-                flipChart={false}
                 duration={0.8}
               />
             </span>

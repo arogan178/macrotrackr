@@ -26,7 +26,6 @@ export default function AtAGlanceSection({ averages }: AtAGlanceSectionProps) {
                 value={Math.round(averages[config.key])}
                 toFixedValue={0}
                 suffix={config.unit}
-                flipChart={false}
                 duration={0.6}
               />
             </span>

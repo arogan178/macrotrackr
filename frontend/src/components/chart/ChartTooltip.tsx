@@ -1,4 +1,5 @@
 import { getUnitForStat } from "../../utils/chart-colors";
+import AnimatedNumber from "../animation/AnimatedNumber";
 
 interface TooltipData {
   name: string;
@@ -32,31 +33,39 @@ function ChartTooltip({
 
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
-      <p className="font-medium text-white">{data.name}</p>
+      <p className="font-medium text-white">{data.name}</p>{" "}
       <p className="text-gray-300">
         <span className="font-medium">
           {selectedStat === "calories" ? "~" : ""}
-          {formatter
-            ? formatter(data.value, selectedStat)
-            : data.value.toFixed(1)}
-          {unit}
+          {formatter ? (
+            formatter(data.value, selectedStat)
+          ) : (
+            <AnimatedNumber value={data.value} toFixedValue={1} suffix={unit} />
+          )}
         </span>
         {data.percentage !== undefined && (
-          <span className="ml-1 text-gray-400">({data.percentage}%)</span>
+          <span className="ml-1 text-gray-400">
+            (
+            <AnimatedNumber value={data.percentage} suffix="%" />)
+          </span>
         )}
       </p>
-
-      {/* Show calories if not already displayed */}
+      {/* Show calories if not already displayed */}{" "}
       {selectedStat !== "calories" && typeof data.calories === "number" && (
         <p className="text-gray-400 text-xs mt-1">
-          ~ {data.calories.toFixed(0)} kcal
+          ~{" "}
+          <AnimatedNumber
+            value={data.calories}
+            toFixedValue={0}
+            suffix=" kcal"
+          />
         </p>
       )}
-
-      {/* Show count if available and not the selected stat */}
+      {/* Show count if available and not the selected stat */}{" "}
       {selectedStat !== "count" && typeof data.count === "number" && (
         <p className="text-gray-400 text-xs">
-          {data.count} {data.count !== 1 ? "items" : "item"}
+          <AnimatedNumber value={data.count} />{" "}
+          {data.count !== 1 ? "items" : "item"}
         </p>
       )}
     </div>
