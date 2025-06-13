@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { UserIcon, StarIcon } from "@/components/Icons";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface UserMetricsPanelProps {
   bmr: number;
@@ -56,11 +57,16 @@ function MetricCard({
             <span className={`text-xs ${classes.acronym} whitespace-nowrap`}>
               ({acronym})
             </span>
-          </div>
+          </div>{" "}
           <p className="text-2xl font-bold text-white">
             {value ? (
               <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
-                {value} <span className="text-lg font-medium">kcal</span>
+                <AnimatedNumber
+                  value={value}
+                  toFixedValue={0}
+                  suffix=" kcal"
+                  duration={0.8}
+                />
               </span>
             ) : (
               <span className="text-gray-500 text-lg">Complete profile</span>

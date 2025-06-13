@@ -9,6 +9,7 @@ import {
   TargetIcon, // Added for Daily Deficit/Surplus
 } from "@/components/Icons";
 import ProgressBar from "@/components/ProgressBar";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import {
   MacroDailyTotals,
   MacroTargetSettings,
@@ -16,7 +17,6 @@ import {
 import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
 import { motion } from "motion/react"; // Import motion
-import React from "react"; // Import React for useEffect
 
 interface WeightGoalStatusProps {
   startingWeight: number; // This should represent the *current* weight
@@ -107,9 +107,7 @@ function WeightGoalStatus({
   const goalColor = isWeightLoss ? "indigo" : isWeightGain ? "green" : "blue";
   const goalTextColor = `text-${goalColor}-400`;
   const goalBgColorLight = `bg-${goalColor}-600/10`; // Lighter background
-  const goalBgColorHover = `bg-${goalColor}-600/20`; // Slightly darker on hover
   const goalBorderColor = `border-${goalColor}-500`;
-  const goalRingColor = `ring-${goalColor}-500`;
 
   const formattedStartDate = formatDate(weightGoals?.startDate);
   const formattedTargetDate = formatDate(weightGoals?.targetDate, {
@@ -190,21 +188,32 @@ function WeightGoalStatus({
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3">
           <div className="flex items-baseline space-x-2">
-            {/* Display the CURRENT weight */}
+            {/* Display the CURRENT weight */}{" "}
             <span className="text-2xl font-bold text-gray-100">
-              {startingWeight.toFixed(1)} kg
+              <AnimatedNumber
+                value={startingWeight}
+                toFixedValue={1}
+                suffix=" kg"
+              />
             </span>
             {!isMaintenance && (
               <>
-                <ChevronRightIcon className="w-4 h-4 text-gray-500 shrink-0" />
+                <ChevronRightIcon className="w-4 h-4 text-gray-500 shrink-0" />{" "}
                 <span className="text-xl text-gray-400">
-                  {targetWeight.toFixed(1)} kg
+                  <AnimatedNumber
+                    value={targetWeight}
+                    toFixedValue={1}
+                    suffix=" kg"
+                  />
                 </span>
-                {/* Display the difference relative to the GOAL's starting weight */}
+                {/* Display the difference relative to the GOAL's starting weight */}{" "}
                 <span className={`${goalTextColor} ml-1 text-sm font-medium`}>
                   ({isWeightLoss ? "↓" : "↑"}
-                  {Math.abs(targetWeight - goalStartingWeight).toFixed(1)} kg
-                  goal)
+                  <AnimatedNumber
+                    value={Math.abs(targetWeight - goalStartingWeight)}
+                    toFixedValue={1}
+                    suffix=" kg goal)"
+                  />
                 </span>
               </>
             )}
@@ -224,17 +233,31 @@ function WeightGoalStatus({
 
         {!isMaintenance && (
           <>
+            {" "}
             <ProgressBar
               progress={progressPercentage} // Use the calculated progress
               color={goalColor}
               height="md"
-              showLabel={false}
               className="mb-1"
             />
             <div className="flex justify-between text-xs text-gray-400 mt-1">
-              {/* Display the GOAL's starting weight here */}
-              <span>Start: {goalStartingWeight.toFixed(1)} kg</span>
-              <span>Target: {targetWeight.toFixed(1)} kg</span>
+              {/* Display the GOAL's starting weight here */}{" "}
+              <span>
+                Start:{" "}
+                <AnimatedNumber
+                  value={goalStartingWeight}
+                  toFixedValue={1}
+                  suffix=" kg"
+                />
+              </span>
+              <span>
+                Target:{" "}
+                <AnimatedNumber
+                  value={targetWeight}
+                  toFixedValue={1}
+                  suffix=" kg"
+                />
+              </span>
             </div>
           </>
         )}
@@ -250,13 +273,16 @@ function WeightGoalStatus({
             className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`}
           />
           <div>
-            <p className="text-xs text-gray-400 mb-0.5">Weekly Rate</p>
+            <p className="text-xs text-gray-400 mb-0.5">Weekly Rate</p>{" "}
             <p className="text-base font-medium text-gray-100">
-              {isMaintenance
-                ? "Maintenance"
-                : `${isWeightLoss ? "↓" : "↑"} ${Math.abs(weeklyChange).toFixed(
-                    2
-                  )} kg/week`}
+              {isMaintenance ? "Maintenance" : `${isWeightLoss ? "↓" : "↑"} `}
+              {!isMaintenance && (
+                <AnimatedNumber
+                  value={Math.abs(weeklyChange)}
+                  toFixedValue={2}
+                  suffix=" kg/week"
+                />
+              )}
             </p>
           </div>
         </div>
@@ -269,9 +295,15 @@ function WeightGoalStatus({
             className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`}
           />
           <div>
-            <p className="text-xs text-gray-400 mb-0.5">Est. Duration</p>
+            <p className="text-xs text-gray-400 mb-0.5">Est. Duration</p>{" "}
             <p className="text-base font-medium text-gray-100">
-              {isMaintenance ? "Ongoing" : `${calculatedWeeks} weeks`}
+              {isMaintenance ? (
+                "Ongoing"
+              ) : (
+                <>
+                  <AnimatedNumber value={calculatedWeeks} suffix=" weeks" />
+                </>
+              )}
             </p>
           </div>
         </div>
@@ -288,9 +320,13 @@ function WeightGoalStatus({
                 : isWeightGain
                 ? "Daily Surplus"
                 : "Est. TDEE"}
-            </p>
+            </p>{" "}
             <p className="text-base font-medium text-gray-100">
-              {isMaintenance ? `${tdee} kcal` : `${dailyDifference} kcal`}
+              {isMaintenance ? (
+                <AnimatedNumber value={tdee} suffix=" kcal" />
+              ) : (
+                <AnimatedNumber value={dailyDifference} suffix=" kcal" />
+              )}
             </p>
           </div>
         </div>
@@ -310,14 +346,17 @@ function WeightGoalStatus({
               <span className="text-sm font-medium text-gray-200">
                 Calories
               </span>
-            </div>
+            </div>{" "}
             <div className="text-sm">
               <span className="font-medium text-gray-100">
-                {Math.round(macroDailyTotals.calories)}
+                <AnimatedNumber value={Math.round(macroDailyTotals.calories)} />
               </span>
               <span className="text-gray-500 mx-1">/</span>
               <span className="text-gray-400">
-                {Math.round(effectiveCalorieTarget)} kcal
+                <AnimatedNumber
+                  value={Math.round(effectiveCalorieTarget)}
+                  suffix=" kcal"
+                />
               </span>
             </div>
           </div>

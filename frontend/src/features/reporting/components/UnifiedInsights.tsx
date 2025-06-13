@@ -235,7 +235,6 @@ function UnifiedInsights({
                   value={dataQuality.completionRate}
                   toFixedValue={0}
                   suffix="% tracking completion rate"
-                  flipChart={false}
                   duration={0.6}
                 />
               </span>
@@ -264,14 +263,12 @@ function UnifiedInsights({
                 <AnimatedNumber
                   value={dataQuality.daysLogged}
                   toFixedValue={0}
-                  flipChart={false}
                   duration={0.5}
                 />
                 /
                 <AnimatedNumber
                   value={dataQuality.totalDaysInPeriod}
                   toFixedValue={0}
-                  flipChart={false}
                   duration={0.5}
                 />
                 {" days logged"}

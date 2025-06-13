@@ -32,7 +32,6 @@ export default function MetricCard({
               typeof value === "number" ? value : parseFloat(value.toString())
             }
             toFixedValue={0}
-            flipChart={false}
             duration={0.8}
           />
         </span>
