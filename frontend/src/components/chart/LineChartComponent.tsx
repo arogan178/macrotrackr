@@ -86,7 +86,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
     !isLoading && !error && !hasData && !emptyState && showNoDataMessage;
 
   return (
-    <div className={`w-full relative ${className}`} style={{ height }}>
+    <div className={`w-full relative ${className} `} style={{ height }}>
       {/* Loading State */}
       <AnimatePresence>
         {isLoading && (
@@ -96,7 +96,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center bg-gray-800/50 backdrop-blur-sm z-10 rounded-lg"
+            className="absolute inset-0 flex items-center justify-center bg-gray-800/50 backdrop-blur-sm z-10 rounded-lg "
           >
             <div className="flex flex-col items-center">
               <LoadingSpinner size="md" />

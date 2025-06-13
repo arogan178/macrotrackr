@@ -219,7 +219,7 @@ function Modal({
         {/* Footer */}
         {(onSave || onConfirm || variant === "confirmation") && (
           <div
-            className={`flex justify-end gap-3 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
+            className={`flex justify-end gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
           >
             <button
               onClick={onClose}
