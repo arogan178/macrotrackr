@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useStore } from "@/store/store";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 // Enhanced colors - simplified
 const COLORS = {
@@ -94,35 +95,62 @@ const MacroSummaryItem = React.memo(
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </span>
         </div>
-
         {/* Average Intake vs Target */}
         <div className="space-y-1 mb-2">
+          {" "}
           {/* Average Intake Display */}
           <div className="flex items-baseline justify-between">
             <span className="text-gray-400 text-xs mr-1">Average Intake:</span>
             <div className="text-right">
               <span className="text-lg font-bold text-white leading-none">
-                {avgGrams.toFixed(1)}g
+                <AnimatedNumber
+                  value={avgGrams}
+                  toFixedValue={1}
+                  suffix="g"
+                  flipChart={false}
+                  duration={0.8}
+                />
               </span>
               <span className="text-gray-400 text-xs ml-1">
-                ({avgPercentage}%)
+                (
+                <AnimatedNumber
+                  value={avgPercentage}
+                  toFixedValue={0}
+                  suffix="%"
+                  flipChart={false}
+                  duration={0.6}
+                />
+                )
               </span>
             </div>
-          </div>
+          </div>{" "}
           {/* Your Target Display */}
           <div className="flex items-baseline justify-between">
             <span className="text-gray-500 text-xs mr-1">Your Target:</span>
             <div className="text-right">
               <span className="text-sm font-medium text-gray-300">
-                {targetGrams.toFixed(1)}g
+                <AnimatedNumber
+                  value={targetGrams}
+                  toFixedValue={1}
+                  suffix="g"
+                  flipChart={false}
+                  duration={0.8}
+                />
               </span>
               <span className="text-gray-500 text-xs ml-1">
-                ({targetPercentage}%)
+                (
+                <AnimatedNumber
+                  value={targetPercentage}
+                  toFixedValue={0}
+                  suffix="%"
+                  flipChart={false}
+                  duration={0.6}
+                />
+                )
               </span>
             </div>
           </div>
-        </div>
-
+        </div>{" "}
         {/* Difference from Target */}
         <div className="flex items-baseline justify-between text-gray-400 mt-auto pt-1 border-t border-gray-700/50">
           <span className="text-xs mr-1.5">Difference:</span>
@@ -132,16 +160,30 @@ const MacroSummaryItem = React.memo(
                 gramDelta >= 0 ? "text-emerald-400" : "text-rose-400"
               }`}
             >
-              {gramDelta >= 0 ? "+" : ""}
-              {gramDelta.toFixed(1)}g
+              <AnimatedNumber
+                value={gramDelta}
+                toFixedValue={1}
+                suffix="g"
+                prefix={gramDelta >= 0 ? "+" : ""}
+                flipChart={false}
+                duration={0.8}
+              />
             </span>
             <span
               className={`text-xs ml-1.5 ${
                 percentageDelta >= 0 ? "text-emerald-400" : "text-rose-400"
               }`}
             >
-              ({percentageDelta >= 0 ? "+" : ""}
-              {Math.round(percentageDelta)}%)
+              (
+              <AnimatedNumber
+                value={Math.round(percentageDelta)}
+                toFixedValue={0}
+                suffix="%"
+                prefix={percentageDelta >= 0 ? "+" : ""}
+                flipChart={false}
+                duration={0.6}
+              />
+              )
             </span>
           </div>
         </div>
@@ -208,23 +250,35 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
             <span className="font-semibold text-sm text-gray-300">
               Calories
             </span>
-          </div>
+          </div>{" "}
           <div className="space-y-1 mb-2">
             <div className="flex items-baseline justify-between">
               <span className="text-gray-400 text-xs mr-1">
                 Average Intake:
               </span>
               <span className="text-lg font-bold text-white leading-none">
-                {avgCalories} kcal
+                <AnimatedNumber
+                  value={avgCalories}
+                  toFixedValue={0}
+                  suffix=" kcal"
+                  flipChart={false}
+                  duration={0.8}
+                />
               </span>
             </div>
             <div className="flex items-baseline justify-between">
               <span className="text-gray-500 text-xs mr-1">Your Target:</span>
               <span className="text-sm font-medium text-gray-300">
-                {effectiveCalorieTarget} kcal
+                <AnimatedNumber
+                  value={effectiveCalorieTarget}
+                  toFixedValue={0}
+                  suffix=" kcal"
+                  flipChart={false}
+                  duration={0.8}
+                />
               </span>
             </div>
-          </div>
+          </div>{" "}
           <div className="flex items-baseline justify-between text-gray-400 mt-auto pt-1 border-t border-gray-700/50">
             <span className="text-xs mr-1.5">Difference:</span>
             <span
@@ -234,8 +288,14 @@ export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
                   : "text-rose-400"
               }`}
             >
-              {avgCalories - effectiveCalorieTarget >= 0 ? "+" : ""}
-              {(avgCalories - effectiveCalorieTarget).toFixed(0)} kcal
+              <AnimatedNumber
+                value={avgCalories - effectiveCalorieTarget}
+                toFixedValue={0}
+                suffix=" kcal"
+                prefix={avgCalories - effectiveCalorieTarget >= 0 ? "+" : ""}
+                flipChart={false}
+                duration={0.8}
+              />
             </span>
           </div>
         </div>

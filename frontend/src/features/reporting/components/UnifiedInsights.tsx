@@ -18,6 +18,7 @@ import MetricCard from "./MetricCard";
 import AtAGlanceSection from "./AtAGlanceSection";
 import TrendDisplay from "./TrendDisplay";
 import RecommendationsSection from "./RecommendationsSection";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 function UnifiedInsights({
   aggregatedData,
@@ -86,7 +87,8 @@ function UnifiedInsights({
       </h2>
 
       {/* Top metrics grid - key performance indicators */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+        {" "}
         {/* Consistency Score */}
         <MetricCard
           title="Consistency Score"
@@ -96,14 +98,14 @@ function UnifiedInsights({
           {...METRIC_CARD_CONFIGS.consistency}
           delay={0}
         >
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-indigo-300/70">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between text-xs text-indigo-300/70 mb-2">
               <span>Logging frequency</span>
               <span>Intake variation</span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-1.5">
+            <div className="w-full bg-gray-800 rounded-full h-2">
               <div
-                className={`h-1.5 rounded-full transition-all duration-1000 ${
+                className={`h-2 rounded-full transition-all duration-1000 ${
                   consistencyScore > 70
                     ? "bg-green-400"
                     : consistencyScore > 40
@@ -114,8 +116,7 @@ function UnifiedInsights({
               />
             </div>
           </div>
-        </MetricCard>
-
+        </MetricCard>{" "}
         {/* Macro Balance */}
         <MetricCard
           title="Macro Balance"
@@ -125,45 +126,46 @@ function UnifiedInsights({
           {...METRIC_CARD_CONFIGS.macroBalance}
           delay={0.1}
         >
-          <div className="space-y-1">
-            <div className="flex justify-between text-[11px] text-purple-300/80">
+          <div className="flex flex-col justify-between h-full">
+            <div className="flex justify-between text-xs text-purple-300/80 mb-2">
               <span>Current: {macroBalance.currentRatio}</span>
               <span>Target: {macroBalance.idealRatio}</span>
             </div>
-            <div className="flex h-2 rounded-full overflow-hidden bg-gray-800">
-              {macroBalance.currentRatio.split("/").map((pct, idx) => {
-                const colors = [
-                  MACRO_COLORS.protein.bar,
-                  MACRO_COLORS.carbs.bar,
-                  MACRO_COLORS.fats.bar,
-                ];
-                return (
-                  <div
-                    key={idx}
-                    className={`${colors[idx]} h-full transition-all duration-1000`}
-                    style={{ width: `${pct}%` }}
-                  />
-                );
-              })}
-            </div>
-            <div className="flex justify-between text-[10px]">
-              {macroBalance.currentRatio.split("/").map((pct, idx) => {
-                const labels = ["Protein", "Carbs", "Fats"];
-                const colors = [
-                  MACRO_COLORS.protein.text,
-                  MACRO_COLORS.carbs.text,
-                  MACRO_COLORS.fats.text,
-                ];
-                return (
-                  <span key={idx} className={colors[idx]}>
-                    {labels[idx]}: {pct}%
-                  </span>
-                );
-              })}
+            <div>
+              <div className="flex h-2 rounded-full overflow-hidden bg-gray-800">
+                {macroBalance.currentRatio.split("/").map((pct, idx) => {
+                  const colors = [
+                    MACRO_COLORS.protein.bar,
+                    MACRO_COLORS.carbs.bar,
+                    MACRO_COLORS.fats.bar,
+                  ];
+                  return (
+                    <div
+                      key={idx}
+                      className={`${colors[idx]} h-full transition-all duration-1000`}
+                      style={{ width: `${pct}%` }}
+                    />
+                  );
+                })}
+              </div>
+              <div className="flex justify-between text-[10px] mt-1">
+                {macroBalance.currentRatio.split("/").map((pct, idx) => {
+                  const labels = ["Protein", "Carbs", "Fats"];
+                  const colors = [
+                    MACRO_COLORS.protein.text,
+                    MACRO_COLORS.carbs.text,
+                    MACRO_COLORS.fats.text,
+                  ];
+                  return (
+                    <span key={idx} className={colors[idx]}>
+                      {labels[idx]}: {pct}%
+                    </span>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </MetricCard>
-
+        </MetricCard>{" "}
         {/* Nutrient Density */}
         <MetricCard
           title="Nutrient Density"
@@ -173,14 +175,14 @@ function UnifiedInsights({
           {...METRIC_CARD_CONFIGS.nutrientDensity}
           delay={0.2}
         >
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-xs text-emerald-300/70">
+          <div className="flex flex-col h-full">
+            <div className="flex items-center justify-between text-xs text-emerald-300/70 mb-2">
               <span>Protein quality</span>
               <span>Macro balance</span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-1.5">
+            <div className="w-full bg-gray-800 rounded-full h-2">
               <div
-                className={`h-1.5 rounded-full transition-all duration-1000 ${
+                className={`h-2 rounded-full transition-all duration-1000 ${
                   nutrientDensity.score > 70
                     ? "bg-emerald-400"
                     : nutrientDensity.score > 40
@@ -226,9 +228,16 @@ function UnifiedInsights({
             Tracking Analysis
           </h3>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between">
+            {" "}
             <div className="mb-2 sm:mb-0">
               <span className="text-gray-300">
-                {dataQuality.completionRate}% tracking completion rate
+                <AnimatedNumber
+                  value={dataQuality.completionRate}
+                  toFixedValue={0}
+                  suffix="% tracking completion rate"
+                  flipChart={false}
+                  duration={0.6}
+                />
               </span>
               <div className="mt-1 h-1.5 w-full sm:w-40 bg-gray-700 rounded-full overflow-hidden">
                 <div
@@ -250,10 +259,22 @@ function UnifiedInsights({
                   strokeWidth="2"
                   d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                 />
-              </svg>
+              </svg>{" "}
               <span>
-                {dataQuality.daysLogged}/{dataQuality.totalDaysInPeriod} days
-                logged
+                <AnimatedNumber
+                  value={dataQuality.daysLogged}
+                  toFixedValue={0}
+                  flipChart={false}
+                  duration={0.5}
+                />
+                /
+                <AnimatedNumber
+                  value={dataQuality.totalDaysInPeriod}
+                  toFixedValue={0}
+                  flipChart={false}
+                  duration={0.5}
+                />
+                {" days logged"}
               </span>
             </div>
           </div>
