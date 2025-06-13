@@ -22,7 +22,6 @@ export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
                   suffix={`% ${
                     trend.direction === "up" ? "increase" : "decrease"
                   }`}
-                  flipChart={false}
                   duration={0.6}
                 />
               </>

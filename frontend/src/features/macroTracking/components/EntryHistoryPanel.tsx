@@ -8,6 +8,7 @@ import {
   PlusCircleIcon,
 } from "@/components/Icons";
 import Modal from "@/components/Modal";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { MacroEntry } from "../types";
 
 interface EntryHistoryProps {
@@ -181,10 +182,11 @@ export default function EntryHistory({
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
-          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>
+          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>{" "}
           <p className="text-sm text-gray-400 mt-1">
-            {history.length} {history.length === 1 ? "entry" : "entries"} across{" "}
-            {groupedEntries.length}{" "}
+            <AnimatedNumber value={history.length} />{" "}
+            {history.length === 1 ? "entry" : "entries"} across{" "}
+            <AnimatedNumber value={groupedEntries.length} />{" "}
             {groupedEntries.length === 1 ? "day" : "days"}
           </p>
         </div>
@@ -340,23 +342,34 @@ export default function EntryHistory({
                                 </span>
                               ) : null}
                             </div>
-                          </td>
+                          </td>{" "}
                           <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
-                            {Math.round(entry.protein) || 0}g
+                            <AnimatedNumber
+                              value={Math.round(entry.protein) || 0}
+                              suffix="g"
+                            />
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
-                            {Math.round(entry.carbs) || 0}g
+                            <AnimatedNumber
+                              value={Math.round(entry.carbs) || 0}
+                              suffix="g"
+                            />
                           </td>
                           <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
-                            {Math.round(entry.fats) || 0}g
-                          </td>
+                            <AnimatedNumber
+                              value={Math.round(entry.fats) || 0}
+                              suffix="g"
+                            />
+                          </td>{" "}
                           <td className="px-4 py-3 text-center font-medium text-white">
-                            {Math.round(
-                              entry.protein * 4 +
-                                entry.carbs * 4 +
-                                entry.fats * 9
-                            )}{" "}
-                            kcal
+                            <AnimatedNumber
+                              value={Math.round(
+                                entry.protein * 4 +
+                                  entry.carbs * 4 +
+                                  entry.fats * 9
+                              )}
+                              suffix=" kcal"
+                            />
                           </td>
                           <td className="px-4 py-3 text-center whitespace-nowrap">
                             <div className="flex justify-center space-x-2">

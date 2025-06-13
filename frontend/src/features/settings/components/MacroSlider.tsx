@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { LockIcon, UnlockIcon } from "@/components/Icons";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface MacroSliderProps {
   name: string;
@@ -88,10 +89,12 @@ export default function MacroSlider({
                 <UnlockIcon className="w-3.5 h-3.5" />
               )}
             </button>
-          )}
-          <span className="text-sm font-medium text-gray-200 w-8 text-right">
-            {value}%
-          </span>
+          )}{" "}
+          <AnimatedNumber
+            value={value}
+            className="text-sm font-medium text-gray-200 w-8 text-right"
+            suffix="%"
+          />
         </div>
       </div>
 
@@ -180,9 +183,9 @@ export function MacroBadge({
         <div className={`w-2 h-2 rounded-full bg-${color}-500`}></div>
         <span className="text-xs text-gray-400">{name}</span>
         {isLocked && <LockIcon className={`w-3 h-3 ${iconColor}`} />}
-      </div>
+      </div>{" "}
       <div className="mt-1 text-lg font-semibold text-gray-200 w-12">
-        {value}%
+        <AnimatedNumber value={value} suffix="%" />
       </div>
     </div>
   );
