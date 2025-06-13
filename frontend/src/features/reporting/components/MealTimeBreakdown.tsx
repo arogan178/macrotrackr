@@ -36,145 +36,66 @@ interface MacroEntry {
   created_at: string;
 }
 
-// Format to nicely capitalize words
-const formatMealType = (mealType: string): string => {
-  return mealType.charAt(0).toUpperCase() + mealType.slice(1);
-};
+const formatMealType = (mealType: string) =>
+  mealType.charAt(0).toUpperCase() + mealType.slice(1);
+
+const calculateCalories = (entry: any) =>
+  entry.calories ??
+  (entry.protein || 0) * 4 + (entry.carbs || 0) * 4 + (entry.fats || 0) * 9;
 
 function calculateMealTypeDistribution(
   entries: MacroEntry[],
   selectedStat: string
-): any[] {
-  // Group entries by meal type
-  const mealTypeGroups: Record<
-    string,
-    {
-      calories: number;
-      protein: number;
-      carbs: number;
-      fats: number;
-      count: number;
-    }
-  > = {};
+) {
+  // Initialize groups
+  const groups = Object.fromEntries(
+    MEAL_TYPES.map((type) => [
+      type,
+      { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 },
+    ])
+  );
 
-  // Initialize meal type groups
-  MEAL_TYPES.forEach((mealType) => {
-    mealTypeGroups[mealType] = {
-      calories: 0,
-      protein: 0,
-      carbs: 0,
-      fats: 0,
-      count: 0,
-    };
-  });
-
-  // Sum up macros for each meal type
-  entries.forEach((entry: any) => {
-    // Accepts both MacroEntry and aggregatedData shape
-    // If entry has mealType, use it; otherwise, fallback to 'snack'
+  // Aggregate data by meal type
+  entries.forEach((entry) => {
     const mealType = entry.mealType || "snack";
-    // If entry has calories, use it; otherwise, calculate
-    const calories =
-      typeof entry.calories === "number"
-        ? entry.calories
-        : (entry.protein || 0) * 4 +
-          (entry.carbs || 0) * 4 +
-          (entry.fats || 0) * 9;
+    const group = groups[mealType];
 
-    mealTypeGroups[mealType].protein += entry.protein || 0;
-    mealTypeGroups[mealType].carbs += entry.carbs || 0;
-    mealTypeGroups[mealType].fats += entry.fats || 0;
-    mealTypeGroups[mealType].calories += calories;
-    mealTypeGroups[mealType].count += 1;
+    group.protein += entry.protein || 0;
+    group.carbs += entry.carbs || 0;
+    group.fats += entry.fats || 0;
+    group.calories += calculateCalories(entry);
+    group.count += 1;
   });
 
-  // After summing, convert total calories to average calories per meal type
-  MEAL_TYPES.forEach((mealType) => {
-    const group = mealTypeGroups[mealType];
-    if (group.count > 0) {
-      group.calories = group.calories / group.count;
-    } else {
-      group.calories = 0;
-    }
+  // Convert to averages for calories
+  Object.values(groups).forEach((group) => {
+    group.calories = group.count > 0 ? group.calories / group.count : 0;
   });
 
-  // Calculate total for percentages
-  const totals = {
-    calories: Object.values(mealTypeGroups).reduce(
-      (sum, group) => sum + group.calories,
-      0
-    ),
-    protein: Object.values(mealTypeGroups).reduce(
-      (sum, group) => sum + group.protein,
-      0
-    ),
-    carbs: Object.values(mealTypeGroups).reduce(
-      (sum, group) => sum + group.carbs,
-      0
-    ),
-    fats: Object.values(mealTypeGroups).reduce(
-      (sum, group) => sum + group.fats,
-      0
-    ),
-    count: Object.values(mealTypeGroups).reduce(
-      (sum, group) => sum + group.count,
-      0
-    ),
-  };
+  // Calculate totals for percentages
+  const totals = Object.values(groups).reduce(
+    (acc, group) => ({
+      calories: acc.calories + group.calories,
+      protein: acc.protein + group.protein,
+      carbs: acc.carbs + group.carbs,
+      fats: acc.fats + group.fats,
+      count: acc.count + group.count,
+    }),
+    { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 }
+  );
 
-  // Format for chart display
+  // Format for chart
   return MEAL_TYPES.map((mealType) => {
-    const group = mealTypeGroups[mealType];
-    const percentages = {
-      caloriesPercent:
-        totals.calories > 0
-          ? Math.round((group.calories / totals.calories) * 100)
-          : 0,
-      proteinPercent:
-        totals.protein > 0
-          ? Math.round((group.protein / totals.protein) * 100)
-          : 0,
-      carbsPercent:
-        totals.carbs > 0 ? Math.round((group.carbs / totals.carbs) * 100) : 0,
-      fatsPercent:
-        totals.fats > 0 ? Math.round((group.fats / totals.fats) * 100) : 0,
-      countPercent:
-        totals.count > 0 ? Math.round((group.count / totals.count) * 100) : 0,
-    };
+    const group = groups[mealType];
+    const value = group[selectedStat as keyof typeof group];
+    const total = totals[selectedStat as keyof typeof totals];
+    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
 
     return {
       name: formatMealType(mealType),
-      calories: group.calories,
-      protein: group.protein,
-      carbs: group.carbs,
-      fats: group.fats,
-      count: group.count,
-      caloriesPercent: percentages.caloriesPercent,
-      proteinPercent: percentages.proteinPercent,
-      carbsPercent: percentages.carbsPercent,
-      fatsPercent: percentages.fatsPercent,
-      countPercent: percentages.countPercent,
-      // Add display value based on selected stat
-      value:
-        selectedStat === "calories"
-          ? group.calories
-          : selectedStat === "protein"
-          ? group.protein
-          : selectedStat === "carbs"
-          ? group.carbs
-          : selectedStat === "fats"
-          ? group.fats
-          : group.count,
-      percentage:
-        selectedStat === "calories"
-          ? percentages.caloriesPercent
-          : selectedStat === "protein"
-          ? percentages.proteinPercent
-          : selectedStat === "carbs"
-          ? percentages.carbsPercent
-          : selectedStat === "fats"
-          ? percentages.fatsPercent
-          : percentages.countPercent,
+      ...group,
+      value,
+      percentage,
     };
   });
 }
@@ -185,59 +106,49 @@ function MealTimeBreakdown({
   endDate,
 }: MealTimeBreakdownProps) {
   const [selectedStat, setSelectedStat] = useState<string>("calories");
-
   // Filter history by date range
   const filteredHistory = useMemo(() => {
-    if (!history || history.length === 0) return [];
+    if (!history?.length) return [];
 
-    // Create date objects with timezone handling
     const start = new Date(startDate);
-    start.setHours(0, 0, 0, 0); // Set to start of day
-
     const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999); // Set to end of day
+    start.setHours(0, 0, 0, 0);
+    end.setHours(23, 59, 59, 999);
 
     return history.filter((entry) => {
-      // First try to get the date from entry_date, then fall back to created_at if needed
-      const dateStr =
-        entry.entry_date ||
-        (entry.created_at ? entry.created_at.split("T")[0] : null);
-
+      const dateStr = entry.entry_date || entry.created_at?.split("T")[0];
       if (!dateStr) return false;
 
-      // Create a date object that's consistent with our date range objects
       const entryDate = new Date(dateStr);
-      entryDate.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
-
+      entryDate.setHours(12, 0, 0, 0);
       return entryDate >= start && entryDate <= end;
     });
   }, [history, startDate, endDate]);
 
-  // Data processing: use the filtered meal-level history
-  const mealTypeDistribution = useMemo(() => {
-    if (!filteredHistory || filteredHistory.length === 0) {
-      return [];
-    }
-    return calculateMealTypeDistribution(filteredHistory, selectedStat);
-  }, [filteredHistory, selectedStat]);
-
-  if (!filteredHistory || filteredHistory.length === 0) {
+  const mealTypeDistribution = useMemo(
+    () =>
+      filteredHistory.length
+        ? calculateMealTypeDistribution(filteredHistory, selectedStat)
+        : [],
+    [filteredHistory, selectedStat]
+  );
+  if (!filteredHistory.length) {
     return (
       <ChartCard
         title="Meal Distribution"
         isEmpty={true}
-        emptyMessage="No meal data for selected period."
+        emptyMessage="No meal data available for selected period."
       >
         <div />
       </ChartCard>
     );
   }
 
-  // Create gradient definitions for chart
+  // Create gradient definitions
   const gradientDefs = (
     <defs>
       {MEAL_TYPES.map((mealType) => {
-        const color = MEAL_COLORS[mealType];
+        const { gradient } = MEAL_COLORS[mealType];
         return (
           <linearGradient
             key={`color-${mealType}`}
@@ -247,46 +158,32 @@ function MealTimeBreakdown({
             x2="0"
             y2="0"
           >
-            <stop offset="0%" stopColor={color.gradient[0]} stopOpacity={0.8} />
-            <stop
-              offset="100%"
-              stopColor={color.gradient[1]}
-              stopOpacity={0.8}
-            />
+            <stop offset="0%" stopColor={gradient[0]} stopOpacity={0.8} />
+            <stop offset="100%" stopColor={gradient[1]} stopOpacity={0.8} />
           </linearGradient>
         );
       })}
     </defs>
   );
-  // Custom chart label component
+
+  // Custom label renderer
   const renderPercentageLabel = (props: any) => {
-    const { x, y, width, value, height } = props;
-    const xPos = typeof x === "number" ? x : 0;
-    const yPos = typeof y === "number" ? y : 0;
-    const widthVal = typeof width === "number" ? width : 0;
-    const heightVal = typeof height === "number" ? height : 0;
+    const { x = 0, y = 0, width = 0, height = 0, value } = props;
     const percent =
       typeof value === "number" ? value : parseInt(value || "0", 10);
 
-    // Skip rendering labels for very small values (less than 5%)
-    if (percent < 5) return null;
-
-    // Calculate minimum width threshold to avoid overlap with Y-axis
-    const minWidth = 50; // Minimum width to display label without overlapping
-
-    // Only show label if the bar is wide enough
-    if (widthVal < minWidth) return null;
+    if (percent < 5 || width < 50) return null;
 
     return (
       <text
-        x={xPos + widthVal - 10}
-        y={yPos + heightVal / 2}
+        x={x + width - 10}
+        y={y + height / 2}
         fill="#fff"
         fontSize={12}
         fontWeight="bold"
         textAnchor="end"
         dominantBaseline="central"
-        style={{ opacity: percent > 0 ? 0.92 : 0 }}
+        style={{ opacity: 0.92 }}
       >
         {percent}%
       </text>
@@ -312,13 +209,13 @@ function MealTimeBreakdown({
           margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
           barSize={25}
         >
-          {" "}
           {gradientDefs}
           <CartesianGrid
             strokeDasharray="3 3"
             opacity={0.1}
             horizontal={false}
           />
+
           <XAxis
             type="number"
             domain={[0, "dataMax"]}
@@ -330,7 +227,8 @@ function MealTimeBreakdown({
               }`
             }
             tick={{ fill: "#9ca3af", fontSize: 10 }}
-          />{" "}
+          />
+
           <YAxis
             dataKey="name"
             type="category"
@@ -338,13 +236,15 @@ function MealTimeBreakdown({
             axisLine={true}
             tickLine={true}
             width={70}
-            interval={0} // Force display of all tick labels
+            interval={0}
           />
+
           <Tooltip
             content={CustomTooltip}
             cursor={{ fill: "rgba(110,118,145,0.1)" }}
             wrapperStyle={{ outline: "none" }}
           />
+
           <Legend
             height={14}
             iconSize={10}
@@ -362,6 +262,7 @@ function MealTimeBreakdown({
               <span className="text-gray-300 capitalize ml-1">{value}</span>
             )}
           />
+
           <Bar
             dataKey="value"
             name="Meal Distribution"
@@ -369,12 +270,12 @@ function MealTimeBreakdown({
             radius={[0, 20, 20, 0]}
             label={false}
           >
-            {mealTypeDistribution.map((_, index) => {
-              const mealType = MEAL_TYPES[index];
-              return (
-                <Cell key={`cell-${index}`} fill={`url(#color-${mealType})`} />
-              );
-            })}
+            {mealTypeDistribution.map((_, index) => (
+              <Cell
+                key={`cell-${index}`}
+                fill={`url(#color-${MEAL_TYPES[index]})`}
+              />
+            ))}
             <LabelList
               dataKey="percentage"
               position="insideRight"
@@ -387,38 +288,35 @@ function MealTimeBreakdown({
   );
 }
 
-// Custom tooltip component (keeping for now due to type compatibility issues)
 const CustomTooltip = ({ active, payload, selectedStat }: any) => {
-  if (active && payload && payload.length) {
-    const data = payload[0].payload;
-    const unit = getUnitForStat(selectedStat || "calories");
+  if (!active || !payload?.length) return null;
 
-    return (
-      <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
-        <p className="font-medium text-white">{data.name}</p>
-        <p className="text-gray-300">
-          <span className="font-medium">
-            {selectedStat === "calories" ? "~" : ""}
-            {data.value.toFixed(1)}
-            {unit}
-          </span>
-          <span className="ml-1 text-gray-400">({data.percentage}%)</span>
+  const data = payload[0].payload;
+  const unit = getUnitForStat(selectedStat || "calories");
+
+  return (
+    <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
+      <p className="font-medium text-white">{data.name}</p>
+      <p className="text-gray-300">
+        <span className="font-medium">
+          {selectedStat === "calories" ? "~" : ""}
+          {data.value.toFixed(1)}
+          {unit}
+        </span>
+        <span className="ml-1 text-gray-400">({data.percentage}%)</span>
+      </p>
+      {selectedStat !== "calories" && (
+        <p className="text-gray-400 text-xs mt-1">
+          ~ {data.calories.toFixed(0)} kcal
         </p>
-        {selectedStat !== "calories" && (
-          <p className="text-gray-400 text-xs mt-1">
-            ~ {data.calories.toFixed(0)} kcal
-          </p>
-        )}
-        {selectedStat !== "count" && (
-          <p className="text-gray-400 text-xs">
-            {data.count} meal{data.count !== 1 ? "s" : ""}
-          </p>
-        )}
-      </div>
-    );
-  }
-
-  return null;
+      )}
+      {selectedStat !== "count" && (
+        <p className="text-gray-400 text-xs">
+          {data.count} meal{data.count !== 1 ? "s" : ""}
+        </p>
+      )}
+    </div>
+  );
 };
 
 export default MealTimeBreakdown;

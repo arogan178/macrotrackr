@@ -4,7 +4,6 @@ import { motion } from "motion/react"; // Import motion
 interface DateRangeSelectorProps {
   currentRange: string;
   onRangeChange: (range: string) => void;
-  onCustomRangeClick: () => void;
   onExportClick: () => void;
   isExportDisabled: boolean;
 }
@@ -12,7 +11,6 @@ interface DateRangeSelectorProps {
 export default function DateRangeSelector({
   currentRange,
   onRangeChange,
-  onCustomRangeClick,
   onExportClick,
   isExportDisabled,
 }: DateRangeSelectorProps) {
@@ -20,7 +18,7 @@ export default function DateRangeSelector({
     // Wrap with motion.div and add layout prop
     <motion.div
       layout // Add layout for smooth transition
-      className="sticky top-20 z-30 bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-700/50 p-4 mb-6 shadow-xl transition-all duration-300"
+      className="sticky top-20 z-30 bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-700/50 p-3 mb-6 shadow-xl transition-all duration-300"
       // Increased top to 20, slightly increased blur/opacity for sticky state
     >
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -35,11 +33,7 @@ export default function DateRangeSelector({
                     ? "text-white" // Active text color from TabButton
                     : "text-gray-300 hover:bg-gray-700/50 hover:text-white" // Inactive text and hover from TabButton
                 }`}
-                onClick={() =>
-                  option.value === "custom"
-                    ? onCustomRangeClick()
-                    : onRangeChange(option.value)
-                }
+                onClick={() => onRangeChange(option.value)}
                 aria-label={`Set time period to ${option.label}`}
               >
                 <span className="relative z-10">{option.label}</span>
