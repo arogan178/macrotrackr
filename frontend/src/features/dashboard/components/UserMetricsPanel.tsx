@@ -57,7 +57,7 @@ function MetricCard({
             <span className={`text-xs ${classes.acronym} whitespace-nowrap`}>
               ({acronym})
             </span>
-          </div>{" "}
+          </div>
           <p className="text-2xl font-bold text-white">
             {value ? (
               <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
