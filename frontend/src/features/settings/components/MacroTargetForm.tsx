@@ -1,10 +1,9 @@
 import { memo, useCallback, useState, useEffect } from "react";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
-import { InfoCard, CardContainer } from "@/components/form";
+import { InfoCard, CardContainer, SaveButton } from "@/components/form";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
-import SaveButton from "@/components/SaveButton";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 // Default macro values (30/40/30 split)

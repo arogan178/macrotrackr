@@ -2,6 +2,7 @@ import { MacroDailyTotals, MacroTargetSettings } from "../types";
 import { calculateCalories } from "@/utils/nutrition";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
 import ProgressBar from "@/components/ProgressBar";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
@@ -141,20 +142,35 @@ export default function DailySummary({
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-lg font-semibold text-gray-200">
               Today's Summary
-            </h2>
+            </h2>{" "}
             <div className="text-right">
               <div className="text-2xl font-bold text-white">
-                {totalCalories}
+                <AnimatedNumber
+                  value={totalCalories}
+                  toFixedValue={0}
+                  duration={0.8}
+                />
               </div>
               <div className="text-xs text-gray-400">
                 <span>of </span>
                 <span className="font-medium text-gray-300">
-                  {dailyCalorieTarget}
+                  <AnimatedNumber
+                    value={dailyCalorieTarget}
+                    toFixedValue={0}
+                    duration={0.6}
+                  />
                 </span>
                 <span> kcal</span>
 
                 <span className="ml-1 font-medium text-indigo-400">
-                  ({calorieCompletionPercent}%)
+                  (
+                  <AnimatedNumber
+                    value={calorieCompletionPercent}
+                    toFixedValue={0}
+                    suffix="%"
+                    duration={0.5}
+                  />
+                  )
                 </span>
               </div>
             </div>
@@ -200,17 +216,27 @@ export default function DailySummary({
                   <h3 className={`${macro.textColor} text-sm font-medium`}>
                     {macro.name}
                   </h3>
-                </div>
+                </div>{" "}
                 <div className="text-right">
                   <span className="text-sm font-bold text-white">
-                    {macro.grams}g
+                    <AnimatedNumber
+                      value={macro.grams}
+                      toFixedValue={0}
+                      suffix="g"
+                      duration={0.7}
+                    />
                   </span>
                   <span className="text-xs text-gray-400 ml-1">
-                    / {macro.targetGrams}g
+                    /{" "}
+                    <AnimatedNumber
+                      value={macro.targetGrams}
+                      toFixedValue={0}
+                      suffix="g"
+                      duration={0.5}
+                    />
                   </span>
                 </div>
               </div>
-
               {/* Progress toward target grams */}
               <ProgressBar
                 progress={macro.completionPercent}
@@ -223,17 +249,26 @@ export default function DailySummary({
                 }
                 height="md"
                 className="mb-3"
-              />
-
+              />{" "}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`text-xs ${macro.textColor}`}>
-                    {macro.calories} kcal
+                    <AnimatedNumber
+                      value={macro.calories}
+                      toFixedValue={0}
+                      suffix=" kcal"
+                      duration={0.6}
+                    />
                   </span>
                 </div>
                 <div className="flex items-center text-xs">
                   <span className={`text-xs ${macro.textColor} ml-1`}>
-                    {macro.completionPercent}%
+                    <AnimatedNumber
+                      value={macro.completionPercent}
+                      toFixedValue={0}
+                      suffix="%"
+                      duration={0.5}
+                    />
                   </span>
                 </div>
               </div>
