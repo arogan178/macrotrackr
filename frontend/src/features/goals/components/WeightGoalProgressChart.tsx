@@ -1,44 +1,51 @@
 import React from "react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  ResponsiveContainer,
-  ReferenceLine,
-  Area,
-} from "recharts";
 import { useStore } from "@/store/store";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LineChartComponent from "@/components/chart/LineChartComponent";
 import EmptyState from "@/components/EmptyState";
 import { BarChartIcon } from "@/components/Icons";
-import { format, isValid, parseISO } from "date-fns"; // Import date-fns functions
+import { format, isValid, parseISO } from "date-fns";
+import { Area, ReferenceLine, TooltipProps } from "recharts";
+import {
+  NameType,
+  ValueType,
+} from "recharts/types/component/DefaultTooltipContent";
 
-// Update CustomTooltip to use the timestamp (fullDate)
-function CustomTooltip({ active, payload, label }: any) {
+// Custom Tooltip specific to Weight Goal Progress
+function WeightCustomTooltip({
+  active,
+  payload,
+  label,
+}: TooltipProps<ValueType, NameType>) {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
-    const entryDate = parseISO(data.fullDate); // Parse the timestamp
-    const isValidDate = isValid(entryDate);
+    // Ensure fullDate exists and is a valid string before parsing
+    const entryDate =
+      data.fullDate && typeof data.fullDate === "string"
+        ? parseISO(data.fullDate)
+        : null;
+    const isValidDate = entryDate && isValid(entryDate);
 
     return (
       <div className="backdrop-blur-lg bg-gray-800/90 border border-gray-700/50 rounded-lg p-3 shadow-lg">
         <div className="text-base font-medium text-gray-200 mb-1">
-          {/* Format the parsed date */}{" "}
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
-            : "Invalid Date"}
+            : label || "Date Unavailable"}{" "}
+          {/* Fallback to label if fullDate is bad */}
         </div>
         <div className="flex items-center gap-2 mt-1">
-          {/* Use appropriate color based on goal? Or keep consistent? */}
-          <div className="w-3 h-3 rounded-full bg-indigo-500" />
+          <div
+            className={`w-3 h-3 rounded-full`}
+            style={{ backgroundColor: payload[0].color || payload[0].stroke }}
+          ></div>
           <span className="text-sm text-gray-300">
             Weight:{" "}
-            <span className="font-semibold text-indigo-300">
-              {data.weight.toFixed(1)} kg
+            <span
+              className="font-semibold"
+              style={{ color: payload[0].color || payload[0].stroke }}
+            >
+              {typeof data.weight === "number" ? data.weight.toFixed(1) : "N/A"}{" "}
+              kg
             </span>
           </span>
         </div>
@@ -57,7 +64,6 @@ function WeightGoalProgressChart() {
   const chartData = React.useMemo(() => {
     const log = Array.isArray(weightLog) ? weightLog : [];
 
-    // Group by date (YYYY-MM-DD), average weights for each day
     const grouped: Record<
       string,
       { weights: number[]; ids: string[]; timestamps: string[] }
@@ -72,125 +78,180 @@ function WeightGoalProgressChart() {
       grouped[dateKey].timestamps.push(entry.timestamp);
     });
 
-    // Convert to array, sorted by date ascending
     return Object.entries(grouped)
       .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
       .map(([dateKey, { weights, ids, timestamps }]) => {
         const avgWeight =
           weights.reduce((sum, w) => sum + w, 0) / (weights.length || 1);
-        // Use the earliest timestamp for tooltip (for consistency)
         const sortedTimestamps = [...timestamps].sort(
           (a, b) => parseISO(a).getTime() - parseISO(b).getTime()
         );
         return {
-          date: format(parseISO(dateKey), "MMM d"),
+          name: format(parseISO(dateKey), "MMM d"), // Use 'name' for LineChartComponent
           weight: avgWeight,
-          fullDate: sortedTimestamps[0],
-          id: ids[0], // Use first id for key
+          fullDate: sortedTimestamps[0], // Keep for tooltip
+          id: ids[0],
         };
       });
   }, [weightLog]);
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="h-80 flex flex-col items-center justify-center">
-        <LoadingSpinner className="h-10 w-10 text-indigo-400" />
-        <p className="text-gray-400 mt-3">Loading your weight data...</p>
-      </div>
-    );
-  }
+  // Calculate Y-axis domain
+  const { domainMin, domainMax } = React.useMemo(() => {
+    const weights = chartData.map((d) => d.weight);
+    const minWeight = weights.length > 0 ? Math.min(...weights) : 0;
+    const maxWeight = weights.length > 0 ? Math.max(...weights) : 0;
+    const targetWeight = weightGoals?.targetWeight;
 
-  // Error state
-  if (error) {
-    return (
-      <div className="h-80">
-        <div className="flex flex-col items-center justify-center h-full">
-          <div className="text-red-400 mb-3">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-10 w-10"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-          </div>
-          <h3 className="text-lg font-medium text-gray-200 mb-1">
-            Error Loading Data
-          </h3>
-          <p className="text-center text-gray-400 max-w-md">{error}</p>
-        </div>
-      </div>
-    );
-  }
+    const effectiveMin = Math.min(minWeight, targetWeight ?? Infinity);
+    const effectiveMax = Math.max(maxWeight, targetWeight ?? 0);
 
-  // Empty state
-  if (!chartData || chartData.length === 0) {
-    return (
-      <div className="h-80">
-        <EmptyState
-          title="Track Your Progress"
-          message="Start logging your weight to see your progress charted over time."
-          icon={
-            <BarChartIcon
-              className="h-14 w-14 text-indigo-400"
-              strokeWidth={1}
-            />
-          }
-          action={{
-            label: "Log Weight",
-            onClick: () => {
-              // This would need to be handled by the parent component
-              console.log("Open log weight modal from empty state");
-            },
-            variant: "outline",
-          }}
-          className="h-full"
-        />
-      </div>
-    );
-  }
+    // Add padding, ensuring min isn't negative unless data is negative
+    const padding = Math.max(1, (effectiveMax - effectiveMin) * 0.05); // 5% padding or at least 1 unit
+    const calculatedMin = Math.floor(Math.max(0, effectiveMin - padding)); // Ensure min is >= 0 unless data is negative
+    const calculatedMax = Math.ceil(effectiveMax + padding);
 
-  // Calculate Y-axis domain with appropriate padding
-  const weights = chartData.map((d) => d.weight);
-  const minWeight = weights.length > 0 ? Math.min(...weights) : 0; // Handle empty array
-  const maxWeight = weights.length > 0 ? Math.max(...weights) : 0; // Handle empty array
+    // Handle case where min and max are the same or very close
+    if (calculatedMax - calculatedMin < 2) {
+      return { domainMin: calculatedMin - 1, domainMax: calculatedMax + 1 };
+    }
+
+    return { domainMin: calculatedMin, domainMax: calculatedMax };
+  }, [chartData, weightGoals?.targetWeight]);
+
+  // Determine line color and gradient based on goal
+  const { lineColor, gradientId } = React.useMemo(() => {
+    switch (weightGoals?.weightGoal) {
+      case "lose":
+        return { lineColor: "rgb(129, 140, 248)", gradientId: "loseGradient" }; // Indigo
+      case "gain":
+        return { lineColor: "rgb(52, 211, 153)", gradientId: "gainGradient" }; // Green
+      default:
+        return {
+          lineColor: "rgb(59, 130, 246)",
+          gradientId: "maintainGradient",
+        }; // Blue
+    }
+  }, [weightGoals?.weightGoal]);
+
   const targetWeight = weightGoals?.targetWeight;
 
-  // Calculate appropriate Y domain with padding
-  const domainMin = Math.floor(
-    Math.min(minWeight, targetWeight ?? Infinity) - 1
+  // Define chart elements (gradients, area, reference line)
+  const chartElements = (
+    <>
+      <defs>
+        <linearGradient id="loseGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgb(129, 140, 248)" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="rgb(129, 140, 248)" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="gainGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgb(52, 211, 153)" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="rgb(52, 211, 153)" stopOpacity={0} />
+        </linearGradient>
+        <linearGradient id="maintainGradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity={0.4} />
+          <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity={0} />
+        </linearGradient>
+      </defs>
+      <Area
+        type="monotone"
+        dataKey="weight"
+        fill={`url(#${gradientId})`}
+        stroke="none"
+        fillOpacity={0.3} // Slightly reduced opacity
+      />
+      {targetWeight && (
+        <ReferenceLine
+          y={targetWeight}
+          stroke={lineColor}
+          strokeOpacity={0.5}
+          strokeDasharray="4 4"
+          label={{
+            value: `Target: ${targetWeight} kg`,
+            position: "insideTopRight",
+            fill: "rgb(156, 163, 175)",
+            fontSize: 11,
+            dy: -5, // Adjust vertical position
+            dx: -5, // Adjust horizontal position
+          }}
+        />
+      )}
+    </>
   );
-  const domainMax = Math.ceil(Math.max(maxWeight, targetWeight ?? 0) + 1);
 
-  // Check if there's a significant trend (for gradient colors)
-  const isWeightDecreasing =
-    chartData.length > 1 &&
-    chartData[0].weight > chartData[chartData.length - 1].weight;
-  const isWeightIncreasing =
-    chartData.length > 1 &&
-    chartData[0].weight < chartData[chartData.length - 1].weight;
+  // Define line configuration
+  const lines = [
+    {
+      dataKey: "weight",
+      color: lineColor,
+      strokeWidth: 2.5,
+      dot: {
+        r: 3,
+        fill: "rgb(17, 24, 39)", // Dark background for contrast
+        strokeWidth: 1.5,
+        stroke: lineColor,
+      },
+      activeDot: {
+        r: 5,
+        fill: "rgb(17, 24, 39)",
+        strokeWidth: 2,
+        stroke: lineColor,
+      },
+      connectNulls: true, // Connect gaps in data
+    },
+  ];
 
-  // Get the appropriate gradient fill based on goal direction
-  const getGradientId = () => {
-    if (weightGoals?.weightGoal === "lose") return "loseGradient";
-    if (weightGoals?.weightGoal === "gain") return "gainGradient";
-    return "maintainGradient";
+  // Define axis props
+  const xAxisProps = {
+    dataKey: "name", // Use 'name' as defined in chartData
+    axisLine: { stroke: "rgba(255,255,255,0.1)" },
+    tickLine: false,
   };
+
+  const yAxisProps = {
+    domain: [domainMin, domainMax],
+    axisLine: false,
+    tickLine: false,
+    tickFormatter: (value: number) => `${value}`,
+    width: 35, // Slightly increased width for labels
+    label: {
+      value: "kg",
+      angle: -90,
+      position: "insideLeft",
+      fill: "rgb(156, 163, 175)",
+      fontSize: 12,
+      dy: 40, // Adjusted position
+      dx: -5,
+    },
+  };
+
+  // Define empty state component
+  const emptyStateComponent = (
+    <EmptyState
+      title="Track Your Progress"
+      message="Start logging your weight to see your progress charted over time."
+      icon={
+        <BarChartIcon className="h-14 w-14 text-indigo-400" strokeWidth={1} />
+      }
+      action={{
+        label: "Log Weight",
+        onClick: () => {
+          console.log("Open log weight modal from empty state");
+          // TODO: Implement modal opening logic, likely via parent state/context
+        },
+        variant: "outline",
+      }}
+      className="h-full"
+    />
+  );
 
   return (
     <div className="h-96 flex flex-col">
-      <div className="text-sm text-gray-400">
+      {/* Date Range Display */}
+      <div className="text-sm text-gray-400 mb-2 h-5">
+        {" "}
+        {/* Added fixed height */}
         {chartData.length > 0 && (
           <span>
-            {/* Format the first and last dates using parseISO */}
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
             {format(
               parseISO(chartData[chartData.length - 1].fullDate),
@@ -199,162 +260,23 @@ function WeightGoalProgressChart() {
           </span>
         )}
       </div>
-
+      {/* Chart Component */}{" "}
       <div className="flex-grow">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{
-              top: 10,
-              right: 20,
-              bottom: 20,
-              left: 0,
-            }}
-          >
-            {/* Define Gradients */}
-            <defs>
-              <linearGradient id="loseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="0%"
-                  stopColor="rgb(129, 140, 248)"
-                  stopOpacity={0.6}
-                />
-                <stop
-                  offset="100%"
-                  stopColor="rgb(129, 140, 248)"
-                  stopOpacity={0}
-                />
-              </linearGradient>
-              <linearGradient id="gainGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="0%"
-                  stopColor="rgb(52, 211, 153)"
-                  stopOpacity={0.6}
-                />
-                <stop
-                  offset="100%"
-                  stopColor="rgb(52, 211, 153)"
-                  stopOpacity={0}
-                />
-              </linearGradient>
-              <linearGradient id="maintainGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop
-                  offset="0%"
-                  stopColor="rgb(59, 130, 246)"
-                  stopOpacity={0.6}
-                />
-                <stop
-                  offset="100%"
-                  stopColor="rgb(59, 130, 246)"
-                  stopOpacity={0}
-                />
-              </linearGradient>
-            </defs>
-
-            <CartesianGrid
-              strokeDasharray="3 3"
-              stroke="rgba(255,255,255,0.1)"
-              vertical={false}
-            />
-
-            <XAxis
-              dataKey="date"
-              tick={{ fill: "rgb(156, 163, 175)", fontSize: 12 }}
-              axisLine={{ stroke: "rgba(255,255,255,0.1)" }}
-              tickLine={false}
-              padding={{ left: 10, right: 10 }}
-              interval="preserveStartEnd"
-            />
-
-            <YAxis
-              domain={[domainMin, domainMax]}
-              tick={{ fill: "rgb(156, 163, 175)", fontSize: 12 }}
-              axisLine={false}
-              tickLine={false}
-              tickFormatter={(value) => `${value}`}
-              width={30}
-              label={{
-                value: "kg",
-                angle: -90,
-                position: "insideLeft",
-                fill: "rgb(156, 163, 175)",
-                fontSize: 12,
-                dy: 50,
-              }}
-            />
-
-            <Tooltip
-              content={<CustomTooltip />} // Ensure CustomTooltip uses fullDate (timestamp)
-              cursor={{ stroke: "rgba(255,255,255,0.2)" }}
-            />
-
-            {/* Add Area under the curve for visual impact */}
-            <Area
-              type="monotone"
-              dataKey="weight"
-              fill={`url(#${getGradientId()})`}
-              stroke="none"
-              fillOpacity={0.2}
-            />
-
-            {/* Target Weight Reference Line */}
-            {targetWeight && (
-              <ReferenceLine
-                y={targetWeight}
-                stroke={
-                  weightGoals?.weightGoal === "lose"
-                    ? "rgba(129, 140, 248, 0.5)"
-                    : weightGoals?.weightGoal === "gain"
-                    ? "rgba(52, 211, 153, 0.5)"
-                    : "rgba(59, 130, 246, 0.5)"
-                }
-                strokeDasharray="3 3"
-                label={{
-                  value: `Target: ${targetWeight} kg`,
-                  position: "insideTopRight",
-                  fill: "rgb(156, 163, 175)",
-                  fontSize: 11,
-                }}
-              />
-            )}
-
-            {/* The main line */}
-            <Line
-              type="monotone"
-              dataKey="weight"
-              stroke={
-                weightGoals?.weightGoal === "lose"
-                  ? "rgb(129, 140, 248)" // Indigo for weight loss
-                  : weightGoals?.weightGoal === "gain"
-                  ? "rgb(52, 211, 153)" // Green for weight gain
-                  : "rgb(59, 130, 246)" // Blue for maintenance
-              }
-              strokeWidth={2.5}
-              dot={{
-                r: 4,
-                fill: "rgb(17, 24, 39)",
-                strokeWidth: 2,
-                stroke:
-                  weightGoals?.weightGoal === "lose"
-                    ? "rgb(129, 140, 248)"
-                    : weightGoals?.weightGoal === "gain"
-                    ? "rgb(52, 211, 153)"
-                    : "rgb(59, 130, 246)",
-              }}
-              activeDot={{
-                r: 6,
-                fill: "rgb(17, 24, 39)",
-                strokeWidth: 3,
-                stroke:
-                  weightGoals?.weightGoal === "lose"
-                    ? "rgb(129, 140, 248)"
-                    : weightGoals?.weightGoal === "gain"
-                    ? "rgb(52, 211, 153)"
-                    : "rgb(59, 130, 246)",
-              }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <LineChartComponent
+          data={chartData}
+          lines={lines}
+          isLoading={isLoading}
+          error={error}
+          emptyState={emptyStateComponent}
+          showNoDataMessage={chartData.length === 0}
+          tooltipContent={<WeightCustomTooltip />}
+          chartElements={chartElements}
+          xAxisProps={xAxisProps}
+          yAxisProps={yAxisProps}
+          margin={{ top: 10, right: 25, bottom: 5, left: 5 }} // Adjusted margins
+          showLegend={false}
+          height="100%"
+        />
       </div>
     </div>
   );

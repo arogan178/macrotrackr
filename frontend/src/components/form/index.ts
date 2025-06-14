@@ -7,7 +7,7 @@ export { default as InfoCard } from "./InfoCard";
 export { default as TabButton } from "./TabButton";
 export { default as CardContainer } from "./CardContainer";
 export { default as FormButton } from "./FormButton";
-
+export { default as SaveButton } from "./SaveButton";
 // Types
 export type {
   TextFieldProps,

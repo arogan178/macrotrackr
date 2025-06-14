@@ -2,7 +2,7 @@ import { ReactNode, useEffect, useRef, memo, useState } from "react";
 import ReactDOM from "react-dom"; // Import ReactDOM for portals
 import { motion } from "motion/react";
 import { XIcon } from "./Icons";
-import SaveButton from "./SaveButton";
+import SaveButton from "./form/SaveButton";
 
 interface BaseModalProps {
   isOpen: boolean;
@@ -219,7 +219,7 @@ function Modal({
         {/* Footer */}
         {(onSave || onConfirm || variant === "confirmation") && (
           <div
-            className={`flex justify-end gap-3 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
+            className={`flex justify-end gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
           >
             <button
               onClick={onClose}

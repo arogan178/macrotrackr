@@ -53,6 +53,11 @@ import {
   TrendingUp,
   TrendingDown,
   Lightbulb,
+  Zap,
+  Scale as BalanceScale,
+  Clipboard,
+  Apple,
+  Beef,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -72,6 +77,30 @@ function createIcon(Icon: LucideIcon) {
     const sizeClass = ICON_SIZES[size] || ICON_SIZES.md;
     return <Icon className={`${sizeClass} ${className}`} {...props} />;
   });
+}
+
+// Custom SVG icons for specific use cases
+interface TrendIconProps {
+  direction: string;
+}
+
+export function TrendIcon({ direction }: TrendIconProps) {
+  const isUp = direction === "up";
+  const color =
+    direction === "stable"
+      ? "text-gray-400"
+      : direction === "insufficient"
+      ? "text-gray-500"
+      : isUp
+      ? "text-red-400"
+      : "text-green-400";
+
+  if (direction === "stable" || direction === "insufficient") return null;
+
+  // Use Lucide TrendingUp/TrendingDown with dynamic styling
+  const IconComponent = isUp ? TrendingUp : TrendingDown;
+
+  return <IconComponent className={`h-4 w-4 ${color} mr-1`} />;
 }
 
 // Export all icon components
@@ -133,3 +162,10 @@ export const SunIcon = createIcon(Sun);
 export const MoreVerticalIcon = createIcon(MoreVertical);
 export const SmilePlusIcon = createIcon(SmilePlus);
 export const XIcon = createIcon(X);
+
+// Reporting-specific icons
+export const LightningIcon = createIcon(Zap);
+export const BalanceIcon = createIcon(BalanceScale);
+export const ClipboardIcon = createIcon(Clipboard);
+export const NutrientIcon = createIcon(Apple);
+export const ProteinIcon = createIcon(Beef);

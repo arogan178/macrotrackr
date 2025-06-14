@@ -97,3 +97,10 @@ export const ICON_POSITIONS = {
 } as const;
 
 export const DEFAULT_LOADING_TEXT = "Processing...";
+
+export const DATE_RANGE_OPTIONS: { value: string; label: string }[] = [
+  { value: "week", label: "7 Days" },
+  { value: "month", label: "30 Days" },
+  { value: "3months", label: "90 Days" },
+  // { value: "custom", label: "Custom" },
+];
