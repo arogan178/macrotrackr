@@ -1,4 +1,5 @@
 import ProgressBar from "@/components/ProgressBar";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { HabitGoal } from "../types";
 import HabitActions from "./HabitActions";
 import EmptyState from "@/components/EmptyState"; // Import EmptyState
@@ -228,13 +229,19 @@ function HabitCard({
         </div>
 
         <div className="flex items-center justify-between mb-1.5">
+          {" "}
           <div className="flex items-baseline gap-1">
-            <span className="text-xl font-bold text-gray-200">{current}</span>
-            <span className="text-gray-400 text-sm">/ {target}</span>
-          </div>
-
+            <span className="text-xl font-bold text-gray-200">
+              <AnimatedNumber value={current} />
+            </span>
+            <span className="text-gray-400 text-sm">
+              / <AnimatedNumber value={target} />
+            </span>
+          </div>{" "}
           {!isComplete && (
-            <span className="text-sm text-gray-400">{progress}%</span>
+            <span className="text-sm text-gray-400">
+              <AnimatedNumber value={progress} suffix="%" />
+            </span>
           )}
         </div>
 

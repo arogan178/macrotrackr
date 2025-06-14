@@ -1,13 +1,12 @@
 import { useState, useEffect, useCallback, ReactNode } from "react";
-import { Navbar } from "../features/layout/components";
-import FloatingNotification from "../features/notifications/components/FloatingNotification";
-import { TabButton, CardContainer } from "../components/form";
-import SaveButton from "../components/SaveButton";
-import Modal from "../components/Modal";
-import { useBeforeUnload } from "../hooks/useBeforeUnload";
+import { Navbar } from "../../layout/components";
+import FloatingNotification from "../../notifications/components/FloatingNotification";
+import { TabButton, SaveButton } from "@/components/form";
+import Modal from "@/components/Modal";
+import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import { ProfileForm, MacroTargetForm } from "@/features/settings/components";
-import { useStore } from "../store/store";
-import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "../components/Icons";
+import { useStore } from "@/store/store";
+import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "@/components/Icons";
 
 // --- Modified PageHeader Component ---
 // Now accepts tabs as children to render them on the right
@@ -154,15 +153,17 @@ export default function SettingsPage() {
           <PageHeader hasChanges={hasSettingsChanges}>
             {/* Tab Navigation Container - Moved inside header */}
             <div
-              className="flex space-x-1 p-1 bg-gray-800/60 rounded-lg" // Style similar to GoalsPage
+              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg" // Style similar to GoalsPage
               role="tablist"
               aria-label="Settings Tabs"
             >
               <TabButton
                 active={activeTab === "profile"}
                 onClick={() => handleTabChange("profile")}
+                layoutId="settingsTabHighlight"
+                isMotion={true}
               >
-                <span className="flex items-center">
+                <span className="flex items-center relative z-10">
                   <UserIcon size="sm" className="mr-1.5" />
                   Profile
                 </span>
@@ -170,8 +171,10 @@ export default function SettingsPage() {
               <TabButton
                 active={activeTab === "macro target"}
                 onClick={() => handleTabChange("macro target")}
+                layoutId="settingsTabHighlight"
+                isMotion={true}
               >
-                <span className="flex items-center">
+                <span className="flex items-center relative z-10">
                   <MenuIcon size="sm" className="mr-1.5" />
                   Macro Target
                 </span>
