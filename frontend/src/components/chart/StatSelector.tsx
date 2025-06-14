@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { STAT_COLORS } from "../../utils/chart-colors";
+import { STAT_COLORS } from "@/utils/chart-colors";
 
 interface StatSelectorProps {
   selectedStat: string;
