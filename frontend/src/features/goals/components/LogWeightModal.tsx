@@ -10,7 +10,7 @@ import {
 import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/api-service";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { getErrorMessage } from "@/utils/error-handling";
+
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
 import { format, parse, isValid } from "date-fns"; // Import date-fns helpers
 

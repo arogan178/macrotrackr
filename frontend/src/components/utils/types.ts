@@ -113,3 +113,33 @@ export interface SaveButtonProps {
   disabled?: boolean;
   children?: ReactNode;
 }
+
+// Chart data point - used for all chart visualizations
+export interface ChartDataPoint {
+  name: string; // x-axis label (e.g., date)
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  [key: string]: number | string; // Allow additional properties for flexibility
+}
+
+// Line configuration for charts
+export interface LineConfig {
+  dataKey: string;
+  name?: string; // Optional: Name for legend and tooltip
+  color?: string; // Optional: HSL or RGB color string
+  strokeWidth?: number;
+  dot?: React.ReactElement | object | boolean;
+  activeDot?: React.ReactElement | object | boolean;
+  type?: "monotone" | "linear" | "step" | "stepBefore" | "stepAfter";
+  connectNulls?: boolean;
+}
+
+// Nutrition averages for summary statistics
+export interface NutritionAverage {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}
