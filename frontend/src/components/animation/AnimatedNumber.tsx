@@ -1,5 +1,4 @@
-// filepath: d:/Users/Andrea Bugeja/Documents/GitHub/app/macro_tracker/frontend/src/components/animation/AnimatedNumber.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { animate } from "motion/react";
 
 interface AnimatedNumberProps {
