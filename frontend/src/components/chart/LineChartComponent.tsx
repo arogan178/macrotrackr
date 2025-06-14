@@ -21,10 +21,23 @@ import {
 import { ChartDataPoint, LineConfig } from "../utils/types"; // Use the correct path for your types
 import { DefaultTooltip } from "./chart-helpers";
 
+// Interface for CustomDot props to improve type safety
+interface CustomDotProps {
+  cx?: number;
+  cy?: number;
+  payload?: any; // The data point payload
+  dataKey?: string;
+  r?: number;
+  dataLength?: number;
+  fill?: string;
+  stroke?: string;
+  strokeWidth?: string | number;
+}
+
 // Custom dot component that adapts based on data length and hides when value is 0
-const CustomDot = (props: any) => {
+const CustomDot = (props: CustomDotProps) => {
   const { cx, cy, payload, dataKey, r = 2, dataLength = 0 } = props;
-  const value = payload?.[dataKey];
+  const value = payload && dataKey ? payload[dataKey] : null;
 
   // Don't render dot if value is 0 or null/undefined
   if (!value || value === 0) {
