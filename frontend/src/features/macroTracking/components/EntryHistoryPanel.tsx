@@ -6,6 +6,7 @@ import {
   memo,
   useCallback,
 } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ExportIcon,
   ChevronDownIcon,
@@ -97,7 +98,14 @@ const EntryRow = memo(
     deleteEntry: (id: number) => void;
     isDeleting: boolean;
   }) => (
-    <tr className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors">
+    <motion.tr
+      className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      layout
+    >
       <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap pl-11">
         {formatTimeFromEntry(entry)}
       </td>
@@ -136,7 +144,7 @@ const EntryRow = memo(
           isDeleting={isDeleting}
         />
       </td>
-    </tr>
+    </motion.tr>
   )
 );
 
@@ -155,7 +163,15 @@ const EntryCard = memo(
     deleteEntry: (id: number) => void;
     isDeleting: boolean;
   }) => (
-    <div className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30">
+    <motion.div
+      className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30"
+      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      exit={{ opacity: 0, y: -20, scale: 0.95 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+      layout
+      whileHover={{ scale: 1.02 }}
+    >
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <span className="text-gray-300 text-sm font-medium">
@@ -173,36 +189,57 @@ const EntryCard = memo(
       </div>
 
       {(entry.foodName || entry.mealName) && (
-        <div className="mb-3">
+        <motion.div
+          className="mb-3"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.1 }}
+        >
           <span className="text-gray-400 text-sm">
             {entry.foodName || entry.mealName}
           </span>
-        </div>
+        </motion.div>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
-        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-          <span className="text-gray-400 text-sm">Protein</span>
-          <MacroCell value={entry.protein} suffix="g" color="text-green-400" />
-        </div>
-        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-          <span className="text-gray-400 text-sm">Carbs</span>
-          <MacroCell value={entry.carbs} suffix="g" color="text-blue-400" />
-        </div>
-        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-          <span className="text-gray-400 text-sm">Fats</span>
-          <MacroCell value={entry.fats} suffix="g" color="text-red-400" />
-        </div>
-        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 col-span-3">
+      <motion.div
+        className="grid grid-cols-3 gap-3"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.2, staggerChildren: 0.05 }}
+      >
+        {[
+          { label: "Protein", value: entry.protein, color: "text-green-400" },
+          { label: "Carbs", value: entry.carbs, color: "text-blue-400" },
+          { label: "Fats", value: entry.fats, color: "text-red-400" },
+        ].map((macro, index) => (
+          <motion.div
+            key={macro.label}
+            className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 * index }}
+            whileHover={{ scale: 1.05 }}
+          >
+            <span className="text-gray-400 text-sm">{macro.label}</span>
+            <MacroCell value={macro.value} suffix="g" color={macro.color} />
+          </motion.div>
+        ))}
+        <motion.div
+          className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 col-span-3"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ scale: 1.05 }}
+        >
           <span className="text-gray-400 text-sm">Calories</span>
           <MacroCell
             value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
             suffix=" kcal"
             color="text-white"
           />
-        </div>
-      </div>
-    </div>
+        </motion.div>
+      </motion.div>
+    </motion.div>
   )
 );
 
@@ -353,9 +390,17 @@ const EntryHistoryComponent = function EntryHistory({
   const handleExportCSV = useCallback(() => exportCSV(history), [history]);
 
   return (
-    <div>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+    >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <div>
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1, duration: 0.3 }}
+        >
           <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>{" "}
           <p className="text-sm text-gray-400 mt-1">
             <AnimatedNumber value={history.length} />{" "}
@@ -363,15 +408,20 @@ const EntryHistoryComponent = function EntryHistory({
             <AnimatedNumber value={groupedEntries.length} />{" "}
             {groupedEntries.length === 1 ? "day" : "days"}
           </p>
-        </div>
+        </motion.div>
         {history.length > 0 && (
-          <button
+          <motion.button
             onClick={handleExportCSV}
             className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.3 }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
             <ExportIcon className="w-4 h-4 mr-2" />
             Export CSV
-          </button>
+          </motion.button>
         )}
       </div>
 
@@ -383,7 +433,12 @@ const EntryHistoryComponent = function EntryHistory({
           size="lg"
         />
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl">
+        <motion.div
+          className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
+        >
           {/* Desktop Table View */}
           <div className="hidden lg:block overflow-x-auto">
             <table className="w-full table-fixed">
@@ -401,17 +456,24 @@ const EntryHistoryComponent = function EntryHistory({
               <tbody>
                 {groupedEntries.map((group) => (
                   <Fragment key={group.date}>
-                    <tr
+                    <motion.tr
                       className="bg-indigo-600/10 border-t border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors group"
                       onClick={() => toggleDateCollapse(group.date)}
+                      whileHover={{
+                        backgroundColor: "rgba(99, 102, 241, 0.15)",
+                      }}
+                      transition={{ duration: 0.2 }}
                     >
                       <td className="px-4 py-2.5 font-semibold text-indigo-300 text-sm">
                         <div className="flex items-center gap-2">
-                          {collapsedDates.has(group.date) ? (
-                            <ChevronDownIcon className="w-4 h-4 -rotate-90 transform transition-transform" />
-                          ) : (
-                            <ChevronDownIcon className="w-4 h-4 transform transition-transform" />
-                          )}
+                          <motion.div
+                            animate={{
+                              rotate: collapsedDates.has(group.date) ? -90 : 0,
+                            }}
+                            transition={{ duration: 0.2, ease: "easeInOut" }}
+                          >
+                            <ChevronDownIcon className="w-4 h-4" />
+                          </motion.div>
                           {formatDate(group.date)}
                         </div>
                       </td>
@@ -439,17 +501,19 @@ const EntryHistoryComponent = function EntryHistory({
                           <TrashIcon className="w-4 h-4" />
                         </button>
                       </td>
-                    </tr>
-                    {!collapsedDates.has(group.date) &&
-                      group.entries.map((entry) => (
-                        <EntryRow
-                          key={entry.id}
-                          entry={entry}
-                          onEdit={onEdit}
-                          deleteEntry={deleteEntry}
-                          isDeleting={isDeleting}
-                        />
-                      ))}
+                    </motion.tr>
+                    <AnimatePresence>
+                      {!collapsedDates.has(group.date) &&
+                        group.entries.map((entry) => (
+                          <EntryRow
+                            key={entry.id}
+                            entry={entry}
+                            onEdit={onEdit}
+                            deleteEntry={deleteEntry}
+                            isDeleting={isDeleting}
+                          />
+                        ))}
+                    </AnimatePresence>
                   </Fragment>
                 ))}
               </tbody>
@@ -459,21 +523,29 @@ const EntryHistoryComponent = function EntryHistory({
           {/* Mobile Card View */}
           <div className="lg:hidden">
             {groupedEntries.map((group) => (
-              <div
+              <motion.div
                 key={group.date}
                 className="border-b border-gray-700/30 last:border-b-0"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
               >
                 {/* Date Header */}
-                <div
+                <motion.div
                   className="flex items-center justify-between p-4 bg-indigo-600/10 border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors"
                   onClick={() => toggleDateCollapse(group.date)}
+                  whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
+                  transition={{ duration: 0.2 }}
                 >
                   <div className="flex items-center gap-3">
-                    {collapsedDates.has(group.date) ? (
-                      <ChevronDownIcon className="w-5 h-5 -rotate-90 transform transition-transform text-indigo-300" />
-                    ) : (
-                      <ChevronDownIcon className="w-5 h-5 transform transition-transform text-indigo-300" />
-                    )}
+                    <motion.div
+                      animate={{
+                        rotate: collapsedDates.has(group.date) ? -90 : 0,
+                      }}
+                      transition={{ duration: 0.2, ease: "easeInOut" }}
+                    >
+                      <ChevronDownIcon className="w-5 h-5 text-indigo-300" />
+                    </motion.div>
                     <h3 className="font-semibold text-indigo-300 text-base">
                       {formatDate(group.date)}
                     </h3>
@@ -503,26 +575,44 @@ const EntryHistoryComponent = function EntryHistory({
                       <TrashIcon className="w-4 h-4" />
                     </button>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Entries */}
-                {!collapsedDates.has(group.date) && (
-                  <div className="space-y-3 p-4">
-                    {group.entries.map((entry) => (
-                      <EntryCard
-                        key={entry.id}
-                        entry={entry}
-                        onEdit={onEdit}
-                        deleteEntry={deleteEntry}
-                        isDeleting={isDeleting}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+                <AnimatePresence>
+                  {!collapsedDates.has(group.date) && (
+                    <motion.div
+                      className="space-y-3 p-4"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      {group.entries.map((entry, index) => (
+                        <motion.div
+                          key={entry.id}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{
+                            delay: index * 0.05,
+                            duration: 0.3,
+                            ease: "easeOut",
+                          }}
+                        >
+                          <EntryCard
+                            entry={entry}
+                            onEdit={onEdit}
+                            deleteEntry={deleteEntry}
+                            isDeleting={isDeleting}
+                          />
+                        </motion.div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
             ))}
           </div>
-        </div>
+        </motion.div>
       )}
 
       {/* Add ConfirmationModal component */}
@@ -539,7 +629,7 @@ const EntryHistoryComponent = function EntryHistory({
         onConfirm={confirmDeleteDate}
         isDanger={true}
       />
-    </div>
+    </motion.div>
   );
 };
 
