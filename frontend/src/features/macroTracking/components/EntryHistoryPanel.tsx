@@ -1,6 +1,10 @@
 import { useEffect, useState, useMemo, memo, useCallback } from "react";
-import { motion } from "motion/react";
-import { ExportIcon, PlusCircleIcon } from "@/components/Icons";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  ExportIcon,
+  PlusCircleIcon,
+  ChevronDownIcon,
+} from "@/components/Icons";
 import Modal from "@/components/Modal";
 import EmptyState from "@/components/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
@@ -14,17 +18,6 @@ interface EntryHistoryProps {
   onEdit: (entry: MacroEntry) => void;
   isDeleting: boolean;
   isEditing: boolean;
-}
-
-interface GroupedEntry {
-  date: string;
-  entries: MacroEntry[];
-  totals: {
-    protein: number;
-    carbs: number;
-    fats: number;
-    calories: number;
-  };
 }
 
 // Consolidated helper functions
@@ -94,6 +87,7 @@ const EntryHistoryComponent = function EntryHistory({
   isDeleting,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
+  const [showAllDates, setShowAllDates] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | null>(null);
 
@@ -114,8 +108,8 @@ const EntryHistoryComponent = function EntryHistory({
     [todayFormatted]
   );
 
-  // Memoize grouped entries with totals
-  const groupedEntries = useMemo((): GroupedEntry[] => {
+  // Memoize grouped entries with totals and filter by show more state
+  const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
     const grouped = history.reduce((acc, entry) => {
       const dateKey = formatEntryDate(entry.entry_date || entry.created_at);
       if (!acc[dateKey]) acc[dateKey] = [];
@@ -123,7 +117,7 @@ const EntryHistoryComponent = function EntryHistory({
       return acc;
     }, {} as Record<string, MacroEntry[]>);
 
-    return Object.entries(grouped)
+    const allEntries = Object.entries(grouped)
       .map(([date, entries]) => ({
         date,
         entries,
@@ -155,22 +149,30 @@ const EntryHistoryComponent = function EntryHistory({
           ).getTime() -
           new Date(a.entries[0].entry_date || a.entries[0].created_at).getTime()
       );
-  }, [history]);
+
+    const displayed = showAllDates ? allEntries : allEntries.slice(0, 5);
+
+    return {
+      displayedEntries: displayed,
+      totalEntries: allEntries,
+      hasMoreDates: allEntries.length > 5,
+    };
+  }, [history, showAllDates]);
 
   // Initialize collapsed dates
   useEffect(() => {
     setCollapsedDates((prev) => {
       if (prev.size === 0) {
         return new Set(
-          groupedEntries
+          totalEntries
             .filter((group) => group.date !== todayFormatted)
             .map((group) => group.date)
         );
       }
-      const existingDates = new Set(groupedEntries.map((group) => group.date));
+      const existingDates = new Set(totalEntries.map((group) => group.date));
       return new Set([...prev].filter((date) => existingDates.has(date)));
     });
-  }, [groupedEntries, todayFormatted]);
+  }, [totalEntries, todayFormatted]);
 
   // Memoized event handlers
   const toggleDateCollapse = useCallback((date: string) => {
@@ -181,6 +183,10 @@ const EntryHistoryComponent = function EntryHistory({
     });
   }, []);
 
+  const toggleShowAllDates = useCallback(() => {
+    setShowAllDates((prev) => !prev);
+  }, []);
+
   const handleDeleteDate = useCallback((date: string, e: React.MouseEvent) => {
     e.stopPropagation();
     setDateToDelete(date);
@@ -189,11 +195,11 @@ const EntryHistoryComponent = function EntryHistory({
 
   const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
-    const group = groupedEntries.find((g) => g.date === dateToDelete);
+    const group = totalEntries.find((g) => g.date === dateToDelete);
     group?.entries.forEach((entry) => deleteEntry(entry.id));
     setIsDeleteModalOpen(false);
     setDateToDelete(null);
-  }, [dateToDelete, groupedEntries, deleteEntry]);
+  }, [dateToDelete, totalEntries, deleteEntry]);
 
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
@@ -218,8 +224,8 @@ const EntryHistoryComponent = function EntryHistory({
           <p className="text-sm text-gray-400 mt-1">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
-            <AnimatedNumber value={groupedEntries.length} />{" "}
-            {groupedEntries.length === 1 ? "day" : "days"}
+            <AnimatedNumber value={totalEntries.length} />{" "}
+            {totalEntries.length === 1 ? "day" : "days"}
           </p>
         </motion.div>
         {history.length > 0 && (
@@ -253,34 +259,87 @@ const EntryHistoryComponent = function EntryHistory({
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
         >
           {/* Desktop Table View */}
-          <DesktopEntryTable
-            groupedEntries={groupedEntries}
-            collapsedDates={collapsedDates}
-            formatDate={formatDate}
-            formatTimeFromEntry={formatTimeFromEntry}
-            capitalizeFirstLetter={capitalizeFirstLetter}
-            calculateCalories={calculateCalories}
-            toggleDateCollapse={toggleDateCollapse}
-            handleDeleteDate={handleDeleteDate}
-            onEdit={onEdit}
-            deleteEntry={deleteEntry}
-            isDeleting={isDeleting}
-          />
+          <div className="hidden lg:block">
+            <DesktopEntryTable
+              groupedEntries={displayedEntries}
+              collapsedDates={collapsedDates}
+              formatDate={formatDate}
+              formatTimeFromEntry={formatTimeFromEntry}
+              capitalizeFirstLetter={capitalizeFirstLetter}
+              calculateCalories={calculateCalories}
+              toggleDateCollapse={toggleDateCollapse}
+              handleDeleteDate={handleDeleteDate}
+              onEdit={onEdit}
+              deleteEntry={deleteEntry}
+              isDeleting={isDeleting}
+              showAllDates={showAllDates}
+            />
+          </div>
 
           {/* Mobile Card View */}
-          <MobileEntryCards
-            groupedEntries={groupedEntries}
-            collapsedDates={collapsedDates}
-            formatDate={formatDate}
-            formatTimeFromEntry={formatTimeFromEntry}
-            capitalizeFirstLetter={capitalizeFirstLetter}
-            calculateCalories={calculateCalories}
-            toggleDateCollapse={toggleDateCollapse}
-            handleDeleteDate={handleDeleteDate}
-            onEdit={onEdit}
-            deleteEntry={deleteEntry}
-            isDeleting={isDeleting}
-          />
+          <div className="lg:hidden">
+            <MobileEntryCards
+              groupedEntries={displayedEntries}
+              collapsedDates={collapsedDates}
+              formatDate={formatDate}
+              formatTimeFromEntry={formatTimeFromEntry}
+              capitalizeFirstLetter={capitalizeFirstLetter}
+              calculateCalories={calculateCalories}
+              toggleDateCollapse={toggleDateCollapse}
+              handleDeleteDate={handleDeleteDate}
+              onEdit={onEdit}
+              deleteEntry={deleteEntry}
+              isDeleting={isDeleting}
+              showAllDates={showAllDates}
+            />
+          </div>
+
+          {/* Show More Dates Button */}
+          {hasMoreDates && (
+            <motion.div
+              className="flex justify-center py-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.button
+                onClick={toggleShowAllDates}
+                className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50"
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                animate={{
+                  borderColor: showAllDates
+                    ? "rgba(156, 163, 175, 0.5)"
+                    : "rgba(156, 163, 175, 0.3)",
+                  backgroundColor: showAllDates
+                    ? "rgba(107, 114, 128, 0.2)"
+                    : "transparent",
+                }}
+                transition={{ type: "spring", stiffness: 400, damping: 17 }}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={showAllDates ? "less" : "more"}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {showAllDates ? "Show Less Dates" : "Show More Dates"}
+                  </motion.span>
+                </AnimatePresence>
+                <motion.div
+                  animate={{
+                    rotate: showAllDates ? 180 : 0,
+                    scale: showAllDates ? 1.1 : 1,
+                  }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <ChevronDownIcon className="w-4 h-4" />
+                </motion.div>
+              </motion.button>
+            </motion.div>
+          )}
         </motion.div>
       )}
 
