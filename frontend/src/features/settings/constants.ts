@@ -1,9 +1,16 @@
-import { ActivityLevel } from "./types";
+import { ActivityLevel, MacroTargetPercentages } from "./types";
 
 interface SelectOption<T> {
   value: T;
   label: string;
 }
+
+// Default macro target percentages
+export const DEFAULT_MACRO_TARGET: MacroTargetPercentages = {
+  proteinPercentage: 30,
+  carbsPercentage: 40,
+  fatsPercentage: 30,
+};
 
 export const GENDER_OPTIONS: SelectOption<string>[] = [
   { value: "male", label: "Male" },
