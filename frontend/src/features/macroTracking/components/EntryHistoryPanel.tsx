@@ -15,6 +15,7 @@ import {
   PlusCircleIcon,
 } from "@/components/Icons";
 import Modal from "@/components/Modal";
+import EmptyState from "@/components/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { MacroEntry } from "../types";
 
@@ -68,6 +69,72 @@ const capitalizeFirstLetter = (string: string): string =>
         .trim()
     : "";
 
+// Reusable micro-components
+const MacroCell = memo(
+  ({
+    value,
+    suffix,
+    color,
+  }: {
+    value: number;
+    suffix: string;
+    color: string;
+  }) => (
+    <span className={`font-medium ${color}`}>
+      <AnimatedNumber value={Math.round(value) || 0} suffix={suffix} />
+    </span>
+  )
+);
+
+const ActionButtons = memo(
+  ({
+    onEdit,
+    onDelete,
+    isDeleting,
+  }: {
+    onEdit: () => void;
+    onDelete: () => void;
+    isDeleting: boolean;
+  }) => (
+    <div className="flex justify-center space-x-2">
+      <button
+        onClick={onEdit}
+        className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
+        aria-label="Edit entry"
+      >
+        <EditIcon className="w-4 h-4" />
+      </button>
+      <button
+        onClick={onDelete}
+        className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
+        disabled={isDeleting}
+        aria-label="Delete entry"
+      >
+        {isDeleting ? (
+          <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
+        ) : (
+          <TrashIcon className="w-4 h-4" />
+        )}
+      </button>
+    </div>
+  )
+);
+
+const TableHeader = memo(
+  ({ label, color }: { label: string; color?: string }) => (
+    <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
+      {color ? (
+        <div className="flex items-center justify-center gap-1">
+          <div className={`w-2 h-2 ${color} rounded-full`}></div>
+          {label}
+        </div>
+      ) : (
+        label
+      )}
+    </th>
+  )
+);
+
 // Simplified Entry Row Component
 const EntryRow = memo(
   ({
@@ -98,42 +165,27 @@ const EntryRow = memo(
         </div>
       </td>
       <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
-        <AnimatedNumber value={Math.round(entry.protein) || 0} suffix="g" />
+        <MacroCell value={entry.protein} suffix="g" color="text-green-400" />
       </td>
       <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
-        <AnimatedNumber value={Math.round(entry.carbs) || 0} suffix="g" />
+        <MacroCell value={entry.carbs} suffix="g" color="text-blue-400" />
       </td>
       <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
-        <AnimatedNumber value={Math.round(entry.fats) || 0} suffix="g" />
+        <MacroCell value={entry.fats} suffix="g" color="text-red-400" />
       </td>
       <td className="px-4 py-3 text-center font-medium text-white">
-        <AnimatedNumber
+        <MacroCell
           value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
           suffix=" kcal"
+          color="text-white"
         />
       </td>
       <td className="px-4 py-3 text-center whitespace-nowrap">
-        <div className="flex justify-center space-x-2">
-          <button
-            onClick={() => onEdit(entry)}
-            className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
-            aria-label="Edit entry"
-          >
-            <EditIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => deleteEntry(entry.id)}
-            className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
-            disabled={isDeleting}
-            aria-label="Delete entry"
-          >
-            {isDeleting ? (
-              <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
-            ) : (
-              <TrashIcon className="w-4 h-4" />
-            )}
-          </button>
-        </div>
+        <ActionButtons
+          onEdit={() => onEdit(entry)}
+          onDelete={() => deleteEntry(entry.id)}
+          isDeleting={isDeleting}
+        />
       </td>
     </tr>
   )
@@ -164,27 +216,11 @@ const EntryCard = memo(
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
-        <div className="flex space-x-2">
-          <button
-            onClick={() => onEdit(entry)}
-            className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
-            aria-label="Edit entry"
-          >
-            <EditIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => deleteEntry(entry.id)}
-            className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
-            disabled={isDeleting}
-            aria-label="Delete entry"
-          >
-            {isDeleting ? (
-              <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
-            ) : (
-              <TrashIcon className="w-4 h-4" />
-            )}
-          </button>
-        </div>
+        <ActionButtons
+          onEdit={() => onEdit(entry)}
+          onDelete={() => deleteEntry(entry.id)}
+          isDeleting={isDeleting}
+        />
       </div>
 
       {(entry.foodName || entry.mealName) && (
@@ -198,30 +234,23 @@ const EntryCard = memo(
       <div className="grid grid-cols-3 gap-3">
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
           <span className="text-gray-400 text-sm">Protein</span>
-          <span className="text-green-400 font-medium">
-            <AnimatedNumber value={Math.round(entry.protein) || 0} suffix="g" />
-          </span>
+          <MacroCell value={entry.protein} suffix="g" color="text-green-400" />
         </div>
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
           <span className="text-gray-400 text-sm">Carbs</span>
-          <span className="text-blue-400 font-medium">
-            <AnimatedNumber value={Math.round(entry.carbs) || 0} suffix="g" />
-          </span>
+          <MacroCell value={entry.carbs} suffix="g" color="text-blue-400" />
         </div>
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
           <span className="text-gray-400 text-sm">Fats</span>
-          <span className="text-red-400 font-medium">
-            <AnimatedNumber value={Math.round(entry.fats) || 0} suffix="g" />
-          </span>
+          <MacroCell value={entry.fats} suffix="g" color="text-red-400" />
         </div>
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 col-span-3">
           <span className="text-gray-400 text-sm">Calories</span>
-          <span className="text-white font-medium">
-            <AnimatedNumber
-              value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
-              suffix=" kcal"
-            />
-          </span>
+          <MacroCell
+            value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
+            suffix=" kcal"
+            color="text-white"
+          />
         </div>
       </div>
     </div>
@@ -398,15 +427,12 @@ const EntryHistoryComponent = function EntryHistory({
       </div>
 
       {history.length === 0 ? (
-        <div className="py-16 flex flex-col items-center justify-center bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50">
-          <div className="w-20 h-20 mb-4 rounded-full bg-gray-700/70 flex items-center justify-center">
-            <PlusCircleIcon className="w-10 h-10 text-gray-500" />
-          </div>
-          <h3 className="text-lg font-medium text-gray-300">No entries yet</h3>
-          <p className="mt-2 text-sm text-gray-400 max-w-sm text-center">
-            Get started by logging your first meal using the form above
-          </p>
-        </div>
+        <EmptyState
+          title="No entries yet"
+          message="Get started by logging your first meal using the form above"
+          icon={<PlusCircleIcon className="w-10 h-10 text-gray-500" />}
+          size="lg"
+        />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl">
           {/* Desktop Table View */}
@@ -414,36 +440,13 @@ const EntryHistoryComponent = function EntryHistory({
             <table className="w-full table-fixed">
               <thead>
                 <tr>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    Time
-                  </th>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    Meal
-                  </th>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    <div className="flex items-center justify-center gap-1">
-                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                      Protein
-                    </div>
-                  </th>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    <div className="flex items-center justify-center gap-1">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                      Carbs
-                    </div>
-                  </th>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    <div className="flex items-center justify-center gap-1">
-                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                      Fats
-                    </div>
-                  </th>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    Calories
-                  </th>
-                  <th className="w-1/6 px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50">
-                    Actions
-                  </th>
+                  <TableHeader label="Time" />
+                  <TableHeader label="Meal" />
+                  <TableHeader label="Protein" color="bg-green-500" />
+                  <TableHeader label="Carbs" color="bg-blue-500" />
+                  <TableHeader label="Fats" color="bg-red-500" />
+                  <TableHeader label="Calories" />
+                  <TableHeader label="Actions" />
                 </tr>
               </thead>
               <tbody>
