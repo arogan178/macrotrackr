@@ -1,5 +1,6 @@
 import { memo, useCallback, useState, useEffect } from "react";
 import { MacroTargetSettings } from "@/features/macroTracking/types";
+import { MacroTargetState } from "@/features/settings/types";
 import { InfoCard, CardContainer, SaveButton } from "@/components/form";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
@@ -7,10 +8,11 @@ import { useStore } from "@/store/store";
 import LoadingSpinner from "@/components/LoadingSpinner";
 
 // Default macro values (30/40/30 split)
-const DEFAULT_MACRO_TARGET = {
+const DEFAULT_MACRO_TARGET: MacroTargetState = {
   proteinPercentage: 30,
   carbsPercentage: 40,
   fatsPercentage: 30,
+  lockedMacros: [],
 };
 
 function MacroTargetForm() {
@@ -23,29 +25,38 @@ function MacroTargetForm() {
   } = useStore();
 
   // Local state for edited values
-  const [localTarget, setLocalTarget] = useState<MacroTargetSettings | null>(
-    null
-  );
+  const [localTarget, setLocalTarget] = useState<MacroTargetState | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
+  // Helper function to convert MacroTargetSettings to MacroTargetState
+  const toMacroTargetState = (
+    settings: MacroTargetSettings
+  ): MacroTargetState => ({
+    proteinPercentage: settings.proteinPercentage,
+    carbsPercentage: settings.carbsPercentage,
+    fatsPercentage: settings.fatsPercentage,
+    lockedMacros: settings.lockedMacros || [],
+  });
+
   // Initialize local target from store values
   useEffect(() => {
-    // Only set default values after we know loading is complete and no data was found
     if (macroTarget) {
-      setLocalTarget(macroTarget);
+      setLocalTarget(toMacroTargetState(macroTarget));
       setHasChanges(false);
-    } else if (!localTarget && !isTargetLoading) {
-      // Explicitly fetch data if macroTarget is null and not currently loading
-      fetchMacroTarget();
-      // Don't set localTarget to defaults here - let the loading state show
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [macroTarget, isTargetLoading]); // Add isTargetLoading as dependency
+  }, [macroTarget]);
+
+  // Fetch macro target on component mount if not already available
+  useEffect(() => {
+    if (!macroTarget && !isTargetLoading) {
+      fetchMacroTarget();
+    }
+  }, [macroTarget, isTargetLoading, fetchMacroTarget]);
 
   // Handle local changes from the slider component
   const handleMacroTargetChange = useCallback(
-    (target: MacroTargetSettings) => {
+    (target: MacroTargetState) => {
       setLocalTarget(target);
 
       if (macroTarget) {
@@ -73,7 +84,18 @@ function MacroTargetForm() {
   // Save changes to the backend
   const handleSaveChanges = useCallback(() => {
     if (localTarget && hasChanges) {
-      updateMacroTargetPercentages(localTarget)
+      // Convert MacroTargetState back to MacroTargetSettings for the API
+      const settingsToSave: MacroTargetSettings = {
+        proteinPercentage: localTarget.proteinPercentage,
+        carbsPercentage: localTarget.carbsPercentage,
+        fatsPercentage: localTarget.fatsPercentage,
+        lockedMacros:
+          localTarget.lockedMacros.length > 0
+            ? localTarget.lockedMacros
+            : undefined,
+      };
+
+      updateMacroTargetPercentages(settingsToSave)
         .then(() => {
           setSaveSuccess(true);
           setHasChanges(false);
@@ -89,7 +111,7 @@ function MacroTargetForm() {
   // Reset to original values
   const handleReset = useCallback(() => {
     if (macroTarget) {
-      setLocalTarget(macroTarget);
+      setLocalTarget(toMacroTargetState(macroTarget));
     } else {
       setLocalTarget(DEFAULT_MACRO_TARGET);
     }
