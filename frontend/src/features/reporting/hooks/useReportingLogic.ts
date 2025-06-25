@@ -1,18 +1,13 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { MacroEntry, MacroTotals } from "@/types";
+import { MacroEntry } from "../../macroTracking/types";
+import { formatDate } from "../utils";
 
-// Helper function to format date (can be moved to a utils file if used elsewhere)
-const formatDate = (dateStr: string): string => {
-  const [year, month, day] = dateStr.split("-").map(Number);
-  const date = new Date(year, month - 1, day);
-  if (isNaN(date.getTime())) {
-    return "Invalid Date";
-  }
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-  });
-};
+interface MacroTotals {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}
 
 export function useReportingLogic(
   history: MacroEntry[] | null,
@@ -168,9 +163,8 @@ export function useReportingLogic(
     });
 
     return relevantEntries.map((entry) => ({
-      name: entry.food_item || "Unknown Item",
-      calories:
-        entry.calories ?? entry.protein * 4 + entry.carbs * 4 + entry.fats * 9,
+      name: entry.foodName || entry.mealName || "Unknown Item",
+      calories: entry.protein * 4 + entry.carbs * 4 + entry.fats * 9,
       protein: entry.protein,
       carbs: entry.carbs,
       fats: entry.fats,

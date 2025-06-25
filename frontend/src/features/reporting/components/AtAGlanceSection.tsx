@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 import type { NutritionAverage } from "../types/insights-types";
-import { DAILY_AVERAGES_CONFIG } from "../constants/insights-constants";
+import { DAILY_AVERAGES_CONFIG } from "../constants";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface AtAGlanceSectionProps {
