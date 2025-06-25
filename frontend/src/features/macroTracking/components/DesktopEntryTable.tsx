@@ -63,42 +63,26 @@ const DesktopEntryTable = memo(
   }: DesktopEntryTableProps) => {
     // Transform data for TanStack Table
     const tableData = useMemo(() => {
-      const visibleEntries = showAllDates
+      // If showAllDates is true, use all entries, otherwise limit to first 5
+      const entriesToProcess = showAllDates
         ? groupedEntries
         : groupedEntries.slice(0, 5);
-      const additionalEntries = groupedEntries.slice(5);
 
-      const initialData: TableRowData[] = visibleEntries.flatMap((group) => [
+      // Always include all rows (both group headers and individual entries)
+      // but mark them for conditional rendering based on collapsed state
+      const data: TableRowData[] = entriesToProcess.flatMap((group) => [
         { ...group, isGroup: true },
-        ...(!collapsedDates.has(group.date)
-          ? group.entries.map((entry) => ({
-              ...group,
-              isGroup: false,
-              entries: [entry], // Wrap single entry for consistency
-              parentDate: group.date,
-            }))
-          : []),
+        // Always include individual entries - we'll handle visibility in the render
+        ...group.entries.map((entry) => ({
+          ...group,
+          isGroup: false,
+          entries: [entry], // Wrap single entry for consistency
+          parentDate: group.date,
+        })),
       ]);
 
-      if (showAllDates && additionalEntries.length > 0) {
-        const additionalData: TableRowData[] = additionalEntries.flatMap(
-          (group) => [
-            { ...group, isGroup: true },
-            ...(!collapsedDates.has(group.date)
-              ? group.entries.map((entry) => ({
-                  ...group,
-                  isGroup: false,
-                  entries: [entry],
-                  parentDate: group.date,
-                }))
-              : []),
-          ]
-        );
-        return [...initialData, ...additionalData];
-      }
-
-      return initialData;
-    }, [groupedEntries, collapsedDates, showAllDates]);
+      return data;
+    }, [groupedEntries, showAllDates]); // Remove collapsedDates from dependencies
 
     // Define columns
     const columns = useMemo(
@@ -114,7 +98,7 @@ const DesktopEntryTable = memo(
                     animate={{
                       rotate: collapsedDates.has(data.date) ? -90 : 0,
                     }}
-                    transition={{ duration: 0.2, ease: "easeInOut" }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
                     <ChevronDownIcon className="w-4 h-4" />
                   </motion.div>
@@ -264,82 +248,107 @@ const DesktopEntryTable = memo(
     });
 
     return (
-      <div className="hidden lg:block overflow-x-auto">
-        <table className="w-full table-fixed">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th
-                    key={header.id}
-                    className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50"
-                    style={{ width: "14.285%" }}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            <AnimatePresence initial={false}>
-              {table.getRowModel().rows.map((row, index) => {
-                const data = row.original;
-                const isGroup = data.isGroup;
-                const isAdditionalEntry =
-                  index >=
-                  (showAllDates
-                    ? groupedEntries.length * 2
-                    : Math.min(groupedEntries.length * 2, 10));
+      <div className="hidden lg:block">
+        <div className="overflow-hidden rounded-lg border border-gray-700/50">
+          <table className="w-full table-fixed bg-gray-800/40">
+            <thead>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <tr key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => (
+                    <th
+                      key={header.id}
+                      className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50"
+                      style={{ width: "14.285%" }}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(
+                            header.column.columnDef.header,
+                            header.getContext()
+                          )}
+                    </th>
+                  ))}
+                </tr>
+              ))}
+            </thead>
+            <tbody>
+              <AnimatePresence initial={false}>
+                {table.getRowModel().rows.map((row) => {
+                  const data = row.original;
+                  const isGroup = data.isGroup;
+                  const parentDate = data.parentDate || data.date;
 
-                return (
-                  <motion.tr
-                    key={row.id}
-                    className={
-                      isGroup
-                        ? "bg-indigo-600/10 border-t border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors group"
-                        : "border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
-                    }
-                    onClick={
-                      isGroup ? () => toggleDateCollapse(data.date) : undefined
-                    }
-                    initial={{
-                      opacity: 0,
-                      y: isAdditionalEntry ? 20 : isGroup ? 0 : -10,
-                      scale: isAdditionalEntry ? 0.95 : 1,
-                    }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                    transition={{
-                      duration: 0.3,
-                      delay: isGroup ? 0 : index * 0.05,
-                      ease: "easeOut",
-                    }}
-                    layout
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <td
-                        key={cell.id}
-                        className="px-4 py-2.5 text-center"
-                        style={{ width: "14.285%" }}
-                      >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </td>
-                    ))}
-                  </motion.tr>
-                );
-              })}
-            </AnimatePresence>
-          </tbody>
-        </table>
+                  // Skip rendering individual entries if their parent date is collapsed
+                  const isEntryCollapsed =
+                    !isGroup && collapsedDates.has(parentDate);
+
+                  // Better key for animations that includes parent date for individual entries
+                  const animationKey = isGroup
+                    ? `group-${data.date}`
+                    : `entry-${data.entries[0].id}-${parentDate}`;
+
+                  // Don't render collapsed entries
+                  if (isEntryCollapsed) {
+                    return null;
+                  }
+
+                  return (
+                    <motion.tr
+                      key={animationKey}
+                      className={
+                        isGroup
+                          ? "bg-indigo-600/10 border-t border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors group"
+                          : "border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
+                      }
+                      onClick={
+                        isGroup
+                          ? () => toggleDateCollapse(data.date)
+                          : undefined
+                      }
+                      initial={{
+                        opacity: 0,
+                        y: isGroup ? 0 : -8,
+                        scaleY: isGroup ? 1 : 0.8,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        y: 0,
+                        scaleY: 1,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        y: isGroup ? 0 : -8,
+                        scaleY: isGroup ? 1 : 0.8,
+                      }}
+                      transition={{
+                        duration: 0.2,
+                        delay: isGroup ? 0 : 0.02,
+                        ease: "easeInOut",
+                        opacity: { duration: 0.15 },
+                        y: { duration: 0.2 },
+                        scaleY: { duration: 0.2 },
+                      }}
+                      layout
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <td
+                          key={cell.id}
+                          className="px-4 py-2.5 text-center"
+                          style={{ width: "14.285%" }}
+                        >
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </td>
+                      ))}
+                    </motion.tr>
+                  );
+                })}
+              </AnimatePresence>
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
