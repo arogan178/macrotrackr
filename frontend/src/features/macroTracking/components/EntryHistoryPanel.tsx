@@ -85,71 +85,6 @@ const TableHeader = memo(
   )
 );
 
-// Simplified Entry Row Component
-const EntryRow = memo(
-  ({
-    entry,
-    onEdit,
-    deleteEntry,
-    isDeleting,
-  }: {
-    entry: MacroEntry;
-    onEdit: (entry: MacroEntry) => void;
-    deleteEntry: (id: number) => void;
-    isDeleting: boolean;
-  }) => (
-    <motion.tr
-      className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
-      layout
-    >
-      <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap pl-11">
-        {formatTimeFromEntry(entry)}
-      </td>
-      <td className="px-4 py-3 text-sm text-gray-300 text-center">
-        <div>
-          <span className="font-medium text-indigo-300">
-            {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
-          </span>
-          {(entry.foodName || entry.mealName) && (
-            <span className="text-gray-400 block text-xs mt-0.5">
-              {entry.foodName || entry.mealName}
-            </span>
-          )}
-        </div>
-      </td>
-      <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
-        <MacroCell value={entry.protein} suffix="g" color="text-green-400" />
-      </td>
-      <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
-        <MacroCell value={entry.carbs} suffix="g" color="text-blue-400" />
-      </td>
-      <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
-        <MacroCell value={entry.fats} suffix="g" color="text-red-400" />
-      </td>
-      <td className="px-4 py-3 text-center font-medium text-white">
-        <MacroCell
-          value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
-          suffix=" kcal"
-          color="text-white"
-        />
-      </td>
-      <td className="px-4 py-3 text-center whitespace-nowrap">
-        <ActionButtonGroup
-          onEdit={() => onEdit(entry)}
-          onDelete={() => deleteEntry(entry.id)}
-          isDeleting={isDeleting}
-        />
-      </td>
-    </motion.tr>
-  )
-);
-
-EntryRow.displayName = "EntryRow";
-
 // Simplified Entry Card Component
 const EntryCard = memo(
   ({
@@ -503,16 +438,103 @@ const EntryHistoryComponent = function EntryHistory({
                       </td>
                     </motion.tr>
                     <AnimatePresence>
-                      {!collapsedDates.has(group.date) &&
-                        group.entries.map((entry) => (
-                          <EntryRow
-                            key={entry.id}
-                            entry={entry}
-                            onEdit={onEdit}
-                            deleteEntry={deleteEntry}
-                            isDeleting={isDeleting}
-                          />
-                        ))}
+                      {!collapsedDates.has(group.date) && (
+                        <motion.tr
+                          key={`entries-${group.date}`}
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.3 }}
+                        >
+                          <td colSpan={7} className="p-0">
+                            <motion.div
+                              initial={{ height: 0 }}
+                              animate={{ height: "auto" }}
+                              exit={{ height: 0 }}
+                              transition={{ duration: 0.4, ease: "easeInOut" }}
+                              className="overflow-hidden"
+                            >
+                              <table className="w-full">
+                                <tbody>
+                                  {group.entries.map((entry, index) => (
+                                    <motion.tr
+                                      key={entry.id}
+                                      className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
+                                      initial={{ opacity: 0, y: -10 }}
+                                      animate={{ opacity: 1, y: 0 }}
+                                      transition={{
+                                        delay: index * 0.05,
+                                        duration: 0.3,
+                                        ease: "easeOut",
+                                      }}
+                                    >
+                                      <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap pl-11">
+                                        {formatTimeFromEntry(entry)}
+                                      </td>
+                                      <td className="px-4 py-3 text-sm text-gray-300 text-center">
+                                        <div>
+                                          <span className="font-medium text-indigo-300">
+                                            {entry.mealType
+                                              ? capitalizeFirstLetter(
+                                                  entry.mealType
+                                                )
+                                              : ""}
+                                          </span>
+                                          {(entry.foodName ||
+                                            entry.mealName) && (
+                                            <span className="text-gray-400 block text-xs mt-0.5">
+                                              {entry.foodName || entry.mealName}
+                                            </span>
+                                          )}
+                                        </div>
+                                      </td>
+                                      <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
+                                        <MacroCell
+                                          value={entry.protein}
+                                          suffix="g"
+                                          color="text-green-400"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
+                                        <MacroCell
+                                          value={entry.carbs}
+                                          suffix="g"
+                                          color="text-blue-400"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
+                                        <MacroCell
+                                          value={entry.fats}
+                                          suffix="g"
+                                          color="text-red-400"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-3 text-center font-medium text-white">
+                                        <MacroCell
+                                          value={calculateCalories(
+                                            entry.protein,
+                                            entry.carbs,
+                                            entry.fats
+                                          )}
+                                          suffix=" kcal"
+                                          color="text-white"
+                                        />
+                                      </td>
+                                      <td className="px-4 py-3 text-center whitespace-nowrap">
+                                        <ActionButtonGroup
+                                          onEdit={() => onEdit(entry)}
+                                          onDelete={() => deleteEntry(entry.id)}
+                                          isDeleting={isDeleting}
+                                        />
+                                      </td>
+                                    </motion.tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </motion.div>
+                          </td>
+                        </motion.tr>
+                      )}
                     </AnimatePresence>
                   </Fragment>
                 ))}
@@ -581,31 +603,46 @@ const EntryHistoryComponent = function EntryHistory({
                 <AnimatePresence>
                   {!collapsedDates.has(group.date) && (
                     <motion.div
-                      className="space-y-3 p-4"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                      className="overflow-hidden"
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{
+                        height: "auto",
+                        opacity: 1,
+                        transition: {
+                          height: { duration: 0.4, ease: "easeInOut" },
+                          opacity: { duration: 0.2, delay: 0.1 },
+                        },
+                      }}
+                      exit={{
+                        height: 0,
+                        opacity: 0,
+                        transition: {
+                          height: { duration: 0.3, ease: "easeInOut" },
+                          opacity: { duration: 0.1 },
+                        },
+                      }}
                     >
-                      {group.entries.map((entry, index) => (
-                        <motion.div
-                          key={entry.id}
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{
-                            delay: index * 0.05,
-                            duration: 0.3,
-                            ease: "easeOut",
-                          }}
-                        >
-                          <EntryCard
-                            entry={entry}
-                            onEdit={onEdit}
-                            deleteEntry={deleteEntry}
-                            isDeleting={isDeleting}
-                          />
-                        </motion.div>
-                      ))}
+                      <div className="space-y-3 p-4">
+                        {group.entries.map((entry, index) => (
+                          <motion.div
+                            key={entry.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{
+                              delay: index * 0.05,
+                              duration: 0.3,
+                              ease: "easeOut",
+                            }}
+                          >
+                            <EntryCard
+                              entry={entry}
+                              onEdit={onEdit}
+                              deleteEntry={deleteEntry}
+                              isDeleting={isDeleting}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
