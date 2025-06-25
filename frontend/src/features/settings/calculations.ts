@@ -137,48 +137,6 @@ export function calculateTDEEByActivityLevel(
   return calculateTDEEValue(bmr, multiplier);
 }
 
-// /**
-//  * Calculates daily calorie goal based on TDEE and weight goal
-//  * @param tdee - Total Daily Energy Expenditure
-//  * @param goal - Weight management goal
-//  * @returns Daily calorie goal
-//  */
-// export function calculateCalorieGoal(tdee: number, goal: WeightGoal): number {
-//   const adjustmentFactor =
-//     CALORIE_ADJUSTMENT_FACTORS[goal] || CALORIE_ADJUSTMENT_FACTORS.maintain;
-//   return calculateCalorieGoalValue(tdee, adjustmentFactor);
-// }
-
-// /**
-//  * Calculates full nutrition profile from basic user information
-//  * @param weight - Weight in kg
-//  * @param height - Height in cm
-//  * @param age - Age in years
-//  * @param gender - 'male' or 'female'
-//  * @param exerciseFrequency - How often the person exercises
-//  * @param goal - Weight management goal
-//  * @returns Complete nutrition profile with BMR, TDEE, calorie goal and macros
-//  */
-
-// export function calculateNutritionProfile(
-//   weight: number,
-//   height: number,
-//   age: number,
-//   gender: Gender,
-//   activityLevel: ActivityLevel,
-//   goal: WeightGoal
-// ): NutritionProfile {
-//   const bmr = calculateBMR(weight, height, age, gender);
-//   const tdee = calculateTDEE(bmr, activityLevel);
-//   const calorieGoal = calculateCalorieGoal(tdee, goal);
-
-//   return {
-//     bmr,
-//     tdee,
-//     calorieGoal,
-//   };
-// }
-
 /**
  * Calculate macros for a given calorie goal and target
  */
