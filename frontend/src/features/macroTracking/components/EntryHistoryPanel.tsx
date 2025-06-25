@@ -37,48 +37,38 @@ interface GroupedEntry {
   };
 }
 
-// Move helper functions outside component to prevent recreation
-const formatEntryDate = (dateStr: string): string => {
-  const date = new Date(dateStr);
-  return date.toLocaleDateString("en-UK", {
+// Consolidated helper functions
+const formatEntryDate = (dateStr: string): string =>
+  new Date(dateStr).toLocaleDateString("en-UK", {
     year: "numeric",
     month: "short",
     day: "numeric",
   });
-};
 
-const formatTimeFromEntry = (entry: MacroEntry): string => {
-  if (entry.entry_time) {
-    return entry.entry_time;
-  }
-  const createdDate = new Date(entry.created_at);
-  return createdDate.toLocaleTimeString([], {
+const formatTimeFromEntry = (entry: MacroEntry): string =>
+  entry.entry_time ||
+  new Date(entry.created_at).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   });
-};
 
 const calculateCalories = (
   protein: number,
   carbs: number,
   fats: number
-): number => {
-  return Math.round(protein * 4 + carbs * 4 + fats * 9);
-};
+): number => Math.round(protein * 4 + carbs * 4 + fats * 9);
 
-const capitalizeFirstLetter = (string: string): string => {
-  if (!string) return "";
-  return (
-    string.charAt(0).toUpperCase() +
-    string
-      .slice(1)
-      .replace(/🍳|🍗|🍽️|🧃/, "")
-      .trim()
-  );
-};
+const capitalizeFirstLetter = (string: string): string =>
+  string
+    ? string.charAt(0).toUpperCase() +
+      string
+        .slice(1)
+        .replace(/🍳|🍗|🍽️|🧃/, "")
+        .trim()
+    : "";
 
-// Memoized Entry Row Component for desktop
+// Simplified Entry Row Component
 const EntryRow = memo(
   ({
     entry,
@@ -100,11 +90,11 @@ const EntryRow = memo(
           <span className="font-medium text-indigo-300">
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
-          {entry.foodName || entry.mealName ? (
+          {(entry.foodName || entry.mealName) && (
             <span className="text-gray-400 block text-xs mt-0.5">
               {entry.foodName || entry.mealName}
             </span>
-          ) : null}
+          )}
         </div>
       </td>
       <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
@@ -151,7 +141,7 @@ const EntryRow = memo(
 
 EntryRow.displayName = "EntryRow";
 
-// Memoized Entry Card Component for mobile
+// Simplified Entry Card Component
 const EntryCard = memo(
   ({
     entry,
@@ -165,7 +155,6 @@ const EntryCard = memo(
     isDeleting: boolean;
   }) => (
     <div className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30">
-      {/* Entry Header */}
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <span className="text-gray-300 text-sm font-medium">
@@ -198,7 +187,6 @@ const EntryCard = memo(
         </div>
       </div>
 
-      {/* Food Name */}
       {(entry.foodName || entry.mealName) && (
         <div className="mb-3">
           <span className="text-gray-400 text-sm">
@@ -207,7 +195,6 @@ const EntryCard = memo(
         </div>
       )}
 
-      {/* Macro Grid */}
       <div className="grid grid-cols-3 gap-3">
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
           <span className="text-gray-400 text-sm">Protein</span>
@@ -215,21 +202,18 @@ const EntryCard = memo(
             <AnimatedNumber value={Math.round(entry.protein) || 0} suffix="g" />
           </span>
         </div>
-
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
           <span className="text-gray-400 text-sm">Carbs</span>
           <span className="text-blue-400 font-medium">
             <AnimatedNumber value={Math.round(entry.carbs) || 0} suffix="g" />
           </span>
         </div>
-
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
           <span className="text-gray-400 text-sm">Fats</span>
           <span className="text-red-400 font-medium">
             <AnimatedNumber value={Math.round(entry.fats) || 0} suffix="g" />
           </span>
         </div>
-
         <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 col-span-3">
           <span className="text-gray-400 text-sm">Calories</span>
           <span className="text-white font-medium">
@@ -249,29 +233,29 @@ EntryCard.displayName = "EntryCard";
 const exportCSV = (history: MacroEntry[]) => {
   const csvContent = [
     "Date, Time, Meal Type, Meal Name, Protein (g), Carbs (g), Fats (g), Calories",
-    history
-      .map(
-        (entry) =>
-          `${
-            entry.entry_date || new Date(entry.created_at).toLocaleDateString()
-          },${new Date(entry.created_at).toLocaleTimeString()},${
-            entry.mealType || ""
-          },${entry.foodName || entry.mealName || ""},${entry.protein},${
-            entry.carbs
-          },${entry.fats},${calculateCalories(
-            entry.protein,
-            entry.carbs,
-            entry.fats
-          )}`
-      )
-      .join("\n"),
-  ];
-  const blob = new Blob([csvContent.join("\n")], { type: "text/csv" });
+    ...history.map(
+      (entry) =>
+        `${
+          entry.entry_date || new Date(entry.created_at).toLocaleDateString()
+        },${new Date(entry.created_at).toLocaleTimeString()},${
+          entry.mealType || ""
+        },${entry.foodName || entry.mealName || ""},${entry.protein},${
+          entry.carbs
+        },${entry.fats},${calculateCalories(
+          entry.protein,
+          entry.carbs,
+          entry.fats
+        )}`
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv" });
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url;
-  a.download = "macro-entries.csv";
+  Object.assign(a, { href: url, download: "macro-entries.csv" });
+  document.body.appendChild(a);
   a.click();
+  document.body.removeChild(a);
   window.URL.revokeObjectURL(url);
 };
 
@@ -305,92 +289,67 @@ const EntryHistoryComponent = function EntryHistory({
   // Memoize grouped entries with totals
   const groupedEntries = useMemo((): GroupedEntry[] => {
     const grouped = history.reduce((acc, entry) => {
-      const dateStr = entry.entry_date || entry.created_at;
-      const dateKey = formatEntryDate(dateStr);
-
-      if (!acc[dateKey]) {
-        acc[dateKey] = [];
-      }
+      const dateKey = formatEntryDate(entry.entry_date || entry.created_at);
+      if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(entry);
       return acc;
     }, {} as Record<string, MacroEntry[]>);
 
-    const groupedArray = Object.entries(grouped).map(([date, entries]) => {
-      // Calculate totals for each date group
-      const totals = entries.reduce(
-        (acc, entry) => ({
-          protein: acc.protein + (entry.protein || 0),
-          carbs: acc.carbs + (entry.carbs || 0),
-          fats: acc.fats + (entry.fats || 0),
-          calories:
-            acc.calories +
-            calculateCalories(entry.protein, entry.carbs, entry.fats),
-        }),
-        { protein: 0, carbs: 0, fats: 0, calories: 0 }
-      );
-
-      return {
+    return Object.entries(grouped)
+      .map(([date, entries]) => ({
         date,
         entries,
+        totals: entries.reduce(
+          (acc, entry) => ({
+            protein: acc.protein + (entry.protein || 0),
+            carbs: acc.carbs + (entry.carbs || 0),
+            fats: acc.fats + (entry.fats || 0),
+            calories:
+              acc.calories +
+              calculateCalories(entry.protein, entry.carbs, entry.fats),
+          }),
+          { protein: 0, carbs: 0, fats: 0, calories: 0 }
+        ),
+      }))
+      .map((group) => ({
+        ...group,
         totals: {
-          protein: Math.round(totals.protein),
-          carbs: Math.round(totals.carbs),
-          fats: Math.round(totals.fats),
-          calories: Math.round(totals.calories),
+          protein: Math.round(group.totals.protein),
+          carbs: Math.round(group.totals.carbs),
+          fats: Math.round(group.totals.fats),
+          calories: Math.round(group.totals.calories),
         },
-      };
-    });
-
-    // Sort by date (newest first)
-    groupedArray.sort((a, b) => {
-      const dateA = new Date(
-        a.entries[0].entry_date || a.entries[0].created_at
+      }))
+      .sort(
+        (a, b) =>
+          new Date(
+            b.entries[0].entry_date || b.entries[0].created_at
+          ).getTime() -
+          new Date(a.entries[0].entry_date || a.entries[0].created_at).getTime()
       );
-      const dateB = new Date(
-        b.entries[0].entry_date || b.entries[0].created_at
-      );
-      return dateB.getTime() - dateA.getTime();
-    });
-
-    return groupedArray;
   }, [history]);
 
-  // Initialize collapsed dates based on grouped entries
+  // Initialize collapsed dates
   useEffect(() => {
-    setCollapsedDates((prevCollapsed) => {
-      // If no collapsed dates are set yet, set defaults
-      if (prevCollapsed.size === 0) {
-        const newCollapsedDates = new Set<string>();
-        groupedEntries.forEach((group) => {
-          if (group.date !== todayFormatted) {
-            newCollapsedDates.add(group.date);
-          }
-        });
-        return newCollapsedDates;
+    setCollapsedDates((prev) => {
+      if (prev.size === 0) {
+        return new Set(
+          groupedEntries
+            .filter((group) => group.date !== todayFormatted)
+            .map((group) => group.date)
+        );
       }
-
-      // Otherwise, preserve existing collapsed state but remove dates that no longer exist
       const existingDates = new Set(groupedEntries.map((group) => group.date));
-      const filteredCollapsed = new Set<string>();
-      prevCollapsed.forEach((date) => {
-        if (existingDates.has(date)) {
-          filteredCollapsed.add(date);
-        }
-      });
-      return filteredCollapsed;
+      return new Set([...prev].filter((date) => existingDates.has(date)));
     });
   }, [groupedEntries, todayFormatted]);
 
-  // Memoize event handlers
+  // Memoized event handlers
   const toggleDateCollapse = useCallback((date: string) => {
     setCollapsedDates((prev) => {
-      const newCollapsed = new Set(prev);
-      if (newCollapsed.has(date)) {
-        newCollapsed.delete(date);
-      } else {
-        newCollapsed.add(date);
-      }
-      return newCollapsed;
+      const newSet = new Set(prev);
+      newSet.has(date) ? newSet.delete(date) : newSet.add(date);
+      return newSet;
     });
   }, []);
 
@@ -402,12 +361,8 @@ const EntryHistoryComponent = function EntryHistory({
 
   const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
-
     const group = groupedEntries.find((g) => g.date === dateToDelete);
-    if (group) {
-      group.entries.forEach((entry) => deleteEntry(entry.id));
-    }
-
+    group?.entries.forEach((entry) => deleteEntry(entry.id));
     setIsDeleteModalOpen(false);
     setDateToDelete(null);
   }, [dateToDelete, groupedEntries, deleteEntry]);
@@ -417,10 +372,7 @@ const EntryHistoryComponent = function EntryHistory({
     setDateToDelete(null);
   }, []);
 
-  // Memoize export handler
-  const handleExportCSV = useCallback(() => {
-    exportCSV(history);
-  }, [history]);
+  const handleExportCSV = useCallback(() => exportCSV(history), [history]);
 
   return (
     <div>
