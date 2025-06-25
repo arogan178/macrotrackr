@@ -1,4 +1,11 @@
-import { useEffect, useState, Fragment, useMemo, memo } from "react";
+import {
+  useEffect,
+  useState,
+  Fragment,
+  useMemo,
+  memo,
+  useCallback,
+} from "react";
 import {
   ExportIcon,
   ChevronDownIcon,
@@ -19,10 +26,225 @@ interface EntryHistoryProps {
   isEditing: boolean;
 }
 
-interface GroupedEntries {
+interface GroupedEntry {
   date: string;
   entries: MacroEntry[];
+  totals: {
+    protein: number;
+    carbs: number;
+    fats: number;
+    calories: number;
+  };
 }
+
+// Move helper functions outside component to prevent recreation
+const formatEntryDate = (dateStr: string): string => {
+  const date = new Date(dateStr);
+  return date.toLocaleDateString("en-UK", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+};
+
+const formatTimeFromEntry = (entry: MacroEntry): string => {
+  if (entry.entry_time) {
+    return entry.entry_time;
+  }
+  const createdDate = new Date(entry.created_at);
+  return createdDate.toLocaleTimeString([], {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+};
+
+const calculateCalories = (
+  protein: number,
+  carbs: number,
+  fats: number
+): number => {
+  return Math.round(protein * 4 + carbs * 4 + fats * 9);
+};
+
+const capitalizeFirstLetter = (string: string): string => {
+  if (!string) return "";
+  return (
+    string.charAt(0).toUpperCase() +
+    string
+      .slice(1)
+      .replace(/🍳|🍗|🍽️|🧃/, "")
+      .trim()
+  );
+};
+
+// Memoized Entry Row Component for desktop
+const EntryRow = memo(
+  ({
+    entry,
+    onEdit,
+    deleteEntry,
+    isDeleting,
+  }: {
+    entry: MacroEntry;
+    onEdit: (entry: MacroEntry) => void;
+    deleteEntry: (id: number) => void;
+    isDeleting: boolean;
+  }) => (
+    <tr className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors">
+      <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap pl-11">
+        {formatTimeFromEntry(entry)}
+      </td>
+      <td className="px-4 py-3 text-sm text-gray-300 text-center">
+        <div>
+          <span className="font-medium text-indigo-300">
+            {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
+          </span>
+          {entry.foodName || entry.mealName ? (
+            <span className="text-gray-400 block text-xs mt-0.5">
+              {entry.foodName || entry.mealName}
+            </span>
+          ) : null}
+        </div>
+      </td>
+      <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
+        <AnimatedNumber value={Math.round(entry.protein) || 0} suffix="g" />
+      </td>
+      <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
+        <AnimatedNumber value={Math.round(entry.carbs) || 0} suffix="g" />
+      </td>
+      <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
+        <AnimatedNumber value={Math.round(entry.fats) || 0} suffix="g" />
+      </td>
+      <td className="px-4 py-3 text-center font-medium text-white">
+        <AnimatedNumber
+          value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
+          suffix=" kcal"
+        />
+      </td>
+      <td className="px-4 py-3 text-center whitespace-nowrap">
+        <div className="flex justify-center space-x-2">
+          <button
+            onClick={() => onEdit(entry)}
+            className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
+            aria-label="Edit entry"
+          >
+            <EditIcon className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => deleteEntry(entry.id)}
+            className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
+            disabled={isDeleting}
+            aria-label="Delete entry"
+          >
+            {isDeleting ? (
+              <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
+            ) : (
+              <TrashIcon className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+      </td>
+    </tr>
+  )
+);
+
+EntryRow.displayName = "EntryRow";
+
+// Memoized Entry Card Component for mobile
+const EntryCard = memo(
+  ({
+    entry,
+    onEdit,
+    deleteEntry,
+    isDeleting,
+  }: {
+    entry: MacroEntry;
+    onEdit: (entry: MacroEntry) => void;
+    deleteEntry: (id: number) => void;
+    isDeleting: boolean;
+  }) => (
+    <div className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30">
+      {/* Entry Header */}
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-3">
+          <span className="text-gray-300 text-sm font-medium">
+            {formatTimeFromEntry(entry)}
+          </span>
+          <span className="text-indigo-300 font-medium text-sm">
+            {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
+          </span>
+        </div>
+        <div className="flex space-x-2">
+          <button
+            onClick={() => onEdit(entry)}
+            className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
+            aria-label="Edit entry"
+          >
+            <EditIcon className="w-4 h-4" />
+          </button>
+          <button
+            onClick={() => deleteEntry(entry.id)}
+            className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
+            disabled={isDeleting}
+            aria-label="Delete entry"
+          >
+            {isDeleting ? (
+              <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
+            ) : (
+              <TrashIcon className="w-4 h-4" />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {/* Food Name */}
+      {(entry.foodName || entry.mealName) && (
+        <div className="mb-3">
+          <span className="text-gray-400 text-sm">
+            {entry.foodName || entry.mealName}
+          </span>
+        </div>
+      )}
+
+      {/* Macro Grid */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
+          <span className="text-gray-400 text-sm">Protein</span>
+          <span className="text-green-400 font-medium">
+            <AnimatedNumber value={Math.round(entry.protein) || 0} suffix="g" />
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
+          <span className="text-gray-400 text-sm">Carbs</span>
+          <span className="text-blue-400 font-medium">
+            <AnimatedNumber value={Math.round(entry.carbs) || 0} suffix="g" />
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
+          <span className="text-gray-400 text-sm">Fats</span>
+          <span className="text-red-400 font-medium">
+            <AnimatedNumber value={Math.round(entry.fats) || 0} suffix="g" />
+          </span>
+        </div>
+
+        <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 col-span-3">
+          <span className="text-gray-400 text-sm">Calories</span>
+          <span className="text-white font-medium">
+            <AnimatedNumber
+              value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
+              suffix=" kcal"
+            />
+          </span>
+        </div>
+      </div>
+    </div>
+  )
+);
+
+EntryCard.displayName = "EntryCard";
 
 const exportCSV = (history: MacroEntry[]) => {
   const csvContent = [
@@ -36,8 +258,10 @@ const exportCSV = (history: MacroEntry[]) => {
             entry.mealType || ""
           },${entry.foodName || entry.mealName || ""},${entry.protein},${
             entry.carbs
-          },${entry.fats},${Math.round(
-            entry.protein * 4 + entry.carbs * 4 + entry.fats * 9
+          },${entry.fats},${calculateCalories(
+            entry.protein,
+            entry.carbs,
+            entry.fats
           )}`
       )
       .join("\n"),
@@ -48,6 +272,7 @@ const exportCSV = (history: MacroEntry[]) => {
   a.href = url;
   a.download = "macro-entries.csv";
   a.click();
+  window.URL.revokeObjectURL(url);
 };
 
 const EntryHistoryComponent = function EntryHistory({
@@ -56,14 +281,11 @@ const EntryHistoryComponent = function EntryHistory({
   onEdit,
   isDeleting,
 }: EntryHistoryProps) {
-  const [groupedEntries, setGroupedEntries] = useState<GroupedEntries[]>([]);
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
-
-  // Add state for confirmation modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | null>(null);
 
-  // Get today's date formatted like "27 Dec, 2023" for comparison
+  // Memoize today's date
   const todayFormatted = useMemo(() => {
     return new Date().toLocaleDateString("en-UK", {
       year: "numeric",
@@ -72,42 +294,18 @@ const EntryHistoryComponent = function EntryHistory({
     });
   }, []);
 
-  // Format a date string, replacing today's date with "Today"
-  const formatDate = (dateString: string) => {
-    return dateString === todayFormatted ? "Today" : dateString;
-  };
+  // Memoize the formatDate function
+  const formatDate = useCallback(
+    (dateString: string) => {
+      return dateString === todayFormatted ? "Today" : dateString;
+    },
+    [todayFormatted]
+  );
 
-  // Helper function to ensure dates are displayed in the correct timezone
-  function formatEntryDate(dateStr: string): string {
-    const date = new Date(dateStr);
-    return date.toLocaleDateString("en-UK", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  }
-
-  // Helper function to format time consistently
-  function formatTimeFromEntry(entry: MacroEntry): string {
-    // First use entry_time if it exists
-    if (entry.entry_time) {
-      return entry.entry_time;
-    }
-
-    // Otherwise fall back to created_at timestamp
-    const createdDate = new Date(entry.created_at);
-    return createdDate.toLocaleTimeString([], {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  }
-
-  useEffect(() => {
+  // Memoize grouped entries with totals
+  const groupedEntries = useMemo((): GroupedEntry[] => {
     const grouped = history.reduce((acc, entry) => {
-      // Always use entry_date if available, only fall back to created_at if missing
       const dateStr = entry.entry_date || entry.created_at;
-      // Format date consistently using the helper
       const dateKey = formatEntryDate(dateStr);
 
       if (!acc[dateKey]) {
@@ -117,10 +315,31 @@ const EntryHistoryComponent = function EntryHistory({
       return acc;
     }, {} as Record<string, MacroEntry[]>);
 
-    const groupedArray = Object.entries(grouped).map(([date, entries]) => ({
-      date,
-      entries,
-    }));
+    const groupedArray = Object.entries(grouped).map(([date, entries]) => {
+      // Calculate totals for each date group
+      const totals = entries.reduce(
+        (acc, entry) => ({
+          protein: acc.protein + (entry.protein || 0),
+          carbs: acc.carbs + (entry.carbs || 0),
+          fats: acc.fats + (entry.fats || 0),
+          calories:
+            acc.calories +
+            calculateCalories(entry.protein, entry.carbs, entry.fats),
+        }),
+        { protein: 0, carbs: 0, fats: 0, calories: 0 }
+      );
+
+      return {
+        date,
+        entries,
+        totals: {
+          protein: Math.round(totals.protein),
+          carbs: Math.round(totals.carbs),
+          fats: Math.round(totals.fats),
+          calories: Math.round(totals.calories),
+        },
+      };
+    });
 
     // Sort by date (newest first)
     groupedArray.sort((a, b) => {
@@ -133,15 +352,16 @@ const EntryHistoryComponent = function EntryHistory({
       return dateB.getTime() - dateA.getTime();
     });
 
-    setGroupedEntries(groupedArray);
+    return groupedArray;
+  }, [history]);
 
-    // Only reset collapsed dates if this is the initial load (collapsedDates is empty)
-    // This preserves user's expanded/collapsed preferences during updates
+  // Initialize collapsed dates based on grouped entries
+  useEffect(() => {
     setCollapsedDates((prevCollapsed) => {
       // If no collapsed dates are set yet, set defaults
       if (prevCollapsed.size === 0) {
         const newCollapsedDates = new Set<string>();
-        groupedArray.forEach((group) => {
+        groupedEntries.forEach((group) => {
           if (group.date !== todayFormatted) {
             newCollapsedDates.add(group.date);
           }
@@ -149,9 +369,8 @@ const EntryHistoryComponent = function EntryHistory({
         return newCollapsedDates;
       }
 
-      // Otherwise, preserve existing collapsed state
-      // But remove any dates that no longer exist in the data
-      const existingDates = new Set(groupedArray.map((group) => group.date));
+      // Otherwise, preserve existing collapsed state but remove dates that no longer exist
+      const existingDates = new Set(groupedEntries.map((group) => group.date));
       const filteredCollapsed = new Set<string>();
       prevCollapsed.forEach((date) => {
         if (existingDates.has(date)) {
@@ -160,9 +379,10 @@ const EntryHistoryComponent = function EntryHistory({
       });
       return filteredCollapsed;
     });
-  }, [history, todayFormatted]);
+  }, [groupedEntries, todayFormatted]);
 
-  const toggleDateCollapse = (date: string) => {
+  // Memoize event handlers
+  const toggleDateCollapse = useCallback((date: string) => {
     setCollapsedDates((prev) => {
       const newCollapsed = new Set(prev);
       if (newCollapsed.has(date)) {
@@ -172,17 +392,15 @@ const EntryHistoryComponent = function EntryHistory({
       }
       return newCollapsed;
     });
-  };
+  }, []);
 
-  // Updated to open modal instead of using native confirm
-  const handleDeleteDate = (date: string, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent toggling the collapse state
+  const handleDeleteDate = useCallback((date: string, e: React.MouseEvent) => {
+    e.stopPropagation();
     setDateToDelete(date);
     setIsDeleteModalOpen(true);
-  };
+  }, []);
 
-  // Handle confirmation from modal
-  const confirmDeleteDate = () => {
+  const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
 
     const group = groupedEntries.find((g) => g.date === dateToDelete);
@@ -190,10 +408,19 @@ const EntryHistoryComponent = function EntryHistory({
       group.entries.forEach((entry) => deleteEntry(entry.id));
     }
 
-    // Close modal
     setIsDeleteModalOpen(false);
     setDateToDelete(null);
-  };
+  }, [dateToDelete, groupedEntries, deleteEntry]);
+
+  const closeDeleteModal = useCallback(() => {
+    setIsDeleteModalOpen(false);
+    setDateToDelete(null);
+  }, []);
+
+  // Memoize export handler
+  const handleExportCSV = useCallback(() => {
+    exportCSV(history);
+  }, [history]);
 
   return (
     <div>
@@ -209,7 +436,7 @@ const EntryHistoryComponent = function EntryHistory({
         </div>
         {history.length > 0 && (
           <button
-            onClick={() => exportCSV(history)}
+            onClick={handleExportCSV}
             className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
           >
             <ExportIcon className="w-4 h-4 mr-2" />
@@ -230,7 +457,8 @@ const EntryHistoryComponent = function EntryHistory({
         </div>
       ) : (
         <div className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl">
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full table-fixed">
               <thead>
                 <tr>
@@ -283,47 +511,18 @@ const EntryHistoryComponent = function EntryHistory({
                           {formatDate(group.date)}
                         </div>
                       </td>
-                      {/* Use explicit widths to avoid shifting content */}
                       <td className="px-4 py-2.5"></td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-green-400">
-                        {Math.round(
-                          group.entries.reduce(
-                            (acc, entry) => acc + (entry.protein || 0),
-                            0
-                          )
-                        )}
-                        g
+                        {group.totals.protein}g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-blue-400">
-                        {Math.round(
-                          group.entries.reduce(
-                            (acc, entry) => acc + (entry.carbs || 0),
-                            0
-                          )
-                        )}
-                        g
+                        {group.totals.carbs}g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-red-400">
-                        {Math.round(
-                          group.entries.reduce(
-                            (acc, entry) => acc + (entry.fats || 0),
-                            0
-                          )
-                        )}
-                        g
+                        {group.totals.fats}g
                       </td>
                       <td className="px-4 py-2.5 text-center text-sm font-semibold text-white">
-                        {Math.round(
-                          group.entries.reduce(
-                            (acc, entry) =>
-                              acc +
-                              entry.protein * 4 +
-                              entry.carbs * 4 +
-                              entry.fats * 9,
-                            0
-                          )
-                        )}{" "}
-                        kcal
+                        {group.totals.calories} kcal
                       </td>
                       <td className="px-4 py-2.5 text-center">
                         <button
@@ -339,84 +538,85 @@ const EntryHistoryComponent = function EntryHistory({
                     </tr>
                     {!collapsedDates.has(group.date) &&
                       group.entries.map((entry) => (
-                        <tr
+                        <EntryRow
                           key={entry.id}
-                          className="border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
-                        >
-                          <td className="px-4 py-3 text-sm text-gray-300 whitespace-nowrap pl-11">
-                            {formatTimeFromEntry(entry)}
-                          </td>
-                          <td className="px-4 py-3 text-sm text-gray-300 text-center">
-                            <div>
-                              <span className="font-medium text-indigo-300">
-                                {entry.mealType
-                                  ? capitalizeFirstLetter(entry.mealType)
-                                  : ""}
-                              </span>
-                              {entry.foodName || entry.mealName ? (
-                                <span className="text-gray-400 block text-xs mt-0.5">
-                                  {entry.foodName || entry.mealName}
-                                </span>
-                              ) : null}
-                            </div>
-                          </td>{" "}
-                          <td className="px-4 py-3 text-center text-sm font-medium text-green-400">
-                            <AnimatedNumber
-                              value={Math.round(entry.protein) || 0}
-                              suffix="g"
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-center text-sm font-medium text-blue-400">
-                            <AnimatedNumber
-                              value={Math.round(entry.carbs) || 0}
-                              suffix="g"
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-center text-sm font-medium text-red-400">
-                            <AnimatedNumber
-                              value={Math.round(entry.fats) || 0}
-                              suffix="g"
-                            />
-                          </td>{" "}
-                          <td className="px-4 py-3 text-center font-medium text-white">
-                            <AnimatedNumber
-                              value={Math.round(
-                                entry.protein * 4 +
-                                  entry.carbs * 4 +
-                                  entry.fats * 9
-                              )}
-                              suffix=" kcal"
-                            />
-                          </td>
-                          <td className="px-4 py-3 text-center whitespace-nowrap">
-                            <div className="flex justify-center space-x-2">
-                              <button
-                                onClick={() => onEdit(entry)}
-                                className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
-                                aria-label="Edit entry"
-                              >
-                                <EditIcon className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => deleteEntry(entry.id)}
-                                className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
-                                disabled={isDeleting}
-                                aria-label="Delete entry"
-                              >
-                                {isDeleting ? (
-                                  <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
-                                ) : (
-                                  <TrashIcon className="w-4 h-4" />
-                                )}
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
+                          entry={entry}
+                          onEdit={onEdit}
+                          deleteEntry={deleteEntry}
+                          isDeleting={isDeleting}
+                        />
                       ))}
                   </Fragment>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden">
+            {groupedEntries.map((group) => (
+              <div
+                key={group.date}
+                className="border-b border-gray-700/30 last:border-b-0"
+              >
+                {/* Date Header */}
+                <div
+                  className="flex items-center justify-between p-4 bg-indigo-600/10 border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors"
+                  onClick={() => toggleDateCollapse(group.date)}
+                >
+                  <div className="flex items-center gap-3">
+                    {collapsedDates.has(group.date) ? (
+                      <ChevronDownIcon className="w-5 h-5 -rotate-90 transform transition-transform text-indigo-300" />
+                    ) : (
+                      <ChevronDownIcon className="w-5 h-5 transform transition-transform text-indigo-300" />
+                    )}
+                    <h3 className="font-semibold text-indigo-300 text-base">
+                      {formatDate(group.date)}
+                    </h3>
+                  </div>
+
+                  {/* Date Totals */}
+                  <div className="flex items-center gap-4 text-xs">
+                    <span className="text-green-400 font-medium">
+                      {group.totals.protein}g P
+                    </span>
+                    <span className="text-blue-400 font-medium">
+                      {group.totals.carbs}g C
+                    </span>
+                    <span className="text-red-400 font-medium">
+                      {group.totals.fats}g F
+                    </span>
+                    <span className="text-white font-medium">
+                      {group.totals.calories} kcal
+                    </span>
+                    <button
+                      onClick={(e) => handleDeleteDate(group.date, e)}
+                      className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
+                      aria-label={`Delete all entries for ${formatDate(
+                        group.date
+                      )}`}
+                    >
+                      <TrashIcon className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Entries */}
+                {!collapsedDates.has(group.date) && (
+                  <div className="space-y-3 p-4">
+                    {group.entries.map((entry) => (
+                      <EntryCard
+                        key={entry.id}
+                        entry={entry}
+                        onEdit={onEdit}
+                        deleteEntry={deleteEntry}
+                        isDeleting={isDeleting}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -424,10 +624,7 @@ const EntryHistoryComponent = function EntryHistory({
       {/* Add ConfirmationModal component */}
       <Modal
         isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setDateToDelete(null);
-        }}
+        onClose={closeDeleteModal}
         title="Delete Entries"
         variant="confirmation"
         message={`Are you sure you want to delete all entries for ${
@@ -445,14 +642,4 @@ const EntryHistoryComponent = function EntryHistory({
 // Export memoized component
 export default memo(EntryHistoryComponent);
 
-// Helper function for meal type display
-function capitalizeFirstLetter(string: string): string {
-  if (!string) return "";
-  return (
-    string.charAt(0).toUpperCase() +
-    string
-      .slice(1)
-      .replace(/🍳|🍗|🍽️|🧃/, "")
-      .trim()
-  );
-}
+EntryHistoryComponent.displayName = "EntryHistoryPanel";
