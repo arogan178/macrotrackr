@@ -9,7 +9,8 @@ import {
 } from "@/components/form";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { CheckMarkIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import { MealType, MEAL_TYPE_OPTIONS } from "../types";
+import { MealType } from "../types";
+import { MEAL_TYPE_OPTIONS } from "../constants";
 
 // Helper function to capitalize first letter of a string
 function capitalizeFirstLetter(string: string): string {
