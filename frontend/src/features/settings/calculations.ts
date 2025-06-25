@@ -2,7 +2,8 @@ import {
   Gender,
   ActivityLevel,
   MacroTargetGrams,
-  MacroTargetPercentages,
+  UserSettings,
+  UserNutritionalProfile,
 } from "./types";
 import { ACTIVITY_LEVELS } from "./constants";
 
@@ -194,3 +195,44 @@ export function calculateMacros(
     fatPercentage
   );
 }
+
+// Helper function to create nutrition profile from user settings
+export const createNutritionProfile = (
+  settings: UserSettings
+): UserNutritionalProfile => {
+  const age = calculateAge(settings.dateOfBirth || "");
+  let bmr = 0;
+  let tdee = 0;
+
+  if (
+    settings.weight &&
+    settings.height &&
+    settings.dateOfBirth &&
+    settings.gender &&
+    settings.activityLevel
+  ) {
+    bmr = Math.round(
+      calculateBMR(settings.weight, settings.height, age, settings.gender)
+    );
+    tdee = Math.round(calculateTDEE(bmr, settings.activityLevel));
+  }
+
+  return {
+    userId: settings.id,
+    bmr,
+    tdee,
+  };
+};
+
+// Helper function to create user settings from API data
+export const createUserSettings = (userData: any): UserSettings => ({
+  id: userData.id,
+  firstName: userData.firstName,
+  lastName: userData.lastName,
+  email: userData.email,
+  dateOfBirth: userData.dateOfBirth,
+  height: userData.height,
+  weight: userData.weight,
+  activityLevel: userData.activityLevel,
+  gender: userData.gender,
+});
