@@ -1,60 +1,57 @@
 import { StateCreator } from "zustand";
-import { apiService } from "@/utils/api-service"; //
-import { MacroEntry, MacroDailyTotals, MacroTargetSettings } from "../types"; // Adjust path
-import { getErrorMessage } from "@/utils/error-handling"; // Adjust path
+import { apiService } from "@/utils/api-service";
+import { MacroEntry, MacroDailyTotals, MacroTargetSettings } from "../types";
+import { getErrorMessage } from "@/utils/error-handling";
+import {
+  calculateTodayTotals,
+  updateEntryInList,
+  removeEntryFromList,
+} from "../calculations";
+import { AddEntryPayload, UpdateEntryPayload } from "../utils";
 
-// Define the slice interface including new state and actions
+// Define the slice interface
 export interface MacrosSlice {
   // State
   history: MacroEntry[];
   macroDailyTotals: MacroDailyTotals;
-  macroTarget: MacroTargetSettings | null; // State for target percentages
+  macroTarget: MacroTargetSettings | null;
   editingEntry: MacroEntry | null;
-  isLoading: boolean; // General loading for fetchMacroData (covers totals, history, target)
-  isTargetLoading: boolean; // Specific loading for target fetch (can be redundant if fetchMacroData is always used)
-  isSaving: boolean; // Saving daily entry
-  isTargetSaving: boolean; // Specific saving for target percentages
-  isEditing: boolean; // Editing daily entry
-  isDeleting: boolean; // Deleting daily entry
-  error: string | null; // General error for entries/totals
-  targetError: string | null; // Specific error for target operations
+  isLoading: boolean;
+  isTargetLoading: boolean;
+  isSaving: boolean;
+  isTargetSaving: boolean;
+  isEditing: boolean;
+  isDeleting: boolean;
+  error: string | null;
+  targetError: string | null;
+
+  // Internal helpers
+  _notifyUser: (
+    message: string,
+    type: "success" | "error" | "info" | "warning"
+  ) => void;
 
   // Actions
-  fetchMacroData: () => Promise<void>; // Fetches totals, history, AND target percentages
-  fetchMacroTarget: () => Promise<void>; // Action to fetch only target percentages
+  fetchMacroData: () => Promise<void>;
+  fetchMacroTarget: () => Promise<void>;
   updateMacroTargetPercentages: (
     percentages: MacroTargetSettings
-  ) => Promise<void>; // Action to update percentages
-  addEntry: (entry: AddEntryPayload) => Promise<void>; // Use specific payload type
-  updateEntry: (id: number, entryUpdate: UpdateEntryPayload) => Promise<void>; // Use specific payload type
+  ) => Promise<void>;
+  addEntry: (entry: AddEntryPayload) => Promise<void>;
+  updateEntry: (id: number, entryUpdate: UpdateEntryPayload) => Promise<void>;
   deleteEntry: (id: number) => Promise<void>;
   setEditingEntry: (entry: MacroEntry | null) => void;
-  clearMacroError: () => void; // Action to clear general error
-  clearTargetError: () => void; // Action to clear target-specific error
+  clearMacroError: () => void;
+  clearTargetError: () => void;
 }
 
 // Define the type for the full state for use with get()
 type FullMacrosState = MacrosSlice & {
-  // Include methods from other slices if they are accessed via get()
   showNotification?: (
     message: string,
     type: "success" | "error" | "info" | "warning"
   ) => void;
 };
-
-// Define payload type for addEntry based on MacroEntryCreatePayload from api-service
-// Ensure this uses camelCase matching the API service interface
-type AddEntryPayload = {
-  protein: number;
-  carbs: number;
-  fats: number;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack";
-  mealName?: string;
-  entry_date: string;
-  entry_time: string;
-};
-// Define update payload type
-type UpdateEntryPayload = Partial<AddEntryPayload>;
 
 export const createMacrosSlice: StateCreator<
   MacrosSlice & any,
@@ -65,34 +62,39 @@ export const createMacrosSlice: StateCreator<
   // Initial State
   history: [],
   macroDailyTotals: { protein: 0, carbs: 0, fats: 0, calories: 0 },
-  macroTarget: null, // Initialize target state
+  macroTarget: null,
   editingEntry: null,
   isLoading: false,
-  isTargetLoading: false, // Initialize target loading
+  isTargetLoading: false,
   isSaving: false,
-  isTargetSaving: false, // Initialize target saving
+  isTargetSaving: false,
   isEditing: false,
   isDeleting: false,
   error: null,
-  targetError: null, // Initialize target error
+  targetError: null,
 
-  // --- Fetch Actions ---
+  // Helper function to safely call notifications
+  _notifyUser: (
+    message: string,
+    type: "success" | "error" | "info" | "warning"
+  ) => {
+    const state = get() as FullMacrosState;
+    state.showNotification?.(message, type);
+  },
+
   fetchMacroData: async () => {
-    // Fetches totals, history, AND target percentages together
     set({
       isLoading: true,
       isTargetLoading: true,
       error: null,
       targetError: null,
     });
-    const fullGet = get as () => FullMacrosState;
 
     try {
-      // Fetch all macro-related data concurrently
       const [totalsData, historyData, targetResult] = await Promise.all([
         apiService.macros.getDailyTotals(),
         apiService.macros.getHistory(),
-        apiService.macros.getMacroTarget(), // Fetch target percentages via macros API service
+        apiService.macros.getMacroTarget(),
       ]);
 
       const formattedTotals: MacroDailyTotals = {
@@ -102,75 +104,53 @@ export const createMacrosSlice: StateCreator<
         calories: totalsData?.calories ?? 0,
       };
 
-      // Extract the nested macroTarget object from the API response { macroTarget: { percentages... } }
       const percentages = targetResult?.macroTarget || null;
 
       set({
         macroDailyTotals: formattedTotals,
-        history: historyData || [], // Ensure history is always an array
-        macroTarget: percentages, // Set the target percentages state
+        history: historyData || [],
+        macroTarget: percentages,
         isLoading: false,
-        isTargetLoading: false, // Clear target loading
-        error: null, // Clear errors on successful fetch
+        isTargetLoading: false,
+        error: null,
         targetError: null,
       });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Fetch macro data error:", error);
-      // Set general error, clear all loading states
       set({ error: errorMessage, isLoading: false, isTargetLoading: false });
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to load macro data: ${errorMessage}`,
-          "error"
-        );
-      }
+      get()._notifyUser(`Failed to load macro data: ${errorMessage}`, "error");
     }
   },
 
-  // Action to fetch only macro target percentages
   fetchMacroTarget: async () => {
     set({ isTargetLoading: true, targetError: null });
-    const fullGet = get as () => FullMacrosState;
     try {
-      const result = await apiService.macros.getMacroTarget(); // Use macros API service
+      const result = await apiService.macros.getMacroTarget();
       const percentages = result?.macroTarget || null;
       set({ macroTarget: percentages, isTargetLoading: false });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error fetching macro target:", error);
       set({ isTargetLoading: false, targetError: errorMessage });
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to load macro targets: ${errorMessage}`,
-          "error"
-        );
-      }
+      get()._notifyUser(
+        `Failed to load macro targets: ${errorMessage}`,
+        "error"
+      );
     }
   },
 
-  // --- Create/Update/Delete Actions for Entries ---
   addEntry: async (inputs: AddEntryPayload): Promise<void> => {
     set({ isSaving: true, error: null });
-    const fullGet = get as () => FullMacrosState;
     try {
-      // Payload uses camelCase as defined in AddEntryPayload type
       await apiService.macros.addEntry(inputs);
-      // Refetch all macro data (totals, history, target) after successful add
-      await fullGet().fetchMacroData();
-      if (fullGet().showNotification) {
-        fullGet().showNotification("Entry saved successfully!", "success");
-      }
+      await get().fetchMacroData();
+      get()._notifyUser("Entry saved successfully!", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Save entry error:", error);
-      set({ error: errorMessage }); // Set general error
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to save entry: ${errorMessage}`,
-          "error"
-        );
-      }
+      set({ error: errorMessage });
+      get()._notifyUser(`Failed to save entry: ${errorMessage}`, "error");
     } finally {
       set({ isSaving: false });
     }
@@ -181,63 +161,27 @@ export const createMacrosSlice: StateCreator<
     entryUpdate: UpdateEntryPayload
   ): Promise<void> => {
     set({ isEditing: true, error: null });
-    const fullGet = get as () => FullMacrosState;
-
-    // Store current state for potential rollback
     const currentHistory = get().history;
     const currentTotals = get().macroDailyTotals;
 
     try {
-      // Optimistic update: Update the entry in local state first
-      const updatedHistory = currentHistory.map((entry: any) => {
-        if (entry.id === id) {
-          return {
-            ...entry,
-            ...entryUpdate, // Apply the updates
-          };
-        }
-        return entry;
-      });
+      // Optimistic update
+      const updatedHistory = updateEntryInList(currentHistory, id, entryUpdate);
+      const newTotals = calculateTodayTotals(updatedHistory);
 
-      // Recalculate daily totals optimistically
-      const today = new Date().toISOString().split("T")[0];
-      const todayEntries = updatedHistory.filter((entry: any) => {
-        const entryDate = entry.entry_date || entry.created_at.split("T")[0];
-        return entryDate === today;
-      });
-
-      const newTotals = todayEntries.reduce(
-        (acc: any, entry: any) => ({
-          protein: acc.protein + (entry.protein || 0),
-          carbs: acc.carbs + (entry.carbs || 0),
-          fats: acc.fats + (entry.fats || 0),
-          calories:
-            acc.calories +
-            (entry.protein || 0) * 4 +
-            (entry.carbs || 0) * 4 +
-            (entry.fats || 0) * 9,
-        }),
-        { protein: 0, carbs: 0, fats: 0, calories: 0 }
-      );
-
-      // Update state optimistically
       set({
         history: updatedHistory,
         macroDailyTotals: newTotals,
-        editingEntry: null, // Clear editing state
+        editingEntry: null,
       });
 
-      // Make API call
       await apiService.macros.updateEntry(id, entryUpdate);
-
-      if (fullGet().showNotification) {
-        fullGet().showNotification("Entry updated successfully", "success");
-      }
+      get()._notifyUser("Entry updated successfully", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Update entry error:", error);
 
-      // Rollback optimistic changes on error
+      // Rollback on error
       set({
         history: currentHistory,
         macroDailyTotals: currentTotals,
@@ -245,12 +189,7 @@ export const createMacrosSlice: StateCreator<
         editingEntry: null,
       });
 
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to update entry: ${errorMessage}`,
-          "error"
-        );
-      }
+      get()._notifyUser(`Failed to update entry: ${errorMessage}`, "error");
     } finally {
       set({ isEditing: false });
     }
@@ -258,68 +197,33 @@ export const createMacrosSlice: StateCreator<
 
   deleteEntry: async (id: number) => {
     set({ isDeleting: true, error: null });
-    const fullGet = get as () => FullMacrosState;
-
-    // Store current state for potential rollback
     const currentHistory = get().history;
     const currentTotals = get().macroDailyTotals;
 
     try {
-      // Optimistic update: Remove the entry from local state first
-      const updatedHistory = currentHistory.filter(
-        (entry: any) => entry.id !== id
-      );
+      // Optimistic update
+      const updatedHistory = removeEntryFromList(currentHistory, id);
+      const newTotals = calculateTodayTotals(updatedHistory);
 
-      // Recalculate daily totals optimistically
-      const today = new Date().toISOString().split("T")[0];
-      const todayEntries = updatedHistory.filter((entry: any) => {
-        const entryDate = entry.entry_date || entry.created_at.split("T")[0];
-        return entryDate === today;
-      });
-
-      const newTotals = todayEntries.reduce(
-        (acc: any, entry: any) => ({
-          protein: acc.protein + (entry.protein || 0),
-          carbs: acc.carbs + (entry.carbs || 0),
-          fats: acc.fats + (entry.fats || 0),
-          calories:
-            acc.calories +
-            (entry.protein || 0) * 4 +
-            (entry.carbs || 0) * 4 +
-            (entry.fats || 0) * 9,
-        }),
-        { protein: 0, carbs: 0, fats: 0, calories: 0 }
-      );
-
-      // Update state optimistically
       set({
         history: updatedHistory,
         macroDailyTotals: newTotals,
       });
 
-      // Make API call
       await apiService.macros.deleteEntry(id);
-
-      if (fullGet().showNotification) {
-        fullGet().showNotification("Entry deleted successfully", "success");
-      }
+      get()._notifyUser("Entry deleted successfully", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Delete entry error:", error);
 
-      // Rollback optimistic changes on error
+      // Rollback on error
       set({
         history: currentHistory,
         macroDailyTotals: currentTotals,
         error: errorMessage,
       });
 
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to delete entry: ${errorMessage}`,
-          "error"
-        );
-      }
+      get()._notifyUser(`Failed to delete entry: ${errorMessage}`, "error");
     } finally {
       set({ isDeleting: false });
     }
@@ -327,9 +231,7 @@ export const createMacrosSlice: StateCreator<
 
   setEditingEntry: (entry) => set({ editingEntry: entry }),
 
-  // --- Action to update only macro target percentages ---
   updateMacroTargetPercentages: async (percentages) => {
-    // Ensure percentages is not null, provide default if needed? Or expect valid object.
     if (!percentages) {
       console.error(
         "updateMacroTargetPercentages called with null percentages"
@@ -337,42 +239,32 @@ export const createMacrosSlice: StateCreator<
       set({ targetError: "Invalid macro target percentages provided." });
       return;
     }
-    set({ isTargetSaving: true, targetError: null }); // Use specific saving/error state
-    const fullGet = get as () => FullMacrosState;
+
+    set({ isTargetSaving: true, targetError: null });
+
     try {
-      // Prepare payload expected by apiService { macroTarget: { percentages... } }
       const payload = { macroTarget: percentages };
-      // Call the specific API endpoint for percentages (now under macros)
       const savedTargetResponse =
         await apiService.macros.saveMacroTargetPercentages(payload);
 
-      // Update state with the saved/returned percentages object
       set({
-        macroTarget: savedTargetResponse?.macroTarget || null, // Extract nested object
+        macroTarget: savedTargetResponse?.macroTarget || null,
         isTargetSaving: false,
         targetError: null,
       });
 
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          "Macro target percentages updated!",
-          "success"
-        );
-      }
+      get()._notifyUser("Macro target percentages updated!", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error updating macro target percentages:", error);
       set({ targetError: errorMessage, isTargetSaving: false });
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to update macro targets: ${errorMessage}`,
-          "error"
-        );
-      }
+      get()._notifyUser(
+        `Failed to update macro targets: ${errorMessage}`,
+        "error"
+      );
     }
   },
 
-  // --- Clear Error Actions ---
   clearMacroError: () => set({ error: null }),
   clearTargetError: () => set({ targetError: null }),
 });
