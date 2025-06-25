@@ -1,13 +1,5 @@
-import { ReactNode } from "react";
 import { motion } from "motion/react"; // Import motion
-
-interface TabButtonProps {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-  layoutId?: string; // Optional layoutId for motion
-  isMotion?: boolean; // Optional flag to enable motion
-}
+import { TabButtonProps } from "../utils/types";
 
 function TabButton({
   active,

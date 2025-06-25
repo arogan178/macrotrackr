@@ -77,6 +77,8 @@ export interface TabButtonProps {
   active: boolean;
   onClick: () => void;
   children: ReactNode;
+  layoutId?: string; // Optional layoutId for motion
+  isMotion?: boolean; // Optional flag to enable motion
 }
 
 export interface CardContainerProps {
@@ -142,4 +144,13 @@ export interface NutritionAverage {
   protein: number;
   carbs: number;
   fats: number;
+}
+
+export interface ActionButtonGroupProps {
+  onEdit: () => void;
+  onDelete: () => void;
+  isDeleting: boolean;
+  editLabel?: string;
+  deleteLabel?: string;
+  size?: "sm" | "md";
 }
