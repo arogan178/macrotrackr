@@ -192,7 +192,7 @@ const EntryRow = memo(
   )
 );
 
-// Reusable Date Group Component
+// Reusable Date Group Component for table context
 const DateGroup = memo(
   ({
     group,
@@ -268,9 +268,124 @@ const DateGroup = memo(
   )
 );
 
+// Simple Date Group for non-table context (additional entries)
+const SimpleDateGroup = memo(
+  ({
+    group,
+    collapsedDates,
+    formatDate,
+    formatTimeFromEntry,
+    capitalizeFirstLetter,
+    calculateCalories,
+    toggleDateCollapse,
+    handleDeleteDate,
+    onEdit,
+    deleteEntry,
+    isDeleting,
+  }: {
+    group: GroupedEntry;
+    collapsedDates: Set<string>;
+    formatDate: (dateString: string) => string;
+    formatTimeFromEntry: (entry: MacroEntry) => string;
+    capitalizeFirstLetter: (string: string) => string;
+    calculateCalories: (protein: number, carbs: number, fats: number) => number;
+    toggleDateCollapse: (date: string) => void;
+    handleDeleteDate: (date: string, e: React.MouseEvent) => void;
+    onEdit: (entry: MacroEntry) => void;
+    deleteEntry: (id: number) => void;
+    isDeleting: boolean;
+  }) => (
+    <div className="border-b border-gray-700/30 last:border-b-0">
+      {/* Date Header */}
+      <div
+        className="bg-indigo-600/10 border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors grid grid-cols-7 items-center group"
+        onClick={() => toggleDateCollapse(group.date)}
+      >
+        <div className="px-4 py-2.5 font-semibold text-indigo-300 text-sm">
+          <div className="flex items-center gap-2">
+            <motion.div
+              animate={{ rotate: collapsedDates.has(group.date) ? -90 : 0 }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+            >
+              <ChevronDownIcon className="w-4 h-4 text-indigo-300" />
+            </motion.div>
+            {formatDate(group.date)}
+          </div>
+        </div>
+        <div className="px-4 py-2.5"></div>
+        <div className="px-4 py-2.5 text-center">
+          <MacroCell
+            value={group.totals.protein}
+            suffix="g"
+            color="text-green-400"
+          />
+        </div>
+        <div className="px-4 py-2.5 text-center">
+          <MacroCell
+            value={group.totals.carbs}
+            suffix="g"
+            color="text-blue-400"
+          />
+        </div>
+        <div className="px-4 py-2.5 text-center">
+          <MacroCell
+            value={group.totals.fats}
+            suffix="g"
+            color="text-red-400"
+          />
+        </div>
+        <div className="px-4 py-2.5 text-center">
+          <MacroCell
+            value={group.totals.calories}
+            suffix=" kcal"
+            color="text-white"
+          />
+        </div>
+        <div className="px-4 py-2.5 text-center">
+          <button
+            onClick={(e) => handleDeleteDate(group.date, e)}
+            className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+            aria-label={`Delete all entries for ${formatDate(group.date)}`}
+          >
+            <TrashIcon className="w-4 h-4" />
+          </button>
+        </div>
+      </div>
+
+      {/* Entries */}
+      <AnimatePresence>
+        {!collapsedDates.has(group.date) && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            {group.entries.map((entry, index) => (
+              <EntryRow
+                key={entry.id}
+                entry={entry}
+                index={index}
+                formatTimeFromEntry={formatTimeFromEntry}
+                capitalizeFirstLetter={capitalizeFirstLetter}
+                calculateCalories={calculateCalories}
+                onEdit={onEdit}
+                deleteEntry={deleteEntry}
+                isDeleting={isDeleting}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  )
+);
+
 DateHeaderRow.displayName = "DateHeaderRow";
 EntryRow.displayName = "EntryRow";
 DateGroup.displayName = "DateGroup";
+SimpleDateGroup.displayName = "SimpleDateGroup";
 
 const DesktopEntryTable = memo(
   ({
@@ -287,25 +402,23 @@ const DesktopEntryTable = memo(
     isDeleting,
     showAllDates = true,
   }: DesktopEntryTableProps) => {
-    const initialEntries = groupedEntries.slice(0, 5);
+    const visibleEntries = showAllDates
+      ? groupedEntries
+      : groupedEntries.slice(0, 5);
     const additionalEntries = groupedEntries.slice(5);
 
-    const renderDateGroup = (group: GroupedEntry) => (
-      <DateGroup
-        key={group.date}
-        group={group}
-        collapsedDates={collapsedDates}
-        formatDate={formatDate}
-        formatTimeFromEntry={formatTimeFromEntry}
-        capitalizeFirstLetter={capitalizeFirstLetter}
-        calculateCalories={calculateCalories}
-        toggleDateCollapse={toggleDateCollapse}
-        handleDeleteDate={handleDeleteDate}
-        onEdit={onEdit}
-        deleteEntry={deleteEntry}
-        isDeleting={isDeleting}
-      />
-    );
+    const sharedProps = {
+      collapsedDates,
+      formatDate,
+      formatTimeFromEntry,
+      capitalizeFirstLetter,
+      calculateCalories,
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      isDeleting,
+    };
 
     return (
       <div className="hidden lg:block overflow-x-auto">
@@ -322,14 +435,16 @@ const DesktopEntryTable = memo(
             </tr>
           </thead>
           <tbody>
-            {/* Initial 5 entries */}
-            {initialEntries.map(renderDateGroup)}
+            {/* Initial entries */}
+            {visibleEntries.slice(0, 5).map((group) => (
+              <DateGroup key={group.date} group={group} {...sharedProps} />
+            ))}
 
             {/* Additional entries with animation */}
             <AnimatePresence>
               {showAllDates && additionalEntries.length > 0 && (
                 <motion.tr
-                  key="additional-entries-wrapper"
+                  key="additional-entries"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
@@ -338,149 +453,21 @@ const DesktopEntryTable = memo(
                   <td colSpan={7} className="p-0">
                     <motion.div
                       initial={{ height: 0 }}
-                      animate={{
-                        height: "auto",
-                        transition: { duration: 0.5, ease: "easeInOut" },
-                      }}
-                      exit={{
-                        height: 0,
-                        transition: { duration: 0.4, ease: "easeInOut" },
-                      }}
-                      className="overflow-hidden"
+                      animate={{ height: "auto" }}
+                      exit={{ height: 0 }}
+                      transition={{ duration: 0.4, ease: "easeInOut" }}
+                      className="overflow-hidden bg-gray-800/20"
                     >
-                      <div className="bg-gray-800/20">
-                        {additionalEntries.map((group, groupIndex) => (
-                          <motion.div
-                            key={group.date}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{
-                              opacity: 1,
-                              y: 0,
-                              transition: {
-                                delay: groupIndex * 0.1,
-                                duration: 0.3,
-                                ease: "easeOut",
-                              },
-                            }}
-                            className="border-b border-gray-700/30 last:border-b-0"
-                          >
-                            {/* Date Header Row */}
-                            <div
-                              className="bg-indigo-600/10 border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors grid grid-cols-7 items-center group"
-                              onClick={() => toggleDateCollapse(group.date)}
-                            >
-                              <div className="px-4 py-2.5 font-semibold text-indigo-300 text-sm">
-                                <div className="flex items-center gap-2">
-                                  <motion.div
-                                    animate={{
-                                      rotate: collapsedDates.has(group.date)
-                                        ? -90
-                                        : 0,
-                                    }}
-                                    transition={{
-                                      duration: 0.2,
-                                      ease: "easeInOut",
-                                    }}
-                                  >
-                                    <ChevronDownIcon className="w-4 h-4 text-indigo-300" />
-                                  </motion.div>
-                                  {formatDate(group.date)}
-                                </div>
-                              </div>
-                              <div className="px-4 py-2.5"></div>
-                              <div className="px-4 py-2.5 text-center">
-                                <MacroCell
-                                  value={group.totals.protein}
-                                  suffix="g"
-                                  color="text-green-400"
-                                />
-                              </div>
-                              <div className="px-4 py-2.5 text-center">
-                                <MacroCell
-                                  value={group.totals.carbs}
-                                  suffix="g"
-                                  color="text-blue-400"
-                                />
-                              </div>
-                              <div className="px-4 py-2.5 text-center">
-                                <MacroCell
-                                  value={group.totals.fats}
-                                  suffix="g"
-                                  color="text-red-400"
-                                />
-                              </div>
-                              <div className="px-4 py-2.5 text-center">
-                                <MacroCell
-                                  value={group.totals.calories}
-                                  suffix=" kcal"
-                                  color="text-white"
-                                />
-                              </div>
-                              <div className="px-4 py-2.5 text-center">
-                                <button
-                                  onClick={(e) =>
-                                    handleDeleteDate(group.date, e)
-                                  }
-                                  className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                                  aria-label={`Delete all entries for ${formatDate(
-                                    group.date
-                                  )}`}
-                                >
-                                  <TrashIcon className="w-4 h-4" />
-                                </button>
-                              </div>
-                            </div>
-
-                            {/* Individual entries for this date */}
-                            <AnimatePresence>
-                              {!collapsedDates.has(group.date) && (
-                                <motion.div
-                                  initial={{ height: 0, opacity: 0 }}
-                                  animate={{
-                                    height: "auto",
-                                    opacity: 1,
-                                    transition: {
-                                      height: {
-                                        duration: 0.4,
-                                        ease: "easeInOut",
-                                      },
-                                      opacity: { duration: 0.2, delay: 0.1 },
-                                    },
-                                  }}
-                                  exit={{
-                                    height: 0,
-                                    opacity: 0,
-                                    transition: {
-                                      height: {
-                                        duration: 0.3,
-                                        ease: "easeInOut",
-                                      },
-                                      opacity: { duration: 0.1 },
-                                    },
-                                  }}
-                                  className="overflow-hidden"
-                                >
-                                  {group.entries.map((entry, index) => (
-                                    <EntryRow
-                                      key={entry.id}
-                                      entry={entry}
-                                      index={index}
-                                      formatTimeFromEntry={formatTimeFromEntry}
-                                      capitalizeFirstLetter={
-                                        capitalizeFirstLetter
-                                      }
-                                      calculateCalories={calculateCalories}
-                                      onEdit={onEdit}
-                                      deleteEntry={deleteEntry}
-                                      isDeleting={isDeleting}
-                                    />
-                                  ))}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </motion.div>
-                        ))}
-                      </div>
+                      {additionalEntries.map((group, index) => (
+                        <motion.div
+                          key={group.date}
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: index * 0.1, duration: 0.3 }}
+                        >
+                          <SimpleDateGroup group={group} {...sharedProps} />
+                        </motion.div>
+                      ))}
                     </motion.div>
                   </td>
                 </motion.tr>
