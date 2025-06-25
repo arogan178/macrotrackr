@@ -1,4 +1,4 @@
-import { useEffect, memo } from "react";
+import { useEffect, memo, useCallback } from "react";
 import { Navbar } from "@/features/layout/components";
 import { FloatingNotification } from "@/features/notifications/components";
 import { CardContainer } from "@/components/form";
@@ -10,6 +10,7 @@ import {
 } from "@/features/macroTracking/components";
 import { UserMetricsPanel } from "@/features/dashboard/components";
 import { useStore } from "@/store/store";
+import { AnimatePresence } from "motion/react";
 
 export default function HomePage() {
   // Get state and actions from our store
@@ -39,6 +40,29 @@ export default function HomePage() {
     clearAllNotifications,
   } = useStore();
 
+  // Handler for editing entries that matches EditModal's expected signature
+  const handleEditEntry = useCallback(
+    async (entry: typeof editingEntry) => {
+      if (!entry) return;
+      console.log("Editing entry:", entry);
+      await updateEntry(entry.id, {
+        protein: entry.protein,
+        carbs: entry.carbs,
+        fats: entry.fats,
+        mealType: entry.mealType,
+        mealName: entry.mealName,
+        entry_date: entry.entry_date,
+        entry_time: entry.entry_time,
+      });
+    },
+    [updateEntry]
+  );
+
+  // Memoized close handler to prevent unnecessary re-renders
+  const handleCloseModal = useCallback(() => {
+    setEditingEntry(null);
+  }, [setEditingEntry]);
+
   // Fetch user details, macros, and persisted goals on component mount
   useEffect(() => {
     fetchUserDetails();
@@ -48,6 +72,11 @@ export default function HomePage() {
     fetchWeightGoals();
     fetchMacroTarget();
   }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTarget]);
+
+  // Debug effect to track editingEntry changes
+  useEffect(() => {
+    console.log("EditingEntry changed:", editingEntry);
+  }, [editingEntry]);
 
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
@@ -89,8 +118,8 @@ export default function HomePage() {
               <div className="lg:col-span-4 flex flex-col h-full space-y-6">
                 {/* Metrics Panel */}
                 <UserMetricsPanel
-                  bmr={nutritionProfile?.bmr}
-                  tdee={nutritionProfile?.tdee}
+                  bmr={nutritionProfile?.bmr ?? 0}
+                  tdee={nutritionProfile?.tdee ?? 0}
                   isLoading={isLoading}
                 />
 
@@ -112,7 +141,7 @@ export default function HomePage() {
                   user && (
                     <DailySummaryPanel
                       macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget}
+                      macroTarget={macroTarget ?? undefined}
                       calorieTarget={effectiveCalorieTarget}
                     />
                   )
@@ -141,14 +170,17 @@ export default function HomePage() {
       </div>
 
       {/* Edit Modal - Only render when editingEntry is not null */}
-      {editingEntry && (
-        <EditModal
-          entry={editingEntry}
-          onSave={updateEntry}
-          onClose={() => setEditingEntry(null)}
-          isSaving={isEditing}
-        />
-      )}
+      <AnimatePresence>
+        {editingEntry && (
+          <EditModal
+            key="edit-modal"
+            entry={editingEntry}
+            onSave={handleEditEntry}
+            onClose={handleCloseModal}
+            isSaving={isEditing}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

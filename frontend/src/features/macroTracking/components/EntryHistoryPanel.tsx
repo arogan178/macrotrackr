@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment, useMemo } from "react";
+import { useEffect, useState, Fragment, useMemo, memo } from "react";
 import {
   ExportIcon,
   ChevronDownIcon,
@@ -50,7 +50,7 @@ const exportCSV = (history: MacroEntry[]) => {
   a.click();
 };
 
-export default function EntryHistory({
+const EntryHistoryComponent = function EntryHistory({
   history,
   deleteEntry,
   onEdit,
@@ -135,14 +135,31 @@ export default function EntryHistory({
 
     setGroupedEntries(groupedArray);
 
-    // Set all dates except today as collapsed by default
-    const newCollapsedDates = new Set<string>();
-    groupedArray.forEach((group) => {
-      if (group.date !== todayFormatted) {
-        newCollapsedDates.add(group.date);
+    // Only reset collapsed dates if this is the initial load (collapsedDates is empty)
+    // This preserves user's expanded/collapsed preferences during updates
+    setCollapsedDates((prevCollapsed) => {
+      // If no collapsed dates are set yet, set defaults
+      if (prevCollapsed.size === 0) {
+        const newCollapsedDates = new Set<string>();
+        groupedArray.forEach((group) => {
+          if (group.date !== todayFormatted) {
+            newCollapsedDates.add(group.date);
+          }
+        });
+        return newCollapsedDates;
       }
+
+      // Otherwise, preserve existing collapsed state
+      // But remove any dates that no longer exist in the data
+      const existingDates = new Set(groupedArray.map((group) => group.date));
+      const filteredCollapsed = new Set<string>();
+      prevCollapsed.forEach((date) => {
+        if (existingDates.has(date)) {
+          filteredCollapsed.add(date);
+        }
+      });
+      return filteredCollapsed;
     });
-    setCollapsedDates(newCollapsedDates);
   }, [history, todayFormatted]);
 
   const toggleDateCollapse = (date: string) => {
@@ -423,7 +440,10 @@ export default function EntryHistory({
       />
     </div>
   );
-}
+};
+
+// Export memoized component
+export default memo(EntryHistoryComponent);
 
 // Helper function for meal type display
 function capitalizeFirstLetter(string: string): string {
