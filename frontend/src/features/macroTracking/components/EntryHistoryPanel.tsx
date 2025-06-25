@@ -9,14 +9,14 @@ import {
 import {
   ExportIcon,
   ChevronDownIcon,
-  EditIcon,
   TrashIcon,
-  LoadingSpinnerIcon,
   PlusCircleIcon,
 } from "@/components/Icons";
 import Modal from "@/components/Modal";
 import EmptyState from "@/components/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { MacroCell } from "@/components/nutrition";
+import { ActionButtonGroup } from "@/components/form";
 import { MacroEntry } from "../types";
 
 interface EntryHistoryProps {
@@ -68,57 +68,6 @@ const capitalizeFirstLetter = (string: string): string =>
         .replace(/🍳|🍗|🍽️|🧃/, "")
         .trim()
     : "";
-
-// Reusable micro-components
-const MacroCell = memo(
-  ({
-    value,
-    suffix,
-    color,
-  }: {
-    value: number;
-    suffix: string;
-    color: string;
-  }) => (
-    <span className={`font-medium ${color}`}>
-      <AnimatedNumber value={Math.round(value) || 0} suffix={suffix} />
-    </span>
-  )
-);
-
-const ActionButtons = memo(
-  ({
-    onEdit,
-    onDelete,
-    isDeleting,
-  }: {
-    onEdit: () => void;
-    onDelete: () => void;
-    isDeleting: boolean;
-  }) => (
-    <div className="flex justify-center space-x-2">
-      <button
-        onClick={onEdit}
-        className="p-1.5 rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors"
-        aria-label="Edit entry"
-      >
-        <EditIcon className="w-4 h-4" />
-      </button>
-      <button
-        onClick={onDelete}
-        className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
-        disabled={isDeleting}
-        aria-label="Delete entry"
-      >
-        {isDeleting ? (
-          <LoadingSpinnerIcon className="w-4 h-4 animate-spin" />
-        ) : (
-          <TrashIcon className="w-4 h-4" />
-        )}
-      </button>
-    </div>
-  )
-);
 
 const TableHeader = memo(
   ({ label, color }: { label: string; color?: string }) => (
@@ -181,7 +130,7 @@ const EntryRow = memo(
         />
       </td>
       <td className="px-4 py-3 text-center whitespace-nowrap">
-        <ActionButtons
+        <ActionButtonGroup
           onEdit={() => onEdit(entry)}
           onDelete={() => deleteEntry(entry.id)}
           isDeleting={isDeleting}
@@ -216,7 +165,7 @@ const EntryCard = memo(
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
-        <ActionButtons
+        <ActionButtonGroup
           onEdit={() => onEdit(entry)}
           onDelete={() => deleteEntry(entry.id)}
           isDeleting={isDeleting}
