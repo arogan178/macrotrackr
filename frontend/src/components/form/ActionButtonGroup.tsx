@@ -1,14 +1,6 @@
 import { memo } from "react";
 import { EditIcon, TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
-
-interface ActionButtonGroupProps {
-  onEdit: () => void;
-  onDelete: () => void;
-  isDeleting: boolean;
-  editLabel?: string;
-  deleteLabel?: string;
-  size?: "sm" | "md";
-}
+import { ActionButtonGroupProps } from "../utils/types";
 
 /**
  * Reusable edit/delete action button group
