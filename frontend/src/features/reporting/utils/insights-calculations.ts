@@ -11,6 +11,7 @@ import {
   DEFAULT_MACRO_TARGET,
   TREND_THRESHOLD,
 } from "../constants/insights-constants";
+import { calculateStandardDeviation } from "./macro-calculations";
 
 export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
   if (!data?.length) return 0;
@@ -22,10 +23,8 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
   if (calories.length <= 1) return frequencyScore;
 
   const avg = calories.reduce((sum, val) => sum + val, 0) / calories.length;
-  const variance =
-    calories.reduce((sum, val) => sum + Math.pow(val - avg, 2), 0) /
-    calories.length;
-  const coefficientOfVariation = Math.sqrt(variance) / avg;
+  const standardDev = calculateStandardDeviation(calories);
+  const coefficientOfVariation = standardDev / avg;
   const consistencyScore = Math.max(
     0,
     60 * (1 - Math.min(coefficientOfVariation, 0.5) / 0.5)
