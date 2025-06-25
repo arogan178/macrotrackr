@@ -13,7 +13,7 @@ import {
   METRIC_CARD_CONFIGS,
   MACRO_COLORS,
   SECTION_STYLES,
-} from "../constants/insights-constants";
+} from "../constants";
 import MetricCard from "./MetricCard";
 import AtAGlanceSection from "./AtAGlanceSection";
 import TrendDisplay from "./TrendDisplay";
