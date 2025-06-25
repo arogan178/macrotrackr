@@ -313,7 +313,7 @@ const EntryHistoryComponent = function EntryHistory({
                     : "rgba(156, 163, 175, 0.3)",
                   backgroundColor: showAllDates
                     ? "rgba(107, 114, 128, 0.2)"
-                    : "transparent",
+                    : "rgba(107, 114, 128, 0)",
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
