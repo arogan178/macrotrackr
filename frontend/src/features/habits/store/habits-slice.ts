@@ -2,7 +2,13 @@ import { StateCreator } from "zustand";
 import { HabitGoal, HabitGoalFormValues, HabitsState } from "../types";
 import { apiService } from "@/utils/api-service";
 import { getErrorMessage } from "@/utils/error-handling";
-import { generateId } from "@/utils/id-generator";
+import {
+  createNewHabit,
+  updateHabitFromForm,
+  incrementHabitProgress,
+  completeHabit,
+} from "../utils";
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../constants";
 
 // Define the notification type
 interface Notification {
@@ -59,18 +65,7 @@ export const createHabitsSlice: StateCreator<
     const fullGet = get as () => FullState;
 
     try {
-      const newHabit: HabitGoal = {
-        id: generateId(),
-        title: values.title,
-        iconName: values.iconName,
-        current: 0,
-        target: values.target,
-        progress: 0,
-        accentColor: values.accentColor,
-        isComplete: false,
-        createdAt: new Date().toISOString(),
-      };
-
+      const newHabit = createNewHabit(values);
       await apiService.habits.saveHabit(newHabit);
 
       // Update local state
@@ -81,7 +76,7 @@ export const createHabitsSlice: StateCreator<
       });
 
       fullGet().addNotification?.({
-        message: "Habit created successfully!",
+        message: SUCCESS_MESSAGES.created,
         type: "success",
       });
     } catch (error) {
@@ -90,7 +85,7 @@ export const createHabitsSlice: StateCreator<
       set({ error: errorMessage, isLoading: false });
 
       fullGet().addNotification?.({
-        message: `Failed to create habit: ${errorMessage}`,
+        message: `${ERROR_MESSAGES.create}: ${errorMessage}`,
         type: "error",
       });
     }
@@ -108,31 +103,21 @@ export const createHabitsSlice: StateCreator<
 
       if (habitIndex === -1) {
         throw new Error("Habit not found");
-      } // Prevent editing of completed habits
-      if (currentHabits[habitIndex].isComplete) {
-        throw new Error("Completed habits cannot be edited");
       }
 
       const existingHabit = currentHabits[habitIndex];
+
+      // Prevent editing of completed habits
+      if (existingHabit.isComplete) {
+        throw new Error("Completed habits cannot be edited");
+      }
 
       // Prevent decreasing the target below the current value
       if (values.target < existingHabit.current) {
         throw new Error("Target cannot be lower than current progress");
       }
 
-      const updatedHabit: HabitGoal = {
-        ...existingHabit,
-        title: values.title,
-        iconName: values.iconName,
-        target: values.target,
-        accentColor: values.accentColor,
-        // Recalculate progress based on the new target
-        progress: Math.min(
-          100,
-          Math.round((existingHabit.current / values.target) * 100)
-        ),
-      };
-
+      const updatedHabit = updateHabitFromForm(existingHabit, values);
       await apiService.habits.updateHabit(id, updatedHabit);
 
       // Update local state
@@ -145,7 +130,7 @@ export const createHabitsSlice: StateCreator<
       });
 
       fullGet().addNotification?.({
-        message: "Habit updated successfully!",
+        message: SUCCESS_MESSAGES.updated,
         type: "success",
       });
     } catch (error) {
@@ -154,7 +139,7 @@ export const createHabitsSlice: StateCreator<
       set({ error: errorMessage, isLoading: false });
 
       fullGet().addNotification?.({
-        message: `Failed to update habit: ${errorMessage}`,
+        message: `${ERROR_MESSAGES.update}: ${errorMessage}`,
         type: "error",
       });
     }
@@ -176,17 +161,7 @@ export const createHabitsSlice: StateCreator<
       }
 
       const habit = currentHabits[habitIndex];
-      const newCurrent = Math.min(habit.target, habit.current + 1);
-      const newProgress = Math.round((newCurrent / habit.target) * 100);
-      const isComplete = newCurrent >= habit.target;
-
-      const updatedHabit: HabitGoal = {
-        ...habit,
-        current: newCurrent,
-        progress: newProgress,
-        isComplete,
-        completedAt: isComplete ? new Date().toISOString() : undefined,
-      };
+      const updatedHabit = incrementHabitProgress(habit);
 
       // Update local state FIRST (optimistic update)
       // This gives immediate visual feedback
@@ -200,7 +175,7 @@ export const createHabitsSlice: StateCreator<
       // Then update in the backend without blocking the UI
       await apiService.habits.updateHabit(id, updatedHabit);
 
-      if (isComplete) {
+      if (updatedHabit.isComplete && !habit.isComplete) {
         fullGet().addNotification?.({
           message: `🎉 Congratulations! You've completed your ${habit.title}!`,
           type: "success",
@@ -232,13 +207,7 @@ export const createHabitsSlice: StateCreator<
       }
 
       const habit = currentHabits[habitIndex];
-      const updatedHabit: HabitGoal = {
-        ...habit,
-        current: habit.target,
-        progress: 100,
-        isComplete: true,
-        completedAt: new Date().toISOString(),
-      };
+      const updatedHabit = completeHabit(habit);
 
       await apiService.habits.updateHabit(id, updatedHabit);
 
@@ -252,7 +221,7 @@ export const createHabitsSlice: StateCreator<
       });
 
       fullGet().addNotification?.({
-        message: `🎉 Congratulations! You've completed your ${habit.title}!`,
+        message: SUCCESS_MESSAGES.completed,
         type: "success",
       });
     } catch (error) {
