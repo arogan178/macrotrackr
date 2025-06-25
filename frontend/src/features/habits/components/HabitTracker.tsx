@@ -2,37 +2,14 @@ import ProgressBar from "@/components/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { HabitGoal } from "../types";
 import HabitActions from "./HabitActions";
-import EmptyState from "@/components/EmptyState"; // Import EmptyState
+import EmptyState from "@/components/EmptyState";
+import { HABIT_ICONS } from "../constants";
 import {
-  CalendarIcon,
-  CheckCircleIcon,
-  TargetIcon,
-  AwardIcon,
-  HeartIcon,
-  BookIcon,
-  CoffeeIcon,
-  DropletIcon,
-  DumbBellIcon,
-  MoonIcon,
-  SunIcon,
   PlusIcon,
   CheckIcon,
+  CheckCircleIcon,
+  TargetIcon,
 } from "@/components/Icons";
-
-// Map of icon names to their components
-const ICON_MAP = {
-  calendar: CalendarIcon,
-  "check-circle": CheckCircleIcon,
-  target: TargetIcon,
-  award: AwardIcon,
-  heart: HeartIcon,
-  book: BookIcon,
-  coffee: CoffeeIcon,
-  droplet: DropletIcon,
-  dumbbell: DumbBellIcon,
-  moon: MoonIcon,
-  sun: SunIcon,
-} as const;
 
 interface HabitTrackerProps {
   habits: HabitGoal[];
@@ -187,8 +164,8 @@ function HabitCard({
   // Render the icon based on iconName
   const renderIcon = () => {
     const IconComponent =
-      ICON_MAP[iconName as keyof typeof ICON_MAP] || TargetIcon;
-    return <IconComponent size="sm" />;
+      HABIT_ICONS[iconName as keyof typeof HABIT_ICONS] || TargetIcon;
+    return <IconComponent className="w-4 h-4" />;
   };
 
   return (
