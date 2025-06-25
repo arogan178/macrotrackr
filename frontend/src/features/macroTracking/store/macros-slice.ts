@@ -182,26 +182,75 @@ export const createMacrosSlice: StateCreator<
   ): Promise<void> => {
     set({ isEditing: true, error: null });
     const fullGet = get as () => FullMacrosState;
+
+    // Store current state for potential rollback
+    const currentHistory = get().history;
+    const currentTotals = get().macroDailyTotals;
+
     try {
-      // Payload uses camelCase as defined in UpdateEntryPayload type
+      // Optimistic update: Update the entry in local state first
+      const updatedHistory = currentHistory.map((entry: any) => {
+        if (entry.id === id) {
+          return {
+            ...entry,
+            ...entryUpdate, // Apply the updates
+          };
+        }
+        return entry;
+      });
+
+      // Recalculate daily totals optimistically
+      const today = new Date().toISOString().split("T")[0];
+      const todayEntries = updatedHistory.filter((entry: any) => {
+        const entryDate = entry.entry_date || entry.created_at.split("T")[0];
+        return entryDate === today;
+      });
+
+      const newTotals = todayEntries.reduce(
+        (acc: any, entry: any) => ({
+          protein: acc.protein + (entry.protein || 0),
+          carbs: acc.carbs + (entry.carbs || 0),
+          fats: acc.fats + (entry.fats || 0),
+          calories:
+            acc.calories +
+            (entry.protein || 0) * 4 +
+            (entry.carbs || 0) * 4 +
+            (entry.fats || 0) * 9,
+        }),
+        { protein: 0, carbs: 0, fats: 0, calories: 0 }
+      );
+
+      // Update state optimistically
+      set({
+        history: updatedHistory,
+        macroDailyTotals: newTotals,
+        editingEntry: null, // Clear editing state
+      });
+
+      // Make API call
       await apiService.macros.updateEntry(id, entryUpdate);
-      set({ editingEntry: null }); // Clear editing state
-      await fullGet().fetchMacroData(); // Refetch all macro data
+
       if (fullGet().showNotification) {
         fullGet().showNotification("Entry updated successfully", "success");
       }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Update entry error:", error);
-      set({ error: errorMessage, editingEntry: null }); // Clear editing state on error
+
+      // Rollback optimistic changes on error
+      set({
+        history: currentHistory,
+        macroDailyTotals: currentTotals,
+        error: errorMessage,
+        editingEntry: null,
+      });
+
       if (fullGet().showNotification) {
         fullGet().showNotification(
           `Failed to update entry: ${errorMessage}`,
           "error"
         );
       }
-      // Optionally refetch data even on error if optimistic UI was used
-      // await fullGet().fetchMacroData();
     } finally {
       set({ isEditing: false });
     }
@@ -210,24 +259,67 @@ export const createMacrosSlice: StateCreator<
   deleteEntry: async (id: number) => {
     set({ isDeleting: true, error: null });
     const fullGet = get as () => FullMacrosState;
+
+    // Store current state for potential rollback
+    const currentHistory = get().history;
+    const currentTotals = get().macroDailyTotals;
+
     try {
+      // Optimistic update: Remove the entry from local state first
+      const updatedHistory = currentHistory.filter(
+        (entry: any) => entry.id !== id
+      );
+
+      // Recalculate daily totals optimistically
+      const today = new Date().toISOString().split("T")[0];
+      const todayEntries = updatedHistory.filter((entry: any) => {
+        const entryDate = entry.entry_date || entry.created_at.split("T")[0];
+        return entryDate === today;
+      });
+
+      const newTotals = todayEntries.reduce(
+        (acc: any, entry: any) => ({
+          protein: acc.protein + (entry.protein || 0),
+          carbs: acc.carbs + (entry.carbs || 0),
+          fats: acc.fats + (entry.fats || 0),
+          calories:
+            acc.calories +
+            (entry.protein || 0) * 4 +
+            (entry.carbs || 0) * 4 +
+            (entry.fats || 0) * 9,
+        }),
+        { protein: 0, carbs: 0, fats: 0, calories: 0 }
+      );
+
+      // Update state optimistically
+      set({
+        history: updatedHistory,
+        macroDailyTotals: newTotals,
+      });
+
+      // Make API call
       await apiService.macros.deleteEntry(id);
-      await fullGet().fetchMacroData(); // Refetch all macro data
+
       if (fullGet().showNotification) {
         fullGet().showNotification("Entry deleted successfully", "success");
       }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Delete entry error:", error);
-      set({ error: errorMessage });
+
+      // Rollback optimistic changes on error
+      set({
+        history: currentHistory,
+        macroDailyTotals: currentTotals,
+        error: errorMessage,
+      });
+
       if (fullGet().showNotification) {
         fullGet().showNotification(
           `Failed to delete entry: ${errorMessage}`,
           "error"
         );
       }
-      // Refetch data to ensure consistency on error
-      await fullGet().fetchMacroData();
     } finally {
       set({ isDeleting: false });
     }
