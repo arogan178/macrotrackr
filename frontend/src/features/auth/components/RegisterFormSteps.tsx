@@ -1,4 +1,4 @@
-import { useCallback, memo } from "react";
+import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   TextField,
@@ -8,105 +8,12 @@ import {
   InfoCard,
   DateField,
 } from "@/components/form";
-import {
-  ForwardIcon,
-  BackIcon,
-  CheckIcon,
-  InfoIcon,
-  CheckMarkIcon,
-} from "@/components/Icons";
+import { ForwardIcon, BackIcon, CheckIcon, InfoIcon } from "@/components/Icons";
 import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/features/settings/constants";
 import { Gender } from "@/features/settings/types";
-
 import { USER_MINIMUM_AGE } from "@/utils/constants";
 import { useStore } from "@/store/store";
-
-// Step indicator component
-interface StepIndicatorProps {
-  currentStep: number;
-  steps: { title: string; icon?: string }[];
-}
-
-export const StepIndicator = memo(function StepIndicator({
-  currentStep,
-  steps,
-}: StepIndicatorProps) {
-  // Calculate progress percentage with 0% at step 1, 50% at step 2, and 100% at step 3
-  // When there are 3 steps, we want the 0%, 50%, 100% to perfectly align with each step
-  const progressPercentage =
-    currentStep === 1 ? 0 : ((currentStep - 1) / (steps.length - 1)) * 100;
-
-  return (
-    <div className="w-full mb-6">
-      <div className="relative flex items-center justify-between">
-        {/* Background track - position it from step 1 center to last step center */}
-        <div
-          className="absolute top-4 h-0.5 bg-gray-700 transform -translate-y-1/2"
-          style={{
-            left: `calc(${100 / (steps.length * 2)}% - 1px)`,
-            right: `calc(${100 / (steps.length * 2)}% - 1px)`,
-          }}
-        ></div>
-
-        {/* Progress line - dynamically sized based on current step */}
-        <div
-          className="absolute top-4 h-0.5 bg-indigo-500 transform -translate-y-1/2 transition-all duration-500 ease-in-out"
-          style={{
-            left: `calc(${100 / (steps.length * 2)}% - 1px)`,
-            width: `calc(${progressPercentage}% * ${
-              (steps.length - 1) / steps.length
-            })`,
-          }}
-        ></div>
-
-        {/* Step circles */}
-        <div className="relative z-10 flex w-full justify-between">
-          {steps.map((info, idx) => {
-            const isComplete = idx + 1 < currentStep;
-            const isCurrent = idx + 1 === currentStep;
-
-            return (
-              <div
-                key={idx}
-                className="flex flex-col items-center"
-                style={{
-                  width: `${100 / steps.length}%`,
-                }}
-              >
-                <div
-                  className={`w-8 h-8 flex items-center justify-center rounded-full mb-1 transition-all duration-300 ${
-                    isCurrent
-                      ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-white ring-2 ring-white/20 scale-110 shadow-md"
-                      : isComplete
-                      ? "bg-indigo-500 text-white"
-                      : "bg-gray-700 text-gray-400"
-                  }`}
-                >
-                  {isComplete ? (
-                    <CheckMarkIcon className="w-4 h-4" />
-                  ) : (
-                    <span className="text-sm font-medium">{idx + 1}</span>
-                  )}
-                </div>
-                <span
-                  className={`text-xs mt-1 transition-colors duration-300 ${
-                    isCurrent
-                      ? "text-white font-medium"
-                      : isComplete
-                      ? "text-gray-300"
-                      : "text-gray-400"
-                  }`}
-                >
-                  {info.title}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-});
+import { handleStepSubmit, handleStepBack } from "../utils";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -126,11 +33,11 @@ export function StepOne() {
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
-      e.preventDefault();
-      const isValid = await validateRegisterStep(1);
-      if (isValid) {
-        setRegisterStep(2);
-      }
+      await handleStepSubmit(e, 1, {
+        currentStep: 1,
+        validateRegisterStep,
+        setRegisterStep,
+      });
     },
     [validateRegisterStep, setRegisterStep]
   );
@@ -206,11 +113,11 @@ export function StepTwo() {
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
-      e.preventDefault();
-      const isValid = await validateRegisterStep(2);
-      if (isValid) {
-        setRegisterStep(3);
-      }
+      await handleStepSubmit(e, 2, {
+        currentStep: 2,
+        validateRegisterStep,
+        setRegisterStep,
+      });
     },
     [validateRegisterStep, setRegisterStep]
   );
@@ -267,7 +174,7 @@ export function StepTwo() {
           <div className="flex gap-3">
             <FormButton
               variant="secondary"
-              onClick={() => setRegisterStep(1)}
+              onClick={() => handleStepBack(2, setRegisterStep)}
               isLoading={isLoading}
               iconPosition="left"
               icon={<BackIcon />}
@@ -307,14 +214,15 @@ export function StepThree() {
 
   const handleSubmit = useCallback(
     async (e: React.FormEvent) => {
-      e.preventDefault();
-      const isValid = await validateRegisterStep(3);
-      if (isValid) {
-        await submitRegistration();
-        navigate("/home", { replace: true });
-      }
+      await handleStepSubmit(e, 3, {
+        currentStep: 3,
+        validateRegisterStep,
+        setRegisterStep,
+        submitRegistration,
+        navigate,
+      });
     },
-    [validateRegisterStep, submitRegistration, navigate]
+    [validateRegisterStep, setRegisterStep, submitRegistration, navigate]
   );
 
   return (
@@ -325,7 +233,7 @@ export function StepThree() {
             label="How active are you on a typical week?"
             value={register.activityLevel}
             onChange={(value) =>
-              setRegisterField("activityLevel", Number(value))
+              setRegisterField("activityLevel", Number(value) as never)
             }
             options={Object.entries(ACTIVITY_LEVELS).map(
               ([key, { label }]) => ({
@@ -351,7 +259,7 @@ export function StepThree() {
           <div className="flex gap-3">
             <FormButton
               variant="secondary"
-              onClick={() => setRegisterStep(2)}
+              onClick={() => handleStepBack(3, setRegisterStep)}
               isLoading={isLoading}
               iconPosition="left"
               icon={<BackIcon />}

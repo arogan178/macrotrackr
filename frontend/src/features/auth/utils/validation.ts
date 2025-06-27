@@ -5,6 +5,13 @@ import {
   RegistrationStep2,
   RegistrationStep3,
 } from "../types";
+import { AUTH_ERROR_MESSAGES } from "../constants";
+import {
+  validateEmailFormat,
+  validatePasswordStrength,
+  validateHeightRange,
+  validateWeightRange,
+} from "./auth-utils";
 
 /**
  * Validates registration step 1 form data
@@ -15,23 +22,23 @@ export function validateRegistrationStep1(
   const errors: Record<string, string> = {};
 
   if (!formData.firstName.trim()) {
-    errors.firstName = "First name is required";
+    errors.firstName = AUTH_ERROR_MESSAGES.firstNameRequired;
   }
 
   if (!formData.lastName.trim()) {
-    errors.lastName = "Last name is required";
+    errors.lastName = AUTH_ERROR_MESSAGES.lastNameRequired;
   }
 
   if (!formData.email.trim()) {
-    errors.email = "Email is required";
-  } else if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
-    errors.email = "Please enter a valid email address";
+    errors.email = AUTH_ERROR_MESSAGES.emailRequired;
+  } else if (!validateEmailFormat(formData.email)) {
+    errors.email = AUTH_ERROR_MESSAGES.emailInvalid;
   }
 
   if (!formData.password) {
-    errors.password = "Password is required";
-  } else if (formData.password.length < 6) {
-    errors.password = "Password must be at least 6 characters";
+    errors.password = AUTH_ERROR_MESSAGES.passwordRequired;
+  } else if (!validatePasswordStrength(formData.password)) {
+    errors.password = AUTH_ERROR_MESSAGES.passwordTooShort;
   }
 
   return errors;
@@ -46,21 +53,21 @@ export function validateRegistrationStep2(
   const errors: Record<string, string> = {};
 
   if (!formData.dateOfBirth) {
-    errors.dateOfBirth = "Date of birth is required";
+    errors.dateOfBirth = AUTH_ERROR_MESSAGES.dateOfBirthRequired;
   } else if (!isOldEnough(formData.dateOfBirth)) {
     errors.dateOfBirth = `You must be at least ${USER_MINIMUM_AGE} years old`;
   }
 
   if (!formData.height) {
-    errors.height = "Height is required";
-  } else if (formData.height < 100 || formData.height > 250) {
-    errors.height = "Please enter a valid height (100-250 cm)";
+    errors.height = AUTH_ERROR_MESSAGES.heightRequired;
+  } else if (!validateHeightRange(formData.height)) {
+    errors.height = AUTH_ERROR_MESSAGES.heightInvalid;
   }
 
   if (!formData.weight) {
-    errors.weight = "Weight is required";
-  } else if (formData.weight < 30 || formData.weight > 300) {
-    errors.weight = "Please enter a valid weight (30-300 kg)";
+    errors.weight = AUTH_ERROR_MESSAGES.weightRequired;
+  } else if (!validateWeightRange(formData.weight)) {
+    errors.weight = AUTH_ERROR_MESSAGES.weightInvalid;
   }
 
   return errors;
@@ -75,7 +82,7 @@ export function validateRegistrationStep3(
   const errors: Record<string, string> = {};
 
   if (!formData.activityLevel) {
-    errors.activityLevel = "Activity level is required";
+    errors.activityLevel = AUTH_ERROR_MESSAGES.activityLevelRequired;
   }
 
   return errors;
