@@ -6,8 +6,9 @@ import {
   StepOne,
   StepTwo,
   StepThree,
-  StepIndicator,
 } from "@/features/auth/components/RegisterFormSteps";
+import { StepIndicator } from "@/features/auth/components/StepIndicator";
+import { REGISTRATION_STEPS } from "@/features/auth/utils";
 
 // Main RegisterForm Component
 function RegisterForm() {
@@ -23,13 +24,6 @@ function RegisterForm() {
       resetRegistration();
     };
   }, [resetRegistration]);
-
-  // Step indicators with titles for better visual feedback
-  const stepInfo = [
-    { title: "Account Info" },
-    { title: "Your Profile" },
-    { title: "Activity Level" },
-  ];
 
   // Step titles and descriptions
   const stepTitles = {
@@ -62,7 +56,10 @@ function RegisterForm() {
     <CardContainer className="p-8">
       <div className="mb-6">
         <div className="flex items-center mb-6">
-          <StepIndicator currentStep={register.step} steps={stepInfo} />
+          <StepIndicator
+            currentStep={register.step}
+            steps={REGISTRATION_STEPS}
+          />
         </div>
         <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
           {stepTitles[register.step as keyof typeof stepTitles]}
