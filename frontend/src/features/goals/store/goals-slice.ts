@@ -1,18 +1,13 @@
 import { StateCreator } from "zustand";
-import {
-  WeightGoals,
-  WeightGoalFormValues,
-  SetWeightGoalPayload, // Import payload types
-  UpdateWeightGoalPayload,
-} from "../types"; // Assuming payload types are moved/copied here or imported directly
-import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
+import { WeightGoals, WeightGoalFormValues } from "../types";
+import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../constants";
 import {
   apiService,
-  WeightLogEntry, // This type now has 'timestamp'
+  WeightLogEntry,
   AddWeightLogPayload,
 } from "@/utils/api-service";
 import { getErrorMessage } from "@/utils/error-handling";
-import { formatISO } from "date-fns"; // Import formatISO
+import { formatISO } from "date-fns";
 
 // Define the slice interface
 export interface GoalsSlice {
@@ -59,86 +54,6 @@ type FullGoalsState = GoalsSlice & {
   updateCurrentUserWeight?: (newWeight: number) => void;
 };
 
-// Helper function to calculate goal details (extracted for reuse)
-function calculateGoalDetails(
-  formValues: WeightGoalFormValues,
-  tdee: number,
-  existingStartDate?: string | null
-): Omit<SetWeightGoalPayload, "startingWeight"> & { weightGoal: string } {
-  const {
-    startingWeight, // Needed for calculation but not always sent
-    targetWeight,
-    startDate,
-    targetDate,
-    calorieTarget: customCalorieTarget,
-    weeklyChange: customWeeklyChange,
-    calculatedWeeks: customCalculatedWeeks,
-    weightGoal: customWeightGoal,
-  } = formValues;
-
-  let weightGoal = customWeightGoal || "maintain";
-  if (!customWeightGoal && startingWeight && targetWeight) {
-    if (targetWeight < startingWeight) weightGoal = "lose";
-    else if (targetWeight > startingWeight) weightGoal = "gain";
-  }
-
-  const today = new Date();
-  const formattedToday = today.toISOString().split("T")[0];
-
-  const calorieTarget =
-    customCalorieTarget ??
-    tdee +
-      (CALORIE_ADJUSTMENT_FACTORS[
-        weightGoal as keyof typeof CALORIE_ADJUSTMENT_FACTORS
-      ] || 0);
-
-  let calculatedWeeks = customCalculatedWeeks ?? 1;
-  let weeklyChange = customWeeklyChange ?? 0;
-  let dailyChange = 0;
-
-  if (
-    (calculatedWeeks <= 1 || weeklyChange === 0) &&
-    targetDate &&
-    startingWeight &&
-    targetWeight
-  ) {
-    const targetDateObj = new Date(targetDate);
-    const diffTime = Math.max(0, targetDateObj.getTime() - today.getTime());
-    calculatedWeeks = Math.max(
-      1,
-      Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7))
-    );
-    const weightDifference = Math.abs(targetWeight - startingWeight);
-    weeklyChange = calculatedWeeks > 0 ? weightDifference / calculatedWeeks : 0;
-  }
-  if (
-    weeklyChange &&
-    weightGoal !== "maintain" &&
-    startingWeight &&
-    targetWeight
-  ) {
-    const calorieChangePerKg = 7700;
-    const totalCalorieDiff =
-      (targetWeight - startingWeight) * calorieChangePerKg;
-    const totalDays = calculatedWeeks * 7;
-    dailyChange = totalDays > 0 ? totalCalorieDiff / totalDays : 0;
-  } else {
-    dailyChange = tdee - calorieTarget;
-  }
-
-  return {
-    // startingWeight is omitted here, added specifically in createWeightGoal
-    targetWeight,
-    weightGoal,
-    startDate: startDate || existingStartDate || formattedToday, // Use existing if available for update
-    targetDate: targetDate || null,
-    calorieTarget: calorieTarget,
-    calculatedWeeks,
-    weeklyChange,
-    dailyChange,
-  };
-}
-
 export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   set,
   get
@@ -156,14 +71,47 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     const fullGet = get as () => FullGoalsState;
     try {
       const weightGoalsData = await apiService.goals.getWeightGoals();
-      set({ weightGoals: weightGoalsData, isLoading: false });
+
+      if (weightGoalsData) {
+        // Get latest weight to determine currentWeight
+        const weightLog = await apiService.goals.getWeightLog();
+        const latestWeight =
+          weightLog.length > 0
+            ? weightLog[weightLog.length - 1].weight
+            : weightGoalsData.startingWeight;
+
+        // Transform to WeightGoals with currentWeight
+        const goalsWithCurrentWeight: WeightGoals = {
+          ...weightGoalsData,
+          currentWeight: latestWeight,
+          targetWeight:
+            weightGoalsData.targetWeight || weightGoalsData.startingWeight,
+          weightGoal: (weightGoalsData.weightGoal || "maintain") as
+            | "lose"
+            | "maintain"
+            | "gain",
+          startDate:
+            weightGoalsData.startDate || new Date().toISOString().split("T")[0],
+          targetDate:
+            weightGoalsData.targetDate ||
+            new Date().toISOString().split("T")[0],
+          calorieTarget: weightGoalsData.calorieTarget || 2000,
+          calculatedWeeks: weightGoalsData.calculatedWeeks || 1,
+          weeklyChange: weightGoalsData.weeklyChange || 0,
+          dailyChange: weightGoalsData.dailyChange || 0,
+        };
+
+        set({ weightGoals: goalsWithCurrentWeight, isLoading: false });
+      } else {
+        set({ weightGoals: null, isLoading: false });
+      }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error fetching weight goals:", error);
       set({ isLoading: false, error: errorMessage });
       if (fullGet().addNotification) {
         fullGet().addNotification({
-          message: `Failed to load weight goals: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.goalFetch}: ${errorMessage}`,
           type: "error",
         });
       }
@@ -182,20 +130,20 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
     try {
       // --- Step 1: Create the Weight Goal ---
-      const goalDetails = calculateGoalDetails(formValues, tdee);
-      const goalPayload: SetWeightGoalPayload = {
-        startingWeight: formValues.startingWeight,
-        ...goalDetails,
-      };
-      savedWeightGoal = await apiService.goals.createWeightGoal(goalPayload);
+
+      // Call API with form values and tdee
+      savedWeightGoal = await apiService.goals.createWeightGoal(
+        formValues,
+        tdee
+      );
       console.log("[GoalsSlice] Weight goal created successfully.");
 
       // --- Step 2: Add the Initial Weight Log Entry ---
-      if (goalPayload.startingWeight !== null) {
+      if (formValues.startingWeight && formValues.startingWeight > 0) {
         const now = new Date();
         const initialLogPayload: AddWeightLogPayload = {
           timestamp: formatISO(now),
-          weight: goalPayload.startingWeight,
+          weight: formValues.startingWeight,
         };
         try {
           savedLogEntry = await apiService.goals.addWeightLogEntry(
@@ -209,8 +157,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
           // Notify about log failure, but goal creation succeeded
           if (fullGet().addNotification) {
             fullGet().addNotification({
-              message:
-                "Weight goal created, but failed to add initial weight log.",
+              message: ERROR_MESSAGES.weightLog,
               type: "warning",
             });
           }
@@ -243,7 +190,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // --- Step 5: Success Notification ---
       if (fullGet().addNotification) {
         fullGet().addNotification({
-          message: "Weight goal created successfully!",
+          message: SUCCESS_MESSAGES.goalCreated,
           type: "success",
         });
       }
@@ -254,7 +201,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set({ error: errorMessage, isSaving: false });
       if (fullGet().addNotification) {
         fullGet().addNotification({
-          message: `Failed to create weight goal: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.goalCreate}: ${errorMessage}`,
           type: "error",
         });
       }
@@ -275,21 +222,9 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     const fullGet = get as () => FullGoalsState;
 
     try {
-      // Calculate details, passing existing start date if available
-      const goalDetails = calculateGoalDetails(
-        formValues,
-        tdee,
-        currentGoal.startDate
-      );
-
-      // Construct payload specifically for update (omits startingWeight)
-      const payload: UpdateWeightGoalPayload = {
-        ...goalDetails,
-      };
-
-      // If updateWeightGoal expects two arguments, pass tdee as second argument
+      // Call API with form values and tdee
       const savedWeightGoal = await apiService.goals.updateWeightGoal(
-        payload,
+        formValues,
         tdee
       );
 
@@ -300,7 +235,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: "Weight goal updated successfully!",
+          message: SUCCESS_MESSAGES.goalUpdated,
           type: "success",
         });
       }
@@ -310,7 +245,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set({ error: errorMessage, isSaving: false });
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: `Failed to update weight goal: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.goalUpdate}: ${errorMessage}`,
           type: "error",
         });
       }
@@ -329,7 +264,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: "Weight goal deleted successfully!",
+          message: SUCCESS_MESSAGES.goalDeleted,
           type: "success",
         });
       }
@@ -339,7 +274,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set({ error: errorMessage, isSaving: false });
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: `Failed to delete weight goal: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.goalDelete}: ${errorMessage}`,
           type: "error",
         });
       }
@@ -383,7 +318,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set({ isLoading: false, error: errorMessage });
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: `Failed to load weight log: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.weightFetch}: ${errorMessage}`,
           type: "error",
         });
       }
@@ -416,7 +351,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: "Weight logged successfully!",
+          message: SUCCESS_MESSAGES.weightLogged,
           type: "success",
         });
       }
@@ -426,7 +361,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set({ error: errorMessage, isSaving: false });
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: `Failed to log weight: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.weightLog}: ${errorMessage}`,
           type: "error",
         });
       }
@@ -474,7 +409,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // Notification
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: "Weight log entry deleted.",
+          message: SUCCESS_MESSAGES.weightDeleted,
           type: "success",
         });
       }
@@ -484,7 +419,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set({ error: errorMessage, isSaving: false });
       if (fullGet().addNotification?.call) {
         fullGet().addNotification({
-          message: `Failed to delete entry: ${errorMessage}`,
+          message: `${ERROR_MESSAGES.weightDelete}: ${errorMessage}`,
           type: "error",
         });
       }
