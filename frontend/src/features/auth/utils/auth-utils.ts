@@ -1,4 +1,4 @@
-import { ActivityLevel } from "@/features/settings/types";
+import { ActivityLevel } from "@/types/user";
 import {
   AUTH_ERROR_MESSAGES,
   PASSWORD_VALIDATION,

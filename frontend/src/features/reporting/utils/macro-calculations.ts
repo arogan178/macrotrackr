@@ -1,4 +1,4 @@
-import { MacroEntry } from "../../macroTracking/types";
+import { MacroEntry } from "@/types/macro";
 
 // Define local types that we need for calculations
 interface TrendDataPoint {
