@@ -174,6 +174,8 @@ export function initializeSchema(db: Database) {
   );
   // --- Indexes for Performance ---
   logger.info("    ⚡ Creating indexes...");
+
+  // Basic single-column indexes
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
@@ -185,13 +187,42 @@ export function initializeSchema(db: Database) {
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
   );
-  // NEW: Index for weight_log - Use 'timestamp' instead of 'date'
+
+  // Weight log indexes
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp ON weight_log(user_id, timestamp)"
   );
-  // Add index on created_at for finding the latest entry efficiently
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)"
+  );
+
+  // --- Advanced Compound Indexes for Performance Optimization ---
+  logger.info("    🚀 Creating compound performance indexes...");
+
+  // Macro entries optimized for common query patterns
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_meal ON macro_entries(user_id, entry_date, meal_type)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_desc ON macro_entries(user_id, entry_date DESC, created_at DESC)"
+  );
+
+  // Weight log optimized for chronological queries
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp_desc ON weight_log(user_id, timestamp DESC)"
+  );
+
+  // Habits optimized for completion status queries
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_complete ON habits(user_id, is_complete)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_created ON habits(user_id, created_at DESC)"
+  );
+
+  // User details lookup optimization
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_user_details_user ON user_details(user_id)"
   );
 
   logger.info("✅ Database schema initialized successfully.");
