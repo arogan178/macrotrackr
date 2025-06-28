@@ -1,6 +1,6 @@
 import { memo, useCallback, useState, useEffect } from "react";
-import { MacroTargetSettings } from "@/features/macroTracking/types";
-import { MacroTargetState } from "@/features/settings/types";
+import { MacroTargetSettings } from "@/types/macro";
+import { MacroTargetState } from "@/features/settings/types/types";
 import { InfoCard, CardContainer, SaveButton } from "@/components/form";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
@@ -18,7 +18,7 @@ const DEFAULT_MACRO_TARGET: MacroTargetState = {
 function MacroTargetForm() {
   const {
     macroTarget,
-    updateMacroTargetPercentages,
+    updateMacroTargetSettings,
     isTargetSaving,
     isTargetLoading,
     fetchMacroTarget,
@@ -95,7 +95,7 @@ function MacroTargetForm() {
             : undefined,
       };
 
-      updateMacroTargetPercentages(settingsToSave)
+      updateMacroTargetSettings(settingsToSave)
         .then(() => {
           setSaveSuccess(true);
           setHasChanges(false);
@@ -106,7 +106,7 @@ function MacroTargetForm() {
           // Error handling is done in the store
         });
     }
-  }, [localTarget, hasChanges, updateMacroTargetPercentages]);
+  }, [localTarget, hasChanges, updateMacroTargetSettings]);
 
   // Reset to original values
   const handleReset = useCallback(() => {

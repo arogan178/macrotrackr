@@ -1,33 +1,5 @@
-import { CALORIE_ADJUSTMENT_FACTORS } from "./constants";
-import { MacroTargetSettings } from "@/features/macroTracking/types";
-
-export type WeightGoal = keyof typeof CALORIE_ADJUSTMENT_FACTORS;
-
-// Weight goal form values interface
-export interface WeightGoalFormValues {
-  startingWeight?: number;
-  targetWeight?: number;
-  startDate?: string;
-  targetDate?: string;
-  calorieTarget?: number;
-  weeklyChange?: number;
-  calculatedWeeks?: number;
-  weightGoal?: string;
-}
-
-// Interface for the fully formed weight goals with required fields
-export interface WeightGoals {
-  startingWeight: number;
-  currentWeight: number;
-  targetWeight: number;
-  weightGoal: WeightGoal;
-  startDate: string;
-  targetDate: string;
-  calorieTarget: number;
-  calculatedWeeks: number;
-  weeklyChange: number;
-  dailyChange: number;
-}
+import { MacroTargetSettings } from "@/types/macro";
+import { WeightGoal, WeightGoalFormValues, WeightGoals } from "@/types/goal";
 
 // Interface for API responses that can have nullable fields
 export interface WeightGoalsResponse {

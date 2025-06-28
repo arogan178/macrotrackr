@@ -9,8 +9,11 @@ import {
   DateField,
 } from "@/components/form";
 import { ForwardIcon, BackIcon, CheckIcon, InfoIcon } from "@/components/Icons";
-import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/features/settings/constants";
-import { Gender } from "@/features/settings/types";
+import {
+  ACTIVITY_LEVELS,
+  GENDER_OPTIONS,
+} from "@/features/settings/utils/constants";
+import { Gender } from "@/types/user";
 import { USER_MINIMUM_AGE } from "@/utils/constants";
 import { useStore } from "@/store/store";
 import { handleStepSubmit, handleStepBack } from "../utils";
