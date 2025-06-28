@@ -1,72 +1,67 @@
 // src/index.ts
-import { Elysia } from "elysia"; // Only import Elysia itself
+import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
-import { config } from "./config"; // Import validated configuration
-import { db } from "./db"; // Import initialized DB instance
-import { authMiddleware } from "./middleware/auth"; // Import authentication middleware plugin
+import { config } from "./config";
+import { db } from "./db";
+import { authMiddleware } from "./middleware/auth";
+import { handleError } from "./lib/responses";
+import { isAppError } from "./lib/errors";
 
-// Import route functions from modules
+// Import route modules
 import { authRoutes } from "./modules/auth/routes";
 import { userRoutes } from "./modules/user/routes";
 import { macroRoutes } from "./modules/macros/routes";
 import { goalRoutes } from "./modules/goals/routes";
-import { habitRoutes } from "./modules/habits/routes"; // Import habit routes
+import { habitRoutes } from "./modules/habits/routes";
 
 console.log("🚀 Starting Elysia server...");
 
 const app = new Elysia()
-  // --- Global Middleware & Plugins ---
+  // Global middleware & plugins
   .use(
     cors({
-      // Apply CORS early
       origin: config.CORS_ORIGIN,
       credentials: true,
       allowedHeaders: ["Content-Type", "Authorization"],
-      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], // Add methods as needed
+      methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     })
   )
-  // Optional: Swagger API documentation setup
   .use(
     swagger({
       path: "/api/docs",
       documentation: {
         info: {
           title: "Macro Tracker API",
-          version: "1.0.0", // Update version as needed
+          version: "1.0.0",
           description: "API for tracking macronutrients and user goals.",
         },
         tags: [
-          // Define tags used in route details for organization
           { name: "System", description: "API status and documentation" },
           { name: "Auth", description: "User authentication and registration" },
           { name: "User", description: "User profile management and settings" },
           { name: "Macros", description: "Managing macro nutrient entries" },
-          { name: "Goals", description: "Managing user goals (Placeholder)" },
+          { name: "Goals", description: "Managing user goals" },
+          { name: "Habits", description: "Managing user habits" },
         ],
       },
-      // Exclude internal Elysia routes from documentation if desired
-      // exclude: ['/swagger', '/swagger/json']
     })
   )
 
-  // --- Context Decorators ---
-  // Make the database instance available in the context for all routes
+  // Context decorators
   .decorate("db", db)
 
-  // --- Authentication Middleware ---
-  // Apply the auth middleware globally. It handles JWT verification and attaches 'user' to context.
-  // It also enforces authentication for non-exempt routes.
+  // Authentication middleware
   .use(authMiddleware)
-  // --- Mount Routes from Modules ---
-  // Pass the app instance to the route functions to attach their specific routes/groups
+
+  // Mount route modules
   .use(authRoutes)
   .use(userRoutes)
   .use(macroRoutes)
   .use(goalRoutes)
-  .use(habitRoutes) // Mount habit routes
+  .use(habitRoutes)
 
-  // --- Root/Health Check Endpoint ---
+  // Root endpoint
   .get(
     "/",
     () => ({
@@ -79,100 +74,59 @@ const app = new Elysia()
     }
   )
 
-  // --- Global Error Handling ---
-  // This handler catches errors thrown anywhere in the application
+  // Global error handling
   .onError(({ code, error, set }) => {
-    console.error(`❌ [${code}] ${error.toString()}`); // Log the error code and message
+    console.error(`❌ [${code}] ${error?.toString() || "Unknown error"}`);
 
-    // Determine status code: Use the one set explicitly, or infer from Elysia's code
-    let statusCode = 500; // Default to Internal Server Error
-    if (set.status && set.status !== 200) {
-      // Check if status was set before throwing
-      statusCode = set.status;
-    } else {
-      // Map Elysia's internal error codes to HTTP status codes if status wasn't set explicitly
-      switch (code) {
-        case "VALIDATION":
-          statusCode = 400;
-          break;
-        case "NOT_FOUND":
-          statusCode = 404;
-          break;
-        // These should now be caught by set.status, but keep as fallback
-        case "UNAUTHORIZED":
-          statusCode = 401;
-          break;
-        case "FORBIDDEN":
-          statusCode = 403;
-          break;
-        case "CONFLICT":
-          statusCode = 409;
-          break;
-        case "NOT_IMPLEMENTED":
-          statusCode = 501;
-          break;
-        case "INTERNAL_SERVER_ERROR":
-          statusCode = 500;
-          break;
-        // Add other mappings as needed
-      }
+    // Handle AppError instances
+    if (isAppError(error)) {
+      return handleError(error, set);
     }
-    // Ensure status code is set on the response object
+
+    // Handle Elysia validation errors
+    if (code === "VALIDATION") {
+      set.status = 400;
+      return {
+        code: "VALIDATION_ERROR",
+        message: "Input validation failed",
+        details: error instanceof Error ? error.message : String(error),
+      };
+    }
+
+    // Map other Elysia codes
+    const statusMap: Record<string, number> = {
+      NOT_FOUND: 404,
+      UNAUTHORIZED: 401,
+      FORBIDDEN: 403,
+      CONFLICT: 409,
+      NOT_IMPLEMENTED: 501,
+      INTERNAL_SERVER_ERROR: 500,
+    };
+
+    const statusCode = statusMap[code] || 500;
     set.status = statusCode;
 
-    // Log stack trace for actual internal server errors
-    if (statusCode >= 500 && code === "INTERNAL_SERVER_ERROR") {
+    // Log stack trace for server errors
+    if (statusCode >= 500 && error instanceof Error) {
       console.error(error.stack);
     }
 
-    // --- Format Error Response ---
-    // Always return a JSON error response
-    let responseBody = {
-      code: code, // Use Elysia's internal code or a custom one based on status
-      message: error.message || "An unexpected error occurred.", // Use the error message
-      details: undefined as any, // Add details field if needed
+    return {
+      code: code || "INTERNAL_ERROR",
+      message:
+        error instanceof Error ? error.message : "An unexpected error occurred",
+      ...(config.NODE_ENV !== "production" &&
+        statusCode >= 500 &&
+        error instanceof Error && {
+          details: error.stack,
+        }),
     };
-
-    // Customize response body based on status code or original error code
-    if (statusCode === 400) {
-      responseBody.code = "VALIDATION_ERROR"; // More specific code for validation
-      responseBody.message = "Input validation failed.";
-      // Attempt to include structured validation details if available
-      if (code === "VALIDATION") {
-        try {
-          const parsedDetails = JSON.parse(error.message);
-          responseBody.details = parsedDetails;
-        } catch {
-          responseBody.details = error.message; // Fallback to raw message
-        }
-      } else {
-        responseBody.details = error.message; // General bad request details
-      }
-    } else if (statusCode === 401) {
-      responseBody.code = "AUTHENTICATION_ERROR";
-    } else if (statusCode === 404) {
-      responseBody.code = "NOT_FOUND";
-    } else if (statusCode === 409) {
-      responseBody.code = "RESOURCE_CONFLICT";
-    } else if (statusCode === 501) {
-      responseBody.code = "NOT_IMPLEMENTED";
-    } else if (statusCode >= 500) {
-      responseBody.code = "INTERNAL_ERROR";
-      // Avoid leaking internal details in production
-      if (config.NODE_ENV !== "production") {
-        responseBody.details = error.stack; // Show stack in dev
-      } else {
-        responseBody.message = "An internal server error occurred."; // Generic message for prod
-      }
-    }
-
-    return responseBody;
   })
 
-  // --- Start the Server ---
+  // Start server
   .listen({
     port: config.PORT,
-    hostname: config.HOST, // Listen on specified host
+    hostname: config.HOST,
   });
 
 console.log(
