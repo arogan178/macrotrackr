@@ -1,5 +1,6 @@
 // src/lib/password.ts
 import { hash as bcryptHash, verify as bcryptVerify } from "@node-rs/bcrypt";
+import { loggerHelpers } from "./logger";
 
 const SALT_ROUNDS = 10; // Standard number of salt rounds for bcrypt
 
@@ -14,7 +15,13 @@ export async function hashPassword(plaintextPassword: string): Promise<string> {
     const hashed = await bcryptHash(plaintextPassword, SALT_ROUNDS);
     return hashed;
   } catch (error) {
-    console.error("Password hashing error:", error);
+    loggerHelpers.security(
+      "password_hashing_failed",
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      "high"
+    );
     throw new Error("Could not hash password."); // Throw a generic error
   }
 }
@@ -34,7 +41,13 @@ export async function verifyPassword(
     return isValid;
   } catch (error) {
     // Log verification errors but typically return false for security
-    console.error("Password verification error:", error);
+    loggerHelpers.security(
+      "password_verification_failed",
+      {
+        error: error instanceof Error ? error.message : String(error),
+      },
+      "medium"
+    );
     return false; // Treat verification errors as a mismatch
   }
 }
