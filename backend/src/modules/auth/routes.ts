@@ -10,12 +10,12 @@ import {
   type UserRow,
 } from "../../lib/database";
 import { ConflictError, AuthenticationError } from "../../lib/errors";
-import { rateLimiters } from "../../middleware/rate-limit";
+// import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
-      .use(rateLimiters.auth) // Apply strict rate limiting to auth endpoints
+      // .use(rateLimiters.auth) // Temporarily disabled for testing
       .decorate("db", db)
 
       // Email Validation

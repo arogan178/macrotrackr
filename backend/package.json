@@ -20,6 +20,7 @@
   "license": "ISC",
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/compression": "^1.8.1",
     "@types/uuid": "^10.0.0"
   },
   "peerDependencies": {
@@ -30,6 +31,7 @@
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/swagger": "^1.0.3",
     "@node-rs/bcrypt": "^1.7.3",
+    "compression": "^1.8.0",
     "elysia": "1.2.25",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",

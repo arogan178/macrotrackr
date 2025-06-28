@@ -10,8 +10,8 @@ import { loggerHelpers } from "../lib/logger";
 export const correlationMiddleware = new Elysia({ name: "correlation" })
   .derive({ as: "scoped" }, ({ request }) => {
     // Extract existing correlation ID from headers or generate new one
-    const correlationId = 
-      request.headers.get("x-correlation-id") || 
+    const correlationId =
+      request.headers.get("x-correlation-id") ||
       request.headers.get("x-request-id") ||
       uuidv4();
 
@@ -19,10 +19,10 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
   })
   .onRequest((context: any) => {
     const { correlationId, request } = context;
-    
+
     // Add correlation ID to request for downstream processing
     (request as any).correlationId = correlationId;
-    
+
     // Log the start of request processing
     loggerHelpers.apiRequest(
       request.method,
@@ -33,14 +33,14 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
   })
   .onAfterHandle({ as: "scoped" }, (context: any) => {
     const { correlationId, set } = context;
-    
+
     // Add correlation ID to response headers for client tracking
     set.headers["x-correlation-id"] = correlationId;
     set.headers["x-request-id"] = correlationId;
   })
   .onError({ as: "scoped" }, (context: any) => {
     const { correlationId, error, code, request } = context;
-    
+
     // Log errors with correlation ID for easier debugging
     loggerHelpers.error(
       error instanceof Error ? error : new Error(String(error)),
@@ -63,9 +63,9 @@ export const enhancedApiLogging = new Elysia({ name: "apiLogging" })
   .onAfterHandle({ as: "scoped" }, (context: any) => {
     const { correlationId, startTime, set, request, user } = context;
     const duration = Date.now() - (startTime || Date.now());
-    const statusCode = typeof set.status === 'number' ? set.status : 200;
+    const statusCode = typeof set.status === "number" ? set.status : 200;
     const path = new URL(request.url).pathname;
-    
+
     // Log API response with timing and correlation info
     loggerHelpers.apiResponse(
       request.method,
