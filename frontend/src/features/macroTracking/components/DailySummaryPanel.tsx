@@ -1,5 +1,10 @@
-import { MacroDailyTotals, MacroTargetSettings } from "../types";
-import { calculateCalories } from "@/utils/nutrition";
+import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+import {
+  calculateCaloriesFromMacros,
+  calculateProteinCalories,
+  calculateCarbsCalories,
+  calculateFatsCalories,
+} from "../calculations";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
 import ProgressBar from "@/components/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
@@ -15,31 +20,35 @@ export default function DailySummary({
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
-  const defaultTarget = {
+  // --- Defaults ---
+  const DEFAULT_TARGET = {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
   };
-
-  // Create default empty values to handle undefined totals
-  const safeTotal = macroDailyTotals || {
+  const EMPTY_TOTALS: MacroDailyTotals = {
     protein: 0,
     carbs: 0,
     fats: 0,
     calories: 0,
   };
-  const target = macroTarget || defaultTarget;
 
-  // Using the shared utility for calorie calculation
-  const calculatedCalories = calculateCalories(
+  // --- Safe values ---
+  const safeTotal = macroDailyTotals || EMPTY_TOTALS;
+  const target = macroTarget || DEFAULT_TARGET;
+  const dailyCalorieTarget = calorieTarget || 0;
+
+  // --- Macro calorie calculations ---
+  const totalCalories = calculateCaloriesFromMacros(
     safeTotal.protein,
     safeTotal.carbs,
     safeTotal.fats
   );
-  const totalCalories = safeTotal.calories || calculatedCalories;
-  const dailyCalorieTarget = calorieTarget || 0;
+  const proteinCalories = calculateProteinCalories(safeTotal.protein);
+  const carbsCalories = calculateCarbsCalories(safeTotal.carbs);
+  const fatsCalories = calculateFatsCalories(safeTotal.fats);
 
-  // Calculate target grams for each macro based on calorie target and target percentages
+  // --- Macro targets (grams) ---
   const targetProteinGrams = Math.round(
     (dailyCalorieTarget * target.proteinPercentage) / 100 / 4
   );
@@ -50,31 +59,21 @@ export default function DailySummary({
     (dailyCalorieTarget * target.fatsPercentage) / 100 / 9
   );
 
-  // Calculate completion percentages for each macro
-  const proteinCompletionPercent = Math.min(
-    100,
-    Math.round((safeTotal.protein / targetProteinGrams) * 100) || 0
+  // --- Completion percentages ---
+  function percent(actual: number, target: number) {
+    if (!target) return 0;
+    return Math.min(100, Math.round((actual / target) * 100) || 0);
+  }
+  const proteinCompletionPercent = percent(
+    safeTotal.protein,
+    targetProteinGrams
   );
-  const carbsCompletionPercent = Math.min(
-    100,
-    Math.round((safeTotal.carbs / targetCarbsGrams) * 100) || 0
-  );
-  const fatsCompletionPercent = Math.min(
-    100,
-    Math.round((safeTotal.fats / targetFatsGrams) * 100) || 0
-  );
-  const calorieCompletionPercent = Math.min(
-    100,
-    Math.round((totalCalories / dailyCalorieTarget) * 100) || 0
-  );
+  const carbsCompletionPercent = percent(safeTotal.carbs, targetCarbsGrams);
+  const fatsCompletionPercent = percent(safeTotal.fats, targetFatsGrams);
+  const calorieCompletionPercent = percent(totalCalories, dailyCalorieTarget);
 
-  // Calculate total calories from each macro
-  const proteinCalories = Math.round(safeTotal.protein * 4);
-  const carbsCalories = Math.round(safeTotal.carbs * 4);
-  const fatsCalories = Math.round(safeTotal.fats * 9);
-  const totalMacroCalories = proteinCalories + carbsCalories + fatsCalories;
-
-  // Calculate actual percentages of total calories for each macro
+  // --- Macro calorie percentages ---
+  const totalMacroCalories = totalCalories;
   const proteinPercent =
     totalMacroCalories === 0
       ? 0
@@ -83,14 +82,14 @@ export default function DailySummary({
     totalMacroCalories === 0
       ? 0
       : Math.round((carbsCalories / totalMacroCalories) * 100);
-  // To ensure percentages add up to 100%, calculate fats as the remaining percentage
   const fatsPercent =
     totalMacroCalories === 0 ? 0 : 100 - proteinPercent - carbsPercent;
 
+  // --- Macro data for rendering ---
   const macroData = [
     {
       name: "Protein",
-      grams: Math.round(safeTotal.protein || 0),
+      grams: Math.round(safeTotal.protein),
       targetGrams: targetProteinGrams,
       calories: proteinCalories,
       targetPercent: target.proteinPercentage,
@@ -105,7 +104,7 @@ export default function DailySummary({
     },
     {
       name: "Carbs",
-      grams: Math.round(safeTotal.carbs || 0),
+      grams: Math.round(safeTotal.carbs),
       targetGrams: targetCarbsGrams,
       calories: carbsCalories,
       targetPercent: target.carbsPercentage,
@@ -120,7 +119,7 @@ export default function DailySummary({
     },
     {
       name: "Fats",
-      grams: Math.round(safeTotal.fats || 0),
+      grams: Math.round(safeTotal.fats),
       targetGrams: targetFatsGrams,
       calories: fatsCalories,
       targetPercent: target.fatsPercentage,
