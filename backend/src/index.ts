@@ -6,6 +6,7 @@ import { config } from "./config";
 import { db } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { rateLimiters } from "./middleware/rate-limit";
+import { correlationMiddleware, enhancedApiLogging } from "./middleware/correlation";
 import { handleError } from "./lib/responses";
 import { isAppError } from "./lib/errors";
 import { logger } from "./lib/logger";
@@ -62,6 +63,10 @@ const app = new Elysia()
       },
     })
   )
+
+  // Apply correlation middleware for request tracing
+  .use(correlationMiddleware)
+  .use(enhancedApiLogging)
 
   // Apply rate limiting
   .use(rateLimiters.api)

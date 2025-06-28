@@ -19,7 +19,8 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/uuid": "^10.0.0"
   },
   "peerDependencies": {
     "typescript": "^5.8.3"
@@ -32,6 +33,7 @@
     "elysia": "1.2.25",
     "pino": "^9.7.0",
     "pino-pretty": "^13.0.0",
+    "uuid": "^11.1.0",
     "zod": "^3.23.8"
   }
 }
