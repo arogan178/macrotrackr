@@ -4,6 +4,7 @@ import { jwt as jwtPlugin } from "@elysiajs/jwt";
 import { AuthSchemas } from "../modules/auth/schemas";
 import { config } from "../config";
 import { AuthenticationError } from "../lib/errors";
+import { loggerHelpers } from "../lib/logger";
 
 // Define paths exempt from authentication checks
 const AUTH_EXEMPT_PATHS = new Set([
@@ -13,6 +14,8 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/api/docs",
   "/api/docs/json",
   "/",
+  "/health",
+  "/health/ready",
 ]);
 
 /**
@@ -62,9 +65,11 @@ export const authMiddleware = new Elysia({ name: "authMiddleware" })
       return { user: payload as AuthenticatedUserPayload };
     } catch (error) {
       if (config.NODE_ENV === "development") {
-        console.warn(
-          `JWT verification failed for path ${path}:`,
-          error instanceof Error ? error.message : error
+        loggerHelpers.auth(
+          "jwt_verification_failed",
+          undefined,
+          undefined,
+          false
         );
       }
       return { user: null };
