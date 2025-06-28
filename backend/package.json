@@ -22,14 +22,14 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/swagger": "^1.0.3",
     "@node-rs/bcrypt": "^1.7.3",
-    "elysia": "1.2.25", 
+    "elysia": "1.2.25",
     "zod": "^3.23.8"
   }
 }
