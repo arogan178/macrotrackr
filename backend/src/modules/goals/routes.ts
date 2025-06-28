@@ -6,6 +6,7 @@ import type { AuthenticatedContext } from "../../middleware/auth";
 import { safeQuery, safeExecute } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
+import { loggerHelpers } from "../../lib/logger";
 
 // Define types for DB results (snake_case) for clarity and type safety
 // These should match the columns defined in src/db/schema.ts
@@ -44,9 +45,9 @@ export const goalRoutes = (app: Elysia) =>
         async (context: any) => {
           const { user, db } = context as AuthenticatedContext;
 
-          console.log(
-            `[GET /goals/weight] Handler started for user ${user.userId}`
-          );
+          loggerHelpers.apiRequest("GET", "/goals/weight", user.userId, {
+            correlationId: (context.request as any)?.correlationId,
+          });
 
           const weightGoalsResult = safeQuery<WeightGoalFromDB>(
             db,
@@ -55,13 +56,10 @@ export const goalRoutes = (app: Elysia) =>
           );
 
           if (!weightGoalsResult) {
-            console.log(
-              "[GET /goals/weight] No weight goals found, returning null."
-            );
+            loggerHelpers.dbQuery("SELECT", "weight_goals", user.userId, 0);
             return null; // Return null if not found (matches schema)
           }
 
-          console.log("[GET /goals/weight] Mapping result to camelCase...");
           // Map snake_case from DB to camelCase for API response
           const apiResponse = {
             startingWeight: weightGoalsResult.starting_weight,
@@ -75,10 +73,7 @@ export const goalRoutes = (app: Elysia) =>
             dailyChange: weightGoalsResult.daily_change,
           };
 
-          console.log(
-            "[GET /goals/weight] Returning mapped response:",
-            apiResponse
-          );
+          loggerHelpers.dbQuery("SELECT", "weight_goals", user.userId, 1);
           return apiResponse;
         },
         {
@@ -125,9 +120,9 @@ export const goalRoutes = (app: Elysia) =>
               dailyChange,
             } = body;
 
-            console.log(
-              `[POST /goals/weight - CREATE] Using starting weight from request body: ${startingWeight} for user ${user.userId}`
-            );
+            loggerHelpers.apiRequest("POST", "/goals/weight", user.userId, {
+              correlationId: (context.request as any)?.correlationId,
+            });
 
             const savedGoalResult = safeQuery<WeightGoalFromDB>(
               db,
@@ -226,9 +221,9 @@ export const goalRoutes = (app: Elysia) =>
             }
 
             const effectiveStartingWeight = existingGoal.starting_weight;
-            console.log(
-              `[PUT /goals/weight - UPDATE] Updating goal for user ${user.userId}. Starting weight remains ${effectiveStartingWeight}`
-            );
+            loggerHelpers.apiRequest("PUT", "/goals/weight", user.userId, {
+              correlationId: (context.request as any)?.correlationId,
+            });
 
             // IMPORTANT: Do NOT update starting_weight
             const savedGoalResult = safeQuery<WeightGoalFromDB>(
