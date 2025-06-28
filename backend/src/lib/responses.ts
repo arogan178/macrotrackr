@@ -60,7 +60,11 @@ export function createErrorResponse(
  * Handles errors and sets appropriate status codes
  */
 export function handleError(error: unknown, set: any): ErrorResponse {
-  console.error("Error occurred:", error);
+  const { loggerHelpers } = require("./logger");
+  loggerHelpers.error(
+    error instanceof Error ? error : new Error(String(error)),
+    { type: "response_error_handling" }
+  );
 
   if (isAppError(error)) {
     set.status = error.statusCode;

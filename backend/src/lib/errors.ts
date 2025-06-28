@@ -112,7 +112,12 @@ export function formatErrorResponse(error: unknown) {
   }
 
   // Generic error fallback
-  console.error("Unexpected error:", error);
+  // Import logger only when needed to avoid circular dependencies
+  const { loggerHelpers } = require("./logger");
+  loggerHelpers.error(
+    error instanceof Error ? error : new Error(String(error)),
+    { type: "unexpected_error" }
+  );
   return {
     code: "INTERNAL_ERROR",
     message: "An unexpected error occurred",
