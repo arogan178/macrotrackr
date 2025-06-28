@@ -1,13 +1,14 @@
 // src/db/schema.ts
 
 import { Database } from "bun:sqlite";
+import { logger } from "../lib/logger";
 
 /**
  * Initializes the database schema, creating tables and applying migrations.
  * @param db - The Bun SQLite database instance.
  */
 export function initializeSchema(db: Database) {
-  console.log("🚀 Initializing database schema...");
+  logger.info("🚀 Initializing database schema...");
 
   // Enable Foreign Key support (important for relationships)
   db.exec("PRAGMA foreign_keys = ON;");
@@ -127,21 +128,26 @@ export function initializeSchema(db: Database) {
       .get(tableName, columnName) as { count: number };
 
     if (columnExists.count === 0) {
-      console.log(
+      logger.info(
         `    ➕ Adding column '${columnName}' to table '${tableName}'...`
       );
       try {
         db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnDefinition}`);
         if (updateLogic) {
-          console.log(
+          logger.info(
             `       🔄 Running update logic for new column '${columnName}'...`
           );
           db.exec(updateLogic);
         }
       } catch (error) {
-        console.error(
-          `    ❌ Failed to add column '${columnName}' to '${tableName}':`,
-          error
+        logger.error(
+          {
+            error: error instanceof Error ? error : new Error(String(error)),
+            operation: "add_column",
+            tableName,
+            columnName,
+          },
+          `Failed to add column '${columnName}' to '${tableName}'`
         );
       }
     }
@@ -167,7 +173,7 @@ export function initializeSchema(db: Database) {
     "UPDATE macro_entries SET entry_time = '12:00:00' WHERE entry_time IS NULL"
   );
   // --- Indexes for Performance ---
-  console.log("    ⚡ Creating indexes...");
+  logger.info("    ⚡ Creating indexes...");
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
@@ -188,5 +194,5 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)"
   );
 
-  console.log("✅ Database schema initialized successfully.");
+  logger.info("✅ Database schema initialized successfully.");
 }

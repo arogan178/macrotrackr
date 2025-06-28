@@ -1,6 +1,7 @@
 // src/lib/database.ts
 import type { Database } from "bun:sqlite";
 import { DatabaseError } from "./errors";
+import { loggerHelpers } from "./logger";
 
 /**
  * Executes a database operation within a transaction with proper error handling
@@ -10,7 +11,7 @@ export function withTransaction<T>(db: Database, operation: () => T): T {
   try {
     return transaction();
   } catch (error) {
-    console.error("Transaction failed:", error);
+    loggerHelpers.error(error as Error, { operation: "database_transaction" });
     throw new DatabaseError(
       error instanceof Error ? error.message : "Transaction failed"
     );
@@ -32,9 +33,14 @@ export function safeQuery<T>(
 ): T | undefined {
   try {
     const statement = db.prepare(query);
-    return statement.get(...params) as T | undefined;
+    const result = statement.get(...params) as T | undefined;
+    loggerHelpers.dbQuery("SELECT", extractTableName(query));
+    return result;
   } catch (error) {
-    console.error(`Query failed: ${query}`, error);
+    loggerHelpers.error(error as Error, {
+      query: sanitizeQuery(query),
+      params: params.length,
+    });
     throw new DatabaseError(
       error instanceof Error ? error.message : "Query execution failed"
     );
@@ -51,9 +57,19 @@ export function safeQueryAll<T>(
 ): T[] {
   try {
     const statement = db.prepare(query);
-    return statement.all(...params) as T[];
+    const result = statement.all(...params) as T[];
+    loggerHelpers.dbQuery(
+      "SELECT_ALL",
+      extractTableName(query),
+      undefined,
+      result.length
+    );
+    return result;
   } catch (error) {
-    console.error(`Query failed: ${query}`, error);
+    loggerHelpers.error(error as Error, {
+      query: sanitizeQuery(query),
+      params: params.length,
+    });
     throw new DatabaseError(
       error instanceof Error ? error.message : "Query execution failed"
     );
@@ -70,9 +86,19 @@ export function safeExecute(
 ): { changes: number; lastInsertRowid: number | bigint } {
   try {
     const statement = db.prepare(query);
-    return statement.run(...params);
+    const result = statement.run(...params);
+    loggerHelpers.dbQuery(
+      getQueryOperation(query),
+      extractTableName(query),
+      undefined,
+      result.changes
+    );
+    return result;
   } catch (error) {
-    console.error(`Execute failed: ${query}`, error);
+    loggerHelpers.error(error as Error, {
+      query: sanitizeQuery(query),
+      params: params.length,
+    });
     throw new DatabaseError(
       error instanceof Error ? error.message : "Query execution failed"
     );
@@ -162,4 +188,43 @@ export interface HabitRow {
   is_complete: number;
   created_at: string;
   completed_at: string | null;
+}
+
+// Helper functions for secure logging
+function extractTableName(query: string): string {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  // Extract table name from different query types
+  if (normalizedQuery.startsWith("select")) {
+    const match = normalizedQuery.match(/from\s+(\w+)/);
+    return match?.[1] ?? "unknown";
+  } else if (normalizedQuery.startsWith("insert")) {
+    const match = normalizedQuery.match(/insert\s+into\s+(\w+)/);
+    return match?.[1] ?? "unknown";
+  } else if (normalizedQuery.startsWith("update")) {
+    const match = normalizedQuery.match(/update\s+(\w+)/);
+    return match?.[1] ?? "unknown";
+  } else if (normalizedQuery.startsWith("delete")) {
+    const match = normalizedQuery.match(/delete\s+from\s+(\w+)/);
+    return match?.[1] ?? "unknown";
+  }
+
+  return "unknown";
+}
+
+function getQueryOperation(query: string): string {
+  const normalizedQuery = query.trim().toLowerCase();
+
+  if (normalizedQuery.startsWith("select")) return "SELECT";
+  if (normalizedQuery.startsWith("insert")) return "INSERT";
+  if (normalizedQuery.startsWith("update")) return "UPDATE";
+  if (normalizedQuery.startsWith("delete")) return "DELETE";
+
+  return "UNKNOWN";
+}
+
+function sanitizeQuery(query: string): string {
+  // Remove potential sensitive data from query for logging
+  // Replace parameter placeholders with [PARAM] for security
+  return query.replace(/\?/g, "[PARAM]").trim();
 }

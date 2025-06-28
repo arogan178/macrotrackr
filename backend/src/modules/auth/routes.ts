@@ -10,10 +10,12 @@ import {
   type UserRow,
 } from "../../lib/database";
 import { ConflictError, AuthenticationError } from "../../lib/errors";
+import { rateLimiters } from "../../middleware/rate-limit";
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
+      .use(rateLimiters.auth) // Apply strict rate limiting to auth endpoints
       .decorate("db", db)
 
       // Email Validation
