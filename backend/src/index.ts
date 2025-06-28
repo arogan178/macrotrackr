@@ -6,7 +6,11 @@ import { config } from "./config";
 import { db } from "./db";
 import { authMiddleware } from "./middleware/auth";
 import { rateLimiters } from "./middleware/rate-limit";
-import { correlationMiddleware, enhancedApiLogging } from "./middleware/correlation";
+import {
+  correlationMiddleware,
+  enhancedApiLogging,
+} from "./middleware/correlation";
+import { compressionMiddleware } from "./middleware/compression";
 import { handleError } from "./lib/responses";
 import { isAppError } from "./lib/errors";
 import { logger } from "./lib/logger";
@@ -67,6 +71,14 @@ const app = new Elysia()
   // Apply correlation middleware for request tracing
   .use(correlationMiddleware)
   .use(enhancedApiLogging)
+
+  // Apply response compression for performance
+  .use(
+    compressionMiddleware({
+      threshold: 1024, // Compress responses > 1KB
+      level: 6, // Balanced compression level
+    })
+  )
 
   // Apply rate limiting
   .use(rateLimiters.api)

@@ -8,7 +8,6 @@ import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError, ConflictError } from "../../lib/errors";
 import { toCamelCase, handleError } from "../../lib/responses";
 import { getLocalDate } from "../../lib/dates";
-import { loggerHelpers } from "../../lib/logger";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
