@@ -1,13 +1,13 @@
 import { StateCreator } from "zustand";
 import { apiService } from "@/utils/api-service";
-import {
-  UserSettings,
-  UserNutritionalProfile,
-  MacroTargetPercentages,
-} from "@/features/settings/types";
+import { UserSettings, UserNutritionalProfile } from "@/types/user";
+import { MacroTargetSettings } from "@/types/macro";
 import { getErrorMessage } from "@/utils/error-handling";
-import { DEFAULT_MACRO_TARGET } from "../constants";
-import { createNutritionProfile, createUserSettings } from "../calculations";
+import { DEFAULT_MACRO_TARGET } from "@/features/settings/utils/constants";
+import {
+  createNutritionProfile,
+  createUserSettings,
+} from "@/features/settings/utils/calculations";
 import { validateSettingsComplete as validateSettings } from "../utils/validation";
 
 // Types for API payloads
@@ -26,7 +26,7 @@ export interface UserSlice {
   // Core user data
   user: UserSettings | null;
   nutritionProfile: UserNutritionalProfile | null;
-  macroTarget: MacroTargetPercentages | null;
+  macroTarget: MacroTargetSettings | null;
 
   // Loading states
   isLoading: boolean;
@@ -42,9 +42,9 @@ export interface UserSlice {
 
   // Settings form state
   settings: UserSettings | null;
-  settingsMacroTarget: MacroTargetPercentages | null;
+  settingsMacroTarget: MacroTargetSettings | null;
   originalSettings: UserSettings | null;
-  originalSettingsMacroTarget: MacroTargetPercentages | null;
+  originalSettingsMacroTarget: MacroTargetSettings | null;
   hasSettingsChanges: boolean;
 
   // Actions
@@ -54,8 +54,8 @@ export interface UserSlice {
   updateSetting: <K extends keyof UserSettings>(key: K, value: any) => void;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
-  updateMacroTargetPercentages: (
-    macroTarget: MacroTargetPercentages
+  updateMacroTargetSettings: (
+    macroTarget: MacroTargetSettings
   ) => Promise<boolean>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
@@ -251,7 +251,7 @@ export const createUserSlice: StateCreator<
     }
   },
 
-  updateMacroTargetPercentages: async (macroTarget: MacroTargetPercentages) => {
+  updateMacroTargetSettings: async (macroTarget: MacroTargetSettings) => {
     const state = get();
     set({ isTargetSaving: true, settingsError: null });
 
