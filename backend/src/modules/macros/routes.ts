@@ -6,6 +6,7 @@ import type { AuthenticatedContext } from "../../middleware/auth";
 import { safeQuery, safeExecute } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
+import { loggerHelpers } from "../../lib/logger";
 
 // Database result types (snake_case)
 type MacroTargetFromDB = {
@@ -43,9 +44,9 @@ export const macroRoutes = (app: Elysia) =>
         async (context: any) => {
           const { user, db } = context as AuthenticatedContext;
 
-          console.log(
-            `[GET /macros/target] Fetching target for user ID: ${user.userId}`
-          );
+          loggerHelpers.apiRequest("GET", "/macros/target", user.userId, {
+            correlationId: (context.request as any)?.correlationId,
+          });
 
           const macroTargetResult = safeQuery<MacroTargetFromDB>(
             db,
@@ -55,9 +56,7 @@ export const macroRoutes = (app: Elysia) =>
 
           // If no row exists, return defaults
           if (!macroTargetResult) {
-            console.log(
-              "[GET /macros/target] No macro target found, using defaults."
-            );
+            loggerHelpers.dbQuery("SELECT", "macro_targets", user.userId, 0);
             return {
               macroTarget: {
                 proteinPercentage: 30,
@@ -110,9 +109,9 @@ export const macroRoutes = (app: Elysia) =>
             body: typeof MacroSchemas.updateMacroTargetBody.static;
           };
 
-          console.log(
-            `[PUT /macros/target] Saving target for user ID: ${user.userId}`
-          );
+          loggerHelpers.apiRequest("PUT", "/macros/target", user.userId, {
+            correlationId: (context.request as any)?.correlationId,
+          });
 
           const { macroTarget } = body;
 
@@ -181,10 +180,7 @@ export const macroRoutes = (app: Elysia) =>
             ),
           };
 
-          console.log(
-            "[PUT /macros/target] Saved successfully:",
-            macroTargetResponse
-          );
+          loggerHelpers.dbQuery("UPSERT", "macro_targets", user.userId, 1);
           return { macroTarget: macroTargetResponse };
         },
         {

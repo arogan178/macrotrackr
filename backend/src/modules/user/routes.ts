@@ -8,6 +8,7 @@ import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError, ConflictError } from "../../lib/errors";
 import { toCamelCase, handleError } from "../../lib/responses";
 import { getLocalDate } from "../../lib/dates";
+import { loggerHelpers } from "../../lib/logger";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -79,9 +80,9 @@ export const userRoutes = (app: Elysia) =>
               body: typeof UserSchemas.userSettingsUpdate.static;
             };
 
-            console.log(
-              `[PUT /user/settings] Updating settings for user ID: ${user.userId}`
-            );
+            loggerHelpers.apiRequest("PUT", "/user/settings", user.userId, {
+              correlationId: (context.request as any)?.correlationId,
+            });
 
             const {
               firstName,
@@ -187,9 +188,7 @@ export const userRoutes = (app: Elysia) =>
                   [logId, user.userId, logDate, weight]
                 );
 
-                console.log(
-                  `[PUT /user/settings] Weight log entry created: ${weight}kg on ${logDate}`
-                );
+                loggerHelpers.dbQuery("INSERT", "weight_log", user.userId, 1);
               }
 
               return {
@@ -223,8 +222,13 @@ export const userRoutes = (app: Elysia) =>
               body: typeof UserSchemas.profileCompletion.static;
             };
 
-            console.log(
-              `[POST /user/complete-profile] Completing profile for user ID: ${user.userId}`
+            loggerHelpers.apiRequest(
+              "POST",
+              "/user/complete-profile",
+              user.userId,
+              {
+                correlationId: (context.request as any)?.correlationId,
+              }
             );
 
             const { dateOfBirth, height, weight, activityLevel } = body;
@@ -263,9 +267,7 @@ export const userRoutes = (app: Elysia) =>
                   [logId, user.userId, logDate, weight]
                 );
 
-                console.log(
-                  `[POST /user/complete-profile] Weight log entry created: ${weight}kg on ${logDate}`
-                );
+                loggerHelpers.dbQuery("INSERT", "weight_log", user.userId, 1);
               }
 
               return { success: true, message: "Profile details updated." };
