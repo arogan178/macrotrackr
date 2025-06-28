@@ -34,6 +34,9 @@ if (!parsedEnv.success) {
 // Export the validated and typed configuration object
 export const config = parsedEnv.data;
 
-console.log(
-  `✅ Configuration loaded successfully (NODE_ENV: ${config.NODE_ENV})`
-);
+// Use basic console.log for startup message as logger may not be initialized yet
+if (process.env.NODE_ENV !== "test") {
+  console.log(
+    `✅ Configuration loaded successfully (NODE_ENV: ${config.NODE_ENV})`
+  );
+}
