@@ -8,6 +8,7 @@ import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError, ConflictError } from "../../lib/errors";
 import { toCamelCase, handleError } from "../../lib/responses";
 import { getLocalDate } from "../../lib/dates";
+import { loggerHelpers } from "../../lib/logger";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -39,9 +40,7 @@ export const userRoutes = (app: Elysia) =>
           try {
             const { db, user } = context as AuthenticatedContext;
 
-            console.log(
-              `[GET /user/me] Fetching details for user ID: ${user.userId}`
-            );
+            // Fetching user details
 
             const dbResult = safeQuery<UserWithDetailsResult>(
               db,
