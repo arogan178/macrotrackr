@@ -24,6 +24,8 @@ export default function ReportingPage() {
     fetchMacroData,
     fetchWeightGoals,
     macroTarget,
+    weightGoals,
+    nutritionProfile,
   } = useStore();
 
   // Use the reporting logic hook to handle all data processing
@@ -128,7 +130,16 @@ export default function ReportingPage() {
             isExportDisabled={aggregatedData.length === 0 || isLoading}
           />
           {/* Summary Stats */}
-          <MacroSummaryStats data={aggregatedData} />
+          {(() => {
+            const calorieTarget =
+              weightGoals?.calorieTarget || nutritionProfile?.tdee || 2000;
+            return (
+              <MacroSummaryStats
+                data={aggregatedData}
+                calorieTarget={calorieTarget}
+              />
+            );
+          })()}
           {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
             <div className="order-2 md:order-1">
