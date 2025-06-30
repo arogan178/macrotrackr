@@ -28,6 +28,10 @@ export interface UserSlice {
   nutritionProfile: UserNutritionalProfile | null;
   macroTarget: MacroTargetSettings | null;
 
+  // Subscription
+  subscriptionStatus: "free" | "pro" | "canceled";
+  setSubscriptionStatus: (status: "free" | "pro" | "canceled") => void;
+
   // Loading states
   isLoading: boolean;
   isSettingsLoading: boolean;
@@ -72,6 +76,8 @@ export const createUserSlice: StateCreator<
   user: null,
   nutritionProfile: null,
   macroTarget: DEFAULT_MACRO_TARGET,
+  subscriptionStatus: "free",
+  setSubscriptionStatus: (status) => set({ subscriptionStatus: status }),
   isLoading: false,
   error: null,
   settings: null,
@@ -99,6 +105,9 @@ export const createUserSlice: StateCreator<
       const userSettings = createUserSettings(userData);
       const nutritionProfile = createNutritionProfile(userSettings);
 
+      // Subscription status (from userData, fallback to 'free')
+      const subscriptionStatus = userData.subscriptionStatus || "free";
+
       // Fetch macro target separately
       try {
         const macroTargetResponse = await apiService.macros.getMacroTarget();
@@ -109,6 +118,7 @@ export const createUserSlice: StateCreator<
           user: userSettings,
           nutritionProfile,
           macroTarget: fetchedMacroTarget,
+          subscriptionStatus,
           isLoading: false,
           error: null,
         });
@@ -118,6 +128,7 @@ export const createUserSlice: StateCreator<
           user: userSettings,
           nutritionProfile,
           macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
+          subscriptionStatus,
           isLoading: false,
           error: null,
         });
@@ -131,6 +142,7 @@ export const createUserSlice: StateCreator<
         user: null,
         nutritionProfile: null,
         macroTarget: null,
+        subscriptionStatus: "free",
       });
 
       if (fullGet().showNotification) {
