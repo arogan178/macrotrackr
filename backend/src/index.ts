@@ -25,7 +25,35 @@ import { billingRoutes } from "./modules/billing/routes";
 
 logger.info("🚀 Starting Elysia server...");
 
+// Elysia plugin to capture raw body for Stripe webhooks
+function rawBodyCapturePlugin() {
+  return (app: any) => {
+    app.onRequest(async (ctx: any) => {
+      if (
+        ctx.request.method === "POST" &&
+        ctx.request.url.endsWith("/webhooks/stripe/billing")
+      ) {
+        const reader = ctx.request.body?.getReader?.();
+        if (reader) {
+          let rawBody = Buffer.alloc(0);
+          let done, value;
+          while (true) {
+            ({ done, value } = await reader.read());
+            if (done) break;
+            if (value) {
+              rawBody = Buffer.concat([rawBody, Buffer.from(value)]);
+            }
+          }
+          ctx.rawBody = rawBody;
+        }
+      }
+    });
+    return app;
+  };
+}
+
 const app = new Elysia()
+  .use(rawBodyCapturePlugin())
   // Request size limits for security
   .onRequest(({ request, set }) => {
     const contentLength = request.headers.get("content-length");
@@ -78,20 +106,8 @@ const app = new Elysia()
     async (ctx) => {
       const { logger } = await import("./lib/logger");
       try {
-        // Read the raw body from the request stream
-        let rawBody = "";
-        if (ctx.request.body) {
-          const reader = ctx.request.body.getReader();
-          let done, value;
-          while (true) {
-            ({ done, value } = await reader.read());
-            if (done) break;
-            if (value) {
-              rawBody += Buffer.from(value).toString();
-            }
-          }
-        }
-
+        // Use the captured raw body
+        const rawBody = ctx.rawBody;
         const signature = ctx.headers["stripe-signature"];
         if (!signature) {
           logger.error(

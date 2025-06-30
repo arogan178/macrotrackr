@@ -2,6 +2,7 @@
 import Stripe from "stripe";
 import { config } from "../../config";
 import { logger } from "../../lib/logger";
+import { handleServiceError } from "../../lib/error-handler";
 
 // Initialize Stripe with secret key
 export const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
@@ -54,7 +55,6 @@ export class StripeService {
         name: options.name,
         metadata: options.metadata || {},
       });
-
       logger.info(
         {
           operation: "stripe_create_customer",
@@ -63,18 +63,11 @@ export class StripeService {
         },
         "Created Stripe customer"
       );
-
       return customer;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "stripe_create_customer",
-          email: options.email,
-        },
-        "Failed to create Stripe customer"
-      );
-      throw error;
+      handleServiceError(error, "stripe_create_customer", {
+        email: options.email,
+      });
     }
   }
 
@@ -101,16 +94,12 @@ export class StripeService {
           metadata: options.metadata || {},
         },
       };
-
-      // Add customer information
       if (options.customerId) {
         sessionParams.customer = options.customerId;
       } else if (options.customerEmail) {
         sessionParams.customer_email = options.customerEmail;
       }
-
       const session = await stripe.checkout.sessions.create(sessionParams);
-
       logger.info(
         {
           operation: "stripe_create_checkout_session",
@@ -120,19 +109,12 @@ export class StripeService {
         },
         "Created Stripe checkout session"
       );
-
       return session;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "stripe_create_checkout_session",
-          customerId: options.customerId,
-          customerEmail: options.customerEmail,
-        },
-        "Failed to create Stripe checkout session"
-      );
-      throw error;
+      handleServiceError(error, "stripe_create_checkout_session", {
+        customerId: options.customerId,
+        customerEmail: options.customerEmail,
+      });
     }
   }
 
@@ -148,7 +130,6 @@ export class StripeService {
         customer: customerId,
         return_url: returnUrl,
       });
-
       logger.info(
         {
           operation: "stripe_create_portal_session",
@@ -157,18 +138,9 @@ export class StripeService {
         },
         "Created Stripe customer portal session"
       );
-
       return portalSession;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "stripe_create_portal_session",
-          customerId,
-        },
-        "Failed to create Stripe customer portal session"
-      );
-      throw error;
+      handleServiceError(error, "stripe_create_portal_session", { customerId });
     }
   }
 
@@ -180,7 +152,6 @@ export class StripeService {
   ): Promise<Stripe.Subscription> {
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-
       logger.debug(
         {
           operation: "stripe_get_subscription",
@@ -189,18 +160,9 @@ export class StripeService {
         },
         "Retrieved Stripe subscription"
       );
-
       return subscription;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "stripe_get_subscription",
-          subscriptionId,
-        },
-        "Failed to retrieve Stripe subscription"
-      );
-      throw error;
+      handleServiceError(error, "stripe_get_subscription", { subscriptionId });
     }
   }
 
@@ -212,7 +174,6 @@ export class StripeService {
   ): Promise<Stripe.Subscription> {
     try {
       const subscription = await stripe.subscriptions.cancel(subscriptionId);
-
       logger.info(
         {
           operation: "stripe_cancel_subscription",
@@ -221,18 +182,11 @@ export class StripeService {
         },
         "Canceled Stripe subscription"
       );
-
       return subscription;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "stripe_cancel_subscription",
-          subscriptionId,
-        },
-        "Failed to cancel Stripe subscription"
-      );
-      throw error;
+      handleServiceError(error, "stripe_cancel_subscription", {
+        subscriptionId,
+      });
     }
   }
 
@@ -249,10 +203,7 @@ export class StripeService {
         signature,
         config.STRIPE_WEBHOOK_SECRET
       );
-
-      // Normalize the event format (handle both snapshot and thin events)
       const normalizedEvent = this.normalizeWebhookEvent(event);
-
       logger.debug(
         {
           operation: "stripe_verify_webhook",
@@ -262,17 +213,9 @@ export class StripeService {
         },
         "Verified and normalized Stripe webhook signature"
       );
-
       return normalizedEvent;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "stripe_verify_webhook",
-        },
-        "Failed to verify Stripe webhook signature"
-      );
-      throw error;
+      handleServiceError(error, "stripe_verify_webhook");
     }
   }
 
@@ -320,27 +263,20 @@ export class StripeService {
     relatedObject: ThinEventRelatedObject
   ): Promise<any> {
     try {
-      // Extract object type and ID from the related object
       const { type, id } = relatedObject;
-
-      // Map thin event types to Stripe API retrievals
       switch (type) {
         case "billing.subscription":
         case "subscription":
           return await stripe.subscriptions.retrieve(id);
-
         case "billing.customer":
         case "customer":
           return await stripe.customers.retrieve(id);
-
         case "billing.invoice":
         case "invoice":
           return await stripe.invoices.retrieve(id);
-
         case "billing.checkout.session":
         case "checkout.session":
           return await stripe.checkout.sessions.retrieve(id);
-
         default:
           logger.warn(
             {
@@ -353,15 +289,7 @@ export class StripeService {
           return null;
       }
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "fetch_related_object",
-          relatedObject,
-        },
-        "Failed to fetch related object for thin event"
-      );
-      throw error;
+      handleServiceError(error, "fetch_related_object", { relatedObject });
     }
   }
 }
