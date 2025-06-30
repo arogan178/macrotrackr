@@ -66,6 +66,15 @@ export class ValidationError extends AppError {
 }
 
 /**
+ * Bad request errors
+ */
+export class BadRequestError extends AppError {
+  constructor(message: string = "Bad request") {
+    super(message, 400, "BAD_REQUEST");
+  }
+}
+
+/**
  * Conflict errors (e.g., duplicate email)
  */
 export class ConflictError extends AppError {

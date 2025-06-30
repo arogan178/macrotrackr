@@ -16,6 +16,12 @@ const EnvSchema = z.object({
   NODE_ENV: z
     .enum(["development", "production", "test"])
     .default("development"),
+  // Stripe configuration
+  STRIPE_SECRET_KEY: z.string().min(1, "STRIPE_SECRET_KEY is required"),
+  STRIPE_WEBHOOK_SECRET: z.string().min(1, "STRIPE_WEBHOOK_SECRET is required"),
+  STRIPE_PRICE_ID: z
+    .string()
+    .min(1, "STRIPE_PRICE_ID is required for Pro subscription"),
 });
 
 // Validate environment variables on startup

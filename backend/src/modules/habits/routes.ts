@@ -5,6 +5,7 @@ import { HabitSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
 import { safeQuery, safeExecute } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
+import { featureLimitGuard } from "../../middleware/pro-guard";
 
 // Define types for DB results (snake_case) for clarity and type safety
 type HabitFromDB = {
@@ -79,12 +80,26 @@ export const habitRoutes = (app: Elysia) =>
       )
 
       // --- Create New Habit ---
+      .use(featureLimitGuard("MAX_HABITS"))
       .post(
         "/",
         async (context: any) => {
-          const { body, user, db } = context as AuthenticatedContext & {
-            body: any;
-          };
+          const { body, user, db, checkLimit } =
+            context as AuthenticatedContext & {
+              body: any;
+              checkLimit: (count: number) => Promise<any>;
+            };
+
+          // Check current habit count before creating new one
+          const currentHabitCount =
+            safeQuery<{ count: number }>(
+              db,
+              "SELECT COUNT(*) as count FROM habits WHERE user_id = ?",
+              [user.userId]
+            )?.count || 0;
+
+          // Check if user can create another habit
+          await checkLimit(currentHabitCount + 1);
 
           const {
             id,
