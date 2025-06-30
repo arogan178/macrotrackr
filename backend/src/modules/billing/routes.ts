@@ -1,4 +1,5 @@
 // src/modules/billing/routes.ts
+
 import { Elysia } from "elysia";
 import { db } from "../../db";
 import { authMiddleware } from "../../middleware/auth";
@@ -7,6 +8,22 @@ import { BadRequestError } from "../../lib/errors";
 import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { t } from "elysia";
+
+// Helper for consistent error logging and user-friendly error throwing
+function handleRouteError(error: unknown, operation: string, userId?: number) {
+  logger.error(
+    {
+      error: error instanceof Error ? error : new Error(String(error)),
+      operation,
+      userId,
+    },
+    `Failed to ${operation.replace(/_/g, " ")}`
+  );
+  if (error instanceof BadRequestError) throw error;
+  throw new BadRequestError(
+    "An unexpected error occurred. Please try again later."
+  );
+}
 
 export const billingRoutes = (app: Elysia) =>
   app.group("/api/billing", (group) =>
@@ -18,52 +35,34 @@ export const billingRoutes = (app: Elysia) =>
       .post(
         "/checkout",
         async ({ body, user }) => {
-          if (!user) {
-            throw new BadRequestError("Authentication required");
-          }
-
+          if (!user) throw new BadRequestError("Authentication required");
           try {
-            // Get user's current subscription info
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
-
-            // Check if user already has an active subscription
             if (userSubscription.subscription_status === "pro") {
               throw new BadRequestError(
                 "User already has an active Pro subscription"
               );
             }
-
             let customerId = userSubscription.stripe_customer_id;
-
-            // Create Stripe customer if doesn't exist
             if (!customerId) {
               const customer = await StripeService.createCustomer({
                 email: user.email,
                 name: `${user.firstName} ${user.lastName}`,
-                metadata: {
-                  userId: user.userId.toString(),
-                },
+                metadata: { userId: user.userId.toString() },
               });
-
               customerId = customer.id;
               await SubscriptionService.updateStripeCustomerId(
                 user.userId,
                 customerId
               );
             }
-
-            // Create checkout session
             const session = await StripeService.createCheckoutSession({
               customerId,
               successUrl: body.successUrl,
               cancelUrl: body.cancelUrl,
-              metadata: {
-                userId: user.userId.toString(),
-                ...body.metadata,
-              },
+              metadata: { userId: user.userId.toString(), ...body.metadata },
             });
-
             logger.info(
               {
                 operation: "create_checkout_session",
@@ -73,22 +72,9 @@ export const billingRoutes = (app: Elysia) =>
               },
               "Created checkout session for user"
             );
-
-            return {
-              sessionId: session.id,
-              url: session.url!,
-            };
+            return { sessionId: session.id, url: session.url! };
           } catch (error) {
-            logger.error(
-              {
-                error:
-                  error instanceof Error ? error : new Error(String(error)),
-                operation: "create_checkout_session",
-                userId: user.userId,
-              },
-              "Failed to create checkout session"
-            );
-            throw error;
+            handleRouteError(error, "create_checkout_session", user?.userId);
           }
         },
         {
@@ -108,24 +94,18 @@ export const billingRoutes = (app: Elysia) =>
       .post(
         "/portal",
         async ({ body, user }) => {
-          if (!user) {
-            throw new BadRequestError("Authentication required");
-          }
-
+          if (!user) throw new BadRequestError("Authentication required");
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
-
             if (!userSubscription.stripe_customer_id) {
               throw new BadRequestError("User has no Stripe customer ID");
             }
-
             const portalSession =
               await StripeService.createCustomerPortalSession(
                 userSubscription.stripe_customer_id,
                 body.returnUrl
               );
-
             logger.info(
               {
                 operation: "create_portal_session",
@@ -134,21 +114,9 @@ export const billingRoutes = (app: Elysia) =>
               },
               "Created customer portal session"
             );
-
-            return {
-              url: portalSession.url,
-            };
+            return { url: portalSession.url };
           } catch (error) {
-            logger.error(
-              {
-                error:
-                  error instanceof Error ? error : new Error(String(error)),
-                operation: "create_portal_session",
-                userId: user.userId,
-              },
-              "Failed to create portal session"
-            );
-            throw error;
+            handleRouteError(error, "create_portal_session", user?.userId);
           }
         },
         {
@@ -166,15 +134,11 @@ export const billingRoutes = (app: Elysia) =>
       .get(
         "/subscription",
         async ({ user }) => {
-          if (!user) {
-            throw new BadRequestError("Authentication required");
-          }
-
+          if (!user) throw new BadRequestError("Authentication required");
           try {
             const subscription = await SubscriptionService.getUserSubscription(
               user.userId
             );
-
             logger.debug(
               {
                 operation: "get_subscription_status",
@@ -183,7 +147,6 @@ export const billingRoutes = (app: Elysia) =>
               },
               "Retrieved user subscription status"
             );
-
             return {
               status: subscription.subscription_status,
               hasStripeCustomer: !!subscription.stripe_customer_id,
@@ -199,16 +162,7 @@ export const billingRoutes = (app: Elysia) =>
                 : null,
             };
           } catch (error) {
-            logger.error(
-              {
-                error:
-                  error instanceof Error ? error : new Error(String(error)),
-                operation: "get_subscription_status",
-                userId: user.userId,
-              },
-              "Failed to get subscription status"
-            );
-            throw error;
+            handleRouteError(error, "get_subscription_status", user?.userId);
           }
         },
         {
