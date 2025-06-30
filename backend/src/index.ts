@@ -1,5 +1,5 @@
 // src/index.ts
-import { Elysia } from "elysia";
+import { Elysia, t } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { config } from "./config";
@@ -21,6 +21,7 @@ import { userRoutes } from "./modules/user/routes";
 import { macroRoutes } from "./modules/macros/routes";
 import { goalRoutes } from "./modules/goals/routes";
 import { habitRoutes } from "./modules/habits/routes";
+import { billingRoutes } from "./modules/billing/routes";
 
 logger.info("🚀 Starting Elysia server...");
 
@@ -68,7 +69,193 @@ const app = new Elysia()
     })
   )
 
-  // Apply correlation middleware for request tracing
+  // Context decorators (add early for webhook access)
+  .decorate("db", db)
+
+  // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
+  .post(
+    "/webhooks/stripe/billing",
+    async (ctx) => {
+      const { logger } = await import("./lib/logger");
+      try {
+        // Read the raw body from the request stream
+        let rawBody = "";
+        if (ctx.request.body) {
+          const reader = ctx.request.body.getReader();
+          let done, value;
+          while (true) {
+            ({ done, value } = await reader.read());
+            if (done) break;
+            if (value) {
+              rawBody += Buffer.from(value).toString();
+            }
+          }
+        }
+
+        const signature = ctx.headers["stripe-signature"];
+        if (!signature) {
+          logger.error(
+            { operation: "stripe_webhook", error: "Missing Stripe signature" },
+            "Missing Stripe signature header"
+          );
+          ctx.set.status = 200;
+          return { received: false, error: "Missing Stripe signature" };
+        }
+
+        logger.info(
+          { operation: "stripe_webhook", payload: rawBody },
+          "Received Stripe webhook payload"
+        );
+
+        // Import services inline to avoid circular dependencies
+        const { StripeService } = await import(
+          "./modules/billing/stripe-service"
+        );
+        const { SubscriptionService } = await import(
+          "./modules/billing/subscription-service"
+        );
+
+        // Verify webhook signature and normalize event format
+        let normalizedEvent;
+        try {
+          normalizedEvent = await StripeService.verifyWebhookSignature(
+            rawBody,
+            signature
+          );
+        } catch (err) {
+          logger.error(
+            { operation: "stripe_webhook", error: err },
+            "Signature verification or event parsing failed"
+          );
+          ctx.set.status = 200;
+          return { received: false, error: "Signature verification failed" };
+        }
+
+        logger.info(
+          {
+            operation: "stripe_webhook",
+            eventType: normalizedEvent.type,
+            eventId: normalizedEvent.id,
+            format: normalizedEvent.format,
+          },
+          `Processing Stripe webhook: ${normalizedEvent.type} (${normalizedEvent.format})`
+        );
+
+        // Handle only supported event types
+        if (
+          normalizedEvent.type &&
+          normalizedEvent.type.includes("subscription")
+        ) {
+          let subscription;
+          if (
+            normalizedEvent.format === "thin" &&
+            normalizedEvent.related_object
+          ) {
+            subscription = await StripeService.fetchRelatedObject(
+              normalizedEvent.related_object
+            );
+          } else if (normalizedEvent.data?.object) {
+            subscription = normalizedEvent.data.object;
+          }
+
+          if (subscription) {
+            const customerId = subscription.customer;
+            const subscriptionId = subscription.id;
+            const status = subscription.status;
+
+            // Find user by Stripe customer ID
+            const user = ctx.db
+              .prepare("SELECT id FROM users WHERE stripe_customer_id = ?")
+              .get(customerId) as { id: number } | undefined;
+
+            if (user) {
+              if (
+                status === "canceled" ||
+                normalizedEvent.type.includes("deleted")
+              ) {
+                await SubscriptionService.cancelSubscription(
+                  user.id,
+                  subscriptionId
+                );
+                logger.info(
+                  {
+                    operation: "stripe_webhook_processed",
+                    eventType: normalizedEvent.type,
+                    userId: user.id,
+                    subscriptionId,
+                  },
+                  "Canceled subscription from webhook"
+                );
+              } else {
+                const currentPeriodEnd = new Date(
+                  subscription.current_period_end * 1000
+                ).toISOString();
+                await SubscriptionService.upsertSubscription(
+                  user.id,
+                  subscriptionId,
+                  status,
+                  currentPeriodEnd
+                );
+                logger.info(
+                  {
+                    operation: "stripe_webhook_processed",
+                    eventType: normalizedEvent.type,
+                    userId: user.id,
+                    subscriptionId,
+                    status,
+                  },
+                  "Updated subscription from webhook"
+                );
+              }
+            } else {
+              logger.warn(
+                {
+                  operation: "stripe_webhook",
+                  eventType: normalizedEvent.type,
+                  customerId,
+                  subscriptionId,
+                },
+                "User not found for Stripe customer ID"
+              );
+            }
+          }
+        } else {
+          // Log and gracefully handle unsupported event types
+          logger.info(
+            { operation: "stripe_webhook", eventType: normalizedEvent?.type },
+            `Received unsupported or unhandled event type: ${normalizedEvent?.type}`
+          );
+        }
+
+        ctx.set.status = 200;
+        return {
+          received: true,
+          format: normalizedEvent.format,
+          eventType: normalizedEvent.type,
+        };
+      } catch (error) {
+        logger.error(
+          {
+            error: error instanceof Error ? error : new Error(String(error)),
+            operation: "stripe_webhook",
+          },
+          "Failed to process webhook"
+        );
+        ctx.set.status = 200;
+        return { received: false, error: "Webhook processing failed" };
+      }
+    },
+    {
+      // Accept any body type to prevent 422 errors from Elysia validation
+      body: t.Any(),
+      detail: {
+        summary: "Handle Stripe webhooks (NO AUTH)",
+        tags: ["Billing"],
+      },
+    }
+  )
+
+  // Apply middleware after webhook routes to avoid body consumption conflicts
   .use(correlationMiddleware)
   .use(enhancedApiLogging)
 
@@ -83,18 +270,17 @@ const app = new Elysia()
   // Apply rate limiting
   .use(rateLimiters.api)
 
-  // Context decorators
-  .decorate("db", db)
-
-  // Authentication middleware
-  .use(authMiddleware)
-
-  // Mount route modules
-  .use(authRoutes)
-  .use(userRoutes)
-  .use(macroRoutes)
-  .use(goalRoutes)
-  .use(habitRoutes)
+  // Authenticated routes group
+  .group("/api", (app) =>
+    app
+      .use(authMiddleware)
+      .use(authRoutes)
+      .use(userRoutes)
+      .use(macroRoutes)
+      .use(goalRoutes)
+      .use(habitRoutes)
+      .use(billingRoutes)
+  )
 
   // Root endpoint
   .get(
