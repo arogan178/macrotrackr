@@ -1,9 +1,11 @@
 // src/modules/billing/subscription-service.ts
+
 import { db } from "../../db";
 import { logger } from "../../lib/logger";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
+import { handleServiceError } from "../../lib/error-handler";
 
 export interface SubscriptionRecord {
   id: string;
@@ -33,15 +35,12 @@ export class SubscriptionService {
   ): Promise<SubscriptionRecord> {
     return withTransaction(db, () => {
       try {
-        // Check if subscription already exists
         const existing = safeQuery<SubscriptionRecord>(
           db,
           "SELECT * FROM subscriptions WHERE stripe_subscription_id = ?",
           [stripeSubscriptionId]
         );
-
         if (existing) {
-          // Update existing subscription
           safeExecute(
             db,
             `UPDATE subscriptions 
@@ -49,7 +48,6 @@ export class SubscriptionService {
              WHERE stripe_subscription_id = ?`,
             [status, currentPeriodEnd, stripeSubscriptionId]
           );
-
           logger.info(
             {
               operation: "update_subscription",
@@ -60,7 +58,6 @@ export class SubscriptionService {
             "Updated subscription record"
           );
         } else {
-          // Create new subscription
           const subscriptionId = generateId();
           safeExecute(
             db,
@@ -74,7 +71,6 @@ export class SubscriptionService {
               currentPeriodEnd,
             ]
           );
-
           logger.info(
             {
               operation: "create_subscription",
@@ -85,8 +81,6 @@ export class SubscriptionService {
             "Created subscription record"
           );
         }
-
-        // Update user subscription status
         const userStatus =
           status === "active"
             ? "pro"
@@ -98,30 +92,22 @@ export class SubscriptionService {
           "UPDATE users SET subscription_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
           [userStatus, userId]
         );
-
-        // Return the updated subscription
         const updated = safeQuery<SubscriptionRecord>(
           db,
           "SELECT * FROM subscriptions WHERE stripe_subscription_id = ?",
           [stripeSubscriptionId]
         );
-
         if (!updated) {
           throw new NotFoundError("Failed to retrieve updated subscription");
         }
-
         return updated;
       } catch (error) {
-        logger.error(
-          {
-            error: error instanceof Error ? error : new Error(String(error)),
-            operation: "upsert_subscription",
-            userId,
-            subscriptionId: stripeSubscriptionId,
-          },
-          "Failed to upsert subscription"
+        handleServiceError(
+          error,
+          "upsert_subscription",
+          { userId, subscriptionId: stripeSubscriptionId },
+          [NotFoundError]
         );
-        throw error;
       }
     });
   }
@@ -133,7 +119,6 @@ export class SubscriptionService {
     userId: number
   ): Promise<UserSubscriptionInfo> {
     try {
-      // Get user's basic subscription info
       const user = safeQuery<{
         subscription_status: "free" | "pro" | "canceled";
         stripe_customer_id: string | null;
@@ -142,12 +127,9 @@ export class SubscriptionService {
         "SELECT subscription_status, stripe_customer_id FROM users WHERE id = ?",
         [userId]
       );
-
       if (!user) {
         throw new NotFoundError("User not found");
       }
-
-      // Get active subscription if exists
       const subscription = safeQuery<SubscriptionRecord>(
         db,
         `SELECT * FROM subscriptions 
@@ -155,7 +137,6 @@ export class SubscriptionService {
          ORDER BY created_at DESC LIMIT 1`,
         [userId]
       );
-
       logger.debug(
         {
           operation: "get_user_subscription",
@@ -165,22 +146,15 @@ export class SubscriptionService {
         },
         "Retrieved user subscription info"
       );
-
       return {
         subscription_status: user.subscription_status,
         stripe_customer_id: user.stripe_customer_id,
         subscription: subscription || undefined,
       };
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "get_user_subscription",
-          userId,
-        },
-        "Failed to get user subscription"
-      );
-      throw error;
+      handleServiceError(error, "get_user_subscription", { userId }, [
+        NotFoundError,
+      ]);
     }
   }
 
@@ -197,11 +171,9 @@ export class SubscriptionService {
         "UPDATE users SET stripe_customer_id = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
         [customerId, userId]
       );
-
       if (result.changes === 0) {
         throw new NotFoundError("User not found");
       }
-
       logger.info(
         {
           operation: "update_stripe_customer_id",
@@ -211,16 +183,12 @@ export class SubscriptionService {
         "Updated user Stripe customer ID"
       );
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "update_stripe_customer_id",
-          userId,
-          customerId,
-        },
-        "Failed to update Stripe customer ID"
+      handleServiceError(
+        error,
+        "update_stripe_customer_id",
+        { userId, customerId },
+        [NotFoundError]
       );
-      throw error;
     }
   }
 
@@ -233,7 +201,6 @@ export class SubscriptionService {
   ): Promise<void> {
     return withTransaction(db, () => {
       try {
-        // Update subscription status
         const result = safeExecute(
           db,
           `UPDATE subscriptions 
@@ -241,18 +208,14 @@ export class SubscriptionService {
            WHERE user_id = ? AND stripe_subscription_id = ?`,
           [userId, stripeSubscriptionId]
         );
-
         if (result.changes === 0) {
           throw new NotFoundError("Subscription not found");
         }
-
-        // Update user subscription status
         safeExecute(
           db,
           "UPDATE users SET subscription_status = 'canceled', updated_at = CURRENT_TIMESTAMP WHERE id = ?",
           [userId]
         );
-
         logger.info(
           {
             operation: "cancel_subscription",
@@ -262,16 +225,12 @@ export class SubscriptionService {
           "Canceled user subscription"
         );
       } catch (error) {
-        logger.error(
-          {
-            error: error instanceof Error ? error : new Error(String(error)),
-            operation: "cancel_subscription",
-            userId,
-            subscriptionId: stripeSubscriptionId,
-          },
-          "Failed to cancel subscription"
+        handleServiceError(
+          error,
+          "cancel_subscription",
+          { userId, subscriptionId: stripeSubscriptionId },
+          [NotFoundError]
         );
-        throw error;
       }
     });
   }
@@ -288,22 +247,17 @@ export class SubscriptionService {
         "SELECT * FROM subscriptions WHERE stripe_subscription_id = ?",
         [stripeSubscriptionId]
       );
-
       if (!subscription) {
         throw new NotFoundError("Subscription not found");
       }
-
       return subscription;
     } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "get_subscription_by_stripe_id",
-          stripeSubscriptionId,
-        },
-        "Failed to get subscription by Stripe ID"
+      handleServiceError(
+        error,
+        "get_subscription_by_stripe_id",
+        { stripeSubscriptionId },
+        [NotFoundError]
       );
-      throw error;
     }
   }
 
