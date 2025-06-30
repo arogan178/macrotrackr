@@ -15,46 +15,12 @@ export const proGuard = new Elysia({ name: "proGuard" })
     if (!user) {
       throw new AuthenticationError("Authentication required for Pro features");
     }
-
+    let hasActivePro = false;
     try {
-      // Check if user has active Pro subscription
-      const hasActivePro = await SubscriptionService.hasActiveProSubscription(
+      hasActivePro = await SubscriptionService.hasActiveProSubscription(
         user.userId
       );
-
-      if (!hasActivePro) {
-        logger.warn(
-          {
-            operation: "pro_guard_access_denied",
-            userId: user.userId,
-          },
-          "User attempted to access Pro feature without active subscription"
-        );
-
-        throw new AuthorizationError(
-          "Pro subscription required. Please upgrade your account to access this feature."
-        );
-      }
-
-      logger.debug(
-        {
-          operation: "pro_guard_access_granted",
-          userId: user.userId,
-        },
-        "Pro subscription verified - access granted"
-      );
-
-      return { isProUser: true };
     } catch (error) {
-      // If it's already an AuthorizationError, re-throw it
-      if (
-        error instanceof AuthorizationError ||
-        error instanceof AuthenticationError
-      ) {
-        throw error;
-      }
-
-      // Log unexpected errors
       logger.error(
         {
           error: error instanceof Error ? error : new Error(String(error)),
@@ -63,12 +29,30 @@ export const proGuard = new Elysia({ name: "proGuard" })
         },
         "Failed to verify Pro subscription status"
       );
-
-      // Default to denying access on error for security
       throw new AuthorizationError(
         "Unable to verify subscription status. Please try again later."
       );
     }
+    if (!hasActivePro) {
+      logger.warn(
+        {
+          operation: "pro_guard_access_denied",
+          userId: user.userId,
+        },
+        "User attempted to access Pro feature without active subscription"
+      );
+      throw new AuthorizationError(
+        "Pro subscription required. Please upgrade your account to access this feature."
+      );
+    }
+    logger.debug(
+      {
+        operation: "pro_guard_access_granted",
+        userId: user.userId,
+      },
+      "Pro subscription verified - access granted"
+    );
+    return { isProUser: true };
   });
 
 /**
