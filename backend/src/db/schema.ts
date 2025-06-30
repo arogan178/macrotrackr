@@ -22,6 +22,8 @@ export function initializeSchema(db: Database) {
             last_name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL, -- Store hashed password
+            subscription_status TEXT DEFAULT 'free' CHECK(subscription_status IN ('free', 'pro', 'canceled')),
+            stripe_customer_id TEXT UNIQUE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -112,6 +114,18 @@ export function initializeSchema(db: Database) {
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
+
+        -- NEW: Subscriptions Table --
+        CREATE TABLE IF NOT EXISTS subscriptions (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          stripe_subscription_id TEXT UNIQUE NOT NULL,
+          status TEXT NOT NULL CHECK(status IN ('active', 'canceled', 'past_due', 'unpaid')),
+          current_period_end TEXT NOT NULL, -- Store as ISO string
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
@@ -172,6 +186,29 @@ export function initializeSchema(db: Database) {
     "TEXT",
     "UPDATE macro_entries SET entry_time = '12:00:00' WHERE entry_time IS NULL"
   );
+
+  // Apply subscription-related column additions to users table
+  checkAndAddColumn(
+    "users",
+    "subscription_status",
+    "subscription_status TEXT DEFAULT 'free'"
+  );
+  checkAndAddColumn("users", "stripe_customer_id", "stripe_customer_id TEXT");
+
+  // Apply data constraints for subscription_status (SQLite doesn't support CHECK in ALTER)
+  // We'll handle validation in the application layer instead
+  try {
+    db.exec(`
+      UPDATE users 
+      SET subscription_status = 'free' 
+      WHERE subscription_status NOT IN ('free', 'pro', 'canceled') OR subscription_status IS NULL
+    `);
+  } catch (error) {
+    logger.debug(
+      "Subscription status normalization skipped (column may not exist yet)"
+    );
+  }
+
   // --- Indexes for Performance ---
   logger.info("    ⚡ Creating indexes...");
 
@@ -223,6 +260,26 @@ export function initializeSchema(db: Database) {
   // User details lookup optimization
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_user_details_user ON user_details(user_id)"
+  );
+
+  // Subscription system indexes
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)"
   );
 
   logger.info("✅ Database schema initialized successfully.");
