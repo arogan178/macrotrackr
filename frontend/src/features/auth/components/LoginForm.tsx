@@ -1,47 +1,46 @@
-import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { CardContainer, TextField } from "@/components/form";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { CalorieIcon } from "@/components/Icons";
 import { useStore } from "@/store/store";
+import { ApiError } from "@/utils/api-service";
 
 function FormLogin() {
   const navigate = useNavigate();
   const {
-    auth: { email, password, isLoading, error },
+    auth: { email, password, isLoading },
     setAuthEmail,
     setAuthPassword,
     login,
     showNotification,
   } = useStore();
 
-  const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
-      try {
-        await login(email, password);
-
-        // Show success notification
-        showNotification("Login successful", "success");
-
-        // Give a small delay before navigation to ensure token is properly stored
-        setTimeout(() => {
-          navigate("/home", { replace: true });
-        }, 100);
-      } catch (error) {
-        // Display floating notification for login error
-        if (error instanceof Error) {
-          showNotification(error.message || "Login failed", "error");
-        } else {
-          showNotification(
-            "Login failed. Please check your credentials.",
-            "error"
-          );
-        }
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      await login(email, password);
+      showNotification("Login successful", "success");
+      setTimeout(() => {
+        navigate("/home", { replace: true });
+      }, 100);
+    } catch (error) {
+      if (
+        error instanceof ApiError &&
+        (error.status === 401 || error.status === 403)
+      ) {
+        showNotification("Invalid email or password.", "error");
+      } else if (error instanceof ApiError) {
+        showNotification(error.message || "Login failed", "error");
+      } else if (error instanceof Error) {
+        showNotification(error.message || "Login failed", "error");
+      } else {
+        showNotification(
+          "Login failed. Please check your credentials.",
+          "error"
+        );
       }
-    },
-    [email, password, login, navigate, showNotification]
-  );
+    }
+  }
 
   return (
     <CardContainer className="p-8">

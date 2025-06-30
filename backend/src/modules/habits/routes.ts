@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-import { safeQuery, safeExecute } from "../../lib/database";
+import { safeQuery, safeQueryAll, safeExecute } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { featureLimitGuard } from "../../middleware/pro-guard";
 
@@ -40,7 +40,7 @@ export const habitRoutes = (app: Elysia) =>
             ORDER BY created_at DESC
           `;
 
-          const habitsResult = safeQuery(db, query, [
+          const habitsResult = safeQueryAll(db, query, [
             user.userId,
           ]) as HabitFromDB[];
 
@@ -169,11 +169,10 @@ export const habitRoutes = (app: Elysia) =>
             SELECT id FROM habits 
             WHERE id = ? AND user_id = ?
           `;
-          const existingHabitResult = safeQuery(db, checkQuery, [
+          const existingHabit = safeQuery(db, checkQuery, [
             params.id,
             user.userId,
-          ]) as { id: string }[];
-          const existingHabit = existingHabitResult[0];
+          ]);
 
           if (!existingHabit) {
             throw new NotFoundError("Habit not found");
@@ -223,11 +222,10 @@ export const habitRoutes = (app: Elysia) =>
             SELECT id FROM habits 
             WHERE id = ? AND user_id = ?
           `;
-          const existingHabitResult = safeQuery(db, checkQuery, [
+          const existingHabit = safeQuery(db, checkQuery, [
             params.id,
             user.userId,
-          ]) as { id: string }[];
-          const existingHabit = existingHabitResult[0];
+          ]);
 
           if (!existingHabit) {
             throw new NotFoundError("Habit not found");
