@@ -13,6 +13,7 @@ export interface WeightGoalFormValues {
   weeklyChange?: number;
   calculatedWeeks?: number;
   weightGoal?: string;
+  dailyChange?: number;
 }
 
 export interface WeightGoals {

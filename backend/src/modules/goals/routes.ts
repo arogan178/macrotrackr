@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-import { safeQuery, safeExecute } from "../../lib/database";
+import { safeQuery, safeExecute, safeQueryAll } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
@@ -323,7 +323,7 @@ export const goalRoutes = (app: Elysia) =>
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
 
-          const logs = safeQuery(db, query, [user.userId]) as Omit<
+          const logs = safeQueryAll(db, query, [user.userId]) as Omit<
             WeightLogFromDB,
             "user_id" | "created_at"
           >[];

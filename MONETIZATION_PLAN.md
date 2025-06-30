@@ -74,6 +74,16 @@ The Pro tier is for users who want to unlock the full potential of their data an
 
 ## 4. Technical Implementation Plan
 
+### Progress Update (June 30, 2025)
+
+- [x] **Backend Stripe integration and Pro feature guard implemented**
+- [x] **Frontend state management:** Zustand user slice and `useSubscriptionStatus` hook for `subscriptionStatus`.
+- [x] **API Service:** Billing helpers for Stripe checkout/portal (`createCheckoutSession`, `createPortalSession`).
+- [x] **UI Components:** `ProBadge`, `PricingTable`, `UpgradeModal`, `ProRoute`, `ProFeature` (for gating and conditional rendering).
+- [x] **Pages:** `/pricing` and `/settings/billing` created with upgrade/management flows.
+- [x] **Feature Gating:** Pro-only features and routes are now protected and conditionally rendered.
+- [ ] **Integration:** Next, integrate these components into the main app router/layout and ensure subscription status is refreshed after login and Stripe webhook events.
+
 This plan requires significant work on both the backend and frontend. We will use **Stripe** for payment processing due to its robust APIs, excellent documentation, and secure handling of payments.
 
 ### 4.1. Backend (Elysia.js & Bun)
@@ -125,33 +135,32 @@ This plan requires significant work on both the backend and frontend. We will us
 
 ### 4.2. Frontend (React & Zustand)
 
-**1. State Management (`frontend/src/store/`)**
+- **State Management:**
 
-- Add `subscriptionStatus` to the user state in Zustand (e.g., in `authSlice` or a new `userSlice`).
-- This state should be populated upon login and refreshed as needed.
+  - Zustand user slice (`userSlice.ts`) and `useSubscriptionStatus` hook for `subscriptionStatus` (done).
+  - Ensure state is set on login and refreshed after subscription changes (in progress).
 
-**2. New Routes & Pages (`frontend/src/pages/`)**
+- **Routes & Pages:**
 
-- **`/pricing`**: A public page displaying the Free vs. Pro feature comparison table. This page will contain the call-to-action to upgrade.
-- **`/settings/billing`**: A protected page for Pro users to manage their subscription. It will have a button that, when clicked, fetches a portal session URL from the backend and redirects the user to the Stripe Customer Portal.
+  - `/pricing` (public): Feature comparison and upgrade flow (done).
+  - `/settings/billing` (Pro-only): Subscription management (done).
 
-**3. New UI Components (`frontend/src/components/`)**
+- **UI Components:**
 
-- **`PricingTable.tsx`**: A component to display the tiers and features.
-- **`UpgradeModal.tsx`**: A modal that appears when a free user tries to access a Pro feature, prompting them to upgrade.
-- **`ProBadge.tsx`**: A small, reusable badge (e.g., "PRO") to place next to Pro features in the UI.
+  - `PricingTable.tsx`, `UpgradeModal.tsx`, `ProBadge.tsx`, `ProRoute.tsx`, `ProFeature.tsx` (all done).
 
-**4. API Service (`frontend/src/utils/api-service.ts`)**
+- **API Service:**
 
-- Add new functions to communicate with the backend's `/api/billing/` endpoints.
-  - `createCheckoutSession()`
-  - `createPortalSession()`
+  - Billing helpers for Stripe checkout/portal (`createCheckoutSession`, `createPortalSession`) (done).
 
-**5. Feature Gating Implementation**
+- **Feature Gating:**
 
-- **Conditional Rendering**: Use the `subscriptionStatus` from the Zustand store to conditionally render UI elements.
-  - For a Pro feature, check the status. If the user is `free`, render the feature in a disabled state with a `ProBadge` and an "Upgrade" button. Clicking the button will open the `UpgradeModal` or redirect to the `/pricing` page.
-- **Route Protection**: Wrap Pro-only pages/routes in a component that checks the `subscriptionStatus`. If the user is not `pro`, redirect them to the `/pricing` page.
+  - Conditional rendering and route protection using `subscriptionStatus` (done).
+
+- **Next Steps:**
+  - Integrate new components into main app router/layout.
+  - Ensure subscription status is refreshed after login and Stripe webhook events.
+  - Finalize UI polish and test full upgrade/management flow.
 
 ---
 
