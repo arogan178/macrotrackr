@@ -48,4 +48,5 @@ export interface TimeToGoalCalculation {
   expectedWeightLossPerWeek: number;
 }
 
-// Re-export WeightGoalFormValues from api-service.ts
+// Re-export WeightGoalFormValues for use in api-service and other modules
+export type { WeightGoalFormValues };
