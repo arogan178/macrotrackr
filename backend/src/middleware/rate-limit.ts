@@ -105,21 +105,21 @@ export const rateLimiters = {
   // Strict rate limiting for authentication endpoints
   auth: rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5, // 5 attempts per 15 minutes
+    maxRequests: 500, // 50 attempts per 15 minutes
     message: "Too many authentication attempts, please try again in 15 minutes",
   }),
 
   // Moderate rate limiting for API endpoints
   api: rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100, // 100 requests per 15 minutes
+    maxRequests: 1000, // 1000 requests per 15 minutes
     message: "Too many API requests, please try again later",
   }),
 
   // Lenient rate limiting for read operations
   read: rateLimit({
     windowMs: 1 * 60 * 1000, // 1 minute
-    maxRequests: 60, // 60 requests per minute
+    maxRequests: 600, // 60 requests per minute
     message: "Too many requests, please slow down",
   }),
 };

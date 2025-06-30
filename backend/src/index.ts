@@ -286,17 +286,18 @@ const app = new Elysia()
   // Apply rate limiting
   .use(rateLimiters.api)
 
-  // Authenticated routes group
-  .group("/api", (app) =>
-    app
-      .use(authMiddleware)
-      .use(authRoutes)
-      .use(userRoutes)
-      .use(macroRoutes)
-      .use(goalRoutes)
-      .use(habitRoutes)
-      .use(billingRoutes)
-  )
+  // Public auth routes (no authentication required)
+  .use(authRoutes)
+
+  // Apply auth middleware globally (it has path exemptions built-in)
+  .use(authMiddleware)
+
+  // All other routes
+  .use(userRoutes)
+  .use(macroRoutes)
+  .use(goalRoutes)
+  .use(habitRoutes)
+  .use(billingRoutes)
 
   // Root endpoint
   .get(
