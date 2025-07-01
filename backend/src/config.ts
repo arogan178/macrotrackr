@@ -57,7 +57,10 @@ const EnvSchema = z.object({
    */
   STRIPE_PRICE_ID_MONTHLY: z
     .string()
-    .min(1, "STRIPE_PRICE_ID_MONTHLY is required for Pro subscription (monthly)"),
+    .min(
+      1,
+      "STRIPE_PRICE_ID_MONTHLY is required for Pro subscription (monthly)"
+    ),
 
   /**
    * Stripe price ID for Pro subscription (yearly)
