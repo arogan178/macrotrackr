@@ -2,18 +2,29 @@ import { post } from "./api-service";
 
 /**
  * Create a Stripe Checkout Session for Pro upgrade
+ * @param successUrl - URL to redirect after successful payment
+ * @param cancelUrl - URL to redirect if checkout is cancelled
  * @returns {Promise<{ url: string }>} Stripe Checkout URL
  */
-export async function createCheckoutSession(): Promise<{ url: string }> {
-  return post<{ url: string }>("/api/billing/create-checkout-session");
+export async function createCheckoutSession(
+  successUrl: string,
+  cancelUrl: string
+): Promise<{ url: string }> {
+  return post<{ url: string }>("/api/billing/checkout", {
+    successUrl,
+    cancelUrl,
+  });
 }
 
 /**
  * Create a Stripe Customer Portal Session for subscription management
+ * @param returnUrl - The URL to return to after managing the subscription
  * @returns {Promise<{ url: string }>} Stripe Portal URL
  */
-export async function createPortalSession(): Promise<{ url: string }> {
-  return post<{ url: string }>("/api/billing/create-portal-session");
+export async function createPortalSession(
+  returnUrl: string
+): Promise<{ url: string }> {
+  return post<{ url: string }>("/api/billing/portal", { returnUrl });
 }
 
 /**

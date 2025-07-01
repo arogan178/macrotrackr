@@ -240,14 +240,14 @@ export const macroRoutes = (app: Elysia) =>
         async (context: any) => {
           const { db, user } = context as AuthenticatedContext;
 
-          // Use safeExecute for multiple rows (all() method)
-          const stmt =
-            db.prepare(`SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at 
+          const historyResult = safeQueryAll<MacroEntryFromDB>(
+            db,
+            `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at 
              FROM macro_entries 
              WHERE user_id = ? 
-             ORDER BY entry_date DESC, entry_time DESC, created_at DESC`);
-
-          const historyResult = stmt.all(user.userId) as MacroEntryFromDB[];
+             ORDER BY entry_date DESC, entry_time DESC, created_at DESC`,
+            [user.userId]
+          );
 
           // Map snake_case DB results to camelCase API response, handling null mealName
           const historyMapped = historyResult.map((entry) => ({
