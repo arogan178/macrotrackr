@@ -53,11 +53,18 @@ const EnvSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().min(1, "STRIPE_WEBHOOK_SECRET is required"),
 
   /**
-   * Stripe price ID for Pro subscription
+   * Stripe price ID for Pro subscription (monthly)
    */
-  STRIPE_PRICE_ID: z
+  STRIPE_PRICE_ID_MONTHLY: z
     .string()
-    .min(1, "STRIPE_PRICE_ID is required for Pro subscription"),
+    .min(1, "STRIPE_PRICE_ID_MONTHLY is required for Pro subscription (monthly)"),
+
+  /**
+   * Stripe price ID for Pro subscription (yearly)
+   */
+  STRIPE_PRICE_ID_YEARLY: z
+    .string()
+    .min(1, "STRIPE_PRICE_ID_YEARLY is required for Pro subscription (yearly)"),
 });
 
 // Validate environment variables on startup
