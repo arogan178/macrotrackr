@@ -33,6 +33,7 @@ export interface CreateCheckoutSessionOptions {
   customerEmail?: string;
   successUrl: string;
   cancelUrl: string;
+  priceId: string;
   metadata?: Record<string, string>;
 }
 
@@ -83,7 +84,7 @@ export class StripeService {
         payment_method_types: ["card"],
         line_items: [
           {
-            price: config.STRIPE_PRICE_ID,
+            price: options.priceId,
             quantity: 1,
           },
         ],
@@ -106,6 +107,7 @@ export class StripeService {
           sessionId: session.id,
           customerId: options.customerId,
           customerEmail: options.customerEmail,
+          priceId: options.priceId,
         },
         "Created Stripe checkout session"
       );
@@ -114,6 +116,7 @@ export class StripeService {
       handleServiceError(error, "stripe_create_checkout_session", {
         customerId: options.customerId,
         customerEmail: options.customerEmail,
+        priceId: options.priceId,
       });
     }
   }
