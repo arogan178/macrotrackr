@@ -179,13 +179,13 @@ export const userRoutes = (app: Elysia) =>
                 newWeightProvided && weight !== currentWeight;
 
               if (weightHasChanged) {
-                const logDate = getLocalDate();
+                const logTimestamp = new Date().toISOString(); // Use full timestamp
                 const logId = generateId();
 
                 safeExecute(
                   db,
-                  "INSERT INTO weight_log (id, user_id, date, weight) VALUES (?, ?, ?, ?)",
-                  [logId, user.userId, logDate, weight]
+                  "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
+                  [logId, user.userId, logTimestamp, weight]
                 );
 
                 loggerHelpers.dbQuery("INSERT", "weight_log", user.userId, 1);
@@ -258,13 +258,13 @@ export const userRoutes = (app: Elysia) =>
 
               // Always insert weight log if weight is provided
               if (weight !== undefined && weight !== null) {
-                const logDate = getLocalDate();
+                const logTimestamp = new Date().toISOString(); // Use full timestamp
                 const logId = generateId();
 
                 safeExecute(
                   db,
-                  "INSERT INTO weight_log (id, user_id, date, weight) VALUES (?, ?, ?, ?)",
-                  [logId, user.userId, logDate, weight]
+                  "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
+                  [logId, user.userId, logTimestamp, weight]
                 );
 
                 loggerHelpers.dbQuery("INSERT", "weight_log", user.userId, 1);
