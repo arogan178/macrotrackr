@@ -57,11 +57,26 @@ export const billingRoutes = (app: Elysia) =>
                 customerId
               );
             }
+            // Determine price ID based on plan
+            const plan = body.plan === "yearly" ? "yearly" : "monthly";
+            const priceId =
+              plan === "yearly"
+                ? process.env.STRIPE_PRICE_ID_YEARLY || ""
+                : process.env.STRIPE_PRICE_ID_MONTHLY || "";
+            if (!priceId)
+              throw new BadRequestError(
+                "Stripe price ID not configured for selected plan"
+              );
             const session = await StripeService.createCheckoutSession({
               customerId,
               successUrl: body.successUrl,
               cancelUrl: body.cancelUrl,
-              metadata: { userId: user.userId.toString(), ...body.metadata },
+              priceId,
+              metadata: {
+                userId: user.userId.toString(),
+                plan,
+                ...body.metadata,
+              },
             });
             logger.info(
               {
@@ -69,6 +84,7 @@ export const billingRoutes = (app: Elysia) =>
                 userId: user.userId,
                 sessionId: session.id,
                 customerId,
+                plan,
               },
               "Created checkout session for user"
             );
@@ -79,12 +95,16 @@ export const billingRoutes = (app: Elysia) =>
         },
         {
           body: t.Object({
+            plan: t.Optional(
+              t.Union([t.Literal("monthly"), t.Literal("yearly")])
+            ),
             successUrl: t.String({ format: "uri" }),
             cancelUrl: t.String({ format: "uri" }),
             metadata: t.Optional(t.Record(t.String(), t.String())),
           }),
           detail: {
-            summary: "Create Stripe checkout session for Pro subscription",
+            summary:
+              "Create Stripe checkout session for Pro subscription (monthly or yearly)",
             tags: ["Billing"],
           },
         }

@@ -450,42 +450,55 @@ const BillingForm: React.FC = () => {
   }, [isOnline, subscriptionStatus, handleBillingError, showNotification]);
 
   // Enhanced upgrade flow with better success handling and validation
-  const handleUpgrade = useCallback(async () => {
-    // Basic validation before proceeding
-    if (!isOnline) {
-      showNotification("Internet connection required for upgrade.", "warning");
-      return;
-    }
-
-    if (subscriptionStatus === "pro") {
-      showNotification("You already have an active Pro subscription.", "info");
-      return;
-    }
-
-    setIsLoading(true);
-    setLastError(null);
-
-    try {
-      const successUrl = window.location.origin + "/settings?upgraded=true";
-      const cancelUrl = window.location.origin + "/settings";
-      const { url } = await createCheckoutSession(successUrl, cancelUrl);
-
-      // Validation for successful URL generation
-      if (!url || !url.startsWith("https://")) {
-        throw new Error("Invalid checkout URL received from server");
+  const handleUpgrade = useCallback(
+    async (plan: "monthly" | "yearly" = "monthly") => {
+      // Basic validation before proceeding
+      if (!isOnline) {
+        showNotification(
+          "Internet connection required for upgrade.",
+          "warning"
+        );
+        return;
       }
 
-      // Success notification before redirect
-      showNotification("Redirecting to secure checkout...", "info", {
-        duration: 2000,
-        context: "billing_redirect",
-      });
+      if (subscriptionStatus === "pro") {
+        showNotification(
+          "You already have an active Pro subscription.",
+          "info"
+        );
+        return;
+      }
 
-      window.location.href = url;
-    } catch (error) {
-      handleBillingError(error, "upgrade");
-    }
-  }, [isOnline, subscriptionStatus, handleBillingError, showNotification]);
+      setIsLoading(true);
+      setLastError(null);
+
+      try {
+        const successUrl = window.location.origin + "/settings?upgraded=true";
+        const cancelUrl = window.location.origin + "/settings";
+        const { url } = await createCheckoutSession(
+          successUrl,
+          cancelUrl,
+          plan
+        );
+
+        // Validation for successful URL generation
+        if (!url || !url.startsWith("https://")) {
+          throw new Error("Invalid checkout URL received from server");
+        }
+
+        // Success notification before redirect
+        showNotification("Redirecting to secure checkout...", "info", {
+          duration: 2000,
+          context: "billing_redirect",
+        });
+
+        window.location.href = url;
+      } catch (error) {
+        handleBillingError(error, "upgrade");
+      }
+    },
+    [isOnline, subscriptionStatus, handleBillingError, showNotification]
+  );
 
   // Simple retry for upgrade (no exponential backoff)
   const handleRetry = useCallback(() => {
@@ -547,7 +560,7 @@ const BillingForm: React.FC = () => {
       {/* Enhanced responsive pricing modal */}
       <Modal
         isOpen={isPricingModalOpen}
-        onClose={() => {}}
+        onClose={() => setIsPricingModalOpen(false)}
         title=""
         size="2xl"
         variant="form"
@@ -576,7 +589,7 @@ const BillingForm: React.FC = () => {
           </div>
 
           {/* Scrollable content area, prevent horizontal scroll */}
-          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden w-full">
+          <div className="max-h-[80vh] overflow-y-visible overflow-x-hidden w-full">
             <div className="w-full max-w-full overflow-x-hidden">
               <PricingTable onUpgrade={handleUpgrade} />
             </div>
