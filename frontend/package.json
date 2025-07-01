@@ -13,6 +13,7 @@
     "@tailwindcss/typography": "^0.5.16",
     "@tailwindcss/vite": "^4.0.3",
     "@tanstack/react-table": "^8.21.3",
+    "caniuse-lite": "^1.0.30001726",
     "chart.js": "^4.5.0",
     "cssnano": "^7.0.6",
     "lucide-react": "^0.484.0",
@@ -21,6 +22,7 @@
     "react-dom": "^19.0.0",
     "react-router-dom": "^7.1.5",
     "recharts": "^2.15.2",
+    "update-browserslist-db": "^1.1.3",
     "zustand": "^5.0.5"
   },
   "devDependencies": {
