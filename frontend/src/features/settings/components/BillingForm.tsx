@@ -12,77 +12,55 @@ import {
   ExternalLinkIcon,
   InfoIcon,
   WarningIcon,
+  BarChartIcon,
+  TargetIcon,
+  BalanceIcon,
+  BookIcon,
+  MenuIcon,
+  ExportIcon,
+  LightningIcon,
 } from "@/components/Icons";
 import { PricingTable } from "@/components/PricingTable";
 import Modal from "@/components/Modal";
 
-// Enhanced error handling types
-interface BillingError {
-  type: "network" | "stripe" | "auth" | "validation" | "unknown";
-  message: string;
-  retryable: boolean;
-}
-
-// Helper function to parse billing errors
-const parseBillingError = (error: unknown): BillingError => {
-  if (error instanceof Error) {
-    const message = error.message.toLowerCase();
-
-    if (message.includes("network") || message.includes("fetch")) {
-      return {
-        type: "network",
-        message:
-          "Network connection issue. Please check your internet connection.",
-        retryable: true,
-      };
-    }
-
-    if (message.includes("stripe") || message.includes("payment")) {
-      return {
-        type: "stripe",
-        message: "Payment service temporarily unavailable. Please try again.",
-        retryable: true,
-      };
-    }
-
-    if (message.includes("auth") || message.includes("unauthorized")) {
-      return {
-        type: "auth",
-        message: "Authentication required. Please refresh and try again.",
-        retryable: false,
-      };
-    }
-
+const parseBillingError = (error: unknown) => {
+  const msg = error instanceof Error ? error.message.toLowerCase() : "";
+  if (msg.includes("network") || msg.includes("fetch"))
     return {
-      type: "unknown",
-      message: error.message || "An unexpected error occurred.",
+      type: "network",
+      message:
+        "Network connection issue. Please check your internet connection.",
       retryable: true,
     };
-  }
-
+  if (msg.includes("stripe") || msg.includes("payment"))
+    return {
+      type: "stripe",
+      message: "Payment service temporarily unavailable. Please try again.",
+      retryable: true,
+    };
+  if (msg.includes("auth") || msg.includes("unauthorized"))
+    return {
+      type: "auth",
+      message: "Authentication required. Please refresh and try again.",
+      retryable: false,
+    };
   return {
     type: "unknown",
-    message: "An unexpected error occurred. Please try again.",
+    message:
+      error instanceof Error
+        ? error.message
+        : "An unexpected error occurred. Please try again.",
     retryable: true,
   };
 };
 
 // Enhanced Pro billing view with confirmation dialog
+
 const ProBillingView: React.FC<{
   onManage: () => void;
   isLoading: boolean;
 }> = ({ onManage, isLoading }) => {
-  const [showConfirmation, setShowConfirmation] = useState(false);
-
-  const handleManageClick = () => {
-    setShowConfirmation(true);
-  };
-
-  const confirmAndProceed = () => {
-    setShowConfirmation(false);
-    onManage();
-  };
-
+  const [show, setShow] = useState(false);
   return (
     <>
       <div className="relative bg-gradient-to-br from-green-900/25 via-green-800/20 to-emerald-900/25 p-6 rounded-xl border border-green-500/40 mb-8 overflow-hidden">
@@ -110,9 +88,8 @@ const ProBillingView: React.FC<{
           </p>
         </div>
       </div>
-
       <FormButton
-        onClick={handleManageClick}
+        onClick={() => setShow(true)}
         isLoading={isLoading}
         loadingText="Redirecting to Billing Portal..."
         fullWidth
@@ -123,27 +100,25 @@ const ProBillingView: React.FC<{
       >
         Manage Subscription
       </FormButton>
-
       <div className="mt-6 p-4 bg-gradient-to-r from-gray-800/40 to-gray-700/40 rounded-lg border border-gray-600/30 backdrop-blur-sm">
         <p className="text-xs text-gray-300 flex items-center">
-          <div className="p-1 bg-blue-500/20 rounded mr-2">
+          <span className="p-1 bg-blue-500/20 rounded mr-2">
             <InfoIcon className="w-3 h-3 text-blue-400" />
-          </div>
+          </span>
           <span>
             <span className="font-medium">Securely managed by Stripe.</span>{" "}
             Cancel anytime with no hidden fees.
           </span>
         </p>
       </div>
-
-      {/* Enhanced Confirmation Modal */}
       <Modal
-        isOpen={showConfirmation}
-        onClose={() => setShowConfirmation(false)}
+        isOpen={show}
+        onClose={() => setShow(false)}
         title="Manage Subscription"
         size="md"
         variant="form"
         hideDefaultButtons
+        hideClose={true}
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
@@ -160,45 +135,46 @@ const ProBillingView: React.FC<{
               </p>
               <ul className="text-gray-300 text-sm space-y-2">
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3 inline-block"></span>
                   Update your payment method
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3 inline-block"></span>
                   Download invoices and receipts
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3 inline-block"></span>
                   Change your billing address
                 </li>
                 <li className="flex items-center">
-                  <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3"></div>
+                  <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mr-3 inline-block"></span>
                   Cancel your subscription
                 </li>
               </ul>
             </div>
           </div>
-
           <div className="bg-gradient-to-r from-amber-900/25 to-orange-900/25 border border-amber-500/30 p-4 rounded-lg">
             <p className="text-amber-200 text-sm flex items-center">
-              <div className="p-1 bg-amber-500/20 rounded mr-2">
+              <span className="p-1 bg-amber-500/20 rounded mr-2">
                 <WarningIcon className="w-3 h-3 text-amber-400" />
-              </div>
+              </span>
               This will open in a new tab. Your current session will remain
               active.
             </p>
           </div>
-
           <div className="flex gap-3 pt-2">
             <FormButton
-              onClick={() => setShowConfirmation(false)}
+              onClick={() => setShow(false)}
               variant="secondary"
               className="flex-1"
             >
               Cancel
             </FormButton>
             <FormButton
-              onClick={confirmAndProceed}
+              onClick={() => {
+                setShow(false);
+                onManage();
+              }}
               variant="primary"
               className="flex-1 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800"
               icon={<ExternalLinkIcon className="w-4 h-4" />}
@@ -229,66 +205,79 @@ const FreeBillingView: React.FC<{
   isDisabled = false,
 }) => (
   <div className="space-y-6">
-    <div className="relative bg-gradient-to-br from-gray-800/60 via-gray-800/40 to-gray-900/60 p-6 rounded-xl border border-gray-700/50 overflow-hidden">
-      <div className="absolute top-0 right-0 w-24 h-24 bg-yellow-400/5 rounded-full blur-xl transform translate-x-12 -translate-y-12"></div>
+    <div className="relative bg-gradient-to-br from-gray-800/60 via-gray-800/40 to-gray-900/60 p-4 sm:p-5 rounded-xl border border-gray-700/50 overflow-hidden">
+      <div className="absolute top-0 right-0 w-20 h-20 bg-yellow-400/5 rounded-full blur-xl transform translate-x-8 -translate-y-8"></div>
       <div className="relative">
-        <h4 className="font-semibold text-gray-100 mb-4 flex items-center text-lg">
-          <div className="p-2 bg-yellow-400/20 rounded-lg mr-3">
+        <h4 className="font-semibold text-gray-100 mb-3 flex items-center text-base sm:text-lg">
+          <div className="p-2 bg-yellow-400/20 rounded-lg mr-2">
             <StarIcon className="w-5 h-5 text-yellow-400" />
           </div>
           Unlock Pro Features
         </h4>
-        <div className="grid gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
           {[
             {
-              feature: "Advanced Reporting & Analytics",
-              icon: "📊",
+              feature: "Detailed insights and trends",
+              Icon: BarChartIcon,
               desc: "Detailed insights and trends",
             },
             {
               feature: "Advanced Goal Setting",
-              icon: "🎯",
-              desc: "Custom targets and milestones",
+              Icon: TargetIcon,
+              desc: "Custom Weight Goals",
+            },
+            {
+              feature: "Custom Macro Targets",
+              Icon: BalanceIcon,
+              desc: "Set personalized macro goals",
             },
             {
               feature: "Unlimited Habit Tracking",
-              icon: "✅",
+              Icon: CheckCircleIcon,
               desc: "Track as many habits as you want",
             },
             {
               feature: "Recipe & Meal Saver",
-              icon: "🍽️",
+              Icon: BookIcon,
               desc: "Save and reuse favorite meals",
+              comingSoon: true,
             },
             {
               feature: "Custom Meal Types",
-              icon: "🔧",
+              Icon: MenuIcon,
               desc: "Create personalized meal categories",
+              comingSoon: true,
             },
             {
               feature: "Data Export (CSV)",
-              icon: "📤",
+              Icon: ExportIcon,
               desc: "Download your data anytime",
             },
             {
               feature: "Priority Support",
-              icon: "💬",
+              Icon: LightningIcon,
               desc: "Fast response from our team",
             },
-          ].map(({ feature, icon, desc }) => (
+          ].map(({ feature, Icon, desc, comingSoon }) => (
             <div
               key={feature}
-              className="flex items-center p-3 rounded-lg bg-gray-800/30 border border-gray-700/30 hover:border-gray-600/50 transition-colors"
+              className="flex items-start gap-2 p-2 rounded-md bg-gray-800/30 border border-gray-700/30 hover:border-gray-600/50 transition-colors min-h-[56px]"
             >
-              <div className="p-1.5 bg-green-400/20 rounded-lg mr-3">
-                <CheckCircleIcon className="w-4 h-4 text-green-400 flex-shrink-0" />
+              <div className="p-1 bg-green-400/20 rounded-md mt-0.5">
+                <Icon className="w-5 h-5 text-green-400 flex-shrink-0" />
               </div>
-              <span className="text-lg mr-3">{icon}</span>
-              <div className="flex-1">
-                <div className="text-gray-200 font-medium text-sm">
+              <div className="flex-1 min-w-0">
+                <div className="text-gray-200 font-medium text-xs sm:text-sm flex items-center gap-1 sm:gap-2 truncate">
                   {feature}
+                  {comingSoon && (
+                    <span className="ml-1 px-1.5 py-0.5 rounded-full text-[10px] sm:text-xs font-semibold bg-yellow-700/40 text-yellow-300 border border-yellow-500/30">
+                      Coming Soon
+                    </span>
+                  )}
                 </div>
-                <div className="text-gray-400 text-xs">{desc}</div>
+                <div className="text-gray-400 text-[11px] sm:text-xs truncate">
+                  {desc}
+                </div>
               </div>
             </div>
           ))}
@@ -365,7 +354,7 @@ const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
   const [isLoading, setIsLoading] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
-  const [lastError, setLastError] = useState<BillingError | null>(null);
+  const [lastError, setLastError] = useState<any>(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
   // Network status monitoring for graceful degradation (minimal, just update isOnline)
@@ -558,22 +547,51 @@ const BillingForm: React.FC = () => {
       {/* Enhanced responsive pricing modal */}
       <Modal
         isOpen={isPricingModalOpen}
-        onClose={() => setIsPricingModalOpen(false)}
-        title="✨ Compare Plans"
+        onClose={() => {}}
+        title=""
         size="2xl"
         variant="form"
         hideDefaultButtons
+        hideClose={true}
       >
-        <div className="max-h-[75vh] overflow-y-auto">
-          <div className="mb-4 p-4 bg-gradient-to-r from-blue-900/20 to-indigo-900/20 rounded-lg border border-blue-500/30">
-            <p className="text-blue-200 text-sm flex items-center">
-              <div className="p-1 bg-blue-500/20 rounded mr-2">
-                <InfoIcon className="w-3 h-3 text-blue-400" />
+        <div className="relative">
+          {/* Custom header with gradient background and more padding */}
+          <div className="relative bg-gradient-to-r from-yellow-600/30 via-yellow-500/20 to-orange-500/30 p-8 -m-6 mb-8 rounded-t-xl border-b border-yellow-500/20">
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-400/10 to-orange-400/10 rounded-t-xl"></div>
+            <div className="relative flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center">
+                <div className="p-3 bg-gradient-to-br from-yellow-400/40 to-orange-400/40 rounded-2xl mr-4 shadow-lg animate-pulse-slow">
+                  <StarIcon className="w-8 h-8 text-yellow-300 drop-shadow-glow" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-extrabold text-yellow-200 tracking-tight leading-tight mb-1">
+                    Unlock Your Full Potential
+                  </h2>
+                  <p className="text-base text-yellow-100/90 leading-relaxed">
+                    See what you get with Pro vs. Free
+                  </p>
+                </div>
               </div>
-              Compare features and choose the plan that's right for you
-            </p>
+            </div>
           </div>
-          <PricingTable onUpgrade={handleUpgrade} />
+
+          {/* Scrollable content area, prevent horizontal scroll */}
+          <div className="max-h-[60vh] overflow-y-auto overflow-x-hidden w-full">
+            <div className="w-full max-w-full overflow-x-hidden">
+              <PricingTable onUpgrade={handleUpgrade} />
+            </div>
+          </div>
+
+          {/* Footer with primary and secondary actions */}
+          <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-gray-700/50 mt-4">
+            <FormButton
+              onClick={() => setIsPricingModalOpen(false)}
+              variant="secondary"
+              className="flex-1 bg-gray-100 text-gray-900 font-semibold hover:bg-gray-200 border border-gray-300 shadow-sm active:scale-95 transition-transform duration-100"
+            >
+              Continue with Free
+            </FormButton>
+          </div>
         </div>
       </Modal>
     </>

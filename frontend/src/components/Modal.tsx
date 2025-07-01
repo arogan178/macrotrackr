@@ -10,6 +10,7 @@ interface BaseModalProps {
   title: string;
   children?: ReactNode;
   size?: "sm" | "md" | "lg" | "xl" | "2xl";
+  hideClose?: boolean; // If true, do not show the X (close) button
 }
 
 interface ConfirmationModalProps extends BaseModalProps {
@@ -32,23 +33,42 @@ interface FormModalProps extends BaseModalProps {
 
 type ModalProps = ConfirmationModalProps | FormModalProps;
 
-function Modal({
-  isOpen,
-  onClose,
-  title,
-  size = "md",
-  variant,
-  message,
-  confirmLabel = "Confirm",
-  cancelLabel = "Cancel",
-  onConfirm,
-  isDanger = false,
-  children,
-  onSave,
-  saveDisabled,
-  saveLabel = "Save",
-  hideDefaultButtons = false,
-}: ModalProps) {
+function Modal(props: ModalProps) {
+  const {
+    isOpen,
+    onClose,
+    title,
+    size = "md",
+    children,
+    hideClose = false,
+  } = props;
+
+  // Discriminated union for variant-specific props
+  let variant: string = (props as any).variant;
+  let message: string | undefined,
+    confirmLabel: string | undefined,
+    cancelLabel: string | undefined,
+    onConfirm: (() => void) | undefined,
+    isDanger: boolean | undefined,
+    onSave: (() => void) | undefined,
+    saveDisabled: boolean | undefined,
+    saveLabel: string | undefined;
+  if (variant === "confirmation") {
+    ({
+      message,
+      confirmLabel = "Confirm",
+      cancelLabel = "Cancel",
+      onConfirm,
+      isDanger = false,
+    } = props as ConfirmationModalProps);
+  } else if (variant === "form") {
+    ({
+      onSave,
+      saveDisabled,
+      saveLabel = "Save",
+      cancelLabel = "Cancel",
+    } = props as FormModalProps);
+  }
   const modalRef = useRef<HTMLDivElement>(null);
   const modalRoot = document.getElementById("modal-root"); // Get the portal target
 
@@ -135,7 +155,6 @@ function Modal({
       y: 0,
       transition: {
         duration: 0.2,
-        ease: "easeOut",
       },
     },
     exit: {
@@ -144,7 +163,6 @@ function Modal({
       y: 20,
       transition: {
         duration: 0.15,
-        ease: "easeIn",
       },
     },
   };
@@ -188,30 +206,33 @@ function Modal({
       <motion.div
         ref={modalRef}
         className={`${baseContentStyles} ${sizeStyles} relative`}
+        style={{ overflowX: "hidden" }}
         variants={modalVariants}
         initial="hidden"
         animate="visible"
         exit="exit"
         role="document"
       >
-        {/* Header */}
-        <div
-          className={`flex items-center justify-between p-4 border-b border-gray-700/50 ${variantStyles.header}`}
-        >
-          <h2 id="modal-title" className="text-lg font-medium text-gray-100">
-            {title}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
-            aria-label="Close modal"
+        {/* Header: Only render if close button is shown */}
+        {!hideClose && (
+          <div
+            className={`flex items-center justify-between p-4 border-b border-gray-700/50 ${variantStyles.header}`}
           >
-            <XIcon size="md" />
-          </button>
-        </div>
+            <h2 id="modal-title" className="text-lg font-medium text-gray-100">
+              {title}
+            </h2>
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
+              aria-label="Close modal"
+            >
+              <XIcon size="md" />
+            </button>
+          </div>
+        )}
 
         {/* Body */}
-        <div className="p-5 flex-grow overflow-y-auto">
+        <div className="p-5 flex-grow overflow-y-auto overflow-x-hidden">
           {message && <p className="text-sm text-gray-300 mb-4">{message}</p>}
           {children}
         </div>
@@ -228,11 +249,9 @@ function Modal({
               {cancelLabel}
             </button>
             {variant === "form" && onSave && (
-              <SaveButton
-                onClick={onSave}
-                disabled={saveDisabled}
-                label={saveLabel}
-              />
+              <SaveButton onClick={onSave} disabled={saveDisabled}>
+                {saveLabel}
+              </SaveButton>
             )}
             {variant === "confirmation" && onConfirm && (
               <button
