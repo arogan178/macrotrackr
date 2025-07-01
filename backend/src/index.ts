@@ -102,7 +102,7 @@ const app = new Elysia()
 
   // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
   .post(
-    "/webhooks/stripe/billing",
+    "/api/billing/webhook",
     async (ctx) => {
       const { logger } = await import("./lib/logger");
       try {
