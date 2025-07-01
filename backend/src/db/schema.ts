@@ -194,6 +194,19 @@ export function initializeSchema(db: Database) {
     "subscription_status TEXT DEFAULT 'free'"
   );
   checkAndAddColumn("users", "stripe_customer_id", "stripe_customer_id TEXT");
+  // SQLite does not allow adding a column with non-constant default (e.g., CURRENT_TIMESTAMP)
+  // So: 1) Add column without default, 2) Backfill, 3) Enforce default in app layer for new inserts
+  checkAndAddColumn("users", "updated_at", "updated_at DATETIME");
+  // Backfill updated_at for existing rows if column was just added (safe to run every time)
+  try {
+    db.exec(`
+      UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL;
+    `);
+  } catch (error) {
+    logger.debug(
+      "Backfill for users.updated_at skipped (column may not exist yet)"
+    );
+  }
 
   // Apply data constraints for subscription_status (SQLite doesn't support CHECK in ALTER)
   // We'll handle validation in the application layer instead
