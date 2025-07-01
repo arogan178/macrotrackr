@@ -232,7 +232,7 @@ function Modal(props: ModalProps) {
         )}
 
         {/* Body */}
-        <div className="p-5 flex-grow overflow-y-auto overflow-x-hidden">
+        <div className="p-5 flex-grow overflow-y-hidden overflow-x-hidden">
           {message && <p className="text-sm text-gray-300 mb-4">{message}</p>}
           {children}
         </div>

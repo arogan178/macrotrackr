@@ -8,11 +8,13 @@ import { post } from "./api-service";
  */
 export async function createCheckoutSession(
   successUrl: string,
-  cancelUrl: string
+  cancelUrl: string,
+  plan: "monthly" | "yearly" = "monthly"
 ): Promise<{ url: string }> {
   return post<{ url: string }>("/api/billing/checkout", {
     successUrl,
     cancelUrl,
+    plan,
   });
 }
 
