@@ -402,7 +402,7 @@ export const goalRoutes = (app: Elysia) =>
             const findEntryQuery = `
               SELECT id FROM weight_log WHERE id = ? AND user_id = ?
             `;
-            const deletedEntryResult = safeQuery(db, findEntryQuery, [
+            const deletedEntryResult = safeQueryAll(db, findEntryQuery, [
               entryIdToDelete,
               user.userId,
             ]) as { id: string }[];
@@ -431,7 +431,7 @@ export const goalRoutes = (app: Elysia) =>
               ORDER BY timestamp DESC, id DESC
               LIMIT 1
             `;
-            const latestEntryResult = safeQuery(db, findLatestQuery, [
+            const latestEntryResult = safeQueryAll(db, findLatestQuery, [
               user.userId,
             ]) as { weight: number; timestamp: string }[];
             const latestEntry = latestEntryResult[0];
