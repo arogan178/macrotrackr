@@ -58,6 +58,7 @@ import {
   Clipboard,
   Apple,
   Beef,
+  ExternalLink,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -169,3 +170,4 @@ export const BalanceIcon = createIcon(BalanceScale);
 export const ClipboardIcon = createIcon(Clipboard);
 export const NutrientIcon = createIcon(Apple);
 export const ProteinIcon = createIcon(Beef);
+export const ExternalLinkIcon = createIcon(ExternalLink);

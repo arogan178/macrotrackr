@@ -3,7 +3,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { MacroSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-import { safeQuery, safeExecute } from "../../lib/database";
+import { safeQuery, safeExecute, safeQueryAll } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
