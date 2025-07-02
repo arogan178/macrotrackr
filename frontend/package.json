@@ -16,6 +16,7 @@
     "caniuse-lite": "^1.0.30001726",
     "chart.js": "^4.5.0",
     "cssnano": "^7.0.6",
+    "date-fns": "^4.1.0",
     "lucide-react": "^0.484.0",
     "motion": "^12.19.1",
     "react": "^19.0.0",
