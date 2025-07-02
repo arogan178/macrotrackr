@@ -1,0 +1,215 @@
+import { useState, useEffect, useCallback, ReactNode } from "react";
+import { Navbar } from "../../layout/components";
+import FloatingNotification from "../../notifications/components/FloatingNotification";
+import { TabButton, SaveButton } from "@/components/form";
+import Modal from "@/components/Modal";
+import { useBeforeUnload } from "@/hooks/useBeforeUnload";
+import { ProfileForm, MacroTargetForm } from "@/features/settings/components";
+import { useStore } from "@/store/store";
+import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "@/components/Icons";
+
+// --- Modified PageHeader Component ---
+// Now accepts tabs as children to render them on the right
+const PageHeader = ({
+  hasChanges,
+  children, // Accept children (the tabs)
+}: {
+  hasChanges: boolean;
+  children: ReactNode; // Define children prop
+}) => (
+  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+    {/* Left Side: Title */}
+    <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
+      Settings
+    </h1>
+    {/* Right Side: Badges and Tabs */}
+    <div className="flex items-center gap-3">
+      {/* Badges */}
+      <div className="flex space-x-2">
+        {hasChanges && (
+          <span className="px-3 py-1 bg-yellow-600/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm font-medium">
+            Unsaved Changes
+          </span>
+        )}
+      </div>
+      {/* Render Tabs passed as children */}
+      {children}
+    </div>
+  </div>
+);
+
+export default function SettingsPage() {
+  const {
+    settings,
+    isLoading,
+    settingsError: error,
+    settingsSuccess: successMessage,
+    formErrors,
+    hasSettingsChanges,
+    isSaving,
+    validateSettingsForm,
+    updateSetting,
+    saveSettings,
+    clearSettingsMessages: clearMessages,
+    resetSettings,
+    fetchSettings,
+  } = useStore();
+
+  const [activeTab, setActiveTab] = useState<"profile" | "macro target">(
+    "profile"
+  );
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingTabChange, setPendingTabChange] = useState<
+    "profile" | "macro target" | null
+  >(null);
+
+  // Fetch settings on component mount
+  useEffect(() => {
+    fetchSettings();
+  }, [fetchSettings]);
+
+  // Warn user before leaving page with unsaved changes
+  useBeforeUnload(
+    hasSettingsChanges,
+    "You have unsaved changes. Are you sure you want to leave?"
+  );
+
+  const handleTabChange = useCallback(
+    (tab: "profile" | "macro target") => {
+      if (hasSettingsChanges) {
+        setPendingTabChange(tab);
+        setShowConfirmModal(true);
+      } else {
+        setActiveTab(tab);
+      }
+    },
+    [hasSettingsChanges]
+  );
+
+  const confirmTabChange = useCallback(() => {
+    if (pendingTabChange) {
+      // Reset settings to original values when discarding changes
+      resetSettings();
+      setActiveTab(pendingTabChange);
+      setPendingTabChange(null);
+    }
+    setShowConfirmModal(false);
+  }, [pendingTabChange, resetSettings]);
+
+  const cancelTabChange = useCallback(() => {
+    setPendingTabChange(null);
+    setShowConfirmModal(false);
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!validateSettingsForm()) return;
+      await saveSettings();
+      // No need to show a local notification here since the store will handle it
+    },
+    [validateSettingsForm, saveSettings]
+  );
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      <Navbar />
+      <div className="relative min-h-screen ">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
+          {/* Only render notification if it comes from the store */}
+          {successMessage && (
+            <FloatingNotification
+              message={successMessage}
+              type="success"
+              onClose={clearMessages}
+              duration={3000}
+            />
+          )}
+
+          {error && (
+            <FloatingNotification
+              message={error}
+              type="error"
+              onClose={clearMessages}
+              duration={3000}
+            />
+          )}
+
+          <Modal
+            isOpen={showConfirmModal}
+            onClose={cancelTabChange}
+            title="Unsaved Changes"
+            variant="confirmation"
+            message="You have unsaved changes that will be lost. Do you want to continue?"
+            confirmLabel="Discard Changes"
+            cancelLabel="Keep Editing"
+            onConfirm={confirmTabChange}
+            isDanger={true}
+          />
+
+          {/* Pass Tabs into the updated PageHeader */}
+          <PageHeader hasChanges={hasSettingsChanges}>
+            {/* Tab Navigation Container - Moved inside header */}
+            <div
+              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg" // Style similar to GoalsPage
+              role="tablist"
+              aria-label="Settings Tabs"
+            >
+              <TabButton
+                active={activeTab === "profile"}
+                onClick={() => handleTabChange("profile")}
+                layoutId="settingsTabHighlight"
+                isMotion={true}
+              >
+                <span className="flex items-center relative z-10">
+                  <UserIcon size="sm" className="mr-1.5" />
+                  Profile
+                </span>
+              </TabButton>
+              <TabButton
+                active={activeTab === "macro target"}
+                onClick={() => handleTabChange("macro target")}
+                layoutId="settingsTabHighlight"
+                isMotion={true}
+              >
+                <span className="flex items-center relative z-10">
+                  <MenuIcon size="sm" className="mr-1.5" />
+                  Macro Target
+                </span>
+              </TabButton>
+            </div>
+          </PageHeader>
+
+          {isLoading || !settings ? (
+            <div className="flex justify-center items-center h-64">
+              <LoadingSpinnerIcon className="h-12 w-12 animate-spin text-indigo-500" />
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="p-6">
+              {activeTab === "profile" ? (
+                <ProfileForm
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  formErrors={formErrors}
+                />
+              ) : (
+                <MacroTargetForm />
+              )}
+
+              <div className="mt-8 flex justify-end">
+                <SaveButton
+                  loading={isSaving}
+                  disabled={
+                    !hasSettingsChanges || Object.keys(formErrors).length > 0
+                  }
+                />
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
