@@ -18,6 +18,9 @@ const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 const ReportingPage = React.lazy(
   () => import("@/features/reporting/pages/ReportingPage")
 ); // Updated path
+const PricingPage = React.lazy(
+  () => import("@/features/pricing/pages/PricingPage")
+);
 
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {
@@ -42,6 +45,7 @@ function AppContent() {
           <Route path="/goals" element={<GoalsPage />} />
           <Route path="/login" element={<AuthPage />} />
           <Route path="/reporting" element={<ReportingPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>

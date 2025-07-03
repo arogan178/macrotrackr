@@ -1,6 +1,11 @@
 import { StateCreator } from "zustand";
 import { apiService } from "@/utils/api-service";
-import { MacroEntry, MacroDailyTotals, MacroTargetSettings } from "../types";
+import {
+  MacroEntry,
+  MacroDailyTotals,
+  MacroTargetSettings,
+} from "@/types/macro";
+
 import { getErrorMessage } from "@/utils/error-handling";
 import {
   calculateTodayTotals,
@@ -34,9 +39,7 @@ export interface MacrosSlice {
   // Actions
   fetchMacroData: () => Promise<void>;
   fetchMacroTarget: () => Promise<void>;
-  updateMacroTargetPercentages: (
-    percentages: MacroTargetSettings
-  ) => Promise<void>;
+  updateMacroTargetSettings: (settings: MacroTargetSettings) => Promise<void>;
   addEntry: (entry: AddEntryPayload) => Promise<void>;
   updateEntry: (id: number, entryUpdate: UpdateEntryPayload) => Promise<void>;
   deleteEntry: (id: number) => Promise<void>;
@@ -231,19 +234,17 @@ export const createMacrosSlice: StateCreator<
 
   setEditingEntry: (entry) => set({ editingEntry: entry }),
 
-  updateMacroTargetPercentages: async (percentages) => {
-    if (!percentages) {
-      console.error(
-        "updateMacroTargetPercentages called with null percentages"
-      );
-      set({ targetError: "Invalid macro target percentages provided." });
+  updateMacroTargetSettings: async (settings) => {
+    if (!settings) {
+      console.error("updateMacroTargetSettings called with null settings");
+      set({ targetError: "Invalid macro target settings provided." });
       return;
     }
 
     set({ isTargetSaving: true, targetError: null });
 
     try {
-      const payload = { macroTarget: percentages };
+      const payload = { macroTarget: settings };
       const savedTargetResponse =
         await apiService.macros.saveMacroTargetPercentages(payload);
 
@@ -253,7 +254,7 @@ export const createMacrosSlice: StateCreator<
         targetError: null,
       });
 
-      get()._notifyUser("Macro target percentages updated!", "success");
+      get()._notifyUser("Macro target settings updated!", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error updating macro target percentages:", error);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
-import { MacroEntry } from "@/features/macroTracking/types";
+import { MacroEntry } from "@/types/macro";
 import { TextField, NumberField } from "@/components/form";
 
 interface EditModalProps {

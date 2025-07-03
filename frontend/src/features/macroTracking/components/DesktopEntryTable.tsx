@@ -9,7 +9,7 @@ import {
 import { ChevronDownIcon, TrashIcon } from "@/components/Icons";
 import { MacroCell } from "@/components/nutrition";
 import { ActionButtonGroup } from "@/components/form";
-import { MacroEntry } from "../types";
+import { MacroEntry } from "@/types/macro";
 
 // Types
 interface GroupedEntry {

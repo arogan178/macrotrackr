@@ -1,5 +1,4 @@
-// Import the ActivityLevel type from settings
-import { ActivityLevel, Gender } from "@/features/settings/types";
+import { ActivityLevel, Gender } from "@/types/user";
 
 export interface RegistrationStep1 {
   firstName: string;
