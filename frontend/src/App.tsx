@@ -1,9 +1,11 @@
-import React, { Suspense } from "react";
+import React, { Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useNotificationManager } from "@/features/notifications/hooks/useNotificationManager";
 import { useStore } from "@/store/store";
+import { getToken } from "@/utils/token-storage";
+import { useNavigate } from "react-router-dom";
 import "./style.css";
 
 // Lazy-loaded pages for better performance
@@ -33,9 +35,22 @@ function LoadingFallback() {
 }
 
 function AppContent() {
-  // This hook will manage notifications across route changes
   useNotificationManager();
   const isAuthenticated = useStore((state) => state.auth.isAuthenticated);
+  const setAuthState = useStore((state) => state.setAuthState);
+  const navigate = useNavigate();
+
+  // Sync auth state with token on mount
+  useEffect(() => {
+    const token = getToken();
+    if (token && !isAuthenticated) {
+      setAuthState({ isAuthenticated: true });
+    } else if (!token && isAuthenticated) {
+      setAuthState({ isAuthenticated: false });
+      navigate("/login", { replace: true });
+    }
+    // eslint-disable-next-line
+  }, []);
 
   return (
     <ErrorBoundary>
@@ -51,11 +66,44 @@ function AppContent() {
               )
             }
           />
-          <Route path="/home" element={<HomePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          <Route path="/goals" element={<GoalsPage />} />
-          <Route path="/login" element={<AuthPage />} />
-          <Route path="/reporting" element={<ReportingPage />} />
+          <Route
+            path="/home"
+            element={
+              isAuthenticated ? <HomePage /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              isAuthenticated ? (
+                <SettingsPage />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
+          <Route
+            path="/goals"
+            element={
+              isAuthenticated ? <GoalsPage /> : <Navigate to="/login" replace />
+            }
+          />
+          <Route
+            path="/login"
+            element={
+              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+            }
+          />
+          <Route
+            path="/reporting"
+            element={
+              isAuthenticated ? (
+                <ReportingPage />
+              ) : (
+                <Navigate to="/login" replace />
+              )
+            }
+          />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
