@@ -4,18 +4,19 @@
  */
 
 // Assuming these imports exist and work as intended in your frontend structure
-import { getActivityLevelFromString } from "@/features/settings/constants"; // Adjust path as needed
-import { ActivityLevel } from "@/features/settings/types"; // Adjust path as needed
+import { getActivityLevelFromString } from "@/features/settings/utils/constants"; // Adjust path as needed
+import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 import { getToken } from "./token-storage"; // Adjust path as needed
 import { WeightGoalFormValues } from "@/features/goals/types";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
-  calculateWeeksToGoal
+  calculateWeeksToGoal,
 } from "@/features/goals/calculations";
 
 // API Base URL and Response Types
-const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+export const API_BASE_URL =
+  import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 // --- Interfaces for Payloads and Responses (camelCase) ---
 
@@ -46,7 +47,6 @@ type SetWeightGoalPayload = {
 
 // Payload for PUT /api/goals/weight (UPDATE)
 // Omits startingWeight
-type UpdateWeightGoalPayload = Omit<SetWeightGoalPayload, "startingWeight">;
 
 // --- Weight Log Interfaces ---
 export interface WeightLogEntry {
@@ -61,22 +61,22 @@ export interface AddWeightLogPayload {
 }
 // --- END Weight Log Interfaces ---
 
-// Type for the macro target percentages object
-type MacroTargetPercentagesObject = {
+// Type for the macro target settings object
+type MacroTargetSettingsObject = {
   proteinPercentage: number;
   carbsPercentage: number;
   fatsPercentage: number;
   lockedMacros?: Array<"protein" | "carbs" | "fats">;
 } | null;
 
-// Payload for PUT /api/macros/target (updating percentages ONLY)
-type MacroTargetPercentagesPayload = {
-  macroTarget: MacroTargetPercentagesObject;
+// Payload for PUT /api/macros/target (updating settings ONLY)
+type MacroTargetSettingsPayload = {
+  macroTarget: MacroTargetSettingsObject;
 };
 
-// Type for response from GET /api/macros/target (percentages ONLY)
+// Type for response from GET /api/macros/target (settings ONLY)
 type MacroTargetGetResponse = {
-  macroTarget: MacroTargetPercentagesObject;
+  macroTarget: MacroTargetSettingsObject;
 } | null;
 
 // Payload for PUT /api/user/settings (User details ONLY)
@@ -107,7 +107,7 @@ interface ApiErrorResponse {
   message: string;
   details?: any;
 }
-class ApiError extends Error {
+export class ApiError extends Error {
   status: number;
   code: string;
   details?: any;
@@ -139,7 +139,7 @@ type HabitGoalPayload = {
  * Handles API responses, parses JSON, and standardizes error handling.
  * Updated to handle valid null/empty responses for 200 OK status.
  */
-async function handleResponse(response: Response): Promise<any> {
+export async function handleResponse(response: Response): Promise<any> {
   // Handle successful responses (2xx status codes)
   if (response.ok) {
     // Handle specific 204 No Content responses
@@ -185,7 +185,7 @@ async function handleResponse(response: Response): Promise<any> {
   throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
 }
 
-function getHeaders(includeContentType = true): Record<string, string> {
+export function getHeaders(includeContentType = true): Record<string, string> {
   const headers: Record<string, string> = {};
   const token = getToken();
   if (token) {
@@ -195,6 +195,18 @@ function getHeaders(includeContentType = true): Record<string, string> {
     headers["Content-Type"] = "application/json";
   }
   return headers;
+}
+
+/**
+ * Generic POST helper for API calls (used by billing helpers)
+ */
+export async function post<T = any>(url: string, body?: any): Promise<T> {
+  const response = await fetch(`${API_BASE_URL}${url}`, {
+    method: "POST",
+    headers: getHeaders(),
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  return handleResponse(response);
 }
 
 function normalizeRegistrationData(userData: any): RegistrationDataPayload {
@@ -426,10 +438,8 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    /** Saves ONLY macro target percentages */
-    saveMacroTargetPercentages: async (
-      payload: MacroTargetPercentagesPayload
-    ) => {
+    /** Saves ONLY macro target settings */
+    saveMacroTargetPercentages: async (payload: MacroTargetSettingsPayload) => {
       if (!payload || payload.macroTarget === undefined) {
         throw new Error("Invalid payload: macroTarget object is required.");
       }
@@ -455,11 +465,20 @@ export const apiService = {
     /** Creates new weight goals */
     createWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
       // Calculate the complete goal data including calorie targets
+      const startingWeight = goals.startingWeight ?? 0;
+      const targetWeight = goals.targetWeight ?? startingWeight;
       const payload = {
         ...goals,
-        calorieTarget: goals.calorieTarget ?? calculateCalorieTarget(tdee, goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
-        weeklyChange: goals.weeklyChange ?? calculateWeeklyChange(goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
-        calculatedWeeks: goals.calculatedWeeks ?? calculateWeeksToGoal(goals.startingWeight, goals.targetWeight ?? goals.startingWeight)
+        calorieTarget:
+          goals.calorieTarget ??
+          calculateCalorieTarget(tdee, startingWeight, targetWeight),
+        weeklyChange:
+          goals.weeklyChange ??
+          calculateWeeklyChange(startingWeight, targetWeight),
+        calculatedWeeks:
+          goals.calculatedWeeks ??
+          calculateWeeksToGoal(startingWeight, targetWeight),
+        dailyChange: goals.dailyChange ?? null,
       };
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
@@ -473,11 +492,20 @@ export const apiService = {
     /** Updates existing weight goals */
     updateWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
       // Calculate the complete goal data including calorie targets
+      const startingWeight = goals.startingWeight ?? 0;
+      const targetWeight = goals.targetWeight ?? startingWeight;
       const payload = {
         ...goals,
-        calorieTarget: goals.calorieTarget ?? calculateCalorieTarget(tdee, goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
-        weeklyChange: goals.weeklyChange ?? calculateWeeklyChange(goals.startingWeight, goals.targetWeight ?? goals.startingWeight),
-        calculatedWeeks: goals.calculatedWeeks ?? calculateWeeksToGoal(goals.startingWeight, goals.targetWeight ?? goals.startingWeight)
+        calorieTarget:
+          goals.calorieTarget ??
+          calculateCalorieTarget(tdee, startingWeight, targetWeight),
+        weeklyChange:
+          goals.weeklyChange ??
+          calculateWeeklyChange(startingWeight, targetWeight),
+        calculatedWeeks:
+          goals.calculatedWeeks ??
+          calculateWeeksToGoal(startingWeight, targetWeight),
+        dailyChange: goals.dailyChange ?? null,
       };
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
