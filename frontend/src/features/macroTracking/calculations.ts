@@ -1,9 +1,6 @@
-import { MacroEntry, MacroDailyTotals } from "./types";
-import {
-  CALORIES_PER_GRAM,
-  DEFAULT_MACRO_TOTALS,
-  getTodayDateString,
-} from "./constants";
+import { MacroEntry, MacroDailyTotals } from "@/types/macro";
+import { CALORIES_PER_GRAM } from "@/utils/constants/nutrition";
+import { DEFAULT_MACRO_TOTALS, getTodayDateString } from "./constants";
 
 // Pure calculation functions
 export const calculateCaloriesFromMacros = (
@@ -26,6 +23,15 @@ export const calculateEntryCalories = (entry: MacroEntry): number => {
   );
 };
 
+export const calculateProteinCalories = (protein: number): number => {
+  return Math.round(protein * CALORIES_PER_GRAM.protein);
+};
+export const calculateCarbsCalories = (carbs: number): number => {
+  return carbs * CALORIES_PER_GRAM.carbs;
+};
+export const calculateFatsCalories = (fats: number): number => {
+  return fats * CALORIES_PER_GRAM.fats;
+};
 // Calculate daily totals from entries
 export const calculateDailyTotals = (
   entries: MacroEntry[]

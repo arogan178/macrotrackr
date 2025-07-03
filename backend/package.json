@@ -19,17 +19,25 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@types/compression": "^1.8.1",
+    "@types/uuid": "^10.0.0"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/swagger": "^1.0.3",
     "@node-rs/bcrypt": "^1.7.3",
-    "elysia": "1.2.25", 
+    "@types/stripe": "^8.0.417",
+    "compression": "^1.8.0",
+    "elysia": "1.2.25",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.0.0",
+    "stripe": "^18.2.1",
+    "uuid": "^11.1.0",
     "zod": "^3.23.8"
   }
 }
