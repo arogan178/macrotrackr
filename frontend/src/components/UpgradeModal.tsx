@@ -1,9 +1,13 @@
 import React from "react";
+import Modal from "./Modal";
+import { AwardIcon, CheckCircleIcon } from "./Icons";
 
 interface UpgradeModalProps {
   open: boolean;
   onClose: () => void;
   onUpgrade: () => void;
+  featureName?: string;
+  description?: string;
 }
 
 /**
@@ -14,34 +18,47 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
   open,
   onClose,
   onUpgrade,
+  featureName = "Pro",
+  description = "Upgrade to Pro to unlock these powerful features:",
 }) => {
   if (!open) return null;
+
+  const proFeatures = [
+    "Advanced, filterable reporting",
+    "Unlimited habit tracking",
+    "Specific macronutrient targets",
+    "Ad-free experience",
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-      <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6 relative">
-        <button
-          className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 text-xl"
-          onClick={onClose}
-          aria-label="Close upgrade modal"
-        >
-          ×
-        </button>
-        <h3 className="text-xl font-bold mb-2">Unlock Pro Features</h3>
-        <p className="mb-4 text-gray-700">
-          This feature is available for{" "}
-          <span className="font-semibold">Pro</span> members only.
-          <br />
-          Upgrade to Pro to access advanced analytics, unlimited habits,
-          customizations, and more!
-        </p>
-        <button
-          className="w-full bg-yellow-400 hover:bg-yellow-500 text-black font-bold py-2 px-4 rounded text-lg focus:outline-none focus:ring-2 focus:ring-yellow-300"
-          onClick={onUpgrade}
-        >
-          Upgrade to Pro
-        </button>
+    <Modal
+      isOpen={open}
+      onClose={onClose}
+      title={`Unlock ${featureName} Features`}
+      variant="confirmation"
+      message={description}
+      onConfirm={onUpgrade}
+      confirmLabel="Upgrade to Pro"
+      cancelLabel="Maybe Later"
+      size="md"
+      hideCancelButton={true}
+    >
+      <div className="text-left">
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
+          <AwardIcon className="h-6 w-6 text-yellow-600" />
+        </div>
+        <p className="text-gray-300 mb-4">{description}</p>
+
+        <ul className="space-y-2">
+          {proFeatures.map((feature) => (
+            <li key={feature} className="flex items-center">
+              <CheckCircleIcon className="h-5 w-5 text-green-400 mr-2 flex-shrink-0" />
+              <span className="text-gray-300">{feature}</span>
+            </li>
+          ))}
+        </ul>
       </div>
-    </div>
+    </Modal>
   );
 };
 

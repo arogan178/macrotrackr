@@ -20,6 +20,7 @@ interface ConfirmationModalProps extends BaseModalProps {
   cancelLabel?: string;
   onConfirm: () => void;
   isDanger?: boolean;
+  hideCancelButton?: boolean;
 }
 
 interface FormModalProps extends BaseModalProps {
@@ -50,6 +51,7 @@ function Modal(props: ModalProps) {
     cancelLabel: string | undefined,
     onConfirm: (() => void) | undefined,
     isDanger: boolean | undefined,
+    hideCancelButton: boolean | undefined,
     onSave: (() => void) | undefined,
     saveDisabled: boolean | undefined,
     saveLabel: string | undefined;
@@ -60,6 +62,7 @@ function Modal(props: ModalProps) {
       cancelLabel = "Cancel",
       onConfirm,
       isDanger = false,
+      hideCancelButton = false,
     } = props as ConfirmationModalProps);
   } else if (variant === "form") {
     ({
@@ -212,6 +215,7 @@ function Modal(props: ModalProps) {
         animate="visible"
         exit="exit"
         role="document"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header: Only render if close button is shown */}
         {!hideClose && (
@@ -240,14 +244,18 @@ function Modal(props: ModalProps) {
         {/* Footer */}
         {(onSave || onConfirm || variant === "confirmation") && (
           <div
-            className={`flex justify-end gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
+            className={`flex ${
+              hideCancelButton ? "justify-center" : "justify-end"
+            } gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
           >
-            <button
-              onClick={onClose}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
-            >
-              {cancelLabel}
-            </button>
+            {!hideCancelButton && (
+              <button
+                onClick={onClose}
+                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
+              >
+                {cancelLabel}
+              </button>
+            )}
             {variant === "form" && onSave && (
               <SaveButton onClick={onSave} disabled={saveDisabled}>
                 {saveLabel}

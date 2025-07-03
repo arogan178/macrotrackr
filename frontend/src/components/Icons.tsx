@@ -54,6 +54,7 @@ import {
   TrendingDown,
   Lightbulb,
   Zap,
+  CircleQuestionMark,
   Scale as BalanceScale,
   Clipboard,
   Apple,
@@ -163,10 +164,10 @@ export const SunIcon = createIcon(Sun);
 export const MoreVerticalIcon = createIcon(MoreVertical);
 export const SmilePlusIcon = createIcon(SmilePlus);
 export const XIcon = createIcon(X);
-
-// Reporting-specific icons
-export const LightningIcon = createIcon(Zap);
 export const BalanceIcon = createIcon(BalanceScale);
+export const CircleCheckIcon = createIcon(CheckCircle);
+export const CircleQuestionMarkIcon = createIcon(CircleQuestionMark);
+export const LightningIcon = createIcon(Zap);
 export const ClipboardIcon = createIcon(Clipboard);
 export const NutrientIcon = createIcon(Apple);
 export const ProteinIcon = createIcon(Beef);

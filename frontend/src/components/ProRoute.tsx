@@ -1,5 +1,5 @@
 import React from "react";
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 import { Navigate } from "react-router-dom";
 
 /**
