@@ -1,0 +1,298 @@
+// src/modules/billing/stripe-service.ts
+import Stripe from "stripe";
+import { config } from "../../config";
+import { logger } from "../../lib/logger";
+import { handleServiceError } from "../../lib/error-handler";
+
+// Initialize Stripe with secret key
+export const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
+  apiVersion: "2025-05-28.basil",
+  typescript: true,
+});
+
+// Types for webhook event normalization
+export interface ThinEventRelatedObject {
+  id: string;
+  type: string;
+  url?: string;
+}
+
+export interface NormalizedWebhookEvent {
+  id: string;
+  type: string;
+  format: "snapshot" | "thin";
+  livemode: boolean;
+  created: number | string;
+  related_object?: ThinEventRelatedObject | null;
+  data?: Stripe.Event.Data | null;
+  rawEvent: Stripe.Event | any;
+}
+
+export interface CreateCheckoutSessionOptions {
+  customerId?: string;
+  customerEmail?: string;
+  successUrl: string;
+  cancelUrl: string;
+  priceId: string;
+  metadata?: Record<string, string>;
+}
+
+export interface CreateCustomerOptions {
+  email: string;
+  name?: string;
+  metadata?: Record<string, string>;
+}
+
+export class StripeService {
+  /**
+   * Create a new Stripe customer
+   */
+  static async createCustomer(
+    options: CreateCustomerOptions
+  ): Promise<Stripe.Customer> {
+    try {
+      const customer = await stripe.customers.create({
+        email: options.email,
+        name: options.name,
+        metadata: options.metadata || {},
+      });
+      logger.info(
+        {
+          operation: "stripe_create_customer",
+          customerId: customer.id,
+          email: options.email,
+        },
+        "Created Stripe customer"
+      );
+      return customer;
+    } catch (error) {
+      handleServiceError(error, "stripe_create_customer", {
+        email: options.email,
+      });
+    }
+  }
+
+  /**
+   * Create a checkout session for Pro subscription
+   */
+  static async createCheckoutSession(
+    options: CreateCheckoutSessionOptions
+  ): Promise<Stripe.Checkout.Session> {
+    try {
+      const sessionParams: Stripe.Checkout.SessionCreateParams = {
+        mode: "subscription",
+        payment_method_types: ["card"],
+        line_items: [
+          {
+            price: options.priceId,
+            quantity: 1,
+          },
+        ],
+        success_url: options.successUrl,
+        cancel_url: options.cancelUrl,
+        metadata: options.metadata || {},
+        subscription_data: {
+          metadata: options.metadata || {},
+        },
+      };
+      if (options.customerId) {
+        sessionParams.customer = options.customerId;
+      } else if (options.customerEmail) {
+        sessionParams.customer_email = options.customerEmail;
+      }
+      const session = await stripe.checkout.sessions.create(sessionParams);
+      logger.info(
+        {
+          operation: "stripe_create_checkout_session",
+          sessionId: session.id,
+          customerId: options.customerId,
+          customerEmail: options.customerEmail,
+          priceId: options.priceId,
+        },
+        "Created Stripe checkout session"
+      );
+      return session;
+    } catch (error) {
+      handleServiceError(error, "stripe_create_checkout_session", {
+        customerId: options.customerId,
+        customerEmail: options.customerEmail,
+        priceId: options.priceId,
+      });
+    }
+  }
+
+  /**
+   * Create a customer portal session for subscription management
+   */
+  static async createCustomerPortalSession(
+    customerId: string,
+    returnUrl: string
+  ): Promise<Stripe.BillingPortal.Session> {
+    try {
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: customerId,
+        return_url: returnUrl,
+      });
+      logger.info(
+        {
+          operation: "stripe_create_portal_session",
+          customerId,
+          sessionId: portalSession.id,
+        },
+        "Created Stripe customer portal session"
+      );
+      return portalSession;
+    } catch (error) {
+      handleServiceError(error, "stripe_create_portal_session", { customerId });
+    }
+  }
+
+  /**
+   * Retrieve a subscription by ID
+   */
+  static async getSubscription(
+    subscriptionId: string
+  ): Promise<Stripe.Subscription> {
+    try {
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+      logger.debug(
+        {
+          operation: "stripe_get_subscription",
+          subscriptionId,
+          status: subscription.status,
+        },
+        "Retrieved Stripe subscription"
+      );
+      return subscription;
+    } catch (error) {
+      handleServiceError(error, "stripe_get_subscription", { subscriptionId });
+    }
+  }
+
+  /**
+   * Cancel a subscription
+   */
+  static async cancelSubscription(
+    subscriptionId: string
+  ): Promise<Stripe.Subscription> {
+    try {
+      const subscription = await stripe.subscriptions.cancel(subscriptionId);
+      logger.info(
+        {
+          operation: "stripe_cancel_subscription",
+          subscriptionId,
+          status: subscription.status,
+        },
+        "Canceled Stripe subscription"
+      );
+      return subscription;
+    } catch (error) {
+      handleServiceError(error, "stripe_cancel_subscription", {
+        subscriptionId,
+      });
+    }
+  }
+
+  /**
+   * Verify webhook signature and normalize event format
+   */
+  static async verifyWebhookSignature(
+    payload: string,
+    signature: string
+  ): Promise<NormalizedWebhookEvent> {
+    try {
+      const event = await stripe.webhooks.constructEventAsync(
+        payload,
+        signature,
+        config.STRIPE_WEBHOOK_SECRET
+      );
+      const normalizedEvent = this.normalizeWebhookEvent(event);
+      logger.debug(
+        {
+          operation: "stripe_verify_webhook",
+          eventType: normalizedEvent.type,
+          eventId: normalizedEvent.id,
+          format: normalizedEvent.format,
+        },
+        "Verified and normalized Stripe webhook signature"
+      );
+      return normalizedEvent;
+    } catch (error) {
+      handleServiceError(error, "stripe_verify_webhook");
+    }
+  }
+
+  /**
+   * Normalize webhook event to handle both Snapshot (v1) and Thin (v2) formats
+   */
+  private static normalizeWebhookEvent(
+    event: Stripe.Event | any
+  ): NormalizedWebhookEvent {
+    // Check if this is a thin event (v2 format)
+    // Thin events have object: "v2.core.event" and related_object property
+    if (
+      (event as any).object === "v2.core.event" &&
+      (event as any).related_object
+    ) {
+      return {
+        id: event.id,
+        type: event.type,
+        format: "thin",
+        livemode: event.livemode,
+        created: event.created,
+        related_object: (event as any).related_object,
+        data: null, // Thin events don't contain full object data
+        rawEvent: event,
+      };
+    }
+
+    // This is a snapshot event (v1 format)
+    return {
+      id: event.id,
+      type: event.type,
+      format: "snapshot",
+      livemode: event.livemode,
+      created: event.created,
+      related_object: null,
+      data: (event as Stripe.Event).data,
+      rawEvent: event,
+    };
+  }
+
+  /**
+   * Fetch the full object for thin events
+   */
+  static async fetchRelatedObject(
+    relatedObject: ThinEventRelatedObject
+  ): Promise<any> {
+    try {
+      const { type, id } = relatedObject;
+      switch (type) {
+        case "billing.subscription":
+        case "subscription":
+          return await stripe.subscriptions.retrieve(id);
+        case "billing.customer":
+        case "customer":
+          return await stripe.customers.retrieve(id);
+        case "billing.invoice":
+        case "invoice":
+          return await stripe.invoices.retrieve(id);
+        case "billing.checkout.session":
+        case "checkout.session":
+          return await stripe.checkout.sessions.retrieve(id);
+        default:
+          logger.warn(
+            {
+              operation: "fetch_related_object",
+              type,
+              id,
+            },
+            `Unsupported object type for thin event: ${type}`
+          );
+          return null;
+      }
+    } catch (error) {
+      handleServiceError(error, "fetch_related_object", { relatedObject });
+    }
+  }
+}

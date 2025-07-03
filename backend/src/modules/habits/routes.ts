@@ -3,6 +3,9 @@ import { Elysia } from "elysia";
 import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
+import { safeQuery, safeQueryAll, safeExecute } from "../../lib/database";
+import { NotFoundError } from "../../lib/errors";
+import { featureLimitGuard } from "../../middleware/pro-guard";
 
 // Define types for DB results (snake_case) for clarity and type safety
 type HabitFromDB = {
@@ -26,49 +29,46 @@ export const habitRoutes = (app: Elysia) =>
       // --- Get All Habits ---
       .get(
         "/",
-        ({ user, set, db }: AuthenticatedContext) => {
-          try {
-            const query = `
-              SELECT id, user_id, title, icon_name, current, target, accent_color, 
-                     is_complete, created_at, completed_at
-              FROM habits
-              WHERE user_id = ?
-              ORDER BY created_at DESC
-            `;
-            const statement = db.prepare(query);
-            const habitsResult = statement.all(user.userId) as HabitFromDB[];
+        async (context: any) => {
+          const { user, db } = context as AuthenticatedContext;
 
-            // Map DB results to API format (camelCase)
-            const apiResponse = habitsResult.map((habit) => ({
-              id: habit.id,
-              title: habit.title,
-              iconName: habit.icon_name,
-              current: habit.current,
-              target: habit.target,
-              progress:
-                habit.target > 0
-                  ? Math.min(
-                      100,
-                      Math.round((habit.current / habit.target) * 100)
-                    )
-                  : 0,
-              accentColor: habit.accent_color as
-                | "indigo"
-                | "blue"
-                | "green"
-                | "purple"
-                | undefined,
-              isComplete: Boolean(habit.is_complete),
-              createdAt: habit.created_at,
-              completedAt: habit.completed_at,
-            }));
+          const query = `
+            SELECT id, user_id, title, icon_name, current, target, accent_color, 
+                   is_complete, created_at, completed_at
+            FROM habits
+            WHERE user_id = ?
+            ORDER BY created_at DESC
+          `;
 
-            return apiResponse;
-          } catch (error) {
-            console.error("[GET /habits] CAUGHT ERROR:", error);
-            set.status = 500;
-            throw new Error("Failed to fetch habits");
-          }
+          const habitsResult = safeQueryAll(db, query, [
+            user.userId,
+          ]) as HabitFromDB[];
+
+          const apiResponse = habitsResult.map((habit) => ({
+            id: habit.id,
+            title: habit.title,
+            iconName: habit.icon_name,
+            current: habit.current,
+            target: habit.target,
+            progress:
+              habit.target > 0
+                ? Math.min(
+                    100,
+                    Math.round((habit.current / habit.target) * 100)
+                  )
+                : 0,
+            accentColor: habit.accent_color as
+              | "indigo"
+              | "blue"
+              | "green"
+              | "purple"
+              | undefined,
+            isComplete: Boolean(habit.is_complete),
+            createdAt: habit.created_at,
+            completedAt: habit.completed_at,
+          }));
+
+          return apiResponse;
         },
         {
           response: HabitSchemas.getHabitsResponse,
@@ -80,54 +80,60 @@ export const habitRoutes = (app: Elysia) =>
       )
 
       // --- Create New Habit ---
+      .use(featureLimitGuard("MAX_HABITS"))
       .post(
         "/",
-        async ({
-          body,
-          user,
-          set,
-          db,
-        }: AuthenticatedContext & { body: any }) => {
-          try {
-            const {
-              id,
-              title,
-              iconName,
-              current,
-              target,
-              accentColor,
-              isComplete,
-              createdAt,
-              completedAt,
-            } = body;
+        async (context: any) => {
+          const { body, user, db, checkLimit } =
+            context as AuthenticatedContext & {
+              body: any;
+              checkLimit: (count: number) => Promise<any>;
+            };
 
-            const query = `
-              INSERT INTO habits (
-                id, user_id, title, icon_name, current, target, 
-                accent_color, is_complete, created_at, completed_at
-              ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            `;
+          // Check current habit count before creating new one
+          const currentHabitCount =
+            safeQuery<{ count: number }>(
+              db,
+              "SELECT COUNT(*) as count FROM habits WHERE user_id = ?",
+              [user.userId]
+            )?.count || 0;
 
-            const statement = db.prepare(query);
-            statement.run(
-              id,
-              user.userId,
-              title,
-              iconName,
-              current,
-              target,
-              accentColor || null,
-              isComplete ? 1 : 0,
-              createdAt,
-              completedAt || null
-            );
+          // Check if user can create another habit
+          await checkLimit(currentHabitCount + 1);
 
-            return body;
-          } catch (error) {
-            console.error("[POST /habits] CAUGHT ERROR:", error);
-            set.status = 500;
-            throw new Error("Failed to create habit");
-          }
+          const {
+            id,
+            title,
+            iconName,
+            current,
+            target,
+            accentColor,
+            isComplete,
+            createdAt,
+            completedAt,
+          } = body;
+
+          const query = `
+            INSERT INTO habits (
+              id, user_id, title, icon_name, current, target, 
+              accent_color, is_complete, created_at, completed_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          `;
+
+          safeExecute(db, query, [
+            id,
+            user.userId,
+            title,
+            iconName,
+            current,
+            target,
+            accentColor || null,
+            isComplete ? 1 : 0,
+            createdAt,
+            completedAt || null,
+          ]);
+
+          return body;
         },
         {
           body: HabitSchemas.createHabitBody,
@@ -142,67 +148,57 @@ export const habitRoutes = (app: Elysia) =>
       // --- Update Habit ---
       .put(
         "/:id",
-        async ({
-          params,
-          body,
-          user,
-          set,
-          db,
-        }: AuthenticatedContext & { params: { id: string }; body: any }) => {
-          try {
-            const {
-              title,
-              iconName,
-              current,
-              target,
-              progress,
-              accentColor,
-              isComplete,
-              createdAt,
-              completedAt,
-            } = body;
+        async (context: any) => {
+          const { params, body, user, db } = context as AuthenticatedContext & {
+            params: { id: string };
+            body: any;
+          };
 
-            // First check if the habit belongs to the user
-            const checkQuery = `
-              SELECT id FROM habits 
-              WHERE id = ? AND user_id = ?
-            `;
-            const checkStatement = db.prepare(checkQuery);
-            const existingHabit = checkStatement.get(params.id, user.userId);
+          const {
+            title,
+            iconName,
+            current,
+            target,
+            accentColor,
+            isComplete,
+            createdAt,
+            completedAt,
+          } = body;
 
-            if (!existingHabit) {
-              set.status = 404;
-              throw new Error("Habit not found");
-            }
+          const checkQuery = `
+            SELECT id FROM habits 
+            WHERE id = ? AND user_id = ?
+          `;
+          const existingHabit = safeQuery(db, checkQuery, [
+            params.id,
+            user.userId,
+          ]);
 
-            // Update the habit
-            const updateQuery = `
-              UPDATE habits
-              SET title = ?, icon_name = ?, current = ?, target = ?, 
-                  accent_color = ?, is_complete = ?, created_at = ?, completed_at = ?
-              WHERE id = ? AND user_id = ?
-            `;
-
-            const updateStatement = db.prepare(updateQuery);
-            updateStatement.run(
-              title,
-              iconName,
-              current,
-              target,
-              accentColor || null,
-              isComplete ? 1 : 0,
-              createdAt,
-              completedAt || null,
-              params.id,
-              user.userId
-            );
-
-            return { success: true };
-          } catch (error) {
-            console.error(`[PUT /habits/${params.id}] CAUGHT ERROR:`, error);
-            set.status = error.message === "Habit not found" ? 404 : 500;
-            throw new Error(error.message || "Failed to update habit");
+          if (!existingHabit) {
+            throw new NotFoundError("Habit not found");
           }
+
+          const updateQuery = `
+            UPDATE habits
+            SET title = ?, icon_name = ?, current = ?, target = ?, 
+                accent_color = ?, is_complete = ?, created_at = ?, completed_at = ?
+            WHERE id = ? AND user_id = ?
+          `;
+
+          safeExecute(db, updateQuery, [
+            title,
+            iconName,
+            current,
+            target,
+            accentColor || null,
+            isComplete ? 1 : 0,
+            createdAt,
+            completedAt || null,
+            params.id,
+            user.userId,
+          ]);
+
+          return { success: true };
         },
         {
           body: HabitSchemas.updateHabitBody,
@@ -217,41 +213,32 @@ export const habitRoutes = (app: Elysia) =>
       // --- Delete Habit ---
       .delete(
         "/:id",
-        async ({
-          params,
-          user,
-          set,
-          db,
-        }: AuthenticatedContext & { params: { id: string } }) => {
-          try {
-            // First check if the habit belongs to the user
-            const checkQuery = `
-              SELECT id FROM habits 
-              WHERE id = ? AND user_id = ?
-            `;
-            const checkStatement = db.prepare(checkQuery);
-            const existingHabit = checkStatement.get(params.id, user.userId);
+        async (context: any) => {
+          const { params, user, db } = context as AuthenticatedContext & {
+            params: { id: string };
+          };
 
-            if (!existingHabit) {
-              set.status = 404;
-              throw new Error("Habit not found");
-            }
+          const checkQuery = `
+            SELECT id FROM habits 
+            WHERE id = ? AND user_id = ?
+          `;
+          const existingHabit = safeQuery(db, checkQuery, [
+            params.id,
+            user.userId,
+          ]);
 
-            // Delete the habit
-            const deleteQuery = `
-              DELETE FROM habits
-              WHERE id = ? AND user_id = ?
-            `;
-
-            const deleteStatement = db.prepare(deleteQuery);
-            deleteStatement.run(params.id, user.userId);
-
-            return { success: true };
-          } catch (error) {
-            console.error(`[DELETE /habits/${params.id}] CAUGHT ERROR:`, error);
-            set.status = error.message === "Habit not found" ? 404 : 500;
-            throw new Error(error.message || "Failed to delete habit");
+          if (!existingHabit) {
+            throw new NotFoundError("Habit not found");
           }
+
+          const deleteQuery = `
+            DELETE FROM habits
+            WHERE id = ? AND user_id = ?
+          `;
+
+          safeExecute(db, deleteQuery, [params.id, user.userId]);
+
+          return { success: true };
         },
         {
           response: HabitSchemas.deleteHabitResponse,
@@ -265,22 +252,17 @@ export const habitRoutes = (app: Elysia) =>
       // --- Reset All Habits ---
       .delete(
         "/",
-        async ({ user, set, db }: AuthenticatedContext) => {
-          try {
-            const query = `
-              DELETE FROM habits
-              WHERE user_id = ?
-            `;
+        async (context: any) => {
+          const { user, db } = context as AuthenticatedContext;
 
-            const statement = db.prepare(query);
-            statement.run(user.userId);
+          const query = `
+            DELETE FROM habits
+            WHERE user_id = ?
+          `;
 
-            return { success: true };
-          } catch (error) {
-            console.error("[DELETE /habits] CAUGHT ERROR:", error);
-            set.status = 500;
-            throw new Error("Failed to reset habits");
-          }
+          safeExecute(db, query, [user.userId]);
+
+          return { success: true };
         },
         {
           response: HabitSchemas.resetHabitsResponse,
