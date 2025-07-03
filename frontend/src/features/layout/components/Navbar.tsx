@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useStore } from "@/store/store";
 import { AnimatePresence, motion } from "motion/react";
 import {
   HomeIcon,
@@ -16,9 +17,10 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const logout = useStore((state) => state.logout);
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
     setIsMobileMenuOpen(false);
   };
 
