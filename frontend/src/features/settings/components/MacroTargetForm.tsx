@@ -1,11 +1,12 @@
 import { memo, useCallback, useState, useEffect } from "react";
-import { MacroTargetSettings } from "@/features/macroTracking/types";
-import { MacroTargetState } from "@/features/settings/types";
+import { MacroTargetSettings } from "@/types/macro";
+import { MacroTargetState } from "@/features/settings/types/types";
 import { InfoCard, CardContainer, SaveButton } from "@/components/form";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
 import LoadingSpinner from "@/components/LoadingSpinner";
+import { ProFeature } from "@/components/ProFeature";
 
 // Default macro values (30/40/30 split)
 const DEFAULT_MACRO_TARGET: MacroTargetState = {
@@ -18,7 +19,7 @@ const DEFAULT_MACRO_TARGET: MacroTargetState = {
 function MacroTargetForm() {
   const {
     macroTarget,
-    updateMacroTargetPercentages,
+    updateMacroTargetSettings,
     isTargetSaving,
     isTargetLoading,
     fetchMacroTarget,
@@ -95,7 +96,7 @@ function MacroTargetForm() {
             : undefined,
       };
 
-      updateMacroTargetPercentages(settingsToSave)
+      updateMacroTargetSettings(settingsToSave)
         .then(() => {
           setSaveSuccess(true);
           setHasChanges(false);
@@ -106,7 +107,7 @@ function MacroTargetForm() {
           // Error handling is done in the store
         });
     }
-  }, [localTarget, hasChanges, updateMacroTargetPercentages]);
+  }, [localTarget, hasChanges, updateMacroTargetSettings]);
 
   // Reset to original values
   const handleReset = useCallback(() => {
@@ -127,160 +128,162 @@ function MacroTargetForm() {
   const displayValues = localTarget || DEFAULT_MACRO_TARGET;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-      {/* Left side - Main content (4 cols) */}
-      <div className="lg:col-span-4 flex flex-col h-full">
-        <CardContainer className="p-6 h-full">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-semibold text-gray-200">
-              Macro Target Settings
-            </h3>
-            <div className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full">
-              <span className="text-sm text-indigo-300">Daily Target</span>
-            </div>
-          </div>
-
-          <p className="text-gray-400 text-sm mb-6">
-            Adjust the sliders below to set your preferred macronutrient target.
-            These percentages will be used to calculate your daily macro target
-            based on your calorie needs.
-          </p>
-
-          {/* Show skeleton loader when loading or when we don't have valid values yet */}
-          {isTargetLoading || !hasValidValues ? (
-            <div className="space-y-10">
-              {/* Skeleton for the stacked bar */}
-              <div className="relative h-2 mb-6 rounded-full overflow-hidden bg-gray-700/30 animate-pulse" />
-
-              {/* Skeleton for sliders */}
-              <div className="space-y-8">
-                {/* Protein slider skeleton */}
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
-                    <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
-                  </div>
-                  <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
-                </div>
-
-                {/* Carbs slider skeleton */}
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
-                    <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
-                  </div>
-                  <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
-                </div>
-
-                {/* Fats slider skeleton */}
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
-                    <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
-                  </div>
-                  <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
-                </div>
-              </div>
-
-              {/* Skeleton for badges */}
-              <div className="grid grid-cols-3 gap-2 pt-5">
-                <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
-                <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
-                <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+    <ProFeature>
+      <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+        {/* Left side - Main content (4 cols) */}
+        <div className="lg:col-span-4 flex flex-col h-full">
+          <CardContainer className="p-6 h-full">
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-semibold text-gray-200">
+                Macro Target Settings
+              </h3>
+              <div className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full">
+                <span className="text-sm text-indigo-300">Daily Target</span>
               </div>
             </div>
-          ) : (
-            <MacroTarget
-              initialValues={displayValues}
-              onTargetChange={handleMacroTargetChange}
-            />
-          )}
 
-          {/* Save/Reset Controls */}
-          <div className="flex justify-between items-center mt-8">
-            {isTargetLoading ? (
-              <div className="text-gray-400 text-sm flex items-center">
-                <LoadingSpinner size="sm" color="text-gray-400" />
-                <span className="ml-2">Loading your saved targets...</span>
+            <p className="text-gray-400 text-sm mb-6">
+              Adjust the sliders below to set your preferred macronutrient
+              target. These percentages will be used to calculate your daily
+              macro target based on your calorie needs.
+            </p>
+
+            {/* Show skeleton loader when loading or when we don't have valid values yet */}
+            {isTargetLoading || !hasValidValues ? (
+              <div className="space-y-10">
+                {/* Skeleton for the stacked bar */}
+                <div className="relative h-2 mb-6 rounded-full overflow-hidden bg-gray-700/30 animate-pulse" />
+
+                {/* Skeleton for sliders */}
+                <div className="space-y-8">
+                  {/* Protein slider skeleton */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
+                      <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
+                    </div>
+                    <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
+                  </div>
+
+                  {/* Carbs slider skeleton */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
+                      <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
+                    </div>
+                    <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
+                  </div>
+
+                  {/* Fats slider skeleton */}
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <div className="h-4 w-20 bg-gray-700/50 rounded animate-pulse" />
+                      <div className="h-4 w-12 bg-gray-700/50 rounded animate-pulse" />
+                    </div>
+                    <div className="h-2 bg-gray-700/50 rounded-full animate-pulse" />
+                  </div>
+                </div>
+
+                {/* Skeleton for badges */}
+                <div className="grid grid-cols-3 gap-2 pt-5">
+                  <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+                  <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+                  <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
+                </div>
               </div>
             ) : (
-              <>
-                {saveSuccess && (
-                  <div className="text-green-400 text-sm flex items-center">
-                    <CheckMarkIcon className="w-4 h-4 mr-1" />
-                    Settings saved successfully
-                  </div>
-                )}
-                {!saveSuccess && hasChanges && (
-                  <div className="text-yellow-400 text-sm">
-                    You have unsaved changes
-                  </div>
-                )}
-                {!saveSuccess && !hasChanges && <div />}
-              </>
+              <MacroTarget
+                initialValues={displayValues}
+                onTargetChange={handleMacroTargetChange}
+              />
             )}
-            <div className="flex gap-4">
-              {hasChanges && (
-                <button
-                  onClick={handleReset}
-                  className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
-                  disabled={isTargetLoading || isTargetSaving}
-                >
-                  Reset
-                </button>
+
+            {/* Save/Reset Controls */}
+            <div className="flex justify-between items-center mt-8">
+              {isTargetLoading ? (
+                <div className="text-gray-400 text-sm flex items-center">
+                  <LoadingSpinner size="sm" color="text-gray-400" />
+                  <span className="ml-2">Loading your saved targets...</span>
+                </div>
+              ) : (
+                <>
+                  {saveSuccess && (
+                    <div className="text-green-400 text-sm flex items-center">
+                      <CheckMarkIcon className="w-4 h-4 mr-1" />
+                      Settings saved successfully
+                    </div>
+                  )}
+                  {!saveSuccess && hasChanges && (
+                    <div className="text-yellow-400 text-sm">
+                      You have unsaved changes
+                    </div>
+                  )}
+                  {!saveSuccess && !hasChanges && <div />}
+                </>
               )}
-              <SaveButton
-                onClick={handleSaveChanges}
-                loading={isTargetSaving}
-                disabled={!hasChanges || isTargetLoading}
-              >
-                Save Targets
-              </SaveButton>
+              <div className="flex gap-4">
+                {hasChanges && (
+                  <button
+                    onClick={handleReset}
+                    className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
+                    disabled={isTargetLoading || isTargetSaving}
+                  >
+                    Reset
+                  </button>
+                )}
+                <SaveButton
+                  onClick={handleSaveChanges}
+                  loading={isTargetSaving}
+                  disabled={!hasChanges || isTargetLoading}
+                >
+                  Save Targets
+                </SaveButton>
+              </div>
             </div>
-          </div>
-        </CardContainer>
+          </CardContainer>
+        </div>
+
+        {/* Right side - Info panel (2 cols) */}
+        <div className="lg:col-span-2 flex flex-col h-full">
+          <CardContainer className="p-6 h-full">
+            <h3 className="text-lg font-semibold text-gray-300 mb-4">
+              Understanding Macros
+            </h3>
+            <div className="space-y-4 flex-1">
+              <InfoCard
+                title="Protein"
+                description="Essential for muscle repair and growth."
+                color="green"
+              />
+
+              <InfoCard
+                title="Carbohydrates"
+                description="Your body's primary energy source."
+                color="blue"
+              />
+
+              <InfoCard
+                title="Fats"
+                description="Essential for hormone production and nutrient absorption."
+                color="red"
+              />
+
+              <InfoCard
+                title="Tips"
+                color="indigo"
+                icon={<InfoIcon className="w-4 h-4 text-indigo-400" />}
+              >
+                <ul className="text-sm text-gray-400 space-y-2 mt-2">
+                  <li>• For muscle growth keep protein between 20-35% </li>
+                  <li>• Carbs work best at 45-65%</li>
+                  <li>• Fats should stay between 20-35%</li>
+                </ul>
+              </InfoCard>
+            </div>
+          </CardContainer>
+        </div>
       </div>
-
-      {/* Right side - Info panel (2 cols) */}
-      <div className="lg:col-span-2 flex flex-col h-full">
-        <CardContainer className="p-6 h-full">
-          <h3 className="text-lg font-semibold text-gray-300 mb-4">
-            Understanding Macros
-          </h3>
-          <div className="space-y-4 flex-1">
-            <InfoCard
-              title="Protein"
-              description="Essential for muscle repair and growth."
-              color="green"
-            />
-
-            <InfoCard
-              title="Carbohydrates"
-              description="Your body's primary energy source."
-              color="blue"
-            />
-
-            <InfoCard
-              title="Fats"
-              description="Essential for hormone production and nutrient absorption."
-              color="red"
-            />
-
-            <InfoCard
-              title="Tips"
-              color="indigo"
-              icon={<InfoIcon className="w-4 h-4 text-indigo-400" />}
-            >
-              <ul className="text-sm text-gray-400 space-y-2 mt-2">
-                <li>• For muscle growth keep protein between 20-35% </li>
-                <li>• Carbs work best at 45-65%</li>
-                <li>• Fats should stay between 20-35%</li>
-              </ul>
-            </InfoCard>
-          </div>
-        </CardContainer>
-      </div>
-    </div>
+    </ProFeature>
   );
 }
 

@@ -9,13 +9,9 @@ import {
 } from "@/components/form";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { CheckMarkIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import { MealType } from "../types";
+import { MealType } from "@/types/macro";
 import { MEAL_TYPE_OPTIONS } from "../constants";
-
-// Helper function to capitalize first letter of a string
-function capitalizeFirstLetter(string: string): string {
-  return string.charAt(0).toUpperCase() + string.slice(1);
-}
+import { calculateCaloriesFromMacros } from "../calculations";
 
 interface AddEntryProps {
   onSubmit: (entry: {
@@ -52,9 +48,9 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
     })
   );
 
-  // Calculate calories dynamically and round to whole numbers
+  // Calculate calories dynamically using shared utility
   const calories = Math.round(
-    (protein || 0) * 4 + (carbs || 0) * 4 + (fats || 0) * 9
+    calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0)
   );
 
   // Check if all fields are 0 (invalid submission)
@@ -183,8 +179,6 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
                 options={MEAL_TYPE_OPTIONS.map((option) => ({
                   value: option.value, // The value associated with the option (e.g., "breakfast")
                   label: option.display, // The text displayed in the dropdown (e.g., "Breakfast 🍳")
-                  // If you still need capitalization, apply it to option.display here:
-                  // label: capitalizeFirstLetter(option.display)
                 }))}
                 // The value prop should be bound to your state variable holding the clean mealType
                 value={mealType} // e.g., "breakfast"

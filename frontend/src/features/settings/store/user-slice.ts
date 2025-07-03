@@ -1,13 +1,13 @@
 import { StateCreator } from "zustand";
 import { apiService } from "@/utils/api-service";
-import {
-  UserSettings,
-  UserNutritionalProfile,
-  MacroTargetPercentages,
-} from "@/features/settings/types";
+import { UserSettings, UserNutritionalProfile } from "@/types/user";
+import { MacroTargetSettings } from "@/types/macro";
 import { getErrorMessage } from "@/utils/error-handling";
-import { DEFAULT_MACRO_TARGET } from "../constants";
-import { createNutritionProfile, createUserSettings } from "../calculations";
+import { DEFAULT_MACRO_TARGET } from "@/features/settings/utils/constants";
+import {
+  createNutritionProfile,
+  createUserSettings,
+} from "@/features/settings/utils/calculations";
 import { validateSettingsComplete as validateSettings } from "../utils/validation";
 
 // Types for API payloads
@@ -26,7 +26,11 @@ export interface UserSlice {
   // Core user data
   user: UserSettings | null;
   nutritionProfile: UserNutritionalProfile | null;
-  macroTarget: MacroTargetPercentages | null;
+  macroTarget: MacroTargetSettings | null;
+
+  // Subscription
+  subscriptionStatus: "free" | "pro" | "canceled";
+  setSubscriptionStatus: (status: "free" | "pro" | "canceled") => void;
 
   // Loading states
   isLoading: boolean;
@@ -42,9 +46,9 @@ export interface UserSlice {
 
   // Settings form state
   settings: UserSettings | null;
-  settingsMacroTarget: MacroTargetPercentages | null;
+  settingsMacroTarget: MacroTargetSettings | null;
   originalSettings: UserSettings | null;
-  originalSettingsMacroTarget: MacroTargetPercentages | null;
+  originalSettingsMacroTarget: MacroTargetSettings | null;
   hasSettingsChanges: boolean;
 
   // Actions
@@ -54,8 +58,8 @@ export interface UserSlice {
   updateSetting: <K extends keyof UserSettings>(key: K, value: any) => void;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
-  updateMacroTargetPercentages: (
-    macroTarget: MacroTargetPercentages
+  updateMacroTargetSettings: (
+    macroTarget: MacroTargetSettings
   ) => Promise<boolean>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
@@ -72,6 +76,8 @@ export const createUserSlice: StateCreator<
   user: null,
   nutritionProfile: null,
   macroTarget: DEFAULT_MACRO_TARGET,
+  subscriptionStatus: "free",
+  setSubscriptionStatus: (status) => set({ subscriptionStatus: status }),
   isLoading: false,
   error: null,
   settings: null,
@@ -99,6 +105,9 @@ export const createUserSlice: StateCreator<
       const userSettings = createUserSettings(userData);
       const nutritionProfile = createNutritionProfile(userSettings);
 
+      // Subscription status (from userData, fallback to 'free')
+      const subscriptionStatus = userData.subscriptionStatus || "free";
+
       // Fetch macro target separately
       try {
         const macroTargetResponse = await apiService.macros.getMacroTarget();
@@ -109,6 +118,7 @@ export const createUserSlice: StateCreator<
           user: userSettings,
           nutritionProfile,
           macroTarget: fetchedMacroTarget,
+          subscriptionStatus,
           isLoading: false,
           error: null,
         });
@@ -118,6 +128,7 @@ export const createUserSlice: StateCreator<
           user: userSettings,
           nutritionProfile,
           macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
+          subscriptionStatus,
           isLoading: false,
           error: null,
         });
@@ -131,6 +142,7 @@ export const createUserSlice: StateCreator<
         user: null,
         nutritionProfile: null,
         macroTarget: null,
+        subscriptionStatus: "free",
       });
 
       if (fullGet().showNotification) {
@@ -251,7 +263,7 @@ export const createUserSlice: StateCreator<
     }
   },
 
-  updateMacroTargetPercentages: async (macroTarget: MacroTargetPercentages) => {
+  updateMacroTargetSettings: async (macroTarget: MacroTargetSettings) => {
     const state = get();
     set({ isTargetSaving: true, settingsError: null });
 
