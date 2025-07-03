@@ -70,6 +70,10 @@ export function validateRegistrationStep2(
     errors.weight = AUTH_ERROR_MESSAGES.weightInvalid;
   }
 
+  if (!formData.gender || formData.gender === "") {
+    errors.gender = "Gender is required";
+  }
+
   return errors;
 }
 

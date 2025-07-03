@@ -236,14 +236,18 @@ export function StepThree() {
             label="How active are you on a typical week?"
             value={register.activityLevel}
             onChange={(value) =>
-              setRegisterField("activityLevel", Number(value) as never)
+              setRegisterField(
+                "activityLevel",
+                value ? (Number(value) as never) : ""
+              )
             }
-            options={Object.entries(ACTIVITY_LEVELS).map(
-              ([key, { label }]) => ({
+            options={[
+              { value: "", label: "Select activity level" },
+              ...Object.entries(ACTIVITY_LEVELS).map(([key, { label }]) => ({
                 value: Number(key),
                 label,
-              })
-            )}
+              })),
+            ]}
             required={true}
           />
 
