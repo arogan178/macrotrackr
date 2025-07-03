@@ -1,4 +1,4 @@
-import { MacroEntry } from "../../macroTracking/types";
+import { MacroEntry } from "@/types/macro";
 import { isWithinDateRange } from "./date-utils";
 import { calculateDailyTotals } from "./macro-calculations";
 

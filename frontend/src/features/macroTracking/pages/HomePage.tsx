@@ -40,6 +40,9 @@ export default function HomePage() {
     clearAllNotifications,
   } = useStore();
 
+  // Debug: Log when HomePage renders and when useEffect runs
+  console.log("[HomePage] Rendered", { user });
+
   // Handler for editing entries that matches EditModal's expected signature
   const handleEditEntry = useCallback(
     async (entry: typeof editingEntry) => {
@@ -65,10 +68,11 @@ export default function HomePage() {
 
   // Fetch user details, macros, and persisted goals on component mount
   useEffect(() => {
+    console.log(
+      "[HomePage] useEffect running: fetching user, macro data, goals, targets"
+    );
     fetchUserDetails();
     fetchMacroData();
-
-    // Fetch saved goals data to ensure we have the latest values
     fetchWeightGoals();
     fetchMacroTarget();
   }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTarget]);

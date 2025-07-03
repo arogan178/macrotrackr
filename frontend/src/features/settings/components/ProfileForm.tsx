@@ -5,12 +5,12 @@ import {
   DateField,
   CardContainer,
 } from "@/components/form";
-import { UserSettings, Gender, ActivityLevel } from "@/features/settings/types";
+import { UserSettings, Gender, ActivityLevel } from "@/types/user";
 import {
   GENDER_OPTIONS,
   ACTIVITY_LEVELS,
   getActivityLevelFromString,
-} from "../constants";
+} from "@/features/settings/utils/constants";
 
 interface ProfileFormProps {
   settings: UserSettings;
@@ -43,14 +43,14 @@ export default function ProfileForm({
   // Ensure weight is a valid positive number
   const handleWeightChange = (value: number | undefined) => {
     // Don't allow undefined, negative or zero weights
-    const validWeight = value && value > 0 ? value : undefined;
+    const validWeight = value && value > 0 ? value : null;
     updateSetting("weight", validWeight);
   };
 
   // Ensure height is a valid positive number
   const handleHeightChange = (value: number | undefined) => {
     // Don't allow undefined, negative or zero heights
-    const validHeight = value && value > 0 ? value : undefined;
+    const validHeight = value && value > 0 ? value : null;
     updateSetting("height", validHeight);
   };
 
@@ -101,7 +101,7 @@ export default function ProfileForm({
 
         <NumberField
           label="Height (cm)"
-          value={settings.height}
+          value={settings.height ?? undefined}
           onChange={handleHeightChange}
           error={formErrors.height}
           min={100}
@@ -113,7 +113,7 @@ export default function ProfileForm({
 
         <NumberField
           label="Weight (kg)"
-          value={settings.weight}
+          value={settings.weight ?? undefined}
           onChange={handleWeightChange}
           error={formErrors.weight}
           min={30}
