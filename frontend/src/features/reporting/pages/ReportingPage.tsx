@@ -11,6 +11,7 @@ import {
 } from "../components";
 import { motion } from "motion/react";
 import { useReportingLogic } from "../hooks/useReportingLogic";
+import { ProFeature } from "@/components/ProFeature";
 
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
@@ -123,12 +124,14 @@ export default function ReportingPage() {
             </div>
           )}
           {/* Date Range Selector */}
-          <DateRangeSelector
-            currentRange={dateRange}
-            onRangeChange={setDateRange}
-            onExportClick={handleDownloadCSV}
-            isExportDisabled={aggregatedData.length === 0 || isLoading}
-          />
+          <ProFeature>
+            <DateRangeSelector
+              currentRange={dateRange}
+              onRangeChange={setDateRange}
+              onExportClick={handleDownloadCSV}
+              isExportDisabled={aggregatedData.length === 0 || isLoading}
+            />
+          </ProFeature>
           {/* Summary Stats */}
           {(() => {
             const calorieTarget =
@@ -168,49 +171,55 @@ export default function ReportingPage() {
           </div>
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <motion.div
-              layout
-              className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
-            >
-              <h2 className="text-lg font-semibold text-gray-200 mb-6">
-                Calorie Intake
-              </h2>
-              <div className="h-80 ">
-                <LineChartComponent
-                  data={aggregatedData}
-                  lines={calorieChartLines}
-                  isLoading={isLoading || !dataProcessed}
-                  showNoDataMessage={showNoDataMessage}
-                />
-              </div>
-            </motion.div>
-            <motion.div
-              layout
-              className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
-            >
-              <h2 className="text-lg font-semibold text-gray-200 mb-6">
-                Macronutrient Intake
-              </h2>
-              <div className="h-80">
-                <LineChartComponent
-                  data={aggregatedData}
-                  lines={macroChartLines}
-                  isLoading={isLoading || !dataProcessed}
-                  showNoDataMessage={showNoDataMessage}
-                />
-              </div>
-            </motion.div>
+            <ProFeature>
+              <motion.div
+                layout
+                className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
+              >
+                <h2 className="text-lg font-semibold text-gray-200 mb-6">
+                  Calorie Intake
+                </h2>
+                <div className="h-80 ">
+                  <LineChartComponent
+                    data={aggregatedData}
+                    lines={calorieChartLines}
+                    isLoading={isLoading || !dataProcessed}
+                    showNoDataMessage={showNoDataMessage}
+                  />
+                </div>
+              </motion.div>
+            </ProFeature>
+            <ProFeature>
+              <motion.div
+                layout
+                className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
+              >
+                <h2 className="text-lg font-semibold text-gray-200 mb-6">
+                  Macronutrient Intake
+                </h2>
+                <div className="h-80">
+                  <LineChartComponent
+                    data={aggregatedData}
+                    lines={macroChartLines}
+                    isLoading={isLoading || !dataProcessed}
+                    showNoDataMessage={showNoDataMessage}
+                  />
+                </div>
+              </motion.div>
+            </ProFeature>
           </div>{" "}
           {/* Unified Insights Dashboard */}
           <div className="mb-6">
             {" "}
-            <UnifiedInsights
-              aggregatedData={aggregatedData}
-              averages={averages}
-              isLoading={isLoading}
-              showNoDataMessage={showNoDataMessage}
-              macroTarget={macroTarget}
-            />
+            <ProFeature>
+              <UnifiedInsights
+                aggregatedData={aggregatedData}
+                averages={averages}
+                isLoading={isLoading}
+                showNoDataMessage={showNoDataMessage}
+                macroTarget={macroTarget}
+              />
+            </ProFeature>
           </div>
         </div>
       </div>

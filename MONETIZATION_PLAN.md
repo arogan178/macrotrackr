@@ -10,26 +10,26 @@ The Pro tier is designed to offer significant value through advanced features, i
 
 ## 2. Pricing Strategy
 
-### 2.1. Proposed Price Point: $5/Month
+### 2.1. Proposed Price Point: $6.99/Month or $59.99/Year
 
-A price of **$5 per month** is a competitive and accessible starting point. It positions the Pro plan as an affordable upgrade for users committed to their health and fitness journey.
+A price of **$6.99 per month** or **$59.99 per year** is a competitive and accessible starting point. It positions the Pro plan as an affordable upgrade for users committed to their health and fitness journey, while supporting ongoing development.
 
 ### 2.2. Price Calculation & Validation
 
-While $5/month is a strong initial proposal, the optimal price point should be validated through a combination of methods:
+While $6.99/month is a strong initial proposal, the optimal price point should be validated through a combination of methods:
 
 - **Competitor Analysis**:
 
   - **MyFitnessPal Premium**: ~$19.99/month or $79.99/year. Offers advanced features like custom macro goals, ad-free experience, and detailed reporting.
   - **Cronometer Gold**: ~$8.99/month or $49.99/year. Provides in-depth nutrient analysis, timestamps, and advanced charting.
   - **Lose It! Premium**: ~$39.99/year. Includes meal planning, advanced tracking, and pattern analysis.
-  - **Conclusion**: At $5/month ($60/year), our Pro plan would be priced very competitively, making it an attractive alternative.
+  - **Conclusion**: At $6.99/month ($59.99/year), our Pro plan would be priced very competitively, making it an attractive alternative.
 
 - **Value-Based Pricing**: The price should reflect the value delivered. The Pro features (outlined below) save users time, provide deeper insights, and offer powerful tools to achieve their goals more effectively.
 
 - **Target Audience**: Our target users are individuals serious about macro tracking. They are often willing to invest in tools that provide clear benefits and a superior user experience.
 
-**Recommendation**: Launch with the **$5/month** price. We can introduce an **annual discount** (e.g., $50/year, offering two months free) later to improve customer lifetime value and reduce churn.
+**Recommendation**: Launch with the **$6.99/month** price and **$59.99/year** annual plan (offering a ~28% discount). Adjust as needed based on user feedback and market response.
 
 ---
 
@@ -48,27 +48,33 @@ The Free tier will provide all the essential tools for effective macro tracking,
 
 ### 3.2. Pro Tier (Advanced & Premium Features)
 
-The Pro tier is for users who want to unlock the full potential of their data and customize their experience.
+The Pro tier is for users who want to unlock the full potential of their data and access advanced analytics and tools.
 
-- 🌟 **Advanced Reporting & Analytics**:
-  - Custom date range filtering for historical data.
-  - Trend analysis charts (e.g., weekly/monthly averages).
-  - Data export to CSV.
-- 🌟 **Advanced Goal Setting**:
-  - Set specific macronutrient targets in grams.
-  - Track other body measurements (e.g., body fat %, waist circumference).
-- 🌟 **Full Habit Tracking**:
-  - Create, track, and analyze an unlimited number of daily/weekly habits.
-- 🌟 **Recipe & Meal Saver**:
-  - Create custom meals from multiple ingredients.
-  - Save and log frequent meals with a single click.
-- 🌟 **Customization**:
-  - Create custom meal types (e.g., "Pre-workout", "Post-workout").
-  - Exclusive app themes and icons.
-- 🌟 **Ad-Free Experience**:
-  - Complete removal of all advertisements.
-- 🌟 **Priority Support**:
-  - Dedicated email support with faster response times.
+- 🌟 **Advanced Reporting & Analytics** (PRO-guarded):
+  - Custom date range filtering for historical data (PRO only)
+  - Trend analysis charts (e.g., weekly/monthly averages) (PRO only)
+  - Data export to CSV (PRO only)
+  - **Note:** All users (Free and Pro) can view basic daily macro history and summary. Only advanced analytics are PRO-guarded.
+- 🌟 **Advanced Goal Setting** (PRO-guarded):
+  - Set specific macronutrient targets in grams (PRO only)
+  - Track other body measurements (e.g., body fat %, waist circumference) (PRO only)
+  - **Note:** Target macro percentages are not yet implemented; only basic macro targets are available.
+- 🌟 **Full Habit Tracking** (PRO-guarded):
+  - Free users can track up to 2 habits; PRO users can create and track unlimited habits.
+  - No habit analysis features exist yet (just a simple tracker).
+- 🌟 **Ad-Free Experience** (PRO-guarded):
+  - Complete removal of all advertisements
+- 🌟 **Priority Support** (PRO-guarded):
+  - Dedicated email support with faster response times
+
+**Planned/Future Features (not yet implemented, not currently PRO-guarded):**
+
+- Recipe & Meal Saver (custom meals, save/log frequent meals)
+- Customization (custom meal types, themes, icons)
+
+**Goals Page:**
+
+- The Goals page is mostly available to all users. There is little to PRO-gate at this time.
 
 ---
 
@@ -155,7 +161,7 @@ This plan requires significant work on both the backend and frontend. We will us
 
 - **Feature Gating:**
 
-  - Conditional rendering and route protection using `subscriptionStatus` (done).
+  - Conditional rendering and route protection using `subscriptionStatus` (done). Only advanced analytics and habit tracking are PRO-guarded; basic reporting and goals are available to all users.
 
 - **Next Steps:**
   - Integrate new components into main app router/layout.
