@@ -25,7 +25,12 @@ function Dropdown({
           required={required}
         >
           {options.map((option) => (
-            <option key={option.value} value={option.value}>
+            <option
+              key={option.value}
+              value={option.value}
+              disabled={option.value === ""}
+              hidden={option.value === ""}
+            >
               {option.label}
             </option>
           ))}

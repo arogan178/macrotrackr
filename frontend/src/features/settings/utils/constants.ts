@@ -8,6 +8,7 @@ export const DEFAULT_MACRO_TARGET: MacroTargetSettings = {
 };
 
 export const GENDER_OPTIONS = [
+  { value: "", label: "Select gender" },
   { value: "male", label: "Male" },
   { value: "female", label: "Female" },
 ] as const;
