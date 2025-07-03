@@ -1,4 +1,4 @@
-import { MacroDailyTotals, MealType } from "./types";
+import { MacroDailyTotals, MealType } from "@/types/macro";
 
 // Default values
 export const DEFAULT_MACRO_TOTALS: MacroDailyTotals = {
@@ -8,12 +8,7 @@ export const DEFAULT_MACRO_TOTALS: MacroDailyTotals = {
   calories: 0,
 };
 
-// Calorie conversion constants
-export const CALORIES_PER_GRAM = {
-  protein: 4,
-  carbs: 4,
-  fats: 9,
-} as const;
+// Calorie conversion constants now imported from shared
 
 // Meal type display options
 export const MEAL_TYPE_OPTIONS = [

@@ -2,7 +2,6 @@
 import { t } from "elysia";
 
 // --- Reusable Primitives ---
-const PositiveNumberOrNull = t.Nullable(t.Number({ minimum: 0 }));
 const MacroPercentage = t.Integer({ minimum: 5, maximum: 70 });
 
 // --- Macro Entry Schemas ---

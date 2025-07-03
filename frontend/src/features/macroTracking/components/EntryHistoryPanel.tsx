@@ -10,8 +10,7 @@ import EmptyState from "@/components/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import DesktopEntryTable from "./DesktopEntryTable";
 import MobileEntryCards from "./MobileEntryCards";
-import { MacroEntry } from "../types";
-
+import { MacroEntry } from "@/types/macro";
 interface EntryHistoryProps {
   history: MacroEntry[];
   deleteEntry: (id: number) => void;

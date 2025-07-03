@@ -18,7 +18,10 @@ try {
   process.exit(1); // Exit if critical DB setup fails
 }
 
-console.log(`💾 Database connected at ${config.DATABASE_PATH}`);
+// Use basic console.log for startup message as logger may not be initialized yet
+if (config.NODE_ENV !== "test") {
+  console.log(`💾 Database connected at ${config.DATABASE_PATH}`);
+}
 
 // Export the initialized database instance
 export { db };
