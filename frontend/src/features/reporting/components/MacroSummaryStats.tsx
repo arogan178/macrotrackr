@@ -25,6 +25,7 @@ interface MacroSummaryStatsProps {
     carbs: number;
     fats: number;
   }[];
+  calorieTarget: number;
 }
 
 // Modified function to accept calorieTarget for percentage calculation
@@ -186,10 +187,12 @@ const MacroSummaryItem = React.memo(
   }
 );
 
-export default function MacroSummaryStats({ data }: MacroSummaryStatsProps) {
+export default function MacroSummaryStats({
+  data,
+  calorieTarget,
+}: MacroSummaryStatsProps) {
   const macroTarget = useStore((state) => state.macroTarget);
-  const calorieTarget = useStore((state) => state.weightGoals?.calorieTarget);
-  const effectiveCalorieTarget = calorieTarget || 2000; // Use stored target or default
+  const effectiveCalorieTarget = calorieTarget || 2000;
 
   const TARGET_MACROS = useMemo(
     () =>

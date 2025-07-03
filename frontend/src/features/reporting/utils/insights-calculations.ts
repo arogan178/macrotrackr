@@ -1,7 +1,7 @@
 import type {
   AggregatedDataPoint,
   NutritionAverage,
-  MacroTargetPercentages,
+  MacroTargetSettings,
   MacroBalanceResult,
   TrendResult,
   DataQualityResult,
@@ -11,12 +11,31 @@ import {
   DEFAULT_MACRO_TARGET,
   TREND_THRESHOLD,
 } from "../constants/insights-constants";
+
+// --- Magic Number Constants ---
+const CONSISTENCY_FREQUENCY_WEIGHT = 40;
+const CONSISTENCY_SCORE_WEIGHT = 60;
+const CONSISTENCY_CV_MAX = 0.5;
+const MACRO_BALANCE_DIFF_MULTIPLIER = 1.5;
+const MACRO_BALANCE_TOLERANCE_MIN = 5;
+const MACRO_BALANCE_TOLERANCE_FACTOR = 0.2;
+const TREND_DAYS_REQUIRED = 5;
+const TREND_AVG_DAYS = 3;
+const DATA_QUALITY_OUTSTANDING = 90;
+const DATA_QUALITY_GREAT = 70;
+const DATA_QUALITY_GOOD = 50;
+const NUTRIENT_DENSITY_SCORE_MAX = 100;
+const NUTRIENT_DENSITY_SCORE_FACTOR = 3;
+const NUTRIENT_DENSITY_SCORE_PROTEIN_MULT = 100;
+const SCORE_COLOR_GREEN = 70;
+const SCORE_COLOR_YELLOW = 40;
 import { calculateStandardDeviation } from "./macro-calculations";
 
 export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
   if (!data?.length) return 0;
 
-  const frequencyScore = Math.min(data.length / 14, 1) * 40;
+  const frequencyScore =
+    Math.min(data.length / 14, 1) * CONSISTENCY_FREQUENCY_WEIGHT;
   if (data.length <= 1) return frequencyScore;
 
   const calories = data.map((d) => d.calories).filter(Boolean);
@@ -27,7 +46,10 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
   const coefficientOfVariation = standardDev / avg;
   const consistencyScore = Math.max(
     0,
-    60 * (1 - Math.min(coefficientOfVariation, 0.5) / 0.5)
+    CONSISTENCY_SCORE_WEIGHT *
+      (1 -
+        Math.min(coefficientOfVariation, CONSISTENCY_CV_MAX) /
+          CONSISTENCY_CV_MAX)
   );
 
   return Math.round(frequencyScore + consistencyScore);
@@ -35,7 +57,7 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
 
 export function calculateMacroBalance(
   averages: NutritionAverage,
-  macroTarget?: MacroTargetPercentages | null
+  macroTarget?: MacroTargetSettings | null
 ): MacroBalanceResult {
   const total = averages.protein + averages.carbs + averages.fats;
   const target = macroTarget || DEFAULT_MACRO_TARGET;
@@ -69,14 +91,23 @@ export function calculateMacroBalance(
     Math.abs(carbsPct - idealCarbs) +
     Math.abs(fatsPct - idealFats);
 
-  const score = Math.max(0, 100 - totalDiff * 1.5);
+  const score = Math.max(0, 100 - totalDiff * MACRO_BALANCE_DIFF_MULTIPLIER);
 
   let recommendations = "Excellent! Your macro balance is right on target.";
   if (totalDiff > 10) {
     const suggestions = [];
-    const proteinTolerance = Math.max(5, idealProtein * 0.2);
-    const carbsTolerance = Math.max(5, idealCarbs * 0.2);
-    const fatsTolerance = Math.max(5, idealFats * 0.2);
+    const proteinTolerance = Math.max(
+      MACRO_BALANCE_TOLERANCE_MIN,
+      idealProtein * MACRO_BALANCE_TOLERANCE_FACTOR
+    );
+    const carbsTolerance = Math.max(
+      MACRO_BALANCE_TOLERANCE_MIN,
+      idealCarbs * MACRO_BALANCE_TOLERANCE_FACTOR
+    );
+    const fatsTolerance = Math.max(
+      MACRO_BALANCE_TOLERANCE_MIN,
+      idealFats * MACRO_BALANCE_TOLERANCE_FACTOR
+    );
 
     if (proteinPct < idealProtein - proteinTolerance)
       suggestions.push("try adding more protein-rich foods");
@@ -111,20 +142,20 @@ export function calculateTrend(
   data: AggregatedDataPoint[],
   metric: keyof AggregatedDataPoint
 ): TrendResult {
-  if (!data?.length || data.length < 5) {
+  if (!data?.length || data.length < TREND_DAYS_REQUIRED) {
     return {
       direction: "insufficient" as const,
       percentage: 0,
-      message: "Need at least 5 days of data to analyze trends.",
+      message: `Need at least ${TREND_DAYS_REQUIRED} days of data to analyze trends.`,
     };
   }
 
   const firstDays = data
-    .slice(0, 3)
+    .slice(0, TREND_AVG_DAYS)
     .map((d) => Number(d[metric]))
     .filter(Boolean);
   const lastDays = data
-    .slice(-3)
+    .slice(-TREND_AVG_DAYS)
     .map((d) => Number(d[metric]))
     .filter(Boolean);
 
@@ -188,11 +219,11 @@ export function calculateDataQuality(
   const completionRate = Math.round((daysWithData / totalDaysInPeriod) * 100);
 
   const message =
-    completionRate >= 90
+    completionRate >= DATA_QUALITY_OUTSTANDING
       ? "Outstanding consistency! You're building excellent tracking habits."
-      : completionRate >= 70
+      : completionRate >= DATA_QUALITY_GREAT
       ? "Great job keeping up with your nutrition tracking!"
-      : completionRate >= 50
+      : completionRate >= DATA_QUALITY_GOOD
       ? "You're on the right track! Try logging more consistently for better insights."
       : "Every entry counts! More consistent tracking will unlock powerful insights about your nutrition patterns.";
 
@@ -216,7 +247,14 @@ export function calculateNutrientDensity(
   }
 
   const proteinDensity = (averages.protein * 4) / averages.calories;
-  const score = Math.min(100, Math.round(proteinDensity * 100 * 3));
+  const score = Math.min(
+    NUTRIENT_DENSITY_SCORE_MAX,
+    Math.round(
+      proteinDensity *
+        NUTRIENT_DENSITY_SCORE_PROTEIN_MULT *
+        NUTRIENT_DENSITY_SCORE_FACTOR
+    )
+  );
 
   const message =
     score >= 80
@@ -231,9 +269,9 @@ export function calculateNutrientDensity(
 }
 
 export function getScoreColor(score: number): string {
-  return score > 70
+  return score > SCORE_COLOR_GREEN
     ? "bg-green-400"
-    : score > 40
+    : score > SCORE_COLOR_YELLOW
     ? "bg-yellow-400"
     : "bg-red-400";
 }

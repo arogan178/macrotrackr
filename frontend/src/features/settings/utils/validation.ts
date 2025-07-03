@@ -6,7 +6,7 @@ import {
   USER_MAXIMUM_WEIGHT,
 } from "@/utils/constants";
 import { isOldEnough } from "@/utils/validation";
-import { UserSettings, MacroTargetPercentages } from "../types";
+import { UserSettings, MacroTargetSettings } from "../types/types";
 
 /**
  * Validates user form fields
@@ -83,8 +83,8 @@ export const hasSettingsChanged = (
 
 // Helper function to check if macro targets have changed
 export const hasMacroTargetsChanged = (
-  current: MacroTargetPercentages | null,
-  original: MacroTargetPercentages | null
+  current: MacroTargetSettings | null,
+  original: MacroTargetSettings | null
 ): boolean => {
   if (!current || !original) return current !== original;
   return JSON.stringify(current) !== JSON.stringify(original);

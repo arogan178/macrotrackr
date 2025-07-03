@@ -61,7 +61,7 @@ export interface SelectOption {
 export interface DropdownProps extends BaseFieldProps {
   value: string | number | undefined;
   onChange: (value: string | number) => void;
-  options: SelectOption[];
+  options: readonly SelectOption[] | SelectOption[];
   placeholder?: string;
 }
 
