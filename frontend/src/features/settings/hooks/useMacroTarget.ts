@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { MacroType, MacroTargetState } from "@/features/settings/types";
+import { MacroType, MacroTargetState } from "@/features/settings/types/types";
 
 /**
  * Custom hook to manage macro target distribution state

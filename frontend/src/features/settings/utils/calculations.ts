@@ -4,8 +4,8 @@ import {
   MacroTargetGrams,
   UserSettings,
   UserNutritionalProfile,
-} from "./types";
-import { ACTIVITY_LEVELS } from "./constants";
+} from "../types/types";
+import { ACTIVITY_LEVELS } from "../utils/constants";
 
 // Pure calculation functions - independent of domain-specific types
 /**

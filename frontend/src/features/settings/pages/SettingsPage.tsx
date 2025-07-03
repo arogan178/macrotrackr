@@ -5,8 +5,14 @@ import { TabButton, SaveButton } from "@/components/form";
 import Modal from "@/components/Modal";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import { ProfileForm, MacroTargetForm } from "@/features/settings/components";
+import BillingForm from "@/features/settings/components/BillingForm";
 import { useStore } from "@/store/store";
-import { UserIcon, MenuIcon, LoadingSpinnerIcon } from "@/components/Icons";
+import {
+  UserIcon,
+  MenuIcon,
+  LoadingSpinnerIcon,
+  AwardIcon,
+} from "@/components/Icons";
 
 // --- Modified PageHeader Component ---
 // Now accepts tabs as children to render them on the right
@@ -55,13 +61,12 @@ export default function SettingsPage() {
     fetchSettings,
   } = useStore();
 
-  const [activeTab, setActiveTab] = useState<"profile" | "macro target">(
-    "profile"
-  );
+  type TabType = "profile" | "macro target" | "billing";
+  const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingTabChange, setPendingTabChange] = useState<
-    "profile" | "macro target" | null
-  >(null);
+  const [pendingTabChange, setPendingTabChange] = useState<TabType | null>(
+    null
+  );
 
   // Fetch settings on component mount
   useEffect(() => {
@@ -75,7 +80,7 @@ export default function SettingsPage() {
   );
 
   const handleTabChange = useCallback(
-    (tab: "profile" | "macro target") => {
+    (tab: TabType) => {
       if (hasSettingsChanges) {
         setPendingTabChange(tab);
         setShowConfirmModal(true);
@@ -153,7 +158,7 @@ export default function SettingsPage() {
           <PageHeader hasChanges={hasSettingsChanges}>
             {/* Tab Navigation Container - Moved inside header */}
             <div
-              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg" // Style similar to GoalsPage
+              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
               role="tablist"
               aria-label="Settings Tabs"
             >
@@ -179,6 +184,17 @@ export default function SettingsPage() {
                   Macro Target
                 </span>
               </TabButton>
+              <TabButton
+                active={activeTab === "billing"}
+                onClick={() => handleTabChange("billing")}
+                layoutId="settingsTabHighlight"
+                isMotion={true}
+              >
+                <span className="flex items-center relative z-10">
+                  <AwardIcon size="sm" className="mr-1.5" />
+                  Billing
+                </span>
+              </TabButton>
             </div>
           </PageHeader>
 
@@ -187,26 +203,28 @@ export default function SettingsPage() {
               <LoadingSpinnerIcon className="h-12 w-12 animate-spin text-indigo-500" />
             </div>
           ) : (
-            <form onSubmit={handleSubmit} className="p-6">
-              {activeTab === "profile" ? (
-                <ProfileForm
-                  settings={settings}
-                  updateSetting={updateSetting}
-                  formErrors={formErrors}
-                />
-              ) : (
-                <MacroTargetForm />
+            <>
+              {activeTab === "profile" && (
+                <form onSubmit={handleSubmit} className="p-6">
+                  <ProfileForm
+                    settings={settings}
+                    updateSetting={updateSetting}
+                    formErrors={formErrors}
+                  />
+                  <div className="mt-8 flex justify-end">
+                    <SaveButton
+                      loading={isSaving}
+                      disabled={
+                        !hasSettingsChanges ||
+                        Object.keys(formErrors).length > 0
+                      }
+                    />
+                  </div>
+                </form>
               )}
-
-              <div className="mt-8 flex justify-end">
-                <SaveButton
-                  loading={isSaving}
-                  disabled={
-                    !hasSettingsChanges || Object.keys(formErrors).length > 0
-                  }
-                />
-              </div>
-            </form>
+              {activeTab === "macro target" && <MacroTargetForm />}
+              {activeTab === "billing" && <BillingForm />}
+            </>
           )}
         </div>
       </div>
