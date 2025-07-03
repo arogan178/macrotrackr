@@ -11,7 +11,7 @@ export interface RegistrationStep2 {
   dateOfBirth: string;
   height: number;
   weight: number;
-  gender: Gender;
+  gender: Gender | "";
 }
 
 export interface RegistrationStep3 {
