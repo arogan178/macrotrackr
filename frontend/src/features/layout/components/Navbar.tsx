@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useStore } from "@/store/store";
 import { AnimatePresence, motion } from "motion/react";
 import {
   HomeIcon,
@@ -16,9 +17,10 @@ const Navbar: React.FC = () => {
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const logout = useStore((state) => state.logout);
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
+    logout();
+    navigate("/login", { replace: true });
     setIsMobileMenuOpen(false);
   };
 
@@ -55,9 +57,15 @@ const Navbar: React.FC = () => {
         style={{ touchAction: "none", overscrollBehavior: "none" }}
       >
         <div className="flex items-center">
-          <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4">
+          <button
+            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onClick={() => handleNavigation("/home")}
+            aria-label="Go to home page"
+            tabIndex={0}
+            type="button"
+          >
             HealthyLife
-          </span>
+          </button>
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-2">

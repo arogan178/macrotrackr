@@ -41,6 +41,14 @@ export interface AuthSlice {
 }
 
 export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
+  setAuthState: (partial: Partial<AuthStateData>) => {
+    set((state: any) => ({
+      auth: {
+        ...state.auth,
+        ...partial,
+      },
+    }));
+  },
   // Nested authentication state
   auth: createInitialAuthState(),
 
