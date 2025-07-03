@@ -1,7 +1,7 @@
 import React from "react";
 import { ProBadge } from "@/components/ProBadge";
 import { UpgradeModal } from "@/components/UpgradeModal";
-import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 
 /**
  * ProFeature - Conditionally renders Pro features with gating
@@ -16,17 +16,12 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
   if (subscriptionStatus === "pro") return <>{children}</>;
 
   return (
-    <div className="relative opacity-60 pointer-events-none select-none">
-      {children}
+    <div
+      className="relative opacity-60 pointer-events-auto select-none cursor-pointer"
+      onClick={() => setModalOpen(true)}
+    >
+      <div className="pointer-events-none">{children}</div>
       <ProBadge />
-      <button
-        className="absolute top-2 right-2 bg-yellow-400 text-black font-bold px-3 py-1 rounded shadow pointer-events-auto select-auto"
-        onClick={() => setModalOpen(true)}
-        tabIndex={0}
-        aria-label="Upgrade to Pro"
-      >
-        Upgrade
-      </button>
       <UpgradeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}

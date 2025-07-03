@@ -1,9 +1,9 @@
-import { useUserStore } from "@/store/userSlice";
+import { useStore } from "@/store/store";
 import { useEffect } from "react";
 
 export function useSubscriptionStatus() {
-  const subscriptionStatus = useUserStore((s) => s.subscriptionStatus);
-  const setSubscriptionStatus = useUserStore((s) => s.setSubscriptionStatus);
+  const subscriptionStatus = useStore((s) => s.subscriptionStatus);
+  const setSubscriptionStatus = useStore((s) => s.setSubscriptionStatus);
 
   // Example: fetch status on mount (replace with real API call)
   useEffect(() => {

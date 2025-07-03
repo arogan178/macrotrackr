@@ -10,6 +10,8 @@ import {
   CheckCircleIcon,
   TargetIcon,
 } from "@/components/Icons";
+import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
+import { ProFeature } from "@/components/ProFeature";
 
 interface HabitTrackerProps {
   habits: HabitGoal[];
@@ -30,6 +32,10 @@ function HabitTracker({
   onEditHabit,
   onDeleteHabit,
 }: HabitTrackerProps) {
+  const { subscriptionStatus } = useSubscriptionStatus();
+  const isPro = subscriptionStatus === "pro";
+  const canAddHabit = isPro || habits.length < 2;
+
   return (
     <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg">
       <div className="p-5">
@@ -42,13 +48,18 @@ function HabitTracker({
 
           {/* Only show Add button in header if NOT showing empty state */}
           {onAddHabit && habits.length > 0 && (
-            <button
-              onClick={onAddHabit}
-              className="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg"
-            >
-              <PlusIcon size="sm" className="mr-1.5" />
-              Add Habit
-            </button>
+            <div className={!canAddHabit ? "relative" : ""}>
+              <ProFeature>
+                <button
+                  onClick={onAddHabit}
+                  disabled={!canAddHabit}
+                  className="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <PlusIcon size="sm" className="mr-1.5" />
+                  Add Habit
+                </button>
+              </ProFeature>
+            </div>
           )}
         </div>
 
