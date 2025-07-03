@@ -13,7 +13,7 @@ export interface NutritionAverage {
   fats: number;
 }
 
-export interface MacroTargetPercentages {
+export interface MacroTargetSettings {
   proteinPercentage: number;
   carbsPercentage: number;
   fatsPercentage: number;
@@ -24,7 +24,7 @@ export interface UnifiedInsightsProps {
   averages: NutritionAverage;
   isLoading: boolean;
   showNoDataMessage?: boolean;
-  macroTarget?: MacroTargetPercentages | null;
+  macroTarget?: MacroTargetSettings | null;
 }
 
 export interface MacroBalanceResult {

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { MacroEntry } from "../../macroTracking/types";
+import { MacroEntry } from "@/types/macro";
 import { formatDate } from "../utils";
 
 interface MacroTotals {

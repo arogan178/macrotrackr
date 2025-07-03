@@ -4,7 +4,7 @@ import MacroSlider from "./MacroSlider";
 import { MacroBadge } from "./MacroSlider"; // Assuming MacroBadge is exported from MacroSlider file
 import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
-import { MacroType, MacroTargetProps } from "../types"; // Ensure these types are correct
+import { MacroType, MacroTargetProps } from "../types/types"; // Ensure these types are correct
 import { useMacroTarget } from "../hooks/useMacroTarget"; // The custom hook managing logic
 import MacroTargetBar from "./MacroTargetBar"; // The visualization component
 
