@@ -85,17 +85,16 @@ const app = new Elysia()
           version: "1.0.0",
           description: "API for tracking macronutrients and user goals.",
         },
-        tags: [
-          { name: "System", description: "API status and documentation" },
-          { name: "Auth", description: "User authentication and registration" },
-          { name: "User", description: "User profile management and settings" },
-          { name: "Macros", description: "Managing macro nutrient entries" },
-          { name: "Goals", description: "Managing user goals" },
-          { name: "Habits", description: "Managing user habits" },
-        ],
       },
     })
   )
+
+  // Alias for Swagger UI bug: serve /api/api/docs/json as /api/docs/json
+  .get("/api/api/docs/json", ({ set }) => {
+    set.status = 302;
+    set.headers["Location"] = "/api/docs/json";
+    return;
+  })
 
   // Context decorators (add early for webhook access)
   .decorate("db", db)
