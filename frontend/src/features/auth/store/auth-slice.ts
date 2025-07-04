@@ -15,6 +15,8 @@ import {
   updateRegisterField,
   updateRegisterStep,
   resetRegisterData,
+  forgotPassword,
+  resetPassword,
 } from "../utils/auth-utils";
 import { AUTH_ERROR_MESSAGES } from "../constants";
 
@@ -38,6 +40,10 @@ export interface AuthSlice {
   validateRegisterStep: (step: number) => Promise<boolean>;
   submitRegistration: () => Promise<void>;
   resetRegistration: () => void;
+
+  // Password Reset
+  forgotPassword: (email: string) => Promise<void>;
+  resetPassword: (token: string, newPassword: string) => Promise<void>;
 }
 
 export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
@@ -245,4 +251,45 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
         register: resetRegisterData(),
       },
     })),
+
+  // Password Reset
+  forgotPassword: async (email: string) => {
+    set((state: any) => ({
+      auth: { ...state.auth, isLoading: true, error: null },
+    }));
+    try {
+      await forgotPassword(email);
+      set((state: any) => ({
+        auth: { ...state.auth, isLoading: false },
+      }));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to send password reset email.";
+      set((state: any) => ({
+        auth: { ...state.auth, isLoading: false, error: errorMessage },
+      }));
+      throw err;
+    }
+  },
+
+  resetPassword: async (token: string, newPassword: string) => {
+    set((state: any) => ({
+      auth: { ...state.auth, isLoading: true, error: null },
+    }));
+    try {
+      await resetPassword(token, newPassword);
+      set((state: any) => ({
+        auth: { ...state.auth, isLoading: false },
+      }));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to reset password.";
+      set((state: any) => ({
+        auth: { ...state.auth, isLoading: false, error: errorMessage },
+      }));
+      throw err;
+    }
+  },
 });
