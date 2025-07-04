@@ -20,18 +20,6 @@ export const API_BASE_URL =
 
 // --- Interfaces for Payloads and Responses (camelCase) ---
 
-interface RegistrationDataPayload {
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  dateOfBirth: string;
-  height: number;
-  weight: number;
-  gender: "male" | "female";
-  activityLevel: number;
-}
-
 // Payload for PUT /api/goals/weight (CREATE)
 type SetWeightGoalPayload = {
   startingWeight: number; // Required for creation
@@ -209,85 +197,6 @@ export async function post<T = any>(url: string, body?: any): Promise<T> {
   return handleResponse(response);
 }
 
-function normalizeRegistrationData(userData: any): RegistrationDataPayload {
-  // Basic validation
-  if (
-    !userData.firstName ||
-    !userData.lastName ||
-    !userData.email ||
-    !userData.password
-  ) {
-    throw new Error("Missing required registration fields.");
-  }
-  // Normalize/validate other fields...
-  const normalized: Partial<RegistrationDataPayload> = {
-    firstName: userData.firstName,
-    lastName: userData.lastName,
-    email: userData.email,
-    password: userData.password,
-    dateOfBirth: userData.dateOfBirth,
-    height: userData.height !== undefined ? Number(userData.height) : undefined,
-    weight: userData.weight !== undefined ? Number(userData.weight) : undefined,
-  };
-  // Gender normalization
-  if (userData.gender !== undefined) {
-    if (
-      typeof userData.gender === "number" ||
-      !isNaN(Number(userData.gender))
-    ) {
-      normalized.gender = Number(userData.gender) === 1 ? "male" : "female";
-    } else if (typeof userData.gender === "string") {
-      const lowerGender = userData.gender.toLowerCase();
-      if (lowerGender === "male" || lowerGender === "female") {
-        normalized.gender = lowerGender as "male" | "female";
-      } else {
-        throw new Error("Invalid gender value provided.");
-      }
-    } else {
-      throw new Error("Invalid gender value provided.");
-    }
-  } else {
-    throw new Error("Gender is required for registration.");
-  }
-  // Activity Level normalization
-  if (userData.activityLevel !== undefined) {
-    let level: number | undefined = undefined;
-    if (
-      typeof userData.activityLevel === "number" ||
-      !isNaN(Number(userData.activityLevel))
-    ) {
-      level = Number(userData.activityLevel);
-    } else if (typeof userData.activityLevel === "string") {
-      level = getActivityLevelFromString(
-        userData.activityLevel as ActivityLevel
-      );
-    }
-    if (level !== undefined && level >= 1 && level <= 5) {
-      normalized.activityLevel = level;
-    } else {
-      throw new Error(
-        "Invalid or out-of-range activity level provided (must be 1-5)."
-      );
-    }
-  } else {
-    throw new Error("Activity Level is required for registration.");
-  }
-  // Final check
-  if (
-    !normalized.dateOfBirth ||
-    normalized.height === undefined ||
-    normalized.weight === undefined ||
-    !normalized.gender ||
-    !normalized.activityLevel
-  ) {
-    throw new Error("Missing required profile details for registration.");
-  }
-  return normalized as RegistrationDataPayload;
-}
-
-// Removed normalizeSettingsData as it's no longer needed after simplifying UserSettingsPayload
-// Add back if complex normalization is needed for user fields (e.g., activityLevel string -> number)
-
 /**
  * Centralized API service object with methods grouped by resource.
  */
@@ -352,29 +261,35 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    register: async (userData: any) => {
-      try {
-        const normalizedData = normalizeRegistrationData(userData);
-        const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-          method: "POST",
-          headers: getHeaders(),
-          body: JSON.stringify(normalizedData),
-        });
-        return handleResponse(response);
-      } catch (error) {
-        if (error instanceof ApiError) {
-          throw error;
-        } else if (error instanceof Error) {
-          throw new ApiError(error.message, 400, "VALIDATION_ERROR");
-        }
-        throw error;
-      }
-    },
     validateEmail: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/validate-email`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ email }),
+      });
+      return handleResponse(response);
+    },
+    register: async (userData: any) => {
+      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(userData),
+      });
+      return handleResponse(response);
+    },
+    forgotPassword: async (email: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ email }),
+      });
+      return handleResponse(response);
+    },
+    resetPassword: async (token: string, newPassword: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ token, newPassword }),
       });
       return handleResponse(response);
     },
