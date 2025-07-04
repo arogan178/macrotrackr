@@ -84,7 +84,7 @@ if (config.NODE_ENV !== "production") {
       path: "/api/docs",
       documentation: {
         info: {
-          title: "Macro Tracker API",
+          title: "Macro Trackr API",
           version: "1.0.0",
           description: "API for tracking macronutrients and user goals.",
         },
@@ -306,7 +306,7 @@ app.get(
   "/",
   () => ({
     status: "ok",
-    message: "Macro Tracker API is running!",
+    message: "Macro Trackr API is running!",
     timestamp: new Date().toISOString(),
   }),
   {

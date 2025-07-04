@@ -1,8 +1,8 @@
-# Macro Tracker Monetization Plan: Free vs. Pro Tiers
+# Macro Trackr Monetization Plan: Free vs. Pro Tiers
 
 ## 1. Executive Summary
 
-This document outlines a strategic plan to introduce a recurring revenue model for the Macro Tracker application. The core of this strategy is a tiered membership system featuring a **Free** plan and a **Pro** plan. This model allows us to maintain a strong user acquisition funnel with the free offering while generating sustainable revenue from power users who require advanced functionality.
+This document outlines a strategic plan to introduce a recurring revenue model for the Macro Trackr application. The core of this strategy is a tiered membership system featuring a **Free** plan and a **Pro** plan. This model allows us to maintain a strong user acquisition funnel with the free offering while generating sustainable revenue from power users who require advanced functionality.
 
 The Pro tier is designed to offer significant value through advanced features, in-depth analytics, and enhanced customization, justifying a monthly subscription fee.
 
