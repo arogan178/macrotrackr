@@ -23,7 +23,7 @@ pm2 restart macro-tracker-api || pm2 start "bun run start" --name macro-tracker-
 echo "Building frontend..."
 cd ../frontend
 bun install --frozen-lockfile
-bun run build
+# bun run build # Uncomment this line if you want to build the frontend on server
 
 # Serve frontend with PM2 and .env (ensure you have pm2 installed globally and serve installed)
 echo "Restarting frontend static server..."
