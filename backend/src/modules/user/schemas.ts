@@ -22,7 +22,7 @@ export const UserSchemas = {
     email: AuthSchemas.login.properties.email,
     firstName: t.String(),
     lastName: t.String(),
-    createdAt: t.Union([t.Date(), t.String()]),
+    createdAt: t.String(),
     dateOfBirth: t.Nullable(t.String({ format: "date" })),
     height: t.Nullable(t.Number()),
     weight: t.Nullable(t.Number()),
