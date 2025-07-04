@@ -1,47 +1,37 @@
-import { useNavigate } from "react-router-dom";
+import { useState } from "react";
 import { CardContainer, TextField } from "@/components/form";
 import LoadingSpinner from "@/components/LoadingSpinner";
-import { CalorieIcon } from "@/components/Icons";
+import { EmailIcon } from "@/components/Icons";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/api-service";
 
-interface LoginFormProps {
-  onForgotPassword: () => void;
+interface ForgotPasswordFormProps {
+  onSwitchToLogin: () => void;
 }
 
-function FormLogin({ onForgotPassword }: LoginFormProps) {
-  const navigate = useNavigate();
+function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
+  const [email, setEmail] = useState("");
   const {
-    auth: { email, password, isLoading },
-    setAuthEmail,
-    setAuthPassword,
-    login,
+    auth: { isLoading },
+    forgotPassword,
     showNotification,
   } = useStore();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
-      await login(email, password);
-      showNotification("Login successful", "success");
-      setTimeout(() => {
-        navigate("/home", { replace: true });
-      }, 100);
+      await forgotPassword(email);
+      showNotification(
+        "If an account exists, a reset link has been sent.",
+        "success"
+      );
     } catch (error) {
-      if (
-        error instanceof ApiError &&
-        (error.status === 401 || error.status === 403)
-      ) {
-        showNotification("Invalid email or password.", "error");
-      } else if (error instanceof ApiError) {
-        showNotification(error.message || "Login failed", "error");
+      if (error instanceof ApiError) {
+        showNotification(error.message || "Request failed", "error");
       } else if (error instanceof Error) {
-        showNotification(error.message || "Login failed", "error");
+        showNotification(error.message || "Request failed", "error");
       } else {
-        showNotification(
-          "Login failed. Please check your credentials.",
-          "error"
-        );
+        showNotification("An unexpected error occurred.", "error");
       }
     }
   }
@@ -50,38 +40,32 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
         <div className="h-16 w-16 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 mb-4 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <CalorieIcon className="w-8 h-8 text-white" />
+          <EmailIcon className="w-8 h-8 text-white" />
         </div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
-          Welcome Back
+          Forgot Password
         </h1>
-        <p className="mt-2 text-gray-400">Sign in to track your macros</p>
+        <p className="mt-2 text-gray-400">
+          Enter your email to get a reset link
+        </p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
           label="Email"
           value={email}
-          onChange={setAuthEmail}
+          onChange={setEmail}
           type="email"
           required={true}
           placeholder="your@email.com"
           maxLength={30}
         />
-        <TextField
-          label="Password"
-          value={password}
-          onChange={setAuthPassword}
-          type="password"
-          required={true}
-          placeholder="••••••••"
-        />
         <div className="text-right">
           <button
             type="button"
-            onClick={onForgotPassword}
+            onClick={onSwitchToLogin}
             className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
           >
-            Forgot Password?
+            Back to Login
           </button>
         </div>
         <button
@@ -92,11 +76,15 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
                  disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
                  shadow-lg shadow-indigo-500/30"
         >
-          {isLoading ? <LoadingSpinner size="sm" color="white" /> : "Sign In"}
+          {isLoading ? (
+            <LoadingSpinner size="sm" color="white" />
+          ) : (
+            "Send Reset Link"
+          )}
         </button>
       </form>
     </CardContainer>
   );
 }
 
-export default FormLogin;
+export default ForgotPasswordForm;

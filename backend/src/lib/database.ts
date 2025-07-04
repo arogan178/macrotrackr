@@ -115,6 +115,8 @@ export interface UserRow {
   email: string;
   password: string;
   created_at: string;
+  password_reset_token?: string;
+  password_reset_expires?: string | Date;
 }
 
 export interface UserDetailsRow {
