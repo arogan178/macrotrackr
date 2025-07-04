@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
             tabIndex={0}
             type="button"
           >
-            HealthyLife
+            MacroTrackr
           </button>
 
           {/* Desktop menu */}
