@@ -17,7 +17,7 @@ bun install --frozen-lockfile
 
 # Restart backend API with PM2
 echo "Restarting backend API..."
-pm2 restart macro-tracker-api || pm2 start "bun run start" --name macro-tracker-api
+pm2 restart macro-tracker-api || pm2 start "bun run start" --name macro-tracker-api --cwd /var/www/macro-tracker/backend
 
 # Install frontend dependencies and build the static site
 echo "Building frontend..."
