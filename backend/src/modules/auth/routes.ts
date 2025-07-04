@@ -171,16 +171,24 @@ export const authRoutes = (app: Elysia) =>
         "/forgot-password",
         async ({ body, db }) => {
           // Log every request to the forgot-password endpoint
-          const logFile = require("path").join(process.cwd(), "email-service.log");
+          const logFile = require("path").join(
+            process.cwd(),
+            "email-service.log"
+          );
           const fs = require("fs");
           function logToFile(message) {
             const timestamp = new Date().toISOString();
-            fs.appendFileSync(logFile, `[${timestamp}] [forgot-password] ${message}\n`);
+            fs.appendFileSync(
+              logFile,
+              `[${timestamp}] [forgot-password] ${message}\n`
+            );
           }
 
           const { email } = body;
           logToFile(`Endpoint hit. Email: ${email}`);
-          const user = safeQuery(db, "SELECT id FROM users WHERE email = ?", [email]);
+          const user = safeQuery(db, "SELECT id FROM users WHERE email = ?", [
+            email,
+          ]);
           if (!user) {
             logToFile(`No user found for email: ${email}`);
           }
@@ -197,7 +205,10 @@ export const authRoutes = (app: Elysia) =>
 
             logToFile(`User found. Sending password reset email to: ${email}`);
             // Send password reset email via Resend
-            await require("../../lib/email-service").emailService.sendPasswordResetEmail(email, token);
+            await require("../../lib/email-service").emailService.sendPasswordResetEmail(
+              email,
+              token
+            );
           }
 
           return {
