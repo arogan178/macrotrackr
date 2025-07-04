@@ -1,6 +1,6 @@
 # 🎯 Stripe Webhook Setup Guide - Dual Format Support
 
-Your Macro Tracker backend now supports **both** Stripe webhook formats:
+Your Macro Trackr backend now supports **both** Stripe webhook formats:
 
 - **Snapshot Events** (v1) - Traditional format with full object data
 - **Thin Events** (v2) - New format with minimal payload + object references
