@@ -47,4 +47,15 @@ export const AuthSchemas = {
   tokenResponse: t.Object({
     token: t.String(),
   }),
+
+  // Schema for requesting a password reset
+  forgotPassword: t.Object({
+    email: t.String({ format: "email" }),
+  }),
+
+  // Schema for resetting a password with a token
+  resetPassword: t.Object({
+    token: t.String(),
+    newPassword: t.String(),
+  }),
 };

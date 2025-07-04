@@ -68,6 +68,11 @@ const EnvSchema = z.object({
   STRIPE_PRICE_ID_YEARLY: z
     .string()
     .min(1, "STRIPE_PRICE_ID_YEARLY is required for Pro subscription (yearly)"),
+
+  /**
+   * Resend API key for the email service
+   */
+  RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
 });
 
 // Validate environment variables on startup

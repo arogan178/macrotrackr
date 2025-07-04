@@ -24,7 +24,9 @@ export function initializeSchema(db: Database) {
             password TEXT NOT NULL, -- Store hashed password
             subscription_status TEXT DEFAULT 'free' CHECK(subscription_status IN ('free', 'pro', 'canceled')),
             stripe_customer_id TEXT UNIQUE,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            password_reset_token TEXT,
+            password_reset_expires DATETIME
         );
 
         -- User Details Table --
@@ -146,7 +148,9 @@ export function initializeSchema(db: Database) {
         `    ➕ Adding column '${columnName}' to table '${tableName}'...`
       );
       try {
-        db.exec(`ALTER TABLE ${tableName} ADD COLUMN ${columnDefinition}`);
+        db.exec(
+          `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`
+        );
         if (updateLogic) {
           logger.info(
             `       🔄 Running update logic for new column '${columnName}'...`
@@ -168,6 +172,8 @@ export function initializeSchema(db: Database) {
   };
 
   // Apply necessary column additions for existing tables (idempotent)
+  checkAndAddColumn("users", "password_reset_token", "TEXT");
+  checkAndAddColumn("users", "password_reset_expires", "DATETIME");
   checkAndAddColumn(
     "macro_entries",
     "meal_type",
