@@ -8,7 +8,7 @@ export const emailService = {
     const resetLink = `${config.CORS_ORIGIN}/reset-password?token=${token}`;
 
     try {
-      await resend.emails.send({
+      const result = await resend.emails.send({
         from: "noreply@macrotrackr.com",
         to,
         subject: "Reset Your Password",
@@ -19,10 +19,16 @@ export const emailService = {
           <p>This link will expire in 1 hour.</p>
         `,
       });
+      if (result && result.error) {
+        console.error("Resend API error:", result.error);
+      } else {
+        console.log(
+          `Password reset email sent to ${to}. Resend response:`,
+          result
+        );
+      }
     } catch (error) {
-      console.error("Failed to send password reset email:", error);
-      // In a real app, you might want to have more robust error handling here
-      // For now, we'll just log the error
+      console.error("Failed to send password reset email (exception):", error);
     }
   },
 };
