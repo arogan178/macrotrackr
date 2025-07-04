@@ -3,6 +3,7 @@ import {
   LoginForm,
   RegisterForm,
   ButtonModeToggle,
+  ForgotPasswordForm,
 } from "@/features/auth/components";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import { useStore } from "@/store/store";
@@ -50,9 +51,13 @@ const styles: Record<string, React.CSSProperties> = {
  * - Accessible, keyboard-friendly, and follows project conventions.
  */
 export default function AuthPage() {
-  const [mode, setMode] = useState<"login" | "register">("login");
+  const [mode, setMode] = useState<"login" | "register" | "forgotPassword">(
+    "login"
+  );
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
-  const [visibleMode, setVisibleMode] = useState<"login" | "register">("login");
+  const [visibleMode, setVisibleMode] = useState<
+    "login" | "register" | "forgotPassword"
+  >("login");
   const { auth, clearAuthError } = useStore();
 
   const formContainerRef = useRef<HTMLDivElement>(null);
@@ -62,48 +67,67 @@ export default function AuthPage() {
    * Handles animated toggle between login and register forms.
    * Prevents toggle if already animating. Clears auth error on toggle.
    */
-  const toggleMode = useCallback((): void => {
-    if (isTransitioning) return;
-    clearAuthError();
-    setIsTransitioning(true);
+  const toggleMode = useCallback(
+    (newMode: "login" | "register" | "forgotPassword"): void => {
+      if (isTransitioning || mode === newMode) return;
+      clearAuthError();
+      setIsTransitioning(true);
 
-    const container = formContainerRef.current;
-    const content = contentRef.current;
-    if (!container || !content) return;
+      const container = formContainerRef.current;
+      const content = contentRef.current;
+      if (!container || !content) return;
 
-    // 1. Apply animation styles
-    Object.assign(container.style, styles.container, styles.animating);
-    // 2. Set initial height
-    const currentHeight = container.offsetHeight;
-    container.style.height = `${currentHeight}px`;
-    // 3. Start fade out
-    Object.assign(content.style, { ...styles.content, ...styles.fadeOut });
+      // 1. Apply animation styles
+      Object.assign(container.style, styles.container, styles.animating);
+      // 2. Set initial height
+      const currentHeight = container.offsetHeight;
+      container.style.height = `${currentHeight}px`;
+      // 3. Start fade out
+      Object.assign(content.style, { ...styles.content, ...styles.fadeOut });
 
-    // 4. After fade out, switch content
-    setTimeout(() => {
-      const newMode = mode === "login" ? "register" : "login";
-      setMode(newMode);
-      setVisibleMode(newMode);
+      // 4. After fade out, switch content
+      setTimeout(() => {
+        setMode(newMode);
+        setVisibleMode(newMode);
 
-      // 5. Animate to new height
-      requestAnimationFrame(() => {
-        const newHeight = content.scrollHeight;
-        container.style.height = `${newHeight}px`;
-        // 6. Fade in new content
-        Object.assign(content.style, styles.content);
-        // 7. Cleanup after animation
-        setTimeout(() => {
-          Object.assign(container.style, styles.autoHeight);
+        // 5. Animate to new height
+        requestAnimationFrame(() => {
+          const newHeight = content.scrollHeight;
+          container.style.height = `${newHeight}px`;
+          // 6. Fade in new content
+          Object.assign(content.style, styles.content);
+          // 7. Cleanup after animation
           setTimeout(() => {
-            container.style.height = "";
-            container.style.overflow = "";
-            container.style.minHeight = "";
-            setIsTransitioning(false);
-          }, 50);
-        }, ANIMATION_HEIGHT_DURATION);
-      });
-    }, ANIMATION_FADE_DURATION);
-  }, [clearAuthError, isTransitioning, mode]);
+            Object.assign(container.style, styles.autoHeight);
+            setTimeout(() => {
+              container.style.height = "";
+              container.style.overflow = "";
+              container.style.minHeight = "";
+              setIsTransitioning(false);
+            }, 50);
+          }, ANIMATION_HEIGHT_DURATION);
+        });
+      }, ANIMATION_FADE_DURATION);
+    },
+    [clearAuthError, isTransitioning, mode]
+  );
+
+  const renderForm = () => {
+    switch (visibleMode) {
+      case "login":
+        return (
+          <LoginForm onForgotPassword={() => toggleMode("forgotPassword")} />
+        );
+      case "register":
+        return <RegisterForm />;
+      case "forgotPassword":
+        return (
+          <ForgotPasswordForm onSwitchToLogin={() => toggleMode("login")} />
+        );
+      default:
+        return null;
+    }
+  };
 
   return (
     <div
@@ -136,14 +160,21 @@ export default function AuthPage() {
         {/* Animated form container (login/register) */}
         <div ref={formContainerRef} style={styles.container}>
           <div ref={contentRef} style={styles.content}>
-            {visibleMode === "login" ? <LoginForm /> : <RegisterForm />}
+            {renderForm()}
           </div>
         </div>
 
         {/* Toggle login/register button */}
-        <div className="mt-8 flex justify-center">
-          <ButtonModeToggle mode={mode} onToggle={toggleMode} />
-        </div>
+        {mode !== "forgotPassword" && (
+          <div className="mt-8 flex justify-center">
+            <ButtonModeToggle
+              mode={mode}
+              onToggle={() =>
+                toggleMode(mode === "login" ? "register" : "login")
+              }
+            />
+          </div>
+        )}
       </div>
     </div>
   );
