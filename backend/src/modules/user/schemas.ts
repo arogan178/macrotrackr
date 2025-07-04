@@ -51,4 +51,10 @@ export const UserSchemas = {
     weight: OptionalPositiveNumber,
     activityLevel: OptionalActivityLevel,
   }),
+
+  // Schema for changing a user's password
+  changePassword: t.Object({
+    currentPassword: t.String(),
+    newPassword: t.String(),
+  }),
 };
