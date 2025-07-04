@@ -27,6 +27,6 @@ bun run build
 
 # Serve frontend with PM2 and .env (ensure you have pm2 installed globally and serve installed)
 echo "Restarting frontend static server..."
-pm2 restart macro-frontend || pm2 start "bunx serve ./dist --single --env-file .env" --name macro-frontend --cwd $(pwd)
+pm2 restart macro-frontend || pm2 start "bunx serve ./dist --single --listen 5173" --name macro-frontend --cwd $(pwd)
 
 echo "Deployment finished successfully at $(date)"
