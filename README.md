@@ -1,4 +1,4 @@
-# Macro Tracker
+# Macro Trackr
 
 A nutrition tracking application with JWT authentication.
 
