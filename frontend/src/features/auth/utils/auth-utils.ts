@@ -243,3 +243,14 @@ export function getNextStep(currentStep: number, totalSteps: number): number {
 export function getPreviousStep(currentStep: number): number {
   return canGoToPreviousStep(currentStep) ? currentStep - 1 : currentStep;
 }
+
+export async function forgotPassword(email: string): Promise<void> {
+  await apiService.auth.forgotPassword(email);
+}
+
+export async function resetPassword(
+  token: string,
+  newPassword: string
+): Promise<void> {
+  await apiService.auth.resetPassword(token, newPassword);
+}
