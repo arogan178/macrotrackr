@@ -10,6 +10,9 @@ import {
   type UserRow,
 } from "../../lib/database";
 import { ConflictError, AuthenticationError } from "../../lib/errors";
+import crypto from "crypto";
+import { emailService } from "../../lib/email-service";
+
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
 export const authRoutes = (app: Elysia) =>
@@ -159,6 +162,91 @@ export const authRoutes = (app: Elysia) =>
           response: AuthSchemas.tokenResponse,
           detail: {
             summary: "Authenticate user and retrieve JWT token",
+            tags: ["Auth"],
+          },
+        }
+      )
+      // Password Reset Request
+      .post(
+        "/forgot-password",
+        async ({ body, db }) => {
+          const { email } = body;
+          const user = safeQuery<UserRow>(
+            db,
+            "SELECT id FROM users WHERE email = ?",
+            [email]
+          );
+
+          if (user) {
+            const token = crypto.randomBytes(32).toString("hex");
+            const expires = new Date(Date.now() + 3600000); // 1 hour from now
+
+            safeExecute(
+              db,
+              "UPDATE users SET password_reset_token = ?, password_reset_expires = ? WHERE id = ?",
+              [token, expires.toISOString(), user.id]
+            );
+
+            // Send password reset email via Resend
+            await emailService.sendPasswordResetEmail(email, token);
+          }
+
+          return {
+            message:
+              "If an account with that email exists, a password reset link has been sent.",
+          };
+        },
+        {
+          body: AuthSchemas.forgotPassword,
+          detail: {
+            summary: "Request a password reset link",
+            tags: ["Auth"],
+          },
+        }
+      )
+
+      // Password Reset Handler
+      .post(
+        "/reset-password",
+        async ({ body, db }) => {
+          const { token, newPassword } = body;
+
+          // Added for debugging
+          console.log("Attempting to reset password with token:", token);
+
+          const user = safeQuery<UserRow>(
+            db,
+            "SELECT id, password_reset_expires FROM users WHERE password_reset_token = ?",
+            [token]
+          );
+
+          if (!user || !user.password_reset_expires) {
+            throw new AuthenticationError(
+              "Invalid or expired password reset token."
+            );
+          }
+
+          const expires = new Date(user.password_reset_expires);
+          if (expires < new Date()) {
+            throw new AuthenticationError(
+              "Invalid or expired password reset token."
+            );
+          }
+
+          const hashedPassword = await hashPassword(newPassword);
+
+          safeExecute(
+            db,
+            "UPDATE users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?",
+            [hashedPassword, user.id]
+          );
+
+          return { message: "Password has been reset successfully." };
+        },
+        {
+          body: AuthSchemas.resetPassword,
+          detail: {
+            summary: "Reset password using a valid token",
             tags: ["Auth"],
           },
         }

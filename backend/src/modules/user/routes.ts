@@ -5,10 +5,14 @@ import { UserSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
 import { generateId } from "../../utils/id-generator";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
-import { NotFoundError, ConflictError } from "../../lib/errors";
+import {
+  NotFoundError,
+  ConflictError,
+  AuthenticationError,
+} from "../../lib/errors";
 import { toCamelCase, handleError } from "../../lib/responses";
-import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
+import { hashPassword, verifyPassword } from "../../lib/password";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -284,6 +288,65 @@ export const userRoutes = (app: Elysia) =>
           detail: {
             summary:
               "Add or update specific user details (e.g., during onboarding)",
+            tags: ["User"],
+          },
+        }
+      )
+
+      // PUT /password - Change user password
+      .put(
+        "/password",
+        async (context: any) => {
+          try {
+            const { db, user, body } = context as AuthenticatedContext & {
+              body: typeof UserSchemas.changePassword.static;
+            };
+
+            const { currentPassword, newPassword } = body;
+
+            return await withTransaction(db, async () => {
+              const dbUser = safeQuery<{ password?: string }>(
+                db,
+                "SELECT password FROM users WHERE id = ?",
+                [user.userId]
+              );
+
+              if (!dbUser?.password) {
+                throw new NotFoundError("User not found or no password set.");
+              }
+
+              const isPasswordValid = await verifyPassword(
+                currentPassword,
+                dbUser.password
+              );
+
+              if (!isPasswordValid) {
+                throw new AuthenticationError("Invalid current password.");
+              }
+
+              const hashedNewPassword = await hashPassword(newPassword);
+
+              safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
+                hashedNewPassword,
+                user.userId,
+              ]);
+
+              return {
+                success: true,
+                message: "Password updated successfully.",
+              };
+            });
+          } catch (error) {
+            return handleError(error, context);
+          }
+        },
+        {
+          body: UserSchemas.changePassword,
+          response: {
+            200: t.Object({ success: t.Boolean(), message: t.String() }),
+          },
+          detail: {
+            summary: "Change the current user's password",
             tags: ["User"],
           },
         }
