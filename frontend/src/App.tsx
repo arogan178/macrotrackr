@@ -24,6 +24,7 @@ const ReportingPage = React.lazy(
 const PricingPage = React.lazy(
   () => import("@/features/pricing/pages/PricingPage")
 );
+const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
 
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {
@@ -37,20 +38,18 @@ function LoadingFallback() {
 function AppContent() {
   useNotificationManager();
   const isAuthenticated = useStore((state) => state.auth.isAuthenticated);
-  const setAuthState = useStore((state) => state.setAuthState);
+  const logout = useStore((state) => state.logout);
   const navigate = useNavigate();
 
   // Sync auth state with token on mount
   useEffect(() => {
     const token = getToken();
-    if (token && !isAuthenticated) {
-      setAuthState({ isAuthenticated: true });
-    } else if (!token && isAuthenticated) {
-      setAuthState({ isAuthenticated: false });
+    if (!token && isAuthenticated) {
+      logout();
       navigate("/login", { replace: true });
     }
     // eslint-disable-next-line
-  }, []);
+  }, [isAuthenticated, logout, navigate]);
 
   return (
     <ErrorBoundary>
@@ -105,6 +104,7 @@ function AppContent() {
             }
           />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
