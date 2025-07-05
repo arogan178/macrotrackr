@@ -19,6 +19,7 @@ import {
   resetPassword,
 } from "../utils/auth-utils";
 import { AUTH_ERROR_MESSAGES } from "../constants";
+import { apiService } from "@/utils/api-service";
 
 export interface AuthSlice {
   auth: AuthStateData;
@@ -44,6 +45,12 @@ export interface AuthSlice {
   // Password Reset
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
+  rehydrateAuth: () => Promise<void>;
+  changePassword: (
+    currentPassword: string,
+    newPassword: string
+  ) => Promise<void>;
+  clearChangePasswordMessages: () => void;
 }
 
 export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
@@ -291,5 +298,75 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
       }));
       throw err;
     }
+  },
+
+  rehydrateAuth: async () => {
+    set((state: any) => ({
+      auth: {
+        ...state.auth,
+        isLoading: true,
+        isAuthenticated: true,
+        error: null,
+      },
+    }));
+    try {
+      await get().fetchUserDetails?.();
+      set((state: any) => ({
+        auth: { ...state.auth, isLoading: false },
+      }));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error ? err.message : AUTH_ERROR_MESSAGES.serverError;
+      set((state: any) => ({
+        auth: {
+          ...state.auth,
+          isLoading: false,
+          isAuthenticated: false,
+          error: errorMessage,
+        },
+      }));
+      get().logout();
+    }
+  },
+
+  changePassword: async (currentPassword: string, newPassword: string) => {
+    set((state: any) => ({
+      auth: {
+        ...state.auth,
+        isChangingPassword: true,
+        changePasswordError: null,
+        changePasswordSuccess: null,
+      },
+    }));
+    try {
+      // Call backend API to change password
+      await apiService.auth.changePassword(currentPassword, newPassword);
+      set((state: any) => ({
+        auth: {
+          ...state.auth,
+          isChangingPassword: false,
+          changePasswordSuccess: "Password changed successfully.",
+        },
+      }));
+    } catch (err) {
+      set((state: any) => ({
+        auth: {
+          ...state.auth,
+          isChangingPassword: false,
+          changePasswordError:
+            err instanceof Error ? err.message : "Failed to change password.",
+        },
+      }));
+    }
+  },
+
+  clearChangePasswordMessages: () => {
+    set((state: any) => ({
+      auth: {
+        ...state.auth,
+        changePasswordError: null,
+        changePasswordSuccess: null,
+      },
+    }));
   },
 });

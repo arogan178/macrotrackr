@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { NumberField, FormButton } from "@/components/form";
-import { GoalsIcon } from "@/components/Icons";
 import { WeightGoalFormValues } from "../types";
 import { generateWeightGoalCalculations } from "../calculations";
 
@@ -27,7 +26,7 @@ function WeightGoalForm({
   const todayString = new Date().toISOString().split("T")[0];
 
   const [formValues, setFormValues] = useState<WeightGoalFormValues>({
-    startingWeight,
+    startingWeight: startingWeight,
     targetWeight: targetWeight || undefined,
     startDate: todayString,
   });
@@ -100,7 +99,13 @@ function WeightGoalForm({
   };
 
   const handleSave = () => {
-    if (!formValues.targetWeight) return;
+    if (!formValues.targetWeight || !calorieIntake) return;
+
+    // Calculate daily change (deficit/surplus)
+    // For weight loss: dailyChange = calorieIntake - tdee (negative value)
+    // For weight gain: dailyChange = calorieIntake - tdee (positive value)
+    // For maintenance: dailyChange = calorieIntake - tdee (around 0)
+    const dailyChange = calorieIntake - tdee;
 
     const completeGoal = {
       startingWeight: formValues.startingWeight, // Ensure startingWeight is included from form state
@@ -110,6 +115,7 @@ function WeightGoalForm({
       targetDate: calculatedTargetDate,
       weeklyChange: weeklyWeightChange,
       calculatedWeeks: calculatedWeeks,
+      dailyChange: dailyChange, // Add the calculated daily change
       weightGoal:
         formValues.startingWeight > formValues.targetWeight
           ? "lose"
@@ -132,15 +138,6 @@ function WeightGoalForm({
 
   return (
     <div className="p-6">
-      {/* <div className="flex items-center mb-5">
-        <div className="p-2 rounded-lg bg-indigo-600/20 mr-3">
-          <GoalsIcon className="w-5 h-5 text-indigo-400" />
-        </div>
-        <h2 className="text-xl font-semibold text-gray-200">
-          {!weightGoals ? "Set Your Weight Goal" : "Edit Weight Goal"}
-        </h2>
-      </div> */}
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
         <NumberField
           label="Starting Weight"
@@ -319,7 +316,6 @@ function WeightGoalForm({
           size="md"
         >
           {!weightGoals ? "Set Goal" : "Update Goal"}{" "}
-          {/* Adjusted button text */}
         </FormButton>
       </div>
     </div>

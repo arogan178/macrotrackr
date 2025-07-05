@@ -5,8 +5,8 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "bun run src/index.ts",
-    "dev": "bun --watch src/index.ts",
+    "start": "dotenvx run --env-file .env.production -- bun run src/index.ts",
+    "dev": "dotenvx run --env-file .env.development -- bun --watch src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
@@ -27,6 +27,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "@dotenvx/dotenvx": "^1.45.2",
     "@elysiajs/cors": "^1.0.2",
     "@elysiajs/jwt": "^1.0.2",
     "@elysiajs/swagger": "latest",
