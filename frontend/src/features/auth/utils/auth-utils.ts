@@ -30,6 +30,9 @@ export interface AuthStateData {
   error: string | null;
   isAuthenticated: boolean;
   register: RegisterData;
+  isChangingPassword?: boolean;
+  changePasswordError?: string | null;
+  changePasswordSuccess?: string | null;
 }
 
 // Initial state creators

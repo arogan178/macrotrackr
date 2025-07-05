@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useStore } from "@/store/store";
 import { TrashIcon } from "@/components/Icons";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -9,11 +9,14 @@ import { format, isValid, parseISO } from "date-fns"; // Import isValid and pars
 function WeightLogList() {
   const weightLog = useStore((state) => state.weightLog); // Now contains { id, timestamp, weight }
   const deleteWeightLogEntry = useStore((state) => state.deleteWeightLogEntry);
+  // Try to get a bulk delete action if it exists
+  // No bulk delete in store, will fallback to per-entry deletion
   const isLoading = useStore((state) => state.isLoading);
   const isSaving = useStore((state) => state.isSaving);
 
-  // State for confirmation modal
+  // State for confirmation modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+  const [isBulkConfirmModalOpen, setIsBulkConfirmModalOpen] = useState(false);
   // Update state type to use timestamp
   const [itemToDelete, setItemToDelete] = useState<{
     id: string;
@@ -27,8 +30,14 @@ function WeightLogList() {
     setIsConfirmModalOpen(true);
   };
 
+  // Opens the bulk delete confirmation modal
+  const handleBulkDeleteClick = () => {
+    setIsBulkConfirmModalOpen(true);
+  };
+
   // Handles the actual deletion after confirmation
-  const handleConfirmDelete = async () => {
+  const handleConfirmDelete = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault(); // Prevent accidental form submit/page reload
     if (!itemToDelete) return;
 
     try {
@@ -41,10 +50,30 @@ function WeightLogList() {
     }
   };
 
+  // Handles bulk deletion after confirmation
+  const handleConfirmBulkDelete = async (e?: React.MouseEvent) => {
+    if (e) e.preventDefault();
+    try {
+      // Fallback: delete entries one by one
+      for (const entry of weightLog) {
+        await deleteWeightLogEntry(entry.id);
+      }
+    } catch (error) {
+      console.error("Bulk deletion failed:", error);
+    } finally {
+      setIsBulkConfirmModalOpen(false);
+    }
+  };
+
   // Closes the confirmation modal without deleting
   const handleCancelDelete = () => {
     setIsConfirmModalOpen(false);
     setItemToDelete(null);
+  };
+
+  // Closes the bulk confirmation modal
+  const handleCancelBulkDelete = () => {
+    setIsBulkConfirmModalOpen(false);
   };
 
   // Sort log by timestamp descending for display
@@ -61,7 +90,7 @@ function WeightLogList() {
   if (isLoading && sortedLog.length === 0) {
     return (
       <div className="h-60 flex flex-col items-center justify-center">
-        <LoadingSpinner className="h-8 w-8 text-indigo-400" />
+        <LoadingSpinner size="md" />
         <p className="text-gray-400 mt-3 text-sm">Loading weight log...</p>
       </div>
     );
@@ -85,6 +114,19 @@ function WeightLogList() {
 
   return (
     <>
+      {/* Delete All Button */}
+      {sortedLog.length > 1 && (
+        <div className="flex justify-end mb-2">
+          <button
+            onClick={handleBulkDeleteClick}
+            className="px-3 py-1.5 rounded-md bg-red-700 text-white text-sm font-medium hover:bg-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500 transition-colors duration-150"
+            disabled={isSaving || isLoading}
+            aria-label="Delete all weight log entries"
+          >
+            Delete All
+          </button>
+        </div>
+      )}
       <div className="max-h-80 overflow-y-auto pr-2">
         <ul className="divide-y divide-gray-700/50">
           {sortedLog.map((entry) => {
@@ -109,12 +151,18 @@ function WeightLogList() {
                   </span>
                 </div>
                 <button
-                  onClick={() =>
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
                     // Pass timestamp only if valid
-                    isValidDate &&
-                    handleDeleteClick(entry.id, entry.timestamp, entry.weight)
-                  }
-                  disabled={isSaving || !isValidDate} // Disable if saving or date is invalid
+                    if (isValidDate)
+                      handleDeleteClick(
+                        entry.id,
+                        entry.timestamp,
+                        entry.weight
+                      );
+                  }}
+                  disabled={isSaving || !isValidDate}
                   className={`p-1.5 rounded-md text-gray-400 hover:text-red-400 hover:bg-red-900/30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500 transition-colors duration-150 ${
                     (isSaving && itemToDelete?.id === entry.id) || !isValidDate
                       ? "opacity-50 cursor-not-allowed"
@@ -127,7 +175,7 @@ function WeightLogList() {
                   }
                 >
                   {isSaving && itemToDelete?.id === entry.id ? (
-                    <LoadingSpinner className="h-4 w-4" />
+                    <LoadingSpinner size="sm" />
                   ) : (
                     <TrashIcon className="h-4 w-4" />
                   )}
@@ -138,7 +186,7 @@ function WeightLogList() {
         </ul>
       </div>
 
-      {/* Confirmation Modal - Update message to use timestamp */}
+      {/* Single Delete Confirmation Modal */}
       {itemToDelete && (
         <Modal
           isOpen={isConfirmModalOpen}
@@ -157,7 +205,21 @@ function WeightLogList() {
           cancelLabel="Cancel"
           onConfirm={handleConfirmDelete}
           isDanger={true}
-          isLoading={isSaving}
+        />
+      )}
+
+      {/* Bulk Delete Confirmation Modal */}
+      {isBulkConfirmModalOpen && (
+        <Modal
+          isOpen={isBulkConfirmModalOpen}
+          onClose={handleCancelBulkDelete}
+          title="Delete All Entries"
+          variant="confirmation"
+          message={`Are you sure you want to delete ALL weight log entries? This action cannot be undone.`}
+          confirmLabel="Delete All"
+          cancelLabel="Cancel"
+          onConfirm={handleConfirmBulkDelete}
+          isDanger={true}
         />
       )}
     </>

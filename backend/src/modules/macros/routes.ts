@@ -7,6 +7,7 @@ import { safeQuery, safeExecute, safeQueryAll } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
+import { toCamelCase } from "../../lib/responses";
 
 // Database result types (snake_case)
 type MacroTargetFromDB = {
@@ -249,24 +250,7 @@ export const macroRoutes = (app: Elysia) =>
             [user.userId]
           );
 
-          // Map snake_case DB results to camelCase API response, handling null mealName
-          const historyMapped = historyResult.map((entry) => ({
-            id: entry.id,
-            protein: entry.protein,
-            carbs: entry.carbs,
-            fats: entry.fats,
-            mealType: entry.meal_type as
-              | "breakfast"
-              | "lunch"
-              | "dinner"
-              | "snack",
-            mealName: entry.meal_name || undefined, // Convert null to undefined
-            entry_date: entry.entry_date,
-            entry_time: entry.entry_time,
-            created_at: entry.created_at,
-          }));
-
-          return historyMapped;
+          return historyResult.map(toCamelCase);
         },
         {
           response: t.Array(MacroSchemas.macroEntryResponse),
@@ -291,8 +275,8 @@ export const macroRoutes = (app: Elysia) =>
             fats,
             mealType,
             mealName,
-            entry_date,
-            entry_time,
+            entryDate,
+            entryTime,
           } = body;
 
           const result = safeQuery<MacroEntryFromDB>(
@@ -307,8 +291,8 @@ export const macroRoutes = (app: Elysia) =>
               fats,
               mealType,
               mealName ?? "",
-              entry_date,
-              entry_time,
+              entryDate,
+              entryTime,
             ]
           );
 
@@ -318,24 +302,7 @@ export const macroRoutes = (app: Elysia) =>
             );
           }
 
-          // Map snake_case result to camelCase response, handling types properly
-          const apiResponse = {
-            id: result.id,
-            protein: result.protein,
-            carbs: result.carbs,
-            fats: result.fats,
-            mealType: result.meal_type as
-              | "breakfast"
-              | "lunch"
-              | "dinner"
-              | "snack",
-            mealName: result.meal_name || undefined, // Convert null to undefined
-            entry_date: result.entry_date,
-            entry_time: result.entry_time,
-            created_at: result.created_at,
-          };
-
-          return apiResponse;
+          return toCamelCase(result);
         },
         {
           // Ensure body/response schemas use camelCase for mealType/mealName
@@ -403,10 +370,8 @@ export const macroRoutes = (app: Elysia) =>
           if (body.fats !== undefined) updates.fats = body.fats;
           if (body.mealType !== undefined) updates.meal_type = body.mealType;
           if (body.mealName !== undefined) updates.meal_name = body.mealName;
-          if (body.entry_date !== undefined)
-            updates.entry_date = body.entry_date;
-          if (body.entry_time !== undefined)
-            updates.entry_time = body.entry_time;
+          if (body.entryDate !== undefined) updates.entry_date = body.entryDate;
+          if (body.entryTime !== undefined) updates.entry_time = body.entryTime;
 
           const fieldsToUpdate = Object.keys(updates);
           if (fieldsToUpdate.length === 0) {
@@ -445,24 +410,7 @@ export const macroRoutes = (app: Elysia) =>
             }
           }
 
-          // Map snake_case result to camelCase response, handling types properly
-          const apiResponse = {
-            id: result.id,
-            protein: result.protein,
-            carbs: result.carbs,
-            fats: result.fats,
-            mealType: result.meal_type as
-              | "breakfast"
-              | "lunch"
-              | "dinner"
-              | "snack",
-            mealName: result.meal_name || undefined, // Convert null to undefined
-            entry_date: result.entry_date,
-            entry_time: result.entry_time,
-            created_at: result.created_at,
-          };
-
-          return apiResponse;
+          return toCamelCase(result);
         },
         {
           params: MacroSchemas.macroIdParam,
