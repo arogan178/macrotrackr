@@ -38,8 +38,8 @@ const macroEntryBase = t.Object({
   fats: MacroValueSchema,
   mealType: MealTypeSchema, // Use camelCase for API
   mealName: t.Optional(t.String({ default: "" })), // Use camelCase for API
-  entry_date: DateSchema, // Keep snake_case to match DB/payload easily? Or change to camelCase? Let's keep for now.
-  entry_time: TimeSchema, // Keep snake_case for now.
+  entryDate: DateSchema, // Changed to camelCase to match frontend
+  entryTime: TimeSchema, // Changed to camelCase to match frontend
 });
 
 // --- Macro Target Percentages Schema (Moved from goals/schemas.ts) ---
@@ -89,9 +89,9 @@ export const MacroSchemas = {
     fats: MacroValueSchema,
     mealType: MealTypeSchema, // camelCase
     mealName: t.Optional(t.String()), // camelCase
-    entry_date: DateSchema,
-    entry_time: TimeSchema,
-    created_at: t.Union([t.Date(), t.String()]),
+    entryDate: DateSchema,
+    entryTime: TimeSchema,
+    createdAt: t.Union([t.Date(), t.String()]),
   }),
   macroTotals: t.Object({
     protein: t.Number(),
