@@ -177,10 +177,48 @@ export const PricingTable: React.FC<PricingTableProps> = (props) => {
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.7; transform: scale(1.12); }
         }
+        @media (max-width: 767px) {
+          .responsive-pricing-table thead {
+            display: none;
+          }
+          .responsive-pricing-table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid rgb(55 65 81 / 0.6);
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+          }
+          .responsive-pricing-table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            text-align: right;
+            border-bottom: 1px solid rgb(55 65 81 / 0.6);
+          }
+          .responsive-pricing-table tr td:last-child {
+            border-bottom: 0;
+          }
+          .responsive-pricing-table td[data-label]::before {
+            content: attr(data-label);
+            font-weight: 600;
+            text-align: left;
+            color: #d1d5db; /* gray-300 */
+          }
+          .responsive-pricing-table .feature-cell {
+            background-color: rgb(55 65 81 / 0.2);
+            font-weight: 600;
+            justify-content: flex-start;
+          }
+          .responsive-pricing-table .feature-cell::before {
+            display: none;
+          }
+        }
       `}</style>
-      <div className="w-full max-w-full bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl shadow-xl p-0 border border-gray-700/60 scrollbar-hide overflow-x-hidden">
+      <div className="w-full max-w-full bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl shadow-xl p-4 border border-gray-700/60 scrollbar-hide overflow-x-hidden">
         {/* Plan selection pill group using TabButton */}
-        <div className="flex justify-center py-4">
+        <div className="flex justify-center pb-4">
           <div
             className="pricing-pill-group inline-flex bg-gray-800 border border-gray-700 rounded-full p-1 gap-0 select-none overflow-hidden"
             role="tablist"
@@ -246,7 +284,7 @@ export const PricingTable: React.FC<PricingTableProps> = (props) => {
           `}</style>
         </div>
         <div>
-          <table className="w-full max-w-full border-separate border-spacing-0 text-sm">
+          <table className="responsive-pricing-table w-full max-w-full border-separate border-spacing-0 text-sm">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr
@@ -277,27 +315,34 @@ export const PricingTable: React.FC<PricingTableProps> = (props) => {
               {table.getRowModel().rows.map((row, idx) => (
                 <tr
                   key={row.id}
-                  className="transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg"
+                  className="md:transition-transform md:duration-200 md:hover:-translate-y-1 md:hover:shadow-lg"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
+                      data-label={
+                        cell.column.id === "free"
+                          ? "Free"
+                          : cell.column.id === "pro"
+                          ? "Pro"
+                          : undefined
+                      }
                       className={
                         cell.column.id === "feature"
-                          ? `px-3 py-2 text-left text-gray-200 font-medium${
+                          ? `feature-cell px-3 py-2 text-left text-gray-200 font-medium${
                               idx !== data.length - 1
-                                ? " border-b border-gray-700/60"
+                                ? " md:border-b md:border-gray-700/60"
                                 : ""
                             }`
                           : cell.column.id === "free"
                           ? `px-3 py-2 text-center${
                               row.index !== data.length - 1
-                                ? " border-b border-gray-700/60"
+                                ? " md:border-b md:border-gray-700/60"
                                 : ""
                             }`
                           : `px-3 py-2 text-center bg-gradient-to-br from-yellow-900/10 to-orange-900/10${
                               row.index !== data.length - 1
-                                ? " border-b border-yellow-700/30"
+                                ? " md:border-b md:border-yellow-700/30"
                                 : ""
                             }`
                       }
