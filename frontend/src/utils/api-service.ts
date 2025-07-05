@@ -86,10 +86,13 @@ interface MacroEntryCreatePayload {
   fats: number;
   mealType: "breakfast" | "lunch" | "dinner" | "snack"; // camelCase
   mealName?: string; // camelCase
-  entry_date: string;
-  entry_time: string;
+  entryDate: string; // Updated to camelCase
+  entryTime: string; // Updated to camelCase
 }
-type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
+export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
+
+// Export the create payload for consistency
+export type { MacroEntryCreatePayload };
 interface ApiErrorResponse {
   code: string;
   message: string;
@@ -293,6 +296,14 @@ export const apiService = {
       });
       return handleResponse(response);
     },
+    changePassword: async (currentPassword: string, newPassword: string) => {
+      const response = await fetch(`${API_BASE_URL}/api/user/password`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify({ currentPassword, newPassword }),
+      });
+      return handleResponse(response);
+    },
   },
 
   // Macro entry endpoints
@@ -311,9 +322,13 @@ export const apiService = {
     },
     addEntry: async (entry: MacroEntryCreatePayload) => {
       const payload = {
-        ...entry,
+        protein: entry.protein,
+        carbs: entry.carbs,
+        fats: entry.fats,
         mealType: entry.mealType,
-        mealName: entry.mealName,
+        mealName: entry.mealName || "",
+        entryDate: entry.entryDate,
+        entryTime: entry.entryTime,
       };
       const response = await fetch(`${API_BASE_URL}/api/macros`, {
         method: "POST",
@@ -329,8 +344,8 @@ export const apiService = {
       if (entry.fats !== undefined) payload.fats = entry.fats;
       if (entry.mealType !== undefined) payload.mealType = entry.mealType;
       if (entry.mealName !== undefined) payload.mealName = entry.mealName;
-      if (entry.entry_date !== undefined) payload.entry_date = entry.entry_date;
-      if (entry.entry_time !== undefined) payload.entry_time = entry.entry_time;
+      if (entry.entryDate !== undefined) payload.entryDate = entry.entryDate;
+      if (entry.entryTime !== undefined) payload.entryTime = entry.entryTime;
       const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
         method: "PUT",
         headers: getHeaders(),

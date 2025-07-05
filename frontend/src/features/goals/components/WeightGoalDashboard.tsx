@@ -1,16 +1,14 @@
 import { useState } from "react";
-import { WeightGoals } from "../types";
-import {
-  MacroDailyTotals,
-  MacroTargetSettings,
-} from "@/features/macroTracking/types";
+import type { WeightGoals } from "@/types/goal";
+import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+import type { UserSettings } from "@/types/user";
 import WeightGoalStatus from "./WeightGoalStatus";
 import EmptyState from "@/components/EmptyState";
-import { LoadingSpinnerIcon, TargetIcon } from "@/components/Icons";
-import LogWeightModal from "./LogWeightModal"; // Import the modal
+import { TargetIcon } from "@/components/Icons";
+import LogWeightModal from "./LogWeightModal";
 
 interface WeightGoalDashboardProps {
-  startingWeight: number;
+  user: UserSettings;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
   weightGoals: WeightGoals | null;
@@ -18,12 +16,13 @@ interface WeightGoalDashboardProps {
   onOpenModal: () => void;
   onDelete: () => void;
   className?: string;
-  targetCalories?: number;
   macroTarget?: MacroTargetSettings;
 }
 
-function WeightGoalDashboard({
-  startingWeight,
+import { memo } from "react";
+
+const WeightGoalDashboard = memo(function WeightGoalDashboard({
+  user,
   tdee,
   macroDailyTotals,
   weightGoals,
@@ -31,7 +30,6 @@ function WeightGoalDashboard({
   onOpenModal,
   onDelete,
   className = "",
-  targetCalories,
   macroTarget,
 }: WeightGoalDashboardProps) {
   // State for Log Weight Modal
@@ -46,17 +44,33 @@ function WeightGoalDashboard({
     setIsLogWeightModalOpen(false);
   }
 
-  // Calculate the target calories based on provided target or weight goals or fall back to TDEE
-  const effectiveTargetCalories =
-    targetCalories || weightGoals?.calorieTarget || tdee;
+  // TDEE is now passed as a prop and should be used directly
+
+  // Get daily deficit/surplus from weightGoals
+  // If dailyChange is null, calculate it from TDEE and calorieTarget
+  let dailyAdjustment = weightGoals?.dailyChange || 0;
+  if (dailyAdjustment === 0 && weightGoals?.calorieTarget && tdee > 0) {
+    // Calculate daily deficit/surplus: deficit is positive, surplus is negative
+    dailyAdjustment = tdee - weightGoals.calorieTarget;
+  }
+
+  // Calculate effective target calories
+  let effectiveTargetCalories: number = Number.isFinite(tdee) ? tdee : 0;
+  if (weightGoals?.calorieTarget) {
+    effectiveTargetCalories = weightGoals.calorieTarget;
+  }
+  // Always ensure it's a finite number
+  if (!Number.isFinite(effectiveTargetCalories)) {
+    effectiveTargetCalories = 0;
+  }
 
   // Loading State
   if (isLoading) {
     return (
       <div
-        className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden flex items-center justify-center h-60 ${className}`}
+        className={`bg-gray-800/40 rounded-2xl h-60 flex items-center justify-center animate-pulse ${className}`}
       >
-        <LoadingSpinnerIcon className="h-10 w-10 text-indigo-400 animate-spin" />
+        <div className="w-full h-full bg-gray-700 rounded-2xl" />
       </div>
     );
   }
@@ -64,9 +78,7 @@ function WeightGoalDashboard({
   // Empty State
   if (!weightGoals) {
     return (
-      <div
-        className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden ${className}`}
-      >
+      <div className={`bg-gray-800/40 rounded-2xl ${className}`}>
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
@@ -88,19 +100,21 @@ function WeightGoalDashboard({
   // Status View (when weightGoals exist)
   return (
     <>
-      <div
-        className={`bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg overflow-hidden ${className}`}
-      >
+      <div className={`bg-gray-800/40 rounded-2xl ${className}`}>
         <WeightGoalStatus
-          startingWeight={startingWeight}
+          startingWeight={user.weight ?? 0} // Pass current weight for progress, fallback to 0
           targetWeight={weightGoals.targetWeight}
-          tdee={tdee}
+          tdee={Number.isFinite(tdee) ? tdee : 0}
           macroDailyTotals={macroDailyTotals}
           weightGoals={weightGoals}
           onEdit={onOpenModal}
           onDelete={onDelete}
-          onLogWeight={handleOpenLogWeightModal} // Pass the open handler
-          targetCalories={effectiveTargetCalories}
+          onLogWeight={handleOpenLogWeightModal}
+          targetCalories={
+            Number.isFinite(effectiveTargetCalories)
+              ? effectiveTargetCalories
+              : 0
+          }
           macroTarget={macroTarget}
         />
       </div>
@@ -114,6 +128,6 @@ function WeightGoalDashboard({
       />
     </>
   );
-}
+});
 
 export default WeightGoalDashboard;

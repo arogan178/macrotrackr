@@ -20,8 +20,8 @@ interface AddEntryProps {
     fats: number;
     mealType: MealType;
     mealName: string;
-    entry_date: string;
-    entry_time: string;
+    entryDate: string;
+    entryTime: string;
   }) => Promise<void>;
   isSaving: boolean;
 }
@@ -35,12 +35,12 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [mealName, setMealName] = useState<string>("");
 
   // Default date is today
-  const [entry_date, setEntryDate] = useState<string>(
+  const [entryDate, setEntryDate] = useState<string>(
     new Date().toISOString().split("T")[0]
   );
 
   // Default time is current time
-  const [entry_time, setEntryTime] = useState<string>(
+  const [entryTime, setEntryTime] = useState<string>(
     new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
@@ -100,8 +100,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
         fats: fats as number,
         mealType,
         mealName,
-        entry_date,
-        entry_time,
+        entryDate,
+        entryTime,
       });
 
       setProtein(undefined);
@@ -116,8 +116,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       fats,
       mealType,
       mealName,
-      entry_date,
-      entry_time,
+      entryDate,
+      entryTime,
       onSubmit,
       anyFieldIsUndefined,
       allFieldsAreZero,
@@ -159,7 +159,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             <div>
               <DateField
                 label="Date"
-                value={entry_date}
+                value={entryDate}
                 onChange={setEntryDate}
                 required
               />
@@ -167,7 +167,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             <div>
               <TimeField
                 label="Time"
-                value={entry_time}
+                value={entryTime}
                 onChange={setEntryTime}
                 required
               />

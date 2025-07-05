@@ -35,13 +35,40 @@ function LoadingFallback() {
   );
 }
 
+import { useLocation } from "react-router-dom";
+
 function AppContent() {
   useNotificationManager();
   const isAuthenticated = useStore((state) => state.auth.isAuthenticated);
+  const rehydrateAuth = useStore((state) => state.rehydrateAuth);
   const logout = useStore((state) => state.logout);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Persist last visited route (except /login and /)
+  useEffect(() => {
+    if (
+      location.pathname !== "/login" &&
+      location.pathname !== "/" &&
+      location.pathname !== "/reset-password"
+    ) {
+      localStorage.setItem(
+        "lastVisitedRoute",
+        location.pathname + location.search
+      );
+    }
+  }, [location]);
 
   // Sync auth state with token on mount
+  useEffect(() => {
+    const token = getToken();
+    if (token) {
+      rehydrateAuth();
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  // If token is missing but store says authenticated, force logout
   useEffect(() => {
     const token = getToken();
     if (!token && isAuthenticated) {
@@ -51,6 +78,22 @@ function AppContent() {
     // eslint-disable-next-line
   }, [isAuthenticated, logout, navigate]);
 
+  // On login or refresh, redirect to last visited route if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      const lastVisited = localStorage.getItem("lastVisitedRoute");
+      // Only redirect if on / or /login
+      if (
+        (location.pathname === "/" || location.pathname === "/login") &&
+        lastVisited &&
+        lastVisited !== location.pathname
+      ) {
+        navigate(lastVisited, { replace: true });
+      }
+    }
+    // eslint-disable-next-line
+  }, [isAuthenticated]);
+
   return (
     <ErrorBoundary>
       <Suspense fallback={<LoadingFallback />}>
@@ -59,7 +102,10 @@ function AppContent() {
             path="/"
             element={
               isAuthenticated ? (
-                <Navigate to="/home" replace />
+                <Navigate
+                  to={localStorage.getItem("lastVisitedRoute") || "/home"}
+                  replace
+                />
               ) : (
                 <Navigate to="/login" replace />
               )
@@ -90,7 +136,14 @@ function AppContent() {
           <Route
             path="/login"
             element={
-              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+              !isAuthenticated ? (
+                <AuthPage />
+              ) : (
+                <Navigate
+                  to={localStorage.getItem("lastVisitedRoute") || "/home"}
+                  replace
+                />
+              )
             }
           />
           <Route
