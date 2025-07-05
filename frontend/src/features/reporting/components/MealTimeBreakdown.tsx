@@ -31,8 +31,10 @@ interface MacroEntry {
   fats: number;
   mealType: MealType;
   mealName: string | null;
-  entry_date: string;
-  entry_time: string;
+  entryDate?: string;
+  entryTime?: string;
+  entry_date?: string; // fallback for migration
+  entry_time?: string; // fallback for migration
   created_at: string;
 }
 
@@ -116,7 +118,8 @@ function MealTimeBreakdown({
     end.setHours(23, 59, 59, 999);
 
     return history.filter((entry) => {
-      const dateStr = entry.entry_date || entry.created_at?.split("T")[0];
+      const dateStr =
+        entry.entryDate || entry.entry_date || entry.created_at?.split("T")[0];
       if (!dateStr) return false;
 
       const entryDate = new Date(dateStr);

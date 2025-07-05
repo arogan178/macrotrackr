@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   CalorieIcon,
   ChevronRightIcon,
@@ -67,7 +68,7 @@ function formatDate(
   });
 }
 
-function WeightGoalStatus({
+const WeightGoalStatus = memo(function WeightGoalStatus({
   startingWeight, // Current weight, potentially updated from logs
   targetWeight,
   tdee,
@@ -133,7 +134,12 @@ function WeightGoalStatus({
 
   const weeklyChange = weightGoals?.weeklyChange || 0;
   const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
-  const dailyDifference = Math.abs(tdee - (weightGoals?.calorieTarget || tdee));
+  // Calculate daily deficit/surplus from available data
+  // If dailyChange is null/undefined, calculate from TDEE and calorieTarget
+  let dailyDifference = Math.abs(weightGoals?.dailyChange || 0);
+  if (dailyDifference === 0 && weightGoals?.calorieTarget && tdee > 0) {
+    dailyDifference = Math.abs(tdee - weightGoals.calorieTarget);
+  }
 
   return (
     <motion.div
@@ -398,6 +404,6 @@ function WeightGoalStatus({
       </div>
     </motion.div>
   );
-}
+});
 
 export default WeightGoalStatus;
