@@ -170,15 +170,31 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/forgot-password",
         async ({ body, db }) => {
-          const { email } = body;
-          const user = safeQuery<UserRow>(
-            db,
-            "SELECT id FROM users WHERE email = ?",
-            [email]
+          // Log every request to the forgot-password endpoint
+          const logFile = require("path").join(
+            process.cwd(),
+            "email-service.log"
           );
+          const fs = require("fs");
+          function logToFile(message) {
+            const timestamp = new Date().toISOString();
+            fs.appendFileSync(
+              logFile,
+              `[${timestamp}] [forgot-password] ${message}\n`
+            );
+          }
+
+          const { email } = body;
+          logToFile(`Endpoint hit. Email: ${email}`);
+          const user = safeQuery(db, "SELECT id FROM users WHERE email = ?", [
+            email,
+          ]);
+          if (!user) {
+            logToFile(`No user found for email: ${email}`);
+          }
 
           if (user) {
-            const token = crypto.randomBytes(32).toString("hex");
+            const token = require("crypto").randomBytes(32).toString("hex");
             const expires = new Date(Date.now() + 3600000); // 1 hour from now
 
             safeExecute(
@@ -187,8 +203,12 @@ export const authRoutes = (app: Elysia) =>
               [token, expires.toISOString(), user.id]
             );
 
+            logToFile(`User found. Sending password reset email to: ${email}`);
             // Send password reset email via Resend
-            await emailService.sendPasswordResetEmail(email, token);
+            await require("../../lib/email-service").emailService.sendPasswordResetEmail(
+              email,
+              token
+            );
           }
 
           return {
