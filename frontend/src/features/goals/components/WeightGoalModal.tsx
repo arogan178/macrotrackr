@@ -1,30 +1,27 @@
 import Modal from "@/components/Modal";
 import WeightGoalForm from "./WeightGoalForm";
-import { WeightGoalFormValues, WeightGoals } from "../types";
+import { WeightGoalFormValues } from "../types";
 import { useEffect } from "react";
+
 import { useStore } from "@/store/store"; // Import useStore
 
 interface WeightGoalModalProps {
   isOpen: boolean;
   onClose: () => void;
-  // onSave: (values: WeightGoalFormValues) => void; // REMOVED - Handled internally now
   startingWeight: number;
   targetWeight?: number;
   tdee: number;
-  weightGoals: WeightGoals | null; // Used to determine create vs update
-  // isLoading?: boolean; // REMOVED - Get from store
+  weightGoals: any | null; // Used to determine create vs update
 }
 
 function WeightGoalModal({
   isOpen,
   onClose,
-  // onSave, // REMOVED
   startingWeight,
   targetWeight,
   tdee,
-  weightGoals, // Keep this to know if editing
-}: // isLoading = false, // REMOVED
-WeightGoalModalProps) {
+  weightGoals,
+}: WeightGoalModalProps) {
   // Get actions and state from store
   const createWeightGoal = useStore((state) => state.createWeightGoal);
   const updateWeightGoal = useStore((state) => state.updateWeightGoal);
@@ -53,8 +50,10 @@ WeightGoalModalProps) {
     }
   };
 
+  // Use the goal's startingWeight if editing, otherwise use user weight
+  const initialStartingWeight = weightGoals?.startingWeight ?? startingWeight;
   const initialTargetWeight =
-    weightGoals?.targetWeight ?? targetWeight ?? startingWeight;
+    weightGoals?.targetWeight ?? targetWeight ?? initialStartingWeight;
 
   return (
     <Modal
@@ -66,7 +65,7 @@ WeightGoalModalProps) {
       size="lg"
     >
       <WeightGoalForm
-        startingWeight={startingWeight}
+        startingWeight={initialStartingWeight}
         targetWeight={initialTargetWeight}
         tdee={tdee}
         weightGoals={weightGoals} // Pass existing goals to form for disabling startingWeight
