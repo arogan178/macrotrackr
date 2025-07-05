@@ -20,8 +20,11 @@ export interface MacroEntry {
   fats: number;
   mealType: MealType;
   mealName: string;
-  entry_date: string;
-  entry_time: string;
+  entryDate: string;
+  entryTime: string;
+  // Keep these for backward compatibility during migration
+  entry_date?: string;
+  entry_time?: string;
   foodName?: string;
 }
 
