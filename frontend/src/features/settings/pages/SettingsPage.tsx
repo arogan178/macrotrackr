@@ -4,15 +4,14 @@ import FloatingNotification from "../../notifications/components/FloatingNotific
 import { TabButton, SaveButton } from "@/components/form";
 import Modal from "@/components/Modal";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
-import { ProfileForm, MacroTargetForm } from "@/features/settings/components";
-import BillingForm from "@/features/settings/components/BillingForm";
-import { useStore } from "@/store/store";
 import {
-  UserIcon,
-  MenuIcon,
-  LoadingSpinnerIcon,
-  AwardIcon,
-} from "@/components/Icons";
+  ProfileForm,
+  SettingsLoadingSkeleton,
+} from "@/features/settings/components";
+import BillingForm from "@/features/settings/components/BillingForm";
+import { ChangePasswordForm } from "@/features/settings/components/ChangePasswordForm";
+import { useStore } from "@/store/store";
+import { UserIcon, AwardIcon, LockIcon } from "@/components/Icons";
 
 // --- Modified PageHeader Component ---
 // Now accepts tabs as children to render them on the right
@@ -61,7 +60,7 @@ export default function SettingsPage() {
     fetchSettings,
   } = useStore();
 
-  type TabType = "profile" | "macro target" | "billing";
+  type TabType = "profile" | "billing" | "security";
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<TabType | null>(
@@ -174,17 +173,6 @@ export default function SettingsPage() {
                 </span>
               </TabButton>
               <TabButton
-                active={activeTab === "macro target"}
-                onClick={() => handleTabChange("macro target")}
-                layoutId="settingsTabHighlight"
-                isMotion={true}
-              >
-                <span className="flex items-center relative z-10">
-                  <MenuIcon size="sm" className="mr-1.5" />
-                  Macro Target
-                </span>
-              </TabButton>
-              <TabButton
                 active={activeTab === "billing"}
                 onClick={() => handleTabChange("billing")}
                 layoutId="settingsTabHighlight"
@@ -195,13 +183,22 @@ export default function SettingsPage() {
                   Billing
                 </span>
               </TabButton>
+              <TabButton
+                active={activeTab === "security"}
+                onClick={() => handleTabChange("security")}
+                layoutId="settingsTabHighlight"
+                isMotion={true}
+              >
+                <span className="flex items-center relative z-10">
+                  <LockIcon size="sm" className="mr-1.5" />
+                  Security
+                </span>
+              </TabButton>
             </div>
           </PageHeader>
 
           {isLoading || !settings ? (
-            <div className="flex justify-center items-center h-64">
-              <LoadingSpinnerIcon className="h-12 w-12 animate-spin text-indigo-500" />
-            </div>
+            <SettingsLoadingSkeleton />
           ) : (
             <>
               {activeTab === "profile" && (
@@ -222,8 +219,8 @@ export default function SettingsPage() {
                   </div>
                 </form>
               )}
-              {activeTab === "macro target" && <MacroTargetForm />}
               {activeTab === "billing" && <BillingForm />}
+              {activeTab === "security" && <ChangePasswordForm />}
             </>
           )}
         </div>

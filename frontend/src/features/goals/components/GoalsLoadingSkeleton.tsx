@@ -1,20 +1,38 @@
-function GoalsLoadingSkeleton() {
+export default function GoalsLoadingSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <div className="lg:col-span-2 bg-gray-800/40 rounded-2xl h-64"></div>
-        <div className="bg-gray-800/40 rounded-2xl h-64"></div>
+      {/* Title and subtitle */}
+      <div className="mb-6">
+        <div className="h-8 w-1/3 bg-gray-700 rounded mb-2" />
+        <div className="h-4 w-1/4 bg-gray-700 rounded" />
       </div>
 
-      <div className="h-6 bg-gray-700 rounded w-1/6 mb-4"></div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-gray-800/40 rounded-2xl h-32"></div>
-        ))}
+      {/* Summary cards */}
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="flex-1 min-w-[120px] h-24 bg-gray-800/40 rounded-2xl"
+            />
+          ))}
+        </div>
       </div>
+
+      {/* Main content grids (e.g., progress, habits) */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="h-56 bg-gray-800/40 rounded-2xl" />
+        <div className="h-56 bg-gray-800/40 rounded-2xl" />
+      </div>
+
+      {/* Additional charts or sections if needed */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+        <div className="h-80 bg-gray-800/40 rounded-2xl" />
+        <div className="h-80 bg-gray-800/40 rounded-2xl" />
+      </div>
+
+      {/* Final section (e.g., insights, actions) */}
+      <div className="h-40 bg-gray-800/40 rounded-2xl mb-6" />
     </div>
   );
 }
-
-export default GoalsLoadingSkeleton;
