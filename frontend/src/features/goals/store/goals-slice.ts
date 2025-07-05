@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { WeightGoals, WeightGoalFormValues } from "../types";
+import { WeightGoals, WeightGoalFormValues } from "@/types/goal";
 import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../constants";
 import {
   apiService,
@@ -109,12 +109,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error fetching weight goals:", error);
       set({ isLoading: false, error: errorMessage });
-      if (fullGet().addNotification) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.goalFetch}: ${errorMessage}`,
-          type: "error",
-        });
-      }
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.goalFetch}: ${errorMessage}`,
+        type: "error",
+      });
     }
   },
 
@@ -155,12 +153,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
             logError
           );
           // Notify about log failure, but goal creation succeeded
-          if (fullGet().addNotification) {
-            fullGet().addNotification({
-              message: ERROR_MESSAGES.weightLog,
-              type: "warning",
-            });
-          }
+          fullGet().addNotification?.({
+            message: ERROR_MESSAGES.weightLog,
+            type: "warning",
+          });
           // Continue without the log entry if it fails
         }
       }
@@ -183,28 +179,24 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       await get().fetchWeightLog();
 
       // --- Step 4: Update User Slice (if log entry succeeded) ---
-      if (savedLogEntry && fullGet().updateCurrentUserWeight?.call) {
-        fullGet().updateCurrentUserWeight(savedLogEntry.weight);
+      if (savedLogEntry) {
+        fullGet().updateCurrentUserWeight?.(savedLogEntry.weight);
       }
 
       // --- Step 5: Success Notification ---
-      if (fullGet().addNotification) {
-        fullGet().addNotification({
-          message: SUCCESS_MESSAGES.goalCreated,
-          type: "success",
-        });
-      }
+      fullGet().addNotification?.({
+        message: SUCCESS_MESSAGES.goalCreated,
+        type: "success",
+      });
     } catch (error) {
       // --- Error Handling for Goal Creation ---
       const errorMessage = getErrorMessage(error);
       console.error("[GoalsSlice] Error creating weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.goalCreate}: ${errorMessage}`,
-          type: "error",
-        });
-      }
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.goalCreate}: ${errorMessage}`,
+        type: "error",
+      });
       throw error; // Re-throw error for potential handling in UI
     }
   },
@@ -233,22 +225,18 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // --- Fetch latest weight log to ensure UI is up to date ---
       await get().fetchWeightLog();
 
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: SUCCESS_MESSAGES.goalUpdated,
-          type: "success",
-        });
-      }
+      fullGet().addNotification?.({
+        message: SUCCESS_MESSAGES.goalUpdated,
+        type: "success",
+      });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error updating weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.goalUpdate}: ${errorMessage}`,
-          type: "error",
-        });
-      }
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.goalUpdate}: ${errorMessage}`,
+        type: "error",
+      });
       throw error; // Re-throw error
     }
   },
@@ -262,22 +250,18 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // NEW: Clear weight log when goal is deleted
       set({ weightGoals: null, weightLog: [], isSaving: false, error: null });
 
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: SUCCESS_MESSAGES.goalDeleted,
-          type: "success",
-        });
-      }
+      fullGet().addNotification?.({
+        message: SUCCESS_MESSAGES.goalDeleted,
+        type: "success",
+      });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error deleting weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.goalDelete}: ${errorMessage}`,
-          type: "error",
-        });
-      }
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.goalDelete}: ${errorMessage}`,
+        type: "error",
+      });
     }
   },
 
@@ -316,12 +300,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error fetching weight log:", error);
       set({ isLoading: false, error: errorMessage });
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.weightFetch}: ${errorMessage}`,
-          type: "error",
-        });
-      }
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.weightFetch}: ${errorMessage}`,
+        type: "error",
+      });
     }
   },
   addWeightLogEntry: async (payload: AddWeightLogPayload) => {
@@ -330,53 +312,82 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     try {
       const savedEntry = await apiService.goals.addWeightLogEntry(payload); // API returns entry with timestamp
 
-      set((state) => ({
-        // Add new entry and re-sort by timestamp
-        weightLog: [...(state.weightLog || []), savedEntry].sort(
+      set((state) => {
+        const newLog = [...(state.weightLog || []), savedEntry].sort(
           (a, b) =>
             new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-        ),
-        // Update current weight in the goals slice
-        weightGoals: state.weightGoals
-          ? { ...state.weightGoals, currentWeight: savedEntry.weight } // Update currentWeight instead? Or maybe startingWeight is fine if it represents the *latest* known weight? Let's stick to currentWeight for clarity if the backend supports it. If not, update startingWeight. Assuming backend updates user_details.weight which is reflected in getWeightGoals response.
-          : null,
-        isSaving: false,
-      }));
+        );
+        // Only update currentWeight, not the whole object
+        return {
+          weightLog: newLog,
+          weightGoals: state.weightGoals
+            ? {
+                ...state.weightGoals,
+                currentWeight:
+                  newLog[0]?.weight ?? state.weightGoals.currentWeight,
+              }
+            : null,
+          isSaving: false,
+        };
+      });
 
-      // Ensure user slice is updated correctly here too
-      const fullGet = get as () => FullGoalsState;
-      if (fullGet().updateCurrentUserWeight) {
-        fullGet().updateCurrentUserWeight(savedEntry.weight);
-      }
-
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: SUCCESS_MESSAGES.weightLogged,
-          type: "success",
-        });
-      }
+      fullGet().updateCurrentUserWeight?.(savedEntry.weight);
+      fullGet().addNotification?.({
+        message: SUCCESS_MESSAGES.weightLogged,
+        type: "success",
+      });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error adding weight log entry:", error);
       set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.weightLog}: ${errorMessage}`,
-          type: "error",
-        });
-      }
-      // Re-throw or handle specific errors if needed
-      throw error; // Re-throw to allow modal to handle closing logic
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.weightLog}: ${errorMessage}`,
+        type: "error",
+      });
+      throw error;
     }
   },
   deleteWeightLogEntry: async (id: string) => {
     set({ isSaving: true, error: null });
     const fullGet = get as () => FullGoalsState;
+    // Optimistic UI: update weightLog immediately
+    const prevLog = get().weightLog;
+    const optimisticLog = prevLog.filter((entry) => entry.id !== id);
+    // Update currentWeight optimistically
+    set((state) => {
+      const sortedOptimistic = [...optimisticLog].sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      );
+      return {
+        weightLog: optimisticLog,
+        weightGoals: state.weightGoals
+          ? {
+              ...state.weightGoals,
+              currentWeight:
+                sortedOptimistic[0]?.weight ?? state.weightGoals.currentWeight,
+            }
+          : null,
+      };
+    });
+
+    // Determine if the deleted entry was the latest
+    const sortedPrevLog = [...prevLog].sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    const latestEntry = sortedPrevLog[0];
+    const deletedEntry = prevLog.find((entry) => entry.id === id);
+    let shouldUpdateUserWeight = false;
+    if (latestEntry && deletedEntry && latestEntry.id === deletedEntry.id) {
+      shouldUpdateUserWeight = true;
+    }
+
     try {
-      // Call the API which now returns { success: true, id: 'deleted_id' }
+      // Call the API
       const result = await apiService.goals.deleteWeightLogEntry(id);
 
-      // Find the new latest weight AFTER successful deletion, sorting by timestamp
+      // After server confirms, get the new latest weight
       const remainingLog = get().weightLog.filter(
         (entry) => entry.id !== result.id
       );
@@ -384,61 +395,47 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
       );
-      // newLatestWeight will be null if sortedRemainingLog is empty
       const newLatestWeight =
         sortedRemainingLog.length > 0 ? sortedRemainingLog[0].weight : null;
 
-      set({
-        weightLog: sortedRemainingLog, // Update state with the filtered and sorted log
+      set((state) => ({
+        weightLog: sortedRemainingLog,
+        weightGoals: state.weightGoals
+          ? {
+              ...state.weightGoals,
+              currentWeight: newLatestWeight ?? state.weightGoals.currentWeight,
+            }
+          : null,
         isSaving: false,
+      }));
+
+      if (shouldUpdateUserWeight && newLatestWeight !== null) {
+        fullGet().updateCurrentUserWeight?.(newLatestWeight);
+      }
+      fullGet().addNotification?.({
+        message: SUCCESS_MESSAGES.weightDeleted,
+        type: "success",
       });
-
-      // Update user slice ONLY if a latest weight exists
-      if (fullGet().updateCurrentUserWeight && newLatestWeight !== null) {
-        console.log(
-          `[GoalsSlice] Deleting log entry, updating user weight to: ${newLatestWeight}`
-        );
-        fullGet().updateCurrentUserWeight(newLatestWeight);
-      } else {
-        console.log(
-          "[GoalsSlice] Deleting last log entry, NOT updating user weight in store."
-        );
-        // If newLatestWeight is null, do nothing to the userSlice weight
-      }
-
-      // Notification
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: SUCCESS_MESSAGES.weightDeleted,
-          type: "success",
-        });
-      }
     } catch (error) {
+      // Rollback optimistic update on error
+      set((state) => ({
+        weightLog: prevLog,
+        weightGoals: state.weightGoals
+          ? {
+              ...state.weightGoals,
+              currentWeight:
+                prevLog[0]?.weight ?? state.weightGoals.currentWeight,
+            }
+          : null,
+        isSaving: false,
+      }));
       const errorMessage = getErrorMessage(error);
       console.error(`Error deleting weight log entry with id ${id}:`, error);
-      set({ error: errorMessage, isSaving: false });
-      if (fullGet().addNotification?.call) {
-        fullGet().addNotification({
-          message: `${ERROR_MESSAGES.weightDelete}: ${errorMessage}`,
-          type: "error",
-        });
-      }
-      // Re-throw might not be needed unless handled specifically higher up
-      // throw error;
+      set({ error: errorMessage });
+      fullGet().addNotification?.({
+        message: `${ERROR_MESSAGES.weightDelete}: ${errorMessage}`,
+        type: "error",
+      });
     }
   },
 });
-
-// Helper type definition (assuming it's needed by the slice)
-interface WeightGoals {
-  startingWeight: number;
-  currentWeight: number; // Added for clarity if backend provides it
-  targetWeight: number | null;
-  weightGoal: "lose" | "maintain" | "gain" | null;
-  startDate: string | null;
-  targetDate: string | null;
-  calorieTarget: number | null;
-  calculatedWeeks: number | null;
-  weeklyChange: number | null;
-  dailyChange: number | null;
-}
