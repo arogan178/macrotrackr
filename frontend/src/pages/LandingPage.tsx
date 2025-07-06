@@ -348,10 +348,10 @@ const LandingPage: React.FC = () => {
       </section>
 
       {/* Enhanced Features Section with Scroll Animations */}
-      <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <ScrollTriggeredDiv className="text-center mb-20">
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6">
+      <section className="relative z-10 py-24 px-6 sm:px-8 lg:px-16 overflow-visible">
+        <div className="mx-auto">
+          <ScrollTriggeredDiv className="text-center mb-20 overflow-visible">
+            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 px-4 sm:px-8 overflow-visible">
               Everything You Need to Succeed
             </h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
