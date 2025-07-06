@@ -1,0 +1,48 @@
+module.exports = {
+  apps: [
+    {
+      name: 'macro-tracker-api',
+      cwd: './backend',
+      script: 'bun',
+      args: 'run start',
+      instances: 1,
+      exec_mode: 'fork',
+      env_file: './.env',
+      env: {
+        NODE_ENV: 'production'
+      },
+      log_file: './logs/api.log',
+      error_file: './logs/api-error.log',
+      out_file: './logs/api-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+      merge_logs: true,
+      max_memory_restart: '1G',
+      watch: false,
+      ignore_watch: ['node_modules', 'logs', '*.log'],
+      restart_delay: 1000,
+      max_restarts: 10,
+      min_uptime: '10s'
+    },
+    {
+      name: 'macro-frontend',
+      cwd: './frontend',
+      script: 'bunx',
+      args: 'serve ./dist --single --listen 5173',
+      instances: 1,
+      exec_mode: 'fork',
+      env: {
+        NODE_ENV: 'production'
+      },
+      log_file: './logs/frontend.log',
+      error_file: './logs/frontend-error.log',
+      out_file: './logs/frontend-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss',
+      merge_logs: true,
+      max_memory_restart: '500M',
+      watch: false,
+      restart_delay: 1000,
+      max_restarts: 5,
+      min_uptime: '5s'
+    }
+  ]
+};
