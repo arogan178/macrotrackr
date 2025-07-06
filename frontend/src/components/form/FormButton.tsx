@@ -1,4 +1,4 @@
-import { memo, ReactNode } from "react";
+import { memo } from "react";
 import { LoadingSpinnerIcon } from "../Icons";
 import {
   BUTTON_VARIANTS,
