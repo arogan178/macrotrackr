@@ -641,6 +641,7 @@ const LandingPage: React.FC = () => {
           </motion.p>
           <Link to="/register">
             <motion.div
+              className="inline-block"
               whileHover={{
                 scale: 1.08,
                 y: -6,
