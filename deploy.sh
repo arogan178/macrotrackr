@@ -53,6 +53,10 @@ else
     echo "✅ Frontend dist folder found"
 fi
 
+# Install serve package for static file serving
+echo "Installing serve package..."
+bun add serve
+
 # Go back to root directory for PM2 ecosystem
 cd ..
 
