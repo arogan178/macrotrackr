@@ -55,8 +55,7 @@ export const calculateDailyTotals = (
 export const getTodayEntries = (entries: MacroEntry[]): MacroEntry[] => {
   const today = getTodayDateString();
   return entries.filter((entry) => {
-    const entryDate =
-      entry.entryDate || entry.entry_date || entry.created_at.split("T")[0];
+    const entryDate = entry.entryDate || entry.createdAt?.split("T")[0];
     return entryDate === today;
   });
 };
