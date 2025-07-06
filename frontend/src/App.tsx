@@ -25,6 +25,11 @@ const PricingPage = React.lazy(
   () => import("@/features/pricing/pages/PricingPage")
 );
 const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
+const LandingPage = React.lazy(() => import("./pages/LandingPage"));
+const TermsAndConditionsPage = React.lazy(
+  () => import("./pages/TermsAndConditionsPage")
+);
+const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage"));
 
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {
@@ -84,7 +89,7 @@ function AppContent() {
       const lastVisited = localStorage.getItem("lastVisitedRoute");
       // Only redirect if on / or /login
       if (
-        (location.pathname === "/" || location.pathname === "/login") &&
+        location.pathname === "/login" &&
         lastVisited &&
         lastVisited !== location.pathname
       ) {
@@ -98,19 +103,7 @@ function AppContent() {
     <ErrorBoundary>
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
-          <Route
-            path="/"
-            element={
-              isAuthenticated ? (
-                <Navigate
-                  to={localStorage.getItem("lastVisitedRoute") || "/home"}
-                  replace
-                />
-              ) : (
-                <Navigate to="/login" replace />
-              )
-            }
-          />
+          <Route path="/" element={<LandingPage />} />
           <Route
             path="/home"
             element={
@@ -136,14 +129,13 @@ function AppContent() {
           <Route
             path="/login"
             element={
-              !isAuthenticated ? (
-                <AuthPage />
-              ) : (
-                <Navigate
-                  to={localStorage.getItem("lastVisitedRoute") || "/home"}
-                  replace
-                />
-              )
+              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
             }
           />
           <Route
@@ -158,6 +150,8 @@ function AppContent() {
           />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
+          <Route path="/terms" element={<TermsAndConditionsPage />} />
+          <Route path="/privacy" element={<PrivacyPolicyPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>
