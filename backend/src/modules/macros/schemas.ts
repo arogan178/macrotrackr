@@ -91,7 +91,7 @@ export const MacroSchemas = {
     mealName: t.Optional(t.String()), // camelCase
     entryDate: DateSchema,
     entryTime: TimeSchema,
-    createdAt: t.Union([t.Date(), t.String()]),
+    createdAt: t.String(), // Accept any string format for timestamp
   }),
   macroTotals: t.Object({
     protein: t.Number(),
