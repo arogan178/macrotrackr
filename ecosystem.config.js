@@ -26,8 +26,7 @@ module.exports = {
     {
       name: "macro-frontend",
       cwd: "./frontend",
-      script: "bunx",
-      args: "serve ./dist --single --listen 5173",
+      script: "bunx serve ./dist --single --listen 5173",
       instances: 1,
       exec_mode: "fork",
       env: {
