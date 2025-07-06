@@ -81,13 +81,13 @@ export function useReportingLogic(
       }
 
       currentHistory.forEach((entry: MacroEntry) => {
-        if (!entry.created_at) return;
+        if (!entry.createdAt) return;
 
         let entryDateStr: string;
-        if (entry.entry_date) {
-          entryDateStr = entry.entry_date;
+        if (entry.entryDate) {
+          entryDateStr = entry.entryDate;
         } else {
-          const createdAtDate = new Date(entry.created_at);
+          const createdAtDate = new Date(entry.createdAt);
           const year = createdAtDate.getFullYear();
           const month = (createdAtDate.getMonth() + 1)
             .toString()
@@ -143,10 +143,10 @@ export function useReportingLogic(
 
     const relevantEntries = history.filter((entry) => {
       let entryDateStr: string;
-      if (entry.entry_date) {
-        entryDateStr = entry.entry_date;
-      } else if (entry.created_at) {
-        const createdAtDate = new Date(entry.created_at);
+      if (entry.entryDate) {
+        entryDateStr = entry.entryDate;
+      } else if (entry.createdAt) {
+        const createdAtDate = new Date(entry.createdAt);
         entryDateStr = `${createdAtDate.getFullYear()}-${(
           createdAtDate.getMonth() + 1
         )
