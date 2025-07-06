@@ -8,7 +8,7 @@ pnpm-debug.log*
 lerna-debug.log*
 .github
 node_modules
-dist
+backend/dist
 dist-ssr
 *.local
 
