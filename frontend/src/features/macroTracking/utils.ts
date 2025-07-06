@@ -37,9 +37,7 @@ export const areEntriesSame = (
     entry1.carbs === entry2.carbs &&
     entry1.fats === entry2.fats &&
     entry1.mealType === entry2.mealType &&
-    (entry1.entryDate || entry1.entry_date) ===
-      (entry2.entryDate || entry2.entry_date) &&
-    (entry1.entryTime || entry1.entry_time) ===
-      (entry2.entryTime || entry2.entry_time)
+    entry1.entryDate === entry2.entryDate &&
+    entry1.entryTime === entry2.entryTime
   );
 };

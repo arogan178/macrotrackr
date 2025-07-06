@@ -33,7 +33,7 @@ export const filterEntriesByDateRange = (
   endDate: string
 ): MacroEntry[] => {
   return entries.filter((entry) =>
-    isWithinDateRange(entry.entry_date, startDate, endDate)
+    isWithinDateRange(entry.entryDate, startDate, endDate)
   );
 };
 
@@ -47,7 +47,7 @@ export const filterEntriesByMealType = (
 // Data grouping utilities
 export const groupEntriesByDate = (entries: MacroEntry[]): GroupedData => {
   return entries.reduce((groups: GroupedData, entry) => {
-    const date = entry.entry_date;
+    const date = entry.entryDate;
     if (!groups[date]) {
       groups[date] = [];
     }
@@ -160,7 +160,7 @@ export const calculateCompletionRate = (
 };
 
 export const getUniqueLoggedDates = (entries: MacroEntry[]): string[] => {
-  const uniqueDates = new Set(entries.map((entry) => entry.entry_date));
+  const uniqueDates = new Set(entries.map((entry) => entry.entryDate));
   return Array.from(uniqueDates).sort();
 };
 

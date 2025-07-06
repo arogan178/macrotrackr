@@ -54,8 +54,8 @@ export default function HomePage() {
         fats: entry.fats,
         mealType: entry.mealType,
         mealName: entry.mealName,
-        entryDate: entry.entryDate || entry.entry_date || "",
-        entryTime: entry.entryTime || entry.entry_time || "",
+        entryDate: entry.entryDate || "",
+        entryTime: entry.entryTime || "",
       });
     },
     [updateEntry]
