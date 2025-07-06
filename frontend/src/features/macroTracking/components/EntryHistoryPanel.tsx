@@ -29,8 +29,7 @@ const formatEntryDate = (dateStr: string): string =>
 
 const formatTimeFromEntry = (entry: MacroEntry): string =>
   entry.entryTime ||
-  entry.entry_time ||
-  new Date(entry.created_at).toLocaleTimeString([], {
+  new Date(entry.createdAt).toLocaleTimeString([], {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
@@ -57,10 +56,8 @@ const exportCSV = (history: MacroEntry[]) => {
     ...history.map(
       (entry) =>
         `${
-          entry.entryDate ||
-          entry.entry_date ||
-          new Date(entry.created_at).toLocaleDateString()
-        },${new Date(entry.created_at).toLocaleTimeString()},${
+          entry.entryDate || new Date(entry.createdAt).toLocaleDateString()
+        },${new Date(entry.createdAt).toLocaleTimeString()},${
           entry.mealType || ""
         },${entry.foodName || entry.mealName || ""},${entry.protein},${
           entry.carbs
@@ -113,9 +110,7 @@ const EntryHistoryComponent = function EntryHistory({
   // Memoize grouped entries with totals and filter by show more state
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
     const grouped = history.reduce((acc, entry) => {
-      const dateKey = formatEntryDate(
-        entry.entryDate || entry.entry_date || entry.created_at
-      );
+      const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
       if (!acc[dateKey]) acc[dateKey] = [];
       acc[dateKey].push(entry);
       return acc;
@@ -148,16 +143,8 @@ const EntryHistoryComponent = function EntryHistory({
       }))
       .sort(
         (a, b) =>
-          new Date(
-            b.entries[0].entryDate ||
-              b.entries[0].entry_date ||
-              b.entries[0].created_at
-          ).getTime() -
-          new Date(
-            a.entries[0].entryDate ||
-              a.entries[0].entry_date ||
-              a.entries[0].created_at
-          ).getTime()
+          new Date(b.entries[0].entryDate || b.entries[0].createdAt).getTime() -
+          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime()
       );
 
     const displayed = showAllDates ? allEntries : allEntries.slice(0, 5);

@@ -14,7 +14,7 @@ export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
 export interface MacroEntry {
   id: number;
-  created_at: string;
+  createdAt: string;
   protein: number;
   carbs: number;
   fats: number;
@@ -22,9 +22,6 @@ export interface MacroEntry {
   mealName: string;
   entryDate: string;
   entryTime: string;
-  // Keep these for backward compatibility during migration
-  entry_date?: string;
-  entry_time?: string;
   foodName?: string;
 }
 

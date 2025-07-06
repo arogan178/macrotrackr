@@ -33,9 +33,7 @@ interface MacroEntry {
   mealName: string | null;
   entryDate?: string;
   entryTime?: string;
-  entry_date?: string; // fallback for migration
-  entry_time?: string; // fallback for migration
-  created_at: string;
+  createdAt: string;
 }
 
 const formatMealType = (mealType: string) =>
@@ -118,8 +116,7 @@ function MealTimeBreakdown({
     end.setHours(23, 59, 59, 999);
 
     return history.filter((entry) => {
-      const dateStr =
-        entry.entryDate || entry.entry_date || entry.created_at?.split("T")[0];
+      const dateStr = entry.entryDate || entry.createdAt?.split("T")[0];
       if (!dateStr) return false;
 
       const entryDate = new Date(dateStr);
