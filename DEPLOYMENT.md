@@ -1,8 +1,50 @@
 # Deployment Guide
 
-## Environment Variables Setup
+## Prerequisites
 
-The backend requires several environment variables to be set. These are configured in `.env.production` for production deployments.
+### Environment Variables Setup
+
+**IMPORTANT**: Environment files are excluded from git for security reasons. You must manually create the `.env.production` file on your production server before deploying.
+
+The backend requires several environment variables to be set. Create the file `/var/www/macro-tracker/backend/.env.production` with the following content:
+
+```bash
+# .env - Environment variables for Macro Trackr Backend
+
+# --- Server Configuration ---
+NODE_ENV=production
+PORT=3000
+HOST=0.0.0.0
+
+# --- Database Configuration ---
+DATABASE_PATH=./macro_tracker.db
+
+# --- Security ---
+JWT_SECRET=your_jwt_secret_here_minimum_32_characters
+
+# --- CORS ---
+CORS_ORIGIN=https://macrotrackr.com
+
+# --- Stripe Configuration ---
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+STRIPE_PRICE_ID_MONTHLY=your_monthly_price_id
+STRIPE_PRICE_ID_YEARLY=your_yearly_price_id
+
+# --- Email Configuration ---
+RESEND_API_KEY=your_resend_api_key
+```
+
+### Creating the Environment File on Server
+
+On your production server, run:
+
+```bash
+cd /var/www/macro-tracker/backend
+nano .env.production
+# Copy and paste the content above with your actual values
+# Save and exit (Ctrl+X, then Y, then Enter in nano)
+```
 
 Required environment variables:
 - `JWT_SECRET` - Secret key for JWT token signing (minimum 32 characters)
@@ -50,10 +92,30 @@ pm2 restart macro-frontend || pm2 start ecosystem.config.js --only macro-fronten
 ## Troubleshooting
 
 ### Environment Variables Error
-If you see "Invalid environment variables" errors, check:
-1. `.env.production` file exists in the backend directory
-2. All required environment variables are set in `.env.production`
-3. The deployment script successfully copied `.env.production` to `.env`
+
+If you see "❌ Error: .env.production file not found!" during deployment:
+
+1. **Create the missing file**: Environment files are gitignored for security, so you need to create `.env.production` manually on your server:
+   ```bash
+   cd /var/www/macro-tracker/backend
+   nano .env.production
+   # Add your production environment variables (see template above)
+   ```
+
+2. **Verify the file exists**:
+   ```bash
+   ls -la /var/www/macro-tracker/backend/.env.production
+   ```
+
+3. **Check file permissions**:
+   ```bash
+   chmod 600 /var/www/macro-tracker/backend/.env.production
+   ```
+
+If you see "Invalid environment variables" errors after creating the file:
+1. Check that all required environment variables are set in `.env.production`
+2. Ensure there are no syntax errors or missing quotes in the file
+3. Verify that the values are correct (especially check for trailing spaces)
 
 ### PM2 Issues
 View logs:
