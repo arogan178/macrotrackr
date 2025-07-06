@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from "motion/react";
 import TabButton from "@/components/form/TabButton";
 interface PricingTableProps {
   onUpgrade?: (plan: "monthly" | "yearly") => void;
+  showProButton?: boolean;
 }
 
 interface FeatureRow {
@@ -28,6 +29,7 @@ interface FeatureRow {
  */
 
 export const PricingTable: React.FC<PricingTableProps> = (props) => {
+  const showProButton = props.showProButton !== false;
   const [selectedPlan, setSelectedPlan] = React.useState<"monthly" | "yearly">(
     "monthly"
   );
@@ -364,31 +366,33 @@ export const PricingTable: React.FC<PricingTableProps> = (props) => {
           </table>
         </div>
       </div>
-      <div className="mt-5 flex flex-col items-center">
-        <button
-          className="w-full max-w-xs bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-extrabold py-4 px-12 rounded-2xl text-xl shadow-2xl focus:outline-none focus:ring-4 focus:ring-yellow-300 border-0 mb-2 transition-all duration-150 tracking-wide drop-shadow-lg active:scale-95"
-          style={{ transition: "transform 0.1s" }}
-          onClick={() => props.onUpgrade && props.onUpgrade(selectedPlan)}
-          aria-label="Upgrade to Pro"
-        >
-          Get Started with Pro
-        </button>
-        <AnimatePresence mode="wait">
-          <motion.span
-            key={selectedPlan}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="text-xs text-yellow-700 font-medium dark:text-yellow-200"
-            style={{ marginTop: "8px" }}
+      {showProButton && (
+        <div className="mt-5 flex flex-col items-center">
+          <button
+            className="w-full max-w-xs bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-extrabold py-4 px-12 rounded-2xl text-xl shadow-2xl focus:outline-none focus:ring-4 focus:ring-yellow-300 border-0 mb-2 transition-all duration-150 tracking-wide drop-shadow-lg active:scale-95"
+            style={{ transition: "transform 0.1s" }}
+            onClick={() => props.onUpgrade && props.onUpgrade(selectedPlan)}
+            aria-label="Upgrade to Pro"
           >
-            {selectedPlan === "monthly"
-              ? "$6.99/month • Cancel anytime"
-              : "$59.99/year • $4.99/mo equivalent • Cancel anytime"}
-          </motion.span>
-        </AnimatePresence>
-      </div>
+            Get Started with Pro
+          </button>
+          <AnimatePresence mode="wait">
+            <motion.span
+              key={selectedPlan}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="text-xs text-yellow-700 font-medium dark:text-yellow-200"
+              style={{ marginTop: "8px" }}
+            >
+              {selectedPlan === "monthly"
+                ? "$6.99/month • Cancel anytime"
+                : "$59.99/year • $4.99/mo equivalent • Cancel anytime"}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+      )}
     </>
   );
 };
