@@ -23,6 +23,23 @@ if [ -f .env.production ]; then
     echo "✅ Production environment variables copied"
 else
     echo "❌ Error: .env.production file not found!"
+    echo ""
+    echo "The .env.production file needs to be created manually on the server"
+    echo "because environment files are excluded from git for security reasons."
+    echo ""
+    echo "Please create /var/www/macro-tracker/backend/.env.production with your"
+    echo "production environment variables, then run this script again."
+    echo ""
+    echo "Required variables:"
+    echo "- JWT_SECRET"
+    echo "- STRIPE_SECRET_KEY"
+    echo "- STRIPE_WEBHOOK_SECRET" 
+    echo "- STRIPE_PRICE_ID_MONTHLY"
+    echo "- STRIPE_PRICE_ID_YEARLY"
+    echo "- RESEND_API_KEY"
+    echo "- CORS_ORIGIN"
+    echo ""
+    echo "See DEPLOYMENT.md for detailed instructions."
     exit 1
 fi
 
