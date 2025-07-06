@@ -43,11 +43,17 @@ else
     exit 1
 fi
 
+
+# Build frontend
+echo "Building frontend..."
+cd ../frontend
+bun install --frozen-lockfile
+bun run build
+
 # Check if frontend dist folder exists
 echo "Checking frontend dist folder..."
-cd ../frontend
 if [ ! -d "./dist" ]; then
-    echo "❌ Frontend dist folder not found - please build locally and commit dist folder"
+    echo "❌ Frontend dist folder not found after build!"
     exit 1
 else
     echo "✅ Frontend dist folder found"
