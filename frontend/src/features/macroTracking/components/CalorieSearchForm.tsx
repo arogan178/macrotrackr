@@ -31,21 +31,21 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     setLoading(true);
     setError("");
     try {
-      const apiKey = import.meta.env.VITE_CALORIE_NINJA_API_KEY;
-      const url = `https://api.calorieninjas.com/v1/nutrition?query=${encodeURIComponent(
+      const appId = import.meta.env.VITE_EDAMAM_APP_ID;
+      const appKey = import.meta.env.VITE_EDAMAM_APP_KEY;
+      const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${appId}&app_key=${appKey}&ingr=${encodeURIComponent(
         query
       )}`;
-      const response = await fetch(url, {
-        headers: { "X-Api-Key": apiKey },
-      });
+      const response = await fetch(url);
       const data = await response.json();
-      if (data.items && data.items.length > 0) {
-        const first = data.items[0];
+
+      if (data.parsed && data.parsed.length > 0) {
+        const food = data.parsed[0].food;
         onResult({
-          protein: String(first.protein_g),
-          carbs: String(first.carbohydrates_total_g),
-          fats: String(first.fat_total_g),
-          name: query, // Use the query as the name
+          protein: String(food.nutrients.PROCNT),
+          carbs: String(food.nutrients.CHOCDF),
+          fats: String(food.nutrients.FAT),
+          name: food.label,
         });
       } else {
         setError("No results found for this food item");
