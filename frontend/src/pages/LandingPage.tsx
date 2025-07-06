@@ -13,13 +13,19 @@ const ScrollTriggeredDiv: React.FC<{
 }> = ({ children, className = "", delay = 0 }) => {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
-
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
-      transition={{ duration: 0.8, delay, ease: "easeOut" }}
+      initial={{ opacity: 0, y: 48 }}
+      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 48 }}
+      transition={{
+        type: "spring",
+        stiffness: 420,
+        damping: 32,
+        duration: 0.65,
+        delay,
+        ease: "easeOut",
+      }}
       className={className}
     >
       {children}
@@ -103,9 +109,15 @@ const LandingPage: React.FC = () => {
         <div className="max-w-7xl mx-auto">
           <div className="text-center">
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 32 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, ease: "easeOut" }}
+              transition={{
+                type: "spring",
+                stiffness: 420,
+                damping: 32,
+                duration: 0.7,
+                ease: "easeOut",
+              }}
               className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8"
             >
               <span className="block bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text">
@@ -119,7 +131,14 @@ const LandingPage: React.FC = () => {
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+              transition={{
+                type: "spring",
+                stiffness: 420,
+                damping: 32,
+                duration: 0.7,
+                delay: 0.15,
+                ease: "easeOut",
+              }}
               className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-300 mb-12 leading-relaxed"
             >
               The most intuitive macro tracking app designed to help you reach
@@ -130,19 +149,26 @@ const LandingPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: "easeOut" }}
+              transition={{
+                type: "spring",
+                stiffness: 420,
+                damping: 32,
+                duration: 0.7,
+                delay: 0.3,
+                ease: "easeOut",
+              }}
               className="flex flex-col items-center mb-12"
             >
               <Link to="/register">
                 <motion.div
                   whileHover={{
-                    scale: 1.07,
-                    y: -4,
+                    scale: 1.08,
+                    y: -6,
                     boxShadow:
-                      "0 8px 32px 0 rgba(79,70,229,0.35), 0 1.5px 8px 0 rgba(79,70,229,0.10)",
+                      "0 12px 36px 0 rgba(79,70,229,0.38), 0 2px 12px 0 rgba(79,70,229,0.12)",
                   }}
-                  whileTap={{ scale: 0.97 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                  whileTap={{ scale: 0.96, y: 0 }}
+                  transition={{ type: "spring", stiffness: 500, damping: 32 }}
                   className="mb-6"
                 >
                   <FormButton
@@ -159,8 +185,14 @@ const LandingPage: React.FC = () => {
                 className="text-slate-300 text-lg font-medium mb-6"
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.5 }}
-                whileHover={{ scale: 1.02, color: "#e2e8f0" }}
+                transition={{
+                  type: "spring",
+                  stiffness: 420,
+                  damping: 32,
+                  duration: 0.5,
+                  delay: 0.45,
+                }}
+                whileHover={{ scale: 1.03, color: "#e2e8f0" }}
               >
                 Join others taking control of their nutrition
               </motion.p>
@@ -610,13 +642,13 @@ const LandingPage: React.FC = () => {
           <Link to="/register">
             <motion.div
               whileHover={{
-                scale: 1.07,
-                y: -4,
+                scale: 1.08,
+                y: -6,
                 boxShadow:
-                  "0 8px 32px 0 rgba(79,70,229,0.35), 0 1.5px 8px 0 rgba(79,70,229,0.10)",
+                  "0 12px 36px 0 rgba(79,70,229,0.38), 0 2px 12px 0 rgba(79,70,229,0.12)",
               }}
-              whileTap={{ scale: 0.97 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              whileTap={{ scale: 0.96, y: 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 32 }}
             >
               <FormButton
                 text="Get Started For Free"
@@ -626,6 +658,8 @@ const LandingPage: React.FC = () => {
               />
             </motion.div>
           </Link>
+          {/* Add margin below the button for spacing if needed */}
+          <div className="mb-6" />
         </ScrollTriggeredDiv>
       </section>
 
@@ -642,37 +676,6 @@ const LandingPage: React.FC = () => {
                 The most intuitive macro tracking app for achieving your fitness
                 and nutrition goals.
               </p>
-            </div>
-
-            {/* Support */}
-            <div className="">
-              <h4 className="font-semibold text-white mb-6">Support</h4>
-              <ul className="space-y-3 text-slate-400">
-                <li>
-                  <Link
-                    to="/terms"
-                    className="hover:text-white transition-colors duration-200"
-                  >
-                    Terms & Conditions
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    to="/privacy"
-                    className="hover:text-white transition-colors duration-200"
-                  >
-                    Privacy Policy
-                  </Link>
-                </li>
-                <li>
-                  <a
-                    href="mailto:contact@macrotrackr.com"
-                    className="hover:text-white transition-colors duration-200"
-                  >
-                    Contact
-                  </a>
-                </li>
-              </ul>
             </div>
           </div>
 
