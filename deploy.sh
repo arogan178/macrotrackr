@@ -43,15 +43,14 @@ else
     exit 1
 fi
 
-# Install frontend dependencies and build the static site
-echo "Building frontend..."
+# Check if frontend dist folder exists
+echo "Checking frontend dist folder..."
 cd ../frontend
-bun install --frozen-lockfile
-bun run build
-
 if [ ! -d "./dist" ]; then
-    echo "❌ Frontend build failed - dist directory not found"
+    echo "❌ Frontend dist folder not found - please build locally and commit dist folder"
     exit 1
+else
+    echo "✅ Frontend dist folder found"
 fi
 
 # Go back to root directory for PM2 ecosystem
