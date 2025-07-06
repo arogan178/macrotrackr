@@ -30,22 +30,38 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     if (!query) return;
     setLoading(true);
     setError("");
+
+    // Regex to parse quantity and food name from the query
+    const match = query.match(/^(\d*\.?\d+)\s*g\s*(.*)$/i) || query.match(/^(\d*\.?\d+)\s*(.*)$/i);
+    let quantity = 100; // Default to 100g if no quantity is specified
+    let foodName = query;
+
+    if (match) {
+      quantity = parseFloat(match[1]);
+      foodName = match[2].trim();
+    }
+
     try {
       const appId = import.meta.env.VITE_EDAMAM_APP_ID;
       const appKey = import.meta.env.VITE_EDAMAM_APP_KEY;
       const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${appId}&app_key=${appKey}&ingr=${encodeURIComponent(
-        query
+        foodName
       )}`;
       const response = await fetch(url);
       const data = await response.json();
 
       if (data.parsed && data.parsed.length > 0) {
         const food = data.parsed[0].food;
+        const nutrients = food.nutrients;
+
+        // The API returns nutrients per 100g. We calculate based on the user's quantity.
+        const multiplier = quantity / 100;
+
         onResult({
-          protein: String(food.nutrients.PROCNT),
-          carbs: String(food.nutrients.CHOCDF),
-          fats: String(food.nutrients.FAT),
-          name: food.label,
+          protein: String((nutrients.PROCNT || 0) * multiplier),
+          carbs: String((nutrients.CHOCDF || 0) * multiplier),
+          fats: String((nutrients.FAT || 0) * multiplier),
+          name: query, // Use the original query as the name
         });
       } else {
         setError("No results found for this food item");
