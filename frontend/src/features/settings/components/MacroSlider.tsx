@@ -75,7 +75,7 @@ export default function MacroSlider({
             <button
               onClick={onToggleLock}
               type="button"
-              className={`p-1.5 rounded-full ${
+              className={`p-1.5 rounded-full cursor-pointer ${
                 isLocked
                   ? `${textLocked} ${bgLocked}`
                   : "text-gray-500 hover:text-gray-300"

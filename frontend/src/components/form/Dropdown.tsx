@@ -12,7 +12,7 @@ function Dropdown({
 }: DropdownProps) {
   const selectClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
-  } ${formStyles.select.base}`;
+  } ${formStyles.select.base} cursor-pointer`;
 
   return (
     <div className={formStyles.container}>
@@ -30,6 +30,7 @@ function Dropdown({
               value={option.value}
               disabled={option.value === ""}
               hidden={option.value === ""}
+              className="cursor-pointer"
             >
               {option.label}
             </option>
