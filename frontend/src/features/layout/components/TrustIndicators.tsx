@@ -37,8 +37,6 @@ const indicators = [
   },
 ];
 
-
-
 const TrustIndicators: React.FC = () => (
   <motion.div
     initial="hidden"
@@ -59,10 +57,7 @@ const TrustIndicators: React.FC = () => (
     }}
     className="mt-16 text-center"
   >
-    <motion.div
-      className="grid grid-cols-1 md:grid-cols-3 gap-8"
-      variants={{}}
-    >
+    <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={{}}>
       {indicators.map((item) => (
         <motion.div
           key={item.title}
