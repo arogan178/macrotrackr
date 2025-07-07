@@ -31,8 +31,7 @@ export const formStyles = {
     primary: `text-white bg-gradient-to-r from-indigo-600 to-blue-500 
               hover:from-indigo-500 hover:to-blue-400 shadow-lg shadow-indigo-500/30`,
     secondary: "border border-gray-600/50 text-gray-300 hover:bg-gray-700/50",
-    common:
-      "disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]",
+    common: "disabled:opacity-50 transition-all duration-300 transform",
   },
   tab: {
     base: "py-3 px-6 font-medium text-sm focus:outline-none",

@@ -16,12 +16,13 @@ function SaveButton({
       className="px-8 py-3 rounded-lg font-semibold text-white text-lg
               bg-gradient-to-r from-indigo-500 via-blue-500 to-indigo-600 
               hover:from-indigo-400 hover:via-blue-400 hover:to-indigo-500
-              disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
+              disabled:opacity-50 disabled:hover:from-indigo-500 disabled:hover:via-blue-500 disabled:hover:to-indigo-600
+              transition-all duration-300 transform hover:scale-[1.02] disabled:hover:scale-100
               shadow-lg shadow-indigo-500/30 relative overflow-hidden
               before:absolute before:inset-0 before:bg-gradient-to-r 
               before:from-transparent before:via-white/10 before:to-transparent
-              before:translate-x-[-200%] hover:before:translate-x-[200%]
-              before:transition-transform before:duration-1000"
+              before:translate-x-[-200%] hover:before:translate-x-[200%] disabled:hover:before:translate-x-[-200%]
+              before:transition-transform before:duration-1000 cursor-pointer disabled:cursor-not-allowed"
       aria-busy={loading}
     >
       {loading ? (
