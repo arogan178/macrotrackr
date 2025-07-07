@@ -35,7 +35,7 @@ function FormButton({
   const baseStyles =
     "inline-flex items-center justify-center font-medium transition-all duration-200 " +
     "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 " +
-    "disabled:opacity-70 disabled:cursor-not-allowed rounded-lg";
+    "disabled:opacity-70 disabled:cursor-not-allowed rounded-lg cursor-pointer";
 
   // Size-specific styles
   const sizeStyles = {
