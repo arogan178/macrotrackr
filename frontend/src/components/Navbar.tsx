@@ -1,4 +1,3 @@
-// This file has been moved to src/components/Navbar.tsx
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStore } from "@/store/store";

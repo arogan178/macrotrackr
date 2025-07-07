@@ -1,9 +1,14 @@
+// This file has been moved to src/features/layout/LandingPage.tsx
+
+// Original content has been removed to avoid duplicate route issues.
 import React, { useRef } from "react";
 import { Link } from "react-router-dom";
-import { motion, useInView } from "motion/react";
+import { motion, useInView } from "framer-motion";
 import CustomPricingCards from "../components/CustomPricingCards";
 import FormButton from "@/components/form/FormButton";
 import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
+import { CheckIcon } from "@/components/Icons";
+import { PlusCircle, BarChart, TrendingUp, Star, ShieldCheck } from "lucide-react";
 
 // Enhanced scroll-triggered animation component
 const ScrollTriggeredDiv: React.FC<{
@@ -60,7 +65,7 @@ const LandingPage: React.FC = () => {
               whileHover={{ scale: 1.02 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text pb-1">
                 MacroTrackr
               </h1>
             </motion.div>
@@ -118,12 +123,12 @@ const LandingPage: React.FC = () => {
                 duration: 0.7,
                 ease: "easeOut",
               }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight mb-8"
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-8"
             >
-              <span className="block bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text">
+              <span className="block bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text pb-4">
                 Track Your Macros
               </span>
-              <span className="block bg-gradient-to-r from-indigo-200 via-blue-200 to-white text-transparent bg-clip-text">
+              <span className="block bg-gradient-to-r from-indigo-200 via-blue-200 to-white text-transparent bg-clip-text pb-4">
                 Achieve Your Goals
               </span>
             </motion.h1>
@@ -213,17 +218,7 @@ const LandingPage: React.FC = () => {
                   className="flex items-center space-x-3"
                 >
                   <div className="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5 text-green-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckIcon className="w-5 h-5 text-green-400" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">Easy Setup</h4>
@@ -240,17 +235,7 @@ const LandingPage: React.FC = () => {
                   className="flex items-center space-x-3"
                 >
                   <div className="w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5 text-blue-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckIcon className="w-5 h-5 text-blue-400" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">
@@ -269,17 +254,7 @@ const LandingPage: React.FC = () => {
                   className="flex items-center space-x-3"
                 >
                   <div className="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
-                    <svg
-                      className="w-5 h-5 text-purple-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
+                    <CheckIcon className="w-5 h-5 text-purple-400" />
                   </div>
                   <div>
                     <h4 className="font-semibold text-white">
@@ -300,45 +275,15 @@ const LandingPage: React.FC = () => {
                 className="flex flex-col sm:flex-row items-center justify-center mt-6 pt-6 border-t border-slate-700/30 space-y-2 sm:space-y-0 sm:space-x-8 text-slate-400 text-sm"
               >
                 <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-4 h-4 text-green-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <ShieldCheck className="w-4 h-4 text-green-400" />
                   <span>Always Free Version</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-4 h-4 text-green-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <ShieldCheck className="w-4 h-4 text-green-400" />
                   <span>No Credit Card Required</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <svg
-                    className="w-4 h-4 text-green-400"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <ShieldCheck className="w-4 h-4 text-green-400" />
                   <span>Cancel Anytime</span>
                 </div>
               </motion.div>
@@ -351,7 +296,7 @@ const LandingPage: React.FC = () => {
       <section className="relative z-10 py-24 px-6 sm:px-8 lg:px-16 overflow-visible">
         <div className="mx-auto">
           <ScrollTriggeredDiv className="text-center mb-20 overflow-visible">
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 px-4 sm:px-8 overflow-visible">
+            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 pb-2">
               Everything You Need to Succeed
             </h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
@@ -367,19 +312,7 @@ const LandingPage: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 to-blue-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
-                      />
-                    </svg>
+                    <PlusCircle className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-4">
                     Smart Meal Logging
@@ -398,19 +331,7 @@ const LandingPage: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-purple-500/10 to-indigo-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                      />
-                    </svg>
+                    <BarChart className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-4">
                     Personal Goal Setting
@@ -429,19 +350,7 @@ const LandingPage: React.FC = () => {
                 <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-cyan-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                 <div className="relative">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
-                    <svg
-                      className="w-8 h-8 text-white"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"
-                      />
-                    </svg>
+                    <TrendingUp className="w-8 h-8 text-white" />
                   </div>
                   <h3 className="text-xl font-semibold text-white mb-4">
                     Advanced Analytics
@@ -461,7 +370,7 @@ const LandingPage: React.FC = () => {
       <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6">
+            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 pb-2">
               Choose Your Plan
             </h2>
             <p className="text-xl text-slate-400 max-w-3xl mx-auto">
@@ -478,7 +387,7 @@ const LandingPage: React.FC = () => {
       <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
           <ScrollTriggeredDiv className="text-center mb-16">
-            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6">
+            <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 pb-2">
               What Users Say
             </h2>
             <p className="text-xl text-slate-400 mb-8">
@@ -492,14 +401,7 @@ const LandingPage: React.FC = () => {
               <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl hover:shadow-indigo-500/10">
                 <div className="flex items-start space-x-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className="w-5 h-5 text-yellow-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
+                    <Star key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" />
                   ))}
                 </div>
                 <blockquote className="text-slate-300 text-lg leading-relaxed mb-6">
@@ -526,14 +428,7 @@ const LandingPage: React.FC = () => {
               <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl hover:shadow-purple-500/10">
                 <div className="flex items-start space-x-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className="w-5 h-5 text-yellow-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
+                    <Star key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" />
                   ))}
                 </div>
                 <blockquote className="text-slate-300 text-lg leading-relaxed mb-6">
@@ -560,14 +455,7 @@ const LandingPage: React.FC = () => {
               <div className="bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-8 hover:bg-slate-800/70 transition-all duration-300 transform hover:-translate-y-2 hover:shadow-xl hover:shadow-green-500/10">
                 <div className="flex items-start space-x-1 mb-4">
                   {[1, 2, 3, 4, 5].map((star) => (
-                    <svg
-                      key={star}
-                      className="w-5 h-5 text-yellow-400"
-                      fill="currentColor"
-                      viewBox="0 0 20 20"
-                    >
-                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                    </svg>
+                    <Star key={star} className="w-5 h-5 text-yellow-400" fill="currentColor" />
                   ))}
                 </div>
                 <blockquote className="text-slate-300 text-lg leading-relaxed mb-6">
@@ -625,7 +513,7 @@ const LandingPage: React.FC = () => {
           />
 
           <motion.h2
-            className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6"
+            className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 pb-2"
             whileHover={{ scale: 1.02 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
           >
@@ -670,7 +558,7 @@ const LandingPage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
             {/* Brand */}
             <div className="">
-              <h3 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-4">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-4 pb-2">
                 MacroTrackr
               </h3>
               <p className="text-slate-400 text-lg max-w-md">
