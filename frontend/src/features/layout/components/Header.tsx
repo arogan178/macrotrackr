@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import FormButton from "@/components/form/FormButton";
 import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
 
