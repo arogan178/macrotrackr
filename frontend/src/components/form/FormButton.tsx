@@ -1,3 +1,4 @@
+// This file has been moved to src/features/layout/components/FormButton.tsx
 import { memo } from "react";
 import { LoadingSpinnerIcon } from "../Icons";
 import {
