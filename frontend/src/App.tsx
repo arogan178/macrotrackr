@@ -25,7 +25,9 @@ const PricingPage = React.lazy(
   () => import("@/features/pricing/pages/PricingPage")
 );
 const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
-const LandingPage = React.lazy(() => import("./pages/LandingPage"));
+const LandingPage = React.lazy(
+  () => import("./features/layout/pages/LandingPage")
+);
 const TermsAndConditionsPage = React.lazy(
   () => import("./pages/TermsAndConditionsPage")
 );

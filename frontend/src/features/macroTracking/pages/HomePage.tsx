@@ -1,5 +1,5 @@
 import { useEffect, memo, useCallback } from "react";
-import { Navbar } from "@/features/layout/components";
+import Navbar from "@/components/Navbar";
 import { FloatingNotification } from "@/features/notifications/components";
 import { CardContainer } from "@/components/form";
 import {
