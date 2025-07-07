@@ -6,7 +6,7 @@ import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
 
 const Header: React.FC = () => (
   <header className="relative z-10 border-b border-slate-800/50 backdrop-blur-xl bg-slate-900/80 supports-[backdrop-filter]:bg-slate-900/60">
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center py-6">
         <motion.div
           className="flex items-center"
