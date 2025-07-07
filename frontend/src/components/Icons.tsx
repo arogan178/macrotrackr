@@ -60,6 +60,7 @@ import {
   Apple,
   Beef,
   ExternalLink,
+  ShieldCheck,
   type LucideIcon,
   type LucideProps,
 } from "lucide-react";
@@ -172,3 +173,4 @@ export const ClipboardIcon = createIcon(Clipboard);
 export const NutrientIcon = createIcon(Apple);
 export const ProteinIcon = createIcon(Beef);
 export const ExternalLinkIcon = createIcon(ExternalLink);
+export const ShieldCheckIcon = createIcon(ShieldCheck);
