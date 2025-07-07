@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Navbar from "@/features/layout/components/Navbar";
+import Navbar from "@/components/Navbar";
 import { useStore } from "@/store/store";
 import { LineChartComponent, DateRangeSelector } from "@/components/chart";
 import {
