@@ -2,7 +2,7 @@ import React from "react";
 import { PricingTable } from "@/components/PricingTable";
 import { createCheckoutSession } from "@/utils/api-billing";
 import { StarIcon, CircleQuestionMarkIcon } from "@/components/Icons";
-import { Navbar } from "@/features/layout/components";
+import Navbar from "@/components/Navbar";
 
 const testimonials = [
   {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import { Navbar } from "@/features/layout/components";
+import Navbar from "@/components/Navbar";
 import {
   WeightGoalDashboard,
   WeightGoalModal,
