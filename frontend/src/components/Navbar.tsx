@@ -58,7 +58,7 @@ const Navbar: React.FC = () => {
       >
         <div className="flex items-center">
           <button
-            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             onClick={() => handleNavigation("/home")}
             aria-label="Go to home page"
             tabIndex={0}
@@ -72,7 +72,7 @@ const Navbar: React.FC = () => {
             {navItems.map(({ path, label, icon: Icon }) => (
               <button
                 key={path}
-                className={getButtonClass(path)}
+                className={`${getButtonClass(path)} cursor-pointer`}
                 onClick={() => handleNavigation(path)}
                 aria-current={location.pathname === path ? "page" : undefined}
               >
@@ -85,7 +85,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center space-x-2">
           {/* Desktop logout button */}
           <button
-            className="hidden md:flex px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+            className="hidden md:flex px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 cursor-pointer"
             onClick={handleLogout}
             aria-label="Logout"
           >
@@ -95,7 +95,7 @@ const Navbar: React.FC = () => {
 
           {/* Mobile menu button */}
           <motion.button
-            className="md:hidden p-2 rounded-lg text-gray-200 hover:bg-gray-700/50 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            className="md:hidden p-2 rounded-lg text-gray-200 hover:bg-gray-700/50 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMobileMenuOpen}
@@ -145,7 +145,7 @@ const Navbar: React.FC = () => {
                 {navItems.map(({ path, label, icon: Icon }) => (
                   <button
                     key={path}
-                    className={getButtonClass(path, true)}
+                    className={`${getButtonClass(path, true)} cursor-pointer`}
                     onClick={() => handleNavigation(path)}
                     aria-current={
                       location.pathname === path ? "page" : undefined
@@ -158,7 +158,7 @@ const Navbar: React.FC = () => {
 
                 {/* Mobile logout button */}
                 <button
-                  className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 cursor-pointer"
                   onClick={handleLogout}
                   aria-label="Logout"
                 >
