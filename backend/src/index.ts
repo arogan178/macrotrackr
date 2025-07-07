@@ -10,7 +10,6 @@ import {
   correlationMiddleware,
   enhancedApiLogging,
 } from "./middleware/correlation";
-import { compressionMiddleware } from "./middleware/compression";
 import { handleError } from "./lib/responses";
 import { isAppError } from "./lib/errors";
 import { logger } from "./lib/logger";
@@ -276,14 +275,6 @@ app.post(
 // Apply middleware after webhook routes to avoid body consumption conflicts
 app.use(correlationMiddleware);
 app.use(enhancedApiLogging);
-
-// Apply response compression for performance
-app.use(
-  compressionMiddleware({
-    threshold: 1024, // Compress responses > 1KB
-    level: 6, // Balanced compression level
-  })
-);
 
 // Apply rate limiting
 app.use(rateLimiters.api);
