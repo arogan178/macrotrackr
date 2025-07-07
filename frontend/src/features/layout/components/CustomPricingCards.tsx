@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import { useNavigate, Link } from "react-router-dom";
 import { useStore } from "@/store/store";
 import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
-import { PRICING_PLANS } from "@/config/pricing";
+import { PRICING_PLANS, PRICING } from "@/config/pricing";
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
 import TrustIndicators from "./TrustIndicators";
@@ -39,9 +39,13 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
     pro: PRICING_PLANS.pro.features,
   };
 
-  const proPrice = selectedPlan === "monthly" ? 6.99 : 59.99;
+  const proPrice =
+    selectedPlan === "monthly" ? PRICING.monthly : PRICING.yearly;
   const proSuffix = selectedPlan === "monthly" ? "/month" : "/year";
-  const proEquivalent = selectedPlan === "yearly" ? "($4.99/month)" : "";
+  const proEquivalent =
+    selectedPlan === "yearly"
+      ? `($${(PRICING.yearly / 12).toFixed(2)}/month)`
+      : "";
 
   return (
     <div className="w-full max-w-6xl mx-auto">
