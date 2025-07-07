@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, ReactNode } from "react";
-import { Navbar } from "../../layout/components";
+import Navbar from "@/components/Navbar";
 import FloatingNotification from "../../notifications/components/FloatingNotification";
 import { TabButton, SaveButton } from "@/components/form";
 import Modal from "@/components/Modal";
