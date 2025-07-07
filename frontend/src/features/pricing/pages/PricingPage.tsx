@@ -43,7 +43,11 @@ const faqs = [
 /**
  * /pricing page - Feature comparison and upgrade flow
  */
+
 const PricingPage: React.FC = () => {
+  const [selectedPlan, setSelectedPlan] = React.useState<"monthly" | "yearly">(
+    "monthly"
+  );
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
       const { url } = await createCheckoutSession(
@@ -72,7 +76,11 @@ const PricingPage: React.FC = () => {
         </div>
 
         <div className="mb-12">
-          <PricingTable onUpgrade={handleUpgrade} />
+          <PricingTable
+            onUpgrade={handleUpgrade}
+            selectedPlan={selectedPlan}
+            setSelectedPlan={setSelectedPlan}
+          />
         </div>
 
         <div className="mb-12">
