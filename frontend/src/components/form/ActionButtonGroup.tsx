@@ -21,14 +21,14 @@ const ActionButtonGroup = memo(
       <div className="flex justify-center space-x-2">
         <button
           onClick={onEdit}
-          className={`${buttonSize} rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors`}
+          className={`${buttonSize} rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors cursor-pointer`}
           aria-label={editLabel}
         >
           <EditIcon className={iconSize} />
         </button>
         <button
           onClick={onDelete}
-          className={`${buttonSize} rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors`}
+          className={`${buttonSize} rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors cursor-pointer`}
           disabled={isDeleting}
           aria-label={deleteLabel}
         >

@@ -59,7 +59,7 @@ const MacroTarget = memo(
             <button
               type="button" // Ensure button type is set
               onClick={() => setHelpVisible(!helpVisible)}
-              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50" // Added padding/bg
+              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50 cursor-pointer" // Added padding/bg
               aria-label={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
             >

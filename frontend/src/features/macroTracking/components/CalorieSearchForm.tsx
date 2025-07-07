@@ -103,7 +103,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             disabled={loading || !query}
             className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800/50 
                         disabled:text-gray-400 rounded-lg shadow-md transition-colors
-                        text-white font-medium flex items-center min-w-[160px] justify-center"
+                        text-white font-medium flex items-center min-w-[160px] justify-center cursor-pointer disabled:cursor-not-allowed"
             type="button"
           >
             {loading ? (
