@@ -32,7 +32,9 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     setError("");
 
     // Regex to parse quantity and food name from the query
-    const match = query.match(/^(\d*\.?\d+)\s*g\s*(.*)$/i) || query.match(/^(\d*\.?\d+)\s*(.*)$/i);
+    const match =
+      query.match(/^(\d*\.?\d+)\s*g\s*(.*)$/i) ||
+      query.match(/^(\d*\.?\d+)\s*(.*)$/i);
     let quantity = 100; // Default to 100g if no quantity is specified
     let foodName = query;
 
@@ -58,9 +60,9 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
         const multiplier = quantity / 100;
 
         onResult({
-          protein: String((nutrients.PROCNT || 0) * multiplier),
-          carbs: String((nutrients.CHOCDF || 0) * multiplier),
-          fats: String((nutrients.FAT || 0) * multiplier),
+          protein: ((nutrients.PROCNT || 0) * multiplier).toFixed(1),
+          carbs: ((nutrients.CHOCDF || 0) * multiplier).toFixed(1),
+          fats: ((nutrients.FAT || 0) * multiplier).toFixed(1),
           name: query, // Use the original query as the name
         });
       } else {
