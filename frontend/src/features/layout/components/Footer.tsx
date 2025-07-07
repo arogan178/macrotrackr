@@ -10,8 +10,8 @@ const Footer: React.FC = () => (
             MacroTrackr
           </h3>
           <p className="text-slate-400 text-lg max-w-md">
-            The most intuitive macro tracking app for achieving your fitness
-            and nutrition goals.
+            The most intuitive macro tracking app for achieving your fitness and
+            nutrition goals.
           </p>
         </div>
       </div>
@@ -19,8 +19,7 @@ const Footer: React.FC = () => (
       <div className="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-slate-800/50">
         <div className="flex flex-col md:flex-row items-center space-y-2 md:space-y-0 md:space-x-8 text-slate-400">
           <p>
-            &copy; {new Date().getFullYear()} MacroTrackr. All rights
-            reserved.
+            &copy; {new Date().getFullYear()} MacroTrackr. All rights reserved.
           </p>
           <div className="flex items-center space-x-4">
             <Link

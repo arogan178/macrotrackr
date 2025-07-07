@@ -93,7 +93,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.1 }}
-          className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 lg:p-10"
+          className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full"
         >
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
@@ -115,20 +115,25 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
             ))}
           </ul>
 
-          <Link to="/register">
-            <motion.div
-              whileHover={{ scale: 1.02, y: -2 }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            >
-              <FormButton
-                text="Get Started Free"
-                variant={BUTTON_VARIANTS.GHOST}
-                size={BUTTON_SIZES.LG}
-                className="w-full bg-slate-700/50 hover:bg-slate-700 text-white border-slate-600 hover:border-slate-500 transition-all duration-300 text-xl px-12 py-4 font-semibold"
-              />
-            </motion.div>
-          </Link>
+          <div className="mt-auto">
+            <Link to="/register">
+              <motion.div
+                whileHover={{ scale: 1.02, y: -2 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              >
+                <FormButton
+                  text="Get Started For Free"
+                  variant={BUTTON_VARIANTS.GHOST}
+                  size={BUTTON_SIZES.LG}
+                  className="w-full bg-slate-700/50 hover:bg-slate-700 text-white border-2 border-indigo-500 hover:border-indigo-400 transition-all duration-300 text-xl px-12 py-4 font-semibold"
+                />
+              </motion.div>
+            </Link>
+            <p className="text-center text-transparent text-sm mt-4 select-none">
+              Cancel anytime
+            </p>
+          </div>
         </motion.div>
 
         {/* Pro Plan */}
@@ -136,7 +141,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="relative bg-gradient-to-br from-indigo-900/50 to-purple-900/50 backdrop-blur-sm border border-indigo-600/50 rounded-3xl p-8 lg:p-10 transform hover:scale-105 transition-transform duration-300"
+          className="relative bg-gradient-to-br from-indigo-900/50 to-purple-900/50 backdrop-blur-sm border border-indigo-600/50 rounded-3xl p-8 lg:p-10 transform hover:scale-105 transition-transform duration-300 flex flex-col h-full"
         >
           {/* Popular Badge */}
           <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -180,47 +185,48 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
             ))}
           </ul>
 
-          {showUpgradeButtons ? (
-            <motion.div
-              whileHover={{
-                scale: 1.02,
-                y: -2,
-                boxShadow: "0 15px 30px rgba(79, 70, 229, 0.4)",
-              }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            >
-              <FormButton
-                text="Upgrade to Pro"
-                variant={BUTTON_VARIANTS.PRIMARY}
-                size={BUTTON_SIZES.LG}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-xl transition-all duration-300"
-                onClick={() => onUpgrade && onUpgrade(selectedPlan)}
-              />
-            </motion.div>
-          ) : (
-            <motion.div
-              whileHover={{
-                scale: 1.02,
-                y: -2,
-                boxShadow: "0 15px 30px rgba(79, 70, 229, 0.4)",
-              }}
-              whileTap={{ scale: 0.98 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            >
-              <FormButton
-                text="Get Pro"
-                variant={BUTTON_VARIANTS.PRIMARY}
-                size={BUTTON_SIZES.LG}
-                className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-xl transition-all duration-300"
-                onClick={handleGetPro}
-              />
-            </motion.div>
-          )}
-
-          <p className="text-center text-slate-400 text-sm mt-4">
-            Cancel anytime
-          </p>
+          <div className="mt-auto">
+            {showUpgradeButtons ? (
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                  y: -2,
+                  boxShadow: "0 15px 30px rgba(79, 70, 229, 0.4)",
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              >
+                <FormButton
+                  text="Upgrade to Pro"
+                  variant={BUTTON_VARIANTS.PRIMARY}
+                  size={BUTTON_SIZES.LG}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-xl transition-all duration-300 text-xl px-12 py-4 font-semibold"
+                  onClick={() => onUpgrade && onUpgrade(selectedPlan)}
+                />
+              </motion.div>
+            ) : (
+              <motion.div
+                whileHover={{
+                  scale: 1.02,
+                  y: -2,
+                  boxShadow: "0 15px 30px rgba(79, 70, 229, 0.4)",
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              >
+                <FormButton
+                  text="Get Pro Now"
+                  variant={BUTTON_VARIANTS.PRIMARY}
+                  size={BUTTON_SIZES.LG}
+                  className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 shadow-xl transition-all duration-300 text-xl px-12 py-4 font-semibold"
+                  onClick={handleGetPro}
+                />
+              </motion.div>
+            )}
+            <p className="text-center text-slate-400 text-sm mt-4">
+              Cancel anytime
+            </p>
+          </div>
         </motion.div>
       </div>
 
