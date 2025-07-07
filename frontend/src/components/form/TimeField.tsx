@@ -16,7 +16,7 @@ function TimeField({
 
   const inputClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
-  }`;
+  } cursor-pointer`;
 
   return (
     <div className={formStyles.container}>
