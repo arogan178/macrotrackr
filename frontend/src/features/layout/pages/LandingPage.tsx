@@ -6,6 +6,7 @@ import PricingSection from "../components/PricingSection";
 import TestimonialsSection from "../components/TestimonialsSection";
 import FinalCTASection from "../components/FinalCTASection";
 import Footer from "../components/Footer";
+import BackgroundAnimation from "@/components/animation/BackgroundAnimation";
 
 const LandingPage: React.FC = () => {
   React.useEffect(() => {
@@ -17,6 +18,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-900 relative overflow-hidden scroll-smooth">
+      <BackgroundAnimation />
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-slate-900 via-blue-900/20 to-indigo-900/30"></div>
         <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_50%)]"></div>
