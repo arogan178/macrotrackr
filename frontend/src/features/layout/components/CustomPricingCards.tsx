@@ -92,8 +92,22 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.1 }}
-          className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full"
+          whileHover={{
+            scale: 1.025,
+            boxShadow: "0 8px 32px 0 rgba(99,102,241,0.15)",
+          }}
+          whileFocus={{
+            scale: 1.02,
+            boxShadow: "0 8px 32px 0 rgba(99,102,241,0.18)",
+          }}
+          transition={{
+            duration: 0.4,
+            type: "spring",
+            stiffness: 300,
+            damping: 30,
+          }}
+          tabIndex={0}
+          className="relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full outline-none focus:ring-4 focus:ring-indigo-500/40"
         >
           <div className="text-center mb-8">
             <h3 className="text-2xl font-bold text-white mb-2">Free</h3>
