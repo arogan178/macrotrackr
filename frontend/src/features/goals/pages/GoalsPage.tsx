@@ -299,7 +299,7 @@ export default function GoalsPage() {
           {/* Page Header with Tabs */}
           <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
             <div>
-              <h1 className="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-2">
+              <h1 className="text-3xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight mb-2">
                 Your Goals
               </h1>
               <p className="text-gray-400 max-w-2xl">
