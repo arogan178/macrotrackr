@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
           <FormButton
             onClick={() => handleNavigation("/home")}
             ariaLabel="Go to home page"
-            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
+            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
             variant="ghost"
             size="md"
           >
@@ -79,7 +79,7 @@ const Navbar: React.FC = () => {
                 variant={location.pathname === path ? "primary" : "ghost"}
                 size="md"
                 aria-current={location.pathname === path ? "page" : undefined}
-                icon={<Icon className="w-5 h-5 mr-2" />}
+                icon={<Icon />}
                 iconPosition="left"
               >
                 <span>{label}</span>
@@ -89,17 +89,19 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           {/* Desktop logout button */}
-          <FormButton
-            onClick={handleLogout}
-            ariaLabel="Logout"
-            className="hidden md:flex px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
-            variant="danger"
-            size="md"
-            icon={<LogoutIcon className="w-5 h-5 mr-2" />}
-            iconPosition="left"
-          >
-            <span>Logout</span>
-          </FormButton>
+          <div className="hidden md:flex">
+            <FormButton
+              onClick={handleLogout}
+              ariaLabel="Logout"
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
+              variant="danger"
+              size="md"
+              icon={<LogoutIcon />}
+              iconPosition="left"
+            >
+              <span>Logout</span>
+            </FormButton>
+          </div>
 
           {/* Mobile menu button */}
           <motion.div
@@ -166,7 +168,7 @@ const Navbar: React.FC = () => {
                     aria-current={
                       location.pathname === path ? "page" : undefined
                     }
-                    icon={<Icon className="w-5 h-5 mr-3" />}
+                    icon={<Icon />}
                     iconPosition="left"
                   >
                     <span>{label}</span>

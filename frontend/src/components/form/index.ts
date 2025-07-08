@@ -8,6 +8,7 @@ export { default as TabButton } from "./TabButton";
 export { default as CardContainer } from "./CardContainer";
 export { default as FormButton } from "./FormButton";
 export { default as ActionButtonGroup } from "./ActionButtonGroup";
+export { default as ActionButton } from "./ActionButton";
 // Types
 export type {
   TextFieldProps,

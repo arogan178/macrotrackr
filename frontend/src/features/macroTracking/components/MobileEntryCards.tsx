@@ -1,8 +1,8 @@
 import { memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronDownIcon, TrashIcon } from "@/components/Icons";
+import { ChevronDownIcon } from "@/components/Icons";
 import { MacroCell } from "@/components/nutrition";
-import { ActionButtonGroup } from "@/components/form";
+import { ActionButtonGroup, ActionButton } from "@/components/form";
 import { MacroEntry } from "@/types/macro";
 
 interface GroupedEntry {
@@ -196,15 +196,12 @@ const MobileEntryCards = memo(
                 <span className="text-white font-medium">
                   {group.totals.calories} kcal
                 </span>
-                <button
+                <ActionButton
+                  variant="delete"
+                  size="sm"
                   onClick={(e) => handleDeleteDate(group.date, e)}
-                  className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
-                  aria-label={`Delete all entries for ${formatDate(
-                    group.date
-                  )}`}
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
+                  ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
+                />
               </div>
             </motion.div>
 
@@ -322,15 +319,14 @@ const MobileEntryCards = memo(
                     <span className="text-white font-medium">
                       {group.totals.calories} kcal
                     </span>
-                    <button
+                    <ActionButton
+                      variant="delete"
+                      size="sm"
                       onClick={(e) => handleDeleteDate(group.date, e)}
-                      className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors"
-                      aria-label={`Delete all entries for ${formatDate(
+                      ariaLabel={`Delete all entries for ${formatDate(
                         group.date
                       )}`}
-                    >
-                      <TrashIcon className="w-4 h-4" />
-                    </button>
+                    />
                   </div>
                 </motion.div>
 

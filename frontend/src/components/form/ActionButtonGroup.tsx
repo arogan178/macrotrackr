@@ -1,6 +1,7 @@
+// Change `space-x-2` to `space-x-1` to reduce the gap between the buttons
 import { memo } from "react";
 import { EditIcon, TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import FormButton from "./FormButton";
+import ActionButton from "./ActionButton";
 import { ActionButtonGroupProps } from "@/components/utils/types";
 
 /**
@@ -15,35 +16,29 @@ const ActionButtonGroup = memo(
     deleteLabel = "Delete entry",
     size = "sm",
   }: ActionButtonGroupProps) => {
-    const iconSize = size === "sm" ? "w-4 h-4" : "w-5 h-5";
-    const buttonSize = size === "sm" ? "p-1.5" : "p-2";
-
     return (
-      <div className="flex justify-center space-x-2">
-        <FormButton
+      <div className="flex justify-center space-x-1">
+        <ActionButton
+          variant="edit"
+          size={size}
           onClick={onEdit}
-          variant="ghost"
-          size={size}
           ariaLabel={editLabel}
-          className={`${buttonSize} text-blue-400 hover:bg-blue-500/30 focus:ring-blue-500`}
-          icon={<EditIcon className={iconSize} />}
-          iconPosition="left"
+          className="text-blue-400 hover:text-blue-300 bg-blue-900/30 hover:bg-blue-900/50 focus:ring-blue-500"
+          icon={<EditIcon />}
         />
-        <FormButton
-          onClick={onDelete}
-          variant="ghost"
+        <ActionButton
+          variant="delete"
           size={size}
+          onClick={onDelete}
           ariaLabel={deleteLabel}
-          className={`${buttonSize} text-red-400 hover:bg-red-500/30 focus:ring-red-500`}
+          disabled={isDeleting}
           icon={
             isDeleting ? (
-              <LoadingSpinnerIcon className={`${iconSize} animate-spin`} />
+              <LoadingSpinnerIcon className="w-3.5 h-3.5 animate-spin" />
             ) : (
-              <TrashIcon className={iconSize} />
+              <TrashIcon />
             )
           }
-          iconPosition="left"
-          disabled={isDeleting}
         />
       </div>
     );

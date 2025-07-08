@@ -98,7 +98,7 @@ export interface FormButtonProps {
   loadingText?: string;
   disabled?: boolean;
   className?: string;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   fullWidth?: boolean;
   ariaLabel?: string;
 }
