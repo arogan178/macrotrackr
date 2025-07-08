@@ -177,7 +177,6 @@ function Modal(props: ModalProps) {
       case "form":
         return {
           ...defaultStyles, // Use default header/footer
-          // confirmButton style might not be needed if SaveButton is always used
           confirmButton: "bg-blue-600 text-white hover:bg-blue-700",
         };
       default:
