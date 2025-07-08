@@ -18,7 +18,7 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import { ChartDataPoint, LineConfig } from "../utils/types"; // Use the correct path for your types
+import { ChartDataPoint, LineConfig } from "@/components/utils/types"; // Use the correct path for your types
 import { DefaultTooltip } from "./chart-helpers";
 
 // Interface for CustomDot props to improve type safety

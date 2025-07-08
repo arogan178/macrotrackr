@@ -109,13 +109,6 @@ export interface LoadingSpinnerProps {
   label?: string;
 }
 
-export interface SaveButtonProps {
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  loading?: boolean;
-  disabled?: boolean;
-  children?: ReactNode;
-}
-
 // Chart data point - used for all chart visualizations
 export interface ChartDataPoint {
   name: string; // x-axis label (e.g., date)

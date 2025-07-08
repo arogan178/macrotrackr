@@ -1,6 +1,21 @@
+/**
+ * CardContainer – Standardized card wrapper for consistent layout and styling.
+ *
+ * Applies shared card styles and allows additional classes.
+ *
+ * Props:
+ * @prop {React.ReactNode} children - Card content
+ * @prop {string} [className] - Additional classes for the card
+ *
+ * @example
+ * <CardContainer>
+ *   <h2>Section Title</h2>
+ *   <p>Some content here.</p>
+ * </CardContainer>
+ */
 import { memo } from "react";
-import { CardContainerProps } from "../utils/types";
-import { formStyles } from "../utils/styles";
+import { CardContainerProps } from "@/components/utils/types";
+import { formStyles } from "@/components/utils/styles";
 
 function CardContainer({ children, className = "" }: CardContainerProps) {
   return (
