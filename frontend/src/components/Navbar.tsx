@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
                 key={path}
                 onClick={() => handleNavigation(path)}
                 ariaLabel={label}
-                className={`${getButtonClass(path)} `}
+                className={`${getButtonClass(path)}, !text-lg `}
                 variant={location.pathname === path ? "primary" : "ghost"}
                 size="md"
                 aria-current={location.pathname === path ? "page" : undefined}
