@@ -26,7 +26,7 @@ function TabButton({
     <FormButton
       onClick={onClick}
       variant={active ? "primary" : "ghost"}
-      size="sm"
+      size="md"
       className={`relative px-3 py-1.5 ${baseRounded} text-sm font-medium ${
         active
           ? "text-white"

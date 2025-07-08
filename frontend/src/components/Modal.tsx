@@ -60,7 +60,8 @@
 import { ReactNode, useEffect, useRef, memo, useState } from "react";
 import ReactDOM from "react-dom"; // Import ReactDOM for portals
 import { motion } from "motion/react";
-import { XIcon } from "./Icons";
+import { CloseIcon } from "./Icons";
+import ActionButton from "./form/ActionButton";
 import FormButton from "./form/FormButton";
 
 interface BaseModalProps {
@@ -283,14 +284,13 @@ function Modal(props: ModalProps) {
             <h2 id="modal-title" className="text-lg font-medium text-gray-100">
               {title}
             </h2>
-            <FormButton
+            <ActionButton
+              variant="close"
+              size="sm"
               onClick={onClose}
               ariaLabel="Close modal"
-              variant="ghost"
-              size="sm"
-              className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
-              icon={<XIcon size="md" />}
-              iconPosition="left"
+              className="text-gray-400 hover:text-red transition-colors"
+              icon={<CloseIcon />}
             />
           </div>
         )}
