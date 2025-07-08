@@ -6,6 +6,7 @@ import {
   WarningIcon,
   InfoIcon,
 } from "@/components/Icons";
+import FormButton from "@/components/form/FormButton";
 
 export interface FloatingNotificationProps {
   message: string;
@@ -173,13 +174,15 @@ function FloatingNotification({
         </div>
 
         {/* Close button */}
-        <button
+        <FormButton
+          type="button"
           onClick={handleClose}
-          className="p-3 h-full flex items-center justify-center text-white/70 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white/20"
-          aria-label="Close notification"
-        >
-          <CloseIcon className="w-4 h-4" />
-        </button>
+          variant="ghost"
+          size="sm"
+          className="p-3 h-full text-white/70 hover:text-white"
+          ariaLabel="Close notification"
+          icon={<CloseIcon className="w-4 h-4" />}
+        />
 
         {/* Progress timer bar */}
         {duration > 0 && autoClose && (
