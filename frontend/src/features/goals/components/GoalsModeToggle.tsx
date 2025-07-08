@@ -1,3 +1,4 @@
+import FormButton from "@/components/form/FormButton";
 interface GoalsModeToggleProps {
   activeMode: "active" | "achieved";
   onToggle: () => void;
@@ -6,13 +7,15 @@ interface GoalsModeToggleProps {
 function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
   return (
     <div className="relative flex items-center bg-gray-800/40 rounded-xl p-1 w-fit">
-      <button
+      <FormButton
+        type="button"
         onClick={activeMode === "achieved" ? onToggle : undefined}
         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
           activeMode === "active"
             ? "bg-blue-600 text-white shadow-md"
             : "text-gray-400 hover:text-gray-300"
         }`}
+        variant={activeMode === "active" ? undefined : "ghost"}
       >
         <div className="flex items-center">
           <svg
@@ -33,14 +36,16 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
           </svg>
           Active Goals
         </div>
-      </button>
-      <button
+      </FormButton>
+      <FormButton
+        type="button"
         onClick={activeMode === "active" ? onToggle : undefined}
         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
           activeMode === "achieved"
             ? "bg-blue-600 text-white shadow-md"
             : "text-gray-400 hover:text-gray-300"
         }`}
+        variant={activeMode === "achieved" ? undefined : "ghost"}
       >
         <div className="flex items-center">
           <svg
@@ -61,7 +66,7 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
           </svg>
           Achievements
         </div>
-      </button>
+      </FormButton>
     </div>
   );
 }

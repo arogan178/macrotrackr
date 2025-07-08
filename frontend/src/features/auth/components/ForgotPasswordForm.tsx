@@ -1,6 +1,6 @@
+import FormButton from "@/components/form/FormButton";
 import { useState } from "react";
 import { CardContainer, TextField } from "@/components/form";
-import LoadingSpinner from "@/components/LoadingSpinner";
 import { EmailIcon } from "@/components/Icons";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/api-service";
@@ -59,30 +59,20 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           placeholder="your@email.com"
           maxLength={30}
         />
-        <div className="text-right">
-          <button
-            type="button"
-            onClick={onSwitchToLogin}
-            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
-          >
-            Back to Login
-          </button>
-        </div>
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="w-full p-3 rounded-lg font-medium text-white 
-                 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
-                 disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
-                 shadow-lg shadow-indigo-500/30"
-        >
-          {isLoading ? (
-            <LoadingSpinner size="sm" color="white" />
-          ) : (
-            "Send Reset Link"
-          )}
-        </button>
+        <FormButton type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Sending..." : "Send Reset Link"}
+        </FormButton>
       </form>
+      <div className="text-right mt-4">
+        <FormButton
+          type="button"
+          variant="ghost"
+          className="text-sm"
+          onClick={onSwitchToLogin}
+        >
+          Back to Login
+        </FormButton>
+      </div>
     </CardContainer>
   );
 }

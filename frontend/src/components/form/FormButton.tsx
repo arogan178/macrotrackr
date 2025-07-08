@@ -65,12 +65,12 @@ function FormButton({
   ...rest
 }: FormButtonAllProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium transition-all duration-200 " +
-    "focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 " +
-    "disabled:opacity-70 disabled:cursor-not-allowed rounded-lg cursor-pointer";
+    "inline-flex items-center justify-center font-medium text-sm gap-2 transition-all duration-200 " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +
+    "rounded-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed";
 
   const sizeStyles = {
-    [BUTTON_SIZES.SM]: "px-2.5 py-1.5 text-xs",
+    [BUTTON_SIZES.SM]: " px-2.5 py-1.5 text-xs",
     [BUTTON_SIZES.MD]: "px-4 py-2.5 text-sm",
     [BUTTON_SIZES.LG]: "px-5 py-3 text-base",
   };
@@ -107,17 +107,16 @@ function FormButton({
         </span>
       );
     }
-    if (children) {
-      return children;
-    }
+    // Always render icon if provided, even with children
+    const content = children || text;
     return (
       <span className="flex items-center justify-center">
         {icon && iconPosition === ICON_POSITIONS.LEFT && (
-          <span className="mr-2">{icon}</span>
+          <span className="mr-2 flex items-center">{icon}</span>
         )}
-        {text && <span>{text}</span>}
+        {content && <span>{content}</span>}
         {icon && iconPosition === ICON_POSITIONS.RIGHT && (
-          <span className="ml-2">{icon}</span>
+          <span className="ml-2 flex items-center">{icon}</span>
         )}
       </span>
     );
