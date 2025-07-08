@@ -4,6 +4,7 @@ import MacroSlider from "./MacroSlider";
 import { MacroBadge } from "./MacroSlider"; // Assuming MacroBadge is exported from MacroSlider file
 import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/Icons";
+import FormButton from "@/components/form/FormButton";
 import { MacroType, MacroTargetProps } from "../types/types"; // Ensure these types are correct
 import { useMacroTarget } from "../hooks/useMacroTarget"; // The custom hook managing logic
 import MacroTargetBar from "./MacroTargetBar"; // The visualization component
@@ -56,15 +57,16 @@ const MacroTarget = memo(
         <div className="flex justify-between items-center">
           <h3 className="text-md font-medium text-gray-200">Macro Target</h3>
           <div className="flex items-center">
-            <button
-              type="button" // Ensure button type is set
+            <FormButton
+              type="button"
               onClick={() => setHelpVisible(!helpVisible)}
-              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50" // Added padding/bg
-              aria-label={helpVisible ? "Hide help" : "Show help"}
+              variant="ghost"
+              size="sm"
+              ariaLabel={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
-            >
-              <InfoIcon className="w-5 h-5" />
-            </button>
+              icon={<InfoIcon className="w-5 h-5" />}
+              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50 "
+            />
           </div>
         </div>
 

@@ -1,10 +1,7 @@
 import { useState } from "react";
-import {
-  SearchIcon,
-  ArrowRightIcon,
-  LoadingSpinnerIcon,
-  WarningIcon,
-} from "@/components/Icons";
+import { SearchIcon, ArrowRightIcon } from "@/components/Icons";
+import StatusIndicator from "@/components/StatusIndicator";
+import FormButton from "@/components/form/FormButton";
 import { TextField } from "@/components/form";
 
 type CalorieSearchProps = {
@@ -88,6 +85,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <TextField
+            id="calorie-search-input"
             label="Search for food"
             value={query}
             onChange={handleQueryChange}
@@ -95,38 +93,30 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             placeholder="e.g. 1 apple, 100g chicken breast"
             icon={<SearchIcon className="w-5 h-5" />}
             maxLength={50}
+            error={error}
           />
+          {error && (
+            <div className="mt-2">
+              <StatusIndicator status="error" message={error} />
+            </div>
+          )}
         </div>
         <div className="flex items-end">
-          <button
-            onClick={handleSearch}
-            disabled={loading || !query}
-            className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800/50 
-                        disabled:text-gray-400 rounded-lg shadow-md transition-colors
-                        text-white font-medium flex items-center min-w-[160px] justify-center"
+          <FormButton
             type="button"
-          >
-            {loading ? (
-              <span className="flex items-center justify-center">
-                <LoadingSpinnerIcon className="mr-2 animate-spin" />
-                Searching
-              </span>
-            ) : (
-              <span className="flex items-center justify-center">
-                <span>Search</span>
-                <ArrowRightIcon className="w-4 h-4 ml-1" />
-              </span>
-            )}
-          </button>
+            onClick={handleSearch}
+            isLoading={loading}
+            disabled={loading || !query}
+            text="Search"
+            icon={<ArrowRightIcon className="w-4 h-4 ml-1" />}
+            iconPosition="right"
+            ariaLabel="Search for food"
+            size="lg"
+            variant="primary"
+            className="min-w-[160px] px-6 py-2.5"
+          />
         </div>
       </div>
-
-      {error && (
-        <div className="text-red-400 text-sm flex items-center gap-2">
-          <WarningIcon className="w-4 h-4" />
-          {error}
-        </div>
-      )}
     </div>
   );
 }

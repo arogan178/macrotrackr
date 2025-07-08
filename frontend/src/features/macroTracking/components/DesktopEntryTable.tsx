@@ -6,9 +6,9 @@ import {
   createColumnHelper,
   flexRender,
 } from "@tanstack/react-table";
-import { ChevronDownIcon, TrashIcon } from "@/components/Icons";
+import { ChevronDownIcon } from "@/components/Icons";
 import { MacroCell } from "@/components/nutrition";
-import { ActionButtonGroup } from "@/components/form";
+import { ActionButtonGroup, ActionButton } from "@/components/form";
 import { MacroEntry } from "@/types/macro";
 
 // Types
@@ -206,13 +206,15 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <button
-                  onClick={(e) => handleDeleteDate(data.date, e)}
-                  className="p-1.5 rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors opacity-0 group-hover:opacity-100"
-                  aria-label={`Delete all entries for ${formatDate(data.date)}`}
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
+                <ActionButton
+                  variant="delete"
+                  size="sm"
+                  onClick={(e: React.MouseEvent) =>
+                    handleDeleteDate(data.date, e)
+                  }
+                  ariaLabel={`Delete all entries for ${formatDate(data.date)}`}
+                  className="opacity-0 group-hover:opacity-100"
+                />
               );
             } else {
               const entry = data.entries[0];
