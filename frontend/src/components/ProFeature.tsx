@@ -17,11 +17,14 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
 
   return (
     <div
-      className="relative opacity-60 pointer-events-auto select-none cursor-pointer"
+      className="relative pointer-events-auto select-none cursor-pointer"
       onClick={() => setModalOpen(true)}
     >
-      <div className="pointer-events-none">{children}</div>
-      <ProBadge />
+      {/* ProBadge in top right, overlapping */}
+      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 pointer-events-none z-999">
+        <ProBadge className="rounded-full p-1 shadow-lg" />
+      </div>
+      <div className="pointer-events-none opacity-20">{children}</div>
       <UpgradeModal
         open={modalOpen}
         onClose={() => setModalOpen(false)}
