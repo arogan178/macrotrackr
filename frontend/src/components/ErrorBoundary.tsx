@@ -1,5 +1,6 @@
 import { Component, ReactNode } from "react";
 import { WarningIcon } from "./Icons";
+import FormButton from "./form/FormButton";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -48,12 +49,15 @@ export class ErrorBoundary extends Component<
               </div>
 
               <div className="flex justify-center">
-                <button
+                <FormButton
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors duration-200"
+                  ariaLabel="Reload page"
+                  variant="primary"
+                  size="md"
+                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
                 >
                   Reload page
-                </button>
+                </FormButton>
               </div>
             </div>
           </div>

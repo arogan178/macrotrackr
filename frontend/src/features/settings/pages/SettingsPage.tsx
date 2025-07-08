@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import FloatingNotification from "../../notifications/components/FloatingNotification";
-import { TabButton, SaveButton } from "@/components/form";
+import { TabButton, FormButton } from "@/components/form";
 import Modal from "@/components/Modal";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import {
@@ -209,12 +209,17 @@ export default function SettingsPage() {
                     formErrors={formErrors}
                   />
                   <div className="mt-8 flex justify-end">
-                    <SaveButton
-                      loading={isSaving}
+                    <FormButton
+                      type="submit"
+                      isLoading={isSaving}
                       disabled={
                         !hasSettingsChanges ||
                         Object.keys(formErrors).length > 0
                       }
+                      text="Save Changes"
+                      size="lg"
+                      variant="primary"
+                      className="px-8 py-3 text-lg"
                     />
                   </div>
                 </form>

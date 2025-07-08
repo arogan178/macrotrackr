@@ -6,9 +6,10 @@ import {
   Dropdown,
   DateField,
   TextField,
+  FormButton,
 } from "@/components/form";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
-import { CheckMarkIcon, LoadingSpinnerIcon } from "@/components/Icons";
+import { CheckMarkIcon } from "@/components/Icons";
 import { MealType } from "@/types/macro";
 import { MEAL_TYPE_OPTIONS } from "../constants";
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -238,22 +239,15 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               </div>
             )}
 
-            <button
+            <FormButton
               type="submit"
               disabled={isSaving || !isFormValid}
-              className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800/50 
-                        disabled:text-gray-400 rounded-lg shadow-md transition-colors
-                        text-white font-medium flex items-center"
-            >
-              {isSaving ? (
-                <>
-                  <LoadingSpinnerIcon className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" />
-                  Saving...
-                </>
-              ) : (
-                <>Add Entry</>
-              )}
-            </button>
+              isLoading={isSaving}
+              loadingText="Saving..."
+              text="Add Entry"
+              variant="primary"
+              size="md"
+            />
           </div>
         </form>
       </div>

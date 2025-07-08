@@ -123,8 +123,6 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
       <LogWeightModal
         isOpen={isLogWeightModalOpen}
         onClose={handleCloseLogWeightModal}
-        // Optionally pass initialWeight if available, e.g., from latest log
-        // initialWeight={latestWeightLog?.weight}
       />
     </>
   );

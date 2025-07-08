@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { DateFieldProps } from "../utils/types";
-import { formStyles } from "../utils/styles";
+import { DateFieldProps } from "@/components/utils/types";
+import { formStyles } from "@/components/utils/styles";
 
 function DateField({
   label,
@@ -15,7 +15,7 @@ function DateField({
 
   const inputClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
-  }`;
+  } cursor-pointer`;
 
   return (
     <div className={formStyles.container}>
