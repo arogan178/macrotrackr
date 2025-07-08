@@ -16,6 +16,7 @@ import {
   PlusIcon,
   CheckIcon,
 } from "@/components/Icons";
+import { FormButton } from "@/components/form";
 
 import { PROGRESS_BAR_COLORS } from "@/components/utils/constants";
 
@@ -64,13 +65,15 @@ function HabitTracker({
           </h3>
 
           {onAddHabit && (
-            <button
+            <FormButton
+              variant="ghost"
+              size="sm"
               onClick={onAddHabit}
-              className="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg"
-            >
-              <PlusIcon size="sm" className="mr-1.5" />
-              Add Habit
-            </button>
+              className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg"
+              text="Add Habit"
+              icon={<PlusIcon size="sm" />}
+              iconPosition="left"
+            />
           )}
         </div>
 
@@ -99,12 +102,13 @@ function HabitTracker({
           <div className="bg-gray-700/30 rounded-lg p-8 text-center">
             <p className="text-gray-400 mb-3">No habit goals set yet</p>
             {onAddHabit && (
-              <button
+              <FormButton
+                variant="ghost"
+                size="sm"
                 onClick={onAddHabit}
-                className="text-sm font-medium text-indigo-400 hover:text-indigo-300"
-              >
-                Add your first habit goal
-              </button>
+                className="font-medium text-indigo-400 hover:text-indigo-300"
+                text="Add your first habit goal"
+              />
             )}
           </div>
         ) : (

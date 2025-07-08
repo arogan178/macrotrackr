@@ -1,6 +1,8 @@
+// Change `space-x-2` to `space-x-1` to reduce the gap between the buttons
 import { memo } from "react";
 import { EditIcon, TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import { ActionButtonGroupProps } from "../utils/types";
+import ActionButton from "./ActionButton";
+import { ActionButtonGroupProps } from "@/components/utils/types";
 
 /**
  * Reusable edit/delete action button group
@@ -14,30 +16,30 @@ const ActionButtonGroup = memo(
     deleteLabel = "Delete entry",
     size = "sm",
   }: ActionButtonGroupProps) => {
-    const iconSize = size === "sm" ? "w-4 h-4" : "w-5 h-5";
-    const buttonSize = size === "sm" ? "p-1.5" : "p-2";
-
     return (
-      <div className="flex justify-center space-x-2">
-        <button
+      <div className="flex justify-center space-x-1">
+        <ActionButton
+          variant="edit"
+          size={size}
           onClick={onEdit}
-          className={`${buttonSize} rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors`}
-          aria-label={editLabel}
-        >
-          <EditIcon className={iconSize} />
-        </button>
-        <button
+          ariaLabel={editLabel}
+          className="text-blue-400 hover:text-blue-300 bg-blue-900/30 hover:bg-blue-900/50 focus:ring-blue-500"
+          icon={<EditIcon />}
+        />
+        <ActionButton
+          variant="delete"
+          size={size}
           onClick={onDelete}
-          className={`${buttonSize} rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors`}
+          ariaLabel={deleteLabel}
           disabled={isDeleting}
-          aria-label={deleteLabel}
-        >
-          {isDeleting ? (
-            <LoadingSpinnerIcon className={`${iconSize} animate-spin`} />
-          ) : (
-            <TrashIcon className={iconSize} />
-          )}
-        </button>
+          icon={
+            isDeleting ? (
+              <LoadingSpinnerIcon className="w-3.5 h-3.5 animate-spin" />
+            ) : (
+              <TrashIcon />
+            )
+          }
+        />
       </div>
     );
   }

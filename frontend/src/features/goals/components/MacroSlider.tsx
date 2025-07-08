@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { LockIcon, UnlockIcon } from "@/components/Icons";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { FormButton } from "@/components/form";
 
 interface MacroSliderProps {
   name: string;
@@ -72,7 +73,9 @@ export default function MacroSlider({
         </div>
         <div className="flex items-center gap-2">
           {onToggleLock && (
-            <button
+            <FormButton
+              variant="ghost"
+              size="sm"
               onClick={onToggleLock}
               type="button"
               className={`p-1.5 rounded-full ${
@@ -80,15 +83,15 @@ export default function MacroSlider({
                   ? `${textLocked} ${bgLocked}`
                   : "text-gray-500 hover:text-gray-300"
               }`}
-              aria-label={isLocked ? `Unlock ${name}` : `Lock ${name}`}
-              title={isLocked ? `Unlock ${name}` : `Lock ${name}`}
-            >
-              {isLocked ? (
-                <LockIcon className="w-3.5 h-3.5" />
-              ) : (
-                <UnlockIcon className="w-3.5 h-3.5" />
-              )}
-            </button>
+              ariaLabel={isLocked ? `Unlock ${name}` : `Lock ${name}`}
+              icon={
+                isLocked ? (
+                  <LockIcon className="w-3.5 h-3.5" />
+                ) : (
+                  <UnlockIcon className="w-3.5 h-3.5" />
+                )
+              }
+            />
           )}{" "}
           <AnimatedNumber
             value={value}

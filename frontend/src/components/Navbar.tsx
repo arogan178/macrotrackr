@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import FormButton from "./form/FormButton";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useStore } from "@/store/store";
 import { AnimatePresence, motion } from "motion/react";
@@ -57,60 +58,74 @@ const Navbar: React.FC = () => {
         style={{ touchAction: "none", overscrollBehavior: "none" }}
       >
         <div className="flex items-center">
-          <button
-            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          <FormButton
             onClick={() => handleNavigation("/home")}
-            aria-label="Go to home page"
-            tabIndex={0}
-            type="button"
+            ariaLabel="Go to home page"
+            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
+            variant="ghost"
+            size="md"
           >
             MacroTrackr
-          </button>
+          </FormButton>
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map(({ path, label, icon: Icon }) => (
-              <button
+              <FormButton
                 key={path}
-                className={getButtonClass(path)}
                 onClick={() => handleNavigation(path)}
+                ariaLabel={label}
+                className={`${getButtonClass(path)}, !text-lg `}
+                variant={location.pathname === path ? "primary" : "ghost"}
+                size="md"
                 aria-current={location.pathname === path ? "page" : undefined}
+                icon={<Icon />}
+                iconPosition="left"
               >
-                <Icon className="w-5 h-5 mr-2" />
                 <span>{label}</span>
-              </button>
+              </FormButton>
             ))}
           </div>
         </div>
         <div className="flex items-center space-x-2">
           {/* Desktop logout button */}
-          <button
-            className="hidden md:flex px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-            onClick={handleLogout}
-            aria-label="Logout"
-          >
-            <LogoutIcon className="w-5 h-5 mr-2" />
-            <span>Logout</span>
-          </button>
+          <div className="hidden md:flex">
+            <FormButton
+              onClick={handleLogout}
+              ariaLabel="Logout"
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
+              variant="danger"
+              size="md"
+              icon={<LogoutIcon />}
+              iconPosition="left"
+            >
+              <span>Logout</span>
+            </FormButton>
+          </div>
 
           {/* Mobile menu button */}
-          <motion.button
-            className="md:hidden p-2 rounded-lg text-gray-200 hover:bg-gray-700/50 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMobileMenuOpen}
+          <motion.div
             whileTap={{ scale: 0.95 }}
-            style={{ touchAction: "manipulation", userSelect: "none" }}
-            transition={{ duration: 0.1 }}
-            drag={false}
-            draggable={false}
+            style={{ display: "inline-block" }}
           >
-            {isMobileMenuOpen ? (
-              <CloseIcon className="w-6 h-6" />
-            ) : (
-              <MenuIcon className="w-6 h-6" />
-            )}
-          </motion.button>
+            <FormButton
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              ariaLabel={isMobileMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMobileMenuOpen}
+              className="md:hidden p-2 rounded-lg text-gray-200 hover:bg-gray-700/50 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
+              variant="ghost"
+              size="md"
+              icon={
+                isMobileMenuOpen ? (
+                  <CloseIcon className="w-6 h-6" />
+                ) : (
+                  <MenuIcon className="w-6 h-6" />
+                )
+              }
+              iconPosition="left"
+              style={{ touchAction: "manipulation", userSelect: "none" }}
+            />
+          </motion.div>
         </div>{" "}
       </nav>
 
@@ -143,28 +158,35 @@ const Navbar: React.FC = () => {
             >
               <div className="p-4 space-y-2">
                 {navItems.map(({ path, label, icon: Icon }) => (
-                  <button
+                  <FormButton
                     key={path}
-                    className={getButtonClass(path, true)}
                     onClick={() => handleNavigation(path)}
+                    ariaLabel={label}
+                    className={`${getButtonClass(path, true)} `}
+                    variant={location.pathname === path ? "primary" : "ghost"}
+                    size="md"
                     aria-current={
                       location.pathname === path ? "page" : undefined
                     }
+                    icon={<Icon />}
+                    iconPosition="left"
                   >
-                    <Icon className="w-5 h-5 mr-3" />
                     <span>{label}</span>
-                  </button>
+                  </FormButton>
                 ))}
 
                 {/* Mobile logout button */}
-                <button
-                  className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500"
+                <FormButton
                   onClick={handleLogout}
-                  aria-label="Logout"
+                  ariaLabel="Logout"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 "
+                  variant="danger"
+                  size="md"
+                  icon={<LogoutIcon className="w-5 h-5 mr-3" />}
+                  iconPosition="left"
                 >
-                  <LogoutIcon className="w-5 h-5 mr-3" />
                   <span>Logout</span>
-                </button>
+                </FormButton>
               </div>
             </motion.div>
           </>

@@ -1,4 +1,5 @@
 import React from "react";
+import FormButton from "@/components/form/FormButton";
 
 interface PlanToggleProps {
   selectedPlan: "monthly" | "yearly";
@@ -12,7 +13,8 @@ interface PlanToggleProps {
  */
 const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
   <div className="inline-flex bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-2xl p-2">
-    <button
+    <FormButton
+      type="button"
       onClick={() => onSelect("monthly")}
       className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 ${
         selectedPlan === "monthly"
@@ -20,10 +22,12 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
           : "text-slate-400 hover:text-slate-300"
       }`}
       aria-pressed={selectedPlan === "monthly"}
+      variant={selectedPlan === "monthly" ? undefined : "ghost"}
     >
       Monthly
-    </button>
-    <button
+    </FormButton>
+    <FormButton
+      type="button"
       onClick={() => onSelect("yearly")}
       className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 relative ${
         selectedPlan === "yearly"
@@ -31,12 +35,13 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
           : "text-slate-400 hover:text-slate-300"
       }`}
       aria-pressed={selectedPlan === "yearly"}
+      variant={selectedPlan === "yearly" ? undefined : "ghost"}
     >
       Yearly
       <span className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full">
         Save 30%
       </span>
-    </button>
+    </FormButton>
   </div>
 );
 
