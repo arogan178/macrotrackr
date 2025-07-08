@@ -1,4 +1,4 @@
-import { DATE_RANGE_OPTIONS } from "../utils/constants";
+import { DATE_RANGE_OPTIONS } from "@/components/utils/constants";
 import { motion } from "motion/react"; // Import motion
 
 interface DateRangeSelectorProps {

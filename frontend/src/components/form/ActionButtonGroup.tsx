@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { EditIcon, TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import { ActionButtonGroupProps } from "../utils/types";
+import { ActionButtonGroupProps } from "@/components/utils/types";
 
 /**
  * Reusable edit/delete action button group

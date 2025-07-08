@@ -11,11 +11,8 @@ import {
   LabelList,
 } from "recharts";
 import { motion } from "motion/react";
-import { MACRO_COLORS } from "../../../utils/chart-colors";
-import {
-  getMacroPercentages,
-  formatDateName,
-} from "../../../utils/chart-utils";
+import { MACRO_COLORS } from "@/utils/chart-colors";
+import { getMacroPercentages, formatDateName } from "@/utils/chart-utils";
 
 interface NutrientDensityVisualizationProps {
   data: {
