@@ -71,7 +71,7 @@ function FormButton({
 
   const sizeStyles = {
     [BUTTON_SIZES.SM]: " px-2 py-1 text-xs",
-    [BUTTON_SIZES.MD]: "px-3.5 py-2 text-sm",
+    [BUTTON_SIZES.MD]: "px-3.5 py-2 text-md",
     [BUTTON_SIZES.LG]: "px-5 py-3 text-base",
   };
 
