@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { EditIcon, TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
+import FormButton from "./FormButton";
 import { ActionButtonGroupProps } from "@/components/utils/types";
 
 /**
@@ -19,25 +20,31 @@ const ActionButtonGroup = memo(
 
     return (
       <div className="flex justify-center space-x-2">
-        <button
+        <FormButton
           onClick={onEdit}
-          className={`${buttonSize} rounded-md bg-blue-600/20 border border-blue-500/30 hover:bg-blue-500/30 text-blue-400 transition-colors cursor-pointer`}
-          aria-label={editLabel}
-        >
-          <EditIcon className={iconSize} />
-        </button>
-        <button
+          variant="ghost"
+          size={size}
+          ariaLabel={editLabel}
+          className={`${buttonSize} text-blue-400 hover:bg-blue-500/30 focus:ring-blue-500`}
+          icon={<EditIcon className={iconSize} />}
+          iconPosition="left"
+        />
+        <FormButton
           onClick={onDelete}
-          className={`${buttonSize} rounded-md bg-red-600/20 border border-red-500/30 hover:bg-red-500/30 text-red-400 transition-colors cursor-pointer`}
+          variant="ghost"
+          size={size}
+          ariaLabel={deleteLabel}
+          className={`${buttonSize} text-red-400 hover:bg-red-500/30 focus:ring-red-500`}
+          icon={
+            isDeleting ? (
+              <LoadingSpinnerIcon className={`${iconSize} animate-spin`} />
+            ) : (
+              <TrashIcon className={iconSize} />
+            )
+          }
+          iconPosition="left"
           disabled={isDeleting}
-          aria-label={deleteLabel}
-        >
-          {isDeleting ? (
-            <LoadingSpinnerIcon className={`${iconSize} animate-spin`} />
-          ) : (
-            <TrashIcon className={iconSize} />
-          )}
-        </button>
+        />
       </div>
     );
   }
