@@ -12,6 +12,7 @@ import {
 } from "@/components/Icons";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 import { ProFeature } from "@/components/ProFeature";
+import { FormButton } from "@/components/form";
 
 interface HabitTrackerProps {
   habits: HabitGoal[];
@@ -50,14 +51,16 @@ function HabitTracker({
           {onAddHabit && habits.length > 0 && (
             <div className={!canAddHabit ? "relative" : ""}>
               <ProFeature>
-                <button
+                <FormButton
+                  variant="ghost"
+                  size="sm"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
-                  className="flex items-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <PlusIcon size="sm" className="mr-1.5" />
-                  Add Habit
-                </button>
+                  className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg disabled:opacity-50"
+                  text="Add Habit"
+                  icon={<PlusIcon size="sm" />}
+                  iconPosition="left"
+                />
               </ProFeature>
             </div>
           )}
