@@ -1,4 +1,5 @@
 import { useState } from "react";
+import FormButton from "@/components/form/FormButton";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { CardContainer, TextField } from "@/components/form";
 import LoadingSpinner from "@/components/LoadingSpinner";
@@ -59,20 +60,17 @@ function ResetPasswordForm() {
           required={true}
           placeholder="••••••••"
         />
-        <button
+        <FormButton
           type="submit"
+          className="w-full"
           disabled={isLoading || !token}
-          className="w-full p-3 rounded-lg font-medium text-white 
-                 bg-gradient-to-r from-green-600 to-teal-500 hover:from-green-500 hover:to-teal-400
-                 disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
-                 shadow-lg shadow-green-500/30"
         >
           {isLoading ? (
             <LoadingSpinner size="sm" color="white" />
           ) : (
             "Reset Password"
           )}
-        </button>
+        </FormButton>
       </form>
     </CardContainer>
   );
