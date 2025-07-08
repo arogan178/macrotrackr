@@ -1,7 +1,7 @@
 import { memo, useCallback, useState, useEffect } from "react";
 import { MacroTargetSettings } from "@/types/macro";
 import { MacroTargetState } from "@/features/settings/types/types";
-import { InfoCard, CardContainer, SaveButton } from "@/components/form";
+import { InfoCard, CardContainer } from "@/components/form";
 import FormButton from "@/components/form/FormButton";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
@@ -235,13 +235,17 @@ function MacroTargetForm() {
                     className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
                   />
                 )}
-                <SaveButton
+                <FormButton
+                  type="button"
                   onClick={handleSaveChanges}
-                  loading={isTargetSaving}
+                  isLoading={isTargetSaving}
                   disabled={!hasChanges || isTargetLoading}
-                >
-                  Save Targets
-                </SaveButton>
+                  text="Save Targets"
+                  size="sm"
+                  variant="primary"
+                  ariaLabel="Save macro targets"
+                  className="px-4 py-2 text-sm"
+                />
               </div>
             </div>
           </CardContainer>
