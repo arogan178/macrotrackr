@@ -130,7 +130,7 @@ const Navbar: React.FC = () => {
       </nav>
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className="h-[73px]" />
+      <div className="h-[60px]" />
 
       {/* Mobile menu overlay and menu */}
       <AnimatePresence initial={false}>
