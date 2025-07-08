@@ -283,13 +283,15 @@ function Modal(props: ModalProps) {
             <h2 id="modal-title" className="text-lg font-medium text-gray-100">
               {title}
             </h2>
-            <button
+            <FormButton
               onClick={onClose}
+              ariaLabel="Close modal"
+              variant="ghost"
+              size="sm"
               className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
-              aria-label="Close modal"
-            >
-              <XIcon size="md" />
-            </button>
+              icon={<XIcon size="md" />}
+              iconPosition="left"
+            />
           </div>
         )}
 
@@ -307,12 +309,15 @@ function Modal(props: ModalProps) {
             } gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
           >
             {!hideCancelButton && (
-              <button
+              <FormButton
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
+                ariaLabel={cancelLabel}
+                variant="ghost"
+                size="md"
+                className="px-4 py-2 rounded-lg font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
               >
                 {cancelLabel}
-              </button>
+              </FormButton>
             )}
             {variant === "form" && onSave && (
               <FormButton
@@ -326,13 +331,15 @@ function Modal(props: ModalProps) {
               />
             )}
             {variant === "confirmation" && onConfirm && (
-              <button
+              <FormButton
                 onClick={onConfirm}
-                // Apply confirmButton style directly
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${variantStyles.confirmButton}`}
+                ariaLabel={confirmLabel}
+                variant={isDanger ? "danger" : "primary"}
+                size="md"
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${variantStyles.confirmButton}`}
               >
                 {confirmLabel}
-              </button>
+              </FormButton>
             )}
           </div>
         )}

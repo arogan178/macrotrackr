@@ -243,7 +243,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               disabled={isSaving || !isFormValid}
               className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-800/50 
                         disabled:text-gray-400 rounded-lg shadow-md transition-colors
-                        text-white font-medium flex items-center cursor-pointer disabled:cursor-not-allowed"
+                        text-white font-medium flex items-center"
             >
               {isSaving ? (
                 <>

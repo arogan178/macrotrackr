@@ -1,4 +1,5 @@
 import { ForwardIcon } from "@/components/Icons";
+import FormButton from "@/components/form/FormButton";
 
 interface ButtonModeToggleProps {
   mode: "login" | "register";
@@ -7,9 +8,11 @@ interface ButtonModeToggleProps {
 
 function ButtonModeToggle({ mode, onToggle }: ButtonModeToggleProps) {
   return (
-    <button
+    <FormButton
+      type="button"
       onClick={onToggle}
       className="group flex flex-col items-center text-gray-300 hover:text-white transition-colors px-6 py-3 rounded-lg hover:bg-gray-800/30"
+      variant="ghost"
     >
       <div className="text-center">
         <p className="text-sm text-gray-400 group-hover:text-gray-300 transition-colors">
@@ -22,7 +25,7 @@ function ButtonModeToggle({ mode, onToggle }: ButtonModeToggleProps) {
           <ForwardIcon />
         </div>
       </div>
-    </button>
+    </FormButton>
   );
 }
 

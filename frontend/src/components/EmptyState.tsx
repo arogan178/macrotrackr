@@ -1,5 +1,6 @@
 import { memo, ReactNode } from "react";
 import { PlusIcon } from "./Icons";
+import FormButton from "./form/FormButton";
 
 interface ActionProps {
   label: string;
@@ -52,7 +53,7 @@ function EmptyState({
   // Get variant styles for action buttons
   const getButtonStyles = (variant: ActionProps["variant"] = "primary") => {
     const baseStyles =
-      "px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200 flex items-center gap-2";
+      "px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center";
 
     switch (variant) {
       case "primary":
@@ -95,25 +96,43 @@ function EmptyState({
       {(action || secondaryAction) && (
         <div className="flex flex-wrap justify-center gap-3">
           {action && (
-            <button
+            <FormButton
               onClick={action.onClick}
+              ariaLabel={action.label}
+              variant={
+                action.variant === "secondary"
+                  ? "secondary"
+                  : action.variant === "outline"
+                  ? "ghost"
+                  : "primary"
+              }
+              size="md"
               className={getButtonStyles(action.variant)}
-              type="button"
+              icon={action.icon}
+              iconPosition="left"
             >
-              {action.icon && <span>{action.icon}</span>}
               {action.label}
-            </button>
+            </FormButton>
           )}
 
           {secondaryAction && (
-            <button
+            <FormButton
               onClick={secondaryAction.onClick}
+              ariaLabel={secondaryAction.label}
+              variant={
+                secondaryAction.variant === "secondary"
+                  ? "secondary"
+                  : secondaryAction.variant === "outline"
+                  ? "ghost"
+                  : "primary"
+              }
+              size="md"
               className={getButtonStyles(secondaryAction.variant || "outline")}
-              type="button"
+              icon={secondaryAction.icon}
+              iconPosition="left"
             >
-              {secondaryAction.icon && <span>{secondaryAction.icon}</span>}
               {secondaryAction.label}
-            </button>
+            </FormButton>
           )}
         </div>
       )}
