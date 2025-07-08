@@ -5,6 +5,7 @@ import {
   PlusCircleIcon,
   ChevronDownIcon,
 } from "@/components/Icons";
+import { ProFeature } from "@/components/ProFeature";
 import Modal from "@/components/Modal";
 import EmptyState from "@/components/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
@@ -226,18 +227,20 @@ const EntryHistoryComponent = function EntryHistory({
           </p>
         </motion.div>
         {history.length > 0 && (
-          <motion.button
-            onClick={handleExportCSV}
-            className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.3 }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <ExportIcon className="w-4 h-4 mr-2" />
-            Export CSV
-          </motion.button>
+          <ProFeature>
+            <motion.button
+              onClick={handleExportCSV}
+              className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ExportIcon className="w-4 h-4 mr-2" />
+              Export CSV
+            </motion.button>
+          </ProFeature>
         )}
       </div>
 

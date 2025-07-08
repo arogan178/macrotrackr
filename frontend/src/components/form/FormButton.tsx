@@ -65,27 +65,27 @@ function FormButton({
   ...rest
 }: FormButtonAllProps) {
   const baseStyles =
-    "inline-flex items-center justify-center font-medium text-sm gap-2 transition-all duration-200 " +
+    "inline-flex items-center justify-center font-medium text-sm gap-1.5 transition-all duration-200 " +
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +
     "rounded-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed";
 
   const sizeStyles = {
-    [BUTTON_SIZES.SM]: " px-2.5 py-1.5 text-xs",
-    [BUTTON_SIZES.MD]: "px-4 py-2.5 text-sm",
+    [BUTTON_SIZES.SM]: " px-2 py-1 text-xs",
+    [BUTTON_SIZES.MD]: "px-3.5 py-2 text-sm",
     [BUTTON_SIZES.LG]: "px-5 py-3 text-base",
   };
 
   const variantStyles = {
     [BUTTON_VARIANTS.PRIMARY]:
-      "bg-indigo-600 hover:bg-indigo-700 text-white focus:ring-indigo-500 shadow-sm",
+      "bg-indigo-600 hover:bg-indigo-700 disabled:hover:bg-indigo-600 text-white focus:ring-indigo-500 shadow-sm",
     [BUTTON_VARIANTS.SECONDARY]:
-      "bg-gray-700 hover:bg-gray-600 text-gray-100 border border-gray-600 focus:ring-gray-500",
+      "bg-gray-700 hover:bg-gray-600 disabled:hover:bg-gray-700 text-gray-100 border border-gray-600 focus:ring-gray-500",
     [BUTTON_VARIANTS.DANGER]:
-      "bg-red-600 hover:bg-red-700 text-white focus:ring-red-500 shadow-sm",
+      "bg-red-600 hover:bg-red-700 disabled:hover:bg-red-600 text-white focus:ring-red-500 shadow-sm",
     [BUTTON_VARIANTS.SUCCESS]:
-      "bg-green-600 hover:bg-green-700 text-white focus:ring-green-500 shadow-sm",
+      "bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600 text-white focus:ring-green-500 shadow-sm",
     [BUTTON_VARIANTS.GHOST]:
-      "bg-transparent hover:bg-gray-700/50 text-gray-300 hover:text-white",
+      "bg-transparent hover:bg-gray-700/50 disabled:hover:bg-transparent text-gray-300 hover:text-white disabled:hover:text-gray-300",
   };
 
   const widthStyles = fullWidth ? "w-full" : "";
