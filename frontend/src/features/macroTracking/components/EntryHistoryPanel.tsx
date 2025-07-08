@@ -212,7 +212,37 @@ const EntryHistoryComponent = function EntryHistory({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      {/* Heading row for mobile: flex with export button inline */}
+      <div className="flex items-center justify-between mb-6 gap-4 lg:hidden">
+        <div>
+          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>
+          <p className="text-sm text-gray-400 mt-1">
+            <AnimatedNumber value={history.length} />{" "}
+            {history.length === 1 ? "entry" : "entries"} across{" "}
+            <AnimatedNumber value={totalEntries.length} />{" "}
+            {totalEntries.length === 1 ? "day" : "days"}
+          </p>
+        </div>
+        {history.length > 0 && (
+          <ProFeature>
+            <motion.button
+              onClick={handleExportCSV}
+              className="px-3 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-xs font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2, duration: 0.3 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              <ExportIcon className="w-4 h-4 mr-1" />
+              <span className="hidden xs:inline">Export CSV</span>
+            </motion.button>
+          </ProFeature>
+        )}
+      </div>
+
+      {/* Heading row for desktop: flex with export button right-aligned */}
+      <div className="hidden lg:flex flex-row justify-between items-center mb-6 gap-4">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
