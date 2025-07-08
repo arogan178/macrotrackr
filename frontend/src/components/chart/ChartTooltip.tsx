@@ -1,5 +1,5 @@
-import { getUnitForStat } from "../../utils/chart-colors";
-import AnimatedNumber from "../animation/AnimatedNumber";
+import { getUnitForStat } from "@/utils/chart-colors";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface TooltipData {
   name: string;

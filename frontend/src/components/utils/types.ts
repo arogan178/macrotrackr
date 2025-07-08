@@ -98,7 +98,7 @@ export interface FormButtonProps {
   loadingText?: string;
   disabled?: boolean;
   className?: string;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
   fullWidth?: boolean;
   ariaLabel?: string;
 }
@@ -107,13 +107,6 @@ export interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";
   color?: string;
   label?: string;
-}
-
-export interface SaveButtonProps {
-  onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
-  loading?: boolean;
-  disabled?: boolean;
-  children?: ReactNode;
 }
 
 // Chart data point - used for all chart visualizations

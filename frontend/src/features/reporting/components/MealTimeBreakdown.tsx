@@ -11,8 +11,8 @@ import {
   Cell,
   Legend,
 } from "recharts";
-import { ChartCard, StatSelector } from "../../../components/chart";
-import { MEAL_COLORS, getUnitForStat } from "../../../utils/chart-colors";
+import { ChartCard, StatSelector } from "@/components/chart";
+import { MEAL_COLORS, getUnitForStat } from "@/utils/chart-colors";
 
 // Define meal types and their display order
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;

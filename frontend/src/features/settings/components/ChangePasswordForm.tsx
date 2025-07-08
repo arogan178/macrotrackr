@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useStore } from "@/store/store";
-import { SaveButton } from "@/components/form";
+import { FormButton } from "@/components/form";
 import TextField from "@/components/form/TextField";
 import { FloatingNotification } from "@/features/notifications/components";
 
@@ -86,12 +86,15 @@ export const ChangePasswordForm = () => {
           />
         </div>
         <div className="flex justify-end pt-4">
-          <SaveButton
-            loading={isChangingPassword}
+          <FormButton
+            type="submit"
+            isLoading={isChangingPassword}
             disabled={!currentPassword || !newPassword || !confirmPassword}
-          >
-            Change Password
-          </SaveButton>
+            text="Change Password"
+            size="lg"
+            variant="primary"
+            className="px-8 py-3 text-lg"
+          />
         </div>
       </form>
     </div>

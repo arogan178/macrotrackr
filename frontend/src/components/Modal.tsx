@@ -1,8 +1,68 @@
+/**
+ * Modal – Accessible, animated modal dialog for confirmation and form flows.
+ *
+ * Renders in a portal (#modal-root), supports keyboard and backdrop close, and provides two variants:
+ * - Confirmation: For yes/no or destructive actions
+ * - Form: For embedded forms with Save/Cancel
+ *
+ * Accessibility:
+ * - Uses role="dialog", aria-modal, and aria-labelledby for screen readers.
+ * - Focus is trapped within the modal while open.
+ *
+ * Props (Confirmation):
+ * @prop {boolean} isOpen - Whether the modal is open
+ * @prop {function} onClose - Close handler
+ * @prop {string} title - Modal title
+ * @prop {string} message - Confirmation message
+ * @prop {function} onConfirm - Confirm handler
+ * @prop {string} [confirmLabel] - Confirm button label
+ * @prop {string} [cancelLabel] - Cancel button label
+ * @prop {boolean} [isDanger] - Use danger styling
+ * @prop {boolean} [hideCancelButton] - Hide cancel button
+ *
+ * Props (Form):
+ * @prop {function} onSave - Save handler
+ * @prop {boolean} [saveDisabled] - Disable save button
+ * @prop {string} [saveLabel] - Save button label
+ * @prop {string} [cancelLabel] - Cancel button label
+ * @prop {boolean} [hideDefaultButtons] - Hide default footer buttons
+ *
+ * Common Props:
+ * @prop {ReactNode} children - Modal content
+ * @prop {"sm"|"md"|"lg"|"xl"|"2xl"} [size] - Modal size
+ * @prop {boolean} [hideClose] - Hide close (X) button
+ *
+ * @example
+ * // Confirmation modal
+ * <Modal
+ *   isOpen={open}
+ *   onClose={close}
+ *   title="Delete item?"
+ *   variant="confirmation"
+ *   message="Are you sure you want to delete this?"
+ *   onConfirm={handleDelete}
+ *   isDanger
+ * />
+ *
+ * @example
+ * // Form modal
+ * <Modal
+ *   isOpen={open}
+ *   onClose={close}
+ *   title="Edit Profile"
+ *   variant="form"
+ *   onSave={handleSave}
+ *   saveDisabled={isSaving}
+ * >
+ *   <ProfileForm />
+ * </Modal>
+ */
 import { ReactNode, useEffect, useRef, memo, useState } from "react";
 import ReactDOM from "react-dom"; // Import ReactDOM for portals
 import { motion } from "motion/react";
-import { XIcon } from "./Icons";
-import SaveButton from "./form/SaveButton";
+import { CloseIcon } from "./Icons";
+import ActionButton from "./form/ActionButton";
+import FormButton from "./form/FormButton";
 
 interface BaseModalProps {
   isOpen: boolean;
@@ -118,7 +178,6 @@ function Modal(props: ModalProps) {
       case "form":
         return {
           ...defaultStyles, // Use default header/footer
-          // confirmButton style might not be needed if SaveButton is always used
           confirmButton: "bg-blue-600 text-white hover:bg-blue-700",
         };
       default:
@@ -225,13 +284,14 @@ function Modal(props: ModalProps) {
             <h2 id="modal-title" className="text-lg font-medium text-gray-100">
               {title}
             </h2>
-            <button
+            <ActionButton
+              variant="close"
+              size="sm"
               onClick={onClose}
-              className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700/50"
-              aria-label="Close modal"
-            >
-              <XIcon size="md" />
-            </button>
+              ariaLabel="Close modal"
+              className="text-gray-400 hover:text-red transition-colors"
+              icon={<CloseIcon />}
+            />
           </div>
         )}
 
@@ -249,26 +309,37 @@ function Modal(props: ModalProps) {
             } gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
           >
             {!hideCancelButton && (
-              <button
+              <FormButton
                 onClick={onClose}
-                className="px-4 py-2 rounded-lg text-sm font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
+                ariaLabel={cancelLabel}
+                variant="ghost"
+                size="md"
+                className="px-4 py-2 rounded-lg font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
               >
                 {cancelLabel}
-              </button>
+              </FormButton>
             )}
             {variant === "form" && onSave && (
-              <SaveButton onClick={onSave} disabled={saveDisabled}>
-                {saveLabel}
-              </SaveButton>
+              <FormButton
+                type="button"
+                onClick={onSave}
+                disabled={saveDisabled}
+                text={saveLabel}
+                size="lg"
+                variant="primary"
+                className="px-8 py-3 text-lg"
+              />
             )}
             {variant === "confirmation" && onConfirm && (
-              <button
+              <FormButton
                 onClick={onConfirm}
-                // Apply confirmButton style directly
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${variantStyles.confirmButton}`}
+                ariaLabel={confirmLabel}
+                variant={isDanger ? "danger" : "primary"}
+                size="md"
+                className={`px-4 py-2 rounded-lg font-medium transition-colors ${variantStyles.confirmButton}`}
               >
                 {confirmLabel}
-              </button>
+              </FormButton>
             )}
           </div>
         )}
