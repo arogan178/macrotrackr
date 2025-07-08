@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { DropdownProps } from "../utils/types";
-import { formStyles } from "../utils/styles";
+import { DropdownProps } from "@/components/utils/types";
+import { formStyles } from "@/components/utils/styles";
 
 function Dropdown({
   label,
@@ -12,7 +12,7 @@ function Dropdown({
 }: DropdownProps) {
   const selectClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
-  } ${formStyles.select.base}`;
+  } ${formStyles.select.base} cursor-pointer`;
 
   return (
     <div className={formStyles.container}>
@@ -30,6 +30,7 @@ function Dropdown({
               value={option.value}
               disabled={option.value === ""}
               hidden={option.value === ""}
+              className="cursor-pointer"
             >
               {option.label}
             </option>

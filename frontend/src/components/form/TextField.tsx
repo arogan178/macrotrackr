@@ -1,7 +1,45 @@
-import { memo } from "react";
-import { TextFieldProps } from "../utils/types";
-import { formStyles } from "../utils/styles";
-import { EyeIcon, EyeSlashIcon } from "../Icons";
+/**
+ * TextField – Standardized, accessible input for text, email, or password fields.
+ *
+ * Handles error, helper text, icons, password visibility, and accessibility.
+ *
+ * Accessibility:
+ * - Uses label, aria-describedby, and aria-label for screen readers.
+ * - Error and helper text are properly linked.
+ *
+ * Props:
+ * @prop {string} label - Field label
+ * @prop {string} value - Input value
+ * @prop {function} onChange - Change handler (string)
+ * @prop {boolean} [required] - Mark as required
+ * @prop {"text"|"email"|"password"} [type] - Input type
+ * @prop {string} [error] - Error message
+ * @prop {string} [helperText] - Helper text
+ * @prop {string} [placeholder] - Placeholder text
+ * @prop {number} [minLength] - Minimum length
+ * @prop {number} [maxLength] - Maximum length
+ * @prop {boolean} [textOnly] - Restrict to letters/spaces
+ * @prop {React.ReactNode} [icon] - Optional icon (left)
+ * @prop {function} [onKeyDown] - Keydown handler
+ * @prop {string} [id] - Custom id
+ * @prop {string} [ariaLabel] - Accessibility label
+ *
+ * @example
+ * // Basic usage
+ * <TextField label="Name" value={name} onChange={setName} />
+ *
+ * @example
+ * // Password field with visibility toggle
+ * <TextField label="Password" type="password" value={pw} onChange={setPw} />
+ *
+ * @example
+ * // With icon and helper text
+ * <TextField label="Email" value={email} onChange={setEmail} icon={<MailIcon />} helperText="We'll never share your email." />
+ */
+import { memo, useId } from "react";
+import { TextFieldProps } from "@/components/utils/types";
+import { formStyles } from "@/components/utils/styles";
+import { EyeIcon, EyeSlashIcon } from "@/components/Icons";
 import { useState } from "react";
 
 function TextField({
@@ -18,7 +56,14 @@ function TextField({
   textOnly = false,
   icon,
   onKeyDown,
-}: TextFieldProps) {
+  id,
+  ariaLabel,
+}: TextFieldProps & { id?: string; ariaLabel?: string }) {
+  const autoId = useId();
+  const inputId = id || `textfield-${autoId}`;
+  const describedByIds = [];
+  if (error) describedByIds.push(`${inputId}-error`);
+  if (helperText && !error) describedByIds.push(`${inputId}-helper`);
   const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -47,10 +92,13 @@ function TextField({
 
   return (
     <div className={formStyles.container}>
-      <label className={formStyles.label}>{label}</label>
+      <label className={formStyles.label} htmlFor={inputId}>
+        {label}
+      </label>
       <div className="relative">
         {icon && <div className={formStyles.iconContainer}>{icon}</div>}
         <input
+          id={inputId}
           type={inputType}
           value={value}
           onChange={handleChange}
@@ -60,6 +108,10 @@ function TextField({
           maxLength={maxLength}
           className={inputClasses}
           required={required}
+          aria-describedby={
+            describedByIds.length ? describedByIds.join(" ") : undefined
+          }
+          aria-label={ariaLabel}
         />
         {type === "password" && (
           <button
@@ -81,9 +133,15 @@ function TextField({
         </p>
       )}
       {helperText && !error && (
-        <p className={formStyles.helper}>{helperText}</p>
+        <p id={`${inputId}-helper`} className={formStyles.helper}>
+          {helperText}
+        </p>
       )}
-      {error && <p className={formStyles.error}>{error}</p>}
+      {error && (
+        <p id={`${inputId}-error`} className={formStyles.error}>
+          {error}
+        </p>
+      )}
     </div>
   );
 }
