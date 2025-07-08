@@ -223,13 +223,14 @@ function MacroTargetForm() {
               )}
               <div className="flex gap-4">
                 {hasChanges && (
-                  <button
+                  <FormButton
+                    type="button"
                     onClick={handleReset}
-                    className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
                     disabled={isTargetLoading || isTargetSaving}
-                  >
-                    Reset
-                  </button>
+                    variant="ghost"
+                    size="md"
+                    text="Reset"
+                  />
                 )}
                 <FormButton
                   type="button"

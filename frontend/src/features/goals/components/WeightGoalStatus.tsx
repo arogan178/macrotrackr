@@ -2,8 +2,6 @@ import { memo } from "react";
 import {
   CalorieIcon,
   ChevronRightIcon,
-  EditIcon,
-  TrashIcon,
   WeightIcon,
   CalendarIcon, // Added for Time Remaining
   TrendingUpIcon, // Added for Weekly Rate
@@ -18,6 +16,8 @@ import {
 import { WeightGoals } from "../types";
 import MacroNutrient from "./MacroNutrient";
 import { motion } from "motion/react"; // Import motion
+import { FormButton } from "@/components/form";
+import ActionButtonGroup from "@/components/form/ActionButtonGroup";
 
 interface WeightGoalStatusProps {
   startingWeight: number; // This should represent the *current* weight
@@ -165,28 +165,24 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-center">
-          <button
+          <FormButton
+            variant="secondary"
+            size="sm"
             onClick={onLogWeight}
-            className="flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-md bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-medium transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500"
-            aria-label="Log current weight"
-          >
-            <WeightIcon className="h-4 w-4" />
-            <span>Log Weight</span>
-          </button>
-          <button
-            onClick={onEdit}
-            className="p-2 rounded-full text-gray-400 hover:text-gray-100 bg-gray-700/50 hover:bg-gray-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500"
-            aria-label="Edit weight goal"
-          >
-            <EditIcon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={onDelete}
-            className="p-2 rounded-full text-red-400 hover:text-red-300 bg-red-900/30 hover:bg-red-900/50 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-red-500"
-            aria-label="Delete weight goal"
-          >
-            <TrashIcon className="w-4 h-4" />
-          </button>
+            className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-medium transition-colors duration-200 focus:ring-blue-500"
+            text="Log Weight"
+            icon={<WeightIcon className="h-4 w-4" />}
+            iconPosition="left"
+            ariaLabel="Log current weight"
+          />
+          <ActionButtonGroup
+            onEdit={onEdit}
+            onDelete={onDelete}
+            editLabel="Edit weight goal"
+            deleteLabel="Delete weight goal"
+            size="sm"
+            isDeleting={false}
+          />
         </div>
       </div>
 
