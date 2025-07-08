@@ -24,7 +24,7 @@ const PageHeader = ({
 }) => (
   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
     {/* Left Side: Title */}
-    <h1 className="text-3xl sm:text-4xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
+    <h1 className="text-3xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight mb-2">
       Settings
     </h1>
     {/* Right Side: Badges and Tabs */}
