@@ -1,6 +1,6 @@
 import { memo } from "react";
-import { DateFieldProps } from "../utils/types";
-import { formStyles } from "../utils/styles";
+import { DateFieldProps } from "@/components/utils/types";
+import { formStyles } from "@/components/utils/styles";
 
 function DateField({
   label,
