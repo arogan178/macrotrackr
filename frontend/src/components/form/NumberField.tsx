@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
-import { NumberFieldProps } from "../utils/types"; // Assuming NumberFieldProps is defined here
-import { formStyles } from "../utils/styles";
+import { NumberFieldProps } from "@/components/utils/types"; // Assuming NumberFieldProps is defined here
+import { formStyles } from "@/components/utils/styles";
 
 // Update NumberFieldProps in ../utils/types.ts if needed to include 'disabled'
 // interface NumberFieldProps {
@@ -111,7 +111,7 @@ function NumberField({
         {unit && <div className={formStyles.unitContainer}>{unit}</div>}
       </div>
       {helperText && (
-        <p id={`${label}-helper`} className={formStyles.helperText}>
+        <p id={`${label}-helper`} className={formStyles.helper}>
           {helperText}
         </p>
       )}{" "}
