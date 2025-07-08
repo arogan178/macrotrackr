@@ -65,7 +65,7 @@ const MacroTarget = memo(
               ariaLabel={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
               icon={<InfoIcon className="w-5 h-5" />}
-              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50 cursor-pointer"
+              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50 "
             />
           </div>
         </div>
