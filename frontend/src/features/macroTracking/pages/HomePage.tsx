@@ -194,7 +194,7 @@ const PageHeader = memo(
   ({ firstName, isLoading }: { firstName?: string; isLoading: boolean }) => (
     <div className="mb-6">
       <div className="flex flex-col md:flex-row md:items-center gap-3">
-        <h1 className="text-2xl sm:text-3xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
+        <h1 className="text-3xl sm:text-4xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
           Welcome back,
           <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
             {isLoading ? "..." : firstName || "User"}
