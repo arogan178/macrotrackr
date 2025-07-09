@@ -1,18 +1,10 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Modal from "@/components/Modal";
-// Import TimeField
-import {
-  DateField,
-  NumberField,
-  FormButton,
-  TimeField,
-} from "@/components/form";
+import { DateField, NumberField, TimeField } from "@/components/form";
 import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/api-service";
-import LoadingSpinner from "@/components/LoadingSpinner";
-
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
-import { format, parse, isValid } from "date-fns"; // Import date-fns helpers
+import { format, parse, isValid } from "date-fns";
 
 interface LogWeightModalProps {
   isOpen: boolean;
@@ -21,9 +13,8 @@ interface LogWeightModalProps {
 }
 
 // Helper to get current time in HH:mm format
-function getCurrentTime(): string {
-  return format(new Date(), "HH:mm");
-}
+const getCurrentTime = () => format(new Date(), "HH:mm");
+
 
 function LogWeightModal({
   isOpen,
@@ -35,49 +26,42 @@ function LogWeightModal({
   const error = useStore((state) => state.error);
   const clearError = useStore((state) => state.clearError);
 
-  const today = format(new Date(), "yyyy-MM-dd"); // Use date-fns format
+  const today = format(new Date(), "yyyy-MM-dd");
   const nowTime = getCurrentTime();
 
   const [date, setDate] = useState<string>(today);
-  const [time, setTime] = useState<string>(nowTime); // Add state for time
+  const [time, setTime] = useState<string>(nowTime);
   const [weight, setWeight] = useState<number | string>(initialWeight || "");
   const [formError, setFormError] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
       const currentDateTime = new Date();
-      setDate(format(currentDateTime, "yyyy-MM-dd")); // Reset date to today
-      setTime(format(currentDateTime, "HH:mm")); // Reset time to now
+      setDate(format(currentDateTime, "yyyy-MM-dd"));
+      setTime(format(currentDateTime, "HH:mm"));
       setWeight(initialWeight || "");
       setFormError(null);
-      if (clearError) {
-        clearError();
-      }
+      if (clearError) clearError();
     }
-  }, [isOpen, initialWeight, clearError]); // Removed today, nowTime as they are derived inside
+  }, [isOpen, initialWeight, clearError]);
 
+  // Validation logic for Save button
   function validateForm(): boolean {
     setFormError(null);
-
-    // Combine date and time for validation
-    const dateTimeString = `${date}T${time}:00`; // Add seconds for parsing
+    const dateTimeString = `${date}T${time}:00`;
     const parsedDateTime = parse(
       dateTimeString,
       "yyyy-MM-dd'T'HH:mm:ss",
       new Date()
     );
-
     if (!isValid(parsedDateTime)) {
       setFormError("Invalid date or time selected.");
       return false;
     }
-
     if (parsedDateTime > new Date()) {
       setFormError("Date and time cannot be in the future.");
       return false;
     }
-
-    // Weight validation (remains the same)
     const weightNum = Number(weight);
     if (isNaN(weightNum)) {
       setFormError("Please enter a valid weight.");
@@ -91,68 +75,44 @@ function LogWeightModal({
       setFormError(`Weight cannot exceed ${USER_MAXIMUM_WEIGHT} kg.`);
       return false;
     }
-
     return true;
   }
 
-  async function handleSubmit(event: React.FormEvent) {
-    event.preventDefault();
+  // Handler for Modal's onSave
+  async function handleSave() {
     clearError();
-
-    if (!validateForm()) {
-      return;
-    }
-
-    // Combine date and time into an ISO 8601 string
-    // Note: This creates a string based on local time. The backend should ideally store it as UTC.
-    // For simplicity here, we send the local time ISO string.
+    if (!validateForm()) return;
     const localDateTime = parse(
       `${date} ${time}`,
       "yyyy-MM-dd HH:mm",
       new Date()
     );
-    const timestamp = localDateTime.toISOString(); // Convert to ISO string (includes timezone offset)
-
-    const payload: AddWeightLogPayload = {
-      timestamp: timestamp, // Use the combined timestamp
-      weight: Number(weight),
-    };
-
+    const timestamp = localDateTime.toISOString();
+    const payload: AddWeightLogPayload = { timestamp, weight: Number(weight) };
     try {
       await addWeightLogEntry(payload);
       onClose();
     } catch (err) {
-      console.error("Failed to add weight log entry:", err);
       // Error state is handled by the slice
     }
   }
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Log Your Weight">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title="Log Your Weight"
+      variant="form"
+      onSave={handleSave}
+      saveDisabled={isSaving || !date || !time || !weight || !!formError}
+    >
+      <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <DateField
-            label="Date"
-            id="log-date"
-            value={date}
-            onChange={(newDate) => setDate(newDate)} // Assuming DateField returns string
-            required
-            disabled={isSaving}
-            max={today}
-          />
-          {/* Add TimeField */}
-          <TimeField
-            label="Time"
-            id="log-time"
-            value={time}
-            onChange={(newTime) => setTime(newTime)} // Assuming TimeField returns string HH:mm
-            required
-            disabled={isSaving}
-          />
+          <DateField label="Date" value={date} onChange={setDate} required />
+          <TimeField label="Time" value={time} onChange={setTime} required />
         </div>
         <NumberField
           label="Weight (kg)"
-          id="log-weight"
           value={weight}
           onChange={(newValue) =>
             setWeight(newValue === undefined ? "" : newValue)
@@ -164,25 +124,10 @@ function LogWeightModal({
           placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
           disabled={isSaving}
         />
-
         {(formError || error) && (
           <p className="text-sm text-red-400">{formError || error}</p>
         )}
-
-        <div className="flex justify-end gap-3 pt-4">
-          <FormButton
-            variant="secondary"
-            type="button"
-            onClick={onClose}
-            disabled={isSaving}
-          >
-            Cancel
-          </FormButton>
-          <FormButton type="submit" disabled={isSaving}>
-            {isSaving ? <LoadingSpinner size="sm" /> : "Save Log"}
-          </FormButton>
-        </div>
-      </form>
+      </div>
     </Modal>
   );
 }
