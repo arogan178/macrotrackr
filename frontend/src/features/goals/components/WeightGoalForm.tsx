@@ -302,7 +302,7 @@ function WeightGoalForm({
             type="button"
             variant="secondary"
             onClick={onCancel}
-            size="md"
+            buttonSize="md"
           >
             Cancel
           </FormButton>
@@ -313,7 +313,7 @@ function WeightGoalForm({
           disabled={!hasChanges || isLoading || !formValues.targetWeight} // Use isLoading prop
           isLoading={isLoading} // Pass isLoading prop to button
           onClick={handleSave}
-          size="md"
+          buttonSize="md"
         >
           {!weightGoals ? "Set Goal" : "Update Goal"}{" "}
         </FormButton>

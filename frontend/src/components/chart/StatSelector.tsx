@@ -33,7 +33,7 @@ function StatSelector({
                 : "text-gray-300 hover:bg-gray-600/50 hover:text-white"
             }`}
             variant={selectedStat === stat ? "primary" : "ghost"}
-            size="sm"
+            buttonSize="sm"
             aria-selected={selectedStat === stat}
             role="tab"
           >
