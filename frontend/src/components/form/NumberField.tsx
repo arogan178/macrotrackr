@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
-import { NumberFieldProps } from "@/components/utils/types"; // Assuming NumberFieldProps is defined here
+import type { NumberFieldProps } from "@/components/utils/types"; // Assuming NumberFieldProps is defined here
 import { formStyles } from "@/components/utils/styles";
 
 // Update NumberFieldProps in ../utils/types.ts if needed to include 'disabled'

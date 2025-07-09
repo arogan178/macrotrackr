@@ -1,6 +1,6 @@
 import { USER_MINIMUM_AGE } from "@/utils/constants";
 import { isOldEnough } from "@/utils/validation";
-import {
+import type {
   RegistrationStep1,
   RegistrationStep2,
   RegistrationStep3,

@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { HabitGoal, HabitGoalFormValues, HabitsState } from "../types";
+import { HabitGoal, HabitGoalFormValues, HabitsState } from "../types/types";
 import { apiService } from "@/utils/api-service";
 import { getErrorMessage } from "@/utils/error-handling";
 import {

@@ -53,7 +53,7 @@ export class ErrorBoundary extends Component<
                   onClick={() => window.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
-                  size="md"
+                  buttonSize="md"
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
                 >
                   Reload page
