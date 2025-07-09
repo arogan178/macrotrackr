@@ -25,6 +25,10 @@ export interface MacroTargetState extends MacroPercentages {
   lockedMacros: MacroType[];
 }
 
+// MacroTarget interface for use in goals and other features
+export interface MacroTarget {
+  macroTarget?: MacroTargetSettings;
+}
 export interface MacroEntry {
   id: number;
   createdAt: string;

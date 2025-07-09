@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { CheckMarkIcon } from "@/components/Icons";
+import { CheckMarkIcon } from "@/components/ui";
 import {
   StepInfo,
   calculateProgressPercentage,
@@ -18,7 +18,7 @@ export const StepIndicator = memo(function StepIndicator({
 }: StepIndicatorProps) {
   const progressPercentage = calculateProgressPercentage(currentStep);
   const { trackStyle, progressLineLeftPosition } = getStepIndicatorStyles(
-    steps.length
+    steps.length,
   );
 
   return (

@@ -8,7 +8,7 @@ import type { MacroType, MacroTargetState, MacroKey } from "@/types/macro";
  */
 export function useMacroTarget(
   initialValues: MacroTargetState,
-  onChange?: (target: MacroTargetState, shouldPersist?: boolean) => void
+  onChange?: (target: MacroTargetState, shouldPersist?: boolean) => void,
 ) {
   const [target, setTarget] = useState<MacroTargetState>(initialValues);
   const [isAdjusting, setIsAdjusting] = useState<MacroType | null>(null);
@@ -55,8 +55,8 @@ export function useMacroTarget(
       ).filter(
         (key) =>
           !currentTarget.lockedMacros.includes(
-            key.replace("Percentage", "") as MacroType
-          )
+            key.replace("Percentage", "") as MacroType,
+          ),
       );
 
       if (unlockedMacros.length === 0) {
@@ -69,20 +69,20 @@ export function useMacroTarget(
       } else if (sum > 100) {
         // Find the largest unlocked macro to reduce
         const largest = unlockedMacros.reduce((a, b) =>
-          (adjusted[a] as number) > (adjusted[b] as number) ? a : b
+          (adjusted[a] as number) > (adjusted[b] as number) ? a : b,
         );
         adjusted[largest] = (adjusted[largest] as number) - (sum - 100);
       } else {
         // Find the smallest unlocked macro to increase
         const smallest = unlockedMacros.reduce((a, b) =>
-          (adjusted[a] as number) < (adjusted[b] as number) ? a : b
+          (adjusted[a] as number) < (adjusted[b] as number) ? a : b,
         );
         adjusted[smallest] = (adjusted[smallest] as number) + (100 - sum);
       }
 
       return adjusted;
     },
-    []
+    [],
   );
 
   /**
@@ -92,7 +92,7 @@ export function useMacroTarget(
     (
       currentTarget: MacroTargetState,
       macro: MacroType,
-      value: number
+      value: number,
     ): MacroTargetState => {
       // Enforce min/max constraints
       value = Math.round(Math.max(5, Math.min(70, value)));
@@ -107,10 +107,10 @@ export function useMacroTarget(
       // Get unlocked macros (except the one being adjusted)
       const unlockedMacrosArr = ["protein", "carbs", "fats"].filter(
         (m) =>
-          m !== macro && !updatedTarget.lockedMacros.includes(m as MacroType)
+          m !== macro && !updatedTarget.lockedMacros.includes(m as MacroType),
       ) as MacroType[];
       const unlockedKeys: MacroKey[] = unlockedMacrosArr.map(
-        (m) => `${m}Percentage` as MacroKey
+        (m) => `${m}Percentage` as MacroKey,
       );
 
       // Calculate values for locked macros (excluding current if it's locked)
@@ -119,7 +119,7 @@ export function useMacroTarget(
         .reduce(
           (sum, m) =>
             sum + (updatedTarget[`${m}Percentage` as MacroKey] as number),
-          0
+          0,
         );
 
       // Calculate remaining percentage for unlocked macros
@@ -131,7 +131,7 @@ export function useMacroTarget(
         if (value + lockedMacrosSum !== 100 && !isCurrentMacroLocked) {
           updatedTarget[macroKey] = Math.max(
             5,
-            Math.min(70, 100 - lockedMacrosSum)
+            Math.min(70, 100 - lockedMacrosSum),
           );
         }
       } else if (unlockedKeys.length === 1) {
@@ -145,7 +145,7 @@ export function useMacroTarget(
           const difference = remainingTotal - newValue;
           updatedTarget[macroKey] = Math.max(
             5,
-            Math.min(70, value - difference)
+            Math.min(70, value - difference),
           );
         }
 
@@ -154,7 +154,7 @@ export function useMacroTarget(
         // Multiple unlocked macros - distribute proportionally
         const currentUnlockedTotal = unlockedKeys.reduce(
           (sum, key) => sum + (updatedTarget[key] as number),
-          0
+          0,
         );
 
         if (currentUnlockedTotal > 0) {
@@ -164,7 +164,7 @@ export function useMacroTarget(
             const proportion =
               (updatedTarget[key] as number) / currentUnlockedTotal;
             const newValue = Math.round(
-              Math.max(5, Math.min(70, remainingTotal * proportion))
+              Math.max(5, Math.min(70, remainingTotal * proportion)),
             );
             updatedTarget[key] = newValue;
             newTotal += newValue;
@@ -187,7 +187,7 @@ export function useMacroTarget(
               // If we can't adjust unlocked macros, adjust the current macro
               updatedTarget[macroKey] = Math.max(
                 5,
-                (updatedTarget[macroKey] as number) + difference
+                (updatedTarget[macroKey] as number) + difference,
               );
             }
           }
@@ -243,7 +243,7 @@ export function useMacroTarget(
 
       return updatedTarget;
     },
-    []
+    [],
   );
 
   /**
@@ -258,7 +258,7 @@ export function useMacroTarget(
       // Clear adjustment state after a brief delay
       setTimeout(() => setIsAdjusting(null), 100);
     },
-    [target, calculateMacroAdjustment, onChange]
+    [target, calculateMacroAdjustment, onChange],
   );
 
   /**
@@ -272,7 +272,7 @@ export function useMacroTarget(
       if (newTarget.lockedMacros.includes(macro)) {
         // Unlock the macro
         newTarget.lockedMacros = newTarget.lockedMacros.filter(
-          (m) => m !== macro
+          (m) => m !== macro,
         );
       } else {
         // Don't allow locking all three macros
@@ -287,7 +287,7 @@ export function useMacroTarget(
       // Lock changes are UI-only state, don't mark for persistence
       onChange?.(newTarget, false);
     },
-    [target, onChange]
+    [target, onChange],
   );
 
   return {

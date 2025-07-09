@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { UserIcon, StarIcon } from "@/components/Icons";
+import { UserIcon, StarIcon } from "@/components/ui";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface UserMetricsPanelProps {

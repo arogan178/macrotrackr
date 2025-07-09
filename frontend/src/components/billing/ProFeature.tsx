@@ -1,6 +1,5 @@
 import React, { memo } from "react";
-import { ProBadge } from "@/components/ProBadge";
-import { UpgradeModal } from "@/components/UpgradeModal";
+import { ProBadge, UpgradeModal } from "@/components/billing";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 
 /**

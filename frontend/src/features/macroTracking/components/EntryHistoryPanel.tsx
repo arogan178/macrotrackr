@@ -1,15 +1,11 @@
 import { useEffect, useState, useMemo, memo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import {
-  PlusCircleIcon,
-  ChevronDownIcon,
-  ExportIcon,
-} from "@/components/Icons";
+import { PlusCircleIcon, ChevronDownIcon, ExportIcon } from "@/components/ui";
 import ActionButton from "@/components/form/ActionButton";
 import { FormButton } from "@/components/form";
-import { ProFeature } from "@/components/ProFeature";
-import Modal from "@/components/form/Modal";
-import EmptyState from "@/components/EmptyState";
+import { ProFeature } from "@/components/billing/ProFeature";
+import Modal from "@/components/ui/Modal";
+import EmptyState from "@/components/ui/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import DesktopEntryTable from "./DesktopEntryTable";
 import MobileEntryCards from "./MobileEntryCards";
@@ -41,7 +37,7 @@ const formatTimeFromEntry = (entry: MacroEntry): string =>
 const calculateCalories = (
   protein: number,
   carbs: number,
-  fats: number
+  fats: number,
 ): number => Math.round(protein * 4 + carbs * 4 + fats * 9);
 
 const capitalizeFirstLetter = (string: string): string =>
@@ -67,8 +63,8 @@ const exportCSV = (history: MacroEntry[]) => {
         },${entry.fats},${calculateCalories(
           entry.protein,
           entry.carbs,
-          entry.fats
-        )}`
+          entry.fats,
+        )}`,
     ),
   ].join("\n");
 
@@ -107,17 +103,20 @@ const EntryHistoryComponent = function EntryHistory({
     (dateString: string) => {
       return dateString === todayFormatted ? "Today" : dateString;
     },
-    [todayFormatted]
+    [todayFormatted],
   );
 
   // Memoize grouped entries with totals and filter by show more state
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
-    const grouped = history.reduce((acc, entry) => {
-      const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(entry);
-      return acc;
-    }, {} as Record<string, MacroEntry[]>);
+    const grouped = history.reduce(
+      (acc, entry) => {
+        const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
+        if (!acc[dateKey]) acc[dateKey] = [];
+        acc[dateKey].push(entry);
+        return acc;
+      },
+      {} as Record<string, MacroEntry[]>,
+    );
 
     const allEntries = Object.entries(grouped)
       .map(([date, entries]) => ({
@@ -132,7 +131,7 @@ const EntryHistoryComponent = function EntryHistory({
               acc.calories +
               calculateCalories(entry.protein, entry.carbs, entry.fats),
           }),
-          { protein: 0, carbs: 0, fats: 0, calories: 0 }
+          { protein: 0, carbs: 0, fats: 0, calories: 0 },
         ),
       }))
       .map((group) => ({
@@ -147,7 +146,7 @@ const EntryHistoryComponent = function EntryHistory({
       .sort(
         (a, b) =>
           new Date(b.entries[0].entryDate || b.entries[0].createdAt).getTime() -
-          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime()
+          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime(),
       );
 
     const displayed = showAllDates ? allEntries : allEntries.slice(0, 5);
@@ -166,7 +165,7 @@ const EntryHistoryComponent = function EntryHistory({
         return new Set(
           totalEntries
             .filter((group) => group.date !== todayFormatted)
-            .map((group) => group.date)
+            .map((group) => group.date),
         );
       }
       const existingDates = new Set(totalEntries.map((group) => group.date));

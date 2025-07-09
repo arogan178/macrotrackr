@@ -1,8 +1,8 @@
 import React from "react";
-import { PricingTable } from "@/components/PricingTable";
+import { PricingTable } from "@/components/billing/PricingTable";
 import { createCheckoutSession } from "@/utils/api-billing";
-import { StarIcon, CircleQuestionMarkIcon } from "@/components/Icons";
-import Navbar from "@/components/Navbar";
+import { StarIcon, CircleQuestionMarkIcon } from "@/components/ui";
+import Navbar from "@/components/layout/Navbar";
 
 const testimonials = [
   {
@@ -46,14 +46,14 @@ const faqs = [
 
 const PricingPage: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = React.useState<"monthly" | "yearly">(
-    "monthly"
+    "monthly",
   );
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
       const { url } = await createCheckoutSession(
         window.location.origin + "/settings?upgraded=true",
         window.location.origin + "/pricing",
-        plan
+        plan,
       );
       window.location.href = url;
     } catch (e) {

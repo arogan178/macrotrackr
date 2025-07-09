@@ -16,7 +16,7 @@ interface ProfileFormProps {
   settings: UserSettings;
   updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserSettings[K]
+    value: UserSettings[K],
   ) => void;
   formErrors: Record<string, string>;
 }

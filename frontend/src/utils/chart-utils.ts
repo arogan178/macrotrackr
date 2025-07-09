@@ -5,7 +5,7 @@
  */
 export function formatDateName(
   entry: { name: string },
-  selectedRange: number
+  selectedRange: number,
 ): string {
   // For 7 days, keep daily format but ensure it's short
   if (selectedRange <= 7) {
@@ -42,7 +42,7 @@ export function formatDateName(
     // Calculate the week number within the month
     const firstDayOfMonth = new Date(currentYear, monthNum, 1);
     const daysSinceFirstDay = Math.floor(
-      (entryDate.getTime() - firstDayOfMonth.getTime()) / (24 * 60 * 60 * 1000)
+      (entryDate.getTime() - firstDayOfMonth.getTime()) / (24 * 60 * 60 * 1000),
     );
     const weekOfMonth = Math.floor(daysSinceFirstDay / 7) + 1;
 
@@ -155,8 +155,8 @@ export function formatNumberWithUnit(value: number, statType: string): string {
     statType === "calories"
       ? "kcal"
       : ["protein", "carbs", "fats"].includes(statType)
-      ? "g"
-      : "";
+        ? "g"
+        : "";
 
   return `${value.toFixed(1)}${unit ? " " + unit : ""}`;
 }

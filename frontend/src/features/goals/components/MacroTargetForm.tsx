@@ -1,14 +1,14 @@
 import { memo, useCallback, useState, useEffect } from "react";
-import { MacroTargetSettings } from "@/types/macro";
-import type { MacroTargetState } from "@/types/macro";
+import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
+
 import {
   InfoCard,
   CardContainer,
   FormButton,
   LoadingSpinner,
 } from "@/components/form";
-import ProFeature from "@/components/ProFeature";
-import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
+import { ProFeature } from "@/components/billing";
+import { InfoIcon, CheckMarkIcon } from "@/components/ui";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
 
@@ -30,7 +30,7 @@ function MacroTargetForm() {
 
   // Helper function to convert MacroTargetSettings to MacroTargetState
   const toMacroTargetState = (
-    settings: MacroTargetSettings
+    settings: MacroTargetSettings,
   ): MacroTargetState => ({
     proteinPercentage: settings.proteinPercentage,
     carbsPercentage: settings.carbsPercentage,
@@ -77,7 +77,7 @@ function MacroTargetForm() {
         setSaveSuccess(false);
       }
     },
-    [macroTarget, saveSuccess]
+    [macroTarget, saveSuccess],
   );
 
   // Save changes to the backend

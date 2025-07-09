@@ -21,7 +21,7 @@ export type UpdateEntryPayload = Partial<AddEntryPayload>;
 
 export const createStateSnapshot = (
   history: MacroEntry[],
-  totals: MacroDailyTotals
+  totals: MacroDailyTotals,
 ): OptimisticUpdateState => ({
   previousHistory: [...history],
   previousTotals: { ...totals },
@@ -30,7 +30,7 @@ export const createStateSnapshot = (
 // Utility: Check if two entries are the same (for duplicate detection)
 export const areEntriesSame = (
   entry1: MacroEntry,
-  entry2: MacroEntry
+  entry2: MacroEntry,
 ): boolean => {
   return (
     entry1.protein === entry2.protein &&

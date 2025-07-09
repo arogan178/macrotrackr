@@ -1,8 +1,7 @@
 import React from "react";
 import { useStore } from "@/store/store";
-import LineChartComponent from "@/components/chart/LineChartComponent";
-import EmptyState from "@/components/EmptyState";
-import { BarChartIcon } from "@/components/Icons";
+import { LineChartComponent } from "@/components/chart";
+import { BarChartIcon, EmptyState } from "@/components/ui";
 import { format, isValid, parseISO } from "date-fns";
 import { Area, ReferenceLine, TooltipProps } from "recharts";
 import {
@@ -84,7 +83,7 @@ function WeightGoalProgressChart() {
         const avgWeight =
           weights.reduce((sum, w) => sum + w, 0) / (weights.length || 1);
         const sortedTimestamps = [...timestamps].sort(
-          (a, b) => parseISO(a).getTime() - parseISO(b).getTime()
+          (a, b) => parseISO(a).getTime() - parseISO(b).getTime(),
         );
         return {
           name: format(parseISO(dateKey), "MMM d"), // Use 'name' for LineChartComponent
@@ -255,7 +254,7 @@ function WeightGoalProgressChart() {
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
             {format(
               parseISO(chartData[chartData.length - 1].fullDate),
-              "MMM d, yyyy"
+              "MMM d, yyyy",
             )}
           </span>
         )}

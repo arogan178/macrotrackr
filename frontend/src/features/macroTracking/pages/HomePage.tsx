@@ -1,5 +1,5 @@
 import { useEffect, memo, useCallback } from "react";
-import Navbar from "@/components/Navbar";
+import Navbar from "@/components/layout/Navbar";
 import { FloatingNotification } from "@/features/notifications/components";
 import { CardContainer } from "@/components/form";
 import {
@@ -58,7 +58,7 @@ export default function HomePage() {
         entryTime: entry.entryTime || "",
       });
     },
-    [updateEntry]
+    [updateEntry],
   );
 
   // Memoized close handler to prevent unnecessary re-renders
@@ -69,7 +69,7 @@ export default function HomePage() {
   // Fetch user details, macros, and persisted goals on component mount
   useEffect(() => {
     console.log(
-      "[HomePage] useEffect running: fetching user, macro data, goals, targets"
+      "[HomePage] useEffect running: fetching user, macro data, goals, targets",
     );
     fetchUserDetails();
     fetchMacroData();
@@ -211,7 +211,7 @@ const PageHeader = memo(
         </div>
       </div>
     </div>
-  )
+  ),
 );
 
 // Loading skeleton components
