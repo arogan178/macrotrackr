@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { ProBadge } from "@/components/ProBadge";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
@@ -37,5 +37,6 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+export default memo(ProFeature);
 // Usage example:
 // <ProFeature><AdvancedReporting /></ProFeature>

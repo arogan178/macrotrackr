@@ -1,4 +1,4 @@
-import { HabitGoal, HabitGoalFormValues } from "../types";
+import { HabitGoal, HabitGoalFormValues } from "../types/types";
 import { generateId } from "@/utils/id-generator";
 import { calculateProgress, isHabitComplete } from "./calculations";
 import { DEFAULT_HABIT_COLOR } from "../constants";

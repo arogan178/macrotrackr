@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { MacroType, MacroTargetState } from "../types/types";
+import type { MacroType, MacroTargetState, MacroKey } from "@/types/macro";
 
-type MacroKey = "proteinPercentage" | "carbsPercentage" | "fatsPercentage";
 /**
  * Custom hook to manage macro target distribution state
  * Handles the complex logic of keeping percentages summing to 100%
@@ -51,11 +50,9 @@ export function useMacroTarget(
       const adjusted = { ...currentTarget };
 
       // Get unlocked macros that can be adjusted
-      const unlockedMacros: MacroKey[] = [
-        "proteinPercentage",
-        "carbsPercentage",
-        "fatsPercentage",
-      ].filter(
+      const unlockedMacros: MacroKey[] = (
+        ["proteinPercentage", "carbsPercentage", "fatsPercentage"] as MacroKey[]
+      ).filter(
         (key) =>
           !currentTarget.lockedMacros.includes(
             key.replace("Percentage", "") as MacroType

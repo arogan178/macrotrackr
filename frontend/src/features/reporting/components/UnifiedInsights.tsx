@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/form/LoadingSpinner";
 import type { UnifiedInsightsProps } from "../types/insights-types";
 import {
   calculateConsistencyScore,
