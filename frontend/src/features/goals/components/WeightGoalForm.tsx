@@ -230,13 +230,13 @@ function WeightGoalForm({
                   Estimated completion:{" "}
                   {calculatedTargetDate
                     ? new Date(calculatedTargetDate).toLocaleDateString(
-                        "en-US",
-                        {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        },
-                      )
+                      "en-US",
+                      {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      },
+                    )
                     : "Calculating..."}
                 </span>
               </p>

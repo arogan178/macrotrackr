@@ -166,7 +166,7 @@ function HabitForm({
       {/* Preview */}
       <div className="mt-4">
         <p className="text-sm font-medium text-gray-300 mb-2">Preview</p>
-        <div className={`bg-gray-700/30 rounded-lg overflow-hidden`}>
+        <div className={"bg-gray-700/30 rounded-lg overflow-hidden"}>
           <div
             className={`bg-gradient-to-r from-${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
           >

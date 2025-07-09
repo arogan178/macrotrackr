@@ -199,7 +199,7 @@ function WeightLogList({
           onClose={onBulkCancel}
           title="Delete All Entries"
           variant="confirmation"
-          message={`Are you sure you want to delete ALL weight log entries? This action cannot be undone.`}
+          message={"Are you sure you want to delete ALL weight log entries? This action cannot be undone."}
           confirmLabel="Delete All"
           cancelLabel="Cancel"
           onConfirm={handleConfirmBulkDelete}

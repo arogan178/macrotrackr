@@ -142,7 +142,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
                   </motion.span>
                 </AnimatePresence>
                 <span
-                  className={`block text-xs font-semibold mt-1 text-yellow-300 transition-opacity duration-200`}
+                  className={"block text-xs font-semibold mt-1 text-yellow-300 transition-opacity duration-200"}
                   style={{
                     minHeight: 18,
                     opacity: selectedPlan === "yearly" ? 1 : 0,
@@ -349,21 +349,21 @@ const PricingTable: React.FC<PricingTableProps> = ({
                       className={
                         cell.column.id === "feature"
                           ? `feature-cell px-3 py-2 text-left text-gray-200 font-medium${
-                              idx !== data.length - 1
+                            idx !== data.length - 1
+                              ? " md:border-b md:border-gray-700/60"
+                              : ""
+                          }`
+                          : cell.column.id === "free"
+                            ? `px-3 py-2 text-center${
+                              row.index !== data.length - 1
                                 ? " md:border-b md:border-gray-700/60"
                                 : ""
                             }`
-                          : cell.column.id === "free"
-                            ? `px-3 py-2 text-center${
-                                row.index !== data.length - 1
-                                  ? " md:border-b md:border-gray-700/60"
-                                  : ""
-                              }`
                             : `px-3 py-2 text-center bg-gradient-to-br from-yellow-900/10 to-orange-900/10${
-                                row.index !== data.length - 1
-                                  ? " md:border-b md:border-yellow-700/30"
-                                  : ""
-                              }`
+                              row.index !== data.length - 1
+                                ? " md:border-b md:border-yellow-700/30"
+                                : ""
+                            }`
                       }
                       style={
                         cell.column.id === "feature"
@@ -406,8 +406,8 @@ const PricingTable: React.FC<PricingTableProps> = ({
               {selectedPlan === "monthly"
                 ? `$${PRICING.monthly}/month • Cancel anytime`
                 : `$${PRICING.yearly}/year • $${(PRICING.yearly / 12).toFixed(
-                    2,
-                  )}/mo equivalent • Cancel anytime`}
+                  2,
+                )}/mo equivalent • Cancel anytime`}
             </motion.span>
           </AnimatePresence>
         </div>

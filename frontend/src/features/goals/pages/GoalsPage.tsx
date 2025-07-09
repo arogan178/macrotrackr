@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { Navbar } from "@/components/layout";
 import { TabButton } from "@/components/form";
-import { GoalsIcon, TargetIcon } from "@/components/ui";
-import Modal from "@/components/ui/Modal";
+import { GoalsIcon, TargetIcon, Modal } from "@/components/ui";
 import {
   GoalsLoadingSkeleton,
   LogWeightModal,
@@ -273,16 +272,16 @@ export default function GoalsPage() {
             weightGoals={
               weightGoals && weightGoals.targetWeight != null
                 ? {
-                    ...weightGoals,
-                    targetWeight: weightGoals.targetWeight ?? 0,
-                    weightGoal: weightGoals.weightGoal ?? "maintain",
-                    startDate: weightGoals.startDate ?? "",
-                    targetDate: weightGoals.targetDate ?? "",
-                    calorieTarget: weightGoals.calorieTarget ?? 0,
-                    calculatedWeeks: weightGoals.calculatedWeeks ?? 0,
-                    weeklyChange: weightGoals.weeklyChange ?? 0,
-                    dailyChange: weightGoals.dailyChange ?? 0,
-                  }
+                  ...weightGoals,
+                  targetWeight: weightGoals.targetWeight ?? 0,
+                  weightGoal: weightGoals.weightGoal ?? "maintain",
+                  startDate: weightGoals.startDate ?? "",
+                  targetDate: weightGoals.targetDate ?? "",
+                  calorieTarget: weightGoals.calorieTarget ?? 0,
+                  calculatedWeeks: weightGoals.calculatedWeeks ?? 0,
+                  weeklyChange: weightGoals.weeklyChange ?? 0,
+                  dailyChange: weightGoals.dailyChange ?? 0,
+                }
                 : null
             }
           />
@@ -367,18 +366,18 @@ export default function GoalsPage() {
                           weightGoals={
                             weightGoals && weightGoals.targetWeight != null
                               ? {
-                                  ...weightGoals,
-                                  targetWeight: weightGoals.targetWeight ?? 0,
-                                  weightGoal:
+                                ...weightGoals,
+                                targetWeight: weightGoals.targetWeight ?? 0,
+                                weightGoal:
                                     weightGoals.weightGoal ?? "maintain",
-                                  startDate: weightGoals.startDate ?? "",
-                                  targetDate: weightGoals.targetDate ?? "",
-                                  calorieTarget: weightGoals.calorieTarget ?? 0,
-                                  calculatedWeeks:
+                                startDate: weightGoals.startDate ?? "",
+                                targetDate: weightGoals.targetDate ?? "",
+                                calorieTarget: weightGoals.calorieTarget ?? 0,
+                                calculatedWeeks:
                                     weightGoals.calculatedWeeks ?? 0,
-                                  weeklyChange: weightGoals.weeklyChange ?? 0,
-                                  dailyChange: weightGoals.dailyChange ?? 0,
-                                }
+                                weeklyChange: weightGoals.weeklyChange ?? 0,
+                                dailyChange: weightGoals.dailyChange ?? 0,
+                              }
                               : null
                           }
                           isLoading={goalsLoading}
