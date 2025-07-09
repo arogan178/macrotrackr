@@ -63,7 +63,6 @@ export default function DateRangeSelector({
             ariaLabel="Export data as CSV file"
             onClick={onExportClick}
             disabled={isExportDisabled}
-            buttonSize="md"
           />
         </div>
         {/* Desktop Export CSV Button */}
@@ -74,7 +73,6 @@ export default function DateRangeSelector({
             ariaLabel="Export data as CSV file"
             className=" bg-indigo-700/60 hover:bg-indigo-700/80 text-indigo-100 rounded-lg font-medium flex items-center transition-all duration-200 border border-indigo-600/30 disabled:opacity-50 "
             variant="primary"
-            buttonSize="md"
             icon={<ExportIcon />}
             iconPosition="left"
           >
