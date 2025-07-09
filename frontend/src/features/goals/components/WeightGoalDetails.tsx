@@ -1,7 +1,7 @@
 import { CardContainer } from "@/components/form";
-import { WeightGoals } from "../types";
+import { WeightGoals } from "@/types/goal";
 import { EditIcon, TrashIcon } from "@/components/Icons";
-import ProgressBar from "@/components/ProgressBar";
+import ProgressBar from "@/components/form/ProgressBar";
 
 interface WeightGoalDetailsProps {
   goalData: WeightGoals;

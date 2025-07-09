@@ -1,8 +1,12 @@
+// ModalProps: Union type for all modal variants
+export type ModalProps = ConfirmationModalProps | FormModalProps;
 import { ReactNode } from "react";
+import type { ICON_SIZES, BUTTON_SIZES } from "./constants";
 
 // Define common type aliases for better type safety
 type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost";
-type ButtonSize = "sm" | "md" | "lg";
+type ButtonSize = keyof typeof BUTTON_SIZES;
+type IconSize = keyof typeof ICON_SIZES;
 type ButtonType = "button" | "submit" | "reset";
 type IconPosition = "left" | "right";
 
@@ -11,6 +15,37 @@ export interface BaseFieldProps {
   required?: boolean;
   error?: string;
   helperText?: string;
+}
+
+export interface BaseModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children?: ReactNode;
+  iconSize?: IconSize;
+  buttonSize?: ButtonSize;
+  hideClose?: boolean; // If true, do not show the X (close) button
+  size?: "sm" | "md" | "lg" | "xl" | "2xl";
+}
+
+export interface FormModalProps extends BaseModalProps {
+  variant: "form";
+  onSave?: () => void;
+  saveDisabled?: boolean;
+  saveLabel?: string;
+  cancelLabel?: string;
+  hideDefaultButtons?: boolean;
+  hideCancelButton?: boolean;
+}
+
+export interface ConfirmationModalProps extends BaseModalProps {
+  variant: "confirmation";
+  message: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  onConfirm: () => void;
+  isDanger?: boolean;
+  hideCancelButton?: boolean;
 }
 
 export interface TextFieldProps extends BaseFieldProps {
@@ -91,7 +126,7 @@ export interface FormButtonProps {
   text?: string;
   type?: ButtonType;
   variant?: ButtonVariant;
-  size?: ButtonSize;
+  buttonSize?: ButtonSize;
   icon?: ReactNode;
   iconPosition?: IconPosition;
   isLoading?: boolean;
@@ -104,7 +139,7 @@ export interface FormButtonProps {
 }
 
 export interface LoadingSpinnerProps {
-  size?: "sm" | "md" | "lg";
+  size?: IconSize;
   color?: string;
   label?: string;
 }
@@ -145,5 +180,6 @@ export interface ActionButtonGroupProps {
   isDeleting: boolean;
   editLabel?: string;
   deleteLabel?: string;
-  size?: "sm" | "md";
+  buttonSize?: ButtonSize;
+  iconSize?: IconSize;
 }

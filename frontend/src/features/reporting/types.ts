@@ -2,7 +2,7 @@
 export * from "./types/insights-types";
 
 // Additional reporting types
-import { MacroDailyTotals } from "@/types/macro";
+import type { MacroDailyTotals } from "@/types/macro";
 
 export interface DateRangeData {
   startDate: string;

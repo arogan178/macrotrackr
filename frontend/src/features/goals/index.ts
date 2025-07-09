@@ -4,9 +4,6 @@ export * from "./components";
 // Export hooks API
 export * from "./hooks";
 
-// Export core types
-export * from "./types";
-
 // Export calculation functions
 export * from "./calculations";
 

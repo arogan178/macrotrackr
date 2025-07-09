@@ -1,16 +1,29 @@
-// MacroTargetSettings: settings for macro targets (percentages or grams)
+// Utility type for macro percentage keys
+export type MacroKey = keyof MacroPercentages;
+export type MacroType = "protein" | "carbs" | "fats";
+export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+export type MacroTargetGrams = {
+  protein: number;
+  carbs: number;
+  fats: number;
+};
+
 export interface MacroTargetSettings {
   proteinPercentage: number;
   carbsPercentage: number;
   fatsPercentage: number;
-  lockedMacros?: Array<"protein" | "carbs" | "fats">;
+  lockedMacros?: MacroType[];
 }
 
-// Macro-related shared types
-// Usage example:
-// import { MacroEntry, MacroDailyTotals } from '@/types/macro';
+export interface MacroPercentages {
+  proteinPercentage: number;
+  carbsPercentage: number;
+  fatsPercentage: number;
+}
 
-export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+export interface MacroTargetState extends MacroPercentages {
+  lockedMacros: MacroType[];
+}
 
 export interface MacroEntry {
   id: number;
@@ -32,8 +45,35 @@ export interface MacroDailyTotals {
   calories: number;
 }
 
-export interface MacroInputs {
-  protein: string;
-  carbs: string;
-  fats: string;
+export interface MacroTargetProps {
+  initialValues?: MacroTargetState;
+  onTargetChange: (target: MacroTargetState) => void;
+}
+
+export interface MacroSliderProps {
+  name: string;
+  value: number;
+  onChange: (value: number) => void;
+  color: "green" | "blue" | "red";
+  isLocked: boolean;
+  onToggleLock: () => void;
+  disabled?: boolean;
+  min?: number;
+  max?: number;
+}
+
+export interface MacroBadgeProps {
+  name: string;
+  value: number;
+  color: "green" | "blue" | "red";
+  isLocked: boolean;
+}
+
+export interface MacroTargetBarProps {
+  percentages: MacroPercentages;
+  className?: string;
+}
+
+export interface MacroTargetInfoProps {
+  isVisible: boolean;
 }

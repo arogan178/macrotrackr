@@ -1,8 +1,8 @@
 // Change `space-x-2` to `space-x-1` to reduce the gap between the buttons
 import { memo } from "react";
-import { EditIcon, TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
+import { TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
 import ActionButton from "./ActionButton";
-import { ActionButtonGroupProps } from "@/components/utils/types";
+import type { ActionButtonGroupProps } from "@/components/utils/types";
 
 /**
  * Reusable edit/delete action button group
@@ -14,21 +14,23 @@ const ActionButtonGroup = memo(
     isDeleting,
     editLabel = "Edit entry",
     deleteLabel = "Delete entry",
-    size = "sm",
+    buttonSize = "md",
+    iconSize,
   }: ActionButtonGroupProps) => {
     return (
       <div className="flex justify-center space-x-1">
         <ActionButton
           variant="edit"
-          size={size}
+          buttonSize={buttonSize}
+          iconSize={iconSize}
           onClick={onEdit}
           ariaLabel={editLabel}
           className="text-blue-400 hover:text-blue-300 bg-blue-900/30 hover:bg-blue-900/50 focus:ring-blue-500"
-          icon={<EditIcon />}
         />
         <ActionButton
           variant="delete"
-          size={size}
+          buttonSize={buttonSize}
+          iconSize={iconSize}
           onClick={onDelete}
           ariaLabel={deleteLabel}
           disabled={isDeleting}

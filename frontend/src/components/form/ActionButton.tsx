@@ -32,7 +32,10 @@ import {
   MoreVerticalIcon,
   InfoIcon,
   WarningIcon,
+  ExportIcon,
 } from "@/components/Icons";
+
+import { ICON_SIZES } from "@/components/utils/constants";
 
 type ActionVariant =
   | "delete"
@@ -42,22 +45,42 @@ type ActionVariant =
   | "more"
   | "info"
   | "warning"
+  | "export"
+  | "password-toggle"
   | "custom";
 
-type ActionSize = "sm" | "md" | "lg";
+type ButtonSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+type IconSize = "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
 
 interface ActionButtonProps {
   variant: ActionVariant;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   ariaLabel: string;
   disabled?: boolean;
-  size?: ActionSize;
+  buttonSize?: ButtonSize;
+  iconSize?: IconSize;
   icon?: React.ReactNode; // Required for custom variant
   className?: string; // Additional styling for custom variants
   tooltip?: string; // Future: tooltip support
 }
 
+const PADDING = {
+  sm: "p-1.5 w-8 h-8 aspect-square", // 32px
+  md: "p-2 w-9 h-9 aspect-square", // 36px
+  lg: "p-2.5 w-10 h-10 aspect-square", // 40px
+  xl: "p-3 w-11 h-11 aspect-square", // 44px
+  "2xl": "p-4 w-12 h-12 aspect-square", // 48px
+  "3xl": "p-5 w-14 h-14 aspect-square", // 56px
+  "4xl": "p-6 w-16 h-16 aspect-square", // 64px
+  "5xl": "p-7 w-18 h-18 aspect-square", // 72px
+};
+
 const ACTION_CONFIGS = {
+  "password-toggle": {
+    icon: null, // Icon is always passed as prop for this variant
+    className:
+      "text-gray-400 hover:text-gray-300 bg-transparent focus:ring-gray-500",
+  },
   delete: {
     icon: TrashIcon,
     className:
@@ -93,27 +116,14 @@ const ACTION_CONFIGS = {
     className:
       "text-yellow-400 hover:text-yellow-300 bg-yellow-900/30 hover:bg-yellow-900/50 focus:ring-yellow-500",
   },
+  export: {
+    icon: ExportIcon,
+    className:
+      "text-emerald-400 hover:text-emerald-200 bg-emerald-900/30 hover:bg-emerald-900/50 focus:ring-emerald-500",
+  },
   custom: {
     icon: null,
     className: "", // Provided via props
-  },
-} as const;
-
-const SIZE_CONFIGS = {
-  sm: {
-    padding: "p-1.5",
-    iconSize: "w-3.5 h-3.5",
-    square: "w-8 h-8 aspect-square", // 32px
-  },
-  md: {
-    padding: "p-2",
-    iconSize: "w-4 h-4",
-    square: "w-9 h-9 aspect-square", // 36px
-  },
-  lg: {
-    padding: "p-2.5",
-    iconSize: "w-5 h-5",
-    square: "w-10 h-10 aspect-square", // 40px
   },
 } as const;
 
@@ -122,13 +132,16 @@ function ActionButton({
   onClick,
   ariaLabel,
   disabled = false,
-  size = "md",
+  buttonSize = "md",
+  iconSize,
   icon: customIcon,
   className: customClassName = "",
   ...rest
 }: ActionButtonProps) {
   const config = ACTION_CONFIGS[variant];
-  const sizeConfig = SIZE_CONFIGS[size];
+  const resolvedIconSize = iconSize || buttonSize;
+  const iconSizeClass = ICON_SIZES[resolvedIconSize] || ICON_SIZES.md;
+  const paddingClass = PADDING[buttonSize] || PADDING.md;
 
   // For custom variant, require custom icon and className
   if (variant === "custom" && !customIcon) {
@@ -136,16 +149,17 @@ function ActionButton({
   }
 
   // Determine icon to use
-  const IconComponent = variant === "custom" ? null : config.icon;
-  const iconElement =
-    variant === "custom" ? (
-      customIcon
-    ) : IconComponent ? (
-      <IconComponent className={sizeConfig.iconSize} />
-    ) : null;
+  const usePropIcon = variant === "custom" || variant === "password-toggle";
+  const IconComponent = usePropIcon ? null : config.icon;
+  // Forward both size and iconSize class to Lucide-based icons (from createIcon)
+  const iconElement = usePropIcon ? (
+    customIcon
+  ) : IconComponent ? (
+    <IconComponent size={resolvedIconSize} className={iconSizeClass} />
+  ) : null;
 
   // Build className
-  const baseClasses = `${sizeConfig.padding} ${sizeConfig.square} flex items-center justify-center transition-colors duration-200`;
+  const baseClasses = `${paddingClass} flex items-center justify-center transition-colors duration-200`;
   const variantClasses =
     variant === "custom" ? customClassName : config.className;
   const combinedClassName = `${baseClasses} ${variantClasses}`.trim();
