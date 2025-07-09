@@ -17,7 +17,7 @@ interface GoalPayload {
 export function calculateGoalDetails(
   formValues: WeightGoalFormValues,
   tdee: number,
-  existingStartDate?: string | null
+  existingStartDate?: string | null,
 ): GoalPayload & { weightGoal: string } {
   const {
     startingWeight, // Needed for calculation but not always sent
@@ -59,8 +59,8 @@ export function calculateGoalDetails(
     const startDateObj = existingStartDate
       ? new Date(existingStartDate)
       : startDate
-      ? new Date(startDate)
-      : today;
+        ? new Date(startDate)
+        : today;
     const targetDateObj = new Date(targetDate);
 
     const timeDiff = targetDateObj.getTime() - startDateObj.getTime();
@@ -170,7 +170,7 @@ export function getWeeksElapsed(startDate: string): number {
 
 // Goal status utilities
 export function getGoalStatus(
-  goals: WeightGoals
+  goals: WeightGoals,
 ): "on-track" | "ahead" | "behind" | "completed" {
   const { progress, isCompleted } = calculateGoalProgress(goals);
 
@@ -189,7 +189,7 @@ export function getGoalStatus(
 }
 
 export function getMotivationalMessage(
-  status: ReturnType<typeof getGoalStatus>
+  status: ReturnType<typeof getGoalStatus>,
 ): string {
   switch (status) {
     case "completed":

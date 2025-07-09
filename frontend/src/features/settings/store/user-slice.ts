@@ -59,7 +59,7 @@ export interface UserSlice {
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   updateMacroTargetSettings: (
-    macroTarget: MacroTargetSettings
+    macroTarget: MacroTargetSettings,
   ) => Promise<boolean>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
@@ -148,7 +148,7 @@ export const createUserSlice: StateCreator<
       if (fullGet().showNotification) {
         fullGet().showNotification(
           `Failed to load user data: ${errorMessage}`,
-          "error"
+          "error",
         );
       }
     }
@@ -257,7 +257,7 @@ export const createUserSlice: StateCreator<
       if (state.showNotification) {
         state.showNotification(
           `Failed to save settings: ${errorMessage}`,
-          "error"
+          "error",
         );
       }
     }
@@ -298,7 +298,7 @@ export const createUserSlice: StateCreator<
       if (state.showNotification) {
         state.showNotification(
           `Failed to save macro targets: ${errorMessage}`,
-          "error"
+          "error",
         );
       }
 

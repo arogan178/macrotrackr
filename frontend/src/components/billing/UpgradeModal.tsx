@@ -1,6 +1,5 @@
-import React from "react";
-import Modal from "./form/Modal";
-import { AwardIcon, CheckCircleIcon } from "./Icons";
+import React, { memo } from "react";
+import { Modal, AwardIcon, CheckCircleIcon } from "@/components/ui";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -14,7 +13,8 @@ interface UpgradeModalProps {
  * UpgradeModal - Prompts free users to upgrade to Pro
  * Usage: <UpgradeModal open={open} onClose={...} onUpgrade={...} />
  */
-export const UpgradeModal: React.FC<UpgradeModalProps> = ({
+
+const UpgradeModal: React.FC<UpgradeModalProps> = ({
   open,
   onClose,
   onUpgrade,
@@ -64,3 +64,5 @@ export const UpgradeModal: React.FC<UpgradeModalProps> = ({
 
 // Usage example:
 // <UpgradeModal open={modalOpen} onClose={closeModal} onUpgrade={goToPricing} />
+
+export default memo(UpgradeModal);

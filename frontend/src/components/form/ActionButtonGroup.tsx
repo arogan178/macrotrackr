@@ -1,8 +1,8 @@
 // Change `space-x-2` to `space-x-1` to reduce the gap between the buttons
 import { memo } from "react";
-import { TrashIcon, LoadingSpinnerIcon } from "@/components/Icons";
-import ActionButton from "./ActionButton";
-import type { ActionButtonGroupProps } from "@/components/utils/types";
+import { TrashIcon, LoadingSpinnerIcon } from "@/components/ui";
+import { ActionButton } from "@/components/form";
+import type { ActionButtonGroupProps } from "@/components/utils";
 
 /**
  * Reusable edit/delete action button group
@@ -44,7 +44,7 @@ const ActionButtonGroup = memo(
         />
       </div>
     );
-  }
+  },
 );
 
 ActionButtonGroup.displayName = "ActionButtonGroup";

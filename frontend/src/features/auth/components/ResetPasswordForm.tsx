@@ -1,9 +1,7 @@
 import { useState } from "react";
-import FormButton from "@/components/form/FormButton";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { CardContainer, TextField } from "@/components/form";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
-import { LockIcon } from "@/components/Icons";
+import { FormButton, CardContainer, TextField } from "@/components/form";
+import { LoadingSpinner, LockIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/api-service";
 

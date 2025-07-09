@@ -1,6 +1,6 @@
-import { useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import { useStore } from '@/store/store';
+import { useEffect } from "react";
+import { useLocation } from "react-router-dom";
+import { useStore } from "@/store/store";
 
 /**
  * A hook that manages notifications across route changes
@@ -8,33 +8,41 @@ import { useStore } from '@/store/store';
  */
 export function useNotificationManager() {
   const location = useLocation();
-  const { 
-    clearSettingsMessages, 
+  const {
+    clearSettingsMessages,
     notifications,
     hideNotification,
-    settingsSuccess
+    settingsSuccess,
   } = useStore();
-  
+
   // Clear settings-related notifications when navigating away from settings page
   useEffect(() => {
     // Check if we've navigated away from the settings page
-    if (!location.pathname.includes('/settings')) {
+    if (!location.pathname.includes("/settings")) {
       // If we have a settings success message, clear it
       if (settingsSuccess) {
         clearSettingsMessages();
       }
-      
+
       // Also clear any success notifications related to settings
       if (notifications.length > 0) {
-        notifications.forEach(notification => {
-          if (notification.type === 'success' && 
-              notification.message.toLowerCase().includes('settings')) {
+        notifications.forEach((notification) => {
+          if (
+            notification.type === "success" &&
+            notification.message.toLowerCase().includes("settings")
+          ) {
             hideNotification(notification.id);
           }
         });
       }
     }
-  }, [location.pathname, settingsSuccess, clearSettingsMessages, notifications, hideNotification]);
-  
+  }, [
+    location.pathname,
+    settingsSuccess,
+    clearSettingsMessages,
+    notifications,
+    hideNotification,
+  ]);
+
   return null;
 }

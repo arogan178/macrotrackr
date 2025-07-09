@@ -9,7 +9,7 @@ import { post } from "./api-service";
 export async function createCheckoutSession(
   successUrl: string,
   cancelUrl: string,
-  plan: "monthly" | "yearly" = "monthly"
+  plan: "monthly" | "yearly" = "monthly",
 ): Promise<{ url: string }> {
   return post<{ url: string }>("/api/billing/checkout", {
     successUrl,
@@ -24,7 +24,7 @@ export async function createCheckoutSession(
  * @returns {Promise<{ url: string }>} Stripe Portal URL
  */
 export async function createPortalSession(
-  returnUrl: string
+  returnUrl: string,
 ): Promise<{ url: string }> {
   return post<{ url: string }>("/api/billing/portal", { returnUrl });
 }

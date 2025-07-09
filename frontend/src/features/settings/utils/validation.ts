@@ -55,7 +55,7 @@ export function validateUserSettings(settings: any): Record<string, string> {
 
 // Helper function to validate user settings with required fields
 export const validateSettingsComplete = (
-  settings: UserSettings | null
+  settings: UserSettings | null,
 ): Record<string, string> => {
   if (!settings) {
     return { general: "Settings data is required" };
@@ -75,7 +75,7 @@ export const validateSettingsComplete = (
 // Helper function to check if settings have changed
 export const hasSettingsChanged = (
   current: UserSettings | null,
-  original: UserSettings | null
+  original: UserSettings | null,
 ): boolean => {
   if (!current || !original) return current !== original;
   return JSON.stringify(current) !== JSON.stringify(original);
@@ -84,7 +84,7 @@ export const hasSettingsChanged = (
 // Helper function to check if macro targets have changed
 export const hasMacroTargetsChanged = (
   current: MacroTargetSettings | null,
-  original: MacroTargetSettings | null
+  original: MacroTargetSettings | null,
 ): boolean => {
   if (!current || !original) return current !== original;
   return JSON.stringify(current) !== JSON.stringify(original);

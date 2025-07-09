@@ -1,9 +1,9 @@
-import ProgressBar from "@/components/form/ProgressBar";
+import ProgressBar from "@/components/ui/ProgressBar";
+import HabitActions from "@/features/habits/components/HabitActions";
 import type {
   HabitTrackerProps,
   HabitCardProps,
 } from "@/features/habits/types/types";
-import HabitActions from "@/features/habits/components/HabitActions";
 import {
   CalendarIcon,
   CheckCircleIcon,
@@ -18,7 +18,7 @@ import {
   SunIcon,
   PlusIcon,
   CheckIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 import { FormButton } from "@/components/form";
 
 // Map of icon names to their components

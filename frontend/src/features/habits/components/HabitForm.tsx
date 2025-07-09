@@ -14,7 +14,7 @@ import {
   DumbBellIcon,
   MoonIcon,
   SunIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 
 const AVAILABLE_ICONS = {
   calendar: CalendarIcon,
@@ -56,7 +56,7 @@ function HabitForm({
 }: HabitFormProps) {
   const handleChange = (
     field: keyof HabitGoalFormValues,
-    value: string | number | undefined // Allow undefined temporarily from NumberField
+    value: string | number | undefined, // Allow undefined temporarily from NumberField
   ) => {
     // Ensure target is never undefined or less than 1 when passed up
     if (field === "target") {

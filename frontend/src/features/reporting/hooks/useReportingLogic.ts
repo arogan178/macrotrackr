@@ -12,7 +12,7 @@ interface MacroTotals {
 export function useReportingLogic(
   history: MacroEntry[] | null,
   dateRange: string,
-  isLoadingExternal: boolean // To know if history is loading vs. empty
+  isLoadingExternal: boolean, // To know if history is loading vs. empty
 ) {
   const [aggregatedData, setAggregatedData] = useState<
     {
@@ -48,7 +48,7 @@ export function useReportingLogic(
       const startDateStr = startDateObj.toISOString().split("T")[0];
       return { startDate: startDateStr, endDate: endDateStr };
     },
-    [mapDateRangeToNumeric]
+    [mapDateRangeToNumeric],
   );
 
   const processDataForCharts = useCallback(
@@ -119,7 +119,7 @@ export function useReportingLogic(
       }));
       setAggregatedData(chartData);
     },
-    [getDateRangeISOStrings] // formatDate is stable
+    [getDateRangeISOStrings], // formatDate is stable
   );
 
   useEffect(() => {
@@ -178,7 +178,7 @@ export function useReportingLogic(
     const sum = aggregatedData.reduce((acc, val) => acc + val.calories, 0);
     const proteinSum = aggregatedData.reduce(
       (acc, val) => acc + val.protein,
-      0
+      0,
     );
     const carbsSum = aggregatedData.reduce((acc, val) => acc + val.carbs, 0);
     const fatsSum = aggregatedData.reduce((acc, val) => acc + val.fats, 0);

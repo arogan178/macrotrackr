@@ -1,8 +1,7 @@
-import FormButton from "@/components/form/FormButton";
 import { useNavigate } from "react-router-dom";
 import { CardContainer, TextField } from "@/components/form";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
-import { CalorieIcon } from "@/components/Icons";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { CalorieIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/api-service";
 
@@ -41,7 +40,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
       } else {
         showNotification(
           "Login failed. Please check your credentials.",
-          "error"
+          "error",
         );
       }
     }

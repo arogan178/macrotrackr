@@ -9,7 +9,7 @@ import {
   FormButton,
 } from "@/components/form";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
-import { CheckMarkIcon } from "@/components/Icons";
+import { CheckMarkIcon } from "@/components/ui";
 import { MealType } from "@/types/macro";
 import { MEAL_TYPE_OPTIONS } from "../constants";
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -37,7 +37,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
 
   // Default date is today
   const [entryDate, setEntryDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
 
   // Default time is current time
@@ -46,12 +46,12 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-    })
+    }),
   );
 
   // Calculate calories dynamically using shared utility
   const calories = Math.round(
-    calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0)
+    calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0),
   );
 
   // Check if all fields are 0 (invalid submission)
@@ -84,7 +84,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       setMealName(name);
       setSearchResult(`Found: ${name} - ${p}g protein, ${c}g carbs, ${f}g fat`);
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -122,7 +122,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       onSubmit,
       anyFieldIsUndefined,
       allFieldsAreZero,
-    ]
+    ],
   );
 
   return (

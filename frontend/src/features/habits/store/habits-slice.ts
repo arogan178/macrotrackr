@@ -98,7 +98,7 @@ export const createHabitsSlice: StateCreator<
     try {
       const currentHabits = get().habits;
       const habitIndex = currentHabits.findIndex(
-        (habit: HabitGoal) => habit.id === id
+        (habit: HabitGoal) => habit.id === id,
       );
 
       if (habitIndex === -1) {
@@ -153,7 +153,7 @@ export const createHabitsSlice: StateCreator<
     try {
       const currentHabits = get().habits;
       const habitIndex = currentHabits.findIndex(
-        (habit: HabitGoal) => habit.id === id
+        (habit: HabitGoal) => habit.id === id,
       );
 
       if (habitIndex === -1 || currentHabits[habitIndex].isComplete) {
@@ -199,7 +199,7 @@ export const createHabitsSlice: StateCreator<
     try {
       const currentHabits = get().habits;
       const habitIndex = currentHabits.findIndex(
-        (habit: HabitGoal) => habit.id === id
+        (habit: HabitGoal) => habit.id === id,
       );
 
       if (habitIndex === -1 || currentHabits[habitIndex].isComplete) {
@@ -246,7 +246,7 @@ export const createHabitsSlice: StateCreator<
 
     // Optimistic Update: Remove locally first
     const updatedHabits = currentHabits.filter(
-      (habit: HabitGoal) => habit.id !== id
+      (habit: HabitGoal) => habit.id !== id,
     );
     set({ habits: updatedHabits });
 

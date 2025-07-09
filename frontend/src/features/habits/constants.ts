@@ -11,7 +11,7 @@ import {
   DumbBellIcon,
   MoonIcon,
   SunIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 

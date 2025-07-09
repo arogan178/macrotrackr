@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { ICON_SIZES } from "./utils/constants";
+import { ICON_SIZES } from "../utils/constants";
 import {
   User,
   Mail,
@@ -93,10 +93,10 @@ export function TrendIcon({ direction }: TrendIconProps) {
     direction === "stable"
       ? "text-gray-400"
       : direction === "insufficient"
-      ? "text-gray-500"
-      : isUp
-      ? "text-red-400"
-      : "text-green-400";
+        ? "text-gray-500"
+        : isUp
+          ? "text-red-400"
+          : "text-green-400";
 
   if (direction === "stable" || direction === "insufficient") return null;
 
