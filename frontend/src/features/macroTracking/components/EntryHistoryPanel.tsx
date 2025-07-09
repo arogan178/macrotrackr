@@ -231,7 +231,6 @@ const EntryHistoryComponent = function EntryHistory({
               variant="export"
               ariaLabel="Export data as CSV file"
               onClick={handleExportCSV}
-              buttonSize="md"
               className="mr-1"
             />
           </ProFeature>

@@ -63,7 +63,6 @@ const Navbar: React.FC = () => {
             ariaLabel="Go to home page"
             className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
             variant="ghost"
-            buttonSize="md"
           >
             MacroTrackr
           </FormButton>
@@ -77,7 +76,6 @@ const Navbar: React.FC = () => {
                 ariaLabel={label}
                 className={`${getButtonClass(path)}, !text-lg `}
                 variant={location.pathname === path ? "primary" : "ghost"}
-                buttonSize="md"
                 aria-current={location.pathname === path ? "page" : undefined}
                 icon={<Icon />}
                 iconPosition="left"
@@ -95,7 +93,6 @@ const Navbar: React.FC = () => {
               ariaLabel="Logout"
               className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
               variant="danger"
-              buttonSize="md"
               icon={<LogoutIcon />}
               iconPosition="left"
             >
@@ -114,7 +111,6 @@ const Navbar: React.FC = () => {
               aria-expanded={isMobileMenuOpen}
               className="md:hidden p-2 rounded-lg text-gray-200 hover:bg-gray-700/50 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
               variant="ghost"
-              buttonSize="md"
               icon={
                 isMobileMenuOpen ? (
                   <CloseIcon className="w-6 h-6" />
@@ -164,7 +160,6 @@ const Navbar: React.FC = () => {
                     ariaLabel={label}
                     className={`${getButtonClass(path, true)} `}
                     variant={location.pathname === path ? "primary" : "ghost"}
-                    buttonSize="md"
                     aria-current={
                       location.pathname === path ? "page" : undefined
                     }
@@ -181,7 +176,6 @@ const Navbar: React.FC = () => {
                   ariaLabel="Logout"
                   className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 "
                   variant="danger"
-                  buttonSize="md"
                   icon={<LogoutIcon className="w-5 h-5 mr-3" />}
                   iconPosition="left"
                 >

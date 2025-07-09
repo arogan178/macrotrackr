@@ -106,7 +106,6 @@ function EmptyState({
                   ? "ghost"
                   : "primary"
               }
-              buttonSize="md"
               className={getButtonStyles(action.variant)}
               icon={action.icon}
               iconPosition="left"
@@ -126,7 +125,6 @@ function EmptyState({
                   ? "ghost"
                   : "primary"
               }
-              buttonSize="md"
               className={getButtonStyles(secondaryAction.variant || "outline")}
               icon={secondaryAction.icon}
               iconPosition="left"
