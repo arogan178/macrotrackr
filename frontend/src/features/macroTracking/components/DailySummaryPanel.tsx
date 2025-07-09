@@ -6,7 +6,7 @@ import {
   calculateFatsCalories,
 } from "../calculations";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
-import ProgressBar from "@/components/ProgressBar";
+import ProgressBar from "@/components/form/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface DailySummaryProps {

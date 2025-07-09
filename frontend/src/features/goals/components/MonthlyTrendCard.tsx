@@ -1,11 +1,10 @@
 import React from "react";
-import { WeightLogEntry } from "@/features/goals/types";
+import { WeightLogEntry } from "@/utils/api-service";
 import { CardContainer } from "@/components/form";
 import { TrendingUpIcon, TrendingDownIcon } from "@/components/Icons";
 import {
   subMonths,
   startOfMonth,
-  endOfMonth,
   parseISO,
   isValid,
   differenceInCalendarMonths,

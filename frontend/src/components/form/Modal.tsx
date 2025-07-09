@@ -17,33 +17,31 @@
  * @prop {function} onConfirm - Confirm handler
  * @prop {string} [confirmLabel] - Confirm button label
  * @prop {string} [cancelLabel] - Cancel button label
- * @prop {boolean} [isDanger] - Use danger styling
- * @prop {boolean} [hideCancelButton] - Hide cancel button
- *
- * Props (Form):
- * @prop {function} onSave - Save handler
- * @prop {boolean} [saveDisabled] - Disable save button
- * @prop {string} [saveLabel] - Save button label
- * @prop {string} [cancelLabel] - Cancel button label
- * @prop {boolean} [hideDefaultButtons] - Hide default footer buttons
- *
+  let message: string | undefined,
+    confirmLabel: string | undefined,
+    cancelLabel: string | undefined,
+    onConfirm: (() => void) | undefined,
+    isDanger: boolean | undefined,
+    hideCancelButton: boolean = false,
+    onSave: (() => void) | undefined,
+    saveDisabled: boolean | undefined,
+    saveLabel: string | undefined;
  * Common Props:
  * @prop {ReactNode} children - Modal content
  * @prop {"sm"|"md"|"lg"|"xl"|"2xl"} [size] - Modal size
  * @prop {boolean} [hideClose] - Hide close (X) button
  *
  * @example
- * // Confirmation modal
  * <Modal
- *   isOpen={open}
+      hideCancelButton,
  *   onClose={close}
  *   title="Delete item?"
  *   variant="confirmation"
  *   message="Are you sure you want to delete this?"
  *   onConfirm={handleDelete}
- *   isDanger
  * />
- *
+  hideCancelButton = false, // Set default for hideCancelButton here
+      hideCancelButton,
  * @example
  * // Form modal
  * <Modal
@@ -57,42 +55,16 @@
  *   <ProfileForm />
  * </Modal>
  */
-import { ReactNode, useEffect, useRef, memo, useState } from "react";
-import ReactDOM from "react-dom"; // Import ReactDOM for portals
+import { useEffect, useRef, memo, useState } from "react";
+import ReactDOM from "react-dom";
 import { motion } from "motion/react";
-import { CloseIcon } from "./Icons";
-import ActionButton from "./form/ActionButton";
-import FormButton from "./form/FormButton";
+import { FormButton, ActionButton } from ".";
 
-interface BaseModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  title: string;
-  children?: ReactNode;
-  size?: "sm" | "md" | "lg" | "xl" | "2xl";
-  hideClose?: boolean; // If true, do not show the X (close) button
-}
-
-interface ConfirmationModalProps extends BaseModalProps {
-  variant: "confirmation";
-  message: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  onConfirm: () => void;
-  isDanger?: boolean;
-  hideCancelButton?: boolean;
-}
-
-interface FormModalProps extends BaseModalProps {
-  variant: "form";
-  onSave?: () => void;
-  saveDisabled?: boolean;
-  saveLabel?: string;
-  cancelLabel?: string;
-  hideDefaultButtons?: boolean;
-}
-
-type ModalProps = ConfirmationModalProps | FormModalProps;
+import type {
+  ModalProps,
+  ConfirmationModalProps,
+  FormModalProps,
+} from "../utils/types";
 
 function Modal(props: ModalProps) {
   const {
@@ -100,6 +72,7 @@ function Modal(props: ModalProps) {
     onClose,
     title,
     size = "md",
+    buttonSize = "md",
     children,
     hideClose = false,
   } = props;
@@ -111,10 +84,10 @@ function Modal(props: ModalProps) {
     cancelLabel: string | undefined,
     onConfirm: (() => void) | undefined,
     isDanger: boolean | undefined,
-    hideCancelButton: boolean | undefined,
     onSave: (() => void) | undefined,
     saveDisabled: boolean | undefined,
-    saveLabel: string | undefined;
+    saveLabel: string | undefined,
+    hideCancelButton = false;
   if (variant === "confirmation") {
     ({
       message,
@@ -130,6 +103,7 @@ function Modal(props: ModalProps) {
       saveDisabled,
       saveLabel = "Save",
       cancelLabel = "Cancel",
+      hideCancelButton = false,
     } = props as FormModalProps);
   }
   const modalRef = useRef<HTMLDivElement>(null);
@@ -286,11 +260,11 @@ function Modal(props: ModalProps) {
             </h2>
             <ActionButton
               variant="close"
-              size="sm"
+              iconSize={buttonSize}
+              buttonSize={buttonSize}
               onClick={onClose}
               ariaLabel="Close modal"
               className="text-gray-400 hover:text-red transition-colors"
-              icon={<CloseIcon />}
             />
           </div>
         )}
@@ -312,8 +286,8 @@ function Modal(props: ModalProps) {
               <FormButton
                 onClick={onClose}
                 ariaLabel={cancelLabel}
-                variant="ghost"
-                size="md"
+                variant="secondary"
+                buttonSize={buttonSize}
                 className="px-4 py-2 rounded-lg font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
               >
                 {cancelLabel}
@@ -325,7 +299,7 @@ function Modal(props: ModalProps) {
                 onClick={onSave}
                 disabled={saveDisabled}
                 text={saveLabel}
-                size="lg"
+                buttonSize={buttonSize}
                 variant="primary"
                 className="px-8 py-3 text-lg"
               />
@@ -335,7 +309,7 @@ function Modal(props: ModalProps) {
                 onClick={onConfirm}
                 ariaLabel={confirmLabel}
                 variant={isDanger ? "danger" : "primary"}
-                size="md"
+                buttonSize={buttonSize}
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${variantStyles.confirmButton}`}
               >
                 {confirmLabel}

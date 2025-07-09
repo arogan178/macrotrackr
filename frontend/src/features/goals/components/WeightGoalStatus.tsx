@@ -7,13 +7,13 @@ import {
   TrendingUpIcon, // Added for Weekly Rate
   TargetIcon, // Added for Daily Deficit/Surplus
 } from "@/components/Icons";
-import ProgressBar from "@/components/ProgressBar";
+import ProgressBar from "@/components/form/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import {
   MacroDailyTotals,
   MacroTargetSettings,
 } from "@/features/macroTracking/types";
-import { WeightGoals } from "../types";
+import type { WeightGoals } from "@/types/goal";
 import MacroNutrient from "./MacroNutrient";
 import { motion } from "motion/react"; // Import motion
 import { FormButton } from "@/components/form";
@@ -167,11 +167,11 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div className="flex items-center gap-2 self-end sm:self-center">
           <FormButton
             variant="secondary"
-            size="sm"
+            // buttonSize="sm"
             onClick={onLogWeight}
             className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-medium transition-colors duration-200 focus:ring-blue-500"
             text="Log Weight"
-            icon={<WeightIcon className="h-4 w-4" />}
+            icon={<WeightIcon />}
             iconPosition="left"
             ariaLabel="Log current weight"
           />
@@ -180,7 +180,6 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             onDelete={onDelete}
             editLabel="Edit weight goal"
             deleteLabel="Delete weight goal"
-            size="sm"
             isDeleting={false}
           />
         </div>

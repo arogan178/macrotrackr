@@ -5,7 +5,7 @@ import {
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
 } from "../constants";
-import { NotificationType } from "../types";
+import type { NotificationType } from "../types";
 
 export interface Notification {
   id: string;

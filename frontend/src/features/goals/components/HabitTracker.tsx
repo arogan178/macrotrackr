@@ -1,6 +1,9 @@
-import ProgressBar from "@/components/ProgressBar";
-import { HabitGoal } from "../types";
-import HabitActions from "./HabitActions";
+import ProgressBar from "@/components/form/ProgressBar";
+import type {
+  HabitTrackerProps,
+  HabitCardProps,
+} from "@/features/habits/types/types";
+import HabitActions from "@/features/habits/components/HabitActions";
 import {
   CalendarIcon,
   CheckCircleIcon,
@@ -18,8 +21,6 @@ import {
 } from "@/components/Icons";
 import { FormButton } from "@/components/form";
 
-import { PROGRESS_BAR_COLORS } from "@/components/utils/constants";
-
 // Map of icon names to their components
 const ICON_MAP = {
   calendar: CalendarIcon,
@@ -34,16 +35,6 @@ const ICON_MAP = {
   moon: MoonIcon,
   sun: SunIcon,
 };
-
-interface HabitTrackerProps {
-  habits: HabitGoal[];
-  isLoading?: boolean;
-  onAddHabit?: () => void;
-  onIncrementHabit?: (id: string) => Promise<void>;
-  onCompleteHabit?: (id: string) => Promise<void>;
-  onEditHabit?: (id: string) => void;
-  onDeleteHabit?: (id: string) => Promise<void>;
-}
 
 function HabitTracker({
   habits,
@@ -67,7 +58,7 @@ function HabitTracker({
           {onAddHabit && (
             <FormButton
               variant="ghost"
-              size="sm"
+              buttonSize="sm"
               onClick={onAddHabit}
               className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg"
               text="Add Habit"
@@ -104,7 +95,7 @@ function HabitTracker({
             {onAddHabit && (
               <FormButton
                 variant="ghost"
-                size="sm"
+                buttonSize="sm"
                 onClick={onAddHabit}
                 className="font-medium text-indigo-400 hover:text-indigo-300"
                 text="Add your first habit goal"
@@ -128,14 +119,6 @@ function HabitTracker({
       </div>
     </div>
   );
-}
-
-interface HabitCardProps {
-  habit: HabitGoal;
-  onIncrement?: (id: string) => Promise<void>;
-  onComplete?: (id: string) => Promise<void>;
-  onEdit?: (id: string) => void;
-  onDelete?: (id: string) => Promise<void>;
 }
 
 function HabitCard({
@@ -179,7 +162,7 @@ function HabitCard({
   // Render the icon based on iconName
   const renderIcon = () => {
     const IconComponent = ICON_MAP[iconName] || TargetIcon;
-    return <IconComponent size="sm" />;
+    return <IconComponent buttonSize="sm" />;
   };
 
   return (

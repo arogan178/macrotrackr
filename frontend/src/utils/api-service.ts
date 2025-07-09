@@ -7,7 +7,7 @@
 import { getActivityLevelFromString } from "@/features/settings/utils/constants"; // Adjust path as needed
 import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 import { getToken } from "./token-storage"; // Adjust path as needed
-import { WeightGoalFormValues } from "@/features/goals/types";
+import type { WeightGoalFormValues } from "@/features/goals/types";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,

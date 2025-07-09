@@ -1,4 +1,4 @@
-import { DateRangeData, ReportingPeriod } from "../types";
+import type { DateRangeData, ReportingPeriod } from "../types";
 import { DATE_RANGE_MAPPING, REPORTING_PERIODS } from "../constants";
 
 // Date utility functions

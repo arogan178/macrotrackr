@@ -1,21 +1,18 @@
 import { memo, useCallback, useState, useEffect } from "react";
 import { MacroTargetSettings } from "@/types/macro";
-import { MacroTargetState } from "@/features/settings/types/types";
-import { InfoCard, CardContainer } from "@/components/form";
-import FormButton from "@/components/form/FormButton";
+import type { MacroTargetState } from "@/types/macro";
+import {
+  InfoCard,
+  CardContainer,
+  FormButton,
+  LoadingSpinner,
+} from "@/components/form";
+import ProFeature from "@/components/ProFeature";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
-import LoadingSpinner from "@/components/LoadingSpinner";
-import { ProFeature } from "@/components/ProFeature";
 
-// Default macro values (30/40/30 split)
-const DEFAULT_MACRO_TARGET: MacroTargetState = {
-  proteinPercentage: 30,
-  carbsPercentage: 40,
-  fatsPercentage: 30,
-  lockedMacros: [],
-};
+import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 
 function MacroTargetForm() {
   const {
@@ -227,7 +224,7 @@ function MacroTargetForm() {
                   <FormButton
                     type="button"
                     onClick={handleReset}
-                    size="sm"
+                    buttonSize="sm"
                     variant="ghost"
                     disabled={isTargetLoading || isTargetSaving}
                     text="Reset"
@@ -241,7 +238,7 @@ function MacroTargetForm() {
                   isLoading={isTargetSaving}
                   disabled={!hasChanges || isTargetLoading}
                   text="Save Targets"
-                  size="sm"
+                  buttonSize="sm"
                   variant="primary"
                   ariaLabel="Save macro targets"
                   className="px-4 py-2 text-sm"

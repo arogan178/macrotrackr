@@ -72,6 +72,11 @@ export const ICON_SIZES = {
   sm: "w-4 h-4",
   md: "w-5 h-5",
   lg: "w-6 h-6",
+  xl: "w-7 h-7",
+  "2xl": "w-8 h-8",
+  "3xl": "w-9 h-9",
+  "4xl": "w-10 h-10",
+  "5xl": "w-12 h-12",
 } as const;
 
 // Button variants
@@ -83,11 +88,23 @@ export const BUTTON_VARIANTS = {
   GHOST: "ghost",
 } as const;
 
-// Button sizes
+// Action button size mapping (square, for icon-only buttons)
 export const BUTTON_SIZES = {
-  SM: "sm",
-  MD: "md",
-  LG: "lg",
+  sm: "p-1.5 w-8 h-8 aspect-square", // 32px
+  md: "p-2 w-9 h-9 aspect-square", // 36px
+  lg: "p-2.5 w-10 h-10 aspect-square", // 40px
+  xl: "p-3 w-11 h-11 aspect-square", // 44px
+  "2xl": "p-4 w-12 h-12 aspect-square", // 48px
+  "3xl": "p-5 w-14 h-14 aspect-square", // 56px
+  "4xl": "p-6 w-16 h-16 aspect-square", // 64px
+  "5xl": "p-7 w-18 h-18 aspect-square", // 72px
+} as const;
+
+// Form button size mapping (rectangular, for text/icon buttons)
+export const FORM_BUTTON_SIZES = {
+  sm: "px-2 py-1 text-xs",
+  md: "px-3.5 py-2 text-md",
+  lg: "px-5 py-3 text-base",
 } as const;
 
 // Icon positions

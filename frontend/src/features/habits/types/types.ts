@@ -24,3 +24,20 @@ export interface HabitGoalFormValues {
   target: number;
   accentColor?: "indigo" | "blue" | "green" | "purple";
 }
+
+export interface HabitCardProps {
+  habit: HabitGoal;
+  onIncrement?: (id: string) => Promise<void>;
+  onComplete?: (id: string) => Promise<void>;
+  onEdit?: (id: string) => void;
+  onDelete?: (id: string) => Promise<void>;
+}
+export interface HabitTrackerProps {
+  habits: HabitGoal[];
+  isLoading?: boolean;
+  onAddHabit?: () => void;
+  onIncrementHabit?: (id: string) => Promise<void>;
+  onCompleteHabit?: (id: string) => Promise<void>;
+  onEditHabit?: (id: string) => void;
+  onDeleteHabit?: (id: string) => Promise<void>;
+}
