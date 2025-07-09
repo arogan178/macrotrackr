@@ -1,9 +1,10 @@
 import { memo, useCallback, useState, useEffect } from "react";
-import { MacroTargetSettings, MacroTarget } from "@/types/macro";
+import { MacroTargetSettings } from "@/types/macro";
 import type { MacroTargetState } from "@/types/macro";
 import { InfoCard, CardContainer, FormButton } from "@/components/form";
 import { InfoIcon, CheckMarkIcon, LoadingSpinner } from "@/components/ui";
 import { useStore } from "@/store/store";
+import MacroTarget from "./MacroTarget";
 
 import { ProFeature } from "@/components/billing/ProFeature";
 
