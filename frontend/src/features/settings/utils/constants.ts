@@ -1,11 +1,4 @@
-import { ActivityLevel, MacroTargetSettings } from "../types/types";
-
-// Default macro target percentages
-export const DEFAULT_MACRO_TARGET: MacroTargetSettings = {
-  proteinPercentage: 30,
-  carbsPercentage: 40,
-  fatsPercentage: 30,
-};
+import { ActivityLevel } from "../types/types";
 
 export const GENDER_OPTIONS = [
   { value: "", label: "Select gender" },

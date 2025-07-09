@@ -36,11 +36,11 @@
  * // With icon and helper text
  * <TextField label="Email" value={email} onChange={setEmail} icon={<MailIcon />} helperText="We'll never share your email." />
  */
-import { memo, useId } from "react";
-import { TextFieldProps } from "@/components/utils/types";
+import { memo, useId, useState } from "react";
+import ActionButton from "./ActionButton";
+import type { TextFieldProps } from "@/components/utils/types";
 import { formStyles } from "@/components/utils/styles";
 import { EyeIcon, EyeSlashIcon } from "@/components/Icons";
-import { useState } from "react";
 
 function TextField({
   label,
@@ -113,18 +113,15 @@ function TextField({
           }
           aria-label={ariaLabel}
         />
-        {type === "password" && (
-          <button
-            type="button"
+        {type === "password" && value && (
+          <ActionButton
+            variant="custom"
             onClick={togglePasswordVisibility}
-            className={`absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none ${
-              !value ? "opacity-0" : ""
-            }`}
-            aria-label={showPassword ? "Hide password" : "Show password"}
-            disabled={!value}
-          >
-            {showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-          </button>
+            ariaLabel={showPassword ? "Hide password" : "Show password"}
+            buttonSize="sm"
+            icon={showPassword ? <EyeSlashIcon /> : <EyeIcon />}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none pr-2"
+          />
         )}
       </div>
       {maxLength && value && value.length === maxLength && !error && (

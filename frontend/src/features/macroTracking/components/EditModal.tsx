@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 import { MacroEntry } from "@/types/macro";
 import { TextField, NumberField } from "@/components/form";
 
