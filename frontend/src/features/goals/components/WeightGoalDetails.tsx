@@ -1,7 +1,7 @@
 import { CardContainer } from "@/components/form";
 import { WeightGoals } from "@/types/goal";
-import { EditIcon, TrashIcon } from "@/components/ui";
-import ProgressBar from "@/components/ui/ProgressBar";
+import { EditIcon, TrashIcon, ProgressBar } from "@/components/ui";
+
 
 interface WeightGoalDetailsProps {
   goalData: WeightGoals;
@@ -44,29 +44,29 @@ function WeightGoalDetails({
   // Format dates for display
   const formattedStartDate = startDate
     ? new Date(startDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
     : "Not set";
 
   const formattedTargetDate = targetDate
     ? new Date(targetDate).toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year: "numeric",
-      })
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    })
     : "Not set";
 
   // Calculate days remaining if target date exists
   const daysRemaining = targetDate
     ? Math.max(
-        0,
-        Math.ceil(
-          (new Date(targetDate).getTime() - new Date().getTime()) /
+      0,
+      Math.ceil(
+        (new Date(targetDate).getTime() - new Date().getTime()) /
             (1000 * 60 * 60 * 24),
-        ),
-      )
+      ),
+    )
     : null;
 
   // Get direction text based on starting and target weights

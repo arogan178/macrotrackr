@@ -146,10 +146,10 @@ function FloatingNotification({
       className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-11/12 sm:w-96 
                  transition-all duration-500 ease-in-out transform
                  ${
-                   isVisible && !isLeaving
-                     ? "opacity-100 translate-y-0"
-                     : "opacity-0 -translate-y-4"
-                 }
+    isVisible && !isLeaving
+      ? "opacity-100 translate-y-0"
+      : "opacity-0 -translate-y-4"
+    }
                  ${isLeaving ? "opacity-0 -translate-y-4" : ""}`}
       role="alert"
       aria-live="assertive"
