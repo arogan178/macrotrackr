@@ -5,7 +5,7 @@ import {
   CheckIcon,
   TrashIcon,
   EditIcon,
-} from "@/components/ui/Icons";
+} from "@/components/ui";
 
 interface HabitActionsProps {
   habitId: string;
@@ -44,7 +44,7 @@ function HabitActions({
 
   const handleAction = async (
     action: () => Promise<void>,
-    actionName: string,
+    actionName: string
   ) => {
     if (isActionInProgress) return;
 
