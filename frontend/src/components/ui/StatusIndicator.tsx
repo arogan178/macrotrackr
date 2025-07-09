@@ -28,7 +28,7 @@ import {
   WarningIcon,
   InfoIcon,
   CloseIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 
 export type StatusType = "success" | "error" | "warning" | "info";
 

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { SearchIcon, ArrowRightIcon } from "@/components/Icons";
-import StatusIndicator from "@/components/StatusIndicator";
+import { SearchIcon, ArrowRightIcon } from "@/components/ui";
+import StatusIndicator from "@/components/ui/StatusIndicator";
 import FormButton from "@/components/form/FormButton";
 import { TextField } from "@/components/form";
 
@@ -44,7 +44,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
       const appId = import.meta.env.VITE_EDAMAM_APP_ID;
       const appKey = import.meta.env.VITE_EDAMAM_APP_KEY;
       const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${appId}&app_key=${appKey}&ingr=${encodeURIComponent(
-        foodName
+        foodName,
       )}`;
       const response = await fetch(url);
       const data = await response.json();

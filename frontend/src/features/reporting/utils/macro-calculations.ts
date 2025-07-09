@@ -48,14 +48,14 @@ export const calculateDailyTotals = (entries: MacroEntry[]): MacroData => {
         fats: acc.fats + (entry.fats || 0),
       };
     },
-    { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    { calories: 0, protein: 0, carbs: 0, fats: 0 },
   );
 
   return totals;
 };
 
 export const calculateMacroPercentages = (
-  macros: MacroData
+  macros: MacroData,
 ): Record<string, number> => {
   const { calories, protein, carbs, fats } = macros;
 
@@ -75,7 +75,7 @@ export const calculateMacroPercentages = (
 };
 
 export const calculateAverageMacros = (
-  dailyEntries: DailyEntry[]
+  dailyEntries: DailyEntry[],
 ): MacroData => {
   if (dailyEntries.length === 0) {
     return { calories: 0, protein: 0, carbs: 0, fats: 0 };
@@ -88,7 +88,7 @@ export const calculateAverageMacros = (
       carbs: acc.carbs + day.carbs,
       fats: acc.fats + day.fats,
     }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    { calories: 0, protein: 0, carbs: 0, fats: 0 },
   );
 
   const days = dailyEntries.length;
@@ -103,7 +103,7 @@ export const calculateAverageMacros = (
 // Trend calculation utilities
 export const calculateTrendData = (
   dailyEntries: DailyEntry[],
-  metric: keyof MacroData
+  metric: keyof MacroData,
 ): TrendDataPoint[] => {
   return dailyEntries.map((entry) => ({
     date: entry.date,
@@ -113,7 +113,7 @@ export const calculateTrendData = (
 
 export const calculateMovingAverage = (
   data: TrendDataPoint[],
-  windowSize: number = 3
+  windowSize: number = 3,
 ): TrendDataPoint[] => {
   if (data.length < windowSize) return data;
 

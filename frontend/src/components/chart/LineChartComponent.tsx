@@ -13,7 +13,7 @@ import {
   YAxisProps,
 } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
-import LoadingSpinner from "@/components/form/LoadingSpinner"; // Corrected path
+import LoadingSpinner from "@/components/ui/LoadingSpinner"; // Corrected path
 import {
   NameType,
   ValueType,
@@ -294,14 +294,14 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                 dataLength > 60
                   ? 1.5
                   : dataLength > 30
-                  ? 2
-                  : line.strokeWidth || 2;
+                    ? 2
+                    : line.strokeWidth || 2;
               const adaptiveActiveDot =
                 dataLength > 60
                   ? { r: 4 }
                   : dataLength > 30
-                  ? { r: 5 }
-                  : line.activeDot ?? { r: 6 };
+                    ? { r: 5 }
+                    : (line.activeDot ?? { r: 6 });
 
               return (
                 <Line

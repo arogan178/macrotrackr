@@ -56,7 +56,7 @@ export const getDaysInRange = (startDate: string, endDate: string): number => {
 
 export const getDatesBetween = (
   startDate: string,
-  endDate: string
+  endDate: string,
 ): string[] => {
   const dates: string[] = [];
   const start = new Date(startDate);
@@ -103,7 +103,7 @@ export const isValidDateString = (dateStr: string): boolean => {
 export const isWithinDateRange = (
   targetDate: string,
   startDate: string,
-  endDate: string
+  endDate: string,
 ): boolean => {
   if (
     !isValidDateString(targetDate) ||

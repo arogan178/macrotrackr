@@ -39,7 +39,7 @@ export const useStore = create<StoreState>()(
     ...createAuthSlice(...a),
     ...createNotificationSlice(...a),
     ...createHabitsSlice(...a),
-  }))
+  })),
 );
 
 // Method to reset the entire store for testing purposes

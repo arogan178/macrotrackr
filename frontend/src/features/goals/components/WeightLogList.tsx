@@ -1,10 +1,7 @@
 import { useState, useMemo } from "react";
 import { useStore } from "@/store/store";
-import { TrashIcon } from "@/components/Icons";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
-import EmptyState from "@/components/EmptyState";
-import Modal from "@/components/form/Modal";
-import ActionButton from "@/components/form/ActionButton";
+import { TrashIcon, EmptyState, LoadingSpinner, Modal } from "@/components/ui";
+import { ActionButton } from "@/components/form";
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 
 interface WeightLogListProps {
@@ -84,7 +81,7 @@ function WeightLogList({
       .filter((entry) => entry.timestamp && isValid(parseISO(entry.timestamp))) // Filter out invalid timestamps first
       .sort(
         (a, b) =>
-          parseISO(b.timestamp).getTime() - parseISO(a.timestamp).getTime()
+          parseISO(b.timestamp).getTime() - parseISO(a.timestamp).getTime(),
       );
   }, [weightLog]);
 
@@ -152,7 +149,7 @@ function WeightLogList({
                       handleDeleteClick(
                         entry.id,
                         entry.timestamp,
-                        entry.weight
+                        entry.weight,
                       );
                   }}
                   disabled={isSaving || !isValidDate}
@@ -181,7 +178,7 @@ function WeightLogList({
           title="Confirm Deletion"
           variant="confirmation"
           message={`Are you sure you want to delete the weight entry (${itemToDelete.weight.toFixed(
-            1
+            1,
           )} kg) from ${
             // Safely format the date in the modal message
             isValid(parseISO(itemToDelete.timestamp))

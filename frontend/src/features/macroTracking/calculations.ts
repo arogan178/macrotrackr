@@ -6,7 +6,7 @@ import { DEFAULT_MACRO_TOTALS, getTodayDateString } from "./constants";
 export const calculateCaloriesFromMacros = (
   protein: number,
   carbs: number,
-  fats: number
+  fats: number,
 ): number => {
   return (
     protein * CALORIES_PER_GRAM.protein +
@@ -19,7 +19,7 @@ export const calculateEntryCalories = (entry: MacroEntry): number => {
   return calculateCaloriesFromMacros(
     entry.protein || 0,
     entry.carbs || 0,
-    entry.fats || 0
+    entry.fats || 0,
   );
 };
 
@@ -34,7 +34,7 @@ export const calculateFatsCalories = (fats: number): number => {
 };
 // Calculate daily totals from entries
 export const calculateDailyTotals = (
-  entries: MacroEntry[]
+  entries: MacroEntry[],
 ): MacroDailyTotals => {
   if (!entries || entries.length === 0) {
     return DEFAULT_MACRO_TOTALS;
@@ -47,7 +47,7 @@ export const calculateDailyTotals = (
       fats: totals.fats + (entry.fats || 0),
       calories: totals.calories + calculateEntryCalories(entry),
     }),
-    { ...DEFAULT_MACRO_TOTALS }
+    { ...DEFAULT_MACRO_TOTALS },
   );
 };
 
@@ -62,7 +62,7 @@ export const getTodayEntries = (entries: MacroEntry[]): MacroEntry[] => {
 
 // Calculate today's totals from all entries
 export const calculateTodayTotals = (
-  allEntries: MacroEntry[]
+  allEntries: MacroEntry[],
 ): MacroDailyTotals => {
   const todayEntries = getTodayEntries(allEntries);
   return calculateDailyTotals(todayEntries);
@@ -72,17 +72,17 @@ export const calculateTodayTotals = (
 export const updateEntryInList = (
   entries: MacroEntry[],
   id: number,
-  updates: Partial<MacroEntry>
+  updates: Partial<MacroEntry>,
 ): MacroEntry[] => {
   return entries.map((entry) =>
-    entry.id === id ? { ...entry, ...updates } : entry
+    entry.id === id ? { ...entry, ...updates } : entry,
   );
 };
 
 // Remove an entry from the entries array
 export const removeEntryFromList = (
   entries: MacroEntry[],
-  id: number
+  id: number,
 ): MacroEntry[] => {
   return entries.filter((entry) => entry.id !== id);
 };
@@ -96,7 +96,7 @@ export const formatMacroValue = (value: number): string => {
 export const validateMacroInputs = (
   protein: string,
   carbs: string,
-  fats: string
+  fats: string,
 ): { isValid: boolean; errors: Record<string, string> } => {
   const errors: Record<string, string> = {};
 

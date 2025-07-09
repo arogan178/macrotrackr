@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/layout";
 import { useStore } from "@/store/store";
 import { LineChartComponent, DateRangeSelector } from "@/components/chart";
 import {
@@ -11,7 +11,7 @@ import {
 } from "../components";
 import { motion } from "motion/react";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { ProFeature } from "@/components/ProFeature";
+import { ProFeature } from "@/components/billing";
 
 export default function ReportingPage() {
   // Primary date range state - used throughout the component

@@ -4,7 +4,7 @@ import { formatISO } from "date-fns";
 // Weight log data utilities
 export function createWeightLogEntry(
   weight: number,
-  date?: string
+  date?: string,
 ): AddWeightLogPayload {
   const entryDate = date || new Date().toISOString().split("T")[0];
 
@@ -16,17 +16,17 @@ export function createWeightLogEntry(
 
 // Weight log sorting and filtering utilities
 export function sortWeightLogByDate(
-  entries: WeightLogEntry[]
+  entries: WeightLogEntry[],
 ): WeightLogEntry[] {
   return [...entries].sort(
-    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
   );
 }
 
 export function filterWeightLogByDateRange(
   entries: WeightLogEntry[],
   startDate: string,
-  endDate: string
+  endDate: string,
 ): WeightLogEntry[] {
   const start = new Date(startDate);
   const end = new Date(endDate);
@@ -39,7 +39,7 @@ export function filterWeightLogByDateRange(
 
 export function getLastNEntries(
   entries: WeightLogEntry[],
-  count: number
+  count: number,
 ): WeightLogEntry[] {
   const sorted = sortWeightLogByDate(entries);
   return sorted.slice(0, count);
@@ -48,7 +48,7 @@ export function getLastNEntries(
 // Weight trend analysis utilities
 export function calculateWeightTrend(
   entries: WeightLogEntry[],
-  days: number = 7
+  days: number = 7,
 ): {
   trend: "up" | "down" | "stable";
   change: number;
@@ -79,7 +79,7 @@ export function calculateWeightTrend(
 
 export function calculateWeightAverage(
   entries: WeightLogEntry[],
-  days: number = 7
+  days: number = 7,
 ): number {
   const recent = getLastNEntries(entries, days);
 
@@ -91,7 +91,7 @@ export function calculateWeightAverage(
 
 export function getWeightChangeFromStart(
   entries: WeightLogEntry[],
-  startingWeight: number
+  startingWeight: number,
 ): {
   totalChange: number;
   latestWeight: number;

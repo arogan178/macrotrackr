@@ -18,7 +18,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   showUpgradeButtons = false,
 }) => {
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">(
-    "monthly"
+    "monthly",
   );
   const navigate = useNavigate();
   const isAuthenticated = useStore((state) => state.auth.isAuthenticated);

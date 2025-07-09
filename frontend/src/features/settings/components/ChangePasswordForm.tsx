@@ -8,13 +8,13 @@ export const ChangePasswordForm = () => {
   const changePassword = useStore((state) => state.changePassword);
   const isChangingPassword = useStore((state) => state.auth.isChangingPassword);
   const changePasswordError = useStore(
-    (state) => state.auth.changePasswordError
+    (state) => state.auth.changePasswordError,
   );
   const changePasswordSuccess = useStore(
-    (state) => state.auth.changePasswordSuccess
+    (state) => state.auth.changePasswordSuccess,
   );
   const clearChangePasswordMessages = useStore(
-    (state) => state.clearChangePasswordMessages
+    (state) => state.clearChangePasswordMessages,
   );
 
   const [currentPassword, setCurrentPassword] = useState("");

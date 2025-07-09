@@ -32,7 +32,7 @@ function WeightGoalForm({
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-    weightGoals?.calorieTarget
+    weightGoals?.calorieTarget,
   );
   const [calculatedTargetDate, setCalculatedTargetDate] = useState<
     string | undefined
@@ -41,7 +41,7 @@ function WeightGoalForm({
     number | undefined
   >(weightGoals?.weeklyChange);
   const [calculatedWeeks, setCalculatedWeeks] = useState<number | undefined>(
-    weightGoals?.calculatedWeeks
+    weightGoals?.calculatedWeeks,
   );
 
   // Calculate default calorie intake based on TDEE and weight goals
@@ -50,7 +50,7 @@ function WeightGoalForm({
       const calculations = generateWeightGoalCalculations(
         tdee,
         formValues.startingWeight,
-        formValues.targetWeight
+        formValues.targetWeight,
       );
       setCalorieIntake(calculations.calorieTarget);
       setCalculatedTargetDate(calculations.targetDate);
@@ -87,7 +87,7 @@ function WeightGoalForm({
         tdee,
         formValues.startingWeight,
         formValues.targetWeight,
-        value
+        value,
       );
 
       // Update all calculation-dependent state values
@@ -120,8 +120,8 @@ function WeightGoalForm({
         formValues.startingWeight > formValues.targetWeight
           ? "lose"
           : formValues.startingWeight < formValues.targetWeight
-          ? "gain"
-          : "maintain",
+            ? "gain"
+            : "maintain",
     };
 
     onSave(completeGoal);
@@ -187,8 +187,8 @@ function WeightGoalForm({
                 isWeightLoss
                   ? Math.max(tdee - 1000, 1200)
                   : isMaintenance
-                  ? tdee - 300
-                  : tdee
+                    ? tdee - 300
+                    : tdee
               }
               max={
                 isWeightLoss ? tdee : isMaintenance ? tdee + 300 : tdee + 1000
@@ -235,7 +235,7 @@ function WeightGoalForm({
                           month: "short",
                           day: "numeric",
                           year: "numeric",
-                        }
+                        },
                       )
                     : "Calculating..."}
                 </span>
@@ -287,8 +287,8 @@ function WeightGoalForm({
                 {calorieIntake < tdee
                   ? "slightly fewer"
                   : calorieIntake > tdee
-                  ? "slightly more"
-                  : "the same"}{" "}
+                    ? "slightly more"
+                    : "the same"}{" "}
                 calories than your TDEE
               </p>
             </div>

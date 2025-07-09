@@ -1,6 +1,5 @@
 import { useState } from "react";
-import FormButton from "@/components/form/FormButton";
-import { TextField } from "@/components/form";
+import { FormButton, TextField } from "@/components/form";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 
 type AuthMode = "login" | "register";

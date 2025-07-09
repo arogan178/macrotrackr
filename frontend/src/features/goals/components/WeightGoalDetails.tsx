@@ -1,7 +1,7 @@
 import { CardContainer } from "@/components/form";
 import { WeightGoals } from "@/types/goal";
-import { EditIcon, TrashIcon } from "@/components/Icons";
-import ProgressBar from "@/components/form/ProgressBar";
+import { EditIcon, TrashIcon } from "@/components/ui";
+import ProgressBar from "@/components/ui/ProgressBar";
 
 interface WeightGoalDetailsProps {
   goalData: WeightGoals;
@@ -15,7 +15,7 @@ interface WeightGoalDetailsProps {
 
 function getDirectionText(
   startingWeight: number | null,
-  targetWeight: number | null
+  targetWeight: number | null,
 ) {
   if (startingWeight === null || targetWeight === null) return "Maintaining";
   if (targetWeight < startingWeight) return "Losing";
@@ -64,8 +64,8 @@ function WeightGoalDetails({
         0,
         Math.ceil(
           (new Date(targetDate).getTime() - new Date().getTime()) /
-            (1000 * 60 * 60 * 24)
-        )
+            (1000 * 60 * 60 * 24),
+        ),
       )
     : null;
 
@@ -167,10 +167,7 @@ function WeightGoalDetails({
             {progressPercentage.toFixed(0)}%
           </span>
         </div>
-        <ProgressBar
-          progress={progressPercentage}
-          variant={directionText === "Losing" ? "weight-loss" : "weight-gain"}
-        />
+        <ProgressBar progress={progressPercentage} />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
           <span>
             {startingWeight !== null

@@ -8,7 +8,7 @@ import {
   InfoCard,
   DateField,
 } from "@/components/form";
-import { ForwardIcon, BackIcon, CheckIcon, InfoIcon } from "@/components/Icons";
+import { ForwardIcon, BackIcon, CheckIcon, InfoIcon } from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
@@ -42,7 +42,7 @@ export function StepOne() {
         setRegisterStep,
       });
     },
-    [validateRegisterStep, setRegisterStep]
+    [validateRegisterStep, setRegisterStep],
   );
 
   return (
@@ -122,7 +122,7 @@ export function StepTwo() {
         setRegisterStep,
       });
     },
-    [validateRegisterStep, setRegisterStep]
+    [validateRegisterStep, setRegisterStep],
   );
 
   return (
@@ -223,7 +223,7 @@ export function StepThree() {
         navigate,
       });
     },
-    [validateRegisterStep, setRegisterStep, submitRegistration, navigate]
+    [validateRegisterStep, setRegisterStep, submitRegistration, navigate],
   );
 
   return (
@@ -236,7 +236,7 @@ export function StepThree() {
             onChange={(value) =>
               setRegisterField(
                 "activityLevel",
-                value ? (Number(value) as never) : ""
+                value ? (Number(value) as never) : "",
               )
             }
             options={[

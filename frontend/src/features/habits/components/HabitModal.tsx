@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import Modal from "@/components/form/Modal";
+import Modal from "@/components/ui/Modal";
 import { HabitGoal, HabitGoalFormValues } from "../types/types";
 import HabitForm from "./HabitForm";
 
@@ -77,7 +77,7 @@ function HabitModal({
   // Handler passed down to HabitForm
   const handleFormChange = (
     field: keyof HabitGoalFormValues,
-    value: string | number
+    value: string | number,
   ) => {
     setFormValues((prevValues) => {
       const newValues = { ...prevValues, [field]: value };
@@ -97,7 +97,7 @@ function HabitModal({
     } catch (error) {
       console.error(
         `Error ${isEditMode ? "updating" : "submitting"} habit:`,
-        error
+        error,
       );
       // Optionally show an error message to the user here
     } finally {
@@ -111,8 +111,8 @@ function HabitModal({
   const saveLabel = isSubmitting
     ? "Saving..."
     : isEditMode
-    ? "Save Changes"
-    : "Save Habit";
+      ? "Save Changes"
+      : "Save Habit";
 
   return (
     <Modal

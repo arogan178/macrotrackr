@@ -1,4 +1,4 @@
-import Modal from "@/components/form/Modal";
+import Modal from "@/components/ui/Modal";
 import WeightGoalForm from "./WeightGoalForm";
 import { WeightGoalFormValues } from "../types";
 import { useEffect } from "react";

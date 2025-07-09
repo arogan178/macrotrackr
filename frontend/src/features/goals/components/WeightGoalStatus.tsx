@@ -5,19 +5,15 @@ import {
   WeightIcon,
   CalendarIcon, // Added for Time Remaining
   TrendingUpIcon, // Added for Weekly Rate
-  TargetIcon, // Added for Daily Deficit/Surplus
-} from "@/components/Icons";
-import ProgressBar from "@/components/form/ProgressBar";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import {
-  MacroDailyTotals,
-  MacroTargetSettings,
-} from "@/features/macroTracking/types";
+  TargetIcon,
+  ProgressBar, // Added for Daily Deficit/Surplus
+} from "@/components/ui";
+import { AnimatedNumber } from "@/components/animation/";
+import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { WeightGoals } from "@/types/goal";
 import MacroNutrient from "./MacroNutrient";
 import { motion } from "motion/react"; // Import motion
-import { FormButton } from "@/components/form";
-import ActionButtonGroup from "@/components/form/ActionButtonGroup";
+import { FormButton, ActionButtonGroup } from "@/components/form";
 
 interface WeightGoalStatusProps {
   startingWeight: number; // This should represent the *current* weight
@@ -36,7 +32,7 @@ interface WeightGoalStatusProps {
 function calculateProgress(
   current: number,
   start: number,
-  target: number
+  target: number,
 ): number {
   if (start === target) return 0; // Avoid division by zero if start equals target
   const totalDifference = Math.abs(target - start);
@@ -46,8 +42,8 @@ function calculateProgress(
     0,
     Math.min(
       100,
-      ((totalDifference - currentDifference) / totalDifference) * 100
-    )
+      ((totalDifference - currentDifference) / totalDifference) * 100,
+    ),
   );
   return Math.round(progress);
 }
@@ -55,7 +51,7 @@ function calculateProgress(
 // Helper to format dates
 function formatDate(
   dateString: string | undefined | null,
-  options?: Intl.DateTimeFormatOptions
+  options?: Intl.DateTimeFormatOptions,
 ): string {
   if (!dateString) return "Not set";
   const defaultOptions: Intl.DateTimeFormatOptions = {
@@ -88,7 +84,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const progressPercentage = calculateProgress(
     startingWeight, // Use the current weight for progress calculation
     goalStartingWeight, // Use the goal's defined starting weight
-    targetWeight
+    targetWeight,
   );
 
   const weightGoal = weightGoals?.weightGoal || "maintain";
@@ -102,8 +98,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const goalTypeLabel = isWeightLoss
     ? "Weight Loss"
     : isWeightGain
-    ? "Weight Gain"
-    : "Maintenance";
+      ? "Weight Gain"
+      : "Maintenance";
 
   const goalColor = isWeightLoss ? "indigo" : isWeightGain ? "green" : "blue";
   const goalTextColor = `text-${goalColor}-400`;
@@ -123,13 +119,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   };
 
   const targetProteinGrams = Math.round(
-    (effectiveCalorieTarget * targetPercentages.proteinPercentage) / 100 / 4
+    (effectiveCalorieTarget * targetPercentages.proteinPercentage) / 100 / 4,
   );
   const targetCarbsGrams = Math.round(
-    (effectiveCalorieTarget * targetPercentages.carbsPercentage) / 100 / 4
+    (effectiveCalorieTarget * targetPercentages.carbsPercentage) / 100 / 4,
   );
   const targetFatsGrams = Math.round(
-    (effectiveCalorieTarget * targetPercentages.fatsPercentage) / 100 / 9
+    (effectiveCalorieTarget * targetPercentages.fatsPercentage) / 100 / 9,
   );
 
   const weeklyChange = weightGoals?.weeklyChange || 0;
@@ -318,8 +314,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               {isWeightLoss
                 ? "Daily Deficit"
                 : isWeightGain
-                ? "Daily Surplus"
-                : "Est. TDEE"}
+                  ? "Daily Surplus"
+                  : "Est. TDEE"}
             </p>{" "}
             <p className="text-base font-medium text-gray-100">
               {isMaintenance ? (
@@ -365,9 +361,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               100, // Cap progress at 100% visually
               effectiveCalorieTarget > 0
                 ? Math.round(
-                    (macroDailyTotals.calories / effectiveCalorieTarget) * 100
+                    (macroDailyTotals.calories / effectiveCalorieTarget) * 100,
                   )
-                : 0
+                : 0,
             )}
             color="indigo"
             height="sm"
