@@ -99,11 +99,11 @@ function HabitTracker({
             action={
               onAddHabit
                 ? {
-                    label: "Add First Habit",
-                    onClick: onAddHabit,
-                    variant: "primary",
-                    icon: <PlusIcon size="sm" />,
-                  }
+                  label: "Add First Habit",
+                  onClick: onAddHabit,
+                  variant: "primary",
+                  icon: <PlusIcon size="sm" />,
+                }
                 : undefined
             }
             size="md"

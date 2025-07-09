@@ -42,7 +42,7 @@ export default function ProfileForm({
   const activityLevelValue =
     typeof settings.activityLevel === "string" && settings.activityLevel ?
       getActivityLevelFromString(settings.activityLevel as ActivityLevel)
-    : settings.activityLevel;
+      : settings.activityLevel;
 
   // Ensure weight is a valid positive number
   const handleWeightChange = (value: number | undefined) => {
