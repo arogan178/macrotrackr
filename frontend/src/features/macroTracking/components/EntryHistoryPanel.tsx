@@ -386,7 +386,10 @@ const EntryHistoryComponent = function EntryHistory({
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
         isDanger={true}
-      />
+      >
+        {/* No additional content needed for confirmation modal */}
+        <></>
+      </Modal>
     </motion.div>
   );
 };

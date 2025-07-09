@@ -67,7 +67,7 @@ import {
 
 // Base icon type with common props
 interface IconProps extends Omit<LucideProps, "size"> {
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
 }
 
 // HOC to apply consistent styling to all icons
@@ -164,7 +164,6 @@ export const MoonIcon = createIcon(Moon);
 export const SunIcon = createIcon(Sun);
 export const MoreVerticalIcon = createIcon(MoreVertical);
 export const SmilePlusIcon = createIcon(SmilePlus);
-export const XIcon = createIcon(X);
 export const BalanceIcon = createIcon(BalanceScale);
 export const CircleCheckIcon = createIcon(CheckCircle);
 export const CircleQuestionMarkIcon = createIcon(CircleQuestionMark);
