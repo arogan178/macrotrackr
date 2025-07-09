@@ -228,7 +228,6 @@ function MacroTargetForm() {
                     onClick={handleReset}
                     disabled={isTargetLoading || isTargetSaving}
                     variant="ghost"
-                    size="md"
                     text="Reset"
                   />
                 )}
@@ -238,7 +237,7 @@ function MacroTargetForm() {
                   isLoading={isTargetSaving}
                   disabled={!hasChanges || isTargetLoading}
                   text="Save Targets"
-                  size="lg"
+                  buttonSize="lg"
                   variant="primary"
                   className="px-8 py-3 text-lg"
                 />

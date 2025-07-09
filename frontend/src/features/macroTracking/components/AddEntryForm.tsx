@@ -246,7 +246,6 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               loadingText="Saving..."
               text="Add Entry"
               variant="primary"
-              size="md"
             />
           </div>
         </form>
