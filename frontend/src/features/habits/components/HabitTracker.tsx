@@ -1,6 +1,6 @@
-import ProgressBar from "@/components/ProgressBar";
+import ProgressBar from "@/components/form/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { HabitGoal } from "../types";
+import { HabitGoal } from "../types/types";
 import HabitActions from "./HabitActions";
 import EmptyState from "@/components/EmptyState";
 import { HABIT_ICONS } from "../constants";

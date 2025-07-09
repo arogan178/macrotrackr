@@ -12,11 +12,11 @@ import {
 import { TabButton } from "@/components/form";
 import { GoalsIcon, TargetIcon } from "@/components/Icons";
 import { HabitTracker, HabitModal } from "@/features/habits/components";
-import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types";
+import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types/types";
 import { WeightGoalFormValues } from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";

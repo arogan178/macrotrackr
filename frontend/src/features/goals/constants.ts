@@ -5,6 +5,12 @@ export const CALORIE_ADJUSTMENT_FACTORS = {
   gain: 300, // 300 calorie surplus
 } as const;
 
+export const DEFAULT_TARGET_VALUES = {
+  proteinPercentage: 30,
+  carbsPercentage: 40,
+  fatsPercentage: 30,
+  lockedMacros: [],
+};
 export const DAILY_PROTEIN_PER_KG = 2; // 2g protein per kg bodyweight
 export const CARBS_PERCENTAGE = 0.5; // 50% of calories from carbs
 export const FATS_PERCENTAGE = 0.25; // 25% of calories from fats

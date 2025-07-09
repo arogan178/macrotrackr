@@ -1,12 +1,12 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { NotificationType } from "../types";
+import type { NotificationType } from "../types";
 import {
   CheckIcon,
   CloseIcon,
   WarningIcon,
   InfoIcon,
 } from "@/components/Icons";
-import FormButton from "@/components/form/FormButton";
+import { FormButton } from "@/components/form";
 
 export interface FloatingNotificationProps {
   message: string;

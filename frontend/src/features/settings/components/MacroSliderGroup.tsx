@@ -1,6 +1,6 @@
 import { memo } from "react";
 import MacroSlider from "./MacroSlider";
-import { MacroType, MacroPercentages } from "../types/macro-types";
+import { MacroType, MacroPercentages } from "@/types/macro";
 
 interface MacroSliderGroupProps {
   percentages: MacroPercentages;
@@ -18,7 +18,7 @@ function MacroSliderGroup({
   lockedMacros,
   onMacroChange,
   onToggleLock,
-  className = ""
+  className = "",
 }: MacroSliderGroupProps) {
   return (
     <div className={`space-y-6 ${className}`}>
@@ -31,7 +31,7 @@ function MacroSliderGroup({
         onToggleLock={() => onToggleLock("protein")}
         disabled={false}
       />
-      
+
       <MacroSlider
         name="Carbs"
         value={percentages.carbsPercentage}
@@ -41,7 +41,7 @@ function MacroSliderGroup({
         onToggleLock={() => onToggleLock("carbs")}
         disabled={false}
       />
-      
+
       <MacroSlider
         name="Fats"
         value={percentages.fatsPercentage}

@@ -3,7 +3,7 @@ import HeroSection from "../components/HeroSection";
 import Footer from "../components/Footer";
 import PageBackground from "../components/PageBackground";
 import React, { Suspense } from "react";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/form/LoadingSpinner";
 
 const FeaturesSection = React.lazy(
   () => import("../components/FeaturesSection")
