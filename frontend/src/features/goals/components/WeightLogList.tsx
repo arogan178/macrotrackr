@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react";
 import { useStore } from "@/store/store";
 import { TrashIcon } from "@/components/Icons";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/form/LoadingSpinner";
 import EmptyState from "@/components/EmptyState";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 import ActionButton from "@/components/form/ActionButton";
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 

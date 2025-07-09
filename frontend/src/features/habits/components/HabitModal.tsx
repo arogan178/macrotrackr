@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import Modal from "@/components/Modal";
-import { HabitGoal, HabitGoalFormValues } from "../types";
+import Modal from "@/components/form/Modal";
+import { HabitGoal, HabitGoalFormValues } from "../types/types";
 import HabitForm from "./HabitForm";
 
 // Default values for a new habit

@@ -1,5 +1,5 @@
 import { calculateCaloriePercentages } from "@/utils/nutrition";
-import { MacroNutrients } from "@/utils/nutrition-types";
+import type { MacroNutrients } from "@/utils/nutrition-types";
 import { memo } from "react";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 

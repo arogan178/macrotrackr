@@ -9,17 +9,6 @@ export { default as CardContainer } from "./CardContainer";
 export { default as FormButton } from "./FormButton";
 export { default as ActionButtonGroup } from "./ActionButtonGroup";
 export { default as ActionButton } from "./ActionButton";
-// Types
-export type {
-  TextFieldProps,
-  DateFieldProps,
-  TimeFieldProps,
-  NumberFieldProps,
-  SelectOption,
-  DropdownProps,
-  InfoCardProps,
-  TabButtonProps,
-  CardContainerProps,
-  FormButtonProps,
-  ActionButtonGroupProps,
-} from "@/components/utils/types";
+export { default as ProgressBar } from "./ProgressBar";
+export { default as LoadingSpinner } from "./LoadingSpinner";
+export { default as Modal } from "./Modal";

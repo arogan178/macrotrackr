@@ -6,8 +6,8 @@ import {
   USER_MAXIMUM_WEIGHT,
 } from "@/utils/constants";
 import { isOldEnough } from "@/utils/validation";
-import { UserSettings, MacroTargetSettings } from "../types/types";
-
+import type { UserSettings } from "../types/types";
+import type { MacroTargetSettings } from "@/types/macro";
 /**
  * Validates user form fields
  */
