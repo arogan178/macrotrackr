@@ -1,6 +1,4 @@
 // Goal-related shared types
-// Usage example:
-// import { WeightGoal, WeightGoals, WeightGoalFormValues } from '@/types/goal';
 
 export type WeightGoal = "lose" | "maintain" | "gain";
 

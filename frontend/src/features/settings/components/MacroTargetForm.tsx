@@ -5,7 +5,7 @@ import { InfoCard, CardContainer, FormButton } from "@/components/form";
 import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
 import MacroTarget from "./MacroTarget";
 import { useStore } from "@/store/store";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/form/LoadingSpinner";
 import { ProFeature } from "@/components/ProFeature";
 
 // Default macro values (30/40/30 split)

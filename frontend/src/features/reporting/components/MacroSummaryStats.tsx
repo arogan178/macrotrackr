@@ -1,21 +1,8 @@
 import React, { useMemo } from "react";
 import { useStore } from "@/store/store";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-
-// Enhanced colors - simplified
-const COLORS = {
-  protein: {
-    base: "#34d399", // green-400
-  },
-  carbs: {
-    base: "#60a5fa", // blue-400
-  },
-  fats: {
-    base: "#f87171", // red-400
-  },
-};
-
-type MacroType = "protein" | "carbs" | "fats";
+import type { MacroType } from "@/types/macro";
+import { MACRO_COLORS } from "@/utils/constants/macro";
 
 interface MacroSummaryStatsProps {
   data: {
@@ -86,13 +73,15 @@ const MacroSummaryItem = React.memo(
   }) => {
     const percentageDelta = avgPercentage - targetPercentage;
     const gramDelta = avgGrams - targetGrams;
-    const color = COLORS[type].base;
 
     return (
       <div className="flex-1 text-xs flex flex-col justify-between h-full">
         {/* Header: Macro Name + Deviation Indicator (now based on grams) */}
         <div className="flex items-center justify-between mb-2">
-          <span className="font-semibold text-lg" style={{ color }}>
+          <span
+            className="font-semibold text-lg"
+            style={{ color: MACRO_COLORS[type].base }}
+          >
             {type.charAt(0).toUpperCase() + type.slice(1)}
           </span>
         </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 import { DateField, NumberField, TimeField } from "@/components/form";
 import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/api-service";
@@ -14,7 +14,6 @@ interface LogWeightModalProps {
 
 // Helper to get current time in HH:mm format
 const getCurrentTime = () => format(new Date(), "HH:mm");
-
 
 function LogWeightModal({
   isOpen,
@@ -105,6 +104,8 @@ function LogWeightModal({
       variant="form"
       onSave={handleSave}
       saveDisabled={isSaving || !date || !time || !weight || !!formError}
+      saveLabel="Log Weight"
+      buttonSize="lg"
     >
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">

@@ -1,12 +1,14 @@
 import { useEffect, useState, useMemo, memo, useCallback } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
-  ExportIcon,
   PlusCircleIcon,
   ChevronDownIcon,
+  ExportIcon,
 } from "@/components/Icons";
+import ActionButton from "@/components/form/ActionButton";
+import { FormButton } from "@/components/form";
 import { ProFeature } from "@/components/ProFeature";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 import EmptyState from "@/components/EmptyState";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import DesktopEntryTable from "./DesktopEntryTable";
@@ -225,18 +227,13 @@ const EntryHistoryComponent = function EntryHistory({
         </div>
         {history.length > 0 && (
           <ProFeature>
-            <motion.button
+            <ActionButton
+              variant="export"
+              ariaLabel="Export data as CSV file"
               onClick={handleExportCSV}
-              className="px-3 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-xs font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ExportIcon className="w-4 h-4 mr-1" />
-              <span className="hidden xs:inline">Export CSV</span>
-            </motion.button>
+              buttonSize="md"
+              className="mr-1"
+            />
           </ProFeature>
         )}
       </div>
@@ -258,18 +255,16 @@ const EntryHistoryComponent = function EntryHistory({
         </motion.div>
         {history.length > 0 && (
           <ProFeature>
-            <motion.button
+            <FormButton
+              type="button"
+              icon={<ExportIcon />}
+              iconPosition="left"
               onClick={handleExportCSV}
-              className="px-4 py-2 bg-emerald-600/90 hover:bg-emerald-500/90 text-white text-sm font-medium rounded-lg flex items-center transition-all duration-200 shadow-lg shadow-emerald-600/20"
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.2, duration: 0.3 }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <ExportIcon className="w-4 h-4 mr-2" />
-              Export CSV
-            </motion.button>
+              text="Export CSV"
+              variant="secondary"
+              buttonSize="lg"
+              className="mr-2"
+            />
           </ProFeature>
         )}
       </div>
