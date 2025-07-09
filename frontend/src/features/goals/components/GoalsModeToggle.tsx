@@ -1,4 +1,5 @@
 import FormButton from "@/components/form/FormButton";
+import { AwardIcon, GoalsIcon } from "@/components/Icons";
 interface GoalsModeToggleProps {
   activeMode: "active" | "achieved";
   onToggle: () => void;
@@ -16,26 +17,15 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
             : "text-gray-400 hover:text-gray-300"
         }`}
         variant={activeMode === "active" ? undefined : "ghost"}
-      >
-        <div className="flex items-center">
-          <svg
+        icon={
+          <GoalsIcon
             className={`w-4 h-4 mr-2 ${
               activeMode === "active" ? "text-white" : "text-gray-400"
             }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-            />
-          </svg>
-          Active Goals
-        </div>
+          />
+        }
+      >
+        <div className="flex items-center">Active Goals</div>
       </FormButton>
       <FormButton
         type="button"
@@ -46,26 +36,9 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
             : "text-gray-400 hover:text-gray-300"
         }`}
         variant={activeMode === "achieved" ? undefined : "ghost"}
+        icon={<AwardIcon />}
       >
-        <div className="flex items-center">
-          <svg
-            className={`w-4 h-4 mr-2 ${
-              activeMode === "achieved" ? "text-white" : "text-gray-400"
-            }`}
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-            />
-          </svg>
-          Achievements
-        </div>
+        <div className="flex items-center">Achievements</div>
       </FormButton>
     </div>
   );

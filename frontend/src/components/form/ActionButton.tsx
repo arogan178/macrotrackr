@@ -167,7 +167,7 @@ function ActionButton({
   return (
     <FormButton
       variant="ghost"
-      size="sm"
+      buttonSize="sm"
       onClick={onClick}
       disabled={disabled}
       className={combinedClassName}

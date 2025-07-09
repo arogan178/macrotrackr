@@ -53,12 +53,11 @@ function HabitTracker({
               <ProFeature>
                 <FormButton
                   variant="ghost"
-                  size="sm"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
                   className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg disabled:opacity-50"
                   text="Add Habit"
-                  icon={<PlusIcon size="sm" />}
+                  icon={<PlusIcon />}
                   iconPosition="left"
                 />
               </ProFeature>
