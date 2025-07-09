@@ -111,7 +111,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             icon={<ArrowRightIcon className="w-4 h-4 ml-1" />}
             iconPosition="right"
             ariaLabel="Search for food"
-            size="lg"
+            buttonSize="lg"
             variant="primary"
             className="min-w-[160px] px-6 py-2.5"
           />
