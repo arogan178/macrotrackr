@@ -1,4 +1,4 @@
-import { AggregatedDataPoint, NutritionAverage } from "../types";
+import type { AggregatedDataPoint, NutritionAverage } from "../types";
 
 interface NutritionInsightsProps {
   isLoading: boolean;

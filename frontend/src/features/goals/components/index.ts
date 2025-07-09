@@ -9,6 +9,5 @@ export { default as LogWeightModal } from "./LogWeightModal";
 export { default as WeightGoalProgressChart } from "./WeightGoalProgressChart";
 export { default as WeightLogList } from "./WeightLogList";
 export { default as WeightProgressTabs } from "./WeightProgressTabs";
-export { default as ProgressBar } from "../../../components/ProgressBar";
 
 export { default as MacroTargetForm } from "./MacroTargetForm";

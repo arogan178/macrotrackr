@@ -1,10 +1,10 @@
-import {
+import type {
   Gender,
   ActivityLevel,
-  MacroTargetGrams,
   UserSettings,
   UserNutritionalProfile,
 } from "../types/types";
+import type { MacroTargetGrams } from "@/types/macro";
 import { ACTIVITY_LEVELS } from "../utils/constants";
 
 // Pure calculation functions - independent of domain-specific types

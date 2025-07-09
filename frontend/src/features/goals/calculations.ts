@@ -4,7 +4,8 @@ import {
   MIN_WEEKLY_WEIGHT_LOSS,
   MAX_WEEKLY_WEIGHT_LOSS,
 } from "./constants";
-import type { TimeToGoalCalculation, WeightGoals } from "./types";
+import type { TimeToGoalCalculation } from "./types";
+import type { WeightGoals } from "@/types/goal";
 
 /**
  * Calculate the time to reach the goal weight based on current and target weights

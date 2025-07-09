@@ -13,12 +13,12 @@ import {
   YAxisProps,
 } from "recharts";
 import { motion, AnimatePresence } from "motion/react";
-import LoadingSpinner from "@/components/LoadingSpinner"; // Corrected path
+import LoadingSpinner from "@/components/form/LoadingSpinner"; // Corrected path
 import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import { ChartDataPoint, LineConfig } from "@/components/utils/types"; // Use the correct path for your types
+import type { ChartDataPoint, LineConfig } from "@/components/utils/types";
 import { DefaultTooltip } from "./chart-helpers";
 
 // Interface for CustomDot props to improve type safety
