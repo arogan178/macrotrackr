@@ -77,7 +77,7 @@ export default function MacroSlider({
               type="button"
               onClick={onToggleLock}
               variant={isLocked ? "secondary" : "ghost"}
-              size="sm"
+              buttonSize="sm"
               ariaLabel={isLocked ? `Unlock ${name}` : `Lock ${name}`}
               title={isLocked ? `Unlock ${name}` : `Lock ${name}`}
               icon={

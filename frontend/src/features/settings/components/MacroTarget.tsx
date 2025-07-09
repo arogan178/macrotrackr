@@ -53,7 +53,7 @@ const MacroTarget = memo(
               type="button"
               onClick={() => setHelpVisible(!helpVisible)}
               variant="ghost"
-              size="sm"
+              buttonSize="sm"
               ariaLabel={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
               icon={<InfoIcon className="w-5 h-5" />}

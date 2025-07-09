@@ -167,7 +167,6 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div className="flex items-center gap-2 self-end sm:self-center">
           <FormButton
             variant="secondary"
-            // buttonSize="sm"
             onClick={onLogWeight}
             className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-medium transition-colors duration-200 focus:ring-blue-500"
             text="Log Weight"

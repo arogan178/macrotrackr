@@ -182,7 +182,7 @@ export function StepTwo() {
               iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
-              size="md"
+              buttonSize="md"
             >
               Back
             </FormButton>
@@ -193,7 +193,7 @@ export function StepTwo() {
               iconPosition="right"
               icon={<ForwardIcon />}
               className="w-2/3"
-              size="md"
+              buttonSize="md"
             >
               Continue
             </FormButton>
@@ -271,7 +271,7 @@ export function StepThree() {
               iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
-              size="md"
+              buttonSize="md"
             >
               Back
             </FormButton>
@@ -283,7 +283,7 @@ export function StepThree() {
               iconPosition="right"
               icon={<CheckIcon />}
               className="w-2/3"
-              size="md"
+              buttonSize="md"
             >
               Finish
             </FormButton>

@@ -75,7 +75,7 @@ export default function MacroSlider({
           {onToggleLock && (
             <FormButton
               variant="ghost"
-              size="sm"
+              buttonSize="sm"
               onClick={onToggleLock}
               type="button"
               className={`p-1.5 rounded-full ${
