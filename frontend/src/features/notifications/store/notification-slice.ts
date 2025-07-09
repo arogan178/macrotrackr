@@ -32,7 +32,7 @@ export interface NotificationSlice {
       duration?: number;
       autoClose?: boolean;
       context?: string; // Optional context for grouping related notifications
-    }
+    },
   ) => string;
   hideNotification: (id: string) => void;
   clearAllNotifications: () => void;
@@ -44,7 +44,7 @@ const NOTIFICATION_DEDUPE_TIMEOUT = 5000;
 
 export const createNotificationSlice: StateCreator<NotificationSlice> = (
   set,
-  get
+  get,
 ) => ({
   // Initial state
   notifications: [],
@@ -60,7 +60,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
       duration?: number;
       autoClose?: boolean;
       context?: string;
-    } = {}
+    } = {},
   ) => {
     const {
       duration = DEFAULT_NOTIFICATION_DURATION,
@@ -74,7 +74,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
       if (existingContextId) {
         // Find the notification with this ID
         const existingNotification = get().notifications.find(
-          (n) => n.id === existingContextId
+          (n) => n.id === existingContextId,
         );
 
         // If the existing notification is still active and has the same message and type,
@@ -102,7 +102,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
     if (now - lastShownTime < NOTIFICATION_DEDUPE_TIMEOUT) {
       // Return existing notification ID if available, or generate a dummy one
       const existingNotification = get().notifications.find(
-        (n) => n.message === message && n.type === type
+        (n) => n.message === message && n.type === type,
       );
       return existingNotification?.id || `ignored_${now}`;
     }
@@ -198,7 +198,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
 
       return {
         notifications: state.notifications.filter(
-          (n: Notification) => n.id !== id
+          (n: Notification) => n.id !== id,
         ),
         activeTimeouts,
         // Keep lastNotificationMap unchanged
@@ -226,7 +226,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
 
         return {
           notifications: state.notifications.filter(
-            (n) => n.id !== notificationId
+            (n) => n.id !== notificationId,
           ),
           activeTimeouts,
           lastNotificationMap: state.lastNotificationMap,

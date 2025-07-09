@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { motion } from "motion/react";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import type { UnifiedInsightsProps } from "../types/insights-types";
 import {
   calculateConsistencyScore,
@@ -109,8 +109,8 @@ function UnifiedInsights({
                   consistencyScore > 70
                     ? "bg-green-400"
                     : consistencyScore > 40
-                    ? "bg-yellow-400"
-                    : "bg-red-400"
+                      ? "bg-yellow-400"
+                      : "bg-red-400"
                 }`}
                 style={{ width: `${consistencyScore}%` }}
               />
@@ -186,8 +186,8 @@ function UnifiedInsights({
                   nutrientDensity.score > 70
                     ? "bg-emerald-400"
                     : nutrientDensity.score > 40
-                    ? "bg-yellow-400"
-                    : "bg-red-400"
+                      ? "bg-yellow-400"
+                      : "bg-red-400"
                 }`}
                 style={{ width: `${nutrientDensity.score}%` }}
               />

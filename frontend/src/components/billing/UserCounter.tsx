@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, memo } from "react";
 import { motion } from "motion/react";
 
 interface UserCounterProps {
   className?: string;
 }
 
-const UserCounter: React.FC<UserCounterProps> = ({ className = "" }) => {
+const UserCounter: React.FC<UserCounterProps> = memo(({ className = "" }) => {
   const [userCount, setUserCount] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -87,6 +87,6 @@ const UserCounter: React.FC<UserCounterProps> = ({ className = "" }) => {
       </div>
     </motion.div>
   );
-};
+});
 
 export default UserCounter;

@@ -1,17 +1,17 @@
-import ProgressBar from "@/components/form/ProgressBar";
+import ProgressBar from "@/components/ui/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { HabitGoal } from "../types/types";
 import HabitActions from "./HabitActions";
-import EmptyState from "@/components/EmptyState";
+import EmptyState from "@/components/ui/EmptyState";
 import { HABIT_ICONS } from "../constants";
 import {
   PlusIcon,
   CheckIcon,
   CheckCircleIcon,
   TargetIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
-import { ProFeature } from "@/components/ProFeature";
+import { ProFeature } from "@/components/billing/ProFeature";
 import { FormButton } from "@/components/form";
 
 interface HabitTrackerProps {

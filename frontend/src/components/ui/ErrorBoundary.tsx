@@ -1,6 +1,6 @@
 import { Component, ReactNode } from "react";
-import { WarningIcon } from "./Icons";
-import FormButton from "./form/FormButton";
+import { WarningIcon } from "@/components/ui";
+import { FormButton } from "@/components/form";
 
 interface ErrorBoundaryProps {
   children: ReactNode;

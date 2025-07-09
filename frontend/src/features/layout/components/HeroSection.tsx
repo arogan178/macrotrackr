@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { motion } from "motion/react";
 import FormButton from "@/components/form/FormButton";
 import { trustIndicators, trustElements } from "../utils/landing-page-const";
-import { ShieldCheckIcon } from "@/components/Icons";
+import { ShieldCheckIcon } from "@/components/ui";
 
 const HeroSection: React.FC = () => (
   <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">

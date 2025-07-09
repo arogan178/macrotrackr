@@ -6,7 +6,7 @@ import {
   createColumnHelper,
   flexRender,
 } from "@tanstack/react-table";
-import { ChevronDownIcon } from "@/components/Icons";
+import { ChevronDownIcon } from "@/components/ui";
 import { MacroCell } from "@/components/nutrition";
 import { ActionButtonGroup, ActionButton } from "@/components/form";
 import { MacroEntry } from "@/types/macro";
@@ -192,7 +192,7 @@ const DesktopEntryTable = memo(
               : calculateCalories(
                   data.entries[0].protein,
                   data.entries[0].carbs,
-                  data.entries[0].fats
+                  data.entries[0].fats,
                 );
             return (
               <MacroCell value={value} suffix=" kcal" color="text-white" />
@@ -239,7 +239,7 @@ const DesktopEntryTable = memo(
         onEdit,
         deleteEntry,
         isDeleting,
-      ]
+      ],
     );
 
     // Initialize table
@@ -266,7 +266,7 @@ const DesktopEntryTable = memo(
                         ? null
                         : flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                     </th>
                   ))}
@@ -340,7 +340,7 @@ const DesktopEntryTable = memo(
                         >
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </td>
                       ))}
@@ -353,7 +353,7 @@ const DesktopEntryTable = memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 DesktopEntryTable.displayName = "DesktopEntryTable";

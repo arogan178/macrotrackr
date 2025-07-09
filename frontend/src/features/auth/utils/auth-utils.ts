@@ -65,7 +65,7 @@ export function createInitialAuthState(): AuthStateData {
 // Authentication utilities
 export async function performLogin(
   email: string,
-  password: string
+  password: string,
 ): Promise<string> {
   try {
     const response = await apiService.auth.login(email, password);
@@ -95,7 +95,7 @@ export function performLogout(): void {
 
 // Registration utilities
 export async function validateEmailAvailability(
-  email: string
+  email: string,
 ): Promise<boolean> {
   try {
     const { valid } = await apiService.auth.validateEmail(email);
@@ -108,13 +108,13 @@ export async function validateEmailAvailability(
   } catch (err) {
     const errorMessage = getErrorMessage(err);
     throw new Error(
-      `${AUTH_ERROR_MESSAGES.emailValidationFailed}: ${errorMessage}`
+      `${AUTH_ERROR_MESSAGES.emailValidationFailed}: ${errorMessage}`,
     );
   }
 }
 
 export async function submitUserRegistration(
-  registerData: RegisterData
+  registerData: RegisterData,
 ): Promise<string> {
   try {
     const userData = {
@@ -157,7 +157,7 @@ export async function submitUserRegistration(
 export function updateRegisterField<K extends keyof Omit<RegisterData, "step">>(
   currentRegister: RegisterData,
   field: K,
-  value: RegisterData[K]
+  value: RegisterData[K],
 ): RegisterData {
   return {
     ...currentRegister,
@@ -167,7 +167,7 @@ export function updateRegisterField<K extends keyof Omit<RegisterData, "step">>(
 
 export function updateRegisterStep(
   currentRegister: RegisterData,
-  step: number
+  step: number,
 ): RegisterData {
   return {
     ...currentRegister,
@@ -182,7 +182,7 @@ export function resetRegisterData(): RegisterData {
 // Progress calculation utilities
 export function calculateStepProgress(
   currentStep: number,
-  totalSteps: number
+  totalSteps: number,
 ): number {
   if (currentStep === 1) return 0;
   return ((currentStep - 1) / (totalSteps - 1)) * 100;
@@ -190,14 +190,14 @@ export function calculateStepProgress(
 
 export function isStepComplete(
   stepNumber: number,
-  currentStep: number
+  currentStep: number,
 ): boolean {
   return stepNumber < currentStep;
 }
 
 export function isCurrentStep(
   stepNumber: number,
-  currentStep: number
+  currentStep: number,
 ): boolean {
   return stepNumber === currentStep;
 }
@@ -228,7 +228,7 @@ export function validateEmailFormat(email: string): boolean {
 // Step navigation utilities
 export function canProceedToNextStep(
   currentStep: number,
-  totalSteps: number
+  totalSteps: number,
 ): boolean {
   return currentStep < totalSteps;
 }
@@ -253,7 +253,7 @@ export async function forgotPassword(email: string): Promise<void> {
 
 export async function resetPassword(
   token: string,
-  newPassword: string
+  newPassword: string,
 ): Promise<void> {
   await apiService.auth.resetPassword(token, newPassword);
 }

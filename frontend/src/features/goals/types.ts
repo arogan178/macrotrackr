@@ -1,4 +1,4 @@
-import { MacroTargetSettings } from "@/types/macro";
+import type { MacroTarget } from "@/types/macro";
 import { WeightGoal, WeightGoalFormValues, WeightGoals } from "@/types/goal";
 
 // Interface for API responses that can have nullable fields
@@ -31,10 +31,6 @@ export interface SetWeightGoalPayload {
 export interface UpdateWeightGoalPayload
   extends Omit<SetWeightGoalPayload, "startingWeight"> {}
 
-export interface MacroTarget {
-  macroTarget?: MacroTargetSettings;
-}
-
 export interface GoalsState {
   weightGoals: WeightGoals | null;
   macroTarget: MacroTarget | null;
@@ -48,5 +44,4 @@ export interface TimeToGoalCalculation {
   expectedWeightLossPerWeek: number;
 }
 
-// Re-export WeightGoalFormValues for use in api-service and other modules
 export type { WeightGoalFormValues };

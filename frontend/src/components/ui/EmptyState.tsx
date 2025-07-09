@@ -1,6 +1,6 @@
 import { memo, ReactNode } from "react";
-import { PlusIcon } from "./Icons";
-import FormButton from "./form/FormButton";
+import { PlusIcon } from "@/components/ui";
+import { FormButton } from "@/components/form";
 
 interface ActionProps {
   label: string;
@@ -103,8 +103,8 @@ function EmptyState({
                 action.variant === "secondary"
                   ? "secondary"
                   : action.variant === "outline"
-                  ? "ghost"
-                  : "primary"
+                    ? "ghost"
+                    : "primary"
               }
               className={getButtonStyles(action.variant)}
               icon={action.icon}
@@ -122,8 +122,8 @@ function EmptyState({
                 secondaryAction.variant === "secondary"
                   ? "secondary"
                   : secondaryAction.variant === "outline"
-                  ? "ghost"
-                  : "primary"
+                    ? "ghost"
+                    : "primary"
               }
               className={getButtonStyles(secondaryAction.variant || "outline")}
               icon={secondaryAction.icon}

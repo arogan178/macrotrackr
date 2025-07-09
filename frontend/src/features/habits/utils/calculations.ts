@@ -10,25 +10,25 @@ export const isHabitComplete = (current: number, target: number): boolean => {
 
 export const calculateRemainingToTarget = (
   current: number,
-  target: number
+  target: number,
 ): number => {
   return Math.max(0, target - current);
 };
 
 export const calculateCompletionRate = (
-  habits: Array<{ current: number; target: number }>
+  habits: Array<{ current: number; target: number }>,
 ): number => {
   if (habits.length === 0) return 0;
 
   const completedHabits = habits.filter((habit) =>
-    isHabitComplete(habit.current, habit.target)
+    isHabitComplete(habit.current, habit.target),
   );
   return Math.round((completedHabits.length / habits.length) * 100);
 };
 
 export const calculateStreakDays = (
   completedDates: string[],
-  referenceDate: string = new Date().toISOString().split("T")[0]
+  referenceDate: string = new Date().toISOString().split("T")[0],
 ): number => {
   if (completedDates.length === 0) return 0;
 
@@ -42,7 +42,7 @@ export const calculateStreakDays = (
 
   for (const completedDate of sortedDates) {
     const daysDiff = Math.floor(
-      (currentDate.getTime() - completedDate.getTime()) / (1000 * 60 * 60 * 24)
+      (currentDate.getTime() - completedDate.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     if (daysDiff === 0 || daysDiff === 1) {
@@ -64,7 +64,7 @@ export const getHabitProgressColor = (progress: number): string => {
 };
 
 export const getProgressBarColor = (
-  progress: number
+  progress: number,
 ): "green" | "blue" | "yellow" | "gray" => {
   if (progress >= 100) return "green";
   if (progress >= 75) return "blue";

@@ -3,7 +3,6 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import React from "react";
 
 // Default Tooltip for LineChartComponent
 export function DefaultTooltip({

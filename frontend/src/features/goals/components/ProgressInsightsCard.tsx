@@ -2,7 +2,7 @@ import React from "react";
 import { WeightGoals } from "@/types/goal";
 import { WeightLogEntry } from "@/utils/api-service";
 import { CardContainer } from "@/components/form";
-import { LightBulbIcon } from "@/components/Icons"; // Assuming this exists
+import { LightBulbIcon } from "@/components/ui"; // Assuming this exists
 import {
   subWeeks,
   startOfWeek,
@@ -27,7 +27,7 @@ function calculateRecentWeeklyChange(log: WeightLogEntry[]): number | null {
   const recentLogs = log
     .map((entry) => ({ ...entry, date: parseISO(entry.timestamp) }))
     .filter(
-      (entry) => isValid(entry.date) && entry.date >= startOfWeek(fourWeeksAgo)
+      (entry) => isValid(entry.date) && entry.date >= startOfWeek(fourWeeksAgo),
     )
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 

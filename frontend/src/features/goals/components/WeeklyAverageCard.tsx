@@ -1,7 +1,7 @@
 import React from "react";
 import { WeightLogEntry } from "@/utils/api-service";
 import { CardContainer } from "@/components/form"; // Assuming CardContainer exists
-import { TrendingUpIcon, TrendingDownIcon } from "@/components/Icons"; // Assuming these exist
+import { TrendingUpIcon, TrendingDownIcon } from "@/components/ui"; // Assuming these exist
 import {
   subWeeks,
   startOfWeek,
@@ -26,7 +26,7 @@ function calculateWeeklyAverageChange(log: WeightLogEntry[]): number | null {
   const recentLogs = log
     .map((entry) => ({ ...entry, date: parseISO(entry.timestamp) }))
     .filter(
-      (entry) => isValid(entry.date) && entry.date >= startOfWeek(fourWeeksAgo)
+      (entry) => isValid(entry.date) && entry.date >= startOfWeek(fourWeeksAgo),
     )
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -39,7 +39,7 @@ function calculateWeeklyAverageChange(log: WeightLogEntry[]): number | null {
   recentLogs.forEach((entry) => {
     const weekNumber = differenceInWeeks(
       startOfWeek(entry.date),
-      firstWeekStart
+      firstWeekStart,
     );
     if (!weeklyData[weekNumber]) {
       weeklyData[weekNumber] = { weights: [], count: 0 };
@@ -75,7 +75,7 @@ function calculateWeeklyAverageChange(log: WeightLogEntry[]): number | null {
 function WeeklyAverageCard({ weightLog, isLoading }: WeeklyAverageCardProps) {
   const weeklyChange = React.useMemo(
     () => calculateWeeklyAverageChange(weightLog),
-    [weightLog]
+    [weightLog],
   );
 
   const renderContent = () => {
@@ -105,8 +105,8 @@ function WeeklyAverageCard({ weightLog, isLoading }: WeeklyAverageCardProps) {
             isLoss
               ? "text-indigo-300"
               : isGain
-              ? "text-green-300"
-              : "text-gray-300"
+                ? "text-green-300"
+                : "text-gray-300"
           }`}
         >
           {isLoss ? `-${absChange}` : isGain ? `+${absChange}` : "0.0"} kg/week

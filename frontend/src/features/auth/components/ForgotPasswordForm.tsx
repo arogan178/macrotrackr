@@ -1,7 +1,6 @@
-import FormButton from "@/components/form/FormButton";
 import { useState } from "react";
-import { CardContainer, TextField } from "@/components/form";
-import { EmailIcon } from "@/components/Icons";
+import { FormButton, CardContainer, TextField } from "@/components/form";
+import { EmailIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/api-service";
 
@@ -23,7 +22,7 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
       await forgotPassword(email);
       showNotification(
         "If an account exists, a reset link has been sent.",
-        "success"
+        "success",
       );
     } catch (error) {
       if (error instanceof ApiError) {

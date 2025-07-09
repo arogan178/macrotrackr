@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { ChevronDownIcon } from "@/components/Icons";
+import { ChevronDownIcon } from "@/components/ui";
 import { MacroCell } from "@/components/nutrition";
 import { ActionButtonGroup, ActionButton } from "@/components/form";
 import { MacroEntry } from "@/types/macro";
@@ -127,7 +127,7 @@ const EntryCard = memo(
         </motion.div>
       </motion.div>
     </motion.div>
-  )
+  ),
 );
 
 EntryCard.displayName = "EntryCard";
@@ -324,7 +324,7 @@ const MobileEntryCards = memo(
                       size="sm"
                       onClick={(e) => handleDeleteDate(group.date, e)}
                       ariaLabel={`Delete all entries for ${formatDate(
-                        group.date
+                        group.date,
                       )}`}
                     />
                   </div>
@@ -385,7 +385,7 @@ const MobileEntryCards = memo(
         </AnimatePresence>
       </div>
     );
-  }
+  },
 );
 
 MobileEntryCards.displayName = "MobileEntryCards";

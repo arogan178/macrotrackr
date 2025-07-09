@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Modal from "@/components/form/Modal";
+import Modal from "@/components/ui/Modal";
 import { DateField, NumberField, TimeField } from "@/components/form";
 import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/api-service";
@@ -51,7 +51,7 @@ function LogWeightModal({
     const parsedDateTime = parse(
       dateTimeString,
       "yyyy-MM-dd'T'HH:mm:ss",
-      new Date()
+      new Date(),
     );
     if (!isValid(parsedDateTime)) {
       setFormError("Invalid date or time selected.");
@@ -84,7 +84,7 @@ function LogWeightModal({
     const localDateTime = parse(
       `${date} ${time}`,
       "yyyy-MM-dd HH:mm",
-      new Date()
+      new Date(),
     );
     const timestamp = localDateTime.toISOString();
     const payload: AddWeightLogPayload = { timestamp, weight: Number(weight) };

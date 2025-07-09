@@ -5,8 +5,8 @@ import type { ICON_SIZES, BUTTON_SIZES } from "./constants";
 
 // Define common type aliases for better type safety
 type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost";
-type ButtonSize = keyof typeof BUTTON_SIZES;
-type IconSize = keyof typeof ICON_SIZES;
+export type ButtonSize = keyof typeof BUTTON_SIZES;
+export type IconSize = keyof typeof ICON_SIZES;
 type ButtonType = "button" | "submit" | "reset";
 type IconPosition = "left" | "right";
 

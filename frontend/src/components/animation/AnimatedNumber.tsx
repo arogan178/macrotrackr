@@ -40,14 +40,14 @@ export default function AnimatedNumber({
       onUpdate: (latest) => {
         if (node) {
           node.textContent = `${prefix}${latest.toFixed(
-            toFixedValue
+            toFixedValue,
           )}${suffix}`;
         }
       },
       onComplete: () => {
         if (node) {
           node.textContent = `${prefix}${toValue.toFixed(
-            toFixedValue
+            toFixedValue,
           )}${suffix}`;
         }
       },
