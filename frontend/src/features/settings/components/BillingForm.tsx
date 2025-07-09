@@ -12,8 +12,8 @@ import {
   ExternalLinkIcon,
   InfoIcon,
   WarningIcon,
-} from "@/components/Icons";
-import Modal from "@/components/form/Modal";
+} from "@/components/ui";
+import Modal from "@/components/ui/Modal";
 
 const parseBillingError = (error: unknown) => {
   const msg = error instanceof Error ? error.message.toLowerCase() : "";
@@ -237,7 +237,7 @@ const BillingForm: React.FC = () => {
       showNotification(
         "Welcome to Pro! Your subscription is now active.",
         "success",
-        { duration: 8000, context: "billing_success" }
+        { duration: 8000, context: "billing_success" },
       );
 
       // Clean up URL parameters
@@ -263,7 +263,7 @@ const BillingForm: React.FC = () => {
 
       setIsLoading(false);
     },
-    [showNotification]
+    [showNotification],
   );
 
   // Enhanced portal management with retry logic and validation
@@ -271,7 +271,7 @@ const BillingForm: React.FC = () => {
     if (subscriptionStatus !== "pro") {
       showNotification(
         "Pro subscription required to access billing portal.",
-        "info"
+        "info",
       );
       return;
     }

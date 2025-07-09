@@ -1,9 +1,4 @@
 import React from "react";
-import { TooltipProps } from "recharts";
-import {
-  NameType,
-  ValueType,
-} from "recharts/types/component/DefaultTooltipContent";
 
 /**
  * Create a linear gradient definition for a chart
@@ -11,7 +6,7 @@ import {
 export function createGradient(
   id: string,
   colors: [string, string],
-  horizontal: boolean = false
+  horizontal: boolean = false,
 ) {
   return (
     <linearGradient

@@ -42,7 +42,7 @@ export function getStepIndicatorStyles(stepCount: number) {
  */
 export function getStepCircleClasses(
   stepIndex: number,
-  currentStep: number
+  currentStep: number,
 ): {
   circleClasses: string;
   labelClasses: string;
@@ -55,14 +55,14 @@ export function getStepCircleClasses(
   const circleClasses = isCurrent
     ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-white ring-2 ring-white/20 scale-110 shadow-md"
     : isComplete
-    ? "bg-indigo-500 text-white"
-    : "bg-gray-700 text-gray-400";
+      ? "bg-indigo-500 text-white"
+      : "bg-gray-700 text-gray-400";
 
   const labelClasses = isCurrent
     ? "text-white font-medium"
     : isComplete
-    ? "text-gray-300"
-    : "text-gray-400";
+      ? "text-gray-300"
+      : "text-gray-400";
 
   return {
     circleClasses,
@@ -86,7 +86,7 @@ export interface StepNavigationProps {
 export async function handleStepSubmit(
   e: React.FormEvent,
   stepNumber: number,
-  navigation: StepNavigationProps
+  navigation: StepNavigationProps,
 ): Promise<void> {
   e.preventDefault();
 
@@ -115,7 +115,7 @@ export async function handleStepSubmit(
 
 export function handleStepBack(
   stepNumber: number,
-  setRegisterStep: (step: number) => void
+  setRegisterStep: (step: number) => void,
 ): void {
   if (stepNumber > 1) {
     setRegisterStep(stepNumber - 1);

@@ -18,7 +18,7 @@ interface MacroSummaryStatsProps {
 // Modified function to accept calorieTarget for percentage calculation
 function calculateAverageMacros(
   data: MacroSummaryStatsProps["data"],
-  calorieTarget: number // Added calorieTarget parameter
+  calorieTarget: number, // Added calorieTarget parameter
 ) {
   if (!data.length) return null;
   const totalMacros = data.reduce(
@@ -29,7 +29,7 @@ function calculateAverageMacros(
       acc.calories += entry.calories; // Still track average consumed calories
       return acc;
     },
-    { protein: 0, carbs: 0, fats: 0, calories: 0 }
+    { protein: 0, carbs: 0, fats: 0, calories: 0 },
   );
   const numDays = data.length;
   const avgGrams = {
@@ -173,7 +173,7 @@ const MacroSummaryItem = React.memo(
         </div>
       </div>
     );
-  }
+  },
 );
 
 export default function MacroSummaryStats({
@@ -190,7 +190,7 @@ export default function MacroSummaryStats({
         carbsPercentage: 40,
         fatsPercentage: 30,
       },
-    [macroTarget]
+    [macroTarget],
   );
 
   // Calculate Target Grams

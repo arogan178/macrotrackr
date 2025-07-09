@@ -30,16 +30,16 @@ interface MealTypeData {
 export const filterEntriesByDateRange = (
   entries: MacroEntry[],
   startDate: string,
-  endDate: string
+  endDate: string,
 ): MacroEntry[] => {
   return entries.filter((entry) =>
-    isWithinDateRange(entry.entryDate, startDate, endDate)
+    isWithinDateRange(entry.entryDate, startDate, endDate),
   );
 };
 
 export const filterEntriesByMealType = (
   entries: MacroEntry[],
-  mealType: string
+  mealType: string,
 ): MacroEntry[] => {
   return entries.filter((entry) => entry.mealType === mealType);
 };
@@ -97,7 +97,7 @@ export const aggregateEntriesByDate = (entries: MacroEntry[]): DailyData[] => {
 };
 
 export const calculateAveragesByMealType = (
-  entries: MacroEntry[]
+  entries: MacroEntry[],
 ): MealTypeData => {
   const grouped = groupEntriesByMealType(entries);
 
@@ -118,7 +118,7 @@ export const calculateAveragesByMealType = (
 // Data transformation utilities
 export const transformToChartData = (
   dailyData: DailyData[],
-  metric: keyof Omit<DailyData, "date" | "entries">
+  metric: keyof Omit<DailyData, "date" | "entries">,
 ) => {
   return dailyData.map((day) => ({
     date: day.date,
@@ -138,7 +138,7 @@ export const calculateDailyAverages = (dailyData: DailyData[]) => {
       carbs: acc.carbs + day.carbs,
       fats: acc.fats + day.fats,
     }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0 }
+    { calories: 0, protein: 0, carbs: 0, fats: 0 },
   );
 
   const days = dailyData.length;
@@ -153,7 +153,7 @@ export const calculateDailyAverages = (dailyData: DailyData[]) => {
 // Data quality utilities
 export const calculateCompletionRate = (
   actualDays: number,
-  expectedDays: number
+  expectedDays: number,
 ): number => {
   if (expectedDays === 0) return 0;
   return Math.round((actualDays / expectedDays) * 100);
@@ -166,7 +166,7 @@ export const getUniqueLoggedDates = (entries: MacroEntry[]): string[] => {
 
 export const getMissingDates = (
   loggedDates: string[],
-  expectedDates: string[]
+  expectedDates: string[],
 ): string[] => {
   const loggedSet = new Set(loggedDates);
   return expectedDates.filter((date) => !loggedSet.has(date));

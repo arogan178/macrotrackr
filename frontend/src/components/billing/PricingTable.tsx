@@ -1,5 +1,5 @@
-import React from "react";
-import { ProBadge } from "@/components/ProBadge";
+import React, { memo } from "react";
+import ProBadge from "@/components/billing/ProBadge";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import {
   useReactTable,
@@ -34,7 +34,7 @@ interface FeatureRow {
  * Usage: <PricingTable onUpgrade={...} />
  */
 
-export const PricingTable: React.FC<PricingTableProps> = ({
+const PricingTable: React.FC<PricingTableProps> = ({
   onUpgrade,
   showProButton = true,
   selectedPlan,
@@ -48,10 +48,10 @@ export const PricingTable: React.FC<PricingTableProps> = ({
         free: freeFeatures.includes(feature),
         pro: proFeatures.includes(feature),
       })),
-    [] // Dependencies are constant, so this only runs once
+    [], // Dependencies are constant, so this only runs once
   );
 
-  const columns: ColumnDef<FeatureRow>[] = React.useMemo(
+  const columns = React.useMemo<ColumnDef<FeatureRow, any>[]>(
     () => [
       {
         accessorKey: "feature",
@@ -66,7 +66,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             </span>
           </div>
         ),
-        cell: (info) => (
+        cell: (info: any) => (
           <span
             className="text-left text-gray-200 font-medium"
             style={{ lineHeight: "1.5" }}
@@ -88,7 +88,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             </span>
           </div>
         ),
-        cell: (info) =>
+        cell: (info: any) =>
           info.getValue() ? (
             <span className="inline-block align-middle text-green-400 font-bold">
               ✔️
@@ -157,7 +157,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
             </div>
           );
         },
-        cell: (info) =>
+        cell: (info: any) =>
           info.getValue() ? (
             <span className="inline-block align-middle text-yellow-300 font-bold">
               ✔️
@@ -169,7 +169,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
           ),
       },
     ],
-    [selectedPlan] // Only re-calculate columns when the selected plan changes
+    [selectedPlan],
   );
 
   const table = useReactTable({
@@ -317,13 +317,13 @@ export const PricingTable: React.FC<PricingTableProps> = ({
                         header.index === 0
                           ? "text-left px-5 py-4 text-base font-semibold text-gray-200 bg-transparent border-b border-gray-700/60"
                           : header.index === 1
-                          ? "px-5 py-4 text-base font-semibold text-gray-300 bg-transparent border-b border-gray-700/60"
-                          : "px-5 py-4 text-base font-extrabold text-yellow-200 bg-gradient-to-br from-yellow-500/20 to-orange-400/20 shadow-[0_0_8px_2px_rgba(255,200,0,0.12)] relative border-b border-gray-700/60"
+                            ? "px-5 py-4 text-base font-semibold text-gray-300 bg-transparent border-b border-gray-700/60"
+                            : "px-5 py-4 text-base font-extrabold text-yellow-200 bg-gradient-to-br from-yellow-500/20 to-orange-400/20 shadow-[0_0_8px_2px_rgba(255,200,0,0.12)] relative border-b border-gray-700/60"
                       }
                     >
                       {flexRender(
                         header.column.columnDef.header,
-                        header.getContext()
+                        header.getContext(),
                       )}
                     </th>
                   ))}
@@ -343,8 +343,8 @@ export const PricingTable: React.FC<PricingTableProps> = ({
                         cell.column.id === "free"
                           ? "Free"
                           : cell.column.id === "pro"
-                          ? "Pro"
-                          : undefined
+                            ? "Pro"
+                            : undefined
                       }
                       className={
                         cell.column.id === "feature"
@@ -354,16 +354,16 @@ export const PricingTable: React.FC<PricingTableProps> = ({
                                 : ""
                             }`
                           : cell.column.id === "free"
-                          ? `px-3 py-2 text-center${
-                              row.index !== data.length - 1
-                                ? " md:border-b md:border-gray-700/60"
-                                : ""
-                            }`
-                          : `px-3 py-2 text-center bg-gradient-to-br from-yellow-900/10 to-orange-900/10${
-                              row.index !== data.length - 1
-                                ? " md:border-b md:border-yellow-700/30"
-                                : ""
-                            }`
+                            ? `px-3 py-2 text-center${
+                                row.index !== data.length - 1
+                                  ? " md:border-b md:border-gray-700/60"
+                                  : ""
+                              }`
+                            : `px-3 py-2 text-center bg-gradient-to-br from-yellow-900/10 to-orange-900/10${
+                                row.index !== data.length - 1
+                                  ? " md:border-b md:border-yellow-700/30"
+                                  : ""
+                              }`
                       }
                       style={
                         cell.column.id === "feature"
@@ -373,7 +373,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
                     >
                       {flexRender(
                         cell.column.columnDef.cell,
-                        cell.getContext()
+                        cell.getContext(),
                       )}
                     </td>
                   ))}
@@ -406,7 +406,7 @@ export const PricingTable: React.FC<PricingTableProps> = ({
               {selectedPlan === "monthly"
                 ? `$${PRICING.monthly}/month • Cancel anytime`
                 : `$${PRICING.yearly}/year • $${(PRICING.yearly / 12).toFixed(
-                    2
+                    2,
                   )}/mo equivalent • Cancel anytime`}
             </motion.span>
           </AnimatePresence>
@@ -415,3 +415,5 @@ export const PricingTable: React.FC<PricingTableProps> = ({
     </>
   );
 };
+
+export default memo(PricingTable);

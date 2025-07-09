@@ -17,7 +17,7 @@ import {
  * Validates registration step 1 form data
  */
 export function validateRegistrationStep1(
-  formData: RegistrationStep1
+  formData: RegistrationStep1,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 
@@ -48,7 +48,7 @@ export function validateRegistrationStep1(
  * Validates registration step 2 form data
  */
 export function validateRegistrationStep2(
-  formData: RegistrationStep2
+  formData: RegistrationStep2,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 
@@ -81,7 +81,7 @@ export function validateRegistrationStep2(
  * Validates registration step 3 form data
  */
 export function validateRegistrationStep3(
-  formData: RegistrationStep3
+  formData: RegistrationStep3,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 

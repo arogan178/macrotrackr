@@ -1,7 +1,7 @@
 import { calculateCaloriePercentages } from "@/utils/nutrition";
 import type { MacroNutrients } from "@/utils/nutrition-types";
 import { memo } from "react";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { AnimatedNumber } from "@/components/animation";
 
 interface MacroBarProps {
   macros: MacroNutrients;

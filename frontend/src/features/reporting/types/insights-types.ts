@@ -1,3 +1,4 @@
+import type { MacroTargetSettings } from "@/types/macro";
 export interface AggregatedDataPoint {
   name: string;
   calories: number;
@@ -11,12 +12,6 @@ export interface NutritionAverage {
   protein: number;
   carbs: number;
   fats: number;
-}
-
-export interface MacroTargetSettings {
-  proteinPercentage: number;
-  carbsPercentage: number;
-  fatsPercentage: number;
 }
 
 export interface UnifiedInsightsProps {

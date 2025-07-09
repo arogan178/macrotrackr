@@ -33,7 +33,7 @@ export interface MacrosSlice {
   // Internal helpers
   _notifyUser: (
     message: string,
-    type: "success" | "error" | "info" | "warning"
+    type: "success" | "error" | "info" | "warning",
   ) => void;
 
   // Actions
@@ -52,7 +52,7 @@ export interface MacrosSlice {
 type FullMacrosState = MacrosSlice & {
   showNotification?: (
     message: string,
-    type: "success" | "error" | "info" | "warning"
+    type: "success" | "error" | "info" | "warning",
   ) => void;
 };
 
@@ -79,7 +79,7 @@ export const createMacrosSlice: StateCreator<
   // Helper function to safely call notifications
   _notifyUser: (
     message: string,
-    type: "success" | "error" | "info" | "warning"
+    type: "success" | "error" | "info" | "warning",
   ) => {
     const state = get() as FullMacrosState;
     state.showNotification?.(message, type);
@@ -138,7 +138,7 @@ export const createMacrosSlice: StateCreator<
       set({ isTargetLoading: false, targetError: errorMessage });
       get()._notifyUser(
         `Failed to load macro targets: ${errorMessage}`,
-        "error"
+        "error",
       );
     }
   },
@@ -161,7 +161,7 @@ export const createMacrosSlice: StateCreator<
 
   updateEntry: async (
     id: number,
-    entryUpdate: UpdateEntryPayload
+    entryUpdate: UpdateEntryPayload,
   ): Promise<void> => {
     set({ isEditing: true, error: null });
     const currentHistory = get().history;
@@ -261,7 +261,7 @@ export const createMacrosSlice: StateCreator<
       set({ targetError: errorMessage, isTargetSaving: false });
       get()._notifyUser(
         `Failed to update macro targets: ${errorMessage}`,
-        "error"
+        "error",
       );
     }
   },

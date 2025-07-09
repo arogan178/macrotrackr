@@ -34,7 +34,7 @@ export interface AuthSlice {
   // Registration methods
   setRegisterField: <K extends keyof Omit<RegisterData, "step">>(
     field: K,
-    value: RegisterData[K]
+    value: RegisterData[K],
   ) => void;
   setRegisterStep: (step: number) => void;
   validateEmail: () => Promise<boolean>;
@@ -48,7 +48,7 @@ export interface AuthSlice {
   rehydrateAuth: () => Promise<void>;
   changePassword: (
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
   ) => Promise<void>;
   clearChangePasswordMessages: () => void;
 }
@@ -120,13 +120,13 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
   // Registration methods
   setRegisterField: <K extends keyof Omit<RegisterData, "step">>(
     field: K,
-    value: RegisterData[K]
+    value: RegisterData[K],
   ) => {
     set((state: any) => {
       const updatedRegister = updateRegisterField(
         state.auth.register,
         field,
-        value
+        value,
       );
 
       return {
