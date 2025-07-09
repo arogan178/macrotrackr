@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useStore } from "@/store/store";
-import { FormButton } from "@/components/form";
+import { FormButton, CardContainer } from "@/components/form";
 import TextField from "@/components/form/TextField";
 import { FloatingNotification } from "@/features/notifications/components";
 
@@ -42,61 +42,72 @@ export const ChangePasswordForm = () => {
   };
 
   return (
-    <div className="relative">
-      {changePasswordSuccess && (
-        <FloatingNotification
-          message={changePasswordSuccess}
-          type="success"
-          onClose={clearChangePasswordMessages}
-        />
-      )}
-      {changePasswordError && (
-        <FloatingNotification
-          message={changePasswordError}
-          type="error"
-          onClose={clearChangePasswordMessages}
-        />
-      )}
-      <form onSubmit={handleSubmit} className="space-y-6 p-6">
-        <h2 className="text-2xl font-semibold text-white">Change Password</h2>
-        <div className="grid grid-cols-1 gap-6">
-          <TextField
-            label="Current Password"
-            type="password"
-            value={currentPassword}
-            onChange={setCurrentPassword}
-            required
-          />
-          <TextField
-            label="New Password"
-            type="password"
-            value={newPassword}
-            onChange={setNewPassword}
-            required
-            minLength={8}
-            helperText="Password must be at least 8 characters long."
-          />
-          <TextField
-            label="Confirm New Password"
-            type="password"
-            value={confirmPassword}
-            onChange={setConfirmPassword}
-            required
-            error={formError ?? undefined}
-          />
+    <>
+      <CardContainer className="p-6">
+        <div className="relative">
+          {changePasswordSuccess && (
+            <FloatingNotification
+              message={changePasswordSuccess}
+              type="success"
+              onClose={clearChangePasswordMessages}
+            />
+          )}
+          {changePasswordError && (
+            <FloatingNotification
+              message={changePasswordError}
+              type="error"
+              onClose={clearChangePasswordMessages}
+            />
+          )}
+          <form
+            id="change-password-form"
+            onSubmit={handleSubmit}
+            className="space-y-6 p-6"
+          >
+            <h2 className="text-2xl font-semibold text-white">
+              Change Password
+            </h2>
+            <div className="grid grid-cols-1 gap-6">
+              <TextField
+                label="Current Password"
+                type="password"
+                value={currentPassword}
+                onChange={setCurrentPassword}
+                required
+              />
+              <TextField
+                label="New Password"
+                type="password"
+                value={newPassword}
+                onChange={setNewPassword}
+                required
+                minLength={8}
+                helperText="Password must be at least 8 characters long."
+              />
+              <TextField
+                label="Confirm New Password"
+                type="password"
+                value={confirmPassword}
+                onChange={setConfirmPassword}
+                required
+                error={formError ?? undefined}
+              />
+            </div>
+          </form>
         </div>
-        <div className="flex justify-end pt-4">
-          <FormButton
-            type="submit"
-            isLoading={isChangingPassword}
-            disabled={!currentPassword || !newPassword || !confirmPassword}
-            text="Change Password"
-            size="lg"
-            variant="primary"
-            className="px-8 py-3 text-lg"
-          />
-        </div>
-      </form>
-    </div>
+      </CardContainer>
+      <div className="flex justify-end pt-4">
+        <FormButton
+          form="change-password-form"
+          type="submit"
+          isLoading={isChangingPassword}
+          disabled={!currentPassword || !newPassword || !confirmPassword}
+          text="Change Password"
+          buttonSize="lg"
+          variant="primary"
+          className="px-8 py-3 text-lg"
+        />
+      </div>
+    </>
   );
 };

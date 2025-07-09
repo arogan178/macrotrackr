@@ -1,5 +1,5 @@
 import React from "react";
-import Modal from "./Modal";
+import Modal from "./form/Modal";
 import { AwardIcon, CheckCircleIcon } from "./Icons";
 
 interface UpgradeModalProps {

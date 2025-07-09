@@ -1,26 +1,18 @@
 import { useState, useCallback, memo } from "react";
-// Assuming components and types are correctly located relative to this file
-import MacroSlider from "./MacroSlider";
-import { MacroBadge } from "./MacroSlider"; // Assuming MacroBadge is exported from MacroSlider file
-import { InfoCard } from "@/components/form";
-import { InfoIcon } from "@/components/Icons";
-import FormButton from "@/components/form/FormButton";
-import { MacroType, MacroTargetProps } from "../types/types"; // Ensure these types are correct
-import { useMacroTarget } from "../hooks/useMacroTarget"; // The custom hook managing logic
-import MacroTargetBar from "./MacroTargetBar"; // The visualization component
 
+import MacroSlider, { MacroBadge } from "./MacroSlider";
+import { InfoCard, FormButton } from "@/components/form";
+import { InfoIcon } from "@/components/Icons";
+import { MacroType, MacroTargetProps } from "@/types/macro";
+import { useMacroTarget } from "../hooks/useMacroTarget";
+import MacroTargetBar from "./MacroTargetBar";
+import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 // Default values remain the same
-const DEFAULT_TARGET_VALUES = {
-  proteinPercentage: 30,
-  carbsPercentage: 40,
-  fatsPercentage: 30,
-  lockedMacros: [],
-};
 
 // Use React.memo for performance optimization
 const MacroTarget = memo(
   ({
-    initialValues = DEFAULT_TARGET_VALUES,
+    initialValues = DEFAULT_MACRO_TARGET,
     onTargetChange,
   }: MacroTargetProps) => {
     // State for UI elements not handled by the hook

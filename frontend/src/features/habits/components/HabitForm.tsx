@@ -1,6 +1,6 @@
 // The updated HabitForm.tsx, removing isSubmitting prop since it's not used
 import { useMemo } from "react";
-import { HabitGoalFormValues } from "../types";
+import { HabitGoalFormValues } from "../types/types";
 import { TextField, NumberField } from "@/components/form";
 import {
   CalendarIcon,

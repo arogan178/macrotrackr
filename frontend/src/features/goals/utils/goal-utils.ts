@@ -1,4 +1,4 @@
-import { WeightGoals, WeightGoalFormValues } from "../types";
+import type { WeightGoals, WeightGoalFormValues } from "@/types/goal";
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 
 // Define local payload types since they're not exported from types

@@ -13,7 +13,7 @@ import {
   InfoIcon,
   WarningIcon,
 } from "@/components/Icons";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 
 const parseBillingError = (error: unknown) => {
   const msg = error instanceof Error ? error.message.toLowerCase() : "";

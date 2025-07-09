@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import LoadingSpinner from "@/components/LoadingSpinner";
+import LoadingSpinner from "@/components/form/LoadingSpinner";
 import { useNotificationManager } from "@/features/notifications/hooks/useNotificationManager";
 import { useStore } from "@/store/store";
 import { getToken } from "@/utils/token-storage";
