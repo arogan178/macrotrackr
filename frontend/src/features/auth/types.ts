@@ -28,5 +28,5 @@ export interface AuthUser {
 // Combined registration data type
 export interface RegistrationData
   extends RegistrationStep1,
-    RegistrationStep2,
-    RegistrationStep3 {}
+  RegistrationStep2,
+  RegistrationStep3 {}

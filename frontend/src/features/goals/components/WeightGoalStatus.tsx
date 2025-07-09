@@ -361,8 +361,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               100, // Cap progress at 100% visually
               effectiveCalorieTarget > 0
                 ? Math.round(
-                    (macroDailyTotals.calories / effectiveCalorieTarget) * 100,
-                  )
+                  (macroDailyTotals.calories / effectiveCalorieTarget) * 100,
+                )
                 : 0,
             )}
             color="indigo"

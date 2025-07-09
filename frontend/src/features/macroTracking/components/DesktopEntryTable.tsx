@@ -190,10 +190,10 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.calories
               : calculateCalories(
-                  data.entries[0].protein,
-                  data.entries[0].carbs,
-                  data.entries[0].fats,
-                );
+                data.entries[0].protein,
+                data.entries[0].carbs,
+                data.entries[0].fats,
+              );
             return (
               <MacroCell value={value} suffix=" kcal" color="text-white" />
             );
@@ -265,9 +265,9 @@ const DesktopEntryTable = memo(
                       {header.isPlaceholder
                         ? null
                         : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                     </th>
                   ))}
                 </tr>

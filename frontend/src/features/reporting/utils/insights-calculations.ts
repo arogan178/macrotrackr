@@ -191,8 +191,8 @@ export function calculateTrend(
     direction === "stable"
       ? "Your intake has been stable."
       : `Your ${metric} intake is ${
-          direction === "up" ? "trending upward" : "trending downward"
-        }.`;
+        direction === "up" ? "trending upward" : "trending downward"
+      }.`;
 
   return {
     direction,
