@@ -178,7 +178,6 @@ function FloatingNotification({
           type="button"
           onClick={handleClose}
           variant="ghost"
-          size="sm"
           className="p-3 h-full text-white/70 hover:text-white"
           ariaLabel="Close notification"
           icon={<CloseIcon className="w-4 h-4" />}

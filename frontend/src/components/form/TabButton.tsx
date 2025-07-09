@@ -21,7 +21,6 @@ function TabButton({
   const baseRounded = rounded || "rounded-md";
   const motionBg = activeBg || "bg-indigo-600";
 
-  // Use FormButton for standardization
   return (
     <FormButton
       onClick={onClick}
