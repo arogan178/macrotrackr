@@ -1,20 +1,19 @@
 import { useState } from "react";
 import { useStore } from "@/store/store";
-import { FormButton, CardContainer } from "@/components/form";
-import TextField from "@/components/form/TextField";
+import { FormButton, CardContainer, TextField } from "@/components/form";
 import { FloatingNotification } from "@/features/notifications/components";
 
-export const ChangePasswordForm = () => {
+const ChangePasswordForm = () => {
   const changePassword = useStore((state) => state.changePassword);
   const isChangingPassword = useStore((state) => state.auth.isChangingPassword);
   const changePasswordError = useStore(
-    (state) => state.auth.changePasswordError,
+    (state) => state.auth.changePasswordError
   );
   const changePasswordSuccess = useStore(
-    (state) => state.auth.changePasswordSuccess,
+    (state) => state.auth.changePasswordSuccess
   );
   const clearChangePasswordMessages = useStore(
-    (state) => state.clearChangePasswordMessages,
+    (state) => state.clearChangePasswordMessages
   );
 
   const [currentPassword, setCurrentPassword] = useState("");
@@ -111,3 +110,5 @@ export const ChangePasswordForm = () => {
     </>
   );
 };
+
+export default ChangePasswordForm;
