@@ -5,21 +5,25 @@ import {
   DateField,
   CardContainer,
 } from "@/components/form";
-import { UserSettings, Gender, ActivityLevel } from "@/types/user";
+import {
+  type UserSettings,
+  type Gender,
+  type ActivityLevel,
+} from "@/types/user";
 import {
   GENDER_OPTIONS,
   ACTIVITY_LEVELS,
   getActivityLevelFromString,
 } from "@/features/settings/utils/constants";
 
-interface ProfileFormProps {
+type ProfileFormProps = {
   settings: UserSettings;
   updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserSettings[K],
+    value: UserSettings[K]
   ) => void;
   formErrors: Record<string, string>;
-}
+};
 
 export default function ProfileForm({
   settings,
@@ -36,9 +40,9 @@ export default function ProfileForm({
 
   // Convert string activity level to number if needed
   const activityLevelValue =
-    typeof settings.activityLevel === "string" && settings.activityLevel
-      ? getActivityLevelFromString(settings.activityLevel as ActivityLevel)
-      : settings.activityLevel;
+    typeof settings.activityLevel === "string" && settings.activityLevel ?
+      getActivityLevelFromString(settings.activityLevel as ActivityLevel)
+    : settings.activityLevel;
 
   // Ensure weight is a valid positive number
   const handleWeightChange = (value: number | undefined) => {
@@ -60,7 +64,9 @@ export default function ProfileForm({
         <TextField
           label="First Name"
           value={settings.firstName || ""}
-          onChange={(value) => updateSetting("firstName", value)}
+          onChange={(value) => {
+            updateSetting("firstName", value);
+          }}
           error={formErrors.firstName}
           required
         />
@@ -68,7 +74,9 @@ export default function ProfileForm({
         <TextField
           label="Last Name"
           value={settings.lastName || ""}
-          onChange={(value) => updateSetting("lastName", value)}
+          onChange={(value) => {
+            updateSetting("lastName", value);
+          }}
           error={formErrors.lastName}
           required
         />
@@ -77,7 +85,9 @@ export default function ProfileForm({
           label="Email"
           value={settings.email || ""}
           type="email"
-          onChange={(value) => updateSetting("email", value)}
+          onChange={(value) => {
+            updateSetting("email", value);
+          }}
           error={formErrors.email}
           required
         />
@@ -85,7 +95,9 @@ export default function ProfileForm({
         <DateField
           label="Date of Birth"
           value={settings.dateOfBirth || ""}
-          onChange={(value) => updateSetting("dateOfBirth", value)}
+          onChange={(value) => {
+            updateSetting("dateOfBirth", value);
+          }}
           error={formErrors.dateOfBirth}
           required
         />
@@ -93,7 +105,9 @@ export default function ProfileForm({
         <Dropdown
           label="Gender"
           value={settings.gender || ""}
-          onChange={(value) => updateSetting("gender", value as Gender)}
+          onChange={(value) => {
+            updateSetting("gender", value as Gender);
+          }}
           options={GENDER_OPTIONS}
           error={formErrors.gender}
           required
@@ -126,7 +140,9 @@ export default function ProfileForm({
         <Dropdown
           label="Activity Level"
           value={activityLevelValue || ""} // Use the converted numeric value
-          onChange={(value) => updateSetting("activityLevel", Number(value))} // Ensure we store as number
+          onChange={(value) => {
+            updateSetting("activityLevel", Number(value));
+          }} // Ensure we store as number
           options={getActivityLevelOptions()}
           error={formErrors.activityLevel}
           required

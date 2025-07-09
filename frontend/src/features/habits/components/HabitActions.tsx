@@ -44,7 +44,7 @@ function HabitActions({
 
   const handleAction = async (
     action: () => Promise<void>,
-    actionName: string
+    actionName: string,
   ) => {
     if (isActionInProgress) return;
 
