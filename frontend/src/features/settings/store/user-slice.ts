@@ -3,7 +3,7 @@ import { apiService } from "@/utils/api-service";
 import { UserSettings, UserNutritionalProfile } from "@/types/user";
 import { MacroTargetSettings } from "@/types/macro";
 import { getErrorMessage } from "@/utils/error-handling";
-import { DEFAULT_MACRO_TARGET } from "@/features/settings/utils/constants";
+import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 import {
   createNutritionProfile,
   createUserSettings,
