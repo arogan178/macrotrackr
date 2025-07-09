@@ -165,10 +165,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         weightGoals: savedWeightGoal,
         weightLog: savedLogEntry
           ? [...(state.weightLog || []), savedLogEntry].sort(
-              (a, b) =>
-                new Date(b.timestamp).getTime() -
+            (a, b) =>
+              new Date(b.timestamp).getTime() -
                 new Date(a.timestamp).getTime(),
-            )
+          )
           : state.weightLog,
         isSaving: false,
         error: null,
@@ -321,10 +321,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
           weightLog: newLog,
           weightGoals: state.weightGoals
             ? {
-                ...state.weightGoals,
-                currentWeight:
+              ...state.weightGoals,
+              currentWeight:
                   newLog[0]?.weight ?? state.weightGoals.currentWeight,
-              }
+            }
             : null,
           isSaving: false,
         };
@@ -362,10 +362,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         weightLog: optimisticLog,
         weightGoals: state.weightGoals
           ? {
-              ...state.weightGoals,
-              currentWeight:
+            ...state.weightGoals,
+            currentWeight:
                 sortedOptimistic[0]?.weight ?? state.weightGoals.currentWeight,
-            }
+          }
           : null,
       };
     });
@@ -401,9 +401,9 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         weightLog: sortedRemainingLog,
         weightGoals: state.weightGoals
           ? {
-              ...state.weightGoals,
-              currentWeight: newLatestWeight ?? state.weightGoals.currentWeight,
-            }
+            ...state.weightGoals,
+            currentWeight: newLatestWeight ?? state.weightGoals.currentWeight,
+          }
           : null,
         isSaving: false,
       }));
@@ -421,10 +421,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         weightLog: prevLog,
         weightGoals: state.weightGoals
           ? {
-              ...state.weightGoals,
-              currentWeight:
+            ...state.weightGoals,
+            currentWeight:
                 prevLog[0]?.weight ?? state.weightGoals.currentWeight,
-            }
+          }
           : null,
         isSaving: false,
       }));
