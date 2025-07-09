@@ -29,7 +29,6 @@ const Header: React.FC = () => (
               <FormButton
                 text="Log In"
                 variant="primary"
-                buttonSize="md"
                 className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
               />
             </motion.div>
@@ -46,7 +45,6 @@ const Header: React.FC = () => (
               <FormButton
                 text="Sign Up"
                 variant="primary"
-                buttonSize="md"
                 className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
               />
             </motion.div>
