@@ -5,4 +5,4 @@ export * from "./components";
 export * from "./store";
 
 // Export types
-export * from "./types";
+export * from "./types/types";

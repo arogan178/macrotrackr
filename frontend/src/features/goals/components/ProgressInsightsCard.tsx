@@ -1,5 +1,6 @@
 import React from "react";
-import { WeightLogEntry, WeightGoals } from "@/features/goals/types";
+import { WeightGoals } from "@/types/goal";
+import { WeightLogEntry } from "@/utils/api-service";
 import { CardContainer } from "@/components/form";
 import { LightBulbIcon } from "@/components/Icons"; // Assuming this exists
 import {

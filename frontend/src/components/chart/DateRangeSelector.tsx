@@ -2,7 +2,7 @@ import { DATE_RANGE_OPTIONS } from "@/components/utils/constants";
 import { motion } from "motion/react";
 import FormButton from "../form/FormButton";
 import ActionButton from "../form/ActionButton";
-import { ExportIcon } from "@/components/Icons";
+import { ExportIcon } from "../Icons";
 
 interface DateRangeSelectorProps {
   currentRange: string;
@@ -40,7 +40,7 @@ export default function DateRangeSelector({
                     : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
                 }`}
                 variant={currentRange === option.value ? "primary" : "ghost"}
-                size="sm"
+                buttonSize="sm"
                 aria-selected={currentRange === option.value}
                 role="tab"
               >
@@ -59,13 +59,11 @@ export default function DateRangeSelector({
         {/* Mobile Export CSV ActionButton aligned right */}
         <div className="flex lg:hidden ml-auto">
           <ActionButton
-            variant="custom"
-            icon={<ExportIcon />}
+            variant="export"
             ariaLabel="Export data as CSV file"
             onClick={onExportClick}
             disabled={isExportDisabled}
-            size="md"
-            className="text-indigo-400 hover:text-indigo-200 bg-indigo-900/30 hover:bg-indigo-900/50 focus:ring-indigo-500"
+            buttonSize="md"
           />
         </div>
         {/* Desktop Export CSV Button */}
@@ -74,25 +72,10 @@ export default function DateRangeSelector({
             onClick={onExportClick}
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
-            className="px-4 py-2 bg-indigo-700/60 hover:bg-indigo-700/80 text-indigo-100 rounded-lg font-medium flex items-center transition-all duration-200 border border-indigo-600/30 disabled:opacity-50 "
+            className=" bg-indigo-700/60 hover:bg-indigo-700/80 text-indigo-100 rounded-lg font-medium flex items-center transition-all duration-200 border border-indigo-600/30 disabled:opacity-50 "
             variant="primary"
-            size="md"
-            icon={
-              <svg
-                className="w-4 h-4 mr-2"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                ></path>
-              </svg>
-            }
+            buttonSize="md"
+            icon={<ExportIcon />}
             iconPosition="left"
           >
             Export CSV

@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, ReactNode } from "react";
 import Navbar from "@/components/Navbar";
 import FloatingNotification from "../../notifications/components/FloatingNotification";
 import { TabButton, FormButton } from "@/components/form";
-import Modal from "@/components/Modal";
+import Modal from "@/components/form/Modal";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import {
   ProfileForm,
@@ -217,7 +217,7 @@ export default function SettingsPage() {
                         Object.keys(formErrors).length > 0
                       }
                       text="Save Changes"
-                      size="lg"
+                      buttonSize="lg"
                       variant="primary"
                       className="px-8 py-3 text-lg"
                     />

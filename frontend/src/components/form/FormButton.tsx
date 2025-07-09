@@ -38,11 +38,11 @@ import React, { memo } from "react";
 import { LoadingSpinnerIcon } from "@/components/Icons";
 import {
   BUTTON_VARIANTS,
-  BUTTON_SIZES,
+  FORM_BUTTON_SIZES,
   ICON_POSITIONS,
   DEFAULT_LOADING_TEXT,
 } from "@/components/utils/constants";
-import { FormButtonProps } from "@/components/utils/types";
+import type { FormButtonProps } from "@/components/utils/types";
 
 type FormButtonAllProps = FormButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -52,7 +52,7 @@ function FormButton({
   text,
   type = "button",
   variant = BUTTON_VARIANTS.PRIMARY,
-  size = BUTTON_SIZES.MD,
+  buttonSize = "md",
   icon,
   iconPosition = ICON_POSITIONS.RIGHT,
   isLoading = false,
@@ -69,11 +69,7 @@ function FormButton({
     "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +
     "rounded-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed";
 
-  const sizeStyles = {
-    [BUTTON_SIZES.SM]: " px-2 py-1 text-xs",
-    [BUTTON_SIZES.MD]: "px-3.5 py-2 text-md",
-    [BUTTON_SIZES.LG]: "px-5 py-3 text-base",
-  };
+  const sizeStyles = FORM_BUTTON_SIZES;
 
   const variantStyles = {
     [BUTTON_VARIANTS.PRIMARY]:
@@ -92,7 +88,7 @@ function FormButton({
 
   const buttonClasses = [
     baseStyles,
-    sizeStyles[size],
+    sizeStyles[buttonSize as keyof typeof sizeStyles],
     variantStyles[variant],
     widthStyles,
     className,

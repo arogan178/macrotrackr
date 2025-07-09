@@ -1,4 +1,4 @@
-import React from "react";
+import React, { memo } from "react";
 import { ProBadge } from "@/components/ProBadge";
 import { UpgradeModal } from "@/components/UpgradeModal";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
@@ -21,7 +21,7 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
       onClick={() => setModalOpen(true)}
     >
       {/* ProBadge in top right, overlapping */}
-      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 pointer-events-none z-999">
+      <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 pointer-events-none z-20">
         <ProBadge className="rounded-full p-1 shadow-lg" />
       </div>
       <div className="pointer-events-none opacity-20">{children}</div>
@@ -37,5 +37,6 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
   );
 };
 
+export default memo(ProFeature);
 // Usage example:
 // <ProFeature><AdvancedReporting /></ProFeature>
