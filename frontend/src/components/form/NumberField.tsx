@@ -96,7 +96,7 @@ function NumberField({
         <input
           id={label} // Add id matching htmlFor
           type="number"
-          value={value === 0 ? "0" : value ?? ""} // Use nullish coalescing for undefined/null
+          value={value === 0 ? "0" : (value ?? "")} // Use nullish coalescing for undefined/null
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           min={min}

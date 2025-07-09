@@ -40,7 +40,7 @@ import { memo, useId, useState } from "react";
 import ActionButton from "./ActionButton";
 import type { TextFieldProps } from "@/components/utils/types";
 import { formStyles } from "@/components/utils/styles";
-import { EyeIcon, EyeSlashIcon } from "@/components/Icons";
+import { EyeIcon, EyeSlashIcon } from "@/components/ui";
 
 function TextField({
   label,

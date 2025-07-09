@@ -3,17 +3,17 @@ import HeroSection from "../components/HeroSection";
 import Footer from "../components/Footer";
 import PageBackground from "../components/PageBackground";
 import React, { Suspense } from "react";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 const FeaturesSection = React.lazy(
-  () => import("../components/FeaturesSection")
+  () => import("../components/FeaturesSection"),
 );
 const PricingSection = React.lazy(() => import("../components/PricingSection"));
 const TestimonialsSection = React.lazy(
-  () => import("../components/TestimonialsSection")
+  () => import("../components/TestimonialsSection"),
 );
 const FinalCTASection = React.lazy(
-  () => import("../components/FinalCTASection")
+  () => import("../components/FinalCTASection"),
 );
 
 const LandingPage: React.FC = () => {

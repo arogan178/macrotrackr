@@ -90,7 +90,7 @@ function NutrientDensityVisualization({
 
         // Find matching data for this date
         const matchingData = data.find(
-          (item) => item.name === expectedDateName
+          (item) => item.name === expectedDateName,
         );
 
         return (

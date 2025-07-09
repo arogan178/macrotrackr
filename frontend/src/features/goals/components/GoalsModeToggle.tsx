@@ -1,5 +1,5 @@
 import FormButton from "@/components/form/FormButton";
-import { AwardIcon, GoalsIcon } from "@/components/Icons";
+import { AwardIcon, GoalsIcon } from "@/components/ui";
 interface GoalsModeToggleProps {
   activeMode: "active" | "achieved";
   onToggle: () => void;

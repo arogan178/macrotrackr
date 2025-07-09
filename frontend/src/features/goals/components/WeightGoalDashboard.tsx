@@ -1,10 +1,9 @@
-import { useState } from "react";
+import { useState, memo } from "react";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
 import WeightGoalStatus from "./WeightGoalStatus";
-import EmptyState from "@/components/EmptyState";
-import { TargetIcon } from "@/components/Icons";
+import { EmptyState, TargetIcon } from "@/components/ui/";
 import LogWeightModal from "./LogWeightModal";
 
 interface WeightGoalDashboardProps {
@@ -18,8 +17,6 @@ interface WeightGoalDashboardProps {
   className?: string;
   macroTarget?: MacroTargetSettings;
 }
-
-import { memo } from "react";
 
 const WeightGoalDashboard = memo(function WeightGoalDashboard({
   user,

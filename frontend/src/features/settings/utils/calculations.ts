@@ -21,7 +21,7 @@ function calculateBMRValue(
   weight: number,
   height: number,
   age: number,
-  isMale: boolean
+  isMale: boolean,
 ): number {
   // Add proper validation to avoid negative values
   if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
@@ -54,7 +54,7 @@ function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
  */
 function calculateCalorieGoalValue(
   tdee: number,
-  adjustmentFactor: number
+  adjustmentFactor: number,
 ): number {
   if (!tdee) return 0;
   return Math.round(tdee * adjustmentFactor);
@@ -67,7 +67,7 @@ function calculateMacrosValue(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
-  fatsPercentage: number
+  fatsPercentage: number,
 ): MacroTargetGrams {
   if (!calorieGoal) return { protein: 0, carbs: 0, fats: 0 };
 
@@ -95,7 +95,7 @@ export function calculateBMR(
   weight: number,
   height: number,
   age: number,
-  gender: Gender
+  gender: Gender,
 ): number {
   return calculateBMRValue(weight, height, age, gender === "male");
 }
@@ -122,7 +122,7 @@ export function calculateTDEE(bmr: number, activityLevel: number): number {
  */
 export function calculateTDEEByActivityLevel(
   bmr: number,
-  activityLevel: ActivityLevel
+  activityLevel: ActivityLevel,
 ): number {
   // Find the correct activity level entry and its multiplier
   let multiplier = ACTIVITY_LEVELS[1].multiplier; // Default to sedentary
@@ -144,19 +144,19 @@ export function calculateMacros(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
-  fatPercentage: number
+  fatPercentage: number,
 ): MacroTargetGrams {
   return calculateMacrosValue(
     calorieGoal,
     proteinPercentage,
     carbsPercentage,
-    fatPercentage
+    fatPercentage,
   );
 }
 
 // Helper function to create nutrition profile from user settings
 export const createNutritionProfile = (
-  settings: UserSettings
+  settings: UserSettings,
 ): UserNutritionalProfile => {
   const age = calculateAge(settings.dateOfBirth || "");
   let bmr = 0;
@@ -170,7 +170,7 @@ export const createNutritionProfile = (
     settings.activityLevel
   ) {
     bmr = Math.round(
-      calculateBMR(settings.weight, settings.height, age, settings.gender)
+      calculateBMR(settings.weight, settings.height, age, settings.gender),
     );
     tdee = Math.round(calculateTDEE(bmr, settings.activityLevel));
   }

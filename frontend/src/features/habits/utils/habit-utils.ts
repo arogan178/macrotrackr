@@ -23,7 +23,7 @@ export const createNewHabit = (values: HabitGoalFormValues): HabitGoal => {
 
 export const updateHabitFromForm = (
   existingHabit: HabitGoal,
-  values: HabitGoalFormValues
+  values: HabitGoalFormValues,
 ): HabitGoal => {
   const progress = calculateProgress(existingHabit.current, values.target);
 
@@ -42,7 +42,7 @@ export const updateHabitFromForm = (
 // Habit progress utilities
 export const incrementHabitProgress = (
   habit: HabitGoal,
-  incrementBy: number = 1
+  incrementBy: number = 1,
 ): HabitGoal => {
   const newCurrent = habit.current + incrementBy;
   const newProgress = calculateProgress(newCurrent, habit.target);
@@ -86,7 +86,7 @@ export const resetHabitProgress = (habit: HabitGoal): HabitGoal => {
 // Habit filtering and sorting utilities
 export const filterHabitsByCompletion = (
   habits: HabitGoal[],
-  showCompleted: boolean = true
+  showCompleted: boolean = true,
 ): HabitGoal[] => {
   if (showCompleted) return habits;
   return habits.filter((habit) => !habit.isComplete);
@@ -105,7 +105,7 @@ export const sortHabitsByProgress = (habits: HabitGoal[]): HabitGoal[] => {
 
 export const sortHabitsByCreatedDate = (habits: HabitGoal[]): HabitGoal[] => {
   return [...habits].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
   );
 };
 
@@ -139,7 +139,7 @@ export const isValidHabitForm = (values: HabitGoalFormValues): boolean => {
 // Habit search and filtering utilities
 export const searchHabits = (
   habits: HabitGoal[],
-  searchTerm: string
+  searchTerm: string,
 ): HabitGoal[] => {
   if (!searchTerm.trim()) return habits;
 

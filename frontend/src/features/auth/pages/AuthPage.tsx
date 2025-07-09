@@ -52,7 +52,7 @@ const styles: Record<string, React.CSSProperties> = {
  */
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "register" | "forgotPassword">(
-    "login"
+    "login",
   );
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [visibleMode, setVisibleMode] = useState<
@@ -109,7 +109,7 @@ export default function AuthPage() {
         });
       }, ANIMATION_FADE_DURATION);
     },
-    [clearAuthError, isTransitioning, mode]
+    [clearAuthError, isTransitioning, mode],
   );
 
   const renderForm = () => {

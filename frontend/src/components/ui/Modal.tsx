@@ -58,7 +58,7 @@
 import { useEffect, useRef, memo, useState } from "react";
 import ReactDOM from "react-dom";
 import { motion } from "motion/react";
-import { FormButton, ActionButton } from ".";
+import { FormButton, ActionButton } from "../form";
 
 import type {
   ModalProps,
@@ -78,7 +78,7 @@ function Modal(props: ModalProps) {
   } = props;
 
   // Discriminated union for variant-specific props
-  let variant: string = (props as any).variant;
+  const variant: string = (props as any).variant;
   let message: string | undefined,
     confirmLabel: string | undefined,
     cancelLabel: string | undefined,
@@ -319,7 +319,7 @@ function Modal(props: ModalProps) {
         )}
       </motion.div>
     </div>,
-    modalRoot // Target element for the portal
+    modalRoot, // Target element for the portal
   );
 }
 

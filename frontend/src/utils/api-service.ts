@@ -153,7 +153,7 @@ export async function handleResponse(response: Response): Promise<any> {
         return null;
       } // Assume valid null/empty for 200
       throw new Error(
-        "Received an invalid or unparsable response from the server."
+        "Received an invalid or unparsable response from the server.",
       );
     }
   }
@@ -223,7 +223,7 @@ export const apiService = {
         typeof payloadToSend.activityLevel === "string"
       ) {
         payloadToSend.activityLevel = getActivityLevelFromString(
-          payloadToSend.activityLevel as ActivityLevel
+          payloadToSend.activityLevel as ActivityLevel,
         );
       }
       const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
@@ -240,7 +240,7 @@ export const apiService = {
           UserSettingsPayload,
           "dateOfBirth" | "height" | "weight" | "activityLevel"
         >
-      >
+      >,
     ) => {
       const response = await fetch(
         `${API_BASE_URL}/api/user/complete-profile`,
@@ -248,7 +248,7 @@ export const apiService = {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify(profileData),
-        }
+        },
       );
       return handleResponse(response);
     },
@@ -466,7 +466,7 @@ export const apiService = {
 
     /** Adds a new weight log entry */
     addWeightLogEntry: async (
-      payload: AddWeightLogPayload
+      payload: AddWeightLogPayload,
     ): Promise<WeightLogEntry> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
         method: "POST",
@@ -484,14 +484,14 @@ export const apiService = {
 
     /** Deletes a specific weight log entry */
     deleteWeightLogEntry: async (
-      id: string
+      id: string,
     ): Promise<{ success: boolean; id: string }> => {
       const response = await fetch(
         `${API_BASE_URL}/api/goals/weight-log/${id}`,
         {
           method: "DELETE",
           headers: getHeaders(false),
-        }
+        },
       );
       // Backend now returns { success: true, id: 'deleted_id' }
       return handleResponse(response);
@@ -509,7 +509,7 @@ export const apiService = {
 
     /** Saves a new habit goal */
     saveHabit: async (
-      habitGoal: HabitGoalPayload
+      habitGoal: HabitGoalPayload,
     ): Promise<HabitGoalPayload> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         method: "POST",
@@ -522,7 +522,7 @@ export const apiService = {
     /** Updates an existing habit goal */
     updateHabit: async (
       id: string,
-      habitGoal: HabitGoalPayload
+      habitGoal: HabitGoalPayload,
     ): Promise<{ success: boolean }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "PUT",

@@ -3,7 +3,7 @@ import {
   BarChartIcon,
   TrendingUpIcon,
   CheckIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 
 export const trustIndicators = [
   {

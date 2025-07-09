@@ -2,7 +2,7 @@ import { useState, useCallback, memo } from "react";
 
 import MacroSlider, { MacroBadge } from "./MacroSlider";
 import { InfoCard, FormButton } from "@/components/form";
-import { InfoIcon } from "@/components/Icons";
+import { InfoIcon } from "@/components/ui";
 import { MacroType, MacroTargetProps } from "@/types/macro";
 import { useMacroTarget } from "../hooks/useMacroTarget";
 import MacroTargetBar from "./MacroTargetBar";
@@ -26,13 +26,13 @@ const MacroTarget = memo(
       // This ensures the parent always gets the latest state including locks
       (updatedTarget) => {
         onTargetChange(updatedTarget);
-      }
+      },
     );
 
     // Helper to check if a specific macro is locked
     const isLocked = useCallback(
       (macro: MacroType) => target.lockedMacros.includes(macro),
-      [target.lockedMacros]
+      [target.lockedMacros],
     );
 
     // Determine if a slider should be disabled (if 2 others are locked)
@@ -40,7 +40,7 @@ const MacroTarget = memo(
       (macro: MacroType) => {
         return target.lockedMacros.length === 2 && !isLocked(macro);
       },
-      [target.lockedMacros, isLocked]
+      [target.lockedMacros, isLocked],
     );
 
     return (
@@ -140,7 +140,7 @@ const MacroTarget = memo(
         </div>
       </div>
     );
-  }
+  },
 ); // Close React.memo
 
 MacroTarget.displayName = "MacroTarget"; // Add display name for DevTools

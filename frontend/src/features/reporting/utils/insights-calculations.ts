@@ -49,7 +49,7 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
     CONSISTENCY_SCORE_WEIGHT *
       (1 -
         Math.min(coefficientOfVariation, CONSISTENCY_CV_MAX) /
-          CONSISTENCY_CV_MAX)
+          CONSISTENCY_CV_MAX),
   );
 
   return Math.round(frequencyScore + consistencyScore);
@@ -57,7 +57,7 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
 
 export function calculateMacroBalance(
   averages: NutritionAverage,
-  macroTarget?: MacroTargetSettings | null
+  macroTarget?: MacroTargetSettings | null,
 ): MacroBalanceResult {
   const total = averages.protein + averages.carbs + averages.fats;
   const target = macroTarget || DEFAULT_MACRO_TARGET;
@@ -98,15 +98,15 @@ export function calculateMacroBalance(
     const suggestions = [];
     const proteinTolerance = Math.max(
       MACRO_BALANCE_TOLERANCE_MIN,
-      idealProtein * MACRO_BALANCE_TOLERANCE_FACTOR
+      idealProtein * MACRO_BALANCE_TOLERANCE_FACTOR,
     );
     const carbsTolerance = Math.max(
       MACRO_BALANCE_TOLERANCE_MIN,
-      idealCarbs * MACRO_BALANCE_TOLERANCE_FACTOR
+      idealCarbs * MACRO_BALANCE_TOLERANCE_FACTOR,
     );
     const fatsTolerance = Math.max(
       MACRO_BALANCE_TOLERANCE_MIN,
-      idealFats * MACRO_BALANCE_TOLERANCE_FACTOR
+      idealFats * MACRO_BALANCE_TOLERANCE_FACTOR,
     );
 
     if (proteinPct < idealProtein - proteinTolerance)
@@ -115,7 +115,7 @@ export function calculateMacroBalance(
       suggestions.push("consider balancing protein with other macros");
     if (carbsPct < idealCarbs - carbsTolerance)
       suggestions.push(
-        "include more healthy carbs like fruits and whole grains"
+        "include more healthy carbs like fruits and whole grains",
       );
     if (carbsPct > idealCarbs + carbsTolerance)
       suggestions.push("balance carbs with more protein and healthy fats");
@@ -140,7 +140,7 @@ export function calculateMacroBalance(
 
 export function calculateTrend(
   data: AggregatedDataPoint[],
-  metric: keyof AggregatedDataPoint
+  metric: keyof AggregatedDataPoint,
 ): TrendResult {
   if (!data?.length || data.length < TREND_DAYS_REQUIRED) {
     return {
@@ -184,8 +184,8 @@ export function calculateTrend(
     percentChange > TREND_THRESHOLD.up
       ? "up"
       : percentChange < TREND_THRESHOLD.down
-      ? "down"
-      : "stable";
+        ? "down"
+        : "stable";
 
   const message =
     direction === "stable"
@@ -202,7 +202,7 @@ export function calculateTrend(
 }
 
 export function calculateDataQuality(
-  data: AggregatedDataPoint[]
+  data: AggregatedDataPoint[],
 ): DataQualityResult {
   if (!data?.length) {
     return {
@@ -222,10 +222,10 @@ export function calculateDataQuality(
     completionRate >= DATA_QUALITY_OUTSTANDING
       ? "Outstanding consistency! You're building excellent tracking habits."
       : completionRate >= DATA_QUALITY_GREAT
-      ? "Great job keeping up with your nutrition tracking!"
-      : completionRate >= DATA_QUALITY_GOOD
-      ? "You're on the right track! Try logging more consistently for better insights."
-      : "Every entry counts! More consistent tracking will unlock powerful insights about your nutrition patterns.";
+        ? "Great job keeping up with your nutrition tracking!"
+        : completionRate >= DATA_QUALITY_GOOD
+          ? "You're on the right track! Try logging more consistently for better insights."
+          : "Every entry counts! More consistent tracking will unlock powerful insights about your nutrition patterns.";
 
   return {
     daysLogged: daysWithData,
@@ -236,7 +236,7 @@ export function calculateDataQuality(
 }
 
 export function calculateNutrientDensity(
-  averages: NutritionAverage
+  averages: NutritionAverage,
 ): NutrientDensityResult {
   if (!averages?.calories) {
     return {
@@ -252,18 +252,18 @@ export function calculateNutrientDensity(
     Math.round(
       proteinDensity *
         NUTRIENT_DENSITY_SCORE_PROTEIN_MULT *
-        NUTRIENT_DENSITY_SCORE_FACTOR
-    )
+        NUTRIENT_DENSITY_SCORE_FACTOR,
+    ),
   );
 
   const message =
     score >= 80
       ? "Fantastic! Your diet has excellent protein quality and nutrient density."
       : score >= 60
-      ? "Great work! You're maintaining good nutritional quality in your meals."
-      : score >= 40
-      ? "Consider adding more protein-rich foods to boost your nutrition quality."
-      : "Focus on nutrient-dense foods like lean proteins, vegetables, and whole grains for better nutrition quality.";
+        ? "Great work! You're maintaining good nutritional quality in your meals."
+        : score >= 40
+          ? "Consider adding more protein-rich foods to boost your nutrition quality."
+          : "Focus on nutrient-dense foods like lean proteins, vegetables, and whole grains for better nutrition quality.";
 
   return { score, message };
 }
@@ -272,6 +272,6 @@ export function getScoreColor(score: number): string {
   return score > SCORE_COLOR_GREEN
     ? "bg-green-400"
     : score > SCORE_COLOR_YELLOW
-    ? "bg-yellow-400"
-    : "bg-red-400";
+      ? "bg-yellow-400"
+      : "bg-red-400";
 }

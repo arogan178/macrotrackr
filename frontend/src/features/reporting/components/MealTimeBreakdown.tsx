@@ -45,14 +45,14 @@ const calculateCalories = (entry: any) =>
 
 function calculateMealTypeDistribution(
   entries: MacroEntry[],
-  selectedStat: string
+  selectedStat: string,
 ) {
   // Initialize groups
   const groups = Object.fromEntries(
     MEAL_TYPES.map((type) => [
       type,
       { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 },
-    ])
+    ]),
   );
 
   // Aggregate data by meal type
@@ -81,7 +81,7 @@ function calculateMealTypeDistribution(
       fats: acc.fats + group.fats,
       count: acc.count + group.count,
     }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 }
+    { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 },
   );
 
   // Format for chart
@@ -130,7 +130,7 @@ function MealTimeBreakdown({
       filteredHistory.length
         ? calculateMealTypeDistribution(filteredHistory, selectedStat)
         : [],
-    [filteredHistory, selectedStat]
+    [filteredHistory, selectedStat],
   );
   if (!filteredHistory.length) {
     return (

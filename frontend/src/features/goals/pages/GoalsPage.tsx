@@ -1,22 +1,22 @@
 import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import Navbar from "@/components/Navbar";
+import { Navbar } from "@/components/layout";
+import { TabButton } from "@/components/form";
+import { GoalsIcon, TargetIcon } from "@/components/ui";
+import Modal from "@/components/ui/Modal";
 import {
+  GoalsLoadingSkeleton,
+  LogWeightModal,
+  MacroTargetForm,
   WeightGoalDashboard,
   WeightGoalModal,
-  LogWeightModal,
   WeightProgressTabs,
-  MacroTargetForm,
-  GoalsLoadingSkeleton,
 } from "@/features/goals/components";
-import { TabButton } from "@/components/form";
-import { GoalsIcon, TargetIcon } from "@/components/Icons";
+import { WeightGoalFormValues } from "@/features/goals/types";
 import { HabitTracker, HabitModal } from "@/features/habits/components";
 import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types/types";
-import { WeightGoalFormValues } from "@/features/goals/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
-import Modal from "@/components/form/Modal";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";
@@ -138,7 +138,7 @@ export default function GoalsPage() {
   // Unified handler for submitting and updating habits
   const handleSubmitHabit = async (
     values: HabitGoalFormValues,
-    habitId?: string
+    habitId?: string,
   ) => {
     if (habitModalMode === "edit" && habitId) {
       await updateHabit(habitId, values);

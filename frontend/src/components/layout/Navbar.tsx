@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import FormButton from "./form/FormButton";
 import { useLocation, useNavigate } from "react-router-dom";
+import { FormButton } from "@/components/form";
 import { useStore } from "@/store/store";
 import { AnimatePresence, motion } from "motion/react";
 import {
@@ -11,7 +11,7 @@ import {
   GoalsIcon,
   MenuIcon,
   CloseIcon,
-} from "@/components/Icons";
+} from "@/components/ui";
 
 const Navbar: React.FC = () => {
   const location = useLocation();

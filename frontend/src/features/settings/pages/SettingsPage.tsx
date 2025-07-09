@@ -1,17 +1,19 @@
 import { useState, useEffect, useCallback, ReactNode } from "react";
-import Navbar from "@/components/Navbar";
+
 import FloatingNotification from "../../notifications/components/FloatingNotification";
+
+import { Navbar } from "@/components/layout";
 import { TabButton, FormButton } from "@/components/form";
-import Modal from "@/components/form/Modal";
+import { Modal, UserIcon, AwardIcon, LockIcon } from "@/components/ui";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import {
   ProfileForm,
   SettingsLoadingSkeleton,
+  BillingForm,
+  ChangePasswordForm,
 } from "@/features/settings/components";
-import BillingForm from "@/features/settings/components/BillingForm";
-import { ChangePasswordForm } from "@/features/settings/components/ChangePasswordForm";
+
 import { useStore } from "@/store/store";
-import { UserIcon, AwardIcon, LockIcon } from "@/components/Icons";
 
 // --- Modified PageHeader Component ---
 // Now accepts tabs as children to render them on the right
@@ -64,7 +66,7 @@ export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<TabType | null>(
-    null
+    null,
   );
 
   // Fetch settings on component mount
@@ -75,7 +77,7 @@ export default function SettingsPage() {
   // Warn user before leaving page with unsaved changes
   useBeforeUnload(
     hasSettingsChanges,
-    "You have unsaved changes. Are you sure you want to leave?"
+    "You have unsaved changes. Are you sure you want to leave?",
   );
 
   const handleTabChange = useCallback(
@@ -87,7 +89,7 @@ export default function SettingsPage() {
         setActiveTab(tab);
       }
     },
-    [hasSettingsChanges]
+    [hasSettingsChanges],
   );
 
   const confirmTabChange = useCallback(() => {
@@ -112,7 +114,7 @@ export default function SettingsPage() {
       await saveSettings();
       // No need to show a local notification here since the store will handle it
     },
-    [validateSettingsForm, saveSettings]
+    [validateSettingsForm, saveSettings],
   );
 
   return (
