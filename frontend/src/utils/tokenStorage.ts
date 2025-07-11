@@ -43,14 +43,11 @@ export function getToken(): string | undefined {
   const token = localStorage.getItem("token");
   const storedAt = localStorage.getItem("token_stored_at");
 
-  // Check if token has expired (e.g., after 24 hours)
-  if (token && storedAt && isTokenExpired(storedAt)) {
+  if (!token || !storedAt) return undefined;
+  if (isTokenExpired(storedAt)) {
     removeToken();
     return undefined;
   }
-
-  // In a real implementation with Web Crypto API,
-  // we would decrypt the token here before returning it
   return token;
 }
 
