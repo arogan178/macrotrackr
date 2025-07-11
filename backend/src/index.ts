@@ -30,7 +30,7 @@ function rawBodyCapturePlugin() {
     app.onRequest(async (ctx: any) => {
       if (
         ctx.request.method === "POST" &&
-        ctx.request.url.endsWith("/webhooks/stripe/billing")
+        ctx.request.url.endsWith("/api/billing/webhook")
       ) {
         const reader = ctx.request.body?.getReader?.();
         if (reader) {
@@ -148,12 +148,27 @@ app.post(
         return { received: false, error: "Signature verification failed" };
       }
 
+      // Deduplication: check if event ID already processed
+      const eventId = normalizedEvent.id;
+      const eventExists = ctx.db
+        .prepare("SELECT 1 FROM stripe_events WHERE id = ?")
+        .get(eventId);
+      if (eventExists) {
+        logger.warn(
+          { operation: "stripe_webhook", eventId },
+          `Duplicate Stripe event received, skipping: ${eventId}`
+        );
+        ctx.set.status = 200;
+        return { received: true, duplicate: true, eventId };
+      }
+
       logger.info(
         {
           operation: "stripe_webhook",
           eventType: normalizedEvent.type,
           eventId: normalizedEvent.id,
           format: normalizedEvent.format,
+          payload: normalizedEvent,
         },
         `Processing Stripe webhook: ${normalizedEvent.type} (${normalizedEvent.format})`
       );
@@ -200,6 +215,7 @@ app.post(
                   eventType: normalizedEvent.type,
                   userId: user.id,
                   subscriptionId,
+                  eventId,
                 },
                 "Canceled subscription from webhook"
               );
@@ -220,6 +236,7 @@ app.post(
                   userId: user.id,
                   subscriptionId,
                   status,
+                  eventId,
                 },
                 "Updated subscription from webhook"
               );
@@ -231,6 +248,7 @@ app.post(
                 eventType: normalizedEvent.type,
                 customerId,
                 subscriptionId,
+                eventId,
               },
               "User not found for Stripe customer ID"
             );
@@ -239,16 +257,24 @@ app.post(
       } else {
         // Log and gracefully handle unsupported event types
         logger.info(
-          { operation: "stripe_webhook", eventType: normalizedEvent?.type },
+          {
+            operation: "stripe_webhook",
+            eventType: normalizedEvent?.type,
+            eventId,
+          },
           `Received unsupported or unhandled event type: ${normalizedEvent?.type}`
         );
       }
+
+      // Insert event ID into stripe_events for deduplication
+      ctx.db.prepare("INSERT INTO stripe_events (id) VALUES (?)").run(eventId);
 
       ctx.set.status = 200;
       return {
         received: true,
         format: normalizedEvent.format,
         eventType: normalizedEvent.type,
+        eventId,
       };
     } catch (error) {
       logger.error(
