@@ -28,28 +28,39 @@ const app = new Elysia()
   // Use onParse to capture raw webhook body as Buffer for Stripe signature verification
   .onParse(async ({ request, headers }) => {
     // Only handle webhook requests - check for Stripe signature header
-    if (headers["stripe-signature"] && request.url.endsWith("/api/billing/webhook")) {
+    if (
+      headers["stripe-signature"] &&
+      request.url.endsWith("/api/billing/webhook")
+    ) {
       try {
         // Convert ReadableStream to ArrayBuffer using Bun's utility
-        const arrayBuffer = await Bun.readableStreamToArrayBuffer(request.body!);
+        const arrayBuffer = await Bun.readableStreamToArrayBuffer(
+          request.body!
+        );
         // Convert to Buffer for Stripe signature verification
         const rawBody = Buffer.from(arrayBuffer);
-        
+
         const { logger } = await import("./lib/logger");
-        logger.debug({
-          operation: "onParse_webhook",
-          rawBodyLength: rawBody.length,
-          rawBodyPreview: rawBody.toString().substring(0, 100) + "...",
-        }, "Captured raw webhook body as Buffer");
-        
+        logger.debug(
+          {
+            operation: "onParse_webhook",
+            rawBodyLength: rawBody.length,
+            rawBodyPreview: rawBody.toString().substring(0, 100) + "...",
+          },
+          "Captured raw webhook body as Buffer"
+        );
+
         return rawBody;
       } catch (error) {
         const { logger } = await import("./lib/logger");
-        logger.error({
-          operation: "onParse_webhook",
-          error,
-        }, "Failed to capture raw webhook body");
-        
+        logger.error(
+          {
+            operation: "onParse_webhook",
+            error,
+          },
+          "Failed to capture raw webhook body"
+        );
+
         // Return undefined to let default parsing continue
         return undefined;
       }
@@ -116,16 +127,21 @@ app.post(
       const signature = ctx.headers["stripe-signature"];
 
       // Convert buffer to string for Stripe signature verification
-      const rawBodyText = rawBodyBuffer ? rawBodyBuffer.toString() : '';
+      const rawBodyText =
+        rawBodyBuffer && Buffer.isBuffer(rawBodyBuffer) ?
+          rawBodyBuffer.toString("utf8")
+        : String(rawBodyBuffer || "");
 
       logger.info(
         {
           operation: "stripe_webhook",
           hasRawBody: !!rawBodyBuffer,
           rawBodyLength: rawBodyBuffer?.length || 0,
+          isBuffer: Buffer.isBuffer(rawBodyBuffer),
           hasSignature: !!signature,
           signature: signature ? signature.substring(0, 20) + "..." : "none",
-          rawBodyPreview: rawBodyText ? rawBodyText.substring(0, 100) + "..." : "none",
+          rawBodyPreview:
+            rawBodyText ? rawBodyText.substring(0, 100) + "..." : "none",
         },
         "Received Stripe webhook request"
       );
@@ -139,7 +155,11 @@ app.post(
         return { received: false, error: "Missing Stripe signature" };
       }
 
-      if (!rawBodyBuffer || rawBodyBuffer.length === 0) {
+      if (
+        !rawBodyBuffer ||
+        (Buffer.isBuffer(rawBodyBuffer) && rawBodyBuffer.length === 0) ||
+        (!Buffer.isBuffer(rawBodyBuffer) && !rawBodyBuffer)
+      ) {
         logger.error(
           {
             operation: "stripe_webhook",
@@ -320,7 +340,8 @@ app.post(
     headers: t.Object({
       "stripe-signature": t.String(),
     }),
-    body: t.Not(t.Undefined()),
+    // Accept Buffer from onParse - don't validate body type
+    body: t.Any(),
     detail: {
       summary: "Handle Stripe webhooks (NO AUTH)",
       tags: ["Billing"],
