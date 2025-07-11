@@ -29,9 +29,58 @@ const app = new Elysia()
   .onParse(async ({ request }, body) => {
     // Only capture raw body for webhook endpoints
     if (request.url.endsWith("/api/billing/webhook")) {
-      // Store the raw body in the request for later use
-      (request as any).rawWebhookBody = body;
-      // Return the body so Elysia can continue normal processing
+      // Debug logging to see what we're receiving
+      const { logger } = await import("./lib/logger");
+      logger.debug(
+        {
+          operation: "onParse_webhook",
+          bodyType: typeof body,
+          bodyConstructor: body?.constructor?.name,
+          isBuffer: Buffer.isBuffer(body),
+          bodyLength:
+            body?.length || (typeof body === "string" ? body.length : 0),
+        },
+        "onParse received webhook body"
+      );
+
+      // Convert body to string if it's not already
+      let rawBodyString: string;
+      if (typeof body === "string") {
+        rawBodyString = body;
+      } else if (body && typeof body === "object") {
+        // Handle various body types using duck typing
+        if ((body as any).constructor?.name === "ArrayBuffer") {
+          rawBodyString = new TextDecoder().decode(body as ArrayBuffer);
+        } else if ((body as any).constructor?.name === "Uint8Array") {
+          rawBodyString = new TextDecoder().decode(body as Uint8Array);
+        } else if (Buffer.isBuffer(body)) {
+          rawBodyString = (body as Buffer).toString("utf8");
+        } else if (
+          (body as any).toString &&
+          typeof (body as any).toString === "function"
+        ) {
+          rawBodyString = (body as any).toString();
+        } else {
+          // Try JSON.stringify for objects, otherwise convert to string
+          rawBodyString = JSON.stringify(body);
+        }
+      } else {
+        rawBodyString = String(body);
+      }
+
+      logger.debug(
+        {
+          operation: "onParse_webhook",
+          rawBodyLength: rawBodyString.length,
+          rawBodyPreview: rawBodyString.substring(0, 100) + "...",
+        },
+        "Converted body to string"
+      );
+
+      // Store the raw body string in the request for later use
+      (request as any).rawWebhookBody = rawBodyString;
+
+      // Return the original body so Elysia can continue normal processing
       return body;
     }
   })
