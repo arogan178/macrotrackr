@@ -6,7 +6,7 @@ import {
   USER_MINIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
 } from "@/utils/constants";
-import { isOldEnough } from "@/utils/Validation";
+import { isOldEnough } from "@/utils/validation";
 
 import type { UserSettings } from "../types/types";
 /**
