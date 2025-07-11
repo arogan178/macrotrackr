@@ -14,7 +14,9 @@ const PricingSection = React.lazy(() => import("../components/PricingSection"));
 const TestimonialsSection = React.lazy(
   () => import("../components/TestimonialsSection"),
 );
-const FinalCtaSection = React.lazy(() => import("../components/Test"));
+const FinalCtaSection = React.lazy(
+  () => import("../components/FinalCtaSection"),
+);
 
 const LandingPage: React.FC = () => {
   return (
