@@ -72,6 +72,33 @@ type MacroTargetGetResponse =
     }
   | undefined;
 
+// --- User Details Response Type ---
+export interface UserDetailsResponse {
+  id: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  createdAt: string;
+  dateOfBirth?: string;
+  height?: number;
+  weight?: number;
+  gender?: string;
+  activityLevel?: number;
+  subscription: {
+    status: "free" | "pro" | "canceled";
+    hasStripeCustomer: boolean;
+    subscription: {
+      id: string;
+      status: "active" | "canceled" | "past_due" | "unpaid";
+      currentPeriodEnd: string;
+      stripeSubscriptionId: string;
+    } | null;
+    price: string | null;
+    paymentMethod: { brand: string; last4: string } | null;
+    stripeDetails: any | null;
+  };
+}
+
 // Payload for PUT /api/user/settings (User details ONLY)
 // macroTarget removed
 type UserSettingsPayload = Partial<{
@@ -220,11 +247,11 @@ export const apiService = {
   // User endpoints
   user: {
     /** Fetches the current authenticated user's profile */
-    getUserDetails: async () => {
+    getUserDetails: async (): Promise<UserDetailsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
         headers: getHeaders(false),
       });
-      return (await handleResponse(response)) as MacroTargetGetResponse;
+      return (await handleResponse(response)) as UserDetailsResponse;
     },
     /** Updates user settings (profile details only) */
     updateSettings: async (settings: UserSettingsPayload) => {
@@ -305,11 +332,11 @@ export const apiService = {
       });
       return (await handleResponse(response)) as MacroTargetGetResponse;
     },
-    resetPassword: async (token: string, passwordNew: string) => {
+    resetPassword: async (token: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ token, passwordNew }),
+        body: JSON.stringify({ token, newPassword }),
       });
       return (await handleResponse(response)) as
         | SetWeightGoalPayload
