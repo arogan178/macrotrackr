@@ -1,6 +1,7 @@
 import { Component, ReactNode } from "react";
-import { WarningIcon } from "@/components/ui";
+
 import { FormButton } from "@/components/form";
+import { WarningIcon } from "@/components/ui";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -16,8 +17,8 @@ export class ErrorBoundary extends Component<
   ErrorBoundaryProps,
   ErrorBoundaryState
 > {
-  constructor(props: ErrorBoundaryProps) {
-    super(props);
+  constructor(properties: ErrorBoundaryProps) {
+    super(properties);
     this.state = { hasError: false };
   }
 
@@ -50,7 +51,7 @@ export class ErrorBoundary extends Component<
 
               <div className="flex justify-center">
                 <FormButton
-                  onClick={() => window.location.reload()}
+                  onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"

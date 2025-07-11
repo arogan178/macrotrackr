@@ -55,18 +55,18 @@
  *   <ProfileForm />
  * </Modal>
  */
-import { useEffect, useRef, memo, useState } from "react";
-import ReactDOM from "react-dom";
 import { motion } from "motion/react";
-import { FormButton, ActionButton } from "../form";
+import { memo, useEffect, useRef, useState } from "react";
+import ReactDOM from "react-dom";
 
+import { ActionButton, FormButton } from "../form";
 import type {
-  ModalProps,
   ConfirmationModalProps,
   FormModalProps,
-} from "../utils/types";
+  ModalProps,
+} from "../utils/Types";
 
-function Modal(props: ModalProps) {
+function Modal(properties: ModalProps) {
   const {
     isOpen,
     onClose,
@@ -75,10 +75,11 @@ function Modal(props: ModalProps) {
     buttonSize = "md",
     children,
     hideClose = false,
-  } = props;
+  } = properties;
 
   // Discriminated union for variant-specific props
-  const variant: string = (props as any).variant;
+  const variant: ConfirmationModalProps["variant"] | FormModalProps["variant"] =
+    (properties as ModalProps & { variant: "confirmation" | "form" }).variant;
   let message: string | undefined,
     confirmLabel: string | undefined,
     cancelLabel: string | undefined,
@@ -96,7 +97,7 @@ function Modal(props: ModalProps) {
       onConfirm,
       isDanger = false,
       hideCancelButton = false,
-    } = props as ConfirmationModalProps);
+    } = properties as ConfirmationModalProps);
   } else if (variant === "form") {
     ({
       onSave,
@@ -104,22 +105,22 @@ function Modal(props: ModalProps) {
       saveLabel = "Save",
       cancelLabel = "Cancel",
       hideCancelButton = false,
-    } = props as FormModalProps);
+    } = properties as FormModalProps);
   }
-  const modalRef = useRef<HTMLDivElement>(null);
-  const modalRoot = document.getElementById("modal-root"); // Get the portal target
+  const modalReference = useRef<HTMLDivElement>(null);
+  const modalRoot = document.querySelector("#modal-root"); // Get the portal target
 
   // Handle escape key press and body scroll lock
   useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape" && isOpen) {
+    function handleKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape" && isOpen) {
         onClose();
       }
     }
 
     if (isOpen) {
       document.body.classList.add("modal-open");
-      window.addEventListener("keydown", handleKeyDown);
+      globalThis.addEventListener("keydown", handleKeyDown);
     } else {
       document.body.classList.remove("modal-open");
     }
@@ -127,7 +128,7 @@ function Modal(props: ModalProps) {
     // Cleanup function
     return () => {
       document.body.classList.remove("modal-open"); // Ensure class is removed on unmount
-      window.removeEventListener("keydown", handleKeyDown);
+      globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
 
@@ -141,7 +142,7 @@ function Modal(props: ModalProps) {
     };
 
     switch (variant) {
-      case "confirmation":
+      case "confirmation": {
         return {
           // Use default header/footer for uniform look, override only confirm button
           ...defaultStyles,
@@ -149,13 +150,16 @@ function Modal(props: ModalProps) {
             ? "bg-red-600 text-white hover:bg-red-700"
             : "bg-indigo-600 text-white hover:bg-indigo-700",
         };
-      case "form":
+      }
+      case "form": {
         return {
           ...defaultStyles, // Use default header/footer
           confirmButton: "bg-blue-600 text-white hover:bg-blue-700",
         };
-      default:
+      }
+      default: {
         return defaultStyles;
+      }
     }
   };
 
@@ -218,7 +222,7 @@ function Modal(props: ModalProps) {
   }, []);
 
   // Prevent rendering if not open or not mounted or portal root not found
-  if (!isOpen || !isMounted || !modalRoot) return null;
+  if (!isOpen || !isMounted || !modalRoot) return;
 
   // Use ReactDOM.createPortal to render the modal into #modal-root
   return ReactDOM.createPortal(
@@ -240,7 +244,7 @@ function Modal(props: ModalProps) {
 
       {/* Modal Content with animation */}
       <motion.div
-        ref={modalRef}
+        ref={modalReference}
         className={`${baseContentStyles} ${sizeStyles} relative`}
         style={{ overflowX: "hidden" }}
         variants={modalVariants}
@@ -248,7 +252,7 @@ function Modal(props: ModalProps) {
         animate="visible"
         exit="exit"
         role="document"
-        onClick={(e) => e.stopPropagation()}
+        onClick={(event) => event.stopPropagation()}
       >
         {/* Header: Only render if close button is shown */}
         {!hideClose && (

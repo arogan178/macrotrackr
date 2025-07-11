@@ -1,6 +1,7 @@
 import { MacroEntry } from "@/types/macro";
-import { isWithinDateRange } from "./date-utils";
-import { calculateDailyTotals } from "./macro-calculations";
+
+import { isWithinDateRange } from "./dateUtilities";
+import { calculateDailyTotals } from "./macroCalculations";
 
 // Data processing types
 interface GroupedData {
@@ -46,18 +47,20 @@ export const filterEntriesByMealType = (
 
 // Data grouping utilities
 export const groupEntriesByDate = (entries: MacroEntry[]): GroupedData => {
-  return entries.reduce((groups: GroupedData, entry) => {
+  const groups: GroupedData = {};
+  for (const entry of entries) {
     const date = entry.entryDate;
     if (!groups[date]) {
       groups[date] = [];
     }
     groups[date].push(entry);
-    return groups;
-  }, {});
+  }
+  return groups;
 };
 
 export const groupEntriesByMealType = (entries: MacroEntry[]): MealTypeData => {
-  return entries.reduce((groups: MealTypeData, entry) => {
+  const groups: MealTypeData = {};
+  for (const entry of entries) {
     const mealType = entry.mealType;
     if (!groups[mealType]) {
       groups[mealType] = {
@@ -68,16 +71,14 @@ export const groupEntriesByMealType = (entries: MacroEntry[]): MealTypeData => {
         count: 0,
       };
     }
-
     const dailyTotals = calculateDailyTotals([entry]);
     groups[mealType].calories += dailyTotals.calories;
     groups[mealType].protein += dailyTotals.protein;
     groups[mealType].carbs += dailyTotals.carbs;
     groups[mealType].fats += dailyTotals.fats;
     groups[mealType].count += 1;
-
-    return groups;
-  }, {});
+  }
+  return groups;
 };
 
 // Data aggregation utilities
@@ -102,7 +103,7 @@ export const calculateAveragesByMealType = (
   const grouped = groupEntriesByMealType(entries);
 
   // Convert totals to averages
-  Object.keys(grouped).forEach((mealType) => {
+  for (const mealType of Object.keys(grouped)) {
     const group = grouped[mealType];
     if (group.count > 0) {
       group.calories = Math.round(group.calories / group.count);
@@ -110,7 +111,7 @@ export const calculateAveragesByMealType = (
       group.carbs = Math.round(group.carbs / group.count);
       group.fats = Math.round(group.fats / group.count);
     }
-  });
+  }
 
   return grouped;
 };
@@ -131,16 +132,13 @@ export const calculateDailyAverages = (dailyData: DailyData[]) => {
     return { calories: 0, protein: 0, carbs: 0, fats: 0 };
   }
 
-  const totals = dailyData.reduce(
-    (acc, day) => ({
-      calories: acc.calories + day.calories,
-      protein: acc.protein + day.protein,
-      carbs: acc.carbs + day.carbs,
-      fats: acc.fats + day.fats,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0 },
-  );
-
+  const totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+  for (const day of dailyData) {
+    totals.calories += day.calories;
+    totals.protein += day.protein;
+    totals.carbs += day.carbs;
+    totals.fats += day.fats;
+  }
   const days = dailyData.length;
   return {
     calories: Math.round(totals.calories / days),
@@ -161,7 +159,7 @@ export const calculateCompletionRate = (
 
 export const getUniqueLoggedDates = (entries: MacroEntry[]): string[] => {
   const uniqueDates = new Set(entries.map((entry) => entry.entryDate));
-  return Array.from(uniqueDates).sort();
+  return [...uniqueDates].sort();
 };
 
 export const getMissingDates = (

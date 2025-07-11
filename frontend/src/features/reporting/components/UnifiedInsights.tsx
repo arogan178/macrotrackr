@@ -1,24 +1,26 @@
-import { useMemo } from "react";
 import { motion } from "motion/react";
+import { useMemo } from "react";
+
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import type { UnifiedInsightsProps } from "../types/insights-types";
+
 import {
-  calculateConsistencyScore,
-  calculateMacroBalance,
-  calculateTrend,
-  calculateDataQuality,
-  calculateNutrientDensity,
-} from "../utils/insights-calculations";
-import {
-  METRIC_CARD_CONFIGS,
   MACRO_COLORS,
+  METRIC_CARD_CONFIGS,
   SECTION_STYLES,
 } from "../constants";
-import MetricCard from "./MetricCard";
+import type { UnifiedInsightsProps as UnifiedInsightsProps } from "../types/insightsTypes";
+import {
+  calculateConsistencyScore,
+  calculateDataQuality,
+  calculateMacroBalance,
+  calculateNutrientDensity,
+  calculateTrend,
+} from "../utils/insightsCalculations";
 import AtAGlanceSection from "./AtAGlanceSection";
-import TrendDisplay from "./TrendDisplay";
+import MetricCard from "./MetricCard";
 import RecommendationsSection from "./RecommendationsSection";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import TrendDisplay from "./TrendDisplay";
 
 function UnifiedInsights({
   aggregatedData,
@@ -30,7 +32,7 @@ function UnifiedInsights({
   // Calculate all insights metrics in one pass
   const insights = useMemo(() => {
     if (isLoading || !aggregatedData || aggregatedData.length === 0) {
-      return null;
+      return;
     }
     return {
       consistencyScore: calculateConsistencyScore(aggregatedData),
@@ -133,7 +135,7 @@ function UnifiedInsights({
             </div>
             <div>
               <div className="flex h-2 rounded-full overflow-hidden bg-gray-800">
-                {macroBalance.currentRatio.split("/").map((pct, idx) => {
+                {macroBalance.currentRatio.split("/").map((pct, index) => {
                   const colors = [
                     MACRO_COLORS.protein.bar,
                     MACRO_COLORS.carbs.bar,
@@ -141,15 +143,15 @@ function UnifiedInsights({
                   ];
                   return (
                     <div
-                      key={idx}
-                      className={`${colors[idx]} h-full transition-all duration-1000`}
+                      key={index}
+                      className={`${colors[index]} h-full transition-all duration-1000`}
                       style={{ width: `${pct}%` }}
                     />
                   );
                 })}
               </div>
               <div className="flex justify-between text-[10px] mt-1">
-                {macroBalance.currentRatio.split("/").map((pct, idx) => {
+                {macroBalance.currentRatio.split("/").map((pct, index) => {
                   const labels = ["Protein", "Carbs", "Fats"];
                   const colors = [
                     MACRO_COLORS.protein.text,
@@ -157,8 +159,8 @@ function UnifiedInsights({
                     MACRO_COLORS.fats.text,
                   ];
                   return (
-                    <span key={idx} className={colors[idx]}>
-                      {labels[idx]}: {pct}%
+                    <span key={index} className={colors[index]}>
+                      {labels[index]}: {pct}%
                     </span>
                   );
                 })}

@@ -1,4 +1,4 @@
-import { MacroEntry, MacroDailyTotals, MealType } from "@/types/macro";
+import { MacroDailyTotals, MacroEntry, MealType } from "@/types/macro";
 
 // State management utilities
 export interface OptimisticUpdateState {

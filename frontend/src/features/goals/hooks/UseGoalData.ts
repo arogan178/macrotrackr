@@ -1,5 +1,6 @@
 import { useMemo } from "react";
-import { TargetIcon, TrendingUpIcon, CalendarIcon } from "@/components/ui";
+
+import { CalendarIcon, TargetIcon, TrendingUpIcon } from "@/components/ui";
 
 /**
  * Custom hook to provide mock goal data
@@ -10,7 +11,7 @@ function useGoalData() {
     () => ({
       weightGoal: {
         current: 72.5,
-        target: 68.0,
+        target: 68,
         progress: 60,
         startDate: "Jan 15, 2025",
         targetDate: "Apr 30, 2025",

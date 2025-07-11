@@ -23,11 +23,12 @@
  * <StatusIndicator status="warning" message="Check your input" icon={<MyIcon />} aria-live="assertive" />
  */
 import React from "react";
+
 import {
   CheckMarkIcon,
-  WarningIcon,
-  InfoIcon,
   CloseIcon,
+  InfoIcon,
+  WarningIcon,
 } from "@/components/ui";
 
 export type StatusType = "success" | "error" | "warning" | "info";

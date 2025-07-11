@@ -1,15 +1,16 @@
-import { useState, useEffect } from "react";
-import Modal from "@/components/ui/Modal";
+import { format, isValid, parse } from "date-fns";
+import { useEffect, useState } from "react";
+
 import { DateField, NumberField, TimeField } from "@/components/form";
+import Modal from "@/components/ui/Modal";
 import { useStore } from "@/store/store";
-import { AddWeightLogPayload } from "@/utils/api-service";
+import { AddWeightLogPayload } from "@/utils/apiServices";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
-import { format, parse, isValid } from "date-fns";
 
 interface LogWeightModalProps {
   isOpen: boolean;
   onClose: () => void;
-  initialWeight?: number | null;
+  initialWeight?: number | undefined;
 }
 
 // Helper to get current time in HH:mm format
@@ -31,7 +32,7 @@ function LogWeightModal({
   const [date, setDate] = useState<string>(today);
   const [time, setTime] = useState<string>(nowTime);
   const [weight, setWeight] = useState<number | string>(initialWeight || "");
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | undefined>();
 
   useEffect(() => {
     if (isOpen) {
@@ -39,14 +40,14 @@ function LogWeightModal({
       setDate(format(currentDateTime, "yyyy-MM-dd"));
       setTime(format(currentDateTime, "HH:mm"));
       setWeight(initialWeight || "");
-      setFormError(null);
+      setFormError(undefined);
       if (clearError) clearError();
     }
   }, [isOpen, initialWeight, clearError]);
 
   // Validation logic for Save button
   function validateForm(): boolean {
-    setFormError(null);
+    setFormError(undefined);
     const dateTimeString = `${date}T${time}:00`;
     const parsedDateTime = parse(
       dateTimeString,
@@ -61,16 +62,16 @@ function LogWeightModal({
       setFormError("Date and time cannot be in the future.");
       return false;
     }
-    const weightNum = Number(weight);
-    if (isNaN(weightNum)) {
+    const weightNumber = Number(weight);
+    if (Number.isNaN(weightNumber)) {
       setFormError("Please enter a valid weight.");
       return false;
     }
-    if (weightNum < USER_MINIMUM_WEIGHT) {
+    if (weightNumber < USER_MINIMUM_WEIGHT) {
       setFormError(`Weight must be at least ${USER_MINIMUM_WEIGHT} kg.`);
       return false;
     }
-    if (weightNum > USER_MAXIMUM_WEIGHT) {
+    if (weightNumber > USER_MAXIMUM_WEIGHT) {
       setFormError(`Weight cannot exceed ${USER_MAXIMUM_WEIGHT} kg.`);
       return false;
     }
@@ -91,7 +92,7 @@ function LogWeightModal({
     try {
       await addWeightLogEntry(payload);
       onClose();
-    } catch (err) {
+    } catch {
       // Error state is handled by the slice
     }
   }

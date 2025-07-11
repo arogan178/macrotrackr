@@ -1,17 +1,19 @@
-import { useState, useEffect } from "react";
+import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+
+import { ProFeature } from "@/components/billing";
+import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { Navbar } from "@/components/layout";
 import { useStore } from "@/store/store";
-import { LineChartComponent, DateRangeSelector } from "@/components/chart";
+
 import {
-  UnifiedInsights,
-  NutrientDensityVisualization,
-  MealTimeBreakdown,
-  ReportingPageSkeleton,
   MacroSummaryStats,
+  MealTimeBreakdown,
+  NutrientDensityVisualization,
+  ReportingPageSkeleton,
+  UnifiedInsights,
 } from "../components";
-import { motion } from "motion/react";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { ProFeature } from "@/components/billing";
 
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
@@ -107,27 +109,27 @@ export default function ReportingPage() {
                 !error &&
                 history?.length === 0 &&
                 dataProcessed && (
-                <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
-                  <div className="flex items-center">
-                    <svg
-                      className="h-5 w-5 mr-2 text-yellow-500"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                      xmlns="http://www.w3.org/2000/svg"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth="2"
-                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                      ></path>
-                    </svg>
-                    No nutrition history found. Add some entries to see your
-                    reporting data.
+                  <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
+                    <div className="flex items-center">
+                      <svg
+                        className="h-5 w-5 mr-2 text-yellow-500"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        ></path>
+                      </svg>
+                      No nutrition history found. Add some entries to see your
+                      reporting data.
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
               {/* Date Range Selector */}
               <ProFeature>
                 <DateRangeSelector

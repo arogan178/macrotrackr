@@ -1,22 +1,24 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
-  TextField,
-  FormButton,
-  Dropdown,
-  NumberField,
-  InfoCard,
   DateField,
+  Dropdown,
+  FormButton,
+  InfoCard,
+  NumberField,
+  TextField,
 } from "@/components/form";
-import { ForwardIcon, BackIcon, CheckIcon, InfoIcon } from "@/components/ui";
+import { BackIcon, CheckIcon, ForwardIcon, InfoIcon } from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
 } from "@/features/settings/utils/constants";
+import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-import { useStore } from "@/store/store";
-import { handleStepSubmit, handleStepBack } from "../utils";
+
+import { handleStepBack, handleStepSubmit } from "../utils";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -35,8 +37,8 @@ export function StepOne() {
   } = useStore();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      await handleStepSubmit(e, 1, {
+    async (event: React.FormEvent) => {
+      await handleStepSubmit(event, 1, {
         currentStep: 1,
         validateRegisterStep,
         setRegisterStep,
@@ -115,8 +117,8 @@ export function StepTwo() {
   } = useStore();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      await handleStepSubmit(e, 2, {
+    async (event: React.FormEvent) => {
+      await handleStepSubmit(event, 2, {
         currentStep: 2,
         validateRegisterStep,
         setRegisterStep,
@@ -214,8 +216,8 @@ export function StepThree() {
   } = useStore();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      await handleStepSubmit(e, 3, {
+    async (event: React.FormEvent) => {
+      await handleStepSubmit(event, 3, {
         currentStep: 3,
         validateRegisterStep,
         setRegisterStep,

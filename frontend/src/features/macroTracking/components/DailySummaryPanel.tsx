@@ -1,13 +1,14 @@
-import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
-import {
-  calculateCaloriesFromMacros,
-  calculateProteinCalories,
-  calculateCarbsCalories,
-  calculateFatsCalories,
-} from "../calculations";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
 import ProgressBar from "@/components/ui/ProgressBar";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+
+import {
+  calculateCaloriesFromMacros,
+  calculateCarbsCalories,
+  calculateFatsCalories,
+  calculateProteinCalories,
+} from "../calculations";
 
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;

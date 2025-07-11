@@ -1,5 +1,6 @@
-import { WeightLogEntry, AddWeightLogPayload } from "@/utils/api-service";
 import { formatISO } from "date-fns";
+
+import { AddWeightLogPayload, WeightLogEntry } from "@/utils/apiServices";
 
 // Weight log data utilities
 export function createWeightLogEntry(
@@ -61,7 +62,7 @@ export function calculateWeightTrend(
   }
 
   const latest = recent[0].weight;
-  const oldest = recent[recent.length - 1].weight;
+  const oldest = recent.at(-1).weight;
   const change = latest - oldest;
   const averageChange = change / (recent.length - 1);
 
@@ -155,8 +156,8 @@ export function getWeightLogStats(entries: WeightLogEntry[]) {
       minWeight: 0,
       maxWeight: 0,
       weightRange: 0,
-      firstEntry: null,
-      lastEntry: null,
+      firstEntry: undefined,
+      lastEntry: undefined,
     };
   }
 
@@ -172,7 +173,7 @@ export function getWeightLogStats(entries: WeightLogEntry[]) {
     minWeight: Math.round(minWeight * 10) / 10,
     maxWeight: Math.round(maxWeight * 10) / 10,
     weightRange: Math.round((maxWeight - minWeight) * 10) / 10,
-    firstEntry: sorted[sorted.length - 1],
+    firstEntry: sorted.at(-1),
     lastEntry: sorted[0],
   };
 }

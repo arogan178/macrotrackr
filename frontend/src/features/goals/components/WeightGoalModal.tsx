@@ -1,9 +1,11 @@
-import Modal from "@/components/ui/Modal";
-import WeightGoalForm from "./WeightGoalForm";
-import { WeightGoalFormValues } from "../types";
 import { useEffect } from "react";
 
+import Modal from "@/components/ui/Modal";
 import { useStore } from "@/store/store"; // Import useStore
+import type { WeightGoals } from "@/types/goal";
+
+import { WeightGoalFormValues } from "../types";
+import WeightGoalForm from "./WeightGoalForm";
 
 interface WeightGoalModalProps {
   isOpen: boolean;
@@ -11,7 +13,7 @@ interface WeightGoalModalProps {
   startingWeight: number;
   targetWeight?: number;
   tdee: number;
-  weightGoals: any | null; // Used to determine create vs update
+  weightGoals: WeightGoals | undefined; // Used to determine create vs update
 }
 
 function WeightGoalModal({
@@ -35,13 +37,9 @@ function WeightGoalModal({
 
   const handleSave = async (values: WeightGoalFormValues) => {
     try {
-      if (weightGoals) {
-        // If weightGoals exists, we are updating
-        await updateWeightGoal(values, tdee);
-      } else {
-        // Otherwise, we are creating
-        await createWeightGoal(values, tdee);
-      }
+      await (weightGoals
+        ? updateWeightGoal(values, tdee)
+        : createWeightGoal(values, tdee));
       onClose(); // Close modal on success
     } catch (error) {
       // Error is handled and displayed by the slice/notification system

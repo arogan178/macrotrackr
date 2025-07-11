@@ -1,18 +1,17 @@
-import { useState, useMemo } from "react";
-import { useStore } from "@/store/store";
-import { TrashIcon, EmptyState, LoadingSpinner, Modal } from "@/components/ui";
-import { ActionButton } from "@/components/form";
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
+import { useMemo, useState } from "react";
+
+import { ActionButton } from "@/components/form";
+import { EmptyState, LoadingSpinner, Modal, TrashIcon } from "@/components/ui";
+import { useStore } from "@/store/store";
 
 interface WeightLogListProps {
   isBulkConfirmModalOpen?: boolean;
-  onBulkConfirm?: () => void;
   onBulkCancel?: () => void;
 }
 
 function WeightLogList({
   isBulkConfirmModalOpen = false,
-  onBulkConfirm,
   onBulkCancel = () => {},
 }: WeightLogListProps) {
   const weightLog = useStore((state) => state.weightLog); // Now contains { id, timestamp, weight }
@@ -25,11 +24,14 @@ function WeightLogList({
   // State for confirmation modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   // Update state type to use timestamp
-  const [itemToDelete, setItemToDelete] = useState<{
-    id: string;
-    timestamp: string; // Changed from date
-    weight: number;
-  } | null>(null);
+  const [itemToDelete, setItemToDelete] = useState<
+    | {
+        id: string;
+        timestamp: string; // Changed from date
+        weight: number;
+      }
+    | undefined
+  >();
 
   // Opens the confirmation modal - use timestamp
   const handleDeleteClick = (id: string, timestamp: string, weight: number) => {
@@ -40,8 +42,8 @@ function WeightLogList({
   // Opens the bulk delete confirmation modal (no longer used)
 
   // Handles the actual deletion after confirmation
-  const handleConfirmDelete = async (e?: React.MouseEvent) => {
-    if (e) e.preventDefault(); // Prevent accidental form submit/page reload
+  const handleConfirmDelete = async (event?: React.MouseEvent) => {
+    if (event) event.preventDefault(); // Prevent accidental form submit/page reload
     if (!itemToDelete) return;
 
     try {
@@ -50,13 +52,13 @@ function WeightLogList({
       console.error("Deletion failed from component:", error);
     } finally {
       setIsConfirmModalOpen(false);
-      setItemToDelete(null);
+      setItemToDelete(undefined);
     }
   };
 
   // Handles bulk deletion after confirmation
-  const handleConfirmBulkDelete = async (e?: React.MouseEvent) => {
-    if (e) e.preventDefault();
+  const handleConfirmBulkDelete = async (event?: React.MouseEvent) => {
+    if (event) event.preventDefault();
     try {
       // Fallback: delete entries one by one
       for (const entry of weightLog) {
@@ -72,7 +74,7 @@ function WeightLogList({
   // Closes the confirmation modal without deleting
   const handleCancelDelete = () => {
     setIsConfirmModalOpen(false);
-    setItemToDelete(null);
+    setItemToDelete(undefined);
   };
 
   // Sort log by timestamp descending for display
@@ -138,7 +140,6 @@ function WeightLogList({
                 </div>
                 <ActionButton
                   variant="delete"
-                  size="sm"
                   ariaLabel={
                     isValidDate
                       ? `Delete entry from ${format(entryDate, "PPPp")}`
@@ -199,7 +200,9 @@ function WeightLogList({
           onClose={onBulkCancel}
           title="Delete All Entries"
           variant="confirmation"
-          message={"Are you sure you want to delete ALL weight log entries? This action cannot be undone."}
+          message={
+            "Are you sure you want to delete ALL weight log entries? This action cannot be undone."
+          }
           confirmLabel="Delete All"
           cancelLabel="Cancel"
           onConfirm={handleConfirmBulkDelete}

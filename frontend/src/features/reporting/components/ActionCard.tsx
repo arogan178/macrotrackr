@@ -1,4 +1,4 @@
-import type { ActionCardProps } from "../types/insights-types";
+import type { ActionCardProps as ActionCardProps } from "../types/insightsTypes";
 
 export default function ActionCard({
   title,

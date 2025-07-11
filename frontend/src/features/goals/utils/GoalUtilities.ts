@@ -1,4 +1,5 @@
-import type { WeightGoals, WeightGoalFormValues } from "@/types/goal";
+import type { WeightGoalFormValues, WeightGoals } from "@/types/goal";
+
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 
 // Define local payload types since they're not exported from types
@@ -17,7 +18,7 @@ interface GoalPayload {
 export function calculateGoalDetails(
   formValues: WeightGoalFormValues,
   tdee: number,
-  existingStartDate?: string | null,
+  existingStartDate?: string | undefined,
 ): GoalPayload & { weightGoal: string } {
   const {
     startingWeight, // Needed for calculation but not always sent
@@ -56,14 +57,14 @@ export function calculateGoalDetails(
     targetWeight &&
     targetDate
   ) {
-    const startDateObj = existingStartDate
+    const startDateObject = existingStartDate
       ? new Date(existingStartDate)
       : startDate
         ? new Date(startDate)
         : today;
-    const targetDateObj = new Date(targetDate);
+    const targetDateObject = new Date(targetDate);
 
-    const timeDiff = targetDateObj.getTime() - startDateObj.getTime();
+    const timeDiff = targetDateObject.getTime() - startDateObject.getTime();
     const daysDiff = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
     calculatedWeeks = Math.max(1, Math.ceil(daysDiff / 7));
 
@@ -94,10 +95,12 @@ export function validateGoalForm(formValues: WeightGoalFormValues): string[] {
     errors.push("Target weight must be greater than 0");
   }
 
-  if (formValues.startingWeight && formValues.targetWeight) {
-    if (Math.abs(formValues.targetWeight - formValues.startingWeight) < 0.1) {
-      errors.push("Target weight must be different from starting weight");
-    }
+  if (
+    formValues.startingWeight &&
+    formValues.targetWeight &&
+    Math.abs(formValues.targetWeight - formValues.startingWeight) < 0.1
+  ) {
+    errors.push("Target weight must be different from starting weight");
   }
 
   if (formValues.targetDate) {
@@ -192,15 +195,20 @@ export function getMotivationalMessage(
   status: ReturnType<typeof getGoalStatus>,
 ): string {
   switch (status) {
-    case "completed":
+    case "completed": {
       return "🎉 Congratulations! You've reached your goal!";
-    case "ahead":
+    }
+    case "ahead": {
       return "🚀 Great job! You're ahead of schedule!";
-    case "on-track":
+    }
+    case "on-track": {
       return "💪 Keep it up! You're right on track!";
-    case "behind":
+    }
+    case "behind": {
       return "📈 Don't give up! Small consistent changes make a big difference!";
-    default:
+    }
+    default: {
       return "🎯 Stay focused on your goal!";
+    }
   }
 }

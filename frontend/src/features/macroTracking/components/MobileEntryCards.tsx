@@ -1,8 +1,9 @@
+import { AnimatePresence, motion } from "motion/react";
 import { memo } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { ChevronDownIcon } from "@/components/ui";
+
+import { ActionButton, ActionButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/nutrition";
-import { ActionButtonGroup, ActionButton } from "@/components/form";
+import { ChevronDownIcon } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
 interface GroupedEntry {
@@ -24,7 +25,7 @@ interface MobileEntryCardsProps {
   capitalizeFirstLetter: (string: string) => string;
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
   toggleDateCollapse: (date: string) => void;
-  handleDeleteDate: (date: string, e: React.MouseEvent) => void;
+  handleDeleteDate: (date: string, event: React.MouseEvent) => void;
   onEdit: (entry: MacroEntry) => void;
   deleteEntry: (id: number) => void;
   isDeleting: boolean;
@@ -198,8 +199,7 @@ const MobileEntryCards = memo(
                 </span>
                 <ActionButton
                   variant="delete"
-                  size="sm"
-                  onClick={(e) => handleDeleteDate(group.date, e)}
+                  onClick={(event) => handleDeleteDate(group.date, event)}
                   ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
                 />
               </div>
@@ -321,8 +321,7 @@ const MobileEntryCards = memo(
                     </span>
                     <ActionButton
                       variant="delete"
-                      size="sm"
-                      onClick={(e) => handleDeleteDate(group.date, e)}
+                      onClick={(event) => handleDeleteDate(group.date, event)}
                       ariaLabel={`Delete all entries for ${formatDate(
                         group.date,
                       )}`}

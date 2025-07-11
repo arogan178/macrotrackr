@@ -76,17 +76,17 @@ export default function NutritionInsights({
               {averages.carbs === 0
                 ? " No carbohydrate data tracked."
                 : (() => {
-                  const trackedCarbs = aggregatedData
-                    .map((d) => d.carbs)
-                    .filter((c) => c > 0);
-                  if (trackedCarbs.length < 2)
-                    return " Not enough data for pattern analysis.";
-                  const variation =
+                    const trackedCarbs = aggregatedData
+                      .map((d) => d.carbs)
+                      .filter((c) => c > 0);
+                    if (trackedCarbs.length < 2)
+                      return " Not enough data for pattern analysis.";
+                    const variation =
                       Math.max(...trackedCarbs) - Math.min(...trackedCarbs);
-                  return variation > 100
-                    ? " Your carbohydrate intake varies significantly day to day. Consider more consistency for stable energy levels."
-                    : " Your carbohydrate intake is relatively consistent, which helps maintain stable energy levels.";
-                })()}
+                    return variation > 100
+                      ? " Your carbohydrate intake varies significantly day to day. Consider more consistency for stable energy levels."
+                      : " Your carbohydrate intake is relatively consistent, which helps maintain stable energy levels.";
+                  })()}
             </p>
           </div>
         </div>

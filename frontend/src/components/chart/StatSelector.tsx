@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
-import { STAT_COLORS } from "@/utils/chart-colors";
+
 import { FormButton } from "@/components/form";
+import { STAT_COLORS } from "@/utils/chartColors";
 
 interface StatSelectorProps {
   selectedStat: string;

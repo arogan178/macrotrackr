@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { FormButton, CardContainer, TextField } from "@/components/form";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+import { CardContainer, FormButton, TextField } from "@/components/form";
 import { LoadingSpinner, LockIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/utils/api-service";
+import { ApiError } from "@/utils/apiServices";
 
 function ResetPasswordForm() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParameters] = useSearchParams();
   const [newPassword, setNewPassword] = useState("");
   const {
     auth: { isLoading },
@@ -15,10 +16,10 @@ function ResetPasswordForm() {
     showNotification,
   } = useStore();
 
-  const token = searchParams.get("token");
+  const token = searchParameters.get("token");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     if (!token) {
       showNotification("No reset token found.", "error");
       return;
