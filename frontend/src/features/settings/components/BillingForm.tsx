@@ -6,7 +6,7 @@ import { useStore } from "@/store/store";
 import { createPortalSession } from "@/utils/apiBilling";
 
 import FreeBillingView from "./FreeBillingView";
-import parseBillingError from "./parseBillingError";
+import parseBillingError from "../utils/parseBillingError";
 import ProBillingView from "./ProBillingView";
 
 function handleUpgradeRedirect() {
