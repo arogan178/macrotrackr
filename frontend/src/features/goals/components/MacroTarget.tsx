@@ -1,11 +1,13 @@
-import { useState, useCallback, memo } from "react";
-import MacroSlider, { MacroBadge } from "./MacroSlider";
+import { memo, useCallback, useState } from "react";
+
 import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/ui";
-import type { MacroType, MacroTargetProps } from "@/types/macro";
-import { useMacroTarget } from "../hooks/useMacroTarget";
-import MacroTargetBar from "./MacroTargetBar";
+import type { MacroTargetProps, MacroType } from "@/types/macro";
+
 import { DEFAULT_TARGET_VALUES } from "../constants";
+import { useMacroTarget } from "../hooks/useMacroTarget";
+import MacroSlider, { MacroBadge } from "./MacroSlider";
+import MacroTargetBar from "./MacroTargetBar";
 
 // Use React.memo for performance optimization
 const MacroTarget = memo(

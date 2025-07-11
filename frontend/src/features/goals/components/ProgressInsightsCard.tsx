@@ -1,25 +1,28 @@
+import {
+  differenceInWeeks,
+  isValid,
+  parseISO,
+  startOfWeek,
+  subWeeks,
+} from "date-fns";
 import React from "react";
-import { WeightGoals } from "@/types/goal";
-import { WeightLogEntry } from "@/utils/api-service";
+
 import { CardContainer } from "@/components/form";
 import { LightBulbIcon } from "@/components/ui"; // Assuming this exists
-import {
-  subWeeks,
-  startOfWeek,
-  parseISO,
-  isValid,
-  differenceInWeeks,
-} from "date-fns";
+import { WeightGoals } from "@/types/goal";
+import { WeightLogEntry } from "@/utils/apiServices";
 
 interface ProgressInsightsCardProps {
   weightLog: WeightLogEntry[];
-  weightGoals: WeightGoals | null;
+  weightGoals: WeightGoals | undefined;
   isLoading: boolean;
 }
 
 // Re-use or adapt weekly change calculation (simplified version here)
-function calculateRecentWeeklyChange(log: WeightLogEntry[]): number | null {
-  if (log.length < 2) return null;
+function calculateRecentWeeklyChange(
+  log: WeightLogEntry[],
+): number | undefined {
+  if (log.length < 2) return undefined;
 
   const now = new Date();
   const fourWeeksAgo = subWeeks(now, 4);
@@ -31,14 +34,14 @@ function calculateRecentWeeklyChange(log: WeightLogEntry[]): number | null {
     )
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  if (recentLogs.length < 2) return null;
+  if (recentLogs.length < 2) return undefined;
 
   // Simple trend: change between first and last point in the last 4 weeks
   const firstLog = recentLogs[0];
-  const lastLog = recentLogs[recentLogs.length - 1];
+  const lastLog = recentLogs.at(-1);
   const weeksBetween = differenceInWeeks(lastLog.date, firstLog.date);
 
-  if (weeksBetween <= 0) return null; // Avoid division by zero or nonsensical results
+  if (weeksBetween <= 0) return undefined; // Avoid division by zero or nonsensical results
 
   return (lastLog.weight - firstLog.weight) / weeksBetween;
 }
@@ -64,7 +67,7 @@ function ProgressInsightsCard({
 
     const actualWeeklyChange = calculateRecentWeeklyChange(weightLog);
 
-    if (actualWeeklyChange === null) {
+    if (actualWeeklyChange === undefined) {
       return {
         message: "Log weight consistently for progress insights.",
         color: "text-gray-400",

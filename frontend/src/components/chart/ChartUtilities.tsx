@@ -57,7 +57,9 @@ interface PercentageLabelProps {
   textColor?: string;
 }
 
-export const PercentageLabel = React.memo((props: PercentageLabelProps) => {
+export const PercentageLabel = React.memo(function PercentageLabel(
+  properties: PercentageLabelProps,
+) {
   const {
     x = 0,
     y = 0,
@@ -65,10 +67,10 @@ export const PercentageLabel = React.memo((props: PercentageLabelProps) => {
     height = 0,
     value = 0,
     textColor = "#ffffff",
-  } = props;
+  } = properties;
 
   // Only show label if value is significant enough to fit
-  if (value < 5 || width < 20) return null;
+  if (value < 5 || width < 20) return;
 
   return (
     <text
@@ -85,6 +87,7 @@ export const PercentageLabel = React.memo((props: PercentageLabelProps) => {
     </text>
   );
 });
+PercentageLabel.displayName = "PercentageLabel";
 
 /**
  * Centralized gradient color schemes
@@ -127,8 +130,8 @@ export const COLOR_SCHEMES = {
 /**
  * Format to nicely capitalize words
  */
-export const capitalizeFirstLetter = (str: string): string => {
-  return str.charAt(0).toUpperCase() + str.slice(1);
+export const capitalizeFirstLetter = (string_: string): string => {
+  return string_.charAt(0).toUpperCase() + string_.slice(1);
 };
 
 /**

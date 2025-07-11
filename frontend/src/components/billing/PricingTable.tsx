@@ -1,20 +1,22 @@
-import React, { memo } from "react";
-import ProBadge from "@/components/billing/ProBadge";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
+  CellContext,
   ColumnDef,
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import React, { memo } from "react";
+
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import ProBadge from "@/components/billing/ProBadge";
 import TabButton from "@/components/form/TabButton";
-import { PRICING_PLANS, PRICING } from "@/config/pricing";
+import { PRICING, PRICING_PLANS } from "@/config/pricing";
 
 // Memoize feature arrays outside the component to prevent re-computation on every render
 const freeFeatures = PRICING_PLANS.free.features;
 const proFeatures = PRICING_PLANS.pro.features;
-const allFeatures = Array.from(new Set([...freeFeatures, ...proFeatures]));
+const allFeatures = [...new Set([...freeFeatures, ...proFeatures])];
 
 interface PricingTableProps {
   onUpgrade?: (plan: "monthly" | "yearly") => void;
@@ -51,7 +53,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
     [], // Dependencies are constant, so this only runs once
   );
 
-  const columns = React.useMemo<ColumnDef<FeatureRow, any>[]>(
+  const columns = React.useMemo<ColumnDef<FeatureRow, unknown>[]>(
     () => [
       {
         accessorKey: "feature",
@@ -66,7 +68,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
             </span>
           </div>
         ),
-        cell: (info: any) => (
+        cell: (info: CellContext<FeatureRow, unknown>) => (
           <span
             className="text-left text-gray-200 font-medium"
             style={{ lineHeight: "1.5" }}
@@ -88,7 +90,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
             </span>
           </div>
         ),
-        cell: (info: any) =>
+        cell: (info: CellContext<FeatureRow, unknown>) =>
           info.getValue() ? (
             <span className="inline-block align-middle text-green-400 font-bold">
               ✔️
@@ -142,7 +144,9 @@ const PricingTable: React.FC<PricingTableProps> = ({
                   </motion.span>
                 </AnimatePresence>
                 <span
-                  className={"block text-xs font-semibold mt-1 text-yellow-300 transition-opacity duration-200"}
+                  className={
+                    "block text-xs font-semibold mt-1 text-yellow-300 transition-opacity duration-200"
+                  }
                   style={{
                     minHeight: 18,
                     opacity: selectedPlan === "yearly" ? 1 : 0,
@@ -157,7 +161,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
             </div>
           );
         },
-        cell: (info: any) =>
+        cell: (info: CellContext<FeatureRow, unknown>) =>
           info.getValue() ? (
             <span className="inline-block align-middle text-yellow-300 font-bold">
               ✔️
@@ -291,6 +295,8 @@ const PricingTable: React.FC<PricingTableProps> = ({
               align-items: center;
               justify-content: center;
               transition: background 0.2s, color 0.2s;
+              /* Remove any purple background */
+              background: none !important;
             }
             .pricing-pill-group [role=tab]:first-child {
               border-top-right-radius: 0;
@@ -331,7 +337,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
               ))}
             </thead>
             <tbody>
-              {table.getRowModel().rows.map((row, idx) => (
+              {table.getRowModel().rows.map((row, index) => (
                 <tr
                   key={row.id}
                   className="md:transition-transform md:duration-200 md:hover:-translate-y-1 md:hover:shadow-lg"
@@ -349,21 +355,21 @@ const PricingTable: React.FC<PricingTableProps> = ({
                       className={
                         cell.column.id === "feature"
                           ? `feature-cell px-3 py-2 text-left text-gray-200 font-medium${
-                            idx !== data.length - 1
-                              ? " md:border-b md:border-gray-700/60"
-                              : ""
-                          }`
+                              index === data.length - 1
+                                ? ""
+                                : " md:border-b md:border-gray-700/60"
+                            }`
                           : cell.column.id === "free"
                             ? `px-3 py-2 text-center${
-                              row.index !== data.length - 1
-                                ? " md:border-b md:border-gray-700/60"
-                                : ""
-                            }`
+                                row.index === data.length - 1
+                                  ? ""
+                                  : " md:border-b md:border-gray-700/60"
+                              }`
                             : `px-3 py-2 text-center bg-gradient-to-br from-yellow-900/10 to-orange-900/10${
-                              row.index !== data.length - 1
-                                ? " md:border-b md:border-yellow-700/30"
-                                : ""
-                            }`
+                                row.index === data.length - 1
+                                  ? ""
+                                  : " md:border-b md:border-yellow-700/30"
+                              }`
                       }
                       style={
                         cell.column.id === "feature"
@@ -406,8 +412,8 @@ const PricingTable: React.FC<PricingTableProps> = ({
               {selectedPlan === "monthly"
                 ? `$${PRICING.monthly}/month • Cancel anytime`
                 : `$${PRICING.yearly}/year • $${(PRICING.yearly / 12).toFixed(
-                  2,
-                )}/mo equivalent • Cancel anytime`}
+                    2,
+                  )}/mo equivalent • Cancel anytime`}
             </motion.span>
           </AnimatePresence>
         </div>

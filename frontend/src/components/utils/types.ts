@@ -1,7 +1,9 @@
 // ModalProps: Union type for all modal variants
-export type ModalProps = ConfirmationModalProps | FormModalProps;
 import { ReactNode } from "react";
-import type { ICON_SIZES, BUTTON_SIZES } from "./constants";
+
+import type { BUTTON_SIZES, ICON_SIZES } from "./Constants";
+
+export type ModalProps = ConfirmationModalProps | FormModalProps;
 
 // Define common type aliases for better type safety
 type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost";
@@ -57,7 +59,7 @@ export interface TextFieldProps extends BaseFieldProps {
   maxLength?: number;
   textOnly?: boolean;
   icon?: ReactNode;
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
 }
 
 export interface DateFieldProps extends BaseFieldProps {
@@ -76,7 +78,7 @@ export interface NumberFieldProps {
   step?: number;
   required?: boolean;
   unit?: string;
-  error?: string | null;
+  error?: string | undefined;
   maxDigits?: number;
   placeholder?: number | string; // Allow string placeholder
   disabled?: boolean; // Add disabled prop

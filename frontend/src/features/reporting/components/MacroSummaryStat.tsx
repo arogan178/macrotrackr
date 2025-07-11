@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
-import { useStore } from "@/store/store";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { useStore } from "@/store/store";
 import type { MacroType } from "@/types/macro";
 import { MACRO_COLORS } from "@/utils/constants/macro";
 
@@ -18,29 +19,26 @@ interface MacroSummaryStatsProps {
 // Modified function to accept calorieTarget for percentage calculation
 function calculateAverageMacros(
   data: MacroSummaryStatsProps["data"],
-  calorieTarget: number, // Added calorieTarget parameter
+  calorieTarget: number,
 ) {
-  if (!data.length) return null;
-  const totalMacros = data.reduce(
-    (acc, entry) => {
-      acc.protein += entry.protein;
-      acc.carbs += entry.carbs;
-      acc.fats += entry.fats;
-      acc.calories += entry.calories; // Still track average consumed calories
-      return acc;
-    },
-    { protein: 0, carbs: 0, fats: 0, calories: 0 },
-  );
-  const numDays = data.length;
+  if (data.length === 0) return;
+  const totalMacros = { protein: 0, carbs: 0, fats: 0, calories: 0 };
+  for (const entry of data) {
+    totalMacros.protein += entry.protein;
+    totalMacros.carbs += entry.carbs;
+    totalMacros.fats += entry.fats;
+    totalMacros.calories += entry.calories;
+  }
+  const numberDays = data.length;
   const avgGrams = {
-    protein: totalMacros.protein / numDays,
-    carbs: totalMacros.carbs / numDays,
-    fats: totalMacros.fats / numDays,
+    protein: totalMacros.protein / numberDays,
+    carbs: totalMacros.carbs / numberDays,
+    fats: totalMacros.fats / numberDays,
   };
-  const avgConsumedCalories = totalMacros.calories / numDays;
+  const avgConsumedCalories = totalMacros.calories / numberDays;
 
   // Calculate percentages based on average grams relative to the calorie TARGET
-  const divisor = calorieTarget > 0 ? calorieTarget : 2000; // Use target, fallback to 2000
+  const divisor = calorieTarget > 0 ? calorieTarget : 2000;
   const proteinPct = Math.round(((avgGrams.protein * 4) / divisor) * 100);
   const carbsPct = Math.round(((avgGrams.carbs * 4) / divisor) * 100);
   const fatsPct = Math.round(((avgGrams.fats * 9) / divisor) * 100);
@@ -50,131 +48,130 @@ function calculateAverageMacros(
     protein: proteinPct,
     carbs: carbsPct,
     fats: fatsPct,
-    gProtein: parseFloat(avgGrams.protein.toFixed(1)),
-    gCarbs: parseFloat(avgGrams.carbs.toFixed(1)),
-    gFats: parseFloat(avgGrams.fats.toFixed(1)),
-    calories: Math.round(avgConsumedCalories), // Return the actual average consumed calories
+    gProtein: Number.parseFloat(avgGrams.protein.toFixed(1)),
+    gCarbs: Number.parseFloat(avgGrams.carbs.toFixed(1)),
+    gFats: Number.parseFloat(avgGrams.fats.toFixed(1)),
+    calories: Math.round(avgConsumedCalories),
   };
 }
 
-const MacroSummaryItem = React.memo(
-  ({
-    type,
-    avgPercentage,
-    avgGrams,
-    targetPercentage,
-    targetGrams,
-  }: {
-    type: MacroType;
-    avgPercentage: number;
-    avgGrams: number;
-    targetPercentage: number;
-    targetGrams: number;
-  }) => {
-    const percentageDelta = avgPercentage - targetPercentage;
-    const gramDelta = avgGrams - targetGrams;
+const MacroSummaryItem = React.memo(function MacroSummaryItem({
+  type,
+  avgPercentage,
+  avgGrams,
+  targetPercentage,
+  targetGrams,
+}: {
+  type: MacroType;
+  avgPercentage: number;
+  avgGrams: number;
+  targetPercentage: number;
+  targetGrams: number;
+}) {
+  const percentageDelta = avgPercentage - targetPercentage;
+  const gramDelta = avgGrams - targetGrams;
 
-    return (
-      <div className="flex-1 text-xs flex flex-col justify-between h-full">
-        {/* Header: Macro Name + Deviation Indicator (now based on grams) */}
-        <div className="flex items-center justify-between mb-2">
-          <span
-            className="font-semibold text-lg"
-            style={{ color: MACRO_COLORS[type].base }}
-          >
-            {type.charAt(0).toUpperCase() + type.slice(1)}
-          </span>
-        </div>
-        {/* Average Intake vs Target */}
-        <div className="space-y-1 mb-2">
-          {" "}
-          {/* Average Intake Display */}
-          <div className="flex items-baseline justify-between">
-            <span className="text-gray-400 text-xs mr-1">Average Intake:</span>
-            <div className="text-right">
-              <span className="text-lg font-bold text-white leading-none">
-                <AnimatedNumber
-                  value={avgGrams}
-                  toFixedValue={1}
-                  suffix="g"
-                  duration={0.8}
-                />
-              </span>
-              <span className="text-gray-400 text-xs ml-1">
-                (
-                <AnimatedNumber
-                  value={avgPercentage}
-                  toFixedValue={0}
-                  suffix="%"
-                  duration={0.6}
-                />
-                )
-              </span>
-            </div>
-          </div>{" "}
-          {/* Your Target Display */}
-          <div className="flex items-baseline justify-between">
-            <span className="text-gray-500 text-xs mr-1">Your Target:</span>
-            <div className="text-right">
-              <span className="text-sm font-medium text-gray-300">
-                <AnimatedNumber
-                  value={targetGrams}
-                  toFixedValue={1}
-                  suffix="g"
-                  duration={0.8}
-                />
-              </span>
-              <span className="text-gray-500 text-xs ml-1">
-                (
-                <AnimatedNumber
-                  value={targetPercentage}
-                  toFixedValue={0}
-                  suffix="%"
-                  duration={0.6}
-                />
-                )
-              </span>
-            </div>
-          </div>
-        </div>{" "}
-        {/* Difference from Target */}
-        <div className="flex items-baseline justify-between text-gray-400 mt-auto pt-1 border-t border-gray-700/50">
-          <span className="text-xs mr-1.5">Difference:</span>
+  return (
+    <div className="flex-1 text-xs flex flex-col justify-between h-full">
+      {/* Header: Macro Name + Deviation Indicator (now based on grams) */}
+      <div className="flex items-center justify-between mb-2">
+        <span
+          className="font-semibold text-lg"
+          style={{ color: MACRO_COLORS[type].base }}
+        >
+          {type.charAt(0).toUpperCase() + type.slice(1)}
+        </span>
+      </div>
+      {/* Average Intake vs Target */}
+      <div className="space-y-1 mb-2">
+        {" "}
+        {/* Average Intake Display */}
+        <div className="flex items-baseline justify-between">
+          <span className="text-gray-400 text-xs mr-1">Average Intake:</span>
           <div className="text-right">
-            <span
-              className={`text-sm font-semibold ${
-                gramDelta >= 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
+            <span className="text-lg font-bold text-white leading-none">
               <AnimatedNumber
-                value={gramDelta}
+                value={avgGrams}
                 toFixedValue={1}
                 suffix="g"
-                prefix={gramDelta >= 0 ? "+" : ""}
                 duration={0.8}
               />
             </span>
-            <span
-              className={`text-xs ml-1.5 ${
-                percentageDelta >= 0 ? "text-emerald-400" : "text-rose-400"
-              }`}
-            >
+            <span className="text-gray-400 text-xs ml-1">
               (
               <AnimatedNumber
-                value={Math.round(percentageDelta)}
+                value={avgPercentage}
                 toFixedValue={0}
                 suffix="%"
-                prefix={percentageDelta >= 0 ? "+" : ""}
+                duration={0.6}
+              />
+              )
+            </span>
+          </div>
+        </div>{" "}
+        {/* Your Target Display */}
+        <div className="flex items-baseline justify-between">
+          <span className="text-gray-500 text-xs mr-1">Your Target:</span>
+          <div className="text-right">
+            <span className="text-sm font-medium text-gray-300">
+              <AnimatedNumber
+                value={targetGrams}
+                toFixedValue={1}
+                suffix="g"
+                duration={0.8}
+              />
+            </span>
+            <span className="text-gray-500 text-xs ml-1">
+              (
+              <AnimatedNumber
+                value={targetPercentage}
+                toFixedValue={0}
+                suffix="%"
                 duration={0.6}
               />
               )
             </span>
           </div>
         </div>
+      </div>{" "}
+      {/* Difference from Target */}
+      <div className="flex items-baseline justify-between text-gray-400 mt-auto pt-1 border-t border-gray-700/50">
+        <span className="text-xs mr-1.5">Difference:</span>
+        <div className="text-right">
+          <span
+            className={`text-sm font-semibold ${
+              gramDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+            }`}
+          >
+            <AnimatedNumber
+              value={gramDelta}
+              toFixedValue={1}
+              suffix="g"
+              prefix={gramDelta >= 0 ? "+" : ""}
+              duration={0.8}
+            />
+          </span>
+          <span
+            className={`text-xs ml-1.5 ${
+              percentageDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+            }`}
+          >
+            (
+            <AnimatedNumber
+              value={Math.round(percentageDelta)}
+              toFixedValue={0}
+              suffix="%"
+              prefix={percentageDelta >= 0 ? "+" : ""}
+              duration={0.6}
+            />
+            )
+          </span>
+        </div>
       </div>
-    );
-  },
-);
+    </div>
+  );
+});
+MacroSummaryItem.displayName = "MacroSummaryItem";
 
 export default function MacroSummaryStats({
   data,
@@ -212,8 +209,8 @@ export default function MacroSummaryStats({
 
   // Average calories over selected range (still based on actual consumption)
   const avgCalories = useMemo(() => {
-    if (!data.length) return 0;
-    const total = data.reduce((acc, d) => acc + d.calories, 0);
+    if (data.length === 0) return 0;
+    const total = data.reduce((accumulator, d) => accumulator + d.calories, 0);
     return Math.round(total / data.length);
   }, [data]);
 
@@ -224,7 +221,7 @@ export default function MacroSummaryStats({
     // Dependency updated
   }, [data, effectiveCalorieTarget]);
 
-  if (!macroAvg) return null; // Updated early return condition
+  if (!macroAvg) return; // Updated early return condition
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">

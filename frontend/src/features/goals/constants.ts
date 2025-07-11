@@ -26,7 +26,7 @@ export const CALORIES_PER_KG_FAT = 7700; // Approximately 7700 calories per kg o
 export const MIN_SAFE_DAILY_CHANGE = 500; // Minimum safe daily calorie deficit
 export const MAX_SAFE_DAILY_CHANGE = 1000; // Maximum safe daily calorie deficit
 export const MIN_WEEKLY_WEIGHT_LOSS = 0.5; // Minimum recommended weight loss per week (kg)
-export const MAX_WEEKLY_WEIGHT_LOSS = 1.0; // Maximum recommended weight loss per week (kg)
+export const MAX_WEEKLY_WEIGHT_LOSS = 1; // Maximum recommended weight loss per week (kg)
 export const DEFAULT_TARGET_WEEKS = 12; // Default timeframe for goal calculations
 
 // Goal status colors and styling

@@ -1,9 +1,11 @@
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
+import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { PRICING, PRICING_PLANS } from "@/config/pricing";
 import { useStore } from "@/store/store";
-import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
-import { PRICING_PLANS, PRICING } from "@/config/pricing";
+
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
 import TrustIndicators from "./TrustIndicators";

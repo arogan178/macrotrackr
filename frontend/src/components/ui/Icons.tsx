@@ -1,69 +1,70 @@
-import { memo } from "react";
-import { ICON_SIZES } from "../utils/constants";
 import {
-  User,
-  Mail,
-  Lock,
-  Calendar,
-  Ruler,
-  Scale,
-  Info,
-  ArrowRight,
+  AlertCircle,
+  Apple,
   ArrowLeft,
-  Check,
-  X,
-  Eye,
-  EyeOff,
-  Plus,
-  Minus,
-  Edit,
-  Trash2,
-  Search,
-  Loader,
-  Home,
+  ArrowRight,
+  Award,
   BarChart,
   BarChart2,
-  Settings,
-  LogOut,
-  Download,
-  AlertCircle,
-  PlusCircle,
-  Flame,
+  Beef,
+  Book,
+  Calendar,
+  CalendarHeart,
+  Check,
+  CheckCircle,
   ChevronDown,
-  ChevronUp,
   ChevronLeft,
   ChevronRight,
-  Unlock,
-  Menu,
-  Star,
-  Goal,
-  Dumbbell,
-  CheckCircle,
-  Target,
-  Award,
-  Heart,
-  Book,
-  Coffee,
-  Droplet,
-  Moon,
-  Sun,
-  MoreVertical,
-  SmilePlus,
-  CalendarHeart,
-  TrendingUp,
-  TrendingDown,
-  Lightbulb,
-  Zap,
+  ChevronUp,
   CircleQuestionMark,
-  Scale as BalanceScale,
   Clipboard,
-  Apple,
-  Beef,
+  Coffee,
+  Download,
+  Droplet,
+  Dumbbell,
+  Edit,
   ExternalLink,
-  ShieldCheck,
+  Eye,
+  EyeOff,
+  Flame,
+  Goal,
+  Heart,
+  Home,
+  Info,
+  Lightbulb,
+  Loader,
+  Lock,
+  LogOut,
   type LucideIcon,
   type LucideProps,
+  Mail,
+  Menu,
+  Minus,
+  Moon,
+  MoreVertical,
+  Plus,
+  PlusCircle,
+  Ruler,
+  Scale as BalanceScale,
+  Scale,
+  Search,
+  Settings,
+  ShieldCheck,
+  SmilePlus,
+  Star,
+  Sun,
+  Target,
+  Trash2,
+  TrendingDown,
+  TrendingUp,
+  Unlock,
+  User,
+  X,
+  Zap,
 } from "lucide-react";
+import { memo } from "react";
+
+import { ICON_SIZES } from "../utils/Constants";
 
 // Base icon type with common props
 interface IconProps extends Omit<LucideProps, "size"> {
@@ -75,10 +76,10 @@ function createIcon(Icon: LucideIcon) {
   return memo(function IconWrapper({
     className = "",
     size = "md",
-    ...props
+    ...properties
   }: IconProps) {
     const sizeClass = ICON_SIZES[size] || ICON_SIZES.md;
-    return <Icon className={`${sizeClass} ${className}`} {...props} />;
+    return <Icon className={`${sizeClass} ${className}`} {...properties} />;
   });
 }
 
@@ -98,7 +99,7 @@ export function TrendIcon({ direction }: TrendIconProps) {
           ? "text-red-400"
           : "text-green-400";
 
-  if (direction === "stable" || direction === "insufficient") return null;
+  if (direction === "stable" || direction === "insufficient") return;
 
   // Use Lucide TrendingUp/TrendingDown with dynamic styling
   const IconComponent = isUp ? TrendingUp : TrendingDown;

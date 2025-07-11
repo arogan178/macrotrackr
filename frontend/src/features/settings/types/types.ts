@@ -14,11 +14,11 @@ export interface UserSettings {
   firstName: string;
   lastName: string;
   email: string;
-  dateOfBirth: string | null; // Use null for potentially unset values
-  height: number | null;
-  weight: number | null;
-  activityLevel: number | null; // Store the number (1-5) consistent with backend
-  gender: Gender | null;
+  dateOfBirth: string | undefined; // Use undefined for potentially unset values
+  height: number | undefined;
+  weight: number | undefined;
+  activityLevel: number | undefined; // Store the number (1-5) consistent with backend
+  gender: Gender | undefined;
 }
 
 // Represents calculated nutritional info based on UserSettings

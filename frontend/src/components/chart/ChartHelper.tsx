@@ -10,7 +10,7 @@ export function DefaultTooltip({
   payload,
   label,
 }: TooltipProps<ValueType, NameType>) {
-  if (active && payload && payload.length) {
+  if (active && payload && payload.length > 0) {
     return (
       <div className="bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 shadow-lg text-sm">
         <p className="label text-gray-200 font-semibold mb-1">{label}</p>
@@ -28,7 +28,7 @@ export function DefaultTooltip({
       </div>
     );
   }
-  return null;
+  return;
 }
 
 // Chart element generator helpers (e.g., gradients, reference lines)

@@ -1,4 +1,5 @@
 import type { MacroTargetSettings } from "@/types/macro";
+
 export interface AggregatedDataPoint {
   name: string;
   calories: number;
@@ -19,7 +20,7 @@ export interface UnifiedInsightsProps {
   averages: NutritionAverage;
   isLoading: boolean;
   showNoDataMessage?: boolean;
-  macroTarget?: MacroTargetSettings | null;
+  macroTarget?: MacroTargetSettings | undefined;
 }
 
 export interface MacroBalanceResult {

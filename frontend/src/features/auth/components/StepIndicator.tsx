@@ -1,11 +1,13 @@
 import { memo } from "react";
+
 import { CheckMarkIcon } from "@/components/ui";
+
 import {
-  StepInfo,
   calculateProgressPercentage,
-  getStepIndicatorStyles,
   getStepCircleClasses,
-} from "../utils/step-utils";
+  getStepIndicatorStyles,
+  StepInfo,
+} from "../utils/stepUtilities";
 
 interface StepIndicatorProps {
   currentStep: number;
@@ -43,13 +45,13 @@ export const StepIndicator = memo(function StepIndicator({
 
         {/* Step circles */}
         <div className="relative z-10 flex w-full justify-between">
-          {steps.map((info, idx) => {
+          {steps.map((info, index) => {
             const { circleClasses, labelClasses, isComplete } =
-              getStepCircleClasses(idx, currentStep);
+              getStepCircleClasses(index, currentStep);
 
             return (
               <div
-                key={idx}
+                key={index}
                 className="flex flex-col items-center"
                 style={{
                   width: `${100 / steps.length}%`,
@@ -61,7 +63,7 @@ export const StepIndicator = memo(function StepIndicator({
                   {isComplete ? (
                     <CheckMarkIcon className="w-4 h-4" />
                   ) : (
-                    <span className="text-sm font-medium">{idx + 1}</span>
+                    <span className="text-sm font-medium">{index + 1}</span>
                   )}
                 </div>
                 <span

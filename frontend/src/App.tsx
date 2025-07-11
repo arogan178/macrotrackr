@@ -1,19 +1,20 @@
+import "./style.css";
+
 import React, { Suspense, useEffect } from "react";
 import {
   BrowserRouter,
-  Routes,
-  Route,
   Navigate,
-  useNavigate,
+  Route,
+  Routes,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
+
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useNotificationManager } from "@/features/notifications/hooks/useNotificationManager";
-import { useStore } from "@/store/store";
-import { getToken } from "@/utils/token-storage";
-
-import "./style.css";
+import { useStore } from "@/store/store.ts";
+import { getToken } from "@/utils/tokenStorage";
 
 // Lazy-loaded pages for better performance
 const HomePage = React.lazy(
@@ -135,13 +136,13 @@ function AppContent() {
           <Route
             path="/login"
             element={
-              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+              isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />
             }
           />
           <Route
             path="/register"
             element={
-              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+              isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />
             }
           />
           <Route

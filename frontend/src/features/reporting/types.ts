@@ -1,8 +1,7 @@
 // Re-export all types from the organized types folder
-export * from "./types/insights-types";
+export * from "./types/insightsTypes";
 
 // Additional reporting types
-import type { MacroDailyTotals } from "@/types/macro";
 
 export interface DateRangeData {
   startDate: string;
@@ -16,4 +15,4 @@ export interface ReportingPeriod {
   days: number;
 }
 
-export type { MacroDailyTotals };
+export { type MacroDailyTotals } from "@/types/macro";

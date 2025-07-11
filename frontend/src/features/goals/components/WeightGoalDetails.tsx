@@ -1,7 +1,6 @@
 import { CardContainer } from "@/components/form";
+import { EditIcon, ProgressBar, TrashIcon } from "@/components/ui";
 import { WeightGoals } from "@/types/goal";
-import { EditIcon, TrashIcon, ProgressBar } from "@/components/ui";
-
 
 interface WeightGoalDetailsProps {
   goalData: WeightGoals;
@@ -14,10 +13,11 @@ interface WeightGoalDetailsProps {
 }
 
 function getDirectionText(
-  startingWeight: number | null,
-  targetWeight: number | null,
+  startingWeight: number | undefined,
+  targetWeight: number | undefined,
 ) {
-  if (startingWeight === null || targetWeight === null) return "Maintaining";
+  if (startingWeight === undefined || targetWeight === undefined)
+    return "Maintaining";
   if (targetWeight < startingWeight) return "Losing";
   if (targetWeight > startingWeight) return "Gaining";
   return "Maintaining";
@@ -34,40 +34,39 @@ function WeightGoalDetails({
 }: WeightGoalDetailsProps) {
   // Extract goal data with safe defaults
   const {
-    startingWeight = null, // Changed from startingWeight to startingWeight
-    targetWeight = null,
-    calorieTarget = null,
-    startDate = null,
-    targetDate = null,
+    startingWeight, // Changed from startingWeight to startingWeight
+    targetWeight,
+    calorieTarget,
+    startDate,
+    targetDate,
   } = goalData;
 
   // Format dates for display
   const formattedStartDate = startDate
     ? new Date(startDate).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
     : "Not set";
 
   const formattedTargetDate = targetDate
     ? new Date(targetDate).toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    })
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })
     : "Not set";
 
   // Calculate days remaining if target date exists
   const daysRemaining = targetDate
     ? Math.max(
-      0,
-      Math.ceil(
-        (new Date(targetDate).getTime() - new Date().getTime()) /
-            (1000 * 60 * 60 * 24),
-      ),
-    )
-    : null;
+        0,
+        Math.ceil(
+          (new Date(targetDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+        ),
+      )
+    : undefined;
 
   // Get direction text based on starting and target weights
   const directionText = getDirectionText(startingWeight, targetWeight);
@@ -114,21 +113,21 @@ function WeightGoalDetails({
         <div className="bg-gray-800/30 p-3 rounded-md">
           <div className="text-sm text-gray-400 mb-1">Starting Weight</div>
           <div className="text-xl font-medium text-gray-100">
-            {startingWeight !== null ? `${startingWeight} kg` : "Not set"}
+            {startingWeight === undefined ? "Not set" : `${startingWeight} kg`}
           </div>
         </div>
 
         <div className="bg-gray-800/30 p-3 rounded-md">
           <div className="text-sm text-gray-400 mb-1">Target Weight</div>
           <div className="text-xl font-medium text-gray-100">
-            {targetWeight !== null ? `${targetWeight} kg` : "Not set"}
+            {targetWeight === undefined ? "Not set" : `${targetWeight} kg`}
           </div>
         </div>
 
         <div className="bg-gray-800/30 p-3 rounded-md">
           <div className="text-sm text-gray-400 mb-1">Daily Calories</div>
           <div className="text-xl font-medium text-gray-100">
-            {calorieTarget !== null ? `${calorieTarget} kcal` : "Not set"}
+            {calorieTarget === undefined ? "Not set" : `${calorieTarget} kcal`}
           </div>
           {calorieTarget && tdee ? (
             <div className="text-xs text-gray-500 mt-0.5">
@@ -142,21 +141,21 @@ function WeightGoalDetails({
                 </span>
               )}
             </div>
-          ) : null}
+          ) : undefined}
         </div>
 
         <div className="bg-gray-800/30 p-3 rounded-md">
           <div className="text-sm text-gray-400 mb-1">Timeline</div>
           <div className="text-xl font-medium text-gray-100">
-            {daysRemaining !== null
-              ? `${daysRemaining} days left`
-              : "No end date"}
+            {daysRemaining === undefined
+              ? "No end date"
+              : `${daysRemaining} days left`}
           </div>
           {startDate && targetDate ? (
             <div className="text-xs text-gray-500 mt-0.5">
               {formattedStartDate} – {formattedTargetDate}
             </div>
-          ) : null}
+          ) : undefined}
         </div>
       </div>
 
@@ -170,9 +169,9 @@ function WeightGoalDetails({
         <ProgressBar progress={progressPercentage} />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
           <span>
-            {startingWeight !== null
-              ? `${startingWeight} kg (start)`
-              : "Starting"}
+            {startingWeight === undefined
+              ? "Starting"
+              : `${startingWeight} kg (start)`}
           </span>
           <span>
             {weightRemaining > 0
@@ -180,7 +179,9 @@ function WeightGoalDetails({
               : "Goal reached!"}
           </span>
           <span>
-            {targetWeight !== null ? `${targetWeight} kg (goal)` : "Target"}
+            {targetWeight === undefined
+              ? "Target"
+              : `${targetWeight} kg (goal)`}
           </span>
         </div>
       </div>

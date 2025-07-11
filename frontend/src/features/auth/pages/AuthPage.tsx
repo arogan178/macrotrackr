@@ -1,9 +1,10 @@
-import { useState, useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
+
 import {
-  LoginForm,
-  RegisterForm,
   ButtonModeToggle,
   ForgotPasswordForm,
+  LoginForm,
+  RegisterForm,
 } from "@/features/auth/components";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import { useStore } from "@/store/store";
@@ -18,7 +19,7 @@ const ANIMATION_CUBIC_BEZIER = "cubic-bezier(0.4, 0, 0.2, 1)";
  * Inline animation style objects for form transitions.
  * Not shared: only used in AuthPage, not reused elsewhere.
  */
-const styles: Record<string, React.CSSProperties> = {
+const styles: Record<string, React.CSSProps> = {
   container: {
     transition: `height ${ANIMATION_HEIGHT_DURATION}ms ${ANIMATION_CUBIC_BEZIER}`,
     willChange: "height",
@@ -60,8 +61,8 @@ export default function AuthPage() {
   >("login");
   const { auth, clearAuthError } = useStore();
 
-  const formContainerRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
+  const formContainerReference = useRef<HTMLDivElement>(undefined);
+  const contentReference = useRef<HTMLDivElement>(undefined);
 
   /**
    * Handles animated toggle between login and register forms.
@@ -73,8 +74,8 @@ export default function AuthPage() {
       clearAuthError();
       setIsTransitioning(true);
 
-      const container = formContainerRef.current;
-      const content = contentRef.current;
+      const container = formContainerReference.current;
+      const content = contentReference.current;
       if (!container || !content) return;
 
       // 1. Apply animation styles
@@ -114,18 +115,22 @@ export default function AuthPage() {
 
   const renderForm = () => {
     switch (visibleMode) {
-      case "login":
+      case "login": {
         return (
           <LoginForm onForgotPassword={() => toggleMode("forgotPassword")} />
         );
-      case "register":
+      }
+      case "register": {
         return <RegisterForm />;
-      case "forgotPassword":
+      }
+      case "forgotPassword": {
         return (
           <ForgotPasswordForm onSwitchToLogin={() => toggleMode("login")} />
         );
-      default:
-        return null;
+      }
+      default: {
+        return;
+      }
     }
   };
 
@@ -158,8 +163,8 @@ export default function AuthPage() {
         )}
 
         {/* Animated form container (login/register) */}
-        <div ref={formContainerRef} style={styles.container}>
-          <div ref={contentRef} style={styles.content}>
+        <div ref={formContainerReference} style={styles.container}>
+          <div ref={contentReference} style={styles.content}>
             {renderForm()}
           </div>
         </div>

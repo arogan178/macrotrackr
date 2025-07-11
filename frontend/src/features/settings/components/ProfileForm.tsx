@@ -1,60 +1,59 @@
 import {
-  TextField,
-  NumberField,
-  Dropdown,
-  DateField,
   CardContainer,
+  DateField,
+  Dropdown,
+  NumberField,
+  TextField,
 } from "@/components/form";
 import {
-  type UserSettings,
-  type Gender,
-  type ActivityLevel,
-} from "@/types/user";
-import {
-  GENDER_OPTIONS,
   ACTIVITY_LEVELS,
+  GENDER_OPTIONS,
   getActivityLevelFromString,
 } from "@/features/settings/utils/constants";
+import {
+  type ActivityLevel,
+  type Gender,
+  type UserSettings,
+} from "@/types/user";
 
 type ProfileFormProps = {
   settings: UserSettings;
   updateSetting: <K extends keyof UserSettings>(
     key: K,
-    value: UserSettings[K]
+    value: UserSettings[K],
   ) => void;
   formErrors: Record<string, string>;
 };
+
+function getActivityLevelOptions() {
+  return Object.entries(ACTIVITY_LEVELS).map(([key, { label }]) => ({
+    value: Number(key), // Use numeric keys for values
+    label,
+  }));
+}
 
 export default function ProfileForm({
   settings,
   updateSetting,
   formErrors,
 }: ProfileFormProps) {
-  // This function helps convert between numeric values in the database and string values in the UI
-  function getActivityLevelOptions() {
-    return Object.entries(ACTIVITY_LEVELS).map(([key, { label }]) => ({
-      value: Number(key), // Use numeric keys for values
-      label,
-    }));
-  }
-
   // Convert string activity level to number if needed
   const activityLevelValue =
-    typeof settings.activityLevel === "string" && settings.activityLevel ?
-      getActivityLevelFromString(settings.activityLevel as ActivityLevel)
+    typeof settings.activityLevel === "string" && settings.activityLevel
+      ? getActivityLevelFromString(settings.activityLevel as ActivityLevel)
       : settings.activityLevel;
 
   // Ensure weight is a valid positive number
   const handleWeightChange = (value: number | undefined) => {
     // Don't allow undefined, negative or zero weights
-    const validWeight = value && value > 0 ? value : null;
+    const validWeight = value && value > 0 ? value : undefined;
     updateSetting("weight", validWeight);
   };
 
   // Ensure height is a valid positive number
   const handleHeightChange = (value: number | undefined) => {
     // Don't allow undefined, negative or zero heights
-    const validHeight = value && value > 0 ? value : null;
+    const validHeight = value && value > 0 ? value : undefined;
     updateSetting("height", validHeight);
   };
 
