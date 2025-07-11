@@ -32,14 +32,18 @@ const ReportingPage = React.lazy(
 const PricingPage = React.lazy(
   () => import("@/features/pricing/pages/PricingPage"),
 );
-const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
+const ResetPasswordPage = React.lazy(
+  () => import("./features/landing/pages/ResetPasswordPage"),
+);
 const LandingPage = React.lazy(
-  () => import("./features/layout/pages/LandingPage"),
+  () => import("./features/landing/pages/LandingPage"),
 );
 const TermsAndConditionsPage = React.lazy(
-  () => import("./pages/TermsAndConditionsPage"),
+  () => import("./features/landing/pages/TermsAndConditionsPage"),
 );
-const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage"));
+const PrivacyPolicyPage = React.lazy(
+  () => import("./features/landing/pages/PrivacyPolicyPage"),
+);
 
 // Loading fallback for lazy-loaded components
 function LoadingFallback() {

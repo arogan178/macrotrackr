@@ -32,6 +32,50 @@ export const billingRoutes = (app: Elysia) =>
 
       // All routes require authentication
       .use(authMiddleware)
+
+      // Cancel current subscription
+      .post(
+        "/cancel",
+        async ({ user }) => {
+          if (!user) throw new BadRequestError("Authentication required");
+          try {
+            const userSubscription =
+              await SubscriptionService.getUserSubscription(user.userId);
+            const sub = userSubscription.subscription;
+            if (!sub || !sub.stripe_subscription_id) {
+              throw new BadRequestError("No active subscription to cancel");
+            }
+            // Cancel in Stripe
+            await StripeService.cancelSubscription(sub.stripe_subscription_id);
+            // Update local DB
+            await SubscriptionService.cancelSubscription(
+              user.userId,
+              sub.stripe_subscription_id
+            );
+            logger.info(
+              {
+                operation: "cancel_subscription",
+                userId: user.userId,
+                subscriptionId: sub.stripe_subscription_id,
+              },
+              "Canceled user subscription via API"
+            );
+            return {
+              success: true,
+              message:
+                "Subscription canceled. You will retain access until the end of your billing period.",
+            };
+          } catch (error) {
+            handleRouteError(error, "cancel_subscription", user?.userId);
+          }
+        },
+        {
+          detail: {
+            summary: "Cancel the current user's subscription",
+            tags: ["Billing"],
+          },
+        }
+      )
       .post(
         "/checkout",
         async ({ body, user }) => {
@@ -60,9 +104,9 @@ export const billingRoutes = (app: Elysia) =>
             // Determine price ID based on plan
             const plan = body.plan === "yearly" ? "yearly" : "monthly";
             const priceId =
-              plan === "yearly"
-                ? process.env.STRIPE_PRICE_ID_YEARLY || ""
-                : process.env.STRIPE_PRICE_ID_MONTHLY || "";
+              plan === "yearly" ?
+                process.env.STRIPE_PRICE_ID_YEARLY || ""
+              : process.env.STRIPE_PRICE_ID_MONTHLY || "";
             if (!priceId)
               throw new BadRequestError(
                 "Stripe price ID not configured for selected plan"
@@ -170,8 +214,9 @@ export const billingRoutes = (app: Elysia) =>
             return {
               status: subscription.subscription_status,
               hasStripeCustomer: !!subscription.stripe_customer_id,
-              subscription: subscription.subscription
-                ? {
+              subscription:
+                subscription.subscription ?
+                  {
                     id: subscription.subscription.id,
                     status: subscription.subscription.status,
                     currentPeriodEnd:
