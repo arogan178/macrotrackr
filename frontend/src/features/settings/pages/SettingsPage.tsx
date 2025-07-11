@@ -1,17 +1,18 @@
-import { useState, useEffect, useCallback, ReactNode } from "react";
-import Navbar from "@/components/Navbar";
-import FloatingNotification from "../../notifications/components/FloatingNotification";
-import { TabButton, FormButton } from "@/components/form";
-import Modal from "@/components/form/Modal";
-import { useBeforeUnload } from "@/hooks/useBeforeUnload";
+import { ReactNode, useCallback, useEffect, useState } from "react";
+
+import { FormButton, TabButton } from "@/components/form";
+import { Navbar } from "@/components/layout";
+import { AwardIcon, LockIcon, Modal, UserIcon } from "@/components/ui";
 import {
+  BillingForm,
+  ChangePasswordForm,
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
-import BillingForm from "@/features/settings/components/BillingForm";
-import { ChangePasswordForm } from "@/features/settings/components/ChangePasswordForm";
+import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import { useStore } from "@/store/store";
-import { UserIcon, AwardIcon, LockIcon } from "@/components/Icons";
+
+import FloatingNotification from "../../notifications/components/FloatingNotification";
 
 // --- Modified PageHeader Component ---
 // Now accepts tabs as children to render them on the right
@@ -63,9 +64,9 @@ export default function SettingsPage() {
   type TabType = "profile" | "billing" | "security";
   const [activeTab, setActiveTab] = useState<TabType>("profile");
   const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [pendingTabChange, setPendingTabChange] = useState<TabType | null>(
-    null
-  );
+  const [pendingTabChange, setPendingTabChange] = useState<
+    TabType | undefined
+  >();
 
   // Fetch settings on component mount
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function SettingsPage() {
   // Warn user before leaving page with unsaved changes
   useBeforeUnload(
     hasSettingsChanges,
-    "You have unsaved changes. Are you sure you want to leave?"
+    "You have unsaved changes. Are you sure you want to leave?",
   );
 
   const handleTabChange = useCallback(
@@ -87,7 +88,7 @@ export default function SettingsPage() {
         setActiveTab(tab);
       }
     },
-    [hasSettingsChanges]
+    [hasSettingsChanges],
   );
 
   const confirmTabChange = useCallback(() => {
@@ -95,24 +96,24 @@ export default function SettingsPage() {
       // Reset settings to original values when discarding changes
       resetSettings();
       setActiveTab(pendingTabChange);
-      setPendingTabChange(null);
+      setPendingTabChange(undefined);
     }
     setShowConfirmModal(false);
   }, [pendingTabChange, resetSettings]);
 
   const cancelTabChange = useCallback(() => {
-    setPendingTabChange(null);
+    setPendingTabChange(undefined);
     setShowConfirmModal(false);
   }, []);
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (event: React.FormEvent) => {
+      event.preventDefault();
       if (!validateSettingsForm()) return;
       await saveSettings();
       // No need to show a local notification here since the store will handle it
     },
-    [validateSettingsForm, saveSettings]
+    [validateSettingsForm, saveSettings],
   );
 
   return (

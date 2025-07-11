@@ -1,22 +1,24 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
-  TextField,
-  FormButton,
-  Dropdown,
-  NumberField,
-  InfoCard,
   DateField,
+  Dropdown,
+  FormButton,
+  InfoCard,
+  NumberField,
+  TextField,
 } from "@/components/form";
-import { ForwardIcon, BackIcon, CheckIcon, InfoIcon } from "@/components/Icons";
+import { BackIcon, CheckIcon, ForwardIcon, InfoIcon } from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
 } from "@/features/settings/utils/constants";
+import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-import { useStore } from "@/store/store";
-import { handleStepSubmit, handleStepBack } from "../utils";
+
+import { handleStepBack, handleStepSubmit } from "../utils";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -35,14 +37,14 @@ export function StepOne() {
   } = useStore();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      await handleStepSubmit(e, 1, {
+    async (event: React.FormEvent) => {
+      await handleStepSubmit(event, 1, {
         currentStep: 1,
         validateRegisterStep,
         setRegisterStep,
       });
     },
-    [validateRegisterStep, setRegisterStep]
+    [validateRegisterStep, setRegisterStep],
   );
 
   return (
@@ -115,14 +117,14 @@ export function StepTwo() {
   } = useStore();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      await handleStepSubmit(e, 2, {
+    async (event: React.FormEvent) => {
+      await handleStepSubmit(event, 2, {
         currentStep: 2,
         validateRegisterStep,
         setRegisterStep,
       });
     },
-    [validateRegisterStep, setRegisterStep]
+    [validateRegisterStep, setRegisterStep],
   );
 
   return (
@@ -182,7 +184,6 @@ export function StepTwo() {
               iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
-              size="md"
             >
               Back
             </FormButton>
@@ -193,7 +194,6 @@ export function StepTwo() {
               iconPosition="right"
               icon={<ForwardIcon />}
               className="w-2/3"
-              size="md"
             >
               Continue
             </FormButton>
@@ -216,8 +216,8 @@ export function StepThree() {
   } = useStore();
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      await handleStepSubmit(e, 3, {
+    async (event: React.FormEvent) => {
+      await handleStepSubmit(event, 3, {
         currentStep: 3,
         validateRegisterStep,
         setRegisterStep,
@@ -225,7 +225,7 @@ export function StepThree() {
         navigate,
       });
     },
-    [validateRegisterStep, setRegisterStep, submitRegistration, navigate]
+    [validateRegisterStep, setRegisterStep, submitRegistration, navigate],
   );
 
   return (
@@ -238,7 +238,7 @@ export function StepThree() {
             onChange={(value) =>
               setRegisterField(
                 "activityLevel",
-                value ? (Number(value) as never) : ""
+                value ? (Number(value) as never) : "",
               )
             }
             options={[
@@ -271,7 +271,6 @@ export function StepThree() {
               iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
-              size="md"
             >
               Back
             </FormButton>
@@ -283,7 +282,6 @@ export function StepThree() {
               iconPosition="right"
               icon={<CheckIcon />}
               className="w-2/3"
-              size="md"
             >
               Finish
             </FormButton>

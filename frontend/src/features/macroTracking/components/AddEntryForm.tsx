@@ -1,18 +1,20 @@
-import { useState, useCallback, memo } from "react";
+import { memo, useCallback, useState } from "react";
+
 import {
-  NumberField,
   CardContainer,
-  TimeField,
-  Dropdown,
   DateField,
-  TextField,
+  Dropdown,
   FormButton,
+  NumberField,
+  TextField,
+  TimeField,
 } from "@/components/form";
+import { CheckMarkIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
-import { CheckMarkIcon } from "@/components/Icons";
 import { MealType } from "@/types/macro";
-import { MEAL_TYPE_OPTIONS } from "../constants";
+
 import { calculateCaloriesFromMacros } from "../calculations";
+import { MEAL_TYPE_OPTIONS } from "../constants";
 
 interface AddEntryProps {
   onSubmit: (entry: {
@@ -28,16 +30,16 @@ interface AddEntryProps {
 }
 
 function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
-  const [protein, setProtein] = useState<number | undefined>(undefined);
-  const [carbs, setCarbs] = useState<number | undefined>(undefined);
-  const [fats, setFats] = useState<number | undefined>(undefined);
-  const [searchResult, setSearchResult] = useState<string | null>(null);
+  const [protein, setProtein] = useState<number | undefined>();
+  const [carbs, setCarbs] = useState<number | undefined>();
+  const [fats, setFats] = useState<number | undefined>();
+  const [searchResult, setSearchResult] = useState<string | undefined>();
   const [mealType, setMealType] = useState<MealType>("breakfast");
   const [mealName, setMealName] = useState<string>("");
 
   // Default date is today
   const [entryDate, setEntryDate] = useState<string>(
-    new Date().toISOString().split("T")[0]
+    new Date().toISOString().split("T")[0],
   );
 
   // Default time is current time
@@ -46,12 +48,12 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
-    })
+    }),
   );
 
   // Calculate calories dynamically using shared utility
   const calories = Math.round(
-    calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0)
+    calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0),
   );
 
   // Check if all fields are 0 (invalid submission)
@@ -78,18 +80,18 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       fats: string;
       name: string;
     }) => {
-      setProtein(parseFloat(p));
-      setCarbs(parseFloat(c));
-      setFats(parseFloat(f));
+      setProtein(Number.parseFloat(p));
+      setCarbs(Number.parseFloat(c));
+      setFats(Number.parseFloat(f));
       setMealName(name);
       setSearchResult(`Found: ${name} - ${p}g protein, ${c}g carbs, ${f}g fat`);
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
-    async (e: React.FormEvent) => {
-      e.preventDefault();
+    async (event: React.FormEvent) => {
+      event.preventDefault();
 
       if (anyFieldIsUndefined || allFieldsAreZero || !mealName.trim()) {
         return;
@@ -109,7 +111,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       setCarbs(undefined);
       setFats(undefined);
       setMealName("");
-      setSearchResult(null);
+      setSearchResult(undefined);
     },
     [
       protein,
@@ -122,7 +124,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       onSubmit,
       anyFieldIsUndefined,
       allFieldsAreZero,
-    ]
+    ],
   );
 
   return (
@@ -246,7 +248,6 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               loadingText="Saving..."
               text="Add Entry"
               variant="primary"
-              size="md"
             />
           </div>
         </form>

@@ -1,10 +1,10 @@
-import FormButton from "@/components/form/FormButton";
 import { useNavigate } from "react-router-dom";
+
 import { CardContainer, TextField } from "@/components/form";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
-import { CalorieIcon } from "@/components/Icons";
+import { CalorieIcon } from "@/components/ui";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/utils/api-service";
+import { ApiError } from "@/utils/apiServices";
 
 interface LoginFormProps {
   onForgotPassword: () => void;
@@ -20,8 +20,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
     showNotification,
   } = useStore();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     try {
       await login(email, password);
       showNotification("Login successful", "success");
@@ -41,7 +41,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
       } else {
         showNotification(
           "Login failed. Please check your credentials.",
-          "error"
+          "error",
         );
       }
     }

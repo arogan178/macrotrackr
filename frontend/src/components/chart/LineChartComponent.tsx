@@ -1,31 +1,33 @@
+import { AnimatePresence, motion } from "motion/react";
 import React from "react";
 import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
   CartesianGrid,
-  Tooltip,
   Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
+  Tooltip,
   TooltipProps,
+  XAxis,
   XAxisProps,
+  YAxis,
   YAxisProps,
 } from "recharts";
-import { motion, AnimatePresence } from "motion/react";
-import LoadingSpinner from "@/components/form/LoadingSpinner"; // Corrected path
 import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
-import type { ChartDataPoint, LineConfig } from "@/components/utils/types";
-import { DefaultTooltip } from "./chart-helpers";
+
+import LoadingSpinner from "@/components/ui/LoadingSpinner"; // Corrected path
+import type { ChartDataPoint, LineConfig } from "@/components/utils/Types";
+
+import { DefaultTooltip } from "./ChartHelper";
 
 // Interface for CustomDot props to improve type safety
 interface CustomDotProps {
   cx?: number;
   cy?: number;
-  payload?: any; // The data point payload
+  payload?: ChartDataPoint;
   dataKey?: string;
   r?: number;
   dataLength?: number;
@@ -35,18 +37,18 @@ interface CustomDotProps {
 }
 
 // Custom dot component that adapts based on data length and hides when value is 0
-const CustomDot = (props: CustomDotProps) => {
-  const { cx, cy, payload, dataKey, r = 2, dataLength = 0 } = props;
-  const value = payload && dataKey ? payload[dataKey] : null;
+const CustomDot = (properties: CustomDotProps) => {
+  const { cx, cy, payload, dataKey, r = 2, dataLength = 0 } = properties;
+  const value = payload && dataKey ? payload[dataKey] : undefined;
 
-  // Don't render dot if value is 0 or null/undefined
+  // Don't render dot if value is 0 or undefined/undefined
   if (!value || value === 0) {
-    return null;
+    return;
   }
 
   // Hide dots completely for very long datasets (90+ days) to reduce clutter
   if (dataLength > 60) {
-    return null;
+    return;
   }
 
   // Adaptive dot size based on data length
@@ -62,8 +64,8 @@ const CustomDot = (props: CustomDotProps) => {
       cx={cx}
       cy={cy}
       r={dotSize}
-      fill={props.fill || props.stroke}
-      stroke={props.stroke}
+      fill={properties.fill || properties.stroke}
+      stroke={properties.stroke}
       strokeWidth="0"
     />
   );
@@ -73,7 +75,7 @@ interface LineChartComponentProps {
   data: ChartDataPoint[]; // Use imported type
   lines: LineConfig[]; // Use imported type
   isLoading: boolean;
-  error?: string | null;
+  error?: string | undefined;
   emptyState?: React.ReactNode;
   tooltipContent?:
     | React.ReactElement
@@ -88,16 +90,24 @@ interface LineChartComponentProps {
   showNoDataMessage?: boolean; // Added prop to control default message visibility
 }
 
+// Adaptive interval based on data length
+function getAdaptiveInterval(dataLength: number) {
+  if (dataLength > 60) return Math.floor(dataLength / 8); // Show ~8 ticks for 90+ days
+  if (dataLength > 30) return Math.floor(dataLength / 6); // Show ~6 ticks for 30-60 days
+  if (dataLength > 15) return Math.floor(dataLength / 5); // Show ~5 ticks for 15-30 days
+  return "preserveStartEnd"; // Show all ticks for shorter periods
+}
+
 const LineChartComponent: React.FC<LineChartComponentProps> = ({
   data,
   lines,
   isLoading,
-  error = null,
-  emptyState = null,
+  error,
+  emptyState,
   tooltipContent,
-  chartElements = null,
-  xAxisProps = {},
-  yAxisProps = {},
+  chartElements,
+  xAxisProps: xAxisProps = {},
+  yAxisProps: yAxisProps = {},
   margin = { top: 5, right: 15, left: 5, bottom: 5 },
   showLegend = true,
   className = "",
@@ -107,14 +117,6 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   const hasData = data && data.length > 0;
   // Assign the component or element directly
   const TooltipContent = tooltipContent || DefaultTooltip;
-
-  // Adaptive interval based on data length
-  const getAdaptiveInterval = (dataLength: number) => {
-    if (dataLength > 60) return Math.floor(dataLength / 8); // Show ~8 ticks for 90+ days
-    if (dataLength > 30) return Math.floor(dataLength / 6); // Show ~6 ticks for 30-60 days
-    if (dataLength > 15) return Math.floor(dataLength / 5); // Show ~5 ticks for 15-30 days
-    return "preserveStartEnd"; // Show all ticks for shorter periods
-  };
 
   const defaultXAxisProps: Partial<XAxisProps> = {
     dataKey: "name",
@@ -294,14 +296,14 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                 dataLength > 60
                   ? 1.5
                   : dataLength > 30
-                  ? 2
-                  : line.strokeWidth || 2;
+                    ? 2
+                    : line.strokeWidth || 2;
               const adaptiveActiveDot =
                 dataLength > 60
                   ? { r: 4 }
                   : dataLength > 30
-                  ? { r: 5 }
-                  : line.activeDot ?? { r: 6 };
+                    ? { r: 5 }
+                    : (line.activeDot ?? { r: 6 });
 
               return (
                 <Line

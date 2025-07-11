@@ -1,6 +1,6 @@
 import { useState } from "react";
-import FormButton from "@/components/form/FormButton";
-import { TextField } from "@/components/form";
+
+import { FormButton, TextField } from "@/components/form";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 
 type AuthMode = "login" | "register";
@@ -15,14 +15,14 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     setLoading(true);
     setError("");
     try {
       await onSubmit({ email, password });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+    } catch (error_) {
+      setError(error_ instanceof Error ? error_.message : "An error occurred");
     } finally {
       setLoading(false);
     }

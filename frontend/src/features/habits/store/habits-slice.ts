@@ -1,14 +1,16 @@
 import { StateCreator } from "zustand";
+
+import { apiService } from "@/utils/apiServices";
+import { getErrorMessage } from "@/utils/errorHandling";
+
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants";
 import { HabitGoal, HabitGoalFormValues, HabitsState } from "../types/types";
-import { apiService } from "@/utils/api-service";
-import { getErrorMessage } from "@/utils/error-handling";
 import {
-  createNewHabit,
-  updateHabitFromForm,
-  incrementHabitProgress,
   completeHabit,
+  createNewHabit,
+  incrementHabitProgress,
+  updateHabitFromForm,
 } from "../utils";
-import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../constants";
 
 // Define the notification type
 interface Notification {
@@ -44,11 +46,11 @@ export const createHabitsSlice: StateCreator<
   // Initial State
   habits: [],
   isLoading: false,
-  error: null,
+  error: undefined,
 
   // --- Fetch Actions ---
   fetchHabits: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     try {
       const habits = await apiService.habits.getHabit();
       set({ habits, isLoading: false });
@@ -61,7 +63,7 @@ export const createHabitsSlice: StateCreator<
 
   // --- Add Action ---
   addHabit: async (values: HabitGoalFormValues) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     const fullGet = get as () => FullState;
 
     try {
@@ -92,13 +94,13 @@ export const createHabitsSlice: StateCreator<
   },
   // --- Update Action ---
   updateHabit: async (id: string, values: HabitGoalFormValues) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     const fullGet = get as () => FullState;
 
     try {
       const currentHabits = get().habits;
       const habitIndex = currentHabits.findIndex(
-        (habit: HabitGoal) => habit.id === id
+        (habit: HabitGoal) => habit.id === id,
       );
 
       if (habitIndex === -1) {
@@ -147,13 +149,13 @@ export const createHabitsSlice: StateCreator<
   // --- Increment Progress Action ---
   incrementHabitProgress: async (id: string) => {
     // Don't set global loading state to avoid full UI refresh
-    set({ error: null });
+    set({ error: undefined });
     const fullGet = get as () => FullState;
 
     try {
       const currentHabits = get().habits;
       const habitIndex = currentHabits.findIndex(
-        (habit: HabitGoal) => habit.id === id
+        (habit: HabitGoal) => habit.id === id,
       );
 
       if (habitIndex === -1 || currentHabits[habitIndex].isComplete) {
@@ -193,13 +195,13 @@ export const createHabitsSlice: StateCreator<
 
   // --- Complete Habit Action ---
   completeHabit: async (id: string) => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     const fullGet = get as () => FullState;
 
     try {
       const currentHabits = get().habits;
       const habitIndex = currentHabits.findIndex(
-        (habit: HabitGoal) => habit.id === id
+        (habit: HabitGoal) => habit.id === id,
       );
 
       if (habitIndex === -1 || currentHabits[habitIndex].isComplete) {
@@ -234,7 +236,7 @@ export const createHabitsSlice: StateCreator<
   // --- Delete Action ---
   deleteHabit: async (id: string) => {
     // Remove global loading state change
-    set({ error: null });
+    set({ error: undefined });
     const fullGet = get as () => FullState;
     const currentHabits = get().habits;
     const habitToDelete = currentHabits.find((habit) => habit.id === id);
@@ -246,7 +248,7 @@ export const createHabitsSlice: StateCreator<
 
     // Optimistic Update: Remove locally first
     const updatedHabits = currentHabits.filter(
-      (habit: HabitGoal) => habit.id !== id
+      (habit: HabitGoal) => habit.id !== id,
     );
     set({ habits: updatedHabits });
 
@@ -276,7 +278,7 @@ export const createHabitsSlice: StateCreator<
 
   // --- Reset All Habits Action ---
   resetHabits: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     try {
       await apiService.habits.resetHabit();
       set({ habits: [], isLoading: false });
@@ -288,5 +290,5 @@ export const createHabitsSlice: StateCreator<
   },
 
   // --- Clear Error Action ---
-  clearError: () => set({ error: null }),
+  clearError: () => set({ error: undefined }),
 });

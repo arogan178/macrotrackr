@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+
 import { MacroEntry } from "@/types/macro";
+
 import { formatDate } from "../utils";
 
 interface MacroTotals {
@@ -10,9 +12,9 @@ interface MacroTotals {
 }
 
 export function useReportingLogic(
-  history: MacroEntry[] | null,
+  history: MacroEntry[] | undefined,
   dateRange: string,
-  isLoadingExternal: boolean // To know if history is loading vs. empty
+  isLoadingExternal: boolean, // To know if history is loading vs. empty
 ) {
   const [aggregatedData, setAggregatedData] = useState<
     {
@@ -27,28 +29,32 @@ export function useReportingLogic(
 
   const mapDateRangeToNumeric = useCallback((range: string): 7 | 30 | 90 => {
     switch (range) {
-      case "week":
+      case "week": {
         return 7;
-      case "month":
+      }
+      case "month": {
         return 30;
-      case "3months":
+      }
+      case "3months": {
         return 90;
-      default:
+      }
+      default: {
         return 7;
+      }
     }
   }, []);
 
   const getDateRangeISOStrings = useCallback(
     (range: string): { startDate: string; endDate: string } => {
       const today = new Date();
-      const endDateStr = today.toISOString().split("T")[0];
+      const endDateString = today.toISOString().split("T")[0];
       const days = mapDateRangeToNumeric(range);
-      const startDateObj = new Date(today);
-      startDateObj.setDate(today.getDate() - (days - 1));
-      const startDateStr = startDateObj.toISOString().split("T")[0];
-      return { startDate: startDateStr, endDate: endDateStr };
+      const startDateObject = new Date(today);
+      startDateObject.setDate(today.getDate() - (days - 1));
+      const startDateString = startDateObject.toISOString().split("T")[0];
+      return { startDate: startDateString, endDate: endDateString };
     },
-    [mapDateRangeToNumeric]
+    [mapDateRangeToNumeric],
   );
 
   const processDataForCharts = useCallback(
@@ -59,12 +65,12 @@ export function useReportingLogic(
       }
 
       const dates: { [key: string]: MacroTotals } = {};
-      const { startDate: startDateStr, endDate: endDateStr } =
+      const { startDate: startDateString, endDate: endDateString } =
         getDateRangeISOStrings(currentRange);
 
-      const startDate = new Date(startDateStr);
+      const startDate = new Date(startDateString);
       startDate.setHours(0, 0, 0, 0);
-      const endDate = new Date(endDateStr);
+      const endDate = new Date(endDateString);
       endDate.setHours(23, 59, 59, 999);
 
       const dateLabels: string[] = [];
@@ -80,12 +86,12 @@ export function useReportingLogic(
         currentDate.setDate(currentDate.getDate() + 1);
       }
 
-      currentHistory.forEach((entry: MacroEntry) => {
-        if (!entry.createdAt) return;
+      for (const entry of currentHistory) {
+        if (!entry.createdAt) continue;
 
-        let entryDateStr: string;
+        let entryDateString: string;
         if (entry.entryDate) {
-          entryDateStr = entry.entryDate;
+          entryDateString = entry.entryDate;
         } else {
           const createdAtDate = new Date(entry.createdAt);
           const year = createdAtDate.getFullYear();
@@ -93,22 +99,22 @@ export function useReportingLogic(
             .toString()
             .padStart(2, "0");
           const day = createdAtDate.getDate().toString().padStart(2, "0");
-          entryDateStr = `${year}-${month}-${day}`;
+          entryDateString = `${year}-${month}-${day}`;
         }
-        const entryDate = new Date(entryDateStr + "T00:00:00");
+        const entryDate = new Date(entryDateString + "T00:00:00");
 
         if (
           entryDate >= startDate &&
           entryDate <= endDate &&
-          dates[entryDateStr]
+          dates[entryDateString]
         ) {
-          dates[entryDateStr].protein += entry.protein;
-          dates[entryDateStr].carbs += entry.carbs;
-          dates[entryDateStr].fats += entry.fats;
-          dates[entryDateStr].calories +=
+          dates[entryDateString].protein += entry.protein;
+          dates[entryDateString].carbs += entry.carbs;
+          dates[entryDateString].fats += entry.fats;
+          dates[entryDateString].calories +=
             entry.protein * 4 + entry.carbs * 4 + entry.fats * 9;
         }
-      });
+      }
 
       const chartData = dateLabels.map((date) => ({
         name: formatDate(date),
@@ -119,7 +125,7 @@ export function useReportingLogic(
       }));
       setAggregatedData(chartData);
     },
-    [getDateRangeISOStrings] // formatDate is stable
+    [getDateRangeISOStrings], // formatDate is stable
   );
 
   useEffect(() => {
@@ -136,18 +142,18 @@ export function useReportingLogic(
     if (!history || history.length === 0) {
       return [];
     }
-    const { startDate: startDateStr, endDate: endDateStr } =
+    const { startDate: startDateString, endDate: endDateString } =
       getDateRangeISOStrings(dateRange);
-    const startDate = new Date(startDateStr + "T00:00:00");
-    const endDate = new Date(endDateStr + "T23:59:59");
+    const startDate = new Date(startDateString + "T00:00:00");
+    const endDate = new Date(endDateString + "T23:59:59");
 
     const relevantEntries = history.filter((entry) => {
-      let entryDateStr: string;
+      let entryDateString: string;
       if (entry.entryDate) {
-        entryDateStr = entry.entryDate;
+        entryDateString = entry.entryDate;
       } else if (entry.createdAt) {
         const createdAtDate = new Date(entry.createdAt);
-        entryDateStr = `${createdAtDate.getFullYear()}-${(
+        entryDateString = `${createdAtDate.getFullYear()}-${(
           createdAtDate.getMonth() + 1
         )
           .toString()
@@ -158,7 +164,7 @@ export function useReportingLogic(
       } else {
         return false;
       }
-      const entryDate = new Date(entryDateStr + "T00:00:00");
+      const entryDate = new Date(entryDateString + "T00:00:00");
       return entryDate >= startDate && entryDate <= endDate;
     });
 
@@ -175,13 +181,22 @@ export function useReportingLogic(
     if (aggregatedData.length === 0)
       return { calories: 0, protein: 0, carbs: 0, fats: 0 };
 
-    const sum = aggregatedData.reduce((acc, val) => acc + val.calories, 0);
-    const proteinSum = aggregatedData.reduce(
-      (acc, val) => acc + val.protein,
-      0
+    const sum = aggregatedData.reduce(
+      (accumulator, value) => accumulator + value.calories,
+      0,
     );
-    const carbsSum = aggregatedData.reduce((acc, val) => acc + val.carbs, 0);
-    const fatsSum = aggregatedData.reduce((acc, val) => acc + val.fats, 0);
+    const proteinSum = aggregatedData.reduce(
+      (accumulator, value) => accumulator + value.protein,
+      0,
+    );
+    const carbsSum = aggregatedData.reduce(
+      (accumulator, value) => accumulator + value.carbs,
+      0,
+    );
+    const fatsSum = aggregatedData.reduce(
+      (accumulator, value) => accumulator + value.fats,
+      0,
+    );
     const count = aggregatedData.length;
 
     return {
@@ -198,9 +213,9 @@ export function useReportingLogic(
       return;
     }
     let csvContent = "Date,Calories,Protein,Carbs,Fats\n";
-    aggregatedData.forEach((item) => {
+    for (const item of aggregatedData) {
       csvContent += `${item.name},${item.calories},${item.protein},${item.carbs},${item.fats}\n`;
-    });
+    }
 
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
@@ -208,9 +223,9 @@ export function useReportingLogic(
     link.setAttribute("href", url);
     link.setAttribute("download", `nutrition_data_${dateRange}.csv`);
     link.style.visibility = "hidden";
-    document.body.appendChild(link);
+    document.body.append(link);
     link.click();
-    document.body.removeChild(link);
+    link.remove();
   }, [aggregatedData, dateRange]);
 
   return {

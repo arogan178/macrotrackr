@@ -1,6 +1,8 @@
 import { memo } from "react";
+
+import { MacroPercentages, MacroType } from "@/types/macro";
+
 import MacroSlider from "./MacroSlider";
-import { MacroType, MacroPercentages } from "@/types/macro";
 
 interface MacroSliderGroupProps {
   percentages: MacroPercentages;

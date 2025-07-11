@@ -1,7 +1,9 @@
-import React from "react";
-import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
-import { testimonials } from "../utils/landing-page-const";
 import { Star } from "lucide-react";
+import React from "react";
+
+import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
+
+import { testimonials } from "../utils/landingPageConstants";
 
 const TestimonialsSection: React.FC = () => (
   <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">

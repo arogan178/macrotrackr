@@ -1,18 +1,21 @@
+import { motion } from "motion/react";
 import { useMemo } from "react";
+// Custom tooltip component
+import type { TooltipProps } from "recharts";
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  LabelList,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-  LabelList,
 } from "recharts";
-import { motion } from "motion/react";
-import { MACRO_COLORS } from "@/utils/chart-colors";
-import { getMacroPercentages, formatDateName } from "@/utils/chart-utils";
+
+import { MACRO_COLORS } from "@/utils/chartColors";
+import { formatDateName, getMacroPercentages } from "@/utils/chartUtilities";
 
 interface NutrientDensityVisualizationProps {
   data: {
@@ -29,10 +32,30 @@ interface NutrientDensityVisualizationProps {
 
 // --- Subcomponents ---
 
-const PercentageLabel = (props: any) => {
-  const { x = 0, y = 0, width = 0, height = 0, value = 0 } = props;
+interface PercentageLabelProps {
+  x?: string | number;
+  y?: string | number;
+  width?: string | number;
+  height?: string | number;
+  value?: string | number;
+}
+
+const PercentageLabel = (properties: PercentageLabelProps) => {
+  // Convert to number if possible, else default to 0
+  const toNumber = (value_: string | number | undefined) =>
+    typeof value_ === "number" ? value_ : value_ ? Number(value_) : 0;
+  const x = toNumber(properties.x);
+  const y = toNumber(properties.y);
+  const width = toNumber(properties.width);
+  const height = toNumber(properties.height);
+  const value =
+    typeof properties.value === "number"
+      ? properties.value
+      : properties.value
+        ? Number(properties.value)
+        : 0;
   // Only show label if value is significant enough to fit
-  if (value < 5 || width < 20) return null;
+  if (value < 5 || width < 20) return;
   return (
     <text
       x={x + width / 2} // Center label horizontally
@@ -90,7 +113,7 @@ function NutrientDensityVisualization({
 
         // Find matching data for this date
         const matchingData = data.find(
-          (item) => item.name === expectedDateName
+          (item) => item.name === expectedDateName,
         );
 
         return (
@@ -138,12 +161,12 @@ function NutrientDensityVisualization({
     if (range <= 30) {
       const groupedData = [];
 
-      for (let i = 0; i < slicedData.length; i += groupSize) {
-        const group = slicedData.slice(i, i + groupSize);
-        if (!group.length) continue;
+      for (let index = 0; index < slicedData.length; index += groupSize) {
+        const group = slicedData.slice(index, index + groupSize);
+        if (group.length === 0) continue;
 
         const firstEntry = group[0];
-        const lastEntry = group[group.length - 1];
+        const lastEntry = group[-1];
         const groupLabel =
           group.length === 1
             ? firstEntry.name
@@ -188,7 +211,7 @@ function NutrientDensityVisualization({
       const monthAggregates = new Map();
       const monthOrder: string[] = [];
 
-      slicedData.forEach((entry) => {
+      for (const entry of slicedData) {
         const month = entry.name.split(" ")[0];
         if (!monthAggregates.has(month)) {
           monthAggregates.set(month, {
@@ -208,7 +231,7 @@ function NutrientDensityVisualization({
         aggregate.fatsSum += entry.fats;
         aggregate.caloriesSum += entry.calories;
         aggregate.count += 1;
-      });
+      }
 
       let monthlyChartData = monthOrder.map((monthName) => {
         const { proteinSum, carbsSum, fatsSum, caloriesSum, count } =
@@ -353,11 +376,21 @@ function NutrientDensityVisualization({
   );
 }
 
-// Custom tooltip component
-const CustomTooltip = ({ active, payload }: any) => {
-  if (!active || !payload || !payload.length) return null;
+interface CustomTooltipPayload {
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  gProtein: string;
+  gCarbs: string;
+  gFats: string;
+  calories: number;
+}
 
-  const data = payload[0].payload;
+const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
+  if (!active || !payload || payload.length === 0) return;
+
+  const data = payload[0].payload as CustomTooltipPayload;
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
       <p className="font-medium text-white mb-1">{data.name}</p>

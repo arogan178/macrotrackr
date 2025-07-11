@@ -1,12 +1,9 @@
-import { useEffect, useState, useRef, useCallback } from "react";
-import type { NotificationType } from "../types";
-import {
-  CheckIcon,
-  CloseIcon,
-  WarningIcon,
-  InfoIcon,
-} from "@/components/Icons";
+import { useCallback, useEffect, useRef, useState } from "react";
+
 import { FormButton } from "@/components/form";
+import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "@/components/ui";
+
+import type { NotificationType } from "../types";
 
 export interface FloatingNotificationProps {
   message: string;
@@ -25,16 +22,16 @@ function FloatingNotification({
 }: FloatingNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const progressRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<number | null>(null);
-  const animationStartedRef = useRef(false);
+  const progressReference = useRef<HTMLDivElement>(undefined);
+  const timerReference = useRef<number | undefined>(undefined);
+  const animationStartedReference = useRef(false);
 
   // Memoize handleClose to prevent unnecessary effect re-runs
   const handleClose = useCallback(() => {
     // Clear any pending timers to avoid duplicate closes
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+    if (timerReference.current) {
+      clearTimeout(timerReference.current);
+      timerReference.current = undefined;
     }
 
     setIsLeaving(true);
@@ -61,31 +58,31 @@ function FloatingNotification({
     if (
       !isVisible ||
       duration <= 0 ||
-      !progressRef.current ||
-      animationStartedRef.current ||
+      !progressReference.current ||
+      animationStartedReference.current ||
       !autoClose
     )
       return;
 
-    animationStartedRef.current = true;
-    const progressEl = progressRef.current;
+    animationStartedReference.current = true;
+    const progressElement = progressReference.current;
 
     // Set up the animation programmatically for better control
-    progressEl.style.transition = `width ${duration}ms linear`;
+    progressElement.style.transition = `width ${duration}ms linear`;
 
     // Ensure we start at full width
-    progressEl.style.width = "100%";
+    progressElement.style.width = "100%";
 
     // Force a reflow to make sure the initial state is rendered
-    void progressEl.offsetWidth;
+    void progressElement.offsetWidth;
 
     // Small delay to ensure proper render sequence
     const startAnimation = () => {
-      if (progressEl) {
-        progressEl.style.width = "0%";
+      if (progressElement) {
+        progressElement.style.width = "0%";
 
         // Set up the auto-close timer to match exactly with animation end
-        timerRef.current = window.setTimeout(() => {
+        timerReference.current = globalThis.setTimeout(() => {
           if (!isLeaving) {
             handleClose();
           }
@@ -97,8 +94,8 @@ function FloatingNotification({
 
     return () => {
       clearTimeout(animationTimer);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (timerReference.current) {
+        clearTimeout(timerReference.current);
       }
     };
   }, [isVisible, duration, isLeaving, handleClose, autoClose]);
@@ -106,8 +103,8 @@ function FloatingNotification({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (timerReference.current) {
+        clearTimeout(timerReference.current);
       }
     };
   }, []);
@@ -178,7 +175,6 @@ function FloatingNotification({
           type="button"
           onClick={handleClose}
           variant="ghost"
-          size="sm"
           className="p-3 h-full text-white/70 hover:text-white"
           ariaLabel="Close notification"
           icon={<CloseIcon className="w-4 h-4" />}
@@ -188,7 +184,7 @@ function FloatingNotification({
         {duration > 0 && autoClose && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 overflow-hidden">
             <div
-              ref={progressRef}
+              ref={progressReference}
               className={`h-full ${progress}`}
               style={{ width: "100%" }}
             ></div>

@@ -1,9 +1,9 @@
+import { motion } from "motion/react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
-import FormButton from "@/components/form/FormButton";
-import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
+
 import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
+import FormButton from "@/components/form/FormButton";
 
 const FinalCTASection: React.FC = () => (
   <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -65,8 +65,8 @@ const FinalCTASection: React.FC = () => (
         >
           <FormButton
             text="Get Started For Free"
-            variant={BUTTON_VARIANTS.PRIMARY}
-            size={BUTTON_SIZES.LG}
+            variant="primary"
+            buttonSize="lg"
             className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 px-12 py-4 text-xl font-semibold shadow-xl transition-all duration-300"
           />
         </motion.div>

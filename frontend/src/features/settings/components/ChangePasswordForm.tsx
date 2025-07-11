@@ -1,30 +1,30 @@
 import { useState } from "react";
-import { useStore } from "@/store/store";
-import { FormButton, CardContainer } from "@/components/form";
-import TextField from "@/components/form/TextField";
-import { FloatingNotification } from "@/features/notifications/components";
 
-export const ChangePasswordForm = () => {
+import { CardContainer, FormButton, TextField } from "@/components/form";
+import { FloatingNotification } from "@/features/notifications/components";
+import { useStore } from "@/store/store";
+
+const ChangePasswordForm = () => {
   const changePassword = useStore((state) => state.changePassword);
   const isChangingPassword = useStore((state) => state.auth.isChangingPassword);
   const changePasswordError = useStore(
-    (state) => state.auth.changePasswordError
+    (state) => state.auth.changePasswordError,
   );
   const changePasswordSuccess = useStore(
-    (state) => state.auth.changePasswordSuccess
+    (state) => state.auth.changePasswordSuccess,
   );
   const clearChangePasswordMessages = useStore(
-    (state) => state.clearChangePasswordMessages
+    (state) => state.clearChangePasswordMessages,
   );
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [formError, setFormError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | undefined>();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError(null);
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setFormError(undefined);
 
     if (newPassword !== confirmPassword) {
       setFormError("New passwords do not match.");
@@ -111,3 +111,5 @@ export const ChangePasswordForm = () => {
     </>
   );
 };
+
+export default ChangePasswordForm;
