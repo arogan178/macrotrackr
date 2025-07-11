@@ -82,11 +82,9 @@ export class SubscriptionService {
           );
         }
         const userStatus =
-          status === "active"
-            ? "pro"
-            : status === "canceled"
-            ? "canceled"
-            : "free";
+          status === "active" ? "pro"
+          : status === "canceled" ? "canceled"
+          : "free";
         safeExecute(
           db,
           "UPDATE users SET subscription_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -266,22 +264,49 @@ export class SubscriptionService {
    */
   static async hasActiveProSubscription(userId: number): Promise<boolean> {
     try {
-      const subscription = safeQuery<{ count: number }>(
+      // First, let's get the raw subscription data to debug
+      const rawSubscription = safeQuery<{
+        id: string;
+        status: string;
+        current_period_end: string;
+      }>(
         db,
-        `SELECT COUNT(*) as count FROM subscriptions 
-         WHERE user_id = ? AND status = 'active' AND datetime(current_period_end) > datetime('now')`,
+        `SELECT id, status, current_period_end FROM subscriptions 
+         WHERE user_id = ? AND status = 'active'`,
         [userId]
       );
 
-      const hasActive = (subscription?.count || 0) > 0;
+      if (!rawSubscription) {
+        logger.debug(
+          {
+            operation: "check_active_pro_subscription",
+            userId,
+            hasActive: false,
+            reason: "no_active_subscription",
+          },
+          "No active subscription found"
+        );
+        return false;
+      }
+
+      // Check if the current period end is in the future
+      const currentPeriodEnd = new Date(rawSubscription.current_period_end);
+      const now = new Date();
+      const hasActive = currentPeriodEnd > now;
 
       logger.debug(
         {
           operation: "check_active_pro_subscription",
           userId,
           hasActive,
+          subscriptionId: rawSubscription.id,
+          status: rawSubscription.status,
+          currentPeriodEnd: rawSubscription.current_period_end,
+          currentPeriodEndParsed: currentPeriodEnd.toISOString(),
+          now: now.toISOString(),
+          isExpired: currentPeriodEnd <= now,
         },
-        "Checked user Pro subscription status"
+        "Checked user Pro subscription status with detailed info"
       );
 
       return hasActive;
