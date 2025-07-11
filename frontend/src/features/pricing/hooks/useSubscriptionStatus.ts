@@ -5,7 +5,17 @@ import { apiService } from "@/utils/apiServices";
 
 interface UserWithSubscription {
   subscription?: {
-    status?: string;
+    status?: "free" | "pro" | "canceled";
+    hasStripeCustomer?: boolean;
+    subscription?: {
+      id: string;
+      status: "active" | "canceled" | "past_due" | "unpaid";
+      currentPeriodEnd: string;
+      stripeSubscriptionId: string;
+    } | null;
+    price?: string | null;
+    paymentMethod?: { brand: string; last4: string } | null;
+    stripeDetails?: any | null;
   };
 }
 
