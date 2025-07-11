@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
 import FormButton from "@/components/form/FormButton";
 
-const FinalCTASection: React.FC = () => (
+const FinalCtaSection: React.FC = () => (
   <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/20 via-transparent to-transparent"></div>
 
@@ -76,4 +76,4 @@ const FinalCTASection: React.FC = () => (
   </section>
 );
 
-export default FinalCTASection;
+export default FinalCtaSection;
