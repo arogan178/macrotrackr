@@ -42,17 +42,7 @@ export interface UserSlice {
     | {
         status: "free" | "pro" | "canceled";
         hasStripeCustomer: boolean;
-        subscription:
-          | {
-              id: string;
-              status: "active" | "canceled" | "past_due" | "unpaid";
-              currentPeriodEnd: string;
-              stripeSubscriptionId: string;
-            }
-          | undefined;
-        price: string | undefined;
-        paymentMethod: { brand: string; last4: string } | undefined;
-        stripeDetails: any | undefined;
+        currentPeriodEnd: string | null;
       }
     | undefined;
 
@@ -152,13 +142,11 @@ export const createUserSlice: StateCreator<
         allowedStatuses.includes(status as "free" | "pro" | "canceled")
           ? (status as "free" | "pro" | "canceled")
           : "free";
+
       const subscription = {
         status: subscriptionStatus,
         hasStripeCustomer: userData.subscription?.hasStripeCustomer || false,
-        subscription: userData.subscription?.subscription || undefined,
-        price: userData.subscription?.price || undefined,
-        paymentMethod: userData.subscription?.paymentMethod || undefined,
-        stripeDetails: userData.subscription?.stripeDetails || undefined,
+        currentPeriodEnd: userData.subscription?.currentPeriodEnd || null,
       };
 
       // Fetch macro target separately
@@ -426,4 +414,17 @@ export const createUserSlice: StateCreator<
   },
 
   clearError: () => set({ error: undefined }),
+
+  // Fetch detailed billing info on demand
+  fetchBillingDetails: async () => {
+    try {
+      const details = await apiService.billing.getBillingDetails();
+      // Use details.subscription, details.price, details.paymentMethod, details.stripeDetails as needed
+      // You may want to store these in a separate billing state slice
+      return details;
+    } catch (error) {
+      console.error("Failed to fetch billing details:", error);
+      return undefined;
+    }
+  },
 });
