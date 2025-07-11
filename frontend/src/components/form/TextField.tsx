@@ -37,10 +37,12 @@
  * <TextField label="Email" value={email} onChange={setEmail} icon={<MailIcon />} helperText="We'll never share your email." />
  */
 import { memo, useId, useState } from "react";
+
+import { EyeIcon, EyeSlashIcon } from "@/components/ui";
+import { formStyles } from "@/components/utils/Styles";
+import type { TextFieldProps } from "@/components/utils/Types";
+
 import ActionButton from "./ActionButton";
-import type { TextFieldProps } from "@/components/utils/types";
-import { formStyles } from "@/components/utils/styles";
-import { EyeIcon, EyeSlashIcon } from "@/components/Icons";
 
 function TextField({
   label,
@@ -66,11 +68,11 @@ function TextField({
   if (helperText && !error) describedByIds.push(`${inputId}-helper`);
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value;
 
     if (textOnly && newValue !== "") {
-      const textOnlyValue = newValue.replace(/[^a-zA-Z\s]/g, "");
+      const textOnlyValue = newValue.replaceAll(/[^\sA-Za-z]/g, "");
       onChange(textOnlyValue);
     } else {
       onChange(newValue);
@@ -78,7 +80,7 @@ function TextField({
   };
 
   const togglePasswordVisibility = () => {
-    setShowPassword((prevShow) => !prevShow);
+    setShowPassword((previousShow) => !previousShow);
   };
 
   const inputType =
@@ -109,7 +111,7 @@ function TextField({
           className={inputClasses}
           required={required}
           aria-describedby={
-            describedByIds.length ? describedByIds.join(" ") : undefined
+            describedByIds.length > 0 ? describedByIds.join(" ") : undefined
           }
           aria-label={ariaLabel}
         />

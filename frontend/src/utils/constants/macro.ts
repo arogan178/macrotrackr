@@ -1,4 +1,11 @@
+// Macro percentage keys for consistent use across the app
 import type { MacroTargetState } from "@/types/macro";
+
+export const MACRO_PERCENTAGE_KEYS = [
+  "proteinPercentage",
+  "carbsPercentage",
+  "fatsPercentage",
+] as const;
 
 export const DEFAULT_MACRO_TARGET: MacroTargetState = {
   proteinPercentage: 30,

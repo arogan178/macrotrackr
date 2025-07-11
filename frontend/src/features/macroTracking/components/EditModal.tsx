@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
-import Modal from "@/components/form/Modal";
+import { useEffect, useState } from "react";
+
+import { NumberField, TextField } from "@/components/form";
+import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
-import { TextField, NumberField } from "@/components/form";
 
 interface EditModalProps {
   entry: MacroEntry;
@@ -31,18 +32,18 @@ export default function EditModal({
   }, [editedEntry]);
 
   const handleInputChange = (field: keyof MacroEntry, value: string) => {
-    setEditedEntry((prev) => ({
-      ...prev,
+    setEditedEntry((previous) => ({
+      ...previous,
       [field]: field === "mealName" ? value : Number(value) || 0,
     }));
   };
 
   const handleNumberChange = (
     field: keyof MacroEntry,
-    value: number | undefined
+    value: number | undefined,
   ) => {
-    setEditedEntry((prev) => ({
-      ...prev,
+    setEditedEntry((previous) => ({
+      ...previous,
       [field]: value ?? 0,
     }));
   };
@@ -101,7 +102,7 @@ export default function EditModal({
               {Math.round(
                 editedEntry.protein * 4 +
                   editedEntry.carbs * 4 +
-                  editedEntry.fats * 9
+                  editedEntry.fats * 9,
               )}
             </span>
           </div>

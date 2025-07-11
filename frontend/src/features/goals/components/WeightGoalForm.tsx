@@ -1,13 +1,16 @@
-import { useState, useEffect } from "react";
-import { NumberField, FormButton } from "@/components/form";
-import { WeightGoalFormValues } from "../types";
+import { useEffect, useState } from "react";
+
+import { FormButton, NumberField } from "@/components/form";
+import type { WeightGoals } from "@/types/goal";
+
 import { generateWeightGoalCalculations } from "../calculations";
+import { WeightGoalFormValues } from "../types";
 
 interface WeightGoalFormProps {
   startingWeight: number;
   targetWeight: number;
   tdee: number;
-  weightGoals: any | null; // If this exists, we are editing
+  weightGoals: WeightGoals | undefined; // If this exists, we are editing
   isLoading?: boolean; // Prop received from modal (bound to store's isSaving)
   onSave: (values: WeightGoalFormValues) => void;
   onCancel?: () => void;
@@ -32,7 +35,7 @@ function WeightGoalForm({
   });
   const [hasChanges, setHasChanges] = useState(false);
   const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-    weightGoals?.calorieTarget
+    weightGoals?.calorieTarget,
   );
   const [calculatedTargetDate, setCalculatedTargetDate] = useState<
     string | undefined
@@ -41,7 +44,7 @@ function WeightGoalForm({
     number | undefined
   >(weightGoals?.weeklyChange);
   const [calculatedWeeks, setCalculatedWeeks] = useState<number | undefined>(
-    weightGoals?.calculatedWeeks
+    weightGoals?.calculatedWeeks,
   );
 
   // Calculate default calorie intake based on TDEE and weight goals
@@ -50,7 +53,7 @@ function WeightGoalForm({
       const calculations = generateWeightGoalCalculations(
         tdee,
         formValues.startingWeight,
-        formValues.targetWeight
+        formValues.targetWeight,
       );
       setCalorieIntake(calculations.calorieTarget);
       setCalculatedTargetDate(calculations.targetDate);
@@ -87,7 +90,7 @@ function WeightGoalForm({
         tdee,
         formValues.startingWeight,
         formValues.targetWeight,
-        value
+        value,
       );
 
       // Update all calculation-dependent state values
@@ -108,7 +111,7 @@ function WeightGoalForm({
     const dailyChange = calorieIntake - tdee;
 
     const completeGoal = {
-      startingWeight: formValues.startingWeight, // Ensure startingWeight is included from form state
+      startingWeight: formValues.startingWeight!, // Ensure startingWeight is included from form state
       targetWeight: formValues.targetWeight,
       calorieTarget: calorieIntake,
       startDate: formValues.startDate || todayString,
@@ -117,11 +120,11 @@ function WeightGoalForm({
       calculatedWeeks: calculatedWeeks,
       dailyChange: dailyChange, // Add the calculated daily change
       weightGoal:
-        formValues.startingWeight > formValues.targetWeight
+        formValues.startingWeight! > formValues.targetWeight!
           ? "lose"
-          : formValues.startingWeight < formValues.targetWeight
-          ? "gain"
-          : "maintain",
+          : formValues.startingWeight! < formValues.targetWeight!
+            ? "gain"
+            : "maintain",
     };
 
     onSave(completeGoal);
@@ -129,9 +132,9 @@ function WeightGoalForm({
 
   // Determine if it's a weight loss, gain, or maintenance goal
   const isWeightLoss =
-    formValues.startingWeight > (formValues.targetWeight || 0);
-  const isWeightGain =
-    formValues.startingWeight < (formValues.targetWeight || 0);
+    formValues.startingWeight! > (formValues.targetWeight || 0);
+  // const isWeightGain =
+  //   formValues.startingWeight < (formValues.targetWeight || 0);
   const isMaintenance =
     formValues.startingWeight === formValues.targetWeight &&
     formValues.targetWeight !== undefined;
@@ -151,7 +154,7 @@ function WeightGoalForm({
           max={300}
           step={0.1}
           required
-          // Disable only if editing an existing goal (weightGoals is not null)
+          // Disable only if editing an existing goal (weightGoals is not undefined)
           disabled={!!weightGoals}
         />
 
@@ -172,7 +175,10 @@ function WeightGoalForm({
       {tdee && calorieIntake !== undefined && formValues.targetWeight && (
         <div className="space-y-3 mb-6">
           <div className="flex justify-between items-center">
-            <label className="block text-sm font-medium text-gray-200">
+            <label
+              htmlFor="calorie-intake-range"
+              className="block text-sm font-medium text-gray-200"
+            >
               Daily Calorie Intake
             </label>
             <span className="text-sm text-gray-400">
@@ -182,21 +188,22 @@ function WeightGoalForm({
 
           <div className="relative">
             <input
+              id="calorie-intake-range"
               type="range"
               min={
                 isWeightLoss
                   ? Math.max(tdee - 1000, 1200)
                   : isMaintenance
-                  ? tdee - 300
-                  : tdee
+                    ? tdee - 300
+                    : tdee
               }
               max={
                 isWeightLoss ? tdee : isMaintenance ? tdee + 300 : tdee + 1000
               }
               step={50}
               value={calorieIntake}
-              onChange={(e) =>
-                handleCalorieIntakeChange(Number(e.target.value))
+              onChange={(event) =>
+                handleCalorieIntakeChange(Number(event.target.value))
               }
               className="appearance-none w-full h-2 bg-gray-700 rounded-lg outline-none cursor-pointer"
             />
@@ -235,22 +242,22 @@ function WeightGoalForm({
                           month: "short",
                           day: "numeric",
                           year: "numeric",
-                        }
+                        },
                       )
                     : "Calculating..."}
                 </span>
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 Expected change:{" "}
-                {weeklyWeightChange !== undefined
-                  ? `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`
-                  : "Calculating..."}
+                {weeklyWeightChange === undefined
+                  ? "Calculating..."
+                  : `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`}
               </p>
               <p className="text-xs text-gray-400 mt-1">
                 Estimated duration:{" "}
-                {calculatedWeeks !== undefined
-                  ? `${calculatedWeeks} weeks`
-                  : "Calculating..."}
+                {calculatedWeeks === undefined
+                  ? "Calculating..."
+                  : `${calculatedWeeks} weeks`}
               </p>
               <div className="mt-2 pt-2 border-t border-gray-600/30">
                 <p className="text-xs text-gray-400 flex justify-between">
@@ -287,8 +294,8 @@ function WeightGoalForm({
                 {calorieIntake < tdee
                   ? "slightly fewer"
                   : calorieIntake > tdee
-                  ? "slightly more"
-                  : "the same"}{" "}
+                    ? "slightly more"
+                    : "the same"}{" "}
                 calories than your TDEE
               </p>
             </div>
@@ -298,12 +305,7 @@ function WeightGoalForm({
 
       <div className="flex justify-end gap-3">
         {weightGoals && (
-          <FormButton
-            type="button"
-            variant="secondary"
-            onClick={onCancel}
-            size="md"
-          >
+          <FormButton type="button" variant="secondary" onClick={onCancel}>
             Cancel
           </FormButton>
         )}
@@ -313,9 +315,8 @@ function WeightGoalForm({
           disabled={!hasChanges || isLoading || !formValues.targetWeight} // Use isLoading prop
           isLoading={isLoading} // Pass isLoading prop to button
           onClick={handleSave}
-          size="md"
         >
-          {!weightGoals ? "Set Goal" : "Update Goal"}{" "}
+          {weightGoals ? "Update Goal" : "Set Goal"}{" "}
         </FormButton>
       </div>
     </div>

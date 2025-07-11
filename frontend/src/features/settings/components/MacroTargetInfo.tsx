@@ -1,13 +1,14 @@
 import { memo } from "react";
+
 import { InfoCard } from "@/components/form";
-import { InfoIcon } from "@/components/Icons";
-import { MacroTargetInfoProps } from "@/types/macro";
+import { InfoIcon } from "@/components/ui";
+import type { MacroTargetInfoProps } from "@/types/macro";
 
 /**
  * Component that displays help information for the macro target distribution
  */
 function MacroTargetInfo({ isVisible }: MacroTargetInfoProps) {
-  if (!isVisible) return null;
+  if (!isVisible) return;
 
   return (
     <InfoCard

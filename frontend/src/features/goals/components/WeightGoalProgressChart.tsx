@@ -1,14 +1,14 @@
-import React from "react";
-import { useStore } from "@/store/store";
-import LineChartComponent from "@/components/chart/LineChartComponent";
-import EmptyState from "@/components/EmptyState";
-import { BarChartIcon } from "@/components/Icons";
 import { format, isValid, parseISO } from "date-fns";
+import React from "react";
 import { Area, ReferenceLine, TooltipProps } from "recharts";
 import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+
+import { LineChartComponent } from "@/components/chart";
+import { BarChartIcon, EmptyState } from "@/components/ui";
+import { useStore } from "@/store/store";
 
 // Custom Tooltip specific to Weight Goal Progress
 function WeightCustomTooltip({
@@ -16,13 +16,13 @@ function WeightCustomTooltip({
   payload,
   label,
 }: TooltipProps<ValueType, NameType>) {
-  if (active && payload && payload.length) {
+  if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
     // Ensure fullDate exists and is a valid string before parsing
     const entryDate =
       data.fullDate && typeof data.fullDate === "string"
         ? parseISO(data.fullDate)
-        : null;
+        : undefined;
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
@@ -35,7 +35,7 @@ function WeightCustomTooltip({
         </div>
         <div className="flex items-center gap-2 mt-1">
           <div
-            className={`w-3 h-3 rounded-full`}
+            className={"w-3 h-3 rounded-full"}
             style={{ backgroundColor: payload[0].color || payload[0].stroke }}
           ></div>
           <span className="text-sm text-gray-300">
@@ -52,7 +52,7 @@ function WeightCustomTooltip({
       </div>
     );
   }
-  return null;
+  return;
 }
 
 function WeightGoalProgressChart() {
@@ -68,15 +68,15 @@ function WeightGoalProgressChart() {
       string,
       { weights: number[]; ids: string[]; timestamps: string[] }
     > = {};
-    log.forEach((entry) => {
-      if (!entry.timestamp || !isValid(parseISO(entry.timestamp))) return;
+    for (const entry of log) {
+      if (!entry.timestamp || !isValid(parseISO(entry.timestamp))) continue;
       const dateKey = format(parseISO(entry.timestamp), "yyyy-MM-dd");
       if (!grouped[dateKey])
         grouped[dateKey] = { weights: [], ids: [], timestamps: [] };
       grouped[dateKey].weights.push(entry.weight);
       grouped[dateKey].ids.push(entry.id);
       grouped[dateKey].timestamps.push(entry.timestamp);
-    });
+    }
 
     return Object.entries(grouped)
       .sort(([a], [b]) => new Date(a).getTime() - new Date(b).getTime())
@@ -84,7 +84,7 @@ function WeightGoalProgressChart() {
         const avgWeight =
           weights.reduce((sum, w) => sum + w, 0) / (weights.length || 1);
         const sortedTimestamps = [...timestamps].sort(
-          (a, b) => parseISO(a).getTime() - parseISO(b).getTime()
+          (a, b) => parseISO(a).getTime() - parseISO(b).getTime(),
         );
         return {
           name: format(parseISO(dateKey), "MMM d"), // Use 'name' for LineChartComponent
@@ -121,15 +121,18 @@ function WeightGoalProgressChart() {
   // Determine line color and gradient based on goal
   const { lineColor, gradientId } = React.useMemo(() => {
     switch (weightGoals?.weightGoal) {
-      case "lose":
-        return { lineColor: "rgb(129, 140, 248)", gradientId: "loseGradient" }; // Indigo
-      case "gain":
-        return { lineColor: "rgb(52, 211, 153)", gradientId: "gainGradient" }; // Green
-      default:
+      case "lose": {
+        return { lineColor: "rgb(129, 140, 248)", gradientId: "loseGradient" };
+      } // Indigo
+      case "gain": {
+        return { lineColor: "rgb(52, 211, 153)", gradientId: "gainGradient" };
+      } // Green
+      default: {
         return {
           lineColor: "rgb(59, 130, 246)",
           gradientId: "maintainGradient",
-        }; // Blue
+        };
+      } // Blue
     }
   }, [weightGoals?.weightGoal]);
 
@@ -196,7 +199,7 @@ function WeightGoalProgressChart() {
         strokeWidth: 2,
         stroke: lineColor,
       },
-      connectNulls: true, // Connect gaps in data
+      connectundefineds: true, // Connect gaps in data
     },
   ];
 
@@ -253,10 +256,7 @@ function WeightGoalProgressChart() {
         {chartData.length > 0 && (
           <span>
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
-            {format(
-              parseISO(chartData[chartData.length - 1].fullDate),
-              "MMM d, yyyy"
-            )}
+            {format(parseISO(chartData.at(-1).fullDate), "MMM d, yyyy")}
           </span>
         )}
       </div>

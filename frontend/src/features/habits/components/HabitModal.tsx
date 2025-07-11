@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import Modal from "@/components/form/Modal";
+import { useCallback, useEffect, useState } from "react";
+
+import Modal from "@/components/ui/Modal";
+
 import { HabitGoal, HabitGoalFormValues } from "../types/types";
 import HabitForm from "./HabitForm";
 
@@ -15,7 +17,7 @@ interface HabitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: HabitGoalFormValues, habitId?: string) => Promise<void>;
-  habit?: HabitGoal | null;
+  habit?: HabitGoal | undefined;
   mode: "add" | "edit";
 }
 
@@ -77,10 +79,10 @@ function HabitModal({
   // Handler passed down to HabitForm
   const handleFormChange = (
     field: keyof HabitGoalFormValues,
-    value: string | number
+    value: string | number,
   ) => {
-    setFormValues((prevValues) => {
-      const newValues = { ...prevValues, [field]: value };
+    setFormValues((previousValues) => {
+      const newValues = { ...previousValues, [field]: value };
       setIsFormValid(validateForm(newValues)); // Re-validate on change
       return newValues;
     });
@@ -97,7 +99,7 @@ function HabitModal({
     } catch (error) {
       console.error(
         `Error ${isEditMode ? "updating" : "submitting"} habit:`,
-        error
+        error,
       );
       // Optionally show an error message to the user here
     } finally {
@@ -111,8 +113,8 @@ function HabitModal({
   const saveLabel = isSubmitting
     ? "Saving..."
     : isEditMode
-    ? "Save Changes"
-    : "Save Habit";
+      ? "Save Changes"
+      : "Save Habit";
 
   return (
     <Modal

@@ -1,6 +1,8 @@
 import React from "react";
+
 import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
-import { features } from "../utils/landing-page-const";
+
+import { features } from "../utils/landingPageConstants";
 
 const FeaturesSection: React.FC = () => (
   <section className="relative z-10 py-24 px-6 sm:px-8 lg:px-16 overflow-visible">

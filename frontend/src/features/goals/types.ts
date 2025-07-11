@@ -1,45 +1,43 @@
-import { MacroTargetSettings } from "@/types/macro";
-import { WeightGoal, WeightGoalFormValues, WeightGoals } from "@/types/goal";
+import { WeightGoal, WeightGoals } from "@/types/goal";
+import type { MacroTarget } from "@/types/macro";
 
-// Interface for API responses that can have nullable fields
+// Interface for API responses that can have undefinedable fields
 export interface WeightGoalsResponse {
   startingWeight: number;
-  targetWeight: number | null;
-  weightGoal: WeightGoal | null;
-  startDate: string | null;
-  targetDate: string | null;
-  calorieTarget: number | null;
-  calculatedWeeks: number | null;
-  weeklyChange: number | null;
-  dailyChange: number | null;
+  targetWeight: number | undefined;
+  weightGoal: WeightGoal | undefined;
+  startDate: string | undefined;
+  targetDate: string | undefined;
+  calorieTarget: number | undefined;
+  calculatedWeeks: number | undefined;
+  weeklyChange: number | undefined;
+  dailyChange: number | undefined;
 }
 
 // Payload types for API calls
 export interface SetWeightGoalPayload {
   startingWeight: number; // Required for creation
-  targetWeight: number | null;
-  weightGoal: WeightGoal | null;
-  startDate: string | null;
-  targetDate: string | null;
-  calorieTarget: number | null;
-  calculatedWeeks: number | null;
-  weeklyChange: number | null;
-  dailyChange: number | null;
+  targetWeight: number | undefined;
+  weightGoal: WeightGoal | undefined;
+  startDate: string | undefined;
+  targetDate: string | undefined;
+  calorieTarget: number | undefined;
+  calculatedWeeks: number | undefined;
+  weeklyChange: number | undefined;
+  dailyChange: number | undefined;
 }
 
 // Payload for updates (omits startingWeight)
-export interface UpdateWeightGoalPayload
-  extends Omit<SetWeightGoalPayload, "startingWeight"> {}
-
-export interface MacroTarget {
-  macroTarget?: MacroTargetSettings;
-}
+export type UpdateWeightGoalPayload = Omit<
+  SetWeightGoalPayload,
+  "startingWeight"
+>;
 
 export interface GoalsState {
-  weightGoals: WeightGoals | null;
-  macroTarget: MacroTarget | null;
+  weightGoals: WeightGoals | undefined;
+  macroTarget: MacroTarget | undefined;
   isLoading: boolean;
-  error: string | null;
+  error: string | undefined;
 }
 
 export interface TimeToGoalCalculation {
@@ -48,5 +46,4 @@ export interface TimeToGoalCalculation {
   expectedWeightLossPerWeek: number;
 }
 
-// Re-export WeightGoalFormValues for use in api-service and other modules
-export type { WeightGoalFormValues };
+export { type WeightGoalFormValues } from "@/types/goal";
