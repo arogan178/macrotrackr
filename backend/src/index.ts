@@ -144,7 +144,7 @@ app.post(
           { operation: "stripe_webhook", error: err },
           "Signature verification or event parsing failed"
         );
-        ctx.set.status = 200;
+        ctx.set.status = 400;
         return { received: false, error: "Signature verification failed" };
       }
 
