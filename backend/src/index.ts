@@ -25,49 +25,6 @@ import { billingRoutes } from "./modules/billing/routes";
 logger.info("🚀 Starting Elysia server...");
 
 const app = new Elysia()
-  // Use onParse to capture raw webhook body as Buffer for Stripe signature verification
-  .onParse(async ({ request, headers }) => {
-    // Only handle webhook requests - check for Stripe signature header
-    if (
-      headers["stripe-signature"] &&
-      request.url.endsWith("/api/billing/webhook")
-    ) {
-      try {
-        // Convert ReadableStream to ArrayBuffer using Bun's utility
-        const arrayBuffer = await Bun.readableStreamToArrayBuffer(
-          request.body!
-        );
-        // Convert to Buffer for Stripe signature verification
-        const rawBody = Buffer.from(arrayBuffer);
-
-        const { logger } = await import("./lib/logger");
-        logger.debug(
-          {
-            operation: "onParse_webhook",
-            rawBodyLength: rawBody.length,
-            rawBodyPreview: rawBody.toString().substring(0, 100) + "...",
-          },
-          "Captured raw webhook body as Buffer"
-        );
-
-        return rawBody;
-      } catch (error) {
-        const { logger } = await import("./lib/logger");
-        logger.error(
-          {
-            operation: "onParse_webhook",
-            error,
-          },
-          "Failed to capture raw webhook body"
-        );
-
-        // Return undefined to let default parsing continue
-        return undefined;
-      }
-    }
-    // For non-webhook requests, return undefined to use default parsing
-    return undefined;
-  })
   // Request size limits for security
   .onRequest(({ request, set }) => {
     const contentLength = request.headers.get("content-length");
@@ -122,22 +79,15 @@ app.post(
   async (ctx: any) => {
     const { logger } = await import("./lib/logger");
     try {
-      // Get the raw body buffer from onParse
-      const rawBodyBuffer = ctx.body;
+      // Get the raw body text from custom parse function
+      const rawBodyText = ctx.body;
       const signature = ctx.headers["stripe-signature"];
-
-      // Convert buffer to string for Stripe signature verification
-      const rawBodyText =
-        rawBodyBuffer && Buffer.isBuffer(rawBodyBuffer) ?
-          rawBodyBuffer.toString("utf8")
-        : String(rawBodyBuffer || "");
 
       logger.info(
         {
           operation: "stripe_webhook",
-          hasRawBody: !!rawBodyBuffer,
-          rawBodyLength: rawBodyBuffer?.length || 0,
-          isBuffer: Buffer.isBuffer(rawBodyBuffer),
+          hasRawBody: !!rawBodyText,
+          rawBodyLength: rawBodyText?.length || 0,
           hasSignature: !!signature,
           signature: signature ? signature.substring(0, 20) + "..." : "none",
           rawBodyPreview:
@@ -155,11 +105,7 @@ app.post(
         return { received: false, error: "Missing Stripe signature" };
       }
 
-      if (
-        !rawBodyBuffer ||
-        (Buffer.isBuffer(rawBodyBuffer) && rawBodyBuffer.length === 0) ||
-        (!Buffer.isBuffer(rawBodyBuffer) && !rawBodyBuffer)
-      ) {
+      if (!rawBodyText || rawBodyText.length === 0) {
         logger.error(
           {
             operation: "stripe_webhook",
@@ -336,12 +282,22 @@ app.post(
     }
   },
   {
-    // Accept raw buffer body from onParse for webhook signature verification
+    // Custom parse function to handle Stripe webhook raw body
+    async parse(ctx) {
+      // Check for Stripe webhook content-type with charset
+      const contentType = ctx.request.headers.get("content-type");
+      if (contentType === "application/json; charset=utf-8") {
+        const reqText = await ctx.request.text();
+        return reqText;
+      } else {
+        // For other content types, let Elysia handle normally
+        return undefined;
+      }
+    },
     headers: t.Object({
       "stripe-signature": t.String(),
     }),
-    // Accept Buffer from onParse - don't validate body type
-    body: t.Any(),
+    body: t.Not(t.Undefined()),
     detail: {
       summary: "Handle Stripe webhooks (NO AUTH)",
       tags: ["Billing"],
