@@ -48,6 +48,14 @@ export const UserSchemas = {
           stripeSubscriptionId: t.String(),
         })
       ),
+      price: t.Nullable(t.String()),
+      paymentMethod: t.Nullable(
+        t.Object({
+          brand: t.String(),
+          last4: t.String(),
+        })
+      ),
+      stripeDetails: t.Nullable(t.Any()),
     }),
   }),
 

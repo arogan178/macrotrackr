@@ -21,6 +21,9 @@ export interface UserSubscriptionInfo {
   subscription_status: "free" | "pro" | "canceled";
   stripe_customer_id: string | null;
   subscription?: SubscriptionRecord;
+  price?: string;
+  paymentMethod?: { brand: string; last4: string };
+  stripeDetails?: any;
 }
 
 export class SubscriptionService {
@@ -135,12 +138,34 @@ export class SubscriptionService {
          ORDER BY created_at DESC LIMIT 1`,
         [userId]
       );
+
+      let price: string | undefined = undefined;
+      let paymentMethod: { brand: string; last4: string } | undefined =
+        undefined;
+      let stripeDetails: any = undefined;
+      if (subscription && subscription.stripe_subscription_id) {
+        try {
+          const details = await (
+            await import("./stripe-service")
+          ).StripeService.getSubscriptionWithDetails(
+            subscription.stripe_subscription_id
+          );
+          price = details.price;
+          paymentMethod = details.paymentMethod || undefined;
+          stripeDetails = details.subscription;
+        } catch (err) {
+          logger.error({ err }, "Failed to fetch Stripe subscription details");
+        }
+      }
+
       logger.debug(
         {
           operation: "get_user_subscription",
           userId,
           subscriptionStatus: user.subscription_status,
           hasActiveSubscription: !!subscription,
+          price,
+          paymentMethod,
         },
         "Retrieved user subscription info"
       );
@@ -148,6 +173,9 @@ export class SubscriptionService {
         subscription_status: user.subscription_status,
         stripe_customer_id: user.stripe_customer_id,
         subscription: subscription || undefined,
+        price,
+        paymentMethod,
+        stripeDetails,
       };
     } catch (error) {
       handleServiceError(error, "get_user_subscription", { userId }, [

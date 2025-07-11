@@ -1,3 +1,4 @@
+// Valid genders for mapping backend string to Gender union
 import { StateCreator } from "zustand";
 
 import {
@@ -11,6 +12,8 @@ import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 import { validateSettingsComplete as validateSettings } from "../utils/validation";
+
+const validGenders = new Set(["male", "female"]);
 
 // Types for API payloads
 interface UserSettingsPayload {
@@ -35,6 +38,23 @@ export interface UserSlice {
   // Subscription
   subscriptionStatus: "free" | "pro" | "canceled";
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") => void;
+  subscription:
+    | {
+        status: "free" | "pro" | "canceled";
+        hasStripeCustomer: boolean;
+        subscription:
+          | {
+              id: string;
+              status: "active" | "canceled" | "past_due" | "unpaid";
+              currentPeriodEnd: string;
+              stripeSubscriptionId: string;
+            }
+          | undefined;
+        price: string | undefined;
+        paymentMethod: { brand: string; last4: string } | undefined;
+        stripeDetails: any | undefined;
+      }
+    | undefined;
 
   // Loading states
   isLoading: boolean;
@@ -85,6 +105,7 @@ export const createUserSlice: StateCreator<
   subscriptionStatus: "free",
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") =>
     set({ subscriptionStatus: status }),
+  subscription: undefined,
   isLoading: false,
   error: undefined,
   settings: undefined,
@@ -109,35 +130,64 @@ export const createUserSlice: StateCreator<
         throw new Error("User profile data not found after API call.");
       }
 
-      const userSettings = createUserSettings(userData);
+      // Map gender to Gender union type if valid, else undefined
+      const validGenders = ["male", "female"];
+      const mappedGender = validGenders.includes(userData.gender as string)
+        ? (userData.gender as "male" | "female")
+        : undefined;
+      const userSettings = createUserSettings({
+        ...userData,
+        gender: mappedGender,
+      });
       const nutritionProfile = createNutritionProfile(userSettings);
 
-      // Subscription status (from userData.subscription.status, fallback to 'free')
+      // Subscription status and details
       const allowedStatuses = ["free", "pro", "canceled"] as const;
       const status =
-        typeof (userData as any)?.subscription?.status === "string"
-          ? (userData as any).subscription.status
+        typeof userData?.subscription?.status === "string"
+          ? userData.subscription.status
           : undefined;
       const subscriptionStatus =
         status &&
         allowedStatuses.includes(status as "free" | "pro" | "canceled")
           ? (status as "free" | "pro" | "canceled")
           : "free";
+      const subscription = {
+        status: subscriptionStatus,
+        hasStripeCustomer: userData.subscription?.hasStripeCustomer || false,
+        subscription: userData.subscription?.subscription || undefined,
+        price: userData.subscription?.price || undefined,
+        paymentMethod: userData.subscription?.paymentMethod || undefined,
+        stripeDetails: userData.subscription?.stripeDetails || undefined,
+      };
 
       // Fetch macro target separately
       try {
-        const macroTargetResponse = await apiService.macros.getMacroTarget();
-        const fetchedMacroTarget =
-          macroTargetResponse?.macroTarget || DEFAULT_MACRO_TARGET;
-
-        set({
-          user: userSettings,
-          nutritionProfile,
-          macroTarget: fetchedMacroTarget,
-          subscriptionStatus,
-          isLoading: false,
-          error: undefined,
-        });
+        // Only fetch macro target if endpoint exists and is needed
+        if (apiService.macros && apiService.macros.getMacroTarget) {
+          const macroTargetResponse = await apiService.macros.getMacroTarget();
+          const fetchedMacroTarget =
+            macroTargetResponse?.macroTarget || DEFAULT_MACRO_TARGET;
+          set({
+            user: userSettings,
+            nutritionProfile,
+            macroTarget: fetchedMacroTarget,
+            subscriptionStatus,
+            subscription,
+            isLoading: false,
+            error: undefined,
+          });
+        } else {
+          set({
+            user: userSettings,
+            nutritionProfile,
+            macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
+            subscriptionStatus,
+            subscription,
+            isLoading: false,
+            error: undefined,
+          });
+        }
       } catch (macroError) {
         console.error("Error fetching macro target:", macroError);
         set({
@@ -145,6 +195,7 @@ export const createUserSlice: StateCreator<
           nutritionProfile,
           macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
           subscriptionStatus,
+          subscription,
           isLoading: false,
           error: undefined,
         });
@@ -159,6 +210,7 @@ export const createUserSlice: StateCreator<
         nutritionProfile: undefined,
         macroTarget: undefined,
         subscriptionStatus: "free",
+        subscription: undefined,
       });
 
       const notify = fullGet().showNotification;
@@ -176,8 +228,14 @@ export const createUserSlice: StateCreator<
         throw new Error("Failed to fetch settings data.");
       }
 
-      const settings = createUserSettings(data);
-      const macroTargetSettings = data.macroTarget || DEFAULT_MACRO_TARGET;
+      // Map gender to Gender union type if valid, else undefined
+      const mappedGender2 = validGenders.has(data.gender as string)
+        ? (data.gender as "male" | "female")
+        : undefined;
+      const settings = createUserSettings({ ...data, gender: mappedGender2 });
+      // Only assign macroTarget if present
+      const macroTargetSettings =
+        (data as any).macroTarget || DEFAULT_MACRO_TARGET;
 
       set({
         settings,
