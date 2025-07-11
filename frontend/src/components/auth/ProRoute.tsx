@@ -1,6 +1,7 @@
 import React from "react";
-import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 import { Navigate } from "react-router-dom";
+
+import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 
 /**
  * ProRoute - Protects Pro-only pages/routes

@@ -56,13 +56,16 @@ export const STAT_COLORS = {
 // Get unit based on stat type
 export function getUnitForStat(statType: string): string {
   switch (statType) {
-    case "calories":
+    case "calories": {
       return "kcal";
+    }
     case "protein":
     case "carbs":
-    case "fats":
+    case "fats": {
       return "g";
-    default:
+    }
+    default: {
       return "";
+    }
   }
 }

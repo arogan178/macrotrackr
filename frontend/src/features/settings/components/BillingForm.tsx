@@ -1,36 +1,34 @@
-import React, { useState, useEffect, useCallback } from "react";
-import {
-  createPortalSession,
-  createCheckoutSession,
-} from "@/utils/api-billing";
+import React, { useCallback, useEffect, useState } from "react";
+
 import { CardContainer, FormButton } from "@/components/form";
-import { useStore } from "@/store/store";
 import {
   AwardIcon,
-  StarIcon,
   CheckCircleIcon,
   ExternalLinkIcon,
   InfoIcon,
+  StarIcon,
   WarningIcon,
 } from "@/components/ui";
 import Modal from "@/components/ui/Modal";
+import { useStore } from "@/store/store";
+import { createPortalSession } from "@/utils/apiBilling";
 
 const parseBillingError = (error: unknown) => {
-  const msg = error instanceof Error ? error.message.toLowerCase() : "";
-  if (msg.includes("network") || msg.includes("fetch"))
+  const message = error instanceof Error ? error.message.toLowerCase() : "";
+  if (message.includes("network") || message.includes("fetch"))
     return {
       type: "network",
       message:
         "Network connection issue. Please check your internet connection.",
       retryable: true,
     };
-  if (msg.includes("stripe") || msg.includes("payment"))
+  if (message.includes("stripe") || message.includes("payment"))
     return {
       type: "stripe",
       message: "Payment service temporarily unavailable. Please try again.",
       retryable: true,
     };
-  if (msg.includes("auth") || msg.includes("unauthorized"))
+  if (message.includes("auth") || message.includes("unauthorized"))
     return {
       type: "auth",
       message: "Authentication required. Please refresh and try again.",
@@ -226,14 +224,19 @@ const FreeBillingView: React.FC<{
  * - Mobile-responsive design
  * - Graceful degradation for network issues
  */
+
+function handleUpgradeRedirect() {
+  globalThis.location.href = "/pricing";
+}
+
 const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
   const [isLoading, setIsLoading] = useState(false);
 
   // Check for successful upgrade on component mount
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("upgraded") === "true") {
+    const urlParameters = new URLSearchParams(globalThis.location.search);
+    if (urlParameters.get("upgraded") === "true") {
       showNotification(
         "Welcome to Pro! Your subscription is now active.",
         "success",
@@ -241,8 +244,8 @@ const BillingForm: React.FC = () => {
       );
 
       // Clean up URL parameters
-      const newUrl = window.location.pathname + window.location.hash;
-      window.history.replaceState({}, "", newUrl);
+      const newUrl = globalThis.location.pathname + globalThis.location.hash;
+      globalThis.history.replaceState({}, "", newUrl);
     }
   }, [showNotification]);
 
@@ -257,7 +260,7 @@ const BillingForm: React.FC = () => {
           : `Billing portal unavailable: ${billingError.message}`;
 
       showNotification(contextualMessage, "error", {
-        duration: billingError.retryable ? 10000 : 6000,
+        duration: billingError.retryable ? 10_000 : 6000,
         context: `billing_error_${operation}`,
       });
 
@@ -278,7 +281,7 @@ const BillingForm: React.FC = () => {
 
     setIsLoading(true);
     try {
-      const returnUrl = window.location.origin + "/settings";
+      const returnUrl = globalThis.location.origin + "/settings";
       const { url } = await createPortalSession(returnUrl);
 
       // Validation for successful URL generation
@@ -292,15 +295,11 @@ const BillingForm: React.FC = () => {
         context: "billing_redirect",
       });
 
-      window.location.href = url;
+      globalThis.location.href = url;
     } catch (error) {
       handleBillingError(error, "portal");
     }
   }, [subscriptionStatus, handleBillingError, showNotification]);
-
-  const handleUpgradeRedirect = () => {
-    window.location.href = "/pricing";
-  };
 
   const isPro = subscriptionStatus === "pro";
 

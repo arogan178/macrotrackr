@@ -1,16 +1,19 @@
-import React, { useState, useEffect, memo } from "react";
 import { motion } from "motion/react";
+import PropTypes from "prop-types";
+import React, { memo, useEffect, useState } from "react";
 
 interface UserCounterProps {
   className?: string;
 }
 
-const UserCounter: React.FC<UserCounterProps> = memo(({ className = "" }) => {
+const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
+  className = "",
+}) {
   const [userCount, setUserCount] = useState(0);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Simulate real user count (in production, this would come from an API)
-  const targetCount = 24847;
+  const targetCount = 24_847;
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -88,5 +91,9 @@ const UserCounter: React.FC<UserCounterProps> = memo(({ className = "" }) => {
     </motion.div>
   );
 });
+UserCounter.displayName = "UserCounter";
+UserCounter.propTypes = {
+  className: PropTypes.string,
+};
 
 export default UserCounter;

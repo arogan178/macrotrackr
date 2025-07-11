@@ -1,16 +1,17 @@
-import { useEffect, memo, useCallback } from "react";
-import Navbar from "@/components/layout/Navbar";
-import { FloatingNotification } from "@/features/notifications/components";
-import { CardContainer } from "@/components/form";
-import {
-  EntryHistoryPanel,
-  DailySummaryPanel,
-  AddEntryForm,
-  EditModal,
-} from "@/features/macroTracking/components";
-import { UserMetricsPanel } from "@/features/dashboard/components";
-import { useStore } from "@/store/store";
 import { AnimatePresence } from "motion/react";
+import { memo, useCallback, useEffect } from "react";
+
+import { CardContainer } from "@/components/form";
+import Navbar from "@/components/layout/Navbar";
+import { UserMetricsPanel } from "@/features/dashboard/components";
+import {
+  AddEntryForm,
+  DailySummaryPanel,
+  EditModal,
+  EntryHistoryPanel,
+} from "@/features/macroTracking/components";
+import { FloatingNotification } from "@/features/notifications/components";
+import { useStore } from "@/store/store";
 
 export default function HomePage() {
   // Get state and actions from our store
@@ -63,7 +64,7 @@ export default function HomePage() {
 
   // Memoized close handler to prevent unnecessary re-renders
   const handleCloseModal = useCallback(() => {
-    setEditingEntry(null);
+    setEditingEntry(undefined);
   }, [setEditingEntry]);
 
   // Fetch user details, macros, and persisted goals on component mount
@@ -173,7 +174,7 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Edit Modal - Only render when editingEntry is not null */}
+      {/* Edit Modal - Only render when editingEntry is not undefined */}
       <AnimatePresence>
         {editingEntry && (
           <EditModal
@@ -190,38 +191,49 @@ export default function HomePage() {
 }
 
 // Extracted components for better organization
-const PageHeader = memo(
-  ({ firstName, isLoading }: { firstName?: string; isLoading: boolean }) => (
+interface PageHeaderProps {
+  firstName?: string;
+  isLoading: boolean;
+}
+function PageHeader({ firstName, isLoading }: PageHeaderProps) {
+  return (
     <div className="mb-6">
+      {" "}
       <div className="flex flex-col md:flex-row md:items-center gap-3">
+        {" "}
         <h1 className="text-3xl sm:text-4xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
-          Welcome back,
+          {" "}
+          Welcome back,{" "}
           <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
-            {isLoading ? "..." : firstName || "User"}
-          </span>
-        </h1>
+            {" "}
+            {isLoading ? "..." : firstName || "User"}{" "}
+          </span>{" "}
+        </h1>{" "}
         <div className="flex md:ml-auto">
+          {" "}
           <span className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-medium">
+            {" "}
             {new Date().toLocaleDateString("en-US", {
               day: "numeric",
               month: "short",
               year: "numeric",
-            })}
-          </span>
-        </div>
-      </div>
+            })}{" "}
+          </span>{" "}
+        </div>{" "}
+      </div>{" "}
     </div>
-  ),
-);
-
+  );
+}
+const MemoizedPageHeader = memo(PageHeader);
+MemoizedPageHeader.displayName = "PageHeader";
 // Loading skeleton components
 const AddEntryLoadingSkeleton = () => (
   <CardContainer>
     <div className="p-5 animate-pulse">
       <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
       <div className="grid grid-cols-3 gap-4">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-8 bg-gray-700 rounded"></div>
+        {[0, 1, 2].map((index) => (
+          <div key={index} className="h-8 bg-gray-700 rounded"></div>
         ))}
       </div>
     </div>
@@ -233,8 +245,8 @@ const DailySummaryLoadingSkeleton = () => (
     <div className="p-5 h-full animate-pulse">
       <div className="h-5 bg-gray-700 rounded w-1/2 mb-4"></div>
       <div className="space-y-4">
-        {[0, 1, 2].map((i) => (
-          <div key={i} className="h-12 bg-gray-700 rounded"></div>
+        {[0, 1, 2].map((index) => (
+          <div key={index} className="h-12 bg-gray-700 rounded"></div>
         ))}
       </div>
     </div>
@@ -244,8 +256,8 @@ const DailySummaryLoadingSkeleton = () => (
 const HistoryLoadingSkeleton = () => (
   <div className="animate-pulse space-y-4">
     <div className="h-6 bg-gray-700 rounded w-1/4 mb-6"></div>
-    {[0, 1, 2].map((i) => (
-      <div key={i} className="space-y-2">
+    {[0, 1, 2].map((index) => (
+      <div key={index} className="space-y-2">
         <div className="h-5 bg-gray-700 rounded w-1/6"></div>
         <div className="h-16 bg-gray-700/50 rounded"></div>
       </div>

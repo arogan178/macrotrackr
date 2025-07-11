@@ -1,17 +1,18 @@
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+
 import { FormButton } from "@/components/form";
-import { useStore } from "@/store/store";
-import { AnimatePresence, motion } from "motion/react";
 import {
+  CloseIcon,
+  GoalsIcon,
   HomeIcon,
+  LogoutIcon,
+  MenuIcon,
   ReportingIcon2,
   SettingsIcon,
-  LogoutIcon,
-  GoalsIcon,
-  MenuIcon,
-  CloseIcon,
 } from "@/components/ui";
+import { useStore } from "@/store/store";
 
 const Navbar: React.FC = () => {
   const location = useLocation();

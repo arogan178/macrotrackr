@@ -1,9 +1,9 @@
+import { motion } from "motion/react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
-import FormButton from "@/components/form/FormButton";
 
 import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
+import FormButton from "@/components/form/FormButton";
 
 const FinalCTASection: React.FC = () => (
   <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">

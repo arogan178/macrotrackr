@@ -84,11 +84,11 @@ export interface StepNavigationProps {
 }
 
 export async function handleStepSubmit(
-  e: React.FormEvent,
+  event: React.FormEvent,
   stepNumber: number,
   navigation: StepNavigationProps,
 ): Promise<void> {
-  e.preventDefault();
+  event.preventDefault();
 
   const {
     validateRegisterStep,

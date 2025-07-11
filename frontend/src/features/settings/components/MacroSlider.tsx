@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { LockIcon, UnlockIcon } from "@/components/ui";
-import FormButton from "@/components/form/FormButton";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import FormButton from "@/components/form/FormButton";
+import { LockIcon, UnlockIcon } from "@/components/ui";
 
 interface MacroSliderProps {
   name: string;
@@ -56,8 +57,8 @@ export default function MacroSlider({
 
   const { bg, focus, textLocked, bgLocked } = colorConfig[color];
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newValue = parseInt(e.target.value);
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const newValue = Number.parseInt(event.target.value);
     onChange(newValue);
     setRecommendationText(
       getRecommendation(

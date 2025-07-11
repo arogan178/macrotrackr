@@ -1,10 +1,11 @@
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
+
 import {
+  CheckIcon,
+  EditIcon,
   MoreVerticalIcon,
   PlusCircleIcon,
-  CheckIcon,
   TrashIcon,
-  EditIcon,
 } from "@/components/ui";
 
 interface HabitActionsProps {
@@ -26,12 +27,15 @@ function HabitActions({
 }: HabitActionsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const menuReference = useRef<HTMLDivElement>(undefined);
 
   // Close menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      if (
+        menuReference.current &&
+        !menuReference.current.contains(event.target as Node)
+      ) {
         setIsMenuOpen(false);
       }
     }
@@ -75,7 +79,7 @@ function HabitActions({
   };
 
   return (
-    <div className="relative flex items-center" ref={menuRef}>
+    <div className="relative flex items-center" ref={menuReference}>
       {/* Progress increment button */}
       {!isComplete && (
         <button

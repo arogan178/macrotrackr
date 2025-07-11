@@ -1,7 +1,8 @@
-import React from "react";
 import { motion } from "motion/react";
-import { CheckIcon } from "@/components/ui";
+import React from "react";
+
 import FormButton from "@/components/form/FormButton";
+import { CheckIcon } from "@/components/ui";
 
 interface PricingCardProps {
   title: string;

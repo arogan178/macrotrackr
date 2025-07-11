@@ -1,5 +1,6 @@
 import { memo } from "react";
-import { PROGRESS_BAR_COLORS, PROGRESS_BAR_HEIGHTS } from "../utils/constants";
+
+import { PROGRESS_BAR_COLORS, PROGRESS_BAR_HEIGHTS } from "../utils/Constants";
 
 interface ProgressBarProps {
   progress: number; // 0-100

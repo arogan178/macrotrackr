@@ -1,6 +1,7 @@
 import { memo } from "react";
-import type { DateFieldProps } from "@/components/utils/types";
-import { formStyles } from "@/components/utils/styles";
+
+import { formStyles } from "@/components/utils/Styles";
+import type { DateFieldProps } from "@/components/utils/Types";
 
 function getTodayISO() {
   const today = new Date();
@@ -19,8 +20,8 @@ function DateField({
   max,
   ...rest
 }: DateFieldProps & { max?: string }) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.value);
   };
 
   const inputClasses = `${formStyles.input.base} ${
