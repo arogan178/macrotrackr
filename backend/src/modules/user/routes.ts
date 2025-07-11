@@ -69,6 +69,9 @@ export const userRoutes = (app: Elysia) =>
                       subscriptionInfo.subscription.stripe_subscription_id,
                   }
                 : null,
+              price: subscriptionInfo.price || null,
+              paymentMethod: subscriptionInfo.paymentMethod || null,
+              stripeDetails: subscriptionInfo.stripeDetails || null,
             };
 
             return result;
