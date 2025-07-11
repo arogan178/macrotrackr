@@ -24,35 +24,7 @@ import { billingRoutes } from "./modules/billing/routes";
 
 logger.info("🚀 Starting Elysia server...");
 
-// Elysia plugin to capture raw body for Stripe webhooks
-function rawBodyCapturePlugin() {
-  return (app: any) => {
-    app.onRequest(async (ctx: any) => {
-      if (
-        ctx.request.method === "POST" &&
-        ctx.request.url.endsWith("/api/billing/webhook")
-      ) {
-        const reader = ctx.request.body?.getReader?.();
-        if (reader) {
-          let rawBody = Buffer.alloc(0);
-          let done, value;
-          while (true) {
-            ({ done, value } = await reader.read());
-            if (done) break;
-            if (value) {
-              rawBody = Buffer.concat([rawBody, Buffer.from(value)]);
-            }
-          }
-          ctx.rawBody = rawBody;
-        }
-      }
-    });
-    return app;
-  };
-}
-
 const app = new Elysia()
-  .use(rawBodyCapturePlugin())
   // Request size limits for security
   .onRequest(({ request, set }) => {
     const contentLength = request.headers.get("content-length");
@@ -107,22 +79,53 @@ app.post(
   async (ctx: any) => {
     const { logger } = await import("./lib/logger");
     try {
-      // Use the captured raw body
-      const rawBody = ctx.rawBody;
+      // Get the raw body from the request - try multiple approaches
+      let rawBodyText: string;
+      try {
+        rawBodyText = await ctx.request.text();
+      } catch (error) {
+        // If text() fails, try to get from body property
+        rawBodyText =
+          typeof ctx.body === "string" ? ctx.body : JSON.stringify(ctx.body);
+        logger.warn(
+          { operation: "stripe_webhook", error },
+          "Failed to get text from request, using body property"
+        );
+      }
+
       const signature = ctx.headers["stripe-signature"];
+
+      logger.info(
+        {
+          operation: "stripe_webhook",
+          hasRawBody: !!rawBodyText,
+          rawBodyLength: rawBodyText?.length || 0,
+          hasSignature: !!signature,
+          signature: signature ? signature.substring(0, 20) + "..." : "none",
+        },
+        "Received Stripe webhook request"
+      );
+
       if (!signature) {
         logger.error(
           { operation: "stripe_webhook", error: "Missing Stripe signature" },
           "Missing Stripe signature header"
         );
-        ctx.set.status = 200;
+        ctx.set.status = 400;
         return { received: false, error: "Missing Stripe signature" };
       }
 
-      logger.info(
-        { operation: "stripe_webhook", payload: rawBody },
-        "Received Stripe webhook payload"
-      );
+      if (!rawBodyText || rawBodyText.length === 0) {
+        logger.error(
+          {
+            operation: "stripe_webhook",
+            error: "Missing or empty request body",
+          },
+          "Missing or empty request body for webhook"
+        );
+        ctx.set.status = 400;
+        return { received: false, error: "Missing request body" };
+      }
 
       // Import services inline to avoid circular dependencies
       const { StripeService } = await import(
@@ -136,7 +139,7 @@ app.post(
       let normalizedEvent;
       try {
         normalizedEvent = await StripeService.verifyWebhookSignature(
-          rawBody,
+          rawBodyText,
           signature
         );
       } catch (err) {
@@ -289,7 +292,7 @@ app.post(
     }
   },
   {
-    // Accept any body type to prevent 422 errors from Elysia validation
+    // Accept any body type to prevent validation errors
     body: t.Any(),
     detail: {
       summary: "Handle Stripe webhooks (NO AUTH)",
