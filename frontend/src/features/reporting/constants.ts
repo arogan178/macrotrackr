@@ -1,5 +1,5 @@
 // Re-export existing constants
-export * from "./constants/insights-constants";
+export * from "./constants/insightsConstants";
 
 // Date range and period constants
 export const REPORTING_PERIODS = [

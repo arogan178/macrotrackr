@@ -1,5 +1,7 @@
 import { memo } from "react";
+
 import type { MacroPercentages, MacroType } from "@/types/macro";
+
 import { MacroBadge } from "./MacroSlider";
 
 interface MacroBadgeGroupProps {

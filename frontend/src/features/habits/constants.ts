@@ -1,17 +1,18 @@
 import type { ComponentType, SVGProps } from "react";
+
 import {
+  AwardIcon,
+  BookIcon,
   CalendarIcon,
   CheckCircleIcon,
-  TargetIcon,
-  AwardIcon,
-  HeartIcon,
-  BookIcon,
   CoffeeIcon,
   DropletIcon,
   DumbBellIcon,
+  HeartIcon,
   MoonIcon,
   SunIcon,
-} from "@/components/Icons";
+  TargetIcon,
+} from "@/components/ui";
 
 type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
 

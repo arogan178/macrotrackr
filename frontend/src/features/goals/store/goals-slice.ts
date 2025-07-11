@@ -1,40 +1,42 @@
+import { formatISO } from "date-fns";
 import { StateCreator } from "zustand";
-import { WeightGoals, WeightGoalFormValues } from "@/types/goal";
-import { SUCCESS_MESSAGES, ERROR_MESSAGES } from "../constants";
+
+import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
 import {
+  AddWeightLogPayload,
   apiService,
   WeightLogEntry,
-  AddWeightLogPayload,
-} from "@/utils/api-service";
-import { getErrorMessage } from "@/utils/error-handling";
-import { formatISO } from "date-fns";
+} from "@/utils/apiServices";
+import { getErrorMessage } from "@/utils/errorHandling";
+
+import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants";
 
 // Define the slice interface
 export interface GoalsSlice {
   // ... existing state ...
-  weightGoals: WeightGoals | null;
+  weightGoals: WeightGoals | undefined;
   weightLog: WeightLogEntry[]; // Uses the updated type
   isLoading: boolean;
   isSaving: boolean;
-  error: string | null;
+  error: string | undefined;
 
   // Actions
   fetchWeightGoals: () => Promise<void>;
-  setWeightGoals: (goals: WeightGoals | null) => void;
+  setWeightGoals: (goals: WeightGoals | undefined) => void;
   createWeightGoal: (
     // Renamed for clarity
     formValues: WeightGoalFormValues,
-    tdee: number
+    tdee: number,
   ) => Promise<void>;
   updateWeightGoal: (
     // New action for updates
     formValues: WeightGoalFormValues,
-    tdee: number
+    tdee: number,
   ) => Promise<void>;
   deleteWeightGoal: () => Promise<void>;
   setLoading: (loading: boolean) => void;
   setSaving: (saving: boolean) => void;
-  setError: (error: string | null) => void;
+  setError: (error: string | undefined) => void;
   clearError: () => void;
   resetGoals: () => Promise<void>;
 
@@ -56,18 +58,18 @@ type FullGoalsState = GoalsSlice & {
 
 export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   set,
-  get
+  get,
 ) => ({
   // ... initial state ...
-  weightGoals: null,
+  weightGoals: undefined,
   weightLog: [],
   isLoading: false,
   isSaving: false,
-  error: null,
+  error: undefined,
 
   // --- Fetch Actions ---
   fetchWeightGoals: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
     try {
       const weightGoalsData = await apiService.goals.getWeightGoals();
@@ -77,7 +79,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         const weightLog = await apiService.goals.getWeightLog();
         const latestWeight =
           weightLog.length > 0
-            ? weightLog[weightLog.length - 1].weight
+            ? weightLog.at(-1).weight
             : weightGoalsData.startingWeight;
 
         // Transform to WeightGoals with currentWeight
@@ -103,7 +105,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
         set({ weightGoals: goalsWithCurrentWeight, isLoading: false });
       } else {
-        set({ weightGoals: null, isLoading: false });
+        set({ weightGoals: undefined, isLoading: false });
       }
     } catch (error) {
       const errorMessage = getErrorMessage(error);
@@ -117,14 +119,14 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   },
 
   // --- Set Actions ---
-  setWeightGoals: (goals) => set({ weightGoals: goals, error: null }),
+  setWeightGoals: (goals) => set({ weightGoals: goals, error: undefined }),
 
   // --- Create Action ---
   createWeightGoal: async (formValues, tdee) => {
-    set({ isSaving: true, error: null });
+    set({ isSaving: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
-    let savedWeightGoal: WeightGoals | null = null;
-    let savedLogEntry: WeightLogEntry | null = null;
+    let savedWeightGoal: WeightGoals | undefined;
+    let savedLogEntry: WeightLogEntry | undefined;
 
     try {
       // --- Step 1: Create the Weight Goal ---
@@ -132,7 +134,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // Call API with form values and tdee
       savedWeightGoal = await apiService.goals.createWeightGoal(
         formValues,
-        tdee
+        tdee,
       );
       console.log("[GoalsSlice] Weight goal created successfully.");
 
@@ -144,13 +146,12 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
           weight: formValues.startingWeight,
         };
         try {
-          savedLogEntry = await apiService.goals.addWeightLogEntry(
-            initialLogPayload
-          );
+          savedLogEntry =
+            await apiService.goals.addWeightLogEntry(initialLogPayload);
         } catch (logError) {
           console.error(
             "[GoalsSlice] Failed to add initial weight log entry:",
-            logError
+            logError,
           );
           // Notify about log failure, but goal creation succeeded
           fullGet().addNotification?.({
@@ -168,11 +169,11 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
           ? [...(state.weightLog || []), savedLogEntry].sort(
               (a, b) =>
                 new Date(b.timestamp).getTime() -
-                new Date(a.timestamp).getTime()
+                new Date(a.timestamp).getTime(),
             )
           : state.weightLog,
         isSaving: false,
-        error: null,
+        error: undefined,
       }));
 
       // --- Step 3.5: Fetch latest weight log to ensure UI is up to date ---
@@ -210,17 +211,17 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       return;
     }
 
-    set({ isSaving: true, error: null });
+    set({ isSaving: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
 
     try {
       // Call API with form values and tdee
       const savedWeightGoal = await apiService.goals.updateWeightGoal(
         formValues,
-        tdee
+        tdee,
       );
 
-      set({ weightGoals: savedWeightGoal, isSaving: false, error: null });
+      set({ weightGoals: savedWeightGoal, isSaving: false, error: undefined });
 
       // --- Fetch latest weight log to ensure UI is up to date ---
       await get().fetchWeightLog();
@@ -243,12 +244,17 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
   // --- Delete Action ---
   deleteWeightGoal: async () => {
-    set({ isSaving: true, error: null });
+    set({ isSaving: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
     try {
       await apiService.goals.deleteWeightGoals(); // Call API service
       // NEW: Clear weight log when goal is deleted
-      set({ weightGoals: null, weightLog: [], isSaving: false, error: null });
+      set({
+        weightGoals: undefined,
+        weightLog: [],
+        isSaving: false,
+        error: undefined,
+      });
 
       fullGet().addNotification?.({
         message: SUCCESS_MESSAGES.goalDeleted,
@@ -269,15 +275,15 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   setLoading: (loading) => set({ isLoading: loading }),
   setSaving: (saving) => set({ isSaving: saving }),
   setError: (error) => set({ error }),
-  clearError: () => set({ error: null }),
+  clearError: () => set({ error: undefined }),
 
   // --- Reset Action ---
   resetGoals: async () => {
     // NEW: Clear weight log on reset
     set({
-      weightGoals: null,
+      weightGoals: undefined,
       weightLog: [],
-      error: null,
+      error: undefined,
       isLoading: false,
       isSaving: false,
     });
@@ -286,14 +292,14 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
   // --- Weight Log Actions ---
   fetchWeightLog: async () => {
-    set({ isLoading: true, error: null });
+    set({ isLoading: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
     try {
       const logData = await apiService.goals.getWeightLog();
       // Sort by timestamp descending
       const sortedLog = logData.sort(
         (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
       set({ weightLog: sortedLog, isLoading: false });
     } catch (error) {
@@ -307,7 +313,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     }
   },
   addWeightLogEntry: async (payload: AddWeightLogPayload) => {
-    set({ isSaving: true, error: null });
+    set({ isSaving: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
     try {
       const savedEntry = await apiService.goals.addWeightLogEntry(payload); // API returns entry with timestamp
@@ -315,7 +321,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       set((state) => {
         const newLog = [...(state.weightLog || []), savedEntry].sort(
           (a, b) =>
-            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
         );
         // Only update currentWeight, not the whole object
         return {
@@ -326,7 +332,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
                 currentWeight:
                   newLog[0]?.weight ?? state.weightGoals.currentWeight,
               }
-            : null,
+            : undefined,
           isSaving: false,
         };
       });
@@ -348,16 +354,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     }
   },
   deleteWeightLogEntry: async (id: string) => {
-    set({ isSaving: true, error: null });
+    set({ isSaving: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
     // Optimistic UI: update weightLog immediately
-    const prevLog = get().weightLog;
-    const optimisticLog = prevLog.filter((entry) => entry.id !== id);
+    const previousLog = get().weightLog;
+    const optimisticLog = previousLog.filter((entry) => entry.id !== id);
     // Update currentWeight optimistically
     set((state) => {
       const sortedOptimistic = [...optimisticLog].sort(
         (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
       return {
         weightLog: optimisticLog,
@@ -367,17 +373,17 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
               currentWeight:
                 sortedOptimistic[0]?.weight ?? state.weightGoals.currentWeight,
             }
-          : null,
+          : undefined,
       };
     });
 
     // Determine if the deleted entry was the latest
-    const sortedPrevLog = [...prevLog].sort(
+    const sortedPreviousLog = [...previousLog].sort(
       (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
-    const latestEntry = sortedPrevLog[0];
-    const deletedEntry = prevLog.find((entry) => entry.id === id);
+    const latestEntry = sortedPreviousLog[0];
+    const deletedEntry = previousLog.find((entry) => entry.id === id);
     let shouldUpdateUserWeight = false;
     if (latestEntry && deletedEntry && latestEntry.id === deletedEntry.id) {
       shouldUpdateUserWeight = true;
@@ -389,14 +395,16 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       // After server confirms, get the new latest weight
       const remainingLog = get().weightLog.filter(
-        (entry) => entry.id !== result.id
+        (entry) => entry.id !== result.id,
       );
       const sortedRemainingLog = [...remainingLog].sort(
         (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
       const newLatestWeight =
-        sortedRemainingLog.length > 0 ? sortedRemainingLog[0].weight : null;
+        sortedRemainingLog.length > 0
+          ? sortedRemainingLog[0].weight
+          : undefined;
 
       set((state) => ({
         weightLog: sortedRemainingLog,
@@ -405,11 +413,11 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
               ...state.weightGoals,
               currentWeight: newLatestWeight ?? state.weightGoals.currentWeight,
             }
-          : null,
+          : undefined,
         isSaving: false,
       }));
 
-      if (shouldUpdateUserWeight && newLatestWeight !== null) {
+      if (shouldUpdateUserWeight && newLatestWeight !== undefined) {
         fullGet().updateCurrentUserWeight?.(newLatestWeight);
       }
       fullGet().addNotification?.({
@@ -419,14 +427,14 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
     } catch (error) {
       // Rollback optimistic update on error
       set((state) => ({
-        weightLog: prevLog,
+        weightLog: previousLog,
         weightGoals: state.weightGoals
           ? {
               ...state.weightGoals,
               currentWeight:
-                prevLog[0]?.weight ?? state.weightGoals.currentWeight,
+                previousLog[0]?.weight ?? state.weightGoals.currentWeight,
             }
-          : null,
+          : undefined,
         isSaving: false,
       }));
       const errorMessage = getErrorMessage(error);

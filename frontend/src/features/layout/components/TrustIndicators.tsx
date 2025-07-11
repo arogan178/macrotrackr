@@ -1,6 +1,6 @@
-import React from "react";
+import { CircleHelp, ShieldCheck, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
-import { ShieldCheck, CircleHelp, Sparkles } from "lucide-react";
+import React from "react";
 
 /**
  * TrustIndicators renders the trust and assurance section for the pricing area.

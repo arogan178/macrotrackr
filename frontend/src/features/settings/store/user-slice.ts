@@ -1,13 +1,15 @@
 import { StateCreator } from "zustand";
-import { apiService } from "@/utils/api-service";
-import { UserSettings, UserNutritionalProfile } from "@/types/user";
-import { MacroTargetSettings } from "@/types/macro";
-import { getErrorMessage } from "@/utils/error-handling";
-import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
+
 import {
   createNutritionProfile,
   createUserSettings,
 } from "@/features/settings/utils/calculations";
+import { MacroTargetSettings } from "@/types/macro";
+import { UserNutritionalProfile, UserSettings } from "@/types/user"; // Unified import
+import { apiService } from "@/utils/apiServices";
+import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
+import { getErrorMessage } from "@/utils/errorHandling";
+
 import { validateSettingsComplete as validateSettings } from "../utils/validation";
 
 // Types for API payloads
@@ -15,18 +17,20 @@ interface UserSettingsPayload {
   firstName: string;
   lastName: string;
   email: string;
-  dateOfBirth: string | null;
-  height: number | null;
-  weight: number | null;
-  gender: "male" | "female" | null;
-  activityLevel: number | null;
+  dateOfBirth: string | undefined;
+  height: number | undefined;
+  weight: number | undefined;
+  gender: "male" | "female" | undefined;
+  activityLevel: number | undefined;
 }
 
 export interface UserSlice {
+  // Optional notification function for UI feedback
+  showNotification?: (message: string, type: "success" | "error") => void;
   // Core user data
-  user: UserSettings | null;
-  nutritionProfile: UserNutritionalProfile | null;
-  macroTarget: MacroTargetSettings | null;
+  user: UserSettings | undefined;
+  nutritionProfile: UserNutritionalProfile | undefined;
+  macroTarget: MacroTargetSettings | undefined;
 
   // Subscription
   subscriptionStatus: "free" | "pro" | "canceled";
@@ -39,27 +43,29 @@ export interface UserSlice {
   isTargetSaving: boolean;
 
   // Error and success states
-  error: string | null;
-  settingsError: string | null;
-  settingsSuccess: string | null;
+  error: string | undefined;
+  settingsError: string | undefined;
+  settingsSuccess: string | undefined;
   formErrors: Record<string, string>;
 
   // Settings form state
-  settings: UserSettings | null;
-  settingsMacroTarget: MacroTargetSettings | null;
-  originalSettings: UserSettings | null;
-  originalSettingsMacroTarget: MacroTargetSettings | null;
+  settings: UserSettings | undefined;
+  settingsMacroTarget: MacroTargetSettings | undefined;
+  originalSettings: UserSettings | undefined;
+  originalSettingsMacroTarget: MacroTargetSettings | undefined;
   hasSettingsChanges: boolean;
-
+  updateSetting: <K extends keyof UserSettings>(
+    key: K,
+    value: UserSettings[K],
+  ) => void;
   // Actions
   fetchUserDetails: () => Promise<void>;
   clearError: () => void;
   fetchSettings: () => Promise<void>;
-  updateSetting: <K extends keyof UserSettings>(key: K, value: any) => void;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   updateMacroTargetSettings: (
-    macroTarget: MacroTargetSettings
+    macroTarget: MacroTargetSettings,
   ) => Promise<boolean>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
@@ -67,34 +73,35 @@ export interface UserSlice {
 }
 
 export const createUserSlice: StateCreator<
-  UserSlice & any,
+  UserSlice & Record<string, unknown>,
   [],
   [],
   UserSlice
 > = (set, get) => ({
   // Initial state
-  user: null,
-  nutritionProfile: null,
+  user: undefined,
+  nutritionProfile: undefined,
   macroTarget: DEFAULT_MACRO_TARGET,
   subscriptionStatus: "free",
-  setSubscriptionStatus: (status) => set({ subscriptionStatus: status }),
+  setSubscriptionStatus: (status: "free" | "pro" | "canceled") =>
+    set({ subscriptionStatus: status }),
   isLoading: false,
-  error: null,
-  settings: null,
+  error: undefined,
+  settings: undefined,
   settingsMacroTarget: DEFAULT_MACRO_TARGET,
-  originalSettings: null,
-  originalSettingsMacroTarget: null,
+  originalSettings: undefined,
+  originalSettingsMacroTarget: undefined,
   isSettingsLoading: false,
   isSaving: false,
   isTargetSaving: false,
-  settingsError: null,
-  settingsSuccess: null,
+  settingsError: undefined,
+  settingsSuccess: undefined,
   formErrors: {},
   hasSettingsChanges: false,
 
   fetchUserDetails: async () => {
-    set({ isLoading: true, error: null });
-    const fullGet = get as () => UserSlice & any;
+    set({ isLoading: true, error: undefined });
+    const fullGet = get as () => UserSlice & Record<string, unknown>;
 
     try {
       const userData = await apiService.user.getUserDetails();
@@ -106,7 +113,18 @@ export const createUserSlice: StateCreator<
       const nutritionProfile = createNutritionProfile(userSettings);
 
       // Subscription status (from userData, fallback to 'free')
-      const subscriptionStatus = userData.subscriptionStatus || "free";
+      const allowedStatuses = ["free", "pro", "canceled"] as const;
+      const status =
+        typeof (userData as unknown as { subscriptionStatus?: unknown })
+          .subscriptionStatus === "string"
+          ? (userData as unknown as { subscriptionStatus: string })
+              .subscriptionStatus
+          : undefined;
+      const subscriptionStatus =
+        status &&
+        allowedStatuses.includes(status as "free" | "pro" | "canceled")
+          ? (status as "free" | "pro" | "canceled")
+          : "free";
 
       // Fetch macro target separately
       try {
@@ -120,7 +138,7 @@ export const createUserSlice: StateCreator<
           macroTarget: fetchedMacroTarget,
           subscriptionStatus,
           isLoading: false,
-          error: null,
+          error: undefined,
         });
       } catch (macroError) {
         console.error("Error fetching macro target:", macroError);
@@ -130,7 +148,7 @@ export const createUserSlice: StateCreator<
           macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
           subscriptionStatus,
           isLoading: false,
-          error: null,
+          error: undefined,
         });
       }
     } catch (error) {
@@ -139,23 +157,21 @@ export const createUserSlice: StateCreator<
       set({
         error: errorMessage,
         isLoading: false,
-        user: null,
-        nutritionProfile: null,
-        macroTarget: null,
+        user: undefined,
+        nutritionProfile: undefined,
+        macroTarget: undefined,
         subscriptionStatus: "free",
       });
 
-      if (fullGet().showNotification) {
-        fullGet().showNotification(
-          `Failed to load user data: ${errorMessage}`,
-          "error"
-        );
+      const notify = fullGet().showNotification;
+      if (typeof notify === "function") {
+        notify(`Failed to load user data: ${errorMessage}`, "error");
       }
     }
   },
 
   fetchSettings: async () => {
-    set({ isSettingsLoading: true, settingsError: null });
+    set({ isSettingsLoading: true, settingsError: undefined });
     try {
       const data = await apiService.user.getUserDetails();
       if (!data) {
@@ -180,8 +196,11 @@ export const createUserSlice: StateCreator<
     }
   },
 
-  updateSetting: (key, value) => {
-    set((state: UserSlice) => {
+  updateSetting: <K extends keyof UserSettings>(
+    key: K,
+    value: UserSettings[K],
+  ) => {
+    set((state: UserSlice & Record<string, unknown>) => {
       if (!state.settings || !(key in state.settings)) {
         console.warn(`Attempted to update unknown setting key: ${String(key)}`);
         return state;
@@ -197,15 +216,20 @@ export const createUserSlice: StateCreator<
         ...state,
         settings: updatedSettings,
         hasSettingsChanges: hasChanged,
-        settingsError: null,
-        settingsSuccess: null,
+        settingsError: undefined,
+        settingsSuccess: undefined,
       };
     });
   },
 
   validateSettingsForm: () => {
     const state = get();
-    const errors = validateSettings(state.settings);
+    // Sanitize gender property for validation
+    const settingsForValidation = state.settings && {
+      ...state.settings,
+      gender: state.settings.gender === "" ? undefined : state.settings.gender,
+    };
+    const errors = validateSettings(settingsForValidation);
     set({ formErrors: errors });
     return Object.keys(errors).length === 0;
   },
@@ -217,7 +241,11 @@ export const createUserSlice: StateCreator<
       return;
     }
 
-    set({ isSaving: true, settingsError: null, settingsSuccess: null });
+    set({
+      isSaving: true,
+      settingsError: undefined,
+      settingsSuccess: undefined,
+    });
 
     try {
       const payload: UserSettingsPayload = {
@@ -227,22 +255,27 @@ export const createUserSlice: StateCreator<
         dateOfBirth: state.settings.dateOfBirth,
         height: state.settings.height,
         weight: state.settings.weight,
-        gender: state.settings.gender,
+        gender:
+          state.settings.gender === "" ? undefined : state.settings.gender,
         activityLevel: state.settings.activityLevel,
       };
 
       await apiService.user.updateSettings(payload);
 
-      const newOriginalSettings = structuredClone(state.settings);
-      const newNutritionProfile = createNutritionProfile(state.settings);
+      const originalSettingsCloned = structuredClone(state.settings);
+      const nutritionProfileCloned = createNutritionProfile({
+        ...state.settings,
+        gender:
+          state.settings.gender === "" ? undefined : state.settings.gender,
+      });
 
       set({
-        originalSettings: newOriginalSettings,
-        user: newOriginalSettings,
-        nutritionProfile: newNutritionProfile,
+        originalSettings: originalSettingsCloned,
+        user: originalSettingsCloned,
+        nutritionProfile: nutritionProfileCloned,
         hasSettingsChanges: false,
         settingsSuccess: "Settings updated successfully!",
-        settingsError: null,
+        settingsError: undefined,
         isSaving: false,
       });
 
@@ -257,7 +290,7 @@ export const createUserSlice: StateCreator<
       if (state.showNotification) {
         state.showNotification(
           `Failed to save settings: ${errorMessage}`,
-          "error"
+          "error",
         );
       }
     }
@@ -265,17 +298,17 @@ export const createUserSlice: StateCreator<
 
   updateMacroTargetSettings: async (macroTarget: MacroTargetSettings) => {
     const state = get();
-    set({ isTargetSaving: true, settingsError: null });
+    set({ isTargetSaving: true, settingsError: undefined });
 
     try {
       await apiService.macros.saveMacroTargetPercentages({ macroTarget });
 
-      const newOriginalMacroTarget = structuredClone(macroTarget);
+      const macroTargetCloned = structuredClone(macroTarget);
 
       set({
-        originalSettingsMacroTarget: newOriginalMacroTarget,
-        settingsMacroTarget: newOriginalMacroTarget,
-        macroTarget: newOriginalMacroTarget,
+        originalSettingsMacroTarget: macroTargetCloned,
+        settingsMacroTarget: macroTargetCloned,
+        macroTarget: macroTargetCloned,
         hasSettingsChanges: false,
         isTargetSaving: false,
         settingsSuccess: "Macro targets updated successfully!",
@@ -298,7 +331,7 @@ export const createUserSlice: StateCreator<
       if (state.showNotification) {
         state.showNotification(
           `Failed to save macro targets: ${errorMessage}`,
-          "error"
+          "error",
         );
       }
 
@@ -311,30 +344,30 @@ export const createUserSlice: StateCreator<
       ...state,
       settings: state.originalSettings
         ? structuredClone(state.originalSettings)
-        : null,
+        : undefined,
       settingsMacroTarget: state.originalSettingsMacroTarget
         ? structuredClone(state.originalSettingsMacroTarget)
-        : null,
+        : undefined,
       hasSettingsChanges: false,
       formErrors: {},
-      settingsError: null,
-      settingsSuccess: null,
+      settingsError: undefined,
+      settingsSuccess: undefined,
     }));
   },
 
   clearSettingsMessages: () => {
-    set({ settingsError: null, settingsSuccess: null });
+    set({ settingsError: undefined, settingsSuccess: undefined });
   },
 
   updateCurrentUserWeight: (newWeight: number) => {
     set((state: UserSlice) => ({
       ...state,
-      user: state.user ? { ...state.user, weight: newWeight } : null,
+      user: state.user ? { ...state.user, weight: newWeight } : undefined,
       settings: state.settings
         ? { ...state.settings, weight: newWeight }
-        : null,
+        : undefined,
     }));
   },
 
-  clearError: () => set({ error: null }),
+  clearError: () => set({ error: undefined }),
 });

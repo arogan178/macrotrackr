@@ -61,8 +61,8 @@ export default function NutritionInsights({
               {averages.protein === 0
                 ? " No protein data tracked."
                 : averages.protein >= 120
-                ? " You're doing great with protein intake!"
-                : " Consider increasing your protein intake for better muscle recovery and growth."}
+                  ? " You're doing great with protein intake!"
+                  : " Consider increasing your protein intake for better muscle recovery and growth."}
             </p>
           </div>
 

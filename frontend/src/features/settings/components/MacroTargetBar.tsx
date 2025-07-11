@@ -1,4 +1,5 @@
 import { memo } from "react";
+
 import { MacroTargetState } from "../types/types";
 
 interface MacroTargetBarProps {

@@ -1,35 +1,43 @@
-import React, { Suspense, useEffect } from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import ErrorBoundary from "@/components/ErrorBoundary";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
-import { useNotificationManager } from "@/features/notifications/hooks/useNotificationManager";
-import { useStore } from "@/store/store";
-import { getToken } from "@/utils/token-storage";
-import { useNavigate } from "react-router-dom";
 import "./style.css";
+
+import React, { Suspense, useEffect } from "react";
+import {
+  BrowserRouter,
+  Navigate,
+  Route,
+  Routes,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { useNotificationManager } from "@/features/notifications/hooks/useNotificationManager";
+import { useStore } from "@/store/store.ts";
+import { getToken } from "@/utils/tokenStorage";
 
 // Lazy-loaded pages for better performance
 const HomePage = React.lazy(
-  () => import("./features/macroTracking/pages/HomePage")
+  () => import("./features/macroTracking/pages/HomePage"),
 );
 const SettingsPage = React.lazy(
-  () => import("@/features/settings/pages/SettingsPage")
+  () => import("@/features/settings/pages/SettingsPage"),
 );
 const GoalsPage = React.lazy(() => import("@/features/goals/pages/GoalsPage"));
 const AuthPage = React.lazy(() => import("@/features/auth/pages/AuthPage"));
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 const ReportingPage = React.lazy(
-  () => import("@/features/reporting/pages/ReportingPage")
+  () => import("@/features/reporting/pages/ReportingPage"),
 ); // Updated path
 const PricingPage = React.lazy(
-  () => import("@/features/pricing/pages/PricingPage")
+  () => import("@/features/pricing/pages/PricingPage"),
 );
 const ResetPasswordPage = React.lazy(() => import("./pages/ResetPasswordPage"));
 const LandingPage = React.lazy(
-  () => import("./features/layout/pages/LandingPage")
+  () => import("./features/layout/pages/LandingPage"),
 );
 const TermsAndConditionsPage = React.lazy(
-  () => import("./pages/TermsAndConditionsPage")
+  () => import("./pages/TermsAndConditionsPage"),
 );
 const PrivacyPolicyPage = React.lazy(() => import("./pages/PrivacyPolicyPage"));
 
@@ -41,8 +49,6 @@ function LoadingFallback() {
     </div>
   );
 }
-
-import { useLocation } from "react-router-dom";
 
 function AppContent() {
   useNotificationManager();
@@ -61,7 +67,7 @@ function AppContent() {
     ) {
       localStorage.setItem(
         "lastVisitedRoute",
-        location.pathname + location.search
+        location.pathname + location.search,
       );
     }
   }, [location]);
@@ -82,7 +88,6 @@ function AppContent() {
       logout();
       navigate("/login", { replace: true });
     }
-    // eslint-disable-next-line
   }, [isAuthenticated, logout, navigate]);
 
   // On login or refresh, redirect to last visited route if authenticated
@@ -131,13 +136,13 @@ function AppContent() {
           <Route
             path="/login"
             element={
-              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+              isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />
             }
           />
           <Route
             path="/register"
             element={
-              !isAuthenticated ? <AuthPage /> : <Navigate to="/home" replace />
+              isAuthenticated ? <Navigate to="/home" replace /> : <AuthPage />
             }
           />
           <Route

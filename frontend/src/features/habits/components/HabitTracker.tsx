@@ -1,18 +1,19 @@
-import ProgressBar from "@/components/form/ProgressBar";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { ProFeature } from "@/components/billing/ProFeature";
+import { FormButton } from "@/components/form";
+import {
+  CheckCircleIcon,
+  CheckIcon,
+  PlusIcon,
+  TargetIcon,
+} from "@/components/ui";
+import EmptyState from "@/components/ui/EmptyState";
+import ProgressBar from "@/components/ui/ProgressBar";
+import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
+
+import { HABIT_ICONS } from "../constants";
 import { HabitGoal } from "../types/types";
 import HabitActions from "./HabitActions";
-import EmptyState from "@/components/EmptyState";
-import { HABIT_ICONS } from "../constants";
-import {
-  PlusIcon,
-  CheckIcon,
-  CheckCircleIcon,
-  TargetIcon,
-} from "@/components/Icons";
-import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
-import { ProFeature } from "@/components/ProFeature";
-import { FormButton } from "@/components/form";
 
 interface HabitTrackerProps {
   habits: HabitGoal[];
@@ -49,16 +50,15 @@ function HabitTracker({
 
           {/* Only show Add button in header if NOT showing empty state */}
           {onAddHabit && habits.length > 0 && (
-            <div className={!canAddHabit ? "relative" : ""}>
+            <div className={canAddHabit ? "" : "relative"}>
               <ProFeature>
                 <FormButton
                   variant="ghost"
-                  size="sm"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
                   className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg disabled:opacity-50"
                   text="Add Habit"
-                  icon={<PlusIcon size="sm" />}
+                  icon={<PlusIcon />}
                   iconPosition="left"
                 />
               </ProFeature>
@@ -68,9 +68,9 @@ function HabitTracker({
 
         {isLoading ? (
           <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3].map((index) => (
               <div
-                key={i}
+                key={index}
                 className="bg-gray-700/30 rounded-lg overflow-hidden"
               >
                 <div className="bg-gradient-to-r from-gray-600/20 to-gray-600/5 p-3">
@@ -137,6 +137,26 @@ interface HabitCardProps {
   onDelete?: (id: string) => Promise<void>;
 }
 
+function getGradientClass(color: string) {
+  const gradients = {
+    indigo: "from-indigo-500/20 to-indigo-500/5",
+    blue: "from-blue-500/20 to-blue-500/5",
+    green: "from-green-500/20 to-green-500/5",
+    purple: "from-purple-500/20 to-purple-500/5",
+  } as const;
+  return gradients[color as keyof typeof gradients] || gradients.indigo;
+}
+
+function getAccentClass(color: string) {
+  const colors = {
+    indigo: "text-indigo-400 bg-indigo-400/10",
+    blue: "text-blue-400 bg-blue-400/10",
+    green: "text-green-400 bg-green-400/10",
+    purple: "text-purple-400 bg-purple-400/10",
+  } as const;
+  return colors[color as keyof typeof colors] || colors.indigo;
+}
+
 function HabitCard({
   habit,
   onIncrement,
@@ -154,26 +174,6 @@ function HabitCard({
     accentColor = "indigo",
     isComplete = false,
   } = habit;
-
-  const getGradientClass = (color: string) => {
-    const gradients = {
-      indigo: "from-indigo-500/20 to-indigo-500/5",
-      blue: "from-blue-500/20 to-blue-500/5",
-      green: "from-green-500/20 to-green-500/5",
-      purple: "from-purple-500/20 to-purple-500/5",
-    } as const;
-    return gradients[color as keyof typeof gradients] || gradients.indigo;
-  };
-
-  const getAccentClass = (color: string) => {
-    const colors = {
-      indigo: "text-indigo-400 bg-indigo-400/10",
-      blue: "text-blue-400 bg-blue-400/10",
-      green: "text-green-400 bg-green-400/10",
-      purple: "text-purple-400 bg-purple-400/10",
-    } as const;
-    return colors[color as keyof typeof colors] || colors.indigo;
-  };
 
   // Render the icon based on iconName
   const renderIcon = () => {
