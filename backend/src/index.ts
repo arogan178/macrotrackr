@@ -297,7 +297,7 @@ app.post(
     headers: t.Object({
       "stripe-signature": t.String(),
     }),
-    body: t.Not(t.Undefined()),
+    body: t.String(),
     detail: {
       summary: "Handle Stripe webhooks (NO AUTH)",
       tags: ["Billing"],
