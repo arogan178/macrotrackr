@@ -35,27 +35,7 @@ export const UserSchemas = {
         t.Literal("canceled"),
       ]),
       hasStripeCustomer: t.Boolean(),
-      subscription: t.Nullable(
-        t.Object({
-          id: t.String(),
-          status: t.Union([
-            t.Literal("active"),
-            t.Literal("canceled"),
-            t.Literal("past_due"),
-            t.Literal("unpaid"),
-          ]),
-          currentPeriodEnd: t.String(),
-          stripeSubscriptionId: t.String(),
-        })
-      ),
-      price: t.Nullable(t.String()),
-      paymentMethod: t.Nullable(
-        t.Object({
-          brand: t.String(),
-          last4: t.String(),
-        })
-      ),
-      stripeDetails: t.Nullable(t.Any()),
+      currentPeriodEnd: t.Optional(t.Nullable(t.String())),
     }),
   }),
 

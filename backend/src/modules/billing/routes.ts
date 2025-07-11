@@ -1,3 +1,4 @@
+// ...existing code...
 // src/modules/billing/routes.ts
 
 import { Elysia } from "elysia";
@@ -32,6 +33,45 @@ export const billingRoutes = (app: Elysia) =>
 
       // All routes require authentication
       .use(authMiddleware)
+
+      // Get detailed billing/subscription info
+      .get(
+        "/details",
+        async (context: any) => {
+          const { user } = context;
+          if (!user) throw new BadRequestError("Authentication required");
+          try {
+            const subscriptionInfo =
+              await SubscriptionService.getUserSubscription(user.userId);
+            // Compose response as per the plan
+            return {
+              subscription:
+                subscriptionInfo.subscription ?
+                  {
+                    id: subscriptionInfo.subscription.id,
+                    status: subscriptionInfo.subscription.status,
+                    currentPeriodEnd:
+                      subscriptionInfo.subscription.current_period_end,
+                    stripeSubscriptionId:
+                      subscriptionInfo.subscription.stripe_subscription_id,
+                  }
+                : null,
+              price: subscriptionInfo.price || null,
+              paymentMethod: subscriptionInfo.paymentMethod || null,
+              stripeDetails: subscriptionInfo.stripeDetails || null,
+            };
+          } catch (error) {
+            handleRouteError(error, "get_billing_details", user?.userId);
+          }
+        },
+        {
+          detail: {
+            summary:
+              "Get detailed billing and subscription info for the current user",
+            tags: ["Billing"],
+          },
+        }
+      )
 
       // Cancel current subscription
       .post(
