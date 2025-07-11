@@ -1,13 +1,14 @@
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
+import ProgressBar from "@/components/ui/ProgressBar";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+
 import {
   calculateCaloriesFromMacros,
-  calculateProteinCalories,
   calculateCarbsCalories,
   calculateFatsCalories,
+  calculateProteinCalories,
 } from "../calculations";
-import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
-import ProgressBar from "@/components/form/ProgressBar";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
@@ -42,7 +43,7 @@ export default function DailySummary({
   const totalCalories = calculateCaloriesFromMacros(
     safeTotal.protein,
     safeTotal.carbs,
-    safeTotal.fats
+    safeTotal.fats,
   );
   const proteinCalories = calculateProteinCalories(safeTotal.protein);
   const carbsCalories = calculateCarbsCalories(safeTotal.carbs);
@@ -50,13 +51,13 @@ export default function DailySummary({
 
   // --- Macro targets (grams) ---
   const targetProteinGrams = Math.round(
-    (dailyCalorieTarget * target.proteinPercentage) / 100 / 4
+    (dailyCalorieTarget * target.proteinPercentage) / 100 / 4,
   );
   const targetCarbsGrams = Math.round(
-    (dailyCalorieTarget * target.carbsPercentage) / 100 / 4
+    (dailyCalorieTarget * target.carbsPercentage) / 100 / 4,
   );
   const targetFatsGrams = Math.round(
-    (dailyCalorieTarget * target.fatsPercentage) / 100 / 9
+    (dailyCalorieTarget * target.fatsPercentage) / 100 / 9,
   );
 
   // --- Completion percentages ---
@@ -66,7 +67,7 @@ export default function DailySummary({
   }
   const proteinCompletionPercent = percent(
     safeTotal.protein,
-    targetProteinGrams
+    targetProteinGrams,
   );
   const carbsCompletionPercent = percent(safeTotal.carbs, targetCarbsGrams);
   const fatsCompletionPercent = percent(safeTotal.fats, targetFatsGrams);
@@ -243,8 +244,8 @@ export default function DailySummary({
                   macro.name.toLowerCase() === "protein"
                     ? "green"
                     : macro.name.toLowerCase() === "carbs"
-                    ? "blue"
-                    : "red"
+                      ? "blue"
+                      : "red"
                 }
                 height="md"
                 className="mb-3"

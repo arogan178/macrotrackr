@@ -1,14 +1,15 @@
 import { useEffect } from "react";
+
 import { CardContainer } from "@/components/form";
-import { useStore } from "@/store/store";
-import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import {
   StepOne,
-  StepTwo,
   StepThree,
+  StepTwo,
 } from "@/features/auth/components/RegisterFormSteps";
 import { StepIndicator } from "@/features/auth/components/StepIndicator";
 import { REGISTRATION_STEPS } from "@/features/auth/utils";
+import FloatingNotification from "@/features/notifications/components/FloatingNotification";
+import { useStore } from "@/store/store";
 
 // Main RegisterForm Component
 function RegisterForm() {
@@ -41,14 +42,18 @@ function RegisterForm() {
   // Render current step content
   const renderCurrentStep = () => {
     switch (register.step) {
-      case 1:
+      case 1: {
         return <StepOne />;
-      case 2:
+      }
+      case 2: {
         return <StepTwo />;
-      case 3:
+      }
+      case 3: {
         return <StepThree />;
-      default:
+      }
+      default: {
         return <StepOne />;
+      }
     }
   };
 

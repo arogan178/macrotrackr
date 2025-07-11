@@ -1,22 +1,21 @@
-import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "motion/react";
-import Navbar from "@/components/Navbar";
+import { useEffect, useState } from "react";
+
+import { TabButton } from "@/components/form";
+import { Navbar } from "@/components/layout";
+import { GoalsIcon, Modal, TargetIcon } from "@/components/ui";
 import {
+  GoalsLoadingSkeleton,
+  LogWeightModal,
+  MacroTargetForm,
   WeightGoalDashboard,
   WeightGoalModal,
-  LogWeightModal,
   WeightProgressTabs,
-  MacroTargetForm,
-  GoalsLoadingSkeleton,
 } from "@/features/goals/components";
-import { TabButton } from "@/components/form";
-import { GoalsIcon, TargetIcon } from "@/components/Icons";
-import { HabitTracker, HabitModal } from "@/features/habits/components";
-import { HabitGoalFormValues, HabitGoal } from "@/features/habits/types/types";
-import { WeightGoalFormValues } from "@/features/goals/types";
+import { HabitModal, HabitTracker } from "@/features/habits/components";
+import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
-import Modal from "@/components/form/Modal";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";
@@ -25,7 +24,7 @@ export default function GoalsPage() {
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   // State for habit modal
   const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
-  const [currentHabit, setCurrentHabit] = useState<HabitGoal | null>(null);
+  const [currentHabit, setCurrentHabit] = useState<HabitGoal | undefined>();
   const [habitModalMode, setHabitModalMode] = useState<"add" | "edit">("add");
   const [isWeightGoalModalOpen, setIsWeightGoalModalOpen] = useState(false);
   const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
@@ -44,7 +43,6 @@ export default function GoalsPage() {
     error: goalsError,
     isLoading: habitsLoading,
     error: habitsError,
-    createWeightGoal,
     clearError,
     fetchUserDetails,
     fetchMacroData,
@@ -83,14 +81,6 @@ export default function GoalsPage() {
     fetchWeightLog,
   ]);
 
-  // Updated handler for saving weight goal
-  const handleSaveGoal = async (formValues: WeightGoalFormValues) => {
-    if (!nutritionProfile?.tdee) return;
-    console.log("Saving weight goal:", formValues);
-    await createWeightGoal(formValues, nutritionProfile.tdee);
-    handleCloseWeightGoalModal();
-  };
-
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
     setIsWeightGoalModalOpen(true);
@@ -114,14 +104,14 @@ export default function GoalsPage() {
 
   // Handler for adding a new habit
   const handleAddHabit = () => {
-    setCurrentHabit(null);
+    setCurrentHabit(undefined);
     setHabitModalMode("add");
     setIsHabitModalOpen(true);
   };
 
   // Handler for editing a habit
   const handleEditHabit = (id: string) => {
-    const habitToEdit = habits?.find((habit) => habit.id === id) || null;
+    const habitToEdit = habits?.find((habit) => habit.id === id) || undefined;
     if (habitToEdit) {
       setCurrentHabit(habitToEdit);
       setHabitModalMode("edit");
@@ -132,22 +122,20 @@ export default function GoalsPage() {
   // Handler for closing habit modal
   const handleCloseHabitModal = () => {
     setIsHabitModalOpen(false);
-    setCurrentHabit(null);
+    setCurrentHabit(undefined);
   };
 
   // Unified handler for submitting and updating habits
   const handleSubmitHabit = async (
     values: HabitGoalFormValues,
-    habitId?: string
+    habitId?: string,
   ) => {
-    if (habitModalMode === "edit" && habitId) {
-      await updateHabit(habitId, values);
-    } else {
-      await addHabit(values);
-    }
+    await (habitModalMode === "edit" && habitId
+      ? updateHabit(habitId, values)
+      : addHabit(values));
 
     setIsHabitModalOpen(false);
-    setCurrentHabit(null);
+    setCurrentHabit(undefined);
   };
 
   // Handler to open the delete confirmation modal
@@ -271,7 +259,7 @@ export default function GoalsPage() {
             targetWeight={safeTargetWeight}
             tdee={nutritionProfile?.tdee || 0}
             weightGoals={
-              weightGoals && weightGoals.targetWeight != null
+              weightGoals && weightGoals.targetWeight != undefined
                 ? {
                     ...weightGoals,
                     targetWeight: weightGoals.targetWeight ?? 0,
@@ -283,7 +271,7 @@ export default function GoalsPage() {
                     weeklyChange: weightGoals.weeklyChange ?? 0,
                     dailyChange: weightGoals.dailyChange ?? 0,
                   }
-                : null
+                : undefined
             }
           />
         )}
@@ -365,7 +353,7 @@ export default function GoalsPage() {
                             }
                           }
                           weightGoals={
-                            weightGoals && weightGoals.targetWeight != null
+                            weightGoals && weightGoals.targetWeight != undefined
                               ? {
                                   ...weightGoals,
                                   targetWeight: weightGoals.targetWeight ?? 0,
@@ -379,7 +367,7 @@ export default function GoalsPage() {
                                   weeklyChange: weightGoals.weeklyChange ?? 0,
                                   dailyChange: weightGoals.dailyChange ?? 0,
                                 }
-                              : null
+                              : undefined
                           }
                           isLoading={goalsLoading}
                           onOpenModal={handleOpenWeightGoalModal}

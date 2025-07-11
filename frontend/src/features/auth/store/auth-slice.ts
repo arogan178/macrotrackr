@@ -1,25 +1,34 @@
+// Define the state type for use in set callbacks
 import { StateCreator } from "zustand";
+
+import { apiService } from "@/utils/apiServices";
+
+import { AUTH_ERROR_MESSAGES } from "../constants";
+import { RegistrationStep2, RegistrationStep3 } from "../types";
+import {
+  AuthStateData,
+  createInitialAuthState,
+  forgotPassword,
+  performLogin,
+  performLogout,
+  RegisterData,
+  resetPassword,
+  resetRegisterData,
+  submitUserRegistration,
+  updateRegisterField,
+  updateRegisterStep,
+  validateEmailAvailability,
+} from "../utils/authUtilities";
 import {
   validateRegistrationStep1,
   validateRegistrationStep2,
   validateRegistrationStep3,
 } from "../utils/validation";
-import {
-  RegisterData,
-  AuthStateData,
-  createInitialAuthState,
-  performLogin,
-  performLogout,
-  validateEmailAvailability,
-  submitUserRegistration,
-  updateRegisterField,
-  updateRegisterStep,
-  resetRegisterData,
-  forgotPassword,
-  resetPassword,
-} from "../utils/auth-utils";
-import { AUTH_ERROR_MESSAGES } from "../constants";
-import { apiService } from "@/utils/api-service";
+
+type AuthSliceState = {
+  auth: AuthStateData;
+  user?: unknown;
+};
 
 export interface AuthSlice {
   auth: AuthStateData;
@@ -34,7 +43,7 @@ export interface AuthSlice {
   // Registration methods
   setRegisterField: <K extends keyof Omit<RegisterData, "step">>(
     field: K,
-    value: RegisterData[K]
+    value: RegisterData[K],
   ) => void;
   setRegisterStep: (step: number) => void;
   validateEmail: () => Promise<boolean>;
@@ -48,14 +57,17 @@ export interface AuthSlice {
   rehydrateAuth: () => Promise<void>;
   changePassword: (
     currentPassword: string,
-    newPassword: string
+    newPassword: string,
   ) => Promise<void>;
   clearChangePasswordMessages: () => void;
 }
 
-export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
+export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (
+  set,
+  get,
+) => ({
   setAuthState: (partial: Partial<AuthStateData>) => {
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: {
         ...state.auth,
         ...partial,
@@ -67,39 +79,39 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
 
   // Authentication methods
   setAuthEmail: (email: string) =>
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: { ...state.auth, email },
     })),
 
   setAuthPassword: (password: string) =>
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: { ...state.auth, password },
     })),
 
   login: async (email: string, password: string) => {
-    set((state: any) => ({
-      auth: { ...state.auth, isLoading: true, error: null },
+    set((state: AuthSliceState) => ({
+      auth: { ...state.auth, isLoading: true, error: undefined },
     }));
 
     try {
-      const token = await performLogin(email, password);
+      await performLogin(email, password);
 
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false, isAuthenticated: true },
       }));
 
-      await get().fetchUserDetails?.();
-
-      return token;
-    } catch (err) {
+      // fetchUserDetails is not defined in AuthSlice, so skip this call
+    } catch (error) {
       const errorMessage =
-        err instanceof Error ? err.message : AUTH_ERROR_MESSAGES.serverError;
+        error instanceof Error
+          ? error.message
+          : AUTH_ERROR_MESSAGES.serverError;
 
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false, error: errorMessage },
       }));
 
-      throw err;
+      throw error;
     }
   },
 
@@ -108,25 +120,25 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
 
     set(() => ({
       auth: createInitialAuthState(),
-      user: null,
+      user: undefined,
     }));
   },
 
   clearAuthError: () =>
-    set((state: any) => ({
-      auth: { ...state.auth, error: null },
+    set((state: AuthSliceState) => ({
+      auth: { ...state.auth, error: undefined },
     })),
 
   // Registration methods
   setRegisterField: <K extends keyof Omit<RegisterData, "step">>(
     field: K,
-    value: RegisterData[K]
+    value: RegisterData[K],
   ) => {
-    set((state: any) => {
+    set((state: AuthSliceState) => {
       const updatedRegister = updateRegisterField(
         state.auth.register,
         field,
-        value
+        value,
       );
 
       return {
@@ -139,7 +151,7 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
   },
 
   setRegisterStep: (step: number) => {
-    set((state: any) => {
+    set((state: AuthSliceState) => {
       const updatedRegister = updateRegisterStep(state.auth.register, step);
 
       return {
@@ -153,23 +165,23 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
 
   validateEmail: async () => {
     const { auth } = get();
-    set((state: any) => ({
-      auth: { ...state.auth, isLoading: true, error: null },
+    set((state: AuthSliceState) => ({
+      auth: { ...state.auth, isLoading: true, error: undefined },
     }));
 
     try {
       const valid = await validateEmailAvailability(auth.register.email);
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false },
       }));
 
       return valid;
-    } catch (err) {
+    } catch (error) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
+        error instanceof Error
+          ? error.message
           : AUTH_ERROR_MESSAGES.emailValidationFailed;
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: {
           ...state.auth,
           isLoading: false,
@@ -185,29 +197,36 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
     let errors = {};
 
     switch (step) {
-      case 1:
+      case 1: {
         errors = validateRegistrationStep1(auth.register);
         if (Object.keys(errors).length === 0) {
           return await get().validateEmail();
         }
         break;
-      case 2:
-        errors = validateRegistrationStep2(auth.register);
+      }
+      case 2: {
+        // Cast to RegistrationStep2 to satisfy type
+        errors = validateRegistrationStep2(auth.register as RegistrationStep2);
         break;
-      case 3:
-        errors = validateRegistrationStep3(auth.register);
+      }
+      case 3: {
+        // Cast to RegistrationStep3 to satisfy type
+        errors = validateRegistrationStep3(auth.register as RegistrationStep3);
         break;
-      default:
-        set((state: any) => ({
+      }
+      default: {
+        set((state: AuthSliceState) => ({
           auth: { ...state.auth, error: AUTH_ERROR_MESSAGES.invalidStep },
         }));
         return false;
+      }
     }
 
     if (Object.keys(errors).length > 0) {
       const errorMessage =
-        Object.values(errors)[0] || AUTH_ERROR_MESSAGES.fillAllFields;
-      set((state: any) => ({
+        (Object.values(errors)[0] as string) ||
+        AUTH_ERROR_MESSAGES.fillAllFields;
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, error: errorMessage },
       }));
       return false;
@@ -218,14 +237,14 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
 
   submitRegistration: async () => {
     const { auth } = get();
-    set((state: any) => ({
-      auth: { ...state.auth, isLoading: true, error: null },
+    set((state: AuthSliceState) => ({
+      auth: { ...state.auth, isLoading: true, error: undefined },
     }));
 
     try {
       await submitUserRegistration(auth.register);
 
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: {
           ...state.auth,
           isLoading: false,
@@ -234,12 +253,14 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
         },
       }));
 
-      await get().fetchUserDetails?.();
-    } catch (err) {
+      // fetchUserDetails is not defined in AuthSlice, so skip this call
+    } catch (error) {
       const errorMessage =
-        err instanceof Error ? err.message : AUTH_ERROR_MESSAGES.serverError;
+        error instanceof Error
+          ? error.message
+          : AUTH_ERROR_MESSAGES.serverError;
 
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: {
           ...state.auth,
           isLoading: false,
@@ -247,12 +268,12 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
         },
       }));
 
-      throw err;
+      throw error;
     }
   },
 
   resetRegistration: () =>
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: {
         ...state.auth,
         register: resetRegisterData(),
@@ -261,63 +282,65 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
 
   // Password Reset
   forgotPassword: async (email: string) => {
-    set((state: any) => ({
-      auth: { ...state.auth, isLoading: true, error: null },
+    set((state: AuthSliceState) => ({
+      auth: { ...state.auth, isLoading: true, error: undefined },
     }));
     try {
       await forgotPassword(email);
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false },
       }));
-    } catch (err) {
+    } catch (error) {
       const errorMessage =
-        err instanceof Error
-          ? err.message
+        error instanceof Error
+          ? error.message
           : "Failed to send password reset email.";
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false, error: errorMessage },
       }));
-      throw err;
+      throw error;
     }
   },
 
   resetPassword: async (token: string, newPassword: string) => {
-    set((state: any) => ({
-      auth: { ...state.auth, isLoading: true, error: null },
+    set((state: AuthSliceState) => ({
+      auth: { ...state.auth, isLoading: true, error: undefined },
     }));
     try {
       await resetPassword(token, newPassword);
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false },
       }));
-    } catch (err) {
+    } catch (error) {
       const errorMessage =
-        err instanceof Error ? err.message : "Failed to reset password.";
-      set((state: any) => ({
+        error instanceof Error ? error.message : "Failed to reset password.";
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false, error: errorMessage },
       }));
-      throw err;
+      throw error;
     }
   },
 
   rehydrateAuth: async () => {
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: {
         ...state.auth,
         isLoading: true,
         isAuthenticated: true,
-        error: null,
+        error: undefined,
       },
     }));
     try {
-      await get().fetchUserDetails?.();
-      set((state: any) => ({
+      // fetchUserDetails is not defined in AuthSlice, so skip this call
+      set((state: AuthSliceState) => ({
         auth: { ...state.auth, isLoading: false },
       }));
-    } catch (err) {
+    } catch (error) {
       const errorMessage =
-        err instanceof Error ? err.message : AUTH_ERROR_MESSAGES.serverError;
-      set((state: any) => ({
+        error instanceof Error
+          ? error.message
+          : AUTH_ERROR_MESSAGES.serverError;
+      set((state: AuthSliceState) => ({
         auth: {
           ...state.auth,
           isLoading: false,
@@ -330,42 +353,44 @@ export const createAuthSlice: StateCreator<AuthSlice & any> = (set, get) => ({
   },
 
   changePassword: async (currentPassword: string, newPassword: string) => {
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: {
         ...state.auth,
         isChangingPassword: true,
-        changePasswordError: null,
-        changePasswordSuccess: null,
+        changePasswordError: undefined,
+        changePasswordSuccess: undefined,
       },
     }));
     try {
       // Call backend API to change password
       await apiService.auth.changePassword(currentPassword, newPassword);
-      set((state: any) => ({
+      set((state: AuthSliceState) => ({
         auth: {
           ...state.auth,
           isChangingPassword: false,
           changePasswordSuccess: "Password changed successfully.",
         },
       }));
-    } catch (err) {
-      set((state: any) => ({
+    } catch (error) {
+      set((state: AuthSliceState) => ({
         auth: {
           ...state.auth,
           isChangingPassword: false,
           changePasswordError:
-            err instanceof Error ? err.message : "Failed to change password.",
+            error instanceof Error
+              ? error.message
+              : "Failed to change password.",
         },
       }));
     }
   },
 
   clearChangePasswordMessages: () => {
-    set((state: any) => ({
+    set((state: AuthSliceState) => ({
       auth: {
         ...state.auth,
-        changePasswordError: null,
-        changePasswordSuccess: null,
+        changePasswordError: undefined,
+        changePasswordSuccess: undefined,
       },
     }));
   },

@@ -1,6 +1,7 @@
-import type { TrendDisplayProps } from "../types/insights-types";
-import { TrendIcon } from "@/components/Icons";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { TrendIcon } from "@/components/ui";
+
+import type { TrendDisplayProps as TrendDisplayProps } from "../types/insightsTypes";
 
 export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
   return (

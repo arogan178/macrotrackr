@@ -1,6 +1,7 @@
 import { memo } from "react";
-import type { InfoCardProps } from "@/components/utils/types";
-import { COLOR_MAP } from "@/components/utils/constants";
+
+import { COLOR_MAP } from "@/components/utils/Constants";
+import type { InfoCardProps } from "@/components/utils/Types";
 
 function InfoCard({
   title,

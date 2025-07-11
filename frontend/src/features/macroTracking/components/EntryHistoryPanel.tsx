@@ -1,19 +1,18 @@
-import { useEffect, useState, useMemo, memo, useCallback } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import {
-  PlusCircleIcon,
-  ChevronDownIcon,
-  ExportIcon,
-} from "@/components/Icons";
-import ActionButton from "@/components/form/ActionButton";
-import { FormButton } from "@/components/form";
-import { ProFeature } from "@/components/ProFeature";
-import Modal from "@/components/form/Modal";
-import EmptyState from "@/components/EmptyState";
+import { AnimatePresence, motion } from "motion/react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { ProFeature } from "@/components/billing/ProFeature";
+import { FormButton } from "@/components/form";
+import ActionButton from "@/components/form/ActionButton";
+import { ChevronDownIcon, ExportIcon, PlusCircleIcon } from "@/components/ui";
+import EmptyState from "@/components/ui/EmptyState";
+import Modal from "@/components/ui/Modal";
+import { MacroEntry } from "@/types/macro";
+
 import DesktopEntryTable from "./DesktopEntryTable";
 import MobileEntryCards from "./MobileEntryCards";
-import { MacroEntry } from "@/types/macro";
+
 interface EntryHistoryProps {
   history: MacroEntry[];
   deleteEntry: (id: number) => void;
@@ -23,8 +22,8 @@ interface EntryHistoryProps {
 }
 
 // Consolidated helper functions
-const formatEntryDate = (dateStr: string): string =>
-  new Date(dateStr).toLocaleDateString("en-UK", {
+const formatEntryDate = (dateString: string): string =>
+  new Date(dateString).toLocaleDateString("en-UK", {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -41,7 +40,7 @@ const formatTimeFromEntry = (entry: MacroEntry): string =>
 const calculateCalories = (
   protein: number,
   carbs: number,
-  fats: number
+  fats: number,
 ): number => Math.round(protein * 4 + carbs * 4 + fats * 9);
 
 const capitalizeFirstLetter = (string: string): string =>
@@ -67,19 +66,19 @@ const exportCSV = (history: MacroEntry[]) => {
         },${entry.fats},${calculateCalories(
           entry.protein,
           entry.carbs,
-          entry.fats
-        )}`
+          entry.fats,
+        )}`,
     ),
   ].join("\n");
 
   const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = window.URL.createObjectURL(blob);
+  const url = globalThis.URL.createObjectURL(blob);
   const a = document.createElement("a");
   Object.assign(a, { href: url, download: "macro-entries.csv" });
-  document.body.appendChild(a);
+  document.body.append(a);
   a.click();
-  document.body.removeChild(a);
-  window.URL.revokeObjectURL(url);
+  a.remove();
+  globalThis.URL.revokeObjectURL(url);
 };
 
 const EntryHistoryComponent = function EntryHistory({
@@ -91,7 +90,7 @@ const EntryHistoryComponent = function EntryHistory({
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [showAllDates, setShowAllDates] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [dateToDelete, setDateToDelete] = useState<string | null>(null);
+  const [dateToDelete, setDateToDelete] = useState<string | undefined>();
 
   // Memoize today's date
   const todayFormatted = useMemo(() => {
@@ -107,34 +106,38 @@ const EntryHistoryComponent = function EntryHistory({
     (dateString: string) => {
       return dateString === todayFormatted ? "Today" : dateString;
     },
-    [todayFormatted]
+    [todayFormatted],
   );
 
   // Memoize grouped entries with totals and filter by show more state
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
-    const grouped = history.reduce((acc, entry) => {
+    const grouped: Record<string, MacroEntry[]> = {};
+    for (const entry of history) {
       const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
-      if (!acc[dateKey]) acc[dateKey] = [];
-      acc[dateKey].push(entry);
-      return acc;
-    }, {} as Record<string, MacroEntry[]>);
+      if (!grouped[dateKey]) grouped[dateKey] = [];
+      grouped[dateKey].push(entry);
+    }
 
     const allEntries = Object.entries(grouped)
-      .map(([date, entries]) => ({
-        date,
-        entries,
-        totals: entries.reduce(
-          (acc, entry) => ({
-            protein: acc.protein + (entry.protein || 0),
-            carbs: acc.carbs + (entry.carbs || 0),
-            fats: acc.fats + (entry.fats || 0),
-            calories:
-              acc.calories +
-              calculateCalories(entry.protein, entry.carbs, entry.fats),
-          }),
-          { protein: 0, carbs: 0, fats: 0, calories: 0 }
-        ),
-      }))
+      .map(([date, entries]) => {
+        // Replace reduce with a loop for totals
+        const totals = { protein: 0, carbs: 0, fats: 0, calories: 0 };
+        for (const entry of entries) {
+          totals.protein += entry.protein || 0;
+          totals.carbs += entry.carbs || 0;
+          totals.fats += entry.fats || 0;
+          totals.calories += calculateCalories(
+            entry.protein,
+            entry.carbs,
+            entry.fats,
+          );
+        }
+        return {
+          date,
+          entries,
+          totals,
+        };
+      })
       .map((group) => ({
         ...group,
         totals: {
@@ -147,7 +150,7 @@ const EntryHistoryComponent = function EntryHistory({
       .sort(
         (a, b) =>
           new Date(b.entries[0].entryDate || b.entries[0].createdAt).getTime() -
-          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime()
+          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime(),
       );
 
     const displayed = showAllDates ? allEntries : allEntries.slice(0, 5);
@@ -161,49 +164,54 @@ const EntryHistoryComponent = function EntryHistory({
 
   // Initialize collapsed dates
   useEffect(() => {
-    setCollapsedDates((prev) => {
-      if (prev.size === 0) {
+    setCollapsedDates((previous) => {
+      if (previous.size === 0) {
         return new Set(
           totalEntries
             .filter((group) => group.date !== todayFormatted)
-            .map((group) => group.date)
+            .map((group) => group.date),
         );
       }
       const existingDates = new Set(totalEntries.map((group) => group.date));
-      return new Set([...prev].filter((date) => existingDates.has(date)));
+      return new Set([...previous].filter((date) => existingDates.has(date)));
     });
   }, [totalEntries, todayFormatted]);
 
   // Memoized event handlers
   const toggleDateCollapse = useCallback((date: string) => {
-    setCollapsedDates((prev) => {
-      const newSet = new Set(prev);
+    setCollapsedDates((previous) => {
+      const newSet = new Set(previous);
       newSet.has(date) ? newSet.delete(date) : newSet.add(date);
       return newSet;
     });
   }, []);
 
   const toggleShowAllDates = useCallback(() => {
-    setShowAllDates((prev) => !prev);
+    setShowAllDates((previous) => !previous);
   }, []);
 
-  const handleDeleteDate = useCallback((date: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    setDateToDelete(date);
-    setIsDeleteModalOpen(true);
-  }, []);
+  const handleDeleteDate = useCallback(
+    (date: string, event: React.MouseEvent) => {
+      event.stopPropagation();
+      setDateToDelete(date);
+      setIsDeleteModalOpen(true);
+    },
+    [],
+  );
 
   const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
     const group = totalEntries.find((g) => g.date === dateToDelete);
-    group?.entries.forEach((entry) => deleteEntry(entry.id));
+    if (group && group.entries) {
+      for (const entry of group.entries) deleteEntry(entry.id);
+    }
     setIsDeleteModalOpen(false);
-    setDateToDelete(null);
+    setDateToDelete(undefined);
   }, [dateToDelete, totalEntries, deleteEntry]);
 
   const closeDeleteModal = useCallback(() => {
     setIsDeleteModalOpen(false);
-    setDateToDelete(null);
+    setDateToDelete(undefined);
   }, []);
 
   const handleExportCSV = useCallback(() => exportCSV(history), [history]);
@@ -231,7 +239,6 @@ const EntryHistoryComponent = function EntryHistory({
               variant="export"
               ariaLabel="Export data as CSV file"
               onClick={handleExportCSV}
-              buttonSize="md"
               className="mr-1"
             />
           </ProFeature>
@@ -381,15 +388,10 @@ const EntryHistoryComponent = function EntryHistory({
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
         isDanger={true}
-      >
-        {/* No additional content needed for confirmation modal */}
-        <></>
-      </Modal>
+      />
     </motion.div>
   );
 };
 
 // Export memoized component
 export default memo(EntryHistoryComponent);
-
-EntryHistoryComponent.displayName = "EntryHistoryPanel";

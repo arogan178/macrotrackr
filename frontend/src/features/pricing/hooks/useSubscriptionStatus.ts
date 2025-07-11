@@ -1,5 +1,6 @@
-import { useStore } from "@/store/store";
 import { useEffect } from "react";
+
+import { useStore } from "@/store/store";
 
 export function useSubscriptionStatus() {
   const subscriptionStatus = useStore((s) => s.subscriptionStatus);

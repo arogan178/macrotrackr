@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
-import { STAT_COLORS } from "@/utils/chart-colors";
-import FormButton from "../form/FormButton";
+
+import { FormButton } from "@/components/form";
+import { STAT_COLORS } from "@/utils/chartColors";
 
 interface StatSelectorProps {
   selectedStat: string;
@@ -33,7 +34,7 @@ function StatSelector({
                 : "text-gray-300 hover:bg-gray-600/50 hover:text-white"
             }`}
             variant={selectedStat === stat ? "primary" : "ghost"}
-            size="sm"
+            buttonSize="sm"
             aria-selected={selectedStat === stat}
             role="tab"
           >
