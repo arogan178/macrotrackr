@@ -1,16 +1,17 @@
-import type {
-  AggregatedDataPoint,
-  NutritionAverage,
-  MacroTargetSettings,
-  MacroBalanceResult,
-  TrendResult,
-  DataQualityResult,
-  NutrientDensityResult,
-} from "../types/insights-types";
 import {
   DEFAULT_MACRO_TARGET,
   TREND_THRESHOLD,
-} from "../constants/insights-constants";
+} from "../constants/insightsConstants";
+import type {
+  AggregatedDataPoint,
+  DataQualityResult,
+  MacroBalanceResult,
+  MacroTargetSettings,
+  NutrientDensityResult,
+  NutritionAverage,
+  TrendResult,
+} from "../types/insightsTypes";
+import { calculateStandardDeviation } from "./macroCalculations";
 
 // --- Magic Number Constants ---
 const CONSISTENCY_FREQUENCY_WEIGHT = 40;
@@ -29,7 +30,6 @@ const NUTRIENT_DENSITY_SCORE_FACTOR = 3;
 const NUTRIENT_DENSITY_SCORE_PROTEIN_MULT = 100;
 const SCORE_COLOR_GREEN = 70;
 const SCORE_COLOR_YELLOW = 40;
-import { calculateStandardDeviation } from "./macro-calculations";
 
 export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
   if (!data?.length) return 0;
@@ -41,9 +41,9 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
   const calories = data.map((d) => d.calories).filter(Boolean);
   if (calories.length <= 1) return frequencyScore;
 
-  const avg = calories.reduce((sum, val) => sum + val, 0) / calories.length;
-  const standardDev = calculateStandardDeviation(calories);
-  const coefficientOfVariation = standardDev / avg;
+  const avg = calories.reduce((sum, value) => sum + value, 0) / calories.length;
+  const standardDevelopment = calculateStandardDeviation(calories);
+  const coefficientOfVariation = standardDevelopment / avg;
   const consistencyScore = Math.max(
     0,
     CONSISTENCY_SCORE_WEIGHT *
@@ -57,7 +57,7 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
 
 export function calculateMacroBalance(
   averages: NutritionAverage,
-  macroTarget?: MacroTargetSettings | null,
+  macroTarget?: MacroTargetSettings | undefined,
 ): MacroBalanceResult {
   const total = averages.protein + averages.carbs + averages.fats;
   const target = macroTarget || DEFAULT_MACRO_TARGET;
@@ -159,7 +159,7 @@ export function calculateTrend(
     .map((d) => Number(d[metric]))
     .filter(Boolean);
 
-  if (!firstDays.length || !lastDays.length) {
+  if (firstDays.length === 0 || lastDays.length === 0) {
     return {
       direction: "insufficient" as const,
       percentage: 0,
@@ -168,8 +168,9 @@ export function calculateTrend(
   }
 
   const firstAvg =
-    firstDays.reduce((sum, val) => sum + val, 0) / firstDays.length;
-  const lastAvg = lastDays.reduce((sum, val) => sum + val, 0) / lastDays.length;
+    firstDays.reduce((sum, value) => sum + value, 0) / firstDays.length;
+  const lastAvg =
+    lastDays.reduce((sum, value) => sum + value, 0) / lastDays.length;
 
   if (firstAvg === 0) {
     return {
@@ -191,8 +192,8 @@ export function calculateTrend(
     direction === "stable"
       ? "Your intake has been stable."
       : `Your ${metric} intake is ${
-        direction === "up" ? "trending upward" : "trending downward"
-      }.`;
+          direction === "up" ? "trending upward" : "trending downward"
+        }.`;
 
   return {
     direction,

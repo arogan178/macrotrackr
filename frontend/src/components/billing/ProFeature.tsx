@@ -1,4 +1,5 @@
 import React, { memo } from "react";
+
 import { ProBadge, UpgradeModal } from "@/components/billing";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 
@@ -17,7 +18,14 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
   return (
     <div
       className="relative pointer-events-auto select-none cursor-pointer"
+      role="button"
+      tabIndex={0}
       onClick={() => setModalOpen(true)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          setModalOpen(true);
+        }
+      }}
     >
       {/* ProBadge in top right, overlapping */}
       <div className="absolute top-0 right-0 -translate-y-1/4 translate-x-1/4 pointer-events-none z-20">
@@ -29,7 +37,7 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
         onClose={() => setModalOpen(false)}
         onUpgrade={() => {
           setModalOpen(false);
-          window.location.href = "/pricing";
+          globalThis.location.href = "/pricing";
         }}
       />
     </div>

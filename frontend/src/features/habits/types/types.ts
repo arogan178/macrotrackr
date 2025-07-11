@@ -14,7 +14,7 @@ export interface HabitGoal {
 export interface HabitsState {
   habits: HabitGoal[];
   isLoading: boolean;
-  error: string | null;
+  error: string | undefined;
 }
 
 // Form values for creating/updating a habit goal

@@ -9,14 +9,14 @@ export function formatDateName(
 ): string {
   // For 7 days, keep daily format but ensure it's short
   if (selectedRange <= 7) {
-    return entry.name.substring(0, 6); // e.g., "Apr 18"
+    return entry.name.slice(0, 6); // e.g., "Apr 18"
   }
 
   // For 30 days, group into weeks
   else if (selectedRange <= 30) {
     const parts = entry.name.split(" ");
     const month = parts[0]; // e.g., "Apr"
-    const day = parseInt(parts[1] || "1"); // e.g., "18" -> 18
+    const day = Number.parseInt(parts[1] || "1"); // e.g., "18" -> 18
 
     // Get month number from abbreviation (0-indexed)
     const monthMap: { [key: string]: number } = {
@@ -36,11 +36,11 @@ export function formatDateName(
 
     // Create a date object for this entry
     const currentYear = new Date().getFullYear();
-    const monthNum = monthMap[month] !== undefined ? monthMap[month] : 0;
-    const entryDate = new Date(currentYear, monthNum, day);
+    const monthNumber = monthMap[month] === undefined ? 0 : monthMap[month];
+    const entryDate = new Date(currentYear, monthNumber, day);
 
     // Calculate the week number within the month
-    const firstDayOfMonth = new Date(currentYear, monthNum, 1);
+    const firstDayOfMonth = new Date(currentYear, monthNumber, 1);
     const daysSinceFirstDay = Math.floor(
       (entryDate.getTime() - firstDayOfMonth.getTime()) / (24 * 60 * 60 * 1000),
     );

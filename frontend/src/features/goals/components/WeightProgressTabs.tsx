@@ -1,10 +1,12 @@
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+
+import { ActionButton } from "@/components/form";
+import { BarChartIcon, BookIcon } from "@/components/ui"; // Using local icons
 import { useStore } from "@/store/store";
-import { motion, AnimatePresence } from "motion/react";
+
 import WeightGoalProgressChart from "./WeightGoalProgressChart";
 import WeightLogList from "./WeightLogList";
-import { BarChartIcon, BookIcon } from "@/components/ui"; // Using local icons
-import { ActionButton } from "@/components/form";
 
 type TabId = "chart" | "list";
 

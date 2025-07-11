@@ -1,13 +1,15 @@
 import { motion } from "motion/react";
-import type { InsightsData, NutritionAverage } from "../types/insights-types";
-import ActionCard from "./ActionCard";
+
 import {
-  LightningIcon,
   BalanceIcon,
+  ClipboardIcon,
+  LightningIcon,
   NutrientIcon,
   ProteinIcon,
-  ClipboardIcon,
 } from "@/components/ui";
+
+import type { InsightsData, NutritionAverage } from "../types/insightsTypes";
+import ActionCard from "./ActionCard";
 
 interface RecommendationsSectionProps {
   insights: InsightsData;

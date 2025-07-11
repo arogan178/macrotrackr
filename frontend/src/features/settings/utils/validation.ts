@@ -1,17 +1,20 @@
+import type { MacroTargetSettings } from "@/types/macro";
 import {
+  USER_MAXIMUM_HEIGHT,
+  USER_MAXIMUM_WEIGHT,
   USER_MINIMUM_AGE,
   USER_MINIMUM_HEIGHT,
-  USER_MAXIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
-  USER_MAXIMUM_WEIGHT,
 } from "@/utils/constants";
-import { isOldEnough } from "@/utils/validation";
+import { isOldEnough } from "@/utils/Validation";
+
 import type { UserSettings } from "../types/types";
-import type { MacroTargetSettings } from "@/types/macro";
 /**
  * Validates user form fields
  */
-export function validateUserSettings(settings: any): Record<string, string> {
+export function validateUserSettings(
+  settings: UserSettings | undefined,
+): Record<string, string> {
   const errors: Record<string, string> = {};
 
   // Email validation
@@ -26,10 +29,8 @@ export function validateUserSettings(settings: any): Record<string, string> {
   }
 
   // Date of birth validation
-  if (settings?.dateOfBirth) {
-    if (!isOldEnough(settings.dateOfBirth)) {
-      errors.dateOfBirth = `You must be at least ${USER_MINIMUM_AGE} years old`;
-    }
+  if (settings?.dateOfBirth && !isOldEnough(settings.dateOfBirth)) {
+    errors.dateOfBirth = `You must be at least ${USER_MINIMUM_AGE} years old`;
   }
 
   // Height validation
@@ -55,7 +56,7 @@ export function validateUserSettings(settings: any): Record<string, string> {
 
 // Helper function to validate user settings with required fields
 export const validateSettingsComplete = (
-  settings: UserSettings | null,
+  settings: UserSettings | undefined,
 ): Record<string, string> => {
   if (!settings) {
     return { general: "Settings data is required" };
@@ -74,8 +75,8 @@ export const validateSettingsComplete = (
 
 // Helper function to check if settings have changed
 export const hasSettingsChanged = (
-  current: UserSettings | null,
-  original: UserSettings | null,
+  current: UserSettings | undefined,
+  original: UserSettings | undefined,
 ): boolean => {
   if (!current || !original) return current !== original;
   return JSON.stringify(current) !== JSON.stringify(original);
@@ -83,8 +84,8 @@ export const hasSettingsChanged = (
 
 // Helper function to check if macro targets have changed
 export const hasMacroTargetsChanged = (
-  current: MacroTargetSettings | null,
-  original: MacroTargetSettings | null,
+  current: MacroTargetSettings | undefined,
+  original: MacroTargetSettings | undefined,
 ): boolean => {
   if (!current || !original) return current !== original;
   return JSON.stringify(current) !== JSON.stringify(original);

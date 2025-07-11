@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useLocation } from "react-router-dom";
+
 import { useStore } from "@/store/store";
 
 /**
@@ -26,14 +27,14 @@ export function useNotificationManager() {
 
       // Also clear any success notifications related to settings
       if (notifications.length > 0) {
-        notifications.forEach((notification) => {
+        for (const notification of notifications) {
           if (
             notification.type === "success" &&
             notification.message.toLowerCase().includes("settings")
           ) {
             hideNotification(notification.id);
           }
-        });
+        }
       }
     }
   }, [
@@ -44,5 +45,5 @@ export function useNotificationManager() {
     hideNotification,
   ]);
 
-  return null;
+  return;
 }

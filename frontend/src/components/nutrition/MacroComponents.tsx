@@ -1,7 +1,8 @@
-import { calculateCaloriePercentages } from "@/utils/nutrition";
-import type { MacroNutrients } from "@/utils/nutrition-types";
 import { memo } from "react";
+
 import { AnimatedNumber } from "@/components/animation";
+import { calculateCaloriePercentages } from "@/utils/nutrition";
+import type { MacroNutrients } from "@/utils/nutritionTypes";
 
 interface MacroBarProps {
   macros: MacroNutrients;
@@ -110,7 +111,7 @@ export function MacroIndicator({
   // Calculate percentage if target is provided
   const percentage = target
     ? Math.min(Math.round((value / target) * 100), 100)
-    : null;
+    : undefined;
 
   return (
     <div className="flex flex-col">
@@ -119,7 +120,7 @@ export function MacroIndicator({
           className={`w-2 h-2 rounded-full ${colorClasses[color].dot}`}
         ></div>
         <span className="text-sm text-gray-300">{name}</span>
-        {showPercentage && percentage !== null && (
+        {showPercentage && percentage !== undefined && (
           <span className="text-xs text-gray-400 ml-auto">{percentage}%</span>
         )}
       </div>

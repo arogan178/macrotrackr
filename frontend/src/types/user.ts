@@ -12,11 +12,11 @@ export interface UserSettings {
   firstName: string;
   lastName: string;
   email: string;
-  dateOfBirth: string | null;
-  height: number | null;
-  weight: number | null;
-  activityLevel: number | null;
-  gender: Gender | null;
+  dateOfBirth: string | undefined;
+  height: number | undefined;
+  weight: number | undefined;
+  activityLevel: number | undefined;
+  gender: Gender | undefined;
 }
 
 export interface UserNutritionalProfile {

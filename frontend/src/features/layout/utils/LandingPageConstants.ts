@@ -1,8 +1,8 @@
 import {
-  PlusCircleIcon,
   BarChartIcon,
-  TrendingUpIcon,
   CheckIcon,
+  PlusCircleIcon,
+  TrendingUpIcon,
 } from "@/components/ui";
 
 export const trustIndicators = [

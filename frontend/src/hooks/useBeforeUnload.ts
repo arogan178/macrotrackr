@@ -10,12 +10,11 @@ export function useBeforeUnload(
   message: string = "You have unsaved changes. Are you sure you want to leave?",
 ) {
   useEffect(() => {
-    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
-        e.preventDefault();
-        // Modern browsers require returnValue to be set
-        e.returnValue = message;
-        return message;
+        event.preventDefault();
+        // Modern browsers ignore the custom message, but setting returnValue triggers the dialog
+        event.returnValue = "";
       }
     };
 
