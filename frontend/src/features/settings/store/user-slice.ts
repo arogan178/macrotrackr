@@ -112,13 +112,11 @@ export const createUserSlice: StateCreator<
       const userSettings = createUserSettings(userData);
       const nutritionProfile = createNutritionProfile(userSettings);
 
-      // Subscription status (from userData, fallback to 'free')
+      // Subscription status (from userData.subscription.status, fallback to 'free')
       const allowedStatuses = ["free", "pro", "canceled"] as const;
       const status =
-        typeof (userData as unknown as { subscriptionStatus?: unknown })
-          .subscriptionStatus === "string"
-          ? (userData as unknown as { subscriptionStatus: string })
-              .subscriptionStatus
+        typeof (userData as any)?.subscription?.status === "string"
+          ? (userData as any).subscription.status
           : undefined;
       const subscriptionStatus =
         status &&
