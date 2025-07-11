@@ -46,13 +46,17 @@ export const userRoutes = (app: Elysia) =>
 
             // Fetching user details
 
-            const dbResult = safeQuery<UserWithDetailsResult>(
+            // Fetch user details and subscription status
+            const dbResult = safeQuery<any>(
               db,
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
-                      ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
+                      ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level,
+                      s.status AS subscription_status
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
-               WHERE u.id = ?`,
+               LEFT JOIN subscriptions s ON u.id = s.user_id AND s.status IN ('active', 'pro')
+               WHERE u.id = ?
+               LIMIT 1`,
               [user.userId]
             );
 
@@ -61,7 +65,13 @@ export const userRoutes = (app: Elysia) =>
             }
 
             // Convert to camelCase API response
-            return toCamelCase(dbResult);
+            const result = toCamelCase(dbResult);
+            // Add subscription object for frontend compatibility
+            result.subscription = {
+              status: result.subscriptionStatus || "free",
+            };
+            delete result.subscriptionStatus;
+            return result;
           } catch (error) {
             return handleError(error, context);
           }
