@@ -82,6 +82,7 @@ export class StripeService {
       const sessionParams: Stripe.Checkout.SessionCreateParams = {
         mode: "subscription",
         payment_method_types: ["card"],
+        allow_promotion_codes: true,
         line_items: [
           {
             price: options.priceId,
