@@ -760,7 +760,7 @@ import { FormButton, TextField } from "@/components/form";
 }
 
 /* ✅ Should use FormButton with proper variant */
-<FormButton variant="primary" size="sm" />
+<FormButton variant="primary" buttonSize="sm" />
 ```
 
 #### Accessibility Gaps

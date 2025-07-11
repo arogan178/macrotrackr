@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
 import { motion } from "motion/react";
+import { ReactNode } from "react";
 
 interface ChartCardProps {
   title?: string;

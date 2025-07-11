@@ -1,17 +1,19 @@
-import { useState, useEffect } from "react";
-import Navbar from "@/components/Navbar";
-import { useStore } from "@/store/store";
-import { LineChartComponent, DateRangeSelector } from "@/components/chart";
-import {
-  UnifiedInsights,
-  NutrientDensityVisualization,
-  MealTimeBreakdown,
-  ReportingPageSkeleton,
-  MacroSummaryStats,
-} from "../components";
 import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+
+import { ProFeature } from "@/components/billing";
+import { DateRangeSelector, LineChartComponent } from "@/components/chart";
+import { Navbar } from "@/components/layout";
+import { useStore } from "@/store/store";
+
+import {
+  MacroSummaryStats,
+  MealTimeBreakdown,
+  NutrientDensityVisualization,
+  ReportingPageSkeleton,
+  UnifiedInsights,
+} from "../components";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { ProFeature } from "@/components/ProFeature";
 
 export default function ReportingPage() {
   // Primary date range state - used throughout the component

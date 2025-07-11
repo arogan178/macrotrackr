@@ -100,7 +100,7 @@ export const STEP_CONTENT = {
 
 // API-related constants
 export const API_TIMEOUTS = {
-  login: 10000, // 10 seconds
-  register: 15000, // 15 seconds
+  login: 10_000, // 10 seconds
+  register: 15_000, // 15 seconds
   emailValidation: 5000, // 5 seconds
 } as const;

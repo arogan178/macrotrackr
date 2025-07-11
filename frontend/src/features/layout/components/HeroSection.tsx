@@ -1,10 +1,11 @@
+import { motion } from "motion/react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
+
 import FormButton from "@/components/form/FormButton";
-import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
-import { trustIndicators, trustElements } from "../utils/landing-page-const";
-import { ShieldCheckIcon } from "@/components/Icons";
+import { ShieldCheckIcon } from "@/components/ui";
+
+import { trustElements, trustIndicators } from "../utils/landingPageConstants";
 
 const HeroSection: React.FC = () => (
   <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">
@@ -74,8 +75,8 @@ const HeroSection: React.FC = () => (
             >
               <FormButton
                 text="Start Your Journey Free"
-                variant={BUTTON_VARIANTS.PRIMARY}
-                size={BUTTON_SIZES.LG}
+                variant="primary"
+                buttonSize="lg"
                 className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 px-12 py-4 text-xl font-semibold shadow-xl transition-all duration-300"
               />
             </motion.div>

@@ -1,5 +1,5 @@
-import { ForwardIcon } from "@/components/Icons";
 import FormButton from "@/components/form/FormButton";
+import { ForwardIcon } from "@/components/ui";
 
 interface ButtonModeToggleProps {
   mode: "login" | "register";

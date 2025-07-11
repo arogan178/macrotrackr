@@ -1,7 +1,8 @@
 import { memo } from "react";
+
+import { formStyles } from "@/components/utils/Styles";
+import type { NumberFieldProps } from "@/components/utils/Types"; // Assuming NumberFieldProps is defined here
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
-import type { NumberFieldProps } from "@/components/utils/types"; // Assuming NumberFieldProps is defined here
-import { formStyles } from "@/components/utils/styles";
 
 // Update NumberFieldProps in ../utils/types.ts if needed to include 'disabled'
 // interface NumberFieldProps {
@@ -25,57 +26,59 @@ function NumberField({
   helperText, // Add helperText prop
 }: NumberFieldProps) {
   // Destructure disabled
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     // Prevent changes if disabled
     if (disabled) return;
 
-    const val = e.target.value;
+    const value_ = event.target.value;
 
     // Handle empty input properly
-    if (val === "") {
-      onChange(undefined);
+    if (value_ === "") {
+      onChange();
       return;
     }
 
     // Check if it's a valid number pattern
-    if (/^-?\d*\.?\d*$/.test(val)) {
-      if (maxDigits && val.replace(/[^0-9]/g, "").length > maxDigits) {
+    if (/^-?\d*\.?\d*$/.test(value_)) {
+      if (maxDigits && value_.replaceAll(/\D/g, "").length > maxDigits) {
         return;
       }
 
-      onChange(Number(val));
+      onChange(Number(value_));
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     // Prevent keydown if disabled
     if (disabled) {
-      e.preventDefault();
+      event.preventDefault();
       return;
     }
 
     // Always allow Backspace, Delete, and navigation keys
     if (
-      ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+      ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(
+        event.key,
+      )
     ) {
       return;
     }
 
     // Allow digits
-    if (/\d/.test(e.key)) {
+    if (/\d/.test(event.key)) {
       return;
     }
 
-    if (!NUMBER_FIELD_ALLOWED_KEYS.includes(e.key)) {
-      e.preventDefault();
+    if (!NUMBER_FIELD_ALLOWED_KEYS.includes(event.key)) {
+      event.preventDefault();
     }
 
-    if (e.key === "." && e.currentTarget.value.includes(".")) {
-      e.preventDefault();
+    if (event.key === "." && event.currentTarget.value.includes(".")) {
+      event.preventDefault();
     }
 
-    if (e.key === "-" && e.currentTarget.value !== "") {
-      e.preventDefault();
+    if (event.key === "-" && event.currentTarget.value !== "") {
+      event.preventDefault();
     }
   };
 
@@ -96,7 +99,7 @@ function NumberField({
         <input
           id={label} // Add id matching htmlFor
           type="number"
-          value={value === 0 ? "0" : value ?? ""} // Use nullish coalescing for undefined/null
+          value={value === 0 ? "0" : (value ?? "")} // Use undefinedish coalescing for undefined/undefined
           onChange={handleChange}
           onKeyDown={handleKeyDown}
           min={min}
@@ -104,7 +107,7 @@ function NumberField({
           step={step}
           className={inputClasses}
           required={required}
-          placeholder={placeholder?.toString() ?? ""} // Handle potential null/undefined placeholder
+          placeholder={placeholder?.toString() ?? ""} // Handle potential undefined/undefined placeholder
           disabled={disabled} // Pass disabled prop to the input element
           aria-describedby={helperText ? `${label}-helper` : undefined} // Add aria-describedby
         />

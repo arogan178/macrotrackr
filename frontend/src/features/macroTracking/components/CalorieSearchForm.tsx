@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { SearchIcon, ArrowRightIcon } from "@/components/Icons";
-import StatusIndicator from "@/components/StatusIndicator";
-import FormButton from "@/components/form/FormButton";
+
 import { TextField } from "@/components/form";
+import FormButton from "@/components/form/FormButton";
+import { ArrowRightIcon, SearchIcon } from "@/components/ui";
+import StatusIndicator from "@/components/ui/StatusIndicator";
 
 type CalorieSearchProps = {
   onResult: (macros: {
@@ -36,7 +37,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     let foodName = query;
 
     if (match) {
-      quantity = parseFloat(match[1]);
+      quantity = Number.parseFloat(match[1]);
       foodName = match[2].trim();
     }
 
@@ -44,7 +45,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
       const appId = import.meta.env.VITE_EDAMAM_APP_ID;
       const appKey = import.meta.env.VITE_EDAMAM_APP_KEY;
       const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${appId}&app_key=${appKey}&ingr=${encodeURIComponent(
-        foodName
+        foodName,
       )}`;
       const response = await fetch(url);
       const data = await response.json();
@@ -73,9 +74,9 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
       handleSearch();
     }
   };
@@ -111,7 +112,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             icon={<ArrowRightIcon className="w-4 h-4 ml-1" />}
             iconPosition="right"
             ariaLabel="Search for food"
-            size="lg"
+            buttonSize="lg"
             variant="primary"
             className="min-w-[160px] px-6 py-2.5"
           />

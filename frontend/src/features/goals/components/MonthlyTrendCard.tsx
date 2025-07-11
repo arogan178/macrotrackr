@@ -1,14 +1,15 @@
-import React from "react";
-import { WeightLogEntry } from "@/utils/api-service";
-import { CardContainer } from "@/components/form";
-import { TrendingUpIcon, TrendingDownIcon } from "@/components/Icons";
 import {
-  subMonths,
-  startOfMonth,
-  parseISO,
-  isValid,
   differenceInCalendarMonths,
+  isValid,
+  parseISO,
+  startOfMonth,
+  subMonths,
 } from "date-fns";
+import React from "react";
+
+import { CardContainer } from "@/components/form";
+import { TrendingDownIcon, TrendingUpIcon } from "@/components/ui";
+import { WeightLogEntry } from "@/utils/apiServices";
 
 interface MonthlyTrendCardProps {
   weightLog: WeightLogEntry[];
@@ -16,8 +17,8 @@ interface MonthlyTrendCardProps {
 }
 
 // Helper to calculate monthly trend
-function calculateMonthlyTrend(log: WeightLogEntry[]): number | null {
-  if (log.length < 2) return null;
+function calculateMonthlyTrend(log: WeightLogEntry[]): number | undefined {
+  if (log.length < 2) return undefined;
 
   const now = new Date();
   // Consider the last 3 full months + current partial month
@@ -27,46 +28,45 @@ function calculateMonthlyTrend(log: WeightLogEntry[]): number | null {
     .map((entry) => ({ ...entry, date: parseISO(entry.timestamp) }))
     .filter(
       (entry) =>
-        isValid(entry.date) && entry.date >= startOfMonth(threeMonthsAgo)
+        isValid(entry.date) && entry.date >= startOfMonth(threeMonthsAgo),
     )
     .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-  if (recentLogs.length < 2) return null;
+  if (recentLogs.length < 2) return undefined;
 
   // Group logs by month number (relative to the start of the period)
   const firstMonthStart = startOfMonth(recentLogs[0].date);
   const monthlyData: Record<number, { weights: number[]; count: number }> = {};
 
-  recentLogs.forEach((entry) => {
+  for (const entry of recentLogs) {
     const monthNumber = differenceInCalendarMonths(
       startOfMonth(entry.date),
-      firstMonthStart
+      firstMonthStart,
     );
     if (!monthlyData[monthNumber]) {
       monthlyData[monthNumber] = { weights: [], count: 0 };
     }
     monthlyData[monthNumber].weights.push(entry.weight);
     monthlyData[monthNumber].count++;
-  });
+  }
 
   const monthlyAverages = Object.entries(monthlyData)
-    .map(([monthNum, data]) => ({
-      month: parseInt(monthNum, 10),
+    .map(([monthNumber, data]) => ({
+      month: Number.parseInt(monthNumber, 10),
       avgWeight: data.weights.reduce((sum, w) => sum + w, 0) / data.count,
     }))
     .sort((a, b) => a.month - b.month);
 
-  if (monthlyAverages.length < 2) return null;
+  if (monthlyAverages.length < 2) return undefined;
 
   // Calculate trend between the first and last month with data in the period
   const firstMonthAvg = monthlyAverages[0].avgWeight;
-  const lastMonthAvg = monthlyAverages[monthlyAverages.length - 1].avgWeight;
+  const lastMonthAvg = monthlyAverages.at(-1).avgWeight;
   const monthDifference =
-    monthlyAverages[monthlyAverages.length - 1].month -
-    monthlyAverages[0].month;
+    monthlyAverages.at(-1).month - monthlyAverages[0].month;
 
   // Avoid division by zero if data is only within the same month index
-  if (monthDifference === 0) return null;
+  if (monthDifference === 0) return undefined;
 
   // Return the total change over the period considered
   return lastMonthAvg - firstMonthAvg;
@@ -75,14 +75,14 @@ function calculateMonthlyTrend(log: WeightLogEntry[]): number | null {
 function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
   const monthlyChange = React.useMemo(
     () => calculateMonthlyTrend(weightLog),
-    [weightLog]
+    [weightLog],
   );
 
   const renderContent = () => {
     if (isLoading) {
       return <p className="text-xs text-gray-400">Calculating...</p>;
     }
-    if (monthlyChange === null) {
+    if (monthlyChange === undefined) {
       return (
         <p className="text-xs text-gray-400">
           Not enough data for monthly trend.
@@ -105,8 +105,8 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
             isLoss
               ? "text-indigo-300"
               : isGain
-              ? "text-green-300"
-              : "text-gray-300"
+                ? "text-green-300"
+                : "text-gray-300"
           }`}
         >
           {isLoss ? `-${absChange}` : isGain ? `+${absChange}` : "0.0"} kg

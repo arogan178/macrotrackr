@@ -1,18 +1,18 @@
-import { memo, useCallback, useState, useEffect } from "react";
-import { MacroTargetSettings } from "@/types/macro";
-import type { MacroTargetState } from "@/types/macro";
+import { memo, useCallback, useEffect, useState } from "react";
+
+import { ProFeature } from "@/components/billing";
 import {
-  InfoCard,
   CardContainer,
   FormButton,
+  InfoCard,
   LoadingSpinner,
 } from "@/components/form";
-import ProFeature from "@/components/ProFeature";
-import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
-import MacroTarget from "./MacroTarget";
+import { CheckMarkIcon, InfoIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
-
+import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
+
+import MacroTarget from "./MacroTarget";
 
 function MacroTargetForm() {
   const {
@@ -24,13 +24,15 @@ function MacroTargetForm() {
   } = useStore();
 
   // Local state for edited values
-  const [localTarget, setLocalTarget] = useState<MacroTargetState | null>(null);
+  const [localTarget, setLocalTarget] = useState<
+    MacroTargetState | undefined
+  >();
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Helper function to convert MacroTargetSettings to MacroTargetState
   const toMacroTargetState = (
-    settings: MacroTargetSettings
+    settings: MacroTargetSettings,
   ): MacroTargetState => ({
     proteinPercentage: settings.proteinPercentage,
     carbsPercentage: settings.carbsPercentage,
@@ -77,7 +79,7 @@ function MacroTargetForm() {
         setSaveSuccess(false);
       }
     },
-    [macroTarget, saveSuccess]
+    [macroTarget, saveSuccess],
   );
 
   // Save changes to the backend
@@ -120,7 +122,7 @@ function MacroTargetForm() {
 
   // Only use displayValues when we actually have a localTarget
   // This ensures we don't render the form with default values while loading
-  const hasValidValues = localTarget !== null;
+  const hasValidValues = localTarget !== undefined;
 
   // Use local target values for rendering
   const displayValues = localTarget || DEFAULT_MACRO_TARGET;

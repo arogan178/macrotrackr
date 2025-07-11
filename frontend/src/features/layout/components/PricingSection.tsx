@@ -1,4 +1,5 @@
 import React from "react";
+
 import CustomPricingCards from "./CustomPricingCards";
 
 const PricingSection: React.FC = () => (

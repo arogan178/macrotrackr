@@ -1,8 +1,8 @@
+import { motion } from "motion/react";
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "motion/react";
+
 import FormButton from "@/components/form/FormButton";
-import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
 
 const Header: React.FC = () => (
   <header className="relative z-10 border-b border-slate-800/50 backdrop-blur-xl bg-slate-900/80 supports-[backdrop-filter]:bg-slate-900/60">
@@ -29,8 +29,7 @@ const Header: React.FC = () => (
             >
               <FormButton
                 text="Log In"
-                variant={BUTTON_VARIANTS.PRIMARY}
-                size={BUTTON_SIZES.MD}
+                variant="primary"
                 className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
               />
             </motion.div>
@@ -46,8 +45,7 @@ const Header: React.FC = () => (
             >
               <FormButton
                 text="Sign Up"
-                variant={BUTTON_VARIANTS.PRIMARY}
-                size={BUTTON_SIZES.MD}
+                variant="primary"
                 className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
               />
             </motion.div>

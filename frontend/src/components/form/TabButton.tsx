@@ -1,6 +1,8 @@
 import { motion } from "motion/react";
+
+import type { TabButtonProps } from "@/components/utils/Types";
+
 import FormButton from "./FormButton";
-import type { TabButtonProps } from "@/components/utils/types";
 
 type ExtendedTabButtonProps = TabButtonProps & {
   rounded?: string;
@@ -21,12 +23,10 @@ function TabButton({
   const baseRounded = rounded || "rounded-md";
   const motionBg = activeBg || "bg-indigo-600";
 
-  // Use FormButton for standardization
   return (
     <FormButton
       onClick={onClick}
       variant={active ? "primary" : "ghost"}
-      buttonSize="md"
       className={`relative px-3 py-1.5 ${baseRounded} text-sm font-medium ${
         active
           ? "text-white"
