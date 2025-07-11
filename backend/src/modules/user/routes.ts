@@ -50,30 +50,14 @@ export const userRoutes = (app: Elysia) =>
             // Get comprehensive subscription information
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
-
-            // Convert to camelCase API response
             const result = toCamelCase(dbResult);
-
-            // Add comprehensive subscription object
+            // Only return summary subscription info
             result.subscription = {
               status: subscriptionInfo.subscription_status,
               hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
-              subscription:
-                subscriptionInfo.subscription ?
-                  {
-                    id: subscriptionInfo.subscription.id,
-                    status: subscriptionInfo.subscription.status,
-                    currentPeriodEnd:
-                      subscriptionInfo.subscription.current_period_end,
-                    stripeSubscriptionId:
-                      subscriptionInfo.subscription.stripe_subscription_id,
-                  }
-                : null,
-              price: subscriptionInfo.price || null,
-              paymentMethod: subscriptionInfo.paymentMethod || null,
-              stripeDetails: subscriptionInfo.stripeDetails || null,
+              currentPeriodEnd:
+                subscriptionInfo.subscription?.current_period_end || null,
             };
-
             return result;
           } catch (error) {
             return handleError(error, context);

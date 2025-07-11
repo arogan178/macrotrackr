@@ -87,15 +87,7 @@ export interface UserDetailsResponse {
   subscription: {
     status: "free" | "pro" | "canceled";
     hasStripeCustomer: boolean;
-    subscription: {
-      id: string;
-      status: "active" | "canceled" | "past_due" | "unpaid";
-      currentPeriodEnd: string;
-      stripeSubscriptionId: string;
-    } | null;
-    price: string | null;
-    paymentMethod: { brand: string; last4: string } | null;
-    stripeDetails: any | null;
+    currentPeriodEnd: string | null;
   };
 }
 
@@ -548,6 +540,15 @@ export const apiService = {
       };
     },
     // --- END NEW Weight Log Endpoints ---
+  },
+  billing: {
+    /** Fetches detailed billing and subscription info for the current user */
+    getBillingDetails: async () => {
+      const response = await fetch(`${API_BASE_URL}/api/billing/details`, {
+        headers: getHeaders(false),
+      });
+      return handleResponse(response);
+    },
   },
   habits: {
     /** Get all habit goals */
