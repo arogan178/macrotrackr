@@ -1,6 +1,8 @@
 import { memo } from "react";
-import FloatingNotification from "./FloatingNotification";
+
 import { useStore } from "@/store/store";
+
+import FloatingNotification from "./FloatingNotification";
 /**
  * Global notification manager that renders notifications from the app state
  * This component should be mounted once near the root of your application

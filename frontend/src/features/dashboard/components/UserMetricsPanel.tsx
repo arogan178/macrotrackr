@@ -1,6 +1,7 @@
 import { memo } from "react";
-import { UserIcon, StarIcon } from "@/components/ui";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { StarIcon, UserIcon } from "@/components/ui";
 
 interface UserMetricsPanelProps {
   bmr: number;
@@ -18,7 +19,7 @@ function MetricCard({
   icon: React.FC<React.SVGProps<SVGSVGElement>>;
   title: string;
   acronym: string;
-  value: number | null;
+  value: number | undefined;
   color: "indigo" | "blue";
 }) {
   const colorClasses = {
@@ -81,9 +82,9 @@ function MetricCard({
 function LoadingSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-      {[0, 1].map((i) => (
+      {[0, 1].map((index) => (
         <div
-          key={i}
+          key={index}
           className="bg-gray-800/70 backdrop-blur-sm p-5 rounded-2xl border border-gray-700/50 shadow-xl animate-pulse"
         >
           <div className="flex items-start gap-5">
@@ -114,14 +115,14 @@ function UserMetricsPanel({
         icon={UserIcon}
         title="Basal Metabolic Rate"
         acronym="BMR"
-        value={bmr || null}
+        value={bmr || undefined}
         color="indigo"
       />
       <MetricCard
         icon={StarIcon}
         title="Total Daily Energy"
         acronym="TDEE"
-        value={tdee || null}
+        value={tdee || undefined}
         color="blue"
       />
     </div>

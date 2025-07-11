@@ -1,17 +1,18 @@
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-import { isOldEnough } from "@/utils/validation";
+import { isOldEnough } from "@/utils/Validation";
+
+import { AUTH_ERROR_MESSAGES } from "../constants";
 import type {
   RegistrationStep1,
   RegistrationStep2,
   RegistrationStep3,
 } from "../types";
-import { AUTH_ERROR_MESSAGES } from "../constants";
 import {
   validateEmailFormat,
-  validatePasswordStrength,
   validateHeightRange,
+  validatePasswordStrength,
   validateWeightRange,
-} from "./auth-utils";
+} from "./authUtilities";
 
 /**
  * Validates registration step 1 form data

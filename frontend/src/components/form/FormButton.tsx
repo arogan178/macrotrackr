@@ -1,13 +1,14 @@
 import React, { memo } from "react";
+
 import { LoadingSpinnerIcon } from "@/components/ui";
 import {
   BUTTON_VARIANTS,
-  FORM_BUTTON_SIZES,
-  ICON_POSITIONS,
   DEFAULT_LOADING_TEXT,
+  FORM_BUTTON_SIZES,
   formStyles,
+  ICON_POSITIONS,
 } from "@/components/utils";
-import type { FormButtonProps } from "@/components/utils/types";
+import type { FormButtonProps } from "@/components/utils/Types";
 
 type FormButtonAllProps = FormButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;

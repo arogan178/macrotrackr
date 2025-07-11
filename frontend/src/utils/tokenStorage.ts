@@ -8,9 +8,9 @@
 
 // Check if Web Crypto API is available
 const isWebCryptoSupported =
-  typeof window !== "undefined" &&
-  window.crypto &&
-  typeof window.crypto.subtle === "object";
+  globalThis.window !== undefined &&
+  globalThis.crypto &&
+  typeof globalThis.crypto.subtle === "object";
 
 /**
  * Securely stores the authentication token
@@ -37,8 +37,8 @@ export function securelyStoreToken(token: string): void {
 /**
  * Retrieves the stored authentication token
  */
-export function getToken(): string | null {
-  if (!isLocalStorageAvailable()) return null;
+export function getToken(): string | undefined {
+  if (!isLocalStorageAvailable()) return undefined;
 
   const token = localStorage.getItem("token");
   const storedAt = localStorage.getItem("token_stored_at");
@@ -46,7 +46,7 @@ export function getToken(): string | null {
   // Check if token has expired (e.g., after 24 hours)
   if (token && storedAt && isTokenExpired(storedAt)) {
     removeToken();
-    return null;
+    return undefined;
   }
 
   // In a real implementation with Web Crypto API,
@@ -67,14 +67,14 @@ export function removeToken(): void {
 /**
  * Checks if token has expired based on storage time
  */
-function isTokenExpired(storedAtStr: string): boolean {
+function isTokenExpired(storedAtString: string): boolean {
   try {
-    const storedAt = parseInt(storedAtStr, 10);
+    const storedAt = Number.parseInt(storedAtString, 10);
     const now = Date.now();
     const maxAge = 24 * 60 * 60 * 1000; // 24 hours
 
     return now - storedAt > maxAge;
-  } catch (e) {
+  } catch {
     return true; // If there's any error parsing, consider it expired
   }
 }
@@ -88,7 +88,7 @@ function isLocalStorageAvailable(): boolean {
     localStorage.setItem(testKey, testKey);
     localStorage.removeItem(testKey);
     return true;
-  } catch (e) {
+  } catch {
     return false;
   }
 }

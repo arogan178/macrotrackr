@@ -1,8 +1,9 @@
 import React from "react";
-import { PricingTable } from "@/components/billing/PricingTable";
-import { createCheckoutSession } from "@/utils/api-billing";
-import { StarIcon, CircleQuestionMarkIcon } from "@/components/ui";
+
+import { PricingTable } from "@/components/billing";
 import Navbar from "@/components/layout/Navbar";
+import { CircleQuestionMarkIcon, StarIcon } from "@/components/ui";
+import { createCheckoutSession } from "@/utils/apiBilling";
 
 const testimonials = [
   {
@@ -44,23 +45,23 @@ const faqs = [
  * /pricing page - Feature comparison and upgrade flow
  */
 
+const handleUpgrade = async (plan: "monthly" | "yearly") => {
+  try {
+    const { url } = await createCheckoutSession(
+      globalThis.location.origin + "/settings?upgraded=true",
+      globalThis.location.origin + "/pricing",
+      plan,
+    );
+    globalThis.location.href = url;
+  } catch {
+    alert("Failed to start checkout. Please try again.");
+  }
+};
+
 const PricingPage: React.FC = () => {
   const [selectedPlan, setSelectedPlan] = React.useState<"monthly" | "yearly">(
     "monthly",
   );
-  const handleUpgrade = async (plan: "monthly" | "yearly") => {
-    try {
-      const { url } = await createCheckoutSession(
-        window.location.origin + "/settings?upgraded=true",
-        window.location.origin + "/pricing",
-        plan,
-      );
-      window.location.href = url;
-    } catch (e) {
-      alert("Failed to start checkout. Please try again.");
-    }
-  };
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-200">
       <Navbar />
@@ -94,8 +95,11 @@ const PricingPage: React.FC = () => {
                 className="bg-gray-800/50 p-6 rounded-lg border border-gray-700/50"
               >
                 <div className="flex items-center mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <StarIcon key={i} className="w-5 h-5 text-yellow-400" />
+                  {Array.from({ length: 5 }).map((_, index_) => (
+                    <StarIcon
+                      key={index_}
+                      className="w-5 h-5 text-yellow-400"
+                    />
                   ))}
                 </div>
                 <p className="text-gray-300 mb-4">"{testimonial.quote}"</p>

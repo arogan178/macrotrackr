@@ -1,11 +1,11 @@
-import type { DateRangeData, ReportingPeriod } from "../types";
 import { DATE_RANGE_MAPPING, REPORTING_PERIODS } from "../constants";
+import type { DateRangeData, ReportingPeriod } from "../types";
 
 // Date utility functions
-export const formatDate = (dateStr: string): string => {
-  const [year, month, day] = dateStr.split("-").map(Number);
+export const formatDate = (dateString: string): string => {
+  const [year, month, day] = dateString.split("-").map(Number);
   const date = new Date(year, month - 1, day);
-  if (isNaN(date.getTime())) {
+  if (Number.isNaN(date.getTime())) {
     return "Invalid Date";
   }
   return date.toLocaleDateString("en-US", {
@@ -14,9 +14,9 @@ export const formatDate = (dateStr: string): string => {
   });
 };
 
-export const formatDateFull = (dateStr: string): string => {
+export const formatDateFull = (dateString: string): string => {
   try {
-    const date = new Date(dateStr);
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "long",
@@ -83,21 +83,27 @@ export const getReportingPeriod = (value: string): ReportingPeriod => {
 
 export const mapDateRangeToNumeric = (range: string): 7 | 30 | 90 => {
   switch (range) {
-    case "week":
+    case "week": {
       return 7;
-    case "month":
+    }
+    case "month": {
       return 30;
-    case "3months":
+    }
+    case "3months": {
       return 90;
-    default:
+    }
+    default: {
       return 7;
+    }
   }
 };
 
 // Data validation utilities
-export const isValidDateString = (dateStr: string): boolean => {
-  const date = new Date(dateStr);
-  return !isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(dateStr);
+export const isValidDateString = (dateString: string): boolean => {
+  const date = new Date(dateString);
+  return (
+    !Number.isNaN(date.getTime()) && /^\d{4}-\d{2}-\d{2}$/.test(dateString)
+  );
 };
 
 export const isWithinDateRange = (

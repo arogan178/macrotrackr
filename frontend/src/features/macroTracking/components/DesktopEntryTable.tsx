@@ -1,14 +1,15 @@
-import { memo, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
-  useReactTable,
-  getCoreRowModel,
   createColumnHelper,
   flexRender,
+  getCoreRowModel,
+  useReactTable,
 } from "@tanstack/react-table";
-import { ChevronDownIcon } from "@/components/ui";
+import { AnimatePresence, motion } from "motion/react";
+import { memo, useMemo } from "react";
+
+import { ActionButton, ActionButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/nutrition";
-import { ActionButtonGroup, ActionButton } from "@/components/form";
+import { ChevronDownIcon } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
 // Types
@@ -31,7 +32,7 @@ interface DesktopEntryTableProps {
   capitalizeFirstLetter: (string: string) => string;
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
   toggleDateCollapse: (date: string) => void;
-  handleDeleteDate: (date: string, e: React.MouseEvent) => void;
+  handleDeleteDate: (date: string, event: React.MouseEvent) => void;
   onEdit: (entry: MacroEntry) => void;
   deleteEntry: (id: number) => void;
   isDeleting: boolean;
@@ -119,7 +120,7 @@ const DesktopEntryTable = memo(
           header: "Meal",
           cell: ({ row }) => {
             const data = row.original;
-            if (data.isGroup) return null;
+            if (data.isGroup) return;
 
             const entry = data.entries[0];
             return (
@@ -190,10 +191,10 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.calories
               : calculateCalories(
-                data.entries[0].protein,
-                data.entries[0].carbs,
-                data.entries[0].fats,
-              );
+                  data.entries[0].protein,
+                  data.entries[0].carbs,
+                  data.entries[0].fats,
+                );
             return (
               <MacroCell value={value} suffix=" kcal" color="text-white" />
             );
@@ -208,9 +209,9 @@ const DesktopEntryTable = memo(
               return (
                 <ActionButton
                   variant="delete"
-                  size="sm"
-                  onClick={(e: React.MouseEvent) =>
-                    handleDeleteDate(data.date, e)
+                  buttonSize="sm"
+                  onClick={(event: React.MouseEvent) =>
+                    handleDeleteDate(data.date, event)
                   }
                   ariaLabel={`Delete all entries for ${formatDate(data.date)}`}
                   className="opacity-0 group-hover:opacity-100"
@@ -263,11 +264,11 @@ const DesktopEntryTable = memo(
                       style={{ width: "14.285%" }}
                     >
                       {header.isPlaceholder
-                        ? null
+                        ? undefined
                         : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          )}
                     </th>
                   ))}
                 </tr>
@@ -291,7 +292,7 @@ const DesktopEntryTable = memo(
 
                   // Don't render collapsed entries
                   if (isEntryCollapsed) {
-                    return null;
+                    return;
                   }
 
                   return (

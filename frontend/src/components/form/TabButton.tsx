@@ -1,6 +1,8 @@
 import { motion } from "motion/react";
+
+import type { TabButtonProps } from "@/components/utils/Types";
+
 import FormButton from "./FormButton";
-import type { TabButtonProps } from "@/components/utils/types";
 
 type ExtendedTabButtonProps = TabButtonProps & {
   rounded?: string;

@@ -1,4 +1,4 @@
-import { post } from "./api-service";
+import { post } from "./apiServices";
 
 /**
  * Create a Stripe Checkout Session for Pro upgrade

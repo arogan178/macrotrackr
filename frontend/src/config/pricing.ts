@@ -46,8 +46,8 @@ export const PRICING_PLANS = {
   },
   pro: {
     name: "Pro",
-    features: Array.from(
-      new Set([
+    features: [
+      ...new Set([
         ...FREE_FEATURES,
         "Unlimited Habit Tracking",
         "Recipe & Meal Saver",
@@ -56,7 +56,7 @@ export const PRICING_PLANS = {
         "Priority Support",
         "Export Data",
       ]),
-    ),
+    ],
     // price, suffix, equivalent, and buttonText will be set dynamically in the component
     price: PRICING.monthly,
     suffix: "/month",

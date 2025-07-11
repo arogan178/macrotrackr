@@ -1,34 +1,49 @@
+// Type guard to check if an object is Partial<MacroDailyTotals>
 import { StateCreator } from "zustand";
-import { apiService } from "@/utils/api-service";
+
 import {
-  MacroEntry,
   MacroDailyTotals,
+  MacroEntry,
   MacroTargetSettings,
 } from "@/types/macro";
+import { apiService } from "@/utils/apiServices";
+import { getErrorMessage } from "@/utils/errorHandling";
 
-import { getErrorMessage } from "@/utils/error-handling";
 import {
   calculateTodayTotals,
-  updateEntryInList,
   removeEntryFromList,
+  updateEntryInList,
 } from "../calculations";
-import { AddEntryPayload, UpdateEntryPayload } from "../utils";
+import { AddEntryPayload, UpdateEntryPayload } from "../utilities";
+
+function isPartialMacroDailyTotals(
+  object: unknown,
+): object is Partial<MacroDailyTotals> {
+  if (typeof object !== "object" || object === null) return false;
+  const maybe = object as Partial<MacroDailyTotals>;
+  return (
+    typeof maybe.protein === "number" ||
+    typeof maybe.carbs === "number" ||
+    typeof maybe.fats === "number" ||
+    typeof maybe.calories === "number"
+  );
+}
 
 // Define the slice interface
 export interface MacrosSlice {
   // State
   history: MacroEntry[];
   macroDailyTotals: MacroDailyTotals;
-  macroTarget: MacroTargetSettings | null;
-  editingEntry: MacroEntry | null;
+  macroTarget: MacroTargetSettings | undefined;
+  editingEntry: MacroEntry | undefined;
   isLoading: boolean;
   isTargetLoading: boolean;
   isSaving: boolean;
   isTargetSaving: boolean;
   isEditing: boolean;
   isDeleting: boolean;
-  error: string | null;
-  targetError: string | null;
+  error: string | undefined;
+  targetError: string | undefined;
 
   // Internal helpers
   _notifyUser: (
@@ -43,7 +58,7 @@ export interface MacrosSlice {
   addEntry: (entry: AddEntryPayload) => Promise<void>;
   updateEntry: (id: number, entryUpdate: UpdateEntryPayload) => Promise<void>;
   deleteEntry: (id: number) => Promise<void>;
-  setEditingEntry: (entry: MacroEntry | null) => void;
+  setEditingEntry: (entry: MacroEntry | undefined) => void;
   clearMacroError: () => void;
   clearTargetError: () => void;
 }
@@ -57,7 +72,7 @@ type FullMacrosState = MacrosSlice & {
 };
 
 export const createMacrosSlice: StateCreator<
-  MacrosSlice & any,
+  FullMacrosState,
   [],
   [],
   MacrosSlice
@@ -65,16 +80,16 @@ export const createMacrosSlice: StateCreator<
   // Initial State
   history: [],
   macroDailyTotals: { protein: 0, carbs: 0, fats: 0, calories: 0 },
-  macroTarget: null,
-  editingEntry: null,
+  macroTarget: undefined,
+  editingEntry: undefined,
   isLoading: false,
   isTargetLoading: false,
   isSaving: false,
   isTargetSaving: false,
   isEditing: false,
   isDeleting: false,
-  error: null,
-  targetError: null,
+  error: undefined,
+  targetError: undefined,
 
   // Helper function to safely call notifications
   _notifyUser: (
@@ -89,8 +104,8 @@ export const createMacrosSlice: StateCreator<
     set({
       isLoading: true,
       isTargetLoading: true,
-      error: null,
-      targetError: null,
+      error: undefined,
+      targetError: undefined,
     });
 
     try {
@@ -100,23 +115,38 @@ export const createMacrosSlice: StateCreator<
         apiService.macros.getMacroTarget(),
       ]);
 
-      const formattedTotals: MacroDailyTotals = {
-        protein: totalsData?.protein ?? 0,
-        carbs: totalsData?.carbs ?? 0,
-        fats: totalsData?.fats ?? 0,
-        calories: totalsData?.calories ?? 0,
+      let formattedTotals: MacroDailyTotals = {
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+        calories: 0,
       };
+      if (isPartialMacroDailyTotals(totalsData)) {
+        formattedTotals = {
+          protein:
+            typeof totalsData.protein === "number" ? totalsData.protein : 0,
+          carbs: typeof totalsData.carbs === "number" ? totalsData.carbs : 0,
+          fats: typeof totalsData.fats === "number" ? totalsData.fats : 0,
+          calories:
+            typeof totalsData.calories === "number" ? totalsData.calories : 0,
+        };
+      }
 
-      const percentages = targetResult?.macroTarget || null;
+      const percentages =
+        targetResult &&
+        typeof targetResult === "object" &&
+        "macroTarget" in targetResult
+          ? (targetResult as { macroTarget?: MacroTargetSettings }).macroTarget
+          : undefined;
 
       set({
         macroDailyTotals: formattedTotals,
-        history: historyData || [],
+        history: Array.isArray(historyData) ? historyData : [],
         macroTarget: percentages,
         isLoading: false,
         isTargetLoading: false,
-        error: null,
-        targetError: null,
+        error: undefined,
+        targetError: undefined,
       });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
@@ -127,10 +157,13 @@ export const createMacrosSlice: StateCreator<
   },
 
   fetchMacroTarget: async () => {
-    set({ isTargetLoading: true, targetError: null });
+    set({ isTargetLoading: true, targetError: undefined });
     try {
       const result = await apiService.macros.getMacroTarget();
-      const percentages = result?.macroTarget || null;
+      const percentages =
+        result && typeof result === "object" && "macroTarget" in result
+          ? (result as { macroTarget?: MacroTargetSettings }).macroTarget
+          : undefined;
       set({ macroTarget: percentages, isTargetLoading: false });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
@@ -144,7 +177,7 @@ export const createMacrosSlice: StateCreator<
   },
 
   addEntry: async (inputs: AddEntryPayload): Promise<void> => {
-    set({ isSaving: true, error: null });
+    set({ isSaving: true, error: undefined });
     try {
       await apiService.macros.addEntry(inputs);
       await get().fetchMacroData();
@@ -163,7 +196,7 @@ export const createMacrosSlice: StateCreator<
     id: number,
     entryUpdate: UpdateEntryPayload,
   ): Promise<void> => {
-    set({ isEditing: true, error: null });
+    set({ isEditing: true, error: undefined });
     const currentHistory = get().history;
     const currentTotals = get().macroDailyTotals;
 
@@ -175,7 +208,7 @@ export const createMacrosSlice: StateCreator<
       set({
         history: updatedHistory,
         macroDailyTotals: newTotals,
-        editingEntry: null,
+        editingEntry: undefined,
       });
 
       await apiService.macros.updateEntry(id, entryUpdate);
@@ -189,7 +222,7 @@ export const createMacrosSlice: StateCreator<
         history: currentHistory,
         macroDailyTotals: currentTotals,
         error: errorMessage,
-        editingEntry: null,
+        editingEntry: undefined,
       });
 
       get()._notifyUser(`Failed to update entry: ${errorMessage}`, "error");
@@ -199,7 +232,7 @@ export const createMacrosSlice: StateCreator<
   },
 
   deleteEntry: async (id: number) => {
-    set({ isDeleting: true, error: null });
+    set({ isDeleting: true, error: undefined });
     const currentHistory = get().history;
     const currentTotals = get().macroDailyTotals;
 
@@ -236,22 +269,29 @@ export const createMacrosSlice: StateCreator<
 
   updateMacroTargetSettings: async (settings) => {
     if (!settings) {
-      console.error("updateMacroTargetSettings called with null settings");
+      console.error("updateMacroTargetSettings called with undefined settings");
       set({ targetError: "Invalid macro target settings provided." });
       return;
     }
 
-    set({ isTargetSaving: true, targetError: null });
+    set({ isTargetSaving: true, targetError: undefined });
 
     try {
       const payload = { macroTarget: settings };
       const savedTargetResponse =
         await apiService.macros.saveMacroTargetPercentages(payload);
 
+      const macroTarget =
+        savedTargetResponse &&
+        typeof savedTargetResponse === "object" &&
+        "macroTarget" in savedTargetResponse
+          ? (savedTargetResponse as { macroTarget?: MacroTargetSettings })
+              .macroTarget
+          : undefined;
       set({
-        macroTarget: savedTargetResponse?.macroTarget || null,
+        macroTarget,
         isTargetSaving: false,
-        targetError: null,
+        targetError: undefined,
       });
 
       get()._notifyUser("Macro target settings updated!", "success");
@@ -266,6 +306,6 @@ export const createMacrosSlice: StateCreator<
     }
   },
 
-  clearMacroError: () => set({ error: null }),
-  clearTargetError: () => set({ targetError: null }),
+  clearMacroError: () => set({ error: undefined }),
+  clearTargetError: () => set({ targetError: undefined }),
 });

@@ -23,19 +23,20 @@
  * />
  */
 import React, { memo } from "react";
+
 import { FormButton } from "@/components/form";
 import {
-  TrashIcon,
-  EditIcon,
   CloseIcon,
-  PlusIcon,
-  MoreVerticalIcon,
-  InfoIcon,
-  WarningIcon,
+  EditIcon,
   ExportIcon,
+  InfoIcon,
+  MoreVerticalIcon,
+  PlusIcon,
+  TrashIcon,
+  WarningIcon,
 } from "@/components/ui";
-import { BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 import type { ButtonSize, IconSize } from "@/components/utils";
+import { BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
 type ActionVariant =
   | "delete"
@@ -65,7 +66,7 @@ interface ActionButtonProps {
 const getActionConfigs = () =>
   ({
     "password-toggle": {
-      icon: null, // Icon is always passed as prop for this variant
+      icon: undefined, // Icon is always passed as prop for this variant
       className:
         "text-gray-400 hover:text-gray-300 bg-transparent focus:ring-gray-500",
     },
@@ -110,7 +111,7 @@ const getActionConfigs = () =>
         "text-emerald-400 hover:text-emerald-200 bg-emerald-900/30 hover:bg-emerald-900/50 focus:ring-emerald-500",
     },
     custom: {
-      icon: null,
+      icon: undefined,
       className: "", // Provided via props
     },
   }) as const;
@@ -133,7 +134,7 @@ function ActionButton({
   const paddingClass = BUTTON_SIZES[buttonSize] || BUTTON_SIZES.md;
 
   // Icon logic: use custom icon for 'custom' and 'password-toggle', otherwise use config.icon
-  let iconElement: React.ReactNode = null;
+  let iconElement: React.ReactNode;
   if (variant === "custom" || variant === "password-toggle") {
     iconElement = customIcon;
   } else if (config.icon) {

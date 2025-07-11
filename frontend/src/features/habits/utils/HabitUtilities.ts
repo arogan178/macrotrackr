@@ -1,7 +1,8 @@
-import { HabitGoal, HabitGoalFormValues } from "../types/types";
-import { generateId } from "@/utils/id-generator";
-import { calculateProgress, isHabitComplete } from "./calculations";
+import { generateId } from "@/utils/idGenerator";
+
 import { DEFAULT_HABIT_COLOR } from "../constants";
+import { HabitGoal, HabitGoalFormValues } from "../types/types";
+import { calculateProgress, isHabitComplete } from "./calculations";
 
 // Habit creation utilities
 export const createNewHabit = (values: HabitGoalFormValues): HabitGoal => {

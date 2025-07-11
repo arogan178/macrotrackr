@@ -1,6 +1,7 @@
 import { memo } from "react";
-import { DropdownProps } from "@/components/utils/types";
-import { formStyles } from "@/components/utils/styles";
+
+import { formStyles } from "@/components/utils/Styles";
+import { DropdownProps } from "@/components/utils/Types";
 
 function Dropdown({
   label,
@@ -20,7 +21,7 @@ function Dropdown({
       <div className={formStyles.select.container}>
         <select
           value={value || ""}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(event) => onChange(event.target.value)}
           className={selectClasses}
           required={required}
         >

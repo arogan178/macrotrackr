@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { MacroType, MacroTargetState } from "@/types/macro";
+import { useCallback, useState } from "react";
+
+import { MacroPercentages, MacroTargetState, MacroType } from "@/types/macro";
+import { MACRO_PERCENTAGE_KEYS } from "@/utils/constants/macro";
 
 /**
  * Custom hook to manage macro target distribution state
@@ -11,83 +13,9 @@ export function useMacroTarget(
   onChange?: (target: MacroTargetState, shouldPersist?: boolean) => void,
 ) {
   const [target, setTarget] = useState<MacroTargetState>(initialValues);
-  const [isAdjusting, setIsAdjusting] = useState<MacroType | null>(null);
+  const [isAdjusting, setIsAdjusting] = useState<MacroType | undefined>();
 
-  // Sync with initial values when they change (but not during adjustment)
-  useEffect(() => {
-    if (initialValues && !isAdjusting) {
-      setTarget(initialValues);
-    }
-  }, [initialValues, isAdjusting]);
-
-  // Ensure percentages always sum to 100%
-  useEffect(() => {
-    if (!isAdjusting) {
-      const sum =
-        target.proteinPercentage +
-        target.carbsPercentage +
-        target.fatsPercentage;
-      if (sum !== 100) {
-        const adjusted = balanceMacroPercentages(target);
-        setTarget(adjusted);
-        // This is a calculation adjustment, not a user action - don't mark for persistence
-        onChange?.(adjusted, false);
-      }
-    }
-  }, [target, isAdjusting, onChange]);
-
-  /**
-   * Balance macro percentages to ensure they sum to 100%
-   */
-  const balanceMacroPercentages = useCallback(
-    (currentTarget: MacroTargetState): MacroTargetState => {
-      const sum =
-        currentTarget.proteinPercentage +
-        currentTarget.carbsPercentage +
-        currentTarget.fatsPercentage;
-      if (sum === 100) return currentTarget;
-
-      const adjusted = { ...currentTarget };
-
-      // Get unlocked macros that can be adjusted
-      const unlockedMacros = [
-        "proteinPercentage",
-        "carbsPercentage",
-        "fatsPercentage",
-      ].filter(
-        (key) =>
-          !currentTarget.lockedMacros.includes(
-            key.replace("Percentage", "") as MacroType,
-          ),
-      ) as Array<keyof MacroTargetState>;
-
-      if (unlockedMacros.length === 0) {
-        // All macros are locked - we need to adjust one anyway to maintain 100%
-        const key = "proteinPercentage";
-        adjusted[key] =
-          100 - (adjusted.carbsPercentage + adjusted.fatsPercentage);
-      } else if (sum > 100) {
-        // Find the largest unlocked macro to reduce
-        const largest = unlockedMacros.reduce((a, b) =>
-          adjusted[a] > adjusted[b] ? a : b,
-        );
-        adjusted[largest] -= sum - 100;
-      } else {
-        // Find the smallest unlocked macro to increase
-        const smallest = unlockedMacros.reduce((a, b) =>
-          adjusted[a] < adjusted[b] ? a : b,
-        );
-        adjusted[smallest] += 100 - sum;
-      }
-
-      return adjusted;
-    },
-    [],
-  );
-
-  /**
-   * Calculate macro distribution when one value changes
-   */
+  // Calculate macro distribution when one value changes
   const calculateMacroAdjustment = useCallback(
     (
       currentTarget: MacroTargetState,
@@ -97,32 +25,29 @@ export function useMacroTarget(
       // Enforce min/max constraints
       value = Math.round(Math.max(5, Math.min(70, value)));
 
-      const updatedTarget = { ...currentTarget };
-      const macroKey = `${macro}Percentage` as keyof MacroTargetState;
-      updatedTarget[macroKey] = value;
+      const targetCopy = { ...currentTarget };
+      targetCopy[`${macro}Percentage` as keyof MacroPercentages] = value;
 
       // The current macro might be locked - we need to check
-      const isCurrentMacroLocked = updatedTarget.lockedMacros.includes(macro);
+      const isCurrentMacroLocked = targetCopy.lockedMacros.includes(macro);
 
       // Get unlocked macros (except the one being adjusted)
       const unlockedMacros = ["protein", "carbs", "fats"].filter(
-        (m) =>
-          m !== macro && !updatedTarget.lockedMacros.includes(m as MacroType),
+        (m) => m !== macro && !targetCopy.lockedMacros.includes(m as MacroType),
       ) as MacroType[];
-
       // Map to get the keys for these macros
       const unlockedKeys = unlockedMacros.map(
-        (m) => `${m}Percentage` as keyof MacroTargetState,
+        (m) => `${m}Percentage` as keyof MacroPercentages,
       );
 
       // Calculate values for locked macros (excluding current if it's locked)
-      const lockedMacrosSum = updatedTarget.lockedMacros
-        .filter((m) => m !== macro || !isCurrentMacroLocked)
-        .reduce(
-          (sum, m) =>
-            sum + updatedTarget[`${m}Percentage` as keyof MacroTargetState],
-          0,
-        );
+      let lockedMacrosSum = 0;
+      for (const m of targetCopy.lockedMacros) {
+        if (m !== macro || !isCurrentMacroLocked) {
+          const key = `${m}Percentage` as keyof MacroPercentages;
+          lockedMacrosSum += targetCopy[key];
+        }
+      }
 
       // Calculate remaining percentage for unlocked macros
       const remainingTotal = 100 - value - lockedMacrosSum;
@@ -131,7 +56,7 @@ export function useMacroTarget(
       if (unlockedKeys.length === 0) {
         // All other macros are locked - adjust current if needed to maintain 100%
         if (value + lockedMacrosSum !== 100 && !isCurrentMacroLocked) {
-          updatedTarget[macroKey] = Math.max(
+          targetCopy[`${macro}Percentage` as keyof MacroPercentages] = Math.max(
             5,
             Math.min(70, 100 - lockedMacrosSum),
           );
@@ -145,50 +70,52 @@ export function useMacroTarget(
         // we need to readjust the macro being changed
         if (newValue !== remainingTotal) {
           const difference = remainingTotal - newValue;
-          updatedTarget[macroKey] = Math.max(
+          targetCopy[`${macro}Percentage` as keyof MacroPercentages] = Math.max(
             5,
             Math.min(70, value - difference),
           );
         }
 
-        updatedTarget[singleUnlockedKey] = newValue;
+        targetCopy[singleUnlockedKey] = newValue;
       } else {
         // Multiple unlocked macros - distribute proportionally
-        const currentUnlockedTotal = unlockedKeys.reduce(
-          (sum, key) => sum + updatedTarget[key],
-          0,
-        );
+        let currentUnlockedTotal = 0;
+        for (const key of unlockedKeys) {
+          currentUnlockedTotal += targetCopy[key];
+        }
 
         if (currentUnlockedTotal > 0) {
           // Distribute proportionally
-          let newTotal = 0;
-          unlockedKeys.forEach((key) => {
-            const proportion = updatedTarget[key] / currentUnlockedTotal;
-            updatedTarget[key] = Math.round(
+          let total = 0;
+          for (const key of unlockedKeys) {
+            const proportion = targetCopy[key] / currentUnlockedTotal;
+            targetCopy[key] = Math.round(
               Math.max(5, Math.min(70, remainingTotal * proportion)),
             );
-            newTotal += updatedTarget[key];
-          });
+            total += targetCopy[key];
+          }
 
           // Handle rounding errors
-          if (newTotal !== remainingTotal) {
-            const difference = remainingTotal - newTotal;
+          if (total !== remainingTotal) {
+            const difference = remainingTotal - total;
 
             // Find an adjustable key
             const adjustableKey = unlockedKeys.find(
               (key) =>
-                updatedTarget[key] + difference >= 5 &&
-                updatedTarget[key] + difference <= 70,
+                targetCopy[key] + difference >= 5 &&
+                targetCopy[key] + difference <= 70,
             );
 
             if (adjustableKey) {
-              updatedTarget[adjustableKey] += difference;
+              targetCopy[adjustableKey] += difference;
             } else if (difference < 0) {
               // If we can't adjust unlocked macros, adjust the current macro
-              updatedTarget[macroKey] = Math.max(
-                5,
-                updatedTarget[macroKey] + difference,
-              );
+              targetCopy[`${macro}Percentage` as keyof MacroPercentages] =
+                Math.max(
+                  5,
+                  targetCopy[`${macro}Percentage` as keyof MacroPercentages] +
+                    difference,
+                );
             }
           }
         } else {
@@ -196,49 +123,48 @@ export function useMacroTarget(
           const perMacro = Math.floor(remainingTotal / unlockedKeys.length);
           let remainder = remainingTotal - perMacro * unlockedKeys.length;
 
-          unlockedKeys.forEach((key) => {
-            updatedTarget[key] = perMacro + (remainder > 0 ? 1 : 0);
+          for (const key of unlockedKeys) {
+            targetCopy[key] = perMacro + (remainder > 0 ? 1 : 0);
             remainder--;
-          });
+          }
         }
       }
 
       // Final sanity check
       const finalSum =
-        updatedTarget.proteinPercentage +
-        updatedTarget.carbsPercentage +
-        updatedTarget.fatsPercentage;
+        targetCopy.proteinPercentage +
+        targetCopy.carbsPercentage +
+        targetCopy.fatsPercentage;
 
       if (finalSum !== 100) {
         // Find an adjustable macro to fix the total
-        const adjustableKeys = [
-          "proteinPercentage",
-          "carbsPercentage",
-          "fatsPercentage",
-        ]
+
+        const adjustableKeys = (
+          MACRO_PERCENTAGE_KEYS as readonly (keyof MacroPercentages)[]
+        )
           .filter((key) => {
             const macroName = key.replace("Percentage", "") as MacroType;
             return (
-              !updatedTarget.lockedMacros.includes(macroName) ||
+              !targetCopy.lockedMacros.includes(macroName) ||
               macroName === macro
             );
           })
           .filter((key) => {
-            const currentValue = updatedTarget[key as keyof MacroTargetState];
+            const currentValue = targetCopy[key];
             return currentValue > 5 && currentValue < 70;
-          }) as Array<keyof MacroTargetState>;
+          });
 
         if (adjustableKeys.length > 0) {
           // Prefer adjusting the macro that's being changed
-          const preferredKey = macroKey as keyof MacroTargetState;
+          const preferredKey = `${macro}Percentage` as keyof MacroPercentages;
           const keyToAdjust = adjustableKeys.includes(preferredKey)
             ? preferredKey
             : adjustableKeys[0];
-          updatedTarget[keyToAdjust] += 100 - finalSum;
+          targetCopy[keyToAdjust] += 100 - finalSum;
         }
       }
 
-      return updatedTarget;
+      return targetCopy;
     },
     [],
   );
@@ -250,14 +176,14 @@ export function useMacroTarget(
     (macro: MacroType, value: number) => {
       setIsAdjusting(macro);
 
-      const updatedTarget = calculateMacroAdjustment(target, macro, value);
+      const adjustedTarget = calculateMacroAdjustment(target, macro, value);
 
-      setTarget(updatedTarget);
+      setTarget(adjustedTarget);
       // Percentage changes should be persisted when saved
-      onChange?.(updatedTarget, true);
+      onChange?.(adjustedTarget, true);
 
       // Clear adjustment state after a brief delay
-      setTimeout(() => setIsAdjusting(null), 100);
+      setTimeout(() => setIsAdjusting(undefined), 100);
     },
     [target, calculateMacroAdjustment, onChange],
   );
@@ -268,25 +194,25 @@ export function useMacroTarget(
    */
   const toggleLock = useCallback(
     (macro: MacroType) => {
-      const newTarget = { ...target };
+      const updatedTarget = { ...target };
 
-      if (newTarget.lockedMacros.includes(macro)) {
+      if (updatedTarget.lockedMacros.includes(macro)) {
         // Unlock the macro
-        newTarget.lockedMacros = newTarget.lockedMacros.filter(
+        updatedTarget.lockedMacros = updatedTarget.lockedMacros.filter(
           (m) => m !== macro,
         );
       } else {
         // Don't allow locking all three macros
-        if (newTarget.lockedMacros.length < 2) {
-          newTarget.lockedMacros = [...newTarget.lockedMacros, macro];
+        if (updatedTarget.lockedMacros.length < 2) {
+          updatedTarget.lockedMacros = [...updatedTarget.lockedMacros, macro];
         } else {
           return; // Can't lock all three
         }
       }
 
-      setTarget(newTarget);
+      setTarget(updatedTarget);
       // Lock changes are UI-only state, don't mark for persistence
-      onChange?.(newTarget, false);
+      onChange?.(updatedTarget, false);
     },
     [target, onChange],
   );

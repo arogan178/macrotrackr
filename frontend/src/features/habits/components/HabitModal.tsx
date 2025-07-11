@@ -1,5 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
+
 import Modal from "@/components/ui/Modal";
+
 import { HabitGoal, HabitGoalFormValues } from "../types/types";
 import HabitForm from "./HabitForm";
 
@@ -15,7 +17,7 @@ interface HabitModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (values: HabitGoalFormValues, habitId?: string) => Promise<void>;
-  habit?: HabitGoal | null;
+  habit?: HabitGoal | undefined;
   mode: "add" | "edit";
 }
 
@@ -79,8 +81,8 @@ function HabitModal({
     field: keyof HabitGoalFormValues,
     value: string | number,
   ) => {
-    setFormValues((prevValues) => {
-      const newValues = { ...prevValues, [field]: value };
+    setFormValues((previousValues) => {
+      const newValues = { ...previousValues, [field]: value };
       setIsFormValid(validateForm(newValues)); // Re-validate on change
       return newValues;
     });

@@ -1,5 +1,5 @@
-import { useEffect, useRef } from "react";
 import { animate } from "motion/react";
+import { useEffect, useRef } from "react";
 
 interface AnimatedNumberProps {
   value: number;
@@ -18,19 +18,19 @@ export default function AnimatedNumber({
   prefix = "",
   suffix = "",
 }: AnimatedNumberProps) {
-  const nodeRef = useRef<HTMLSpanElement>(null);
-  const prevValueRef = useRef<number>(value);
+  const nodeReference = useRef<HTMLSpanElement>(undefined);
+  const previousValueReference = useRef<number>(value);
 
   useEffect(() => {
-    const node = nodeRef.current;
+    const node = nodeReference.current;
     if (!node) return;
 
-    const fromValue = prevValueRef.current;
+    const fromValue = previousValueReference.current;
     const toValue = value;
 
     if (fromValue === toValue || duration === 0) {
       node.textContent = `${prefix}${toValue.toFixed(toFixedValue)}${suffix}`;
-      prevValueRef.current = toValue;
+      previousValueReference.current = toValue;
       return;
     }
 
@@ -53,12 +53,12 @@ export default function AnimatedNumber({
       },
     });
 
-    prevValueRef.current = toValue;
+    previousValueReference.current = toValue;
     return () => controls.stop();
   }, [value, toFixedValue, duration, prefix, suffix]);
 
   return (
-    <span ref={nodeRef} className={className}>
+    <span ref={nodeReference} className={className}>
       {`${prefix}${value.toFixed(toFixedValue)}${suffix}`}
     </span>
   );
