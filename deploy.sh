@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Ensure /usr/local/bin is in PATH for bun
-export PATH=$PATH:/usr/local/bin
+# Ensure /root/.bun/bin and /usr/local/bin are in PATH for bun and pm2
+export PATH=$PATH:/root/.bun/bin:/usr/local/bin
 
 set -e
 
@@ -17,7 +17,7 @@ git pull origin master
 # Install backend dependencies
 echo "Installing backend dependencies..."
 cd backend
-/root/.bun/bin/bun install --frozen-lockfile
+bun install --frozen-lockfile
 
 # Copy production environment variables
 echo "Setting up production environment variables..."
@@ -50,8 +50,8 @@ fi
 # Build frontend
 echo "Building frontend..."
 cd ../frontend
-/root/.bun/bin/bun install --frozen-lockfile
-/root/.bun/bin/bun run build
+bun install --frozen-lockfile
+bun run build
 
 # Check if frontend dist folder exists
 echo "Checking frontend dist folder..."
@@ -64,7 +64,7 @@ fi
 
 # Install serve package for static file serving
 echo "Installing serve package..."
-/root/.bun/bin/bun add serve
+bun add serve
 
 # Go back to root directory for PM2 ecosystem
 cd ..
