@@ -25,6 +25,16 @@ import { billingRoutes } from "./modules/billing/routes";
 logger.info("🚀 Starting Elysia server...");
 
 const app = new Elysia()
+  // Capture raw body for webhook before any parsing occurs
+  .onParse(async ({ request }, body) => {
+    // Only capture raw body for webhook endpoints
+    if (request.url.endsWith("/api/billing/webhook")) {
+      // Store the raw body in the request for later use
+      (request as any).rawWebhookBody = body;
+      // Return the body so Elysia can continue normal processing
+      return body;
+    }
+  })
   // Request size limits for security
   .onRequest(({ request, set }) => {
     const contentLength = request.headers.get("content-length");
@@ -79,20 +89,8 @@ app.post(
   async (ctx: any) => {
     const { logger } = await import("./lib/logger");
     try {
-      // Get the raw body from the request - try multiple approaches
-      let rawBodyText: string;
-      try {
-        rawBodyText = await ctx.request.text();
-      } catch (error) {
-        // If text() fails, try to get from body property
-        rawBodyText =
-          typeof ctx.body === "string" ? ctx.body : JSON.stringify(ctx.body);
-        logger.warn(
-          { operation: "stripe_webhook", error },
-          "Failed to get text from request, using body property"
-        );
-      }
-
+      // Get the raw body that was captured in onParse
+      const rawBodyText = (ctx.request as any).rawWebhookBody || ctx.body;
       const signature = ctx.headers["stripe-signature"];
 
       logger.info(
