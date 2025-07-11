@@ -202,6 +202,17 @@ export class StripeService {
     signature: string
   ): Promise<NormalizedWebhookEvent> {
     try {
+      logger.debug(
+        {
+          operation: "stripe_verify_webhook",
+          payloadLength: payload.length,
+          payloadPreview: payload.substring(0, 100) + "...",
+          signature,
+          webhookSecret: config.STRIPE_WEBHOOK_SECRET ? "present" : "missing",
+        },
+        "Attempting to verify Stripe webhook signature"
+      );
+
       const event = await stripe.webhooks.constructEventAsync(
         payload,
         signature,
@@ -219,6 +230,15 @@ export class StripeService {
       );
       return normalizedEvent;
     } catch (error) {
+      logger.error(
+        {
+          operation: "stripe_verify_webhook",
+          error,
+          header: signature,
+          payload: payload.substring(0, 200) + "...",
+        },
+        "Failed to stripe verify webhook"
+      );
       handleServiceError(error, "stripe_verify_webhook");
     }
   }
