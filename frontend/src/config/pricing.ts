@@ -21,16 +21,18 @@ export interface PricingPlan {
   description?: string;
 }
 
+const FREE_FEATURES = [
+  "Macro Tracking",
+  "Meal Types",
+  "Weight Logging",
+  "Goal Setting",
+  "Basic Reporting",
+];
+
 export const PRICING_PLANS = {
   free: {
     name: "Free",
-    features: [
-      "Macro Tracking",
-      "Meal Types",
-      "Weight Logging",
-      "Goal Setting",
-      "Basic Reporting",
-    ],
+    features: FREE_FEATURES,
     price: "$0",
     suffix: "/forever",
     buttonText: "Get Started For Free",
@@ -44,23 +46,17 @@ export const PRICING_PLANS = {
   },
   pro: {
     name: "Pro",
-    features: Array.from(
-      new Set([
-        ...[
-          "Macro Tracking",
-          "Meal Types",
-          "Weight Logging",
-          "Goal Setting",
-          "Basic Reporting",
-        ],
+    features: [
+      ...new Set([
+        ...FREE_FEATURES,
         "Unlimited Habit Tracking",
         "Recipe & Meal Saver",
         "Advanced Analytics",
         "Ad-Free Experience",
         "Priority Support",
         "Export Data",
-      ])
-    ),
+      ]),
+    ],
     // price, suffix, equivalent, and buttonText will be set dynamically in the component
     price: PRICING.monthly,
     suffix: "/month",

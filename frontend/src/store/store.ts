@@ -1,26 +1,27 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import {
-  UserSlice,
-  createUserSlice,
-} from "@/features/settings/store/user-slice";
-import {
-  MacrosSlice,
-  createMacrosSlice,
-} from "@/features/macroTracking/store/macros-slice";
-import {
-  GoalsSlice,
-  createGoalsSlice,
-} from "@/features/goals/store/goals-slice";
+
 import { AuthSlice, createAuthSlice } from "@/features/auth/store/auth-slice";
 import {
-  NotificationSlice,
-  createNotificationSlice,
-} from "@/features/notifications/store/notification-slice";
+  createGoalsSlice,
+  GoalsSlice,
+} from "@/features/goals/store/goals-slice";
 import {
-  HabitsSlice,
   createHabitsSlice,
+  HabitsSlice,
 } from "@/features/habits/store/habits-slice";
+import {
+  createMacrosSlice,
+  MacrosSlice,
+} from "@/features/macroTracking/store/macros-slice";
+import {
+  createNotificationSlice,
+  NotificationSlice,
+} from "@/features/notifications/store/notifications-slice";
+import {
+  createUserSlice,
+  UserSlice,
+} from "@/features/settings/store/user-slice";
 
 // Combine all slice types
 export type StoreState = UserSlice &
@@ -39,7 +40,7 @@ export const useStore = create<StoreState>()(
     ...createAuthSlice(...a),
     ...createNotificationSlice(...a),
     ...createHabitsSlice(...a),
-  }))
+  })),
 );
 
 // Method to reset the entire store for testing purposes

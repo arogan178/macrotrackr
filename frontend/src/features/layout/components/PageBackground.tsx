@@ -1,4 +1,5 @@
 import React from "react";
+
 import BackgroundAnimation from "@/components/animation/BackgroundAnimation";
 
 /**

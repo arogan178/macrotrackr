@@ -1,12 +1,13 @@
-import { memo, useCallback, useState, useEffect } from "react";
-import { MacroTargetSettings } from "@/types/macro";
-import { MacroTargetState } from "@/features/settings/types/types";
-import { InfoCard, CardContainer, FormButton } from "@/components/form";
-import { InfoIcon, CheckMarkIcon } from "@/components/Icons";
-import MacroTarget from "./MacroTarget";
+import { memo, useCallback, useEffect, useState } from "react";
+
+import { ProFeature } from "@/components/billing/ProFeature";
+import { CardContainer, FormButton, InfoCard } from "@/components/form";
+import { CheckMarkIcon, InfoIcon, LoadingSpinner } from "@/components/ui";
 import { useStore } from "@/store/store";
-import LoadingSpinner from "@/components/form/LoadingSpinner";
-import { ProFeature } from "@/components/ProFeature";
+import type { MacroTargetState } from "@/types/macro";
+import { MacroTargetSettings } from "@/types/macro";
+
+import MacroTarget from "./MacroTarget";
 
 // Default macro values (30/40/30 split)
 const DEFAULT_MACRO_TARGET: MacroTargetState = {
@@ -26,13 +27,15 @@ function MacroTargetForm() {
   } = useStore();
 
   // Local state for edited values
-  const [localTarget, setLocalTarget] = useState<MacroTargetState | null>(null);
+  const [localTarget, setLocalTarget] = useState<
+    MacroTargetState | undefined
+  >();
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
   // Helper function to convert MacroTargetSettings to MacroTargetState
   const toMacroTargetState = (
-    settings: MacroTargetSettings
+    settings: MacroTargetSettings,
   ): MacroTargetState => ({
     proteinPercentage: settings.proteinPercentage,
     carbsPercentage: settings.carbsPercentage,
@@ -79,7 +82,7 @@ function MacroTargetForm() {
         setSaveSuccess(false);
       }
     },
-    [macroTarget, saveSuccess]
+    [macroTarget, saveSuccess],
   );
 
   // Save changes to the backend
@@ -122,7 +125,7 @@ function MacroTargetForm() {
 
   // Only use displayValues when we actually have a localTarget
   // This ensures we don't render the form with default values while loading
-  const hasValidValues = localTarget !== null;
+  const hasValidValues = localTarget !== undefined;
 
   // Use local target values for rendering
   const displayValues = localTarget || DEFAULT_MACRO_TARGET;
@@ -228,7 +231,6 @@ function MacroTargetForm() {
                     onClick={handleReset}
                     disabled={isTargetLoading || isTargetSaving}
                     variant="ghost"
-                    size="md"
                     text="Reset"
                   />
                 )}
@@ -238,7 +240,7 @@ function MacroTargetForm() {
                   isLoading={isTargetSaving}
                   disabled={!hasChanges || isTargetLoading}
                   text="Save Targets"
-                  size="lg"
+                  buttonSize="lg"
                   variant="primary"
                   className="px-8 py-3 text-lg"
                 />

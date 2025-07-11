@@ -1,18 +1,18 @@
-import { getUnitForStat } from "@/utils/chart-colors";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { getUnitForStat } from "@/utils/chartColors";
 
 interface TooltipData {
   name: string;
   value: number;
   percentage?: number;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 interface ChartTooltipProps {
   active?: boolean;
   payload?: Array<{ payload: TooltipData }>;
   selectedStat?: string;
-  formatter?: (value: any, key?: string) => string;
+  formatter?: (value: number, key?: string) => string;
 }
 
 /**
@@ -24,8 +24,8 @@ function ChartTooltip({
   selectedStat = "calories",
   formatter,
 }: ChartTooltipProps) {
-  if (!active || !payload || !payload.length) {
-    return null;
+  if (!active || !payload || payload.length === 0) {
+    return;
   }
 
   const data = payload[0].payload;
@@ -65,7 +65,7 @@ function ChartTooltip({
       {selectedStat !== "count" && typeof data.count === "number" && (
         <p className="text-gray-400 text-xs">
           <AnimatedNumber value={data.count} />{" "}
-          {data.count !== 1 ? "items" : "item"}
+          {data.count === 1 ? "item" : "items"}
         </p>
       )}
     </div>

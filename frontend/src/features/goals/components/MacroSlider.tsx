@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { LockIcon, UnlockIcon } from "@/components/Icons";
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
+
+import { AnimatedNumber } from "@/components/animation";
 import { FormButton } from "@/components/form";
+import { LockIcon, UnlockIcon } from "@/components/ui";
 
 interface MacroSliderProps {
   name: string;
@@ -27,7 +28,10 @@ export default function MacroSlider({
   max = 70,
 }: MacroSliderProps) {
   const [recommendationText, setRecommendationText] = useState(
-    getRecommendation(name.toLowerCase() as "protein" | "carbs" | "fats", value)
+    getRecommendation(
+      name.toLowerCase() as "protein" | "carbs" | "fats",
+      value,
+    ),
   );
 
   const colorConfig = {
@@ -53,14 +57,14 @@ export default function MacroSlider({
 
   const { bg, focus, textLocked, bgLocked } = colorConfig[color];
 
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const newValue = parseInt(e.target.value);
+  function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
+    const newValue = Number.parseInt(event.target.value);
     onChange(newValue);
     setRecommendationText(
       getRecommendation(
         name.toLowerCase() as "protein" | "carbs" | "fats",
-        newValue
-      )
+        newValue,
+      ),
     );
   }
 
@@ -75,7 +79,7 @@ export default function MacroSlider({
           {onToggleLock && (
             <FormButton
               variant="ghost"
-              size="sm"
+              buttonSize="sm"
               onClick={onToggleLock}
               type="button"
               className={`p-1.5 rounded-full ${
@@ -133,7 +137,7 @@ export default function MacroSlider({
 
 function getRecommendation(
   macro: "protein" | "carbs" | "fats",
-  value: number
+  value: number,
 ): string {
   if (macro === "protein") {
     if (value < 15) return "Consider increasing for muscle maintenance";

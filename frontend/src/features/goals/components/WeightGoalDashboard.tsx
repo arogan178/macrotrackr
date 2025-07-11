@@ -1,25 +1,24 @@
-import { useState } from "react";
+import { memo, useState } from "react";
+
+import { EmptyState, TargetIcon } from "@/components/ui/";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
-import WeightGoalStatus from "./WeightGoalStatus";
-import EmptyState from "@/components/EmptyState";
-import { TargetIcon } from "@/components/Icons";
+
 import LogWeightModal from "./LogWeightModal";
+import WeightGoalStatus from "./WeightGoalStatus";
 
 interface WeightGoalDashboardProps {
   user: UserSettings;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
-  weightGoals: WeightGoals | null;
+  weightGoals: WeightGoals | undefined;
   isLoading?: boolean;
   onOpenModal: () => void;
   onDelete: () => void;
   className?: string;
   macroTarget?: MacroTargetSettings;
 }
-
-import { memo } from "react";
 
 const WeightGoalDashboard = memo(function WeightGoalDashboard({
   user,
@@ -47,7 +46,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // TDEE is now passed as a prop and should be used directly
 
   // Get daily deficit/surplus from weightGoals
-  // If dailyChange is null, calculate it from TDEE and calorieTarget
+  // If dailyChange is undefined, calculate it from TDEE and calorieTarget
   let dailyAdjustment = weightGoals?.dailyChange || 0;
   if (dailyAdjustment === 0 && weightGoals?.calorieTarget && tdee > 0) {
     // Calculate daily deficit/surplus: deficit is positive, surplus is negative

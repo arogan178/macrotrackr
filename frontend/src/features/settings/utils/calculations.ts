@@ -1,11 +1,12 @@
-import type {
-  Gender,
-  ActivityLevel,
-  UserSettings,
-  UserNutritionalProfile,
-} from "../types/types";
 import type { MacroTargetGrams } from "@/types/macro";
-import { ACTIVITY_LEVELS } from "../utils/constants";
+
+import type {
+  ActivityLevel,
+  Gender,
+  UserNutritionalProfile,
+  UserSettings,
+} from "../types/types";
+import { ACTIVITY_LEVELS } from "./constants";
 
 // Pure calculation functions - independent of domain-specific types
 /**
@@ -21,7 +22,7 @@ function calculateBMRValue(
   weight: number,
   height: number,
   age: number,
-  isMale: boolean
+  isMale: boolean,
 ): number {
   // Add proper validation to avoid negative values
   if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
@@ -50,24 +51,13 @@ function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
 }
 
 /**
- * Calculate calorie goal based on TDEE and adjustment factor
- */
-function calculateCalorieGoalValue(
-  tdee: number,
-  adjustmentFactor: number
-): number {
-  if (!tdee) return 0;
-  return Math.round(tdee * adjustmentFactor);
-}
-
-/**
  * Calculate macros based on calorie goal and macro percentages
  */
 function calculateMacrosValue(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
-  fatsPercentage: number
+  fatsPercentage: number,
 ): MacroTargetGrams {
   if (!calorieGoal) return { protein: 0, carbs: 0, fats: 0 };
 
@@ -95,7 +85,7 @@ export function calculateBMR(
   weight: number,
   height: number,
   age: number,
-  gender: Gender
+  gender: Gender,
 ): number {
   return calculateBMRValue(weight, height, age, gender === "male");
 }
@@ -122,7 +112,7 @@ export function calculateTDEE(bmr: number, activityLevel: number): number {
  */
 export function calculateTDEEByActivityLevel(
   bmr: number,
-  activityLevel: ActivityLevel
+  activityLevel: ActivityLevel,
 ): number {
   // Find the correct activity level entry and its multiplier
   let multiplier = ACTIVITY_LEVELS[1].multiplier; // Default to sedentary
@@ -144,19 +134,19 @@ export function calculateMacros(
   calorieGoal: number,
   proteinPercentage: number,
   carbsPercentage: number,
-  fatPercentage: number
+  fatPercentage: number,
 ): MacroTargetGrams {
   return calculateMacrosValue(
     calorieGoal,
     proteinPercentage,
     carbsPercentage,
-    fatPercentage
+    fatPercentage,
   );
 }
 
 // Helper function to create nutrition profile from user settings
 export const createNutritionProfile = (
-  settings: UserSettings
+  settings: UserSettings,
 ): UserNutritionalProfile => {
   const age = calculateAge(settings.dateOfBirth || "");
   let bmr = 0;
@@ -170,7 +160,7 @@ export const createNutritionProfile = (
     settings.activityLevel
   ) {
     bmr = Math.round(
-      calculateBMR(settings.weight, settings.height, age, settings.gender)
+      calculateBMR(settings.weight, settings.height, age, settings.gender),
     );
     tdee = Math.round(calculateTDEE(bmr, settings.activityLevel));
   }
@@ -183,14 +173,16 @@ export const createNutritionProfile = (
 };
 
 // Helper function to create user settings from API data
-export const createUserSettings = (userData: any): UserSettings => ({
-  id: userData.id,
-  firstName: userData.firstName,
-  lastName: userData.lastName,
-  email: userData.email,
-  dateOfBirth: userData.dateOfBirth,
-  height: userData.height,
-  weight: userData.weight,
-  activityLevel: userData.activityLevel,
-  gender: userData.gender,
+export const createUserSettings = (
+  userData: Partial<UserSettings>,
+): UserSettings => ({
+  id: userData.id!,
+  firstName: userData.firstName!,
+  lastName: userData.lastName!,
+  email: userData.email!,
+  dateOfBirth: userData.dateOfBirth!,
+  height: userData.height!,
+  weight: userData.weight!,
+  activityLevel: userData.activityLevel!,
+  gender: userData.gender!,
 });

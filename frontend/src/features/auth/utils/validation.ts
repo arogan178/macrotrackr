@@ -1,23 +1,24 @@
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-import { isOldEnough } from "@/utils/validation";
+import { isOldEnough } from "@/utils/Validation";
+
+import { AUTH_ERROR_MESSAGES } from "../constants";
 import type {
   RegistrationStep1,
   RegistrationStep2,
   RegistrationStep3,
 } from "../types";
-import { AUTH_ERROR_MESSAGES } from "../constants";
 import {
   validateEmailFormat,
-  validatePasswordStrength,
   validateHeightRange,
+  validatePasswordStrength,
   validateWeightRange,
-} from "./auth-utils";
+} from "./authUtilities";
 
 /**
  * Validates registration step 1 form data
  */
 export function validateRegistrationStep1(
-  formData: RegistrationStep1
+  formData: RegistrationStep1,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 
@@ -48,7 +49,7 @@ export function validateRegistrationStep1(
  * Validates registration step 2 form data
  */
 export function validateRegistrationStep2(
-  formData: RegistrationStep2
+  formData: RegistrationStep2,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 
@@ -81,7 +82,7 @@ export function validateRegistrationStep2(
  * Validates registration step 3 form data
  */
 export function validateRegistrationStep3(
-  formData: RegistrationStep3
+  formData: RegistrationStep3,
 ): Record<string, string> {
   const errors: Record<string, string> = {};
 

@@ -1,7 +1,9 @@
 import { motion } from "motion/react";
-import type { MetricCardProps } from "../types/insights-types";
-import { getScoreColor } from "../utils/insights-calculations";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+
+import type { MetricCardProps as MetricCardProps } from "../types/insightsTypes";
+import { getScoreColor } from "../utils/insightsCalculations";
 
 export default function MetricCard({
   title,
@@ -29,7 +31,9 @@ export default function MetricCard({
         <span className="text-2xl font-bold text-white">
           <AnimatedNumber
             value={
-              typeof value === "number" ? value : parseFloat(value.toString())
+              typeof value === "number"
+                ? value
+                : Number.parseFloat(value.toString())
             }
             toFixedValue={0}
             duration={0.8}

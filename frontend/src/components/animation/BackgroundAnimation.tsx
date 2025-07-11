@@ -1,5 +1,5 @@
-import React from "react";
 import { motion, useReducedMotion } from "motion/react";
+import React from "react";
 
 const blobs = [
   {
@@ -29,9 +29,9 @@ const BackgroundAnimation: React.FC = () => {
   const prefersReducedMotion = useReducedMotion();
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      {blobs.map((blob, i) => (
+      {blobs.map((blob, index) => (
         <motion.div
-          key={i}
+          key={index}
           className={`absolute rounded-full blur-3xl ${blob.style}`}
           animate={prefersReducedMotion ? {} : blob.animate}
           transition={{

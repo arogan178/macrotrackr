@@ -1,20 +1,22 @@
 // The updated HabitForm.tsx, removing isSubmitting prop since it's not used
 import { useMemo } from "react";
-import { HabitGoalFormValues } from "../types/types";
-import { TextField, NumberField } from "@/components/form";
+
+import { NumberField, TextField } from "@/components/form";
 import {
+  AwardIcon,
+  BookIcon,
   CalendarIcon,
   CheckCircleIcon,
-  TargetIcon,
-  AwardIcon,
-  HeartIcon,
-  BookIcon,
   CoffeeIcon,
   DropletIcon,
   DumbBellIcon,
+  HeartIcon,
   MoonIcon,
   SunIcon,
-} from "@/components/Icons";
+  TargetIcon,
+} from "@/components/ui";
+
+import { HabitGoalFormValues } from "../types/types";
 
 const AVAILABLE_ICONS = {
   calendar: CalendarIcon,
@@ -56,7 +58,7 @@ function HabitForm({
 }: HabitFormProps) {
   const handleChange = (
     field: keyof HabitGoalFormValues,
-    value: string | number | undefined // Allow undefined temporarily from NumberField
+    value: string | number | undefined, // Allow undefined temporarily from NumberField
   ) => {
     // Ensure target is never undefined or less than 1 when passed up
     if (field === "target") {
@@ -113,25 +115,35 @@ function HabitForm({
 
       {/* Icon selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">
+        <label
+          htmlFor="icon-button-group"
+          className="block text-sm font-medium text-gray-200 mb-1"
+        >
           Icon
         </label>
-        <div className="grid grid-cols-5 gap-2">
+        <div
+          id="icon-button-group"
+          className="grid grid-cols-5 gap-2"
+          role="group"
+          aria-label="Icon selection"
+        >
           {Object.entries(AVAILABLE_ICONS).map(([key, IconComponent]) => (
             <button
               key={key}
               type="button"
               className={`p-3 rounded-lg flex items-center justify-center ${
-                values.iconName === key // Use prop value
+                values.iconName === key
                   ? `bg-${values.accentColor}-500/20 border border-${values.accentColor}-500/50`
                   : "bg-gray-700/40 hover:bg-gray-700/60"
               }`}
               onClick={() => handleChange("iconName", key)}
+              aria-pressed={values.iconName === key}
+              aria-label={key.charAt(0).toUpperCase() + key.slice(1) + " icon"}
             >
               <IconComponent
                 size="sm"
                 className={
-                  values.iconName === key // Use prop value
+                  values.iconName === key
                     ? `text-${values.accentColor}-400`
                     : "text-gray-300"
                 }
@@ -143,20 +155,29 @@ function HabitForm({
 
       {/* Color selection */}
       <div>
-        <label className="block text-sm font-medium text-gray-200 mb-1">
+        <label
+          htmlFor="color-button-group"
+          className="block text-sm font-medium text-gray-200 mb-1"
+        >
           Color
         </label>
-        <div className="flex space-x-2">
+        <div
+          id="color-button-group"
+          className="flex space-x-2"
+          role="group"
+          aria-label="Color selection"
+        >
           {COLOR_OPTIONS.map((color) => (
             <button
               key={color.value}
               type="button"
               className={`w-8 h-8 rounded-full ${color.class} ${
-                values.accentColor === color.value // Use prop value
+                values.accentColor === color.value
                   ? "ring-2 ring-white ring-opacity-60"
                   : "opacity-70 hover:opacity-100"
               }`}
               onClick={() => handleChange("accentColor", color.value)}
+              aria-pressed={values.accentColor === color.value}
               aria-label={`Select ${color.label} color`}
             />
           ))}
@@ -166,7 +187,7 @@ function HabitForm({
       {/* Preview */}
       <div className="mt-4">
         <p className="text-sm font-medium text-gray-300 mb-2">Preview</p>
-        <div className={`bg-gray-700/30 rounded-lg overflow-hidden`}>
+        <div className={"bg-gray-700/30 rounded-lg overflow-hidden"}>
           <div
             className={`bg-gradient-to-r from-${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
           >

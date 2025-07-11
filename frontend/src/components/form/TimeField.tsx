@@ -1,6 +1,7 @@
 import { memo } from "react";
-import type { TimeFieldProps } from "@/components/utils/types";
-import { formStyles } from "@/components/utils/styles";
+
+import { formStyles } from "@/components/utils/Styles";
+import type { TimeFieldProps } from "@/components/utils/Types";
 
 function TimeField({
   label,
@@ -10,8 +11,8 @@ function TimeField({
   error,
   helperText,
 }: TimeFieldProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    onChange(event.target.value);
   };
 
   const inputClasses = `${formStyles.input.base} ${

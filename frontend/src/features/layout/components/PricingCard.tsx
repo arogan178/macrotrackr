@@ -1,8 +1,8 @@
-import React from "react";
 import { motion } from "motion/react";
-import { CheckIcon } from "@/components/Icons";
+import React from "react";
+
 import FormButton from "@/components/form/FormButton";
-import { BUTTON_VARIANTS, BUTTON_SIZES } from "@/components/utils/constants";
+import { CheckIcon } from "@/components/ui";
 
 interface PricingCardProps {
   title: string;
@@ -36,8 +36,8 @@ const PricingCard: React.FC<PricingCardProps> = ({
   features,
   isPopular = false,
   buttonText,
-  buttonVariant = BUTTON_VARIANTS.PRIMARY,
-  buttonSize = BUTTON_SIZES.LG,
+  buttonVariant = "primary",
+  buttonSize = "lg",
   buttonClassName = "",
   onButtonClick,
   focusRingColor = "focus:ring-indigo-500/40",
@@ -119,7 +119,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         <FormButton
           text={buttonText}
           variant={buttonVariant}
-          size={buttonSize}
+          buttonSize={buttonSize}
           className={buttonClassName}
           onClick={onButtonClick}
         />
