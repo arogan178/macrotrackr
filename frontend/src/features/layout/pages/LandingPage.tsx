@@ -14,7 +14,7 @@ const PricingSection = React.lazy(() => import("../components/PricingSection"));
 const TestimonialsSection = React.lazy(
   () => import("../components/TestimonialsSection"),
 );
-const FinalCTASection = React.lazy(
+const FinalCtaSection = React.lazy(
   () => import("../components/FinalCtaSection"),
 );
 
@@ -34,7 +34,7 @@ const LandingPage: React.FC = () => {
         <TestimonialsSection />
       </Suspense>
       <Suspense fallback={<LoadingSpinner />}>
-        <FinalCTASection />
+        <FinalCtaSection />
       </Suspense>
       <Footer />
     </div>
