@@ -13,24 +13,11 @@ import {
 import { toCamelCase, handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
 import { hashPassword, verifyPassword } from "../../lib/password";
+import { SubscriptionService } from "../billing/subscription-service";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
   value === undefined || value === null ? null : value;
-
-// Combined user data query result type
-type UserWithDetailsResult = {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  created_at: string | Date;
-  date_of_birth: string | null;
-  height: number | null;
-  weight: number | null;
-  gender: "male" | "female" | null;
-  activity_level: number | null;
-};
 
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
@@ -44,17 +31,13 @@ export const userRoutes = (app: Elysia) =>
           try {
             const { db, user } = context as AuthenticatedContext;
 
-            // Fetching user details
-
-            // Fetch user details and subscription status
+            // Fetch user details
             const dbResult = safeQuery<any>(
               db,
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
-                      ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level,
-                      s.status AS subscription_status
+                      ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
-               LEFT JOIN subscriptions s ON u.id = s.user_id AND s.status IN ('active', 'pro')
                WHERE u.id = ?
                LIMIT 1`,
               [user.userId]
@@ -64,13 +47,30 @@ export const userRoutes = (app: Elysia) =>
               throw new NotFoundError("User data not found.");
             }
 
+            // Get comprehensive subscription information
+            const subscriptionInfo =
+              await SubscriptionService.getUserSubscription(user.userId);
+
             // Convert to camelCase API response
             const result = toCamelCase(dbResult);
-            // Add subscription object for frontend compatibility
+
+            // Add comprehensive subscription object
             result.subscription = {
-              status: result.subscriptionStatus || "free",
+              status: subscriptionInfo.subscription_status,
+              hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
+              subscription:
+                subscriptionInfo.subscription ?
+                  {
+                    id: subscriptionInfo.subscription.id,
+                    status: subscriptionInfo.subscription.status,
+                    currentPeriodEnd:
+                      subscriptionInfo.subscription.current_period_end,
+                    stripeSubscriptionId:
+                      subscriptionInfo.subscription.stripe_subscription_id,
+                  }
+                : null,
             };
-            delete result.subscriptionStatus;
+
             return result;
           } catch (error) {
             return handleError(error, context);
