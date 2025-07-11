@@ -213,9 +213,18 @@ app.post(
                 "Canceled subscription from webhook"
               );
             } else {
-              const currentPeriodEnd = new Date(
-                subscription.current_period_end * 1000
-              ).toISOString();
+              logger.info({
+                operation: "stripe_webhook",
+                rawCurrentPeriodEnd: subscription.current_period_end,
+                msg: "Processing current_period_end"
+              });
+              
+              const currentPeriodEndTimestamp = subscription.current_period_end;
+              if (!currentPeriodEndTimestamp || typeof currentPeriodEndTimestamp !== 'number') {
+                throw new Error(`Invalid current_period_end timestamp: ${currentPeriodEndTimestamp}`);
+              }
+              
+              const currentPeriodEnd = new Date(currentPeriodEndTimestamp * 1000).toISOString();
               await SubscriptionService.upsertSubscription(
                 user.id,
                 subscriptionId,
