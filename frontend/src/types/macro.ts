@@ -1,5 +1,4 @@
 // Utility type for macro percentage keys
-export type MacroKey = keyof MacroPercentages;
 export type MacroType = "protein" | "carbs" | "fats";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 export type MacroTargetGrams = {

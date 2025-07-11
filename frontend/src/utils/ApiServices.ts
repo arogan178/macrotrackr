@@ -4,15 +4,16 @@
  */
 
 // Assuming these imports exist and work as intended in your frontend structure
-import { getActivityLevelFromString } from "@/features/settings/utils/constants"; // Adjust path as needed
-import { ActivityLevel } from "@/types/user"; // Adjust path as needed
-import { getToken } from "./token-storage"; // Adjust path as needed
-import type { WeightGoalFormValues } from "@/features/goals/types";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
   calculateWeeksToGoal,
 } from "@/features/goals/calculations";
+import type { WeightGoalFormValues } from "@/features/goals/types";
+import { getActivityLevelFromString } from "@/features/settings/utils/constants"; // Adjust path as needed
+import { ActivityLevel } from "@/types/user"; // Adjust path as needed
+
+import { getToken } from "./tokenStorage"; // Adjust path as needed
 
 // API Base URL and Response Types
 export const API_BASE_URL =
@@ -23,14 +24,14 @@ export const API_BASE_URL =
 // Payload for PUT /api/goals/weight (CREATE)
 type SetWeightGoalPayload = {
   startingWeight: number; // Required for creation
-  targetWeight: number | null;
-  weightGoal: "lose" | "maintain" | "gain" | null;
-  startDate: string | null;
-  targetDate: string | null;
-  calorieTarget: number | null;
-  calculatedWeeks: number | null;
-  weeklyChange: number | null;
-  dailyChange: number | null;
+  targetWeight: number | undefined;
+  weightGoal: "lose" | "maintain" | "gain" | undefined;
+  startDate: string | undefined;
+  targetDate: string | undefined;
+  calorieTarget: number | undefined;
+  calculatedWeeks: number | undefined;
+  weeklyChange: number | undefined;
+  dailyChange: number | undefined;
 };
 
 // Payload for PUT /api/goals/weight (UPDATE)
@@ -50,12 +51,14 @@ export interface AddWeightLogPayload {
 // --- END Weight Log Interfaces ---
 
 // Type for the macro target settings object
-type MacroTargetSettingsObject = {
-  proteinPercentage: number;
-  carbsPercentage: number;
-  fatsPercentage: number;
-  lockedMacros?: Array<"protein" | "carbs" | "fats">;
-} | null;
+type MacroTargetSettingsObject =
+  | {
+      proteinPercentage: number;
+      carbsPercentage: number;
+      fatsPercentage: number;
+      lockedMacros?: Array<"protein" | "carbs" | "fats">;
+    }
+  | undefined;
 
 // Payload for PUT /api/macros/target (updating settings ONLY)
 type MacroTargetSettingsPayload = {
@@ -63,9 +66,11 @@ type MacroTargetSettingsPayload = {
 };
 
 // Type for response from GET /api/macros/target (settings ONLY)
-type MacroTargetGetResponse = {
-  macroTarget: MacroTargetSettingsObject;
-} | null;
+type MacroTargetGetResponse =
+  | {
+      macroTarget: MacroTargetSettingsObject;
+    }
+  | undefined;
 
 // Payload for PUT /api/user/settings (User details ONLY)
 // macroTarget removed
@@ -73,11 +78,11 @@ type UserSettingsPayload = Partial<{
   firstName: string;
   lastName: string;
   email: string;
-  dateOfBirth: string | null;
-  height: number | null;
-  weight: number | null;
-  gender: "male" | "female" | null;
-  activityLevel: number | null;
+  dateOfBirth: string | undefined;
+  height: number | undefined;
+  weight: number | undefined;
+  gender: "male" | "female" | undefined;
+  activityLevel: number | undefined;
 }>;
 
 interface MacroEntryCreatePayload {
@@ -96,13 +101,18 @@ export type { MacroEntryCreatePayload };
 interface ApiErrorResponse {
   code: string;
   message: string;
-  details?: any;
+  details?: unknown;
 }
 export class ApiError extends Error {
   status: number;
   code: string;
-  details?: any;
-  constructor(message: string, status: number, code: string, details?: any) {
+  details?: unknown;
+  constructor(
+    message: string,
+    status: number,
+    code: string,
+    details?: unknown,
+  ) {
     super(message);
     this.name = "ApiError";
     this.status = status;
@@ -128,30 +138,30 @@ type HabitGoalPayload = {
 // --- Helper Functions ---
 /**
  * Handles API responses, parses JSON, and standardizes error handling.
- * Updated to handle valid null/empty responses for 200 OK status.
+ * Updated to handle valid undefined/empty responses for 200 OK status.
  */
-export async function handleResponse(response: Response): Promise<any> {
+export async function handleResponse(response: Response): Promise<unknown> {
   // Handle successful responses (2xx status codes)
   if (response.ok) {
     // Handle specific 204 No Content responses
     if (response.status === 204) {
       return { success: true }; // Return a simple success indicator
     }
-    // Try to parse successful JSON response, but handle potential null/empty body for 200 OK
+    // Try to parse successful JSON response, but handle potential undefined/empty body for 200 OK
     try {
       const responseBodyText = await response.clone().text();
       if (!responseBodyText) {
-        return null;
-      } // Return null if body is empty
+        return undefined;
+      } // Return undefined if body is empty
       return await response.json(); // Parse JSON if body exists
-    } catch (e) {
+    } catch (error) {
       console.warn("API Success Response (2xx) could not be parsed as JSON:", {
         status: response.status,
-        error: e,
+        error: error,
       });
       if (response.status === 200) {
-        return null;
-      } // Assume valid null/empty for 200
+        return undefined;
+      } // Assume valid undefined/empty for 200
       throw new Error(
         "Received an invalid or unparsable response from the server.",
       );
@@ -159,10 +169,10 @@ export async function handleResponse(response: Response): Promise<any> {
   }
 
   // Handle error responses (response.ok is false - 4xx, 5xx status codes)
-  let errorPayload: ApiErrorResponse | null = null;
+  let errorPayload: ApiErrorResponse | undefined = undefined;
   let errorMessage = `API error (${response.status}): ${response.statusText}`;
   let errorCode = `HTTP_${response.status}`;
-  let errorDetails: any = undefined;
+  let errorDetails: unknown = undefined;
   try {
     errorPayload = await response.json();
     if (errorPayload && typeof errorPayload === "object") {
@@ -170,8 +180,8 @@ export async function handleResponse(response: Response): Promise<any> {
       errorCode = errorPayload.code || errorCode;
       errorDetails = errorPayload.details;
     }
-  } catch (e) {
-    console.warn("API Error Response is not valid JSON:", e);
+  } catch (error) {
+    console.warn("API Error Response is not valid JSON:", error);
   }
   throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
 }
@@ -191,13 +201,16 @@ export function getHeaders(includeContentType = true): Record<string, string> {
 /**
  * Generic POST helper for API calls (used by billing helpers)
  */
-export async function post<T = any>(url: string, body?: any): Promise<T> {
+export async function post<T = unknown>(
+  url: string,
+  body?: unknown,
+): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     method: "POST",
     headers: getHeaders(),
     body: body ? JSON.stringify(body) : undefined,
   });
-  return handleResponse(response);
+  return handleResponse(response) as T;
 }
 
 /**
@@ -211,7 +224,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
         headers: getHeaders(false),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as MacroTargetGetResponse;
     },
     /** Updates user settings (profile details only) */
     updateSettings: async (settings: UserSettingsPayload) => {
@@ -219,7 +232,7 @@ export const apiService = {
       const payloadToSend = { ...settings };
       if (
         payloadToSend.activityLevel !== undefined &&
-        payloadToSend.activityLevel !== null &&
+        payloadToSend.activityLevel !== undefined &&
         typeof payloadToSend.activityLevel === "string"
       ) {
         payloadToSend.activityLevel = getActivityLevelFromString(
@@ -231,7 +244,9 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify(payloadToSend), // Send payload with only user details
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as
+        | SetWeightGoalPayload
+        | undefined;
     },
     /** Completes user profile */
     completeProfile: async (
@@ -250,7 +265,7 @@ export const apiService = {
           body: JSON.stringify(profileData),
         },
       );
-      return handleResponse(response);
+      return (await handleResponse(response)) as WeightLogEntry[];
     },
   },
 
@@ -262,7 +277,7 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify({ email, password }),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as MacroTargetGetResponse;
     },
     validateEmail: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/validate-email`, {
@@ -270,15 +285,17 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify({ email }),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as
+        | SetWeightGoalPayload
+        | undefined;
     },
-    register: async (userData: any) => {
+    register: async (userData: Record<string, unknown>) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(userData),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as WeightLogEntry[];
     },
     forgotPassword: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
@@ -286,23 +303,25 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify({ email }),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as MacroTargetGetResponse;
     },
-    resetPassword: async (token: string, newPassword: string) => {
+    resetPassword: async (token: string, passwordNew: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
         method: "POST",
         headers: getHeaders(),
-        body: JSON.stringify({ token, newPassword }),
+        body: JSON.stringify({ token, passwordNew }),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as
+        | SetWeightGoalPayload
+        | undefined;
     },
-    changePassword: async (currentPassword: string, newPassword: string) => {
+    changePassword: async (passwordCurrent: string, passwordNew: string) => {
       const response = await fetch(`${API_BASE_URL}/api/user/password`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify({ currentPassword, newPassword }),
+        body: JSON.stringify({ passwordCurrent, passwordNew }),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as WeightLogEntry[];
     },
   },
 
@@ -366,7 +385,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
         headers: getHeaders(false),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as MacroTargetGetResponse;
     },
     /** Saves ONLY macro target settings */
     saveMacroTargetPercentages: async (payload: MacroTargetSettingsPayload) => {
@@ -385,12 +404,14 @@ export const apiService = {
   // Goals endpoints
   goals: {
     /** Gets weight goals (including calorieTarget) */
-    getWeightGoals: async (): Promise<SetWeightGoalPayload | null> => {
+    getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
       // Return type might need adjustment based on backend response
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         headers: getHeaders(false),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as
+        | SetWeightGoalPayload
+        | undefined;
     },
     /** Creates new weight goals */
     createWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
@@ -408,7 +429,7 @@ export const apiService = {
         calculatedWeeks:
           goals.calculatedWeeks ??
           calculateWeeksToGoal(startingWeight, targetWeight),
-        dailyChange: goals.dailyChange ?? null,
+        dailyChange: goals.dailyChange ?? undefined,
       };
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
@@ -435,7 +456,7 @@ export const apiService = {
         calculatedWeeks:
           goals.calculatedWeeks ??
           calculateWeeksToGoal(startingWeight, targetWeight),
-        dailyChange: goals.dailyChange ?? null,
+        dailyChange: goals.dailyChange ?? undefined,
       };
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
@@ -461,7 +482,7 @@ export const apiService = {
         headers: getHeaders(false),
       });
       // The backend returns an array, potentially empty, matching WeightLogEntry[]
-      return handleResponse(response);
+      return (await handleResponse(response)) as WeightLogEntry[];
     },
 
     /** Adds a new weight log entry */
@@ -474,7 +495,7 @@ export const apiService = {
         body: JSON.stringify(payload),
       });
       // Backend returns the created entry including id, timestamp, and weight
-      const fullEntry = await handleResponse(response);
+      const fullEntry = (await handleResponse(response)) as WeightLogEntry;
       return {
         id: fullEntry.id,
         timestamp: fullEntry.timestamp,
@@ -494,7 +515,10 @@ export const apiService = {
         },
       );
       // Backend now returns { success: true, id: 'deleted_id' }
-      return handleResponse(response);
+      return (await handleResponse(response)) as {
+        success: boolean;
+        id: string;
+      };
     },
     // --- END NEW Weight Log Endpoints ---
   },
@@ -504,7 +528,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         headers: getHeaders(false),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as HabitGoalPayload[];
     },
 
     /** Saves a new habit goal */
@@ -516,7 +540,7 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify(habitGoal),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as HabitGoalPayload;
     },
 
     /** Updates an existing habit goal */
@@ -529,7 +553,7 @@ export const apiService = {
         headers: getHeaders(),
         body: JSON.stringify(habitGoal),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as { success: boolean };
     },
 
     /** Deletes a habit goal */
@@ -538,7 +562,7 @@ export const apiService = {
         method: "DELETE",
         headers: getHeaders(),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as { success: boolean };
     },
 
     /** Reset all habit goals */
@@ -547,7 +571,7 @@ export const apiService = {
         method: "DELETE",
         headers: getHeaders(),
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as { success: boolean };
     },
   },
 };

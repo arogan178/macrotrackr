@@ -1,7 +1,8 @@
 import { StateCreator } from "zustand";
+
 import {
-  DEFAULT_NOTIFICATION_DURATION,
   DEFAULT_NOTIFICATION_AUTO_CLOSE,
+  DEFAULT_NOTIFICATION_DURATION,
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
 } from "../constants";
@@ -109,9 +110,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
 
     // Generate a unique ID with timestamp and random component
     const timestamp = Date.now();
-    const id = `notif_${timestamp}_${Math.random()
-      .toString(36)
-      .substring(2, 9)}`;
+    const id = `notif_${timestamp}_${Math.random().toString(36).slice(2, 9)}`;
 
     const notification: Notification = {
       id,
@@ -136,13 +135,13 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
 
       // Clear any existing timeout for this ID (shouldn't exist, but just in case)
       if (state.activeTimeouts[id]) {
-        window.clearTimeout(state.activeTimeouts[id]);
+        globalThis.clearTimeout(state.activeTimeouts[id]);
       }
 
       // Set a new timeout if autoClose is true
       const activeTimeouts = { ...state.activeTimeouts };
       if (autoClose && duration > 0) {
-        const timeoutId = window.setTimeout(() => {
+        const timeoutId = globalThis.setTimeout(() => {
           get().hideNotification(id);
         }, duration);
 
@@ -177,7 +176,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
     set((state: NotificationSlice) => {
       // Clear the timeout to prevent memory leaks
       if (state.activeTimeouts[id]) {
-        window.clearTimeout(state.activeTimeouts[id]);
+        globalThis.clearTimeout(state.activeTimeouts[id]);
       }
 
       // Find notification to check if it has a context
@@ -189,11 +188,11 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
 
       // Also remove from context map if it was associated with a context
       const notificationContexts = { ...state.notificationContexts };
-      if (notification?.context) {
-        // Only remove if the current ID for this context matches this notification
-        if (notificationContexts[notification.context] === id) {
-          delete notificationContexts[notification.context];
-        }
+      if (
+        notification?.context && // Only remove if the current ID for this context matches this notification
+        notificationContexts[notification.context] === id
+      ) {
+        delete notificationContexts[notification.context];
       }
 
       return {
@@ -214,7 +213,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
       if (notificationId) {
         // Clear the timeout for this notification
         if (state.activeTimeouts[notificationId]) {
-          window.clearTimeout(state.activeTimeouts[notificationId]);
+          globalThis.clearTimeout(state.activeTimeouts[notificationId]);
         }
 
         // Create new objects for state updates
@@ -240,9 +239,9 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
   clearAllNotifications: () => {
     set((state: NotificationSlice) => {
       // Clear all active timeouts to prevent memory leaks
-      Object.values(state.activeTimeouts).forEach((timeoutId) => {
-        window.clearTimeout(timeoutId as number);
-      });
+      for (const timeoutId of Object.values(state.activeTimeouts)) {
+        globalThis.clearTimeout(timeoutId as number);
+      }
 
       return {
         notifications: [],

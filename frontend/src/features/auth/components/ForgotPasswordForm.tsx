@@ -1,8 +1,9 @@
 import { useState } from "react";
-import { FormButton, CardContainer, TextField } from "@/components/form";
+
+import { CardContainer, FormButton, TextField } from "@/components/form";
 import { EmailIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/utils/api-service";
+import { ApiError } from "@/utils/apiServices";
 
 interface ForgotPasswordFormProps {
   onSwitchToLogin: () => void;
@@ -16,8 +17,8 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
     showNotification,
   } = useStore();
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
     try {
       await forgotPassword(email);
       showNotification(

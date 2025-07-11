@@ -1,6 +1,7 @@
 import { memo, ReactNode } from "react";
-import { PlusIcon } from "@/components/ui";
+
 import { FormButton } from "@/components/form";
+import { PlusIcon } from "@/components/ui";
 
 interface ActionProps {
   label: string;
@@ -17,6 +18,26 @@ interface EmptyStateProps {
   secondaryAction?: ActionProps;
   className?: string;
   size?: "sm" | "md" | "lg";
+}
+
+function getButtonStyles(variant: ActionProps["variant"] = "primary") {
+  const baseStyles =
+    "px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center";
+
+  switch (variant) {
+    case "primary": {
+      return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
+    }
+    case "secondary": {
+      return `${baseStyles} bg-gray-700 hover:bg-gray-600 text-white`;
+    }
+    case "outline": {
+      return `${baseStyles} border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white`;
+    }
+    default: {
+      return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
+    }
+  }
 }
 
 function EmptyState({
@@ -49,23 +70,6 @@ function EmptyState({
       message: "text-base max-w-lg",
     },
   }[size];
-
-  // Get variant styles for action buttons
-  const getButtonStyles = (variant: ActionProps["variant"] = "primary") => {
-    const baseStyles =
-      "px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center";
-
-    switch (variant) {
-      case "primary":
-        return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
-      case "secondary":
-        return `${baseStyles} bg-gray-700 hover:bg-gray-600 text-white`;
-      case "outline":
-        return `${baseStyles} border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white`;
-      default:
-        return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
-    }
-  };
 
   // Default icon if none provided
   const defaultIcon = (

@@ -18,7 +18,7 @@ export const ACTIVITY_LEVELS: Record<
   1: {
     label: "Sedentary (little or no exercise)",
     value: "sedentary",
-    multiplier: 1.0,
+    multiplier: 1,
   },
   2: {
     label: "Lightly active (light exercise 1-3 days/week)",
@@ -52,7 +52,7 @@ export function getActivityLevelValue(level: number): ActivityLevel {
 }
 
 export function getActivityLevelMultiplier(level: number): number {
-  return ACTIVITY_LEVELS[level]?.multiplier || 1.0;
+  return ACTIVITY_LEVELS[level]?.multiplier || 1;
 }
 
 export function getActivityLevelFromString(value: ActivityLevel): number {

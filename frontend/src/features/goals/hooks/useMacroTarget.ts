@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from "react";
-import type { MacroType, MacroTargetState, MacroKey } from "@/types/macro";
+import { useCallback, useEffect, useState } from "react";
+
+import type { MacroKey, MacroTargetState, MacroType } from "@/types/macro";
 
 /**
  * Custom hook to manage macro target distribution state
@@ -11,34 +12,9 @@ export function useMacroTarget(
   onChange?: (target: MacroTargetState, shouldPersist?: boolean) => void,
 ) {
   const [target, setTarget] = useState<MacroTargetState>(initialValues);
-  const [isAdjusting, setIsAdjusting] = useState<MacroType | null>(null);
+  const [isAdjusting, setIsAdjusting] = useState<MacroType | undefined>();
 
-  // Sync with initial values when they change (but not during adjustment)
-  useEffect(() => {
-    if (initialValues && !isAdjusting) {
-      setTarget(initialValues);
-    }
-  }, [initialValues, isAdjusting]);
-
-  // Ensure percentages always sum to 100%
-  useEffect(() => {
-    if (!isAdjusting) {
-      const sum =
-        target.proteinPercentage +
-        target.carbsPercentage +
-        target.fatsPercentage;
-      if (sum !== 100) {
-        const adjusted = balanceMacroPercentages(target);
-        setTarget(adjusted);
-        // This is a calculation adjustment, not a user action - don't mark for persistence
-        onChange?.(adjusted, false);
-      }
-    }
-  }, [target, isAdjusting, onChange]);
-
-  /**
-   * Balance macro percentages to ensure they sum to 100%
-   */
+  // Balance macro percentages to ensure they sum to 100%
   const balanceMacroPercentages = useCallback(
     (currentTarget: MacroTargetState): MacroTargetState => {
       const sum =
@@ -68,15 +44,21 @@ export function useMacroTarget(
             (adjusted.fatsPercentage as number));
       } else if (sum > 100) {
         // Find the largest unlocked macro to reduce
-        const largest = unlockedMacros.reduce((a, b) =>
-          (adjusted[a] as number) > (adjusted[b] as number) ? a : b,
-        );
+        let largest = unlockedMacros[0];
+        for (const key of unlockedMacros) {
+          if ((adjusted[key] as number) > (adjusted[largest] as number)) {
+            largest = key;
+          }
+        }
         adjusted[largest] = (adjusted[largest] as number) - (sum - 100);
       } else {
         // Find the smallest unlocked macro to increase
-        const smallest = unlockedMacros.reduce((a, b) =>
-          (adjusted[a] as number) < (adjusted[b] as number) ? a : b,
-        );
+        let smallest = unlockedMacros[0];
+        for (const key of unlockedMacros) {
+          if ((adjusted[key] as number) < (adjusted[smallest] as number)) {
+            smallest = key;
+          }
+        }
         adjusted[smallest] = (adjusted[smallest] as number) + (100 - sum);
       }
 
@@ -84,6 +66,29 @@ export function useMacroTarget(
     },
     [],
   );
+
+  // Sync with initial values when they change (but not during adjustment)
+  useEffect(() => {
+    if (initialValues && !isAdjusting) {
+      setTarget(initialValues);
+    }
+  }, [initialValues, isAdjusting]);
+
+  // Ensure percentages always sum to 100%
+  useEffect(() => {
+    if (!isAdjusting) {
+      const sum =
+        target.proteinPercentage +
+        target.carbsPercentage +
+        target.fatsPercentage;
+      if (sum !== 100) {
+        const adjusted = balanceMacroPercentages(target);
+        setTarget(adjusted);
+        // This is a calculation adjustment, not a user action - don't mark for persistence
+        onChange?.(adjusted, false);
+      }
+    }
+  }, [target, isAdjusting, onChange, balanceMacroPercentages]);
 
   /**
    * Calculate macro distribution when one value changes
@@ -105,11 +110,11 @@ export function useMacroTarget(
       const isCurrentMacroLocked = updatedTarget.lockedMacros.includes(macro);
 
       // Get unlocked macros (except the one being adjusted)
-      const unlockedMacrosArr = ["protein", "carbs", "fats"].filter(
+      const unlockedMacrosArray = ["protein", "carbs", "fats"].filter(
         (m) =>
           m !== macro && !updatedTarget.lockedMacros.includes(m as MacroType),
       ) as MacroType[];
-      const unlockedKeys: MacroKey[] = unlockedMacrosArr.map(
+      const unlockedKeys: MacroKey[] = unlockedMacrosArray.map(
         (m) => `${m}Percentage` as MacroKey,
       );
 
@@ -160,7 +165,7 @@ export function useMacroTarget(
         if (currentUnlockedTotal > 0) {
           // Distribute proportionally
           let newTotal = 0;
-          unlockedKeys.forEach((key) => {
+          for (const key of unlockedKeys) {
             const proportion =
               (updatedTarget[key] as number) / currentUnlockedTotal;
             const newValue = Math.round(
@@ -168,7 +173,7 @@ export function useMacroTarget(
             );
             updatedTarget[key] = newValue;
             newTotal += newValue;
-          });
+          }
 
           // Handle rounding errors
           if (newTotal !== remainingTotal) {
@@ -176,8 +181,8 @@ export function useMacroTarget(
 
             // Find an adjustable key
             const adjustableKey = unlockedKeys.find((key) => {
-              const val = updatedTarget[key] as number;
-              return val + difference >= 5 && val + difference <= 70;
+              const value_ = updatedTarget[key] as number;
+              return value_ + difference >= 5 && value_ + difference <= 70;
             });
 
             if (adjustableKey) {
@@ -196,10 +201,10 @@ export function useMacroTarget(
           const perMacro = Math.floor(remainingTotal / unlockedKeys.length);
           let remainder = remainingTotal - perMacro * unlockedKeys.length;
 
-          unlockedKeys.forEach((key) => {
+          for (const key of unlockedKeys) {
             updatedTarget[key] = perMacro + (remainder > 0 ? 1 : 0);
             remainder--;
-          });
+          }
         }
       }
 
@@ -256,7 +261,7 @@ export function useMacroTarget(
       // Percentage changes should be persisted when saved
       onChange?.(updatedTarget, true);
       // Clear adjustment state after a brief delay
-      setTimeout(() => setIsAdjusting(null), 100);
+      setTimeout(() => setIsAdjusting(undefined), 100);
     },
     [target, calculateMacroAdjustment, onChange],
   );

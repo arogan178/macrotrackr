@@ -1,18 +1,20 @@
 import { useMemo, useState } from "react";
+import type { LabelProps, TooltipProps } from "recharts";
 import {
-  ResponsiveContainer,
-  BarChart,
   Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  LabelList,
+  Legend,
+  ResponsiveContainer,
+  Tooltip,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  LabelList,
-  Cell,
-  Legend,
 } from "recharts";
+
 import { ChartCard, StatSelector } from "@/components/chart";
-import { MEAL_COLORS, getUnitForStat } from "@/utils/chart-colors";
+import { getUnitForStat, MEAL_COLORS } from "@/utils/chartColors";
 
 // Define meal types and their display order
 const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
@@ -30,7 +32,7 @@ interface MacroEntry {
   carbs: number;
   fats: number;
   mealType: MealType;
-  mealName: string | null;
+  mealName: string | undefined;
   entryDate?: string;
   entryTime?: string;
   createdAt: string;
@@ -39,8 +41,7 @@ interface MacroEntry {
 const formatMealType = (mealType: string) =>
   mealType.charAt(0).toUpperCase() + mealType.slice(1);
 
-const calculateCalories = (entry: any) =>
-  entry.calories ??
+const calculateCalories = (entry: MacroEntry) =>
   (entry.protein || 0) * 4 + (entry.carbs || 0) * 4 + (entry.fats || 0) * 9;
 
 function calculateMealTypeDistribution(
@@ -56,7 +57,7 @@ function calculateMealTypeDistribution(
   );
 
   // Aggregate data by meal type
-  entries.forEach((entry) => {
+  for (const entry of entries) {
     const mealType = entry.mealType || "snack";
     const group = groups[mealType];
 
@@ -65,24 +66,22 @@ function calculateMealTypeDistribution(
     group.fats += entry.fats || 0;
     group.calories += calculateCalories(entry);
     group.count += 1;
-  });
+  }
 
   // Convert to averages for calories
-  Object.values(groups).forEach((group) => {
+  for (const group of Object.values(groups)) {
     group.calories = group.count > 0 ? group.calories / group.count : 0;
-  });
+  }
 
   // Calculate totals for percentages
-  const totals = Object.values(groups).reduce(
-    (acc, group) => ({
-      calories: acc.calories + group.calories,
-      protein: acc.protein + group.protein,
-      carbs: acc.carbs + group.carbs,
-      fats: acc.fats + group.fats,
-      count: acc.count + group.count,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 },
-  );
+  const totals = { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 };
+  for (const group of Object.values(groups)) {
+    totals.calories += group.calories;
+    totals.protein += group.protein;
+    totals.carbs += group.carbs;
+    totals.fats += group.fats;
+    totals.count += group.count;
+  }
 
   // Format for chart
   return MEAL_TYPES.map((mealType) => {
@@ -116,10 +115,10 @@ function MealTimeBreakdown({
     end.setHours(23, 59, 59, 999);
 
     return history.filter((entry) => {
-      const dateStr = entry.entryDate || entry.createdAt?.split("T")[0];
-      if (!dateStr) return false;
+      const dateString = entry.entryDate || entry.createdAt?.split("T")[0];
+      if (!dateString) return false;
 
-      const entryDate = new Date(dateStr);
+      const entryDate = new Date(dateString);
       entryDate.setHours(12, 0, 0, 0);
       return entryDate >= start && entryDate <= end;
     });
@@ -127,12 +126,12 @@ function MealTimeBreakdown({
 
   const mealTypeDistribution = useMemo(
     () =>
-      filteredHistory.length
+      filteredHistory.length > 0
         ? calculateMealTypeDistribution(filteredHistory, selectedStat)
         : [],
     [filteredHistory, selectedStat],
   );
-  if (!filteredHistory.length) {
+  if (filteredHistory.length === 0) {
     return (
       <ChartCard
         title="Meal Distribution"
@@ -167,17 +166,23 @@ function MealTimeBreakdown({
   );
 
   // Custom label renderer
-  const renderPercentageLabel = (props: any) => {
-    const { x = 0, y = 0, width = 0, height = 0, value } = props;
+  const renderPercentageLabel = (properties: LabelProps) => {
+    const { x = 0, y = 0, width = 0, height = 0, value } = properties;
     const percent =
-      typeof value === "number" ? value : parseInt(value || "0", 10);
+      typeof value === "number"
+        ? value
+        : Number.parseInt((value as string) || "0", 10);
+    const widthNumber = typeof width === "number" ? width : Number(width);
+    const xNumber = typeof x === "number" ? x : Number(x);
+    const yNumber = typeof y === "number" ? y : Number(y);
+    const heightNumber = typeof height === "number" ? height : Number(height);
 
-    if (percent < 5 || width < 50) return null;
+    if (percent < 5 || widthNumber < 50) return;
 
     return (
       <text
-        x={x + width - 10}
-        y={y + height / 2}
+        x={xNumber + widthNumber - 10}
+        y={yNumber + heightNumber / 2}
         fill="#fff"
         fontSize={12}
         fontWeight="bold"
@@ -288,10 +293,25 @@ function MealTimeBreakdown({
   );
 }
 
-const CustomTooltip = ({ active, payload, selectedStat }: any) => {
-  if (!active || !payload?.length) return null;
+interface MealTypeDistributionData {
+  name: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  count: number;
+  value: number;
+  percentage: number;
+}
 
-  const data = payload[0].payload;
+const CustomTooltip = (
+  properties: TooltipProps<number, string> & { selectedStat?: string },
+) => {
+  // selectedStat is passed via ...rest
+  const { active, payload, selectedStat } = properties;
+  if (!active || !payload?.length) return;
+
+  const data = payload[0].payload as MealTypeDistributionData;
   const unit = getUnitForStat(selectedStat || "calories");
 
   return (
@@ -312,7 +332,7 @@ const CustomTooltip = ({ active, payload, selectedStat }: any) => {
       )}
       {selectedStat !== "count" && (
         <p className="text-gray-400 text-xs">
-          {data.count} meal{data.count !== 1 ? "s" : ""}
+          {data.count} meal{data.count === 1 ? "" : "s"}
         </p>
       )}
     </div>

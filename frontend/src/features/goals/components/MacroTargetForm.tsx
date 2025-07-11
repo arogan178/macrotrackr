@@ -1,18 +1,18 @@
-import { memo, useCallback, useState, useEffect } from "react";
-import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
+import { memo, useCallback, useEffect, useState } from "react";
 
+import { ProFeature } from "@/components/billing";
 import {
-  InfoCard,
   CardContainer,
   FormButton,
+  InfoCard,
   LoadingSpinner,
 } from "@/components/form";
-import { ProFeature } from "@/components/billing";
-import { InfoIcon, CheckMarkIcon } from "@/components/ui";
-import MacroTarget from "./MacroTarget";
+import { CheckMarkIcon, InfoIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
-
+import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
+
+import MacroTarget from "./MacroTarget";
 
 function MacroTargetForm() {
   const {
@@ -24,7 +24,9 @@ function MacroTargetForm() {
   } = useStore();
 
   // Local state for edited values
-  const [localTarget, setLocalTarget] = useState<MacroTargetState | null>(null);
+  const [localTarget, setLocalTarget] = useState<
+    MacroTargetState | undefined
+  >();
   const [hasChanges, setHasChanges] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
 
@@ -120,7 +122,7 @@ function MacroTargetForm() {
 
   // Only use displayValues when we actually have a localTarget
   // This ensures we don't render the form with default values while loading
-  const hasValidValues = localTarget !== null;
+  const hasValidValues = localTarget !== undefined;
 
   // Use local target values for rendering
   const displayValues = localTarget || DEFAULT_MACRO_TARGET;

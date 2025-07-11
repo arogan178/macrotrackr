@@ -1,5 +1,6 @@
 import React, { memo } from "react";
-import { Modal, AwardIcon, CheckCircleIcon } from "@/components/ui";
+
+import { AwardIcon, CheckCircleIcon, Modal } from "@/components/ui";
 
 interface UpgradeModalProps {
   open: boolean;
@@ -21,7 +22,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
   featureName = "Pro",
   description = "Upgrade to Pro to unlock these powerful features:",
 }) => {
-  if (!open) return null;
+  if (!open) return;
 
   const proFeatures = [
     "Advanced, filterable reporting",

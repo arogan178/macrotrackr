@@ -38,19 +38,14 @@ export const calculateMacroCalories = (entry: MacroEntry): number => {
 };
 
 export const calculateDailyTotals = (entries: MacroEntry[]): MacroData => {
-  const totals = entries.reduce(
-    (acc, entry) => {
-      const entryCalories = calculateMacroCalories(entry);
-      return {
-        calories: acc.calories + entryCalories,
-        protein: acc.protein + (entry.protein || 0),
-        carbs: acc.carbs + (entry.carbs || 0),
-        fats: acc.fats + (entry.fats || 0),
-      };
-    },
-    { calories: 0, protein: 0, carbs: 0, fats: 0 },
-  );
-
+  const totals: MacroData = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+  for (const entry of entries) {
+    const entryCalories = calculateMacroCalories(entry);
+    totals.calories += entryCalories;
+    totals.protein += entry.protein || 0;
+    totals.carbs += entry.carbs || 0;
+    totals.fats += entry.fats || 0;
+  }
   return totals;
 };
 
@@ -81,16 +76,13 @@ export const calculateAverageMacros = (
     return { calories: 0, protein: 0, carbs: 0, fats: 0 };
   }
 
-  const totals = dailyEntries.reduce(
-    (acc, day) => ({
-      calories: acc.calories + day.calories,
-      protein: acc.protein + day.protein,
-      carbs: acc.carbs + day.carbs,
-      fats: acc.fats + day.fats,
-    }),
-    { calories: 0, protein: 0, carbs: 0, fats: 0 },
-  );
-
+  const totals: MacroData = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+  for (const day of dailyEntries) {
+    totals.calories += day.calories;
+    totals.protein += day.protein;
+    totals.carbs += day.carbs;
+    totals.fats += day.fats;
+  }
   const days = dailyEntries.length;
   return {
     calories: Math.round(totals.calories / days),
@@ -134,9 +126,9 @@ export const calculateMovingAverage = (
 export const calculateVariance = (values: number[]): number => {
   if (values.length === 0) return 0;
 
-  const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
   const variance =
-    values.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
+    values.reduce((sum, value) => sum + Math.pow(value - mean, 2), 0) /
     values.length;
 
   return Math.round(variance * 100) / 100;
@@ -149,13 +141,13 @@ export const calculateStandardDeviation = (values: number[]): number => {
 export const calculateMacroConsistencyScore = (values: number[]): number => {
   if (values.length === 0) return 0;
 
-  const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
-  const standardDev = calculateStandardDeviation(values);
+  const mean = values.reduce((sum, value) => sum + value, 0) / values.length;
+  const standardDevelopment = calculateStandardDeviation(values);
 
   if (mean === 0) return 0;
 
   // Coefficient of variation as a consistency metric (lower is more consistent)
-  const coefficientOfVariation = (standardDev / mean) * 100;
+  const coefficientOfVariation = (standardDevelopment / mean) * 100;
 
   // Convert to consistency score (higher is more consistent)
   return Math.max(0, Math.round((100 - coefficientOfVariation) * 100) / 100);

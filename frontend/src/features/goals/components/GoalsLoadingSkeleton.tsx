@@ -10,9 +10,9 @@ export default function GoalsLoadingSkeleton() {
       {/* Summary cards */}
       <div className="mb-6">
         <div className="flex flex-wrap gap-4">
-          {[1, 2, 3, 4].map((i) => (
+          {[1, 2, 3, 4].map((index) => (
             <div
-              key={i}
+              key={index}
               className="flex-1 min-w-[120px] h-24 bg-gray-800/40 rounded-2xl"
             />
           ))}

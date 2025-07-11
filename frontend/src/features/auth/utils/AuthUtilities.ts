@@ -1,13 +1,14 @@
 import { ActivityLevel } from "@/types/user";
+import { apiService } from "@/utils/apiServices";
+import { getErrorMessage } from "@/utils/errorHandling";
+import { removeToken, securelyStoreToken } from "@/utils/tokenStorage";
+
 import {
   AUTH_ERROR_MESSAGES,
-  PASSWORD_VALIDATION,
   HEIGHT_VALIDATION,
+  PASSWORD_VALIDATION,
   WEIGHT_VALIDATION,
 } from "../constants";
-import { apiService } from "@/utils/api-service";
-import { getErrorMessage } from "@/utils/error-handling";
-import { securelyStoreToken, removeToken } from "@/utils/token-storage";
 
 // Types for registration data
 export interface RegisterData {
@@ -27,12 +28,12 @@ export interface AuthStateData {
   email: string;
   password: string;
   isLoading: boolean;
-  error: string | null;
+  error: string | undefined;
   isAuthenticated: boolean;
   register: RegisterData;
   isChangingPassword?: boolean;
-  changePasswordError?: string | null;
-  changePasswordSuccess?: string | null;
+  changePasswordError?: string | undefined;
+  changePasswordSuccess?: string | undefined;
 }
 
 // Initial state creators
@@ -56,7 +57,7 @@ export function createInitialAuthState(): AuthStateData {
     email: "",
     password: "",
     isLoading: false,
-    error: null,
+    error: undefined,
     isAuthenticated: false,
     register: createInitialRegisterData(),
   };
@@ -76,8 +77,8 @@ export async function performLogin(
 
     securelyStoreToken(response.token);
     return response.token;
-  } catch (err) {
-    let errorMessage = getErrorMessage(err);
+  } catch (error) {
+    let errorMessage = getErrorMessage(error);
 
     if (errorMessage.includes("401") || errorMessage.includes("403")) {
       errorMessage = AUTH_ERROR_MESSAGES.invalidCredentials;
@@ -105,8 +106,8 @@ export async function validateEmailAvailability(
     }
 
     return valid;
-  } catch (err) {
-    const errorMessage = getErrorMessage(err);
+  } catch (error) {
+    const errorMessage = getErrorMessage(error);
     throw new Error(
       `${AUTH_ERROR_MESSAGES.emailValidationFailed}: ${errorMessage}`,
     );
@@ -137,8 +138,8 @@ export async function submitUserRegistration(
 
     securelyStoreToken(response.token);
     return response.token;
-  } catch (err) {
-    let errorMessage = getErrorMessage(err);
+  } catch (error) {
+    let errorMessage = getErrorMessage(error);
 
     if (
       errorMessage.includes("email") ||

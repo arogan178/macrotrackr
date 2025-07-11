@@ -1,26 +1,28 @@
+import { motion } from "motion/react"; // Import motion
 import { memo } from "react";
+
+import { AnimatedNumber } from "@/components/animation/";
+import { ActionButtonGroup, FormButton } from "@/components/form";
 import {
+  CalendarIcon, // Added for Time Remaining
   CalorieIcon,
   ChevronRightIcon,
-  WeightIcon,
-  CalendarIcon, // Added for Time Remaining
-  TrendingUpIcon, // Added for Weekly Rate
-  TargetIcon,
   ProgressBar, // Added for Daily Deficit/Surplus
+  TargetIcon,
+  TrendingUpIcon, // Added for Weekly Rate
+  WeightIcon,
 } from "@/components/ui";
-import { AnimatedNumber } from "@/components/animation/";
-import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { WeightGoals } from "@/types/goal";
+import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+
 import MacroNutrient from "./MacroNutrient";
-import { motion } from "motion/react"; // Import motion
-import { FormButton, ActionButtonGroup } from "@/components/form";
 
 interface WeightGoalStatusProps {
   startingWeight: number; // This should represent the *current* weight
   targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
-  weightGoals: WeightGoals | null; // This object holds the specific goal details
+  weightGoals: WeightGoals | undefined; // This object holds the specific goal details
   onEdit: () => void;
   onDelete: () => void;
   onLogWeight: () => void;
@@ -50,7 +52,7 @@ function calculateProgress(
 
 // Helper to format dates
 function formatDate(
-  dateString: string | undefined | null,
+  dateString: string | undefined | undefined,
   options?: Intl.DateTimeFormatOptions,
 ): string {
   if (!dateString) return "Not set";
@@ -131,7 +133,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const weeklyChange = weightGoals?.weeklyChange || 0;
   const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
   // Calculate daily deficit/surplus from available data
-  // If dailyChange is null/undefined, calculate from TDEE and calorieTarget
+  // If dailyChange is undefined/undefined, calculate from TDEE and calorieTarget
   let dailyDifference = Math.abs(weightGoals?.dailyChange || 0);
   if (dailyDifference === 0 && weightGoals?.calorieTarget && tdee > 0) {
     dailyDifference = Math.abs(tdee - weightGoals.calorieTarget);
@@ -361,8 +363,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               100, // Cap progress at 100% visually
               effectiveCalorieTarget > 0
                 ? Math.round(
-                  (macroDailyTotals.calories / effectiveCalorieTarget) * 100,
-                )
+                    (macroDailyTotals.calories / effectiveCalorieTarget) * 100,
+                  )
                 : 0,
             )}
             color="indigo"

@@ -1,11 +1,12 @@
-import type {
-  Gender,
-  ActivityLevel,
-  UserSettings,
-  UserNutritionalProfile,
-} from "../types/types";
 import type { MacroTargetGrams } from "@/types/macro";
-import { ACTIVITY_LEVELS } from "../utils/constants";
+
+import type {
+  ActivityLevel,
+  Gender,
+  UserNutritionalProfile,
+  UserSettings,
+} from "../types/types";
+import { ACTIVITY_LEVELS } from "./constants";
 
 // Pure calculation functions - independent of domain-specific types
 /**
@@ -47,17 +48,6 @@ function calculateBMRValue(
 function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
   if (!bmr) return 0;
   return Math.round(bmr * activityMultiplier);
-}
-
-/**
- * Calculate calorie goal based on TDEE and adjustment factor
- */
-function calculateCalorieGoalValue(
-  tdee: number,
-  adjustmentFactor: number,
-): number {
-  if (!tdee) return 0;
-  return Math.round(tdee * adjustmentFactor);
 }
 
 /**
@@ -183,14 +173,16 @@ export const createNutritionProfile = (
 };
 
 // Helper function to create user settings from API data
-export const createUserSettings = (userData: any): UserSettings => ({
-  id: userData.id,
-  firstName: userData.firstName,
-  lastName: userData.lastName,
-  email: userData.email,
-  dateOfBirth: userData.dateOfBirth,
-  height: userData.height,
-  weight: userData.weight,
-  activityLevel: userData.activityLevel,
-  gender: userData.gender,
+export const createUserSettings = (
+  userData: Partial<UserSettings>,
+): UserSettings => ({
+  id: userData.id!,
+  firstName: userData.firstName!,
+  lastName: userData.lastName!,
+  email: userData.email!,
+  dateOfBirth: userData.dateOfBirth!,
+  height: userData.height!,
+  weight: userData.weight!,
+  activityLevel: userData.activityLevel!,
+  gender: userData.gender!,
 });

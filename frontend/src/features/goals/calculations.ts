@@ -1,11 +1,12 @@
+import type { WeightGoals } from "@/types/goal";
+
 import {
   CALORIES_PER_KG_FAT,
   DEFAULT_TARGET_WEEKS,
-  MIN_WEEKLY_WEIGHT_LOSS,
   MAX_WEEKLY_WEIGHT_LOSS,
+  MIN_WEEKLY_WEIGHT_LOSS,
 } from "./constants";
 import type { TimeToGoalCalculation } from "./types";
-import type { WeightGoals } from "@/types/goal";
 
 /**
  * Calculate the time to reach the goal weight based on current and target weights
@@ -124,9 +125,9 @@ export function generateWeightGoalCalculations(
 ): Partial<WeightGoals> {
   // If custom calorie intake is provided, use it
   const calorieTarget =
-    customCalorieIntake !== undefined
-      ? customCalorieIntake
-      : calculateCalorieTarget(tdee, startingWeight, targetWeight);
+    customCalorieIntake === undefined
+      ? calculateCalorieTarget(tdee, startingWeight, targetWeight)
+      : customCalorieIntake;
 
   const calorieDeficit = tdee - calorieTarget;
   const isWeightLoss = startingWeight > targetWeight;

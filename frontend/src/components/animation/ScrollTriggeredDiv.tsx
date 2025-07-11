@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
 import { motion, useInView } from "motion/react";
+import React, { useRef } from "react";
 
 interface ScrollTriggeredDivProps {
   children: React.ReactNode;
@@ -12,12 +12,12 @@ const ScrollTriggeredDiv: React.FC<ScrollTriggeredDivProps> = ({
   className = "",
   delay = 0,
 }) => {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-100px" });
+  const reference = useRef(undefined);
+  const isInView = useInView(reference, { once: true, margin: "-100px" });
 
   return (
     <motion.div
-      ref={ref}
+      ref={reference}
       initial={{ opacity: 0, y: 48 }}
       animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 48 }}
       transition={{
