@@ -9,6 +9,8 @@ import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
 import { toCamelCase } from "../../lib/responses";
 
+import { OpenFoodFactsApiClient } from "../../lib/openfoodfacts-api-client";
+import { cacheService } from "../../lib/cache-service";
 // Database result types (snake_case)
 type MacroTargetFromDB = {
   id: number;
@@ -37,6 +39,34 @@ type MacroEntryFromDB = {
 export const macroRoutes = (app: Elysia) =>
   app.group("/api/macros", (group) =>
     group
+      .decorate("openFoodFactsApiClient", new OpenFoodFactsApiClient())
+      .decorate("cacheService", cacheService)
+
+      // GET /search - Search for food
+      .get(
+        "/search",
+        async (context: any) => {
+          const { query, openFoodFactsApiClient, cacheService } = context;
+
+          const cacheKey = `food_search:${query.q}`;
+          const cachedResult = cacheService.get(cacheKey);
+          if (cachedResult) {
+            return cachedResult;
+          }
+
+          const results = await openFoodFactsApiClient.search(query.q);
+          cacheService.set(cacheKey, results);
+          return results;
+        },
+        {
+          query: MacroSchemas.foodSearchQuery,
+          response: MacroSchemas.foodSearchResponse,
+          detail: {
+            summary: "Search for a food item using OpenFoodFacts API",
+            tags: ["Macros"],
+          },
+        }
+      )
       .decorate("db", db)
 
       // GET /target - Get macro target percentages
@@ -83,8 +113,9 @@ export const macroRoutes = (app: Elysia) =>
             proteinPercentage: macroTargetResult.protein_percentage,
             carbsPercentage: macroTargetResult.carbs_percentage,
             fatsPercentage: macroTargetResult.fats_percentage,
-            lockedMacros: Array.isArray(lockedMacros)
-              ? lockedMacros.filter(
+            lockedMacros:
+              Array.isArray(lockedMacros) ?
+                lockedMacros.filter(
                   (item): item is "protein" | "carbs" | "fats" =>
                     ["protein", "carbs", "fats"].includes(item)
                 )
