@@ -50,23 +50,13 @@ export const macroRoutes = (app: Elysia) =>
 
           const cacheKey = `food_search:${query.q}`;
           const cachedResult = cacheService.get(cacheKey);
-
           if (cachedResult) {
             return cachedResult;
           }
 
-          const result = await openFoodFactsApiClient.search(query.q);
-
-          if (result) {
-            const transformedResult = {
-              name: result.product_name,
-              nutriments: result.nutriments,
-            };
-            cacheService.set(cacheKey, transformedResult);
-            return transformedResult;
-          }
-
-          return null;
+          const results = await openFoodFactsApiClient.search(query.q);
+          cacheService.set(cacheKey, results);
+          return results;
         },
         {
           query: MacroSchemas.foodSearchQuery,
