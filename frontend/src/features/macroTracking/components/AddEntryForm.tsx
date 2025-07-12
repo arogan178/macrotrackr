@@ -1,4 +1,4 @@
-import { memo, useCallback, useState, useMemo, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   CardContainer,
@@ -35,11 +35,14 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [fats, setFats] = useState<number | undefined>();
   const [quantity, setQuantity] = useState<number>(100);
   const [unit, setUnit] = useState("g");
-  const [baseMacros, setBaseMacros] = useState<{
-    protein: number;
-    carbs: number;
-    fats: number;
-  } | null>(null);
+  const [baseMacros, setBaseMacros] = useState<
+    | {
+        protein: number;
+        carbs: number;
+        fats: number;
+      }
+    | undefined
+  >();
 
   const [searchResult, setSearchResult] = useState<string | undefined>();
   // Helper: get current hour in user's local time
@@ -141,7 +144,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   );
 
   const handleClearSearch = useCallback(() => {
-    setBaseMacros(null);
+    setBaseMacros(undefined);
     setMealName("");
     setSearchResult(undefined);
     setProtein(undefined);
@@ -153,10 +156,10 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
 
   // When user manually edits a macro, break the link to the search result
   const handleManualMacroChange =
-    (setter: (val: number | undefined) => void) =>
+    (setter: (value: number | undefined) => void) =>
     (value: number | undefined) => {
       setter(value);
-      setBaseMacros(null);
+      setBaseMacros(undefined);
     };
 
   const handleSubmit = useCallback(

@@ -108,10 +108,10 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           )}
           {showResults && results.length > 0 && (
             <div className="absolute z-10 bg-white border border-gray-200 rounded shadow-md mt-2 w-full max-h-64 overflow-y-auto">
-              {results.map((item, idx) => {
+              {results.map((item, index) => {
                 // Calculate calories (energyKcal) if available
                 const calories =
-                  item.energyKcal !== undefined ? item.energyKcal : null;
+                  item.energyKcal === undefined ? undefined : item.energyKcal;
                 // Prefer rawQuantity if present, fallback to parsed quantity/unit
                 let quantityDisplay = "";
                 if ((item as any).rawQuantity) {
@@ -125,7 +125,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
                 }
                 return (
                   <button
-                    key={idx}
+                    key={index}
                     className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
                     onClick={() => handleSelect(item)}
                     type="button"
@@ -135,9 +135,9 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
                       {/* Always show quantity/serving size if available */}
                       {quantityDisplay ? `${quantityDisplay} | ` : ""}
                       {/* Show calories if available */}
-                      {calories !== null
-                        ? `Calories: ${calories.toFixed(1)} kcal | `
-                        : ""}
+                      {calories === undefined
+                        ? ""
+                        : `Calories: ${calories.toFixed(1)} kcal | `}
                       Protein: {item.protein.toFixed(1)}g, Carbs:{" "}
                       {item.carbs.toFixed(1)}g, Fats: {item.fats.toFixed(1)}g
                     </div>
