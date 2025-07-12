@@ -4,6 +4,7 @@ import { TextField } from "@/components/form";
 import FormButton from "@/components/form/FormButton";
 import { ArrowRightIcon, SearchIcon } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
+import { apiService } from "@/utils/apiServices";
 
 type CalorieSearchProps = {
   onResult: (macros: {
@@ -29,39 +30,16 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     setLoading(true);
     setError("");
 
-    // Regex to parse quantity and food name from the query
-    const match =
-      query.match(/^(\d*\.?\d+)\s*g\s*(.*)$/i) ||
-      query.match(/^(\d*\.?\d+)\s*(.*)$/i);
-    let quantity = 100; // Default to 100g if no quantity is specified
-    let foodName = query;
-
-    if (match) {
-      quantity = Number.parseFloat(match[1]);
-      foodName = match[2].trim();
-    }
-
     try {
-      const appId = import.meta.env.VITE_EDAMAM_APP_ID;
-      const appKey = import.meta.env.VITE_EDAMAM_APP_KEY;
-      const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${appId}&app_key=${appKey}&ingr=${encodeURIComponent(
-        foodName,
-      )}`;
-      const response = await fetch(url);
-      const data = await response.json();
+      const result: any = await apiService.macros.search(query);
 
-      if (data.parsed && data.parsed.length > 0) {
-        const food = data.parsed[0].food;
-        const nutrients = food.nutrients;
-
-        // The API returns nutrients per 100g. We calculate based on the user's quantity.
-        const multiplier = quantity / 100;
-
+      if (result && result.nutriments) {
+        const { nutriments } = result;
         onResult({
-          protein: ((nutrients.PROCNT || 0) * multiplier).toFixed(1),
-          carbs: ((nutrients.CHOCDF || 0) * multiplier).toFixed(1),
-          fats: ((nutrients.FAT || 0) * multiplier).toFixed(1),
-          name: query, // Use the original query as the name
+          protein: (nutriments.proteins_100g || 0).toFixed(1),
+          carbs: (nutriments.carbohydrates_100g || 0).toFixed(1),
+          fats: (nutriments.fat_100g || 0).toFixed(1),
+          name: result.name || query,
         });
       } else {
         setError("No results found for this food item");
