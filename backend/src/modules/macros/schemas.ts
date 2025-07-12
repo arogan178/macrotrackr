@@ -121,15 +121,17 @@ export const MacroSchemas = {
   foodSearchQuery: t.Object({
     q: t.String(),
   }),
-  foodSearchResponse: t.Nullable(
+  foodSearchResponse: t.Array(
     t.Object({
       name: t.String(),
-      nutriments: t.Object({
-        "energy-kcal_100g": t.Number(),
-        proteins_100g: t.Number(),
-        carbohydrates_100g: t.Number(),
-        fat_100g: t.Number(),
-      }),
+      protein: t.Number(),
+      carbs: t.Number(),
+      fats: t.Number(),
+      energyKcal: t.Number(),
+      categories: t.String(),
+      servingQuantity: t.Number(),
+      servingUnit: t.String(),
+      rawQuantity: t.Optional(t.String()),
     })
   ),
 };
