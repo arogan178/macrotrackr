@@ -5,8 +5,8 @@ import { AwardIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
 import { createPortalSession } from "@/utils/apiBilling";
 
-import FreeBillingView from "./FreeBillingView";
 import parseBillingError from "../utils/parseBillingError";
+import FreeBillingView from "./FreeBillingView";
 import ProBillingView from "./ProBillingView";
 
 function handleUpgradeRedirect() {
