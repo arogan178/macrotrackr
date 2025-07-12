@@ -42,7 +42,7 @@ export interface UserSlice {
     | {
         status: "free" | "pro" | "canceled";
         hasStripeCustomer: boolean;
-        currentPeriodEnd: string | null;
+        currentPeriodEnd: string | undefined;
       }
     | undefined;
 
@@ -146,7 +146,7 @@ export const createUserSlice: StateCreator<
       const subscription = {
         status: subscriptionStatus,
         hasStripeCustomer: userData.subscription?.hasStripeCustomer || false,
-        currentPeriodEnd: userData.subscription?.currentPeriodEnd || null,
+        currentPeriodEnd: userData.subscription?.currentPeriodEnd || undefined,
       };
 
       // Fetch macro target separately
@@ -424,7 +424,7 @@ export const createUserSlice: StateCreator<
       return details;
     } catch (error) {
       console.error("Failed to fetch billing details:", error);
-      return undefined;
+      return;
     }
   },
 });
