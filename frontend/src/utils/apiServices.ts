@@ -418,6 +418,15 @@ export const apiService = {
       });
       return handleResponse(response);
     },
+    search: async (query: string) => {
+      const response = await fetch(
+        `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(query)}`,
+        {
+          headers: getHeaders(false),
+        },
+      );
+      return handleResponse(response);
+    },
   },
 
   // Goals endpoints
