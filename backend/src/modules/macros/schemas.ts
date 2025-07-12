@@ -118,4 +118,18 @@ export const MacroSchemas = {
     // Response only contains percentages object
     macroTarget: t.Nullable(MacroTargetPercentagesSchema),
   }),
+  foodSearchQuery: t.Object({
+    q: t.String(),
+  }),
+  foodSearchResponse: t.Nullable(
+    t.Object({
+      name: t.String(),
+      nutriments: t.Object({
+        "energy-kcal_100g": t.Number(),
+        proteins_100g: t.Number(),
+        carbohydrates_100g: t.Number(),
+        fat_100g: t.Number(),
+      }),
+    })
+  ),
 };
