@@ -166,7 +166,7 @@ function NutrientDensityVisualization({
         if (group.length === 0) continue;
 
         const firstEntry = group[0];
-        const lastEntry = group[-1];
+        const lastEntry = group[group.length - 1];
         const groupLabel =
           group.length === 1
             ? firstEntry.name
