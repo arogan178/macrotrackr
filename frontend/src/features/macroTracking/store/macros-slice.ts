@@ -218,6 +218,7 @@ export const createMacrosSlice: StateCreator<
     try {
       const payload = { macroTarget: settings };
       await apiService.macros.saveMacroTargetPercentages(payload);
+      set({ isTargetSaving: false }); // <-- Fix: always reset after success
       get()._notifyUser("Macro target settings updated!", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);

@@ -18,6 +18,7 @@ import { macroDataLoader } from "@/loaders/macroDataLoader";
 import {
   macroTargetLoader,
   macroHomeLoader,
+  macroGoalsLoader,
 } from "@/loaders/macroTargetLoader";
 
 import MainLayout from "./components/layout/MainLayout";
@@ -120,7 +121,7 @@ const settingsRoute = createRoute({
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
-  loader: macroTargetLoader,
+  loader: macroGoalsLoader,
   component: () => (
     <RequireAuth>
       <GoalsPage />
