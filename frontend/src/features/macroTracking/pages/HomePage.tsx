@@ -2,7 +2,7 @@ import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { memo, useCallback, useEffect } from "react";
 
-import { homeRoute, rootRoute } from "@/appRouter";
+import { homeRoute, rootRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
 import Navbar from "@/components/layout/Navbar";
 import { UserMetricsPanel } from "@/features/dashboard/components";
@@ -20,16 +20,17 @@ export default function HomePage() {
   // Get user data from root route loader
   const { user } = useLoaderData({ from: rootRoute.id });
   // Get macro data from home route loader
-  const homeLoaderData = useLoaderData({ from: homeRoute.id }) as any;
-  const macroTarget = homeLoaderData?.macroTarget;
-  const macroDailyTotals = homeLoaderData?.macroDailyTotals || {
-    protein: 0,
-    carbs: 0,
-    fats: 0,
-    calories: 0,
-  };
-  const history = homeLoaderData?.history || [];
-  const historyHasMore = homeLoaderData?.historyHasMore || false;
+  const {
+    macroTarget,
+    macroDailyTotals = {
+      protein: 0,
+      carbs: 0,
+      fats: 0,
+      calories: 0,
+    },
+    history = [],
+    historyHasMore = false,
+  } = useLoaderData({ from: homeRoute.id }) as any;
 
   // Get state and actions from our store (excluding user)
   const {
@@ -65,7 +66,12 @@ export default function HomePage() {
   }, [user, setNutritionProfile]);
 
   // Debug: Log when HomePage renders and when useEffect runs
-  console.log("[HomePage] Rendered", { user, homeLoaderData });
+  console.log("[HomePage] Rendered", {
+    user,
+    macroTarget,
+    macroDailyTotals,
+    history,
+  });
 
   // Hydrate nutritionProfile and subscriptionStatus from loader user object
   useEffect(() => {
