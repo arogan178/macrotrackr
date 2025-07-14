@@ -1,7 +1,7 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
-import { resetPasswordRoute } from "@/appRouter";
+import { resetPasswordRoute } from "@/AppRouter";
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { LoadingSpinner, LockIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
