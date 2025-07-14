@@ -29,10 +29,27 @@ function isExemptPath(path: string): boolean {
  * Extract token from Authorization header
  */
 function extractToken(authHeader: string | null): string | null {
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return null;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.slice(7);
   }
-  return authHeader.slice(7);
+  return null;
+}
+
+/**
+ * Extract JWT token from cookies (if present)
+ */
+function extractTokenFromCookies(
+  cookieHeader: string | null,
+  cookieName = "jwt"
+): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(";").map((c) => c.trim());
+  for (const cookie of cookies) {
+    if (cookie.startsWith(cookieName + "=")) {
+      return cookie.slice(cookieName.length + 1);
+    }
+  }
+  return null;
 }
 
 /**
@@ -55,7 +72,12 @@ export const authMiddleware = new Elysia({ name: "authMiddleware" })
       return { user: null };
     }
 
-    const token = extractToken(request.headers.get("authorization"));
+    // Try to extract JWT from Authorization header first
+    let token = extractToken(request.headers.get("authorization"));
+    // If not found, try to extract from cookies (cookie name: 'jwt')
+    if (!token) {
+      token = extractTokenFromCookies(request.headers.get("cookie"), "jwt");
+    }
     if (!token) {
       return { user: null };
     }

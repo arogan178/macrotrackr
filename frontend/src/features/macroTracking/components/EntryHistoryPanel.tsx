@@ -19,6 +19,8 @@ interface EntryHistoryProps {
   onEdit: (entry: MacroEntry) => void;
   isDeleting: boolean;
   isEditing: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
 }
 
 // Consolidated helper functions
@@ -86,6 +88,8 @@ const EntryHistoryComponent = function EntryHistory({
   deleteEntry,
   onEdit,
   isDeleting,
+  hasMore,
+  onLoadMore,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [showAllDates, setShowAllDates] = useState(false);
@@ -371,6 +375,18 @@ const EntryHistoryComponent = function EntryHistory({
                 </motion.div>
               </motion.button>
             </motion.div>
+          )}
+
+          {/* Load More Pagination Button */}
+          {hasMore && onLoadMore && (
+            <div className="flex justify-center py-4">
+              <button
+                onClick={onLoadMore}
+                className="px-4 py-2 text-sm text-indigo-300 bg-indigo-800/30 hover:bg-indigo-700/40 rounded-md border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-200"
+              >
+                Load More Entries
+              </button>
+            </div>
           )}
         </motion.div>
       )}

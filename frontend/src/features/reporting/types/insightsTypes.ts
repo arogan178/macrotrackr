@@ -43,7 +43,7 @@ export interface DataQualityResult {
   message: string;
 }
 
-export interface NutrientDensityResult {
+export interface MacroDensityResult {
   score: number;
   message: string;
 }
@@ -54,7 +54,7 @@ export interface InsightsData {
   caloriesTrend: TrendResult;
   proteinTrend: TrendResult;
   dataQuality: DataQualityResult;
-  nutrientDensity: NutrientDensityResult;
+  macroDensity: MacroDensityResult;
 }
 
 export interface DailyAverageItem {

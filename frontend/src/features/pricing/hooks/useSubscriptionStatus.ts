@@ -7,7 +7,7 @@ interface UserWithSubscription {
   subscription?: {
     status?: "free" | "pro" | "canceled";
     hasStripeCustomer?: boolean;
-    currentPeriodEnd?: string | null;
+    currentPeriodEnd?: string | undefined;
   };
 }
 
@@ -19,31 +19,7 @@ export function useSubscriptionStatus() {
   const setSubscriptionStatus = useStore((s) => s.setSubscriptionStatus);
   const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
 
-  useEffect(() => {
-    const fetchStatus = async () => {
-      if (!isAuthenticated) {
-        setSubscriptionStatus("free");
-        return;
-      }
-      try {
-        const user =
-          (await apiService.user.getUserDetails()) as UserWithSubscription;
-        let status: SubscriptionStatus = "free";
-        if (user && user.subscription && user.subscription.status) {
-          const rawStatus = user.subscription.status;
-          if (allowedStatuses.includes(rawStatus as SubscriptionStatus)) {
-            status = rawStatus as SubscriptionStatus;
-          }
-        }
-        setSubscriptionStatus(status);
-      } catch (error) {
-        console.error("Failed to fetch subscription status:", error);
-        setSubscriptionStatus("free");
-      }
-    };
-
-    fetchStatus();
-  }, [isAuthenticated, setSubscriptionStatus]);
+  // Removed effect that overwrites subscriptionStatus
 
   return { subscriptionStatus, setSubscriptionStatus };
 }

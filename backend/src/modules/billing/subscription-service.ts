@@ -6,6 +6,7 @@ import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { handleServiceError } from "../../lib/error-handler";
+import { cacheService } from "../../lib/cache-service";
 
 export interface SubscriptionRecord {
   id: string;
@@ -143,32 +144,36 @@ export class SubscriptionService {
       let paymentMethod: { brand: string; last4: string } | undefined =
         undefined;
       let stripeDetails: any = undefined;
+
+      // Use cache for Stripe details if available
+      let cacheKey: string | undefined = undefined;
       if (subscription && subscription.stripe_subscription_id) {
-        try {
-          const details = await (
-            await import("./stripe-service")
-          ).StripeService.getSubscriptionWithDetails(
-            subscription.stripe_subscription_id
-          );
-          price = details.price;
-          paymentMethod = details.paymentMethod || undefined;
-          stripeDetails = details.subscription;
-        } catch (err) {
-          logger.error({ err }, "Failed to fetch Stripe subscription details");
+        cacheKey = `stripe-details:${subscription.stripe_subscription_id}`;
+        const cached = cacheService.get<any>(cacheKey);
+        if (cached) {
+          price = cached.price;
+          paymentMethod = cached.paymentMethod;
+          stripeDetails = cached.stripeDetails;
+        } else {
+          try {
+            const details = await (
+              await import("./stripe-service")
+            ).StripeService.getSubscriptionWithDetails(
+              subscription.stripe_subscription_id
+            );
+            price = details.price;
+            paymentMethod = details.paymentMethod || undefined;
+            stripeDetails = details.subscription;
+            cacheService.set(cacheKey, { price, paymentMethod, stripeDetails });
+          } catch (err) {
+            logger.error(
+              { err },
+              "Failed to fetch Stripe subscription details"
+            );
+          }
         }
       }
 
-      logger.debug(
-        {
-          operation: "get_user_subscription",
-          userId,
-          subscriptionStatus: user.subscription_status,
-          hasActiveSubscription: !!subscription,
-          price,
-          paymentMethod,
-        },
-        "Retrieved user subscription info"
-      );
       return {
         subscription_status: user.subscription_status,
         stripe_customer_id: user.stripe_customer_id,
@@ -306,13 +311,8 @@ export class SubscriptionService {
 
       if (!rawSubscription) {
         logger.debug(
-          {
-            operation: "check_active_pro_subscription",
-            userId,
-            hasActive: false,
-            reason: "no_active_subscription",
-          },
-          "No active subscription found"
+          { operation: "check_active_pro_subscription", userId },
+          "No active subscription found for user"
         );
         return false;
       }
@@ -322,20 +322,6 @@ export class SubscriptionService {
       const now = new Date();
       const hasActive = currentPeriodEnd > now;
 
-      logger.debug(
-        {
-          operation: "check_active_pro_subscription",
-          userId,
-          hasActive,
-          subscriptionId: rawSubscription.id,
-          status: rawSubscription.status,
-          currentPeriodEnd: rawSubscription.current_period_end,
-          currentPeriodEndParsed: currentPeriodEnd.toISOString(),
-          now: now.toISOString(),
-          isExpired: currentPeriodEnd <= now,
-        },
-        "Checked user Pro subscription status with detailed info"
-      );
 
       return hasActive;
     } catch (error) {

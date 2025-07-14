@@ -1,3 +1,4 @@
+import { useLoaderData } from "@tanstack/react-router";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { CardContainer } from "@/components/form";
@@ -15,6 +16,8 @@ function handleUpgradeRedirect() {
 
 const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
+  // Get billing details from loader
+  const { billingDetails } = useLoaderData({ strict: false }) || {};
   const [isLoading, setIsLoading] = useState(false);
 
   // Check for successful upgrade on component mount
@@ -122,7 +125,11 @@ const BillingForm: React.FC = () => {
 
         {/* Conditional rendering based on subscription status */}
         {isPro ? (
-          <ProBillingView onManage={handleManage} isLoading={isLoading} />
+          <ProBillingView
+            onManage={handleManage}
+            isLoading={isLoading}
+            billingDetails={billingDetails}
+          />
         ) : (
           <FreeBillingView
             onUpgrade={handleUpgradeRedirect}

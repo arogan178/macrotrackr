@@ -1,3 +1,4 @@
+import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -32,22 +33,19 @@ export default function GoalsPage() {
   const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
 
   // Get state and actions from store
+  const { user, macroTarget } = useLoaderData({ from: "goals" }) || {};
   const {
-    user,
     nutritionProfile,
     weightGoals,
-    macroTarget,
-    macroDailyTotals,
+    // macroTarget,
     habits,
     isLoading: goalsLoading,
     error: goalsError,
     isLoading: habitsLoading,
     error: habitsError,
     clearError,
-    fetchUserDetails,
-    fetchMacroData,
     fetchWeightGoals,
-    fetchMacroTarget,
+    // fetchMacroTarget,
     fetchHabits,
     addHabit,
     updateHabit,
@@ -57,29 +55,28 @@ export default function GoalsPage() {
     deleteWeightGoal,
     resetGoals,
     fetchWeightLog,
+    setSubscriptionStatus,
   } = useStore();
 
-  // Fetch user details and macros on component mount if needed
+  // Use macro data from loader with fallback
+  // macroDailyTotals now comes from another loader if needed
+  // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
-    if (!user) {
-      fetchUserDetails();
+    if (
+      user &&
+      user.subscription &&
+      typeof user.subscription.status === "string"
+    ) {
+      setSubscriptionStatus(user.subscription.status);
     }
-    fetchMacroData();
+  }, [user, setSubscriptionStatus]);
 
-    // Fetch persisted goals data
+  // Fetch goals, habits, and weight log on component mount if needed
+  useEffect(() => {
     fetchWeightGoals();
-    fetchMacroTarget();
     fetchHabits();
     fetchWeightLog();
-  }, [
-    user,
-    fetchUserDetails,
-    fetchMacroData,
-    fetchWeightGoals,
-    fetchMacroTarget,
-    fetchHabits,
-    fetchWeightLog,
-  ]);
+  }, [fetchWeightGoals, fetchHabits, fetchWeightLog]);
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
@@ -344,14 +341,12 @@ export default function GoalsPage() {
                       {user && (
                         <WeightGoalDashboard
                           user={user}
-                          macroDailyTotals={
-                            macroDailyTotals || {
-                              protein: 0,
-                              carbs: 0,
-                              fats: 0,
-                              calories: 0,
-                            }
-                          }
+                          macroDailyTotals={{
+                            protein: 0,
+                            carbs: 0,
+                            fats: 0,
+                            calories: 0,
+                          }}
                           weightGoals={
                             weightGoals && weightGoals.targetWeight != undefined
                               ? {
@@ -401,7 +396,7 @@ export default function GoalsPage() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
                     <div className="space-y-6">
-                      <MacroTargetForm />
+                      <MacroTargetForm macroTarget={macroTarget} />
                     </div>
                   </motion.div>
                 )}
