@@ -47,6 +47,7 @@ const PageHeader = ({
 export default function SettingsPage() {
   const {
     settings,
+    user,
     isLoading,
     settingsError: error,
     settingsSuccess: successMessage,
@@ -59,7 +60,19 @@ export default function SettingsPage() {
     clearSettingsMessages: clearMessages,
     resetSettings,
     fetchSettings,
+    setSubscriptionStatus,
   } = useStore();
+
+  // Hydrate subscriptionStatus from user.subscription.status
+  useEffect(() => {
+    if (
+      user &&
+      user.subscription &&
+      typeof user.subscription.status === "string"
+    ) {
+      setSubscriptionStatus(user.subscription.status);
+    }
+  }, [user, setSubscriptionStatus]);
 
   type TabType = "profile" | "billing" | "security";
   const [activeTab, setActiveTab] = useState<TabType>("profile");

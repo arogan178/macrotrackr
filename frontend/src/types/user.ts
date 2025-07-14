@@ -17,6 +17,11 @@ export interface UserSettings {
   weight: number | undefined;
   activityLevel: number | undefined;
   gender: Gender | undefined;
+  subscription?: {
+    status: "free" | "pro" | "canceled";
+    hasStripeCustomer: boolean;
+    currentPeriodEnd: string | undefined;
+  };
 }
 
 export interface UserNutritionalProfile {

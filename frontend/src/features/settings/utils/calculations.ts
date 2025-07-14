@@ -1,11 +1,11 @@
 import type { MacroTargetGrams } from "@/types/macro";
-
 import type {
   ActivityLevel,
   Gender,
   UserNutritionalProfile,
   UserSettings,
-} from "../types/types";
+} from "@/types/user";
+
 import { ACTIVITY_LEVELS } from "./constants";
 
 // Pure calculation functions - independent of domain-specific types
@@ -185,4 +185,5 @@ export const createUserSettings = (
   weight: userData.weight!,
   activityLevel: userData.activityLevel!,
   gender: userData.gender!,
+  subscription: userData.subscription,
 });
