@@ -28,12 +28,20 @@ interface UserSettingsPayload {
 }
 
 export interface UserSlice {
-  // Optional notification function for UI feedback
-  showNotification?: (message: string, type: "success" | "error") => void;
+  // Notification function for UI feedback (required, matches NotificationSlice signature)
+  showNotification: (
+    message: string,
+    type?: string,
+    options?: {
+      duration?: number;
+    },
+  ) => string;
   // Core user data
   user: UserSettings | undefined;
   nutritionProfile: UserNutritionalProfile | undefined;
   macroTarget: MacroTargetSettings | undefined;
+  // Action to set nutrition profile directly (for loader hydration)
+  setNutritionProfile: (profile: UserNutritionalProfile | undefined) => void;
 
   // Subscription
   subscriptionStatus: "free" | "pro" | "canceled";
@@ -69,25 +77,30 @@ export interface UserSlice {
     value: UserSettings[K],
   ) => void;
   // Actions
-  fetchUserDetails: () => Promise<void>;
   clearError: () => void;
   fetchSettings: () => Promise<void>;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
   updateMacroTargetSettings: (
     macroTarget: MacroTargetSettings,
-  ) => Promise<boolean>;
+  ) => Promise<void>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
   updateCurrentUserWeight: (newWeight: number) => void;
 }
 
-export const createUserSlice: StateCreator<
-  UserSlice & Record<string, unknown>,
-  [],
-  [],
-  UserSlice
-> = (set, get) => ({
+export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
+  set,
+  get,
+) => ({
+  // Passthrough showNotification implementation to satisfy interface
+  showNotification: (message, type, options) => {
+    const state = get() as UserSlice & Record<string, unknown>;
+    if (typeof state.showNotification === "function") {
+      return state.showNotification(message, type, options);
+    }
+    return "";
+  },
   // Initial state
   user: undefined,
   nutritionProfile: undefined,
@@ -110,104 +123,6 @@ export const createUserSlice: StateCreator<
   formErrors: {},
   hasSettingsChanges: false,
 
-  fetchUserDetails: async () => {
-    set({ isLoading: true, error: undefined });
-    const fullGet = get as () => UserSlice & Record<string, unknown>;
-
-    try {
-      const userData = await apiService.user.getUserDetails();
-      if (!userData) {
-        throw new Error("User profile data not found after API call.");
-      }
-
-      // Map gender to Gender union type if valid, else undefined
-      const validGenders = ["male", "female"];
-      const mappedGender = validGenders.includes(userData.gender as string)
-        ? (userData.gender as "male" | "female")
-        : undefined;
-      const userSettings = createUserSettings({
-        ...userData,
-        gender: mappedGender,
-      });
-      const nutritionProfile = createNutritionProfile(userSettings);
-
-      // Subscription status and details
-      const allowedStatuses = ["free", "pro", "canceled"] as const;
-      const status =
-        typeof userData?.subscription?.status === "string"
-          ? userData.subscription.status
-          : undefined;
-      const subscriptionStatus =
-        status &&
-        allowedStatuses.includes(status as "free" | "pro" | "canceled")
-          ? (status as "free" | "pro" | "canceled")
-          : "free";
-
-      const subscription = {
-        status: subscriptionStatus,
-        hasStripeCustomer: userData.subscription?.hasStripeCustomer || false,
-        currentPeriodEnd: userData.subscription?.currentPeriodEnd || undefined,
-      };
-
-      // Fetch macro target separately
-      try {
-        // Only fetch macro target if endpoint exists and is needed
-        if (apiService.macros && apiService.macros.getMacroTarget) {
-          const macroTargetResponse = await apiService.macros.getMacroTarget();
-          const fetchedMacroTarget =
-            macroTargetResponse?.macroTarget || DEFAULT_MACRO_TARGET;
-          set({
-            user: userSettings,
-            nutritionProfile,
-            macroTarget: fetchedMacroTarget,
-            subscriptionStatus,
-            subscription,
-            isLoading: false,
-            error: undefined,
-          });
-        } else {
-          set({
-            user: userSettings,
-            nutritionProfile,
-            macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
-            subscriptionStatus,
-            subscription,
-            isLoading: false,
-            error: undefined,
-          });
-        }
-      } catch (macroError) {
-        console.error("Error fetching macro target:", macroError);
-        set({
-          user: userSettings,
-          nutritionProfile,
-          macroTarget: get().macroTarget || DEFAULT_MACRO_TARGET,
-          subscriptionStatus,
-          subscription,
-          isLoading: false,
-          error: undefined,
-        });
-      }
-    } catch (error) {
-      console.error("Fetch user error:", error);
-      const errorMessage = getErrorMessage(error);
-      set({
-        error: errorMessage,
-        isLoading: false,
-        user: undefined,
-        nutritionProfile: undefined,
-        macroTarget: undefined,
-        subscriptionStatus: "free",
-        subscription: undefined,
-      });
-
-      const notify = fullGet().showNotification;
-      if (typeof notify === "function") {
-        notify(`Failed to load user data: ${errorMessage}`, "error");
-      }
-    }
-  },
-
   fetchSettings: async () => {
     set({ isSettingsLoading: true, settingsError: undefined });
     try {
@@ -220,13 +135,19 @@ export const createUserSlice: StateCreator<
       const mappedGender2 = validGenders.has(data.gender as string)
         ? (data.gender as "male" | "female")
         : undefined;
-      const settings = createUserSettings({ ...data, gender: mappedGender2 });
+      // Pass subscription through to settings and user
+      const settings = createUserSettings({
+        ...data,
+        gender: mappedGender2,
+        subscription: data.subscription,
+      });
       // Only assign macroTarget if present
       const macroTargetSettings =
         (data as any).macroTarget || DEFAULT_MACRO_TARGET;
 
       set({
         settings,
+        user: { ...settings, subscription: data.subscription },
         settingsMacroTarget: macroTargetSettings,
         originalSettings: structuredClone(settings),
         originalSettingsMacroTarget: structuredClone(macroTargetSettings),
@@ -239,6 +160,8 @@ export const createUserSlice: StateCreator<
       set({ settingsError: getErrorMessage(error), isSettingsLoading: false });
     }
   },
+
+  setNutritionProfile: (profile) => set({ nutritionProfile: profile }),
 
   updateSetting: <K extends keyof UserSettings>(
     key: K,
@@ -361,8 +284,6 @@ export const createUserSlice: StateCreator<
       if (state.showNotification) {
         state.showNotification("Macro targets saved successfully!", "success");
       }
-
-      return true;
     } catch (error) {
       console.error("Save macro targets error:", error);
       const errorMessage = getErrorMessage(error);
@@ -378,8 +299,6 @@ export const createUserSlice: StateCreator<
           "error",
         );
       }
-
-      return false;
     }
   },
 
@@ -414,17 +333,4 @@ export const createUserSlice: StateCreator<
   },
 
   clearError: () => set({ error: undefined }),
-
-  // Fetch detailed billing info on demand
-  fetchBillingDetails: async () => {
-    try {
-      const details = await apiService.billing.getBillingDetails();
-      // Use details.subscription, details.price, details.paymentMethod, details.stripeDetails as needed
-      // You may want to store these in a separate billing state slice
-      return details;
-    } catch (error) {
-      console.error("Failed to fetch billing details:", error);
-      return;
-    }
-  },
 });

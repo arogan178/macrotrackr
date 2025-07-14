@@ -21,6 +21,7 @@ import { macroRoutes } from "./modules/macros/routes";
 import { goalRoutes } from "./modules/goals/routes";
 import { habitRoutes } from "./modules/habits/routes";
 import { billingRoutes } from "./modules/billing/routes";
+import { reportingRoutes } from "./modules/reporting/routes";
 
 logger.info("🚀 Starting Elysia server...");
 
@@ -328,6 +329,7 @@ app.use(macroRoutes);
 app.use(goalRoutes);
 app.use(habitRoutes);
 app.use(billingRoutes);
+app.use(reportingRoutes);
 
 // Root endpoint
 app.get(
@@ -412,7 +414,7 @@ app.get(
 );
 
 // Global error handling
-app.onError(({ code, error, set }: any) => {
+app.onError(({ code, error, set, path }: any) => {
   logger.error(
     {
       type: "elysia_error",
@@ -421,6 +423,12 @@ app.onError(({ code, error, set }: any) => {
     },
     `[${code}] ${error?.toString() || "Unknown error"}`
   );
+
+  // Always set JSON content type for API routes
+  set.headers = set.headers || {};
+  if (typeof path === "string" && path.startsWith("/api/")) {
+    set.headers["Content-Type"] = "application/json";
+  }
 
   // Handle AppError instances
   if (isAppError(error)) {

@@ -1,6 +1,6 @@
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
 
 import { FormButton } from "@/components/form";
 import {
@@ -22,12 +22,12 @@ const Navbar: React.FC = () => {
   const logout = useStore((state) => state.logout);
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    navigate({ to: "/login", replace: true });
     setIsMobileMenuOpen(false);
   };
 
   const handleNavigation = (path: string) => {
-    navigate(path);
+    navigate({ to: path });
     setIsMobileMenuOpen(false);
   };
 
@@ -60,7 +60,7 @@ const Navbar: React.FC = () => {
       >
         <div className="flex items-center">
           <FormButton
-            onClick={() => handleNavigation("/home")}
+            onClick={() => navigate({ to: "/home" })}
             ariaLabel="Go to home page"
             className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
             variant="ghost"

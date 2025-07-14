@@ -6,8 +6,8 @@ import type {
   AggregatedDataPoint,
   DataQualityResult,
   MacroBalanceResult,
+  MacroDensityResult,
   MacroTargetSettings,
-  NutrientDensityResult,
   NutritionAverage,
   TrendResult,
 } from "../types/insightsTypes";
@@ -236,9 +236,9 @@ export function calculateDataQuality(
   };
 }
 
-export function calculateNutrientDensity(
+export function calculateMacroDensity(
   averages: NutritionAverage,
-): NutrientDensityResult {
+): MacroDensityResult {
   if (!averages?.calories) {
     return {
       score: 0,

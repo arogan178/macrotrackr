@@ -43,8 +43,8 @@ export const useStore = create<StoreState>()(
   })),
 );
 
-// Method to reset the entire store for testing purposes
-export const resetStore = () => {
-  const { reset: resetAuth } = useStore.getState();
-  resetAuth();
-};
+// If you need to reset slices for testing, implement a reset method in each slice and call them here.
+// Example:
+// export const resetStore = () => {
+//   useStore.setState((state) => ({ ...state, ...initialState }));
+// };

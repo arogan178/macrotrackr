@@ -1,6 +1,8 @@
+import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { memo, useCallback, useEffect } from "react";
 
+import { homeRoute, rootRoute } from "@/appRouter";
 import { CardContainer } from "@/components/form";
 import Navbar from "@/components/layout/Navbar";
 import { UserMetricsPanel } from "@/features/dashboard/components";
@@ -11,17 +13,28 @@ import {
   EntryHistoryPanel,
 } from "@/features/macroTracking/components";
 import { FloatingNotification } from "@/features/notifications/components";
+import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useStore } from "@/store/store";
 
 export default function HomePage() {
-  // Get state and actions from our store
+  // Get user data from root route loader
+  const { user } = useLoaderData({ from: rootRoute.id });
+  // Get macro data from home route loader
+  const homeLoaderData = useLoaderData({ from: homeRoute.id }) as any;
+  const macroTarget = homeLoaderData?.macroTarget;
+  const macroDailyTotals = homeLoaderData?.macroDailyTotals || {
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+    calories: 0,
+  };
+  const history = homeLoaderData?.history || [];
+  const historyHasMore = homeLoaderData?.historyHasMore || false;
+
+  // Get state and actions from our store (excluding user)
   const {
-    user,
-    macroTarget,
     nutritionProfile,
     weightGoals,
-    history,
-    macroDailyTotals,
     isLoading,
     isSaving,
     isEditing,
@@ -29,20 +42,51 @@ export default function HomePage() {
     error,
     notifications,
     editingEntry,
-    fetchUserDetails,
-    fetchMacroData,
     fetchWeightGoals,
-    fetchMacroTarget,
     addEntry,
     updateEntry,
     deleteEntry,
     setEditingEntry,
     hideNotification,
     clearAllNotifications,
+    setNutritionProfile,
+    setSubscriptionStatus,
   } = useStore();
+  // Hydrate nutritionProfile from loader user object
+  useEffect(() => {
+    if (
+      user &&
+      typeof user.id === "number" &&
+      typeof user.bmr === "number" &&
+      typeof user.tdee === "number"
+    ) {
+      setNutritionProfile({ userId: user.id, bmr: user.bmr, tdee: user.tdee });
+    }
+  }, [user, setNutritionProfile]);
 
   // Debug: Log when HomePage renders and when useEffect runs
-  console.log("[HomePage] Rendered", { user });
+  console.log("[HomePage] Rendered", { user, homeLoaderData });
+
+  // Hydrate nutritionProfile and subscriptionStatus from loader user object
+  useEffect(() => {
+    if (user && typeof user.id === "number") {
+      // Compute nutritionProfile if not present
+      let nutritionProfile;
+      if (typeof user.bmr === "number" && typeof user.tdee === "number") {
+        nutritionProfile = { userId: user.id, bmr: user.bmr, tdee: user.tdee };
+      } else {
+        try {
+          nutritionProfile = createNutritionProfile(user);
+        } catch {
+          nutritionProfile = undefined;
+        }
+      }
+      setNutritionProfile(nutritionProfile);
+      if (user.subscription && typeof user.subscription.status === "string") {
+        setSubscriptionStatus(user.subscription.status);
+      }
+    }
+  }, [user, setNutritionProfile, setSubscriptionStatus]);
 
   // Handler for editing entries that matches EditModal's expected signature
   const handleEditEntry = useCallback(
@@ -67,16 +111,12 @@ export default function HomePage() {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
 
-  // Fetch user details, macros, and persisted goals on component mount
+  // Fetch macros and goals on component mount (user is now loaded by route loader)
   useEffect(() => {
-    console.log(
-      "[HomePage] useEffect running: fetching user, macro data, goals, targets",
-    );
-    fetchUserDetails();
-    fetchMacroData();
+    if (!user) return;
     fetchWeightGoals();
-    fetchMacroTarget();
-  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals, fetchMacroTarget]);
+    // if (macroData) setMacroData(macroData);
+  }, [user, fetchWeightGoals]);
 
   // Debug effect to track editingEntry changes
   useEffect(() => {
@@ -87,6 +127,10 @@ export default function HomePage() {
   const latestNotification = notifications?.[notifications.length - 1];
 
   // Determine the calorie target - prioritize weight goals target if available, otherwise use TDEE
+  // Use macroData from loader for history and macroDailyTotals
+
+  // All macro data now comes directly from loader
+  const loadMoreHistory = undefined; // Loader-based, implement if needed
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
@@ -167,6 +211,8 @@ export default function HomePage() {
                   onEdit={setEditingEntry}
                   isDeleting={isDeleting}
                   isEditing={isEditing}
+                  hasMore={historyHasMore}
+                  onLoadMore={loadMoreHistory}
                 />
               )}
             </div>
