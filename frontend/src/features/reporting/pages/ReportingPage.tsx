@@ -2,7 +2,7 @@ import { useLoaderData } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
-import { reportingRoute, rootRoute } from "@/appRouter";
+import { reportingRoute, rootRoute } from "@/AppRouter";
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { Navbar } from "@/components/layout";

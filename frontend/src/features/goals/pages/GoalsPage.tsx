@@ -1,4 +1,5 @@
 import { useLoaderData } from "@tanstack/react-router";
+import { goalsRoute, rootRoute } from "@/AppRouter";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -32,8 +33,18 @@ export default function GoalsPage() {
     useState(false);
   const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
 
-  // Get state and actions from store
-  const { user, macroTarget } = useLoaderData({ from: "goals" }) || {};
+  // Get user from rootRoute loader
+  const { user } = useLoaderData({ from: rootRoute.id }) as { user: any };
+  // Get macro data from goalsRoute loader
+  const {
+    macroTarget,
+    macroDailyTotals = {
+      protein: 0,
+      carbs: 0,
+      fats: 0,
+      calories: 0,
+    },
+  } = useLoaderData({ from: goalsRoute.id }) || {};
   const {
     nutritionProfile,
     weightGoals,
@@ -341,12 +352,7 @@ export default function GoalsPage() {
                       {user && (
                         <WeightGoalDashboard
                           user={user}
-                          macroDailyTotals={{
-                            protein: 0,
-                            carbs: 0,
-                            fats: 0,
-                            calories: 0,
-                          }}
+                          macroDailyTotals={macroDailyTotals}
                           weightGoals={
                             weightGoals && weightGoals.targetWeight != undefined
                               ? {
