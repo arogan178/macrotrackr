@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 
-import App from "./app";
+import AppRouter from "./appRouter";
 
 ReactDOM.createRoot(document.querySelector("#root")!).render(
   <React.StrictMode>
-    <App />
+    <AppRouter />
   </React.StrictMode>,
 );

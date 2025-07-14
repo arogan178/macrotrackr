@@ -1,6 +1,7 @@
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 
+import { resetPasswordRoute } from "@/appRouter";
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { LoadingSpinner, LockIcon } from "@/components/ui";
 import { useStore } from "@/store/store";
@@ -8,7 +9,7 @@ import { ApiError } from "@/utils/apiServices";
 
 function ResetPasswordForm() {
   const navigate = useNavigate();
-  const [searchParameters] = useSearchParams();
+  const search = useSearch({ from: resetPasswordRoute.id });
   const [newPassword, setNewPassword] = useState("");
   const {
     auth: { isLoading },
@@ -16,7 +17,7 @@ function ResetPasswordForm() {
     showNotification,
   } = useStore();
 
-  const token = searchParameters.get("token");
+  const token = search.token;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -27,7 +28,7 @@ function ResetPasswordForm() {
     try {
       await resetPassword(token, newPassword);
       showNotification("Password has been reset successfully.", "success");
-      navigate("/login");
+      navigate({ to: "/login" });
     } catch (error) {
       if (error instanceof ApiError) {
         showNotification(error.message || "Reset failed", "error");
