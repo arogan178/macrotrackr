@@ -1,3 +1,4 @@
+// --- Reporting ---
 /**
  * API Service - Centralizes API calls and standardizes error handling
  * Updated for simplified calorie target model and refactored goal/macro endpoints.
@@ -13,7 +14,22 @@ import type { WeightGoalFormValues } from "@/features/goals/types";
 import { getActivityLevelFromString } from "@/features/settings/utils/constants"; // Adjust path as needed
 import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 
-import { getToken } from "./tokenStorage"; // Adjust path as needed
+import { getToken } from "./tokenStorage";
+
+export interface MacroDensitySummaryParameters {
+  startDate?: string;
+  endDate?: string;
+  groupBy?: string;
+}
+
+export interface MacroDensitySummaryItem {
+  period: string;
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  count: number;
+} // Adjust path as needed
 
 // API Base URL and Response Types
 export const API_BASE_URL =
@@ -87,8 +103,34 @@ export interface UserDetailsResponse {
   subscription: {
     status: "free" | "pro" | "canceled";
     hasStripeCustomer: boolean;
-    currentPeriodEnd: string | null;
+    currentPeriodEnd: string | undefined;
   };
+}
+
+export interface BillingDetailsResponse {
+  subscription:
+    | {
+        id: string;
+        status: string;
+        currentPeriodEnd: string;
+        stripeSubscriptionId: string;
+      }
+    | undefined;
+  price: string | undefined;
+  paymentMethod:
+    | {
+        brand: string;
+        last4: string;
+      }
+    | undefined;
+  stripeDetails:
+    | {
+        id: string;
+        customer: string;
+        status: string;
+        current_period_end: number;
+      }
+    | undefined;
 }
 
 // Payload for PUT /api/user/settings (User details ONLY)
@@ -228,6 +270,7 @@ export async function post<T = unknown>(
     method: "POST",
     headers: getHeaders(),
     body: body ? JSON.stringify(body) : undefined,
+    credentials: "include",
   });
   return handleResponse(response) as T;
 }
@@ -236,12 +279,34 @@ export async function post<T = unknown>(
  * Centralized API service object with methods grouped by resource.
  */
 export const apiService = {
+  reporting: {
+    /** Fetches nutrient density summary for a date range and grouping */
+    getMacroDensitySummary: async (
+      parameters: MacroDensitySummaryParameters = {},
+    ): Promise<MacroDensitySummaryItem[]> => {
+      const url = new URL(
+        `${API_BASE_URL}/api/reporting/nutrient-density-summary`,
+      );
+      if (parameters.startDate)
+        url.searchParams.append("startDate", parameters.startDate);
+      if (parameters.endDate)
+        url.searchParams.append("endDate", parameters.endDate);
+      if (parameters.groupBy)
+        url.searchParams.append("groupBy", parameters.groupBy);
+      const response = await fetch(url.toString(), {
+        headers: getHeaders(false),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as MacroDensitySummaryItem[];
+    },
+  },
   // User endpoints
   user: {
     /** Fetches the current authenticated user's profile */
     getUserDetails: async (): Promise<UserDetailsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       return (await handleResponse(response)) as UserDetailsResponse;
     },
@@ -262,6 +327,7 @@ export const apiService = {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify(payloadToSend), // Send payload with only user details
+        credentials: "include",
       });
       return (await handleResponse(response)) as
         | SetWeightGoalPayload
@@ -282,6 +348,7 @@ export const apiService = {
           method: "POST",
           headers: getHeaders(),
           body: JSON.stringify(profileData),
+          credentials: "include",
         },
       );
       return (await handleResponse(response)) as WeightLogEntry[];
@@ -295,6 +362,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
       return (await handleResponse(response)) as MacroTargetGetResponse;
     },
@@ -303,6 +371,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ email }),
+        credentials: "include",
       });
       return (await handleResponse(response)) as
         | SetWeightGoalPayload
@@ -313,6 +382,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(userData),
+        credentials: "include",
       });
       return (await handleResponse(response)) as WeightLogEntry[];
     },
@@ -321,6 +391,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ email }),
+        credentials: "include",
       });
       return (await handleResponse(response)) as MacroTargetGetResponse;
     },
@@ -329,6 +400,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify({ token, newPassword }),
+        credentials: "include",
       });
       return (await handleResponse(response)) as
         | SetWeightGoalPayload
@@ -339,6 +411,7 @@ export const apiService = {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify({ passwordCurrent, passwordNew }),
+        credentials: "include",
       });
       return (await handleResponse(response)) as WeightLogEntry[];
     },
@@ -346,15 +419,39 @@ export const apiService = {
 
   // Macro entry endpoints
   macros: {
-    getDailyTotals: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/macros/today`, {
+    getDailyTotals: async ({
+      startDate,
+      endDate,
+    }: { startDate?: string; endDate?: string } = {}) => {
+      let url = `${API_BASE_URL}/api/macros/totals`;
+      const parameters = [];
+      if (startDate)
+        parameters.push(`startDate=${encodeURIComponent(startDate)}`);
+      if (endDate) parameters.push(`endDate=${encodeURIComponent(endDate)}`);
+      if (parameters.length > 0) url += `?${parameters.join("&")}`;
+      const response = await fetch(url, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       return handleResponse(response);
     },
-    getHistory: async () => {
-      const response = await fetch(`${API_BASE_URL}/api/macros/history`, {
+    /**
+     * Fetches paginated macro history
+     * @param {number} [limit=20] - Number of entries per page
+     * @param {number} [offset=0] - Offset for pagination
+     * @returns {Promise<{ entries: MacroEntry[]; total: number; limit: number; offset: number; hasMore: boolean; }>}
+     */
+    getHistory: async (
+      limit = 20,
+      offset = 0,
+      { startDate, endDate }: { startDate?: string; endDate?: string } = {},
+    ) => {
+      let url = `${API_BASE_URL}/api/macros/history?limit=${limit}&offset=${offset}`;
+      if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+      if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+      const response = await fetch(url, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -372,6 +469,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(payload),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -388,6 +486,7 @@ export const apiService = {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify(payload),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -395,6 +494,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
         method: "DELETE",
         headers: getHeaders(false),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -403,6 +503,7 @@ export const apiService = {
     getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       return (await handleResponse(response)) as MacroTargetGetResponse;
     },
@@ -415,6 +516,7 @@ export const apiService = {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify({ macroTarget: payload.macroTarget }),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -423,6 +525,7 @@ export const apiService = {
         `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(query)}`,
         {
           headers: getHeaders(false),
+          credentials: "include",
         },
       );
       return handleResponse(response);
@@ -436,6 +539,7 @@ export const apiService = {
       // Return type might need adjustment based on backend response
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       return (await handleResponse(response)) as
         | SetWeightGoalPayload
@@ -464,6 +568,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(payload),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -491,6 +596,7 @@ export const apiService = {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify(payload),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -499,6 +605,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "DELETE",
         headers: getHeaders(false),
+        credentials: "include",
       });
       return handleResponse(response);
     },
@@ -508,6 +615,7 @@ export const apiService = {
     getWeightLog: async (): Promise<WeightLogEntry[]> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       // The backend returns an array, potentially empty, matching WeightLogEntry[]
       return (await handleResponse(response)) as WeightLogEntry[];
@@ -521,6 +629,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(payload),
+        credentials: "include",
       });
       // Backend returns the created entry including id, timestamp, and weight
       const fullEntry = (await handleResponse(response)) as WeightLogEntry;
@@ -540,6 +649,7 @@ export const apiService = {
         {
           method: "DELETE",
           headers: getHeaders(false),
+          credentials: "include",
         },
       );
       // Backend now returns { success: true, id: 'deleted_id' }
@@ -552,11 +662,12 @@ export const apiService = {
   },
   billing: {
     /** Fetches detailed billing and subscription info for the current user */
-    getBillingDetails: async () => {
+    getBillingDetails: async (): Promise<BillingDetailsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/billing/details`, {
         headers: getHeaders(false),
+        credentials: "include",
       });
-      return handleResponse(response);
+      return (await handleResponse(response)) as BillingDetailsResponse;
     },
   },
   habits: {
@@ -564,6 +675,7 @@ export const apiService = {
     getHabit: async (): Promise<HabitGoalPayload[]> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         headers: getHeaders(false),
+        credentials: "include",
       });
       return (await handleResponse(response)) as HabitGoalPayload[];
     },
@@ -576,6 +688,7 @@ export const apiService = {
         method: "POST",
         headers: getHeaders(),
         body: JSON.stringify(habitGoal),
+        credentials: "include",
       });
       return (await handleResponse(response)) as HabitGoalPayload;
     },
@@ -589,6 +702,7 @@ export const apiService = {
         method: "PUT",
         headers: getHeaders(),
         body: JSON.stringify(habitGoal),
+        credentials: "include",
       });
       return (await handleResponse(response)) as { success: boolean };
     },
@@ -598,6 +712,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "DELETE",
         headers: getHeaders(),
+        credentials: "include",
       });
       return (await handleResponse(response)) as { success: boolean };
     },
@@ -607,6 +722,7 @@ export const apiService = {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         method: "DELETE",
         headers: getHeaders(),
+        credentials: "include",
       });
       return (await handleResponse(response)) as { success: boolean };
     },

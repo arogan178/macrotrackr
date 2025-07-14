@@ -1,3 +1,4 @@
+import { useLoaderData } from "@tanstack/react-router";
 import React, { useState } from "react";
 
 import { FormButton } from "@/components/form";
@@ -10,23 +11,29 @@ import {
 } from "@/components/ui";
 import { useStore } from "@/store/store";
 import { cancelSubscription } from "@/utils/apiBilling";
+import { BillingDetailsResponse } from "@/utils/apiServices";
 
 import StatusBadge from "./StatusBadge";
 
 const ProBillingView: React.FC<{
   onManage: () => void;
   isLoading: boolean;
-}> = ({ onManage, isLoading }) => {
+  billingDetails?: BillingDetailsResponse;
+}> = ({ onManage, isLoading, billingDetails }) => {
   const [show, setShow] = useState(false);
   const [showCancel, setShowCancel] = useState(false);
-  const { subscription, fetchUserDetails, showNotification } = useStore();
-  // Extract details
-  const price = subscription?.price || "";
-  const paymentMethod = subscription?.paymentMethod;
-  const renewalDate = subscription?.subscription?.currentPeriodEnd
-    ? new Date(subscription.subscription.currentPeriodEnd).toLocaleDateString()
+  const { showNotification } = useStore();
+  // If user is needed, get from loader: const { user } = useLoaderData({ from: '/' });
+
+  // Extract details from billingDetails
+  const price = billingDetails?.price || "";
+  const paymentMethod = billingDetails?.paymentMethod;
+  const renewalDate = billingDetails?.subscription?.currentPeriodEnd
+    ? new Date(
+        billingDetails.subscription.currentPeriodEnd,
+      ).toLocaleDateString()
     : undefined;
-  const status = subscription?.subscription?.status || "unknown";
+  const status = billingDetails?.subscription?.status || "unknown";
   const isCanceled = status === "canceled";
   const isActionRequired = status === "past_due" || status === "unpaid";
 
@@ -166,11 +173,11 @@ const ProBillingView: React.FC<{
                   const response = await cancelSubscription();
                   setShowCancel(false);
                   showNotification(
-                    res.message || "Subscription canceled.",
+                    response?.message || "Subscription canceled.",
                     "success",
                   );
                   // Refresh user details to update UI
-                  await fetchUserDetails();
+                  // No need to refetch user details, loader will handle updates if needed
                 } catch (error) {
                   setShowCancel(false);
                   showNotification(

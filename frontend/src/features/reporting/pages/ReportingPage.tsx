@@ -1,37 +1,54 @@
+import { useLoaderData } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
+import { reportingRoute, rootRoute } from "@/appRouter";
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { Navbar } from "@/components/layout";
 import { useStore } from "@/store/store";
 
 import {
+  MacroDensityBreakdown,
   MacroSummaryStats,
   MealTimeBreakdown,
-  NutrientDensityVisualization,
   ReportingPageSkeleton,
   UnifiedInsights,
 } from "../components";
+import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
 
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
   // Get history data from app state
+  const { user } = useLoaderData({ from: rootRoute.id });
+  const reportingLoaderData = useLoaderData({ from: reportingRoute.id }) as any;
+  const macroData = reportingLoaderData?.macroData;
+  const history = macroData?.history || [];
+
   const {
-    history,
     isLoading,
     error,
-    fetchUserDetails,
-    fetchMacroData,
     fetchWeightGoals,
     macroTarget,
     weightGoals,
     nutritionProfile,
+    setSubscriptionStatus,
   } = useStore();
+  // Hydrate subscriptionStatus from loader user.subscription.status
+  useEffect(() => {
+    if (
+      user &&
+      user.subscription &&
+      typeof user.subscription.status === "string"
+    ) {
+      setSubscriptionStatus(user.subscription.status);
+    }
+  }, [user, setSubscriptionStatus]);
 
   // Use the reporting logic hook to handle all data processing
+
   const {
     aggregatedData,
     dataProcessed,
@@ -41,15 +58,13 @@ export default function ReportingPage() {
     mapDateRangeToNumeric,
   } = useReportingLogic(history, dateRange, isLoading);
 
-  // Fetch user details and history on component mount
+  // Macro density breakdown chart data (percentages)
+  const macroDensityData = useMacroDensityBreakdown(history, dateRange);
+
+  // Fetch weight goals on component mount if needed
   useEffect(() => {
-    async function loadData() {
-      await fetchUserDetails();
-      await fetchMacroData();
-      await fetchWeightGoals();
-    }
-    loadData();
-  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals]);
+    fetchWeightGoals();
+  }, [fetchWeightGoals]);
 
   // Define chart configurations for the new component
   const calorieChartLines = [
@@ -147,29 +162,30 @@ export default function ReportingPage() {
                   <MacroSummaryStats
                     data={aggregatedData}
                     calorieTarget={calorieTarget}
+                    macroTarget={macroTarget}
                   />
                 );
               })()}
-              {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
+              {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="order-2 md:order-1">
-                  {/* 
-                    MealTimeBreakdown works with raw history data and needs exact ISO date strings
-                    to properly filter entries. It doesn't care about the numeric range value.
-                  */}
-                  <MealTimeBreakdown
-                    history={history}
-                    {...getDateRangeISOStrings(dateRange)}
-                  />
+                  {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
+                  {(() => {
+                    const { startDate, endDate } =
+                      getDateRangeISOStrings(dateRange);
+                    return (
+                      <MealTimeBreakdown
+                        history={history}
+                        startDate={startDate}
+                        endDate={endDate}
+                      />
+                    );
+                  })()}
                 </div>
                 <div className="order-1 md:order-2">
-                  {/* 
-                    NutrientDensityVisualization works with pre-aggregated data and uses numeric range
-                    for visualization purposes, not for data filtering. That's why it takes selectedRange
-                    as a number (7, 30, 90) instead of ISO date strings.
-                  */}{" "}
-                  <NutrientDensityVisualization
-                    data={aggregatedData}
+                  {/* MacroDensityBreakdown expects pre-aggregated macro density data and numeric range */}
+                  <MacroDensityBreakdown
+                    data={macroDensityData}
                     selectedRange={mapDateRangeToNumeric(dateRange)}
                     isLoading={isLoading}
                     dataProcessed={dataProcessed}

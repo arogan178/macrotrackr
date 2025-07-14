@@ -14,14 +14,12 @@ import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 
 import MacroTarget from "./MacroTarget";
 
-function MacroTargetForm() {
-  const {
-    macroTarget,
-    updateMacroTargetSettings,
-    isTargetSaving,
-    isTargetLoading,
-    fetchMacroTarget,
-  } = useStore();
+interface MacroTargetFormProps {
+  macroTarget: MacroTargetSettings | null;
+}
+
+function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
+  const { updateMacroTargetSettings, isTargetSaving } = useStore();
 
   // Local state for edited values
   const [localTarget, setLocalTarget] = useState<
@@ -40,20 +38,13 @@ function MacroTargetForm() {
     lockedMacros: settings.lockedMacros || [],
   });
 
-  // Initialize local target from store values
+  // Initialize local target from prop value
   useEffect(() => {
     if (macroTarget) {
       setLocalTarget(toMacroTargetState(macroTarget));
       setHasChanges(false);
     }
   }, [macroTarget]);
-
-  // Fetch macro target on component mount if not already available
-  useEffect(() => {
-    if (!macroTarget && !isTargetLoading) {
-      fetchMacroTarget();
-    }
-  }, [macroTarget, isTargetLoading, fetchMacroTarget]);
 
   // Handle local changes from the slider component
   const handleMacroTargetChange = useCallback(
@@ -149,7 +140,7 @@ function MacroTargetForm() {
             </p>
 
             {/* Show skeleton loader when loading or when we don't have valid values yet */}
-            {isTargetLoading || !hasValidValues ? (
+            {!hasValidValues ? (
               <div className="space-y-10">
                 {/* Skeleton for the stacked bar */}
                 <div className="relative h-2 mb-6 rounded-full overflow-hidden bg-gray-700/30 animate-pulse" />
@@ -200,7 +191,7 @@ function MacroTargetForm() {
 
             {/* Save/Reset Controls */}
             <div className="flex justify-between items-center mt-8">
-              {isTargetLoading ? (
+              {isTargetSaving ? (
                 <div className="text-gray-400 text-sm flex items-center">
                   <LoadingSpinner size="sm" color="text-gray-400" />
                   <span className="ml-2">Loading your saved targets...</span>
@@ -228,7 +219,7 @@ function MacroTargetForm() {
                     onClick={handleReset}
                     buttonSize="sm"
                     variant="ghost"
-                    disabled={isTargetLoading || isTargetSaving}
+                    disabled={isTargetSaving}
                     text="Reset"
                     ariaLabel="Reset macro targets"
                     className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
@@ -238,7 +229,7 @@ function MacroTargetForm() {
                   type="button"
                   onClick={handleSaveChanges}
                   isLoading={isTargetSaving}
-                  disabled={!hasChanges || isTargetLoading}
+                  disabled={!hasChanges || isTargetSaving}
                   text="Save Targets"
                   buttonSize="sm"
                   variant="primary"
