@@ -38,25 +38,40 @@ export async function macroDataLoader({
       : [];
     const historyHasMore = !!historyData.hasMore;
 
-    const macroData = {
+    // Return a flat object for easier consumption by route components
+    return {
       macroDailyTotals,
       history,
       historyHasMore,
       historyTotal: historyData.total || 0,
       historyLimit: historyData.limit || 20,
       historyOffset: historyData.offset || 0,
+      error: undefined,
+      authRequired: false,
     };
-
-    return { macroData, error: undefined, authRequired: false };
   } catch (error: any) {
     // Handle authentication errors
     if (error?.status === 401) {
-      return { macroData: undefined, error: undefined, authRequired: true };
+      return {
+        macroDailyTotals: undefined,
+        history: [],
+        historyHasMore: false,
+        historyTotal: 0,
+        historyLimit: 20,
+        historyOffset: 0,
+        error: undefined,
+        authRequired: true,
+      };
     }
 
     console.error("Macro data loader error:", error);
     return {
-      macroData: undefined,
+      macroDailyTotals: undefined,
+      history: [],
+      historyHasMore: false,
+      historyTotal: 0,
+      historyLimit: 20,
+      historyOffset: 0,
       error: error?.message || "Failed to load macro data",
       authRequired: false,
     };
