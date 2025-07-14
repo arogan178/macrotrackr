@@ -1,3 +1,11 @@
+// Paginated macro history response for API pagination
+export interface PaginatedMacroHistory {
+  entries: MacroEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+}
 // Utility type for macro percentage keys
 export type MacroType = "protein" | "carbs" | "fats";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";

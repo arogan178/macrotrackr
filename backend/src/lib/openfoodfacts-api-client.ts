@@ -58,11 +58,6 @@ export class OpenFoodFactsApiClient {
 
       const data = await response.json();
 
-      logger.debug(
-        { products: data.hits?.slice(0, 5) },
-        "search-a-licious API raw response"
-      );
-
       if (data.hits && data.hits.length > 0) {
         const mapped: FoodProductResult[] = data.hits
           .filter((hit: any) => hit) // Filter out any null/undefined hits

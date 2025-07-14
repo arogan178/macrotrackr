@@ -19,7 +19,7 @@ export default function ReportingPageSkeleton() {
         </div>
       </div>
 
-      {/* MealTimeBreakdown & NutrientDensityVisualization (2-column grid on md+) */}
+      {/* MealTimeBreakdown & MacroDensityBreakdown (2-column grid on md+) */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="h-56 bg-gray-800/40 rounded-2xl" />
         <div className="h-56 bg-gray-800/40 rounded-2xl" />

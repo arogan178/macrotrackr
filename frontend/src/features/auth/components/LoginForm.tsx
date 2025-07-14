@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "@tanstack/react-router";
 
 import { CardContainer, TextField } from "@/components/form";
 import { CalorieIcon } from "@/components/ui";
@@ -26,7 +26,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
       await login(email, password);
       showNotification("Login successful", "success");
       setTimeout(() => {
-        navigate("/home", { replace: true });
+        navigate({ to: "/home", replace: true });
       }, 100);
     } catch (error) {
       if (
