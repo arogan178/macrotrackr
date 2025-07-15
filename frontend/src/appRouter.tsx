@@ -13,12 +13,11 @@ import React, { Suspense } from "react";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { billingLoader } from "@/loaders/billingLoader";
-
 import { macroDataLoader } from "@/loaders/macroDataLoader";
 import {
-  macroTargetLoader,
-  macroHomeLoader,
   macroGoalsLoader,
+  macroHomeLoader,
+  macroTargetLoader,
 } from "@/loaders/macroTargetLoader";
 
 import MainLayout from "./components/layout/MainLayout";

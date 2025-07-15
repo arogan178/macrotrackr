@@ -1,16 +1,19 @@
 import { MacroDailyTotals } from "@/types/macro";
 import { apiService } from "@/utils/apiServices";
 
+import { weightGoalsLoader } from "./weightGoalsLoader";
+
 // Route loader for macro tracking data
 export async function macroDataLoader({
   startDate,
   endDate,
 }: { startDate?: string; endDate?: string } = {}) {
   try {
-    // Fetch both daily totals and history in parallel
-    const [totalsData, historyPage] = await Promise.all([
+    // Fetch daily totals, history, and weight goals in parallel
+    const [totalsData, historyPage, weightGoalsResult] = await Promise.all([
       apiService.macros.getDailyTotals({ startDate, endDate }),
       apiService.macros.getHistory(100, 0, { startDate, endDate }),
+      weightGoalsLoader(),
     ]);
 
     // Format daily totals with defaults
@@ -46,6 +49,9 @@ export async function macroDataLoader({
       historyTotal: historyData.total || 0,
       historyLimit: historyData.limit || 20,
       historyOffset: historyData.offset || 0,
+      weightGoals: weightGoalsResult?.weightGoals ?? undefined,
+      weightLog: weightGoalsResult?.weightLog ?? [],
+      weightGoalsError: weightGoalsResult?.error,
       error: undefined,
       authRequired: false,
     };
