@@ -54,20 +54,26 @@ export const macroGoalsLoader = async () => {
 };
 
 // Combined loader for home route: fetches macroTarget, macroData, and weightGoals
-export const macroHomeLoader = async () => {
+export const macroHomeLoader = async (opts?: { search?: { limit?: string | number; offset?: string | number } }) => {
+  // Get limit/offset from search params, fallback to defaults
+  const limit = opts?.search?.limit ? Number(opts.search.limit) : 20;
+  const offset = opts?.search?.offset ? Number(opts.search.offset) : 0;
+
   const [macroTargetResult, macroDataResult, weightGoalsResult] =
     await Promise.all([
       apiService.macros.getMacroTarget(),
-      macroDataLoader(),
+      macroDataLoader({ limit, offset }),
       weightGoalsLoader(),
     ]);
-  return {
+  const result = {
     macroTarget: macroTargetResult?.macroTarget ?? null,
     ...macroDataResult,
     weightGoals: weightGoalsResult?.weightGoals ?? undefined,
     weightLog: weightGoalsResult?.weightLog ?? [],
     weightGoalsError: weightGoalsResult?.error,
   };
+  // Return a new shallow copy to ensure a new object reference
+  return { ...result };
 };
 
 export const macroTargetLoader = async () => {
