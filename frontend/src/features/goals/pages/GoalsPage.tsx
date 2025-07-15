@@ -1,8 +1,8 @@
 import { useLoaderData } from "@tanstack/react-router";
-import { goalsRoute, rootRoute } from "@/AppRouter";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
+import { goalsRoute, rootRoute } from "@/AppRouter";
 import { TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
 import { GoalsIcon, Modal, TargetIcon } from "@/components/ui";
@@ -18,6 +18,7 @@ import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
+import { useRouter } from "@tanstack/react-router";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";
@@ -44,19 +45,21 @@ export default function GoalsPage() {
       fats: 0,
       calories: 0,
     },
+    weightGoals,
+    weightLog,
+    weightGoalsError,
+    nutritionProfile,
   } = useLoaderData({ from: goalsRoute.id }) || {};
   const {
-    nutritionProfile,
-    weightGoals,
-    // macroTarget,
+    // Remove nutritionProfile from store, always use loader's nutritionProfile
+    // weightGoals, // now hydrated from loader
     habits,
     isLoading: goalsLoading,
     error: goalsError,
     isLoading: habitsLoading,
     error: habitsError,
     clearError,
-    fetchWeightGoals,
-    // fetchMacroTarget,
+    setWeightGoals,
     fetchHabits,
     addHabit,
     updateHabit,
@@ -69,8 +72,11 @@ export default function GoalsPage() {
     setSubscriptionStatus,
   } = useStore();
 
-  // Use macro data from loader with fallback
-  // macroDailyTotals now comes from another loader if needed
+  // Hydrate weight goals from loader into Zustand store
+  useEffect(() => {
+    setWeightGoals(weightGoals);
+  }, [weightGoals, setWeightGoals]);
+
   // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
     if (
@@ -82,12 +88,11 @@ export default function GoalsPage() {
     }
   }, [user, setSubscriptionStatus]);
 
-  // Fetch goals, habits, and weight log on component mount if needed
+  // Fetch habits and weight log on component mount if needed
   useEffect(() => {
-    fetchWeightGoals();
     fetchHabits();
     fetchWeightLog();
-  }, [fetchWeightGoals, fetchHabits, fetchWeightLog]);
+  }, [fetchHabits, fetchWeightLog]);
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
@@ -157,9 +162,13 @@ export default function GoalsPage() {
   };
 
   // Handler to confirm and execute weight goal deletion
+  const router = useRouter();
+
   const handleDeleteWeightGoalConfirmed = async () => {
     await deleteWeightGoal();
     handleCloseDeleteConfirmModal();
+    // Invalidate loader to refresh weight goals after deletion
+    router.invalidate();
   };
 
   // Get the safe target weight value for components
