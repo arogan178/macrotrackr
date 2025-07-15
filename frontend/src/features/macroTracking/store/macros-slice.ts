@@ -117,7 +117,6 @@ export const createMacrosSlice: StateCreator<
     }
   },
 
-
   addEntry: async (inputs: AddEntryPayload): Promise<void> => {
     set({ isSaving: true, error: undefined });
     try {
