@@ -24,16 +24,16 @@ export default function ReportingPage() {
   // Get history data from app state
   const { user } = useLoaderData({ from: rootRoute.id });
   const reportingLoaderData = useLoaderData({ from: reportingRoute.id }) as any;
-  const macroData = reportingLoaderData?.macroData;
-  const history = macroData?.history || [];
+  const weightGoals = reportingLoaderData?.weightGoals;
+  const history = reportingLoaderData?.history || [];
 
   const {
     isLoading,
     error,
-    fetchWeightGoals,
     macroTarget,
-    weightGoals,
+    // weightGoals, // now hydrated from loader
     nutritionProfile,
+    setWeightGoals,
     setSubscriptionStatus,
   } = useStore();
   // Hydrate subscriptionStatus from loader user.subscription.status
@@ -61,10 +61,10 @@ export default function ReportingPage() {
   // Macro density breakdown chart data (percentages)
   const macroDensityData = useMacroDensityBreakdown(history, dateRange);
 
-  // Fetch weight goals on component mount if needed
+  // Hydrate weight goals from loader into Zustand store
   useEffect(() => {
-    fetchWeightGoals();
-  }, [fetchWeightGoals]);
+    setWeightGoals(weightGoals);
+  }, [weightGoals, setWeightGoals]);
 
   // Define chart configurations for the new component
   const calorieChartLines = [

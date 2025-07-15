@@ -30,12 +30,15 @@ export default function HomePage() {
     },
     history = [],
     historyHasMore = false,
+    weightGoals,
+    weightLog,
+    weightGoalsError,
   } = useLoaderData({ from: homeRoute.id }) as any;
 
   // Get state and actions from our store (excluding user)
   const {
     nutritionProfile,
-    weightGoals,
+    // weightGoals, // now hydrated from loader
     isLoading,
     isSaving,
     isEditing,
@@ -43,7 +46,7 @@ export default function HomePage() {
     error,
     notifications,
     editingEntry,
-    fetchWeightGoals,
+    setWeightGoals,
     addEntry,
     updateEntry,
     deleteEntry,
@@ -117,12 +120,10 @@ export default function HomePage() {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
 
-  // Fetch macros and goals on component mount (user is now loaded by route loader)
+  // Hydrate weight goals from loader into Zustand store
   useEffect(() => {
-    if (!user) return;
-    fetchWeightGoals();
-    // if (macroData) setMacroData(macroData);
-  }, [user, fetchWeightGoals]);
+    setWeightGoals(weightGoals);
+  }, [weightGoals, setWeightGoals]);
 
   // Debug effect to track editingEntry changes
   useEffect(() => {
