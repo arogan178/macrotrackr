@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import Modal from "@/components/ui/Modal";
 import { useStore } from "@/store/store"; // Import useStore
 import type { WeightGoals } from "@/types/goal";
+import { useRouter } from "@tanstack/react-router";
 
 import { WeightGoalFormValues } from "../types";
 import WeightGoalForm from "./WeightGoalForm";
@@ -28,6 +29,7 @@ function WeightGoalModal({
   const createWeightGoal = useStore((state) => state.createWeightGoal);
   const updateWeightGoal = useStore((state) => state.updateWeightGoal);
   const isSaving = useStore((state) => state.isSaving); // Get saving state
+  const router = useRouter();
 
   useEffect(() => {
     if (isOpen) {
@@ -41,6 +43,7 @@ function WeightGoalModal({
         ? updateWeightGoal(values, tdee)
         : createWeightGoal(values, tdee));
       onClose(); // Close modal on success
+      router.invalidate(); // Refresh loader/UI after save
     } catch (error) {
       // Error is handled and displayed by the slice/notification system
       console.error("Save failed in WeightGoalModal:", error);
