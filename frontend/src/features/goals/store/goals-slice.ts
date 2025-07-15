@@ -13,28 +13,22 @@ import { ERROR_MESSAGES, SUCCESS_MESSAGES } from "../constants";
 
 // Define the slice interface
 export interface GoalsSlice {
-  // ... existing state ...
   weightGoals: WeightGoals | undefined;
-  weightLog: WeightLogEntry[]; // Uses the updated type
-  isLoading: boolean;
+  weightLog: WeightLogEntry[];
   isSaving: boolean;
   error: string | undefined;
 
   // Actions
-  fetchWeightGoals: () => Promise<void>;
   setWeightGoals: (goals: WeightGoals | undefined) => void;
   createWeightGoal: (
-    // Renamed for clarity
     formValues: WeightGoalFormValues,
     tdee: number,
   ) => Promise<void>;
   updateWeightGoal: (
-    // New action for updates
     formValues: WeightGoalFormValues,
     tdee: number,
   ) => Promise<void>;
   deleteWeightGoal: () => Promise<void>;
-  setLoading: (loading: boolean) => void;
   setSaving: (saving: boolean) => void;
   setError: (error: string | undefined) => void;
   clearError: () => void;
@@ -63,60 +57,8 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   // ... initial state ...
   weightGoals: undefined,
   weightLog: [],
-  isLoading: false,
   isSaving: false,
   error: undefined,
-
-  // --- Fetch Actions ---
-  fetchWeightGoals: async () => {
-    set({ isLoading: true, error: undefined });
-    const fullGet = get as () => FullGoalsState;
-    try {
-      const weightGoalsData = await apiService.goals.getWeightGoals();
-
-      if (weightGoalsData) {
-        // Get latest weight to determine currentWeight
-        const weightLog = await apiService.goals.getWeightLog();
-        const latestWeight =
-          weightLog.length > 0
-            ? weightLog.at(-1).weight
-            : weightGoalsData.startingWeight;
-
-        // Transform to WeightGoals with currentWeight
-        const goalsWithCurrentWeight: WeightGoals = {
-          ...weightGoalsData,
-          currentWeight: latestWeight,
-          targetWeight:
-            weightGoalsData.targetWeight || weightGoalsData.startingWeight,
-          weightGoal: (weightGoalsData.weightGoal || "maintain") as
-            | "lose"
-            | "maintain"
-            | "gain",
-          startDate:
-            weightGoalsData.startDate || new Date().toISOString().split("T")[0],
-          targetDate:
-            weightGoalsData.targetDate ||
-            new Date().toISOString().split("T")[0],
-          calorieTarget: weightGoalsData.calorieTarget || 2000,
-          calculatedWeeks: weightGoalsData.calculatedWeeks || 1,
-          weeklyChange: weightGoalsData.weeklyChange || 0,
-          dailyChange: weightGoalsData.dailyChange || 0,
-        };
-
-        set({ weightGoals: goalsWithCurrentWeight, isLoading: false });
-      } else {
-        set({ weightGoals: undefined, isLoading: false });
-      }
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error fetching weight goals:", error);
-      set({ isLoading: false, error: errorMessage });
-      fullGet().addNotification?.({
-        message: `${ERROR_MESSAGES.goalFetch}: ${errorMessage}`,
-        type: "error",
-      });
-    }
-  },
 
   // --- Set Actions ---
   setWeightGoals: (goals) => set({ weightGoals: goals, error: undefined }),
@@ -132,10 +74,10 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       // --- Step 1: Create the Weight Goal ---
 
       // Call API with form values and tdee
-      savedWeightGoal = await apiService.goals.createWeightGoal(
+      savedWeightGoal = (await apiService.goals.createWeightGoal(
         formValues,
         tdee,
-      );
+      )) as WeightGoals | undefined;
       console.log("[GoalsSlice] Weight goal created successfully.");
 
       // --- Step 2: Add the Initial Weight Log Entry ---
@@ -272,7 +214,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   },
 
   // --- State Management Actions ---
-  setLoading: (loading) => set({ isLoading: loading }),
+  // setLoading removed (no longer needed)
   setSaving: (saving) => set({ isSaving: saving }),
   setError: (error) => set({ error }),
   clearError: () => set({ error: undefined }),
@@ -284,7 +226,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       weightGoals: undefined,
       weightLog: [],
       error: undefined,
-      isLoading: false,
+      // isLoading removed (no longer needed)
       isSaving: false,
     });
     // Optionally, refetch or perform other cleanup
@@ -292,7 +234,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
   // --- Weight Log Actions ---
   fetchWeightLog: async () => {
-    set({ isLoading: true, error: undefined });
+    set({ error: undefined });
     const fullGet = get as () => FullGoalsState;
     try {
       const logData = await apiService.goals.getWeightLog();
@@ -301,11 +243,11 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         (a, b) =>
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
       );
-      set({ weightLog: sortedLog, isLoading: false });
+      set({ weightLog: sortedLog });
     } catch (error) {
       const errorMessage = getErrorMessage(error);
       console.error("Error fetching weight log:", error);
-      set({ isLoading: false, error: errorMessage });
+      set({ error: errorMessage });
       fullGet().addNotification?.({
         message: `${ERROR_MESSAGES.weightFetch}: ${errorMessage}`,
         type: "error",

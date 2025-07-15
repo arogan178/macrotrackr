@@ -6,6 +6,7 @@ import Modal from "@/components/ui/Modal";
 import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/apiServices";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
+import { useRouter } from "@tanstack/react-router";
 
 interface LogWeightModalProps {
   isOpen: boolean;
@@ -21,6 +22,7 @@ function LogWeightModal({
   onClose,
   initialWeight,
 }: LogWeightModalProps) {
+  const router = useRouter();
   const addWeightLogEntry = useStore((state) => state.addWeightLogEntry);
   const isSaving = useStore((state) => state.isSaving);
   const error = useStore((state) => state.error);
@@ -91,6 +93,8 @@ function LogWeightModal({
     const payload: AddWeightLogPayload = { timestamp, weight: Number(weight) };
     try {
       await addWeightLogEntry(payload);
+      // Invalidate loader to refresh weight log and progress bar
+      router.invalidate();
       onClose();
     } catch {
       // Error state is handled by the slice

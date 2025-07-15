@@ -140,7 +140,12 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
             </p>
 
             {/* Show skeleton loader when loading or when we don't have valid values yet */}
-            {!hasValidValues ? (
+            {hasValidValues ? (
+              <MacroTarget
+                initialValues={displayValues}
+                onTargetChange={handleMacroTargetChange}
+              />
+            ) : (
               <div className="space-y-10">
                 {/* Skeleton for the stacked bar */}
                 <div className="relative h-2 mb-6 rounded-full overflow-hidden bg-gray-700/30 animate-pulse" />
@@ -182,11 +187,6 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                   <div className="h-10 bg-gray-700/50 rounded animate-pulse" />
                 </div>
               </div>
-            ) : (
-              <MacroTarget
-                initialValues={displayValues}
-                onTargetChange={handleMacroTargetChange}
-              />
             )}
 
             {/* Save/Reset Controls */}
