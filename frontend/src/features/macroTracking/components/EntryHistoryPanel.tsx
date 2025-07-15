@@ -21,6 +21,7 @@ interface EntryHistoryProps {
   isEditing: boolean;
   hasMore?: boolean;
   onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }
 
 // Consolidated helper functions
@@ -90,6 +91,7 @@ const EntryHistoryComponent = function EntryHistory({
   isDeleting,
   hasMore,
   onLoadMore,
+  isLoadingMore,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [showAllDates, setShowAllDates] = useState(false);
@@ -381,10 +383,35 @@ const EntryHistoryComponent = function EntryHistory({
           {hasMore && onLoadMore && (
             <div className="flex justify-center py-4">
               <button
-                onClick={onLoadMore}
-                className="px-4 py-2 text-sm text-indigo-300 bg-indigo-800/30 hover:bg-indigo-700/40 rounded-md border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-200"
+                onClick={isLoadingMore ? undefined : onLoadMore}
+                className={`px-4 py-2 text-sm text-indigo-300 bg-indigo-800/30 hover:bg-indigo-700/40 rounded-md border border-indigo-500/30 hover:border-indigo-400/50 transition-all duration-200 flex items-center gap-2 ${
+                  isLoadingMore ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoadingMore}
               >
-                Load More Entries
+                {isLoadingMore && (
+                  <svg
+                    className="animate-spin h-4 w-4 mr-2 text-indigo-300"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      stroke="currentColor"
+                      strokeWidth="4"
+                    ></circle>
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                    ></path>
+                  </svg>
+                )}
+                {isLoadingMore ? "Loading..." : "Load More Entries"}
               </button>
             </div>
           )}
