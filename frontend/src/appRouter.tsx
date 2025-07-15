@@ -99,7 +99,16 @@ const landingRoute = createRoute({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
-  loader: macroHomeLoader,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { limit: number; offset: number } => {
+    return {
+      limit: Number(search.limit) || 20,
+      offset: Number(search.offset) || 0,
+    };
+  },
+  loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
+  loader: ({ deps }) => macroHomeLoader({ search: deps }),
   component: () => (
     <RequireAuth>
       <HomePage />
@@ -140,7 +149,16 @@ const registerRoute = createRoute({
 export const reportingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reporting",
-  loader: macroDataLoader,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { startDate?: string; endDate?: string } => {
+    return {
+      startDate: search.startDate as string | undefined,
+      endDate: search.endDate as string | undefined,
+    };
+  },
+  loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
+  loader: ({ deps }) => macroDataLoader(deps),
   component: () => (
     <RequireAuth>
       <ReportingPage />

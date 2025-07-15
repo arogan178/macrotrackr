@@ -37,7 +37,7 @@ export interface MacrosSlice {
   _notifyUser: (message: string, type?: string) => void;
 
   // Actions
-  loadMoreHistory: () => Promise<void>;
+  // loadMoreHistory: () => Promise<void>; // Loader now handles pagination
   updateMacroTargetSettings: (settings: MacroTargetSettings) => Promise<void>;
   addEntry: (entry: AddEntryPayload) => Promise<void>;
   updateEntry: (id: number, entryUpdate: UpdateEntryPayload) => Promise<void>;
@@ -86,36 +86,9 @@ export const createMacrosSlice: StateCreator<
     }
   },
 
-  loadMoreHistory: async () => {
-    const { history, historyLimit, historyOffset, historyHasMore } = get();
-    if (!historyHasMore) return;
-    set({ isLoading: true });
-    try {
-      const pageRaw = await apiService.macros.getHistory(
-        historyLimit,
-        historyOffset,
-      );
-      const page = pageRaw as PaginatedMacroHistory;
-      set({
-        history: [
-          ...history,
-          ...(Array.isArray(page.entries) ? page.entries : []),
-        ],
-        historyTotal: page.total || 0,
-        historyLimit: page.limit || historyLimit,
-        historyOffset: (page.offset || 0) + (page.entries?.length || 0),
-        historyHasMore: !!page.hasMore,
-        isLoading: false,
-      });
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      set({ error: errorMessage, isLoading: false });
-      get()._notifyUser(
-        `Failed to load more history: ${errorMessage}`,
-        "error",
-      );
-    }
-  },
+  // loadMoreHistory: async () => {
+  //   // Deprecated: Loader now handles pagination
+  // },
 
   addEntry: async (inputs: AddEntryPayload): Promise<void> => {
     set({ isSaving: true, error: undefined });

@@ -3,6 +3,7 @@ import { AnimatePresence } from "motion/react";
 import { memo, useCallback, useEffect } from "react";
 
 import { homeRoute, rootRoute } from "@/AppRouter";
+import { useNavigate, useSearch, useRouterState } from "@tanstack/react-router";
 import { CardContainer } from "@/components/form";
 import Navbar from "@/components/layout/Navbar";
 import { UserMetricsPanel } from "@/features/dashboard/components";
@@ -137,7 +138,33 @@ export default function HomePage() {
   // Use macroData from loader for history and macroDailyTotals
 
   // All macro data now comes directly from loader
-  const loadMoreHistory = undefined; // Loader-based, implement if needed
+  // Add TanStack Router hooks for navigation and search params
+  const navigate = useNavigate({ from: homeRoute.id });
+  const search = useSearch({ from: homeRoute.id });
+
+  // Loader-based pagination
+  const loadMoreHistory = useCallback(() => {
+    const currentOffset = Number(search.offset) || 0;
+    const currentLimit = Number(search.limit) || 20;
+    const newOffset = currentOffset + currentLimit;
+    navigate({
+      search: {
+        ...search,
+        offset: newOffset,
+        limit: currentLimit,
+      },
+      replace: false,
+    });
+  }, [navigate, search]);
+
+  // Loading indicator for "Load More" button
+  const isLoadingMore = useRouterState({
+    select: (s) =>
+      s.status === "pending" &&
+      s.location.pathname === "/home" &&
+      s.location.search.offset !== search.offset,
+  });
+
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
@@ -220,6 +247,7 @@ export default function HomePage() {
                   isEditing={isEditing}
                   hasMore={historyHasMore}
                   onLoadMore={loadMoreHistory}
+                  isLoadingMore={isLoadingMore}
                 />
               )}
             </div>
