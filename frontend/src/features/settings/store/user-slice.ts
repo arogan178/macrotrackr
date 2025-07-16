@@ -34,9 +34,7 @@ export interface UserSlice {
   // Action to set nutrition profile directly (for loader hydration)
   setNutritionProfile: (profile: UserNutritionalProfile | undefined) => void;
   // Action to initialize settings from loader data
-  initializeSettings: (data: {
-    settings: UserSettings;
-  }) => void;
+  initializeSettings: (data: { settings: UserSettings }) => void;
 
   // Subscription
   subscriptionStatus: "free" | "pro" | "canceled";
@@ -111,7 +109,7 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   initializeSettings: (data) => {
     const { settings } = data;
     const nutritionProfile = createNutritionProfile(settings);
-    
+
     set({
       settings,
       user: settings,
@@ -223,8 +221,6 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
       }
     }
   },
-
-
 
   resetSettings: () => {
     set((state: UserSlice) => ({
