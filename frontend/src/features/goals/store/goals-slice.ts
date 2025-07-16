@@ -20,6 +20,7 @@ export interface GoalsSlice {
 
   // Actions
   setWeightGoals: (goals: WeightGoals | undefined) => void;
+  setWeightLog: (log: WeightLogEntry[]) => void;
   createWeightGoal: (
     formValues: WeightGoalFormValues,
     tdee: number,
@@ -35,7 +36,6 @@ export interface GoalsSlice {
   resetGoals: () => Promise<void>;
 
   // Weight Log Actions
-  fetchWeightLog: () => Promise<void>;
   addWeightLogEntry: (payload: AddWeightLogPayload) => Promise<void>;
   deleteWeightLogEntry: (id: string) => Promise<void>;
 }
@@ -62,6 +62,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
   // --- Set Actions ---
   setWeightGoals: (goals) => set({ weightGoals: goals, error: undefined }),
+  setWeightLog: (log) => set({ weightLog: log }),
 
   // --- Create Action ---
   createWeightGoal: async (formValues, tdee) => {
@@ -118,8 +119,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         error: undefined,
       }));
 
-      // --- Step 3.5: Fetch latest weight log to ensure UI is up to date ---
-      await get().fetchWeightLog();
+      // --- Step 3.5: Loader now hydrates weight log; no fetchWeightLog needed ---
 
       // --- Step 4: Update User Slice (if log entry succeeded) ---
       if (savedLogEntry) {
@@ -163,10 +163,9 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         tdee,
       );
 
-      set({ weightGoals: savedWeightGoal, isSaving: false, error: undefined });
+      set({ weightGoals: savedWeightGoal as WeightGoals, isSaving: false, error: undefined });
 
-      // --- Fetch latest weight log to ensure UI is up to date ---
-      await get().fetchWeightLog();
+      // --- Loader now hydrates weight log; no fetchWeightLog needed ---
 
       fullGet().addNotification?.({
         message: SUCCESS_MESSAGES.goalUpdated,
@@ -233,27 +232,6 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
   },
 
   // --- Weight Log Actions ---
-  fetchWeightLog: async () => {
-    set({ error: undefined });
-    const fullGet = get as () => FullGoalsState;
-    try {
-      const logData = await apiService.goals.getWeightLog();
-      // Sort by timestamp descending
-      const sortedLog = logData.sort(
-        (a, b) =>
-          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
-      );
-      set({ weightLog: sortedLog });
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error fetching weight log:", error);
-      set({ error: errorMessage });
-      fullGet().addNotification?.({
-        message: `${ERROR_MESSAGES.weightFetch}: ${errorMessage}`,
-        type: "error",
-      });
-    }
-  },
   addWeightLogEntry: async (payload: AddWeightLogPayload) => {
     set({ isSaving: true, error: undefined });
     const fullGet = get as () => FullGoalsState;
