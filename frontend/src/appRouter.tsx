@@ -13,16 +13,12 @@ import React, { Suspense } from "react";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { billingLoader } from "@/loaders/billingLoader";
+import { authLoader } from "@/loaders/authLoader";
 import { macroDataLoader } from "@/loaders/macroDataLoader";
-import {
-  macroGoalsLoader,
-  macroHomeLoader,
-  macroTargetLoader,
-} from "@/loaders/macroTargetLoader";
+import { macroGoalsLoader, macroHomeLoader } from "@/loaders/macroTargetLoader";
 import { settingsLoader } from "@/loaders/settingsLoader";
 
 import MainLayout from "./components/layout/MainLayout";
-import { loader as userLoader } from "./loaders/userLoader";
 
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 const LandingPage = React.lazy(
@@ -62,19 +58,19 @@ function LoadingFallback() {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { user, authRequired } = useLoaderData({ from: rootRoute.id }) as any;
-  if (authRequired) {
+  const { isAuthenticated } = useLoaderData({ from: rootRoute.id }) as any;
+  if (!isAuthenticated) {
     if (globalThis.window !== undefined) {
       globalThis.location.replace("/login");
     }
-    return;
+    return null;
   }
   return <>{children}</>;
 }
 
 // Root route with loader for user data
 export const rootRoute = createRootRoute({
-  loader: userLoader,
+  loader: authLoader,
   component: () => (
     <ErrorBoundary>
       <MainLayout>
