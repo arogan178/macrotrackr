@@ -48,6 +48,7 @@ export interface UserSlice {
     | undefined;
 
   // Loading states
+  isLoading: boolean;
   isSettingsLoading: boolean;
   isSaving: boolean;
 
