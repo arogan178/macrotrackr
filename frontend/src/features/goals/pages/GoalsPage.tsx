@@ -1,4 +1,4 @@
-import { useLoaderData } from "@tanstack/react-router";
+import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
@@ -18,7 +18,6 @@ import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useStore } from "@/store/store";
-import { useRouter } from "@tanstack/react-router";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";
