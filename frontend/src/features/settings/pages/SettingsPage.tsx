@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect, useState } from "react";
+import { useLoaderData } from "@tanstack/react-router";
 
 import { FormButton, TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
@@ -45,10 +46,10 @@ const PageHeader = ({
 );
 
 export default function SettingsPage() {
+  const loaderData = useLoaderData({ from: "/settings" }) as any;
   const {
     settings,
     user,
-    isLoading,
     settingsError: error,
     settingsSuccess: successMessage,
     formErrors,
@@ -59,8 +60,8 @@ export default function SettingsPage() {
     saveSettings,
     clearSettingsMessages: clearMessages,
     resetSettings,
-    fetchSettings,
     setSubscriptionStatus,
+    initializeSettings,
   } = useStore();
 
   // Hydrate subscriptionStatus from user.subscription.status
@@ -81,10 +82,14 @@ export default function SettingsPage() {
     TabType | undefined
   >();
 
-  // Fetch settings on component mount
+  // Initialize settings from loader data on component mount
   useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+    if (loaderData?.settings) {
+      initializeSettings({
+        settings: loaderData.settings,
+      });
+    }
+  }, [loaderData, initializeSettings]);
 
   // Warn user before leaving page with unsaved changes
   useBeforeUnload(
@@ -211,7 +216,7 @@ export default function SettingsPage() {
             </div>
           </PageHeader>
 
-          {isLoading || !settings ? (
+          {!settings ? (
             <SettingsLoadingSkeleton />
           ) : (
             <>

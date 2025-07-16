@@ -1,19 +1,11 @@
-// Valid genders for mapping backend string to Gender union
 import { StateCreator } from "zustand";
 
-import {
-  createNutritionProfile,
-  createUserSettings,
-} from "@/features/settings/utils/calculations";
-import { MacroTargetSettings } from "@/types/macro";
+import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { UserNutritionalProfile, UserSettings } from "@/types/user"; // Unified import
 import { apiService } from "@/utils/apiServices";
-import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 import { validateSettingsComplete as validateSettings } from "../utils/validation";
-
-const validGenders = new Set(["male", "female"]);
 
 // Types for API payloads
 interface UserSettingsPayload {
@@ -39,9 +31,12 @@ export interface UserSlice {
   // Core user data
   user: UserSettings | undefined;
   nutritionProfile: UserNutritionalProfile | undefined;
-  macroTarget: MacroTargetSettings | undefined;
   // Action to set nutrition profile directly (for loader hydration)
   setNutritionProfile: (profile: UserNutritionalProfile | undefined) => void;
+  // Action to initialize settings from loader data
+  initializeSettings: (data: {
+    settings: UserSettings;
+  }) => void;
 
   // Subscription
   subscriptionStatus: "free" | "pro" | "canceled";
@@ -55,10 +50,8 @@ export interface UserSlice {
     | undefined;
 
   // Loading states
-  isLoading: boolean;
   isSettingsLoading: boolean;
   isSaving: boolean;
-  isTargetSaving: boolean;
 
   // Error and success states
   error: string | undefined;
@@ -68,9 +61,7 @@ export interface UserSlice {
 
   // Settings form state
   settings: UserSettings | undefined;
-  settingsMacroTarget: MacroTargetSettings | undefined;
   originalSettings: UserSettings | undefined;
-  originalSettingsMacroTarget: MacroTargetSettings | undefined;
   hasSettingsChanges: boolean;
   updateSetting: <K extends keyof UserSettings>(
     key: K,
@@ -78,12 +69,8 @@ export interface UserSlice {
   ) => void;
   // Actions
   clearError: () => void;
-  fetchSettings: () => Promise<void>;
   validateSettingsForm: () => boolean;
   saveSettings: () => Promise<void>;
-  updateMacroTargetSettings: (
-    macroTarget: MacroTargetSettings,
-  ) => Promise<void>;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
   updateCurrentUserWeight: (newWeight: number) => void;
@@ -104,7 +91,6 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   // Initial state
   user: undefined,
   nutritionProfile: undefined,
-  macroTarget: DEFAULT_MACRO_TARGET,
   subscriptionStatus: "free",
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") =>
     set({ subscriptionStatus: status }),
@@ -112,56 +98,31 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
   isLoading: false,
   error: undefined,
   settings: undefined,
-  settingsMacroTarget: DEFAULT_MACRO_TARGET,
   originalSettings: undefined,
-  originalSettingsMacroTarget: undefined,
   isSettingsLoading: false,
   isSaving: false,
-  isTargetSaving: false,
   settingsError: undefined,
   settingsSuccess: undefined,
   formErrors: {},
   hasSettingsChanges: false,
 
-  fetchSettings: async () => {
-    set({ isSettingsLoading: true, settingsError: undefined });
-    try {
-      const data = await apiService.user.getUserDetails();
-      if (!data) {
-        throw new Error("Failed to fetch settings data.");
-      }
-
-      // Map gender to Gender union type if valid, else undefined
-      const mappedGender2 = validGenders.has(data.gender as string)
-        ? (data.gender as "male" | "female")
-        : undefined;
-      // Pass subscription through to settings and user
-      const settings = createUserSettings({
-        ...data,
-        gender: mappedGender2,
-        subscription: data.subscription,
-      });
-      // Only assign macroTarget if present
-      const macroTargetSettings =
-        (data as any).macroTarget || DEFAULT_MACRO_TARGET;
-
-      set({
-        settings,
-        user: { ...settings, subscription: data.subscription },
-        settingsMacroTarget: macroTargetSettings,
-        originalSettings: structuredClone(settings),
-        originalSettingsMacroTarget: structuredClone(macroTargetSettings),
-        hasSettingsChanges: false,
-        formErrors: {},
-        isSettingsLoading: false,
-      });
-    } catch (error) {
-      console.error("Fetch settings error:", error);
-      set({ settingsError: getErrorMessage(error), isSettingsLoading: false });
-    }
-  },
-
   setNutritionProfile: (profile) => set({ nutritionProfile: profile }),
+
+  initializeSettings: (data) => {
+    const { settings } = data;
+    const nutritionProfile = createNutritionProfile(settings);
+    
+    set({
+      settings,
+      user: settings,
+      nutritionProfile,
+      originalSettings: structuredClone(settings),
+      hasSettingsChanges: false,
+      formErrors: {},
+      isSettingsLoading: false,
+      settingsError: undefined,
+    });
+  },
 
   updateSetting: <K extends keyof UserSettings>(
     key: K,
@@ -263,53 +224,13 @@ export const createUserSlice: StateCreator<UserSlice, [], [], UserSlice> = (
     }
   },
 
-  updateMacroTargetSettings: async (macroTarget: MacroTargetSettings) => {
-    const state = get();
-    set({ isTargetSaving: true, settingsError: undefined });
 
-    try {
-      await apiService.macros.saveMacroTargetPercentages({ macroTarget });
-
-      const macroTargetCloned = structuredClone(macroTarget);
-
-      set({
-        originalSettingsMacroTarget: macroTargetCloned,
-        settingsMacroTarget: macroTargetCloned,
-        macroTarget: macroTargetCloned,
-        hasSettingsChanges: false,
-        isTargetSaving: false,
-        settingsSuccess: "Macro targets updated successfully!",
-      });
-
-      if (state.showNotification) {
-        state.showNotification("Macro targets saved successfully!", "success");
-      }
-    } catch (error) {
-      console.error("Save macro targets error:", error);
-      const errorMessage = getErrorMessage(error);
-
-      set({
-        settingsError: errorMessage,
-        isTargetSaving: false,
-      });
-
-      if (state.showNotification) {
-        state.showNotification(
-          `Failed to save macro targets: ${errorMessage}`,
-          "error",
-        );
-      }
-    }
-  },
 
   resetSettings: () => {
     set((state: UserSlice) => ({
       ...state,
       settings: state.originalSettings
         ? structuredClone(state.originalSettings)
-        : undefined,
-      settingsMacroTarget: state.originalSettingsMacroTarget
-        ? structuredClone(state.originalSettingsMacroTarget)
         : undefined,
       hasSettingsChanges: false,
       formErrors: {},

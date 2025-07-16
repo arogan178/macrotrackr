@@ -19,6 +19,7 @@ import {
   macroHomeLoader,
   macroTargetLoader,
 } from "@/loaders/macroTargetLoader";
+import { settingsLoader } from "@/loaders/settingsLoader";
 
 import MainLayout from "./components/layout/MainLayout";
 import { loader as userLoader } from "./loaders/userLoader";
@@ -119,7 +120,17 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: billingLoader,
+  loader: async () => {
+    const [settingsData, billingData] = await Promise.all([
+      settingsLoader(),
+      billingLoader(),
+    ]);
+    return {
+      ...settingsData,
+      billingDetails: billingData.billingDetails,
+      billingError: billingData.error,
+    };
+  },
   component: () => (
     <RequireAuth>
       <SettingsPage />
