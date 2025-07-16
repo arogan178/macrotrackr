@@ -21,7 +21,7 @@ interface Notification {
 // Define the slice interface
 export interface HabitsSlice extends HabitsState {
   // Actions
-  fetchHabits: () => Promise<void>;
+  setHabits: (habits: HabitGoal[]) => void;
   addHabit: (values: HabitGoalFormValues) => Promise<void>;
   updateHabit: (id: string, values: HabitGoalFormValues) => Promise<void>;
   incrementHabitProgress: (id: string) => Promise<void>;
@@ -48,18 +48,8 @@ export const createHabitsSlice: StateCreator<
   isLoading: false,
   error: undefined,
 
-  // --- Fetch Actions ---
-  fetchHabits: async () => {
-    set({ isLoading: true, error: undefined });
-    try {
-      const habits = await apiService.habits.getHabit();
-      set({ habits, isLoading: false });
-    } catch (error) {
-      const errorMessage = getErrorMessage(error);
-      console.error("Error fetching habits:", error);
-      set({ error: errorMessage, isLoading: false });
-    }
-  },
+  // --- Set Actions ---
+  setHabits: (habits) => set({ habits }),
 
   // --- Add Action ---
   addHabit: async (values: HabitGoalFormValues) => {
@@ -70,12 +60,8 @@ export const createHabitsSlice: StateCreator<
       const newHabit = createNewHabit(values);
       await apiService.habits.saveHabit(newHabit);
 
-      // Update local state
-      const currentHabits = get().habits;
-      set({
-        habits: [...currentHabits, newHabit],
-        isLoading: false,
-      });
+      // No local state update; loader will hydrate after router.invalidate()
+      set({ isLoading: false });
 
       fullGet().addNotification?.({
         message: SUCCESS_MESSAGES.created,
@@ -122,14 +108,8 @@ export const createHabitsSlice: StateCreator<
       const updatedHabit = updateHabitFromForm(existingHabit, values);
       await apiService.habits.updateHabit(id, updatedHabit);
 
-      // Update local state
-      const updatedHabits = [...currentHabits];
-      updatedHabits[habitIndex] = updatedHabit;
-
-      set({
-        habits: updatedHabits,
-        isLoading: false,
-      });
+      // No local state update; loader will hydrate after router.invalidate()
+      set({ isLoading: false });
 
       fullGet().addNotification?.({
         message: SUCCESS_MESSAGES.updated,
@@ -187,9 +167,8 @@ export const createHabitsSlice: StateCreator<
       const errorMessage = getErrorMessage(error);
       console.error("Error incrementing habit progress:", error);
 
-      // On error, revert to original state by refetching habits
-      set({ error: errorMessage });
-      get().fetchHabits();
+      // On error, revert to original state by clearing habits (loader will rehydrate on navigation)
+      set({ error: errorMessage, habits: [] });
     }
   },
 
@@ -265,9 +244,8 @@ export const createHabitsSlice: StateCreator<
       const errorMessage = getErrorMessage(error);
       console.error("Error deleting habit:", error);
 
-      // Revert optimistic update on error by re-fetching
-      set({ error: errorMessage });
-      get().fetchHabits(); // Refetch to get the correct state
+      // Revert optimistic update on error by clearing habits (loader will rehydrate on navigation)
+      set({ error: errorMessage, habits: [] });
 
       fullGet().addNotification?.({
         message: `Failed to delete habit: ${errorMessage}`,
