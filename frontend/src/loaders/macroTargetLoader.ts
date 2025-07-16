@@ -11,36 +11,13 @@ export const macroGoalsLoader = async () => {
     macroTargetResult,
     macroDataResult,
     weightGoalsResult,
-    userDetailsResult,
     habitsResult,
   ] = await Promise.all([
     apiService.macros.getMacroTarget(),
     macroDataLoader(),
     weightGoalsLoader(),
-    apiService.user.getUserDetails(),
     habitsLoader(),
   ]);
-
-  // Compute nutritionProfile from user details
-  let nutritionProfile;
-  if (userDetailsResult) {
-    try {
-      // Map userDetailsResult to UserSettings shape
-      const userSettings = {
-        ...userDetailsResult,
-        dateOfBirth: userDetailsResult.dateOfBirth ?? "",
-        height: userDetailsResult.height ?? 0,
-        weight: userDetailsResult.weight ?? 0,
-        gender:
-          (userDetailsResult.gender as "" | "male" | "female" | undefined) ??
-          "male",
-        activityLevel: userDetailsResult.activityLevel ?? 1,
-      };
-      nutritionProfile = createNutritionProfile(userSettings);
-    } catch {
-      nutritionProfile = undefined;
-    }
-  }
 
   return {
     macroTarget: macroTargetResult?.macroTarget ?? undefined,
@@ -53,7 +30,6 @@ export const macroGoalsLoader = async () => {
     weightGoals: weightGoalsResult?.weightGoals ?? undefined,
     weightLog: weightGoalsResult?.weightLog ?? [],
     weightGoalsError: weightGoalsResult?.error,
-    nutritionProfile,
     habits: habitsResult?.habits ?? [],
     habitsError: habitsResult?.error,
   };
