@@ -186,22 +186,22 @@ const EntryHistoryComponent = function EntryHistory({
   useEffect(() => {
     setCollapsedDates((previous) => {
       const allDates = totalEntries.map((group) => group.date);
-      const prevDates = new Set(previous);
+      const previousDates = new Set(previous);
       let changed = false;
       for (const date of allDates) {
-        if (date !== todayFormatted && !prevDates.has(date)) {
-          prevDates.add(date);
+        if (date !== todayFormatted && !previousDates.has(date)) {
+          previousDates.add(date);
           changed = true;
         }
       }
       // Remove any dates that no longer exist
-      for (const date of prevDates) {
+      for (const date of previousDates) {
         if (!allDates.includes(date)) {
-          prevDates.delete(date);
+          previousDates.delete(date);
           changed = true;
         }
       }
-      return changed ? new Set(prevDates) : previous;
+      return changed ? new Set(previousDates) : previous;
     });
   }, [totalEntries, todayFormatted]);
 
@@ -367,10 +367,10 @@ const EntryHistoryComponent = function EntryHistory({
                   if (hasMore && onLoadMore) {
                     await onLoadMore();
                     setShowAllDates(true);
-                  } else if (!showAllDates) {
-                    setShowAllDates(true);
-                  } else {
+                  } else if (showAllDates) {
                     setShowAllDates(false);
+                  } else {
+                    setShowAllDates(true);
                   }
                 }}
                 className={`px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50 ${
