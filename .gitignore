@@ -11,7 +11,7 @@ node_modules
 backend/dist
 dist-ssr
 *.local
-
+*.kiro
 
 *.db
 *.db-shm
