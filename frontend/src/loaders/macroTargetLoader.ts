@@ -1,6 +1,6 @@
-import { habitsLoader } from "@/features/habits/loaders/habitsLoader";
 // Combined loader for goals route: fetches macroTarget, macroDailyTotals, and weightGoals
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { habitsLoader } from "@/loaders/habitsLoader";
 import { apiService } from "@/utils/apiServices";
 
 import { macroDataLoader } from "./macroDataLoader";
@@ -22,7 +22,7 @@ export const macroGoalsLoader = async () => {
   ]);
 
   // Compute nutritionProfile from user details
-  let nutritionProfile = null;
+  let nutritionProfile;
   if (userDetailsResult) {
     try {
       // Map userDetailsResult to UserSettings shape
@@ -38,12 +38,12 @@ export const macroGoalsLoader = async () => {
       };
       nutritionProfile = createNutritionProfile(userSettings);
     } catch {
-      nutritionProfile = null;
+      nutritionProfile = undefined;
     }
   }
 
   return {
-    macroTarget: macroTargetResult?.macroTarget ?? null,
+    macroTarget: macroTargetResult?.macroTarget ?? undefined,
     macroDailyTotals: macroDataResult?.macroDailyTotals ?? {
       protein: 0,
       carbs: 0,
@@ -74,7 +74,7 @@ export const macroHomeLoader = async (options?: {
       weightGoalsLoader(),
     ]);
   const result = {
-    macroTarget: macroTargetResult?.macroTarget ?? null,
+    macroTarget: macroTargetResult?.macroTarget ?? undefined,
     ...macroDataResult,
     weightGoals: weightGoalsResult?.weightGoals ?? undefined,
     weightLog: weightGoalsResult?.weightLog ?? [],
@@ -87,10 +87,10 @@ export const macroHomeLoader = async (options?: {
 export const macroTargetLoader = async () => {
   try {
     const response = await apiService.macros.getMacroTarget();
-    return { macroTarget: response?.macroTarget ?? null };
+    return { macroTarget: response?.macroTarget ?? undefined };
   } catch (error: any) {
     return {
-      macroTarget: null,
+      macroTarget: undefined,
       error: error?.message || "Failed to load macro target",
     };
   }
