@@ -2,7 +2,7 @@
 import { apiService } from "@/utils/apiServices";
 import { getErrorMessage } from "@/utils/errorHandling";
 
-import type { HabitGoal } from "../types/types";
+import type { HabitGoal } from "../features/habits/types/types";
 
 export async function habitsLoader() {
   try {

@@ -119,8 +119,6 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         error: undefined,
       }));
 
-      // --- Step 3.5: Loader now hydrates weight log; no fetchWeightLog needed ---
-
       // --- Step 4: Update User Slice (if log entry succeeded) ---
       if (savedLogEntry) {
         fullGet().updateCurrentUserWeight?.(savedLogEntry.weight);

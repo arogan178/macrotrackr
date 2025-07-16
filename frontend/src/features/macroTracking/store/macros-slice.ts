@@ -4,7 +4,6 @@ import {
   MacroDailyTotals,
   MacroEntry,
   MacroTargetSettings,
-  PaginatedMacroHistory,
 } from "@/types/macro";
 import { apiService } from "@/utils/apiServices";
 import { getErrorMessage } from "@/utils/errorHandling";
@@ -86,15 +85,10 @@ export const createMacrosSlice: StateCreator<
     }
   },
 
-  // loadMoreHistory: async () => {
-  //   // Deprecated: Loader now handles pagination
-  // },
-
   addEntry: async (inputs: AddEntryPayload): Promise<void> => {
     set({ isSaving: true, error: undefined });
     try {
       await apiService.macros.addEntry(inputs);
-      // fetchMacroData removed; loader now handles macro data refresh
       get()._notifyUser("Entry saved successfully!", "success");
     } catch (error) {
       const errorMessage = getErrorMessage(error);
