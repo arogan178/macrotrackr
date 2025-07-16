@@ -9,7 +9,12 @@ export async function macroDataLoader({
   endDate,
   limit = 20,
   offset = 0,
-}: { startDate?: string; endDate?: string; limit?: number; offset?: number } = {}) {
+}: {
+  startDate?: string;
+  endDate?: string;
+  limit?: number;
+  offset?: number;
+} = {}) {
   try {
     // Fetch daily totals, history, and weight goals in parallel
     // Fetch all entries from 0 to offset+limit for cumulative pagination

@@ -1,11 +1,10 @@
+import { habitsLoader } from "@/features/habits/loaders/habitsLoader";
+// Combined loader for goals route: fetches macroTarget, macroDailyTotals, and weightGoals
+import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { apiService } from "@/utils/apiServices";
 
 import { macroDataLoader } from "./macroDataLoader";
 import { weightGoalsLoader } from "./weightGoalsLoader";
-import { habitsLoader } from "@/features/habits/loaders/habitsLoader";
-
-// Combined loader for goals route: fetches macroTarget, macroDailyTotals, and weightGoals
-import { createNutritionProfile } from "@/features/settings/utils/calculations";
 
 export const macroGoalsLoader = async () => {
   const [
@@ -32,7 +31,9 @@ export const macroGoalsLoader = async () => {
         dateOfBirth: userDetailsResult.dateOfBirth ?? "",
         height: userDetailsResult.height ?? 0,
         weight: userDetailsResult.weight ?? 0,
-        gender: (userDetailsResult.gender as "" | "male" | "female" | undefined) ?? "male",
+        gender:
+          (userDetailsResult.gender as "" | "male" | "female" | undefined) ??
+          "male",
         activityLevel: userDetailsResult.activityLevel ?? 1,
       };
       nutritionProfile = createNutritionProfile(userSettings);
@@ -59,10 +60,12 @@ export const macroGoalsLoader = async () => {
 };
 
 // Combined loader for home route: fetches macroTarget, macroData, and weightGoals
-export const macroHomeLoader = async (opts?: { search?: { limit?: string | number; offset?: string | number } }) => {
+export const macroHomeLoader = async (options?: {
+  search?: { limit?: string | number; offset?: string | number };
+}) => {
   // Get limit/offset from search params, fallback to defaults
-  const limit = opts?.search?.limit ? Number(opts.search.limit) : 20;
-  const offset = opts?.search?.offset ? Number(opts.search.offset) : 0;
+  const limit = options?.search?.limit ? Number(options.search.limit) : 20;
+  const offset = options?.search?.offset ? Number(options.search.offset) : 0;
 
   const [macroTargetResult, macroDataResult, weightGoalsResult] =
     await Promise.all([

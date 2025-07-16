@@ -163,7 +163,11 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         tdee,
       );
 
-      set({ weightGoals: savedWeightGoal as WeightGoals, isSaving: false, error: undefined });
+      set({
+        weightGoals: savedWeightGoal as WeightGoals,
+        isSaving: false,
+        error: undefined,
+      });
 
       // --- Loader now hydrates weight log; no fetchWeightLog needed ---
 
