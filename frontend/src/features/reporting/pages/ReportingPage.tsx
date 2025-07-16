@@ -26,12 +26,11 @@ export default function ReportingPage() {
   const reportingLoaderData = useLoaderData({ from: reportingRoute.id }) as any;
   const weightGoals = reportingLoaderData?.weightGoals;
   const history = reportingLoaderData?.history || [];
+  const macroTarget = reportingLoaderData?.macroTarget;
 
   const {
     isLoading,
     error,
-    macroTarget,
-    // weightGoals, // now hydrated from loader
     nutritionProfile,
     setWeightGoals,
     setSubscriptionStatus,
