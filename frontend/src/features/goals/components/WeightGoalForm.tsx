@@ -53,8 +53,7 @@ function WeightGoalForm({
       ? generateWeightGoalCalculations(
           tdee,
           formValues.startingWeight,
-          formValues.targetWeight,
-          undefined, // let calculation use default calorie target
+          formValues.targetWeight, // let calculation use default calorie target
         )
       : undefined;
 
@@ -70,7 +69,6 @@ function WeightGoalForm({
     } else if (weightGoals?.calorieTarget) {
       setCalorieIntake(weightGoals.calorieTarget);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [calculations?.calorieTarget, isEditing, weightGoals?.calorieTarget]);
 
   // Derived values for display

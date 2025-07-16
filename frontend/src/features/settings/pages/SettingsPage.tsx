@@ -1,5 +1,5 @@
-import { ReactNode, useCallback, useEffect, useState } from "react";
 import { useLoaderData } from "@tanstack/react-router";
+import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { FormButton, TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
@@ -216,9 +216,7 @@ export default function SettingsPage() {
             </div>
           </PageHeader>
 
-          {!settings ? (
-            <SettingsLoadingSkeleton />
-          ) : (
+          {settings ? (
             <>
               {activeTab === "profile" && (
                 <form onSubmit={handleSubmit} className="p-6">
@@ -246,6 +244,8 @@ export default function SettingsPage() {
               {activeTab === "billing" && <BillingForm />}
               {activeTab === "security" && <ChangePasswordForm />}
             </>
+          ) : (
+            <SettingsLoadingSkeleton />
           )}
         </div>
       </div>
