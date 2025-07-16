@@ -1,3 +1,4 @@
+import { useRouter } from "@tanstack/react-router";
 import { format, isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
 
@@ -6,7 +7,6 @@ import Modal from "@/components/ui/Modal";
 import { useStore } from "@/store/store";
 import { AddWeightLogPayload } from "@/utils/apiServices";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
-import { useRouter } from "@tanstack/react-router";
 
 interface LogWeightModalProps {
   isOpen: boolean;

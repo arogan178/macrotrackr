@@ -1,9 +1,9 @@
+import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import Modal from "@/components/ui/Modal";
 import { useStore } from "@/store/store"; // Import useStore
 import type { WeightGoals } from "@/types/goal";
-import { useRouter } from "@tanstack/react-router";
 
 import { WeightGoalFormValues } from "../types";
 import WeightGoalForm from "./WeightGoalForm";
