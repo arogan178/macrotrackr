@@ -17,6 +17,7 @@ import {
 import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 import { FloatingNotification } from "@/features/notifications/components";
+import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useStore } from "@/store/store";
 
 export default function GoalsPage() {
@@ -47,9 +48,12 @@ export default function GoalsPage() {
     weightGoals,
     weightLog,
     weightGoalsError,
-    nutritionProfile,
     habits: loaderHabits, // Get habits from loader
   } = useLoaderData({ from: goalsRoute.id }) || {};
+
+  // Calculate nutritionProfile from user data
+  const nutritionProfile = user ? createNutritionProfile(user) : undefined;
+
   const {
     // Remove nutritionProfile from store, always use loader's nutritionProfile
     // weightGoals, // now hydrated from loader
