@@ -406,11 +406,11 @@ export const apiService = {
         | SetWeightGoalPayload
         | undefined;
     },
-    changePassword: async (passwordCurrent: string, passwordNew: string) => {
+    changePassword: async (currentPassword: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/user/password`, {
         method: "PUT",
         headers: getHeaders(),
-        body: JSON.stringify({ passwordCurrent, passwordNew }),
+        body: JSON.stringify({ currentPassword, newPassword }),
         credentials: "include",
       });
       return (await handleResponse(response)) as WeightLogEntry[];
