@@ -49,6 +49,7 @@ export default function GoalsPage() {
     weightLog,
     weightGoalsError,
     nutritionProfile,
+    habits: loaderHabits, // Get habits from loader
   } = useLoaderData({ from: goalsRoute.id }) || {};
   const {
     // Remove nutritionProfile from store, always use loader's nutritionProfile
@@ -60,7 +61,7 @@ export default function GoalsPage() {
     error: habitsError,
     clearError,
     setWeightGoals,
-    fetchHabits,
+    setHabits,
     addHabit,
     updateHabit,
     incrementHabitProgress,
@@ -68,7 +69,7 @@ export default function GoalsPage() {
     deleteHabit,
     deleteWeightGoal,
     resetGoals,
-    fetchWeightLog,
+    setWeightLog,
     setSubscriptionStatus,
   } = useStore();
 
@@ -88,11 +89,17 @@ export default function GoalsPage() {
     }
   }, [user, setSubscriptionStatus]);
 
-  // Fetch habits and weight log on component mount if needed
+  // Hydrate habits from loader into Zustand store
   useEffect(() => {
-    fetchHabits();
-    fetchWeightLog();
-  }, [fetchHabits, fetchWeightLog]);
+    if (loaderHabits) {
+      setHabits(loaderHabits);
+    }
+  }, [loaderHabits, setHabits]);
+
+  // Hydrate weight log from loader into Zustand store
+  useEffect(() => {
+    setWeightLog(weightLog);
+  }, [weightLog, setWeightLog]);
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
@@ -146,6 +153,9 @@ export default function GoalsPage() {
     await (habitModalMode === "edit" && habitId
       ? updateHabit(habitId, values)
       : addHabit(values));
+
+    // Invalidate the router to refetch loader data (habits)
+    router.invalidate();
 
     setIsHabitModalOpen(false);
     setCurrentHabit(undefined);
