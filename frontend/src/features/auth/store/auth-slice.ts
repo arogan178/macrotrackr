@@ -54,7 +54,6 @@ export interface AuthSlice {
   // Password Reset
   forgotPassword: (email: string) => Promise<void>;
   resetPassword: (token: string, newPassword: string) => Promise<void>;
-  rehydrateAuth: () => Promise<void>;
   changePassword: (
     currentPassword: string,
     newPassword: string,
@@ -318,37 +317,6 @@ export const createAuthSlice: StateCreator<AuthSlice, [], [], AuthSlice> = (
         auth: { ...state.auth, isLoading: false, error: errorMessage },
       }));
       throw error;
-    }
-  },
-
-  rehydrateAuth: async () => {
-    set((state: AuthSliceState) => ({
-      auth: {
-        ...state.auth,
-        isLoading: true,
-        isAuthenticated: true,
-        error: undefined,
-      },
-    }));
-    try {
-      // fetchUserDetails is not defined in AuthSlice, so skip this call
-      set((state: AuthSliceState) => ({
-        auth: { ...state.auth, isLoading: false },
-      }));
-    } catch (error) {
-      const errorMessage =
-        error instanceof Error
-          ? error.message
-          : AUTH_ERROR_MESSAGES.serverError;
-      set((state: AuthSliceState) => ({
-        auth: {
-          ...state.auth,
-          isLoading: false,
-          isAuthenticated: false,
-          error: errorMessage,
-        },
-      }));
-      get().logout();
     }
   },
 
