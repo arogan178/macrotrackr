@@ -1,8 +1,7 @@
-import { useNavigate } from "@tanstack/react-router";
-
 import { CardContainer, TextField } from "@/components/form";
 import { CalorieIcon } from "@/components/ui";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
 
@@ -11,23 +10,26 @@ interface LoginFormProps {
 }
 
 function FormLogin({ onForgotPassword }: LoginFormProps) {
-  const navigate = useNavigate();
   const {
-    auth: { email, password, isLoading },
-    setAuthEmail,
-    setAuthPassword,
-    login,
+    loginEmail,
+    loginPassword,
+    setLoginEmail,
+    setLoginPassword,
+    clearLoginForm,
     showNotification,
   } = useStore();
+
+  const loginMutation = useLogin();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
-      await login(email, password);
+      await loginMutation.mutateAsync({
+        email: loginEmail,
+        password: loginPassword,
+      });
       showNotification("Login successful", "success");
-      setTimeout(() => {
-        navigate({ to: "/home", replace: true });
-      }, 100);
+      clearLoginForm();
     } catch (error) {
       if (
         error instanceof ApiError &&
@@ -61,8 +63,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
           label="Email"
-          value={email}
-          onChange={setAuthEmail}
+          value={loginEmail}
+          onChange={setLoginEmail}
           type="email"
           required={true}
           placeholder="your@email.com"
@@ -70,8 +72,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
         />
         <TextField
           label="Password"
-          value={password}
-          onChange={setAuthPassword}
+          value={loginPassword}
+          onChange={setLoginPassword}
           type="password"
           required={true}
           placeholder="••••••••"
@@ -87,13 +89,13 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
         </div>
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={loginMutation.isPending}
           className="w-full p-3 rounded-lg font-medium text-white 
                  bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
                  disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
                  shadow-lg shadow-indigo-500/30"
         >
-          {isLoading ? <LoadingSpinner size="sm" color="white" /> : "Sign In"}
+          {loginMutation.isPending ? <LoadingSpinner size="sm" color="white" /> : "Sign In"}
         </button>
       </form>
     </CardContainer>

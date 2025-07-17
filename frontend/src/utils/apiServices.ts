@@ -364,7 +364,10 @@ export const apiService = {
         body: JSON.stringify({ email, password }),
         credentials: "include",
       });
-      return (await handleResponse(response)) as MacroTargetGetResponse;
+      return (await handleResponse(response)) as {
+        token: string;
+        user?: UserDetailsResponse;
+      };
     },
     validateEmail: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/validate-email`, {
@@ -373,9 +376,7 @@ export const apiService = {
         body: JSON.stringify({ email }),
         credentials: "include",
       });
-      return (await handleResponse(response)) as
-        | SetWeightGoalPayload
-        | undefined;
+      return (await handleResponse(response)) as { valid: boolean };
     },
     register: async (userData: Record<string, unknown>) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
@@ -384,7 +385,10 @@ export const apiService = {
         body: JSON.stringify(userData),
         credentials: "include",
       });
-      return (await handleResponse(response)) as WeightLogEntry[];
+      return (await handleResponse(response)) as {
+        token: string;
+        user?: UserDetailsResponse;
+      };
     },
     forgotPassword: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
@@ -393,7 +397,10 @@ export const apiService = {
         body: JSON.stringify({ email }),
         credentials: "include",
       });
-      return (await handleResponse(response)) as MacroTargetGetResponse;
+      return (await handleResponse(response)) as {
+        success: boolean;
+        message?: string;
+      };
     },
     resetPassword: async (token: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
@@ -402,9 +409,10 @@ export const apiService = {
         body: JSON.stringify({ token, newPassword }),
         credentials: "include",
       });
-      return (await handleResponse(response)) as
-        | SetWeightGoalPayload
-        | undefined;
+      return (await handleResponse(response)) as {
+        success: boolean;
+        message?: string;
+      };
     },
     changePassword: async (currentPassword: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/user/password`, {
@@ -413,7 +421,10 @@ export const apiService = {
         body: JSON.stringify({ currentPassword, newPassword }),
         credentials: "include",
       });
-      return (await handleResponse(response)) as WeightLogEntry[];
+      return (await handleResponse(response)) as {
+        success: boolean;
+        message?: string;
+      };
     },
   },
 

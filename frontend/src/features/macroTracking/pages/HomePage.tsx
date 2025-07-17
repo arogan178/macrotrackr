@@ -7,7 +7,7 @@ import {
 import { AnimatePresence } from "motion/react";
 import { memo, useCallback, useEffect } from "react";
 
-import { homeRoute, rootRoute } from "@/AppRouter";
+import { homeRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
 import Navbar from "@/components/layout/Navbar";
 import { UserMetricsPanel } from "@/features/dashboard/components";
@@ -19,11 +19,12 @@ import {
 } from "@/features/macroTracking/components";
 import { FloatingNotification } from "@/features/notifications/components";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 export default function HomePage() {
-  // Get user data from root route loader
-  const { user } = useLoaderData({ from: rootRoute.id });
+  // Get user data from useUser hook
+  const { data: user } = useUser();
   // Get macro data from home route loader
   const {
     macroTarget,
