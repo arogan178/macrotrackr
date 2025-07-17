@@ -4,6 +4,7 @@ import React, { useState } from "react";
 
 import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 import PlanToggle from "./PlanToggle";
@@ -23,7 +24,8 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
     "monthly",
   );
   const navigate = useNavigate();
-  const isAuthenticated = useStore((state) => state.auth.isAuthenticated);
+  const { data: user } = useUser();
+  const isAuthenticated = !!user;
 
   const handleGetPro = () => {
     if (isAuthenticated) {
