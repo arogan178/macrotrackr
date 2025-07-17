@@ -6,19 +6,20 @@ import {
   createRouter,
   Outlet,
   RouterProvider,
-  useLoaderData,
 } from "@tanstack/react-router";
 import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { billingLoader } from "@/loaders/billingLoader";
-import { authLoader } from "@/loaders/authLoader";
 import { macroDataLoader } from "@/loaders/macroDataLoader";
 import { macroGoalsLoader, macroHomeLoader } from "@/loaders/macroTargetLoader";
 import { settingsLoader } from "@/loaders/settingsLoader";
 
 import MainLayout from "./components/layout/MainLayout";
+import { useUser } from "./hooks/auth/useAuthQueries";
+import { queryClient } from "./lib/queryClient";
+import { queryKeys } from "./lib/queryKeys";
 
 const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
 const LandingPage = React.lazy(
@@ -58,19 +59,56 @@ function LoadingFallback() {
 }
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useLoaderData({ from: rootRoute.id }) as any;
-  if (!isAuthenticated) {
+  const { data: user, isLoading } = useUser();
+
+  // Show loading while checking authentication
+  if (isLoading) {
+    return <LoadingSpinner size="lg" />;
+  }
+
+  // Redirect to login if not authenticated
+  if (!user) {
     if (globalThis.window !== undefined) {
       globalThis.location.replace("/login");
     }
-    return null;
+    return;
   }
+
   return <>{children}</>;
 }
 
-// Root route with loader for user data
+// Root route with query-based user data prefetching
 export const rootRoute = createRootRoute({
-  loader: authLoader,
+  loader: async ({ context }) => {
+    // Only prefetch user data if there's a token
+    const { getToken } = await import("@/utils/tokenStorage");
+    
+    if (getToken()) {
+      // Prefetch user data using TanStack Query
+      await context.queryClient.ensureQueryData({
+        queryKey: queryKeys.auth.user(),
+        queryFn: async () => {
+          try {
+            const { apiService } = await import("@/utils/apiServices");
+            return await apiService.user.getUserDetails();
+          } catch (error) {
+            // If user is not authenticated, return undefined instead of throwing
+            if (
+              error instanceof Error &&
+              "status" in error &&
+              (error as any).status === 401
+            ) {
+              return;
+            }
+            throw error;
+          }
+        },
+        staleTime: 1 * 60 * 1000, // 1 minute
+        gcTime: 5 * 60 * 1000, // 5 minutes
+        retry: false, // Don't retry auth queries to avoid infinite loops
+      });
+    }
+  },
   component: () => (
     <ErrorBoundary>
       <MainLayout>
@@ -105,7 +143,15 @@ export const homeRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
-  loader: ({ deps }) => macroHomeLoader({ search: deps }),
+  loader: async ({ deps, context }) => {
+    // Use queryClient.ensureQueryData for prefetching
+    return await context.queryClient.ensureQueryData({
+      queryKey: queryKeys.macros.history(),
+      queryFn: () => macroHomeLoader({ search: deps }),
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    });
+  },
   component: () => (
     <RequireAuth>
       <HomePage />
@@ -116,10 +162,21 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: async () => {
+  loader: async ({ context }) => {
+    // Use queryClient.ensureQueryData for prefetching settings and billing data
     const [settingsData, billingData] = await Promise.all([
-      settingsLoader(),
-      billingLoader(),
+      context.queryClient.ensureQueryData({
+        queryKey: queryKeys.settings.user(),
+        queryFn: () => settingsLoader(),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+      }),
+      context.queryClient.ensureQueryData({
+        queryKey: queryKeys.settings.billing(),
+        queryFn: () => billingLoader(),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+      }),
     ]);
     return {
       ...settingsData,
@@ -136,7 +193,15 @@ const settingsRoute = createRoute({
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
-  loader: macroGoalsLoader,
+  loader: async ({ context }) => {
+    // Use queryClient.ensureQueryData for prefetching goals data
+    return await context.queryClient.ensureQueryData({
+      queryKey: queryKeys.goals.all(),
+      queryFn: () => macroGoalsLoader(),
+      staleTime: 5 * 60 * 1000, // 5 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    });
+  },
   component: () => (
     <RequireAuth>
       <GoalsPage />
@@ -165,7 +230,17 @@ export const reportingRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
-  loader: ({ deps }) => macroDataLoader(deps),
+  loader: async ({ deps, context }) => {
+    // Use queryClient.ensureQueryData for prefetching reporting data
+    return await context.queryClient.ensureQueryData({
+      queryKey: queryKeys.macros.dailyTotals(
+        `${deps.startDate || ""}-${deps.endDate || ""}`,
+      ),
+      queryFn: () => macroDataLoader(deps),
+      staleTime: 2 * 60 * 1000, // 2 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
+    });
+  },
   component: () => (
     <RequireAuth>
       <ReportingPage />
@@ -209,7 +284,21 @@ const routeTree = rootRoute.addChildren([
 
 const router = createRouter({
   routeTree,
+  context: {
+    queryClient,
+  },
 });
+
+// Declare the router context type for TypeScript
+declare module "@tanstack/react-router" {
+  interface Register {
+    router: typeof router;
+  }
+
+  interface RouterContext {
+    queryClient: typeof queryClient;
+  }
+}
 
 export default function AppRouter() {
   return <RouterProvider router={router} />;

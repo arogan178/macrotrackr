@@ -2,25 +2,18 @@ import { useState } from "react";
 
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { FloatingNotification } from "@/features/notifications/components";
+import { useChangePassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 const ChangePasswordForm = () => {
-  const changePassword = useStore((state) => state.changePassword);
-  const isChangingPassword = useStore((state) => state.auth.isChangingPassword);
-  const changePasswordError = useStore(
-    (state) => state.auth.changePasswordError,
-  );
-  const changePasswordSuccess = useStore(
-    (state) => state.auth.changePasswordSuccess,
-  );
-  const clearChangePasswordMessages = useStore(
-    (state) => state.clearChangePasswordMessages,
-  );
+  const { showNotification } = useStore();
+  const changePasswordMutation = useChangePassword();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
+  const [successMessage, setSuccessMessage] = useState<string | undefined>();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -35,28 +28,30 @@ const ChangePasswordForm = () => {
       return;
     }
 
-    await changePassword(currentPassword, newPassword);
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    try {
+      await changePasswordMutation.mutateAsync({
+        currentPassword,
+        newPassword,
+      });
+      setSuccessMessage("Password changed successfully.");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to change password.";
+      showNotification(errorMessage, "error");
+    }
   };
 
   return (
     <>
       <CardContainer className="p-6">
         <div className="relative">
-          {changePasswordSuccess && (
+          {successMessage && (
             <FloatingNotification
-              message={changePasswordSuccess}
+              message={successMessage}
               type="success"
-              onClose={clearChangePasswordMessages}
-            />
-          )}
-          {changePasswordError && (
-            <FloatingNotification
-              message={changePasswordError}
-              type="error"
-              onClose={clearChangePasswordMessages}
+              onClose={() => setSuccessMessage(undefined)}
             />
           )}
           <form
@@ -100,7 +95,7 @@ const ChangePasswordForm = () => {
         <FormButton
           form="change-password-form"
           type="submit"
-          isLoading={isChangingPassword}
+          isLoading={changePasswordMutation.isPending}
           disabled={!currentPassword || !newPassword || !confirmPassword}
           text="Change Password"
           buttonSize="lg"

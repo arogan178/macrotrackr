@@ -1,4 +1,3 @@
-import { useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 
 import {
@@ -14,11 +13,10 @@ import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
 } from "@/features/settings/utils/constants";
+import { useRegistrationProcess } from "@/hooks/auth/useRegistration";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-
-import { handleStepBack, handleStepSubmit } from "../utils";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
@@ -29,22 +27,21 @@ const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
 
 // Step One Component - Account Information
 export function StepOne() {
-  const {
-    auth: { register, isLoading },
-    setRegisterField,
-    validateRegisterStep,
-    setRegisterStep,
-  } = useStore();
+  const { register, setRegisterField, setRegisterStep, showNotification } = useStore();
+  const { validateStep, isValidating } = useRegistrationProcess();
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
-      await handleStepSubmit(event, 1, {
-        currentStep: 1,
-        validateRegisterStep,
-        setRegisterStep,
-      });
+      event.preventDefault();
+      
+      const result = await validateStep(1, register);
+      if (result.isValid) {
+        setRegisterStep(2);
+      } else if (result.error) {
+        showNotification(result.error, "error");
+      }
     },
-    [validateRegisterStep, setRegisterStep],
+    [validateStep, register, setRegisterStep, showNotification],
   );
 
   return (
@@ -94,7 +91,7 @@ export function StepOne() {
         <div className="pt-4">
           <FormButton
             type="submit"
-            isLoading={isLoading}
+            isLoading={isValidating}
             fullWidth={true}
             iconPosition="right"
             icon={<ForwardIcon />}
@@ -109,23 +106,26 @@ export function StepOne() {
 
 // Step Two Component - Profile Information
 export function StepTwo() {
-  const {
-    auth: { register, isLoading },
-    setRegisterField,
-    validateRegisterStep,
-    setRegisterStep,
-  } = useStore();
+  const { register, setRegisterField, setRegisterStep, showNotification } = useStore();
+  const { validateStep, isValidating } = useRegistrationProcess();
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
-      await handleStepSubmit(event, 2, {
-        currentStep: 2,
-        validateRegisterStep,
-        setRegisterStep,
-      });
+      event.preventDefault();
+      
+      const result = await validateStep(2, register);
+      if (result.isValid) {
+        setRegisterStep(3);
+      } else if (result.error) {
+        showNotification(result.error, "error");
+      }
     },
-    [validateRegisterStep, setRegisterStep],
+    [validateStep, register, setRegisterStep, showNotification],
   );
+
+  const handleStepBack = () => {
+    setRegisterStep(1);
+  };
 
   return (
     <StepFormWrapper>
@@ -179,8 +179,8 @@ export function StepTwo() {
           <div className="flex gap-3">
             <FormButton
               variant="secondary"
-              onClick={() => handleStepBack(2, setRegisterStep)}
-              isLoading={isLoading}
+              onClick={handleStepBack}
+              isLoading={isValidating}
               iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
@@ -190,7 +190,7 @@ export function StepTwo() {
             <FormButton
               type="submit"
               variant="primary"
-              isLoading={isLoading}
+              isLoading={isValidating}
               iconPosition="right"
               icon={<ForwardIcon />}
               className="w-2/3"
@@ -206,27 +206,32 @@ export function StepTwo() {
 
 // Step Three Component - Activity Level
 export function StepThree() {
-  const navigate = useNavigate();
-  const {
-    auth: { register, isLoading },
-    setRegisterField,
-    setRegisterStep,
-    validateRegisterStep,
-    submitRegistration,
-  } = useStore();
+  const { register, setRegisterField, setRegisterStep, showNotification } = useStore();
+  const { validateStep, submitRegistration, isValidating, isSubmitting } = useRegistrationProcess();
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
-      await handleStepSubmit(event, 3, {
-        currentStep: 3,
-        validateRegisterStep,
-        setRegisterStep,
-        submitRegistration,
-        navigate,
-      });
+      event.preventDefault();
+      
+      const result = await validateStep(3, register);
+      if (result.isValid) {
+        try {
+          await submitRegistration(register);
+          showNotification("Registration successful!", "success");
+        } catch (error) {
+          const errorMessage = error instanceof Error ? error.message : "Registration failed";
+          showNotification(errorMessage, "error");
+        }
+      } else if (result.error) {
+        showNotification(result.error, "error");
+      }
     },
-    [validateRegisterStep, setRegisterStep, submitRegistration, navigate],
+    [validateStep, register, submitRegistration, showNotification],
   );
+
+  const handleStepBack = () => {
+    setRegisterStep(2);
+  };
 
   return (
     <StepFormWrapper>
@@ -266,8 +271,8 @@ export function StepThree() {
           <div className="flex gap-3">
             <FormButton
               variant="secondary"
-              onClick={() => handleStepBack(3, setRegisterStep)}
-              isLoading={isLoading}
+              onClick={handleStepBack}
+              isLoading={isValidating || isSubmitting}
               iconPosition="left"
               icon={<BackIcon />}
               className="w-1/3"
@@ -277,7 +282,7 @@ export function StepThree() {
             <FormButton
               type="submit"
               variant="primary"
-              isLoading={isLoading}
+              isLoading={isValidating || isSubmitting}
               loadingText="Creating Account..."
               iconPosition="right"
               icon={<CheckIcon />}
