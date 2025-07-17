@@ -12,17 +12,16 @@ import {
   ReportingIcon2,
   SettingsIcon,
 } from "@/components/ui";
-import { useStore } from "@/store/store";
+import { useLogout } from "@/hooks/auth/useAuthQueries";
 
 const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const logout = useStore((state) => state.logout);
+  const logoutMutation = useLogout();
   const handleLogout = () => {
-    logout();
-    navigate({ to: "/login", replace: true });
+    logoutMutation.mutate();
     setIsMobileMenuOpen(false);
   };
 

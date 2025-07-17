@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { apiService } from "@/utils/apiServices";
 
@@ -17,7 +18,8 @@ type SubscriptionStatus = (typeof allowedStatuses)[number];
 export function useSubscriptionStatus() {
   const subscriptionStatus = useStore((s) => s.subscriptionStatus);
   const setSubscriptionStatus = useStore((s) => s.setSubscriptionStatus);
-  const isAuthenticated = useStore((s) => s.auth.isAuthenticated);
+  const { data: user } = useUser();
+  const isAuthenticated = !!user;
 
   // Removed effect that overwrites subscriptionStatus
 

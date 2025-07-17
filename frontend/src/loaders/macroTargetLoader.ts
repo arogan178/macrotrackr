@@ -7,17 +7,13 @@ import { macroDataLoader } from "./macroDataLoader";
 import { weightGoalsLoader } from "./weightGoalsLoader";
 
 export const macroGoalsLoader = async () => {
-  const [
-    macroTargetResult,
-    macroDataResult,
-    weightGoalsResult,
-    habitsResult,
-  ] = await Promise.all([
-    apiService.macros.getMacroTarget(),
-    macroDataLoader(),
-    weightGoalsLoader(),
-    habitsLoader(),
-  ]);
+  const [macroTargetResult, macroDataResult, weightGoalsResult, habitsResult] =
+    await Promise.all([
+      apiService.macros.getMacroTarget(),
+      macroDataLoader(),
+      weightGoalsLoader(),
+      habitsLoader(),
+    ]);
 
   return {
     macroTarget: macroTargetResult?.macroTarget ?? undefined,

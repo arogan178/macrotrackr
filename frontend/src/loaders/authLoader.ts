@@ -16,9 +16,9 @@ export async function authLoader(): Promise<AuthLoaderResult> {
     const errorMessage = getErrorMessage(error);
     // Handle specific auth error case
     if (errorMessage.includes("401")) {
-      return { isAuthenticated: false, user: null };
+      return { isAuthenticated: false, user: undefined };
     }
     // Handle other errors
-    return { isAuthenticated: false, user: null, error: errorMessage };
+    return { isAuthenticated: false, user: undefined, error: errorMessage };
   }
 }
