@@ -7,10 +7,6 @@ import {
   GoalsSlice,
 } from "@/features/goals/store/goals-slice";
 import {
-  createHabitsSlice,
-  HabitsSlice,
-} from "@/features/habits/store/habits-slice";
-import {
   createMacrosSlice,
   MacrosSlice,
 } from "@/features/macroTracking/store/macros-slice";
@@ -23,15 +19,14 @@ import {
   UserSlice,
 } from "@/features/settings/store/user-slice";
 
-// Combine all slice types
+// Combine all slice types (removed HabitsSlice)
 export type StoreState = UserSlice &
   MacrosSlice &
   GoalsSlice &
   AuthUISlice &
-  NotificationSlice &
-  HabitsSlice;
+  NotificationSlice;
 
-// Create the store with all slices
+// Create the store with all slices (removed createHabitsSlice)
 export const useStore = create<StoreState>()(
   devtools((...a) => ({
     ...createUserSlice(...a),
@@ -39,7 +34,6 @@ export const useStore = create<StoreState>()(
     ...createGoalsSlice(...a),
     ...createAuthUISlice(...a),
     ...createNotificationSlice(...a),
-    ...createHabitsSlice(...a),
   })),
 );
 
