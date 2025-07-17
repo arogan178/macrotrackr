@@ -194,13 +194,26 @@ export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
   loader: async ({ context }) => {
-    // Use queryClient.ensureQueryData for prefetching goals data
-    return await context.queryClient.ensureQueryData({
-      queryKey: queryKeys.goals.all(),
-      queryFn: () => macroGoalsLoader(),
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-    });
+    // Use queryClient.ensureQueryData for prefetching goals and habits data
+    const [goalsData] = await Promise.all([
+      context.queryClient.ensureQueryData({
+        queryKey: queryKeys.goals.all(),
+        queryFn: () => macroGoalsLoader(),
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+      }),
+      // Prefetch habits data using TanStack Query
+      context.queryClient.ensureQueryData({
+        queryKey: queryKeys.habits.list(),
+        queryFn: async () => {
+          const { apiService } = await import("@/utils/apiServices");
+          return await apiService.habits.getHabit();
+        },
+        staleTime: 5 * 60 * 1000, // 5 minutes
+        gcTime: 10 * 60 * 1000, // 10 minutes
+      }),
+    ]);
+    return goalsData;
   },
   component: () => (
     <RequireAuth>
