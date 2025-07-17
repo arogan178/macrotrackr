@@ -1,18 +1,16 @@
 // Combined loader for goals route: fetches macroTarget, macroDailyTotals, and weightGoals
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
-import { habitsLoader } from "@/loaders/habitsLoader";
 import { apiService } from "@/utils/apiServices";
 
 import { macroDataLoader } from "./macroDataLoader";
 import { weightGoalsLoader } from "./weightGoalsLoader";
 
 export const macroGoalsLoader = async () => {
-  const [macroTargetResult, macroDataResult, weightGoalsResult, habitsResult] =
+  const [macroTargetResult, macroDataResult, weightGoalsResult] =
     await Promise.all([
       apiService.macros.getMacroTarget(),
       macroDataLoader(),
       weightGoalsLoader(),
-      habitsLoader(),
     ]);
 
   return {
@@ -26,8 +24,6 @@ export const macroGoalsLoader = async () => {
     weightGoals: weightGoalsResult?.weightGoals ?? undefined,
     weightLog: weightGoalsResult?.weightLog ?? [],
     weightGoalsError: weightGoalsResult?.error,
-    habits: habitsResult?.habits ?? [],
-    habitsError: habitsResult?.error,
   };
 };
 
