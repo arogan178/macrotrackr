@@ -20,6 +20,14 @@ import { FloatingNotification } from "@/features/notifications/components";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
+import {
+  useAddHabit,
+  useCompleteHabit,
+  useDeleteHabit,
+  useHabits,
+  useIncrementHabitProgress,
+  useUpdateHabit,
+} from "@/hooks/queries/useHabits";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";
@@ -49,32 +57,30 @@ export default function GoalsPage() {
     weightGoals,
     weightLog,
     weightGoalsError,
-    habits: loaderHabits, // Get habits from loader
   } = useLoaderData({ from: goalsRoute.id }) || {};
 
   // Calculate nutritionProfile from user data
   const nutritionProfile = user ? createNutritionProfile(user) : undefined;
 
+  // Use TanStack Query hooks for habits (server state)
+  const { data: habits = [], isLoading: habitsLoading, error: habitsQueryError } = useHabits();
+  const addHabitMutation = useAddHabit();
+  const updateHabitMutation = useUpdateHabit();
+  const deleteHabitMutation = useDeleteHabit();
+  const incrementProgressMutation = useIncrementHabitProgress();
+  const completeHabitMutation = useCompleteHabit();
+
+  // Use Zustand only for UI state (notifications, goals state, etc.)
   const {
-    // Remove nutritionProfile from store, always use loader's nutritionProfile
-    // weightGoals, // now hydrated from loader
-    habits,
     isLoading: goalsLoading,
     error: goalsError,
-    isLoading: habitsLoading,
-    error: habitsError,
     clearError,
     setWeightGoals,
-    setHabits,
-    addHabit,
-    updateHabit,
-    incrementHabitProgress,
-    completeHabit,
-    deleteHabit,
     deleteWeightGoal,
     resetGoals,
     setWeightLog,
     setSubscriptionStatus,
+    showNotification,
   } = useStore();
 
   // Hydrate weight goals from loader into Zustand store
@@ -92,13 +98,6 @@ export default function GoalsPage() {
       setSubscriptionStatus(user.subscription.status);
     }
   }, [user, setSubscriptionStatus]);
-
-  // Hydrate habits from loader into Zustand store
-  useEffect(() => {
-    if (loaderHabits) {
-      setHabits(loaderHabits);
-    }
-  }, [loaderHabits, setHabits]);
 
   // Hydrate weight log from loader into Zustand store
   useEffect(() => {
@@ -154,15 +153,19 @@ export default function GoalsPage() {
     values: HabitGoalFormValues,
     habitId?: string,
   ) => {
-    await (habitModalMode === "edit" && habitId
-      ? updateHabit(habitId, values)
-      : addHabit(values));
-
-    // Invalidate the router to refetch loader data (habits)
-    router.invalidate();
-
-    setIsHabitModalOpen(false);
-    setCurrentHabit(undefined);
+    try {
+      if (habitModalMode === "edit" && habitId) {
+        await updateHabitMutation.mutateAsync({ id: habitId, values });
+        showNotification("Habit updated successfully!", "success");
+      } else {
+        await addHabitMutation.mutateAsync(values);
+        showNotification("Habit added successfully!", "success");
+      }
+      setIsHabitModalOpen(false);
+      setCurrentHabit(undefined);
+    } catch (error) {
+      showNotification(`Failed to ${habitModalMode === "edit" ? "update" : "add"} habit`, "error");
+    }
   };
 
   // Handler to open the delete confirmation modal
@@ -173,6 +176,48 @@ export default function GoalsPage() {
   // Handler to close the delete confirmation modal
   const handleCloseDeleteConfirmModal = () => {
     setIsDeleteConfirmModalOpen(false);
+  };
+
+  // Handler for incrementing habit progress
+  const handleIncrementHabit = async (id: string) => {
+    try {
+      await incrementProgressMutation.mutateAsync(id);
+      // Check if habit was completed
+      const habit = habits.find((h) => h.id === id);
+      if (habit && habit.current + 1 >= habit.target) {
+        showNotification(`🎉 Congratulations! You've completed your ${habit.title}!`, "success");
+      }
+    } catch (error) {
+      showNotification("Failed to update habit progress", "error");
+    }
+  };
+
+  // Handler for completing a habit
+  const handleCompleteHabit = async (id: string) => {
+    console.log('handleCompleteHabit called with id:', id);
+    try {
+      console.log('About to call completeHabitMutation.mutateAsync');
+      await completeHabitMutation.mutateAsync(id);
+      console.log('completeHabitMutation.mutateAsync completed');
+      const habit = habits.find((h) => h.id === id);
+      // Only show congratulations if the habit wasn't already complete
+      if (habit && !habit.isComplete) {
+        showNotification(`🎉 Congratulations! You've completed your ${habit.title}!`, "success");
+      }
+    } catch (error) {
+      console.error('Error in handleCompleteHabit:', error);
+      showNotification("Failed to complete habit", "error");
+    }
+  };
+
+  // Handler for deleting a habit
+  const handleDeleteHabit = async (id: string) => {
+    try {
+      await deleteHabitMutation.mutateAsync(id);
+      showNotification("Habit deleted successfully", "info");
+    } catch (error) {
+      showNotification("Failed to delete habit", "error");
+    }
   };
 
   // Handler to confirm and execute weight goal deletion
@@ -202,11 +247,11 @@ export default function GoalsPage() {
         />
       )}
 
-      {habitsError && (
+      {habitsQueryError && (
         <FloatingNotification
-          message={habitsError}
+          message="Failed to load habits"
           type="error"
-          onClose={clearError}
+          onClose={() => {}}
           duration={5000}
         />
       )}
@@ -409,10 +454,10 @@ export default function GoalsPage() {
                         habits={habits || []}
                         isLoading={habitsLoading}
                         onAddHabit={handleAddHabit}
-                        onIncrementHabit={incrementHabitProgress}
-                        onCompleteHabit={completeHabit}
+                        onIncrementHabit={handleIncrementHabit}
+                        onCompleteHabit={handleCompleteHabit}
                         onEditHabit={handleEditHabit}
-                        onDeleteHabit={deleteHabit}
+                        onDeleteHabit={handleDeleteHabit}
                       />
                     </div>
                   </motion.div>
