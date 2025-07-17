@@ -1,7 +1,7 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { AuthSlice, createAuthSlice } from "@/features/auth/store/auth-slice";
+import { AuthUISlice, createAuthUISlice } from "@/features/auth/store/auth-ui-slice";
 import {
   createGoalsSlice,
   GoalsSlice,
@@ -27,7 +27,7 @@ import {
 export type StoreState = UserSlice &
   MacrosSlice &
   GoalsSlice &
-  AuthSlice &
+  AuthUISlice &
   NotificationSlice &
   HabitsSlice;
 
@@ -37,7 +37,7 @@ export const useStore = create<StoreState>()(
     ...createUserSlice(...a),
     ...createMacrosSlice(...a),
     ...createGoalsSlice(...a),
-    ...createAuthSlice(...a),
+    ...createAuthUISlice(...a),
     ...createNotificationSlice(...a),
     ...createHabitsSlice(...a),
   })),

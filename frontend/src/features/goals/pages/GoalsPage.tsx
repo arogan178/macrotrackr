@@ -2,7 +2,7 @@ import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 
-import { goalsRoute, rootRoute } from "@/AppRouter";
+import { goalsRoute } from "@/AppRouter";
 import { TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
 import { GoalsIcon, Modal, TargetIcon } from "@/components/ui";
@@ -18,6 +18,7 @@ import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 export default function GoalsPage() {
@@ -34,8 +35,8 @@ export default function GoalsPage() {
     useState(false);
   const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
 
-  // Get user from rootRoute loader
-  const { user } = useLoaderData({ from: rootRoute.id }) as { user: any };
+  // Get user from useUser hook
+  const { data: user } = useUser();
   // Get macro data from goalsRoute loader
   const {
     macroTarget,

@@ -19,12 +19,13 @@ export async function macroDataLoader({
     // Fetch daily totals, history, weight goals, and macro targets in parallel
     // Fetch all entries from 0 to offset+limit for cumulative pagination
     const fetchLimit = offset + limit;
-    const [totalsData, historyPage, weightGoalsResult, macroTargetResult] = await Promise.all([
-      apiService.macros.getDailyTotals({ startDate, endDate }),
-      apiService.macros.getHistory(fetchLimit, 0, { startDate, endDate }),
-      weightGoalsLoader(),
-      apiService.macros.getMacroTarget(),
-    ]);
+    const [totalsData, historyPage, weightGoalsResult, macroTargetResult] =
+      await Promise.all([
+        apiService.macros.getDailyTotals({ startDate, endDate }),
+        apiService.macros.getHistory(fetchLimit, 0, { startDate, endDate }),
+        weightGoalsLoader(),
+        apiService.macros.getMacroTarget(),
+      ]);
 
     // Format daily totals with defaults
     let macroDailyTotals: MacroDailyTotals = {

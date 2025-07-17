@@ -2,10 +2,11 @@ import { useLoaderData } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
-import { reportingRoute, rootRoute } from "@/AppRouter";
+import { reportingRoute } from "@/AppRouter";
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { Navbar } from "@/components/layout";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 import {
@@ -21,8 +22,8 @@ import { useReportingLogic } from "../hooks/useReportingLogic";
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
-  // Get history data from app state
-  const { user } = useLoaderData({ from: rootRoute.id });
+  // Get user data from useUser hook
+  const { data: user } = useUser();
   const reportingLoaderData = useLoaderData({ from: reportingRoute.id }) as any;
   const weightGoals = reportingLoaderData?.weightGoals;
   const history = reportingLoaderData?.history || [];
