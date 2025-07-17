@@ -42,7 +42,7 @@ export interface GoalsSlice {
 
 // ... FullGoalsState definition ...
 type FullGoalsState = GoalsSlice & {
-  addNotification?: (notification: {
+  showNotification?: (notification: {
     message: string;
     type: "success" | "error" | "info" | "warning";
   }) => void;
@@ -97,7 +97,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
             logError,
           );
           // Notify about log failure, but goal creation succeeded
-          fullGet().addNotification?.({
+          fullGet().showNotification?.({
             message: ERROR_MESSAGES.weightLog,
             type: "warning",
           });
@@ -125,7 +125,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       }
 
       // --- Step 5: Success Notification ---
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: SUCCESS_MESSAGES.goalCreated,
         type: "success",
       });
@@ -134,7 +134,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("[GoalsSlice] Error creating weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: `${ERROR_MESSAGES.goalCreate}: ${errorMessage}`,
         type: "error",
       });
@@ -169,7 +169,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
 
       // --- Loader now hydrates weight log; no fetchWeightLog needed ---
 
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: SUCCESS_MESSAGES.goalUpdated,
         type: "success",
       });
@@ -177,7 +177,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error updating weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: `${ERROR_MESSAGES.goalUpdate}: ${errorMessage}`,
         type: "error",
       });
@@ -199,7 +199,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
         error: undefined,
       });
 
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: SUCCESS_MESSAGES.goalDeleted,
         type: "success",
       });
@@ -207,7 +207,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error deleting weight goal:", error);
       set({ error: errorMessage, isSaving: false });
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: `${ERROR_MESSAGES.goalDelete}: ${errorMessage}`,
         type: "error",
       });
@@ -260,7 +260,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       });
 
       fullGet().updateCurrentUserWeight?.(savedEntry.weight);
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: SUCCESS_MESSAGES.weightLogged,
         type: "success",
       });
@@ -268,7 +268,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error("Error adding weight log entry:", error);
       set({ error: errorMessage, isSaving: false });
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: `${ERROR_MESSAGES.weightLog}: ${errorMessage}`,
         type: "error",
       });
@@ -342,7 +342,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       if (shouldUpdateUserWeight && newLatestWeight !== undefined) {
         fullGet().updateCurrentUserWeight?.(newLatestWeight);
       }
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: SUCCESS_MESSAGES.weightDeleted,
         type: "success",
       });
@@ -362,7 +362,7 @@ export const createGoalsSlice: StateCreator<GoalsSlice, [], [], GoalsSlice> = (
       const errorMessage = getErrorMessage(error);
       console.error(`Error deleting weight log entry with id ${id}:`, error);
       set({ error: errorMessage });
-      fullGet().addNotification?.({
+      fullGet().showNotification?.({
         message: `${ERROR_MESSAGES.weightDelete}: ${errorMessage}`,
         type: "error",
       });
