@@ -1,22 +1,20 @@
+import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 
+import { resetPasswordRoute } from "@/AppRouter";
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { LoadingSpinner, LockIcon } from "@/components/ui";
+import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
 
 function ResetPasswordForm() {
-  const navigate = useNavigate();
-  const [searchParameters] = useSearchParams();
+  const search = useSearch({ from: resetPasswordRoute.id });
   const [newPassword, setNewPassword] = useState("");
-  const {
-    auth: { isLoading },
-    resetPassword,
-    showNotification,
-  } = useStore();
+  const { showNotification } = useStore();
+  const resetPasswordMutation = useResetPassword();
 
-  const token = searchParameters.get("token");
+  const token = search.token;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -25,9 +23,8 @@ function ResetPasswordForm() {
       return;
     }
     try {
-      await resetPassword(token, newPassword);
+      await resetPasswordMutation.mutateAsync({ token, newPassword });
       showNotification("Password has been reset successfully.", "success");
-      navigate("/login");
     } catch (error) {
       if (error instanceof ApiError) {
         showNotification(error.message || "Reset failed", "error");
@@ -62,9 +59,9 @@ function ResetPasswordForm() {
         <FormButton
           type="submit"
           className="w-full"
-          disabled={isLoading || !token}
+          disabled={resetPasswordMutation.isPending || !token}
         >
-          {isLoading ? (
+          {resetPasswordMutation.isPending ? (
             <LoadingSpinner size="sm" color="white" />
           ) : (
             "Reset Password"

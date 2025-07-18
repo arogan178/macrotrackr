@@ -27,3 +27,6 @@ export function useBeforeUnload(
     };
   }, [hasUnsavedChanges, message]);
 }
+
+// Default export for backward compatibility
+export default useBeforeUnload;

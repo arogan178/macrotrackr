@@ -128,6 +128,12 @@ export function initializeSchema(db: Database) {
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
+
+        -- Stripe Events Table for Deduplication --
+        CREATE TABLE IF NOT EXISTS stripe_events (
+          id TEXT PRIMARY KEY,
+          received_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
