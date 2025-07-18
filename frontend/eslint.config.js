@@ -17,6 +17,8 @@ export default [
     files: [
       "src/components/**/*.{js,jsx,ts,tsx}",
       "src/pages/**/*.{js,jsx,ts,tsx}",
+      "src/hooks/**/*.{js,jsx,ts,tsx}",
+      "src/lib/**/*.{js,jsx,ts,tsx}",
       "src/features/**/components/**/*.{js,jsx,ts,tsx}",
       "src/features/**/pages/**/*.{js,jsx,ts,tsx}",
     ],
