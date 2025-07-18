@@ -1,7 +1,6 @@
 import React, { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { useStore } from "@/store/store";
 import type { MacroType } from "@/types/macro";
 import { MACRO_COLORS } from "@/utils/constants/macro";
 
@@ -14,6 +13,11 @@ interface MacroSummaryStatsProps {
     fats: number;
   }[];
   calorieTarget: number;
+  macroTarget?: {
+    proteinPercentage: number;
+    carbsPercentage: number;
+    fatsPercentage: number;
+  };
 }
 
 // Modified function to accept calorieTarget for percentage calculation
@@ -176,8 +180,8 @@ MacroSummaryItem.displayName = "MacroSummaryItem";
 export default function MacroSummaryStats({
   data,
   calorieTarget,
+  macroTarget,
 }: MacroSummaryStatsProps) {
-  const macroTarget = useStore((state) => state.macroTarget);
   const effectiveCalorieTarget = calorieTarget || 2000;
 
   const TARGET_MACROS = useMemo(

@@ -72,14 +72,37 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     }
   };
 
+  // Convert to metric for display and selection
+  const getMetricServing = (quantity: number, unit: string) => {
+    if (unit === "oz")
+      return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
+    if (unit === "lbs")
+      return { quantity: +(quantity * 0.453592).toFixed(3), unit: "kg" };
+    // If L, keep as L
+    return { quantity, unit };
+  };
+
   const handleSelect = (item: FoodResult) => {
+    let quantity = item.servingQuantity;
+    let unit = item.servingUnit;
+    // If unit is 'unit' and rawQuantity contains a gram value, use that
+    if (unit === "unit" && (item as any).rawQuantity) {
+      const raw = (item as any).rawQuantity as string;
+      // Match e.g. '90 g' or '90g'
+      const match = raw.match(/(\d+(?:[.,]\d+)?)\s*g/);
+      if (match) {
+        quantity = parseFloat(match[1].replace(",", "."));
+        unit = "g";
+      }
+    }
+    const metric = getMetricServing(quantity, unit);
     onResult({
       protein: item.protein.toFixed(1),
       carbs: item.carbs.toFixed(1),
       fats: item.fats.toFixed(1),
       name: item.name,
-      servingQuantity: item.servingQuantity,
-      servingUnit: item.servingUnit,
+      servingQuantity: metric.quantity,
+      servingUnit: metric.unit,
     });
     setShowResults(false);
     setResults([]);
@@ -108,47 +131,67 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           )}
           {showResults && results.length > 0 && (
             <div className="absolute z-10 bg-white border border-gray-200 rounded shadow-md mt-2 w-full max-h-64 overflow-y-auto">
-              {results.map((item, index) => {
-                // Calculate calories (energyKcal) if available
-                const calories =
-                  item.energyKcal === undefined ? undefined : item.energyKcal;
-                // Prefer rawQuantity if present, fallback to parsed quantity/unit
-                let quantityDisplay = "";
-                if ((item as any).rawQuantity) {
-                  quantityDisplay = (item as any).rawQuantity;
-                } else if (item.servingQuantity && item.servingUnit) {
-                  quantityDisplay = `${item.servingQuantity}${item.servingUnit}`;
-                } else if (item.servingQuantity) {
-                  quantityDisplay = `${item.servingQuantity}`;
-                } else if ((item as any).quantity) {
-                  quantityDisplay = `${(item as any).quantity}`;
-                }
-                return (
-                  <button
-                    key={index}
-                    className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none"
-                    onClick={() => handleSelect(item)}
-                    type="button"
-                  >
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-gray-500">
-                      {/* Always show quantity/serving size if available */}
-                      {quantityDisplay ? `${quantityDisplay} | ` : ""}
-                      {/* Show calories if available */}
-                      {calories === undefined
-                        ? ""
-                        : `Calories: ${calories.toFixed(1)} kcal | `}
-                      Protein: {item.protein.toFixed(1)}g, Carbs:{" "}
-                      {item.carbs.toFixed(1)}g, Fats: {item.fats.toFixed(1)}g
-                    </div>
-                    {item.categories && (
-                      <div className="text-xs text-gray-400">
-                        {item.categories}
+              {results
+                .filter(
+                  (item) =>
+                    !(
+                      item.protein === 0 &&
+                      item.carbs === 0 &&
+                      item.fats === 0
+                    ),
+                )
+                .map((item, index) => {
+                  // Calculate calories (energyKcal) if available, otherwise compute from macros
+                  let calories = item.energyKcal;
+                  if (
+                    (calories === undefined || calories === 0) &&
+                    (item.protein !== 0 || item.carbs !== 0 || item.fats !== 0)
+                  ) {
+                    calories =
+                      item.protein * 4 + item.carbs * 4 + item.fats * 9;
+                  }
+                  // Prefer rawQuantity if present, fallback to parsed quantity/unit
+                  let quantityDisplay = "";
+                  if ((item as any).rawQuantity) {
+                    quantityDisplay = (item as any).rawQuantity;
+                  } else if (item.servingQuantity && item.servingUnit) {
+                    const metric = getMetricServing(
+                      item.servingQuantity,
+                      item.servingUnit,
+                    );
+                    quantityDisplay = `${metric.quantity}${metric.unit}`;
+                  } else if (item.servingQuantity) {
+                    quantityDisplay = `${item.servingQuantity}`;
+                  } else if ((item as any).quantity) {
+                    quantityDisplay = `${(item as any).quantity}`;
+                  }
+                  // Ensure all rows are fully readable (no opacity or disabled style)
+                  return (
+                    <button
+                      key={index}
+                      className={
+                        "w-full text-left px-4 py-2 bg-white text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                      }
+                      onClick={() => handleSelect(item)}
+                      type="button"
+                    >
+                      <div className="font-medium">{item.name}</div>
+                      <div className="text-xs text-gray-500">
+                        {quantityDisplay ? `${quantityDisplay} | ` : ""}
+                        {calories === undefined
+                          ? ""
+                          : `Calories: ${calories.toFixed(1)} kcal | `}
+                        Protein: {item.protein.toFixed(1)}g, Carbs:{" "}
+                        {item.carbs.toFixed(1)}g, Fats: {item.fats.toFixed(1)}g
                       </div>
-                    )}
-                  </button>
-                );
-              })}
+                      {item.categories && (
+                        <div className="text-xs text-gray-400">
+                          {item.categories}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
             </div>
           )}
         </div>

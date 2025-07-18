@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { EmailIcon } from "@/components/ui";
+import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
 
@@ -11,16 +12,13 @@ interface ForgotPasswordFormProps {
 
 function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
   const [email, setEmail] = useState("");
-  const {
-    auth: { isLoading },
-    forgotPassword,
-    showNotification,
-  } = useStore();
+  const { showNotification } = useStore();
+  const forgotPasswordMutation = useForgotPassword();
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
-      await forgotPassword(email);
+      await forgotPasswordMutation.mutateAsync({ email });
       showNotification(
         "If an account exists, a reset link has been sent.",
         "success",
@@ -59,8 +57,12 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           placeholder="your@email.com"
           maxLength={30}
         />
-        <FormButton type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Sending..." : "Send Reset Link"}
+        <FormButton
+          type="submit"
+          className="w-full"
+          disabled={forgotPasswordMutation.isPending}
+        >
+          {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
         </FormButton>
       </form>
       <div className="text-right mt-4">
