@@ -6,6 +6,7 @@ import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { handleServiceError } from "../../lib/error-handler";
+import { cacheService } from "../../lib/cache-service";
 
 export interface SubscriptionRecord {
   id: string;
@@ -21,6 +22,9 @@ export interface UserSubscriptionInfo {
   subscription_status: "free" | "pro" | "canceled";
   stripe_customer_id: string | null;
   subscription?: SubscriptionRecord;
+  price?: string;
+  paymentMethod?: { brand: string; last4: string };
+  stripeDetails?: any;
 }
 
 export class SubscriptionService {
@@ -82,11 +86,9 @@ export class SubscriptionService {
           );
         }
         const userStatus =
-          status === "active"
-            ? "pro"
-            : status === "canceled"
-            ? "canceled"
-            : "free";
+          status === "active" ? "pro"
+          : status === "canceled" ? "canceled"
+          : "free";
         safeExecute(
           db,
           "UPDATE users SET subscription_status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -137,19 +139,48 @@ export class SubscriptionService {
          ORDER BY created_at DESC LIMIT 1`,
         [userId]
       );
-      logger.debug(
-        {
-          operation: "get_user_subscription",
-          userId,
-          subscriptionStatus: user.subscription_status,
-          hasActiveSubscription: !!subscription,
-        },
-        "Retrieved user subscription info"
-      );
+
+      let price: string | undefined = undefined;
+      let paymentMethod: { brand: string; last4: string } | undefined =
+        undefined;
+      let stripeDetails: any = undefined;
+
+      // Use cache for Stripe details if available
+      let cacheKey: string | undefined = undefined;
+      if (subscription && subscription.stripe_subscription_id) {
+        cacheKey = `stripe-details:${subscription.stripe_subscription_id}`;
+        const cached = cacheService.get<any>(cacheKey);
+        if (cached) {
+          price = cached.price;
+          paymentMethod = cached.paymentMethod;
+          stripeDetails = cached.stripeDetails;
+        } else {
+          try {
+            const details = await (
+              await import("./stripe-service")
+            ).StripeService.getSubscriptionWithDetails(
+              subscription.stripe_subscription_id
+            );
+            price = details.price;
+            paymentMethod = details.paymentMethod || undefined;
+            stripeDetails = details.subscription;
+            cacheService.set(cacheKey, { price, paymentMethod, stripeDetails });
+          } catch (err) {
+            logger.error(
+              { err },
+              "Failed to fetch Stripe subscription details"
+            );
+          }
+        }
+      }
+
       return {
         subscription_status: user.subscription_status,
         stripe_customer_id: user.stripe_customer_id,
         subscription: subscription || undefined,
+        price,
+        paymentMethod,
+        stripeDetails,
       };
     } catch (error) {
       handleServiceError(error, "get_user_subscription", { userId }, [
@@ -266,23 +297,31 @@ export class SubscriptionService {
    */
   static async hasActiveProSubscription(userId: number): Promise<boolean> {
     try {
-      const subscription = safeQuery<{ count: number }>(
+      // First, let's get the raw subscription data to debug
+      const rawSubscription = safeQuery<{
+        id: string;
+        status: string;
+        current_period_end: string;
+      }>(
         db,
-        `SELECT COUNT(*) as count FROM subscriptions 
-         WHERE user_id = ? AND status = 'active' AND datetime(current_period_end) > datetime('now')`,
+        `SELECT id, status, current_period_end FROM subscriptions 
+         WHERE user_id = ? AND status = 'active'`,
         [userId]
       );
 
-      const hasActive = (subscription?.count || 0) > 0;
+      if (!rawSubscription) {
+        logger.debug(
+          { operation: "check_active_pro_subscription", userId },
+          "No active subscription found for user"
+        );
+        return false;
+      }
 
-      logger.debug(
-        {
-          operation: "check_active_pro_subscription",
-          userId,
-          hasActive,
-        },
-        "Checked user Pro subscription status"
-      );
+      // Check if the current period end is in the future
+      const currentPeriodEnd = new Date(rawSubscription.current_period_end);
+      const now = new Date();
+      const hasActive = currentPeriodEnd > now;
+
 
       return hasActive;
     } catch (error) {

@@ -7,7 +7,7 @@ export function getErrorMessage(error: unknown): string {
   if (
     typeof error === "object" &&
     error !== undefined &&
-    error !== null &&
+    error !== undefined &&
     "message" in error
   ) {
     // Use Record<string, unknown> for safer typing

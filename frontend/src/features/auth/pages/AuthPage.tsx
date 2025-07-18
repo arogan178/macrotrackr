@@ -6,8 +6,6 @@ import {
   LoginForm,
   RegisterForm,
 } from "@/features/auth/components";
-import FloatingNotification from "@/features/notifications/components/FloatingNotification";
-import { useStore } from "@/store/store";
 
 // --- Animation Constants (keep in local scope, not shared: only used here) ---
 const ANIMATION_HEIGHT_DURATION = 500; // ms
@@ -59,19 +57,17 @@ export default function AuthPage() {
   const [visibleMode, setVisibleMode] = useState<
     "login" | "register" | "forgotPassword"
   >("login");
-  const { auth, clearAuthError } = useStore();
 
   const formContainerReference = useRef<HTMLDivElement>(undefined);
   const contentReference = useRef<HTMLDivElement>(undefined);
 
   /**
    * Handles animated toggle between login and register forms.
-   * Prevents toggle if already animating. Clears auth error on toggle.
+   * Prevents toggle if already animating.
    */
   const toggleMode = useCallback(
     (newMode: "login" | "register" | "forgotPassword"): void => {
       if (isTransitioning || mode === newMode) return;
-      clearAuthError();
       setIsTransitioning(true);
 
       const container = formContainerReference.current;
@@ -110,7 +106,7 @@ export default function AuthPage() {
         });
       }, ANIMATION_FADE_DURATION);
     },
-    [clearAuthError, isTransitioning, mode],
+    [isTransitioning, mode],
   );
 
   const renderForm = () => {
@@ -152,15 +148,7 @@ export default function AuthPage() {
       </div>
 
       <div className="w-full max-w-md relative z-10 px-4">
-        {/* Error notification (floating, dismissible) */}
-        {auth.error && (
-          <FloatingNotification
-            message={auth.error}
-            type="error"
-            onClose={clearAuthError}
-            duration={5000}
-          />
-        )}
+        {/* Error notifications are now handled by individual components */}
 
         {/* Animated form container (login/register) */}
         <div ref={formContainerReference} style={styles.container}>

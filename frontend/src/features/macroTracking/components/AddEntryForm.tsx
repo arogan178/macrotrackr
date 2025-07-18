@@ -1,4 +1,4 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import {
   CardContainer,
@@ -9,7 +9,7 @@ import {
   TextField,
   TimeField,
 } from "@/components/form";
-import { CheckMarkIcon } from "@/components/ui";
+import { CheckMarkIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { MealType } from "@/types/macro";
 
@@ -33,16 +33,58 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [protein, setProtein] = useState<number | undefined>();
   const [carbs, setCarbs] = useState<number | undefined>();
   const [fats, setFats] = useState<number | undefined>();
+  const [quantity, setQuantity] = useState<number | undefined>(100);
+  const [unit, setUnit] = useState<string>("g");
+  const [baseMacros, setBaseMacros] = useState<
+    | {
+        protein: number;
+        carbs: number;
+        fats: number;
+      }
+    | undefined
+  >();
+
   const [searchResult, setSearchResult] = useState<string | undefined>();
-  const [mealType, setMealType] = useState<MealType>("breakfast");
+  // Helper: get current hour in user's local time
+  const currentHour = new Date().getHours();
+
+  // Define time ranges for each meal type
+  const mealTypeTimeRanges = {
+    breakfast: { start: 5, end: 10 }, // 5am–10am
+    lunch: { start: 11, end: 15 }, // 11am–3pm
+    dinner: { start: 17, end: 22 }, // 5pm–10pm
+    snack: { start: 0, end: 23 }, // Snacks always available
+  };
+
+  // Function to get default meal type based on current time
+  const getDefaultMealType = () => {
+    if (
+      currentHour >= mealTypeTimeRanges.breakfast.start &&
+      currentHour <= mealTypeTimeRanges.breakfast.end
+    ) {
+      return "breakfast";
+    }
+    if (
+      currentHour >= mealTypeTimeRanges.lunch.start &&
+      currentHour <= mealTypeTimeRanges.lunch.end
+    ) {
+      return "lunch";
+    }
+    if (
+      currentHour >= mealTypeTimeRanges.dinner.start &&
+      currentHour <= mealTypeTimeRanges.dinner.end
+    ) {
+      return "dinner";
+    }
+    return "snack";
+  };
+
+  const [mealType, setMealType] = useState<MealType>(getDefaultMealType());
   const [mealName, setMealName] = useState<string>("");
 
-  // Default date is today
   const [entryDate, setEntryDate] = useState<string>(
     new Date().toISOString().split("T")[0],
   );
-
-  // Default time is current time
   const [entryTime, setEntryTime] = useState<string>(
     new Date().toLocaleTimeString([], {
       hour: "2-digit",
@@ -51,51 +93,84 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
     }),
   );
 
-  // Calculate calories dynamically using shared utility
+  // Effect to recalculate macros when quantity or baseMacros change
+  useEffect(() => {
+    if (baseMacros && typeof quantity === "number") {
+      const factor = quantity / 100; // Macros are per 100g
+      setProtein(Number((baseMacros.protein * factor).toFixed(1)));
+      setCarbs(Number((baseMacros.carbs * factor).toFixed(1)));
+      setFats(Number((baseMacros.fats * factor).toFixed(1)));
+    }
+  }, [quantity, baseMacros]);
+
   const calories = Math.round(
     calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0),
   );
 
-  // Check if all fields are 0 (invalid submission)
-  const allFieldsAreZero = protein === 0 && carbs === 0 && fats === 0;
-
-  // Check if any field is undefined (incomplete form)
   const anyFieldIsUndefined =
     protein === undefined || carbs === undefined || fats === undefined;
-
-  // Form is valid if no field is undefined, not all fields are 0, and meal name is provided
+  const allFieldsAreZero = protein === 0 && carbs === 0 && fats === 0;
   const isFormValid =
     !anyFieldIsUndefined && !allFieldsAreZero && mealName.trim() !== "";
 
-  // Handle result from CalorieSearch
   const handleSearchResult = useCallback(
     ({
       protein: p,
       carbs: c,
       fats: f,
       name,
+      servingQuantity,
+      servingUnit,
     }: {
       protein: string;
       carbs: string;
       fats: string;
       name: string;
+      servingQuantity: number;
+      servingUnit: string;
     }) => {
-      setProtein(Number.parseFloat(p));
-      setCarbs(Number.parseFloat(c));
-      setFats(Number.parseFloat(f));
+      const per100g = {
+        protein: Number.parseFloat(p),
+        carbs: Number.parseFloat(c),
+        fats: Number.parseFloat(f),
+      };
+      setBaseMacros(per100g);
       setMealName(name);
-      setSearchResult(`Found: ${name} - ${p}g protein, ${c}g carbs, ${f}g fat`);
+      setQuantity(servingQuantity);
+      // Only allow metric units: g, kg, L
+      let metricUnit = servingUnit;
+      if (servingUnit === "oz") metricUnit = "g";
+      if (servingUnit === "lbs") metricUnit = "kg";
+      // If L, keep as L
+      setUnit(metricUnit);
+      setSearchResult(`Selected: ${name}`);
     },
     [],
   );
 
+  const handleClearSearch = useCallback(() => {
+    setBaseMacros(undefined);
+    setMealName("");
+    setSearchResult(undefined);
+    setProtein(undefined);
+    setCarbs(undefined);
+    setFats(undefined);
+    setQuantity(100);
+    setUnit("g");
+  }, []);
+
+  // When user manually edits a macro, break the link to the search result
+  const handleManualMacroChange =
+    (setter: (value: number | undefined) => void) =>
+    (value: number | undefined) => {
+      setter(value);
+      setBaseMacros(undefined);
+    };
+
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-
-      if (anyFieldIsUndefined || allFieldsAreZero || !mealName.trim()) {
-        return;
-      }
+      if (!isFormValid) return;
 
       await onSubmit({
         protein: protein as number,
@@ -107,11 +182,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
         entryTime,
       });
 
-      setProtein(undefined);
-      setCarbs(undefined);
-      setFats(undefined);
-      setMealName("");
-      setSearchResult(undefined);
+      handleClearSearch();
     },
     [
       protein,
@@ -122,8 +193,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       entryDate,
       entryTime,
       onSubmit,
-      anyFieldIsUndefined,
-      allFieldsAreZero,
+      isFormValid,
+      handleClearSearch,
     ],
   );
 
@@ -134,88 +205,98 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
           Add Today's Macros
         </h2>
 
-        {/* Food Search Feature */}
         <div className="mb-6">
           <CalorieSearch onResult={handleSearchResult} />
-
           {searchResult && (
-            <div className="mt-3 text-sm text-green-400 flex items-center">
-              <CheckMarkIcon className="w-4 h-4 mr-1" />
-              {searchResult}
+            <div className="mt-3 text-sm text-green-400 flex items-center justify-between">
+              <div className="flex items-center">
+                <CheckMarkIcon className="w-4 h-4 mr-2" />
+                {searchResult}
+              </div>
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="text-xs text-gray-400 hover:text-white flex items-center"
+                aria-label="Clear search"
+              >
+                <TrashIcon className="w-4 h-4 mr-1" />
+                Clear
+              </button>
             </div>
           )}
         </div>
 
         <form onSubmit={handleSubmit}>
-          {/* Meal name field */}
-          <div className="mb-4">
-            <TextField
-              label="Meal Name"
-              value={mealName}
-              onChange={(value) => setMealName(value)}
-              placeholder="e.g. Chicken Salad"
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <div className="sm:col-span-1">
+              <NumberField
+                label="Quantity"
+                value={quantity}
+                onChange={setQuantity}
+                disabled={!baseMacros}
+                min={0}
+                step={0.01}
+                unit={unit}
+              />
+            </div>
+            <div className="sm:col-span-2">
+              <TextField
+                label="Meal Name"
+                value={mealName}
+                onChange={setMealName}
+                placeholder="e.g. Chicken Salad"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+            <DateField
+              label="Date"
+              value={entryDate}
+              onChange={setEntryDate}
               required
             />
-          </div>
-          {/* Date and meal type row */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-            <div>
-              <DateField
-                label="Date"
-                value={entryDate}
-                onChange={setEntryDate}
-                required
-              />
-            </div>
-            <div>
-              <TimeField
-                label="Time"
-                value={entryTime}
-                onChange={setEntryTime}
-                required
-              />
-            </div>
-            <div>
-              <Dropdown
-                label="Meal Type"
-                // Map over the new options array
-                options={MEAL_TYPE_OPTIONS.map((option) => ({
-                  value: option.value, // The value associated with the option (e.g., "breakfast")
-                  label: option.display, // The text displayed in the dropdown (e.g., "Breakfast 🍳")
-                }))}
-                // The value prop should be bound to your state variable holding the clean mealType
-                value={mealType} // e.g., "breakfast"
-                // The onChange handler receives the clean value directly from the dropdown option's value
-                onChange={(value) => setMealType(value as MealType)} // value will be "breakfast", "lunch", etc.
-              />
-            </div>
+            <TimeField
+              label="Time"
+              value={entryTime}
+              onChange={setEntryTime}
+              required
+            />
+            <Dropdown
+              label="Meal Type"
+              options={MEAL_TYPE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.display,
+              }))}
+              value={mealType}
+              onChange={(value) => setMealType(value as MealType)}
+            />
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <NumberField
               label="Protein"
               value={protein}
-              onChange={setProtein}
+              onChange={handleManualMacroChange(setProtein)}
               min={0}
               max={500}
               step={0.1}
               unit="g"
             />
-
             <NumberField
               label="Carbs"
               value={carbs}
-              onChange={setCarbs}
+              onChange={handleManualMacroChange(setCarbs)}
               min={0}
               max={500}
               step={0.1}
               unit="g"
             />
-
             <NumberField
               label="Fats"
               value={fats}
-              onChange={setFats}
+              onChange={handleManualMacroChange(setFats)}
               min={0}
               max={500}
               step={0.1}
@@ -228,19 +309,16 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               Total Calories:{" "}
               <span className="text-indigo-400 font-medium">{calories}</span>
             </div>
-
             {allFieldsAreZero && (
               <div className="text-sm text-red-400 mr-4">
-                At least one macro value must be greater than 0
+                Macros must be greater than 0
               </div>
             )}
-
-            {!mealName.trim() && protein !== undefined && (
+            {!mealName.trim() && !anyFieldIsUndefined && (
               <div className="text-sm text-red-400 mr-4">
                 Please provide a meal name
               </div>
             )}
-
             <FormButton
               type="submit"
               disabled={isSaving || !isFormValid}
