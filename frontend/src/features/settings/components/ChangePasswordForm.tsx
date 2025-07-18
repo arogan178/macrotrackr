@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { CardContainer, FormButton, TextField } from "@/components/form";
+import { LockIcon } from "@/components/ui";
 import { FloatingNotification } from "@/features/notifications/components";
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
@@ -45,66 +46,74 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <>
-      <CardContainer className="p-6">
-        <div className="relative">
-          {successMessage && (
-            <FloatingNotification
-              message={successMessage}
-              type="success"
-              onClose={() => setSuccessMessage(undefined)}
-            />
-          )}
-          <form
-            id="change-password-form"
-            onSubmit={handleSubmit}
-            className="space-y-6 p-6"
-          >
-            <h2 className="text-2xl font-semibold text-white">
-              Change Password
-            </h2>
-            <div className="grid grid-cols-1 gap-6">
-              <TextField
-                label="Current Password"
-                type="password"
-                value={currentPassword}
-                onChange={setCurrentPassword}
-                required
-              />
-              <TextField
-                label="New Password"
-                type="password"
-                value={newPassword}
-                onChange={setNewPassword}
-                required
-                minLength={8}
-                helperText="Password must be at least 8 characters long."
-              />
-              <TextField
-                label="Confirm New Password"
-                type="password"
-                value={confirmPassword}
-                onChange={setConfirmPassword}
-                required
-                error={formError ?? undefined}
-              />
+    <CardContainer className="p-6 sm:p-8">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Header section to match ProfileForm pattern */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
+          <div className="flex items-center">
+            <div className="p-3 bg-gradient-to-br from-red-400/20 to-red-500/20 rounded-xl mr-4">
+              <LockIcon className="w-7 h-7 text-red-400 flex-shrink-0" />
             </div>
-          </form>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-xl font-bold text-gray-100 truncate">
+                Security Settings
+              </h3>
+              <p className="text-sm text-gray-400 mt-1">
+                Update your password to keep your account secure
+              </p>
+            </div>
+          </div>
         </div>
-      </CardContainer>
-      <div className="flex justify-end pt-4">
-        <FormButton
-          form="change-password-form"
-          type="submit"
-          isLoading={changePasswordMutation.isPending}
-          disabled={!currentPassword || !newPassword || !confirmPassword}
-          text="Change Password"
-          buttonSize="lg"
-          variant="primary"
-          className="px-8 py-3 text-lg"
-        />
-      </div>
-    </>
+
+        {successMessage && (
+          <FloatingNotification
+            message={successMessage}
+            type="success"
+            onClose={() => setSuccessMessage(undefined)}
+          />
+        )}
+
+        <div className="grid grid-cols-1 gap-6">
+          <TextField
+            label="Current Password"
+            type="password"
+            value={currentPassword}
+            onChange={setCurrentPassword}
+            required
+          />
+          <TextField
+            label="New Password"
+            type="password"
+            value={newPassword}
+            onChange={setNewPassword}
+            required
+            minLength={8}
+            helperText="Password must be at least 8 characters long."
+          />
+          <TextField
+            label="Confirm New Password"
+            type="password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            required
+            error={formError ?? undefined}
+          />
+        </div>
+
+        {/* Submit button section */}
+        <div className="mt-8 flex justify-end">
+          <FormButton
+            type="submit"
+            isLoading={changePasswordMutation.isPending}
+            disabled={!currentPassword || !newPassword || !confirmPassword}
+            text="Change Password"
+            buttonSize="lg"
+            variant="primary"
+            className="px-8 py-3 text-lg"
+          />
+        </div>
+      </form>
+    </CardContainer>
   );
 };
 
