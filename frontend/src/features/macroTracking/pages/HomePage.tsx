@@ -20,47 +20,61 @@ import {
 import { FloatingNotification } from "@/features/notifications/components";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { 
+  useMacroHistory,
+  useMacroDailyTotals, 
+  useMacroTarget, 
+  useAddMacroEntry, 
+  useUpdateMacroEntry, 
+  useDeleteMacroEntry 
+} from "@/hooks/queries/useMacroQueries";
 import { useStore } from "@/store/store";
+import type { MacroEntry } from "@/types/macro";
 
 export default function HomePage() {
   // Get user data from useUser hook
   const { data: user } = useUser();
-  // Get macro data from home route loader
+  
+  // Add TanStack Router hooks for navigation and search params
+  const navigate = useNavigate({ from: homeRoute.id });
+  const search = useSearch({ from: homeRoute.id });
+
+  // Get macro data from TanStack Query hooks
+  const today = new Date().toISOString().split('T')[0];
+  const { data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 } } = useMacroDailyTotals(today);
+  const { data: macroTarget } = useMacroTarget();
+  
+  // Get paginated macro history from TanStack Query
+  const limit = Number(search.limit) || 20;
+  const offset = Number(search.offset) || 0;
+  const { data: macroHistoryData, isLoading: isHistoryLoading } = useMacroHistory(limit, offset);
+  
+  // Get weight goals from home route loader
   const {
-    macroTarget,
-    macroDailyTotals = {
-      protein: 0,
-      carbs: 0,
-      fats: 0,
-      calories: 0,
-    },
-    history = [],
-    historyHasMore = false,
     weightGoals,
     weightLog,
     weightGoalsError,
   } = useLoaderData({ from: homeRoute.id }) as any;
 
-  // Get state and actions from our store (excluding user)
+  // Extract history data from query result
+  const history = macroHistoryData?.entries || [];
+  const historyHasMore = macroHistoryData?.hasMore || false;
+
+  // Macro mutations
+  const addMacroEntryMutation = useAddMacroEntry();
+  const updateMacroEntryMutation = useUpdateMacroEntry();
+  const deleteMacroEntryMutation = useDeleteMacroEntry();
+
+  // Get state and actions from our store (UI state only)
   const {
     nutritionProfile,
-    // weightGoals, // now hydrated from loader
-    isLoading,
-    isSaving,
-    isEditing,
-    isDeleting,
-    error,
     notifications,
     editingEntry,
-    setWeightGoals,
-    addEntry,
-    updateEntry,
-    deleteEntry,
-    setEditingEntry,
     hideNotification,
     clearAllNotifications,
     setNutritionProfile,
     setSubscriptionStatus,
+    setEditingEntry,
   } = useStore();
   // Hydrate nutritionProfile from loader user object
   useEffect(() => {
@@ -103,33 +117,52 @@ export default function HomePage() {
     }
   }, [user, setNutritionProfile, setSubscriptionStatus]);
 
+  // Handler for adding entries
+  const handleAddEntry = useCallback(async (entry: {
+    protein: number;
+    carbs: number;
+    fats: number;
+    mealType: "breakfast" | "lunch" | "dinner" | "snack";
+    mealName: string;
+    entryDate: string;
+    entryTime: string;
+  }) => {
+    await addMacroEntryMutation.mutateAsync(entry);
+  }, [addMacroEntryMutation]);
+
   // Handler for editing entries that matches EditModal's expected signature
   const handleEditEntry = useCallback(
     async (entry: typeof editingEntry) => {
       if (!entry) return;
       console.log("Editing entry:", entry);
-      await updateEntry(entry.id, {
-        protein: entry.protein,
-        carbs: entry.carbs,
-        fats: entry.fats,
-        mealType: entry.mealType,
-        mealName: entry.mealName,
-        entryDate: entry.entryDate || "",
-        entryTime: entry.entryTime || "",
+      await updateMacroEntryMutation.mutateAsync({
+        id: entry.id,
+        entry: {
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          mealType: entry.mealType,
+          mealName: entry.mealName,
+          entryDate: entry.entryDate || "",
+          entryTime: entry.entryTime || "",
+        }
       });
+      setEditingEntry(undefined);
     },
-    [updateEntry],
+    [updateMacroEntryMutation],
   );
+
+  // Handler for deleting entries
+  const handleDeleteEntry = useCallback(async (id: number) => {
+    await deleteMacroEntryMutation.mutateAsync(id);
+  }, [deleteMacroEntryMutation]);
 
   // Memoized close handler to prevent unnecessary re-renders
   const handleCloseModal = useCallback(() => {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
 
-  // Hydrate weight goals from loader into Zustand store
-  useEffect(() => {
-    setWeightGoals(weightGoals);
-  }, [weightGoals, setWeightGoals]);
+  // Weight goals are now handled directly by TanStack Query, no need to hydrate into store
 
   // Debug effect to track editingEntry changes
   useEffect(() => {
@@ -138,14 +171,6 @@ export default function HomePage() {
 
   // Get the latest notification
   const latestNotification = notifications?.[notifications.length - 1];
-
-  // Determine the calorie target - prioritize weight goals target if available, otherwise use TDEE
-  // Use macroData from loader for history and macroDailyTotals
-
-  // All macro data now comes directly from loader
-  // Add TanStack Router hooks for navigation and search params
-  const navigate = useNavigate({ from: homeRoute.id });
-  const search = useSearch({ from: homeRoute.id });
 
   // Loader-based pagination
   const loadMoreHistory = useCallback(() => {
@@ -169,6 +194,17 @@ export default function HomePage() {
       s.location.pathname === "/home" &&
       s.location.search.offset !== search.offset,
   });
+
+  // Determine loading states from mutations and queries
+  const isLoading = isHistoryLoading; // Use history loading state for initial load
+  const isSaving = addMacroEntryMutation.isPending;
+  const isEditing = updateMacroEntryMutation.isPending;
+  const isDeleting = deleteMacroEntryMutation.isPending;
+
+  // Error handling
+  const error = addMacroEntryMutation.error?.message || 
+                updateMacroEntryMutation.error?.message || 
+                deleteMacroEntryMutation.error?.message;
 
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
@@ -216,7 +252,7 @@ export default function HomePage() {
                   {isLoading ? (
                     <AddEntryLoadingSkeleton />
                   ) : (
-                    <AddEntryForm onSubmit={addEntry} isSaving={isSaving} />
+                    <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
                   )}
                 </div>
               </div>
@@ -246,7 +282,7 @@ export default function HomePage() {
               ) : (
                 <EntryHistoryPanel
                   history={history}
-                  deleteEntry={deleteEntry}
+                  deleteEntry={handleDeleteEntry}
                   onEdit={setEditingEntry}
                   isDeleting={isDeleting}
                   isEditing={isEditing}
