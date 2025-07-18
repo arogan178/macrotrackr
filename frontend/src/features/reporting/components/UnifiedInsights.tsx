@@ -14,7 +14,7 @@ import {
   calculateConsistencyScore,
   calculateDataQuality,
   calculateMacroBalance,
-  calculateNutrientDensity,
+  calculateMacroDensity,
   calculateTrend,
 } from "../utils/insightsCalculations";
 import AtAGlanceSection from "./AtAGlanceSection";
@@ -40,7 +40,7 @@ function UnifiedInsights({
       caloriesTrend: calculateTrend(aggregatedData, "calories"),
       proteinTrend: calculateTrend(aggregatedData, "protein"),
       dataQuality: calculateDataQuality(aggregatedData),
-      nutrientDensity: calculateNutrientDensity(averages),
+      macroDensity: calculateMacroDensity(averages),
     };
   }, [aggregatedData, averages, isLoading, macroTarget]);
 
@@ -79,7 +79,7 @@ function UnifiedInsights({
     caloriesTrend,
     proteinTrend,
     dataQuality,
-    nutrientDensity,
+    macroDensity,
   } = insights;
 
   return (
@@ -171,10 +171,10 @@ function UnifiedInsights({
         {/* Nutrient Density */}
         <MetricCard
           title="Nutrient Density"
-          value={nutrientDensity.score}
+          value={macroDensity.score}
           subtitle="quality score"
-          score={nutrientDensity.score}
-          {...METRIC_CARD_CONFIGS.nutrientDensity}
+          score={macroDensity.score}
+          {...METRIC_CARD_CONFIGS.macroDensity}
           delay={0.2}
         >
           <div className="flex flex-col h-full">
@@ -185,13 +185,13 @@ function UnifiedInsights({
             <div className="w-full bg-gray-800 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all duration-1000 ${
-                  nutrientDensity.score > 70
+                  macroDensity.score > 70
                     ? "bg-emerald-400"
-                    : nutrientDensity.score > 40
+                    : macroDensity.score > 40
                       ? "bg-yellow-400"
                       : "bg-red-400"
                 }`}
-                style={{ width: `${nutrientDensity.score}%` }}
+                style={{ width: `${macroDensity.score}%` }}
               />
             </div>
           </div>

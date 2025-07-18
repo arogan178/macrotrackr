@@ -47,17 +47,18 @@ export const userRoutes = (app: Elysia) =>
               throw new NotFoundError("User data not found.");
             }
 
-            // Get comprehensive subscription information
+            // Get only summary subscription info
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
             const result = toCamelCase(dbResult);
-            // Only return summary subscription info
             result.subscription = {
               status: subscriptionInfo.subscription_status,
               hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
               currentPeriodEnd:
                 subscriptionInfo.subscription?.current_period_end || null,
             };
+
+            // Do NOT include any detailed billing or payment info here
             return result;
           } catch (error) {
             return handleError(error, context);
