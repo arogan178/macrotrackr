@@ -66,6 +66,10 @@ export function handleError(error: unknown, set: any): ErrorResponse {
     { type: "response_error_handling" }
   );
 
+  // Always ensure JSON content type for error responses
+  set.headers = set.headers || {};
+  set.headers["Content-Type"] = "application/json";
+
   if (isAppError(error)) {
     set.status = error.statusCode;
     return createErrorResponse(
