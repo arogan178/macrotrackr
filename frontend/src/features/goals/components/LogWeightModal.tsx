@@ -1,10 +1,9 @@
-import { useRouter } from "@tanstack/react-router";
 import { format, isValid, parse } from "date-fns";
 import { useEffect, useState } from "react";
 
 import { DateField, NumberField, TimeField } from "@/components/form";
 import Modal from "@/components/ui/Modal";
-import { useStore } from "@/store/store";
+import { useAddWeightLogEntry } from "@/hooks/queries/useGoals";
 import { AddWeightLogPayload } from "@/utils/apiServices";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
 
@@ -22,11 +21,7 @@ function LogWeightModal({
   onClose,
   initialWeight,
 }: LogWeightModalProps) {
-  const router = useRouter();
-  const addWeightLogEntry = useStore((state) => state.addWeightLogEntry);
-  const isSaving = useStore((state) => state.isSaving);
-  const error = useStore((state) => state.error);
-  const clearError = useStore((state) => state.clearError);
+  const addWeightLogMutation = useAddWeightLogEntry();
 
   const today = format(new Date(), "yyyy-MM-dd");
   const nowTime = getCurrentTime();
@@ -36,6 +31,22 @@ function LogWeightModal({
   const [weight, setWeight] = useState<number | string>(initialWeight || "");
   const [formError, setFormError] = useState<string | undefined>();
 
+  // Clear form error when inputs change
+  const handleDateChange = (value: string) => {
+    setDate(value);
+    if (formError) setFormError(undefined);
+  };
+
+  const handleTimeChange = (value: string) => {
+    setTime(value);
+    if (formError) setFormError(undefined);
+  };
+
+  const handleWeightChange = (value: number | undefined) => {
+    setWeight(value === undefined ? "" : value);
+    if (formError) setFormError(undefined);
+  };
+
   useEffect(() => {
     if (isOpen) {
       const currentDateTime = new Date();
@@ -43,9 +54,8 @@ function LogWeightModal({
       setTime(format(currentDateTime, "HH:mm"));
       setWeight(initialWeight || "");
       setFormError(undefined);
-      if (clearError) clearError();
     }
-  }, [isOpen, initialWeight, clearError]);
+  }, [isOpen, initialWeight]);
 
   // Validation logic for Save button
   function validateForm(): boolean {
@@ -82,7 +92,6 @@ function LogWeightModal({
 
   // Handler for Modal's onSave
   async function handleSave() {
-    clearError();
     if (!validateForm()) return;
     const localDateTime = parse(
       `${date} ${time}`,
@@ -92,12 +101,10 @@ function LogWeightModal({
     const timestamp = localDateTime.toISOString();
     const payload: AddWeightLogPayload = { timestamp, weight: Number(weight) };
     try {
-      await addWeightLogEntry(payload);
-      // Invalidate loader to refresh weight log and progress bar
-      router.invalidate();
+      await addWeightLogMutation.mutateAsync(payload);
       onClose();
     } catch {
-      // Error state is handled by the slice
+      // Error state is handled by the mutation hook
     }
   }
 
@@ -108,30 +115,28 @@ function LogWeightModal({
       title="Log Your Weight"
       variant="form"
       onSave={handleSave}
-      saveDisabled={isSaving || !date || !time || !weight || !!formError}
+      saveDisabled={addWeightLogMutation.isPending || !date || !time || !weight || !!formError}
       saveLabel="Log Weight"
       buttonSize="lg"
     >
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <DateField label="Date" value={date} onChange={setDate} required />
-          <TimeField label="Time" value={time} onChange={setTime} required />
+          <DateField label="Date" value={date} onChange={handleDateChange} required />
+          <TimeField label="Time" value={time} onChange={handleTimeChange} required />
         </div>
         <NumberField
           label="Weight (kg)"
           value={weight}
-          onChange={(newValue) =>
-            setWeight(newValue === undefined ? "" : newValue)
-          }
+          onChange={handleWeightChange}
           required
           min={USER_MINIMUM_WEIGHT}
           max={USER_MAXIMUM_WEIGHT}
           step={0.1}
           placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
-          disabled={isSaving}
+          disabled={addWeightLogMutation.isPending}
         />
-        {(formError || error) && (
-          <p className="text-sm text-red-400">{formError || error}</p>
+        {formError && (
+          <p className="text-sm text-red-400">{formError}</p>
         )}
       </div>
     </Modal>

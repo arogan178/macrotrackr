@@ -1,8 +1,7 @@
-import { useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
 
 import Modal from "@/components/ui/Modal";
-import { useStore } from "@/store/store"; // Import useStore
+import { useCreateWeightGoal, useUpdateWeightGoal } from "@/hooks/queries/useGoals";
 import type { WeightGoals } from "@/types/goal";
 
 import { WeightGoalFormValues } from "../types";
@@ -25,11 +24,9 @@ function WeightGoalModal({
   tdee,
   weightGoals,
 }: WeightGoalModalProps) {
-  // Get actions and state from store
-  const createWeightGoal = useStore((state) => state.createWeightGoal);
-  const updateWeightGoal = useStore((state) => state.updateWeightGoal);
-  const isSaving = useStore((state) => state.isSaving); // Get saving state
-  const router = useRouter();
+  // Use query hooks instead of store
+  const createWeightGoalMutation = useCreateWeightGoal();
+  const updateWeightGoalMutation = useUpdateWeightGoal();
 
   useEffect(() => {
     if (isOpen) {
@@ -39,13 +36,19 @@ function WeightGoalModal({
 
   const handleSave = async (values: WeightGoalFormValues) => {
     try {
-      await (weightGoals
-        ? updateWeightGoal(values, tdee)
-        : createWeightGoal(values, tdee));
+      // Use update if we have existing weight goals with a startingWeight (indicating it exists)
+      // Otherwise use create
+      const hasExistingGoal = weightGoals && weightGoals.startingWeight !== undefined;
+      
+      if (hasExistingGoal) {
+        await updateWeightGoalMutation.mutateAsync({ goals: values, tdee });
+      } else {
+        await createWeightGoalMutation.mutateAsync({ goals: values, tdee });
+      }
+      
       onClose(); // Close modal on success
-      router.invalidate(); // Refresh loader/UI after save
     } catch (error) {
-      // Error is handled and displayed by the slice/notification system
+      // Error is handled and displayed by the mutation hooks
       console.error("Save failed in WeightGoalModal:", error);
       // Optionally keep modal open on error, or handle specific errors
     }
@@ -70,7 +73,7 @@ function WeightGoalModal({
         targetWeight={initialTargetWeight}
         tdee={tdee}
         weightGoals={weightGoals} // Pass existing goals to form for disabling startingWeight
-        isLoading={isSaving} // Pass saving state from store
+        isLoading={createWeightGoalMutation.isPending || updateWeightGoalMutation.isPending} // Pass saving state from mutations
         onSave={handleSave} // Pass the correct handler
         onCancel={onClose}
       />
