@@ -57,7 +57,11 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           placeholder="your@email.com"
           maxLength={30}
         />
-        <FormButton type="submit" className="w-full" disabled={forgotPasswordMutation.isPending}>
+        <FormButton
+          type="submit"
+          className="w-full"
+          disabled={forgotPasswordMutation.isPending}
+        >
           {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
         </FormButton>
       </form>

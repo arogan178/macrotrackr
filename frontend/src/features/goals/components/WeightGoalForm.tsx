@@ -92,11 +92,11 @@ function WeightGoalForm({
       // This ensures maintenance goals (starting = target weight) can be created
       setHasChanges(
         formValues.startingWeight !== undefined &&
-        formValues.targetWeight !== undefined &&
-        calorieIntake !== undefined &&
-        formValues.startingWeight > 0 &&
-        formValues.targetWeight > 0 &&
-        calorieIntake > 0
+          formValues.targetWeight !== undefined &&
+          calorieIntake !== undefined &&
+          formValues.startingWeight > 0 &&
+          formValues.targetWeight > 0 &&
+          calorieIntake > 0,
       );
     }
   }, [

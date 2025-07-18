@@ -27,13 +27,14 @@ const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
 
 // Step One Component - Account Information
 export function StepOne() {
-  const { register, setRegisterField, setRegisterStep, showNotification } = useStore();
+  const { register, setRegisterField, setRegisterStep, showNotification } =
+    useStore();
   const { validateStep, isValidating } = useRegistrationProcess();
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      
+
       const result = await validateStep(1, register);
       if (result.isValid) {
         setRegisterStep(2);
@@ -106,13 +107,14 @@ export function StepOne() {
 
 // Step Two Component - Profile Information
 export function StepTwo() {
-  const { register, setRegisterField, setRegisterStep, showNotification } = useStore();
+  const { register, setRegisterField, setRegisterStep, showNotification } =
+    useStore();
   const { validateStep, isValidating } = useRegistrationProcess();
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      
+
       const result = await validateStep(2, register);
       if (result.isValid) {
         setRegisterStep(3);
@@ -206,20 +208,23 @@ export function StepTwo() {
 
 // Step Three Component - Activity Level
 export function StepThree() {
-  const { register, setRegisterField, setRegisterStep, showNotification } = useStore();
-  const { validateStep, submitRegistration, isValidating, isSubmitting } = useRegistrationProcess();
+  const { register, setRegisterField, setRegisterStep, showNotification } =
+    useStore();
+  const { validateStep, submitRegistration, isValidating, isSubmitting } =
+    useRegistrationProcess();
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      
+
       const result = await validateStep(3, register);
       if (result.isValid) {
         try {
           await submitRegistration(register);
           showNotification("Registration successful!", "success");
         } catch (error) {
-          const errorMessage = error instanceof Error ? error.message : "Registration failed";
+          const errorMessage =
+            error instanceof Error ? error.message : "Registration failed";
           showNotification(errorMessage, "error");
         }
       } else if (result.error) {
