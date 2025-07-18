@@ -1,6 +1,7 @@
+import { AnimatePresence, motion } from "motion/react";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 
-import { FormButton, TabButton } from "@/components/form";
+import { TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
 import { AwardIcon, LockIcon, Modal, UserIcon } from "@/components/ui";
 import {
@@ -60,7 +61,6 @@ export default function SettingsPage() {
     hasSettingsChanges,
     validateSettingsForm,
     updateSetting,
-    clearSettingsMessages: clearMessages,
     resetSettings,
     setSubscriptionStatus,
     initializeSettings,
@@ -264,33 +264,48 @@ export default function SettingsPage() {
               </p>
             </div>
           ) : settings ? (
-            <>
+            <AnimatePresence mode="wait">
               {activeTab === "profile" && (
-                <form onSubmit={handleSubmit} className="p-6">
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
                   <ProfileForm
                     settings={settings}
                     updateSetting={updateSetting}
                     formErrors={formErrors}
+                    onSubmit={handleSubmit}
+                    isSaving={isSaving}
+                    hasChanges={hasSettingsChanges}
                   />
-                  <div className="mt-8 flex justify-end">
-                    <FormButton
-                      type="submit"
-                      isLoading={isSaving}
-                      disabled={
-                        !hasSettingsChanges ||
-                        Object.keys(formErrors).length > 0
-                      }
-                      text="Save Changes"
-                      buttonSize="lg"
-                      variant="primary"
-                      className="px-8 py-3 text-lg"
-                    />
-                  </div>
-                </form>
+                </motion.div>
               )}
-              {activeTab === "billing" && <BillingForm />}
-              {activeTab === "security" && <ChangePasswordForm />}
-            </>
+              {activeTab === "billing" && (
+                <motion.div
+                  key="billing"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <BillingForm />
+                </motion.div>
+              )}
+              {activeTab === "security" && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <ChangePasswordForm />
+                </motion.div>
+              )}
+            </AnimatePresence>
           ) : (
             <SettingsLoadingSkeleton />
           )}
