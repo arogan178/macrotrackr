@@ -37,7 +37,7 @@ export default function RecommendationsSection({
   insights,
   averages,
 }: RecommendationsSectionProps) {
-  const { macroBalance, nutrientDensity, dataQuality } = insights;
+  const { macroBalance, macroDensity, dataQuality } = insights;
 
   return (
     <motion.div
@@ -64,7 +64,7 @@ export default function RecommendationsSection({
         <ActionCard
           title="Food Quality"
           bgColor="bg-emerald-900/50"
-          message={nutrientDensity.message}
+          message={macroDensity.message}
           icon={<NutrientIcon className="h-4 w-4 text-emerald-400" />}
         />
 

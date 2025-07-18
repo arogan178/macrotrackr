@@ -21,38 +21,11 @@ import { macroRoutes } from "./modules/macros/routes";
 import { goalRoutes } from "./modules/goals/routes";
 import { habitRoutes } from "./modules/habits/routes";
 import { billingRoutes } from "./modules/billing/routes";
+import { reportingRoutes } from "./modules/reporting/routes";
 
 logger.info("🚀 Starting Elysia server...");
 
-// Elysia plugin to capture raw body for Stripe webhooks
-function rawBodyCapturePlugin() {
-  return (app: any) => {
-    app.onRequest(async (ctx: any) => {
-      if (
-        ctx.request.method === "POST" &&
-        ctx.request.url.endsWith("/webhooks/stripe/billing")
-      ) {
-        const reader = ctx.request.body?.getReader?.();
-        if (reader) {
-          let rawBody = Buffer.alloc(0);
-          let done, value;
-          while (true) {
-            ({ done, value } = await reader.read());
-            if (done) break;
-            if (value) {
-              rawBody = Buffer.concat([rawBody, Buffer.from(value)]);
-            }
-          }
-          ctx.rawBody = rawBody;
-        }
-      }
-    });
-    return app;
-  };
-}
-
 const app = new Elysia()
-  .use(rawBodyCapturePlugin())
   // Request size limits for security
   .onRequest(({ request, set }) => {
     const contentLength = request.headers.get("content-length");
@@ -107,22 +80,43 @@ app.post(
   async (ctx: any) => {
     const { logger } = await import("./lib/logger");
     try {
-      // Use the captured raw body
-      const rawBody = ctx.rawBody;
+      // Get the raw body text from custom parse function
+      const rawBodyText = ctx.body;
       const signature = ctx.headers["stripe-signature"];
+
+      logger.info(
+        {
+          operation: "stripe_webhook",
+          hasRawBody: !!rawBodyText,
+          rawBodyLength: rawBodyText?.length || 0,
+          hasSignature: !!signature,
+          signature: signature ? signature.substring(0, 20) + "..." : "none",
+          rawBodyPreview:
+            rawBodyText ? rawBodyText.substring(0, 100) + "..." : "none",
+        },
+        "Received Stripe webhook request"
+      );
+
       if (!signature) {
         logger.error(
           { operation: "stripe_webhook", error: "Missing Stripe signature" },
           "Missing Stripe signature header"
         );
-        ctx.set.status = 200;
+        ctx.set.status = 400;
         return { received: false, error: "Missing Stripe signature" };
       }
 
-      logger.info(
-        { operation: "stripe_webhook", payload: rawBody },
-        "Received Stripe webhook payload"
-      );
+      if (!rawBodyText || rawBodyText.length === 0) {
+        logger.error(
+          {
+            operation: "stripe_webhook",
+            error: "Missing or empty request body",
+          },
+          "Missing or empty request body for webhook"
+        );
+        ctx.set.status = 400;
+        return { received: false, error: "Missing request body" };
+      }
 
       // Import services inline to avoid circular dependencies
       const { StripeService } = await import(
@@ -136,7 +130,7 @@ app.post(
       let normalizedEvent;
       try {
         normalizedEvent = await StripeService.verifyWebhookSignature(
-          rawBody,
+          rawBodyText,
           signature
         );
       } catch (err) {
@@ -144,8 +138,22 @@ app.post(
           { operation: "stripe_webhook", error: err },
           "Signature verification or event parsing failed"
         );
-        ctx.set.status = 200;
+        ctx.set.status = 400;
         return { received: false, error: "Signature verification failed" };
+      }
+
+      // Deduplication: check if event ID already processed
+      const eventId = normalizedEvent.id;
+      const eventExists = ctx.db
+        .prepare("SELECT 1 FROM stripe_events WHERE id = ?")
+        .get(eventId);
+      if (eventExists) {
+        logger.warn(
+          { operation: "stripe_webhook", eventId },
+          `Duplicate Stripe event received, skipping: ${eventId}`
+        );
+        ctx.set.status = 200;
+        return { received: true, duplicate: true, eventId };
       }
 
       logger.info(
@@ -154,6 +162,7 @@ app.post(
           eventType: normalizedEvent.type,
           eventId: normalizedEvent.id,
           format: normalizedEvent.format,
+          payload: normalizedEvent,
         },
         `Processing Stripe webhook: ${normalizedEvent.type} (${normalizedEvent.format})`
       );
@@ -200,12 +209,17 @@ app.post(
                   eventType: normalizedEvent.type,
                   userId: user.id,
                   subscriptionId,
+                  eventId,
                 },
                 "Canceled subscription from webhook"
               );
             } else {
+              const subscriptionItem = subscription.items.data[0];
+              if (!subscriptionItem) {
+                throw new Error("Subscription has no items");
+              }
               const currentPeriodEnd = new Date(
-                subscription.current_period_end * 1000
+                subscriptionItem.current_period_end * 1000
               ).toISOString();
               await SubscriptionService.upsertSubscription(
                 user.id,
@@ -220,6 +234,7 @@ app.post(
                   userId: user.id,
                   subscriptionId,
                   status,
+                  eventId,
                 },
                 "Updated subscription from webhook"
               );
@@ -231,6 +246,7 @@ app.post(
                 eventType: normalizedEvent.type,
                 customerId,
                 subscriptionId,
+                eventId,
               },
               "User not found for Stripe customer ID"
             );
@@ -239,16 +255,24 @@ app.post(
       } else {
         // Log and gracefully handle unsupported event types
         logger.info(
-          { operation: "stripe_webhook", eventType: normalizedEvent?.type },
+          {
+            operation: "stripe_webhook",
+            eventType: normalizedEvent?.type,
+            eventId,
+          },
           `Received unsupported or unhandled event type: ${normalizedEvent?.type}`
         );
       }
+
+      // Insert event ID into stripe_events for deduplication
+      ctx.db.prepare("INSERT INTO stripe_events (id) VALUES (?)").run(eventId);
 
       ctx.set.status = 200;
       return {
         received: true,
         format: normalizedEvent.format,
         eventType: normalizedEvent.type,
+        eventId,
       };
     } catch (error) {
       logger.error(
@@ -263,8 +287,22 @@ app.post(
     }
   },
   {
-    // Accept any body type to prevent 422 errors from Elysia validation
-    body: t.Any(),
+    // Custom parse function to handle Stripe webhook raw body
+    async parse(ctx) {
+      // Check for Stripe webhook content-type with charset
+      const contentType = ctx.request.headers.get("content-type");
+      if (contentType === "application/json; charset=utf-8") {
+        const reqText = await ctx.request.text();
+        return reqText;
+      } else {
+        // For other content types, let Elysia handle normally
+        return undefined;
+      }
+    },
+    headers: t.Object({
+      "stripe-signature": t.String(),
+    }),
+    body: t.String(),
     detail: {
       summary: "Handle Stripe webhooks (NO AUTH)",
       tags: ["Billing"],
@@ -291,6 +329,7 @@ app.use(macroRoutes);
 app.use(goalRoutes);
 app.use(habitRoutes);
 app.use(billingRoutes);
+app.use(reportingRoutes);
 
 // Root endpoint
 app.get(
@@ -375,7 +414,7 @@ app.get(
 );
 
 // Global error handling
-app.onError(({ code, error, set }: any) => {
+app.onError(({ code, error, set, path }: any) => {
   logger.error(
     {
       type: "elysia_error",
@@ -384,6 +423,12 @@ app.onError(({ code, error, set }: any) => {
     },
     `[${code}] ${error?.toString() || "Unknown error"}`
   );
+
+  // Always set JSON content type for API routes
+  set.headers = set.headers || {};
+  if (typeof path === "string" && path.startsWith("/api/")) {
+    set.headers["Content-Type"] = "application/json";
+  }
 
   // Handle AppError instances
   if (isAppError(error)) {

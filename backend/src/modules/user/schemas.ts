@@ -28,6 +28,15 @@ export const UserSchemas = {
     weight: t.Nullable(t.Number()),
     gender: t.Nullable(t.Union([t.Literal("male"), t.Literal("female")])),
     activityLevel: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
+    subscription: t.Object({
+      status: t.Union([
+        t.Literal("free"),
+        t.Literal("pro"),
+        t.Literal("canceled"),
+      ]),
+      hasStripeCustomer: t.Boolean(),
+      currentPeriodEnd: t.Optional(t.Nullable(t.String())),
+    }),
   }),
 
   // Schema for updating user settings - USE camelCase

@@ -20,6 +20,11 @@ export default function EditModal({
   const [editedEntry, setEditedEntry] = useState<MacroEntry>({ ...entry });
   const [formValid, setFormValid] = useState(true);
 
+  // Update editedEntry when entry prop changes (to handle fresh data from cache)
+  useEffect(() => {
+    setEditedEntry({ ...entry });
+  }, [entry]);
+
   // Validate form whenever entry changes
   useEffect(() => {
     const isValid =

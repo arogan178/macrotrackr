@@ -50,7 +50,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/register",
         async (context: any) => {
-          const { body, db, jwt } = context;
+          const { body, db, jwt, set } = context;
           const {
             email,
             password,
@@ -114,6 +114,10 @@ export const authRoutes = (app: Elysia) =>
             lastName: userData.lastName,
           });
 
+          // Set JWT as cookie
+          set.headers["Set-Cookie"] =
+            `jwt=${token}; Path=/; HttpOnly; SameSite=Lax`;
+
           return { token };
         },
         {
@@ -127,7 +131,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/login",
         async (context: any) => {
-          const { body, db, jwt } = context;
+          const { body, db, jwt, set } = context;
 
           const user = safeQuery<UserRow>(
             db,
@@ -154,6 +158,10 @@ export const authRoutes = (app: Elysia) =>
             firstName: user.first_name,
             lastName: user.last_name,
           });
+
+          // Set JWT as cookie
+          set.headers["Set-Cookie"] =
+            `jwt=${token}; Path=/; HttpOnly; SameSite=Lax`;
 
           return { token };
         },
@@ -230,9 +238,6 @@ export const authRoutes = (app: Elysia) =>
         "/reset-password",
         async ({ body, db }) => {
           const { token, newPassword } = body;
-
-          // Added for debugging
-          console.log("Attempting to reset password with token:", token);
 
           const user = safeQuery<UserRow>(
             db,

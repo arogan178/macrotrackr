@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { CardContainer } from "@/components/form";
 import {
@@ -13,11 +13,8 @@ import { useStore } from "@/store/store";
 
 // Main RegisterForm Component
 function RegisterForm() {
-  const {
-    auth: { register, error },
-    resetRegistration,
-    clearAuthError,
-  } = useStore();
+  const { register, resetRegistration } = useStore();
+  const [error, setError] = useState<string | undefined>();
 
   // Reset registration data when component unmounts
   useEffect(() => {
@@ -78,7 +75,7 @@ function RegisterForm() {
         <FloatingNotification
           message={error}
           type="error"
-          onClose={clearAuthError}
+          onClose={() => setError(undefined)}
           duration={5000}
         />
       )}

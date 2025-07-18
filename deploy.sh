@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Ensure /root/.bun/bin and /usr/local/bin are in PATH for bun and pm2
+export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
 set -e
 
 echo "Starting deployment at $(date)"

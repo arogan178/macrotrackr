@@ -1,5 +1,5 @@
 import { USER_MINIMUM_AGE } from "@/utils/constants";
-import { isOldEnough } from "@/utils/Validation";
+import { isOldEnough } from "@/utils/validation";
 
 import { AUTH_ERROR_MESSAGES } from "../constants";
 import type {
