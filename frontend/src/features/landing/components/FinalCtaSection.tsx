@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import React from "react";
-import { Link } from "react-router-dom";
 
 import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
 import FormButton from "@/components/form/FormButton";

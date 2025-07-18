@@ -206,14 +206,6 @@ export class StripeService {
   ): Promise<Stripe.Subscription> {
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      logger.debug(
-        {
-          operation: "stripe_get_subscription",
-          subscriptionId,
-          status: subscription.status,
-        },
-        "Retrieved Stripe subscription"
-      );
       return subscription;
     } catch (error) {
       handleServiceError(error, "stripe_get_subscription", { subscriptionId });
@@ -252,16 +244,6 @@ export class StripeService {
     signature: string
   ): Promise<NormalizedWebhookEvent> {
     try {
-      logger.debug(
-        {
-          operation: "stripe_verify_webhook",
-          payloadLength: payload.length,
-          payloadPreview: payload.substring(0, 100) + "...",
-          signature,
-          webhookSecret: config.STRIPE_WEBHOOK_SECRET ? "present" : "missing",
-        },
-        "Attempting to verify Stripe webhook signature"
-      );
 
       const event = await stripe.webhooks.constructEventAsync(
         payload,
@@ -269,15 +251,6 @@ export class StripeService {
         config.STRIPE_WEBHOOK_SECRET
       );
       const normalizedEvent = this.normalizeWebhookEvent(event);
-      logger.debug(
-        {
-          operation: "stripe_verify_webhook",
-          eventType: normalizedEvent.type,
-          eventId: normalizedEvent.id,
-          format: normalizedEvent.format,
-        },
-        "Verified and normalized Stripe webhook signature"
-      );
       return normalizedEvent;
     } catch (error) {
       logger.error(

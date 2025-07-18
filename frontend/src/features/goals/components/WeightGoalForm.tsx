@@ -28,97 +28,107 @@ function WeightGoalForm({
   // Get today's date in YYYY-MM-DD format for the starting date
   const todayString = new Date().toISOString().split("T")[0];
 
-  const [formValues, setFormValues] = useState<WeightGoalFormValues>({
-    startingWeight: startingWeight,
-    targetWeight: targetWeight || undefined,
-    startDate: todayString,
-  });
-  const [hasChanges, setHasChanges] = useState(false);
-  const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-    weightGoals?.calorieTarget,
-  );
-  const [calculatedTargetDate, setCalculatedTargetDate] = useState<
-    string | undefined
-  >(weightGoals?.targetDate);
-  const [weeklyWeightChange, setWeeklyWeightChange] = useState<
-    number | undefined
-  >(weightGoals?.weeklyChange);
-  const [calculatedWeeks, setCalculatedWeeks] = useState<number | undefined>(
-    weightGoals?.calculatedWeeks,
-  );
+  // Track if editing or creating
+  const isEditing = Boolean(weightGoals);
 
-  // Calculate default calorie intake based on TDEE and weight goals
-  useEffect(() => {
-    if (tdee && formValues.startingWeight && formValues.targetWeight) {
-      const calculations = generateWeightGoalCalculations(
-        tdee,
-        formValues.startingWeight,
-        formValues.targetWeight,
-      );
-      setCalorieIntake(calculations.calorieTarget);
-      setCalculatedTargetDate(calculations.targetDate);
-      setWeeklyWeightChange(calculations.weeklyChange);
-      setCalculatedWeeks(calculations.calculatedWeeks);
-    }
-  }, [tdee, formValues.startingWeight, formValues.targetWeight]);
+  // Only initialize form state on mount or when switching between edit/create
+  const [formValues, setFormValues] = useState<WeightGoalFormValues>(() => ({
+    startingWeight: weightGoals?.startingWeight ?? startingWeight,
+    targetWeight: weightGoals?.targetWeight ?? targetWeight ?? startingWeight,
+    startDate: weightGoals?.startDate ?? todayString,
+  }));
 
+  // When switching between edit/create, reset form state
   useEffect(() => {
     setFormValues({
-      startingWeight,
-      targetWeight: targetWeight || undefined,
-      startDate: weightGoals?.startDate || todayString,
+      startingWeight: weightGoals?.startingWeight ?? startingWeight,
+      targetWeight: weightGoals?.targetWeight ?? targetWeight ?? startingWeight,
+      startDate: weightGoals?.startDate ?? todayString,
     });
-  }, [startingWeight, targetWeight, weightGoals, todayString]);
+  }, [weightGoals, startingWeight, targetWeight, todayString]);
 
+  // Calculate all derived values from current form state and tdee
+  const calculations =
+    tdee && formValues.startingWeight && formValues.targetWeight
+      ? generateWeightGoalCalculations(
+          tdee,
+          formValues.startingWeight,
+          formValues.targetWeight, // let calculation use default calorie target
+        )
+      : undefined;
+
+  // Calorie intake is either user-adjusted or default from calculations
+  const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
+    weightGoals?.calorieTarget ?? calculations?.calorieTarget,
+  );
+
+  // When switching between edit/create or when form values change, update calorieIntake if not user-adjusted
   useEffect(() => {
-    // Check if values have changed from props
-    const isDifferent =
-      formValues.startingWeight !== startingWeight ||
-      formValues.targetWeight !== targetWeight ||
-      calorieIntake !== weightGoals?.calorieTarget;
+    if (!isEditing) {
+      setCalorieIntake(calculations?.calorieTarget);
+    } else if (weightGoals?.calorieTarget) {
+      setCalorieIntake(weightGoals.calorieTarget);
+    }
+  }, [calculations?.calorieTarget, isEditing, weightGoals?.calorieTarget]);
 
-    setHasChanges(isDifferent);
-  }, [formValues, startingWeight, targetWeight, calorieIntake, weightGoals]);
+  // Derived values for display
+  const calculatedTargetDate = calculations?.targetDate;
+  const weeklyWeightChange = calculations?.weeklyChange;
+  const calculatedWeeks = calculations?.calculatedWeeks;
 
-  // Update calculations when calorie intake changes
+  const [hasChanges, setHasChanges] = useState(false);
+
+  // Track if form has changes compared to initial values
+  useEffect(() => {
+    if (isEditing && weightGoals) {
+      // For editing, check if values have changed from existing goal
+      setHasChanges(
+        formValues.startingWeight !== weightGoals.startingWeight ||
+          formValues.targetWeight !== weightGoals.targetWeight ||
+          calorieIntake !== weightGoals.calorieTarget,
+      );
+    } else {
+      // For creating new goals, always allow saving if we have valid values
+      // This ensures maintenance goals (starting = target weight) can be created
+      setHasChanges(
+        formValues.startingWeight !== undefined &&
+          formValues.targetWeight !== undefined &&
+          calorieIntake !== undefined &&
+          formValues.startingWeight > 0 &&
+          formValues.targetWeight > 0 &&
+          calorieIntake > 0,
+      );
+    }
+  }, [
+    formValues,
+    startingWeight,
+    targetWeight,
+    calorieIntake,
+    weightGoals,
+    calculations?.calorieTarget,
+    isEditing,
+  ]);
+
+  // Update calculations when calorie intake slider is changed
   const handleCalorieIntakeChange = (value: number | undefined) => {
     setCalorieIntake(value);
-
-    if (value && tdee && formValues.startingWeight && formValues.targetWeight) {
-      // Generate new calculations based on the adjusted calorie intake
-      const calculations = generateWeightGoalCalculations(
-        tdee,
-        formValues.startingWeight,
-        formValues.targetWeight,
-        value,
-      );
-
-      // Update all calculation-dependent state values
-      setCalculatedTargetDate(calculations.targetDate);
-      setWeeklyWeightChange(calculations.weeklyChange);
-      setCalculatedWeeks(calculations.calculatedWeeks);
-      setHasChanges(true);
-    }
   };
 
   const handleSave = () => {
     if (!formValues.targetWeight || !calorieIntake) return;
 
     // Calculate daily change (deficit/surplus)
-    // For weight loss: dailyChange = calorieIntake - tdee (negative value)
-    // For weight gain: dailyChange = calorieIntake - tdee (positive value)
-    // For maintenance: dailyChange = calorieIntake - tdee (around 0)
     const dailyChange = calorieIntake - tdee;
 
     const completeGoal = {
-      startingWeight: formValues.startingWeight!, // Ensure startingWeight is included from form state
+      startingWeight: formValues.startingWeight!,
       targetWeight: formValues.targetWeight,
       calorieTarget: calorieIntake,
       startDate: formValues.startDate || todayString,
       targetDate: calculatedTargetDate,
       weeklyChange: weeklyWeightChange,
       calculatedWeeks: calculatedWeeks,
-      dailyChange: dailyChange, // Add the calculated daily change
+      dailyChange: dailyChange,
       weightGoal:
         formValues.startingWeight! > formValues.targetWeight!
           ? "lose"
@@ -145,7 +155,6 @@ function WeightGoalForm({
         <NumberField
           label="Starting Weight"
           value={formValues.startingWeight}
-          // Restore onChange handler
           onChange={(value) =>
             setFormValues({ ...formValues, startingWeight: value || 0 })
           }
@@ -155,7 +164,7 @@ function WeightGoalForm({
           step={0.1}
           required
           // Disable only if editing an existing goal (weightGoals is not undefined)
-          disabled={!!weightGoals}
+          disabled={Boolean(weightGoals)}
         />
 
         <NumberField
@@ -171,7 +180,6 @@ function WeightGoalForm({
           required
         />
       </div>
-
       {tdee && calorieIntake !== undefined && formValues.targetWeight && (
         <div className="space-y-3 mb-6">
           <div className="flex justify-between items-center">

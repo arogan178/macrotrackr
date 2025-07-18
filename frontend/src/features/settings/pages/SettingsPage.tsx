@@ -1,6 +1,7 @@
+import { AnimatePresence, motion } from "motion/react";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 
-import { FormButton, TabButton } from "@/components/form";
+import { TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
 import { AwardIcon, LockIcon, Modal, UserIcon } from "@/components/ui";
 import {
@@ -9,6 +10,7 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
+import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import { useStore } from "@/store/store";
 
@@ -45,21 +47,38 @@ const PageHeader = ({
 );
 
 export default function SettingsPage() {
+  // Use TanStack Query for settings data and mutations
+  const {
+    data: settingsData,
+    isLoading: isSettingsLoading,
+    error: settingsQueryError,
+  } = useSettings();
+  const saveSettingsMutation = useSaveSettings();
+
   const {
     settings,
-    isLoading,
-    settingsError: error,
-    settingsSuccess: successMessage,
     formErrors,
     hasSettingsChanges,
-    isSaving,
     validateSettingsForm,
     updateSetting,
-    saveSettings,
-    clearSettingsMessages: clearMessages,
     resetSettings,
-    fetchSettings,
+    setSubscriptionStatus,
+    initializeSettings,
   } = useStore();
+
+  // Get loading state from mutation
+  const isSaving = saveSettingsMutation.isPending;
+
+  // Hydrate subscriptionStatus from settings data
+  useEffect(() => {
+    if (
+      settingsData &&
+      settingsData.subscription &&
+      typeof settingsData.subscription.status === "string"
+    ) {
+      setSubscriptionStatus(settingsData.subscription.status);
+    }
+  }, [settingsData, setSubscriptionStatus]);
 
   type TabType = "profile" | "billing" | "security";
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -68,10 +87,29 @@ export default function SettingsPage() {
     TabType | undefined
   >();
 
-  // Fetch settings on component mount
+  // Initialize settings from query data on component mount
   useEffect(() => {
-    fetchSettings();
-  }, [fetchSettings]);
+    if (settingsData) {
+      // Transform the API response to match the expected settings format
+      const transformedSettings = {
+        id: settingsData.id,
+        email: settingsData.email,
+        firstName: settingsData.firstName,
+        lastName: settingsData.lastName,
+        createdAt: settingsData.createdAt,
+        dateOfBirth: settingsData.dateOfBirth,
+        height: settingsData.height,
+        weight: settingsData.weight,
+        gender: settingsData.gender as "male" | "female" | undefined,
+        activityLevel: settingsData.activityLevel,
+        subscription: settingsData.subscription,
+      };
+
+      initializeSettings({
+        settings: transformedSettings,
+      });
+    }
+  }, [settingsData, initializeSettings]);
 
   // Warn user before leaving page with unsaved changes
   useBeforeUnload(
@@ -109,11 +147,30 @@ export default function SettingsPage() {
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      if (!validateSettingsForm()) return;
-      await saveSettings();
-      // No need to show a local notification here since the store will handle it
+      if (!validateSettingsForm() || !settings) return;
+
+      // Prepare payload for TanStack Query mutation
+      const payload = {
+        firstName: settings.firstName,
+        lastName: settings.lastName,
+        email: settings.email,
+        dateOfBirth: settings.dateOfBirth,
+        height: settings.height,
+        weight: settings.weight,
+        gender: settings.gender === "" ? undefined : settings.gender,
+        activityLevel: settings.activityLevel,
+      };
+
+      try {
+        await saveSettingsMutation.mutateAsync(payload);
+        // Update the store to reflect successful save
+        const updatedSettings = structuredClone(settings);
+        initializeSettings({ settings: updatedSettings });
+      } catch (error) {
+        console.error("Failed to save settings:", error);
+      }
     },
-    [validateSettingsForm, saveSettings],
+    [validateSettingsForm, settings, saveSettingsMutation, initializeSettings],
   );
 
   return (
@@ -123,21 +180,21 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          {/* Only render notification if it comes from the store */}
-          {successMessage && (
+          {/* Error handling is now managed by TanStack Query */}
+          {saveSettingsMutation.isError && (
             <FloatingNotification
-              message={successMessage}
-              type="success"
-              onClose={clearMessages}
-              duration={3000}
+              message={`Failed to save settings: ${saveSettingsMutation.error?.message || "Unknown error"}`}
+              type="error"
+              onClose={() => saveSettingsMutation.reset()}
+              duration={5000}
             />
           )}
 
-          {error && (
+          {saveSettingsMutation.isSuccess && (
             <FloatingNotification
-              message={error}
-              type="error"
-              onClose={clearMessages}
+              message="Settings saved successfully!"
+              type="success"
+              onClose={() => saveSettingsMutation.reset()}
               duration={3000}
             />
           )}
@@ -198,36 +255,59 @@ export default function SettingsPage() {
             </div>
           </PageHeader>
 
-          {isLoading || !settings ? (
+          {isSettingsLoading ? (
             <SettingsLoadingSkeleton />
-          ) : (
-            <>
+          ) : settingsQueryError ? (
+            <div className="p-6 text-center">
+              <p className="text-red-400">
+                Failed to load settings. Please try again.
+              </p>
+            </div>
+          ) : settings ? (
+            <AnimatePresence mode="wait">
               {activeTab === "profile" && (
-                <form onSubmit={handleSubmit} className="p-6">
+                <motion.div
+                  key="profile"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
                   <ProfileForm
                     settings={settings}
                     updateSetting={updateSetting}
                     formErrors={formErrors}
+                    onSubmit={handleSubmit}
+                    isSaving={isSaving}
+                    hasChanges={hasSettingsChanges}
                   />
-                  <div className="mt-8 flex justify-end">
-                    <FormButton
-                      type="submit"
-                      isLoading={isSaving}
-                      disabled={
-                        !hasSettingsChanges ||
-                        Object.keys(formErrors).length > 0
-                      }
-                      text="Save Changes"
-                      buttonSize="lg"
-                      variant="primary"
-                      className="px-8 py-3 text-lg"
-                    />
-                  </div>
-                </form>
+                </motion.div>
               )}
-              {activeTab === "billing" && <BillingForm />}
-              {activeTab === "security" && <ChangePasswordForm />}
-            </>
+              {activeTab === "billing" && (
+                <motion.div
+                  key="billing"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <BillingForm />
+                </motion.div>
+              )}
+              {activeTab === "security" && (
+                <motion.div
+                  key="security"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3, ease: "easeInOut" }}
+                >
+                  <ChangePasswordForm />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          ) : (
+            <SettingsLoadingSkeleton />
           )}
         </div>
       </div>
