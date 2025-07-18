@@ -33,8 +33,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   const [protein, setProtein] = useState<number | undefined>();
   const [carbs, setCarbs] = useState<number | undefined>();
   const [fats, setFats] = useState<number | undefined>();
-  const [quantity, setQuantity] = useState<number>(100);
-  const [unit, setUnit] = useState("g");
+  const [quantity, setQuantity] = useState<number | undefined>(100);
+  const [unit, setUnit] = useState<string>("g");
   const [baseMacros, setBaseMacros] = useState<
     | {
         protein: number;
@@ -95,7 +95,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
 
   // Effect to recalculate macros when quantity or baseMacros change
   useEffect(() => {
-    if (baseMacros) {
+    if (baseMacros && typeof quantity === "number") {
       const factor = quantity / 100; // Macros are per 100g
       setProtein(Number((baseMacros.protein * factor).toFixed(1)));
       setCarbs(Number((baseMacros.carbs * factor).toFixed(1)));
@@ -137,7 +137,12 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
       setBaseMacros(per100g);
       setMealName(name);
       setQuantity(servingQuantity);
-      setUnit(servingUnit);
+      // Only allow metric units: g, kg, L
+      let metricUnit = servingUnit;
+      if (servingUnit === "oz") metricUnit = "g";
+      if (servingUnit === "lbs") metricUnit = "kg";
+      // If L, keep as L
+      setUnit(metricUnit);
       setSearchResult(`Selected: ${name}`);
     },
     [],
@@ -230,7 +235,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
                 onChange={setQuantity}
                 disabled={!baseMacros}
                 min={0}
-                step={1}
+                step={0.01}
                 unit={unit}
               />
             </div>

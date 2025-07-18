@@ -15,7 +15,7 @@ export const METRIC_CARD_CONFIGS = {
     borderColor: "border border-purple-700/30",
     textColor: "text-purple-300",
   },
-  nutrientDensity: {
+  macroDensity: {
     bgGradient: "bg-gradient-to-br from-emerald-900/60 to-emerald-800/30",
     borderColor: "border border-emerald-700/30",
     textColor: "text-emerald-300",

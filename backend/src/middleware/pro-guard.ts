@@ -45,13 +45,6 @@ export const proGuard = new Elysia({ name: "proGuard" })
         "Pro subscription required. Please upgrade your account to access this feature."
       );
     }
-    logger.debug(
-      {
-        operation: "pro_guard_access_granted",
-        userId: user.userId,
-      },
-      "Pro subscription verified - access granted"
-    );
     return { isProUser: true };
   });
 

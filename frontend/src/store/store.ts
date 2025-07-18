@@ -1,50 +1,47 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { AuthSlice, createAuthSlice } from "@/features/auth/store/auth-slice";
 import {
-  createGoalsSlice,
-  GoalsSlice,
-} from "@/features/goals/store/goals-slice";
+  AuthUISlice,
+  createAuthUISlice,
+} from "@/features/auth/store/auth-ui-slice";
 import {
-  createHabitsSlice,
-  HabitsSlice,
-} from "@/features/habits/store/habits-slice";
+  createGoalsUISlice,
+  GoalsUISlice,
+} from "@/features/goals/store/goals-ui-slice";
 import {
-  createMacrosSlice,
-  MacrosSlice,
-} from "@/features/macroTracking/store/macros-slice";
+  createMacroUISlice,
+  MacroUISlice,
+} from "@/features/macroTracking/store/macro-ui-slice";
 import {
   createNotificationSlice,
   NotificationSlice,
 } from "@/features/notifications/store/notifications-slice";
 import {
-  createUserSlice,
-  UserSlice,
-} from "@/features/settings/store/user-slice";
+  createUserUISlice,
+  UserUISlice,
+} from "@/features/settings/store/user-ui-slice";
 
-// Combine all slice types
-export type StoreState = UserSlice &
-  MacrosSlice &
-  GoalsSlice &
-  AuthSlice &
-  NotificationSlice &
-  HabitsSlice;
+// Combine all slice types (removed HabitsSlice, GoalsSlice, and MacrosSlice - kept UI slices for UI state)
+export type StoreState = UserUISlice &
+  AuthUISlice &
+  GoalsUISlice &
+  MacroUISlice &
+  NotificationSlice;
 
-// Create the store with all slices
+// Create the store with all slices (removed createHabitsSlice, createGoalsSlice, and createMacrosSlice - kept UI slices for UI state)
 export const useStore = create<StoreState>()(
   devtools((...a) => ({
-    ...createUserSlice(...a),
-    ...createMacrosSlice(...a),
-    ...createGoalsSlice(...a),
-    ...createAuthSlice(...a),
+    ...createUserUISlice(...a),
+    ...createAuthUISlice(...a),
+    ...createGoalsUISlice(...a),
+    ...createMacroUISlice(...a),
     ...createNotificationSlice(...a),
-    ...createHabitsSlice(...a),
   })),
 );
 
-// Method to reset the entire store for testing purposes
-export const resetStore = () => {
-  const { reset: resetAuth } = useStore.getState();
-  resetAuth();
-};
+// If you need to reset slices for testing, implement a reset method in each slice and call them here.
+// Example:
+// export const resetStore = () => {
+//   useStore.setState((state) => ({ ...state, ...initialState }));
+// };
