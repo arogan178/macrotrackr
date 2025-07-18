@@ -20,13 +20,13 @@ import {
 import { FloatingNotification } from "@/features/notifications/components";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import { 
+import {
+  useAddMacroEntry,
+  useDeleteMacroEntry,
+  useMacroDailyTotals,
   useMacroHistory,
-  useMacroDailyTotals, 
-  useMacroTarget, 
-  useAddMacroEntry, 
-  useUpdateMacroEntry, 
-  useDeleteMacroEntry 
+  useMacroTarget,
+  useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
@@ -34,27 +34,28 @@ import type { MacroEntry } from "@/types/macro";
 export default function HomePage() {
   // Get user data from useUser hook
   const { data: user } = useUser();
-  
+
   // Add TanStack Router hooks for navigation and search params
   const navigate = useNavigate({ from: homeRoute.id });
   const search = useSearch({ from: homeRoute.id });
 
   // Get macro data from TanStack Query hooks
-  const today = new Date().toISOString().split('T')[0];
-  const { data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 } } = useMacroDailyTotals(today);
+  const today = new Date().toISOString().split("T")[0];
+  const {
+    data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
+  } = useMacroDailyTotals(today);
   const { data: macroTarget } = useMacroTarget();
-  
+
   // Get paginated macro history from TanStack Query
   const limit = Number(search.limit) || 20;
   const offset = Number(search.offset) || 0;
-  const { data: macroHistoryData, isLoading: isHistoryLoading } = useMacroHistory(limit, offset);
-  
+  const { data: macroHistoryData, isLoading: isHistoryLoading } =
+    useMacroHistory(limit, offset);
+
   // Get weight goals from home route loader
-  const {
-    weightGoals,
-    weightLog,
-    weightGoalsError,
-  } = useLoaderData({ from: homeRoute.id }) as any;
+  const { weightGoals, weightLog, weightGoalsError } = useLoaderData({
+    from: homeRoute.id,
+  }) as any;
 
   // Extract history data from query result
   const history = macroHistoryData?.entries || [];
@@ -118,17 +119,20 @@ export default function HomePage() {
   }, [user, setNutritionProfile, setSubscriptionStatus]);
 
   // Handler for adding entries
-  const handleAddEntry = useCallback(async (entry: {
-    protein: number;
-    carbs: number;
-    fats: number;
-    mealType: "breakfast" | "lunch" | "dinner" | "snack";
-    mealName: string;
-    entryDate: string;
-    entryTime: string;
-  }) => {
-    await addMacroEntryMutation.mutateAsync(entry);
-  }, [addMacroEntryMutation]);
+  const handleAddEntry = useCallback(
+    async (entry: {
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: "breakfast" | "lunch" | "dinner" | "snack";
+      mealName: string;
+      entryDate: string;
+      entryTime: string;
+    }) => {
+      await addMacroEntryMutation.mutateAsync(entry);
+    },
+    [addMacroEntryMutation],
+  );
 
   // Handler for editing entries that matches EditModal's expected signature
   const handleEditEntry = useCallback(
@@ -145,7 +149,7 @@ export default function HomePage() {
           mealName: entry.mealName,
           entryDate: entry.entryDate || "",
           entryTime: entry.entryTime || "",
-        }
+        },
       });
       setEditingEntry(undefined);
     },
@@ -153,9 +157,12 @@ export default function HomePage() {
   );
 
   // Handler for deleting entries
-  const handleDeleteEntry = useCallback(async (id: number) => {
-    await deleteMacroEntryMutation.mutateAsync(id);
-  }, [deleteMacroEntryMutation]);
+  const handleDeleteEntry = useCallback(
+    async (id: number) => {
+      await deleteMacroEntryMutation.mutateAsync(id);
+    },
+    [deleteMacroEntryMutation],
+  );
 
   // Memoized close handler to prevent unnecessary re-renders
   const handleCloseModal = useCallback(() => {
@@ -202,9 +209,10 @@ export default function HomePage() {
   const isDeleting = deleteMacroEntryMutation.isPending;
 
   // Error handling
-  const error = addMacroEntryMutation.error?.message || 
-                updateMacroEntryMutation.error?.message || 
-                deleteMacroEntryMutation.error?.message;
+  const error =
+    addMacroEntryMutation.error?.message ||
+    updateMacroEntryMutation.error?.message ||
+    deleteMacroEntryMutation.error?.message;
 
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
@@ -252,7 +260,10 @@ export default function HomePage() {
                   {isLoading ? (
                     <AddEntryLoadingSkeleton />
                   ) : (
-                    <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
+                    <AddEntryForm
+                      onSubmit={handleAddEntry}
+                      isSaving={isSaving}
+                    />
                   )}
                 </div>
               </div>

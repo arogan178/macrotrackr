@@ -5,6 +5,7 @@ import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
+
 import WeightGoalStatus from "./WeightGoalStatus";
 
 interface WeightGoalDashboardProps {
@@ -112,7 +113,6 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
           macroTarget={macroTarget}
         />
       </div>
-
     </>
   );
 });

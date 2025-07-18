@@ -1,24 +1,32 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService } from "@/utils/apiServices";
 import type {
-  MacroEntry,
   MacroDailyTotals,
+  MacroEntry,
   MacroTargetSettings,
-  PaginatedMacroHistory
+  PaginatedMacroHistory,
 } from "@/types/macro";
-import type { MacroEntryCreatePayload, MacroEntryUpdatePayload } from "@/utils/apiServices";
+import type {
+  MacroEntryCreatePayload,
+  MacroEntryUpdatePayload,
+} from "@/utils/apiServices";
+import { apiService } from "@/utils/apiServices";
 
 // Query hook for paginated macro history
 export function useMacroHistory(
   limit = 20,
   offset = 0,
-  options?: { startDate?: string; endDate?: string }
+  options?: { startDate?: string; endDate?: string },
 ) {
   return useQuery({
     queryKey: queryKeys.macros.history(Math.floor(offset / limit) + 1),
     queryFn: async () => {
-      const response = await apiService.macros.getHistory(limit, offset, options);
+      const response = await apiService.macros.getHistory(
+        limit,
+        offset,
+        options,
+      );
       return response as PaginatedMacroHistory;
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
@@ -28,7 +36,7 @@ export function useMacroHistory(
 
 // Query hook for daily macro totals by date
 export function useMacroDailyTotals(date?: string) {
-  const today = new Date().toISOString().split('T')[0];
+  const today = new Date().toISOString().split("T")[0];
   const queryDate = date || today;
 
   return useQuery({
@@ -36,7 +44,7 @@ export function useMacroDailyTotals(date?: string) {
     queryFn: async () => {
       const response = await apiService.macros.getDailyTotals({
         startDate: queryDate,
-        endDate: queryDate
+        endDate: queryDate,
       });
       return response as MacroDailyTotals;
     },
@@ -69,11 +77,11 @@ export function useAddMacroEntry() {
       // Invalidate all macro history queries (all pages)
       queryClient.invalidateQueries({
         queryKey: queryKeys.macros.all(),
-        exact: false
+        exact: false,
       });
       // Also specifically invalidate daily totals
       queryClient.invalidateQueries({
-        queryKey: queryKeys.macros.dailyTotals(variables.entryDate)
+        queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
       });
     },
   });
@@ -84,14 +92,20 @@ export function useUpdateMacroEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, entry }: { id: number; entry: MacroEntryUpdatePayload }) => {
+    mutationFn: async ({
+      id,
+      entry,
+    }: {
+      id: number;
+      entry: MacroEntryUpdatePayload;
+    }) => {
       return await apiService.macros.updateEntry(id, entry);
     },
     onSuccess: () => {
       // Invalidate all macro queries (all pages and daily totals)
       queryClient.invalidateQueries({
         queryKey: queryKeys.macros.all(),
-        exact: false
+        exact: false,
       });
     },
   });
@@ -109,7 +123,7 @@ export function useDeleteMacroEntry() {
       // Invalidate all macro queries (all pages and daily totals)
       queryClient.invalidateQueries({
         queryKey: queryKeys.macros.all(),
-        exact: false
+        exact: false,
       });
     },
   });
@@ -121,7 +135,9 @@ export function useUpdateMacroTarget() {
 
   return useMutation({
     mutationFn: async (settings: MacroTargetSettings) => {
-      return await apiService.macros.saveMacroTargetPercentages({ macroTarget: settings });
+      return await apiService.macros.saveMacroTargetPercentages({
+        macroTarget: settings,
+      });
     },
     onSuccess: () => {
       // Invalidate macro targets query to refetch fresh data

@@ -17,7 +17,8 @@ function handleUpgradeRedirect() {
 const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
   // Get billing details from TanStack Query
-  const { data: billingDetails, isLoading: isBillingLoading } = useBillingDetails();
+  const { data: billingDetails, isLoading: isBillingLoading } =
+    useBillingDetails();
   const [isLoading, setIsLoading] = useState(false);
 
   // Check for successful upgrade on component mount

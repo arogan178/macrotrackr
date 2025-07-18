@@ -3,17 +3,18 @@
  * These examples show best practices for integrating TanStack Query loading states
  */
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { 
-  QueryLoadingWrapper,
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+
+import {
   FeatureLoadingIndicator,
+  GlobalLoadingIndicator,
   MutationLoadingButton,
-  GlobalLoadingIndicator
+  QueryLoadingWrapper,
 } from "@/components/ui";
-import { 
-  useFeatureLoading, 
+import {
+  useFeatureLoading,
   useGlobalLoading,
-  useMutationErrorHandler 
+  useMutationErrorHandler,
 } from "@/hooks";
 import { queryKeys } from "@/lib/queryKeys";
 
@@ -25,8 +26,8 @@ export function QueryLoadingExample() {
     queryKey: queryKeys.habits.list(),
     queryFn: async () => {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return [{ id: '1', name: 'Example Habit' }];
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return [{ id: "1", name: "Example Habit" }];
     },
   });
 
@@ -39,7 +40,7 @@ export function QueryLoadingExample() {
     >
       <div>
         <h3>Habits Data</h3>
-        {data?.map(habit => (
+        {data?.map((habit) => (
           <div key={habit.id}>{habit.name}</div>
         ))}
       </div>
@@ -54,19 +55,16 @@ export function FeatureLoadingExample() {
   const { data } = useQuery({
     queryKey: queryKeys.habits.list(),
     queryFn: async () => {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      return [{ id: '1', name: 'Example Habit' }];
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      return [{ id: "1", name: "Example Habit" }];
     },
   });
 
   return (
-    <FeatureLoadingIndicator 
-      feature="habits"
-      className="min-h-[200px]"
-    >
+    <FeatureLoadingIndicator feature="habits" className="min-h-[200px]">
       <div>
         <h3>Habits Feature Content</h3>
-        {data?.map(habit => (
+        {data?.map((habit) => (
           <div key={habit.id}>{habit.name}</div>
         ))}
       </div>
@@ -79,14 +77,15 @@ export function FeatureLoadingExample() {
  */
 export function MutationLoadingExample() {
   const queryClient = useQueryClient();
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => console.error("Mutation failed:", message),
-    onSuccess: (message) => console.log("Mutation succeeded:", message),
-  });
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => console.error("Mutation failed:", message),
+      onSuccess: (message) => console.log("Mutation succeeded:", message),
+    });
 
   const mutation = useMutation({
     mutationFn: async (data: { name: string }) => {
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
       return { id: Date.now().toString(), ...data };
     },
     onSuccess: () => {
@@ -108,13 +107,13 @@ export function MutationLoadingExample() {
       >
         Create Habit
       </MutationLoadingButton>
-      
+
       {mutation.isError && (
         <div className="text-red-400 text-sm">
           Error: {mutation.error?.message}
         </div>
       )}
-      
+
       {mutation.isSuccess && (
         <div className="text-green-400 text-sm">
           Success! Created habit with ID: {mutation.data?.id}
@@ -128,29 +127,28 @@ export function MutationLoadingExample() {
  * Example 4: Using loading state hooks for custom logic
  */
 export function CustomLoadingLogicExample() {
-  const { isLoading: isGlobalLoading, activeQueries, activeMutations } = useGlobalLoading();
-  const { isLoading: isHabitsLoading, activeQueries: habitsQueries } = useFeatureLoading('habits');
+  const {
+    isLoading: isGlobalLoading,
+    activeQueries,
+    activeMutations,
+  } = useGlobalLoading();
+  const { isLoading: isHabitsLoading, activeQueries: habitsQueries } =
+    useFeatureLoading("habits");
 
   return (
     <div className="space-y-4 p-4 bg-gray-800 rounded-lg">
       <h3 className="text-white font-semibold">Loading State Information</h3>
-      
+
       <div className="space-y-2 text-sm">
         <div className="text-gray-300">
           Global Loading: {isGlobalLoading ? "Yes" : "No"}
         </div>
-        <div className="text-gray-300">
-          Active Queries: {activeQueries}
-        </div>
-        <div className="text-gray-300">
-          Active Mutations: {activeMutations}
-        </div>
+        <div className="text-gray-300">Active Queries: {activeQueries}</div>
+        <div className="text-gray-300">Active Mutations: {activeMutations}</div>
         <div className="text-gray-300">
           Habits Loading: {isHabitsLoading ? "Yes" : "No"}
         </div>
-        <div className="text-gray-300">
-          Habits Queries: {habitsQueries}
-        </div>
+        <div className="text-gray-300">Habits Queries: {habitsQueries}</div>
       </div>
 
       {isGlobalLoading && (
@@ -173,10 +171,12 @@ export function GlobalLoadingExample() {
           Loading...
         </div>
       </GlobalLoadingIndicator>
-      
+
       <div className="p-4">
         <h3>Page Content</h3>
-        <p>This content will show a loading indicator when any query is active.</p>
+        <p>
+          This content will show a loading indicator when any query is active.
+        </p>
       </div>
     </div>
   );

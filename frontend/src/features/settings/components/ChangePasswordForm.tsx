@@ -38,7 +38,8 @@ const ChangePasswordForm = () => {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to change password.";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to change password.";
       showNotification(errorMessage, "error");
     }
   };

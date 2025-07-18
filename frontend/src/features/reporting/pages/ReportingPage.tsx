@@ -1,12 +1,16 @@
-import { useLoaderData } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import { useEffect, useState } from "react";
 
-import { reportingRoute } from "@/AppRouter";
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { Navbar } from "@/components/layout";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useWeightGoals } from "@/hooks/queries/useGoals";
+import {
+  useMacroHistory,
+  useMacroTarget,
+} from "@/hooks/queries/useMacroQueries";
+import { useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useStore } from "@/store/store";
 
 import {
@@ -22,20 +26,21 @@ import { useReportingLogic } from "../hooks/useReportingLogic";
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
+
   // Get user data from useUser hook
   const { data: user } = useUser();
-  const reportingLoaderData = useLoaderData({ from: reportingRoute.id }) as any;
-  const weightGoals = reportingLoaderData?.weightGoals;
-  const history = reportingLoaderData?.history || [];
-  const macroTarget = reportingLoaderData?.macroTarget;
 
-  const {
-    isLoading,
-    error,
-    nutritionProfile,
-    setWeightGoals,
-    setSubscriptionStatus,
-  } = useStore();
+  // Use TanStack Query hooks for data fetching
+  const { data: weightGoals } = useWeightGoals();
+  const { data: macroTarget } = useMacroTarget();
+  const { data: macroHistoryData } = useMacroHistory(1000, 0); // Get large set for reporting
+  const history = macroHistoryData?.entries || [];
+
+  const { nutritionProfile, setSubscriptionStatus } = useStore();
+
+  // Use feature loading for reporting-related operations
+  const { isLoading } = useFeatureLoading("macros");
+
   // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
     if (
@@ -60,11 +65,6 @@ export default function ReportingPage() {
 
   // Macro density breakdown chart data (percentages)
   const macroDensityData = useMacroDensityBreakdown(history, dateRange);
-
-  // Hydrate weight goals from loader into Zustand store
-  useEffect(() => {
-    setWeightGoals(weightGoals);
-  }, [weightGoals, setWeightGoals]);
 
   // Define chart configurations for the new component
   const calorieChartLines = [
@@ -98,11 +98,12 @@ export default function ReportingPage() {
                   Track your nutrition trends and progress over time
                 </p>
               </div>
-              {error && (
-                <div className="mb-6 text-red-400 bg-red-900/50 p-4 rounded-lg border border-red-800/50 shadow-lg">
+              {/* Debug info for development - Adjusted condition */}
+              {!isLoading && history?.length === 0 && dataProcessed && (
+                <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
                   <div className="flex items-center">
                     <svg
-                      className="h-5 w-5 mr-2 text-red-500"
+                      className="h-5 w-5 mr-2 text-yellow-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -112,39 +113,14 @@ export default function ReportingPage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       ></path>
                     </svg>
-                    {error}
+                    No nutrition history found. Add some entries to see your
+                    reporting data.
                   </div>
                 </div>
               )}
-              {/* Debug info for development - Adjusted condition */}
-              {!isLoading &&
-                !error &&
-                history?.length === 0 &&
-                dataProcessed && (
-                  <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
-                    <div className="flex items-center">
-                      <svg
-                        className="h-5 w-5 mr-2 text-yellow-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
-                      </svg>
-                      No nutrition history found. Add some entries to see your
-                      reporting data.
-                    </div>
-                  </div>
-                )}
               {/* Date Range Selector */}
               <ProFeature>
                 <DateRangeSelector

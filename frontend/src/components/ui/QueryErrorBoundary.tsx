@@ -1,5 +1,5 @@
-import { Component, ReactNode } from "react";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
+import { Component, ReactNode } from "react";
 
 import { FormButton } from "@/components/form";
 import { WarningIcon } from "@/components/ui";
@@ -19,8 +19,8 @@ class QueryErrorBoundaryInner extends Component<
   QueryErrorBoundaryProps & { reset: () => void },
   QueryErrorBoundaryState
 > {
-  constructor(props: QueryErrorBoundaryProps & { reset: () => void }) {
-    super(props);
+  constructor(properties: QueryErrorBoundaryProps & { reset: () => void }) {
+    super(properties);
     this.state = { hasError: false };
   }
 
@@ -85,7 +85,10 @@ class QueryErrorBoundaryInner extends Component<
  * QueryErrorBoundary component that integrates with TanStack Query's error reset functionality
  * This boundary specifically handles query-related errors and provides reset capabilities
  */
-export function QueryErrorBoundary({ children, fallback }: QueryErrorBoundaryProps) {
+export function QueryErrorBoundary({
+  children,
+  fallback,
+}: QueryErrorBoundaryProps) {
   return (
     <QueryErrorResetBoundary>
       {({ reset }) => (
