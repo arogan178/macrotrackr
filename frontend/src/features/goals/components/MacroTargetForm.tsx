@@ -217,7 +217,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                   <FormButton
                     type="button"
                     onClick={handleReset}
-                    buttonSize="sm"
+                    buttonSize="lg"
                     variant="ghost"
                     disabled={isTargetSaving}
                     text="Reset"
@@ -231,7 +231,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                   isLoading={isTargetSaving}
                   disabled={!hasChanges || isTargetSaving}
                   text="Save Targets"
-                  buttonSize="sm"
+                  buttonSize="lg"
                   variant="primary"
                   ariaLabel="Save macro targets"
                   className="px-4 py-2 text-sm"
