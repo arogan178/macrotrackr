@@ -3,13 +3,13 @@ import { devtools } from "zustand/middleware";
 
 import { AuthUISlice, createAuthUISlice } from "@/features/auth/store/auth-ui-slice";
 import {
-  createGoalsSlice,
-  GoalsSlice,
-} from "@/features/goals/store/goals-slice";
+  createGoalsUISlice,
+  GoalsUISlice,
+} from "@/features/goals/store/goals-ui-slice";
 import {
-  createMacrosSlice,
-  MacrosSlice,
-} from "@/features/macroTracking/store/macros-slice";
+  createMacroUISlice,
+  MacroUISlice,
+} from "@/features/macroTracking/store/macro-ui-slice";
 import {
   createNotificationSlice,
   NotificationSlice,
@@ -19,20 +19,20 @@ import {
   UserSlice,
 } from "@/features/settings/store/user-slice";
 
-// Combine all slice types (removed HabitsSlice)
+// Combine all slice types (removed HabitsSlice, GoalsSlice, and MacrosSlice - kept UI slices for UI state)
 export type StoreState = UserSlice &
-  MacrosSlice &
-  GoalsSlice &
   AuthUISlice &
+  GoalsUISlice &
+  MacroUISlice &
   NotificationSlice;
 
-// Create the store with all slices (removed createHabitsSlice)
+// Create the store with all slices (removed createHabitsSlice, createGoalsSlice, and createMacrosSlice - kept UI slices for UI state)
 export const useStore = create<StoreState>()(
   devtools((...a) => ({
     ...createUserSlice(...a),
-    ...createMacrosSlice(...a),
-    ...createGoalsSlice(...a),
     ...createAuthUISlice(...a),
+    ...createGoalsUISlice(...a),
+    ...createMacroUISlice(...a),
     ...createNotificationSlice(...a),
   })),
 );
