@@ -9,19 +9,19 @@ import { FormButton } from "@/components/form";
 import {
   CheckCircleIcon,
   CheckIcon,
-  PlusIcon,
-  TargetIcon,
-  QueryLoadingWrapper,
   FeatureLoadingIndicator,
   MutationLoadingButton,
+  PlusIcon,
+  QueryLoadingWrapper,
+  TargetIcon,
 } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
-import { 
-  useFeatureLoading, 
+import {
+  useFeatureLoading,
   useMutationErrorHandler,
-  useSpecificMutationLoading 
+  useSpecificMutationLoading,
 } from "@/hooks";
 
 import { HABIT_ICONS } from "../constants";
@@ -56,20 +56,20 @@ function HabitTrackerUpdated({
   const canAddHabit = isPro || habits.length < 2;
 
   // Use the new loading state hooks
-  const { isMutationLoading: isHabitMutationLoading } = useFeatureLoading('habits');
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => console.error("Habit operation failed:", message),
-    onSuccess: (message) => console.log("Habit operation succeeded:", message),
-  });
+  const { isMutationLoading: isHabitMutationLoading } =
+    useFeatureLoading("habits");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => console.error("Habit operation failed:", message),
+      onSuccess: (message) =>
+        console.log("Habit operation succeeded:", message),
+    });
 
   // Custom loading skeleton component
   const HabitLoadingSkeleton = () => (
     <div className="space-y-4">
       {[1, 2, 3].map((index) => (
-        <div
-          key={index}
-          className="bg-gray-700/30 rounded-lg overflow-hidden"
-        >
+        <div key={index} className="bg-gray-700/30 rounded-lg overflow-hidden">
           <div className="bg-gradient-to-r from-gray-600/20 to-gray-600/5 p-3">
             <div className="flex items-center mb-2">
               <div className="w-8 h-8 rounded-lg bg-gray-600/30 animate-pulse mr-2"></div>
@@ -191,11 +191,29 @@ interface HabitCardProps {
   onDelete?: (id: string) => Promise<void>;
 }
 
-function HabitCard({ habit, onIncrement, onComplete, onEdit, onDelete }: HabitCardProps) {
+function HabitCard({
+  habit,
+  onIncrement,
+  onComplete,
+  onEdit,
+  onDelete,
+}: HabitCardProps) {
   // Check loading state for specific mutations
-  const { isLoading: isIncrementLoading } = useSpecificMutationLoading(['habits', 'increment', habit.id]);
-  const { isLoading: isCompleteLoading } = useSpecificMutationLoading(['habits', 'complete', habit.id]);
-  const { isLoading: isDeleteLoading } = useSpecificMutationLoading(['habits', 'delete', habit.id]);
+  const { isLoading: isIncrementLoading } = useSpecificMutationLoading([
+    "habits",
+    "increment",
+    habit.id,
+  ]);
+  const { isLoading: isCompleteLoading } = useSpecificMutationLoading([
+    "habits",
+    "complete",
+    habit.id,
+  ]);
+  const { isLoading: isDeleteLoading } = useSpecificMutationLoading([
+    "habits",
+    "delete",
+    habit.id,
+  ]);
 
   const IconComponent = HABIT_ICONS[habit.icon] || TargetIcon;
   const isComplete = habit.isComplete;
@@ -211,7 +229,7 @@ function HabitCard({ habit, onIncrement, onComplete, onEdit, onDelete }: HabitCa
             </div>
             <span className="text-gray-200 font-medium">{habit.name}</span>
           </div>
-          
+
           <HabitActions
             habit={habit}
             onEdit={onEdit}

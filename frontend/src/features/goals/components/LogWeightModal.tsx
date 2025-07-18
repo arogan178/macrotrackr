@@ -115,14 +115,30 @@ function LogWeightModal({
       title="Log Your Weight"
       variant="form"
       onSave={handleSave}
-      saveDisabled={addWeightLogMutation.isPending || !date || !time || !weight || !!formError}
+      saveDisabled={
+        addWeightLogMutation.isPending ||
+        !date ||
+        !time ||
+        !weight ||
+        !!formError
+      }
       saveLabel="Log Weight"
       buttonSize="lg"
     >
       <div className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
-          <DateField label="Date" value={date} onChange={handleDateChange} required />
-          <TimeField label="Time" value={time} onChange={handleTimeChange} required />
+          <DateField
+            label="Date"
+            value={date}
+            onChange={handleDateChange}
+            required
+          />
+          <TimeField
+            label="Time"
+            value={time}
+            onChange={handleTimeChange}
+            required
+          />
         </div>
         <NumberField
           label="Weight (kg)"
@@ -135,9 +151,7 @@ function LogWeightModal({
           placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
           disabled={addWeightLogMutation.isPending}
         />
-        {formError && (
-          <p className="text-sm text-red-400">{formError}</p>
-        )}
+        {formError && <p className="text-sm text-red-400">{formError}</p>}
       </div>
     </Modal>
   );

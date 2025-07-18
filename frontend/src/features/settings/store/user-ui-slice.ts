@@ -15,11 +15,11 @@ export interface UserUISlice {
       duration?: number;
     },
   ) => string;
-  
+
   // UI state only - server state is now managed by TanStack Query
   nutritionProfile: UserNutritionalProfile | undefined;
   setNutritionProfile: (profile: UserNutritionalProfile | undefined) => void;
-  
+
   // Subscription status for UI (derived from server data)
   subscriptionStatus: "free" | "pro" | "canceled";
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") => void;
@@ -29,7 +29,7 @@ export interface UserUISlice {
   originalSettings: UserSettings | undefined;
   hasSettingsChanges: boolean;
   formErrors: Record<string, string>;
-  
+
   // Form actions
   initializeSettings: (data: { settings: UserSettings }) => void;
   updateSetting: <K extends keyof UserSettings>(
@@ -39,15 +39,17 @@ export interface UserUISlice {
   validateSettingsForm: () => boolean;
   resetSettings: () => void;
   clearSettingsMessages: () => void;
-  
+
   // Weight update for other components that might need it
   updateCurrentUserWeight: (newWeight: number) => void;
 }
 
-export const createUserUISlice: StateCreator<UserUISlice, [], [], UserUISlice> = (
-  set,
-  get,
-) => ({
+export const createUserUISlice: StateCreator<
+  UserUISlice,
+  [],
+  [],
+  UserUISlice
+> = (set, get) => ({
   // Passthrough showNotification implementation to satisfy interface
   showNotification: (message, type, options) => {
     const state = get() as UserUISlice & Record<string, unknown>;
@@ -56,7 +58,7 @@ export const createUserUISlice: StateCreator<UserUISlice, [], [], UserUISlice> =
     }
     return "";
   },
-  
+
   // Initial UI state only
   nutritionProfile: undefined,
   subscriptionStatus: "free",

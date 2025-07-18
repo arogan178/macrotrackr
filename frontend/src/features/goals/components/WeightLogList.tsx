@@ -3,7 +3,10 @@ import { useMemo, useState } from "react";
 
 import { ActionButton } from "@/components/form";
 import { EmptyState, LoadingSpinner, Modal, TrashIcon } from "@/components/ui";
-import { useDeleteWeightLogEntry, useWeightLog } from "@/hooks/queries/useGoals";
+import {
+  useDeleteWeightLogEntry,
+  useWeightLog,
+} from "@/hooks/queries/useGoals";
 import { useStore } from "@/store/store";
 
 interface WeightLogListProps {
@@ -19,7 +22,7 @@ function WeightLogList({
   const { data: weightLog = [], isLoading } = useWeightLog();
   const deleteWeightLogMutation = useDeleteWeightLogEntry();
   const isSaving = deleteWeightLogMutation.isPending;
-  
+
   // Get notification function from store for user feedback
   const showNotification = useStore((state) => state.showNotification);
 

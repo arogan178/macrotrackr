@@ -1,7 +1,10 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { AuthUISlice, createAuthUISlice } from "@/features/auth/store/auth-ui-slice";
+import {
+  AuthUISlice,
+  createAuthUISlice,
+} from "@/features/auth/store/auth-ui-slice";
 import {
   createGoalsUISlice,
   GoalsUISlice,

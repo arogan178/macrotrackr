@@ -1,7 +1,10 @@
 import { useEffect } from "react";
 
 import Modal from "@/components/ui/Modal";
-import { useCreateWeightGoal, useUpdateWeightGoal } from "@/hooks/queries/useGoals";
+import {
+  useCreateWeightGoal,
+  useUpdateWeightGoal,
+} from "@/hooks/queries/useGoals";
 import type { WeightGoals } from "@/types/goal";
 
 import { WeightGoalFormValues } from "../types";
@@ -38,14 +41,13 @@ function WeightGoalModal({
     try {
       // Use update if we have existing weight goals with a startingWeight (indicating it exists)
       // Otherwise use create
-      const hasExistingGoal = weightGoals && weightGoals.startingWeight !== undefined;
-      
-      if (hasExistingGoal) {
-        await updateWeightGoalMutation.mutateAsync({ goals: values, tdee });
-      } else {
-        await createWeightGoalMutation.mutateAsync({ goals: values, tdee });
-      }
-      
+      const hasExistingGoal =
+        weightGoals && weightGoals.startingWeight !== undefined;
+
+      await (hasExistingGoal
+        ? updateWeightGoalMutation.mutateAsync({ goals: values, tdee })
+        : createWeightGoalMutation.mutateAsync({ goals: values, tdee }));
+
       onClose(); // Close modal on success
     } catch (error) {
       // Error is handled and displayed by the mutation hooks
@@ -73,7 +75,10 @@ function WeightGoalModal({
         targetWeight={initialTargetWeight}
         tdee={tdee}
         weightGoals={weightGoals} // Pass existing goals to form for disabling startingWeight
-        isLoading={createWeightGoalMutation.isPending || updateWeightGoalMutation.isPending} // Pass saving state from mutations
+        isLoading={
+          createWeightGoalMutation.isPending ||
+          updateWeightGoalMutation.isPending
+        } // Pass saving state from mutations
         onSave={handleSave} // Pass the correct handler
         onCancel={onClose}
       />

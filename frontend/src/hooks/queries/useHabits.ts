@@ -1,16 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
-import { queryKeys } from "@/lib/queryKeys";
-import { apiService } from "@/utils/apiServices";
-import { getErrorMessage } from "@/utils/errorHandling";
-
 import {
   completeHabit,
   createNewHabit,
   incrementHabitProgress,
   updateHabitFromForm,
 } from "@/features/habits/utils";
+import { queryKeys } from "@/lib/queryKeys";
+import { apiService } from "@/utils/apiServices";
+import { getErrorMessage } from "@/utils/errorHandling";
 
 // Query hook for fetching habits
 export function useHabits() {
@@ -117,7 +116,10 @@ export function useDeleteHabit() {
     onError: (error, id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
-        queryClient.setQueryData(queryKeys.habits.list(), context.previousHabits);
+        queryClient.setQueryData(
+          queryKeys.habits.list(),
+          context.previousHabits,
+        );
       }
       console.error("Error deleting habit:", error);
     },
@@ -177,7 +179,10 @@ export function useIncrementHabitProgress() {
     onError: (error, id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
-        queryClient.setQueryData(queryKeys.habits.list(), context.previousHabits);
+        queryClient.setQueryData(
+          queryKeys.habits.list(),
+          context.previousHabits,
+        );
       }
       console.error("Error incrementing habit progress:", error);
     },
@@ -194,13 +199,13 @@ export function useCompleteHabit() {
 
   return useMutation({
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
-      console.log('useCompleteHabit mutationFn called with id:', id);
+      console.log("useCompleteHabit mutationFn called with id:", id);
       // Get current habits to find the habit to complete
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
       const habit = currentHabits?.find((h) => h.id === id);
-      console.log('Found habit:', habit);
+      console.log("Found habit:", habit);
 
       if (!habit) {
         throw new Error("Habit not found");
@@ -215,9 +220,9 @@ export function useCompleteHabit() {
         isComplete: true,
         completedAt: new Date().toISOString(),
       };
-      console.log('Original habit:', habit);
-      console.log('Completed habit:', completedHabit);
-      console.log('Sending completed habit to API:', completedHabit);
+      console.log("Original habit:", habit);
+      console.log("Completed habit:", completedHabit);
+      console.log("Sending completed habit to API:", completedHabit);
       return await apiService.habits.updateHabit(id, completedHabit);
     },
     onMutate: async (id: string) => {
@@ -250,7 +255,10 @@ export function useCompleteHabit() {
     onError: (error, id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
-        queryClient.setQueryData(queryKeys.habits.list(), context.previousHabits);
+        queryClient.setQueryData(
+          queryKeys.habits.list(),
+          context.previousHabits,
+        );
       }
       console.error("Error completing habit:", error);
     },
