@@ -28,6 +28,7 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
+import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 
 export default function GoalsPage() {
   type TabType = "goals" | "macro targets";
@@ -70,23 +71,15 @@ export default function GoalsPage() {
   const incrementProgressMutation = useIncrementHabitProgress();
   const completeHabitMutation = useCompleteHabit();
 
-  // Use Zustand only for UI state (notifications, goals state, etc.)
+  // Use TanStack Query hooks for weight goals (server state)
+  const { data: weightGoalsFromQuery, isLoading: weightGoalsLoading } = useWeightGoals();
+  const deleteWeightGoalMutation = useDeleteWeightGoal();
+
+  // Use Zustand only for UI state (notifications, subscription status, etc.)
   const {
-    isLoading: goalsLoading,
-    error: goalsError,
-    clearError,
-    setWeightGoals,
-    deleteWeightGoal,
-    resetGoals,
-    setWeightLog,
     setSubscriptionStatus,
     showNotification,
   } = useStore();
-
-  // Hydrate weight goals from loader into Zustand store
-  useEffect(() => {
-    setWeightGoals(weightGoals);
-  }, [weightGoals, setWeightGoals]);
 
   // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
@@ -98,11 +91,6 @@ export default function GoalsPage() {
       setSubscriptionStatus(user.subscription.status);
     }
   }, [user, setSubscriptionStatus]);
-
-  // Hydrate weight log from loader into Zustand store
-  useEffect(() => {
-    setWeightLog(weightLog);
-  }, [weightLog, setWeightLog]);
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
@@ -121,7 +109,8 @@ export default function GoalsPage() {
 
   // Handler for resetting goals
   const handleResetGoals = () => {
-    resetGoals();
+    // Reset goals functionality can be implemented later if needed
+    // For now, just close the modal
     setIsResetModalOpen(false);
   };
 
@@ -224,25 +213,32 @@ export default function GoalsPage() {
   const router = useRouter();
 
   const handleDeleteWeightGoalConfirmed = async () => {
-    await deleteWeightGoal();
-    handleCloseDeleteConfirmModal();
-    // Invalidate loader to refresh weight goals after deletion
-    router.invalidate();
+    try {
+      await deleteWeightGoalMutation.mutateAsync();
+      handleCloseDeleteConfirmModal();
+      showNotification("Weight goal deleted successfully", "success");
+    } catch (error) {
+      console.error("Error deleting weight goal:", error);
+      showNotification("Failed to delete weight goal", "error");
+    }
   };
 
+  // Use TanStack Query data instead of loader data for weight goals
+  const currentWeightGoals = weightGoalsFromQuery || weightGoals;
+  
   // Get the safe target weight value for components
-  const safeTargetWeight = weightGoals?.targetWeight || user?.weight || 0;
+  const safeTargetWeight = currentWeightGoals?.targetWeight || user?.weight || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
 
       {/* Show notifications for errors */}
-      {goalsError && (
+      {weightGoalsError && (
         <FloatingNotification
-          message={goalsError}
+          message={weightGoalsError}
           type="error"
-          onClose={clearError}
+          onClose={() => {}}
           duration={5000}
         />
       )}
@@ -335,17 +331,17 @@ export default function GoalsPage() {
             targetWeight={safeTargetWeight}
             tdee={nutritionProfile?.tdee || 0}
             weightGoals={
-              weightGoals && weightGoals.targetWeight != undefined
+              currentWeightGoals && currentWeightGoals.targetWeight != undefined
                 ? {
-                    ...weightGoals,
-                    targetWeight: weightGoals.targetWeight ?? 0,
-                    weightGoal: weightGoals.weightGoal ?? "maintain",
-                    startDate: weightGoals.startDate ?? "",
-                    targetDate: weightGoals.targetDate ?? "",
-                    calorieTarget: weightGoals.calorieTarget ?? 0,
-                    calculatedWeeks: weightGoals.calculatedWeeks ?? 0,
-                    weeklyChange: weightGoals.weeklyChange ?? 0,
-                    dailyChange: weightGoals.dailyChange ?? 0,
+                    ...currentWeightGoals,
+                    targetWeight: currentWeightGoals.targetWeight ?? 0,
+                    weightGoal: currentWeightGoals.weightGoal ?? "maintain",
+                    startDate: currentWeightGoals.startDate ?? "",
+                    targetDate: currentWeightGoals.targetDate ?? "",
+                    calorieTarget: currentWeightGoals.calorieTarget ?? 0,
+                    calculatedWeeks: currentWeightGoals.calculatedWeeks ?? 0,
+                    weeklyChange: currentWeightGoals.weeklyChange ?? 0,
+                    dailyChange: currentWeightGoals.dailyChange ?? 0,
                   }
                 : undefined
             }
@@ -403,7 +399,7 @@ export default function GoalsPage() {
 
           {/* Main Content Area */}
           <div className="mt-8 relative">
-            {goalsLoading && !user ? (
+            {!user ? (
               <GoalsLoadingSkeleton />
             ) : (
               <AnimatePresence mode="wait">
@@ -422,23 +418,23 @@ export default function GoalsPage() {
                           user={user}
                           macroDailyTotals={macroDailyTotals}
                           weightGoals={
-                            weightGoals && weightGoals.targetWeight != undefined
+                            currentWeightGoals && currentWeightGoals.targetWeight != undefined
                               ? {
-                                  ...weightGoals,
-                                  targetWeight: weightGoals.targetWeight ?? 0,
+                                  ...currentWeightGoals,
+                                  targetWeight: currentWeightGoals.targetWeight ?? 0,
                                   weightGoal:
-                                    weightGoals.weightGoal ?? "maintain",
-                                  startDate: weightGoals.startDate ?? "",
-                                  targetDate: weightGoals.targetDate ?? "",
-                                  calorieTarget: weightGoals.calorieTarget ?? 0,
+                                    currentWeightGoals.weightGoal ?? "maintain",
+                                  startDate: currentWeightGoals.startDate ?? "",
+                                  targetDate: currentWeightGoals.targetDate ?? "",
+                                  calorieTarget: currentWeightGoals.calorieTarget ?? 0,
                                   calculatedWeeks:
-                                    weightGoals.calculatedWeeks ?? 0,
-                                  weeklyChange: weightGoals.weeklyChange ?? 0,
-                                  dailyChange: weightGoals.dailyChange ?? 0,
+                                    currentWeightGoals.calculatedWeeks ?? 0,
+                                  weeklyChange: currentWeightGoals.weeklyChange ?? 0,
+                                  dailyChange: currentWeightGoals.dailyChange ?? 0,
                                 }
                               : undefined
                           }
-                          isLoading={goalsLoading}
+                          isLoading={false}
                           onOpenModal={handleOpenWeightGoalModal}
                           onDelete={handleOpenDeleteConfirmModal}
                           macroTarget={macroTarget || undefined}

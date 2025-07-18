@@ -8,7 +8,7 @@ import {
 
 import { LineChartComponent } from "@/components/chart";
 import { BarChartIcon, EmptyState } from "@/components/ui";
-import { useStore } from "@/store/store";
+import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 
 // Custom Tooltip specific to Weight Goal Progress
 function WeightCustomTooltip({
@@ -56,10 +56,10 @@ function WeightCustomTooltip({
 }
 
 function WeightGoalProgressChart() {
-  const weightLog = useStore((state) => state.weightLog);
-  const isLoading = useStore((state) => state.isLoading);
-  const error = useStore((state) => state.error);
-  const weightGoals = useStore((state) => state.weightGoals);
+  const { data: weightLog = [], isLoading: weightLogLoading } = useWeightLog();
+  const { data: weightGoals, isLoading: weightGoalsLoading } = useWeightGoals();
+  const isLoading = weightLogLoading || weightGoalsLoading;
+  const error = null; // TanStack Query handles errors differently
 
   const chartData = React.useMemo(() => {
     const log = Array.isArray(weightLog) ? weightLog : [];
