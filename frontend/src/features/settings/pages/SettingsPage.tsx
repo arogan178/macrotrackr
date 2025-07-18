@@ -9,8 +9,8 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
+import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
-import { useSettings, useSaveSettings } from "@/hooks/queries/useSettings";
 import { useStore } from "@/store/store";
 
 import FloatingNotification from "../../notifications/components/FloatingNotification";
@@ -47,9 +47,13 @@ const PageHeader = ({
 
 export default function SettingsPage() {
   // Use TanStack Query for settings data and mutations
-  const { data: settingsData, isLoading: isSettingsLoading, error: settingsQueryError } = useSettings();
+  const {
+    data: settingsData,
+    isLoading: isSettingsLoading,
+    error: settingsQueryError,
+  } = useSettings();
   const saveSettingsMutation = useSaveSettings();
-  
+
   const {
     settings,
     formErrors,
@@ -61,7 +65,7 @@ export default function SettingsPage() {
     setSubscriptionStatus,
     initializeSettings,
   } = useStore();
-  
+
   // Get loading state from mutation
   const isSaving = saveSettingsMutation.isPending;
 
@@ -100,7 +104,7 @@ export default function SettingsPage() {
         activityLevel: settingsData.activityLevel,
         subscription: settingsData.subscription,
       };
-      
+
       initializeSettings({
         settings: transformedSettings,
       });
@@ -144,7 +148,7 @@ export default function SettingsPage() {
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (!validateSettingsForm() || !settings) return;
-      
+
       // Prepare payload for TanStack Query mutation
       const payload = {
         firstName: settings.firstName,
@@ -156,7 +160,7 @@ export default function SettingsPage() {
         gender: settings.gender === "" ? undefined : settings.gender,
         activityLevel: settings.activityLevel,
       };
-      
+
       try {
         await saveSettingsMutation.mutateAsync(payload);
         // Update the store to reflect successful save
@@ -179,7 +183,7 @@ export default function SettingsPage() {
           {/* Error handling is now managed by TanStack Query */}
           {saveSettingsMutation.isError && (
             <FloatingNotification
-              message={`Failed to save settings: ${saveSettingsMutation.error?.message || 'Unknown error'}`}
+              message={`Failed to save settings: ${saveSettingsMutation.error?.message || "Unknown error"}`}
               type="error"
               onClose={() => saveSettingsMutation.reset()}
               duration={5000}
@@ -255,7 +259,9 @@ export default function SettingsPage() {
             <SettingsLoadingSkeleton />
           ) : settingsQueryError ? (
             <div className="p-6 text-center">
-              <p className="text-red-400">Failed to load settings. Please try again.</p>
+              <p className="text-red-400">
+                Failed to load settings. Please try again.
+              </p>
             </div>
           ) : settings ? (
             <>

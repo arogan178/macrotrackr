@@ -1,24 +1,25 @@
 import { ReactNode } from "react";
+
 import { LoadingSpinner } from "@/components/ui";
-import { useGlobalLoading, useCriticalLoading } from "@/hooks/useGlobalLoading";
-import { useFeatureLoading, FeatureType } from "@/hooks/useFeatureLoading";
+import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
+import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 interface LoadingStateProps {
   /**
    * Content to show when loading
    */
   children?: ReactNode;
-  
+
   /**
    * Custom loading component
    */
   loadingComponent?: ReactNode;
-  
+
   /**
    * Size of the loading spinner
    */
   size?: "sm" | "md" | "lg";
-  
+
   /**
    * Additional CSS classes
    */
@@ -28,11 +29,11 @@ interface LoadingStateProps {
 /**
  * Global loading indicator that shows when any query or mutation is active
  */
-export function GlobalLoadingIndicator({ 
-  children, 
-  loadingComponent, 
+export function GlobalLoadingIndicator({
+  children,
+  loadingComponent,
   size = "md",
-  className = ""
+  className = "",
 }: LoadingStateProps) {
   const { isLoading } = useGlobalLoading();
 
@@ -50,11 +51,11 @@ export function GlobalLoadingIndicator({
 /**
  * Critical loading indicator that only shows for first-time loads, not background refetches
  */
-export function CriticalLoadingIndicator({ 
-  children, 
-  loadingComponent, 
+export function CriticalLoadingIndicator({
+  children,
+  loadingComponent,
   size = "md",
-  className = ""
+  className = "",
 }: LoadingStateProps) {
   const { isLoading } = useCriticalLoading();
 
@@ -74,12 +75,12 @@ interface FeatureLoadingIndicatorProps extends LoadingStateProps {
    * The feature to check loading state for
    */
   feature: FeatureType;
-  
+
   /**
    * Whether to show loading for queries only (not mutations)
    */
   queriesOnly?: boolean;
-  
+
   /**
    * Whether to show loading for mutations only (not queries)
    */
@@ -89,16 +90,17 @@ interface FeatureLoadingIndicatorProps extends LoadingStateProps {
 /**
  * Feature-specific loading indicator
  */
-export function FeatureLoadingIndicator({ 
+export function FeatureLoadingIndicator({
   feature,
-  children, 
-  loadingComponent, 
+  children,
+  loadingComponent,
   size = "md",
   className = "",
   queriesOnly = false,
-  mutationsOnly = false
+  mutationsOnly = false,
 }: FeatureLoadingIndicatorProps) {
-  const { isQueryLoading, isMutationLoading, isLoading } = useFeatureLoading(feature);
+  const { isQueryLoading, isMutationLoading, isLoading } =
+    useFeatureLoading(feature);
 
   const shouldShowLoading = () => {
     if (queriesOnly) return isQueryLoading;
@@ -122,37 +124,37 @@ interface QueryLoadingWrapperProps {
    * Whether the query is loading
    */
   isLoading: boolean;
-  
+
   /**
    * Whether the query has an error
    */
   isError?: boolean;
-  
+
   /**
    * The error object if there is one
    */
   error?: Error | null;
-  
+
   /**
    * Content to show when loaded successfully
    */
   children: ReactNode;
-  
+
   /**
    * Custom loading component
    */
   loadingComponent?: ReactNode;
-  
+
   /**
    * Custom error component
    */
   errorComponent?: ReactNode;
-  
+
   /**
    * Size of the loading spinner
    */
   size?: "sm" | "md" | "lg";
-  
+
   /**
    * Additional CSS classes
    */
@@ -170,7 +172,7 @@ export function QueryLoadingWrapper({
   loadingComponent,
   errorComponent,
   size = "md",
-  className = ""
+  className = "",
 }: QueryLoadingWrapperProps) {
   if (isLoading) {
     return (
@@ -203,17 +205,17 @@ interface MutationLoadingButtonProps {
    * Whether the mutation is loading
    */
   isLoading: boolean;
-  
+
   /**
    * Button content when not loading
    */
   children: ReactNode;
-  
+
   /**
    * Loading text to show
    */
   loadingText?: string;
-  
+
   /**
    * Additional props to pass to the button
    */
@@ -229,13 +231,13 @@ export function MutationLoadingButton({
   loadingText = "Loading...",
   disabled,
   className = "",
-  ...props
+  ...properties
 }: MutationLoadingButtonProps) {
   return (
     <button
-      {...props}
+      {...properties}
       disabled={disabled || isLoading}
-      className={`${className} ${isLoading ? 'opacity-75 cursor-not-allowed' : ''}`}
+      className={`${className} ${isLoading ? "opacity-75 cursor-not-allowed" : ""}`}
     >
       {isLoading ? (
         <div className="flex items-center justify-center space-x-2">

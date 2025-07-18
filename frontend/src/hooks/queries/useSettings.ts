@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/queryKeys";
-import { UserDetailsResponse } from "@/utils/apiServices";
-import { apiService } from "@/utils/apiServices";
+import { apiService, UserDetailsResponse } from "@/utils/apiServices";
 
 // Types for settings mutations
 interface UserSettingsPayload {
@@ -29,7 +28,7 @@ export function useSettings() {
     gcTime: 10 * 60 * 1000, // 10 minutes
     retry: (failureCount, error) => {
       // Don't retry on auth errors
-      if (error instanceof Error && error.message.includes('401')) {
+      if (error instanceof Error && error.message.includes("401")) {
         return false;
       }
       return failureCount < 3;
@@ -52,7 +51,7 @@ export function useSaveSettings() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.settings.user(),
       });
-      
+
       // Also invalidate auth user query since settings update affects user data
       queryClient.invalidateQueries({
         queryKey: queryKeys.auth.user(),
@@ -60,7 +59,7 @@ export function useSaveSettings() {
     },
     retry: (failureCount, error) => {
       // Don't retry on validation errors (4xx)
-      if (error instanceof Error && error.message.includes('4')) {
+      if (error instanceof Error && error.message.includes("4")) {
         return false;
       }
       return failureCount < 2;

@@ -1,4 +1,5 @@
 import { useIsFetching, useIsMutating } from "@tanstack/react-query";
+
 import { queryKeys } from "@/lib/queryKeys";
 
 /**
@@ -14,22 +15,22 @@ export function useGlobalLoading() {
      * True if any query is currently fetching
      */
     isQueryLoading: isFetching > 0,
-    
+
     /**
      * True if any mutation is currently running
      */
     isMutationLoading: isMutating > 0,
-    
+
     /**
      * True if any query or mutation is active
      */
     isLoading: isFetching > 0 || isMutating > 0,
-    
+
     /**
      * Number of active queries
      */
     activeQueries: isFetching,
-    
+
     /**
      * Number of active mutations
      */
@@ -44,9 +45,10 @@ export function useGlobalLoading() {
 export function useCriticalLoading() {
   // Check for queries that are fetching for the first time (not background refetch)
   const isFetchingCritical = useIsFetching({
-    predicate: (query) => query.state.fetchStatus === 'fetching' && !query.state.data
+    predicate: (query) =>
+      query.state.fetchStatus === "fetching" && !query.state.data,
   });
-  
+
   const isMutating = useIsMutating();
 
   return {
@@ -54,12 +56,12 @@ export function useCriticalLoading() {
      * True if critical queries are loading (first-time fetch, not background)
      */
     isCriticalLoading: isFetchingCritical > 0,
-    
+
     /**
      * True if any mutation is running
      */
     isMutationLoading: isMutating > 0,
-    
+
     /**
      * True if critical operations are running
      */

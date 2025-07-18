@@ -1,6 +1,11 @@
 import { StateCreator } from "zustand";
 
-import { RegisterData, resetRegisterData, updateRegisterField, updateRegisterStep } from "../utils/authUtilities";
+import {
+  RegisterData,
+  resetRegisterData,
+  updateRegisterField,
+  updateRegisterStep,
+} from "../utils/authUtilities";
 
 // UI-only auth state for form management
 export interface AuthUISlice {
@@ -21,9 +26,12 @@ export interface AuthUISlice {
   resetRegistration: () => void;
 }
 
-export const createAuthUISlice: StateCreator<AuthUISlice, [], [], AuthUISlice> = (
-  set,
-) => ({
+export const createAuthUISlice: StateCreator<
+  AuthUISlice,
+  [],
+  [],
+  AuthUISlice
+> = (set) => ({
   // Login form state
   loginEmail: "",
   loginPassword: "",

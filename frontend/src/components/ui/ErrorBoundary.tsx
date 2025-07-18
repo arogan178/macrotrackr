@@ -35,21 +35,22 @@ export class ErrorBoundary extends Component<
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Check if this is a query-related error
-    const isQueryError = error.message?.includes('query') || 
-                        error.message?.includes('fetch') ||
-                        error.name?.includes('Query');
-    
+    const isQueryError =
+      error.message?.includes("query") ||
+      error.message?.includes("fetch") ||
+      error.name?.includes("Query");
+
     return { hasError: true, error, isQueryError };
   }
 
   componentDidCatch(error: Error, info: { componentStack: string }): void {
     // Log the error to console and call custom error handler if provided
     console.error("Error caught by boundary:", error, info);
-    
+
     if (this.props.onError) {
       this.props.onError(error, info);
     }
-    
+
     // Additional logging for query errors
     if (this.state.isQueryError && this.props.handleQueryErrors) {
       console.error("Query error details:", {
@@ -70,7 +71,9 @@ export class ErrorBoundary extends Component<
               <div className="text-red-400 mb-4">
                 <WarningIcon className="w-12 h-12 mx-auto mb-3" />
                 <h2 className="text-xl font-bold text-center text-white mb-1">
-                  {this.state.isQueryError ? "Data Loading Error" : "Something went wrong"}
+                  {this.state.isQueryError
+                    ? "Data Loading Error"
+                    : "Something went wrong"}
                 </h2>
                 <p className="text-center text-gray-400">
                   {getErrorMessage(this.state.error)}
@@ -85,7 +88,11 @@ export class ErrorBoundary extends Component<
               <div className="flex justify-center space-x-3">
                 <FormButton
                   onClick={() => {
-                    this.setState({ hasError: false, error: undefined, isQueryError: false });
+                    this.setState({
+                      hasError: false,
+                      error: undefined,
+                      isQueryError: false,
+                    });
                   }}
                   ariaLabel="Try again"
                   variant="secondary"
