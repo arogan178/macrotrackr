@@ -95,17 +95,17 @@ function HabitModal({
     setIsSubmitting(true);
     try {
       await onSubmit(formValues, isEditMode ? habit?.id : undefined);
-      // onClose(); // onSubmit should handle closing
+      // onSubmit handles closing the modal, so we don't call onClose() here
     } catch (error) {
       console.error(
         `Error ${isEditMode ? "updating" : "submitting"} habit:`,
         error,
       );
-      // Optionally show an error message to the user here
-    } finally {
-      // Don't reset submitting state here if onClose is called in onSubmit
-      // setIsSubmitting(false);
+      // Reset submitting state on error so user can try again
+      setIsSubmitting(false);
     }
+    // Note: We don't reset isSubmitting on success because the modal will close
+    // and the component will unmount/reset when it reopens
   };
 
   // Determine the title and save button label based on the mode

@@ -1,5 +1,5 @@
 // filepath: frontend/src/utils/nutrition-visualization.ts
-// Shared utilities for nutrition visualizations (MealTimeBreakdown, NutrientDensityVisualization)
+// Shared utilities for nutrition visualizations (MealTimeBreakdown, MacroDensityBreakdown)
 
 export const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
 export type MealType = (typeof MEAL_TYPES)[number];

@@ -11,15 +11,9 @@ export const DEFAULT_TARGET_VALUES = {
   fatsPercentage: 30,
   lockedMacros: [],
 };
-export const DAILY_PROTEIN_PER_KG = 2; // 2g protein per kg bodyweight
+export const DAILY_PROTEIN_PER_KG = 2.1; // 2g protein per kg bodyweight
 export const CARBS_PERCENTAGE = 0.5; // 50% of calories from carbs
 export const FATS_PERCENTAGE = 0.25; // 25% of calories from fats
-
-export const CALORIES_PER_GRAM = {
-  protein: 4,
-  carbs: 4,
-  fats: 9,
-} as const;
 
 // Constants for weight and calorie calculations
 export const CALORIES_PER_KG_FAT = 7700; // Approximately 7700 calories per kg of body fat

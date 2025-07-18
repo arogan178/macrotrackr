@@ -1,4 +1,15 @@
+/**
+ * Cancel the current user's subscription
+ * @returns {Promise<{ success: boolean, message: string }>}
+ */
 import { post } from "./apiServices";
+
+export async function cancelSubscription(): Promise<{
+  success: boolean;
+  message: string;
+}> {
+  return post<{ success: boolean; message: string }>("/api/billing/cancel");
+}
 
 /**
  * Create a Stripe Checkout Session for Pro upgrade

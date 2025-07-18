@@ -1,5 +1,5 @@
+import { Navigate } from "@tanstack/react-router";
 import React from "react";
-import { Navigate } from "react-router-dom";
 
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
 

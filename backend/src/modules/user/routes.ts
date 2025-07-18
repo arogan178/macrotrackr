@@ -13,24 +13,11 @@ import {
 import { toCamelCase, handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
 import { hashPassword, verifyPassword } from "../../lib/password";
+import { SubscriptionService } from "../billing/subscription-service";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
   value === undefined || value === null ? null : value;
-
-// Combined user data query result type
-type UserWithDetailsResult = {
-  id: number;
-  email: string;
-  first_name: string;
-  last_name: string;
-  created_at: string | Date;
-  date_of_birth: string | null;
-  height: number | null;
-  weight: number | null;
-  gender: "male" | "female" | null;
-  activity_level: number | null;
-};
 
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
@@ -44,15 +31,15 @@ export const userRoutes = (app: Elysia) =>
           try {
             const { db, user } = context as AuthenticatedContext;
 
-            // Fetching user details
-
-            const dbResult = safeQuery<UserWithDetailsResult>(
+            // Fetch user details
+            const dbResult = safeQuery<any>(
               db,
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
-               WHERE u.id = ?`,
+               WHERE u.id = ?
+               LIMIT 1`,
               [user.userId]
             );
 
@@ -60,8 +47,19 @@ export const userRoutes = (app: Elysia) =>
               throw new NotFoundError("User data not found.");
             }
 
-            // Convert to camelCase API response
-            return toCamelCase(dbResult);
+            // Get only summary subscription info
+            const subscriptionInfo =
+              await SubscriptionService.getUserSubscription(user.userId);
+            const result = toCamelCase(dbResult);
+            result.subscription = {
+              status: subscriptionInfo.subscription_status,
+              hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
+              currentPeriodEnd:
+                subscriptionInfo.subscription?.current_period_end || null,
+            };
+
+            // Do NOT include any detailed billing or payment info here
+            return result;
           } catch (error) {
             return handleError(error, context);
           }

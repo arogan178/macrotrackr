@@ -9,6 +9,7 @@ import eslintPluginPrettier from "eslint-plugin-prettier";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
+import pluginRouter from "@tanstack/eslint-plugin-router";
 
 export default [
   // PascalCase for components
@@ -16,6 +17,8 @@ export default [
     files: [
       "src/components/**/*.{js,jsx,ts,tsx}",
       "src/pages/**/*.{js,jsx,ts,tsx}",
+      "src/hooks/**/*.{js,jsx,ts,tsx}",
+      "src/lib/**/*.{js,jsx,ts,tsx}",
       "src/features/**/components/**/*.{js,jsx,ts,tsx}",
       "src/features/**/pages/**/*.{js,jsx,ts,tsx}",
     ],
@@ -35,11 +38,13 @@ export default [
       "src/utils/**/*.{js,ts}",
       "src/types/**/*.{js,ts}",
       "src/hooks/**/*.{js,ts,tsx}",
+      "src/loaders/**/*.{js,ts,tsx}",
       "src/constants/**/*.{js,ts,tsx}",
       "src/features/**/hooks/**/*.{js,ts,tsx}",
       "src/features/**/types/**/*.{js,ts,tsx}",
       "src/features/**/utils/**/*.{js,ts,tsx}",
       "src/features/**/constants/**/*.{js,ts,tsx}",
+      "src/appRouter.tsx",
     ],
     rules: {
       "unicorn/filename-case": [
@@ -73,6 +78,7 @@ export default [
       prettier: eslintPluginPrettier,
       "simple-import-sort": simpleImportSort,
       import: eslintPluginImport,
+      ...pluginRouter.configs["flat/recommended"],
     },
     rules: {
       ...pluginJs.configs.recommended.rules,

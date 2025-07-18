@@ -5,7 +5,12 @@ import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
 import { FormButton } from "@/components/form";
 import ActionButton from "@/components/form/ActionButton";
-import { ChevronDownIcon, ExportIcon, PlusCircleIcon } from "@/components/ui";
+import {
+  ChevronDownIcon,
+  ExportIcon,
+  LoadingSpinner,
+  PlusCircleIcon,
+} from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
@@ -19,6 +24,9 @@ interface EntryHistoryProps {
   onEdit: (entry: MacroEntry) => void;
   isDeleting: boolean;
   isEditing: boolean;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
 }
 
 // Consolidated helper functions
@@ -86,9 +94,14 @@ const EntryHistoryComponent = function EntryHistory({
   deleteEntry,
   onEdit,
   isDeleting,
+  hasMore,
+  onLoadMore,
+  isLoadingMore,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [showAllDates, setShowAllDates] = useState(false);
+
+  // (removed duplicate collapseAllButToday)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | undefined>();
 
@@ -162,18 +175,38 @@ const EntryHistoryComponent = function EntryHistory({
     };
   }, [history, showAllDates]);
 
+  // Helper to collapse all but today (must be after totalEntries/todayFormatted)
+  const collapseAllButToday = useCallback(() => {
+    setCollapsedDates(
+      new Set(
+        totalEntries
+          .filter((group) => group.date !== todayFormatted)
+          .map((group) => group.date),
+      ),
+    );
+  }, [totalEntries, todayFormatted]);
+
   // Initialize collapsed dates
+  // Always add any new dates (except today) to the collapsed set
   useEffect(() => {
     setCollapsedDates((previous) => {
-      if (previous.size === 0) {
-        return new Set(
-          totalEntries
-            .filter((group) => group.date !== todayFormatted)
-            .map((group) => group.date),
-        );
+      const allDates = totalEntries.map((group) => group.date);
+      const previousDates = new Set(previous);
+      let changed = false;
+      for (const date of allDates) {
+        if (date !== todayFormatted && !previousDates.has(date)) {
+          previousDates.add(date);
+          changed = true;
+        }
       }
-      const existingDates = new Set(totalEntries.map((group) => group.date));
-      return new Set([...previous].filter((date) => existingDates.has(date)));
+      // Remove any dates that no longer exist
+      for (const date of previousDates) {
+        if (!allDates.includes(date)) {
+          previousDates.delete(date);
+          changed = true;
+        }
+      }
+      return changed ? new Set(previousDates) : previous;
     });
   }, [totalEntries, todayFormatted]);
 
@@ -326,8 +359,8 @@ const EntryHistoryComponent = function EntryHistory({
             />
           </div>
 
-          {/* Show More Dates Button */}
-          {hasMoreDates && (
+          {/* Unified Show More/Less Dates Button */}
+          {(hasMoreDates || hasMore) && (
             <motion.div
               className="flex justify-center py-4"
               initial={{ opacity: 0, y: 20 }}
@@ -335,8 +368,20 @@ const EntryHistoryComponent = function EntryHistory({
               transition={{ duration: 0.3 }}
             >
               <motion.button
-                onClick={toggleShowAllDates}
-                className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50"
+                onClick={async () => {
+                  if (hasMore && onLoadMore) {
+                    await onLoadMore();
+                    setShowAllDates(true);
+                  } else if (showAllDates) {
+                    setShowAllDates(false);
+                  } else {
+                    setShowAllDates(true);
+                  }
+                }}
+                className={`px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50 ${
+                  isLoadingMore ? "opacity-60 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoadingMore}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 animate={{
@@ -349,21 +394,32 @@ const EntryHistoryComponent = function EntryHistory({
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
+                {isLoadingMore && <LoadingSpinner />}
                 <AnimatePresence mode="wait">
                   <motion.span
-                    key={showAllDates ? "less" : "more"}
+                    key={
+                      hasMore
+                        ? "show-more-dates"
+                        : showAllDates
+                          ? "show-less-dates"
+                          : "show-more-dates"
+                    }
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
                   >
-                    {showAllDates ? "Show Less Dates" : "Show More Dates"}
+                    {hasMore
+                      ? "Show More Dates"
+                      : showAllDates
+                        ? "Show Less Dates"
+                        : "Show More Dates"}
                   </motion.span>
                 </AnimatePresence>
                 <motion.div
                   animate={{
-                    rotate: showAllDates ? 180 : 0,
-                    scale: showAllDates ? 1.1 : 1,
+                    rotate: showAllDates && !hasMore ? 180 : 0,
+                    scale: showAllDates && !hasMore ? 1.1 : 1,
                   }}
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
@@ -372,6 +428,7 @@ const EntryHistoryComponent = function EntryHistory({
               </motion.button>
             </motion.div>
           )}
+          {/* Remove old Load More Pagination Button */}
         </motion.div>
       )}
 
