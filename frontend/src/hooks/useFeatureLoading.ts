@@ -134,6 +134,33 @@ export function useMultiFeatureLoading(features: FeatureType[]) {
     0,
   );
 
+  // Build featureStates object using a for loop for readability
+  const allFeatureTypes: FeatureType[] = [
+    "auth",
+    "habits",
+    "goals",
+    "macros",
+    "settings",
+  ];
+  const featureStates = {} as Record<
+    FeatureType,
+    ReturnType<typeof useFeatureLoading>
+  >;
+  // Initialize all keys to a default state
+  for (const feature of allFeatureTypes) {
+    featureStates[feature] = {
+      isQueryLoading: false,
+      isMutationLoading: false,
+      isLoading: false,
+      activeQueries: 0,
+      activeMutations: 0,
+    };
+  }
+  // Assign actual values for requested features
+  for (const [index, feature] of features.entries()) {
+    featureStates[feature] = loadingStates[index];
+  }
+
   return {
     /**
      * True if any query across the specified features is loading
@@ -163,12 +190,6 @@ export function useMultiFeatureLoading(features: FeatureType[]) {
     /**
      * Loading state for each individual feature
      */
-    featureStates: features.reduce(
-      (accumulator, feature, index) => {
-        accumulator[feature] = loadingStates[index];
-        return accumulator;
-      },
-      {} as Record<FeatureType, ReturnType<typeof useFeatureLoading>>,
-    ),
+    featureStates,
   };
 }

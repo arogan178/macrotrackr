@@ -59,9 +59,6 @@ const ProBillingView: React.FC<{
           {/* Header with status */}
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center">
-              <div className="p-1.5 bg-green-400/20 rounded-lg mr-3">
-                <CheckCircleIcon className="w-5 h-5 text-green-400" />
-              </div>
               <div>
                 <span className="text-green-300 font-semibold text-lg">
                   Pro Plan Member
