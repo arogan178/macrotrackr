@@ -19,7 +19,7 @@ import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 import { FloatingNotification } from "@/features/notifications/components";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import { useStore } from "@/store/store";
+import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 import {
   useAddHabit,
   useCompleteHabit,
@@ -28,7 +28,7 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
-import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
+import { useStore } from "@/store/store";
 
 export default function GoalsPage() {
   // Get UI state from centralized goals UI slice
@@ -70,7 +70,11 @@ export default function GoalsPage() {
   const nutritionProfile = user ? createNutritionProfile(user) : undefined;
 
   // Use TanStack Query hooks for habits (server state)
-  const { data: habits = [], isLoading: habitsLoading, error: habitsQueryError } = useHabits();
+  const {
+    data: habits = [],
+    isLoading: habitsLoading,
+    error: habitsQueryError,
+  } = useHabits();
   const addHabitMutation = useAddHabit();
   const updateHabitMutation = useUpdateHabit();
   const deleteHabitMutation = useDeleteHabit();
@@ -78,14 +82,12 @@ export default function GoalsPage() {
   const completeHabitMutation = useCompleteHabit();
 
   // Use TanStack Query hooks for weight goals (server state)
-  const { data: weightGoalsFromQuery, isLoading: weightGoalsLoading } = useWeightGoals();
+  const { data: weightGoalsFromQuery, isLoading: weightGoalsLoading } =
+    useWeightGoals();
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
   // Use Zustand only for UI state (notifications, subscription status, etc.)
-  const {
-    setSubscriptionStatus,
-    showNotification,
-  } = useStore();
+  const { setSubscriptionStatus, showNotification } = useStore();
 
   // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
@@ -152,8 +154,11 @@ export default function GoalsPage() {
         showNotification("Habit added successfully!", "success");
       }
       closeHabitModal();
-    } catch (error) {
-      showNotification(`Failed to ${habitModalMode === "edit" ? "update" : "add"} habit`, "error");
+    } catch {
+      showNotification(
+        `Failed to ${habitModalMode === "edit" ? "update" : "add"} habit`,
+        "error",
+      );
     }
   };
 
@@ -174,27 +179,33 @@ export default function GoalsPage() {
       // Check if habit was completed
       const habit = habits.find((h) => h.id === id);
       if (habit && habit.current + 1 >= habit.target) {
-        showNotification(`🎉 Congratulations! You've completed your ${habit.title}!`, "success");
+        showNotification(
+          `🎉 Congratulations! You've completed your ${habit.title}!`,
+          "success",
+        );
       }
-    } catch (error) {
+    } catch {
       showNotification("Failed to update habit progress", "error");
     }
   };
 
   // Handler for completing a habit
   const handleCompleteHabit = async (id: string) => {
-    console.log('handleCompleteHabit called with id:', id);
+    console.log("handleCompleteHabit called with id:", id);
     try {
-      console.log('About to call completeHabitMutation.mutateAsync');
+      console.log("About to call completeHabitMutation.mutateAsync");
       await completeHabitMutation.mutateAsync(id);
-      console.log('completeHabitMutation.mutateAsync completed');
+      console.log("completeHabitMutation.mutateAsync completed");
       const habit = habits.find((h) => h.id === id);
       // Only show congratulations if the habit wasn't already complete
       if (habit && !habit.isComplete) {
-        showNotification(`🎉 Congratulations! You've completed your ${habit.title}!`, "success");
+        showNotification(
+          `🎉 Congratulations! You've completed your ${habit.title}!`,
+          "success",
+        );
       }
     } catch (error) {
-      console.error('Error in handleCompleteHabit:', error);
+      console.error("Error in handleCompleteHabit:", error);
       showNotification("Failed to complete habit", "error");
     }
   };
@@ -204,7 +215,7 @@ export default function GoalsPage() {
     try {
       await deleteHabitMutation.mutateAsync(id);
       showNotification("Habit deleted successfully", "info");
-    } catch (error) {
+    } catch {
       showNotification("Failed to delete habit", "error");
     }
   };
@@ -225,9 +236,10 @@ export default function GoalsPage() {
 
   // Use TanStack Query data instead of loader data for weight goals
   const currentWeightGoals = weightGoalsFromQuery || weightGoals;
-  
+
   // Get the safe target weight value for components
-  const safeTargetWeight = currentWeightGoals?.targetWeight || user?.weight || 0;
+  const safeTargetWeight =
+    currentWeightGoals?.targetWeight || user?.weight || 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -399,9 +411,7 @@ export default function GoalsPage() {
 
           {/* Main Content Area */}
           <div className="mt-8 relative">
-            {!user ? (
-              <GoalsLoadingSkeleton />
-            ) : (
+            {user ? (
               <AnimatePresence mode="wait">
                 {activeTab === "goals" ? (
                   <motion.div
@@ -418,19 +428,25 @@ export default function GoalsPage() {
                           user={user}
                           macroDailyTotals={macroDailyTotals}
                           weightGoals={
-                            currentWeightGoals && currentWeightGoals.targetWeight != undefined
+                            currentWeightGoals &&
+                            currentWeightGoals.targetWeight != undefined
                               ? {
                                   ...currentWeightGoals,
-                                  targetWeight: currentWeightGoals.targetWeight ?? 0,
+                                  targetWeight:
+                                    currentWeightGoals.targetWeight ?? 0,
                                   weightGoal:
                                     currentWeightGoals.weightGoal ?? "maintain",
                                   startDate: currentWeightGoals.startDate ?? "",
-                                  targetDate: currentWeightGoals.targetDate ?? "",
-                                  calorieTarget: currentWeightGoals.calorieTarget ?? 0,
+                                  targetDate:
+                                    currentWeightGoals.targetDate ?? "",
+                                  calorieTarget:
+                                    currentWeightGoals.calorieTarget ?? 0,
                                   calculatedWeeks:
                                     currentWeightGoals.calculatedWeeks ?? 0,
-                                  weeklyChange: currentWeightGoals.weeklyChange ?? 0,
-                                  dailyChange: currentWeightGoals.dailyChange ?? 0,
+                                  weeklyChange:
+                                    currentWeightGoals.weeklyChange ?? 0,
+                                  dailyChange:
+                                    currentWeightGoals.dailyChange ?? 0,
                                 }
                               : undefined
                           }
@@ -471,6 +487,8 @@ export default function GoalsPage() {
                   </motion.div>
                 )}
               </AnimatePresence>
+            ) : (
+              <GoalsLoadingSkeleton />
             )}
           </div>
         </div>

@@ -1,19 +1,19 @@
 // Error handling hooks
 export { useErrorHandler, useQueryErrorHandler } from "./useErrorHandler";
-export { 
-  useMutationErrorHandler, 
-  useOptimisticMutationHandler 
+export {
+  useMutationErrorHandler,
+  useOptimisticMutationHandler,
 } from "./useMutationErrorHandler";
 
 // Loading state hooks
-export { useGlobalLoading, useCriticalLoading } from "./useGlobalLoading";
-export { 
-  useFeatureLoading, 
-  useSpecificQueryLoading, 
-  useSpecificMutationLoading,
+export {
+  type FeatureType,
+  useFeatureLoading,
   useMultiFeatureLoading,
-  type FeatureType
+  useSpecificMutationLoading,
+  useSpecificQueryLoading,
 } from "./useFeatureLoading";
+export { useCriticalLoading, useGlobalLoading } from "./useGlobalLoading";
 
 // Other hooks
 export { default as useBeforeUnload } from "./useBeforeUnload";

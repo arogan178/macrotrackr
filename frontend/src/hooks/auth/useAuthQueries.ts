@@ -73,7 +73,7 @@ export function useUser(options?: { enabled?: boolean }) {
     },
     ...queryConfigs.auth,
     retry: false, // Don't retry auth queries to avoid infinite loops
-    enabled: options?.enabled !== undefined ? options.enabled : !!getToken(),
+    enabled: options?.enabled === undefined ? !!getToken() : options.enabled,
   });
 }
 
@@ -140,7 +140,7 @@ export function useLogout() {
     onSuccess: () => {
       // Clear all cached data
       queryClient.clear();
-      
+
       // Also specifically invalidate auth queries to ensure they're cleared
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
 

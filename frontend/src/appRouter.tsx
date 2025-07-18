@@ -82,7 +82,7 @@ export const rootRoute = createRootRoute({
   loader: async ({ context }) => {
     // Only prefetch user data if there's a token
     const { getToken } = await import("@/utils/tokenStorage");
-    
+
     if (getToken()) {
       // Prefetch user data using TanStack Query
       await context.queryClient.ensureQueryData({
@@ -147,61 +147,68 @@ export const homeRoute = createRoute({
     // Use queryClient.ensureQueryData for prefetching macro data
     const limit = deps.limit || 20;
     const offset = deps.offset || 0;
-    
-    const [macroTarget, macroHistory, weightGoals, weightLog] = await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.macros.targets(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          const response = await apiService.macros.getMacroTarget();
-          return response?.macroTarget;
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.macros.history(Math.floor(offset / limit) + 1),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          return await apiService.macros.getHistory(limit, offset);
-        },
-        staleTime: 2 * 60 * 1000, // 2 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.goals.weight(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          return await apiService.goals.getWeightGoals();
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.goals.weightLog(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          return await apiService.goals.getWeightLog();
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-    ]);
+
+    const [macroTarget, macroHistory, weightGoals, weightLog] =
+      await Promise.all([
+        context.queryClient.ensureQueryData({
+          queryKey: queryKeys.macros.targets(),
+          queryFn: async () => {
+            const { apiService } = await import("@/utils/apiServices");
+            const response = await apiService.macros.getMacroTarget();
+            return response?.macroTarget;
+          },
+          staleTime: 5 * 60 * 1000, // 5 minutes
+          gcTime: 30 * 60 * 1000, // 30 minutes
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: queryKeys.macros.history(Math.floor(offset / limit) + 1),
+          queryFn: async () => {
+            const { apiService } = await import("@/utils/apiServices");
+            return await apiService.macros.getHistory(limit, offset);
+          },
+          staleTime: 2 * 60 * 1000, // 2 minutes
+          gcTime: 10 * 60 * 1000, // 10 minutes
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: queryKeys.goals.weight(),
+          queryFn: async () => {
+            const { apiService } = await import("@/utils/apiServices");
+            return await apiService.goals.getWeightGoals();
+          },
+          staleTime: 5 * 60 * 1000, // 5 minutes
+          gcTime: 10 * 60 * 1000, // 10 minutes
+        }),
+        context.queryClient.ensureQueryData({
+          queryKey: queryKeys.goals.weightLog(),
+          queryFn: async () => {
+            const { apiService } = await import("@/utils/apiServices");
+            return await apiService.goals.getWeightLog();
+          },
+          staleTime: 5 * 60 * 1000, // 5 minutes
+          gcTime: 10 * 60 * 1000, // 10 minutes
+        }),
+      ]);
 
     // Transform weight goals data similar to the old loader
     let transformedWeightGoals;
     if (weightGoals) {
-      const latestWeight = weightLog.length > 0 
-        ? weightLog[weightLog.length - 1].weight 
-        : weightGoals.startingWeight;
+      const latestWeight =
+        weightLog.length > 0
+          ? weightLog.at(-1).weight
+          : weightGoals.startingWeight;
 
       transformedWeightGoals = {
         ...weightGoals,
         currentWeight: latestWeight,
         targetWeight: weightGoals.targetWeight || weightGoals.startingWeight,
-        weightGoal: (weightGoals.weightGoal || "maintain") as "lose" | "maintain" | "gain",
-        startDate: weightGoals.startDate || new Date().toISOString().split("T")[0],
-        targetDate: weightGoals.targetDate || new Date().toISOString().split("T")[0],
+        weightGoal: (weightGoals.weightGoal || "maintain") as
+          | "lose"
+          | "maintain"
+          | "gain",
+        startDate:
+          weightGoals.startDate || new Date().toISOString().split("T")[0],
+        targetDate:
+          weightGoals.targetDate || new Date().toISOString().split("T")[0],
         calorieTarget: weightGoals.calorieTarget || 2000,
         calculatedWeeks: weightGoals.calculatedWeeks || 1,
         weeklyChange: weightGoals.weeklyChange || 0,
@@ -306,17 +313,23 @@ export const goalsRoute = createRoute({
     // Transform weight goals data similar to the old loader
     let transformedWeightGoals;
     if (weightGoals) {
-      const latestWeight = weightLog.length > 0 
-        ? weightLog[weightLog.length - 1].weight 
-        : weightGoals.startingWeight;
+      const latestWeight =
+        weightLog.length > 0
+          ? weightLog.at(-1).weight
+          : weightGoals.startingWeight;
 
       transformedWeightGoals = {
         ...weightGoals,
         currentWeight: latestWeight,
         targetWeight: weightGoals.targetWeight || weightGoals.startingWeight,
-        weightGoal: (weightGoals.weightGoal || "maintain") as "lose" | "maintain" | "gain",
-        startDate: weightGoals.startDate || new Date().toISOString().split("T")[0],
-        targetDate: weightGoals.targetDate || new Date().toISOString().split("T")[0],
+        weightGoal: (weightGoals.weightGoal || "maintain") as
+          | "lose"
+          | "maintain"
+          | "gain",
+        startDate:
+          weightGoals.startDate || new Date().toISOString().split("T")[0],
+        targetDate:
+          weightGoals.targetDate || new Date().toISOString().split("T")[0],
         calorieTarget: weightGoals.calorieTarget || 2000,
         calculatedWeeks: weightGoals.calculatedWeeks || 1,
         weeklyChange: weightGoals.weeklyChange || 0,
@@ -360,16 +373,16 @@ export const reportingRoute = createRoute({
   loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
   loader: async ({ deps, context }) => {
     // Use queryClient.ensureQueryData for prefetching reporting data
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const queryDate = deps.startDate || today;
-    
+
     return await context.queryClient.ensureQueryData({
       queryKey: queryKeys.macros.dailyTotals(queryDate),
       queryFn: async () => {
         const { apiService } = await import("@/utils/apiServices");
         return await apiService.macros.getDailyTotals({
           startDate: deps.startDate,
-          endDate: deps.endDate
+          endDate: deps.endDate,
         });
       },
       staleTime: 2 * 60 * 1000, // 2 minutes
