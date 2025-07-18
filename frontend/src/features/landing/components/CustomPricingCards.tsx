@@ -1,9 +1,10 @@
+import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 import PlanToggle from "./PlanToggle";
@@ -23,15 +24,16 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
     "monthly",
   );
   const navigate = useNavigate();
-  const isAuthenticated = useStore((state) => state.auth.isAuthenticated);
+  const { data: user } = useUser();
+  const isAuthenticated = !!user;
 
   const handleGetPro = () => {
     if (isAuthenticated) {
       // If user is logged in, go to pricing page
-      navigate("/pricing");
+      navigate({ to: "/pricing" });
     } else {
       // If user is not logged in, go to register
-      navigate("/register");
+      navigate({ to: "/register" });
     }
   };
 

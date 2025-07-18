@@ -1,8 +1,40 @@
+// --- Shared helpers for reporting breakdowns ---
 import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { MacroEntry } from "@/types/macro";
 
 import { formatDate } from "../utils";
+
+export function getDateRangeISOStrings(range: string): {
+  startDate: string;
+  endDate: string;
+} {
+  const today = new Date();
+  const endDateString = today.toISOString().split("T")[0];
+  let days = 7;
+  if (range === "month") days = 30;
+  if (range === "3months") days = 90;
+  const startDateObject = new Date(today);
+  startDateObject.setDate(today.getDate() - (days - 1));
+  const startDateString = startDateObject.toISOString().split("T")[0];
+  return { startDate: startDateString, endDate: endDateString };
+}
+
+export function getDayString(date: Date) {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}-${date.getDate().toString().padStart(2, "0")}`;
+}
+
+export function getWeekString(date: Date) {
+  const year = date.getFullYear();
+  const firstDay = new Date(date.getFullYear(), 0, 1);
+  const pastDaysOfYear = (date.getTime() - firstDay.getTime()) / 86_400_000;
+  const week = Math.ceil((pastDaysOfYear + firstDay.getDay() + 1) / 7);
+  return `${year}-W${week.toString().padStart(2, "0")}`;
+}
+
+export function getMonthString(date: Date) {
+  return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
+}
 
 interface MacroTotals {
   calories: number;
@@ -136,46 +168,10 @@ export function useReportingLogic(
       setAggregatedData([]);
       setDataProcessed(true);
     }
-  }, [history, dateRange, isLoadingExternal, processDataForCharts]);
+  }, [history, dateRange, isLoadingExternal]); // DO NOT include processDataForCharts in deps to avoid infinite loop
 
-  const nutrientDensityData = useMemo(() => {
-    if (!history || history.length === 0) {
-      return [];
-    }
-    const { startDate: startDateString, endDate: endDateString } =
-      getDateRangeISOStrings(dateRange);
-    const startDate = new Date(startDateString + "T00:00:00");
-    const endDate = new Date(endDateString + "T23:59:59");
-
-    const relevantEntries = history.filter((entry) => {
-      let entryDateString: string;
-      if (entry.entryDate) {
-        entryDateString = entry.entryDate;
-      } else if (entry.createdAt) {
-        const createdAtDate = new Date(entry.createdAt);
-        entryDateString = `${createdAtDate.getFullYear()}-${(
-          createdAtDate.getMonth() + 1
-        )
-          .toString()
-          .padStart(2, "0")}-${createdAtDate
-          .getDate()
-          .toString()
-          .padStart(2, "0")}`;
-      } else {
-        return false;
-      }
-      const entryDate = new Date(entryDateString + "T00:00:00");
-      return entryDate >= startDate && entryDate <= endDate;
-    });
-
-    return relevantEntries.map((entry) => ({
-      name: entry.foodName || entry.mealName || "Unknown Item",
-      calories: entry.protein * 4 + entry.carbs * 4 + entry.fats * 9,
-      protein: entry.protein,
-      carbs: entry.carbs,
-      fats: entry.fats,
-    }));
-  }, [history, dateRange, getDateRangeISOStrings]);
+  // macroDensityData logic moved to useMacroDensityBreakdown
+  // If you need macro density breakdown, use the new hook instead.
 
   const averages = useMemo(() => {
     if (aggregatedData.length === 0)
@@ -230,11 +226,11 @@ export function useReportingLogic(
 
   return {
     aggregatedData,
-    nutrientDensityData,
+    // macroDensityData removed; use useMacroDensityBreakdown for macro density chart data
     averages,
     handleDownloadCSV,
     getDateRangeISOStrings, // Exporting if ReportingPage still needs it directly for other components
-    mapDateRangeToNumeric, // Exporting for NutrientDensityVisualization prop
+    mapDateRangeToNumeric, // Exporting for MacroDensityBreakdown prop
     dataProcessed,
     formatDate, // Exporting if needed by other parts of ReportingPage, though ideally it's self-contained or a shared util
   };

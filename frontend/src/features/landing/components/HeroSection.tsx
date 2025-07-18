@@ -1,6 +1,6 @@
+import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import React from "react";
-import { Link } from "react-router-dom";
 
 import FormButton from "@/components/form/FormButton";
 import { ShieldCheckIcon } from "@/components/ui";

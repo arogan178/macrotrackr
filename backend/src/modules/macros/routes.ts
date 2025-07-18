@@ -227,13 +227,23 @@ export const macroRoutes = (app: Elysia) =>
 
       // === DAILY MACRO ENTRY ENDPOINTS ===
 
-      // GET /today - Get today's macro totals
+      // GET /totals - Get macro totals for a date range (or today if not specified)
       .get(
-        "/today",
+        "/totals",
         async (context: any) => {
-          const { db, user } = context as AuthenticatedContext;
+          const { db, user, query } = context as AuthenticatedContext & { query: any };
+          let startDate = query.startDate;
+          let endDate = query.endDate;
 
-          const todayDate = getLocalDate();
+          // If no date range provided, default to today
+          if (!startDate && !endDate) {
+            startDate = endDate = getLocalDate();
+          }
+
+          // If only one date provided, use it for both
+          if (startDate && !endDate) endDate = startDate;
+          if (endDate && !startDate) startDate = endDate;
+
           const result = safeQuery<{
             protein: number;
             carbs: number;
@@ -243,8 +253,8 @@ export const macroRoutes = (app: Elysia) =>
             `SELECT COALESCE(SUM(protein), 0) AS protein, 
                     COALESCE(SUM(carbs), 0) AS carbs, 
                     COALESCE(SUM(fats), 0) AS fats
-             FROM macro_entries WHERE user_id = ? AND entry_date = ?`,
-            [user.userId, todayDate]
+             FROM macro_entries WHERE user_id = ? AND entry_date >= ? AND entry_date <= ?`,
+            [user.userId, startDate, endDate]
           );
 
           if (!result) {
@@ -258,35 +268,71 @@ export const macroRoutes = (app: Elysia) =>
           return { ...result, calories };
         },
         {
+          query: t.Object({
+            startDate: t.Optional(t.String()),
+            endDate: t.Optional(t.String()),
+          }),
           response: MacroSchemas.macroTotals,
           detail: {
-            summary: "Get total macros consumed by the user today",
+            summary: "Get total macros consumed by the user for a date range (or today)",
             tags: ["Macros"],
           },
         }
       )
 
-      // GET /history - Get macro history
+      // GET /history - Get macro history (paginated)
       .get(
         "/history",
         async (context: any) => {
-          const { db, user } = context as AuthenticatedContext;
+          const { db, user, query } = context as AuthenticatedContext & {
+            query: any;
+          };
 
+          // Parse pagination params
+          const limit = Math.max(1, Math.min(Number(query.limit) || 20, 100));
+          const offset = Math.max(0, Number(query.offset) || 0);
+
+          // Get total count for pagination metadata
+          const countResult = safeQuery<{ count: number }>(
+            db,
+            `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`,
+            [user.userId]
+          );
+          const total = countResult?.count || 0;
+
+          // Get paginated results
           const historyResult = safeQueryAll<MacroEntryFromDB>(
             db,
             `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at 
              FROM macro_entries 
              WHERE user_id = ? 
-             ORDER BY entry_date DESC, entry_time DESC, created_at DESC`,
-            [user.userId]
+             ORDER BY entry_date DESC, entry_time DESC, created_at DESC
+             LIMIT ? OFFSET ?`,
+            [user.userId, limit, offset]
           );
 
-          return historyResult.map(toCamelCase);
+          return {
+            entries: historyResult.map(toCamelCase),
+            total,
+            limit,
+            offset,
+            hasMore: offset + limit < total,
+          };
         },
         {
-          response: t.Array(MacroSchemas.macroEntryResponse),
+          query: t.Object({
+            limit: t.Optional(t.Numeric()),
+            offset: t.Optional(t.Numeric()),
+          }),
+          response: t.Object({
+            entries: t.Array(MacroSchemas.macroEntryResponse),
+            total: t.Numeric(),
+            limit: t.Numeric(),
+            offset: t.Numeric(),
+            hasMore: t.Boolean(),
+          }),
           detail: {
-            summary: "Get all macro entries recorded by the user",
+            summary: "Get paginated macro entries recorded by the user",
             tags: ["Macros"],
           },
         }

@@ -243,14 +243,7 @@ export const billingRoutes = (app: Elysia) =>
             const subscription = await SubscriptionService.getUserSubscription(
               user.userId
             );
-            logger.debug(
-              {
-                operation: "get_subscription_status",
-                userId: user.userId,
-                status: subscription.subscription_status,
-              },
-              "Retrieved user subscription status"
-            );
+            
             return {
               status: subscription.subscription_status,
               hasStripeCustomer: !!subscription.stripe_customer_id,

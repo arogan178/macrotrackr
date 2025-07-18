@@ -107,7 +107,7 @@ function Modal(properties: ModalProps) {
       hideCancelButton = false,
     } = properties as FormModalProps);
   }
-  const modalReference = useRef<HTMLDivElement>(null);
+  const modalReference = useRef<HTMLDivElement>(undefined);
   const modalRoot = document.querySelector("#modal-root"); // Get the portal target
 
   // Handle escape key press and body scroll lock

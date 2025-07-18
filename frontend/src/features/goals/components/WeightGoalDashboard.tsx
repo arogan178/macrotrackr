@@ -1,11 +1,11 @@
-import { memo, useState } from "react";
+import { memo } from "react";
 
 import { EmptyState, TargetIcon } from "@/components/ui/";
+import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
 
-import LogWeightModal from "./LogWeightModal";
 import WeightGoalStatus from "./WeightGoalStatus";
 
 interface WeightGoalDashboardProps {
@@ -31,16 +31,12 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   className = "",
   macroTarget,
 }: WeightGoalDashboardProps) {
-  // State for Log Weight Modal
-  const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
+  // Get log weight modal state from centralized goals UI slice
+  const { setLogWeightModalOpen } = useStore();
 
-  // Handlers for Log Weight Modal
+  // Handler for Log Weight Modal
   function handleOpenLogWeightModal() {
-    setIsLogWeightModalOpen(true);
-  }
-
-  function handleCloseLogWeightModal() {
-    setIsLogWeightModalOpen(false);
+    setLogWeightModalOpen(true);
   }
 
   // TDEE is now passed as a prop and should be used directly
@@ -117,12 +113,6 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
           macroTarget={macroTarget}
         />
       </div>
-
-      {/* Render the Log Weight Modal */}
-      <LogWeightModal
-        isOpen={isLogWeightModalOpen}
-        onClose={handleCloseLogWeightModal}
-      />
     </>
   );
 });

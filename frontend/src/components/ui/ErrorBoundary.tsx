@@ -2,15 +2,26 @@ import { Component, ReactNode } from "react";
 
 import { FormButton } from "@/components/form";
 import { WarningIcon } from "@/components/ui";
+import { getErrorMessage } from "@/utils/errorHandling";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
+  /**
+   * Whether this boundary should handle query errors specifically
+   * @default false
+   */
+  handleQueryErrors?: boolean;
+  /**
+   * Callback when an error is caught
+   */
+  onError?: (error: Error, errorInfo: { componentStack: string }) => void;
 }
 
 interface ErrorBoundaryState {
   hasError: boolean;
   error?: Error;
+  isQueryError?: boolean;
 }
 
 export class ErrorBoundary extends Component<
@@ -23,13 +34,31 @@ export class ErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Update state so the next render shows the fallback UI
-    return { hasError: true, error };
+    // Check if this is a query-related error
+    const isQueryError =
+      error.message?.includes("query") ||
+      error.message?.includes("fetch") ||
+      error.name?.includes("Query");
+
+    return { hasError: true, error, isQueryError };
   }
 
   componentDidCatch(error: Error, info: { componentStack: string }): void {
-    // You can log the error to an error reporting service
+    // Log the error to console and call custom error handler if provided
     console.error("Error caught by boundary:", error, info);
+
+    if (this.props.onError) {
+      this.props.onError(error, info);
+    }
+
+    // Additional logging for query errors
+    if (this.state.isQueryError && this.props.handleQueryErrors) {
+      console.error("Query error details:", {
+        message: error.message,
+        stack: error.stack,
+        componentStack: info.componentStack,
+      });
+    }
   }
 
   render(): ReactNode {
@@ -42,14 +71,35 @@ export class ErrorBoundary extends Component<
               <div className="text-red-400 mb-4">
                 <WarningIcon className="w-12 h-12 mx-auto mb-3" />
                 <h2 className="text-xl font-bold text-center text-white mb-1">
-                  Something went wrong
+                  {this.state.isQueryError
+                    ? "Data Loading Error"
+                    : "Something went wrong"}
                 </h2>
                 <p className="text-center text-gray-400">
-                  {this.state.error?.message || "An unexpected error occurred"}
+                  {getErrorMessage(this.state.error)}
                 </p>
+                {this.state.isQueryError && (
+                  <p className="text-center text-gray-500 text-sm mt-2">
+                    There was a problem loading your data. Please try again.
+                  </p>
+                )}
               </div>
 
-              <div className="flex justify-center">
+              <div className="flex justify-center space-x-3">
+                <FormButton
+                  onClick={() => {
+                    this.setState({
+                      hasError: false,
+                      error: undefined,
+                      isQueryError: false,
+                    });
+                  }}
+                  ariaLabel="Try again"
+                  variant="secondary"
+                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                >
+                  Try Again
+                </FormButton>
                 <FormButton
                   onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
