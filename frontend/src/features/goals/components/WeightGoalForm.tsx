@@ -81,16 +81,22 @@ function WeightGoalForm({
   // Track if form has changes compared to initial values
   useEffect(() => {
     if (isEditing && weightGoals) {
+      // For editing, check if values have changed from existing goal
       setHasChanges(
         formValues.startingWeight !== weightGoals.startingWeight ||
           formValues.targetWeight !== weightGoals.targetWeight ||
           calorieIntake !== weightGoals.calorieTarget,
       );
     } else {
+      // For creating new goals, always allow saving if we have valid values
+      // This ensures maintenance goals (starting = target weight) can be created
       setHasChanges(
-        formValues.startingWeight !== startingWeight ||
-          formValues.targetWeight !== targetWeight ||
-          calorieIntake !== calculations?.calorieTarget,
+        formValues.startingWeight !== undefined &&
+        formValues.targetWeight !== undefined &&
+        calorieIntake !== undefined &&
+        formValues.startingWeight > 0 &&
+        formValues.targetWeight > 0 &&
+        calorieIntake > 0
       );
     }
   }, [
