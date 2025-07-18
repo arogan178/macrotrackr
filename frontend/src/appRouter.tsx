@@ -45,6 +45,9 @@ const TermsAndConditionsPage = React.lazy(
 const PrivacyPolicyPage = React.lazy(
   () => import("./features/landing/pages/PrivacyPolicyPage"),
 );
+const LoadingStateDemoPage = React.lazy(
+  () => import("./pages/LoadingStateDemoPage"),
+);
 
 // Fallback component to show while loading
 function LoadingFallback() {
@@ -400,6 +403,12 @@ const privacyRoute = createRoute({
   component: () => <PrivacyPolicyPage />,
 });
 
+const demoRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/demo",
+  component: () => <LoadingStateDemoPage />,
+});
+
 const routeTree = rootRoute.addChildren([
   landingRoute,
   homeRoute,
@@ -412,6 +421,7 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   termsRoute,
   privacyRoute,
+  demoRoute,
 ]);
 
 const router = createRouter({
