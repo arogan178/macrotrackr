@@ -1,6 +1,6 @@
 import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { goalsRoute } from "@/AppRouter";
 import { TabButton } from "@/components/form";
@@ -31,18 +31,24 @@ import {
 import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 
 export default function GoalsPage() {
-  type TabType = "goals" | "macro targets";
-  const [activeTab, setActiveTab] = useState<TabType>("goals");
-  // State for reset goals modal
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
-  // State for habit modal
-  const [isHabitModalOpen, setIsHabitModalOpen] = useState(false);
-  const [currentHabit, setCurrentHabit] = useState<HabitGoal | undefined>();
-  const [habitModalMode, setHabitModalMode] = useState<"add" | "edit">("add");
-  const [isWeightGoalModalOpen, setIsWeightGoalModalOpen] = useState(false);
-  const [isDeleteConfirmModalOpen, setIsDeleteConfirmModalOpen] =
-    useState(false);
-  const [isLogWeightModalOpen, setIsLogWeightModalOpen] = useState(false);
+  // Get UI state from centralized goals UI slice
+  const {
+    activeTab,
+    setActiveTab,
+    isResetModalOpen,
+    setResetModalOpen,
+    isHabitModalOpen,
+    currentHabit,
+    habitModalMode,
+    isWeightGoalModalOpen,
+    setWeightGoalModalOpen,
+    isDeleteConfirmModalOpen,
+    setDeleteConfirmModalOpen,
+    isLogWeightModalOpen,
+    setLogWeightModalOpen,
+    openHabitModal,
+    closeHabitModal,
+  } = useStore();
 
   // Get user from useUser hook
   const { data: user } = useUser();
@@ -94,47 +100,42 @@ export default function GoalsPage() {
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
-    setIsWeightGoalModalOpen(true);
+    setWeightGoalModalOpen(true);
   };
 
   // Handler to close the weight goal modal
   const handleCloseWeightGoalModal = () => {
-    setIsWeightGoalModalOpen(false);
+    setWeightGoalModalOpen(false);
   };
 
   // Handler to close the log weight modal
   const handleCloseLogWeightModal = () => {
-    setIsLogWeightModalOpen(false);
+    setLogWeightModalOpen(false);
   };
 
   // Handler for resetting goals
   const handleResetGoals = () => {
     // Reset goals functionality can be implemented later if needed
     // For now, just close the modal
-    setIsResetModalOpen(false);
+    setResetModalOpen(false);
   };
 
   // Handler for adding a new habit
   const handleAddHabit = () => {
-    setCurrentHabit(undefined);
-    setHabitModalMode("add");
-    setIsHabitModalOpen(true);
+    openHabitModal(undefined, "add");
   };
 
   // Handler for editing a habit
   const handleEditHabit = (id: string) => {
     const habitToEdit = habits?.find((habit) => habit.id === id) || undefined;
     if (habitToEdit) {
-      setCurrentHabit(habitToEdit);
-      setHabitModalMode("edit");
-      setIsHabitModalOpen(true);
+      openHabitModal(habitToEdit, "edit");
     }
   };
 
   // Handler for closing habit modal
   const handleCloseHabitModal = () => {
-    setIsHabitModalOpen(false);
-    setCurrentHabit(undefined);
+    closeHabitModal();
   };
 
   // Unified handler for submitting and updating habits
@@ -150,8 +151,7 @@ export default function GoalsPage() {
         await addHabitMutation.mutateAsync(values);
         showNotification("Habit added successfully!", "success");
       }
-      setIsHabitModalOpen(false);
-      setCurrentHabit(undefined);
+      closeHabitModal();
     } catch (error) {
       showNotification(`Failed to ${habitModalMode === "edit" ? "update" : "add"} habit`, "error");
     }
@@ -159,12 +159,12 @@ export default function GoalsPage() {
 
   // Handler to open the delete confirmation modal
   const handleOpenDeleteConfirmModal = () => {
-    setIsDeleteConfirmModalOpen(true);
+    setDeleteConfirmModalOpen(true);
   };
 
   // Handler to close the delete confirmation modal
   const handleCloseDeleteConfirmModal = () => {
-    setIsDeleteConfirmModalOpen(false);
+    setDeleteConfirmModalOpen(false);
   };
 
   // Handler for incrementing habit progress
@@ -258,7 +258,7 @@ export default function GoalsPage() {
           <Modal
             key="reset-modal"
             isOpen={isResetModalOpen}
-            onClose={() => setIsResetModalOpen(false)}
+            onClose={() => setResetModalOpen(false)}
             title="Reset Goals"
             variant="confirmation"
             message="This will reset all your current goals and progress. Are you sure you want to continue?"
