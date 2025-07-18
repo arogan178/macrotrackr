@@ -1,3 +1,8 @@
-// Export all query hooks for easy importing
-export * from "./useHabits";
-export * from "./useGoals";
+// Settings query hooks
+export { useSettings, useSaveSettings } from './useSettings';
+export { useBillingDetails } from './useBilling';
+
+// Other existing query hooks
+export * from './useHabits';
+export * from './useGoals';
+export * from './useMacroQueries';

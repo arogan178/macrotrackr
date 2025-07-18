@@ -1,4 +1,3 @@
-import { useLoaderData } from "@tanstack/react-router";
 import { ReactNode, useCallback, useEffect, useState } from "react";
 
 import { FormButton, TabButton } from "@/components/form";
@@ -11,6 +10,7 @@ import {
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
 import { useBeforeUnload } from "@/hooks/useBeforeUnload";
+import { useSettings, useSaveSettings } from "@/hooks/queries/useSettings";
 import { useStore } from "@/store/store";
 
 import FloatingNotification from "../../notifications/components/FloatingNotification";
@@ -46,34 +46,35 @@ const PageHeader = ({
 );
 
 export default function SettingsPage() {
-  const loaderData = useLoaderData({ from: "/settings" }) as any;
+  // Use TanStack Query for settings data and mutations
+  const { data: settingsData, isLoading: isSettingsLoading, error: settingsQueryError } = useSettings();
+  const saveSettingsMutation = useSaveSettings();
+  
   const {
     settings,
-    user,
-    settingsError: error,
-    settingsSuccess: successMessage,
     formErrors,
     hasSettingsChanges,
-    isSaving,
     validateSettingsForm,
     updateSetting,
-    saveSettings,
     clearSettingsMessages: clearMessages,
     resetSettings,
     setSubscriptionStatus,
     initializeSettings,
   } = useStore();
+  
+  // Get loading state from mutation
+  const isSaving = saveSettingsMutation.isPending;
 
-  // Hydrate subscriptionStatus from user.subscription.status
+  // Hydrate subscriptionStatus from settings data
   useEffect(() => {
     if (
-      user &&
-      user.subscription &&
-      typeof user.subscription.status === "string"
+      settingsData &&
+      settingsData.subscription &&
+      typeof settingsData.subscription.status === "string"
     ) {
-      setSubscriptionStatus(user.subscription.status);
+      setSubscriptionStatus(settingsData.subscription.status);
     }
-  }, [user, setSubscriptionStatus]);
+  }, [settingsData, setSubscriptionStatus]);
 
   type TabType = "profile" | "billing" | "security";
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -82,14 +83,29 @@ export default function SettingsPage() {
     TabType | undefined
   >();
 
-  // Initialize settings from loader data on component mount
+  // Initialize settings from query data on component mount
   useEffect(() => {
-    if (loaderData?.settings) {
+    if (settingsData) {
+      // Transform the API response to match the expected settings format
+      const transformedSettings = {
+        id: settingsData.id,
+        email: settingsData.email,
+        firstName: settingsData.firstName,
+        lastName: settingsData.lastName,
+        createdAt: settingsData.createdAt,
+        dateOfBirth: settingsData.dateOfBirth,
+        height: settingsData.height,
+        weight: settingsData.weight,
+        gender: settingsData.gender as "male" | "female" | undefined,
+        activityLevel: settingsData.activityLevel,
+        subscription: settingsData.subscription,
+      };
+      
       initializeSettings({
-        settings: loaderData.settings,
+        settings: transformedSettings,
       });
     }
-  }, [loaderData, initializeSettings]);
+  }, [settingsData, initializeSettings]);
 
   // Warn user before leaving page with unsaved changes
   useBeforeUnload(
@@ -127,11 +143,30 @@ export default function SettingsPage() {
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
-      if (!validateSettingsForm()) return;
-      await saveSettings();
-      // No need to show a local notification here since the store will handle it
+      if (!validateSettingsForm() || !settings) return;
+      
+      // Prepare payload for TanStack Query mutation
+      const payload = {
+        firstName: settings.firstName,
+        lastName: settings.lastName,
+        email: settings.email,
+        dateOfBirth: settings.dateOfBirth,
+        height: settings.height,
+        weight: settings.weight,
+        gender: settings.gender === "" ? undefined : settings.gender,
+        activityLevel: settings.activityLevel,
+      };
+      
+      try {
+        await saveSettingsMutation.mutateAsync(payload);
+        // Update the store to reflect successful save
+        const updatedSettings = structuredClone(settings);
+        initializeSettings({ settings: updatedSettings });
+      } catch (error) {
+        console.error("Failed to save settings:", error);
+      }
     },
-    [validateSettingsForm, saveSettings],
+    [validateSettingsForm, settings, saveSettingsMutation, initializeSettings],
   );
 
   return (
@@ -141,21 +176,21 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          {/* Only render notification if it comes from the store */}
-          {successMessage && (
+          {/* Error handling is now managed by TanStack Query */}
+          {saveSettingsMutation.isError && (
             <FloatingNotification
-              message={successMessage}
-              type="success"
-              onClose={clearMessages}
-              duration={3000}
+              message={`Failed to save settings: ${saveSettingsMutation.error?.message || 'Unknown error'}`}
+              type="error"
+              onClose={() => saveSettingsMutation.reset()}
+              duration={5000}
             />
           )}
 
-          {error && (
+          {saveSettingsMutation.isSuccess && (
             <FloatingNotification
-              message={error}
-              type="error"
-              onClose={clearMessages}
+              message="Settings saved successfully!"
+              type="success"
+              onClose={() => saveSettingsMutation.reset()}
               duration={3000}
             />
           )}
@@ -216,7 +251,13 @@ export default function SettingsPage() {
             </div>
           </PageHeader>
 
-          {settings ? (
+          {isSettingsLoading ? (
+            <SettingsLoadingSkeleton />
+          ) : settingsQueryError ? (
+            <div className="p-6 text-center">
+              <p className="text-red-400">Failed to load settings. Please try again.</p>
+            </div>
+          ) : settings ? (
             <>
               {activeTab === "profile" && (
                 <form onSubmit={handleSubmit} className="p-6">
