@@ -52,6 +52,14 @@ export function getToken(): string | undefined {
 }
 
 /**
+ * Sets/stores the authentication token
+ * Alias for securelyStoreToken for consistency with existing code
+ */
+export function setToken(token: string): void {
+  securelyStoreToken(token);
+}
+
+/**
  * Removes the stored token
  */
 export function removeToken(): void {

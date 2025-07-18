@@ -45,6 +45,56 @@ export interface CreateCustomerOptions {
 
 export class StripeService {
   /**
+   * Get subscription with expanded details (price, payment method)
+   */
+  static async getSubscriptionWithDetails(subscriptionId: string): Promise<{
+    subscription: Stripe.Subscription;
+    price: string;
+    paymentMethod: { brand: string; last4: string } | null;
+  }> {
+    try {
+      // Expand default_payment_method and plan.product for full details
+      const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
+        expand: ["default_payment_method", "plan.product"],
+      });
+
+      // Get price string
+      let price = "";
+      if (subscription.items.data.length > 0) {
+        const item = subscription.items.data[0];
+        if (
+          item &&
+          item.price &&
+          item.price.unit_amount &&
+          item.price.currency
+        ) {
+          price = `$${(item.price.unit_amount / 100).toFixed(2)}/${item.price.recurring?.interval || "month"}`;
+        }
+      }
+
+      // Get payment method details from the expanded default_payment_method
+      let paymentMethod: { brand: string; last4: string } | null = null;
+      if (
+        subscription.default_payment_method &&
+        typeof subscription.default_payment_method === "object" &&
+        "card" in subscription.default_payment_method &&
+        subscription.default_payment_method.card
+      ) {
+        paymentMethod = {
+          brand: subscription.default_payment_method.card.brand,
+          last4: subscription.default_payment_method.card.last4,
+        };
+      }
+
+      return { subscription, price, paymentMethod };
+    } catch (error) {
+      handleServiceError(error, "stripe_get_subscription_with_details", {
+        subscriptionId,
+      });
+      throw error;
+    }
+  }
+  /**
    * Create a new Stripe customer
    */
   static async createCustomer(
@@ -156,14 +206,6 @@ export class StripeService {
   ): Promise<Stripe.Subscription> {
     try {
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
-      logger.debug(
-        {
-          operation: "stripe_get_subscription",
-          subscriptionId,
-          status: subscription.status,
-        },
-        "Retrieved Stripe subscription"
-      );
       return subscription;
     } catch (error) {
       handleServiceError(error, "stripe_get_subscription", { subscriptionId });
@@ -202,23 +244,24 @@ export class StripeService {
     signature: string
   ): Promise<NormalizedWebhookEvent> {
     try {
+
       const event = await stripe.webhooks.constructEventAsync(
         payload,
         signature,
         config.STRIPE_WEBHOOK_SECRET
       );
       const normalizedEvent = this.normalizeWebhookEvent(event);
-      logger.debug(
-        {
-          operation: "stripe_verify_webhook",
-          eventType: normalizedEvent.type,
-          eventId: normalizedEvent.id,
-          format: normalizedEvent.format,
-        },
-        "Verified and normalized Stripe webhook signature"
-      );
       return normalizedEvent;
     } catch (error) {
+      logger.error(
+        {
+          operation: "stripe_verify_webhook",
+          error,
+          header: signature,
+          payload: payload.substring(0, 200) + "...",
+        },
+        "Failed to stripe verify webhook"
+      );
       handleServiceError(error, "stripe_verify_webhook");
     }
   }
