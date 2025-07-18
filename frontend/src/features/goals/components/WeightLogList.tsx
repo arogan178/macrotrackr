@@ -3,6 +3,10 @@ import { useMemo, useState } from "react";
 
 import { ActionButton } from "@/components/form";
 import { EmptyState, LoadingSpinner, Modal, TrashIcon } from "@/components/ui";
+import {
+  useDeleteWeightLogEntry,
+  useWeightLog,
+} from "@/hooks/queries/useGoals";
 import { useStore } from "@/store/store";
 
 interface WeightLogListProps {
@@ -14,12 +18,13 @@ function WeightLogList({
   isBulkConfirmModalOpen = false,
   onBulkCancel = () => {},
 }: WeightLogListProps) {
-  const weightLog = useStore((state) => state.weightLog); // Now contains { id, timestamp, weight }
-  const deleteWeightLogEntry = useStore((state) => state.deleteWeightLogEntry);
-  // Try to get a bulk delete action if it exists
-  // No bulk delete in store, will fallback to per-entry deletion
-  const isLoading = useStore((state) => state.isLoading);
-  const isSaving = useStore((state) => state.isSaving);
+  // Use TanStack Query hooks instead of Zustand store
+  const { data: weightLog = [], isLoading } = useWeightLog();
+  const deleteWeightLogMutation = useDeleteWeightLogEntry();
+  const isSaving = deleteWeightLogMutation.isPending;
+
+  // Get notification function from store for user feedback
+  const showNotification = useStore((state) => state.showNotification);
 
   // State for confirmation modals
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -47,9 +52,11 @@ function WeightLogList({
     if (!itemToDelete) return;
 
     try {
-      await deleteWeightLogEntry(itemToDelete.id);
+      await deleteWeightLogMutation.mutateAsync(itemToDelete.id);
+      showNotification("Weight entry deleted successfully", "success");
     } catch (error) {
       console.error("Deletion failed from component:", error);
+      showNotification("Failed to delete weight entry", "error");
     } finally {
       setIsConfirmModalOpen(false);
       setItemToDelete(undefined);
@@ -62,10 +69,12 @@ function WeightLogList({
     try {
       // Fallback: delete entries one by one
       for (const entry of weightLog) {
-        await deleteWeightLogEntry(entry.id);
+        await deleteWeightLogMutation.mutateAsync(entry.id);
       }
+      showNotification("All weight entries deleted successfully", "success");
     } catch (error) {
       console.error("Bulk deletion failed:", error);
+      showNotification("Failed to delete weight entries", "error");
     } finally {
       onBulkCancel();
     }

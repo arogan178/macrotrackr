@@ -1,5 +1,5 @@
+import { useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { useLocation } from "react-router-dom";
 
 import { useStore } from "@/store/store";
 

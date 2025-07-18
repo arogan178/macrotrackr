@@ -4,34 +4,56 @@ import { useEffect, useState } from "react";
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { Navbar } from "@/components/layout";
+import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useWeightGoals } from "@/hooks/queries/useGoals";
+import {
+  useMacroHistory,
+  useMacroTarget,
+} from "@/hooks/queries/useMacroQueries";
+import { useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useStore } from "@/store/store";
 
 import {
+  MacroDensityBreakdown,
   MacroSummaryStats,
   MealTimeBreakdown,
-  NutrientDensityVisualization,
   ReportingPageSkeleton,
   UnifiedInsights,
 } from "../components";
+import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
 
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
-  // Get history data from app state
-  const {
-    history,
-    isLoading,
-    error,
-    fetchUserDetails,
-    fetchMacroData,
-    fetchWeightGoals,
-    macroTarget,
-    weightGoals,
-    nutritionProfile,
-  } = useStore();
+
+  // Get user data from useUser hook
+  const { data: user } = useUser();
+
+  // Use TanStack Query hooks for data fetching
+  const { data: weightGoals } = useWeightGoals();
+  const { data: macroTarget } = useMacroTarget();
+  const { data: macroHistoryData } = useMacroHistory(1000, 0); // Get large set for reporting
+  const history = macroHistoryData?.entries || [];
+
+  const { nutritionProfile, setSubscriptionStatus } = useStore();
+
+  // Use feature loading for reporting-related operations
+  const { isLoading } = useFeatureLoading("macros");
+
+  // Hydrate subscriptionStatus from loader user.subscription.status
+  useEffect(() => {
+    if (
+      user &&
+      user.subscription &&
+      typeof user.subscription.status === "string"
+    ) {
+      setSubscriptionStatus(user.subscription.status);
+    }
+  }, [user, setSubscriptionStatus]);
 
   // Use the reporting logic hook to handle all data processing
+
   const {
     aggregatedData,
     dataProcessed,
@@ -41,15 +63,8 @@ export default function ReportingPage() {
     mapDateRangeToNumeric,
   } = useReportingLogic(history, dateRange, isLoading);
 
-  // Fetch user details and history on component mount
-  useEffect(() => {
-    async function loadData() {
-      await fetchUserDetails();
-      await fetchMacroData();
-      await fetchWeightGoals();
-    }
-    loadData();
-  }, [fetchUserDetails, fetchMacroData, fetchWeightGoals]);
+  // Macro density breakdown chart data (percentages)
+  const macroDensityData = useMacroDensityBreakdown(history, dateRange);
 
   // Define chart configurations for the new component
   const calorieChartLines = [
@@ -83,11 +98,12 @@ export default function ReportingPage() {
                   Track your nutrition trends and progress over time
                 </p>
               </div>
-              {error && (
-                <div className="mb-6 text-red-400 bg-red-900/50 p-4 rounded-lg border border-red-800/50 shadow-lg">
+              {/* Debug info for development - Adjusted condition */}
+              {!isLoading && history?.length === 0 && dataProcessed && (
+                <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
                   <div className="flex items-center">
                     <svg
-                      className="h-5 w-5 mr-2 text-red-500"
+                      className="h-5 w-5 mr-2 text-yellow-500"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -97,39 +113,14 @@ export default function ReportingPage() {
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         strokeWidth="2"
-                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                        d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                       ></path>
                     </svg>
-                    {error}
+                    No nutrition history found. Add some entries to see your
+                    reporting data.
                   </div>
                 </div>
               )}
-              {/* Debug info for development - Adjusted condition */}
-              {!isLoading &&
-                !error &&
-                history?.length === 0 &&
-                dataProcessed && (
-                  <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
-                    <div className="flex items-center">
-                      <svg
-                        className="h-5 w-5 mr-2 text-yellow-500"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                        xmlns="http://www.w3.org/2000/svg"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                        ></path>
-                      </svg>
-                      No nutrition history found. Add some entries to see your
-                      reporting data.
-                    </div>
-                  </div>
-                )}
               {/* Date Range Selector */}
               <ProFeature>
                 <DateRangeSelector
@@ -147,29 +138,30 @@ export default function ReportingPage() {
                   <MacroSummaryStats
                     data={aggregatedData}
                     calorieTarget={calorieTarget}
+                    macroTarget={macroTarget}
                   />
                 );
               })()}
-              {/* Mobile-optimized: MealTimeBreakdown and NutrientDensityVisualization */}
+              {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                 <div className="order-2 md:order-1">
-                  {/* 
-                    MealTimeBreakdown works with raw history data and needs exact ISO date strings
-                    to properly filter entries. It doesn't care about the numeric range value.
-                  */}
-                  <MealTimeBreakdown
-                    history={history}
-                    {...getDateRangeISOStrings(dateRange)}
-                  />
+                  {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
+                  {(() => {
+                    const { startDate, endDate } =
+                      getDateRangeISOStrings(dateRange);
+                    return (
+                      <MealTimeBreakdown
+                        history={history}
+                        startDate={startDate}
+                        endDate={endDate}
+                      />
+                    );
+                  })()}
                 </div>
                 <div className="order-1 md:order-2">
-                  {/* 
-                    NutrientDensityVisualization works with pre-aggregated data and uses numeric range
-                    for visualization purposes, not for data filtering. That's why it takes selectedRange
-                    as a number (7, 30, 90) instead of ISO date strings.
-                  */}{" "}
-                  <NutrientDensityVisualization
-                    data={aggregatedData}
+                  {/* MacroDensityBreakdown expects pre-aggregated macro density data and numeric range */}
+                  <MacroDensityBreakdown
+                    data={macroDensityData}
                     selectedRange={mapDateRangeToNumeric(dateRange)}
                     isLoading={isLoading}
                     dataProcessed={dataProcessed}
