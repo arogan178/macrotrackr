@@ -3,7 +3,7 @@ import React, { useState } from "react";
 
 import { ActionButton } from "@/components/form";
 import { BarChartIcon, BookIcon } from "@/components/ui"; // Using local icons
-import { useStore } from "@/store/store";
+import { useWeightLog } from "@/hooks/queries/useGoals";
 
 import WeightGoalProgressChart from "./WeightGoalProgressChart";
 import WeightLogList from "./WeightLogList";
@@ -17,10 +17,8 @@ function WeightProgressTabs() {
     { id: "chart", label: "Progress Chart", icon: BarChartIcon },
     { id: "list", label: "Weight Log", icon: BookIcon },
   ];
-  // Get weight log and loading state from store
-  const weightLog = useStore((state) => state.weightLog);
-  const isLoading = useStore((state) => state.isLoading);
-  const isSaving = useStore((state) => state.isSaving);
+  // Use TanStack Query hooks instead of Zustand store
+  const { data: weightLog = [], isLoading } = useWeightLog();
 
   // Bulk delete modal state
   const [isBulkConfirmModalOpen, setIsBulkConfirmModalOpen] = useState(false);
@@ -63,7 +61,7 @@ function WeightProgressTabs() {
             variant="delete"
             ariaLabel="Delete all weight log entries"
             onClick={handleBulkDelete}
-            disabled={isSaving || isLoading}
+            disabled={isLoading}
             tooltip="Delete All"
             size="sm"
             className="pl-4"
