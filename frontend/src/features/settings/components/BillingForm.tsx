@@ -1,8 +1,8 @@
-import { useLoaderData } from "@tanstack/react-router";
 import React, { useCallback, useEffect, useState } from "react";
 
 import { CardContainer } from "@/components/form";
 import { AwardIcon } from "@/components/ui";
+import { useBillingDetails } from "@/hooks/queries/useBilling";
 import { useStore } from "@/store/store";
 import { createPortalSession } from "@/utils/apiBilling";
 
@@ -16,8 +16,8 @@ function handleUpgradeRedirect() {
 
 const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
-  // Get billing details from loader
-  const { billingDetails } = useLoaderData({ strict: false }) || {};
+  // Get billing details from TanStack Query
+  const { data: billingDetails, isLoading: isBillingLoading } = useBillingDetails();
   const [isLoading, setIsLoading] = useState(false);
 
   // Check for successful upgrade on component mount

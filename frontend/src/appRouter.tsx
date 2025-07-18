@@ -11,9 +11,7 @@ import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { billingLoader } from "@/loaders/billingLoader";
-
-import { settingsLoader } from "@/loaders/settingsLoader";
+import { apiService } from "@/utils/apiServices";
 
 import MainLayout from "./components/layout/MainLayout";
 import { useUser } from "./hooks/auth/useAuthQueries";
@@ -229,25 +227,26 @@ const settingsRoute = createRoute({
   path: "/settings",
   loader: async ({ context }) => {
     // Use queryClient.ensureQueryData for prefetching settings and billing data
-    const [settingsData, billingData] = await Promise.all([
+    await Promise.all([
       context.queryClient.ensureQueryData({
         queryKey: queryKeys.settings.user(),
-        queryFn: () => settingsLoader(),
+        queryFn: async () => {
+          return await apiService.user.getUserDetails();
+        },
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
       }),
       context.queryClient.ensureQueryData({
         queryKey: queryKeys.settings.billing(),
-        queryFn: () => billingLoader(),
+        queryFn: async () => {
+          return await apiService.billing.getBillingDetails();
+        },
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
       }),
     ]);
-    return {
-      ...settingsData,
-      billingDetails: billingData.billingDetails,
-      billingError: billingData.error,
-    };
+    // No need to return data since components will use query hooks
+    return {};
   },
   component: () => (
     <RequireAuth>

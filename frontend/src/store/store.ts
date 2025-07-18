@@ -15,12 +15,12 @@ import {
   NotificationSlice,
 } from "@/features/notifications/store/notifications-slice";
 import {
-  createUserSlice,
-  UserSlice,
-} from "@/features/settings/store/user-slice";
+  createUserUISlice,
+  UserUISlice,
+} from "@/features/settings/store/user-ui-slice";
 
 // Combine all slice types (removed HabitsSlice, GoalsSlice, and MacrosSlice - kept UI slices for UI state)
-export type StoreState = UserSlice &
+export type StoreState = UserUISlice &
   AuthUISlice &
   GoalsUISlice &
   MacroUISlice &
@@ -29,7 +29,7 @@ export type StoreState = UserSlice &
 // Create the store with all slices (removed createHabitsSlice, createGoalsSlice, and createMacrosSlice - kept UI slices for UI state)
 export const useStore = create<StoreState>()(
   devtools((...a) => ({
-    ...createUserSlice(...a),
+    ...createUserUISlice(...a),
     ...createAuthUISlice(...a),
     ...createGoalsUISlice(...a),
     ...createMacroUISlice(...a),
