@@ -2,7 +2,10 @@ import { useMutation } from "@tanstack/react-query";
 
 import { AUTH_ERROR_MESSAGES } from "@/features/auth/constants";
 import { RegistrationStep2, RegistrationStep3 } from "@/features/auth/types";
-import { RegisterData, validateEmailAvailability } from "@/features/auth/utils/authUtilities";
+import {
+  RegisterData,
+  validateEmailAvailability,
+} from "@/features/auth/utils/authUtilities";
 import {
   validateRegistrationStep1,
   validateRegistrationStep2,
@@ -30,7 +33,10 @@ export function useEmailValidation() {
 export function useRegistrationValidation() {
   const emailValidation = useEmailValidation();
 
-  const validateStep = async (step: number, registerData: RegisterData): Promise<{ isValid: boolean; error?: string }> => {
+  const validateStep = async (
+    step: number,
+    registerData: RegisterData,
+  ): Promise<{ isValid: boolean; error?: string }> => {
     let errors = {};
 
     switch (step) {
@@ -38,7 +44,9 @@ export function useRegistrationValidation() {
         errors = validateRegistrationStep1(registerData);
         if (Object.keys(errors).length === 0) {
           try {
-            const isEmailValid = await emailValidation.mutateAsync(registerData.email);
+            const isEmailValid = await emailValidation.mutateAsync(
+              registerData.email,
+            );
             return { isValid: isEmailValid };
           } catch (error) {
             const errorMessage =

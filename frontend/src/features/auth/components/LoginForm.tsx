@@ -95,7 +95,11 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
                  disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
                  shadow-lg shadow-indigo-500/30"
         >
-          {loginMutation.isPending ? <LoadingSpinner size="sm" color="white" /> : "Sign In"}
+          {loginMutation.isPending ? (
+            <LoadingSpinner size="sm" color="white" />
+          ) : (
+            "Sign In"
+          )}
         </button>
       </form>
     </CardContainer>

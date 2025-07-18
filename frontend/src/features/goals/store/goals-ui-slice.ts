@@ -1,4 +1,5 @@
 import { StateCreator } from "zustand";
+
 import type { HabitGoal } from "@/features/habits/types/types";
 
 // Tab type for goals page
@@ -11,7 +12,7 @@ export type HabitModalMode = "add" | "edit";
 export interface GoalsUISlice {
   // Tab state
   activeTab: GoalsTabType;
-  
+
   // Modal states
   isResetModalOpen: boolean;
   isHabitModalOpen: boolean;
@@ -20,10 +21,10 @@ export interface GoalsUISlice {
   isWeightGoalModalOpen: boolean;
   isDeleteConfirmModalOpen: boolean;
   isLogWeightModalOpen: boolean;
-  
+
   // Tab actions
   setActiveTab: (tab: GoalsTabType) => void;
-  
+
   // Modal actions
   setResetModalOpen: (open: boolean) => void;
   setHabitModalOpen: (open: boolean) => void;
@@ -32,7 +33,7 @@ export interface GoalsUISlice {
   setWeightGoalModalOpen: (open: boolean) => void;
   setDeleteConfirmModalOpen: (open: boolean) => void;
   setLogWeightModalOpen: (open: boolean) => void;
-  
+
   // Convenience actions for common operations
   openHabitModal: (habit?: HabitGoal, mode?: HabitModalMode) => void;
   closeHabitModal: () => void;
@@ -54,10 +55,10 @@ export const createGoalsUISlice: StateCreator<
   isWeightGoalModalOpen: false,
   isDeleteConfirmModalOpen: false,
   isLogWeightModalOpen: false,
-  
+
   // Tab actions
   setActiveTab: (tab) => set({ activeTab: tab }),
-  
+
   // Modal actions
   setResetModalOpen: (open) => set({ isResetModalOpen: open }),
   setHabitModalOpen: (open) => set({ isHabitModalOpen: open }),
@@ -66,27 +67,30 @@ export const createGoalsUISlice: StateCreator<
   setWeightGoalModalOpen: (open) => set({ isWeightGoalModalOpen: open }),
   setDeleteConfirmModalOpen: (open) => set({ isDeleteConfirmModalOpen: open }),
   setLogWeightModalOpen: (open) => set({ isLogWeightModalOpen: open }),
-  
+
   // Convenience actions
-  openHabitModal: (habit, mode = "add") => set({
-    isHabitModalOpen: true,
-    currentHabit: habit,
-    habitModalMode: mode,
-  }),
-  
-  closeHabitModal: () => set({
-    isHabitModalOpen: false,
-    currentHabit: undefined,
-    habitModalMode: "add",
-  }),
-  
-  closeAllModals: () => set({
-    isResetModalOpen: false,
-    isHabitModalOpen: false,
-    currentHabit: undefined,
-    habitModalMode: "add",
-    isWeightGoalModalOpen: false,
-    isDeleteConfirmModalOpen: false,
-    isLogWeightModalOpen: false,
-  }),
+  openHabitModal: (habit, mode = "add") =>
+    set({
+      isHabitModalOpen: true,
+      currentHabit: habit,
+      habitModalMode: mode,
+    }),
+
+  closeHabitModal: () =>
+    set({
+      isHabitModalOpen: false,
+      currentHabit: undefined,
+      habitModalMode: "add",
+    }),
+
+  closeAllModals: () =>
+    set({
+      isResetModalOpen: false,
+      isHabitModalOpen: false,
+      currentHabit: undefined,
+      habitModalMode: "add",
+      isWeightGoalModalOpen: false,
+      isDeleteConfirmModalOpen: false,
+      isLogWeightModalOpen: false,
+    }),
 });
