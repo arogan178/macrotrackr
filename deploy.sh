@@ -51,6 +51,15 @@ fi
 echo "Building frontend..."
 cd ../frontend
 bun install --frozen-lockfile
+
+# Clear any existing dist and cache
+echo "Clearing build cache..."
+rm -rf dist/
+rm -rf node_modules/.vite/
+rm -rf .tanstack/
+
+# Force clean build
+echo "Building frontend with clean cache..."
 bun run build
 
 # Check if frontend dist folder exists
