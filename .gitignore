@@ -34,3 +34,5 @@ dist/
 *.db
 *.db-shm
 *.db-wal
+frontend/src/routeTree.gen.ts
+frontend/.tanstack/tmp/router-generator-QwK0SG/b71a3937b1b59cff23ad5de484ba2a50
