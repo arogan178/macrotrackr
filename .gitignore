@@ -34,3 +34,4 @@ dist/
 *.db
 *.db-shm
 *.db-wal
+frontend/.tanstack/tmp/*
