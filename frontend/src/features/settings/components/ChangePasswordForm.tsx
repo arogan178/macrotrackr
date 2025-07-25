@@ -2,26 +2,27 @@ import { useState } from "react";
 
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { LockIcon } from "@/components/ui";
+import { useMutationErrorHandler } from "@/hooks";
 // Notifications are handled by the global NotificationManager and store
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
-import { useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 
 const ChangePasswordForm = () => {
   const { showNotification } = useStore();
   const changePasswordMutation = useChangePassword();
-  
+
   // Use new mutation error handling
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => {
-      setFormError(message);
-      showNotification(message, "error");
-    },
-    onSuccess: (message) => {
-      setSuccessMessage(message);
-      showNotification(message, "success");
-    },
-  });
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => {
+        setFormError(message);
+        showNotification(message, "error");
+      },
+      onSuccess: (message) => {
+        setSuccessMessage(message);
+        showNotification(message, "success");
+      },
+    });
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");

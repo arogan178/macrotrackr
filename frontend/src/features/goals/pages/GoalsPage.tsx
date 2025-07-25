@@ -18,6 +18,7 @@ import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 // Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -28,7 +29,6 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 
 export default function GoalsPage() {
@@ -90,12 +90,13 @@ export default function GoalsPage() {
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
   // Use new loading state hooks
-  const { isLoading: isHabitsLoading } = useFeatureLoading('habits');
-  const { isLoading: isGoalsLoading } = useFeatureLoading('goals');
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => showNotification(message, "error"),
-    onSuccess: (message) => showNotification(message, "success"),
-  });
+  const { isLoading: isHabitsLoading } = useFeatureLoading("habits");
+  const { isLoading: isGoalsLoading } = useFeatureLoading("goals");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => showNotification(message, "error"),
+      onSuccess: (message) => showNotification(message, "success"),
+    });
 
   // Error handling is managed by TanStack Query's built-in mechanisms
 
@@ -165,7 +166,10 @@ export default function GoalsPage() {
       }
       closeHabitModal();
     } catch (error) {
-      handleMutationError(error, `${habitModalMode === "edit" ? "updating" : "adding"} habit`);
+      handleMutationError(
+        error,
+        `${habitModalMode === "edit" ? "updating" : "adding"} habit`,
+      );
     }
   };
 
@@ -187,12 +191,14 @@ export default function GoalsPage() {
       if (!originalHabit) {
         throw new Error("Habit not found");
       }
-      
+
       await incrementProgressMutation.mutateAsync(id);
-      
+
       // Check if habit was completed
       if (originalHabit.current + 1 >= originalHabit.target) {
-        handleMutationSuccess(`🎉 Congratulations! You've completed your ${originalHabit.title}!`);
+        handleMutationSuccess(
+          `🎉 Congratulations! You've completed your ${originalHabit.title}!`,
+        );
       }
     } catch (error) {
       handleMutationError(error, "updating habit progress");
@@ -206,7 +212,9 @@ export default function GoalsPage() {
       const habit = habits.find((h) => h.id === id);
       // Only show congratulations if the habit wasn't already complete
       if (habit && !habit.isComplete) {
-        handleMutationSuccess(`🎉 Congratulations! You've completed your ${habit.title}!`);
+        handleMutationSuccess(
+          `🎉 Congratulations! You've completed your ${habit.title}!`,
+        );
       }
     } catch (error) {
       handleMutationError(error, "completing habit");
