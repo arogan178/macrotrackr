@@ -1,4 +1,9 @@
-import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  useInfiniteQuery,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/queryKeys";
 import type {
@@ -19,9 +24,13 @@ export function useMacroHistory(
   options?: { startDate?: string; endDate?: string },
 ) {
   const page = Math.floor(offset / limit) + 1;
-  
+
   return useQuery({
-    queryKey: queryKeys.macros.history(page, options?.startDate, options?.endDate),
+    queryKey: queryKeys.macros.history(
+      page,
+      options?.startDate,
+      options?.endDate,
+    ),
     queryFn: async () => {
       const response = await apiService.macros.getHistory(
         limit,
@@ -41,17 +50,20 @@ export function useMacroHistoryInfinite(
   options?: { startDate?: string; endDate?: string },
 ) {
   return useInfiniteQuery({
-    queryKey: queryKeys.macros.historyInfinite(options?.startDate, options?.endDate),
-    queryFn: async ({ pageParam = 0 }) => {
+    queryKey: queryKeys.macros.historyInfinite(
+      options?.startDate,
+      options?.endDate,
+    ),
+    queryFn: async ({ pageParam: pageParameter = 0 }) => {
       const response = await apiService.macros.getHistory(
         limit,
-        pageParam,
+        pageParameter,
         options,
       );
       return response as PaginatedMacroHistory;
     },
     getNextPageParam: (lastPage, allPages) => {
-      if (!lastPage.hasMore) return undefined;
+      if (!lastPage.hasMore) return;
       return allPages.length * limit; // Calculate next offset
     },
     initialPageParam: 0,
@@ -69,7 +81,10 @@ export function useMacroHistoryForDateRange(
     queryKey: queryKeys.macros.historyRange(startDate, endDate),
     queryFn: async () => {
       // Get a large number of entries to ensure we get all data for the date range
-      const response = await apiService.macros.getHistory(10000, 0, { startDate, endDate });
+      const response = await apiService.macros.getHistory(10_000, 0, {
+        startDate,
+        endDate,
+      });
       return (response as PaginatedMacroHistory).entries;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes for reporting data
