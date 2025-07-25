@@ -1,9 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useInfiniteQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/queryKeys";
 import type {
   MacroDailyTotals,
-  MacroEntry,
   MacroTargetSettings,
   PaginatedMacroHistory,
 } from "@/types/macro";
@@ -19,8 +18,10 @@ export function useMacroHistory(
   offset = 0,
   options?: { startDate?: string; endDate?: string },
 ) {
+  const page = Math.floor(offset / limit) + 1;
+  
   return useQuery({
-    queryKey: queryKeys.macros.history(Math.floor(offset / limit) + 1),
+    queryKey: queryKeys.macros.history(page, options?.startDate, options?.endDate),
     queryFn: async () => {
       const response = await apiService.macros.getHistory(
         limit,
@@ -31,6 +32,49 @@ export function useMacroHistory(
     },
     staleTime: 2 * 60 * 1000, // 2 minutes
     gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+// Infinite query hook for macro history with proper pagination
+export function useMacroHistoryInfinite(
+  limit = 20,
+  options?: { startDate?: string; endDate?: string },
+) {
+  return useInfiniteQuery({
+    queryKey: queryKeys.macros.historyInfinite(options?.startDate, options?.endDate),
+    queryFn: async ({ pageParam = 0 }) => {
+      const response = await apiService.macros.getHistory(
+        limit,
+        pageParam,
+        options,
+      );
+      return response as PaginatedMacroHistory;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      if (!lastPage.hasMore) return undefined;
+      return allPages.length * limit; // Calculate next offset
+    },
+    initialPageParam: 0,
+    staleTime: 2 * 60 * 1000, // 2 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
+}
+
+// Query hook for getting ALL macro entries within a date range (for reporting)
+export function useMacroHistoryForDateRange(
+  startDate?: string,
+  endDate?: string,
+) {
+  return useQuery({
+    queryKey: queryKeys.macros.historyRange(startDate, endDate),
+    queryFn: async () => {
+      // Get a large number of entries to ensure we get all data for the date range
+      const response = await apiService.macros.getHistory(10000, 0, { startDate, endDate });
+      return (response as PaginatedMacroHistory).entries;
+    },
+    staleTime: 5 * 60 * 1000, // 5 minutes for reporting data
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    enabled: !!(startDate && endDate), // Only run if both dates are provided
   });
 }
 
@@ -73,7 +117,7 @@ export function useAddMacroEntry() {
     mutationFn: async (entry: MacroEntryCreatePayload) => {
       return await apiService.macros.addEntry(entry);
     },
-    onSuccess: (data, variables) => {
+    onSuccess: (_data, variables) => {
       // Invalidate all macro history queries (all pages)
       queryClient.invalidateQueries({
         queryKey: queryKeys.macros.all(),
