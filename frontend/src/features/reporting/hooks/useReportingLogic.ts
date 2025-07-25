@@ -96,7 +96,6 @@ export function useReportingLogic(
         return;
       }
 
-      const dates: { [key: string]: MacroTotals } = {};
       const { startDate: startDateString, endDate: endDateString } =
         getDateRangeISOStrings(currentRange);
 
@@ -105,19 +104,9 @@ export function useReportingLogic(
       const endDate = new Date(endDateString);
       endDate.setHours(23, 59, 59, 999);
 
-      const dateLabels: string[] = [];
-      const currentDate = new Date(startDate);
-
-      while (currentDate <= endDate) {
-        const year = currentDate.getFullYear();
-        const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
-        const day = currentDate.getDate().toString().padStart(2, "0");
-        const dateString = `${year}-${month}-${day}`;
-        dateLabels.push(dateString);
-        dates[dateString] = { protein: 0, carbs: 0, fats: 0, calories: 0 };
-        currentDate.setDate(currentDate.getDate() + 1);
-      }
-
+      // Process entries into daily totals first
+      const dailyTotals: { [key: string]: MacroTotals } = {};
+      
       for (const entry of currentHistory) {
         if (!entry.createdAt) continue;
 
@@ -133,28 +122,112 @@ export function useReportingLogic(
           const day = createdAtDate.getDate().toString().padStart(2, "0");
           entryDateString = `${year}-${month}-${day}`;
         }
+        
         const entryDate = new Date(entryDateString + "T00:00:00");
-
-        if (
-          entryDate >= startDate &&
-          entryDate <= endDate &&
-          dates[entryDateString]
-        ) {
-          dates[entryDateString].protein += entry.protein;
-          dates[entryDateString].carbs += entry.carbs;
-          dates[entryDateString].fats += entry.fats;
-          dates[entryDateString].calories +=
+        if (entryDate >= startDate && entryDate <= endDate) {
+          if (!dailyTotals[entryDateString]) {
+            dailyTotals[entryDateString] = { protein: 0, carbs: 0, fats: 0, calories: 0 };
+          }
+          dailyTotals[entryDateString].protein += entry.protein;
+          dailyTotals[entryDateString].carbs += entry.carbs;
+          dailyTotals[entryDateString].fats += entry.fats;
+          dailyTotals[entryDateString].calories +=
             entry.protein * 4 + entry.carbs * 4 + entry.fats * 9;
         }
       }
 
-      const chartData = dateLabels.map((date) => ({
-        name: formatDate(date),
-        calories: dates[date].calories,
-        protein: dates[date].protein,
-        carbs: dates[date].carbs,
-        fats: dates[date].fats,
-      }));
+      let chartData: any[] = [];
+
+      if (currentRange === "week") {
+        // For weekly view: show daily data
+        const dateLabels: string[] = [];
+        const currentDate = new Date(startDate);
+
+        while (currentDate <= endDate) {
+          const year = currentDate.getFullYear();
+          const month = (currentDate.getMonth() + 1).toString().padStart(2, "0");
+          const day = currentDate.getDate().toString().padStart(2, "0");
+          const dateString = `${year}-${month}-${day}`;
+          dateLabels.push(dateString);
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+
+        chartData = dateLabels.map((date) => ({
+          name: formatDate(date),
+          calories: dailyTotals[date]?.calories || 0,
+          protein: dailyTotals[date]?.protein || 0,
+          carbs: dailyTotals[date]?.carbs || 0,
+          fats: dailyTotals[date]?.fats || 0,
+        }));
+      } else if (currentRange === "month") {
+        // For monthly view: aggregate by week
+        const weeklyTotals: { [key: string]: { totals: MacroTotals; count: number } } = {};
+        
+        for (const [dateString, totals] of Object.entries(dailyTotals)) {
+          const date = new Date(dateString);
+          const weekKey = getWeekString(date);
+          
+          if (!weeklyTotals[weekKey]) {
+            weeklyTotals[weekKey] = { 
+              totals: { protein: 0, carbs: 0, fats: 0, calories: 0 }, 
+              count: 0 
+            };
+          }
+          weeklyTotals[weekKey].totals.protein += totals.protein;
+          weeklyTotals[weekKey].totals.carbs += totals.carbs;
+          weeklyTotals[weekKey].totals.fats += totals.fats;
+          weeklyTotals[weekKey].totals.calories += totals.calories;
+          weeklyTotals[weekKey].count += 1;
+        }
+
+        chartData = Object.entries(weeklyTotals)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([weekKey, { totals, count }]) => ({
+            name: `Week ${weekKey.split('-W')[1]}`,
+            calories: count > 0 ? Math.round(totals.calories / count) : 0,
+            protein: count > 0 ? Math.round(totals.protein / count) : 0,
+            carbs: count > 0 ? Math.round(totals.carbs / count) : 0,
+            fats: count > 0 ? Math.round(totals.fats / count) : 0,
+          }));
+      } else if (currentRange === "3months") {
+        // For 3-month view: aggregate by month
+        const monthlyTotals: { [key: string]: { totals: MacroTotals; count: number } } = {};
+        
+        for (const [dateString, totals] of Object.entries(dailyTotals)) {
+          const date = new Date(dateString);
+          const monthKey = getMonthString(date);
+          
+          if (!monthlyTotals[monthKey]) {
+            monthlyTotals[monthKey] = { 
+              totals: { protein: 0, carbs: 0, fats: 0, calories: 0 }, 
+              count: 0 
+            };
+          }
+          monthlyTotals[monthKey].totals.protein += totals.protein;
+          monthlyTotals[monthKey].totals.carbs += totals.carbs;
+          monthlyTotals[monthKey].totals.fats += totals.fats;
+          monthlyTotals[monthKey].totals.calories += totals.calories;
+          monthlyTotals[monthKey].count += 1;
+        }
+
+        chartData = Object.entries(monthlyTotals)
+          .sort(([a], [b]) => a.localeCompare(b))
+          .map(([monthKey, { totals, count }]) => {
+            const [year, month] = monthKey.split('-');
+            const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 
+                              'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            const monthName = monthNames[parseInt(month) - 1];
+            
+            return {
+              name: `${monthName} ${year}`,
+              calories: count > 0 ? Math.round(totals.calories / count) : 0,
+              protein: count > 0 ? Math.round(totals.protein / count) : 0,
+              carbs: count > 0 ? Math.round(totals.carbs / count) : 0,
+              fats: count > 0 ? Math.round(totals.fats / count) : 0,
+            };
+          });
+      }
+
       setAggregatedData(chartData);
     },
     [getDateRangeISOStrings], // formatDate is stable
