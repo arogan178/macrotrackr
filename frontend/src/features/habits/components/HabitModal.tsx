@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import Modal from "@/components/ui/Modal";
+import { useMutationErrorHandler } from "@/hooks";
 
 import { HabitGoal, HabitGoalFormValues } from "../types/types";
 import HabitForm from "./HabitForm";
@@ -36,6 +37,12 @@ function HabitModal({
     Partial<Record<keyof HabitGoalFormValues, string>>
   >({});
   const [isFormValid, setIsFormValid] = useState(false);
+
+  // Use new mutation error handling
+  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
+    onError: (message) => console.error("Habit modal operation failed:", message),
+    onSuccess: (message) => console.log("Habit modal operation succeeded:", message),
+  });
 
   const isEditMode = mode === "edit";
 
@@ -95,12 +102,10 @@ function HabitModal({
     setIsSubmitting(true);
     try {
       await onSubmit(formValues, isEditMode ? habit?.id : undefined);
+      handleMutationSuccess(`Habit ${isEditMode ? "updated" : "created"} successfully!`);
       // onSubmit handles closing the modal, so we don't call onClose() here
     } catch (error) {
-      console.error(
-        `Error ${isEditMode ? "updating" : "submitting"} habit:`,
-        error,
-      );
+      handleMutationError(error, `${isEditMode ? "updating" : "creating"} habit`);
       // Reset submitting state on error so user can try again
       setIsSubmitting(false);
     }

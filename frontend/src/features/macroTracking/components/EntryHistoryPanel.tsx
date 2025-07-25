@@ -394,7 +394,7 @@ const EntryHistoryComponent = function EntryHistory({
                 }}
                 transition={{ type: "spring", stiffness: 400, damping: 17 }}
               >
-                {isLoadingMore && <LoadingSpinner />}
+                {/* Loading handled by FormButton auto-loading */}
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={

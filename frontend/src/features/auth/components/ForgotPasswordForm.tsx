@@ -3,8 +3,8 @@ import { useState } from "react";
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { EmailIcon } from "@/components/ui";
 import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
+import { useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/utils/apiServices";
 
 interface ForgotPasswordFormProps {
   onSwitchToLogin: () => void;
@@ -15,22 +15,19 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
   const { showNotification } = useStore();
   const forgotPasswordMutation = useForgotPassword();
 
+  // Use new mutation error handling
+  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
+    onError: (message) => showNotification(message, "error"),
+    onSuccess: (message) => showNotification(message, "success"),
+  });
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
       await forgotPasswordMutation.mutateAsync({ email });
-      showNotification(
-        "If an account exists, a reset link has been sent.",
-        "success",
-      );
+      handleMutationSuccess("If an account exists, a reset link has been sent.");
     } catch (error) {
-      if (error instanceof ApiError) {
-        showNotification(error.message || "Request failed", "error");
-      } else if (error instanceof Error) {
-        showNotification(error.message || "Request failed", "error");
-      } else {
-        showNotification("An unexpected error occurred.", "error");
-      }
+      handleMutationError(error, "sending password reset email");
     }
   }
 
@@ -59,10 +56,11 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
         />
         <FormButton
           type="submit"
+          autoLoadingFeature="auth"
+          loadingText="Sending..."
           className="w-full"
-          disabled={forgotPasswordMutation.isPending}
         >
-          {forgotPasswordMutation.isPending ? "Sending..." : "Send Reset Link"}
+          Send Reset Link
         </FormButton>
       </form>
       <div className="text-right mt-4">

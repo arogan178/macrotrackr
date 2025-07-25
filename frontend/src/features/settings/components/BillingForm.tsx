@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { CardContainer } from "@/components/form";
 import { AwardIcon } from "@/components/ui";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 import { createPortalSession } from "@/utils/apiBilling";
 
@@ -20,6 +21,13 @@ const BillingForm: React.FC = () => {
   const { data: billingDetails, isLoading: isBillingLoading } =
     useBillingDetails();
   const [isLoading, setIsLoading] = useState(false);
+
+  // Use new loading state hooks
+  const { isLoading: isBillingFeatureLoading } = useFeatureLoading('settings');
+  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
+    onError: (message) => showNotification(message, "error"),
+    onSuccess: (message) => showNotification(message, "success"),
+  });
 
   // Check for successful upgrade on component mount
   useEffect(() => {
@@ -85,7 +93,9 @@ const BillingForm: React.FC = () => {
 
       globalThis.location.href = url;
     } catch (error) {
-      handleBillingError(error, "portal");
+      handleMutationError(error, "accessing billing portal");
+    } finally {
+      setIsLoading(false);
     }
   }, [subscriptionStatus, handleBillingError, showNotification]);
 
