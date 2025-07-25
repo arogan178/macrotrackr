@@ -1,6 +1,7 @@
-import { CardContainer, TextField } from "@/components/form";
+import { CardContainer, FormButton, TextField } from "@/components/form";
 import { CalorieIcon } from "@/components/ui";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
@@ -21,6 +22,14 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
 
   const loginMutation = useLogin();
 
+  // Use new loading state hooks
+  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => showNotification(message, "error"),
+      onSuccess: (message) => showNotification(message, "success"),
+    });
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
@@ -28,23 +37,20 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
         email: loginEmail,
         password: loginPassword,
       });
-      showNotification("Login successful", "success");
+      handleMutationSuccess("Login successful");
       clearLoginForm();
     } catch (error) {
+      // Handle specific auth errors with custom messages
       if (
         error instanceof ApiError &&
         (error.status === 401 || error.status === 403)
       ) {
-        showNotification("Invalid email or password.", "error");
-      } else if (error instanceof ApiError) {
-        showNotification(error.message || "Login failed", "error");
-      } else if (error instanceof Error) {
-        showNotification(error.message || "Login failed", "error");
-      } else {
-        showNotification(
-          "Login failed. Please check your credentials.",
-          "error",
+        handleMutationError(
+          new Error("Invalid email or password"),
+          "logging in",
         );
+      } else {
+        handleMutationError(error, "logging in");
       }
     }
   }
@@ -87,20 +93,18 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
             Forgot Password?
           </button>
         </div>
-        <button
+        <FormButton
           type="submit"
-          disabled={loginMutation.isPending}
-          className="w-full p-3 rounded-lg font-medium text-white 
+          autoLoadingFeature="auth"
+          loadingText="Signing in..."
+          fullWidth={true}
+          className="p-3 rounded-lg font-medium text-white 
                  bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
                  disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
                  shadow-lg shadow-indigo-500/30"
         >
-          {loginMutation.isPending ? (
-            <LoadingSpinner size="sm" color="white" />
-          ) : (
-            "Sign In"
-          )}
-        </button>
+          Sign In
+        </FormButton>
       </form>
     </CardContainer>
   );
