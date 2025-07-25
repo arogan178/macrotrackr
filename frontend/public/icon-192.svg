@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192">
+  <!-- Background with gradient -->
+  <defs>
+    <linearGradient id="bg192" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#6366f1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4338ca;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#1e1b4b" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  
+  <!-- Rounded rectangle background -->
+  <rect width="192" height="192" rx="48" fill="url(#bg192)"/>
+  
+  <!-- Professional, clean MT text -->
+  <text x="96" y="96" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'SF Pro Display', 'Segoe UI', 'Roboto', Arial, sans-serif" font-size="80" font-weight="700" letter-spacing="3px" fill="#fff" filter="url(#shadow)">MT</text>
+</svg>

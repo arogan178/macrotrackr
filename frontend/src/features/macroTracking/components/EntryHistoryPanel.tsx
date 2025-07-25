@@ -200,15 +200,15 @@ const EntryHistoryComponent = function EntryHistory({
       );
 
       // Check if we need to remove any dates that no longer exist
-      const datesToRemove = Array.from(previous).filter(
+      const datesToRemove = [...previous].filter(
         (date) => !allDates.includes(date),
       );
 
       // Only create new Set if there are actual changes
       if (newDatesToAdd.length > 0 || datesToRemove.length > 0) {
         const newSet = new Set(previous);
-        newDatesToAdd.forEach((date) => newSet.add(date));
-        datesToRemove.forEach((date) => newSet.delete(date));
+        for (const date of newDatesToAdd) newSet.add(date);
+        for (const date of datesToRemove) newSet.delete(date);
         return newSet;
       }
 
