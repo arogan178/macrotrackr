@@ -99,9 +99,8 @@ const EntryHistoryComponent = function EntryHistory({
   isLoadingMore,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
-  const [showAllDates, setShowAllDates] = useState(false);
+  const [displayedDateCount, setDisplayedDateCount] = useState(5);
 
-  // (removed duplicate collapseAllButToday)
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | undefined>();
 
@@ -122,7 +121,7 @@ const EntryHistoryComponent = function EntryHistory({
     [todayFormatted],
   );
 
-  // Memoize grouped entries with totals and filter by show more state
+  // Memoize grouped entries with totals and incremental pagination
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
     const grouped: Record<string, MacroEntry[]> = {};
     for (const entry of history) {
@@ -166,47 +165,55 @@ const EntryHistoryComponent = function EntryHistory({
           new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime(),
       );
 
-    const displayed = showAllDates ? allEntries : allEntries.slice(0, 5);
+    // Show entries up to displayedDateCount
+    const displayed = allEntries.slice(0, displayedDateCount);
 
     return {
       displayedEntries: displayed,
       totalEntries: allEntries,
-      hasMoreDates: allEntries.length > 5,
+      hasMoreDates: allEntries.length > displayedDateCount,
     };
-  }, [history, showAllDates]);
+  }, [history, displayedDateCount]);
 
-  // Helper to collapse all but today (must be after totalEntries/todayFormatted)
-  const collapseAllButToday = useCallback(() => {
-    setCollapsedDates(
-      new Set(
-        totalEntries
-          .filter((group) => group.date !== todayFormatted)
-          .map((group) => group.date),
-      ),
-    );
-  }, [totalEntries, todayFormatted]);
+  // Reset displayed count when history changes significantly (new data loaded)
+  const [previousTotalDates, setPreviousTotalDates] = useState(0);
+
+  useEffect(() => {
+    const currentTotalDates = totalEntries.length;
+    // If we have significantly more dates than before, it means new data was loaded
+    if (currentTotalDates > previousTotalDates + 3) {
+      // Keep the current displayedDateCount to show all the data that was loaded
+      // This ensures that when server loads more data, user sees it immediately
+    }
+    setPreviousTotalDates(currentTotalDates);
+  }, [totalEntries.length, previousTotalDates]);
 
   // Initialize collapsed dates
   // Always add any new dates (except today) to the collapsed set
   useEffect(() => {
     setCollapsedDates((previous) => {
       const allDates = totalEntries.map((group) => group.date);
-      const previousDates = new Set(previous);
-      let changed = false;
-      for (const date of allDates) {
-        if (date !== todayFormatted && !previousDates.has(date)) {
-          previousDates.add(date);
-          changed = true;
-        }
+
+      // Check if we need to add any new dates
+      const newDatesToAdd = allDates.filter(
+        (date) => date !== todayFormatted && !previous.has(date),
+      );
+
+      // Check if we need to remove any dates that no longer exist
+      const datesToRemove = Array.from(previous).filter(
+        (date) => !allDates.includes(date),
+      );
+
+      // Only create new Set if there are actual changes
+      if (newDatesToAdd.length > 0 || datesToRemove.length > 0) {
+        const newSet = new Set(previous);
+        newDatesToAdd.forEach((date) => newSet.add(date));
+        datesToRemove.forEach((date) => newSet.delete(date));
+        return newSet;
       }
-      // Remove any dates that no longer exist
-      for (const date of previousDates) {
-        if (!allDates.includes(date)) {
-          previousDates.delete(date);
-          changed = true;
-        }
-      }
-      return changed ? new Set(previousDates) : previous;
+
+      // Return the same reference if no changes
+      return previous;
     });
   }, [totalEntries, todayFormatted]);
 
@@ -219,8 +226,19 @@ const EntryHistoryComponent = function EntryHistory({
     });
   }, []);
 
-  const toggleShowAllDates = useCallback(() => {
-    setShowAllDates((previous) => !previous);
+  const loadMoreDates = useCallback(async () => {
+    // Always increment by 5 dates
+    setDisplayedDateCount((prev) => prev + 5);
+
+    // If we've shown all local dates and server has more, load from server
+    if (!hasMoreDates && hasMore && onLoadMore) {
+      await onLoadMore();
+    }
+  }, [hasMoreDates, hasMore, onLoadMore]);
+
+  const showLessDates = useCallback(() => {
+    // Reset to initial 5 dates
+    setDisplayedDateCount(5);
   }, []);
 
   const handleDeleteDate = useCallback(
@@ -337,7 +355,6 @@ const EntryHistoryComponent = function EntryHistory({
               onEdit={onEdit}
               deleteEntry={deleteEntry}
               isDeleting={isDeleting}
-              showAllDates={showAllDates}
             />
           </div>
 
@@ -355,77 +372,68 @@ const EntryHistoryComponent = function EntryHistory({
               onEdit={onEdit}
               deleteEntry={deleteEntry}
               isDeleting={isDeleting}
-              showAllDates={showAllDates}
             />
           </div>
 
-          {/* Unified Show More/Less Dates Button */}
-          {(hasMoreDates || hasMore) && (
+          {/* Load More / Show Less Button */}
+          {(hasMoreDates || hasMore || displayedDateCount > 5) && (
             <motion.div
               className="flex justify-center py-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <motion.button
-                onClick={async () => {
-                  if (hasMore && onLoadMore) {
-                    await onLoadMore();
-                    setShowAllDates(true);
-                  } else if (showAllDates) {
-                    setShowAllDates(false);
-                  } else {
-                    setShowAllDates(true);
-                  }
-                }}
-                className={`px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50 ${
-                  isLoadingMore ? "opacity-60 cursor-not-allowed" : ""
-                }`}
-                disabled={isLoadingMore}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                animate={{
-                  borderColor: showAllDates
-                    ? "rgba(156, 163, 175, 0.5)"
-                    : "rgba(156, 163, 175, 0.3)",
-                  backgroundColor: showAllDates
-                    ? "rgba(107, 114, 128, 0.2)"
-                    : "rgba(107, 114, 128, 0)",
-                }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-              >
-                {/* Loading handled by FormButton auto-loading */}
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={
-                      hasMore
-                        ? "show-more-dates"
-                        : showAllDates
-                          ? "show-less-dates"
-                          : "show-more-dates"
-                    }
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.2 }}
-                  >
-                    {hasMore
-                      ? "Show More Dates"
-                      : showAllDates
-                        ? "Show Less Dates"
-                        : "Show More Dates"}
-                  </motion.span>
-                </AnimatePresence>
-                <motion.div
-                  animate={{
-                    rotate: showAllDates && !hasMore ? 180 : 0,
-                    scale: showAllDates && !hasMore ? 1.1 : 1,
-                  }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
+              {/* Show "Load More" button when there's more data to show */}
+              {(hasMoreDates || hasMore) && (
+                <motion.button
+                  onClick={loadMoreDates}
+                  className={`px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50 ${
+                    isLoadingMore ? "opacity-60 cursor-not-allowed" : ""
+                  }`}
+                  disabled={isLoadingMore}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
+                  {isLoadingMore && <LoadingSpinner />}
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key="load-more"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      Load More Dates
+                    </motion.span>
+                  </AnimatePresence>
                   <ChevronDownIcon className="w-4 h-4" />
-                </motion.div>
-              </motion.button>
+                </motion.button>
+              )}
+
+              {/* Show "Show Less" button when no more data and showing more than 5 dates */}
+              {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
+                <motion.button
+                  onClick={showLessDates}
+                  className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                  <AnimatePresence mode="wait">
+                    <motion.span
+                      key="show-less"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.2 }}
+                    >
+                      Show Less
+                    </motion.span>
+                  </AnimatePresence>
+                  <ChevronDownIcon className="w-4 h-4 rotate-180" />
+                </motion.button>
+              )}
             </motion.div>
           )}
           {/* Remove old Load More Pagination Button */}

@@ -26,7 +26,16 @@ export const queryKeys = {
   // Macro tracking queries
   macros: {
     all: () => ["macros"] as const,
-    history: (page?: number) => ["macros", "history", page] as const,
+    history: (page?: number, startDate?: string, endDate?: string) => 
+      startDate || endDate 
+        ? ["macros", "history", page, startDate, endDate] as const
+        : ["macros", "history", page] as const,
+    historyInfinite: (startDate?: string, endDate?: string) => 
+      startDate || endDate 
+        ? ["macros", "history-infinite", startDate, endDate] as const
+        : ["macros", "history-infinite"] as const,
+    historyRange: (startDate?: string, endDate?: string) => 
+      ["macros", "history-range", startDate, endDate] as const,
     dailyTotals: (date: string) => ["macros", "daily-totals", date] as const,
     targets: () => ["macros", "targets"] as const,
   },
