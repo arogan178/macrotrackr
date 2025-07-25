@@ -1,5 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="16" fill="#312e81"/>
-  <circle cx="32" cy="32" r="22" fill="#fbbf24"/>
-  <text x="32" y="40" text-anchor="middle" font-size="28" font-family="Arial, Helvetica, sans-serif" fill="#312e81" font-weight="bold">M</text>
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#6366f1" />
+      <stop offset="100%" stop-color="#4338ca" />
+    </linearGradient>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#1e1b4b" flood-opacity="0.4"/>
+    </filter>
+  </defs>
+  <!-- Background -->
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+  <!-- Professional, clean MT text -->
+  <text x="32" y="32" text-anchor="middle" dominant-baseline="middle" font-family="'Inter', 'SF Pro Display', 'Segoe UI', 'Roboto', Arial, sans-serif" font-size="28" font-weight="700" letter-spacing="1px" fill="#fff" filter="url(#shadow)">MT</text>
 </svg>
