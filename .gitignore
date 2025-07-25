@@ -35,3 +35,4 @@ dist/
 *.db-shm
 *.db-wal
 frontend/.tanstack/tmp/*
+frontend/src/routeTree.*

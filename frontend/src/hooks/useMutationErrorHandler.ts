@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-
 import { getErrorMessage } from "@/utils/errorHandling";
 
 export interface MutationErrorHandlerOptions {
@@ -8,24 +7,24 @@ export interface MutationErrorHandlerOptions {
    * @default true
    */
   logError?: boolean;
-
+  
   /**
    * Whether to show success notifications
    * @default true
    */
   showSuccess?: boolean;
-
+  
   /**
    * Default success message
    * @default "Operation completed successfully"
    */
   defaultSuccessMessage?: string;
-
+  
   /**
    * Callback for displaying error messages (e.g., toast notifications)
    */
   onError?: (errorMessage: string) => void;
-
+  
   /**
    * Callback for displaying success messages (e.g., toast notifications)
    */
@@ -36,9 +35,7 @@ export interface MutationErrorHandlerOptions {
  * Hook for handling mutation errors and success states consistently
  * Provides standardized error handling and success notifications for mutations
  */
-export function useMutationErrorHandler(
-  options: MutationErrorHandlerOptions = {},
-) {
+export function useMutationErrorHandler(options: MutationErrorHandlerOptions = {}) {
   const {
     logError = true,
     showSuccess = true,
@@ -47,48 +44,38 @@ export function useMutationErrorHandler(
     onSuccess,
   } = options;
 
-  const handleMutationError = useCallback(
-    (error: unknown, context?: string): string => {
-      const errorMessage = getErrorMessage(error);
-      const errorObject =
-        error instanceof Error ? error : new Error(errorMessage);
+  const handleMutationError = useCallback((error: unknown, context?: string): string => {
+    const errorMessage = getErrorMessage(error);
+    const errorObj = error instanceof Error ? error : new Error(errorMessage);
 
-      if (logError) {
-        const contextMessage = context ? ` (${context})` : "";
-        console.error(`Mutation error${contextMessage}:`, errorObject);
+    if (logError) {
+      const contextMessage = context ? ` (${context})` : "";
+      console.error(`Mutation error${contextMessage}:`, errorObj);
+    }
+
+    if (onError) {
+      onError(errorMessage);
+    }
+
+    return errorMessage;
+  }, [logError, onError]);
+
+  const handleMutationSuccess = useCallback((message?: string): void => {
+    if (showSuccess) {
+      const successMessage = message || defaultSuccessMessage;
+      
+      if (onSuccess) {
+        onSuccess(successMessage);
+      } else {
+        console.log("Mutation success:", successMessage);
       }
+    }
+  }, [showSuccess, defaultSuccessMessage, onSuccess]);
 
-      if (onError) {
-        onError(errorMessage);
-      }
-
-      return errorMessage;
-    },
-    [logError, onError],
-  );
-
-  const handleMutationSuccess = useCallback(
-    (message?: string): void => {
-      if (showSuccess) {
-        const successMessage = message || defaultSuccessMessage;
-
-        if (onSuccess) {
-          onSuccess(successMessage);
-        } else {
-          console.log("Mutation success:", successMessage);
-        }
-      }
-    },
-    [showSuccess, defaultSuccessMessage, onSuccess],
-  );
-
-  const createMutationHandlers = useCallback(
-    (context?: string) => ({
-      onError: (error: unknown) => handleMutationError(error, context),
-      onSuccess: (message?: string) => handleMutationSuccess(message),
-    }),
-    [handleMutationError, handleMutationSuccess],
-  );
+  const createMutationHandlers = useCallback((context?: string) => ({
+    onError: (error: unknown) => handleMutationError(error, context),
+    onSuccess: (message?: string) => handleMutationSuccess(message),
+  }), [handleMutationError, handleMutationSuccess]);
 
   return {
     handleMutationError,
@@ -101,33 +88,27 @@ export function useMutationErrorHandler(
  * Hook for handling optimistic update errors specifically
  * Provides rollback functionality and error handling for optimistic mutations
  */
-export function useOptimisticMutationHandler<
-  TData = unknown,
-  TVariables = unknown,
->(options: MutationErrorHandlerOptions = {}) {
-  const { handleMutationError, handleMutationSuccess } =
-    useMutationErrorHandler(options);
+export function useOptimisticMutationHandler<TData = unknown, TVariables = unknown>(
+  options: MutationErrorHandlerOptions = {}
+) {
+  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler(options);
 
-  const createOptimisticHandlers = useCallback(
-    (rollbackFunction?: (context: any) => void, context?: string) => ({
-      onError: (
-        error: unknown,
-        variables: TVariables,
-        rollbackContext: any,
-      ) => {
-        // Perform rollback if provided
-        if (rollbackFunction && rollbackContext) {
-          rollbackFunction(rollbackContext);
-        }
-
-        return handleMutationError(error, context);
-      },
-      onSuccess: (data: TData, variables: TVariables, rollbackContext: any) => {
-        handleMutationSuccess();
-      },
-    }),
-    [handleMutationError, handleMutationSuccess],
-  );
+  const createOptimisticHandlers = useCallback((
+    rollbackFn?: (context: any) => void,
+    context?: string
+  ) => ({
+    onError: (error: unknown, variables: TVariables, rollbackContext: any) => {
+      // Perform rollback if provided
+      if (rollbackFn && rollbackContext) {
+        rollbackFn(rollbackContext);
+      }
+      
+      return handleMutationError(error, context);
+    },
+    onSuccess: (data: TData, variables: TVariables, rollbackContext: any) => {
+      handleMutationSuccess();
+    },
+  }), [handleMutationError, handleMutationSuccess]);
 
   return {
     createOptimisticHandlers,
