@@ -148,7 +148,7 @@ export function useIncrementHabitProgress() {
       const previousHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
-      
+
       // Find the original habit before any optimistic updates
       const originalHabit = previousHabits?.find((h) => h.id === id);
 

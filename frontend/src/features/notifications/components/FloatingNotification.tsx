@@ -22,9 +22,9 @@ function FloatingNotification({
 }: FloatingNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const progressRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<number | undefined>(undefined);
-  const animationStartedRef = useRef(false);
+  const progressReference = useRef<HTMLDivElement>(null);
+  const timerReference = useRef<number | undefined>(undefined);
+  const animationStartedReference = useRef(false);
 
   // Memoize handleClose to prevent unnecessary effect re-runs
   const handleClose = useCallback(() => {
@@ -32,9 +32,9 @@ function FloatingNotification({
     if (isLeaving) return;
 
     // Clear any pending timers to avoid duplicate closes
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = undefined;
+    if (timerReference.current) {
+      clearTimeout(timerReference.current);
+      timerReference.current = undefined;
     }
 
     setIsLeaving(true);
@@ -61,15 +61,15 @@ function FloatingNotification({
     if (
       !isVisible ||
       duration <= 0 ||
-      !progressRef.current ||
-      animationStartedRef.current ||
+      !progressReference.current ||
+      animationStartedReference.current ||
       !autoClose ||
       isLeaving
     )
       return;
 
-    animationStartedRef.current = true;
-    const progressElement = progressRef.current;
+    animationStartedReference.current = true;
+    const progressElement = progressReference.current;
 
     // Set up the animation programmatically for better control
     progressElement.style.transition = `width ${duration}ms linear`;
@@ -84,7 +84,7 @@ function FloatingNotification({
         progressElement.style.width = "0%";
 
         // Set up the auto-close timer to match exactly with animation end
-        timerRef.current = window.setTimeout(() => {
+        timerReference.current = globalThis.setTimeout(() => {
           if (!isLeaving) {
             handleClose();
           }
@@ -93,8 +93,8 @@ function FloatingNotification({
     });
 
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (timerReference.current) {
+        clearTimeout(timerReference.current);
       }
     };
   }, [isVisible, duration, isLeaving, handleClose, autoClose]);
@@ -102,8 +102,8 @@ function FloatingNotification({
   // Cleanup on unmount
   useEffect(() => {
     return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
+      if (timerReference.current) {
+        clearTimeout(timerReference.current);
       }
     };
   }, []);
@@ -161,7 +161,9 @@ function FloatingNotification({
                      hover:shadow-3xl transition-shadow duration-200`}
       >
         {/* Icon section */}
-        <div className={`${icon} p-4 flex items-center justify-center flex-shrink-0`}>
+        <div
+          className={`${icon} p-4 flex items-center justify-center flex-shrink-0`}
+        >
           {component}
         </div>
 
@@ -186,7 +188,7 @@ function FloatingNotification({
         {duration > 0 && autoClose && (
           <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30 overflow-hidden">
             <div
-              ref={progressRef}
+              ref={progressReference}
               className={`h-full ${progress} transition-all ease-linear`}
               style={{ width: "100%" }}
             />
