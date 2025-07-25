@@ -227,14 +227,20 @@ const EntryHistoryComponent = function EntryHistory({
   }, []);
 
   const loadMoreDates = useCallback(async () => {
-    // Always increment by 5 dates
-    setDisplayedDateCount((prev) => prev + 5);
+    // First, try to fetch more data from server if needed
+    // We want to ensure we have enough data to show 5 more dates
+    const currentlyShowing = displayedDateCount;
+    const targetDateCount = currentlyShowing + 5;
+    const availableDates = totalEntries.length;
 
-    // If we've shown all local dates and server has more, load from server
-    if (!hasMoreDates && hasMore && onLoadMore) {
+    // If we don't have enough dates locally to reach our target, fetch more from server first
+    if (availableDates < targetDateCount && hasMore && onLoadMore) {
       await onLoadMore();
     }
-  }, [hasMoreDates, hasMore, onLoadMore]);
+
+    // Then increment the displayed count
+    setDisplayedDateCount(targetDateCount);
+  }, [displayedDateCount, hasMore, onLoadMore, totalEntries.length]);
 
   const showLessDates = useCallback(() => {
     // Reset to initial 5 dates
