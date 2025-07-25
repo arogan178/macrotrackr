@@ -1,8 +1,8 @@
-import { CardContainer, TextField, FormButton } from "@/components/form";
+import { CardContainer, FormButton, TextField } from "@/components/form";
 import { CalorieIcon } from "@/components/ui";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
+import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
 
@@ -23,11 +23,12 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
   const loginMutation = useLogin();
 
   // Use new loading state hooks
-  const { isLoading: isAuthLoading } = useFeatureLoading('auth');
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => showNotification(message, "error"),
-    onSuccess: (message) => showNotification(message, "success"),
-  });
+  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => showNotification(message, "error"),
+      onSuccess: (message) => showNotification(message, "success"),
+    });
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -44,7 +45,10 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
         error instanceof ApiError &&
         (error.status === 401 || error.status === 403)
       ) {
-        handleMutationError(new Error("Invalid email or password"), "logging in");
+        handleMutationError(
+          new Error("Invalid email or password"),
+          "logging in",
+        );
       } else {
         handleMutationError(error, "logging in");
       }

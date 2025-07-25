@@ -40,7 +40,8 @@ function HabitTracker({
   const canAddHabit = isPro || habits.length < 2;
 
   // Use new loading state hooks
-  const { isMutationLoading: isHabitMutationLoading } = useFeatureLoading('habits');
+  const { isMutationLoading: isHabitMutationLoading } =
+    useFeatureLoading("habits");
   const { handleMutationError } = useMutationErrorHandler({
     onError: (message) => console.error("Habit operation failed:", message),
   });

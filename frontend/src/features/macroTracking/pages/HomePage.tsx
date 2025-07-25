@@ -19,6 +19,7 @@ import {
 } from "@/features/macroTracking/components";
 // Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import {
   useAddMacroEntry,
@@ -28,7 +29,6 @@ import {
   useMacroTarget,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
 
@@ -68,11 +68,14 @@ export default function HomePage() {
   const deleteMacroEntryMutation = useDeleteMacroEntry();
 
   // Use new loading state hooks
-  const { isLoading: isMacroFeatureLoading, isMutationLoading } = useFeatureLoading('macros');
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => console.error("Macro operation failed:", message),
-    onSuccess: (message) => console.log("Macro operation succeeded:", message),
-  });
+  const { isLoading: isMacroFeatureLoading, isMutationLoading } =
+    useFeatureLoading("macros");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => console.error("Macro operation failed:", message),
+      onSuccess: (message) =>
+        console.log("Macro operation succeeded:", message),
+    });
 
   // Get state and actions from our store (UI state only)
   const {
