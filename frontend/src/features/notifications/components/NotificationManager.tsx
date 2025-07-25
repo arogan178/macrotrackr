@@ -22,10 +22,10 @@ function NotificationManager() {
           <div
             key={notification.id}
             className="pointer-events-auto"
-            style={{ 
+            style={{
               zIndex: 9999 - index,
               // Add slight stagger to entrance animations
-              animationDelay: `${index * 50}ms`
+              animationDelay: `${index * 50}ms`,
             }}
           >
             <FloatingNotification

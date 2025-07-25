@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { EmailIcon } from "@/components/ui";
-import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
 import { useMutationErrorHandler } from "@/hooks";
+import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 interface ForgotPasswordFormProps {
@@ -16,16 +16,19 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
   const forgotPasswordMutation = useForgotPassword();
 
   // Use new mutation error handling
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => showNotification(message, "error"),
-    onSuccess: (message) => showNotification(message, "success"),
-  });
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => showNotification(message, "error"),
+      onSuccess: (message) => showNotification(message, "success"),
+    });
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     try {
       await forgotPasswordMutation.mutateAsync({ email });
-      handleMutationSuccess("If an account exists, a reset link has been sent.");
+      handleMutationSuccess(
+        "If an account exists, a reset link has been sent.",
+      );
     } catch (error) {
       handleMutationError(error, "sending password reset email");
     }

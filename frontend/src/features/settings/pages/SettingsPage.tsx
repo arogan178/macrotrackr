@@ -10,12 +10,12 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
-import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
-import { 
+import {
   useBeforeUnload,
   useFeatureLoading,
-  useMutationErrorHandler
+  useMutationErrorHandler,
 } from "@/hooks";
+import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { useStore } from "@/store/store";
 
 // Notifications are handled by the global NotificationManager and store
@@ -75,11 +75,14 @@ export default function SettingsPage() {
   const isSaving = saveSettingsMutation.isPending;
 
   // Use new loading state hooks
-  const { isLoading: isSettingsFeatureLoading } = useFeatureLoading('settings');
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => console.error("Settings operation failed:", message),
-    onSuccess: (message) => console.log("Settings operation succeeded:", message),
-  });
+  const { isLoading: isSettingsFeatureLoading } = useFeatureLoading("settings");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) =>
+        console.error("Settings operation failed:", message),
+      onSuccess: (message) =>
+        console.log("Settings operation succeeded:", message),
+    });
 
   // Hydrate subscriptionStatus from settings data
   useEffect(() => {
@@ -180,10 +183,11 @@ export default function SettingsPage() {
         initializeSettings({ settings: updatedSettings });
         showNotification("Settings saved successfully!", "success");
         handleMutationSuccess("Settings saved successfully!");
-      } catch (err) {
-        const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
         showNotification(`Failed to save settings: ${errorMessage}`, "error");
-        handleMutationError(err, "saving settings");
+        handleMutationError(error, "saving settings");
       }
     },
     [validateSettingsForm, settings, saveSettingsMutation, initializeSettings],
