@@ -1,7 +1,6 @@
 import React, { memo } from "react";
 
 import { LoadingSpinnerIcon } from "@/components/ui";
-import { useFeatureLoading, useGlobalLoading } from "@/hooks";
 import {
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
@@ -10,6 +9,7 @@ import {
   ICON_POSITIONS,
 } from "@/components/utils";
 import type { FormButtonProps } from "@/components/utils/Types";
+import { useFeatureLoading, useGlobalLoading } from "@/hooks";
 
 type FormButtonAllProps = FormButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -34,15 +34,17 @@ function FormButton({
   ...rest
 }: FormButtonAllProps) {
   // Auto-detect loading states if requested
-  const featureLoading = autoLoadingFeature ? useFeatureLoading(autoLoadingFeature) : null;
+  const featureLoading = autoLoadingFeature
+    ? useFeatureLoading(autoLoadingFeature)
+    : null;
   const globalLoading = autoLoadingGlobal ? useGlobalLoading() : null;
-  
+
   // Determine final loading state
-  const autoDetectedLoading = 
-    (featureLoading?.isMutationLoading) || 
-    (globalLoading?.isMutationLoading) || 
+  const autoDetectedLoading =
+    featureLoading?.isMutationLoading ||
+    globalLoading?.isMutationLoading ||
     false;
-  
+
   const finalIsLoading = isLoading || autoDetectedLoading;
 
   // Use centralized styles from formStyles.button
