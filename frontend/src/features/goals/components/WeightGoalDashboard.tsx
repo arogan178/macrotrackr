@@ -1,6 +1,7 @@
 import { memo } from "react";
 
 import { EmptyState, TargetIcon } from "@/components/ui/";
+import { useFeatureLoading } from "@/hooks";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -31,6 +32,9 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   className = "",
   macroTarget,
 }: WeightGoalDashboardProps) {
+  // Use new loading state hooks
+  const { isLoading: isGoalsLoading } = useFeatureLoading('goals');
+
   // Get log weight modal state from centralized goals UI slice
   const { setLogWeightModalOpen } = useStore();
 

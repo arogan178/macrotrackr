@@ -17,7 +17,7 @@ import {
   EditModal,
   EntryHistoryPanel,
 } from "@/features/macroTracking/components";
-import { FloatingNotification } from "@/features/notifications/components";
+// Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import {
@@ -28,6 +28,7 @@ import {
   useMacroTarget,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
 
@@ -65,6 +66,13 @@ export default function HomePage() {
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
   const deleteMacroEntryMutation = useDeleteMacroEntry();
+
+  // Use new loading state hooks
+  const { isLoading: isMacroFeatureLoading, isMutationLoading } = useFeatureLoading('macros');
+  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
+    onError: (message) => console.error("Macro operation failed:", message),
+    onSuccess: (message) => console.log("Macro operation succeeded:", message),
+  });
 
   // Get state and actions from our store (UI state only)
   const {
@@ -221,24 +229,7 @@ export default function HomePage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
 
-      {/* Notification system */}
-      {latestNotification && (
-        <FloatingNotification
-          message={latestNotification.message}
-          type={latestNotification.type}
-          onClose={() => hideNotification(latestNotification.id)}
-          duration={latestNotification.duration}
-        />
-      )}
-
-      {error && (
-        <FloatingNotification
-          message={error}
-          type="error"
-          onClose={clearAllNotifications}
-          duration={5000}
-        />
-      )}
+      {/* Notifications are now handled by the global NotificationManager */}
 
       <div className="relative min-h-screen ">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
