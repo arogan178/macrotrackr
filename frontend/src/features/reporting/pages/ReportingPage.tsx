@@ -48,7 +48,8 @@ export default function ReportingPage() {
   // Use TanStack Query hooks for data fetching
   const { data: weightGoals } = useWeightGoals();
   const { data: macroTarget } = useMacroTarget();
-  const { data: history = [], isLoading: isHistoryLoading } = useMacroHistoryForDateRange(startDate, endDate);
+  const { data: history = [], isLoading: isHistoryLoading } =
+    useMacroHistoryForDateRange(startDate, endDate);
 
   const { nutritionProfile, setSubscriptionStatus } = useStore();
 
@@ -136,7 +137,9 @@ export default function ReportingPage() {
                   currentRange={dateRange}
                   onRangeChange={setDateRange}
                   onExportClick={handleDownloadCSV}
-                  isExportDisabled={aggregatedData.length === 0 || isHistoryLoading}
+                  isExportDisabled={
+                    aggregatedData.length === 0 || isHistoryLoading
+                  }
                 />
               </ProFeature>
               {/* Summary Stats */}
