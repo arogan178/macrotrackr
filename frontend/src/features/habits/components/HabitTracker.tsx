@@ -10,6 +10,7 @@ import {
 import EmptyState from "@/components/ui/EmptyState";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 
 import { HABIT_ICONS } from "../constants";
 import { HabitGoal } from "../types/types";
@@ -38,6 +39,12 @@ function HabitTracker({
   const isPro = subscriptionStatus === "pro";
   const canAddHabit = isPro || habits.length < 2;
 
+  // Use new loading state hooks
+  const { isMutationLoading: isHabitMutationLoading } = useFeatureLoading('habits');
+  const { handleMutationError } = useMutationErrorHandler({
+    onError: (message) => console.error("Habit operation failed:", message),
+  });
+
   return (
     <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg">
       <div className="p-5">
@@ -56,6 +63,8 @@ function HabitTracker({
                   variant="ghost"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
+                  autoLoadingFeature="habits"
+                  loadingText="Adding..."
                   className="text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-3 py-1.5 rounded-lg disabled:opacity-50"
                   text="Add Habit"
                   icon={<PlusIcon />}
