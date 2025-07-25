@@ -18,11 +18,13 @@ function RegisterForm() {
   const [error, setError] = useState<string | undefined>();
 
   // Use new loading state hooks
-  const { isLoading: isAuthLoading } = useFeatureLoading('auth');
-  const { handleMutationError, handleMutationSuccess } = useMutationErrorHandler({
-    onError: (message) => setError(message),
-    onSuccess: (message) => console.log("Registration step succeeded:", message),
-  });
+  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => setError(message),
+      onSuccess: (message) =>
+        console.log("Registration step succeeded:", message),
+    });
 
   // Reset registration data when component unmounts
   useEffect(() => {
