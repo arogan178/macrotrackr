@@ -321,8 +321,8 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             )}
             <FormButton
               type="submit"
-              disabled={isSaving || !isFormValid}
-              isLoading={isSaving}
+              disabled={!isFormValid}
+              autoLoadingFeature="macros"
               loadingText="Saving..."
               text="Add Entry"
               variant="primary"
