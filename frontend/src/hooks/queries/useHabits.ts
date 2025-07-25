@@ -136,33 +136,43 @@ export function useIncrementHabitProgress() {
 
   return useMutation({
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
-      // Get current habits to find the habit to update
-      const currentHabits = queryClient.getQueryData<HabitGoal[]>(
-        queryKeys.habits.list(),
-      );
-      const habit = currentHabits?.find((h) => h.id === id);
-
-      if (!habit || habit.isComplete) {
-        throw new Error("Habit not found or already complete");
-      }
-
-      const updatedHabit = incrementHabitProgress(habit);
-      return await apiService.habits.updateHabit(id, updatedHabit);
+      // Get the original habit from the context passed by onMutate
+      // We'll access this through the mutation context
+      return { success: true }; // The actual API call will be made with the correct data
     },
     onMutate: async (id: string) => {
       // Cancel any outgoing refetches
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
 
-      // Snapshot the previous value
+      // Snapshot the previous value BEFORE any changes
       const previousHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
+      
+      // Find the original habit before any optimistic updates
+      const originalHabit = previousHabits?.find((h) => h.id === id);
 
-      // Optimistically update the habit progress
+      // Validate the habit can be incremented
+      if (!originalHabit || originalHabit.isComplete) {
+        throw new Error("Habit not found or already complete");
+      }
+
+      // Calculate the updated habit
+      const updatedHabit = incrementHabitProgress(originalHabit);
+
+      // Make the API call with the original habit data
+      try {
+        await apiService.habits.updateHabit(id, updatedHabit);
+      } catch (error) {
+        // If API call fails, the onError will handle rollback
+        throw error;
+      }
+
+      // Only do optimistic update after successful API call
       if (previousHabits) {
         const updatedHabits = previousHabits.map((habit) => {
-          if (habit.id === id && !habit.isComplete) {
-            return incrementHabitProgress(habit);
+          if (habit.id === id) {
+            return updatedHabit;
           }
           return habit;
         });
@@ -173,10 +183,10 @@ export function useIncrementHabitProgress() {
         );
       }
 
-      // Return a context object with the snapshotted value
-      return { previousHabits };
+      // Return context for potential rollback
+      return { previousHabits, originalHabit };
     },
-    onError: (error, id, context) => {
+    onError: (error, variables, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
         queryClient.setQueryData(

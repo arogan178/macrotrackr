@@ -228,8 +228,9 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                 <FormButton
                   type="button"
                   onClick={handleSaveChanges}
-                  isLoading={isTargetSaving}
-                  disabled={!hasChanges || isTargetSaving}
+                  autoLoadingFeature="goals"
+                  loadingText="Saving..."
+                  disabled={!hasChanges}
                   text="Save Targets"
                   buttonSize="lg"
                   variant="primary"
