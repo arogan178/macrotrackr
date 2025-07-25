@@ -1,9 +1,4 @@
-import {
-  useLoaderData,
-  useNavigate,
-  useRouterState,
-  useSearch,
-} from "@tanstack/react-router";
+import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 import { memo, useCallback, useEffect } from "react";
 
@@ -19,26 +14,20 @@ import {
 } from "@/features/macroTracking/components";
 // Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import {
   useAddMacroEntry,
   useDeleteMacroEntry,
   useMacroDailyTotals,
-  useMacroHistory,
+  useMacroHistoryInfinite,
   useMacroTarget,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
 import { useStore } from "@/store/store";
-import type { MacroEntry } from "@/types/macro";
 
 export default function HomePage() {
   // Get user data from useUser hook
   const { data: user } = useUser();
-
-  // Add TanStack Router hooks for navigation and search params
-  const navigate = useNavigate({ from: homeRoute.id });
-  const search = useSearch({ from: homeRoute.id });
 
   // Get macro data from TanStack Query hooks
   const today = new Date().toISOString().split("T")[0];
@@ -47,58 +36,59 @@ export default function HomePage() {
   } = useMacroDailyTotals(today);
   const { data: macroTarget } = useMacroTarget();
 
-  // Get paginated macro history from TanStack Query
-  const limit = Number(search.limit) || 20;
-  const offset = Number(search.offset) || 0;
-  const { data: macroHistoryData, isLoading: isHistoryLoading } =
-    useMacroHistory(limit, offset);
+  // Get paginated macro history using infinite query
+  const {
+    data: macroHistoryData,
+    isLoading: isHistoryLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useMacroHistoryInfinite(20);
 
   // Get weight goals from home route loader
-  const { weightGoals, weightLog, weightGoalsError } = useLoaderData({
+  const { weightGoals } = useLoaderData({
     from: homeRoute.id,
   }) as any;
 
-  // Extract history data from query result
-  const history = macroHistoryData?.entries || [];
-  const historyHasMore = macroHistoryData?.hasMore || false;
+  // Extract history data from infinite query result
+  const history =
+    macroHistoryData?.pages?.flatMap((page) => page.entries) || [];
+  const historyHasMore = hasNextPage;
 
   // Macro mutations
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
   const deleteMacroEntryMutation = useDeleteMacroEntry();
 
-  // Use new loading state hooks
-  const { isLoading: isMacroFeatureLoading, isMutationLoading } =
-    useFeatureLoading("macros");
-  const { handleMutationError, handleMutationSuccess } =
-    useMutationErrorHandler({
-      onError: (message) => console.error("Macro operation failed:", message),
-      onSuccess: (message) =>
-        console.log("Macro operation succeeded:", message),
-    });
-
   // Get state and actions from our store (UI state only)
   const {
     nutritionProfile,
-    notifications,
     editingEntry,
-    hideNotification,
-    clearAllNotifications,
     setNutritionProfile,
     setSubscriptionStatus,
     setEditingEntry,
   } = useStore();
   // Hydrate nutritionProfile from loader user object
   useEffect(() => {
-    if (
-      user &&
-      typeof user.id === "number" &&
-      typeof user.bmr === "number" &&
-      typeof user.tdee === "number"
-    ) {
-      setNutritionProfile({ userId: user.id, bmr: user.bmr, tdee: user.tdee });
+    if (user && typeof user.id === "number") {
+      // Calculate nutrition profile from user data
+      let nutritionProfile;
+      try {
+        // Calculate nutrition profile from user data
+        nutritionProfile = createNutritionProfile(user as any);
+      } catch (error) {
+        console.warn("Could not calculate nutrition profile:", error);
+        // Use default values as fallback
+        nutritionProfile = { userId: user.id, bmr: 1800, tdee: 2200 };
+      }
+      setNutritionProfile(nutritionProfile);
+
+      // Set subscription status if available
+      if (user.subscription && typeof user.subscription.status === "string") {
+        setSubscriptionStatus(user.subscription.status);
+      }
     }
-  }, [user, setNutritionProfile]);
+  }, [user, setNutritionProfile, setSubscriptionStatus]);
 
   // Debug: Log when HomePage renders and when useEffect runs
   console.log("[HomePage] Rendered", {
@@ -107,27 +97,6 @@ export default function HomePage() {
     macroDailyTotals,
     history,
   });
-
-  // Hydrate nutritionProfile and subscriptionStatus from loader user object
-  useEffect(() => {
-    if (user && typeof user.id === "number") {
-      // Compute nutritionProfile if not present
-      let nutritionProfile;
-      if (typeof user.bmr === "number" && typeof user.tdee === "number") {
-        nutritionProfile = { userId: user.id, bmr: user.bmr, tdee: user.tdee };
-      } else {
-        try {
-          nutritionProfile = createNutritionProfile(user);
-        } catch {
-          nutritionProfile = undefined;
-        }
-      }
-      setNutritionProfile(nutritionProfile);
-      if (user.subscription && typeof user.subscription.status === "string") {
-        setSubscriptionStatus(user.subscription.status);
-      }
-    }
-  }, [user, setNutritionProfile, setSubscriptionStatus]);
 
   // Handler for adding entries
   const handleAddEntry = useCallback(
@@ -187,43 +156,21 @@ export default function HomePage() {
     console.log("EditingEntry changed:", editingEntry);
   }, [editingEntry]);
 
-  // Get the latest notification
-  const latestNotification = notifications?.[notifications.length - 1];
-
-  // Loader-based pagination
-  const loadMoreHistory = useCallback(() => {
-    const currentOffset = Number(search.offset) || 0;
-    const currentLimit = Number(search.limit) || 20;
-    const newOffset = currentOffset + currentLimit;
-    navigate({
-      search: {
-        ...search,
-        offset: newOffset,
-        limit: currentLimit,
-      },
-      replace: false,
-    });
-  }, [navigate, search]);
+  // Infinite query-based pagination
+  const loadMoreHistory = useCallback(async () => {
+    if (hasNextPage) {
+      await fetchNextPage();
+    }
+  }, [fetchNextPage, hasNextPage]);
 
   // Loading indicator for "Load More" button
-  const isLoadingMore = useRouterState({
-    select: (s) =>
-      s.status === "pending" &&
-      s.location.pathname === "/home" &&
-      s.location.search.offset !== search.offset,
-  });
+  const isLoadingMore = isFetchingNextPage;
 
   // Determine loading states from mutations and queries
   const isLoading = isHistoryLoading; // Use history loading state for initial load
   const isSaving = addMacroEntryMutation.isPending;
   const isEditing = updateMacroEntryMutation.isPending;
   const isDeleting = deleteMacroEntryMutation.isPending;
-
-  // Error handling
-  const error =
-    addMacroEntryMutation.error?.message ||
-    updateMacroEntryMutation.error?.message ||
-    deleteMacroEntryMutation.error?.message;
 
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
