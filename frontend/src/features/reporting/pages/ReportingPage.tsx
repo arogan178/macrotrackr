@@ -84,6 +84,7 @@ export default function ReportingPage() {
 
   return (
     <FeaturePage
+      feature="reports"
       title="Nutrition Reports"
       subtitle="Track your nutrition trends and progress over time"
     >
