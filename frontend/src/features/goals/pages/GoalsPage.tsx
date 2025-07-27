@@ -4,12 +4,8 @@ import { useEffect } from "react";
 
 import { goalsRoute } from "@/AppRouter";
 import { TabButton } from "@/components/form";
-import { Navbar } from "@/components/layout";
-import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
-import { PageHeader } from "@/components/layout/PageHeader";
+import FeaturePage from "@/components/layout/FeaturePage";
 import { GoalsIcon, Modal, TargetIcon } from "@/components/ui";
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import {
   GoalsLoadingSkeleton,
   LogWeightModal,
@@ -34,6 +30,7 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { UserDetailsResponse } from "@/utils/apiServices";
@@ -130,16 +127,8 @@ export default function GoalsPage() {
 
   // Error handling is managed by TanStack Query's built-in mechanisms
 
-  // Hydrate subscriptionStatus from loader user.subscription.status
-  useEffect(() => {
-    if (
-      user &&
-      user.subscription &&
-      typeof user.subscription.status === "string"
-    ) {
-      setSubscriptionStatus(user.subscription.status);
-    }
-  }, [user, setSubscriptionStatus]);
+  // Centralize subscription status hydration
+  usePageDataSync();
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
@@ -282,231 +271,219 @@ export default function GoalsPage() {
     currentWeightGoals?.targetWeight || user?.weight || 0;
 
   return (
-    <DashboardPageContainer>
-      <Navbar />
-
-      <QueryErrorBoundary>
-        <ErrorBoundary>
-          {/* Reset Goals Confirmation Modal */}
-          <AnimatePresence>
-            {isResetModalOpen && (
-              <Modal
-                key="reset-modal"
-                isOpen={isResetModalOpen}
-                onClose={() => setResetModalOpen(false)}
-                title="Reset Goals"
-                variant="confirmation"
-                message="This will reset all your current goals and progress. Are you sure you want to continue?"
-                confirmLabel="Reset Goals"
-                cancelLabel="Cancel"
-                onConfirm={handleResetGoals}
-                isDanger={true}
-                size="md"
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Delete Weight Goal Confirmation Modal */}
-          <AnimatePresence>
-            {isDeleteConfirmModalOpen && (
-              <Modal
-                key="delete-weight-goal-confirm-modal"
-                isOpen={isDeleteConfirmModalOpen}
-                onClose={handleCloseDeleteConfirmModal}
-                title="Delete Weight Goal"
-                variant="confirmation"
-                message="Are you sure you want to delete your current weight goal? This action cannot be undone."
-                confirmLabel="Delete Goal"
-                cancelLabel="Cancel"
-                onConfirm={handleDeleteWeightGoalConfirmed}
-                isDanger={true}
-                size="md"
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Unified Habit Modal */}
-          <AnimatePresence>
-            {isHabitModalOpen && (
-              <HabitModal
-                key={
-                  habitModalMode === "edit" && currentHabit
-                    ? `habit-modal-edit-${currentHabit.id}`
-                    : "habit-modal-add"
-                }
-                isOpen={isHabitModalOpen}
-                onClose={handleCloseHabitModal}
-                onSubmit={handleSubmitHabit}
-                habit={currentHabit}
-                mode={habitModalMode}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Log Weight Modal */}
-          <AnimatePresence>
-            {isLogWeightModalOpen && (
-              <LogWeightModal
-                key="log-weight-modal"
-                isOpen={isLogWeightModalOpen}
-                onClose={handleCloseLogWeightModal}
-                initialWeight={user?.weight}
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Weight Goal Modal */}
-          <AnimatePresence>
-            {isWeightGoalModalOpen && (
-              <WeightGoalModal
-                key="weight-goal-modal"
-                isOpen={isWeightGoalModalOpen}
-                onClose={handleCloseWeightGoalModal}
-                startingWeight={user?.weight || 0}
-                targetWeight={safeTargetWeight}
-                tdee={nutritionProfile?.tdee || 0}
-                weightGoals={
-                  currentWeightGoals &&
-                  currentWeightGoals.targetWeight != undefined
-                    ? ({
-                        ...currentWeightGoals,
-                        targetWeight: currentWeightGoals.targetWeight ?? 0,
-                        weightGoal: currentWeightGoals.weightGoal ?? "maintain",
-                        startDate: currentWeightGoals.startDate ?? "",
-                        targetDate: currentWeightGoals.targetDate ?? "",
-                        calorieTarget: currentWeightGoals.calorieTarget ?? 0,
-                        calculatedWeeks:
-                          currentWeightGoals.calculatedWeeks ?? 0,
-                        weeklyChange: currentWeightGoals.weeklyChange ?? 0,
-                        dailyChange: currentWeightGoals.dailyChange ?? 0,
-                        currentWeight: user?.weight ?? 0,
-                      } as WeightGoals)
-                    : undefined
-                }
-              />
-            )}
-          </AnimatePresence>
-
-          {/* Page Header with Tabs */}
-          <PageHeader
-            title="Your Goals"
-            subtitle="Track your progress and stay motivated on your health journey"
+    <FeaturePage
+      title="Your Goals"
+      subtitle="Track your progress and stay motivated on your health journey"
+      headerChildren={
+        <div
+          className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
+          role="tablist"
+          aria-label="Goals Tabs"
+        >
+          <TabButton
+            active={activeTab === "goals"}
+            onClick={() => setActiveTab("goals")}
+            layoutId="goalsTabHighlight"
+            isMotion={true}
           >
-            <div
-              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
-              role="tablist"
-              aria-label="Goals Tabs"
-            >
-              <TabButton
-                active={activeTab === "goals"}
-                onClick={() => setActiveTab("goals")}
-                layoutId="goalsTabHighlight"
-                isMotion={true}
+            <span className="flex items-center relative z-10">
+              <GoalsIcon size="sm" className="mr-1.5" />
+              Goals
+            </span>
+          </TabButton>
+          <TabButton
+            active={activeTab === "macro targets"}
+            onClick={() => setActiveTab("macro targets")}
+            layoutId="goalsTabHighlight"
+            isMotion={true}
+          >
+            <span className="flex items-center relative z-10">
+              <TargetIcon size="sm" className="mr-1.5" />
+              Macro Targets
+            </span>
+          </TabButton>
+        </div>
+      }
+    >
+      {/* Reset Goals Confirmation Modal */}
+      <AnimatePresence>
+        {isResetModalOpen && (
+          <Modal
+            key="reset-modal"
+            isOpen={isResetModalOpen}
+            onClose={() => setResetModalOpen(false)}
+            title="Reset Goals"
+            variant="confirmation"
+            message="This will reset all your current goals and progress. Are you sure you want to continue?"
+            confirmLabel="Reset Goals"
+            cancelLabel="Cancel"
+            onConfirm={handleResetGoals}
+            isDanger={true}
+            size="md"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Delete Weight Goal Confirmation Modal */}
+      <AnimatePresence>
+        {isDeleteConfirmModalOpen && (
+          <Modal
+            key="delete-weight-goal-confirm-modal"
+            isOpen={isDeleteConfirmModalOpen}
+            onClose={handleCloseDeleteConfirmModal}
+            title="Delete Weight Goal"
+            variant="confirmation"
+            message="Are you sure you want to delete your current weight goal? This action cannot be undone."
+            confirmLabel="Delete Goal"
+            cancelLabel="Cancel"
+            onConfirm={handleDeleteWeightGoalConfirmed}
+            isDanger={true}
+            size="md"
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Unified Habit Modal */}
+      <AnimatePresence>
+        {isHabitModalOpen && (
+          <HabitModal
+            key={
+              habitModalMode === "edit" && currentHabit
+                ? `habit-modal-edit-${currentHabit.id}`
+                : "habit-modal-add"
+            }
+            isOpen={isHabitModalOpen}
+            onClose={handleCloseHabitModal}
+            onSubmit={handleSubmitHabit}
+            habit={currentHabit}
+            mode={habitModalMode}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Log Weight Modal */}
+      <AnimatePresence>
+        {isLogWeightModalOpen && (
+          <LogWeightModal
+            key="log-weight-modal"
+            isOpen={isLogWeightModalOpen}
+            onClose={handleCloseLogWeightModal}
+            initialWeight={user?.weight}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Weight Goal Modal */}
+      <AnimatePresence>
+        {isWeightGoalModalOpen && (
+          <WeightGoalModal
+            key="weight-goal-modal"
+            isOpen={isWeightGoalModalOpen}
+            onClose={handleCloseWeightGoalModal}
+            startingWeight={user?.weight || 0}
+            targetWeight={safeTargetWeight}
+            tdee={nutritionProfile?.tdee || 0}
+            weightGoals={
+              currentWeightGoals && currentWeightGoals.targetWeight != undefined
+                ? ({
+                    ...currentWeightGoals,
+                    targetWeight: currentWeightGoals.targetWeight ?? 0,
+                    weightGoal: currentWeightGoals.weightGoal ?? "maintain",
+                    startDate: currentWeightGoals.startDate ?? "",
+                    targetDate: currentWeightGoals.targetDate ?? "",
+                    calorieTarget: currentWeightGoals.calorieTarget ?? 0,
+                    calculatedWeeks: currentWeightGoals.calculatedWeeks ?? 0,
+                    weeklyChange: currentWeightGoals.weeklyChange ?? 0,
+                    dailyChange: currentWeightGoals.dailyChange ?? 0,
+                    currentWeight: user?.weight ?? 0,
+                  } as WeightGoals)
+                : undefined
+            }
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Main Content Area */}
+      <div className="relative">
+        {user ? (
+          <AnimatePresence mode="wait">
+            {activeTab === "goals" ? (
+              <motion.div
+                key="goals"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <span className="flex items-center relative z-10">
-                  <GoalsIcon size="sm" className="mr-1.5" />
-                  Goals
-                </span>
-              </TabButton>
-              <TabButton
-                active={activeTab === "macro targets"}
-                onClick={() => setActiveTab("macro targets")}
-                layoutId="goalsTabHighlight"
-                isMotion={true}
-              >
-                <span className="flex items-center relative z-10">
-                  <TargetIcon size="sm" className="mr-1.5" />
-                  Macro Targets
-                </span>
-              </TabButton>
-            </div>
-          </PageHeader>
+                <div className="space-y-6">
+                  {/* Weight Goal Dashboard */}
+                  {user && (
+                    <WeightGoalDashboard
+                      user={toUserSettings(user)}
+                      macroDailyTotals={macroDailyTotals}
+                      weightGoals={
+                        currentWeightGoals &&
+                        currentWeightGoals.targetWeight != undefined
+                          ? ({
+                              ...currentWeightGoals,
+                              targetWeight:
+                                currentWeightGoals.targetWeight ?? 0,
+                              weightGoal:
+                                currentWeightGoals.weightGoal ?? "maintain",
+                              startDate: currentWeightGoals.startDate ?? "",
+                              targetDate: currentWeightGoals.targetDate ?? "",
+                              calorieTarget:
+                                currentWeightGoals.calorieTarget ?? 0,
+                              calculatedWeeks:
+                                currentWeightGoals.calculatedWeeks ?? 0,
+                              weeklyChange:
+                                currentWeightGoals.weeklyChange ?? 0,
+                              dailyChange: currentWeightGoals.dailyChange ?? 0,
+                              currentWeight: user?.weight ?? 0,
+                            } as WeightGoals)
+                          : undefined
+                      }
+                      isLoading={false}
+                      onOpenModal={handleOpenWeightGoalModal}
+                      onDelete={handleOpenDeleteConfirmModal}
+                      macroTarget={macroTarget || undefined}
+                      tdee={nutritionProfile?.tdee || 0}
+                    />
+                  )}
 
-          {/* Main Content Area */}
-          <div className="relative">
-            {user ? (
-              <AnimatePresence mode="wait">
-                {activeTab === "goals" ? (
-                  <motion.div
-                    key="goals"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="space-y-6">
-                      {/* Weight Goal Dashboard */}
-                      {user && (
-                        <WeightGoalDashboard
-                          user={toUserSettings(user)}
-                          macroDailyTotals={macroDailyTotals}
-                          weightGoals={
-                            currentWeightGoals &&
-                            currentWeightGoals.targetWeight != undefined
-                              ? ({
-                                  ...currentWeightGoals,
-                                  targetWeight:
-                                    currentWeightGoals.targetWeight ?? 0,
-                                  weightGoal:
-                                    currentWeightGoals.weightGoal ?? "maintain",
-                                  startDate: currentWeightGoals.startDate ?? "",
-                                  targetDate:
-                                    currentWeightGoals.targetDate ?? "",
-                                  calorieTarget:
-                                    currentWeightGoals.calorieTarget ?? 0,
-                                  calculatedWeeks:
-                                    currentWeightGoals.calculatedWeeks ?? 0,
-                                  weeklyChange:
-                                    currentWeightGoals.weeklyChange ?? 0,
-                                  dailyChange:
-                                    currentWeightGoals.dailyChange ?? 0,
-                                  currentWeight: user?.weight ?? 0,
-                                } as WeightGoals)
-                              : undefined
-                          }
-                          isLoading={false}
-                          onOpenModal={handleOpenWeightGoalModal}
-                          onDelete={handleOpenDeleteConfirmModal}
-                          macroTarget={macroTarget || undefined}
-                          tdee={nutritionProfile?.tdee || 0}
-                        />
-                      )}
+                  {/* Weight Progress Tabs */}
+                  <WeightProgressTabs />
 
-                      {/* Weight Progress Tabs */}
-                      <WeightProgressTabs />
-
-                      {/* Habit Tracker */}
-                      <HabitTracker
-                        habits={habits || []}
-                        isLoading={habitsLoading}
-                        onAddHabit={handleAddHabit}
-                        onIncrementHabit={handleIncrementHabit}
-                        onCompleteHabit={handleCompleteHabit}
-                        onEditHabit={handleEditHabit}
-                        onDeleteHabit={handleDeleteHabit}
-                      />
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="macro-targets"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="space-y-6">
-                      <MacroTargetForm macroTarget={macroTarget} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  {/* Habit Tracker */}
+                  <HabitTracker
+                    habits={habits || []}
+                    isLoading={habitsLoading}
+                    onAddHabit={handleAddHabit}
+                    onIncrementHabit={handleIncrementHabit}
+                    onCompleteHabit={handleCompleteHabit}
+                    onEditHabit={handleEditHabit}
+                    onDeleteHabit={handleDeleteHabit}
+                  />
+                </div>
+              </motion.div>
             ) : (
-              <GoalsLoadingSkeleton />
+              <motion.div
+                key="macro-targets"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <div className="space-y-6">
+                  <MacroTargetForm macroTarget={macroTarget} />
+                </div>
+              </motion.div>
             )}
-          </div>
-        </ErrorBoundary>
-      </QueryErrorBoundary>
-    </DashboardPageContainer>
+          </AnimatePresence>
+        ) : (
+          <GoalsLoadingSkeleton />
+        )}
+      </div>
+    </FeaturePage>
   );
 }
