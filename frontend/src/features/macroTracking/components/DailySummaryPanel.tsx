@@ -1,5 +1,5 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { MacroTargetBar, MacroTargetLegend } from "@/components/nutrition";
+import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 

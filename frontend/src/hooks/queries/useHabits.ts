@@ -11,7 +11,6 @@ import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 import { apiService } from "@/utils/apiServices";
-import { getErrorMessage } from "@/utils/errorHandling";
 
 // Query hook for fetching habits
 export function useHabits() {
@@ -138,82 +137,57 @@ export function useIncrementHabitProgress() {
   const showNotification = useStore((state) => state.showNotification);
 
   return useMutation({
-    mutationFn: async (id: string): Promise<{ success: boolean }> => {
-      // Get the current habits to find the habit to increment
-      const currentHabits = queryClient.getQueryData<HabitGoal[]>(
-        queryKeys.habits.list(),
-      );
-      const habit = currentHabits?.find((h) => h.id === id);
-
+    // Accept the full habit object instead of just the id
+    mutationFn: async (habit: HabitGoal): Promise<{ success: boolean }> => {
       if (!habit) {
         throw new Error("Habit not found");
       }
-
       if (habit.isComplete) {
         throw new Error("Habit is already complete");
       }
-
-      // Calculate the updated habit
+      // Only increment once, using the original habit object
       const updatedHabit = incrementHabitProgress(habit);
-
-      // Make the API call
-      return await apiService.habits.updateHabit(id, updatedHabit);
+      return await apiService.habits.updateHabit(habit.id, updatedHabit);
     },
-    onMutate: async (id: string) => {
-      // Cancel any outgoing refetches
+    onMutate: async (habit: HabitGoal) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
-
-      // Snapshot the previous value
       const previousHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
-
-      // Find the habit to increment
-      const habitToIncrement = previousHabits?.find((h) => h.id === id);
-
       // Validate the habit can be incremented
-      if (!habitToIncrement || habitToIncrement.isComplete) {
+      if (!habit || habit.isComplete) {
         throw new Error("Habit not found or already complete");
       }
-
       // Calculate the updated habit for optimistic update
-      const updatedHabit = incrementHabitProgress(habitToIncrement);
-
+      const updatedHabit = incrementHabitProgress(habit);
       // Optimistically update the cache
       if (previousHabits) {
-        const updatedHabits = previousHabits.map((habit) => {
-          if (habit.id === id) {
+        const updatedHabits = previousHabits.map((h) => {
+          if (h.id === habit.id) {
             return updatedHabit;
           }
-          return habit;
+          return h;
         });
-
         queryClient.setQueryData<HabitGoal[]>(
           queryKeys.habits.list(),
           updatedHabits,
         );
       }
-
-      // Return context for potential rollback
       return { previousHabits };
     },
     onSuccess: (data, variables, context) => {
-      // Check if the habit was completed through this increment
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
-      const updatedHabit = currentHabits?.find((h) => h.id === variables);
+      const updatedHabit = currentHabits?.find((h) => h.id === variables.id);
       const previousHabit = context?.previousHabits?.find(
-        (h) => h.id === variables,
+        (h) => h.id === variables.id,
       );
-
-      // If the habit was not complete before but is complete now, it was just completed
       if (
         previousHabit &&
         !previousHabit.isComplete &&
         updatedHabit?.isComplete
       ) {
-        // Trigger success notification for habit completion
         showNotification(
           `🎉 Habit "${updatedHabit.title}" completed!`,
           "success",
@@ -225,7 +199,6 @@ export function useIncrementHabitProgress() {
       }
     },
     onError: (error, _variables, context) => {
-      // Rollback optimistic update
       if (context?.previousHabits) {
         queryClient.setQueryData(
           queryKeys.habits.list(),
@@ -235,7 +208,6 @@ export function useIncrementHabitProgress() {
       console.error("Error incrementing habit progress:", error);
     },
     onSettled: () => {
-      // Always refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
     },
   });
