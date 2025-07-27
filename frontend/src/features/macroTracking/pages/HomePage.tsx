@@ -1,10 +1,14 @@
 import { useLoaderData } from "@tanstack/react-router";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect } from "react";
 
 import { homeRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
+import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import Navbar from "@/components/layout/Navbar";
+import { PageHeader } from "@/components/layout/PageHeader";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import { UserMetricsPanel } from "@/features/dashboard/components";
 import {
   AddEntryForm,
@@ -176,130 +180,112 @@ export default function HomePage() {
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <DashboardPageContainer>
       <Navbar />
 
-      {/* Notifications are now handled by the global NotificationManager */}
+      {/* Error boundaries for macro tracking feature */}
+      <QueryErrorBoundary>
+        <ErrorBoundary>
+          {/* Notifications are now handled by the global NotificationManager */}
 
-      <div className="relative min-h-screen ">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          <PageHeader firstName={user?.firstName} isLoading={isLoading} />
-
-          <div className="mb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-              <div className="lg:col-span-4 flex flex-col h-full space-y-6">
-                {/* Metrics Panel */}
-                <UserMetricsPanel
-                  bmr={nutritionProfile?.bmr ?? 0}
-                  tdee={nutritionProfile?.tdee ?? 0}
-                  isLoading={isLoading}
-                />
-
-                {/* Add Entry Section */}
-                <div className="flex-1">
-                  {isLoading ? (
-                    <AddEntryLoadingSkeleton />
-                  ) : (
-                    <AddEntryForm
-                      onSubmit={handleAddEntry}
-                      isSaving={isSaving}
+          <PageHeader
+            title={`Welcome back, ${isLoading ? "..." : user?.firstName || "User"}`}
+            subtitle={new Date().toLocaleDateString("en-US", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })}
+          />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="macro-home-content"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+              className="relative min-h-screen"
+            >
+              <div>
+                <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+                  <div className="lg:col-span-4 flex flex-col h-full space-y-6">
+                    {/* Metrics Panel */}
+                    <UserMetricsPanel
+                      bmr={nutritionProfile?.bmr ?? 0}
+                      tdee={nutritionProfile?.tdee ?? 0}
+                      isLoading={isLoading}
                     />
-                  )}
+
+                    {/* Add Entry Section */}
+                    <div className="flex-1">
+                      {isLoading ? (
+                        <AddEntryLoadingSkeleton />
+                      ) : (
+                        <AddEntryForm
+                          onSubmit={handleAddEntry}
+                          isSaving={isSaving}
+                        />
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Today's Summary - Right side */}
+                  <div className="lg:col-span-2 flex flex-col h-full">
+                    {isLoading ? (
+                      <DailySummaryLoadingSkeleton />
+                    ) : (
+                      user && (
+                        <DailySummaryPanel
+                          macroDailyTotals={macroDailyTotals}
+                          macroTarget={macroTarget ?? undefined}
+                          calorieTarget={effectiveCalorieTarget}
+                        />
+                      )
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Today's Summary - Right side */}
-              <div className="lg:col-span-2 flex flex-col h-full">
-                {isLoading ? (
-                  <DailySummaryLoadingSkeleton />
-                ) : (
-                  user && (
-                    <DailySummaryPanel
-                      macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget ?? undefined}
-                      calorieTarget={effectiveCalorieTarget}
+              {/* History Section */}
+              <CardContainer>
+                <div className="p-6">
+                  {isLoading ? (
+                    <HistoryLoadingSkeleton />
+                  ) : (
+                    <EntryHistoryPanel
+                      history={history}
+                      deleteEntry={handleDeleteEntry}
+                      onEdit={setEditingEntry}
+                      isDeleting={isDeleting}
+                      isEditing={isEditing}
+                      hasMore={historyHasMore}
+                      onLoadMore={loadMoreHistory}
+                      isLoadingMore={isLoadingMore}
                     />
-                  )
-                )}
-              </div>
-            </div>
-          </div>
+                  )}
+                </div>
+              </CardContainer>
+            </motion.div>
+          </AnimatePresence>
 
-          {/* History Section */}
-          <CardContainer>
-            <div className="p-6">
-              {isLoading ? (
-                <HistoryLoadingSkeleton />
-              ) : (
-                <EntryHistoryPanel
-                  history={history}
-                  deleteEntry={handleDeleteEntry}
-                  onEdit={setEditingEntry}
-                  isDeleting={isDeleting}
-                  isEditing={isEditing}
-                  hasMore={historyHasMore}
-                  onLoadMore={loadMoreHistory}
-                  isLoadingMore={isLoadingMore}
-                />
-              )}
-            </div>
-          </CardContainer>
-        </div>
-      </div>
-
-      {/* Edit Modal - Only render when editingEntry is not undefined */}
-      <AnimatePresence>
-        {editingEntry && (
-          <EditModal
-            key="edit-modal"
-            entry={editingEntry}
-            onSave={handleEditEntry}
-            onClose={handleCloseModal}
-            isSaving={isEditing}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+          {/* Edit Modal - Only render when editingEntry is not undefined */}
+          <AnimatePresence>
+            {editingEntry && (
+              <EditModal
+                key="edit-modal"
+                entry={editingEntry}
+                onSave={handleEditEntry}
+                onClose={handleCloseModal}
+                isSaving={isEditing}
+              />
+            )}
+          </AnimatePresence>
+        </ErrorBoundary>
+      </QueryErrorBoundary>
+    </DashboardPageContainer>
   );
 }
 
 // Extracted components for better organization
-interface PageHeaderProps {
-  firstName?: string;
-  isLoading: boolean;
-}
-function PageHeader({ firstName, isLoading }: PageHeaderProps) {
-  return (
-    <div className="mb-6">
-      {" "}
-      <div className="flex flex-col md:flex-row md:items-center gap-3">
-        {" "}
-        <h1 className="text-3xl sm:text-4xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
-          {" "}
-          Welcome back,{" "}
-          <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
-            {" "}
-            {isLoading ? "..." : firstName || "User"}{" "}
-          </span>{" "}
-        </h1>{" "}
-        <div className="flex md:ml-auto">
-          {" "}
-          <span className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-medium">
-            {" "}
-            {new Date().toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}{" "}
-          </span>{" "}
-        </div>{" "}
-      </div>{" "}
-    </div>
-  );
-}
-const MemoizedPageHeader = memo(PageHeader);
-MemoizedPageHeader.displayName = "PageHeader";
 // Loading skeleton components
 const AddEntryLoadingSkeleton = () => (
   <CardContainer>
