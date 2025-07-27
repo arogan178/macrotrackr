@@ -102,22 +102,47 @@ export function useLogin() {
       // If no token in response, throw error
       throw new Error("Invalid login response - no token received");
     },
+    onMutate: async () => {
+      // Clear any existing auth data before login attempt
+      queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
+      removeToken(); // Clear any stale token
+    },
     onSuccess: (data) => {
       // Store the token
       if (data.token) {
         setToken(data.token);
       }
 
-      // Invalidate and refetch user query
+      // Optimistically set user data if available
+      if (data.user) {
+        queryClient.setQueryData(queryKeys.auth.user(), data.user);
+      }
+
+      // Invalidate and refetch user query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
 
       // Navigate to home or intended route
       navigate({ to: "/home", search: { limit: 20, offset: 0 } });
     },
-    onError: (error) => {
+    onError: (error, _variables, _context) => {
+      // Ensure token is cleared on login failure
+      removeToken();
+      queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
       console.error("Login failed:", error);
-      // Error handling will be managed by the component
     },
+    // Enhanced retry logic for login
+    retry: (failureCount, error) => {
+      // Don't retry on authentication errors (401, 403)
+      if (error instanceof Error && "status" in error) {
+        const status = (error as any).status;
+        if (status === 401 || status === 403 || status === 400) {
+          return false;
+        }
+      }
+      // Retry network errors up to 2 times
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 }
 
@@ -168,21 +193,47 @@ export function useRegister() {
 
       throw new Error("Invalid registration response - no token received");
     },
+    onMutate: async () => {
+      // Clear any existing auth data before registration attempt
+      queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
+      removeToken(); // Clear any stale token
+    },
     onSuccess: (data) => {
       // Store the token
       if (data.token) {
         setToken(data.token);
       }
 
-      // Invalidate and refetch user query
+      // Optimistically set user data if available
+      if (data.user) {
+        queryClient.setQueryData(queryKeys.auth.user(), data.user);
+      }
+
+      // Invalidate and refetch user query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
 
       // Navigate to home
       navigate({ to: "/home", search: { limit: 20, offset: 0 } });
     },
-    onError: (error) => {
+    onError: (error, _variables, _context) => {
+      // Ensure token is cleared on registration failure
+      removeToken();
+      queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
       console.error("Registration failed:", error);
     },
+    // Enhanced retry logic for registration
+    retry: (failureCount, error) => {
+      // Don't retry on validation errors (400, 422) or conflicts (409)
+      if (error instanceof Error && "status" in error) {
+        const status = (error as any).status;
+        if (status === 400 || status === 409 || status === 422) {
+          return false;
+        }
+      }
+      // Retry network errors up to 2 times
+      return failureCount < 2;
+    },
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000),
   });
 }
 

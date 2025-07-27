@@ -82,7 +82,9 @@ const MacroDensityBreakdown = ({
   const data = propertyData || useMacroDensityBreakdown(undefined, "week");
   const loading =
     typeof propertyIsLoading === "boolean" ? propertyIsLoading : false;
-  const error = undefined;
+  // Show a message if there is no data after loading
+  const showNoData =
+    !loading && Array.isArray(data) && data.length === 0 && dataProcessed;
 
   return (
     <motion.div
@@ -104,9 +106,11 @@ const MacroDensityBreakdown = ({
               Loading macro distribution...
             </div>
           </div>
-        ) : error ? (
+        ) : showNoData ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-red-400 text-sm">{error}</div>
+            <div className="text-yellow-400 text-sm">
+              No macro data available for this period.
+            </div>
           </div>
         ) : (
           <ResponsiveContainer width="100%" height="100%">
