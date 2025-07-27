@@ -2,40 +2,32 @@ import { memo, useCallback, useState } from "react";
 
 import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/ui";
+import MacroTargetBar from "@/features/macroTracking/components/MacroTargetBar";
+import { useMacroTarget } from "@/features/macroTracking/hooks/useMacroTarget";
 import type { MacroTargetProps, MacroType } from "@/types/macro";
+import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 
-import { DEFAULT_TARGET_VALUES } from "../constants";
-import { useMacroTarget } from "../hooks/useMacroTarget";
 import MacroSlider, { MacroBadge } from "./MacroSlider";
-import MacroTargetBar from "./MacroTargetBar";
 
-// Use React.memo for performance optimization
 const MacroTarget = memo(
   ({
-    initialValues = DEFAULT_TARGET_VALUES,
+    initialValues = DEFAULT_MACRO_TARGET,
     onTargetChange,
   }: MacroTargetProps) => {
-    // State for UI elements not handled by the hook
     const [helpVisible, setHelpVisible] = useState(false);
 
-    // Use the custom hook for core state and logic management
-    // The hook provides the current target state and functions to modify it
     const { target, handleChange, toggleLock } = useMacroTarget(
       initialValues,
-      // Callback to notify parent component of changes
-      // This ensures the parent always gets the latest state including locks
       (updatedTarget) => {
         onTargetChange(updatedTarget);
       },
     );
 
-    // Helper to check if a specific macro is locked
     const isLocked = useCallback(
       (macro: MacroType) => target.lockedMacros.includes(macro),
       [target.lockedMacros],
     );
 
-    // Determine if a slider should be disabled (if 2 others are locked)
     const isSliderDisabled = useCallback(
       (macro: MacroType) => {
         return target.lockedMacros.length === 2 && !isLocked(macro);
@@ -45,14 +37,13 @@ const MacroTarget = memo(
 
     return (
       <div className="space-y-6 py-2">
-        {/* Header section */}
         <div className="flex justify-between items-center">
           <h3 className="text-md font-medium text-gray-200">Macro Target</h3>
           <div className="flex items-center">
             <button
-              type="button" // Ensure button type is set
+              type="button"
               onClick={() => setHelpVisible(!helpVisible)}
-              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50" // Added padding/bg
+              className="text-gray-400 hover:text-indigo-300 transition-colors p-1 rounded-full hover:bg-gray-700/50"
               aria-label={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
             >
@@ -61,7 +52,6 @@ const MacroTarget = memo(
           </div>
         </div>
 
-        {/* Help information card */}
         {helpVisible && (
           <InfoCard
             title="Tips for adjusting your macros:"
@@ -79,10 +69,8 @@ const MacroTarget = memo(
           </InfoCard>
         )}
 
-        {/* Visual macro percentage bar */}
         <MacroTargetBar target={target} className="mb-6" />
 
-        {/* Sliders section */}
         <div className="space-y-6">
           <MacroSlider
             name="Protein"
@@ -91,7 +79,6 @@ const MacroTarget = memo(
             color="green"
             isLocked={isLocked("protein")}
             onToggleLock={() => toggleLock("protein")}
-            // Restore disabled logic: Disable if 2 *others* are locked
             disabled={isSliderDisabled("protein")}
           />
           <MacroSlider
@@ -101,7 +88,6 @@ const MacroTarget = memo(
             color="blue"
             isLocked={isLocked("carbs")}
             onToggleLock={() => toggleLock("carbs")}
-            // Restore disabled logic
             disabled={isSliderDisabled("carbs")}
           />
           <MacroSlider
@@ -111,12 +97,10 @@ const MacroTarget = memo(
             color="red"
             isLocked={isLocked("fats")}
             onToggleLock={() => toggleLock("fats")}
-            // Restore disabled logic
             disabled={isSliderDisabled("fats")}
           />
         </div>
 
-        {/* Badges section */}
         <div className="grid grid-cols-3 gap-2 pt-5">
           <MacroBadge
             name="Protein"
@@ -140,8 +124,8 @@ const MacroTarget = memo(
       </div>
     );
   },
-); // Close React.memo
+);
 
-MacroTarget.displayName = "MacroTarget"; // Add display name for DevTools
+MacroTarget.displayName = "MacroTarget";
 
 export default MacroTarget;

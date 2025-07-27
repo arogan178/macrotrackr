@@ -209,7 +209,7 @@ export default function GoalsPage() {
         throw new Error("Habit not found");
       }
 
-      await incrementProgressMutation.mutateAsync(id);
+      await incrementProgressMutation.mutateAsync(originalHabit);
 
       // Check if habit was completed
       if (originalHabit.current + 1 >= originalHabit.target) {

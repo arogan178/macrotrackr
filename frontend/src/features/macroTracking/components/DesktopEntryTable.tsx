@@ -8,7 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { memo, useMemo } from "react";
 
 import { ActionButton, ActionButtonGroup } from "@/components/form";
-import { MacroCell } from "@/components/nutrition";
+import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
