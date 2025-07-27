@@ -1,9 +1,14 @@
 import { AnimatePresence, motion } from "motion/react";
-import { ReactNode, useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { TabButton } from "@/components/form";
 import { Navbar } from "@/components/layout";
+import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
+// Now accepts tabs as children to render them on the right
+import { PageHeader } from "@/components/layout/PageHeader";
 import { AwardIcon, LockIcon, Modal, UserIcon } from "@/components/ui";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import {
   BillingForm,
   ChangePasswordForm,
@@ -17,38 +22,6 @@ import {
 } from "@/hooks";
 import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { useStore } from "@/store/store";
-
-// Notifications are handled by the global NotificationManager and store
-
-// --- Modified PageHeader Component ---
-// Now accepts tabs as children to render them on the right
-const PageHeader = ({
-  hasChanges,
-  children, // Accept children (the tabs)
-}: {
-  hasChanges: boolean;
-  children: ReactNode; // Define children prop
-}) => (
-  <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
-    {/* Left Side: Title */}
-    <h1 className="text-3xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight mb-2">
-      Settings
-    </h1>
-    {/* Right Side: Badges and Tabs */}
-    <div className="flex items-center gap-3">
-      {/* Badges */}
-      <div className="flex space-x-2">
-        {hasChanges && (
-          <span className="px-3 py-1 bg-yellow-600/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm font-medium">
-            Unsaved Changes
-          </span>
-        )}
-      </div>
-      {/* Render Tabs passed as children */}
-      {children}
-    </div>
-  </div>
-);
 
 export default function SettingsPage() {
   // Use TanStack Query for settings data and mutations
@@ -194,29 +167,13 @@ export default function SettingsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <DashboardPageContainer>
       <Navbar />
-      <div className="relative min-h-screen ">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          {/* Notifications are now handled by the global NotificationManager */}
-
-          <Modal
-            isOpen={showConfirmModal}
-            onClose={cancelTabChange}
-            title="Unsaved Changes"
-            variant="confirmation"
-            message="You have unsaved changes that will be lost. Do you want to continue?"
-            confirmLabel="Discard Changes"
-            cancelLabel="Keep Editing"
-            onConfirm={confirmTabChange}
-            isDanger={true}
-          />
-
+      <QueryErrorBoundary>
+        <ErrorBoundary>
           {/* Pass Tabs into the updated PageHeader */}
-          <PageHeader hasChanges={hasSettingsChanges}>
-            {/* Tab Navigation Container - Moved inside header */}
+
+          <PageHeader title="Settings" hasChanges={hasSettingsChanges}>
             <div
               className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
               role="tablist"
@@ -312,8 +269,19 @@ export default function SettingsPage() {
           ) : (
             <SettingsLoadingSkeleton />
           )}
-        </div>
-      </div>
-    </div>
+          <Modal
+            isOpen={showConfirmModal}
+            onClose={cancelTabChange}
+            title="Unsaved Changes"
+            variant="confirmation"
+            message="You have unsaved changes that will be lost. Do you want to continue?"
+            confirmLabel="Discard Changes"
+            cancelLabel="Keep Editing"
+            onConfirm={confirmTabChange}
+            isDanger={true}
+          />
+        </ErrorBoundary>
+      </QueryErrorBoundary>
+    </DashboardPageContainer>
   );
 }
