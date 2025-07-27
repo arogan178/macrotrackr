@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { apiService, BillingDetailsResponse } from "@/utils/apiServices";
 
@@ -12,8 +13,7 @@ export function useBillingDetails() {
     queryFn: async (): Promise<BillingDetailsResponse> => {
       return await apiService.billing.getBillingDetails();
     },
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    ...queryConfigs.longLived, // 5 minutes stale time for billing settings
     retry: (failureCount, error) => {
       // Don't retry on auth errors
       if (error instanceof Error && error.message.includes("401")) {
