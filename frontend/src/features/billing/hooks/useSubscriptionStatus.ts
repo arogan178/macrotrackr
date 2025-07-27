@@ -1,8 +1,5 @@
-import { useEffect } from "react";
-
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
-import { apiService } from "@/utils/apiServices";
 
 interface UserWithSubscription {
   subscription?: {
@@ -25,9 +22,3 @@ export function useSubscriptionStatus() {
 
   return { subscriptionStatus, setSubscriptionStatus };
 }
-
-/**
- * Usage example:
- * const { subscriptionStatus } = useSubscriptionStatus();
- * if (subscriptionStatus === 'pro') { ... }
- */

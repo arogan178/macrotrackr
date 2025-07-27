@@ -2,7 +2,13 @@ import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/queryKeys";
 
-export type FeatureType = "auth" | "habits" | "goals" | "macros" | "reports" | "settings";
+export type FeatureType =
+  | "auth"
+  | "habits"
+  | "goals"
+  | "macros"
+  | "reports"
+  | "settings";
 
 /**
  * Hook for feature-specific loading states
