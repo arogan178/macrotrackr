@@ -1,7 +1,7 @@
 import { Navigate } from "@tanstack/react-router";
 import React from "react";
 
-import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
+import { useSubscriptionStatus } from "@/features/billing/hooks/useSubscriptionStatus";
 
 /**
  * ProRoute - Protects Pro-only pages/routes
