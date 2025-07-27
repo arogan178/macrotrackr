@@ -1,13 +1,14 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ReactNode } from "react";
-import { useFeatureLoading, FeatureType } from "@/hooks/useFeatureLoading";
+
+import SettingsLoadingSkeleton from "@/features/settings/components/SettingsLoadingSkeleton";
+import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
 
 import ErrorBoundary from "../ui/ErrorBoundary";
 import { QueryErrorBoundary } from "../ui/QueryErrorBoundary";
 import { DashboardPageContainer } from "./DashboardPageContainer";
 import Navbar from "./Navbar";
 import { PageHeader } from "./PageHeader";
-import SettingsLoadingSkeleton from "@/features/settings/components/SettingsLoadingSkeleton";
 
 /**
  * FeaturePage layout component.
