@@ -7,20 +7,18 @@ import {
   InfoCard,
   LoadingSpinner,
 } from "@/components/form";
+import MacroTarget from "@/components/macros/MacroTarget";
 import { CheckMarkIcon, InfoIcon } from "@/components/ui";
-import { useStore } from "@/store/store";
+import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
-
-import MacroTarget from "./MacroTarget";
 
 interface MacroTargetFormProps {
   macroTarget: MacroTargetSettings | null;
 }
 
 function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
-  const { updateMacroTargetSettings, isTargetSaving } = useStore();
-
+  const { mutateAsync, isPending } = useUpdateMacroTarget();
   // Local state for edited values
   const [localTarget, setLocalTarget] = useState<
     MacroTargetState | undefined
@@ -87,7 +85,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
             : undefined,
       };
 
-      updateMacroTargetSettings(settingsToSave)
+      mutateAsync(settingsToSave)
         .then(() => {
           setSaveSuccess(true);
           setHasChanges(false);
@@ -95,10 +93,10 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
           setTimeout(() => setSaveSuccess(false), 3000);
         })
         .catch(() => {
-          // Error handling is done in the store
+          // Error handling is done in the mutation
         });
     }
-  }, [localTarget, hasChanges, updateMacroTargetSettings]);
+  }, [localTarget, hasChanges, mutateAsync]);
 
   // Reset to original values
   const handleReset = useCallback(() => {
@@ -191,7 +189,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
 
             {/* Save/Reset Controls */}
             <div className="flex justify-between items-center mt-8">
-              {isTargetSaving ? (
+              {isPending ? (
                 <div className="text-gray-400 text-sm flex items-center">
                   <LoadingSpinner size="sm" color="text-gray-400" />
                   <span className="ml-2">Loading your saved targets...</span>
@@ -219,7 +217,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                     onClick={handleReset}
                     buttonSize="lg"
                     variant="ghost"
-                    disabled={isTargetSaving}
+                    disabled={isPending}
                     text="Reset"
                     ariaLabel="Reset macro targets"
                     className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
