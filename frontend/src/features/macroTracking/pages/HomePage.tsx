@@ -171,6 +171,7 @@ export default function HomePage() {
 
   return (
     <FeaturePage
+      feature="macros"
       title={`Welcome back, ${isLoading ? "..." : user?.firstName || "User"}`}
       subtitle={new Date().toLocaleDateString("en-US", {
         day: "numeric",

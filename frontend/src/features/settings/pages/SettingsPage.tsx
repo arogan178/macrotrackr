@@ -10,11 +10,7 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
-import {
-  useBeforeUnload,
-  useFeatureLoading,
-  useMutationErrorHandler,
-} from "@/hooks";
+import { useBeforeUnload, useMutationErrorHandler } from "@/hooks";
 import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
@@ -44,7 +40,6 @@ export default function SettingsPage() {
   const isSaving = saveSettingsMutation.isPending;
 
   // Use new loading state hooks
-  const { isLoading: isSettingsFeatureLoading } = useFeatureLoading("settings");
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) =>

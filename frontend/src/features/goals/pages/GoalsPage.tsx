@@ -19,7 +19,7 @@ import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 // Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
+import { useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -117,8 +117,6 @@ export default function GoalsPage() {
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
   // Use new loading state hooks
-  const { isLoading: isHabitsLoading } = useFeatureLoading("habits");
-  const { isLoading: isGoalsLoading } = useFeatureLoading("goals");
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),
