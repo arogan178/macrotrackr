@@ -1,19 +1,16 @@
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
-import { Navbar } from "@/components/layout";
-import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
-import { PageHeader } from "@/components/layout/PageHeader";
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
+import FeaturePage from "@/components/layout/FeaturePage";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
   useMacroHistoryForDateRange,
   useMacroTarget,
 } from "@/hooks/queries/useMacroQueries";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 
 import {
@@ -54,18 +51,10 @@ export default function ReportingPage() {
   const { data: history = [], isLoading: isHistoryLoading } =
     useMacroHistoryForDateRange(startDate, endDate);
 
-  const { nutritionProfile, setSubscriptionStatus } = useStore();
+  const { nutritionProfile } = useStore();
 
-  // Hydrate subscriptionStatus from loader user.subscription.status
-  useEffect(() => {
-    if (
-      user &&
-      user.subscription &&
-      typeof user.subscription.status === "string"
-    ) {
-      setSubscriptionStatus(user.subscription.status);
-    }
-  }, [user, setSubscriptionStatus]);
+  // Centralize subscription status hydration
+  usePageDataSync();
 
   // Use the reporting logic hook to handle all data processing
   const {
@@ -94,162 +83,155 @@ export default function ReportingPage() {
     !isHistoryLoading && dataProcessed && aggregatedData.length === 0;
 
   return (
-    <DashboardPageContainer>
-      <Navbar />
-
-      <QueryErrorBoundary>
-        <ErrorBoundary>
-          <PageHeader
-            title="Nutrition Reports"
-            subtitle="Track your nutrition trends and progress over time"
-          />
-          <AnimatePresence mode="wait">
-            {
-              <motion.div
-                key="reporting-main-content"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
-              >
-                {isHistoryLoading ? (
-                  <ReportingPageSkeleton />
-                ) : (
-                  <>
-                    {/* Debug info for development - Adjusted condition */}
-                    {!isHistoryLoading &&
-                      history?.length === 0 &&
-                      dataProcessed && (
-                        <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
-                          <div className="flex items-center">
-                            <svg
-                              className="h-5 w-5 mr-2 text-yellow-500"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth="2"
-                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                              ></path>
-                            </svg>
-                            No nutrition history found. Add some entries to see
-                            your reporting data.
-                          </div>
-                        </div>
-                      )}
-                    {/* Date Range Selector */}
-                    <ProFeature>
-                      <DateRangeSelector
-                        currentRange={dateRange}
-                        onRangeChange={setDateRange}
-                        onExportClick={handleDownloadCSV}
-                        isExportDisabled={
-                          aggregatedData.length === 0 || isHistoryLoading
-                        }
-                      />
-                    </ProFeature>
-                    {/* Summary Stats */}
+    <FeaturePage
+      title="Nutrition Reports"
+      subtitle="Track your nutrition trends and progress over time"
+    >
+      <AnimatePresence mode="wait">
+        {
+          <motion.div
+            key="reporting-main-content"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3, ease: "easeInOut" }}
+          >
+            {isHistoryLoading ? (
+              <ReportingPageSkeleton />
+            ) : (
+              <>
+                {/* Debug info for development - Adjusted condition */}
+                {!isHistoryLoading &&
+                  history?.length === 0 &&
+                  dataProcessed && (
+                    <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
+                      <div className="flex items-center">
+                        <svg
+                          className="h-5 w-5 mr-2 text-yellow-500"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth="2"
+                            d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                          ></path>
+                        </svg>
+                        No nutrition history found. Add some entries to see your
+                        reporting data.
+                      </div>
+                    </div>
+                  )}
+                {/* Date Range Selector */}
+                <ProFeature>
+                  <DateRangeSelector
+                    currentRange={dateRange}
+                    onRangeChange={setDateRange}
+                    onExportClick={handleDownloadCSV}
+                    isExportDisabled={
+                      aggregatedData.length === 0 || isHistoryLoading
+                    }
+                  />
+                </ProFeature>
+                {/* Summary Stats */}
+                {(() => {
+                  const calorieTarget =
+                    weightGoals?.calorieTarget ||
+                    nutritionProfile?.tdee ||
+                    2000;
+                  return (
+                    <MacroSummaryStats
+                      data={aggregatedData}
+                      calorieTarget={calorieTarget}
+                      macroTarget={macroTarget}
+                    />
+                  );
+                })()}
+                {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="order-2 md:order-1">
+                    {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
                     {(() => {
-                      const calorieTarget =
-                        weightGoals?.calorieTarget ||
-                        nutritionProfile?.tdee ||
-                        2000;
+                      const { startDate, endDate } =
+                        getDateRangeISOStrings(dateRange);
                       return (
-                        <MacroSummaryStats
-                          data={aggregatedData}
-                          calorieTarget={calorieTarget}
-                          macroTarget={macroTarget}
+                        <MealTimeBreakdown
+                          history={history}
+                          startDate={startDate}
+                          endDate={endDate}
                         />
                       );
                     })()}
-                    {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <div className="order-2 md:order-1">
-                        {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
-                        {(() => {
-                          const { startDate, endDate } =
-                            getDateRangeISOStrings(dateRange);
-                          return (
-                            <MealTimeBreakdown
-                              history={history}
-                              startDate={startDate}
-                              endDate={endDate}
-                            />
-                          );
-                        })()}
-                      </div>
-                      <div className="order-1 md:order-2">
-                        {/* MacroDensityBreakdown expects pre-aggregated macro density data and numeric range */}
-                        <MacroDensityBreakdown
-                          data={macroDensityData}
-                          selectedRange={mapDateRangeToNumeric(dateRange)}
-                          isLoading={isHistoryLoading}
-                          dataProcessed={dataProcessed}
-                        />
-                      </div>
-                    </div>
-                    {/* Charts */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                      <ProFeature>
-                        <motion.div
-                          layout
-                          className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
-                        >
-                          <h2 className="text-lg font-semibold text-gray-200 mb-6">
-                            Calorie Intake
-                          </h2>
-                          <div className="h-80 ">
-                            <LineChartComponent
-                              data={aggregatedData}
-                              lines={calorieChartLines}
-                              isLoading={isHistoryLoading || !dataProcessed}
-                              showNoDataMessage={showNoDataMessage}
-                            />
-                          </div>
-                        </motion.div>
-                      </ProFeature>
-                      <ProFeature>
-                        <motion.div
-                          layout
-                          className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
-                        >
-                          <h2 className="text-lg font-semibold text-gray-200 mb-6">
-                            Macronutrient Intake
-                          </h2>
-                          <div className="h-80">
-                            <LineChartComponent
-                              data={aggregatedData}
-                              lines={macroChartLines}
-                              isLoading={isHistoryLoading || !dataProcessed}
-                              showNoDataMessage={showNoDataMessage}
-                            />
-                          </div>
-                        </motion.div>
-                      </ProFeature>
-                    </div>
-                    {/* Unified Insights Dashboard */}
-                    <div className="mb-6">
-                      <ProFeature>
-                        <UnifiedInsights
-                          aggregatedData={aggregatedData}
-                          averages={averages}
-                          isLoading={isHistoryLoading}
+                  </div>
+                  <div className="order-1 md:order-2">
+                    {/* MacroDensityBreakdown expects pre-aggregated macro density data and numeric range */}
+                    <MacroDensityBreakdown
+                      data={macroDensityData}
+                      selectedRange={mapDateRangeToNumeric(dateRange)}
+                      isLoading={isHistoryLoading}
+                      dataProcessed={dataProcessed}
+                    />
+                  </div>
+                </div>
+                {/* Charts */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <ProFeature>
+                    <motion.div
+                      layout
+                      className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
+                    >
+                      <h2 className="text-lg font-semibold text-gray-200 mb-6">
+                        Calorie Intake
+                      </h2>
+                      <div className="h-80 ">
+                        <LineChartComponent
+                          data={aggregatedData}
+                          lines={calorieChartLines}
+                          isLoading={isHistoryLoading || !dataProcessed}
                           showNoDataMessage={showNoDataMessage}
-                          macroTarget={macroTarget}
                         />
-                      </ProFeature>
-                    </div>
-                  </>
-                )}
-              </motion.div>
-            }
-          </AnimatePresence>
-        </ErrorBoundary>
-      </QueryErrorBoundary>
-    </DashboardPageContainer>
+                      </div>
+                    </motion.div>
+                  </ProFeature>
+                  <ProFeature>
+                    <motion.div
+                      layout
+                      className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
+                    >
+                      <h2 className="text-lg font-semibold text-gray-200 mb-6">
+                        Macronutrient Intake
+                      </h2>
+                      <div className="h-80">
+                        <LineChartComponent
+                          data={aggregatedData}
+                          lines={macroChartLines}
+                          isLoading={isHistoryLoading || !dataProcessed}
+                          showNoDataMessage={showNoDataMessage}
+                        />
+                      </div>
+                    </motion.div>
+                  </ProFeature>
+                </div>
+                {/* Unified Insights Dashboard */}
+                <div className="mb-6">
+                  <ProFeature>
+                    <UnifiedInsights
+                      aggregatedData={aggregatedData}
+                      averages={averages}
+                      isLoading={isHistoryLoading}
+                      showNoDataMessage={showNoDataMessage}
+                      macroTarget={macroTarget}
+                    />
+                  </ProFeature>
+                </div>
+              </>
+            )}
+          </motion.div>
+        }
+      </AnimatePresence>
+    </FeaturePage>
   );
 }
