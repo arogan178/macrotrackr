@@ -142,7 +142,7 @@ export interface FormButtonProps {
    * Auto-detect loading state from a specific feature
    * When provided, will automatically show loading when that feature has active mutations
    */
-  autoLoadingFeature?: "auth" | "habits" | "goals" | "macros" | "settings";
+  autoLoadingFeature?: "auth" | "habits" | "goals" | "macros" | "reports" | "settings";
 
   /**
    * Auto-detect loading state globally

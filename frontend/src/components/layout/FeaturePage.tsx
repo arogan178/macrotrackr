@@ -1,22 +1,26 @@
 import { AnimatePresence, motion } from "motion/react";
 import { ReactNode } from "react";
+import { useFeatureLoading, FeatureType } from "@/hooks/useFeatureLoading";
 
 import ErrorBoundary from "../ui/ErrorBoundary";
 import { QueryErrorBoundary } from "../ui/QueryErrorBoundary";
 import { DashboardPageContainer } from "./DashboardPageContainer";
 import Navbar from "./Navbar";
 import { PageHeader } from "./PageHeader";
+import SettingsLoadingSkeleton from "@/features/settings/components/SettingsLoadingSkeleton";
 
 /**
  * FeaturePage layout component.
  * - Wraps content in DashboardPageContainer, Navbar, PageHeader, error boundaries, and animation.
- * - Accepts title, subtitle, and children.
+ * - Accepts title, subtitle, feature, and children.
  */
 interface FeaturePageProps {
   title: string;
   subtitle?: string;
   headerChildren?: ReactNode;
   children: ReactNode;
+  feature?: FeatureType;
+  loadingSkeleton?: ReactNode;
 }
 
 export function FeaturePage({
@@ -24,7 +28,12 @@ export function FeaturePage({
   subtitle,
   headerChildren,
   children,
+  feature,
+  loadingSkeleton,
 }: FeaturePageProps) {
+  const loading = feature ? useFeatureLoading(feature) : undefined;
+  const isLoading = loading?.isLoading ?? false;
+
   return (
     <DashboardPageContainer>
       <Navbar />
@@ -41,7 +50,9 @@ export function FeaturePage({
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              {children}
+              {isLoading
+                ? (loadingSkeleton ?? <SettingsLoadingSkeleton />)
+                : children}
             </motion.div>
           </AnimatePresence>
         </ErrorBoundary>
