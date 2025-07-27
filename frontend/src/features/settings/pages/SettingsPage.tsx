@@ -2,13 +2,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
 import { TabButton } from "@/components/form";
-import { Navbar } from "@/components/layout";
-import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
-// Now accepts tabs as children to render them on the right
-import { PageHeader } from "@/components/layout/PageHeader";
+import FeaturePage from "@/components/layout/FeaturePage";
 import { AwardIcon, LockIcon, Modal, UserIcon } from "@/components/ui";
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import {
   BillingForm,
   ChangePasswordForm,
@@ -21,6 +16,7 @@ import {
   useMutationErrorHandler,
 } from "@/hooks";
 import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 
 export default function SettingsPage() {
@@ -57,16 +53,8 @@ export default function SettingsPage() {
         console.log("Settings operation succeeded:", message),
     });
 
-  // Hydrate subscriptionStatus from settings data
-  useEffect(() => {
-    if (
-      settingsData &&
-      settingsData.subscription &&
-      typeof settingsData.subscription.status === "string"
-    ) {
-      setSubscriptionStatus(settingsData.subscription.status);
-    }
-  }, [settingsData, setSubscriptionStatus]);
+  // Centralize subscription status hydration
+  usePageDataSync();
 
   type TabType = "profile" | "billing" | "security";
   const [activeTab, setActiveTab] = useState<TabType>("profile");
@@ -167,121 +155,116 @@ export default function SettingsPage() {
   );
 
   return (
-    <DashboardPageContainer>
-      <Navbar />
-      <QueryErrorBoundary>
-        <ErrorBoundary>
-          {/* Pass Tabs into the updated PageHeader */}
-
-          <PageHeader title="Settings" hasChanges={hasSettingsChanges}>
-            <div
-              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
-              role="tablist"
-              aria-label="Settings Tabs"
+    <FeaturePage
+      title="Settings"
+      subtitle={undefined}
+      headerChildren={
+        <div
+          className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
+          role="tablist"
+          aria-label="Settings Tabs"
+        >
+          <TabButton
+            active={activeTab === "profile"}
+            onClick={() => handleTabChange("profile")}
+            layoutId="settingsTabHighlight"
+            isMotion={true}
+          >
+            <span className="flex items-center relative z-10">
+              <UserIcon size="sm" className="mr-1.5" />
+              Profile
+            </span>
+          </TabButton>
+          <TabButton
+            active={activeTab === "billing"}
+            onClick={() => handleTabChange("billing")}
+            layoutId="settingsTabHighlight"
+            isMotion={true}
+          >
+            <span className="flex items-center relative z-10">
+              <AwardIcon size="sm" className="mr-1.5" />
+              Billing
+            </span>
+          </TabButton>
+          <TabButton
+            active={activeTab === "security"}
+            onClick={() => handleTabChange("security")}
+            layoutId="settingsTabHighlight"
+            isMotion={true}
+          >
+            <span className="flex items-center relative z-10">
+              <LockIcon size="sm" className="mr-1.5" />
+              Security
+            </span>
+          </TabButton>
+        </div>
+      }
+    >
+      {isSettingsLoading ? (
+        <SettingsLoadingSkeleton />
+      ) : settingsQueryError ? (
+        <div className="p-6 text-center">
+          <p className="text-red-400">
+            Failed to load settings. Please try again.
+          </p>
+        </div>
+      ) : settings ? (
+        <AnimatePresence mode="wait">
+          {activeTab === "profile" && (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-              <TabButton
-                active={activeTab === "profile"}
-                onClick={() => handleTabChange("profile")}
-                layoutId="settingsTabHighlight"
-                isMotion={true}
-              >
-                <span className="flex items-center relative z-10">
-                  <UserIcon size="sm" className="mr-1.5" />
-                  Profile
-                </span>
-              </TabButton>
-              <TabButton
-                active={activeTab === "billing"}
-                onClick={() => handleTabChange("billing")}
-                layoutId="settingsTabHighlight"
-                isMotion={true}
-              >
-                <span className="flex items-center relative z-10">
-                  <AwardIcon size="sm" className="mr-1.5" />
-                  Billing
-                </span>
-              </TabButton>
-              <TabButton
-                active={activeTab === "security"}
-                onClick={() => handleTabChange("security")}
-                layoutId="settingsTabHighlight"
-                isMotion={true}
-              >
-                <span className="flex items-center relative z-10">
-                  <LockIcon size="sm" className="mr-1.5" />
-                  Security
-                </span>
-              </TabButton>
-            </div>
-          </PageHeader>
-
-          {isSettingsLoading ? (
-            <SettingsLoadingSkeleton />
-          ) : settingsQueryError ? (
-            <div className="p-6 text-center">
-              <p className="text-red-400">
-                Failed to load settings. Please try again.
-              </p>
-            </div>
-          ) : settings ? (
-            <AnimatePresence mode="wait">
-              {activeTab === "profile" && (
-                <motion.div
-                  key="profile"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  <ProfileForm
-                    settings={settings}
-                    updateSetting={updateSetting}
-                    formErrors={formErrors}
-                    onSubmit={handleSubmit}
-                    isSaving={isSaving}
-                    hasChanges={hasSettingsChanges}
-                  />
-                </motion.div>
-              )}
-              {activeTab === "billing" && (
-                <motion.div
-                  key="billing"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  <BillingForm />
-                </motion.div>
-              )}
-              {activeTab === "security" && (
-                <motion.div
-                  key="security"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
-                  <ChangePasswordForm />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          ) : (
-            <SettingsLoadingSkeleton />
+              <ProfileForm
+                settings={settings}
+                updateSetting={updateSetting}
+                formErrors={formErrors}
+                onSubmit={handleSubmit}
+                isSaving={isSaving}
+                hasChanges={hasSettingsChanges}
+              />
+            </motion.div>
           )}
-          <Modal
-            isOpen={showConfirmModal}
-            onClose={cancelTabChange}
-            title="Unsaved Changes"
-            variant="confirmation"
-            message="You have unsaved changes that will be lost. Do you want to continue?"
-            confirmLabel="Discard Changes"
-            cancelLabel="Keep Editing"
-            onConfirm={confirmTabChange}
-            isDanger={true}
-          />
-        </ErrorBoundary>
-      </QueryErrorBoundary>
-    </DashboardPageContainer>
+          {activeTab === "billing" && (
+            <motion.div
+              key="billing"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <BillingForm />
+            </motion.div>
+          )}
+          {activeTab === "security" && (
+            <motion.div
+              key="security"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3, ease: "easeInOut" }}
+            >
+              <ChangePasswordForm />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      ) : (
+        <SettingsLoadingSkeleton />
+      )}
+      <Modal
+        isOpen={showConfirmModal}
+        onClose={cancelTabChange}
+        title="Unsaved Changes"
+        variant="confirmation"
+        message="You have unsaved changes that will be lost. Do you want to continue?"
+        confirmLabel="Discard Changes"
+        cancelLabel="Keep Editing"
+        onConfirm={confirmTabChange}
+        isDanger={true}
+      />
+    </FeaturePage>
   );
 }
