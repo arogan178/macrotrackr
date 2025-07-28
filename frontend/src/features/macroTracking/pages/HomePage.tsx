@@ -215,40 +215,43 @@ export default function HomePage() {
               )}
             </div>
           </div>
-        </div>
 
-        {/* History Section */}
-        <CardContainer>
-          <div className="p-6">
-            {isLoading ? (
-              <HistoryLoadingSkeleton />
-            ) : (
-              <EntryHistoryPanel
-                history={history}
-                deleteEntry={handleDeleteEntry}
-                onEdit={setEditingEntry}
-                isDeleting={isDeleting}
-                isEditing={isEditing}
-                hasMore={historyHasMore}
-                onLoadMore={loadMoreHistory}
-                isLoadingMore={isLoadingMore}
+          {/* Gap between AddEntryForm and EntryHistoryPanel */}
+          <div className="my-8" />
+
+          {/* History Section */}
+          <CardContainer>
+            <div className="p-6">
+              {isLoading ? (
+                <HistoryLoadingSkeleton />
+              ) : (
+                <EntryHistoryPanel
+                  history={history}
+                  deleteEntry={handleDeleteEntry}
+                  onEdit={setEditingEntry}
+                  isDeleting={isDeleting}
+                  isEditing={isEditing}
+                  hasMore={historyHasMore}
+                  onLoadMore={loadMoreHistory}
+                  isLoadingMore={isLoadingMore}
+                />
+              )}
+            </div>
+          </CardContainer>
+
+          {/* Edit Modal - Only render when editingEntry is not undefined */}
+          <AnimatePresence>
+            {editingEntry && (
+              <EditModal
+                key="edit-modal"
+                entry={editingEntry}
+                onSave={handleEditEntry}
+                onClose={handleCloseModal}
+                isSaving={isEditing}
               />
             )}
-          </div>
-        </CardContainer>
-
-        {/* Edit Modal - Only render when editingEntry is not undefined */}
-        <AnimatePresence>
-          {editingEntry && (
-            <EditModal
-              key="edit-modal"
-              entry={editingEntry}
-              onSave={handleEditEntry}
-              onClose={handleCloseModal}
-              isSaving={isEditing}
-            />
-          )}
-        </AnimatePresence>
+          </AnimatePresence>
+        </div>
       </div>
     </FeaturePage>
   );
