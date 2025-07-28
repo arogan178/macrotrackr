@@ -36,3 +36,4 @@ dist/
 *.db-wal
 frontend/.tanstack/tmp/*
 frontend/src/routeTree.*
+.roo/mcp.json
