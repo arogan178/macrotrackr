@@ -7,7 +7,7 @@ import { Navbar } from "@/components/layout";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
-  useMacroHistory,
+  useMacroHistoryForDateRange,
   useMacroTarget,
 } from "@/hooks/queries/useMacroQueries";
 import { useFeatureLoading } from "@/hooks/useFeatureLoading";
@@ -30,16 +30,28 @@ export default function ReportingPage() {
   // Get user data from useUser hook
   const { data: user } = useUser();
 
+  // Calculate date range for the selected period
+  const getDateRangeISOStrings = (range: string) => {
+    const today = new Date();
+    const endDateString = today.toISOString().split("T")[0];
+    let days = 7;
+    if (range === "month") days = 30;
+    if (range === "3months") days = 90;
+    const startDateObject = new Date(today);
+    startDateObject.setDate(today.getDate() - (days - 1));
+    const startDateString = startDateObject.toISOString().split("T")[0];
+    return { startDate: startDateString, endDate: endDateString };
+  };
+
+  const { startDate, endDate } = getDateRangeISOStrings(dateRange);
+
   // Use TanStack Query hooks for data fetching
   const { data: weightGoals } = useWeightGoals();
   const { data: macroTarget } = useMacroTarget();
-  const { data: macroHistoryData } = useMacroHistory(1000, 0); // Get large set for reporting
-  const history = macroHistoryData?.entries || [];
+  const { data: history = [], isLoading: isHistoryLoading } =
+    useMacroHistoryForDateRange(startDate, endDate);
 
   const { nutritionProfile, setSubscriptionStatus } = useStore();
-
-  // Use feature loading for reporting-related operations
-  const { isLoading } = useFeatureLoading("macros");
 
   // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
@@ -53,15 +65,13 @@ export default function ReportingPage() {
   }, [user, setSubscriptionStatus]);
 
   // Use the reporting logic hook to handle all data processing
-
   const {
     aggregatedData,
     dataProcessed,
     averages,
     handleDownloadCSV,
-    getDateRangeISOStrings,
     mapDateRangeToNumeric,
-  } = useReportingLogic(history, dateRange, isLoading);
+  } = useReportingLogic(history, dateRange, isHistoryLoading);
 
   // Macro density breakdown chart data (percentages)
   const macroDensityData = useMacroDensityBreakdown(history, dateRange);
@@ -78,7 +88,7 @@ export default function ReportingPage() {
   ];
 
   const showNoDataMessage =
-    !isLoading && dataProcessed && aggregatedData.length === 0;
+    !isHistoryLoading && dataProcessed && aggregatedData.length === 0;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-300">
@@ -86,7 +96,7 @@ export default function ReportingPage() {
       <div className="relative min-h-screen">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          {isLoading ? (
+          {isHistoryLoading ? (
             <ReportingPageSkeleton />
           ) : (
             <>
@@ -99,7 +109,7 @@ export default function ReportingPage() {
                 </p>
               </div>
               {/* Debug info for development - Adjusted condition */}
-              {!isLoading && history?.length === 0 && dataProcessed && (
+              {!isHistoryLoading && history?.length === 0 && dataProcessed && (
                 <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
                   <div className="flex items-center">
                     <svg
@@ -127,7 +137,9 @@ export default function ReportingPage() {
                   currentRange={dateRange}
                   onRangeChange={setDateRange}
                   onExportClick={handleDownloadCSV}
-                  isExportDisabled={aggregatedData.length === 0 || isLoading}
+                  isExportDisabled={
+                    aggregatedData.length === 0 || isHistoryLoading
+                  }
                 />
               </ProFeature>
               {/* Summary Stats */}
@@ -163,7 +175,7 @@ export default function ReportingPage() {
                   <MacroDensityBreakdown
                     data={macroDensityData}
                     selectedRange={mapDateRangeToNumeric(dateRange)}
-                    isLoading={isLoading}
+                    isLoading={isHistoryLoading}
                     dataProcessed={dataProcessed}
                   />
                 </div>
@@ -182,7 +194,7 @@ export default function ReportingPage() {
                       <LineChartComponent
                         data={aggregatedData}
                         lines={calorieChartLines}
-                        isLoading={isLoading || !dataProcessed}
+                        isLoading={isHistoryLoading || !dataProcessed}
                         showNoDataMessage={showNoDataMessage}
                       />
                     </div>
@@ -200,7 +212,7 @@ export default function ReportingPage() {
                       <LineChartComponent
                         data={aggregatedData}
                         lines={macroChartLines}
-                        isLoading={isLoading || !dataProcessed}
+                        isLoading={isHistoryLoading || !dataProcessed}
                         showNoDataMessage={showNoDataMessage}
                       />
                     </div>
@@ -214,7 +226,7 @@ export default function ReportingPage() {
                   <UnifiedInsights
                     aggregatedData={aggregatedData}
                     averages={averages}
-                    isLoading={isLoading}
+                    isLoading={isHistoryLoading}
                     showNoDataMessage={showNoDataMessage}
                     macroTarget={macroTarget}
                   />

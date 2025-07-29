@@ -16,8 +16,9 @@ import {
 } from "@/features/goals/components";
 import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
-import { FloatingNotification } from "@/features/notifications/components";
+// Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -48,6 +49,8 @@ export default function GoalsPage() {
     setLogWeightModalOpen,
     openHabitModal,
     closeHabitModal,
+    showNotification,
+    setSubscriptionStatus,
   } = useStore();
 
   // Get user from useUser hook
@@ -86,8 +89,16 @@ export default function GoalsPage() {
     useWeightGoals();
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
-  // Use Zustand only for UI state (notifications, subscription status, etc.)
-  const { setSubscriptionStatus, showNotification } = useStore();
+  // Use new loading state hooks
+  const { isLoading: isHabitsLoading } = useFeatureLoading("habits");
+  const { isLoading: isGoalsLoading } = useFeatureLoading("goals");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => showNotification(message, "error"),
+      onSuccess: (message) => showNotification(message, "success"),
+    });
+
+  // Error handling is managed by TanStack Query's built-in mechanisms
 
   // Hydrate subscriptionStatus from loader user.subscription.status
   useEffect(() => {
@@ -148,16 +159,16 @@ export default function GoalsPage() {
     try {
       if (habitModalMode === "edit" && habitId) {
         await updateHabitMutation.mutateAsync({ id: habitId, values });
-        showNotification("Habit updated successfully!", "success");
+        handleMutationSuccess("Habit updated successfully!");
       } else {
         await addHabitMutation.mutateAsync(values);
-        showNotification("Habit added successfully!", "success");
+        handleMutationSuccess("Habit added successfully!");
       }
       closeHabitModal();
-    } catch {
-      showNotification(
-        `Failed to ${habitModalMode === "edit" ? "update" : "add"} habit`,
-        "error",
+    } catch (error) {
+      handleMutationError(
+        error,
+        `${habitModalMode === "edit" ? "updating" : "adding"} habit`,
       );
     }
   };
@@ -175,38 +186,38 @@ export default function GoalsPage() {
   // Handler for incrementing habit progress
   const handleIncrementHabit = async (id: string) => {
     try {
+      // Find the original habit before mutation
+      const originalHabit = habits.find((h) => h.id === id);
+      if (!originalHabit) {
+        throw new Error("Habit not found");
+      }
+
       await incrementProgressMutation.mutateAsync(id);
+
       // Check if habit was completed
-      const habit = habits.find((h) => h.id === id);
-      if (habit && habit.current + 1 >= habit.target) {
-        showNotification(
-          `🎉 Congratulations! You've completed your ${habit.title}!`,
-          "success",
+      if (originalHabit.current + 1 >= originalHabit.target) {
+        handleMutationSuccess(
+          `🎉 Congratulations! You've completed your ${originalHabit.title}!`,
         );
       }
-    } catch {
-      showNotification("Failed to update habit progress", "error");
+    } catch (error) {
+      handleMutationError(error, "updating habit progress");
     }
   };
 
   // Handler for completing a habit
   const handleCompleteHabit = async (id: string) => {
-    console.log("handleCompleteHabit called with id:", id);
     try {
-      console.log("About to call completeHabitMutation.mutateAsync");
       await completeHabitMutation.mutateAsync(id);
-      console.log("completeHabitMutation.mutateAsync completed");
       const habit = habits.find((h) => h.id === id);
       // Only show congratulations if the habit wasn't already complete
       if (habit && !habit.isComplete) {
-        showNotification(
+        handleMutationSuccess(
           `🎉 Congratulations! You've completed your ${habit.title}!`,
-          "success",
         );
       }
     } catch (error) {
-      console.error("Error in handleCompleteHabit:", error);
-      showNotification("Failed to complete habit", "error");
+      handleMutationError(error, "completing habit");
     }
   };
 
@@ -214,9 +225,9 @@ export default function GoalsPage() {
   const handleDeleteHabit = async (id: string) => {
     try {
       await deleteHabitMutation.mutateAsync(id);
-      showNotification("Habit deleted successfully", "info");
-    } catch {
-      showNotification("Failed to delete habit", "error");
+      handleMutationSuccess("Habit deleted successfully");
+    } catch (error) {
+      handleMutationError(error, "deleting habit");
     }
   };
 
@@ -227,10 +238,9 @@ export default function GoalsPage() {
     try {
       await deleteWeightGoalMutation.mutateAsync();
       handleCloseDeleteConfirmModal();
-      showNotification("Weight goal deleted successfully", "success");
+      handleMutationSuccess("Weight goal deleted successfully");
     } catch (error) {
-      console.error("Error deleting weight goal:", error);
-      showNotification("Failed to delete weight goal", "error");
+      handleMutationError(error, "deleting weight goal");
     }
   };
 
@@ -245,24 +255,7 @@ export default function GoalsPage() {
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
       <Navbar />
 
-      {/* Show notifications for errors */}
-      {weightGoalsError && (
-        <FloatingNotification
-          message={weightGoalsError}
-          type="error"
-          onClose={() => {}}
-          duration={5000}
-        />
-      )}
-
-      {habitsQueryError && (
-        <FloatingNotification
-          message="Failed to load habits"
-          type="error"
-          onClose={() => {}}
-          duration={5000}
-        />
-      )}
+      {/* Error notifications are now handled by the global NotificationManager */}
 
       {/* Reset Goals Confirmation Modal */}
       <AnimatePresence>
