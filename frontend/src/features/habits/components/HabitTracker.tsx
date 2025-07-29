@@ -9,8 +9,7 @@ import {
 } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
+import { useSubscriptionStatus } from "@/features/billing/hooks/useSubscriptionStatus";
 
 import { HABIT_ICONS } from "../constants";
 import { HabitGoal } from "../types/types";
@@ -38,13 +37,6 @@ function HabitTracker({
   const { subscriptionStatus } = useSubscriptionStatus();
   const isPro = subscriptionStatus === "pro";
   const canAddHabit = isPro || habits.length < 2;
-
-  // Use new loading state hooks
-  const { isMutationLoading: isHabitMutationLoading } =
-    useFeatureLoading("habits");
-  const { handleMutationError } = useMutationErrorHandler({
-    onError: (message) => console.error("Habit operation failed:", message),
-  });
 
   return (
     <div className="bg-gray-800/40 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-lg">
