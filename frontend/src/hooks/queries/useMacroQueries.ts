@@ -5,6 +5,8 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+// Mutation hook for adding macro entry with optimistic updates
+import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import type {
@@ -122,112 +124,134 @@ export function useMacroTarget() {
     gcTime: 30 * 60 * 1000, // Keep longer cache time for targets
   });
 }
-// Mutation hook for adding macro entry with optimistic updates
+
+// REFACTORED: Mutation hook for adding macro entry with seamless optimistic updates
 export function useAddMacroEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (entry: MacroEntryCreatePayload) => {
+      // This function now returns the newly created entry from the server
       return await apiService.macros.addEntry(entry);
     },
     onMutate: async (variables: MacroEntryCreatePayload) => {
-      // Cancel any outgoing refetches for affected queries
-      await queryClient.cancelQueries({ queryKey: queryKeys.macros.all() });
+      // 1. Cancel ongoing queries to prevent them from overwriting the optimistic update
+      await queryClient.cancelQueries({
+        queryKey: queryKeys.macros.historyInfinite(),
+      });
       await queryClient.cancelQueries({
         queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
       });
 
-      // Snapshot previous data
-      const previousHistoryData = queryClient.getQueryData(
+      // 2. Snapshot the current state for potential rollback on error
+      const previousHistoryData = queryClient.getQueryData<any>(
         queryKeys.macros.historyInfinite(),
       );
-      const previousDailyTotals = queryClient.getQueryData(
+      const previousDailyTotals = queryClient.getQueryData<MacroDailyTotals>(
         queryKeys.macros.dailyTotals(variables.entryDate),
       );
 
-      // Create optimistic entry with temporary ID
+      // 3. Create a temporary ID for the optimistic entry
+      const temporaryId = `temp_${Date.now()}`;
       const optimisticEntry = {
-        id: Date.now(), // Temporary ID
+        id: temporaryId,
         ...variables,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
 
-      // Optimistically update infinite query data
+      // 4. Optimistically update the history list in the cache
       queryClient.setQueryData(
         queryKeys.macros.historyInfinite(),
         (oldData: any) => {
-          if (!oldData) return oldData;
-
-          const newPages = [...oldData.pages];
-          if (newPages[0]) {
-            newPages[0] = {
-              ...newPages[0],
-              entries: [optimisticEntry, ...newPages[0].entries],
-            };
-          }
-
-          return {
-            ...oldData,
-            pages: newPages,
-          };
-        },
-      );
-
-      // Optimistically update daily totals
-      queryClient.setQueryData(
-        queryKeys.macros.dailyTotals(variables.entryDate),
-        (oldData: any) => {
           if (!oldData) {
             return {
-              date: variables.entryDate,
-              totalCalories: variables.calories,
-              totalProtein: variables.protein,
-              totalCarbs: variables.carbs,
-              totalFat: variables.fat,
-              entryCount: 1,
+              pages: [
+                {
+                  entries: [optimisticEntry],
+                  hasMore: true,
+                  total: 1,
+                  limit: 20,
+                  offset: 0,
+                },
+              ],
+              pageParams: [0],
             };
           }
+          const newPages = [...oldData.pages];
+          newPages[0] = {
+            ...newPages[0],
+            entries: [optimisticEntry, ...newPages[0].entries],
+          };
+          return { ...oldData, pages: newPages };
+        },
+      );
 
+      // 5. Optimistically update the daily totals in the cache
+      queryClient.setQueryData(
+        queryKeys.macros.dailyTotals(variables.entryDate),
+        (oldData: MacroDailyTotals | undefined) => {
+          const entryCalories = calculateCaloriesFromMacros(
+            variables.protein,
+            variables.carbs,
+            variables.fats,
+          );
+          if (!oldData) {
+            return {
+              protein: variables.protein,
+              carbs: variables.carbs,
+              fats: variables.fats,
+              calories: entryCalories,
+            };
+          }
           return {
             ...oldData,
-            totalCalories: oldData.totalCalories + variables.calories,
-            totalProtein: oldData.totalProtein + variables.protein,
-            totalCarbs: oldData.totalCarbs + variables.carbs,
-            totalFat: oldData.totalFat + variables.fat,
-            entryCount: oldData.entryCount + 1,
+            protein: oldData.protein + variables.protein,
+            carbs: oldData.carbs + variables.carbs,
+            fats: oldData.fats + variables.fats,
+            calories: oldData.calories + entryCalories,
           };
         },
       );
 
-      return { previousHistoryData, previousDailyTotals };
+      // 6. Return the context with snapshot data and the temporary ID
+      return { previousHistoryData, previousDailyTotals, tempId: temporaryId };
     },
-    onError: (error, variables, context) => {
-      // Rollback optimistic updates
-      if (context?.previousHistoryData !== undefined) {
+    onError: (_error, variables, context) => {
+      // If there's an error, roll back the optimistic updates
+      if (context?.previousHistoryData) {
         queryClient.setQueryData(
           queryKeys.macros.historyInfinite(),
           context.previousHistoryData,
         );
       }
-      if (context?.previousDailyTotals !== undefined) {
+      if (context?.previousDailyTotals) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(variables.entryDate),
           context.previousDailyTotals,
         );
       }
-      console.error("Error adding macro entry:", error);
     },
-    onSettled: (_data, _error, variables) => {
-      // Always refetch to ensure consistency
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.macros.all(),
-        exact: false,
-      });
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
-      });
+    onSuccess: (newEntryFromServer, variables, context) => {
+      // 7. On success, replace the temporary entry with the real one from the server
+      queryClient.setQueryData(
+        queryKeys.macros.historyInfinite(),
+        (oldData: any) => {
+          if (!oldData) return oldData;
+          const newPages = oldData.pages.map((page: any) => ({
+            ...page,
+            entries: page.entries.map((entry: any) =>
+              entry.id === context?.tempId ? newEntryFromServer : entry,
+            ),
+          }));
+          return { ...oldData, pages: newPages };
+        },
+      );
+
+      // By removing the invalidation, we rely on the optimistic update for UI
+      // smoothness. The data will be synchronized on the next stale-time invalidation or manual refetch, which is a good trade-off for UX.
     },
+    // By removing onSettled, we stop the broad, disruptive invalidation
   });
 }
 
@@ -305,23 +329,32 @@ export function useUpdateMacroEntry() {
             (oldData: any) => {
               if (!oldData) return oldData;
 
-              const caloriesDiff =
-                (entry.calories || originalEntry.calories) -
-                originalEntry.calories;
+              // Calculate calories diff using calculateCaloriesFromMacros
+              const newCalories = calculateCaloriesFromMacros(
+                entry.protein ?? originalEntry.protein,
+                entry.carbs ?? originalEntry.carbs,
+                entry.fats ?? originalEntry.fats,
+              );
+              const oldCalories = calculateCaloriesFromMacros(
+                originalEntry.protein,
+                originalEntry.carbs,
+                originalEntry.fats,
+              );
+              const caloriesDiff = newCalories - oldCalories;
               const proteinDiff =
-                (entry.protein || originalEntry.protein) -
+                (entry.protein ?? originalEntry.protein) -
                 originalEntry.protein;
               const carbsDiff =
-                (entry.carbs || originalEntry.carbs) - originalEntry.carbs;
-              const fatDiff =
-                (entry.fat || originalEntry.fat) - originalEntry.fat;
+                (entry.carbs ?? originalEntry.carbs) - originalEntry.carbs;
+              const fatsDiff =
+                (entry.fats ?? originalEntry.fats) - originalEntry.fats;
 
               return {
                 ...oldData,
                 totalCalories: oldData.totalCalories + caloriesDiff,
                 totalProtein: oldData.totalProtein + proteinDiff,
                 totalCarbs: oldData.totalCarbs + carbsDiff,
-                totalFat: oldData.totalFat + fatDiff,
+                totalFat: oldData.totalFat + fatsDiff,
               };
             },
           );
@@ -347,16 +380,13 @@ export function useUpdateMacroEntry() {
       console.error("Error updating macro entry:", error);
     },
     onSettled: (_data, _error, _variables, context) => {
-      // Always refetch to ensure consistency
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.macros.all(),
-        exact: false,
-      });
+      // Only invalidate queries if the mutation affects the currently displayed data
       if (context?.entryDate) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.macros.dailyTotals(context.entryDate),
         });
       }
+      // Avoid broad invalidation of all macro queries to prevent remounts
     },
   });
 }
@@ -460,16 +490,13 @@ export function useDeleteMacroEntry() {
       console.error("Error deleting macro entry:", error);
     },
     onSettled: (_data, _error, _id, context) => {
-      // Always refetch to ensure consistency
-      queryClient.invalidateQueries({
-        queryKey: queryKeys.macros.all(),
-        exact: false,
-      });
+      // Only invalidate queries if the mutation affects the currently displayed data
       if (context?.entryDate) {
         queryClient.invalidateQueries({
           queryKey: queryKeys.macros.dailyTotals(context.entryDate),
         });
       }
+      // Avoid broad invalidation of all macro queries to prevent remounts
     },
   });
 }
