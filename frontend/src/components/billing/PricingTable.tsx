@@ -10,7 +10,7 @@ import React, { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ProBadge from "@/components/billing/ProBadge";
-import TabButton from "@/components/form/TabButton";
+import { TabButton } from "@/components/ui";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
 
 // Memoize feature arrays outside the component to prevent re-computation on every render
