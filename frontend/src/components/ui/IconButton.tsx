@@ -2,7 +2,7 @@
  * IconButton – Standardized circular icon buttons for common actions.
  *
  * Provides predefined styling for common action types (delete, edit, close, etc.)
- * while maintaining consistency with the FormButton system.
+ * while maintaining consistency with the Button system.
  *
  * @example
  * // Delete button
@@ -24,8 +24,8 @@
  */
 import React, { memo } from "react";
 
-import { FormButton } from "@/components/form";
 import {
+  Button,
   CloseIcon,
   EditIcon,
   ExportIcon,
@@ -154,7 +154,7 @@ function IconButton({
     .join(" ");
 
   return (
-    <FormButton
+    <Button
       variant="ghost"
       buttonSize="sm"
       onClick={onClick}
@@ -164,7 +164,7 @@ function IconButton({
       {...rest}
     >
       {iconElement}
-    </FormButton>
+    </Button>
   );
 }
 

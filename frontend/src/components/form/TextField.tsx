@@ -42,7 +42,7 @@ import { EyeIcon, EyeSlashIcon } from "@/components/ui";
 import { formStyles } from "@/components/utils/Styles";
 import type { TextFieldProps } from "@/components/utils/Types";
 
-import IconButton from "./IconButton";
+import IconButton from "../ui/IconButton";
 
 function TextField({
   label,

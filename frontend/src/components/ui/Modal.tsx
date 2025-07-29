@@ -59,7 +59,8 @@ import { motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { FormButton, IconButton } from "../form";
+import { Button, IconButton } from "@/components/ui";
+
 import type {
   ConfirmationModalProps,
   FormModalProps,
@@ -287,7 +288,7 @@ function Modal(properties: ModalProps) {
             } gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
           >
             {!hideCancelButton && (
-              <FormButton
+              <Button
                 onClick={onClose}
                 ariaLabel={cancelLabel}
                 variant="secondary"
@@ -295,10 +296,10 @@ function Modal(properties: ModalProps) {
                 className="px-4 py-2 rounded-lg font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
               >
                 {cancelLabel}
-              </FormButton>
+              </Button>
             )}
             {variant === "form" && onSave && (
-              <FormButton
+              <Button
                 type="button"
                 onClick={onSave}
                 disabled={saveDisabled}
@@ -309,7 +310,7 @@ function Modal(properties: ModalProps) {
               />
             )}
             {variant === "confirmation" && onConfirm && (
-              <FormButton
+              <Button
                 onClick={onConfirm}
                 ariaLabel={confirmLabel}
                 variant={isDanger ? "danger" : "primary"}
@@ -317,7 +318,7 @@ function Modal(properties: ModalProps) {
                 className={`px-4 py-2 rounded-lg font-medium transition-colors ${variantStyles.confirmButton}`}
               >
                 {confirmLabel}
-              </FormButton>
+              </Button>
             )}
           </div>
         )}

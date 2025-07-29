@@ -2,11 +2,12 @@ import { motion } from "motion/react"; // Import motion
 import { memo } from "react";
 
 import { AnimatedNumber } from "@/components/animation/";
-import { FormButton, IconButtonGroup } from "@/components/form";
 import {
+  Button,
   CalendarIcon, // Added for Time Remaining
   CalorieIcon,
   ChevronRightIcon,
+  IconButtonGroup,
   ProgressBar, // Added for Daily Deficit/Surplus
   TargetIcon,
   TrendingUpIcon, // Added for Weekly Rate
@@ -163,7 +164,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
         </div>
         <div className="flex items-center gap-2 self-end sm:self-center">
-          <FormButton
+          <Button
             variant="secondary"
             onClick={onLogWeight}
             className="bg-blue-600/20 hover:bg-blue-600/30 text-blue-300 font-medium transition-colors duration-200 focus:ring-blue-500"
