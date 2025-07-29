@@ -2,13 +2,27 @@ import { useState } from "react";
 
 import { CardContainer, FormButton, TextField } from "@/components/form";
 import { LockIcon } from "@/components/ui";
-import { FloatingNotification } from "@/features/notifications/components";
+import { useMutationErrorHandler } from "@/hooks";
+// Notifications are handled by the global NotificationManager and store
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 const ChangePasswordForm = () => {
   const { showNotification } = useStore();
   const changePasswordMutation = useChangePassword();
+
+  // Use new mutation error handling
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => {
+        setFormError(message);
+        showNotification(message, "error");
+      },
+      onSuccess: (message) => {
+        setSuccessMessage(message);
+        showNotification(message, "success");
+      },
+    });
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -34,14 +48,12 @@ const ChangePasswordForm = () => {
         currentPassword,
         newPassword,
       });
-      setSuccessMessage("Password changed successfully.");
+      handleMutationSuccess("Password changed successfully.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to change password.";
-      showNotification(errorMessage, "error");
+      handleMutationError(error, "changing password");
     }
   };
 
@@ -65,13 +77,7 @@ const ChangePasswordForm = () => {
           </div>
         </div>
 
-        {successMessage && (
-          <FloatingNotification
-            message={successMessage}
-            type="success"
-            onClose={() => setSuccessMessage(undefined)}
-          />
-        )}
+        {/* Success notifications are now handled by the global NotificationManager */}
 
         <div className="grid grid-cols-1 gap-6">
           <TextField
