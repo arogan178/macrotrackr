@@ -1,6 +1,5 @@
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { CalorieIcon } from "@/components/ui";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, CalorieIcon, LoadingSpinner } from "@/components/ui";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
@@ -93,7 +92,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
             Forgot Password?
           </button>
         </div>
-        <FormButton
+        <Button
           type="submit"
           autoLoadingFeature="auth"
           loadingText="Signing in..."
@@ -104,7 +103,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
                  shadow-lg shadow-indigo-500/30"
         >
           Sign In
-        </FormButton>
+        </Button>
       </form>
     </CardContainer>
   );

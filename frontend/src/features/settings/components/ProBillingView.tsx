@@ -1,8 +1,8 @@
 import { useLoaderData } from "@tanstack/react-router";
 import React, { useState } from "react";
 
-import { FormButton } from "@/components/form";
 import {
+  Button,
   ExternalLinkIcon,
   InfoIcon,
   Modal,
@@ -103,7 +103,7 @@ const ProBillingView: React.FC<{
         </div>
       </div>
       <div className="flex flex-col sm:flex-row gap-3">
-        <FormButton
+        <Button
           onClick={() => setShow(true)}
           isLoading={isLoading}
           loadingText="Opening Portal..."
@@ -116,9 +116,9 @@ const ProBillingView: React.FC<{
           ariaLabel="Manage your Pro subscription"
         >
           {isActionRequired ? "Fix Payment Issue" : "Manage Subscription"}
-        </FormButton>
+        </Button>
         {!isCanceled && (
-          <FormButton
+          <Button
             onClick={() => setShowCancel(true)}
             variant="danger"
             fullWidth
@@ -126,7 +126,7 @@ const ProBillingView: React.FC<{
             ariaLabel="Cancel your Pro subscription"
           >
             Cancel Subscription
-          </FormButton>
+          </Button>
         )}
       </div>
 
@@ -155,14 +155,14 @@ const ProBillingView: React.FC<{
             </div>
           </div>
           <div className="flex gap-3 pt-2">
-            <FormButton
+            <Button
               onClick={() => setShowCancel(false)}
               variant="secondary"
               className="flex-1"
             >
               Keep Subscription
-            </FormButton>
-            <FormButton
+            </Button>
+            <Button
               onClick={async () => {
                 try {
                   const response = await cancelSubscription();
@@ -186,7 +186,7 @@ const ProBillingView: React.FC<{
               className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
             >
               Confirm Cancel
-            </FormButton>
+            </Button>
           </div>
         </div>
       </Modal>
@@ -242,14 +242,14 @@ const ProBillingView: React.FC<{
             </p>
           </div>
           <div className="flex gap-3 pt-2">
-            <FormButton
+            <Button
               onClick={() => setShow(false)}
               variant="secondary"
               className="flex-1"
             >
               Cancel
-            </FormButton>
-            <FormButton
+            </Button>
+            <Button
               onClick={() => {
                 setShow(false);
                 onManage();
@@ -259,7 +259,7 @@ const ProBillingView: React.FC<{
               icon={<ExternalLinkIcon className="w-4 h-4" />}
             >
               Continue to Portal
-            </FormButton>
+            </Button>
           </div>
         </div>
       </Modal>

@@ -1,8 +1,7 @@
 import { useState } from "react";
 
 import { TextField } from "@/components/form";
-import FormButton from "@/components/form/FormButton";
-import { ArrowRightIcon, SearchIcon } from "@/components/ui";
+import { ArrowRightIcon, Button, SearchIcon } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { apiService } from "@/utils/apiServices";
 
@@ -196,7 +195,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           )}
         </div>
         <div className="flex items-end">
-          <FormButton
+          <Button
             type="button"
             onClick={handleSearch}
             isLoading={loading}
