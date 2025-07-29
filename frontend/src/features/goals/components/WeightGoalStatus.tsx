@@ -2,7 +2,7 @@ import { motion } from "motion/react"; // Import motion
 import { memo } from "react";
 
 import { AnimatedNumber } from "@/components/animation/";
-import { ActionButtonGroup, FormButton } from "@/components/form";
+import { FormButton, IconButtonGroup } from "@/components/form";
 import {
   CalendarIcon, // Added for Time Remaining
   CalorieIcon,
@@ -172,7 +172,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             iconPosition="left"
             ariaLabel="Log current weight"
           />
-          <ActionButtonGroup
+          <IconButtonGroup
             onEdit={onEdit}
             onDelete={onDelete}
             editLabel="Edit weight goal"

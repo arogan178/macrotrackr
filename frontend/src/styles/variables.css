@@ -1,0 +1,21 @@
+/* Modern Productivity App Color Variables */
+
+:root {
+  /* Primary (Deep Teal) */
+  --primary: #0a4d68;
+
+  /* Accent (Vibrant Coral) */
+  --accent: #ff6b6b;
+
+  /* Neutrals */
+  --neutral-0: #f8f9fa; /* Off-White (background) */
+  --neutral-1: #e9ecef; /* Light Gray (borders, dividers) */
+  --neutral-2: #ced4da; /* Medium Gray (secondary text, disabled) */
+  --neutral-3: #495057; /* Dark Gray (body text) */
+  --neutral-4: #212529; /* Charcoal (headings, titles) */
+
+  /* System Colors */
+  --success: #28a745;
+  --warning: #ffc107;
+  --error: #dc3545;
+}

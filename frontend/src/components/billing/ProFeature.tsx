@@ -1,7 +1,7 @@
 import React, { memo } from "react";
 
 import { ProBadge, UpgradeModal } from "@/components/billing";
-import { useSubscriptionStatus } from "@/features/pricing/hooks/useSubscriptionStatus";
+import { useSubscriptionStatus } from "@/features/billing/hooks/useSubscriptionStatus";
 
 /**
  * ProFeature - Conditionally renders Pro features with gating

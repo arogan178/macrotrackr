@@ -2,7 +2,13 @@ import { useIsFetching, useIsMutating } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/queryKeys";
 
-export type FeatureType = "auth" | "habits" | "goals" | "macros" | "settings";
+export type FeatureType =
+  | "auth"
+  | "habits"
+  | "goals"
+  | "macros"
+  | "reports"
+  | "settings";
 
 /**
  * Hook for feature-specific loading states
@@ -13,19 +19,22 @@ export function useFeatureLoading(feature: FeatureType) {
   const getFeatureQueryKey = (feature: FeatureType): unknown[] => {
     switch (feature) {
       case "auth": {
-        return queryKeys.auth.all();
+        return [...queryKeys.auth.all()];
       }
       case "habits": {
-        return queryKeys.habits.all();
+        return [...queryKeys.habits.all()];
       }
       case "goals": {
-        return queryKeys.goals.all();
+        return [...queryKeys.goals.all()];
       }
       case "macros": {
-        return queryKeys.macros.all();
+        return [...queryKeys.macros.all()];
       }
       case "settings": {
-        return queryKeys.settings.all();
+        return [...queryKeys.settings.all()];
+      }
+      case "reports": {
+        return [...queryKeys.macros.all()];
       }
       default: {
         return [];

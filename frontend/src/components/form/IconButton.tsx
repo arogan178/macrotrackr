@@ -1,20 +1,20 @@
 /**
- * ActionButton – Standardized circular icon buttons for common actions.
+ * IconButton – Standardized circular icon buttons for common actions.
  *
  * Provides predefined styling for common action types (delete, edit, close, etc.)
  * while maintaining consistency with the FormButton system.
  *
  * @example
  * // Delete button
- * <ActionButton variant="delete" onClick={handleDelete} ariaLabel="Delete item" />
+ * <IconButton variant="delete" onClick={handleDelete} ariaLabel="Delete item" />
  *
  * @example
  * // Edit button
- * <ActionButton variant="edit" onClick={handleEdit} ariaLabel="Edit item" />
+ * <IconButton variant="edit" onClick={handleEdit} ariaLabel="Edit item" />
  *
  * @example
  * // Custom action with custom icon
- * <ActionButton
+ * <IconButton
  *   variant="custom"
  *   icon={<CustomIcon />}
  *   onClick={handleCustomAction}
@@ -50,7 +50,7 @@ type ActionVariant =
   | "password-toggle"
   | "custom";
 
-interface ActionButtonProps {
+interface IconButtonProps {
   variant: ActionVariant;
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   ariaLabel: string;
@@ -116,7 +116,7 @@ const getActionConfigs = () =>
     },
   }) as const;
 
-function ActionButton({
+function IconButton({
   variant,
   onClick,
   ariaLabel,
@@ -126,7 +126,7 @@ function ActionButton({
   icon: customIcon,
   className = "",
   ...rest
-}: ActionButtonProps) {
+}: IconButtonProps) {
   const config = getActionConfigs()[variant];
   // Prefer iconSize, fallback to buttonSize (both are strongly typed)
   const resolvedIconSize: IconSize = iconSize || buttonSize;
@@ -168,4 +168,4 @@ function ActionButton({
   );
 }
 
-export default memo(ActionButton);
+export default memo(IconButton);
