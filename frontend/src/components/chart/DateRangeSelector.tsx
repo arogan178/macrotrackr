@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-import { ActionButton, FormButton } from "@/components/form";
+import { FormButton, IconButton } from "@/components/form";
 import { ExportIcon } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 
@@ -56,9 +56,9 @@ export default function DateRangeSelector({
             ))}
           </div>
         </div>
-        {/* Mobile Export CSV ActionButton aligned right */}
+        {/* Mobile Export CSV IconButton aligned right */}
         <div className="flex lg:hidden ml-auto">
-          <ActionButton
+          <IconButton
             variant="export"
             ariaLabel="Export data as CSV file"
             onClick={onExportClick}

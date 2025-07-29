@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { ActionButton } from "@/components/form";
+import { IconButton } from "@/components/form";
 import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "@/components/ui";
 
 import type { NotificationType } from "../types";
@@ -176,7 +176,7 @@ function FloatingNotification({
 
         {/* Close button */}
         <div className="flex-shrink-0 p-2">
-          <ActionButton
+          <IconButton
             variant="close"
             onClick={handleClose}
             ariaLabel="Close notification"

@@ -7,7 +7,7 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useMemo } from "react";
 
-import { ActionButton, ActionButtonGroup } from "@/components/form";
+import { IconButton, IconButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
@@ -209,7 +209,7 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <ActionButton
+                <IconButton
                   variant="delete"
                   buttonSize="sm"
                   onClick={(event: React.MouseEvent) =>
@@ -222,7 +222,7 @@ const DesktopEntryTable = memo(
             } else {
               const entry = data.entries[0];
               return (
-                <ActionButtonGroup
+                <IconButtonGroup
                   onEdit={() => onEdit(entry)}
                   onDelete={() => deleteEntry(entry.id)}
                   isDeleting={isDeleting}
