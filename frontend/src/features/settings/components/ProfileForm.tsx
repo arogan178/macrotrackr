@@ -2,11 +2,10 @@ import {
   CardContainer,
   DateField,
   Dropdown,
-  FormButton,
   NumberField,
   TextField,
 } from "@/components/form";
-import { UserIcon } from "@/components/ui";
+import { Button, UserIcon } from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
@@ -176,7 +175,7 @@ export default function ProfileForm({
 
         {/* Submit button section */}
         <div className="mt-8 flex justify-end">
-          <FormButton
+          <Button
             type="submit"
             isLoading={isSaving}
             disabled={!hasChanges || Object.keys(formErrors).length > 0}

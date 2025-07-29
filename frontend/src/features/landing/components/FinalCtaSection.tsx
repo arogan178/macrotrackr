@@ -3,7 +3,7 @@ import { motion } from "motion/react";
 import React from "react";
 
 import ScrollTriggeredDiv from "@/components/animation/ScrollTriggeredDiv";
-import FormButton from "@/components/form/FormButton";
+import { Button } from "@/components/ui";
 
 const FinalCTASection: React.FC = () => (
   <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
@@ -63,7 +63,7 @@ const FinalCTASection: React.FC = () => (
           whileTap={{ scale: 0.96, y: 0 }}
           transition={{ type: "spring", stiffness: 500, damping: 32 }}
         >
-          <FormButton
+          <Button
             text="Get Started For Free"
             variant="primary"
             buttonSize="lg"

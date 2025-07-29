@@ -8,13 +8,13 @@ import {
   formStyles,
   ICON_POSITIONS,
 } from "@/components/utils";
-import type { FormButtonProps } from "@/components/utils/Types";
+import type { ButtonProps } from "@/components/utils/Types";
 import { useFeatureLoading, useGlobalLoading } from "@/hooks";
 
-type FormButtonAllProps = FormButtonProps &
+type ButtonAllProps = ButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-function FormButton({
+function Button({
   children,
   text,
   type = "button",
@@ -32,7 +32,7 @@ function FormButton({
   autoLoadingFeature,
   autoLoadingGlobal = false,
   ...rest
-}: FormButtonAllProps) {
+}: ButtonAllProps) {
   // Auto-detect loading states if requested
   const featureLoading = autoLoadingFeature
     ? useFeatureLoading(autoLoadingFeature)
@@ -99,4 +99,4 @@ function FormButton({
   );
 }
 
-export default memo(FormButton);
+export default memo(Button);

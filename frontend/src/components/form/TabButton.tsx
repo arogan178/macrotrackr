@@ -2,7 +2,7 @@ import { motion } from "motion/react";
 
 import type { TabButtonProps } from "@/components/utils/Types";
 
-import FormButton from "./FormButton";
+import Button from "../ui/Button";
 
 type ExtendedTabButtonProps = TabButtonProps & {
   rounded?: string;
@@ -24,7 +24,7 @@ function TabButton({
   const motionBg = activeBg || "bg-indigo-600";
 
   return (
-    <FormButton
+    <Button
       onClick={onClick}
       variant={active ? "primary" : "ghost"}
       className={`relative px-3 py-1.5 ${baseRounded} text-sm font-medium ${
@@ -46,7 +46,7 @@ function TabButton({
           transition={{ type: "spring", stiffness: 350, damping: 30 }}
         />
       )}
-    </FormButton>
+    </Button>
   );
 }
 

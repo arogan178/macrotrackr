@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { FormButton, TextField } from "@/components/form";
+import { TextField } from "@/components/form";
+import { Button } from "@/components/ui";
 // Notifications are handled by the global NotificationManager and store
 
 type AuthMode = "login" | "register";
@@ -58,14 +59,14 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
           required
           minLength={6}
         />
-        <FormButton
+        <Button
           type="submit"
           isLoading={loading}
           disabled={loading}
           className="w-full"
         >
           {mode === "login" ? "Login" : "Register"}
-        </FormButton>
+        </Button>
       </form>
     </div>
   );

@@ -1,8 +1,7 @@
 import { useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import IconButton from "@/components/form/IconButton";
-import { LockIcon, UnlockIcon } from "@/components/ui";
+import { IconButton, LockIcon, UnlockIcon } from "@/components/ui";
 
 interface MacroSliderProps {
   name: string;

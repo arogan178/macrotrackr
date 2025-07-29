@@ -45,7 +45,7 @@ export const formStyles = {
 
   // Button styles
   button: {
-    // Base button styles (used in FormButton and elsewhere)
+    // Base button styles (used in Button and elsewhere)
     base:
       "inline-flex items-center justify-center font-medium text-sm gap-1.5 transition-all duration-200 " +
       "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +

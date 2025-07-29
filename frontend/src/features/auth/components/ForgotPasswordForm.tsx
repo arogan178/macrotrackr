@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { EmailIcon } from "@/components/ui";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, EmailIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
@@ -57,24 +57,24 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           placeholder="your@email.com"
           maxLength={30}
         />
-        <FormButton
+        <Button
           type="submit"
           autoLoadingFeature="auth"
           loadingText="Sending..."
           className="w-full"
         >
           Send Reset Link
-        </FormButton>
+        </Button>
       </form>
       <div className="text-right mt-4">
-        <FormButton
+        <Button
           type="button"
           variant="ghost"
           className="text-sm"
           onClick={onSwitchToLogin}
         >
           Back to Login
-        </FormButton>
+        </Button>
       </div>
     </CardContainer>
   );

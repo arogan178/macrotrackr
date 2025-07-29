@@ -1,7 +1,6 @@
 import React from "react";
 
-import { FormButton } from "@/components/form";
-import { StarIcon } from "@/components/ui";
+import { Button, StarIcon } from "@/components/ui";
 
 const FreeBillingView: React.FC<{
   onUpgrade: () => void;
@@ -22,7 +21,7 @@ const FreeBillingView: React.FC<{
     </div>
 
     <div className="space-y-4">
-      <FormButton
+      <Button
         onClick={onUpgrade}
         isLoading={isLoading}
         loadingText="Redirecting..."
@@ -33,7 +32,7 @@ const FreeBillingView: React.FC<{
         ariaLabel="Upgrade to Pro"
       >
         Upgrade to Pro
-      </FormButton>
+      </Button>
     </div>
   </div>
 );

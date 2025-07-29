@@ -2,8 +2,8 @@ import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
-import { FormButton } from "@/components/form";
 import {
+  Button,
   CloseIcon,
   GoalsIcon,
   HomeIcon,
@@ -58,19 +58,19 @@ const Navbar: React.FC = () => {
         style={{ touchAction: "none", overscrollBehavior: "none" }}
       >
         <div className="flex items-center">
-          <FormButton
+          <Button
             onClick={() => navigate({ to: "/home" })}
             ariaLabel="Go to home page"
             className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
             variant="ghost"
           >
             MacroTrackr
-          </FormButton>
+          </Button>
 
           {/* Desktop menu */}
           <div className="hidden md:flex items-center space-x-2">
             {navItems.map(({ path, label, icon: Icon }) => (
-              <FormButton
+              <Button
                 key={path}
                 onClick={() => handleNavigation(path)}
                 ariaLabel={label}
@@ -81,14 +81,14 @@ const Navbar: React.FC = () => {
                 iconPosition="left"
               >
                 <span>{label}</span>
-              </FormButton>
+              </Button>
             ))}
           </div>
         </div>
         <div className="flex items-center space-x-2">
           {/* Desktop logout button */}
           <div className="hidden md:flex">
-            <FormButton
+            <Button
               onClick={handleLogout}
               ariaLabel="Logout"
               className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
@@ -97,7 +97,7 @@ const Navbar: React.FC = () => {
               iconPosition="left"
             >
               <span>Logout</span>
-            </FormButton>
+            </Button>
           </div>
 
           {/* Mobile menu button */}
@@ -105,7 +105,7 @@ const Navbar: React.FC = () => {
             whileTap={{ scale: 0.95 }}
             style={{ display: "inline-block" }}
           >
-            <FormButton
+            <Button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               ariaLabel={isMobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMobileMenuOpen}
@@ -154,7 +154,7 @@ const Navbar: React.FC = () => {
             >
               <div className="p-4 space-y-2">
                 {navItems.map(({ path, label, icon: Icon }) => (
-                  <FormButton
+                  <Button
                     key={path}
                     onClick={() => handleNavigation(path)}
                     ariaLabel={label}
@@ -167,11 +167,11 @@ const Navbar: React.FC = () => {
                     iconPosition="left"
                   >
                     <span>{label}</span>
-                  </FormButton>
+                  </Button>
                 ))}
 
                 {/* Mobile logout button */}
-                <FormButton
+                <Button
                   onClick={handleLogout}
                   ariaLabel="Logout"
                   className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 "
@@ -180,7 +180,7 @@ const Navbar: React.FC = () => {
                   iconPosition="left"
                 >
                   <span>Logout</span>
-                </FormButton>
+                </Button>
               </div>
             </motion.div>
           </>

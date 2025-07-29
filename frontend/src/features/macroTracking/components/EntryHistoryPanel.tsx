@@ -3,15 +3,15 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
-import { FormButton } from "@/components/form";
-import IconButton from "@/components/form/IconButton";
 import {
+  Button,
   ChevronDownIcon,
   ExportIcon,
   LoadingSpinner,
   PlusCircleIcon,
 } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
+import IconButton from "@/components/ui/IconButton";
 import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
 
@@ -319,7 +319,7 @@ const EntryHistoryComponent = function EntryHistory({
         </motion.div>
         {history.length > 0 && (
           <ProFeature>
-            <FormButton
+            <Button
               type="button"
               icon={<ExportIcon />}
               iconPosition="left"
