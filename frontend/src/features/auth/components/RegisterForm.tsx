@@ -9,12 +9,22 @@ import {
 import { StepIndicator } from "@/features/auth/components/StepIndicator";
 import { REGISTRATION_STEPS } from "@/features/auth/utils";
 import FloatingNotification from "@/features/notifications/components/FloatingNotification";
+import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 
 // Main RegisterForm Component
 function RegisterForm() {
   const { register, resetRegistration } = useStore();
   const [error, setError] = useState<string | undefined>();
+
+  // Use new loading state hooks
+  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) => setError(message),
+      onSuccess: (message) =>
+        console.log("Registration step succeeded:", message),
+    });
 
   // Reset registration data when component unmounts
   useEffect(() => {
