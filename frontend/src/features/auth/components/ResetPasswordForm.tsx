@@ -2,8 +2,8 @@ import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { resetPasswordRoute } from "@/AppRouter";
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { LoadingSpinner, LockIcon } from "@/components/ui";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, LoadingSpinner, LockIcon } from "@/components/ui";
 import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
@@ -56,7 +56,7 @@ function ResetPasswordForm() {
           required={true}
           placeholder="••••••••"
         />
-        <FormButton
+        <Button
           type="submit"
           className="w-full"
           disabled={resetPasswordMutation.isPending || !token}
@@ -66,7 +66,7 @@ function ResetPasswordForm() {
           ) : (
             "Reset Password"
           )}
-        </FormButton>
+        </Button>
       </form>
     </CardContainer>
   );

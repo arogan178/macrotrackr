@@ -1,5 +1,4 @@
-import FormButton from "@/components/form/FormButton";
-import { AwardIcon, GoalsIcon } from "@/components/ui";
+import { AwardIcon, Button, GoalsIcon } from "@/components/ui";
 
 interface GoalsModeToggleProps {
   activeMode: "active" | "achieved";
@@ -9,7 +8,7 @@ interface GoalsModeToggleProps {
 function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
   return (
     <div className="relative flex items-center bg-gray-800/40 rounded-xl p-1 w-fit">
-      <FormButton
+      <Button
         type="button"
         onClick={activeMode === "achieved" ? onToggle : undefined}
         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -27,8 +26,8 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
         }
       >
         <div className="flex items-center">Active Goals</div>
-      </FormButton>
-      <FormButton
+      </Button>
+      <Button
         type="button"
         onClick={activeMode === "active" ? onToggle : undefined}
         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
@@ -40,7 +39,7 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
         icon={<AwardIcon />}
       >
         <div className="flex items-center">Achievements</div>
-      </FormButton>
+      </Button>
     </div>
   );
 }

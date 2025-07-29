@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import React from "react";
 
-import FormButton from "@/components/form/FormButton";
+import { Button } from "@/components/ui";
 
 const Header: React.FC = () => (
   <header className="relative z-10 border-b border-slate-800/50 backdrop-blur-xl bg-slate-900/80 supports-[backdrop-filter]:bg-slate-900/60">
@@ -27,7 +27,7 @@ const Header: React.FC = () => (
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              <FormButton
+              <Button
                 text="Log In"
                 variant="primary"
                 className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
@@ -43,7 +43,7 @@ const Header: React.FC = () => (
               whileTap={{ scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
             >
-              <FormButton
+              <Button
                 text="Sign Up"
                 variant="primary"
                 className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"

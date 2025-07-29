@@ -2,8 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import React from "react";
 
-import FormButton from "@/components/form/FormButton";
-import { ShieldCheckIcon } from "@/components/ui";
+import { Button, ShieldCheckIcon } from "@/components/ui";
 
 import { trustElements, trustIndicators } from "../utils/landingPageConstants";
 
@@ -73,7 +72,7 @@ const HeroSection: React.FC = () => (
               transition={{ type: "spring", stiffness: 500, damping: 32 }}
               className="mb-6"
             >
-              <FormButton
+              <Button
                 text="Start Your Journey Free"
                 variant="primary"
                 buttonSize="lg"
