@@ -77,7 +77,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     if (unit === "oz")
       return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
     if (unit === "lbs")
-      return { quantity: +(quantity * 0.453592).toFixed(3), unit: "kg" };
+      return { quantity: +(quantity * 0.453_592).toFixed(3), unit: "kg" };
     // If L, keep as L
     return { quantity, unit };
   };
@@ -89,9 +89,9 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     if (unit === "unit" && (item as any).rawQuantity) {
       const raw = (item as any).rawQuantity as string;
       // Match e.g. '90 g' or '90g'
-      const match = raw.match(/(\d+(?:[.,]\d+)?)\s*g/);
+      const match = raw.match(/(\d+(?:[,.]\d+)?)\s*g/);
       if (match) {
-        quantity = parseFloat(match[1].replace(",", "."));
+        quantity = Number.parseFloat(match[1].replace(",", "."));
         unit = "g";
       }
     }
