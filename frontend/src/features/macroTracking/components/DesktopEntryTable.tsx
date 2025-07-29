@@ -7,9 +7,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useMemo } from "react";
 
-import { IconButton, IconButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/macros";
-import { ChevronDownIcon } from "@/components/ui";
+import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
 // Types

@@ -4,12 +4,11 @@ import {
   CardContainer,
   DateField,
   Dropdown,
-  FormButton,
   NumberField,
   TextField,
   TimeField,
 } from "@/components/form";
-import { CheckMarkIcon, TrashIcon } from "@/components/ui";
+import { Button, CheckMarkIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { MealType } from "@/types/macro";
 
@@ -319,7 +318,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
                 Please provide a meal name
               </div>
             )}
-            <FormButton
+            <Button
               type="submit"
               disabled={!isFormValid}
               autoLoadingFeature="macros"

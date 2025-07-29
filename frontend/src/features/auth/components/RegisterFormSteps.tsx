@@ -3,12 +3,17 @@ import { useCallback } from "react";
 import {
   DateField,
   Dropdown,
-  FormButton,
   InfoCard,
   NumberField,
   TextField,
 } from "@/components/form";
-import { BackIcon, CheckIcon, ForwardIcon, InfoIcon } from "@/components/ui";
+import {
+  BackIcon,
+  Button,
+  CheckIcon,
+  ForwardIcon,
+  InfoIcon,
+} from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
@@ -90,7 +95,7 @@ export function StepOne() {
         </div>
 
         <div className="pt-4">
-          <FormButton
+          <Button
             type="submit"
             isLoading={isValidating}
             fullWidth={true}
@@ -98,7 +103,7 @@ export function StepOne() {
             icon={<ForwardIcon />}
           >
             Continue
-          </FormButton>
+          </Button>
         </div>
       </form>
     </StepFormWrapper>
@@ -179,7 +184,7 @@ export function StepTwo() {
 
         <div className="pt-4">
           <div className="flex gap-3">
-            <FormButton
+            <Button
               variant="secondary"
               onClick={handleStepBack}
               isLoading={isValidating}
@@ -188,8 +193,8 @@ export function StepTwo() {
               className="w-1/3"
             >
               Back
-            </FormButton>
-            <FormButton
+            </Button>
+            <Button
               type="submit"
               variant="primary"
               isLoading={isValidating}
@@ -198,7 +203,7 @@ export function StepTwo() {
               className="w-2/3"
             >
               Continue
-            </FormButton>
+            </Button>
           </div>
         </div>
       </form>
@@ -274,7 +279,7 @@ export function StepThree() {
 
         <div className="pt-4">
           <div className="flex gap-3">
-            <FormButton
+            <Button
               variant="secondary"
               onClick={handleStepBack}
               isLoading={isValidating || isSubmitting}
@@ -283,8 +288,8 @@ export function StepThree() {
               className="w-1/3"
             >
               Back
-            </FormButton>
-            <FormButton
+            </Button>
+            <Button
               type="submit"
               variant="primary"
               isLoading={isValidating || isSubmitting}
@@ -294,7 +299,7 @@ export function StepThree() {
               className="w-2/3"
             >
               Finish
-            </FormButton>
+            </Button>
           </div>
         </div>
       </form>

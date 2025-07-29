@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { LockIcon } from "@/components/ui";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, LockIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 // Notifications are handled by the global NotificationManager and store
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
@@ -108,7 +108,7 @@ const ChangePasswordForm = () => {
 
         {/* Submit button section */}
         <div className="mt-8 flex justify-end">
-          <FormButton
+          <Button
             type="submit"
             isLoading={changePasswordMutation.isPending}
             disabled={!currentPassword || !newPassword || !confirmPassword}

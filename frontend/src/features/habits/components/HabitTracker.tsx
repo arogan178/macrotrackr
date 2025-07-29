@@ -1,7 +1,7 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
-import { FormButton } from "@/components/form";
 import {
+  Button,
   CheckCircleIcon,
   CheckIcon,
   PlusIcon,
@@ -52,7 +52,7 @@ function HabitTracker({
           {onAddHabit && habits.length > 0 && (
             <div className={canAddHabit ? "" : "relative"}>
               <ProFeature>
-                <FormButton
+                <Button
                   variant="ghost"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
