@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import { memo } from "react";
 
-import { ActionButton, ActionButtonGroup } from "@/components/form";
+import { IconButton, IconButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
@@ -69,7 +69,7 @@ const EntryCard = memo(
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
-        <ActionButtonGroup
+        <IconButtonGroup
           onEdit={() => onEdit(entry)}
           onDelete={() => deleteEntry(entry.id)}
           isDeleting={isDeleting}
@@ -197,7 +197,7 @@ const MobileEntryCards = memo(
                 <span className="text-white font-medium">
                   {group.totals.calories} kcal
                 </span>
-                <ActionButton
+                <IconButton
                   variant="delete"
                   onClick={(event) => handleDeleteDate(group.date, event)}
                   ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
@@ -321,7 +321,7 @@ const MobileEntryCards = memo(
                     <span className="text-white font-medium">
                       {group.totals.calories} kcal
                     </span>
-                    <ActionButton
+                    <IconButton
                       variant="delete"
                       onClick={(event) => handleDeleteDate(group.date, event)}
                       ariaLabel={`Delete all entries for ${formatDate(

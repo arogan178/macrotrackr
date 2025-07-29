@@ -4,7 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
 import { FormButton } from "@/components/form";
-import ActionButton from "@/components/form/ActionButton";
+import IconButton from "@/components/form/IconButton";
 import {
   ChevronDownIcon,
   ExportIcon,
@@ -292,7 +292,7 @@ const EntryHistoryComponent = function EntryHistory({
         </div>
         {history.length > 0 && (
           <ProFeature>
-            <ActionButton
+            <IconButton
               variant="export"
               ariaLabel="Export data as CSV file"
               onClick={handleExportCSV}

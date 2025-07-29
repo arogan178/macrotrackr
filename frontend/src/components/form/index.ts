@@ -1,12 +1,12 @@
 export { default as LoadingSpinner } from "../ui/LoadingSpinner";
 export { default as Modal } from "../ui/Modal";
 export { default as ProgressBar } from "../ui/ProgressBar";
-export { default as ActionButton } from "./ActionButton";
-export { default as ActionButtonGroup } from "./ActionButtonGroup";
 export { default as CardContainer } from "./CardContainer";
 export { default as DateField } from "./DateField";
 export { default as Dropdown } from "./Dropdown";
 export { default as FormButton } from "./FormButton";
+export { default as IconButton } from "./IconButton";
+export { default as IconButtonGroup } from "./IconButtonGroup";
 export { default as InfoCard } from "./InfoCard";
 export { default as NumberField } from "./NumberField";
 export { default as TabButton } from "./TabButton";

@@ -59,7 +59,7 @@ import { motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { ActionButton, FormButton } from "../form";
+import { FormButton, IconButton } from "../form";
 import type {
   ConfirmationModalProps,
   FormModalProps,
@@ -262,7 +262,7 @@ function Modal(properties: ModalProps) {
             <h2 id="modal-title" className="text-lg font-medium text-gray-100">
               {title}
             </h2>
-            <ActionButton
+            <IconButton
               variant="close"
               iconSize={buttonSize}
               buttonSize={buttonSize}
