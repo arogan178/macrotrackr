@@ -193,7 +193,7 @@ export interface NutritionAverage {
   fats: number;
 }
 
-export interface ActionButtonGroupProps {
+export interface IconButtonGroupProps {
   onEdit: () => void;
   onDelete: () => void;
   isDeleting: boolean;
