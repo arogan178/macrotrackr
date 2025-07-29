@@ -42,7 +42,7 @@ import { EyeIcon, EyeSlashIcon } from "@/components/ui";
 import { formStyles } from "@/components/utils/Styles";
 import type { TextFieldProps } from "@/components/utils/Types";
 
-import ActionButton from "./ActionButton";
+import IconButton from "./IconButton";
 
 function TextField({
   label,
@@ -116,7 +116,7 @@ function TextField({
           aria-label={ariaLabel}
         />
         {type === "password" && value && (
-          <ActionButton
+          <IconButton
             variant="custom"
             onClick={togglePasswordVisibility}
             ariaLabel={showPassword ? "Hide password" : "Show password"}

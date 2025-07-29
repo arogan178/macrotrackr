@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 import { goalsRoute } from "@/AppRouter";
 import { TabButton } from "@/components/form";
-import { Navbar } from "@/components/layout";
+import FeaturePage from "@/components/layout/FeaturePage";
 import { GoalsIcon, Modal, TargetIcon } from "@/components/ui";
 import {
   GoalsLoadingSkeleton,
@@ -14,11 +14,12 @@ import {
   WeightGoalModal,
   WeightProgressTabs,
 } from "@/features/goals/components";
+import type { WeightGoalsResponse } from "@/features/goals/types";
 import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
 // Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
+import { useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useDeleteWeightGoal, useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -29,7 +30,19 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
+import type { WeightGoals } from "@/types/goal";
+import type { UserDetailsResponse } from "@/utils/apiServices";
+
+// Helper to convert UserDetailsResponse to UserSettings shape
+function toUserSettings(user: UserDetailsResponse | null | undefined): any {
+  if (!user) return undefined;
+  return {
+    ...user,
+    dateOfBirth: user.dateOfBirth ?? "",
+  };
+}
 
 export default function GoalsPage() {
   // Get UI state from centralized goals UI slice
@@ -54,7 +67,8 @@ export default function GoalsPage() {
   } = useStore();
 
   // Get user from useUser hook
-  const { data: user } = useUser();
+  const { data: user } = useUser(); // user: UserDetailsResponse | null
+
   // Get macro data from goalsRoute loader
   const {
     macroTarget,
@@ -67,10 +81,23 @@ export default function GoalsPage() {
     weightGoals,
     weightLog,
     weightGoalsError,
+  }: {
+    macroTarget?: any;
+    macroDailyTotals?: {
+      protein: number;
+      carbs: number;
+      fats: number;
+      calories: number;
+    };
+    weightGoals?: WeightGoalsResponse;
+    weightLog?: any;
+    weightGoalsError?: string;
   } = useLoaderData({ from: goalsRoute.id }) || {};
 
   // Calculate nutritionProfile from user data
-  const nutritionProfile = user ? createNutritionProfile(user) : undefined;
+  const nutritionProfile = user
+    ? createNutritionProfile(toUserSettings(user))
+    : undefined;
 
   // Use TanStack Query hooks for habits (server state)
   const {
@@ -90,8 +117,6 @@ export default function GoalsPage() {
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
   // Use new loading state hooks
-  const { isLoading: isHabitsLoading } = useFeatureLoading("habits");
-  const { isLoading: isGoalsLoading } = useFeatureLoading("goals");
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),
@@ -100,16 +125,8 @@ export default function GoalsPage() {
 
   // Error handling is managed by TanStack Query's built-in mechanisms
 
-  // Hydrate subscriptionStatus from loader user.subscription.status
-  useEffect(() => {
-    if (
-      user &&
-      user.subscription &&
-      typeof user.subscription.status === "string"
-    ) {
-      setSubscriptionStatus(user.subscription.status);
-    }
-  }, [user, setSubscriptionStatus]);
+  // Centralize subscription status hydration
+  usePageDataSync();
 
   // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
@@ -192,7 +209,7 @@ export default function GoalsPage() {
         throw new Error("Habit not found");
       }
 
-      await incrementProgressMutation.mutateAsync(id);
+      await incrementProgressMutation.mutateAsync(originalHabit);
 
       // Check if habit was completed
       if (originalHabit.current + 1 >= originalHabit.target) {
@@ -252,11 +269,40 @@ export default function GoalsPage() {
     currentWeightGoals?.targetWeight || user?.weight || 0;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <Navbar />
-
-      {/* Error notifications are now handled by the global NotificationManager */}
-
+    <FeaturePage
+      title="Your Goals"
+      subtitle="Track your progress and stay motivated on your health journey"
+      headerChildren={
+        <div
+          className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
+          role="tablist"
+          aria-label="Goals Tabs"
+        >
+          <TabButton
+            active={activeTab === "goals"}
+            onClick={() => setActiveTab("goals")}
+            layoutId="goalsTabHighlight"
+            isMotion={true}
+          >
+            <span className="flex items-center relative z-10">
+              <GoalsIcon size="sm" className="mr-1.5" />
+              Goals
+            </span>
+          </TabButton>
+          <TabButton
+            active={activeTab === "macro targets"}
+            onClick={() => setActiveTab("macro targets")}
+            layoutId="goalsTabHighlight"
+            isMotion={true}
+          >
+            <span className="flex items-center relative z-10">
+              <TargetIcon size="sm" className="mr-1.5" />
+              Macro Targets
+            </span>
+          </TabButton>
+        </div>
+      }
+    >
       {/* Reset Goals Confirmation Modal */}
       <AnimatePresence>
         {isResetModalOpen && (
@@ -337,7 +383,7 @@ export default function GoalsPage() {
             tdee={nutritionProfile?.tdee || 0}
             weightGoals={
               currentWeightGoals && currentWeightGoals.targetWeight != undefined
-                ? {
+                ? ({
                     ...currentWeightGoals,
                     targetWeight: currentWeightGoals.targetWeight ?? 0,
                     weightGoal: currentWeightGoals.weightGoal ?? "maintain",
@@ -347,145 +393,95 @@ export default function GoalsPage() {
                     calculatedWeeks: currentWeightGoals.calculatedWeeks ?? 0,
                     weeklyChange: currentWeightGoals.weeklyChange ?? 0,
                     dailyChange: currentWeightGoals.dailyChange ?? 0,
-                  }
+                    currentWeight: user?.weight ?? 0,
+                  } as WeightGoals)
                 : undefined
             }
           />
         )}
       </AnimatePresence>
 
-      <div className="relative min-h-screen pb-12 overflow-hidden">
-        {/* Background effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none" />
-        <div className="absolute top-40 -left-32 w-64 h-64 bg-indigo-600/10 rounded-full filter blur-3xl opacity-30 animate-blob animation-delay-4000"></div>
-        <div className="absolute top-24 -right-32 w-72 h-72 bg-purple-600/10 rounded-full filter blur-3xl opacity-30 animate-blob animation-delay-2000"></div>
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
-          {/* Page Header with Tabs */}
-          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight mb-2">
-                Your Goals
-              </h1>
-              <p className="text-gray-400 max-w-2xl">
-                Track your progress and stay motivated on your health journey
-              </p>
-            </div>
-            {/* Tab Navigation */}
-            <div
-              className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
-              role="tablist"
-              aria-label="Goals Tabs"
-            >
-              <TabButton
-                active={activeTab === "goals"}
-                onClick={() => setActiveTab("goals")}
-                layoutId="goalsTabHighlight"
-                isMotion={true}
+      {/* Main Content Area */}
+      <div className="relative">
+        {user ? (
+          <AnimatePresence mode="wait">
+            {activeTab === "goals" ? (
+              <motion.div
+                key="goals"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
               >
-                <span className="flex items-center relative z-10">
-                  <GoalsIcon size="sm" className="mr-1.5" />
-                  Goals
-                </span>
-              </TabButton>
-              <TabButton
-                active={activeTab === "macro targets"}
-                onClick={() => setActiveTab("macro targets")}
-                layoutId="goalsTabHighlight"
-                isMotion={true}
-              >
-                <span className="flex items-center relative z-10">
-                  <TargetIcon size="sm" className="mr-1.5" />
-                  Macro Targets
-                </span>
-              </TabButton>
-            </div>
-          </div>
+                <div className="space-y-6">
+                  {/* Weight Goal Dashboard */}
+                  {user && (
+                    <WeightGoalDashboard
+                      user={toUserSettings(user)}
+                      macroDailyTotals={macroDailyTotals}
+                      weightGoals={
+                        currentWeightGoals &&
+                        currentWeightGoals.targetWeight != undefined
+                          ? ({
+                              ...currentWeightGoals,
+                              targetWeight:
+                                currentWeightGoals.targetWeight ?? 0,
+                              weightGoal:
+                                currentWeightGoals.weightGoal ?? "maintain",
+                              startDate: currentWeightGoals.startDate ?? "",
+                              targetDate: currentWeightGoals.targetDate ?? "",
+                              calorieTarget:
+                                currentWeightGoals.calorieTarget ?? 0,
+                              calculatedWeeks:
+                                currentWeightGoals.calculatedWeeks ?? 0,
+                              weeklyChange:
+                                currentWeightGoals.weeklyChange ?? 0,
+                              dailyChange: currentWeightGoals.dailyChange ?? 0,
+                              currentWeight: user?.weight ?? 0,
+                            } as WeightGoals)
+                          : undefined
+                      }
+                      isLoading={false}
+                      onOpenModal={handleOpenWeightGoalModal}
+                      onDelete={handleOpenDeleteConfirmModal}
+                      macroTarget={macroTarget || undefined}
+                      tdee={nutritionProfile?.tdee || 0}
+                    />
+                  )}
 
-          {/* Main Content Area */}
-          <div className="mt-8 relative">
-            {user ? (
-              <AnimatePresence mode="wait">
-                {activeTab === "goals" ? (
-                  <motion.div
-                    key="goals"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="space-y-6">
-                      {/* Weight Goal Dashboard */}
-                      {user && (
-                        <WeightGoalDashboard
-                          user={user}
-                          macroDailyTotals={macroDailyTotals}
-                          weightGoals={
-                            currentWeightGoals &&
-                            currentWeightGoals.targetWeight != undefined
-                              ? {
-                                  ...currentWeightGoals,
-                                  targetWeight:
-                                    currentWeightGoals.targetWeight ?? 0,
-                                  weightGoal:
-                                    currentWeightGoals.weightGoal ?? "maintain",
-                                  startDate: currentWeightGoals.startDate ?? "",
-                                  targetDate:
-                                    currentWeightGoals.targetDate ?? "",
-                                  calorieTarget:
-                                    currentWeightGoals.calorieTarget ?? 0,
-                                  calculatedWeeks:
-                                    currentWeightGoals.calculatedWeeks ?? 0,
-                                  weeklyChange:
-                                    currentWeightGoals.weeklyChange ?? 0,
-                                  dailyChange:
-                                    currentWeightGoals.dailyChange ?? 0,
-                                }
-                              : undefined
-                          }
-                          isLoading={false}
-                          onOpenModal={handleOpenWeightGoalModal}
-                          onDelete={handleOpenDeleteConfirmModal}
-                          macroTarget={macroTarget || undefined}
-                          tdee={nutritionProfile?.tdee || 0}
-                        />
-                      )}
+                  {/* Weight Progress Tabs */}
+                  <WeightProgressTabs />
 
-                      {/* Weight Progress Tabs */}
-                      <WeightProgressTabs />
-
-                      {/* Habit Tracker */}
-                      <HabitTracker
-                        habits={habits || []}
-                        isLoading={habitsLoading}
-                        onAddHabit={handleAddHabit}
-                        onIncrementHabit={handleIncrementHabit}
-                        onCompleteHabit={handleCompleteHabit}
-                        onEditHabit={handleEditHabit}
-                        onDeleteHabit={handleDeleteHabit}
-                      />
-                    </div>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="macro-targets"
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <div className="space-y-6">
-                      <MacroTargetForm macroTarget={macroTarget} />
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+                  {/* Habit Tracker */}
+                  <HabitTracker
+                    habits={habits || []}
+                    isLoading={habitsLoading}
+                    onAddHabit={handleAddHabit}
+                    onIncrementHabit={handleIncrementHabit}
+                    onCompleteHabit={handleCompleteHabit}
+                    onEditHabit={handleEditHabit}
+                    onDeleteHabit={handleDeleteHabit}
+                  />
+                </div>
+              </motion.div>
             ) : (
-              <GoalsLoadingSkeleton />
+              <motion.div
+                key="macro-targets"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <div className="space-y-6">
+                  <MacroTargetForm macroTarget={macroTarget} />
+                </div>
+              </motion.div>
             )}
-          </div>
-        </div>
+          </AnimatePresence>
+        ) : (
+          <GoalsLoadingSkeleton />
+        )}
       </div>
-    </div>
+    </FeaturePage>
   );
 }
