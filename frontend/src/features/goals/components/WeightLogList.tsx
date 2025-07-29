@@ -1,7 +1,7 @@
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 import { useMemo, useState } from "react";
 
-import { IconButton } from "@/components/form";
+import { IconButton } from "@/components/ui";
 import { EmptyState, LoadingSpinner, Modal, TrashIcon } from "@/components/ui";
 import {
   useDeleteWeightLogEntry,
