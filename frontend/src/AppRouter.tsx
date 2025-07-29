@@ -34,7 +34,7 @@ const ReportingPage = React.lazy(
   () => import("@/features/reporting/pages/ReportingPage"),
 );
 const PricingPage = React.lazy(
-  () => import("@/features/pricing/pages/PricingPage"),
+  () => import("@/features/billing/pages/PricingPage"),
 );
 const ResetPasswordPage = React.lazy(
   () => import("./features/landing/pages/ResetPasswordPage"),

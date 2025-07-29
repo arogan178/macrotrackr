@@ -1,7 +1,7 @@
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 import { useMemo, useState } from "react";
 
-import { ActionButton } from "@/components/form";
+import { IconButton } from "@/components/form";
 import { EmptyState, LoadingSpinner, Modal, TrashIcon } from "@/components/ui";
 import {
   useDeleteWeightLogEntry,
@@ -147,7 +147,7 @@ function WeightLogList({
                     {entry.weight.toFixed(1)} kg
                   </span>
                 </div>
-                <ActionButton
+                <IconButton
                   variant="delete"
                   ariaLabel={
                     isValidDate
