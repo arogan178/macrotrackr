@@ -1,9 +1,14 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
-import { TabButton } from "@/components/form";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { AwardIcon, LockIcon, Modal, UserIcon } from "@/components/ui";
+import {
+  AwardIcon,
+  LockIcon,
+  Modal,
+  TabButton,
+  UserIcon,
+} from "@/components/ui";
 import {
   BillingForm,
   ChangePasswordForm,
