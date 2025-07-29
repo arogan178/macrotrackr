@@ -1,8 +1,7 @@
 import { motion } from "motion/react";
 import React from "react";
 
-import FormButton from "@/components/form/FormButton";
-import { CheckIcon } from "@/components/ui";
+import { Button, CheckIcon } from "@/components/ui";
 
 interface PricingCardProps {
   title: string;
@@ -116,7 +115,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         whileTap={{ scale: 0.98 }}
         transition={{ type: "spring", stiffness: 400, damping: 30 }}
       >
-        <FormButton
+        <Button
           text={buttonText}
           variant={buttonVariant}
           buttonSize={buttonSize}

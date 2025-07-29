@@ -1,6 +1,6 @@
-# Color Palette Refactoring Plan
+# Color Palette Refactoring Plan: Natural Wellness (Vibrant)
 
-This document outlines the plan to implement the new color palette defined in `COLOR_PALETTE.md` throughout the application. The goal is to replace all hardcoded color values with a centralized, themeable system.
+This document outlines the official plan to implement the "Natural Wellness (Vibrant)" color palette. The goal is to replace all hardcoded color values with a centralized, themeable system that is calm and professional, with a vibrant accent for key actions.
 
 ## 1. Phased Implementation
 
@@ -41,13 +41,13 @@ graph TD
 
 ### Phase 1: Foundation
 
-- [ ] **Create CSS Variables:** Define the new color palette, including macronutrient colors, as CSS custom properties in `frontend/src/styles/variables.css`.
+- [ ] **Create CSS Variables:** Define the "Natural Wellness (Vibrant)" color palette, including the new vibrant accent, as CSS custom properties in `frontend/src/styles/variables.css`.
 - [ ] **Define Theme Object:** Create a theme object in `frontend/src/theme/theme.ts` that maps semantic roles to the new CSS variables.
 - [ ] **Update Global Styles:** Modify `frontend/src/styles/global.css` to use the new variables for default background and text colors.
 
 ### Phase 2: Core Component Refactoring
 
-- [ ] **Refactor Buttons:** Update all button components to use semantic color tokens for different states (default, hover, disabled).
+- [ ] **Refactor Buttons:** Update all button components to use the `vibrant-accent` color for primary actions and other semantic tokens for secondary actions.
 - [ ] **Refactor Cards:** Update card components to use the new neutral palette for backgrounds and borders.
 - [ ] **Refactor Forms & Inputs:** Update all form elements to use the new color system for text, borders, and focus states.
 - [ ] **Refactor Modals & Dialogs:** Update modal components to use the new background and text colors.
@@ -56,7 +56,7 @@ graph TD
 
 - [ ] **Feature Components:** Systematically replace hardcoded colors in all feature-specific components.
 - [ ] **Page Layouts:** Update all page layouts and containers to align with the new design system.
-- [ ] **Charts & Data Visualizations:** Update all charts to use the new macronutrient colors for protein, carbohydrates, and fats.
+- [ ] **Charts & Data Visualizations:** Update all charts to use the new, more vibrant macronutrient colors.
 
 ### Phase 4: Verification & Cleanup
 

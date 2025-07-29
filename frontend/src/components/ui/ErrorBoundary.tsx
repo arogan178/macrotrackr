@@ -1,7 +1,6 @@
 import { Component, ReactNode } from "react";
 
-import { FormButton } from "@/components/form";
-import { WarningIcon } from "@/components/ui";
+import { Button, WarningIcon } from "@/components/ui";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 interface ErrorBoundaryProps {
@@ -86,7 +85,7 @@ export class ErrorBoundary extends Component<
               </div>
 
               <div className="flex justify-center space-x-3">
-                <FormButton
+                <Button
                   onClick={() => {
                     this.setState({
                       hasError: false,
@@ -99,15 +98,15 @@ export class ErrorBoundary extends Component<
                   className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
                 >
                   Try Again
-                </FormButton>
-                <FormButton
+                </Button>
+                <Button
                   onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
                   className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
                 >
                   Reload page
-                </FormButton>
+                </Button>
               </div>
             </div>
           </div>

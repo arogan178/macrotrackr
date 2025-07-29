@@ -3,12 +3,14 @@
 ## ✅ **Completed Updates**
 
 ### **1. Fixed Critical Issues**
+
 - ✅ **Restored** `frontend/src/hooks/useMutationErrorHandler.ts` (was deleted)
 - ✅ **Fixed** missing imports and broken references
 
 ### **2. Updated Core Components**
 
 #### **Settings Components** ✅
+
 1. **SettingsPage** (`frontend/src/features/settings/pages/SettingsPage.tsx`)
    - ✅ Added `useFeatureLoading('settings')` and `useMutationErrorHandler`
    - ✅ Updated error handling in `handleSubmit` function
@@ -25,11 +27,13 @@
    - ✅ Added proper `finally` block for loading state cleanup
 
 #### **Macro Tracking Components** ✅
+
 4. **HomePage** (`frontend/src/features/macroTracking/pages/HomePage.tsx`)
    - ✅ Added `useFeatureLoading('macros')` and `useMutationErrorHandler`
    - ✅ Ready for macro operation error handling improvements
 
 #### **Goals & Habits Components** ✅
+
 5. **GoalsPage** (`frontend/src/features/goals/pages/GoalsPage.tsx`)
    - ✅ Added `useFeatureLoading('habits')`, `useFeatureLoading('goals')`, and `useMutationErrorHandler`
    - ✅ Ready for habit and goal operation improvements
@@ -37,6 +41,7 @@
 ## 🔄 **Next Priority Updates Needed**
 
 ### **High Priority - Auth Components**
+
 1. **LoginForm** (`frontend/src/features/auth/components/LoginForm.tsx`)
    - ❌ Add `useFeatureLoading('auth')` and `useMutationErrorHandler`
    - ❌ Update login mutation error handling
@@ -48,14 +53,16 @@
    - ❌ Add mutation error handling
 
 ### **Medium Priority - Macro Components**
+
 4. **AddEntryForm** (`frontend/src/features/macroTracking/components/AddEntryForm.tsx`)
-   - ❌ Update FormButton to use `autoLoadingFeature="macros"`
+   - ❌ Update Button to use `autoLoadingFeature="macros"`
    - ❌ Add mutation error handling
 
 5. **EntryHistoryPanel** (`frontend/src/features/macroTracking/components/EntryHistoryPanel.tsx`)
    - ❌ Update "Load More" button with auto-loading
 
 ### **Medium Priority - Habit Components**
+
 6. **HabitTracker** (`frontend/src/features/habits/components/HabitTracker.tsx`)
    - ✅ Partially updated (has hooks imported)
    - ❌ Update habit action buttons with auto-loading
@@ -64,52 +71,57 @@
    - ❌ Add habit mutation error handling
 
 ### **Lower Priority - Goal Components**
+
 8. **WeightGoalDashboard** (`frontend/src/features/goals/components/WeightGoalDashboard.tsx`)
    - ❌ Add feature loading for goals
    - ❌ Update weight goal mutations
 
 9. **MacroTargetForm** (`frontend/src/features/goals/components/MacroTargetForm.tsx`)
-   - ❌ Update FormButton with auto-loading
+   - ❌ Update Button with auto-loading
 
-## 🎯 **FormButton Updates Needed**
+## 🎯 **Button Updates Needed**
 
-### **Components with FormButtons to Update**
+### **Components with Buttons to Update**
 
 1. **Settings Forms**:
+
    ```tsx
    // Current
-   <FormButton isLoading={mutation.isPending} onClick={handleAction}>
-   
+   <Button isLoading={mutation.isPending} onClick={handleAction}>
+
    // Updated
-   <FormButton autoLoadingFeature="settings" onClick={handleAction}>
+   <Button autoLoadingFeature="settings" onClick={handleAction}>
    ```
 
 2. **Macro Forms**:
+
    ```tsx
-   <FormButton autoLoadingFeature="macros" loadingText="Adding...">
+   <Button autoLoadingFeature="macros" loadingText="Adding...">
      Add Entry
-   </FormButton>
+   </Button>
    ```
 
 3. **Habit Forms**:
+
    ```tsx
-   <FormButton autoLoadingFeature="habits" loadingText="Adding...">
+   <Button autoLoadingFeature="habits" loadingText="Adding...">
      Add Habit
-   </FormButton>
+   </Button>
    ```
 
 4. **Auth Forms**:
    ```tsx
-   <FormButton autoLoadingFeature="auth" loadingText="Signing in...">
+   <Button autoLoadingFeature="auth" loadingText="Signing in...">
      Sign In
-   </FormButton>
+   </Button>
    ```
 
 ## 📊 **Current Status**
 
 ### **Completed**: 9/15 major components ✅
+
 - SettingsPage ✅
-- ChangePasswordForm ✅  
+- ChangePasswordForm ✅
 - BillingForm ✅
 - HomePage ✅
 - GoalsPage ✅
@@ -121,6 +133,7 @@
 ### **In Progress**: 0/15 components 🔄
 
 ### **Not Started**: 6/15 components ❌
+
 - EntryHistoryPanel ❌
 - HabitTracker (partial) ❌
 - HabitModal ❌
@@ -133,7 +146,7 @@
 1. **Update Auth Components** (LoginForm, RegisterForm, ForgotPasswordForm)
 2. **Update Macro Components** (AddEntryForm, EntryHistoryPanel)
 3. **Complete Habit Components** (HabitTracker, HabitModal)
-4. **Update FormButtons** throughout the app with auto-loading
+4. **Update Buttons** throughout the app with auto-loading
 5. **Test all changes** thoroughly
 
 ## 💡 **Benefits Already Achieved**

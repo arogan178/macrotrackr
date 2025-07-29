@@ -123,7 +123,7 @@ export interface CardContainerProps {
   className?: string;
 }
 
-export interface FormButtonProps {
+export interface ButtonProps {
   children?: ReactNode;
   text?: string;
   type?: ButtonType;

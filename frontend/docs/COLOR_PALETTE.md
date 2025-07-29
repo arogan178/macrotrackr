@@ -1,44 +1,40 @@
-# Application Color Palette
+# Application Color Palette: Natural Wellness (Vibrant)
 
-This document defines the official color palette for the application, designed to create a vibrant, motivating, and personalized user interface that makes tracking nutrition fun and engaging.
+This document defines the official color palette for the application. The theme is designed to be calm and professional, with a vibrant accent for key actions to create a motivating user experience.
 
-## 1. Primary Color
+## 1. Core Colors
 
-The primary color is used for key actions, branding, and interactive elements, creating a lively and energetic feel.
+- **Primary (Forest Green - #2A4B41):** The core brand color for a calm, professional feel on navigation and static elements.
+- **Secondary (Warm Ochre - #D4A276):** For secondary highlights, information panels, and adding warmth.
+- **Vibrant Accent (Vibrant Coral - #E67E22):** A bright, energetic color reserved only for primary buttons ("Log Meal"), FABs, and key calls-to-action to motivate user interaction.
 
-- **Vibrant Teal (`#16A085`)**: A bright, welcoming teal that serves as the core of our brand identity. It's used for primary buttons, navigation elements, and active state indicators.
+## 2. Neutral Palette
 
-## 2. Accent Color
+Our neutral palette is built on soft, natural tones to create a clean, airy, and highly readable foundation.
 
-The accent color is used to draw attention to important actions and notifications, adding a playful and expressive touch.
+- **Background (Cream White - #F8FAF7):** The primary background color for a soft, natural, and clean feel.
+- **Surface (Cream White - #F8FAF7):** Used for card backgrounds and other raised surfaces.
+- **Borders & Dividers (Light Stone - #DAE5DE):** For subtle separation and to define UI elements without harsh lines.
+- **Body Text (Charcoal - #191C1A):** A soft black for primary text, ensuring excellent readability.
+- **Secondary Text (Stone Gray - #707974):** For labels, placeholders, and less important information.
 
-- **Sunny Yellow (`#F1C40F`)**: A warm, cheerful yellow that contrasts beautifully with the vibrant teal. It's used for high-impact actions and celebratory moments.
+## 3. Macronutrient & System Colors
 
-## 3. Neutral Palette
+### Macronutrient Colors
 
-Our neutral palette provides a clean, organized foundation, ensuring high readability and a calm, focused environment.
+Used for instant recognition in charts and data visualizations.
 
-- **Off-White (`#F8F9FA`)**: The primary background color for a bright, airy feel.
-- **Light Gray (`#E9ECEF`)**: Used for subtle borders, dividers, and inactive UI elements.
-- **Medium Gray (`#CED4DA`)**: For secondary text, placeholders, and disabled states.
-- **Dark Gray (`#495057`)**: The primary color for body text, ensuring excellent readability.
-- **Charcoal (`#212529`)**: Reserved for headings and titles to create clear visual hierarchy.
+- **Protein (Fresh Green - #2ECC71):** A slightly more saturated green for better chart readability.
+- **Carbohydrates (Strong Blue - #3498DB):** A clearer blue for better chart readability.
+- **Fats (Energetic Red - #E74C3C):** A more vibrant red for better chart readability.
 
-## 4. Macronutrient Colors
+### System Colors
 
-These colors are used to represent the three main macronutrients, providing instant visual recognition in charts, graphs, and data visualizations.
+Provide immediate and intuitive feedback for user actions.
 
-- **Protein (`#2ECC71`)**: A fresh, clean green.
-- **Carbohydrates (`#3498DB`)**: A strong, clear blue.
-- **Fats (`#E74C3C`)**: A vibrant, energetic red.
-
-## 5. System Colors
-
-These colors provide clear, immediate feedback for system states and user actions, ensuring an intuitive experience.
-
-- **Success (`#28A745`)**: A clear, positive green used for success notifications, confirmation messages, and completed states.
-- **Warning (`#FFC107`)**: A noticeable but not alarming yellow-orange for warnings, pending states, or gentle reminders.
-- **Error (`#DC3545`)**: A distinct, accessible red for error messages, failed validations, and critical alerts.
+- **Success (#006E51):** A deep, positive green for success notifications and confirmations.
+- **Warning (#D4A276):** The secondary Warm Ochre is used for gentle warnings and pending states.
+- **Error (#BA1A1A):** A clear, accessible color for errors and critical alerts.
 
 ---
 

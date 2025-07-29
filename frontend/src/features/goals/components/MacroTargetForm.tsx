@@ -1,14 +1,9 @@
 import { memo, useCallback, useEffect, useState } from "react";
 
 import { ProFeature } from "@/components/billing";
-import {
-  CardContainer,
-  FormButton,
-  InfoCard,
-  LoadingSpinner,
-} from "@/components/form";
+import { CardContainer, InfoCard, LoadingSpinner } from "@/components/form";
 import MacroTarget from "@/components/macros/MacroTarget";
-import { CheckMarkIcon, InfoIcon } from "@/components/ui";
+import { Button, CheckMarkIcon, InfoIcon } from "@/components/ui";
 import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
@@ -212,7 +207,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
               )}
               <div className="flex gap-4">
                 {hasChanges && (
-                  <FormButton
+                  <Button
                     type="button"
                     onClick={handleReset}
                     buttonSize="lg"
@@ -223,7 +218,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                     className="px-4 py-2 text-sm text-gray-300 hover:text-white transition-colors"
                   />
                 )}
-                <FormButton
+                <Button
                   type="button"
                   onClick={handleSaveChanges}
                   autoLoadingFeature="goals"

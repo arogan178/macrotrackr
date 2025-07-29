@@ -6,8 +6,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 
-import { FormButton } from "@/components/form";
 import {
+  Button,
   CriticalLoadingIndicator,
   FeatureLoadingIndicator,
   GlobalLoadingIndicator,
@@ -216,13 +216,13 @@ function DemoControls({
           />
           <span>Slow Queries (5s delay)</span>
         </label>
-        <FormButton
+        <Button
           onClick={onClearCache}
           variant="secondary"
           className="px-3 py-1 text-sm"
         >
           Clear Cache
-        </FormButton>
+        </Button>
       </div>
     </div>
   );
@@ -242,13 +242,13 @@ function QueryLoadingWrapperDemo({ shouldFail, isSlowQuery }: any) {
         <span className="text-sm text-gray-400">
           Auto-refetches when controls change
         </span>
-        <FormButton
+        <Button
           onClick={() => refetch()}
           variant="ghost"
           className="text-xs px-2 py-1"
         >
           Manual Refetch
-        </FormButton>
+        </Button>
       </div>
 
       <QueryLoadingWrapper
@@ -291,9 +291,9 @@ function FeatureLoadingIndicatorDemo() {
 
   return (
     <div className="space-y-3">
-      <FormButton onClick={simulateFeatureLoading} disabled={isLoading}>
+      <Button onClick={simulateFeatureLoading} disabled={isLoading}>
         Simulate Feature Loading
-      </FormButton>
+      </Button>
 
       <FeatureLoadingIndicator
         feature="habits"
@@ -363,12 +363,12 @@ function QueryErrorBoundaryDemo() {
 
   return (
     <div className="space-y-3">
-      <FormButton
+      <Button
         onClick={() => setShouldError(!shouldError)}
         variant={shouldError ? "secondary" : "primary"}
       >
         {shouldError ? "Fix Component" : "Break Component"}
-      </FormButton>
+      </Button>
 
       <QueryErrorBoundary>
         <div className="min-h-[150px] bg-gray-700/30 rounded-lg p-4">
@@ -404,7 +404,7 @@ function CriticalLoadingIndicatorDemo() {
 
   return (
     <div className="space-y-3">
-      <FormButton onClick={() => refetch()}>Trigger Critical Load</FormButton>
+      <Button onClick={() => refetch()}>Trigger Critical Load</Button>
 
       <CriticalLoadingIndicator className="min-h-[150px] bg-gray-700/30 rounded-lg">
         <div className="p-4">
@@ -449,9 +449,9 @@ function CustomLoadingPatternsDemo() {
 
   return (
     <div className="space-y-3">
-      <FormButton onClick={simulateCustomPattern} disabled={customLoading}>
+      <Button onClick={simulateCustomPattern} disabled={customLoading}>
         Custom Loading Pattern
-      </FormButton>
+      </Button>
 
       <div className="min-h-[150px] bg-gray-700/30 rounded-lg p-4">
         {customLoading ? (

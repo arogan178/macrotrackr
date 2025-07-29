@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-import { FormButton } from "@/components/form";
+import { Button } from "@/components/ui";
 import { STAT_COLORS } from "@/utils/chartColors";
 
 interface StatSelectorProps {
@@ -24,7 +24,7 @@ function StatSelector({
           STAT_COLORS[stat as keyof typeof STAT_COLORS] || "bg-indigo-600";
 
         return (
-          <FormButton
+          <Button
             key={stat}
             onClick={() => onStatChange(stat)}
             ariaLabel={`Select ${stat}`}
@@ -49,7 +49,7 @@ function StatSelector({
             <span className="relative z-10">
               {stat.charAt(0).toUpperCase() + stat.slice(1)}
             </span>
-          </FormButton>
+          </Button>
         );
       })}
     </div>

@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 
-import { FormButton, IconButton } from "@/components/form";
-import { ExportIcon } from "@/components/ui";
+import { Button, ExportIcon, IconButton } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 
 interface DateRangeSelectorProps {
@@ -30,7 +29,7 @@ export default function DateRangeSelector({
           <span className="text-gray-300 font-medium mr-3">Time Period:</span>
           <div className="relative flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50">
             {DATE_RANGE_OPTIONS.map((option) => (
-              <FormButton
+              <Button
                 key={option.value}
                 onClick={() => onRangeChange(option.value)}
                 ariaLabel={`Set time period to ${option.label}`}
@@ -52,7 +51,7 @@ export default function DateRangeSelector({
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
                 )}
-              </FormButton>
+              </Button>
             ))}
           </div>
         </div>
@@ -67,7 +66,7 @@ export default function DateRangeSelector({
         </div>
         {/* Desktop Export CSV Button */}
         <div className="hidden lg:flex ml-auto">
-          <FormButton
+          <Button
             onClick={onExportClick}
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
@@ -77,7 +76,7 @@ export default function DateRangeSelector({
             iconPosition="left"
           >
             Export CSV
-          </FormButton>
+          </Button>
         </div>
       </div>
     </motion.div>

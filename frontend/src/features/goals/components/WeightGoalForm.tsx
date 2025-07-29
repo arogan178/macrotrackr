@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
-import { FormButton, NumberField } from "@/components/form";
+import { NumberField } from "@/components/form";
+import { Button } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 
 import { generateWeightGoalCalculations } from "../calculations";
@@ -313,11 +314,11 @@ function WeightGoalForm({
 
       <div className="flex justify-end gap-3">
         {weightGoals && (
-          <FormButton type="button" variant="secondary" onClick={onCancel}>
+          <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel
-          </FormButton>
+          </Button>
         )}
-        <FormButton
+        <Button
           type="button"
           variant="primary"
           disabled={!hasChanges || isLoading || !formValues.targetWeight} // Use isLoading prop
@@ -325,7 +326,7 @@ function WeightGoalForm({
           onClick={handleSave}
         >
           {weightGoals ? "Update Goal" : "Set Goal"}{" "}
-        </FormButton>
+        </Button>
       </div>
     </div>
   );

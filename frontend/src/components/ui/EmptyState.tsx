@@ -1,7 +1,6 @@
 import { memo, ReactNode } from "react";
 
-import { FormButton } from "@/components/form";
-import { PlusIcon } from "@/components/ui";
+import { Button, PlusIcon } from "@/components/ui";
 
 interface ActionProps {
   label: string;
@@ -100,7 +99,7 @@ function EmptyState({
       {(action || secondaryAction) && (
         <div className="flex flex-wrap justify-center gap-3">
           {action && (
-            <FormButton
+            <Button
               onClick={action.onClick}
               ariaLabel={action.label}
               variant={
@@ -115,11 +114,11 @@ function EmptyState({
               iconPosition="left"
             >
               {action.label}
-            </FormButton>
+            </Button>
           )}
 
           {secondaryAction && (
-            <FormButton
+            <Button
               onClick={secondaryAction.onClick}
               ariaLabel={secondaryAction.label}
               variant={
@@ -134,7 +133,7 @@ function EmptyState({
               iconPosition="left"
             >
               {secondaryAction.label}
-            </FormButton>
+            </Button>
           )}
         </div>
       )}
