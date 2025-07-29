@@ -3,17 +3,15 @@ import React, { useState } from "react";
 
 import { FormButton } from "@/components/form";
 import {
-  CheckCircleIcon,
   ExternalLinkIcon,
   InfoIcon,
   Modal,
   WarningIcon,
 } from "@/components/ui";
+import StatusBadge from "@/components/ui/StatusBadge";
 import { useStore } from "@/store/store";
 import { cancelSubscription } from "@/utils/apiBilling";
 import { BillingDetailsResponse } from "@/utils/apiServices";
-
-import StatusBadge from "./StatusBadge";
 
 const ProBillingView: React.FC<{
   onManage: () => void;

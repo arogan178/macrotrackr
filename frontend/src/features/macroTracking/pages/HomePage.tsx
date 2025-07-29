@@ -1,10 +1,10 @@
 import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
-import { memo, useCallback, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 
 import { homeRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
-import Navbar from "@/components/layout/Navbar";
+import FeaturePage from "@/components/layout/FeaturePage";
 import { UserMetricsPanel } from "@/features/dashboard/components";
 import {
   AddEntryForm,
@@ -23,9 +23,13 @@ import {
   useMacroTarget,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 
 export default function HomePage() {
+  // Centralize subscription status hydration
+  usePageDataSync();
+
   // Get user data from useUser hook
   const { data: user } = useUser();
 
@@ -65,30 +69,22 @@ export default function HomePage() {
     nutritionProfile,
     editingEntry,
     setNutritionProfile,
-    setSubscriptionStatus,
     setEditingEntry,
   } = useStore();
+
   // Hydrate nutritionProfile from loader user object
   useEffect(() => {
     if (user && typeof user.id === "number") {
-      // Calculate nutrition profile from user data
       let nutritionProfile;
       try {
-        // Calculate nutrition profile from user data
         nutritionProfile = createNutritionProfile(user as any);
       } catch (error) {
         console.warn("Could not calculate nutrition profile:", error);
-        // Use default values as fallback
         nutritionProfile = { userId: user.id, bmr: 1800, tdee: 2200 };
       }
       setNutritionProfile(nutritionProfile);
-
-      // Set subscription status if available
-      if (user.subscription && typeof user.subscription.status === "string") {
-        setSubscriptionStatus(user.subscription.status);
-      }
     }
-  }, [user, setNutritionProfile, setSubscriptionStatus]);
+  }, [user, setNutritionProfile]);
 
   // Debug: Log when HomePage renders and when useEffect runs
   console.log("[HomePage] Rendered", {
@@ -149,8 +145,6 @@ export default function HomePage() {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
 
-  // Weight goals are now handled directly by TanStack Query, no need to hydrate into store
-
   // Debug effect to track editingEntry changes
   useEffect(() => {
     console.log("EditingEntry changed:", editingEntry);
@@ -176,55 +170,54 @@ export default function HomePage() {
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <Navbar />
+    <FeaturePage
+      feature="macros"
+      title={`Welcome back, ${isLoading ? "..." : user?.firstName || "User"}`}
+      subtitle={new Date().toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      })}
+    >
+      <div className="relative min-h-screen">
+        <div>
+          <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
+            <div className="lg:col-span-4 flex flex-col h-full space-y-6">
+              {/* Metrics Panel */}
+              <UserMetricsPanel
+                bmr={nutritionProfile?.bmr ?? 0}
+                tdee={nutritionProfile?.tdee ?? 0}
+                isLoading={isLoading}
+              />
 
-      {/* Notifications are now handled by the global NotificationManager */}
-
-      <div className="relative min-h-screen ">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          <PageHeader firstName={user?.firstName} isLoading={isLoading} />
-
-          <div className="mb-8">
-            <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-              <div className="lg:col-span-4 flex flex-col h-full space-y-6">
-                {/* Metrics Panel */}
-                <UserMetricsPanel
-                  bmr={nutritionProfile?.bmr ?? 0}
-                  tdee={nutritionProfile?.tdee ?? 0}
-                  isLoading={isLoading}
-                />
-
-                {/* Add Entry Section */}
-                <div className="flex-1">
-                  {isLoading ? (
-                    <AddEntryLoadingSkeleton />
-                  ) : (
-                    <AddEntryForm
-                      onSubmit={handleAddEntry}
-                      isSaving={isSaving}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Today's Summary - Right side */}
-              <div className="lg:col-span-2 flex flex-col h-full">
+              {/* Add Entry Section */}
+              <div className="flex-1">
                 {isLoading ? (
-                  <DailySummaryLoadingSkeleton />
+                  <AddEntryLoadingSkeleton />
                 ) : (
-                  user && (
-                    <DailySummaryPanel
-                      macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget ?? undefined}
-                      calorieTarget={effectiveCalorieTarget}
-                    />
-                  )
+                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
                 )}
               </div>
             </div>
+
+            {/* Today's Summary - Right side */}
+            <div className="lg:col-span-2 flex flex-col h-full">
+              {isLoading ? (
+                <DailySummaryLoadingSkeleton />
+              ) : (
+                user && (
+                  <DailySummaryPanel
+                    macroDailyTotals={macroDailyTotals}
+                    macroTarget={macroTarget ?? undefined}
+                    calorieTarget={effectiveCalorieTarget}
+                  />
+                )
+              )}
+            </div>
           </div>
+
+          {/* Gap between AddEntryForm and EntryHistoryPanel */}
+          <div className="my-8" />
 
           {/* History Section */}
           <CardContainer>
@@ -245,61 +238,26 @@ export default function HomePage() {
               )}
             </div>
           </CardContainer>
+
+          {/* Edit Modal - Only render when editingEntry is not undefined */}
+          <AnimatePresence>
+            {editingEntry && (
+              <EditModal
+                key="edit-modal"
+                entry={editingEntry}
+                onSave={handleEditEntry}
+                onClose={handleCloseModal}
+                isSaving={isEditing}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </div>
-
-      {/* Edit Modal - Only render when editingEntry is not undefined */}
-      <AnimatePresence>
-        {editingEntry && (
-          <EditModal
-            key="edit-modal"
-            entry={editingEntry}
-            onSave={handleEditEntry}
-            onClose={handleCloseModal}
-            isSaving={isEditing}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+    </FeaturePage>
   );
 }
 
 // Extracted components for better organization
-interface PageHeaderProps {
-  firstName?: string;
-  isLoading: boolean;
-}
-function PageHeader({ firstName, isLoading }: PageHeaderProps) {
-  return (
-    <div className="mb-6">
-      {" "}
-      <div className="flex flex-col md:flex-row md:items-center gap-3">
-        {" "}
-        <h1 className="text-3xl sm:text-4xl font-medium bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text flex items-baseline">
-          {" "}
-          Welcome back,{" "}
-          <span className="font-bold bg-gradient-to-r from-white to-indigo-200 text-transparent bg-clip-text ml-1.5">
-            {" "}
-            {isLoading ? "..." : firstName || "User"}{" "}
-          </span>{" "}
-        </h1>{" "}
-        <div className="flex md:ml-auto">
-          {" "}
-          <span className="px-3 py-1 bg-indigo-600/20 border border-indigo-500/30 rounded-full text-indigo-300 text-sm font-medium">
-            {" "}
-            {new Date().toLocaleDateString("en-US", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}{" "}
-          </span>{" "}
-        </div>{" "}
-      </div>{" "}
-    </div>
-  );
-}
-const MemoizedPageHeader = memo(PageHeader);
-MemoizedPageHeader.displayName = "PageHeader";
 // Loading skeleton components
 const AddEntryLoadingSkeleton = () => (
   <CardContainer>

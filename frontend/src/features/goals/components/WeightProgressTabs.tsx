@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
-import { ActionButton } from "@/components/form";
+import { IconButton } from "@/components/form";
 import { BarChartIcon, BookIcon } from "@/components/ui"; // Using local icons
 import { useWeightLog } from "@/hooks/queries/useGoals";
 
@@ -57,7 +57,7 @@ function WeightProgressTabs() {
         <div className="flex-1" />
         {/* Delete All Button */}
         {activeTab === "list" && weightLog.length > 1 && (
-          <ActionButton
+          <IconButton
             variant="delete"
             ariaLabel="Delete all weight log entries"
             onClick={handleBulkDelete}
