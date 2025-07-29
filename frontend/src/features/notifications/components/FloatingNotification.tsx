@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { IconButton } from "@/components/form";
+import { IconButton } from "@/components/ui";
 import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "@/components/ui";
 
 import type { NotificationType } from "../types";

@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
-import { IconButton } from "@/components/form";
+import { IconButton } from "@/components/ui";
 import { BarChartIcon, BookIcon } from "@/components/ui"; // Using local icons
 import { useWeightLog } from "@/hooks/queries/useGoals";
 
