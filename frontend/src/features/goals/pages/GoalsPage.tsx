@@ -3,9 +3,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
 
 import { goalsRoute } from "@/AppRouter";
-import { TabButton } from "@/components/form";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { GoalsIcon, Modal, TargetIcon } from "@/components/ui";
+import { GoalsIcon, Modal, TabButton, TargetIcon } from "@/components/ui";
 import {
   GoalsLoadingSkeleton,
   LogWeightModal,
