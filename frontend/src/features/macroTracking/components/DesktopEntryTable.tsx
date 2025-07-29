@@ -96,6 +96,8 @@ const DesktopEntryTable = memo(
               return (
                 <div className="flex items-center gap-2 font-semibold text-indigo-300 text-sm">
                   <motion.div
+                    key={`chevron-${data.date}`}
+                    initial={false}
                     animate={{
                       rotate: collapsedDates.has(data.date) ? -90 : 0,
                     }}
