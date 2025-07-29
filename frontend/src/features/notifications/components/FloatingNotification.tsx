@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { FormButton } from "@/components/form";
+import { ActionButton } from "@/components/form";
 import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "@/components/ui";
 
 import type { NotificationType } from "../types";
@@ -22,12 +22,15 @@ function FloatingNotification({
 }: FloatingNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
-  const progressReference = useRef<HTMLDivElement>(undefined);
+  const progressReference = useRef<HTMLDivElement>(null);
   const timerReference = useRef<number | undefined>(undefined);
   const animationStartedReference = useRef(false);
 
   // Memoize handleClose to prevent unnecessary effect re-runs
   const handleClose = useCallback(() => {
+    // Prevent multiple close calls
+    if (isLeaving) return;
+
     // Clear any pending timers to avoid duplicate closes
     if (timerReference.current) {
       clearTimeout(timerReference.current);
@@ -39,8 +42,8 @@ function FloatingNotification({
     // Only trigger the actual onClose after fade-out animation completes
     setTimeout(() => {
       onClose();
-    }, 500); // Animation duration for exit
-  }, [onClose]);
+    }, 300); // Reduced animation duration for snappier feel
+  }, [onClose, isLeaving]);
 
   // Handle mount animation
   useEffect(() => {
@@ -60,7 +63,8 @@ function FloatingNotification({
       duration <= 0 ||
       !progressReference.current ||
       animationStartedReference.current ||
-      !autoClose
+      !autoClose ||
+      isLeaving
     )
       return;
 
@@ -69,16 +73,14 @@ function FloatingNotification({
 
     // Set up the animation programmatically for better control
     progressElement.style.transition = `width ${duration}ms linear`;
-
-    // Ensure we start at full width
     progressElement.style.width = "100%";
 
     // Force a reflow to make sure the initial state is rendered
     void progressElement.offsetWidth;
 
-    // Small delay to ensure proper render sequence
-    const startAnimation = () => {
-      if (progressElement) {
+    // Start the progress animation
+    requestAnimationFrame(() => {
+      if (progressElement && !isLeaving) {
         progressElement.style.width = "0%";
 
         // Set up the auto-close timer to match exactly with animation end
@@ -88,12 +90,9 @@ function FloatingNotification({
           }
         }, duration);
       }
-    };
-
-    const animationTimer = setTimeout(startAnimation, 20);
+    });
 
     return () => {
-      clearTimeout(animationTimer);
       if (timerReference.current) {
         clearTimeout(timerReference.current);
       }
@@ -112,31 +111,31 @@ function FloatingNotification({
   // Style mappings for notification types
   const styles = {
     success: {
-      bg: "bg-gradient-to-r from-green-900/90 to-green-800/90",
-      border: "border-green-500/30",
-      icon: "text-green-400",
-      progress: "bg-green-500/50",
+      bg: "bg-gradient-to-r from-green-900/95 to-green-800/95",
+      border: "border-green-500/40",
+      icon: "text-green-300",
+      progress: "bg-green-400",
       component: <CheckIcon className="w-5 h-5" />,
     },
     error: {
-      bg: "bg-gradient-to-r from-red-900/90 to-red-800/90",
-      border: "border-red-500/30",
-      icon: "text-red-400",
-      progress: "bg-red-500/50",
+      bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
+      border: "border-red-500/40",
+      icon: "text-red-300",
+      progress: "bg-red-400",
       component: <CloseIcon className="w-5 h-5" />,
     },
     warning: {
-      bg: "bg-gradient-to-r from-yellow-700/90 to-amber-700/90",
-      border: "border-yellow-500/30",
-      icon: "text-yellow-400",
-      progress: "bg-yellow-500/50",
+      bg: "bg-gradient-to-r from-amber-800/95 to-yellow-700/95",
+      border: "border-amber-500/40",
+      icon: "text-amber-300",
+      progress: "bg-amber-400",
       component: <WarningIcon className="w-5 h-5" />,
     },
     info: {
-      bg: "bg-gradient-to-r from-blue-900/90 to-blue-800/90",
-      border: "border-blue-500/30",
-      icon: "text-blue-400",
-      progress: "bg-blue-500/50",
+      bg: "bg-gradient-to-r from-blue-900/95 to-blue-800/95",
+      border: "border-blue-500/40",
+      icon: "text-blue-300",
+      progress: "bg-blue-400",
       component: <InfoIcon className="w-5 h-5" />,
     },
   };
@@ -145,49 +144,54 @@ function FloatingNotification({
 
   return (
     <div
-      className={`fixed top-20 left-1/2 -translate-x-1/2 z-50 max-w-md w-11/12 sm:w-96 
-                 transition-all duration-500 ease-in-out transform
+      className={`relative max-w-md w-full mx-auto
+                 transition-all duration-300 ease-out transform
                  ${
                    isVisible && !isLeaving
-                     ? "opacity-100 translate-y-0"
-                     : "opacity-0 -translate-y-4"
-                 }
-                 ${isLeaving ? "opacity-0 -translate-y-4" : ""}`}
+                     ? "opacity-100 translate-y-0 scale-100"
+                     : "opacity-0 -translate-y-4 scale-95"
+                 }`}
       role="alert"
       aria-live="assertive"
+      aria-atomic="true"
     >
       <div
-        className={`flex items-center rounded-lg shadow-xl backdrop-blur-sm 
-                     ${bg} border ${border} overflow-hidden`}
+        className={`flex items-center rounded-lg shadow-2xl backdrop-blur-md 
+                     ${bg} border ${border} overflow-hidden
+                     hover:shadow-3xl transition-shadow duration-200`}
       >
         {/* Icon section */}
-        <div className={`${icon} p-4 flex items-center justify-center`}>
+        <div
+          className={`${icon} p-4 flex items-center justify-center flex-shrink-0`}
+        >
           {component}
         </div>
 
         {/* Content area */}
-        <div className="py-3 px-4 flex-1">
-          <p className="text-white font-medium text-sm">{message}</p>
+        <div className="py-3 px-4 flex-1 min-w-0">
+          <p className="text-white font-medium text-sm leading-relaxed break-words">
+            {message}
+          </p>
         </div>
 
         {/* Close button */}
-        <FormButton
-          type="button"
-          onClick={handleClose}
-          variant="ghost"
-          className="p-3 h-full text-white/70 hover:text-white"
-          ariaLabel="Close notification"
-          icon={<CloseIcon className="w-4 h-4" />}
-        />
+        <div className="flex-shrink-0 p-2">
+          <ActionButton
+            variant="close"
+            onClick={handleClose}
+            ariaLabel="Close notification"
+            className="text-white/60 hover:text-white bg-transparent hover:bg-white/10"
+          />
+        </div>
 
         {/* Progress timer bar */}
         {duration > 0 && autoClose && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/20 overflow-hidden">
+          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30 overflow-hidden">
             <div
               ref={progressReference}
-              className={`h-full ${progress}`}
+              className={`h-full ${progress} transition-all ease-linear`}
               style={{ width: "100%" }}
-            ></div>
+            />
           </div>
         )}
       </div>

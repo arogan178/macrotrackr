@@ -10,11 +10,15 @@ import {
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
+import {
+  useBeforeUnload,
+  useFeatureLoading,
+  useMutationErrorHandler,
+} from "@/hooks";
 import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
-import { useBeforeUnload } from "@/hooks/useBeforeUnload";
 import { useStore } from "@/store/store";
 
-import FloatingNotification from "../../notifications/components/FloatingNotification";
+// Notifications are handled by the global NotificationManager and store
 
 // --- Modified PageHeader Component ---
 // Now accepts tabs as children to render them on the right
@@ -64,10 +68,21 @@ export default function SettingsPage() {
     resetSettings,
     setSubscriptionStatus,
     initializeSettings,
+    showNotification,
   } = useStore();
 
   // Get loading state from mutation
   const isSaving = saveSettingsMutation.isPending;
+
+  // Use new loading state hooks
+  const { isLoading: isSettingsFeatureLoading } = useFeatureLoading("settings");
+  const { handleMutationError, handleMutationSuccess } =
+    useMutationErrorHandler({
+      onError: (message) =>
+        console.error("Settings operation failed:", message),
+      onSuccess: (message) =>
+        console.log("Settings operation succeeded:", message),
+    });
 
   // Hydrate subscriptionStatus from settings data
   useEffect(() => {
@@ -166,8 +181,13 @@ export default function SettingsPage() {
         // Update the store to reflect successful save
         const updatedSettings = structuredClone(settings);
         initializeSettings({ settings: updatedSettings });
+        showNotification("Settings saved successfully!", "success");
+        handleMutationSuccess("Settings saved successfully!");
       } catch (error) {
-        console.error("Failed to save settings:", error);
+        const errorMessage =
+          error instanceof Error ? error.message : "Unknown error";
+        showNotification(`Failed to save settings: ${errorMessage}`, "error");
+        handleMutationError(error, "saving settings");
       }
     },
     [validateSettingsForm, settings, saveSettingsMutation, initializeSettings],
@@ -180,24 +200,7 @@ export default function SettingsPage() {
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"></div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 relative">
-          {/* Error handling is now managed by TanStack Query */}
-          {saveSettingsMutation.isError && (
-            <FloatingNotification
-              message={`Failed to save settings: ${saveSettingsMutation.error?.message || "Unknown error"}`}
-              type="error"
-              onClose={() => saveSettingsMutation.reset()}
-              duration={5000}
-            />
-          )}
-
-          {saveSettingsMutation.isSuccess && (
-            <FloatingNotification
-              message="Settings saved successfully!"
-              type="success"
-              onClose={() => saveSettingsMutation.reset()}
-              duration={3000}
-            />
-          )}
+          {/* Notifications are now handled by the global NotificationManager */}
 
           <Modal
             isOpen={showConfirmModal}

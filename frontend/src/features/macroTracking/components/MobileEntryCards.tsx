@@ -293,6 +293,8 @@ const MobileEntryCards = memo(
                 >
                   <div className="flex items-center gap-3">
                     <motion.div
+                      key={`chevron-${group.date}`}
+                      initial={false}
                       animate={{
                         rotate: collapsedDates.has(group.date) ? -90 : 0,
                       }}

@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { FormButton, TextField } from "@/components/form";
-import FloatingNotification from "@/features/notifications/components/FloatingNotification";
+// Notifications are handled by the global NotificationManager and store
 
 type AuthMode = "login" | "register";
 type AuthFormProps = {

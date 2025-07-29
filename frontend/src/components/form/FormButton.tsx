@@ -9,6 +9,7 @@ import {
   ICON_POSITIONS,
 } from "@/components/utils";
 import type { FormButtonProps } from "@/components/utils/Types";
+import { useFeatureLoading, useGlobalLoading } from "@/hooks";
 
 type FormButtonAllProps = FormButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
@@ -28,8 +29,24 @@ function FormButton({
   onClick,
   fullWidth = false,
   ariaLabel,
+  autoLoadingFeature,
+  autoLoadingGlobal = false,
   ...rest
 }: FormButtonAllProps) {
+  // Auto-detect loading states if requested
+  const featureLoading = autoLoadingFeature
+    ? useFeatureLoading(autoLoadingFeature)
+    : null;
+  const globalLoading = autoLoadingGlobal ? useGlobalLoading() : null;
+
+  // Determine final loading state
+  const autoDetectedLoading =
+    featureLoading?.isMutationLoading ||
+    globalLoading?.isMutationLoading ||
+    false;
+
+  const finalIsLoading = isLoading || autoDetectedLoading;
+
   // Use centralized styles from formStyles.button
   const sizeStyles = FORM_BUTTON_SIZES;
   const variantStyles = formStyles.button.variants;
@@ -43,7 +60,7 @@ function FormButton({
   ].join(" ");
 
   const renderContent = () => {
-    if (isLoading) {
+    if (finalIsLoading) {
       return (
         <span className="flex items-center justify-center">
           <LoadingSpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
@@ -70,9 +87,9 @@ function FormButton({
     <button
       type={type}
       onClick={onClick}
-      disabled={isLoading || disabled}
+      disabled={finalIsLoading || disabled}
       className={buttonClasses}
-      aria-busy={isLoading}
+      aria-busy={finalIsLoading}
       aria-label={ariaLabel || text}
       data-variant={variant}
       {...rest}

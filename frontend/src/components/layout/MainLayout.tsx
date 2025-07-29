@@ -1,6 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import React from "react";
 
+import { NotificationManager } from "@/features/notifications/components";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { getToken } from "@/utils/tokenStorage";
 
@@ -37,6 +38,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen bg-gray-900 text-gray-100">
       {isAuthenticated && <Navbar />}
       <main>{children}</main>
+      <NotificationManager />
     </div>
   );
 };

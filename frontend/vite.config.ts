@@ -50,15 +50,54 @@ export default defineConfig(({ command, mode }) => {
         manifest: {
           name: "Macro Tracker",
           short_name: "MacroTracker",
+          description: "Track your macronutrients and nutrition goals",
           start_url: "/",
           display: "standalone",
           background_color: "#18181b",
           theme_color: "#6366f1",
           icons: [
             {
-              src: "/vite.svg",
+              src: "/favicon.svg",
+              sizes: "any",
+              type: "image/svg+xml",
+              purpose: "any maskable",
+            },
+            {
+              src: "/icon-192.svg",
               sizes: "192x192",
               type: "image/svg+xml",
+              purpose: "any",
+            },
+            {
+              src: "/icon-512.svg",
+              sizes: "512x512",
+              type: "image/svg+xml",
+              purpose: "any",
+            },
+            {
+              src: "/apple-touch-icon.svg",
+              sizes: "180x180",
+              type: "image/svg+xml",
+              purpose: "apple touch icon",
+            },
+          ],
+          categories: ["health", "fitness", "lifestyle"],
+          lang: "en",
+          orientation: "portrait-primary",
+        },
+        workbox: {
+          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+          runtimeCaching: [
+            {
+              urlPattern: /^https:\/\/api\./,
+              handler: "NetworkFirst",
+              options: {
+                cacheName: "api-cache",
+                expiration: {
+                  maxEntries: 100,
+                  maxAgeSeconds: 300, // 5 minutes
+                },
+              },
             },
           ],
         },
