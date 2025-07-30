@@ -58,7 +58,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {
         accessorKey: "feature",
         header: () => (
-          <div className="px-5 py-4 text-base font-semibold text-gray-200 bg-transparent flex flex-col items-start justify-center min-h-[72px]">
+          <div className="px-5 py-4 text-base font-semibold text-foreground bg-transparent flex flex-col items-start justify-center min-h-[72px]">
             <span>Feature</span>
             <span
               className="block text-transparent select-none"
@@ -70,7 +70,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
         ),
         cell: (info: CellContext<FeatureRow, unknown>) => (
           <span
-            className="text-left text-gray-200 font-medium"
+            className="text-left text-foreground font-medium"
             style={{ lineHeight: "1.5" }}
           >
             {info.getValue() as string}
@@ -80,7 +80,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {
         accessorKey: "free",
         header: () => (
-          <div className="px-5 py-4 text-base font-semibold text-gray-300 bg-transparent flex flex-col items-center justify-center min-h-[72px]">
+          <div className="px-5 py-4 text-base font-semibold text-foreground bg-transparent flex flex-col items-center justify-center min-h-[72px]">
             <span>Free</span>
             <span
               className="block text-transparent select-none"
@@ -92,11 +92,11 @@ const PricingTable: React.FC<PricingTableProps> = ({
         ),
         cell: (info: CellContext<FeatureRow, unknown>) =>
           info.getValue() ? (
-            <span className="inline-block align-middle text-green-400 font-bold">
+            <span className="inline-block align-middle text-success font-bold">
               ✔️
             </span>
           ) : (
-            <span className="inline-block align-middle text-gray-500 font-bold">
+            <span className="inline-block align-middle text-foreground font-bold">
               —
             </span>
           ),
@@ -113,8 +113,8 @@ const PricingTable: React.FC<PricingTableProps> = ({
               ? `($${(PRICING.yearly / 12).toFixed(2)}/mo equivalent)`
               : "";
           return (
-            <div className="px-5 py-4 text-base font-extrabold text-yellow-200 bg-gradient-to-br relative">
-              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-200 font-bold text-base shadow-glow border border-yellow-400/30">
+            <div className="px-5 py-4 text-base font-extrabold text-warning bg-gradient-to-br relative">
+              <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-warning/20 text-warning font-bold text-base shadow-glow border border-yellow-400/30">
                 PRO <ProBadge />
               </span>
               <div
@@ -128,7 +128,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="block text-yellow-300 text-lg font-extrabold mt-2 drop-shadow-glow text-center"
+                    className="block text-warning text-lg font-extrabold mt-2 drop-shadow-glow text-center"
                     style={{ minWidth: "120px" }}
                   >
                     <AnimatedNumber
@@ -138,14 +138,14 @@ const PricingTable: React.FC<PricingTableProps> = ({
                       prefix="$"
                       className="inline-block"
                     />
-                    <span className="text-base font-semibold text-yellow-200">
+                    <span className="text-base font-semibold text-warning">
                       {suffix}
                     </span>
                   </motion.span>
                 </AnimatePresence>
                 <span
                   className={
-                    "block text-xs font-semibold mt-1 text-yellow-300 transition-opacity duration-200"
+                    "block text-xs font-semibold mt-1 text-warning transition-opacity duration-200"
                   }
                   style={{
                     minHeight: 18,
@@ -163,11 +163,11 @@ const PricingTable: React.FC<PricingTableProps> = ({
         },
         cell: (info: CellContext<FeatureRow, unknown>) =>
           info.getValue() ? (
-            <span className="inline-block align-middle text-yellow-300 font-bold">
+            <span className="inline-block align-middle text-warning font-bold">
               ✔️
             </span>
           ) : (
-            <span className="inline-block align-middle text-gray-500 font-bold">
+            <span className="inline-block align-middle text-foreground font-bold">
               —
             </span>
           ),
@@ -239,11 +239,11 @@ const PricingTable: React.FC<PricingTableProps> = ({
           }
         }
       `}</style>
-      <div className="w-full max-w-full bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl shadow-xl p-4 border border-gray-700/60 scrollbar-hide overflow-x-hidden">
+      <div className="w-full max-w-full bg-gradient-to-br from-gray-900/90 to-gray-800/90 rounded-2xl shadow-modal p-4 border border-border/60 scrollbar-hide overflow-x-hidden">
         {/* Plan selection pill group using TabButton */}
         <div className="flex justify-center pb-4">
           <div
-            className="pricing-pill-group inline-flex bg-gray-800 border border-gray-700 rounded-full p-1 gap-0 select-none overflow-hidden"
+            className="pricing-pill-group inline-flex bg-surface border border-border rounded-full p-1 gap-0 select-none overflow-hidden"
             role="tablist"
             aria-label="Plan Toggle"
           >
@@ -258,8 +258,8 @@ const PricingTable: React.FC<PricingTableProps> = ({
               <span
                 className={`text-sm font-semibold ${
                   selectedPlan === "monthly"
-                    ? "text-gray-900"
-                    : "text-yellow-300"
+                    ? "text-foreground"
+                    : "text-warning"
                 }`}
               >
                 Monthly
@@ -275,9 +275,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
             >
               <span
                 className={`text-sm font-semibold ${
-                  selectedPlan === "yearly"
-                    ? "text-gray-900"
-                    : "text-yellow-300"
+                  selectedPlan === "yearly" ? "text-foreground" : "text-warning"
                 }`}
               >
                 Yearly
@@ -312,19 +310,16 @@ const PricingTable: React.FC<PricingTableProps> = ({
           <table className="responsive-pricing-table w-full max-w-full border-separate border-spacing-0 text-sm">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr
-                  key={headerGroup.id}
-                  className="border-b border-gray-700/60"
-                >
+                <tr key={headerGroup.id} className="border-b border-border/60">
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
                       className={
                         header.index === 0
-                          ? "text-left px-5 py-4 text-base font-semibold text-gray-200 bg-transparent border-b border-gray-700/60"
+                          ? "text-left px-5 py-4 text-base font-semibold text-foreground bg-transparent border-b border-border/60"
                           : header.index === 1
-                            ? "px-5 py-4 text-base font-semibold text-gray-300 bg-transparent border-b border-gray-700/60"
-                            : "px-5 py-4 text-base font-extrabold text-yellow-200 bg-gradient-to-br from-yellow-500/20 to-orange-400/20 shadow-[0_0_8px_2px_rgba(255,200,0,0.12)] relative border-b border-gray-700/60"
+                            ? "px-5 py-4 text-base font-semibold text-foreground bg-transparent border-b border-border/60"
+                            : "px-5 py-4 text-base font-extrabold text-warning bg-gradient-to-br from-yellow-500/20 to-orange-400/20 shadow-glow relative border-b border-border/60"
                       }
                     >
                       {flexRender(
@@ -340,7 +335,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
               {table.getRowModel().rows.map((row, index) => (
                 <tr
                   key={row.id}
-                  className="md:transition-transform md:duration-200 md:hover:-translate-y-1 md:hover:shadow-lg"
+                  className="md:transition-transform md:duration-200 md:hover:-translate-y-1 md:hover:shadow-primary"
                 >
                   {row.getVisibleCells().map((cell) => (
                     <td
@@ -354,16 +349,16 @@ const PricingTable: React.FC<PricingTableProps> = ({
                       }
                       className={
                         cell.column.id === "feature"
-                          ? `feature-cell px-3 py-2 text-left text-gray-200 font-medium${
+                          ? `feature-cell px-3 py-2 text-left text-foreground font-medium${
                               index === data.length - 1
                                 ? ""
-                                : " md:border-b md:border-gray-700/60"
+                                : " md:border-b md:border-border/60"
                             }`
                           : cell.column.id === "free"
                             ? `px-3 py-2 text-center${
                                 row.index === data.length - 1
                                   ? ""
-                                  : " md:border-b md:border-gray-700/60"
+                                  : " md:border-b md:border-border/60"
                               }`
                             : `px-3 py-2 text-center bg-gradient-to-br from-yellow-900/10 to-orange-900/10${
                                 row.index === data.length - 1
@@ -392,7 +387,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {showProButton && (
         <div className="mt-5 flex flex-col items-center">
           <button
-            className="w-full max-w-xs bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-extrabold py-4 px-12 rounded-2xl text-xl shadow-2xl focus:outline-none focus:ring-4 focus:ring-yellow-300 border-0 mb-2 transition-all duration-150 tracking-wide drop-shadow-lg active:scale-95"
+            className="w-full max-w-xs bg-gradient-to-r from-yellow-400 via-yellow-500 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-black font-extrabold py-4 px-12 rounded-2xl text-xl shadow-modal focus:outline-none focus:ring-4 focus:ring-yellow-300 border-0 mb-2 transition-all duration-150 tracking-wide drop-shadow-primary active:scale-95"
             style={{ transition: "transform 0.1s" }}
             onClick={() => onUpgrade && onUpgrade(selectedPlan)}
             aria-label="Upgrade to Pro"
@@ -406,7 +401,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25, ease: "easeInOut" }}
-              className="text-xs text-yellow-700 font-medium dark:text-yellow-200"
+              className="text-xs text-warning font-medium dark:text-warning"
               style={{ marginTop: "8px" }}
             >
               {selectedPlan === "monthly"

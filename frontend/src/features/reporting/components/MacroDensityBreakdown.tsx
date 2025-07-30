@@ -92,23 +92,23 @@ const MacroDensityBreakdown = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="bg-gray-800/70 rounded-xl border border-gray-700/30 p-3 shadow-lg flex flex-col"
+      className="bg-surface/70 rounded-xl border border-border/30 p-3 shadow-primary flex flex-col"
     >
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-base font-semibold text-white">
+        <h3 className="text-base font-semibold text-foreground">
           Macro Distribution
         </h3>
       </div>
       <div className="h-[300px]">
         {loading ? (
           <div className="flex items-center justify-center h-full">
-            <div className="animate-pulse text-gray-400 text-sm">
+            <div className="animate-pulse text-foreground text-sm">
               Loading macro distribution...
             </div>
           </div>
         ) : showNoData ? (
           <div className="flex items-center justify-center h-full">
-            <div className="text-yellow-400 text-sm">
+            <div className="text-warning text-sm">
               No macro data available for this period.
             </div>
           </div>
@@ -159,7 +159,9 @@ const MacroDensityBreakdown = ({
                   color: MACRO_COLORS[macro].base,
                 }))}
                 formatter={(value) => (
-                  <span className="text-gray-300 capitalize ml-1">{value}</span>
+                  <span className="text-foreground capitalize ml-1">
+                    {value}
+                  </span>
                 )}
               />
               <Bar
@@ -206,25 +208,25 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (!active || !payload || payload.length === 0) return;
   const data = payload[0].payload as CustomTooltipPayload;
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
-      <p className="font-medium text-white mb-1">{data.period}</p>
+    <div className="bg-surface border border-border rounded-md shadow-modal p-2 text-sm">
+      <p className="font-medium text-foreground mb-1">{data.period}</p>
       <div className="space-y-0.5">
-        <p className="text-green-400">
-          <span className="inline-block w-3 h-3 rounded-full bg-green-400 mr-2" />
+        <p className="text-success">
+          <span className="inline-block w-3 h-3 rounded-full bg-success mr-2" />
           <span className="font-medium">
             {(data.protein * 100).toFixed(0)}%
           </span>
         </p>
-        <p className="text-blue-400">
-          <span className="inline-block w-3 h-3 rounded-full bg-blue-400 mr-2" />
+        <p className="text-primary">
+          <span className="inline-block w-3 h-3 rounded-full bg-primary mr-2" />
           <span className="font-medium">{(data.carbs * 100).toFixed(0)}%</span>
         </p>
-        <p className="text-red-400">
-          <span className="inline-block w-3 h-3 rounded-full bg-red-400 mr-2" />
+        <p className="text-vibrant-accent">
+          <span className="inline-block w-3 h-3 rounded-full bg-vibrant-accent mr-2" />
           <span className="font-medium">{(data.fats * 100).toFixed(0)}%</span>
         </p>
       </div>
-      <p className="text-gray-300 text-xs mt-1 pt-1 border-t border-gray-700">
+      <p className="text-foreground text-xs mt-1 pt-1 border-t border-border">
         {Math.round(data.calories)} calories
       </p>
     </div>

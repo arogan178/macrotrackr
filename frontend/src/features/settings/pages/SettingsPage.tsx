@@ -160,7 +160,7 @@ export default function SettingsPage() {
       subtitle={undefined}
       headerChildren={
         <div
-          className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
+          className="relative flex space-x-1 p-1 bg-surface/60 rounded-lg"
           role="tablist"
           aria-label="Settings Tabs"
         >
@@ -204,7 +204,7 @@ export default function SettingsPage() {
         <SettingsLoadingSkeleton />
       ) : settingsQueryError ? (
         <div className="p-6 text-center">
-          <p className="text-red-400">
+          <p className="text-vibrant-accent">
             Failed to load settings. Please try again.
           </p>
         </div>

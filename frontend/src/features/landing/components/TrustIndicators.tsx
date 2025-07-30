@@ -9,22 +9,22 @@ import React from "react";
  */
 const indicators = [
   {
-    icon: <ShieldCheck className="w-6 h-6 text-green-400" />,
-    bg: "bg-green-500/20",
+    icon: <ShieldCheck className="w-6 h-6 text-success" />,
+    bg: "bg-success/20",
     hoverBg: "rgba(34, 197, 94, 0.3)",
     title: "Secure & Private",
     desc: "Your data is encrypted and protected",
-    hoverTitle: "text-green-100",
-    hoverDesc: "text-slate-300",
+    hoverTitle: "text-success",
+    hoverDesc: "text-foreground",
   },
   {
-    icon: <CircleHelp className="w-6 h-6 text-blue-400" />,
-    bg: "bg-blue-500/20",
+    icon: <CircleHelp className="w-6 h-6 text-primary" />,
+    bg: "bg-primary/20",
     hoverBg: "rgba(59, 130, 246, 0.3)",
     title: "24/7 Support",
     desc: "Get help whenever you need it",
-    hoverTitle: "text-blue-100",
-    hoverDesc: "text-slate-300",
+    hoverTitle: "text-primary",
+    hoverDesc: "text-foreground",
   },
   {
     icon: <Sparkles className="w-6 h-6 text-purple-400" />,
@@ -33,7 +33,7 @@ const indicators = [
     title: "Always Improving",
     desc: "Regular updates and new features",
     hoverTitle: "text-purple-100",
-    hoverDesc: "text-slate-300",
+    hoverDesc: "text-foreground",
   },
 ];
 
@@ -88,12 +88,12 @@ const TrustIndicators: React.FC = () => (
             {item.icon}
           </motion.div>
           <h4
-            className={`font-semibold text-white mb-1 group-hover:${item.hoverTitle} transition-colors duration-200`}
+            className={`font-semibold text-foreground mb-1 group-hover:${item.hoverTitle} transition-colors duration-200`}
           >
             {item.title}
           </h4>
           <p
-            className={`text-slate-400 text-sm group-hover:${item.hoverDesc} transition-colors duration-200`}
+            className={`text-foreground text-sm group-hover:${item.hoverDesc} transition-colors duration-200`}
           >
             {item.desc}
           </p>

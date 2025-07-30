@@ -62,7 +62,7 @@ const capitalizeFirstLetter = (string: string): string =>
 
 const exportCSV = (history: MacroEntry[]) => {
   const csvContent = [
-    "Date, Time, Meal Type, Meal Name, Protein (g), Carbs (g), Fats (g), Calories",
+    "Date, Time, Meal Type, Meal Name, Protein (g), Carbs (g), Fats (g), Calories (kcal)",
     ...history.map(
       (entry) =>
         `${
@@ -282,8 +282,10 @@ const EntryHistoryComponent = function EntryHistory({
       {/* Heading row for mobile: flex with export button inline */}
       <div className="flex items-center justify-between mb-6 gap-4 lg:hidden">
         <div>
-          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-lg font-semibold text-foreground">
+            Entry History
+          </h2>
+          <p className="text-sm text-foreground mt-1">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
             <AnimatedNumber value={totalEntries.length} />{" "}
@@ -309,8 +311,10 @@ const EntryHistoryComponent = function EntryHistory({
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>{" "}
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-lg font-semibold text-foreground">
+            Entry History
+          </h2>{" "}
+          <p className="text-sm text-foreground mt-1">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
             <AnimatedNumber value={totalEntries.length} />{" "}
@@ -320,14 +324,11 @@ const EntryHistoryComponent = function EntryHistory({
         {history.length > 0 && (
           <ProFeature>
             <Button
-              type="button"
               icon={<ExportIcon />}
               iconPosition="left"
               onClick={handleExportCSV}
               text="Export CSV"
-              variant="secondary"
               buttonSize="lg"
-              className="mr-2"
             />
           </ProFeature>
         )}
@@ -337,12 +338,12 @@ const EntryHistoryComponent = function EntryHistory({
         <EmptyState
           title="No entries yet"
           message="Get started by logging your first meal using the form above"
-          icon={<PlusCircleIcon className="w-10 h-10 text-gray-500" />}
+          icon={<PlusCircleIcon className="w-10 h-10 text-foreground" />}
           size="lg"
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl"
+          className="overflow-hidden rounded-2xl border border-border/50 bg-surface/40 backdrop-blur-sm shadow-modal"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
@@ -393,7 +394,7 @@ const EntryHistoryComponent = function EntryHistory({
               {(hasMoreDates || hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
-                  className={`px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50 ${
+                  className={`px-4 py-2 text-sm text-foreground hover:text-foreground bg-transparent hover:bg-surface/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-border/30 hover:border-border/50 ${
                     isLoadingMore ? "opacity-60 cursor-not-allowed" : ""
                   }`}
                   disabled={isLoadingMore}
@@ -413,7 +414,7 @@ const EntryHistoryComponent = function EntryHistory({
                       Load More Dates
                     </motion.span>
                   </AnimatePresence>
-                  <ChevronDownIcon className="w-4 h-4" />
+                  <ChevronDownIcon className="w-4 h-4 text-foreground" />
                 </motion.button>
               )}
 
@@ -421,7 +422,7 @@ const EntryHistoryComponent = function EntryHistory({
               {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
                 <motion.button
                   onClick={showLessDates}
-                  className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50"
+                  className="px-4 py-2 text-sm text-foreground hover:text-foreground bg-transparent hover:bg-surface/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-border/30 hover:border-border/50"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}

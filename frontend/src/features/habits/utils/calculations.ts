@@ -57,10 +57,10 @@ export const calculateStreakDays = (
 };
 
 export const getHabitProgressColor = (progress: number): string => {
-  if (progress >= 100) return "text-green-400";
-  if (progress >= 75) return "text-blue-400";
-  if (progress >= 50) return "text-yellow-400";
-  return "text-gray-400";
+  if (progress >= 100) return "text-success";
+  if (progress >= 75) return "text-primary";
+  if (progress >= 50) return "text-warning";
+  return "text-foreground";
 };
 
 export const getProgressBarColor = (

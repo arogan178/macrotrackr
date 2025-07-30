@@ -49,7 +49,7 @@ const PrivacyPolicyPage = React.lazy(
 // Fallback component to show while loading
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+    <div className="min-h-screen bg-surface flex justify-center items-center">
       <LoadingSpinner size="lg" />
     </div>
   );

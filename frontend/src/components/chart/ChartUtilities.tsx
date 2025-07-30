@@ -27,7 +27,7 @@ export function createGradient(
  * Recharts Legend formatter
  */
 export const legendFormatter = (value: string) => (
-  <span className="text-gray-300 capitalize ml-1">{value}</span>
+  <span className="text-foreground capitalize ml-1">{value}</span>
 );
 
 /**
@@ -145,16 +145,18 @@ export const ChartContainer: React.FC<{
 }> = ({ title, subtitle, children, className = "" }) => {
   return (
     <div
-      className={`bg-gray-800/70 rounded-xl border border-gray-700/30 p-3 shadow-lg h-full flex flex-col ${className}`}
+      className={`bg-surface/70 rounded-xl border border-border/30 p-3 shadow-primary h-full flex flex-col ${className}`}
     >
       {(title || subtitle) && (
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-baseline gap-1.5">
             {title && (
-              <h3 className="text-base font-semibold text-white">{title}</h3>
+              <h3 className="text-base font-semibold text-foreground">
+                {title}
+              </h3>
             )}
             {subtitle && (
-              <span className="text-sm text-gray-400 truncate max-w-[160px] block">
+              <span className="text-sm text-foreground truncate max-w-[160px] block">
                 {subtitle}
               </span>
             )}

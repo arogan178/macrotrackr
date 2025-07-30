@@ -22,10 +22,10 @@ const HeroSection: React.FC = () => (
           }}
           className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-8"
         >
-          <span className="block bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text pb-4">
+          <span className="block bg-gradient-to-r from-white via-blue-100 to-primary text-transparent bg-clip-text pb-4">
             Track Your Macros
           </span>
-          <span className="block bg-gradient-to-r from-indigo-200 via-blue-200 to-white text-transparent bg-clip-text pb-4">
+          <span className="block bg-gradient-to-r from-primary via-blue-200 to-white text-transparent bg-clip-text pb-4">
             Achieve Your Goals
           </span>
         </motion.h1>
@@ -41,7 +41,7 @@ const HeroSection: React.FC = () => (
             delay: 0.15,
             ease: "easeOut",
           }}
-          className="max-w-3xl mx-auto text-xl sm:text-2xl text-slate-300 mb-12 leading-relaxed"
+          className="max-w-3xl mx-auto text-xl sm:text-2xl text-foreground mb-12 leading-relaxed"
         >
           The most intuitive macro tracking app designed to help you reach your
           fitness and nutrition goals with precision and ease.
@@ -76,13 +76,13 @@ const HeroSection: React.FC = () => (
                 text="Start Your Journey Free"
                 variant="primary"
                 buttonSize="lg"
-                className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 px-12 py-4 text-xl font-semibold shadow-xl transition-all duration-300"
+                className="bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary px-12 py-4 text-xl font-semibold shadow-modal transition-all duration-300"
               />
             </motion.div>
           </Link>
 
           <motion.p
-            className="text-slate-300 text-lg font-medium mb-6"
+            className="text-foreground text-lg font-medium mb-6"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -102,7 +102,7 @@ const HeroSection: React.FC = () => (
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.6, ease: "easeOut" }}
-          className="max-w-4xl mx-auto bg-slate-800/30 backdrop-blur-sm border border-slate-700/30 rounded-2xl p-8 mb-8"
+          className="max-w-4xl mx-auto bg-surface/30 backdrop-blur-sm border border-border/30 rounded-2xl p-8 mb-8"
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {trustIndicators.map((indicator, index) => (
@@ -121,10 +121,10 @@ const HeroSection: React.FC = () => (
                   />
                 </div>
                 <div>
-                  <h4 className="font-semibold text-white">
+                  <h4 className="font-semibold text-foreground">
                     {indicator.title}
                   </h4>
-                  <p className="text-slate-400 text-sm">
+                  <p className="text-foreground text-sm">
                     {indicator.description}
                   </p>
                 </div>
@@ -136,11 +136,11 @@ const HeroSection: React.FC = () => (
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.6, delay: 1.2 }}
-            className="flex flex-col sm:flex-row items-center justify-center mt-6 pt-6 border-t border-slate-700/30 space-y-2 sm:space-y-0 sm:space-x-8 text-slate-400 text-sm"
+            className="flex flex-col sm:flex-row items-center justify-center mt-6 pt-6 border-t border-border/30 space-y-2 sm:space-y-0 sm:space-x-8 text-foreground text-sm"
           >
             {trustElements.map((element) => (
               <div key={element.text} className="flex items-center space-x-2">
-                <ShieldCheckIcon className="w-4 h-4 text-green-400" />
+                <ShieldCheckIcon className="w-4 h-4 text-success" />
                 <span>{element.text}</span>
               </div>
             ))}

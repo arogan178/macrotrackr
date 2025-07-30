@@ -2,21 +2,21 @@
 // Font sizes and weights are based on usage in src/components/
 export const formStyles = {
   // Label styles
-  label: "block text-sm font-medium text-gray-300", // Common: text-sm, font-medium
-  labelBase: "block text-base font-medium text-gray-300", // For larger forms
-  labelLg: "block text-lg font-semibold text-gray-200", // For headings
-  labelXl: "block text-xl font-bold text-gray-100", // For prominent titles
+  label: "block text-sm font-medium text-foreground", // Common: text-sm, font-medium
+  labelBase: "block text-base font-medium text-foreground", // For larger forms
+  labelLg: "block text-lg font-semibold text-foreground", // For headings
+  labelXl: "block text-xl font-bold text-foreground", // For prominent titles
 
   // Container spacing
   container: "space-y-2",
 
   // Input styles
   input: {
-    base: `w-full px-4 py-2 bg-gray-700/70 border-2 rounded-lg text-gray-100 
-           focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none
-           transition-all duration-200 shadow-sm`,
+    base: `w-full px-4 py-2 bg-surface/70 border-2 rounded-lg text-foreground 
+           focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none
+           transition-all duration-200 shadow-surface`,
     error: "border-red-500/70",
-    normal: "border-gray-600/70",
+    normal: "border-border/70",
     withIcon: "pl-10",
     withUnit: "pr-10",
     withPassword: "pr-10",
@@ -24,17 +24,17 @@ export const formStyles = {
                   [&::-webkit-outer-spin-button]:appearance-none
                   [-moz-appearance:textfield]`,
     disabled:
-      "bg-gray-600/40 border-gray-500/50 text-gray-400 cursor-not-allowed opacity-70",
+      "bg-surface/40 border-border/50 text-foreground cursor-not-allowed opacity-70",
   },
 
   // Error and helper text
-  error: "text-xs text-red-400 font-medium", // text-xs, font-medium
-  helper: "text-xs text-gray-500",
-  maxLength: "text-xs text-gray-500",
+  error: "text-xs text-vibrant-accent font-medium", // text-xs, font-medium
+  helper: "text-xs text-foreground",
+  maxLength: "text-xs text-foreground",
 
   // Icon/unit containers
-  iconContainer: "absolute left-3 top-1/2 -translate-y-1/2 text-gray-500",
-  unitContainer: "absolute right-4 top-1/2 -translate-y-1/2 text-gray-400",
+  iconContainer: "absolute left-3 top-1/2 -translate-y-1/2 text-foreground",
+  unitContainer: "absolute right-4 top-1/2 -translate-y-1/2 text-foreground",
 
   // Select styles
   select: {
@@ -54,15 +54,15 @@ export const formStyles = {
     // Variant styles
     variants: {
       primary:
-        "bg-indigo-600 hover:bg-indigo-700 disabled:hover:bg-indigo-600 text-white focus:ring-indigo-500 shadow-sm",
+        "bg-primary hover:bg-opacity-90 disabled:hover:bg-accent text-foreground focus:ring-accent shadow-surface",
       secondary:
-        "bg-gray-700 hover:bg-gray-600 disabled:hover:bg-gray-700 text-gray-100 border border-gray-600 focus:ring-gray-500",
+        "bg-secondary hover:bg-opacity-90 disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
       danger:
-        "bg-red-600 hover:bg-red-700 disabled:hover:bg-red-600 text-white focus:ring-red-500 shadow-sm",
+        "bg-error hover:bg-opacity-90 disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
       success:
-        "bg-green-600 hover:bg-green-700 disabled:hover:bg-green-600 text-white focus:ring-green-500 shadow-sm",
+        "bg-success hover:bg-opacity-90 disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
       ghost:
-        "bg-transparent hover:bg-gray-700/50 disabled:hover:bg-transparent text-gray-300 hover:text-white disabled:hover:text-gray-300",
+        "bg-transparent hover:bg-surface/50 disabled:hover:bg-transparent disabled:hover:text-foreground",
     },
     // Full width utility
     fullWidth: "w-full",
@@ -79,13 +79,13 @@ export const formStyles = {
   tab: {
     base: "py-3 px-6 font-medium text-sm focus:outline-none",
     baseLg: "py-3 px-6 font-semibold text-lg focus:outline-none", // For larger tabs
-    active: "text-indigo-400 border-b-2 border-indigo-500",
-    inactive: "text-gray-400 hover:text-gray-300",
+    active: "text-primary border-b-2 border-primary",
+    inactive: "text-foreground hover:text-foreground",
   },
 
   // Card container
   card: {
     container:
-      "bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden",
+      "bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 shadow-modal overflow-hidden",
   },
 };
