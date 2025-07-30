@@ -1,13 +1,15 @@
-import { useState } from "react";
+// src/components/macros/MacroSlider.tsx
 
+import { useState } from "react";
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { IconButton, LockIcon, UnlockIcon } from "@/components/ui";
+import { COLOR_MAP } from "../utils";
 
 interface MacroSliderProps {
   name: string;
   value: number;
   onChange: (value: number) => void;
-  color: "green" | "blue" | "red";
+  color: "protein" | "carbs" | "fats";
   isLocked?: boolean;
   onToggleLock?: () => void;
   disabled?: boolean;
@@ -33,28 +35,14 @@ export default function MacroSlider({
     ),
   );
 
-  const colorConfig = {
-    green: {
-      bg: "bg-green-500",
-      focus: "focus:ring-green-500/50",
-      textLocked: "text-green-400",
-      bgLocked: "bg-green-900/30",
-    },
-    blue: {
-      bg: "bg-blue-500",
-      focus: "focus:ring-blue-500/50",
-      textLocked: "text-blue-400",
-      bgLocked: "bg-blue-900/30",
-    },
-    red: {
-      bg: "bg-red-500",
-      focus: "focus:ring-red-500/50",
-      textLocked: "text-red-400",
-      bgLocked: "bg-red-900/30",
-    },
-  };
-
-  const { bg, focus, textLocked, bgLocked } = colorConfig[color];
+  let colorProps = COLOR_MAP[color];
+  if (!colorProps) {
+    console.warn(
+      `MacroSlider: Unknown color '${color}', using 'protein' as fallback.`,
+    );
+    colorProps = COLOR_MAP["protein"];
+  }
+  const { bg, iconColor } = colorProps;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
     const newValue = Number.parseInt(event.target.value);
@@ -67,12 +55,14 @@ export default function MacroSlider({
     );
   }
 
+  const percentage = ((value - min) / (max - min)) * 100;
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
           <div className={`w-2 h-2 rounded-full ${bg}`}></div>
-          <span className="text-sm text-gray-300">{name}</span>
+          <span className="text-sm text-muted">{name}</span>
         </div>
         <div className="flex items-center gap-2">
           {onToggleLock && (
@@ -82,29 +72,33 @@ export default function MacroSlider({
               ariaLabel={isLocked ? `Unlock ${name}` : `Lock ${name}`}
               icon={
                 isLocked ? (
-                  <LockIcon className="w-3.5 h-3.5" />
+                  <LockIcon className={`w-3.5 h-3.5 ${iconColor}`} />
                 ) : (
-                  <UnlockIcon className="w-3.5 h-3.5" />
+                  <UnlockIcon className="w-3.5 h-3.5 text-muted" />
                 )
               }
-              className={`p-1.5 rounded-full ${
-                isLocked
-                  ? `${textLocked} ${bgLocked}`
-                  : "text-gray-500 hover:text-gray-300"
-              }`}
+              className="p-1.5 rounded-full"
               buttonSize="sm"
               disabled={disabled}
             />
           )}
           <AnimatedNumber
             value={value}
-            className="text-sm font-medium text-gray-200 w-8 text-right"
+            className="text-sm font-medium text-muted w-8 text-right"
             suffix="%"
           />
         </div>
       </div>
 
-      <div className="relative">
+      <div className="relative h-4 flex items-center">
+        {/* Background Track */}
+        <div className="absolute w-full h-2 bg-surface/80 rounded-lg" />
+        {/* Filled Track */}
+        <div
+          className={`absolute h-2 ${bg} rounded-lg`}
+          style={{ width: `${percentage}%` }}
+        />
+        {/* Actual Slider Input */}
         <input
           type="range"
           min={min}
@@ -113,22 +107,27 @@ export default function MacroSlider({
           value={value}
           onChange={handleChange}
           disabled={disabled || (isLocked && !disabled)}
-          className={`w-full h-2 bg-gray-700/80 rounded-lg appearance-none cursor-pointer
-                    focus:outline-none ${focus}
+          className={`relative w-full h-4 bg-transparent appearance-none cursor-pointer
+                    focus:outline-none
                     [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 
                     [&::-webkit-slider-thumb]:h-4 
                     [&::-webkit-slider-thumb]:${bg} 
                     [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
+                    [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
+                    [&::-moz-range-thumb]:${bg} [&::-moz-range-thumb]:rounded-full
+                    [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer
+                    [&::-webkit-slider-runnable-track]:bg-transparent
+                    [&::-moz-range-track]:bg-transparent
                     ${disabled || (isLocked && !disabled) ? "opacity-50" : ""}`}
         />
       </div>
 
       <div className="flex justify-between items-center">
-        <span className="text-xs text-gray-400">{min}%</span>
-        <span className="text-xs text-gray-400 max-w-[180px] text-center h-4">
+        <span className="text-xs text-muted">{min}%</span>
+        <span className="text-xs text-muted max-w-[180px] text-center h-4">
           {recommendationText}
         </span>
-        <span className="text-xs text-gray-400">{max}%</span>
+        <span className="text-xs text-muted">{max}%</span>
       </div>
     </div>
   );
@@ -156,7 +155,7 @@ function getRecommendation(
 interface MacroBadgeProps {
   name: string;
   value: number;
-  color: "green" | "blue" | "red";
+  color: "protein" | "carbs" | "fats";
   isLocked?: boolean;
 }
 
@@ -166,31 +165,23 @@ export function MacroBadge({
   color,
   isLocked = false,
 }: MacroBadgeProps) {
-  const colorConfig = {
-    green: {
-      border: "border-green-500/20",
-      iconColor: "text-green-500",
-    },
-    blue: {
-      border: "border-blue-500/20",
-      iconColor: "text-blue-500",
-    },
-    red: {
-      border: "border-red-500/20",
-      iconColor: "text-red-500",
-    },
-  };
-
-  const { border, iconColor } = colorConfig[color];
+  let badgeColorProps = COLOR_MAP[color];
+  if (!badgeColorProps) {
+    console.warn(
+      `MacroBadge: Unknown color '${color}', using 'protein' as fallback.`,
+    );
+    badgeColorProps = COLOR_MAP["protein"];
+  }
+  const { border, iconColor } = badgeColorProps;
 
   return (
-    <div className={`bg-gray-800/50 rounded-lg p-3 border ${border}`}>
+    <div className={`bg-background/50 rounded-lg p-3 border ${border}`}>
       <div className="flex items-center gap-1.5">
-        <div className={`w-2 h-2 rounded-full bg-${color}-500`}></div>
-        <span className="text-xs text-gray-400">{name}</span>
+        <div className={`w-2 h-2 rounded-full bg-${color}`}></div>
+        <span className="text-xs text-muted">{name}</span>
         {isLocked && <LockIcon className={`w-3 h-3 ${iconColor}`} />}
       </div>{" "}
-      <div className="mt-1 text-lg font-semibold text-gray-200 w-12">
+      <div className="mt-1 text-lg font-semibold text-muted w-12">
         <AnimatedNumber value={value} suffix="%" />
       </div>
     </div>

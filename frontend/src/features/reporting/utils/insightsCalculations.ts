@@ -271,8 +271,8 @@ export function calculateMacroDensity(
 
 export function getScoreColor(score: number): string {
   return score > SCORE_COLOR_GREEN
-    ? "bg-green-400"
+    ? "bg-success"
     : score > SCORE_COLOR_YELLOW
-      ? "bg-yellow-400"
-      : "bg-red-400";
+      ? "bg-warning"
+      : "bg-vibrant-accent";
 }

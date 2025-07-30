@@ -109,13 +109,13 @@ const BillingForm: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center">
             <div className="p-3 bg-gradient-to-br from-yellow-400/20 to-yellow-500/20 rounded-xl mr-4">
-              <AwardIcon className="w-7 h-7 text-yellow-400 flex-shrink-0" />
+              <AwardIcon className="w-7 h-7 text-warning flex-shrink-0" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold text-gray-100 truncate">
+              <h3 className="text-xl font-bold text-foreground truncate">
                 Subscription Plan
               </h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-foreground mt-1">
                 {isPro
                   ? "Pro features active • Full access"
                   : "Basic plan • Upgrade available"}
@@ -125,8 +125,8 @@ const BillingForm: React.FC = () => {
           <div
             className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 self-start sm:self-auto ${
               isPro
-                ? "bg-gradient-to-r from-yellow-400/25 to-yellow-500/25 border border-yellow-400/40 text-yellow-300 shadow-lg"
-                : "bg-gradient-to-r from-gray-600/25 to-gray-700/25 border border-gray-500/40 text-gray-300"
+                ? "bg-gradient-to-r from-yellow-400/25 to-yellow-500/25 border border-yellow-400/40 text-warning shadow-primary"
+                : "bg-gradient-to-r from-gray-600/25 to-gray-700/25 border border-border/40 text-foreground"
             }`}
             role="status"
             aria-label={`Current plan: ${isPro ? "Pro" : "Free"}`}

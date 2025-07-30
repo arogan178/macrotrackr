@@ -67,9 +67,9 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   if (isLoading) {
     return (
       <div
-        className={`bg-gray-800/40 rounded-2xl h-60 flex items-center justify-center animate-pulse ${className}`}
+        className={`bg-surface/40 rounded-2xl h-60 flex items-center justify-center animate-pulse ${className}`}
       >
-        <div className="w-full h-full bg-gray-700 rounded-2xl" />
+        <div className="w-full h-full bg-surface rounded-2xl" />
       </div>
     );
   }
@@ -77,12 +77,12 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Empty State
   if (!weightGoals) {
     return (
-      <div className={`bg-gray-800/40 rounded-2xl ${className}`}>
+      <div className={`bg-surface/40 rounded-2xl ${className}`}>
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
           icon={
-            <TargetIcon className="h-14 w-14 text-indigo-400" strokeWidth={1} />
+            <TargetIcon className="h-14 w-14 text-primary" strokeWidth={1} />
           }
           action={{
             label: "Set Weight Goal",
@@ -99,7 +99,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Status View (when weightGoals exist)
   return (
     <>
-      <div className={`bg-gray-800/40 rounded-2xl ${className}`}>
+      <div className={`bg-surface/40 rounded-2xl ${className}`}>
         <WeightGoalStatus
           startingWeight={user.weight ?? 0} // Pass current weight for progress, fallback to 0
           targetWeight={weightGoals.targetWeight}

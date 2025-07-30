@@ -39,13 +39,13 @@ class QueryErrorBoundaryInner extends Component<
 
       return (
         <div className="min-h-[200px] flex items-center justify-center p-4">
-          <div className="bg-gray-800 p-6 rounded-xl shadow-lg max-w-md w-full border border-gray-700">
-            <div className="text-red-400 mb-4">
+          <div className="bg-surface p-6 rounded-xl shadow-primary max-w-md w-full border border-border">
+            <div className="text-vibrant-accent mb-4">
               <WarningIcon className="w-8 h-8 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-center text-white mb-2">
+              <h3 className="text-lg font-semibold text-center text-foreground mb-2">
                 Data Loading Error
               </h3>
-              <p className="text-center text-gray-400 text-sm mb-4">
+              <p className="text-center text-foreground text-sm mb-4">
                 {getErrorMessage(this.state.error)}
               </p>
             </div>
@@ -58,7 +58,7 @@ class QueryErrorBoundaryInner extends Component<
                 }}
                 ariaLabel="Try again"
                 variant="primary"
-                className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
+                className="px-4 py-2 bg-primary hover:bg-primary text-foreground rounded-lg font-medium transition-colors duration-200"
               >
                 Try Again
               </Button>
@@ -66,7 +66,7 @@ class QueryErrorBoundaryInner extends Component<
                 onClick={() => globalThis.location.reload()}
                 ariaLabel="Reload page"
                 variant="secondary"
-                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                className="px-4 py-2 bg-surface hover:bg-surface text-foreground rounded-lg font-medium transition-colors duration-200"
               >
                 Reload Page
               </Button>

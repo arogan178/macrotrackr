@@ -7,20 +7,20 @@ interface GoalsModeToggleProps {
 
 function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
   return (
-    <div className="relative flex items-center bg-gray-800/40 rounded-xl p-1 w-fit">
+    <div className="relative flex items-center bg-surface/40 rounded-xl p-1 w-fit">
       <Button
         type="button"
         onClick={activeMode === "achieved" ? onToggle : undefined}
         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
           activeMode === "active"
-            ? "bg-blue-600 text-white shadow-md"
-            : "text-gray-400 hover:text-gray-300"
+            ? "bg-primary text-foreground shadow-surface"
+            : "text-foreground hover:text-foreground"
         }`}
         variant={activeMode === "active" ? undefined : "ghost"}
         icon={
           <GoalsIcon
             className={`w-4 h-4 mr-2 ${
-              activeMode === "active" ? "text-white" : "text-gray-400"
+              activeMode === "active" ? "text-foreground" : "text-foreground"
             }`}
           />
         }
@@ -32,8 +32,8 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
         onClick={activeMode === "active" ? onToggle : undefined}
         className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
           activeMode === "achieved"
-            ? "bg-blue-600 text-white shadow-md"
-            : "text-gray-400 hover:text-gray-300"
+            ? "bg-primary text-foreground shadow-surface"
+            : "text-foreground hover:text-foreground"
         }`}
         variant={activeMode === "achieved" ? undefined : "ghost"}
         icon={<AwardIcon />}

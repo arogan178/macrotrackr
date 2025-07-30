@@ -6,7 +6,7 @@ import type { InfoCardProps } from "@/components/utils/Types";
 function InfoCard({
   title,
   description,
-  color = "indigo",
+  color = "accent",
   icon,
   children,
 }: InfoCardProps) {
@@ -19,7 +19,7 @@ function InfoCard({
         {icon && <div className={text}>{icon}</div>}
         <h4 className={`${text} font-medium`}>{title}</h4>
       </div>
-      {description && <p className="text-sm text-gray-400">{description}</p>}
+      {description && <p className="text-sm text-foreground">{description}</p>}
       {children}
     </div>
   );

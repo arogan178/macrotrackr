@@ -18,17 +18,17 @@ export const PageHeader = ({
   <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
     {/* Left Side: Title and subtitle */}
     <div className="mb-6">
-      <h1 className="text-2xl sm:text-3xl font-extrabold bg-gradient-to-r from-white via-indigo-200 to-gray-300 text-transparent bg-clip-text tracking-tight">
+      <h1 className="text-2xl sm:text-3xl font-extrabold text-foreground bg-clip-text tracking-tight">
         {title}
       </h1>
-      {subtitle && <p className="text-gray-400 max-w-2xl">{subtitle}</p>}
+      {subtitle && <p className="text-foreground max-w-2xl">{subtitle}</p>}
     </div>
     {/* Right Side: Badges and Tabs */}
     <div className="flex items-center gap-3">
       {/* Badges */}
       <div className="flex space-x-2">
         {hasChanges && (
-          <span className="px-3 py-1 bg-yellow-600/20 border border-yellow-500/30 rounded-full text-yellow-300 text-sm font-medium">
+          <span className="px-3 py-1 bg-warning/20 border border-warning/30 rounded-full text-warning text-sm font-medium">
             Unsaved Changes
           </span>
         )}

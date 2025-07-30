@@ -20,7 +20,7 @@ const FinalCtaSection = React.lazy(
 
 const LandingPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-slate-900 relative overflow-hidden scroll-smooth">
+    <div className="min-h-screen bg-surface relative overflow-hidden scroll-smooth">
       <PageBackground />
       <Header />
       <HeroSection />

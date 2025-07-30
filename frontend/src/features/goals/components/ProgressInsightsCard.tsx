@@ -56,12 +56,12 @@ function ProgressInsightsCard({
     color: string;
   } => {
     if (isLoading) {
-      return { message: "Analyzing progress...", color: "text-gray-400" };
+      return { message: "Analyzing progress...", color: "text-foreground" };
     }
     if (!weightGoals || weightGoals.weightGoal === "maintain") {
       return {
         message: "Set a weight loss or gain goal to see insights.",
-        color: "text-gray-400",
+        color: "text-foreground",
       };
     }
 
@@ -70,7 +70,7 @@ function ProgressInsightsCard({
     if (actualWeeklyChange === undefined) {
       return {
         message: "Log weight consistently for progress insights.",
-        color: "text-gray-400",
+        color: "text-foreground",
       };
     }
 
@@ -84,18 +84,18 @@ function ProgressInsightsCard({
       if (actualWeeklyChange < targetWeeklyChange - tolerance) {
         return {
           message: "Progressing faster than planned. Ensure it's sustainable.",
-          color: "text-yellow-400",
+          color: "text-warning",
         };
       }
       if (actualWeeklyChange > targetWeeklyChange + tolerance) {
         return {
           message: "Slightly behind schedule. Stay consistent!",
-          color: "text-orange-400",
+          color: "text-vibrant-accent",
         };
       }
       return {
         message: "Great consistency! You're on track to reach your goal.",
-        color: "text-indigo-300",
+        color: "text-primary",
       };
     }
 
@@ -103,24 +103,24 @@ function ProgressInsightsCard({
       if (actualWeeklyChange > targetWeeklyChange + tolerance) {
         return {
           message: "Progressing faster than planned. Ensure it's sustainable.",
-          color: "text-yellow-400",
+          color: "text-warning",
         };
       }
       if (actualWeeklyChange < targetWeeklyChange - tolerance) {
         return {
           message: "Slightly behind schedule. Stay consistent!",
-          color: "text-orange-400",
+          color: "text-vibrant-accent",
         };
       }
       return {
         message: "Great consistency! You're on track to reach your goal.",
-        color: "text-green-300",
+        color: "text-success",
       };
     }
 
     return {
       message: "Keep logging to see more insights.",
-      color: "text-gray-400",
+      color: "text-foreground",
     };
   }, [weightLog, weightGoals, isLoading]);
 
@@ -128,7 +128,7 @@ function ProgressInsightsCard({
 
   return (
     <CardContainer>
-      <h3 className="text-sm font-medium text-gray-300 mb-2">
+      <h3 className="text-sm font-medium text-foreground mb-2">
         Progress Insights
       </h3>
       <div className="flex items-start">

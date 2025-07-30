@@ -118,15 +118,15 @@ function FloatingNotification({
     success: {
       bg: "bg-gradient-to-r from-green-900/95 to-green-800/95",
       border: "border-green-500/40",
-      icon: "text-green-300",
-      progress: "bg-green-400",
+      icon: "text-success",
+      progress: "bg-success",
       component: <CheckIcon className="w-5 h-5" />,
     },
     error: {
       bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
       border: "border-red-500/40",
-      icon: "text-red-300",
-      progress: "bg-red-400",
+      icon: "text-error",
+      progress: "bg-vibrant-accent",
       component: <CloseIcon className="w-5 h-5" />,
     },
     warning: {
@@ -137,10 +137,10 @@ function FloatingNotification({
       component: <WarningIcon className="w-5 h-5" />,
     },
     info: {
-      bg: "bg-gradient-to-r from-blue-900/95 to-blue-800/95",
-      border: "border-blue-500/40",
-      icon: "text-blue-300",
-      progress: "bg-blue-400",
+      bg: "bg-gradient-to-r from-primary/95 to-primary/95",
+      border: "border-primary/40",
+      icon: "text-primary",
+      progress: "bg-primary",
       component: <InfoIcon className="w-5 h-5" />,
     },
   };
@@ -161,7 +161,7 @@ function FloatingNotification({
       aria-atomic="true"
     >
       <div
-        className={`flex items-center rounded-lg shadow-2xl backdrop-blur-md 
+        className={`flex items-center rounded-lg shadow-modal backdrop-blur-md 
                      ${bg} border ${border} overflow-hidden
                      hover:shadow-3xl transition-shadow duration-200`}
       >
@@ -174,7 +174,7 @@ function FloatingNotification({
 
         {/* Content area */}
         <div className="py-3 px-4 flex-1 min-w-0">
-          <p className="text-white font-medium text-sm leading-relaxed break-words">
+          <p className="text-foreground font-medium text-sm leading-relaxed break-words">
             {message}
           </p>
         </div>
@@ -185,7 +185,7 @@ function FloatingNotification({
             variant="close"
             onClick={handleClose}
             ariaLabel="Close notification"
-            className="text-white/60 hover:text-white bg-transparent hover:bg-white/10"
+            className="text-foreground/60 hover:text-foreground bg-transparent hover:bg-surface/10"
           />
         </div>
 

@@ -34,7 +34,7 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
+    <div className="max-w-md mx-auto p-6 bg-surface rounded-lg shadow-surface">
       <h2 className="text-2xl font-bold mb-6 text-center">
         {mode === "login" ? "Login" : "Register"}
       </h2>

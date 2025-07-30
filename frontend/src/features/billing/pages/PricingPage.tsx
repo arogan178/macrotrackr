@@ -63,14 +63,14 @@ const PricingPage: React.FC = () => {
     "monthly",
   );
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-gray-200">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-foreground">
       <Navbar />
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="text-center mb-12">
           <h1 className="text-4xl sm:text-5xl font-extrabold bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-300 text-transparent bg-clip-text tracking-tight">
             Unlock Your Full Potential
           </h1>
-          <p className="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">
+          <p className="mt-4 text-lg text-foreground max-w-2xl mx-auto">
             Join Pro to access exclusive features designed to help you achieve
             your fitness goals faster.
           </p>
@@ -92,18 +92,15 @@ const PricingPage: React.FC = () => {
             {testimonials.map((testimonial, index) => (
               <div
                 key={index}
-                className="bg-gray-800/50 p-6 rounded-lg border border-gray-700/50"
+                className="bg-surface/50 p-6 rounded-lg border border-border/50"
               >
                 <div className="flex items-center mb-2">
                   {Array.from({ length: 5 }).map((_, index_) => (
-                    <StarIcon
-                      key={index_}
-                      className="w-5 h-5 text-yellow-400"
-                    />
+                    <StarIcon key={index_} className="w-5 h-5 text-warning" />
                   ))}
                 </div>
-                <p className="text-gray-300 mb-4">"{testimonial.quote}"</p>
-                <p className="text-gray-500 font-semibold">
+                <p className="text-foreground mb-4">"{testimonial.quote}"</p>
+                <p className="text-foreground font-semibold">
                   - {testimonial.author}
                 </p>
               </div>
@@ -119,13 +116,13 @@ const PricingPage: React.FC = () => {
             {faqs.map((faq, index) => (
               <div
                 key={index}
-                className="bg-gray-800/50 p-4 rounded-lg mb-4 border border-gray-700/50"
+                className="bg-surface/50 p-4 rounded-lg mb-4 border border-border/50"
               >
                 <h3 className="font-semibold text-lg flex items-center">
-                  <CircleQuestionMarkIcon className="w-5 h-5 mr-2 text-indigo-400" />
+                  <CircleQuestionMarkIcon className="w-5 h-5 mr-2 text-primary" />
                   {faq.question}
                 </h3>
-                <p className="text-gray-400 mt-2 ml-7">{faq.answer}</p>
+                <p className="text-foreground mt-2 ml-7">{faq.answer}</p>
               </div>
             ))}
           </div>
