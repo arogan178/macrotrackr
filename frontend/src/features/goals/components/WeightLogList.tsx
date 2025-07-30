@@ -106,7 +106,7 @@ function WeightLogList({
     return (
       <div className="h-60 flex flex-col items-center justify-center">
         <LoadingSpinner size="md" />
-        <p className="text-gray-400 mt-3 text-sm">Loading weight log...</p>
+        <p className="text-foreground mt-3 text-sm">Loading weight log...</p>
       </div>
     );
   }
@@ -119,7 +119,7 @@ function WeightLogList({
           title="No Weight Logged Yet"
           message="Your recorded weights will appear here."
           icon={
-            <TrashIcon className="h-12 w-12 text-gray-500" strokeWidth={1} />
+            <TrashIcon className="h-12 w-12 text-foreground" strokeWidth={1} />
           } // Placeholder icon
           className="h-full"
         />
@@ -142,13 +142,13 @@ function WeightLogList({
                 className="py-2 flex items-center justify-between"
               >
                 <div className="flex flex-col min-w-[200px] max-w-[220px]">
-                  <span className="text-gray-300 text-sm w-full block truncate">
+                  <span className="text-foreground text-sm w-full block truncate">
                     {/* Format timestamp only if valid */}
                     {isValidDate
                       ? format(entryDate, "MMM d, yyyy 'at' p")
                       : "Invalid Date"}
                   </span>
-                  <span className="font-semibold text-indigo-300 text-lg mt-1">
+                  <span className="font-semibold text-primary text-lg mt-1">
                     {entry.weight.toFixed(1)} kg
                   </span>
                 </div>

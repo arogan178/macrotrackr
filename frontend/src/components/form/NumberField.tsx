@@ -86,8 +86,8 @@ function NumberField({
   const inputClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
   } ${formStyles.input.numberInput} ${unit ? formStyles.input.withUnit : ""} ${
-    disabled ? formStyles.input.disabled : "" // Add disabled class
-  }`;
+    disabled ? formStyles.input.disabled : ""
+  } placeholder:text-muted`;
 
   return (
     <div className={formStyles.container}>
@@ -111,7 +111,9 @@ function NumberField({
           disabled={disabled} // Pass disabled prop to the input element
           aria-describedby={helperText ? `${label}-helper` : undefined} // Add aria-describedby
         />
-        {unit && <div className={formStyles.unitContainer}>{unit}</div>}
+        {unit && (
+          <div className={`${formStyles.unitContainer} text-muted`}>{unit}</div>
+        )}
       </div>
       {helperText && (
         <p id={`${label}-helper`} className={formStyles.helper}>

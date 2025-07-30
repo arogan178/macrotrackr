@@ -10,7 +10,7 @@ interface MacroTargetBarProps {
 function MacroTargetBar({ target, className = "" }: MacroTargetBarProps) {
   return (
     <div
-      className={`relative h-2 rounded-full overflow-hidden bg-gray-700/30 ${className}`}
+      className={`relative h-2 rounded-full overflow-hidden bg-surface/30 ${className}`}
     >
       <div
         className="absolute top-0 left-0 h-2 bg-gradient-to-r from-green-500 to-green-600"
@@ -18,7 +18,7 @@ function MacroTargetBar({ target, className = "" }: MacroTargetBarProps) {
         aria-label={`Protein: ${target.proteinPercentage}%`}
       />
       <div
-        className="absolute top-0 h-2 bg-gradient-to-r from-blue-500 to-blue-600"
+        className="absolute top-0 h-2 bg-gradient-to-r from-primary to-primary"
         style={{
           width: `${target.carbsPercentage}%`,
           left: `${target.proteinPercentage}%`,

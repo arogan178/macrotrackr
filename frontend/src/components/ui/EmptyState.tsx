@@ -25,16 +25,16 @@ function getButtonStyles(variant: ActionProps["variant"] = "primary") {
 
   switch (variant) {
     case "primary": {
-      return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
+      return `${baseStyles} bg-primary hover:bg-primary text-foreground`;
     }
     case "secondary": {
-      return `${baseStyles} bg-gray-700 hover:bg-gray-600 text-white`;
+      return `${baseStyles} bg-surface hover:bg-surface text-foreground`;
     }
     case "outline": {
-      return `${baseStyles} border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white`;
+      return `${baseStyles} border border-border hover:border-border text-foreground hover:text-foreground`;
     }
     default: {
-      return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
+      return `${baseStyles} bg-primary hover:bg-primary text-foreground`;
     }
   }
 }
@@ -73,7 +73,7 @@ function EmptyState({
   // Default icon if none provided
   const defaultIcon = (
     <PlusIcon
-      className={`${sizeStyles.iconSize} text-gray-500`}
+      className={`${sizeStyles.iconSize} text-foreground`}
       strokeWidth={1.5}
     />
   );
@@ -82,18 +82,18 @@ function EmptyState({
     <div
       className={`flex flex-col items-center justify-center text-center ${sizeStyles.padding} px-4 ${className}`}
     >
-      <div className="mb-4 text-gray-400">
+      <div className="mb-4 text-foreground">
         {icon || (
-          <div className="rounded-full bg-gray-800 p-4 inline-block">
+          <div className="rounded-full bg-surface p-4 inline-block">
             {defaultIcon}
           </div>
         )}
       </div>
 
-      <h3 className={`${sizeStyles.title} font-medium text-gray-200 mb-2`}>
+      <h3 className={`${sizeStyles.title} font-medium text-foreground mb-2`}>
         {title}
       </h3>
-      <p className={`${sizeStyles.message} text-gray-400 mb-6`}>{message}</p>
+      <p className={`${sizeStyles.message} text-foreground mb-6`}>{message}</p>
 
       {/* Action buttons */}
       {(action || secondaryAction) && (

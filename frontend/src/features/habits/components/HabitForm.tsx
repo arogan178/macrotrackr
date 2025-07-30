@@ -33,9 +33,9 @@ const AVAILABLE_ICONS = {
 } as const;
 
 const COLOR_OPTIONS = [
-  { value: "indigo", label: "Indigo", class: "bg-indigo-500" },
-  { value: "blue", label: "Blue", class: "bg-blue-500" },
-  { value: "green", label: "Green", class: "bg-green-500" },
+  { value: "indigo", label: "Indigo", class: "bg-primary" },
+  { value: "blue", label: "Blue", class: "bg-primary" },
+  { value: "green", label: "Green", class: "bg-success" },
   { value: "purple", label: "Purple", class: "bg-purple-500" },
 ] as const;
 
@@ -108,7 +108,7 @@ function HabitForm({
           error={errors.target} // Use prop error
           required
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="text-xs text-foreground mt-1">
           Set how many times you need to complete this habit to reach your goal
         </p>
       </div>
@@ -117,7 +117,7 @@ function HabitForm({
       <div>
         <label
           htmlFor="icon-button-group"
-          className="block text-sm font-medium text-gray-200 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Icon
         </label>
@@ -134,7 +134,7 @@ function HabitForm({
               className={`p-3 rounded-lg flex items-center justify-center ${
                 values.iconName === key
                   ? `bg-${values.accentColor}-500/20 border border-${values.accentColor}-500/50`
-                  : "bg-gray-700/40 hover:bg-gray-700/60"
+                  : "bg-surface/40 hover:bg-surface/60"
               }`}
               onClick={() => handleChange("iconName", key)}
               aria-pressed={values.iconName === key}
@@ -145,7 +145,7 @@ function HabitForm({
                 className={
                   values.iconName === key
                     ? `text-${values.accentColor}-400`
-                    : "text-gray-300"
+                    : "text-foreground"
                 }
               />
             </button>
@@ -157,7 +157,7 @@ function HabitForm({
       <div>
         <label
           htmlFor="color-button-group"
-          className="block text-sm font-medium text-gray-200 mb-1"
+          className="block text-sm font-medium text-foreground mb-1"
         >
           Color
         </label>
@@ -186,8 +186,8 @@ function HabitForm({
 
       {/* Preview */}
       <div className="mt-4">
-        <p className="text-sm font-medium text-gray-300 mb-2">Preview</p>
-        <div className={"bg-gray-700/30 rounded-lg overflow-hidden"}>
+        <p className="text-sm font-medium text-foreground mb-2">Preview</p>
+        <div className={"bg-surface/30 rounded-lg overflow-hidden"}>
           <div
             className={`bg-gradient-to-r from-${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
           >
@@ -197,7 +197,7 @@ function HabitForm({
               >
                 {selectedIcon}
               </div>
-              <h4 className="font-medium text-gray-200">
+              <h4 className="font-medium text-foreground">
                 {values.title || "Habit Title"}
               </h4>
             </div>
@@ -205,18 +205,20 @@ function HabitForm({
             <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-baseline gap-1">
                 {/* Use currentProgress prop here */}
-                <span className="text-xl font-bold text-gray-200">
+                <span className="text-xl font-bold text-foreground">
                   {currentProgress}
                 </span>
-                <span className="text-gray-400 text-sm">/ {values.target}</span>
+                <span className="text-foreground text-sm">
+                  / {values.target}
+                </span>
               </div>
               {/* Use calculated preview percentage */}
-              <span className="text-sm text-gray-400">
+              <span className="text-sm text-foreground">
                 {previewProgressPercentage}%
               </span>
             </div>
 
-            <div className="w-full h-2 bg-gray-700/60 rounded-full overflow-hidden">
+            <div className="w-full h-2 bg-surface/60 rounded-full overflow-hidden">
               <div
                 className={`h-full bg-${values.accentColor}-500 rounded-full`}
                 /* Use calculated preview percentage for width */

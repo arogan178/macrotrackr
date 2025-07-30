@@ -35,7 +35,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = shouldFetchUser && !!user && !isLoading;
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100">
+    <div className="min-h-screen bg-surface text-foreground">
       {isAuthenticated && <Navbar />}
       <main>{children}</main>
       <NotificationManager />

@@ -20,23 +20,23 @@ export default function DateRangeSelector({
     // Wrap with motion.div and add layout prop
     <motion.div
       layout // Add layout for smooth transition
-      className="sticky top-20 z-30 bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-700/50 p-3 mb-6 shadow-xl transition-all duration-300"
+      className="sticky top-20 z-30 bg-surface/80 backdrop-blur-md rounded-xl border border-border/50 p-3 mb-6 shadow-modal transition-all duration-300"
       // Increased top to 20, slightly increased blur/opacity for sticky state
     >
       <div className="flex flex-wrap items-center gap-4 w-full">
         {/* Time Period Selector */}
         <div className="flex items-center">
-          <span className="text-gray-300 font-medium mr-3">Time Period:</span>
-          <div className="relative flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50">
+          <span className="text-foreground font-medium mr-3">Time Period:</span>
+          <div className="relative flex bg-surface/50 rounded-lg p-1 border border-border/50">
             {DATE_RANGE_OPTIONS.map((option) => (
               <Button
                 key={option.value}
                 onClick={() => onRangeChange(option.value)}
                 ariaLabel={`Set time period to ${option.label}`}
-                className={`relative px-4 py-1.5 rounded-md font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 ${
+                className={`relative px-4 py-1.5 rounded-md font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 ${
                   currentRange === option.value
-                    ? "text-white"
-                    : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+                    ? "text-foreground"
+                    : "text-foreground hover:bg-surface/50 hover:text-foreground"
                 }`}
                 variant={currentRange === option.value ? "primary" : "ghost"}
                 buttonSize="sm"
@@ -46,7 +46,7 @@ export default function DateRangeSelector({
                 <span className="relative z-10">{option.label}</span>
                 {currentRange === option.value && (
                   <motion.div
-                    className="absolute inset-0 bg-indigo-600 rounded-md shadow-md"
+                    className="absolute inset-0 bg-primary rounded-md shadow-surface"
                     layoutId="activeRangeHighlight"
                     transition={{ type: "spring", stiffness: 350, damping: 30 }}
                   />
@@ -70,8 +70,7 @@ export default function DateRangeSelector({
             onClick={onExportClick}
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
-            className=" bg-indigo-700/60 hover:bg-indigo-700/80 text-indigo-100 rounded-lg font-medium flex items-center transition-all duration-200 border border-indigo-600/30 disabled:opacity-50 "
-            variant="primary"
+            className=" bg-primary/60 hover:bg-primary/80 text-foreground rounded-lg font-medium flex items-center transition-all duration-200 border border-primary/30 disabled:opacity-50 "
             icon={<ExportIcon />}
             iconPosition="left"
           >
