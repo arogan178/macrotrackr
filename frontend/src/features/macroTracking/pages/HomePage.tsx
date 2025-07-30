@@ -262,10 +262,10 @@ export default function HomePage() {
 const AddEntryLoadingSkeleton = () => (
   <CardContainer>
     <div className="p-5 animate-pulse">
-      <div className="h-4 bg-gray-700 rounded w-1/2 mb-4"></div>
+      <div className="h-4 bg-surface rounded w-1/2 mb-4"></div>
       <div className="grid grid-cols-3 gap-4">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="h-8 bg-gray-700 rounded"></div>
+          <div key={index} className="h-8 bg-surface rounded"></div>
         ))}
       </div>
     </div>
@@ -275,10 +275,10 @@ const AddEntryLoadingSkeleton = () => (
 const DailySummaryLoadingSkeleton = () => (
   <CardContainer className="h-full">
     <div className="p-5 h-full animate-pulse">
-      <div className="h-5 bg-gray-700 rounded w-1/2 mb-4"></div>
+      <div className="h-5 bg-surface rounded w-1/2 mb-4"></div>
       <div className="space-y-4">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="h-12 bg-gray-700 rounded"></div>
+          <div key={index} className="h-12 bg-surface rounded"></div>
         ))}
       </div>
     </div>
@@ -287,11 +287,11 @@ const DailySummaryLoadingSkeleton = () => (
 
 const HistoryLoadingSkeleton = () => (
   <div className="animate-pulse space-y-4">
-    <div className="h-6 bg-gray-700 rounded w-1/4 mb-6"></div>
+    <div className="h-6 bg-surface rounded w-1/4 mb-6"></div>
     {[0, 1, 2].map((index) => (
       <div key={index} className="space-y-2">
-        <div className="h-5 bg-gray-700 rounded w-1/6"></div>
-        <div className="h-16 bg-gray-700/50 rounded"></div>
+        <div className="h-5 bg-surface rounded w-1/6"></div>
+        <div className="h-16 bg-surface/50 rounded"></div>
       </div>
     ))}
   </div>

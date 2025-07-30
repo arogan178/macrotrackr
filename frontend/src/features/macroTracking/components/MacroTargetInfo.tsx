@@ -16,7 +16,7 @@ function MacroTargetInfo({ isVisible }: MacroTargetInfoProps) {
       color="indigo"
       icon={<InfoIcon className="w-5 h-5" />}
     >
-      <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-300 mt-2">
+      <ul className="list-disc pl-5 space-y-1.5 text-sm text-foreground mt-2">
         <li>Drag the sliders to adjust percentages</li>
         <li>
           Click the lock icon to keep a macro fixed while adjusting others

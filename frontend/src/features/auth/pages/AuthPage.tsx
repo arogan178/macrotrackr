@@ -146,8 +146,8 @@ export default function AuthPage() {
           ></div>
           <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
             <div className="absolute -inset-[10px] opacity-50">
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full filter blur-3xl"></div>
-              <div className="absolute top-3/4 right-1/3 w-64 h-64 bg-blue-600/20 rounded-full filter blur-3xl"></div>
+              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl"></div>
+              <div className="absolute top-3/4 right-1/3 w-64 h-64 bg-primary/20 rounded-full filter blur-3xl"></div>
             </div>
           </div>
 

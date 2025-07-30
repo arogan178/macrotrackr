@@ -92,12 +92,12 @@ export function TrendIcon({ direction }: TrendIconProps) {
   const isUp = direction === "up";
   const color =
     direction === "stable"
-      ? "text-gray-400"
+      ? "text-foreground"
       : direction === "insufficient"
-        ? "text-gray-500"
+        ? "text-error"
         : isUp
-          ? "text-red-400"
-          : "text-green-400";
+          ? "text-foreground"
+          : "text-foreground";
 
   if (direction === "stable" || direction === "insufficient") return;
 

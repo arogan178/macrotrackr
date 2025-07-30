@@ -28,7 +28,7 @@ export default function MetricCard({
         <div className={`h-2 w-2 rounded-full ${getScoreColor(score)}`} />
       </div>{" "}
       <div className="flex items-center justify-between mb-4">
-        <span className="text-2xl font-bold text-white">
+        <span className="text-2xl font-bold text-foreground">
           <AnimatedNumber
             value={
               typeof value === "number"

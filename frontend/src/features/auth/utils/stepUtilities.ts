@@ -56,16 +56,16 @@ export function getStepCircleClasses(
   const isCurrent = stepIndex + 1 === currentStep;
 
   const circleClasses = isCurrent
-    ? "bg-gradient-to-r from-indigo-600 to-blue-500 text-white ring-2 ring-white/20 scale-110 shadow-md"
+    ? "bg-gradient-to-r from-primary to-primary text-foreground ring-2 ring-white/20 scale-110 shadow-surface"
     : isComplete
-      ? "bg-indigo-500 text-white"
-      : "bg-gray-700 text-gray-400";
+      ? "bg-primary text-foreground"
+      : "bg-surface text-foreground";
 
   const labelClasses = isCurrent
-    ? "text-white font-medium"
+    ? "text-foreground font-medium"
     : isComplete
-      ? "text-gray-300"
-      : "text-gray-400";
+      ? "text-foreground"
+      : "text-foreground";
 
   return {
     circleClasses,

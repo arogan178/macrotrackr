@@ -70,7 +70,7 @@ export default function ReportingPage() {
 
   // Define chart configurations for the new component
   const calorieChartLines = [
-    { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)" }, // indigo-500 approx
+    { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)" }, // vibrant-accent approx
   ];
 
   const macroChartLines = [
@@ -105,10 +105,10 @@ export default function ReportingPage() {
                 {!isHistoryLoading &&
                   history?.length === 0 &&
                   dataProcessed && (
-                    <div className="mb-6 text-yellow-400 bg-yellow-900/30 p-4 rounded-lg border border-yellow-800/30 shadow-lg">
+                    <div className="mb-6 text-warning bg-warning/30 p-4 rounded-lg border border-yellow-800/30 shadow-primary">
                       <div className="flex items-center">
                         <svg
-                          className="h-5 w-5 mr-2 text-yellow-500"
+                          className="h-5 w-5 mr-2 text-warning"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -182,9 +182,9 @@ export default function ReportingPage() {
                   <ProFeature>
                     <motion.div
                       layout
-                      className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
+                      className="bg-surface/70 rounded-xl border border-border/50 p-4 shadow-modal"
                     >
-                      <h2 className="text-lg font-semibold text-gray-200 mb-6">
+                      <h2 className="text-lg font-semibold text-foreground mb-6">
                         Calorie Intake
                       </h2>
                       <div className="h-80 ">
@@ -200,9 +200,9 @@ export default function ReportingPage() {
                   <ProFeature>
                     <motion.div
                       layout
-                      className="bg-gray-800/70 rounded-xl border border-gray-700/50 p-4 shadow-xl"
+                      className="bg-surface/70 rounded-xl border border-border/50 p-4 shadow-modal"
                     >
-                      <h2 className="text-lg font-semibold text-gray-200 mb-6">
+                      <h2 className="text-lg font-semibold text-foreground mb-6">
                         Macronutrient Intake
                       </h2>
                       <div className="h-80">

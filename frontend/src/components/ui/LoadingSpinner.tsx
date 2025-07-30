@@ -10,7 +10,7 @@ interface LoadingSpinnerProps {
 
 function LoadingSpinner({
   size = "md",
-  color = "text-indigo-500",
+  color = "text-primary",
   label,
 }: LoadingSpinnerProps) {
   // Size mappings
@@ -26,7 +26,7 @@ function LoadingSpinner({
         className={`animate-spin ${sizeClasses[size]} ${color}`}
       />
 
-      {label && <span className="mt-2 text-sm text-gray-400">{label}</span>}
+      {label && <span className="mt-2 text-sm text-foreground">{label}</span>}
     </div>
   );
 }

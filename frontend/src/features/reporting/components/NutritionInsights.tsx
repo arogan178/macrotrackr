@@ -16,31 +16,31 @@ export default function NutritionInsights({
   averages,
 }: NutritionInsightsProps) {
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-4 shadow-xl">
-      <h2 className="text-lg font-semibold text-gray-200 mb-4">
+    <div className="bg-surface/70 backdrop-blur-sm rounded-xl border border-border/50 p-4 shadow-modal">
+      <h2 className="text-lg font-semibold text-foreground mb-4">
         Nutrition Insights
       </h2>
       {isLoading || !dataProcessed ? (
         <div className="flex items-center justify-center h-40">
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-indigo-500 mb-3"></div>
-            <p className="text-gray-400">Loading insights...</p>
+            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-b-2 border-primary mb-3"></div>
+            <p className="text-foreground">Loading insights...</p>
           </div>
         </div>
       ) : showNoDataMessage ? (
         <div className="flex items-center justify-center h-40">
-          <p className="text-gray-400 text-center">
+          <p className="text-foreground text-center">
             No insights available due to lack of data.
           </p>
         </div>
       ) : (
         <div className="space-y-4">
           {/* Consistency Analysis */}
-          <div className="p-4 rounded-lg border border-indigo-500/20 bg-indigo-900/10">
-            <h3 className="text-md font-medium text-indigo-300 mb-2">
+          <div className="p-4 rounded-lg border border-primary/20 bg-primary/10">
+            <h3 className="text-md font-medium text-primary mb-2">
               Consistency Analysis
             </h3>
-            <p className="text-gray-300">
+            <p className="text-foreground">
               {aggregatedData.filter((d) => d.calories > 0).length} out of{" "}
               {aggregatedData.length} days had tracked nutrition data.
               {aggregatedData.filter((d) => d.calories > 0).length /
@@ -52,11 +52,11 @@ export default function NutritionInsights({
           </div>
 
           {/* Protein Intake */}
-          <div className="p-4 rounded-lg border border-green-500/20 bg-green-900/10">
-            <h3 className="text-md font-medium text-green-300 mb-2">
+          <div className="p-4 rounded-lg border border-green-500/20 bg-success/10">
+            <h3 className="text-md font-medium text-success mb-2">
               Protein Intake
             </h3>
-            <p className="text-gray-300">
+            <p className="text-foreground">
               Your average daily protein intake is {averages.protein}g.
               {averages.protein === 0
                 ? " No protein data tracked."
@@ -67,11 +67,11 @@ export default function NutritionInsights({
           </div>
 
           {/* Carbohydrate Patterns */}
-          <div className="p-4 rounded-lg border border-blue-500/20 bg-blue-900/10">
-            <h3 className="text-md font-medium text-blue-300 mb-2">
+          <div className="p-4 rounded-lg border border-primary/20 bg-primary/10">
+            <h3 className="text-md font-medium text-primary mb-2">
               Carbohydrate Patterns
             </h3>
-            <p className="text-gray-300">
+            <p className="text-foreground">
               Your average daily carbohydrate intake is {averages.carbs}g.
               {averages.carbs === 0
                 ? " No carbohydrate data tracked."

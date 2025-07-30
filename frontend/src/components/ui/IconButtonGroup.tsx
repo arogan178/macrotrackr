@@ -25,7 +25,6 @@ const IconButtonGroup = memo(
           iconSize={iconSize}
           onClick={onEdit}
           ariaLabel={editLabel}
-          className="text-blue-400 hover:text-blue-300 bg-blue-900/30 hover:bg-blue-900/50 focus:ring-blue-500"
         />
         <IconButton
           variant="delete"

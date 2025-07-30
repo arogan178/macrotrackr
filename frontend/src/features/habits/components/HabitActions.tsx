@@ -85,7 +85,7 @@ function HabitActions({
         <button
           onClick={handleIncrement}
           disabled={isActionInProgress}
-          className="p-1.5 rounded-full text-gray-300 hover:text-indigo-400 hover:bg-indigo-400/10"
+          className="p-1.5 rounded-full text-foreground hover:text-primary hover:bg-primary/10"
           title="Add progress"
         >
           <PlusCircleIcon size="sm" />
@@ -96,7 +96,7 @@ function HabitActions({
         <button
           onClick={handleComplete}
           disabled={isActionInProgress}
-          className="p-1.5 rounded-full text-gray-300 hover:text-green-400 hover:bg-green-400/10 mx-0.5"
+          className="p-1.5 rounded-full text-foreground hover:text-success hover:bg-success/10 mx-0.5"
           title="Mark complete"
         >
           <CheckIcon size="sm" />
@@ -107,7 +107,7 @@ function HabitActions({
         <button
           onClick={handleDelete}
           disabled={isActionInProgress}
-          className="p-1.5 rounded-full text-red-400 hover:bg-red-400/10"
+          className="p-1.5 rounded-full text-vibrant-accent hover:bg-vibrant-accent/10"
           title="Delete habit"
         >
           <TrashIcon size="sm" />
@@ -117,7 +117,7 @@ function HabitActions({
       {!isComplete && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="p-1.5 rounded-full text-gray-300 hover:text-gray-100 hover:bg-gray-600/50"
+          className="p-1.5 rounded-full text-foreground hover:text-foreground hover:bg-surface/50"
           title="More actions"
         >
           <MoreVerticalIcon size="sm" />
@@ -125,11 +125,11 @@ function HabitActions({
       )}{" "}
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute z-50 right-0 top-full mt-1 py-0.5 w-32 rounded-md shadow-lg bg-gray-800/90 backdrop-blur-sm border border-gray-700/40 text-xs">
+        <div className="absolute z-50 right-0 top-full mt-1 py-0.5 w-32 rounded-md shadow-primary bg-surface/90 backdrop-blur-sm border border-border/40 text-xs">
           {onEdit && (
             <button
               onClick={handleEdit}
-              className="w-full text-left px-3 py-1.5 flex items-center hover:bg-gray-700/50 text-gray-200"
+              className="w-full text-left px-3 py-1.5 flex items-center hover:bg-surface/50 text-foreground"
             >
               <EditIcon size="sm" className="mr-1.5" />
               Edit
@@ -141,7 +141,7 @@ function HabitActions({
             <button
               onClick={handleDelete}
               disabled={isActionInProgress}
-              className="w-full text-left px-3 py-1.5 flex items-center hover:bg-gray-700/50 text-red-400"
+              className="w-full text-left px-3 py-1.5 flex items-center hover:bg-surface/50 text-error"
             >
               <TrashIcon size="sm" className="mr-1.5" />
               Delete

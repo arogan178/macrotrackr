@@ -51,19 +51,19 @@ interface StatusIndicatorProps {
 
 const statusConfig = {
   success: {
-    color: "text-green-400",
+    color: "text-success",
     Icon: CheckMarkIcon,
   },
   error: {
-    color: "text-red-400",
+    color: "text-vibrant-accent",
     Icon: CloseIcon,
   },
   warning: {
-    color: "text-yellow-400",
+    color: "text-warning",
     Icon: WarningIcon,
   },
   info: {
-    color: "text-indigo-400",
+    color: "text-primary",
     Icon: InfoIcon,
   },
 };
