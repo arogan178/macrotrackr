@@ -101,9 +101,9 @@ export default function EditModal({
         </div>
 
         <div className="mt-2 text-sm">
-          <div className="flex justify-between text-gray-400">
+          <div className="flex justify-between text-foreground">
             <span>Total Calories:</span>
-            <span className="font-medium text-white">
+            <span className="font-medium text-foreground">
               {Math.round(
                 editedEntry.protein * 4 +
                   editedEntry.carbs * 4 +

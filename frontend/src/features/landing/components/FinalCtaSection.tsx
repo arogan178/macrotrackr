@@ -7,11 +7,11 @@ import { Button } from "@/components/ui";
 
 const FinalCTASection: React.FC = () => (
   <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-    <div className="absolute inset-0 bg-gradient-to-t from-indigo-900/20 via-transparent to-transparent"></div>
+    <div className="absolute inset-0 bg-gradient-to-t from-primary/20 via-transparent to-transparent"></div>
 
     <ScrollTriggeredDiv className="max-w-4xl mx-auto text-center relative">
       <motion.div
-        className="absolute -top-10 -left-10 w-20 h-20 bg-indigo-500/10 rounded-full blur-xl"
+        className="absolute -top-10 -left-10 w-20 h-20 bg-primary/10 rounded-full blur-xl"
         animate={{
           x: [0, 20, 0],
           y: [0, -10, 0],
@@ -37,14 +37,14 @@ const FinalCTASection: React.FC = () => (
       />
 
       <motion.h2
-        className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 pb-2"
+        className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-surface text-transparent bg-clip-text mb-6 pb-2"
         whileHover={{ scale: 1.02 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         Ready to Transform Your Nutrition?
       </motion.h2>
       <motion.p
-        className="text-xl text-slate-400 mb-12"
+        className="text-xl text-foreground mb-12"
         initial={{ opacity: 0.8 }}
         whileHover={{ opacity: 1, scale: 1.01 }}
         transition={{ duration: 0.2 }}
@@ -67,7 +67,7 @@ const FinalCTASection: React.FC = () => (
             text="Get Started For Free"
             variant="primary"
             buttonSize="lg"
-            className="bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 px-12 py-4 text-xl font-semibold shadow-xl transition-all duration-300"
+            className="bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary px-12 py-4 text-xl font-semibold shadow-modal transition-all duration-300"
           />
         </motion.div>
       </Link>

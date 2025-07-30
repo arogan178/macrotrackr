@@ -1,131 +1,53 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap");
+/* src/style.css */
+@import "./styles/global.css";
 @import "tailwindcss";
 
-/* Root variables for consistent theming */
-:root {
-  --color-primary: 59 130 246; /* blue-500 */
-  --color-primary-hover: 37 99 235; /* blue-700 */
-  --color-background: 249 250 251; /* gray-50 */
-  --color-text: 17 24 39; /* gray-900 */
-  --color-selection-bg: 59 130 246; /* blue-500 */
-  --color-selection-text: 255 255 255; /* white */
+@theme {
+  --color-primary: #347235;
+  --color-secondary: #d4a276;
+  --color-vibrant-accent: #e67e22;
+
+  --color-background: #0d1117;
+  --color-surface: #161b22;
+  --color-border: #30363d;
+  --color-foreground: #e6edf3;
+  --color-muted: #84909c;
+
+  --color-protein: #2ecc71;
+  --color-carbs: #3498db;
+  --color-fats: #e74c3c;
+
+  --color-success: #2ecc71;
+  --color-warning: #d4a276;
+  --color-error: #f85149;
+
+  --shadow-surface: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-primary:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-modal:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-warning: 0 4px 14px 0 rgba(212, 162, 118, 0.3);
+  --shadow-error: 0 4px 14px 0 rgba(248, 81, 73, 0.3);
+  --shadow-success: 0 4px 14px 0 rgba(46, 204, 113, 0.3);
+  --shadow-accent: 0 4px 14px 0 rgba(230, 126, 34, 0.3);
+  --shadow-glow: 0 0 20px rgba(100, 100, 255, 0.3);
+  --shadow-border: 0 1px 3px 0 rgba(48, 54, 61, 0.1);
 }
 
-a:focus {
-  outline: 2px solid rgb(var(--color-primary));
-  outline-offset: 2px;
+/* Mouse action styles */
+.cursor-pointer {
+  cursor: pointer;
 }
-/* Base styles */
-html {
-  font-size: 16px;
-  scroll-behavior: smooth;
-  -moz-osx-font-smoothing: grayscale;
+.cursor-not-allowed {
+  cursor: not-allowed;
 }
-nav {
-  background-color: black;
-  box-shadow:
-    rgba(50, 50, 93, 0.25) 0px 13px 27px -5px,
-    rgba(0, 0, 0, 0.3) 0px 8px 16px -8px;
-}
-/* Body styles */
-body {
-  background-color: rgb(var(--color-background));
-  color: rgb(var(--color-text));
-  font-family: "Roboto Flex", sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
+.cursor-default {
+  cursor: default;
 }
 
-/* Utility class for custom Roboto Flex settings */
-.roboto-flex {
-  font-family: "Roboto Flex", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
-  font-variation-settings:
-    "slnt" 0,
-    "wdth" 100,
-    "GRAD" 0,
-    "XOPQ" 96,
-    "XTRA" 468,
-    "YOPQ" 79,
-    "YTAS" 750,
-    "YTDE" -203,
-    "YTFI" 738,
-    "YTLC" 514,
-    "YTUC" 712;
-}
-
-/* Container utility */
-.container {
-  width: 100%;
-  margin-left: auto;
-  margin-right: auto;
-  padding-left: 1rem; /* px-4 */
-  padding-right: 1rem; /* px-4 */
-  padding-top: 1.5rem; /* py-6 */
-  padding-bottom: 1.5rem; /* py-6 */
-}
-
-/* Link styles */
-a {
-  color: rgb(var(--color-primary));
-  transition: color 0.2s ease-in-out;
-}
-
-a:hover {
-  color: rgb(var(--color-primary-hover));
-}
-
-/* Selection styling */
-::selection {
-  background-color: rgb(var(--color-selection-bg));
-  color: rgb(var(--color-selection-text));
-}
-
-/* Scrollbar styling */
-::-webkit-scrollbar {
-  width: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background-color: rgb(243 244 246); /* gray-100 */
-}
-
-::-webkit-scrollbar-thumb {
-  background-color: rgb(209 213 219); /* gray-300 */
-  border-radius: 0.375rem; /* rounded-md */
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(156 163 175); /* gray-400 */
-}
-
-/* Class to disable body scroll when modal is open */
-body.modal-open {
-  overflow: hidden;
-}
-
-@keyframes fade-in-out {
-  0% {
-    opacity: 0;
-    transform: translateY(-1rem) translateX(-50%);
-  }
-  10% {
-    opacity: 1;
-    transform: translateY(0) translateX(-50%);
-  }
-  90% {
-    opacity: 1;
-    transform: translateY(0) translateX(-50%);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-1rem) translateX(-50%);
-  }
-}
-
-.animate-fade-in-out {
-  animation: fade-in-out 3s ease-in-out forwards;
+/* Example usage for disabled buttons/inputs */
+button:disabled,
+input:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }

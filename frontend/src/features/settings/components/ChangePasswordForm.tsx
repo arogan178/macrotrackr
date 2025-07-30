@@ -64,13 +64,13 @@ const ChangePasswordForm = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
           <div className="flex items-center">
             <div className="p-3 bg-gradient-to-br from-red-400/20 to-red-500/20 rounded-xl mr-4">
-              <LockIcon className="w-7 h-7 text-red-400 flex-shrink-0" />
+              <LockIcon className="w-7 h-7 text-vibrant-accent flex-shrink-0" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold text-gray-100 truncate">
+              <h3 className="text-xl font-bold text-foreground truncate">
                 Security Settings
               </h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="text-sm text-foreground mt-1">
                 Update your password to keep your account secure
               </p>
             </div>

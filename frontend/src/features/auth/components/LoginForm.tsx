@@ -57,13 +57,13 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 mb-4 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <CalorieIcon className="w-8 h-8 text-white" />
+        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary mb-4 flex items-center justify-center shadow-primary shadow-primary/30">
+          <CalorieIcon className="w-8 h-8 text-foreground" />
         </div>
         <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
-          Welcome Back
+          Welcome
         </h1>
-        <p className="mt-2 text-gray-400">Sign in to track your macros</p>
+        <p className="mt-2 text-foreground">Sign in to track your macros</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
@@ -87,7 +87,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           <button
             type="button"
             onClick={onForgotPassword}
-            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="text-sm text-primary hover:text-primary transition-colors"
           >
             Forgot Password?
           </button>
@@ -97,10 +97,10 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           autoLoadingFeature="auth"
           loadingText="Signing in..."
           fullWidth={true}
-          className="p-3 rounded-lg font-medium text-white 
-                 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
+          className="p-3 rounded-lg font-medium text-foreground 
+                 bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary
                  disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
-                 shadow-lg shadow-indigo-500/30"
+                 shadow-primary shadow-primary/30"
         >
           Sign In
         </Button>

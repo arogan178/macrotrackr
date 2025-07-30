@@ -28,13 +28,13 @@ export const StepIndicator = memo(function StepIndicator({
       <div className="relative flex items-center justify-between">
         {/* Background track */}
         <div
-          className="absolute top-4 h-0.5 bg-gray-700 transform -translate-y-1/2"
+          className="absolute top-4 h-0.5 bg-surface transform -translate-y-1/2"
           style={trackStyle}
         />
 
         {/* Progress line */}
         <div
-          className="absolute top-4 h-0.5 bg-indigo-500 transform -translate-y-1/2 transition-all duration-500 ease-in-out"
+          className="absolute top-4 h-0.5 bg-primary transform -translate-y-1/2 transition-all duration-500 ease-in-out"
           style={{
             left: progressLineLeftPosition,
             width: `calc(${progressPercentage}% * ${

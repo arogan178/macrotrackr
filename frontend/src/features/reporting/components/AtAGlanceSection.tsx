@@ -22,7 +22,7 @@ export default function AtAGlanceSection({ averages }: AtAGlanceSectionProps) {
         {" "}
         {DAILY_AVERAGES_CONFIG.map((config, index) => (
           <div key={index} className="flex flex-col">
-            <span className="text-gray-400 text-xs">Daily Average</span>
+            <span className="text-foreground text-xs">Daily Average</span>
             <span className={`text-xl font-bold ${config.color}`}>
               <AnimatedNumber
                 value={Math.round(averages[config.key])}
@@ -31,7 +31,7 @@ export default function AtAGlanceSection({ averages }: AtAGlanceSectionProps) {
                 duration={0.6}
               />
             </span>
-            <span className="text-gray-400 text-xs mt-1">{config.label}</span>
+            <span className="text-foreground text-xs mt-1">{config.label}</span>
           </div>
         ))}
       </div>

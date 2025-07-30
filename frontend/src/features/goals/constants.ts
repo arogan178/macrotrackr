@@ -26,22 +26,22 @@ export const DEFAULT_TARGET_WEEKS = 12; // Default timeframe for goal calculatio
 // Goal status colors and styling
 export const GOAL_STATUS_COLORS = {
   "on-track": {
-    bg: "bg-green-500/10",
+    bg: "bg-success/10",
     border: "border-green-500/20",
-    text: "text-green-400",
-    icon: "text-green-400",
+    text: "text-success",
+    icon: "text-success",
   },
   ahead: {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    icon: "text-blue-400",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    text: "text-primary",
+    icon: "text-primary",
   },
   behind: {
-    bg: "bg-orange-500/10",
+    bg: "bg-vibrant-accent/10",
     border: "border-orange-500/20",
-    text: "text-orange-400",
-    icon: "text-orange-400",
+    text: "text-vibrant-accent",
+    icon: "text-vibrant-accent",
   },
   completed: {
     bg: "bg-purple-500/10",
@@ -53,9 +53,9 @@ export const GOAL_STATUS_COLORS = {
 
 // Weight goal options
 export const WEIGHT_GOAL_OPTIONS = [
-  { value: "lose", label: "Lose Weight", color: "text-red-400" },
-  { value: "maintain", label: "Maintain Weight", color: "text-blue-400" },
-  { value: "gain", label: "Gain Weight", color: "text-green-400" },
+  { value: "lose", label: "Lose Weight", color: "text-vibrant-accent" },
+  { value: "maintain", label: "Maintain Weight", color: "text-primary" },
+  { value: "gain", label: "Gain Weight", color: "text-success" },
 ] as const;
 
 // Chart configuration

@@ -44,11 +44,11 @@ export default function RecommendationsSection({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.5 }}
-      className="p-4 rounded-lg border border-green-500/20 bg-green-900/10"
+      className="p-4 rounded-lg border border-green-500/20 bg-success/10"
     >
       <div className="flex items-center mb-3">
-        <LightningIcon className="h-5 w-5 text-green-400 mr-2" />
-        <h3 className="text-md font-medium text-green-300">
+        <LightningIcon className="h-5 w-5 text-success mr-2" />
+        <h3 className="text-md font-medium text-success">
           Personalized Action Plan
         </h3>
       </div>
@@ -71,17 +71,17 @@ export default function RecommendationsSection({
         {averages.protein < 100 && (
           <ActionCard
             title="Protein Goals"
-            bgColor="bg-green-900/50"
+            bgColor="bg-success/50"
             message={getProteinRecommendation(averages.protein)}
-            icon={<ProteinIcon className="h-4 w-4 text-green-400" />}
+            icon={<ProteinIcon className="h-4 w-4 text-success" />}
           />
         )}
 
         <ActionCard
           title="Next Steps"
-          bgColor="bg-blue-900/50"
+          bgColor="bg-primary/50"
           message={getNextStepsRecommendation(dataQuality.completionRate)}
-          icon={<ClipboardIcon className="h-4 w-4 text-blue-400" />}
+          icon={<ClipboardIcon className="h-4 w-4 text-primary" />}
         />
       </div>
     </motion.div>

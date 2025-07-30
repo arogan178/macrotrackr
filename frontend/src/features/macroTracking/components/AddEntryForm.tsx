@@ -200,14 +200,14 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   return (
     <CardContainer>
       <div className="p-5">
-        <h2 className="text-lg font-medium text-gray-200 mb-4">
+        <h2 className="text-lg font-medium text-foreground mb-4">
           Add Today's Macros
         </h2>
 
         <div className="mb-6">
           <CalorieSearch onResult={handleSearchResult} />
           {searchResult && (
-            <div className="mt-3 text-sm text-green-400 flex items-center justify-between">
+            <div className="mt-3 text-sm text-success flex items-center justify-between">
               <div className="flex items-center">
                 <CheckMarkIcon className="w-4 h-4 mr-2" />
                 {searchResult}
@@ -215,7 +215,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="text-xs text-gray-400 hover:text-white flex items-center"
+                className="text-xs text-foreground hover:text-foreground flex items-center"
                 aria-label="Clear search"
               >
                 <TrashIcon className="w-4 h-4 mr-1" />
@@ -304,17 +304,17 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
           </div>
 
           <div className="mt-5 flex justify-between items-center">
-            <div className="text-sm text-gray-400">
+            <div className="text-sm text-foreground">
               Total Calories:{" "}
-              <span className="text-indigo-400 font-medium">{calories}</span>
+              <span className="text-primary font-medium">{calories}</span>
             </div>
             {allFieldsAreZero && (
-              <div className="text-sm text-red-400 mr-4">
+              <div className="text-sm text-vibrant-accent mr-4">
                 Macros must be greater than 0
               </div>
             )}
             {!mealName.trim() && !anyFieldIsUndefined && (
-              <div className="text-sm text-red-400 mr-4">
+              <div className="text-sm text-vibrant-accent mr-4">
                 Please provide a meal name
               </div>
             )}

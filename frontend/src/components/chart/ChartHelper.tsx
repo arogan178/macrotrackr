@@ -12,8 +12,8 @@ export function DefaultTooltip({
 }: TooltipProps<ValueType, NameType>) {
   if (active && payload && payload.length > 0) {
     return (
-      <div className="bg-gray-800/80 backdrop-blur-sm border border-gray-700/50 rounded-lg p-3 shadow-lg text-sm">
-        <p className="label text-gray-200 font-semibold mb-1">{label}</p>
+      <div className="bg-surface/80 backdrop-blur-sm border border-border/50 rounded-lg p-3 shadow-primary text-sm">
+        <p className="label text-foreground font-semibold mb-1">{label}</p>
         {payload.map((entry) => (
           <p
             key={`tooltip-${entry.dataKey}`}

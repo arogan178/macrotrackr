@@ -45,16 +45,16 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
       hideCancelButton={true}
     >
       <div className="text-left">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-yellow-100">
-          <AwardIcon className="h-6 w-6 text-yellow-600" />
+        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warning">
+          <AwardIcon className="h-6 w-6 text-warning" />
         </div>
-        <p className="text-gray-300 mb-4">{description}</p>
+        <p className="text-foreground mb-4">{description}</p>
 
         <ul className="space-y-2">
           {proFeatures.map((feature) => (
             <li key={feature} className="flex items-center">
-              <CheckCircleIcon className="h-5 w-5 text-green-400 mr-2 flex-shrink-0" />
-              <span className="text-gray-300">{feature}</span>
+              <CheckCircleIcon className="h-5 w-5 text-success mr-2 flex-shrink-0" />
+              <span className="text-foreground">{feature}</span>
             </li>
           ))}
         </ul>

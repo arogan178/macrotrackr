@@ -6,7 +6,7 @@ function ResetPasswordPage() {
   return (
     <QueryErrorBoundary>
       <ErrorBoundary>
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+        <div className="min-h-screen flex items-center justify-center bg-surface p-4">
           <div className="w-full max-w-md">
             <ResetPasswordForm />
           </div>

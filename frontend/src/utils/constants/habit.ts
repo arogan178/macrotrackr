@@ -4,24 +4,24 @@
 
 export const HABIT_COLORS = {
   indigo: {
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/20",
-    text: "text-indigo-400",
-    button: "bg-indigo-500 hover:bg-indigo-600 ",
-    gradient: "from-indigo-500 to-indigo-600",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    text: "text-primary",
+    button: "bg-primary hover:bg-primary ",
+    gradient: "from-primary to-primary",
   },
   blue: {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    button: "bg-blue-500 hover:bg-blue-600 ",
-    gradient: "from-blue-500 to-blue-600",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    text: "text-primary",
+    button: "bg-primary hover:bg-primary ",
+    gradient: "from-primary to-primary",
   },
   green: {
-    bg: "bg-green-500/10",
+    bg: "bg-success/10",
     border: "border-green-500/20",
-    text: "text-green-400",
-    button: "bg-green-500 hover:bg-green-600 ",
+    text: "text-success",
+    button: "bg-success hover:bg-success ",
     gradient: "from-green-500 to-green-600",
   },
   purple: {

@@ -5,7 +5,7 @@ import React from "react";
 import { Button } from "@/components/ui";
 
 const Header: React.FC = () => (
-  <header className="relative z-10 border-b border-slate-800/50 backdrop-blur-xl bg-slate-900/80 supports-[backdrop-filter]:bg-slate-900/60">
+  <header className="relative z-10 border-b border-border/50 backdrop-blur-xl bg-surface/80 supports-[backdrop-filter]:bg-surface/60">
     <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center py-6">
         <motion.div
@@ -13,7 +13,7 @@ const Header: React.FC = () => (
           whileHover={{ scale: 1.02 }}
           transition={{ type: "spring", stiffness: 400, damping: 30 }}
         >
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-indigo-200 text-transparent bg-clip-text pb-1">
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-primary text-transparent bg-clip-text pb-1">
             MacroTrackr
           </h1>
         </motion.div>
@@ -30,7 +30,7 @@ const Header: React.FC = () => (
               <Button
                 text="Log In"
                 variant="primary"
-                className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
+                className="bg-primary hover:bg-primary shadow-primary transition-all duration-300"
               />
             </motion.div>
           </Link>
@@ -46,7 +46,7 @@ const Header: React.FC = () => (
               <Button
                 text="Sign Up"
                 variant="primary"
-                className="bg-indigo-600 hover:bg-indigo-700 shadow-lg transition-all duration-300"
+                className="bg-primary hover:bg-primary shadow-primary transition-all duration-300"
               />
             </motion.div>
           </Link>

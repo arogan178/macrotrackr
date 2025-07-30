@@ -65,20 +65,20 @@ export class ErrorBoundary extends Component<
       // You can render any custom fallback UI
       return (
         this.props.fallback || (
-          <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-            <div className="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-full border border-gray-700">
-              <div className="text-red-400 mb-4">
+          <div className="min-h-screen bg-surface flex items-center justify-center p-4">
+            <div className="bg-surface p-6 rounded-xl shadow-modal max-w-lg w-full border border-border">
+              <div className="text-vibrant-accent mb-4">
                 <WarningIcon className="w-12 h-12 mx-auto mb-3" />
-                <h2 className="text-xl font-bold text-center text-white mb-1">
+                <h2 className="text-xl font-bold text-center text-foreground mb-1">
                   {this.state.isQueryError
                     ? "Data Loading Error"
                     : "Something went wrong"}
                 </h2>
-                <p className="text-center text-gray-400">
+                <p className="text-center text-foreground">
                   {getErrorMessage(this.state.error)}
                 </p>
                 {this.state.isQueryError && (
-                  <p className="text-center text-gray-500 text-sm mt-2">
+                  <p className="text-center text-foreground text-sm mt-2">
                     There was a problem loading your data. Please try again.
                   </p>
                 )}
@@ -95,7 +95,7 @@ export class ErrorBoundary extends Component<
                   }}
                   ariaLabel="Try again"
                   variant="secondary"
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  className="px-4 py-2 bg-surface hover:bg-surface text-foreground rounded-lg font-medium transition-colors duration-200"
                 >
                   Try Again
                 </Button>
@@ -103,7 +103,7 @@ export class ErrorBoundary extends Component<
                   onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  className="px-4 py-2 bg-primary hover:bg-primary text-foreground rounded-lg font-medium transition-colors duration-200"
                 >
                   Reload page
                 </Button>

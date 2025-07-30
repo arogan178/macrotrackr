@@ -6,29 +6,29 @@ const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const statusInfo = {
     active: {
       text: "Active",
-      className: "bg-green-500/20 text-green-300 border border-green-500/40",
+      className: "bg-success/20 text-success border border-green-500/40",
       icon: <CheckCircleIcon className="w-3 h-3 mr-1.5" />,
     },
     past_due: {
       text: "Past Due",
-      className: "bg-yellow-500/20 text-yellow-300 border border-yellow-500/40",
+      className: "bg-warning/20 text-warning border border-yellow-500/40",
       icon: <WarningIcon className="w-3 h-3 mr-1.5" />,
     },
     unpaid: {
       text: "Unpaid",
-      className: "bg-red-500/20 text-red-300 border border-red-500/40",
+      className: "bg-vibrant-accent/20 text-error border border-red-500/40",
       icon: <WarningIcon className="w-3 h-3 mr-1.5" />,
     },
     canceled: {
       text: "Canceled",
-      className: "bg-gray-500/20 text-gray-300 border border-gray-500/40",
+      className: "bg-surface/20 text-foreground border border-border/40",
       icon: <InfoIcon className="w-3 h-3 mr-1.5" />,
     },
   }[status];
 
   if (!statusInfo) {
     return (
-      <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-gray-500/20 text-gray-300 border border-gray-500/40 capitalize">
+      <div className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold bg-surface/20 text-foreground border border-border/40 capitalize">
         {status}
       </div>
     );
