@@ -21,7 +21,7 @@ function TabButton({
   ...rest
 }: ExtendedTabButtonProps) {
   const baseRounded = rounded || "rounded-md";
-  const motionBg = activeBg || "bg-indigo-600";
+  const motionBg = activeBg || "bg-primary";
 
   return (
     <Button
@@ -29,8 +29,8 @@ function TabButton({
       variant={active ? "primary" : "ghost"}
       className={`relative px-3 py-1.5 ${baseRounded} text-sm font-medium ${
         active
-          ? "text-white"
-          : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+          ? "text-foreground"
+          : "text-foreground hover:bg-surface/50 hover:text-foreground"
       }`}
       ariaLabel={typeof children === "string" ? children : undefined}
       disabled={disabled}
@@ -41,7 +41,7 @@ function TabButton({
       <span className="relative z-10">{children}</span>
       {isMotion && active && layoutId && (
         <motion.div
-          className={`absolute inset-0 ${motionBg} ${baseRounded} shadow-md`}
+          className={`absolute inset-0 ${motionBg} ${baseRounded} shadow-surface`}
           layoutId={layoutId}
           transition={{ type: "spring", stiffness: 350, damping: 30 }}
         />

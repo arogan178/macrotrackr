@@ -47,7 +47,7 @@ function UnifiedInsights({
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 flex items-center justify-center text-gray-400 shadow-xl min-h-[250px]">
+      <div className="bg-surface/70 backdrop-blur-sm rounded-xl border border-border/50 p-6 flex items-center justify-center text-foreground shadow-modal min-h-[250px]">
         <LoadingSpinner />
       </div>
     );
@@ -56,14 +56,14 @@ function UnifiedInsights({
   // Handle no data state
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
-      <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 flex items-center justify-center text-gray-400 text-center shadow-xl min-h-[250px]">
+      <div className="bg-surface/70 backdrop-blur-sm rounded-xl border border-border/50 p-6 flex items-center justify-center text-foreground text-center shadow-modal min-h-[250px]">
         <div className="space-y-3">
           <div className="text-4xl">📊</div>
           <div>
-            <p className="mb-2 text-xl font-semibold text-gray-200">
+            <p className="mb-2 text-xl font-semibold text-foreground">
               Ready for Insights!
             </p>
-            <p className="text-gray-400 max-w-md">
+            <p className="text-foreground max-w-md">
               Start logging your meals to unlock personalized nutrition
               insights, trends, and recommendations tailored just for you.
             </p>
@@ -83,8 +83,8 @@ function UnifiedInsights({
   } = insights;
 
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm rounded-xl border border-gray-700/50 p-6 shadow-xl">
-      <h2 className="text-lg font-semibold text-gray-200 mb-6">
+    <div className="bg-surface/70 backdrop-blur-sm rounded-xl border border-border/50 p-6 shadow-modal">
+      <h2 className="text-lg font-semibold text-foreground mb-6">
         Comprehensive Nutrition Insights
       </h2>
 
@@ -101,18 +101,18 @@ function UnifiedInsights({
           delay={0}
         >
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between text-xs text-indigo-300/70 mb-2">
+            <div className="flex items-center justify-between text-xs text-primary/70 mb-2">
               <span>Logging frequency</span>
               <span>Intake variation</span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-2">
+            <div className="w-full bg-surface rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all duration-1000 ${
                   consistencyScore > 70
-                    ? "bg-green-400"
+                    ? "bg-success"
                     : consistencyScore > 40
-                      ? "bg-yellow-400"
-                      : "bg-red-400"
+                      ? "bg-warning"
+                      : "bg-vibrant-accent"
                 }`}
                 style={{ width: `${consistencyScore}%` }}
               />
@@ -134,7 +134,7 @@ function UnifiedInsights({
               <span>Target: {macroBalance.idealRatio}</span>
             </div>
             <div>
-              <div className="flex h-2 rounded-full overflow-hidden bg-gray-800">
+              <div className="flex h-2 rounded-full overflow-hidden bg-surface">
                 {macroBalance.currentRatio.split("/").map((pct, index) => {
                   const colors = [
                     MACRO_COLORS.protein.bar,
@@ -182,14 +182,14 @@ function UnifiedInsights({
               <span>Protein quality</span>
               <span>Macro balance</span>
             </div>
-            <div className="w-full bg-gray-800 rounded-full h-2">
+            <div className="w-full bg-surface rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all duration-1000 ${
                   macroDensity.score > 70
-                    ? "bg-emerald-400"
+                    ? "bg-success"
                     : macroDensity.score > 40
-                      ? "bg-yellow-400"
-                      : "bg-red-400"
+                      ? "bg-warning"
+                      : "bg-error"
                 }`}
                 style={{ width: `${macroDensity.score}%` }}
               />
@@ -210,7 +210,7 @@ function UnifiedInsights({
           transition={{ duration: 0.3, delay: 0.3 }}
           className={SECTION_STYLES.trendAnalysis}
         >
-          <h3 className="text-md font-medium text-blue-300 mb-2">
+          <h3 className="text-md font-medium text-primary mb-2">
             Trend Analysis
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -226,13 +226,13 @@ function UnifiedInsights({
           transition={{ duration: 0.3, delay: 0.4 }}
           className={SECTION_STYLES.trackingAnalysis}
         >
-          <h3 className="text-md font-medium text-indigo-300 mb-2">
+          <h3 className="text-md font-medium text-primary mb-2">
             Tracking Analysis
           </h3>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between">
             {" "}
             <div className="mb-2 sm:mb-0">
-              <span className="text-gray-300">
+              <span className="text-foreground">
                 <AnimatedNumber
                   value={dataQuality.completionRate}
                   toFixedValue={0}
@@ -240,16 +240,16 @@ function UnifiedInsights({
                   duration={0.6}
                 />
               </span>
-              <div className="mt-1 h-1.5 w-full sm:w-40 bg-gray-700 rounded-full overflow-hidden">
+              <div className="mt-1 h-1.5 w-full sm:w-40 bg-surface rounded-full overflow-hidden">
                 <div
-                  className="h-full bg-indigo-500 rounded-full"
+                  className="h-full bg-primary rounded-full"
                   style={{ width: `${dataQuality.completionRate}%` }}
                 />
               </div>
             </div>
-            <div className="text-gray-300 flex items-center">
+            <div className="text-foreground flex items-center">
               <svg
-                className="h-5 w-5 text-indigo-400 mr-1"
+                className="h-5 w-5 text-primary mr-1"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -277,7 +277,7 @@ function UnifiedInsights({
               </span>
             </div>
           </div>
-          <p className="text-gray-400 text-sm mt-2">{dataQuality.message}</p>
+          <p className="text-foreground text-sm mt-2">{dataQuality.message}</p>
         </motion.div>
 
         {/* Recommendations */}

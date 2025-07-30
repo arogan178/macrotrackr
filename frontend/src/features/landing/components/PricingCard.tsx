@@ -39,9 +39,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
   buttonSize = "lg",
   buttonClassName = "",
   onButtonClick,
-  focusRingColor = "focus:ring-indigo-500/40",
-  featureIconColor = "text-indigo-400",
-  featureTextClass = "text-white font-medium",
+  focusRingColor = "focus:ring-primary/40",
+  featureIconColor = "text-primary",
+  featureTextClass = "text-foreground font-medium",
   cardClassName = "",
   children,
 }) => (
@@ -60,25 +60,25 @@ const PricingCard: React.FC<PricingCardProps> = ({
     tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/70 ${focusRingColor} ${cardClassName}`}
+    className={`relative bg-surface/50 backdrop-blur-sm border border-border/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full outline-none focus-visible:ring-4 focus-visible:ring-vibrant-accent/70 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
       <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-        <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+        <span className="bg-gradient-to-r from-primary to-purple-600 text-foreground px-4 py-2 rounded-full text-sm font-semibold shadow-primary">
           Most Popular
         </span>
       </div>
     )}
     <div className="text-center mb-8 mt-4">
-      <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
-      <div className="text-4xl font-bold text-white mb-2">
+      <h3 className="text-2xl font-bold text-foreground mb-2">{title}</h3>
+      <div className="text-4xl font-bold text-foreground mb-2">
         {price}
         {suffix && (
-          <span className="text-lg font-normal text-slate-300">{suffix}</span>
+          <span className="text-lg font-normal text-foreground">{suffix}</span>
         )}
       </div>
       {equivalent && (
-        <p className="text-green-400 text-sm font-medium">{equivalent}</p>
+        <p className="text-success text-sm font-medium">{equivalent}</p>
       )}
       {children}
     </div>

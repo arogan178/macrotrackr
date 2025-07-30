@@ -26,8 +26,8 @@ function WeightCustomTooltip({
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
-      <div className="backdrop-blur-lg bg-gray-800/90 border border-gray-700/50 rounded-lg p-3 shadow-lg">
-        <div className="text-base font-medium text-gray-200 mb-1">
+      <div className="backdrop-blur-lg bg-surface/90 border border-border/50 rounded-lg p-3 shadow-primary">
+        <div className="text-base font-medium text-foreground mb-1">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
             : label || "Date Unavailable"}{" "}
@@ -38,7 +38,7 @@ function WeightCustomTooltip({
             className={"w-3 h-3 rounded-full"}
             style={{ backgroundColor: payload[0].color || payload[0].stroke }}
           ></div>
-          <span className="text-sm text-gray-300">
+          <span className="text-sm text-foreground">
             Weight:{" "}
             <span
               className="font-semibold"
@@ -232,9 +232,7 @@ function WeightGoalProgressChart() {
     <EmptyState
       title="Track Your Progress"
       message="Start logging your weight to see your progress charted over time."
-      icon={
-        <BarChartIcon className="h-14 w-14 text-indigo-400" strokeWidth={1} />
-      }
+      icon={<BarChartIcon className="h-14 w-14 text-primary" strokeWidth={1} />}
       action={{
         label: "Log Weight",
         onClick: () => {
@@ -250,7 +248,7 @@ function WeightGoalProgressChart() {
   return (
     <div className="h-96 flex flex-col">
       {/* Date Range Display */}
-      <div className="text-sm text-gray-400 mb-2 h-5">
+      <div className="text-sm text-foreground mb-2 h-5">
         {" "}
         {/* Added fixed height */}
         {chartData.length > 0 && (

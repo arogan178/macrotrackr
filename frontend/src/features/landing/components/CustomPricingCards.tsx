@@ -71,12 +71,12 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           buttonSize={BUTTON_SIZES.LG}
           buttonClassName={PRICING_PLANS.free.buttonClassName}
           tabIndex={0}
-          focusRingColor="focus:ring-indigo-500/40"
+          focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.free.featureIconColor}
           featureTextClass={PRICING_PLANS.free.featureTextClass}
           cardClassName={PRICING_PLANS.free.cardClassName}
         >
-          <p className="text-slate-400">{PRICING_PLANS.free.description}</p>
+          <p className="text-foreground">{PRICING_PLANS.free.description}</p>
         </PricingCard>
 
         {/* Pro Plan */}
@@ -106,7 +106,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           buttonSize={BUTTON_SIZES.LG}
           buttonClassName={PRICING_PLANS.pro.buttonClassName}
           tabIndex={0}
-          focusRingColor="focus:ring-indigo-500/40"
+          focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.pro.featureIconColor}
           featureTextClass={PRICING_PLANS.pro.featureTextClass}
           cardClassName={PRICING_PLANS.pro.cardClassName}
@@ -116,7 +116,9 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
               : handleGetPro
           }
         >
-          <p className="text-slate-400 mt-2">{PRICING_PLANS.pro.description}</p>
+          <p className="text-foreground mt-2">
+            {PRICING_PLANS.pro.description}
+          </p>
         </PricingCard>
       </div>
 

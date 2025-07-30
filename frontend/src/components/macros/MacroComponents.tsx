@@ -18,18 +18,18 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
 
   return (
     <div
-      className={`relative h-2 w-full bg-gray-700/30 rounded-full overflow-hidden ${className}`}
+      className={`relative h-2 w-full bg-surface/30 rounded-full overflow-hidden ${className}`}
     >
       <div
-        className="absolute top-0 left-0 h-full bg-green-500/80 transition-all duration-500"
+        className="absolute top-0 left-0 h-full bg-protein/80 transition-all duration-500"
         style={{ width: `${proteinPercent}%` }}
       />
       <div
-        className="absolute top-0 h-full bg-blue-500/80 transition-all duration-500"
+        className="absolute top-0 h-full bg-carbs/80 transition-all duration-500"
         style={{ width: `${carbsPercent}%`, left: `${proteinPercent}%` }}
       />
       <div
-        className="absolute top-0 h-full bg-red-500/80 transition-all duration-500"
+        className="absolute top-0 h-full bg-fats/80 transition-all duration-500"
         style={{
           width: `${fatsPercent}%`,
           left: `${proteinPercent + carbsPercent}%`,
@@ -57,16 +57,16 @@ export function MacroTargetLegend({
   return (
     <div className={`flex justify-between text-xs ${className}`}>
       <div className="flex items-center">
-        <span className="inline-block w-2 h-2 bg-green-500 rounded-full mr-1"></span>
-        <span className="text-gray-400">{proteinPercent}%</span>
+        <span className="inline-block w-2 h-2 bg-protein rounded-full mr-1"></span>
+        <span className="text-foreground">{proteinPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="inline-block w-2 h-2 bg-blue-500 rounded-full mr-1"></span>
-        <span className="text-gray-400">{carbsPercent}%</span>
+        <span className="inline-block w-2 h-2 bg-carbs rounded-full mr-1"></span>
+        <span className="text-foreground">{carbsPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="inline-block w-2 h-2 bg-red-500 rounded-full mr-1"></span>
-        <span className="text-gray-400">{fatsPercent}%</span>
+        <span className="inline-block w-2 h-2 bg-fats rounded-full mr-1"></span>
+        <span className="text-foreground">{fatsPercent}%</span>
       </div>
     </div>
   );
@@ -76,7 +76,7 @@ interface MacroIndicatorProps {
   name: string;
   value: number;
   target?: number;
-  color: "green" | "blue" | "red";
+  color: "protein" | "carbs" | "fats";
   showPercentage?: boolean;
 }
 
@@ -91,20 +91,25 @@ export function MacroIndicator({
   showPercentage = false,
 }: MacroIndicatorProps) {
   const colorClasses = {
-    green: {
-      dot: "bg-green-500",
-      text: "text-green-400",
-      bg: "bg-green-500/80",
+    protein: {
+      dot: "bg-protein",
+      text: "text-protein",
+      bg: "bg-protein/80",
     },
-    blue: {
-      dot: "bg-blue-500",
-      text: "text-blue-400",
-      bg: "bg-blue-500/80",
+    carbs: {
+      dot: "bg-carbs",
+      text: "text-carbs",
+      bg: "bg-carbs/80",
     },
-    red: {
-      dot: "bg-red-500",
-      text: "text-red-400",
-      bg: "bg-red-500/80",
+    fats: {
+      dot: "bg-fats",
+      text: "text-fats",
+      bg: "bg-fats/80",
+    },
+    calories: {
+      dot: "bg-vibrant-accent",
+      text: "text-vibrant-accent",
+      bg: "bg-vibrant-accent/80",
     },
   };
 
@@ -119,21 +124,21 @@ export function MacroIndicator({
         <div
           className={`w-2 h-2 rounded-full ${colorClasses[color].dot}`}
         ></div>
-        <span className="text-sm text-gray-300">{name}</span>
+        <span className="text-sm text-foreground">{name}</span>
         {showPercentage && percentage !== undefined && (
-          <span className="text-xs text-gray-400 ml-auto">{percentage}%</span>
+          <span className="text-xs text-foreground ml-auto">{percentage}%</span>
         )}
       </div>
 
       <div className="flex items-baseline gap-1.5 mb-1">
-        <span className="text-sm font-semibold text-gray-200">
+        <span className="text-sm font-semibold text-foreground">
           {Math.round(value)}g
         </span>
-        {target && <span className="text-xs text-gray-500">/ {target}g</span>}
+        {target && <span className="text-xs text-foreground">/ {target}g</span>}
       </div>
 
       {target && (
-        <div className="h-1.5 bg-gray-700/80 rounded-full overflow-hidden">
+        <div className="h-1.5 bg-surface/80 rounded-full overflow-hidden">
           <div
             className={`h-full rounded-full ${colorClasses[color].bg}`}
             style={{ width: `${percentage}%` }}

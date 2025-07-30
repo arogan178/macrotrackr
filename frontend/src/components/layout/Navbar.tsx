@@ -40,19 +40,19 @@ const Navbar: React.FC = () => {
   const getButtonClass = (path: string, isMobile = false) => {
     const isActive = location.pathname === path;
     const baseClass = isMobile
-      ? "w-full px-4 py-3 font-medium rounded-lg transition-all duration-200 flex items-center justify-start text-left focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      : "px-3 py-2 font-medium rounded-lg transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800";
+      ? "w-full px-4 py-3 font-medium rounded-lg transition-all duration-200 flex items-center justify-start text-left focus:outline-none focus:ring-2 focus:ring-primary"
+      : "px-3 py-2 font-medium rounded-lg transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-800";
 
     return `${baseClass} ${
       isActive
-        ? "bg-gradient-to-r from-indigo-600/90 to-blue-500/90 text-white shadow-lg shadow-indigo-500/20"
-        : "text-gray-200 hover:bg-gray-700/50 hover:text-white"
+        ? "bg-gradient-to-r from-primary/90 to-primary/90 text-foreground shadow-primary shadow-primary/20"
+        : "text-foreground hover:bg-surface/50 hover:text-foreground"
     }`;
   };
   return (
     <>
       <nav
-        className="p-3 flex justify-between items-center fixed top-0 left-0 right-0 z-50 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-lg"
+        className="p-3 flex justify-between items-center fixed top-0 left-0 right-0 z-50 bg-surface/95 backdrop-blur-sm border-b border-border/50 shadow-primary"
         role="navigation"
         aria-label="Main navigation"
         style={{ touchAction: "none", overscrollBehavior: "none" }}
@@ -61,7 +61,7 @@ const Navbar: React.FC = () => {
           <Button
             onClick={() => navigate({ to: "/home" })}
             ariaLabel="Go to home page"
-            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-indigo-400 to-blue-400 text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
+            className="text-lg sm:text-xl font-bold bg-gradient-to-r from-primary to-primary text-transparent bg-clip-text mr-2 sm:mr-4 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 "
             variant="ghost"
           >
             MacroTrackr
@@ -91,7 +91,7 @@ const Navbar: React.FC = () => {
             <Button
               onClick={handleLogout}
               ariaLabel="Logout"
-              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-500 text-foreground font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 items-center shadow-primary shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 "
               variant="danger"
               icon={<LogoutIcon />}
               iconPosition="left"
@@ -109,7 +109,7 @@ const Navbar: React.FC = () => {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               ariaLabel={isMobileMenuOpen ? "Close menu" : "Open menu"}
               aria-expanded={isMobileMenuOpen}
-              className="md:hidden p-2 rounded-lg text-gray-200 hover:bg-gray-700/50 hover:text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 "
+              className="md:hidden p-2 rounded-lg text-foreground hover:bg-surface/50 hover:text-foreground transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary "
               variant="ghost"
               icon={
                 isMobileMenuOpen ? (
@@ -146,7 +146,7 @@ const Navbar: React.FC = () => {
 
             {/* Mobile menu */}
             <motion.div
-              className="md:hidden fixed top-[73px] left-0 right-0 z-50 bg-gray-800/95 backdrop-blur-sm border-b border-gray-700/50 shadow-lg"
+              className="md:hidden fixed top-[73px] left-0 right-0 z-50 bg-surface/95 backdrop-blur-sm border-b border-border/50 shadow-primary"
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
@@ -174,7 +174,7 @@ const Navbar: React.FC = () => {
                 <Button
                   onClick={handleLogout}
                   ariaLabel="Logout"
-                  className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-white font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-lg shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 "
+                  className="w-full px-4 py-3 bg-gradient-to-r from-red-600 to-red-500 text-foreground font-medium rounded-lg hover:from-red-500 hover:to-red-400 transition-all duration-200 flex items-center justify-start shadow-primary shadow-red-600/20 hover:shadow-red-500/30 focus:outline-none focus:ring-2 focus:ring-red-500 "
                   variant="danger"
                   icon={<LogoutIcon className="w-5 h-5 mr-3" />}
                   iconPosition="left"

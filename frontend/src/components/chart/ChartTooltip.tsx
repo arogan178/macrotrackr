@@ -32,9 +32,9 @@ function ChartTooltip({
   const unit = getUnitForStat(selectedStat);
 
   return (
-    <div className="bg-gray-800 border border-gray-700 rounded-md shadow-xl p-2 text-sm">
-      <p className="font-medium text-white">{data.name}</p>{" "}
-      <p className="text-gray-300">
+    <div className="bg-surface border border-border rounded-md shadow-modal p-2 text-sm">
+      <p className="font-medium text-foreground">{data.name}</p>{" "}
+      <p className="text-foreground">
         <span className="font-medium">
           {selectedStat === "calories" ? "~" : ""}
           {formatter ? (
@@ -44,7 +44,7 @@ function ChartTooltip({
           )}
         </span>
         {data.percentage !== undefined && (
-          <span className="ml-1 text-gray-400">
+          <span className="ml-1 text-foreground">
             (
             <AnimatedNumber value={data.percentage} suffix="%" />)
           </span>
@@ -52,7 +52,7 @@ function ChartTooltip({
       </p>
       {/* Show calories if not already displayed */}{" "}
       {selectedStat !== "calories" && typeof data.calories === "number" && (
-        <p className="text-gray-400 text-xs mt-1">
+        <p className="text-foreground text-xs mt-1">
           ~{" "}
           <AnimatedNumber
             value={data.calories}
@@ -63,7 +63,7 @@ function ChartTooltip({
       )}
       {/* Show count if available and not the selected stat */}{" "}
       {selectedStat !== "count" && typeof data.count === "number" && (
-        <p className="text-gray-400 text-xs">
+        <p className="text-foreground text-xs">
           <AnimatedNumber value={data.count} />{" "}
           {data.count === 1 ? "item" : "items"}
         </p>

@@ -90,7 +90,7 @@ function TextField({
     error ? formStyles.input.error : formStyles.input.normal
   } ${type === "password" ? formStyles.input.withPassword : ""} ${
     icon ? formStyles.input.withIcon : ""
-  }`;
+  } placeholder:text-muted`;
 
   return (
     <div className={formStyles.container}>
@@ -122,7 +122,7 @@ function TextField({
             ariaLabel={showPassword ? "Hide password" : "Show password"}
             buttonSize="sm"
             icon={showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none pr-2"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground hover:text-foreground focus:outline-none pr-2"
           />
         )}
       </div>

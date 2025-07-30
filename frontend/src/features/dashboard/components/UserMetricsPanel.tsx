@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { StarIcon, UserIcon } from "@/components/ui";
+import { COLOR_MAP } from "@/components/utils";
 
 interface UserMetricsPanelProps {
   bmr: number;
@@ -20,27 +21,21 @@ function MetricCard({
   title: string;
   acronym: string;
   value: number | undefined;
-  color: "indigo" | "blue";
+  color:
+    | "green"
+    | "blue"
+    | "red"
+    | "accent"
+    | "indigo"
+    | "purple"
+    | "protein"
+    | "carbs"
+    | "fats";
 }) {
-  const colorClasses = {
-    indigo: {
-      gradient: "from-indigo-600/20 to-indigo-600/5",
-      border: "border-indigo-500/20",
-      text: "text-indigo-400",
-      acronym: "text-indigo-400/80",
-    },
-    blue: {
-      gradient: "from-blue-600/20 to-blue-600/5",
-      border: "border-blue-500/20",
-      text: "text-blue-400",
-      acronym: "text-blue-400/80",
-    },
-  };
-
-  const classes = colorClasses[color];
+  const classes = COLOR_MAP[color];
 
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm p-3.5 rounded-2xl border border-gray-700/50 shadow-xl hover:bg-gray-800/80 transition-colors group">
+    <div className="bg-surface/70 backdrop-blur-sm p-3.5 rounded-2xl border border-border/50 shadow-modal hover:bg-surface/80 transition-colors group">
       <div className="flex items-start gap-5">
         <div
           className={`p-3 rounded-xl bg-gradient-to-br ${classes.gradient} border ${classes.border}`}
@@ -52,14 +47,14 @@ function MetricCard({
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-baseline gap-2 mb-1">
-            <h3 className="font-medium text-gray-400 text-sm truncate">
+            <h3 className="font-medium text-foreground text-sm truncate">
               {title}
             </h3>
             <span className={`text-xs ${classes.acronym} whitespace-nowrap`}>
               ({acronym})
             </span>
           </div>
-          <p className="text-2xl font-bold text-white">
+          <p className="text-2xl font-bold text-foreground">
             {value ? (
               <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
                 <AnimatedNumber
@@ -70,7 +65,7 @@ function MetricCard({
                 />
               </span>
             ) : (
-              <span className="text-gray-500 text-lg">Complete profile</span>
+              <span className="text-foreground text-lg">Complete profile</span>
             )}
           </p>
         </div>
@@ -85,15 +80,15 @@ function LoadingSkeleton() {
       {[0, 1].map((index) => (
         <div
           key={index}
-          className="bg-gray-800/70 backdrop-blur-sm p-5 rounded-2xl border border-gray-700/50 shadow-xl animate-pulse"
+          className="bg-surface/70 backdrop-blur-sm p-5 rounded-2xl border border-border/50 shadow-modal animate-pulse"
         >
           <div className="flex items-start gap-5">
-            <div className="p-3 rounded-xl bg-gradient-to-br from-indigo-600/20 to-indigo-600/5 border border-indigo-500/20">
-              <div className="h-7 w-7 bg-gray-700 rounded"></div>
+            <div className="p-3 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20">
+              <div className="h-7 w-7 bg-surface rounded"></div>
             </div>
             <div className="flex-1 min-w-0">
-              <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
-              <div className="h-7 bg-gray-700 rounded w-2/5"></div>
+              <div className="h-4 bg-surface rounded w-3/4 mb-2"></div>
+              <div className="h-7 bg-surface rounded w-2/5"></div>
             </div>
           </div>
         </div>
@@ -116,14 +111,14 @@ function UserMetricsPanel({
         title="Basal Metabolic Rate"
         acronym="BMR"
         value={bmr || undefined}
-        color="indigo"
+        color="accent"
       />
       <MetricCard
         icon={StarIcon}
         title="Total Daily Energy"
         acronym="TDEE"
         value={tdee || undefined}
-        color="blue"
+        color="accent"
       />
     </div>
   );

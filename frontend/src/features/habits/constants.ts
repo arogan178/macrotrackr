@@ -36,24 +36,24 @@ export type HabitIconName = keyof typeof HABIT_ICONS;
 // Habit accent colors
 export const HABIT_COLORS = {
   indigo: {
-    bg: "bg-indigo-500/10",
-    border: "border-indigo-500/20",
-    text: "text-indigo-400",
-    button: "bg-indigo-500 hover:bg-indigo-600",
-    gradient: "from-indigo-500 to-indigo-600",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    text: "text-primary",
+    button: "bg-primary hover:bg-primary",
+    gradient: "from-primary to-primary",
   },
   blue: {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    button: "bg-blue-500 hover:bg-blue-600",
-    gradient: "from-blue-500 to-blue-600",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    text: "text-primary",
+    button: "bg-primary hover:bg-primary",
+    gradient: "from-primary to-primary",
   },
   green: {
-    bg: "bg-green-500/10",
+    bg: "bg-success/10",
     border: "border-green-500/20",
-    text: "text-green-400",
-    button: "bg-green-500 hover:bg-green-600",
+    text: "text-success",
+    button: "bg-success hover:bg-success",
     gradient: "from-green-500 to-green-600",
   },
   purple: {
@@ -72,9 +72,9 @@ export const DEFAULT_HABIT_COLOR: HabitAccentColor = "indigo";
 export const DEFAULT_HABIT_ICON: HabitIconName = "target";
 
 export const HABIT_COLOR_OPTIONS = [
-  { value: "indigo" as const, label: "Indigo", color: "bg-indigo-500" },
-  { value: "blue" as const, label: "Blue", color: "bg-blue-500" },
-  { value: "green" as const, label: "Green", color: "bg-green-500" },
+  { value: "indigo" as const, label: "Indigo", color: "bg-primary" },
+  { value: "blue" as const, label: "Blue", color: "bg-primary" },
+  { value: "green" as const, label: "Green", color: "bg-success" },
   { value: "purple" as const, label: "Purple", color: "bg-purple-500" },
 ] as const;
 

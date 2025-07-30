@@ -1,3 +1,5 @@
+// src/features/goals/pages/GoalsPage.tsx
+
 import { useLoaderData, useRouter } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect } from "react";
@@ -16,7 +18,6 @@ import {
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
-// Notifications are handled by the global NotificationManager and store
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
@@ -29,6 +30,7 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
+import { useMacroTarget } from "@/hooks/queries/useMacroQueries"; // <-- FIX: Import the hook
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
@@ -44,7 +46,6 @@ function toUserSettings(user: UserDetailsResponse | null | undefined): any {
 }
 
 export default function GoalsPage() {
-  // Get UI state from centralized goals UI slice
   const {
     activeTab,
     setActiveTab,
@@ -65,12 +66,12 @@ export default function GoalsPage() {
     setSubscriptionStatus,
   } = useStore();
 
-  // Get user from useUser hook
-  const { data: user } = useUser(); // user: UserDetailsResponse | null
+  const { data: user } = useUser();
 
-  // Get macro data from goalsRoute loader
+  // FIX: Use the useMacroTarget hook to get live data
+  const { data: macroTarget } = useMacroTarget();
+
   const {
-    macroTarget,
     macroDailyTotals = {
       protein: 0,
       carbs: 0,
@@ -81,7 +82,6 @@ export default function GoalsPage() {
     weightLog,
     weightGoalsError,
   }: {
-    macroTarget?: any;
     macroDailyTotals?: {
       protein: number;
       carbs: number;
@@ -93,12 +93,10 @@ export default function GoalsPage() {
     weightGoalsError?: string;
   } = useLoaderData({ from: goalsRoute.id }) || {};
 
-  // Calculate nutritionProfile from user data
   const nutritionProfile = user
     ? createNutritionProfile(toUserSettings(user))
     : undefined;
 
-  // Use TanStack Query hooks for habits (server state)
   const {
     data: habits = [],
     isLoading: habitsLoading,
@@ -110,51 +108,38 @@ export default function GoalsPage() {
   const incrementProgressMutation = useIncrementHabitProgress();
   const completeHabitMutation = useCompleteHabit();
 
-  // Use TanStack Query hooks for weight goals (server state)
   const { data: weightGoalsFromQuery, isLoading: weightGoalsLoading } =
     useWeightGoals();
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
-  // Use new loading state hooks
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),
       onSuccess: (message) => showNotification(message, "success"),
     });
 
-  // Error handling is managed by TanStack Query's built-in mechanisms
-
-  // Centralize subscription status hydration
   usePageDataSync();
 
-  // Handler to open the weight goal modal
   const handleOpenWeightGoalModal = () => {
     setWeightGoalModalOpen(true);
   };
 
-  // Handler to close the weight goal modal
   const handleCloseWeightGoalModal = () => {
     setWeightGoalModalOpen(false);
   };
 
-  // Handler to close the log weight modal
   const handleCloseLogWeightModal = () => {
     setLogWeightModalOpen(false);
   };
 
-  // Handler for resetting goals
   const handleResetGoals = () => {
-    // Reset goals functionality can be implemented later if needed
-    // For now, just close the modal
     setResetModalOpen(false);
   };
 
-  // Handler for adding a new habit
   const handleAddHabit = () => {
     openHabitModal(undefined, "add");
   };
 
-  // Handler for editing a habit
   const handleEditHabit = (id: string) => {
     const habitToEdit = habits?.find((habit) => habit.id === id) || undefined;
     if (habitToEdit) {
@@ -162,12 +147,10 @@ export default function GoalsPage() {
     }
   };
 
-  // Handler for closing habit modal
   const handleCloseHabitModal = () => {
     closeHabitModal();
   };
 
-  // Unified handler for submitting and updating habits
   const handleSubmitHabit = async (
     values: HabitGoalFormValues,
     habitId?: string,
@@ -189,28 +172,21 @@ export default function GoalsPage() {
     }
   };
 
-  // Handler to open the delete confirmation modal
   const handleOpenDeleteConfirmModal = () => {
     setDeleteConfirmModalOpen(true);
   };
 
-  // Handler to close the delete confirmation modal
   const handleCloseDeleteConfirmModal = () => {
     setDeleteConfirmModalOpen(false);
   };
 
-  // Handler for incrementing habit progress
   const handleIncrementHabit = async (id: string) => {
     try {
-      // Find the original habit before mutation
       const originalHabit = habits.find((h) => h.id === id);
       if (!originalHabit) {
         throw new Error("Habit not found");
       }
-
       await incrementProgressMutation.mutateAsync(originalHabit);
-
-      // Check if habit was completed
       if (originalHabit.current + 1 >= originalHabit.target) {
         handleMutationSuccess(
           `🎉 Congratulations! You've completed your ${originalHabit.title}!`,
@@ -221,12 +197,10 @@ export default function GoalsPage() {
     }
   };
 
-  // Handler for completing a habit
   const handleCompleteHabit = async (id: string) => {
     try {
       await completeHabitMutation.mutateAsync(id);
       const habit = habits.find((h) => h.id === id);
-      // Only show congratulations if the habit wasn't already complete
       if (habit && !habit.isComplete) {
         handleMutationSuccess(
           `🎉 Congratulations! You've completed your ${habit.title}!`,
@@ -237,7 +211,6 @@ export default function GoalsPage() {
     }
   };
 
-  // Handler for deleting a habit
   const handleDeleteHabit = async (id: string) => {
     try {
       await deleteHabitMutation.mutateAsync(id);
@@ -247,7 +220,6 @@ export default function GoalsPage() {
     }
   };
 
-  // Handler to confirm and execute weight goal deletion
   const router = useRouter();
 
   const handleDeleteWeightGoalConfirmed = async () => {
@@ -260,10 +232,7 @@ export default function GoalsPage() {
     }
   };
 
-  // Use TanStack Query data instead of loader data for weight goals
   const currentWeightGoals = weightGoalsFromQuery || weightGoals;
-
-  // Get the safe target weight value for components
   const safeTargetWeight =
     currentWeightGoals?.targetWeight || user?.weight || 0;
 
@@ -273,7 +242,7 @@ export default function GoalsPage() {
       subtitle="Track your progress and stay motivated on your health journey"
       headerChildren={
         <div
-          className="relative flex space-x-1 p-1 bg-gray-800/60 rounded-lg"
+          className="relative flex space-x-1 p-1 bg-background/60 rounded-lg"
           role="tablist"
           aria-label="Goals Tabs"
         >
@@ -302,7 +271,6 @@ export default function GoalsPage() {
         </div>
       }
     >
-      {/* Reset Goals Confirmation Modal */}
       <AnimatePresence>
         {isResetModalOpen && (
           <Modal
@@ -320,8 +288,6 @@ export default function GoalsPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Delete Weight Goal Confirmation Modal */}
       <AnimatePresence>
         {isDeleteConfirmModalOpen && (
           <Modal
@@ -339,8 +305,6 @@ export default function GoalsPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Unified Habit Modal */}
       <AnimatePresence>
         {isHabitModalOpen && (
           <HabitModal
@@ -357,8 +321,6 @@ export default function GoalsPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Log Weight Modal */}
       <AnimatePresence>
         {isLogWeightModalOpen && (
           <LogWeightModal
@@ -369,8 +331,6 @@ export default function GoalsPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Weight Goal Modal */}
       <AnimatePresence>
         {isWeightGoalModalOpen && (
           <WeightGoalModal
@@ -399,8 +359,6 @@ export default function GoalsPage() {
           />
         )}
       </AnimatePresence>
-
-      {/* Main Content Area */}
       <div className="relative">
         {user ? (
           <AnimatePresence mode="wait">
@@ -413,7 +371,6 @@ export default function GoalsPage() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
                 <div className="space-y-6">
-                  {/* Weight Goal Dashboard */}
                   {user && (
                     <WeightGoalDashboard
                       user={toUserSettings(user)}
@@ -447,11 +404,7 @@ export default function GoalsPage() {
                       tdee={nutritionProfile?.tdee || 0}
                     />
                   )}
-
-                  {/* Weight Progress Tabs */}
                   <WeightProgressTabs />
-
-                  {/* Habit Tracker */}
                   <HabitTracker
                     habits={habits || []}
                     isLoading={habitsLoading}
@@ -472,7 +425,7 @@ export default function GoalsPage() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
                 <div className="space-y-6">
-                  <MacroTargetForm macroTarget={macroTarget} />
+                  <MacroTargetForm macroTarget={macroTarget ?? null} />
                 </div>
               </motion.div>
             )}
