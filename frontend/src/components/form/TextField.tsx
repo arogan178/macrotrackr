@@ -39,7 +39,7 @@
 import { memo, useId, useState } from "react";
 
 import { EyeIcon, EyeSlashIcon } from "@/components/ui";
-import { formStyles } from "@/components/utils/Styles";
+import { formStyles } from "@/components/form/styles";
 import type { TextFieldProps } from "@/components/utils/Types";
 
 import IconButton from "../ui/IconButton";
@@ -72,7 +72,7 @@ function TextField({
     const newValue = event.target.value;
 
     if (textOnly && newValue !== "") {
-      const textOnlyValue = newValue.replaceAll(/[^\sA-Za-z]/g, "");
+      const textOnlyValue = newValue.replace(/[^\sA-Za-z]/g, "");
       onChange(textOnlyValue);
     } else {
       onChange(newValue);

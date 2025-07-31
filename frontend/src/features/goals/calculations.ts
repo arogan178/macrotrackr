@@ -33,9 +33,9 @@ export function calculateTimeToGoal(
   const weeklyCalorieChange = dailyCalorieChange * 7;
   const expectedWeightChangePerWeek = weeklyCalorieChange / CALORIES_PER_KG_FAT;
   const weeksToGoal =
-    expectedWeightChangePerWeek !== 0
-      ? weightDifference / Math.abs(expectedWeightChangePerWeek)
-      : Infinity;
+    expectedWeightChangePerWeek === 0
+      ? Infinity
+      : weightDifference / Math.abs(expectedWeightChangePerWeek);
 
   return {
     weeksToGoal: Math.ceil(weeksToGoal),
@@ -119,10 +119,15 @@ export function generateWeightGoalCalculations(
     customCalorieIntake ??
     calculateCalorieTarget(tdee, startingWeight, targetWeight);
 
-  const weightGoal = startingWeight > targetWeight ? "lose" : startingWeight < targetWeight ? "gain" : "maintain";
+  const weightGoal =
+    startingWeight > targetWeight
+      ? "lose"
+      : startingWeight < targetWeight
+        ? "gain"
+        : "maintain";
 
   // Enforce a minimum 50 kcal surplus/deficit if a custom intake is provided or if difference is 0
-  if (weightGoal !== 'maintain') {
+  if (weightGoal !== "maintain") {
     let difference = calorieTarget - tdee;
     if (Math.abs(difference) < 50) {
       // If difference is 0 or too small, adjust to minimum allowed
@@ -133,7 +138,7 @@ export function generateWeightGoalCalculations(
 
   const calorieDifference = calorieTarget - tdee;
 
-  if (weightGoal === 'maintain') {
+  if (weightGoal === "maintain") {
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + 7);
     return {
@@ -148,7 +153,8 @@ export function generateWeightGoalCalculations(
     };
   }
 
-  const effectiveCalorieChange = weightGoal === 'lose' ? -calorieDifference : calorieDifference;
+  const effectiveCalorieChange =
+    weightGoal === "lose" ? -calorieDifference : calorieDifference;
 
   if (effectiveCalorieChange <= 0) {
     const fallbackDate = new Date();
@@ -182,7 +188,9 @@ export function generateWeightGoalCalculations(
     calorieTarget,
     targetDate: targetDate.toISOString().split("T")[0],
     calculatedWeeks: finalWeeks,
-    weeklyChange: isFinite(expectedWeightLossPerWeek) ? expectedWeightLossPerWeek : 0,
+    weeklyChange: isFinite(expectedWeightLossPerWeek)
+      ? expectedWeightLossPerWeek
+      : 0,
     dailyChange: calorieDifference,
   };
 }
