@@ -275,7 +275,7 @@ function WeightGoalForm({
                   <span>
                     {(() => {
                       const diff = Math.abs(tdee - calorieIntake);
-                      const displayDiff = diff < 50 ? 50 : diff;
+                      const displayDiff = Math.max(diff, 50);
                       return isWeightLoss
                         ? `Deficit: ${displayDiff} kcal`
                         : `Surplus: ${displayDiff} kcal`;

@@ -5,7 +5,6 @@ import {
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
   FORM_BUTTON_SIZES,
-  formStyles,
   ICON_POSITIONS,
 } from "@/components/utils";
 import type { ButtonProps } from "@/components/utils/Types";
@@ -47,14 +46,33 @@ function Button({
 
   const finalIsLoading = isLoading || autoDetectedLoading;
 
-  // Use centralized styles from formStyles.button
+  // Localized button styles (migrated from utils/Styles.ts)
   const sizeStyles = FORM_BUTTON_SIZES;
-  const variantStyles = formStyles.button.variants;
-  const widthStyles = fullWidth ? formStyles.button.fullWidth : "";
+
+  const buttonBase =
+    "inline-flex items-center justify-center font-medium text-sm gap-1.5 transition-all duration-200 " +
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +
+    "rounded-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed";
+
+  const buttonVariants: Record<string, string> = {
+    primary:
+      "bg-primary hover:bg-primary/50 disabled:hover:bg-primary text-foreground focus:ring-primary shadow-surface",
+    secondary:
+      "bg-secondary hover:bg-secondary/50 disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
+    danger:
+      "bg-error hover:bg-error/50 disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
+    success:
+      "bg-success hover:bg-success/50 disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
+    ghost:
+      "bg-transparent hover:bg-surface/50 disabled:hover:bg-transparent disabled:hover:text-foreground",
+  };
+
+  const widthStyles = fullWidth ? "w-full" : "";
+
   const buttonClasses = [
-    formStyles.button.base,
+    buttonBase,
     sizeStyles[buttonSize as keyof typeof sizeStyles],
-    variantStyles[variant],
+    buttonVariants[variant],
     widthStyles,
     className,
   ].join(" ");

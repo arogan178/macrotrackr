@@ -1,40 +1,36 @@
 import { Link } from "@tanstack/react-router";
 import React from "react";
+import { BackIcon, Button } from "@/components/ui";
 
 const TermsAndConditionsPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-surface relative overflow-hidden">
-      {/* Background Elements */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-surface via-blue-900/20 to-primary/30"></div>
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_50%)]"></div>
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_70%_80%,rgba(67,56,202,0.2),transparent_50%)]"></div>
-      </div>
-
-      {/* Header */}
-      <header className="relative z-10 border-b border-border/50 backdrop-blur-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <header className="border border-border bg-surface">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-6">
-            <Link to="/" className="flex items-center">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-white via-blue-100 to-primary text-transparent bg-clip-text">
+            <Link to="/" className="flex items-center" aria-label="Home">
+              <h1 className="text-3xl font-bold text-foreground">
                 MacroTrackr
               </h1>
             </Link>
-            <Link
-              to="/"
-              className="text-foreground hover:text-foreground transition-colors"
-            >
-              ← Back to Home
+            <Link to="/" aria-label="Back to Home">
+              <Button
+                text="Back to Home"
+                variant="ghost"
+                buttonSize="sm"
+                ariaLabel="Back"
+                icon={<BackIcon />}
+                iconPosition="left"
+              />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* Content */}
-      <div className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto">
-          <div className="bg-surface/50 backdrop-blur-sm border border-border/50 rounded-3xl p-8 lg:p-12">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-white to-surface text-transparent bg-clip-text mb-8">
+          <div className="bg-surface backdrop-blur-sm border border-border/50 rounded-2xl p-8 lg:p-12 shadow-primary">
+            <h1 className="text-4xl font-bold text-foreground mb-8">
               Terms and Conditions
             </h1>
 
@@ -44,169 +40,145 @@ const TermsAndConditionsPage: React.FC = () => {
               </p>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   1. Acceptance of Terms
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  By accessing and using MacroTrackr ("the Service"), you accept
-                  and agree to be bound by the terms and provision of this
-                  agreement. If you do not agree to abide by the above, please
-                  do not use this service.
+                  By accessing and using MacroTrackr, you accept and agree to be
+                  bound by these terms. If you do not agree, please do not use
+                  the service.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   2. Description of Service
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
                   MacroTrackr is a nutrition and macro tracking application that
-                  allows users to log meals, track macronutrients, set fitness
-                  goals, and monitor their progress. The service includes both
-                  free and premium features.
+                  includes free and premium features.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   3. User Accounts
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  To access certain features of the Service, you may be required
-                  to create an account. You are responsible for:
+                  To access certain features, you may be required to create an
+                  account. You are responsible for account security and accurate
+                  information.
                 </p>
                 <ul className="list-disc list-inside text-foreground space-y-2 mb-4">
-                  <li>
-                    Maintaining the confidentiality of your account credentials
-                  </li>
-                  <li>All activities that occur under your account</li>
-                  <li>Providing accurate and up-to-date information</li>
-                  <li>Notifying us immediately of any unauthorized use</li>
+                  <li>Maintain credential confidentiality</li>
+                  <li>All activities under your account</li>
+                  <li>Provide accurate and up-to-date information</li>
+                  <li>Notify us immediately of unauthorized use</li>
                 </ul>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   4. Privacy Policy
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  Your privacy is important to us. Our Privacy Policy explains
-                  how we collect, use, and protect your information when you use
-                  our Service. By using our Service, you agree to the collection
-                  and use of information in accordance with our Privacy Policy.
+                  Your privacy is important. By using the Service, you agree to
+                  our Privacy Policy.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   5. Subscription and Billing
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
                   Pro features require a paid subscription. By subscribing, you
-                  agree to:
+                  agree to fees, automatic renewal, and price changes with
+                  notice.
                 </p>
-                <ul className="list-disc list-inside text-foreground space-y-2 mb-4">
-                  <li>Pay all fees associated with your subscription</li>
-                  <li>Automatic renewal unless cancelled</li>
-                  <li>No refunds for partial subscription periods</li>
-                  <li>Price changes with 30 days notice</li>
-                </ul>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   6. Acceptable Use
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  You agree not to use the Service to:
+                  You agree not to misuse the Service.
                 </p>
                 <ul className="list-disc list-inside text-foreground space-y-2 mb-4">
-                  <li>Upload harmful, offensive, or illegal content</li>
-                  <li>Attempt to gain unauthorized access to our systems</li>
-                  <li>Interfere with the proper functioning of the Service</li>
-                  <li>Violate any applicable laws or regulations</li>
+                  <li>Do not upload harmful, offensive, or illegal content</li>
+                  <li>Do not attempt to gain unauthorized access</li>
+                  <li>
+                    Do not interfere with the proper functioning of the Service
+                  </li>
+                  <li>Comply with applicable laws and regulations</li>
                 </ul>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   7. Health Disclaimer
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  MacroTrackr is not a medical service and should not be used as
-                  a substitute for professional medical advice. Always consult
-                  with healthcare professionals before making significant
-                  changes to your diet or exercise routine.
+                  MacroTrackr is not a medical service; consult professionals
+                  before significant dietary or exercise changes.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   8. Limitation of Liability
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  In no event shall MacroTrackr be liable for any indirect,
-                  incidental, special, consequential, or punitive damages,
-                  including without limitation, loss of profits, data, use,
-                  goodwill, or other intangible losses.
+                  In no event shall MacroTrackr be liable for indirect or
+                  consequential damages.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   9. Data Ownership and Export
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  You retain ownership of all data you input into MacroTrackr.
-                  You may export your data at any time through your account
-                  settings. Upon account deletion, your data will be permanently
-                  removed from our systems within 30 days.
+                  You retain ownership of your data and may export it. Upon
+                  account deletion, data is removed within 30 days.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   10. Termination
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  We may terminate or suspend your account at any time for
-                  violation of these terms. You may also delete your account at
-                  any time through your account settings.
+                  We may terminate or suspend your account for violations. You
+                  can delete your account at any time.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   11. Changes to Terms
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  We reserve the right to modify these terms at any time. We
-                  will notify users of any material changes via email or through
-                  the Service. Continued use of the Service after changes
-                  constitutes acceptance of the new terms.
+                  We may modify these terms; continued use indicates acceptance.
                 </p>
               </section>
 
               <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   12. Governing Law
                 </h2>
                 <p className="text-foreground leading-relaxed mb-4">
-                  These terms shall be governed by and construed in accordance
-                  with the laws of the jurisdiction in which MacroTrackr
-                  operates, without regard to its conflict of law provisions.
+                  These terms are governed by the laws of our operating
+                  jurisdiction.
                 </p>
               </section>
 
-              <section className="mb-8">
-                <h2 className="text-2xl font-semibold text-foreground mb-4">
+              <section className="mb-2">
+                <h2 className="text-2xl font-semibold text-foreground mb-3">
                   13. Contact Information
                 </h2>
-                <p className="text-foreground leading-relaxed mb-4">
-                  If you have any questions about these Terms and Conditions,
-                  please contact us at:
-                </p>
-                <div className="bg-surface/50 rounded-lg p-4 text-foreground">
+                <div className="bg-surface/50 rounded-lg p-4 text-foreground border border-border/50">
                   <p>Website: www.macrotrackr.com</p>
                   <p>Email: contact@macrotrackr.com</p>
                 </div>
@@ -214,7 +186,7 @@ const TermsAndConditionsPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 };

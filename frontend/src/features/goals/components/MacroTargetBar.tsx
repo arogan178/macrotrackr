@@ -1,6 +1,7 @@
 // src/features/macroTracking/components/MacroTargetBar.tsx
 
 import { memo } from "react";
+
 import type { MacroTargetState } from "@/types/macro";
 
 interface MacroTargetBarProps {
