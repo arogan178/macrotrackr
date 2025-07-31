@@ -30,7 +30,10 @@ import {
   useIncrementHabitProgress,
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
-import { useMacroTarget } from "@/hooks/queries/useMacroQueries"; // <-- FIX: Import the hook
+import {
+  useMacroDailyTotals,
+  useMacroTarget,
+} from "@/hooks/queries/useMacroQueries"; // <-- FIX: Import the hook
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
@@ -71,17 +74,9 @@ export default function GoalsPage() {
   // FIX: Use the useMacroTarget hook to get live data
   const { data: macroTarget } = useMacroTarget();
 
-  const {
-    macroDailyTotals = {
-      protein: 0,
-      carbs: 0,
-      fats: 0,
-      calories: 0,
-    },
-    weightGoals,
-    weightLog,
-    weightGoalsError,
-  }: {
+  const { data: liveMacroDailyTotals } = useMacroDailyTotals();
+
+  const loaderData: {
     macroDailyTotals?: {
       protein: number;
       carbs: number;
@@ -92,6 +87,17 @@ export default function GoalsPage() {
     weightLog?: any;
     weightGoalsError?: string;
   } = useLoaderData({ from: goalsRoute.id }) || {};
+
+  const initialMacroDailyTotals = loaderData.macroDailyTotals || {
+    protein: 0,
+    carbs: 0,
+    fats: 0,
+    calories: 0,
+  };
+
+  const { weightGoals, weightLog, weightGoalsError } = loaderData;
+
+  const macroDailyTotals = liveMacroDailyTotals || initialMacroDailyTotals;
 
   const nutritionProfile = user
     ? createNutritionProfile(toUserSettings(user))

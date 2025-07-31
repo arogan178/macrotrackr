@@ -81,7 +81,6 @@ export const COLOR_MAP = {
     acronym: "text-muted/80",
     gradient: "from-fats/30 to-gray-800/10",
   },
-
 } as const;
 
 // Progress bar colors
@@ -89,7 +88,7 @@ export const PROGRESS_BAR_COLORS = {
   blue: "bg-surface",
   green: "bg-success",
   red: "bg-error",
-  accent: "bg-vibrant-accent", 
+  accent: "bg-vibrant-accent",
   purple: "bg-secondary",
   protein: "bg-protein",
   carbs: "bg-carbs",

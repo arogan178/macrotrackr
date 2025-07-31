@@ -3,6 +3,7 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
 import ProgressBar from "@/components/ui/ProgressBar";
+import CardContainer from "@/components/form/CardContainer";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
 import {
@@ -132,7 +133,7 @@ export default function DailySummary({
   ];
 
   return (
-    <div className="bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-modal overflow-hidden h-full">
+    <CardContainer className="h-full">
       <div className="p-6 flex flex-col h-full">
         <div className="bg-muted/10 rounded-xl p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -262,6 +263,6 @@ export default function DailySummary({
           ))}
         </div>
       </div>
-    </div>
+    </CardContainer>
   );
 }

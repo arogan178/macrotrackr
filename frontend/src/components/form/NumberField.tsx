@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { formStyles } from "@/components/utils/Styles";
+import { formStyles } from "@/components/form/styles";
 import type { NumberFieldProps } from "@/components/utils/Types"; // Assuming NumberFieldProps is defined here
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
 
@@ -34,13 +34,14 @@ function NumberField({
 
     // Handle empty input properly
     if (value_ === "") {
-      onChange();
+      onChange(undefined as unknown as number);
       return;
     }
 
     // Check if it's a valid number pattern
     if (/^-?\d*\.?\d*$/.test(value_)) {
-      if (maxDigits && value_.replaceAll(/\D/g, "").length > maxDigits) {
+      const digitsOnlyLength = value_.replace(/\D/g, "").length;
+      if (maxDigits && digitsOnlyLength > maxDigits) {
         return;
       }
 

@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { formStyles } from "@/components/utils/Styles";
+import { formStyles } from "@/components/form/styles";
 import type { TimeFieldProps } from "@/components/utils/Types";
 
 function TimeField({
