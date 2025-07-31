@@ -38,8 +38,8 @@
  */
 import { memo, useId, useState } from "react";
 
-import { EyeIcon, EyeSlashIcon } from "@/components/ui";
 import { formStyles } from "@/components/form/styles";
+import { EyeIcon, EyeSlashIcon } from "@/components/ui";
 import type { TextFieldProps } from "@/components/utils/Types";
 
 import IconButton from "../ui/IconButton";
