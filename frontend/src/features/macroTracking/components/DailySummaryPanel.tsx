@@ -1,9 +1,9 @@
 // src/features/macroTracking/components/DailySummaryPanel.tsx
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
 import ProgressBar from "@/components/ui/ProgressBar";
-import CardContainer from "@/components/form/CardContainer";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
 import {

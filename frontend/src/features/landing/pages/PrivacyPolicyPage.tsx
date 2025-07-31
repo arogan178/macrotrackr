@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import React from "react";
+
 import { BackIcon, Button } from "@/components/ui";
 
 const PrivacyPolicyPage: React.FC = () => {
