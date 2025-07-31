@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
-import CardContainer from "@/components/form/CardContainer";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import { COLOR_MAP } from "@/components/utils";
 
 // Optional: import getScoreColor if needed for reporting
@@ -23,7 +24,7 @@ export interface MetricCardProps {
   showKcalSuffix?: boolean;
 }
 
-export default function MetricCard(props: MetricCardProps) {
+export default function MetricCard(properties: MetricCardProps) {
   const {
     icon: Icon,
     title,
@@ -39,7 +40,7 @@ export default function MetricCard(props: MetricCardProps) {
     children,
     className = "",
     showKcalSuffix = false,
-  } = props;
+  } = properties;
 
   // Resolve color classes for icon
   const colorClasses = color ? COLOR_MAP[color] : {};
@@ -87,7 +88,9 @@ export default function MetricCard(props: MetricCardProps) {
             )}
           </div>
           <p className="text-2xl font-bold text-foreground">
-            {typeof value !== "undefined" ? (
+            {value === undefined ? (
+              <span className="text-foreground text-lg">Complete profile</span>
+            ) : (
               <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
                 <AnimatedNumber
                   value={
@@ -100,8 +103,6 @@ export default function MetricCard(props: MetricCardProps) {
                   duration={0.8}
                 />
               </span>
-            ) : (
-              <span className="text-foreground text-lg">Complete profile</span>
             )}
             {subtitle && (
               <span className={`text-xs ml-2 ${textColor ?? ""}`}>
