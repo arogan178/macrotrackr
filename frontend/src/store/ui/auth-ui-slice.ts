@@ -5,7 +5,7 @@ import {
   resetRegisterData,
   updateRegisterField,
   updateRegisterStep,
-} from "../utils/authUtilities";
+} from "@/features/auth/utils/authUtilities";
 
 // UI-only auth state for form management
 export interface AuthUISlice {

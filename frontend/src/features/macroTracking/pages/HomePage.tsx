@@ -1,6 +1,6 @@
 import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
-import { useCallback, useEffect } from "react";
+import { useCallback, useMemo } from "react";
 
 import { homeRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
@@ -64,35 +64,21 @@ export default function HomePage() {
   const updateMacroEntryMutation = useUpdateMacroEntry();
   const deleteMacroEntryMutation = useDeleteMacroEntry();
 
-  // Get state and actions from our store (UI state only)
-  const {
-    nutritionProfile,
-    editingEntry,
-    setNutritionProfile,
-    setEditingEntry,
-  } = useStore();
+  // Only UI state from zustand
+  const { editingEntry, setEditingEntry } = useStore();
 
-  // Hydrate nutritionProfile from loader user object
-  useEffect(() => {
+  // Derive nutritionProfile locally from server user data
+  const nutritionProfile = useMemo(() => {
     if (user && typeof user.id === "number") {
-      let nutritionProfile;
       try {
-        nutritionProfile = createNutritionProfile(user as any);
+        return createNutritionProfile(user as any);
       } catch (error) {
         console.warn("Could not calculate nutrition profile:", error);
-        nutritionProfile = { userId: user.id, bmr: 1800, tdee: 2200 };
+        return { userId: user.id, bmr: 1800, tdee: 2200 };
       }
-      setNutritionProfile(nutritionProfile);
     }
-  }, [user, setNutritionProfile]);
-
-  // Debug: Log when HomePage renders and when useEffect runs
-  console.log("[HomePage] Rendered", {
-    user,
-    macroTarget,
-    macroDailyTotals,
-    history,
-  });
+    return;
+  }, [user]);
 
   // Handler for adding entries
   const handleAddEntry = useCallback(
@@ -114,7 +100,6 @@ export default function HomePage() {
   const handleEditEntry = useCallback(
     async (entry: typeof editingEntry) => {
       if (!entry) return;
-      console.log("Editing entry:", entry);
       await updateMacroEntryMutation.mutateAsync({
         id: entry.id,
         entry: {
@@ -129,7 +114,7 @@ export default function HomePage() {
       });
       setEditingEntry(undefined);
     },
-    [updateMacroEntryMutation],
+    [updateMacroEntryMutation, setEditingEntry],
   );
 
   // Handler for deleting entries
@@ -144,11 +129,6 @@ export default function HomePage() {
   const handleCloseModal = useCallback(() => {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
-
-  // Debug effect to track editingEntry changes
-  useEffect(() => {
-    console.log("EditingEntry changed:", editingEntry);
-  }, [editingEntry]);
 
   // Infinite query-based pagination
   const loadMoreHistory = useCallback(async () => {

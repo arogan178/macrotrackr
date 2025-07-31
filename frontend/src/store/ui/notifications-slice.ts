@@ -5,8 +5,8 @@ import {
   DEFAULT_NOTIFICATION_DURATION,
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
-} from "../constants";
-import type { NotificationType } from "../types";
+} from "@/features/notifications/constants";
+import type { NotificationType } from "@/features/notifications/types";
 
 export interface Notification {
   id: string;
@@ -146,7 +146,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
         }, duration);
 
         // Store timeout ID for cleanup
-        activeTimeouts[id] = timeoutId;
+        activeTimeouts[id] = timeoutId as unknown as number;
       }
 
       // Update the lastNotificationMap to track this message
