@@ -40,7 +40,7 @@ function NumberField({
 
     // Check if it's a valid number pattern
     if (/^-?\d*\.?\d*$/.test(value_)) {
-      const digitsOnlyLength = value_.replace(/\D/g, "").length;
+      const digitsOnlyLength = value_.replaceAll(/\D/g, "").length;
       if (maxDigits && digitsOnlyLength > maxDigits) {
         return;
       }
