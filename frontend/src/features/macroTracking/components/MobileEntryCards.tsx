@@ -51,7 +51,7 @@ const EntryCard = memo(
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
   }) => (
     <motion.div
-      className="bg-surface/30 rounded-lg p-4 "
+      className="bg-surface rounded-lg p-4 "
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -175,9 +175,9 @@ const MobileEntryCards = memo(
                   }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
-                  <ChevronDownIcon className="w-5 h-5 text-primary" />
+                  <ChevronDownIcon className="w-5 h-5 text-foreground" />
                 </motion.div>
-                <h3 className="font-semibold text-primary text-base">
+                <h3 className="font-semibold text-foreground text-base">
                   {formatDate(group.date)}
                 </h3>
               </div>

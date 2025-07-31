@@ -72,7 +72,7 @@ function TextField({
     const newValue = event.target.value;
 
     if (textOnly && newValue !== "") {
-      const textOnlyValue = newValue.replace(/[^\sA-Za-z]/g, "");
+      const textOnlyValue = newValue.replaceAll(/[^\sA-Za-z]/g, "");
       onChange(textOnlyValue);
     } else {
       onChange(newValue);

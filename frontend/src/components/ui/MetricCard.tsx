@@ -42,8 +42,10 @@ export default function MetricCard(properties: MetricCardProps) {
     showKcalSuffix = false,
   } = properties;
 
-  // Resolve color classes for icon
-  const colorClasses = color ? COLOR_MAP[color] : {};
+  // Resolve color classes for icon with safe fallbacks for optional keys
+  const colorClasses = color
+    ? COLOR_MAP[color]
+    : ({} as Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>);
 
   // Use motion.div for animation if delay or score is provided, else CardContainer
   const Wrapper = score !== undefined || delay > 0 ? motion.div : CardContainer;
@@ -53,7 +55,7 @@ export default function MetricCard(properties: MetricCardProps) {
           initial: { opacity: 0, y: 10 },
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.3, delay },
-          className: `rounded-lg ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-[160px] flex flex-col ${className}`,
+          className: `bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-[160px] flex flex-col group ${className}`,
         }
       : {
           className: `p-3.5 hover:bg-surface/80 hover:shadow-accent transition group ${className}`,
@@ -64,10 +66,10 @@ export default function MetricCard(properties: MetricCardProps) {
       <div className="flex items-start gap-5">
         {Icon && (
           <div
-            className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses.gradient ?? ""} border ${colorClasses.border ?? borderColor ?? ""}`}
+            className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
           >
             <Icon
-              className={`h-7 w-7 ${colorClasses.text ?? textColor ?? ""} transform group-hover:scale-120 transition-transform`}
+              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""} transform group-hover:scale-120 transition-transform`}
               strokeWidth={1.5}
             />
           </div>
@@ -81,7 +83,7 @@ export default function MetricCard(properties: MetricCardProps) {
             </h3>
             {acronym && (
               <span
-                className={`text-xs whitespace-nowrap ${colorClasses.acronym ?? textColor ?? ""}`}
+                className={`text-xs whitespace-nowrap ${colorClasses?.acronym ?? textColor ?? ""}`}
               >
                 ({acronym})
               </span>
