@@ -1,77 +1,12 @@
 import { memo } from "react";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { StarIcon, UserIcon } from "@/components/ui";
-import { COLOR_MAP } from "@/components/utils";
+import MetricCard from "@/components/ui/MetricCard";
 
 interface UserMetricsPanelProps {
   bmr: number;
   tdee: number;
   isLoading?: boolean;
-}
-
-function MetricCard({
-  icon: Icon,
-  title,
-  acronym,
-  value,
-  color,
-}: {
-  icon: React.FC<React.SVGProps<SVGSVGElement>>;
-  title: string;
-  acronym: string;
-  value: number | undefined;
-  color:
-    | "green"
-    | "blue"
-    | "red"
-    | "accent"
-    | "indigo"
-    | "purple"
-    | "protein"
-    | "carbs"
-    | "fats";
-}) {
-  const classes = COLOR_MAP[color];
-
-  return (
-    <div className="bg-surface/70 backdrop-blur-sm p-3.5 rounded-2xl border border-border/50 shadow-modal hover:bg-surface/80 transition-colors group">
-      <div className="flex items-start gap-5">
-        <div
-          className={`p-3 rounded-xl bg-gradient-to-br ${classes.gradient} border ${classes.border}`}
-        >
-          <Icon
-            className={`h-7 w-7 ${classes.text} transform group-hover:scale-110 transition-transform`}
-            strokeWidth={1.5}
-          />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2 mb-1">
-            <h3 className="font-medium text-foreground text-sm truncate">
-              {title}
-            </h3>
-            <span className={`text-xs ${classes.acronym} whitespace-nowrap`}>
-              ({acronym})
-            </span>
-          </div>
-          <p className="text-2xl font-bold text-foreground">
-            {value ? (
-              <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
-                <AnimatedNumber
-                  value={value}
-                  toFixedValue={0}
-                  suffix=" kcal"
-                  duration={0.8}
-                />
-              </span>
-            ) : (
-              <span className="text-foreground text-lg">Complete profile</span>
-            )}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
 }
 
 function LoadingSkeleton() {
@@ -112,6 +47,7 @@ function UserMetricsPanel({
         acronym="BMR"
         value={bmr || undefined}
         color="accent"
+        showKcalSuffix
       />
       <MetricCard
         icon={StarIcon}
@@ -119,6 +55,7 @@ function UserMetricsPanel({
         acronym="TDEE"
         value={tdee || undefined}
         color="accent"
+        showKcalSuffix
       />
     </div>
   );

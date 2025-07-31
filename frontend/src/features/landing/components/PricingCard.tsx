@@ -5,7 +5,7 @@ import { Button, CheckIcon } from "@/components/ui";
 
 interface PricingCardProps {
   title: string;
-  price: string;
+  price: React.ReactNode | string;
   suffix?: string;
   equivalent?: string;
   features: string[];
@@ -24,8 +24,6 @@ interface PricingCardProps {
 
 /**
  * PricingCard renders a single pricing plan card for the pricing section.
- * Usage example:
- *   <PricingCard title="Pro" price="$6.99" features={[...]} buttonText="Get Pro Now" onButtonClick={...} />
  */
 const PricingCard: React.FC<PricingCardProps> = ({
   title,
@@ -39,32 +37,25 @@ const PricingCard: React.FC<PricingCardProps> = ({
   buttonSize = "lg",
   buttonClassName = "",
   onButtonClick,
-  focusRingColor = "focus:ring-primary/40",
+  focusRingColor = "focus-visible:ring-primary/50",
   featureIconColor = "text-primary",
   featureTextClass = "text-foreground font-medium",
   cardClassName = "",
   children,
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
-    whileHover={{
-      scale: 1.025,
-      boxShadow: "0 8px 32px 0 rgba(99,102,241,0.15)",
-    }}
-    whileFocus={{
-      scale: 1.02,
-      boxShadow: "0 8px 32px 0 rgba(99,102,241,0.18)",
-    }}
-    transition={{ duration: 0.4, type: "spring", stiffness: 300, damping: 30 }}
+    whileHover={{ scale: 1.01 }}
+    transition={{ duration: 0.3, type: "spring", stiffness: 280, damping: 26 }}
     tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative bg-surface/50 backdrop-blur-sm border border-border/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full outline-none focus-visible:ring-4 focus-visible:ring-vibrant-accent/70 ${focusRingColor} ${cardClassName}`}
+    className={`relative bg-surface backdrop-blur-sm border border-border/50 rounded-2xl p-8 lg:p-10 flex flex-col h-full outline-none ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
-      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-        <span className="bg-gradient-to-r from-primary to-purple-600 text-foreground px-4 py-2 rounded-full text-sm font-semibold shadow-primary">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+        <span className="bg-primary text-foreground px-4 py-2 rounded-full text-sm font-semibold shadow-surface">
           Most Popular
         </span>
       </div>
@@ -96,11 +87,11 @@ const PricingCard: React.FC<PricingCardProps> = ({
           key={index}
           className="flex items-center space-x-3"
           variants={{
-            hidden: { opacity: 0, y: 16 },
+            hidden: { opacity: 0, y: 12 },
             visible: {
               opacity: 1,
               y: 0,
-              transition: { type: "spring", stiffness: 400, damping: 30 },
+              transition: { type: "spring", stiffness: 360, damping: 26 },
             },
           }}
         >
@@ -111,9 +102,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
     </motion.ul>
     <div className="mt-auto">
       <motion.div
-        whileHover={{ scale: 1.02, y: -2 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        whileHover={{ scale: 1.01, y: -1 }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ type: "spring", stiffness: 350, damping: 26 }}
       >
         <Button
           text={buttonText}

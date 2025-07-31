@@ -1,8 +1,10 @@
 // src/components/macros/MacroSlider.tsx
 
 import { useState } from "react";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { IconButton, LockIcon, UnlockIcon } from "@/components/ui";
+
 import { COLOR_MAP } from "../utils";
 
 interface MacroSliderProps {
