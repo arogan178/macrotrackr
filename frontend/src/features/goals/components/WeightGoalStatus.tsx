@@ -15,10 +15,10 @@ import {
   TrendingUpIcon,
   WeightIcon,
 } from "@/components/ui";
+import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
+import { formatDate } from "@/features/reporting/utils/dateUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
-import { formatDate } from "@/features/reporting/utils/dateUtilities";
-import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
 
 import MacroNutrient from "./MacroNutrient";
 
@@ -72,9 +72,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const goalBorderColor = `border-${goalColor}-500`;
 
   const formattedStartDate = formatDate(weightGoals?.startDate ?? "");
-  const formattedTargetDate = formatDate(weightGoals?.targetDate ?? "", {
-    year: "numeric",
-  });
+  const formattedTargetDate = formatDate(weightGoals?.targetDate ?? "");
 
   const targetPercentages = macroTarget || {
     proteinPercentage: 30,
@@ -98,6 +96,10 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   if (dailyDifference === 0 && weightGoals?.calorieTarget && tdee > 0) {
     dailyDifference = Math.abs(tdee - weightGoals.calorieTarget);
   }
+  // Enforce minimum of 50 kcal for weight gain/loss goals
+  if (!isMaintenance && dailyDifference < 50) {
+    dailyDifference = 50;
+  }
 
   return (
     <motion.div
@@ -113,7 +115,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             <WeightIcon className={`w-6 h-6 ${goalTextColor}`} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-muted">
+            <h2 className="text-xl font-semibold text-foreground">
               {goalTypeLabel} Plan
             </h2>
             <p className="text-sm text-muted">
@@ -125,7 +127,6 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           <Button
             variant="secondary"
             onClick={onLogWeight}
-            className="bg-surface/20 hover:bg-surface/30 text-foreground font-medium transition-colors duration-200 focus:ring-primary"
             text="Log Weight"
             icon={<WeightIcon />}
             iconPosition="left"
@@ -145,7 +146,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3">
           <div className="flex items-baseline space-x-2">
-            <span className="text-2xl font-bold text-muted">
+            <span className="text-2xl font-bold text-foreground">
               <AnimatedNumber
                 value={startingWeight}
                 toFixedValue={1}
@@ -154,8 +155,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             </span>
             {!isMaintenance && (
               <>
-                <ChevronRightIcon className="w-4 h-4 text-muted shrink-0" />{" "}
-                <span className="text-xl text-muted">
+                <ChevronRightIcon />
+                <span className="text-xl text-foreground">
                   <AnimatedNumber
                     value={targetWeight}
                     toFixedValue={1}

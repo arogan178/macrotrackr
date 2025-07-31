@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { CardContainer, TextField } from "@/components/form";
-import { Button, EmailIcon } from "@/components/ui";
+import { BackIcon, Button, EmailIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
@@ -68,13 +68,14 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
       </form>
       <div className="text-right mt-4">
         <Button
+          text="Back to Login"
           type="button"
           variant="ghost"
           className="text-sm text-muted hover:text-foreground"
           onClick={onSwitchToLogin}
-        >
-          Back to Login
-        </Button>
+          icon={<BackIcon />}
+          iconPosition="left"
+        />
       </div>
     </CardContainer>
   );

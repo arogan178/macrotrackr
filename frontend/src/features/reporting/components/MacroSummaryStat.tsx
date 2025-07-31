@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import type { MacroType } from "@/types/macro";
 import { MACRO_COLORS } from "@/utils/constants/macro";
 
@@ -229,15 +230,14 @@ export default function MacroSummaryStats({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {/* Macro Panels */}
-      {/* "bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 shadow-modal overflow-hidden" */}
-      <div className="flex flex-col bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 p-3 shadow-modal h-full">
-        <div className="flex-1 text-xs flex flex-col justify-between h-full">
+      {/* Calories Card */}
+      <CardContainer className="p-3">
+        <div className="flex-1 flex flex-col justify-between">
           <div className="flex items-center justify-between mb-2">
             <span className="font-semibold text-sm text-foreground">
               Calories
             </span>
-          </div>{" "}
+          </div>
           <div className="space-y-1 mb-2">
             <div className="flex items-baseline justify-between">
               <span className="text-foreground text-xs mr-1">
@@ -263,7 +263,7 @@ export default function MacroSummaryStats({
                 />
               </span>
             </div>
-          </div>{" "}
+          </div>
           <div className="flex items-baseline justify-between text-foreground mt-auto pt-1 border-t border-border/50">
             <span className="text-xs mr-1.5">Difference:</span>
             <span
@@ -283,8 +283,10 @@ export default function MacroSummaryStats({
             </span>
           </div>
         </div>
-      </div>
-      <div className="flex flex-col bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 p-3 shadow-modal h-full">
+      </CardContainer>
+
+      {/* Protein Card */}
+      <CardContainer className="p-3">
         <MacroSummaryItem
           type="protein"
           avgPercentage={macroAvg.protein}
@@ -292,8 +294,10 @@ export default function MacroSummaryStats({
           targetPercentage={TARGET_MACROS.proteinPercentage}
           targetGrams={targetGrams.protein}
         />
-      </div>
-      <div className="flex flex-col bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 p-3 shadow-modal h-full">
+      </CardContainer>
+
+      {/* Carbs Card */}
+      <CardContainer className="p-3">
         <MacroSummaryItem
           type="carbs"
           avgPercentage={macroAvg.carbs}
@@ -301,8 +305,10 @@ export default function MacroSummaryStats({
           targetPercentage={TARGET_MACROS.carbsPercentage}
           targetGrams={targetGrams.carbs}
         />
-      </div>
-      <div className="flex flex-col bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 p-3 shadow-modal h-full">
+      </CardContainer>
+
+      {/* Fats Card */}
+      <CardContainer className="p-3">
         <MacroSummaryItem
           type="fats"
           avgPercentage={macroAvg.fats}
@@ -310,7 +316,7 @@ export default function MacroSummaryStats({
           targetPercentage={TARGET_MACROS.fatsPercentage}
           targetGrams={targetGrams.fats}
         />
-      </div>
+      </CardContainer>
     </div>
   );
 }

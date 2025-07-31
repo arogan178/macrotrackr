@@ -40,8 +40,7 @@ export const MACRO_COLORS = {
 export const SECTION_STYLES = {
   atAGlance: "p-4 rounded-lg border border-purple-500/20 bg-purple-900/10",
   trendAnalysis: "p-4 rounded-lg border border-primary/20 bg-primary/10",
-  trackingAnalysis:
-    "p-4 rounded-lg border border-primary/20 bg-primary/10",
+  trackingAnalysis: "p-4 rounded-lg border border-primary/20 bg-primary/10",
   recommendations: "p-4 rounded-lg border border-green-500/20 bg-success/10",
 } as const;
 

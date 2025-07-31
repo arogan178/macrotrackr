@@ -105,7 +105,7 @@ export interface DropdownProps extends BaseFieldProps {
 export interface InfoCardProps {
   title: string;
   description?: string;
-  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent" ;
+  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent";
   icon?: ReactNode;
   children?: ReactNode;
 }

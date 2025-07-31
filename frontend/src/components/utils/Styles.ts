@@ -1,5 +1,5 @@
 // Centralized form and UI styles for consistency across components
-// Font sizes and weights are based on usage in src/components/
+/
 export const formStyles = {
   // Label styles
   label: "block text-sm font-medium text-foreground", // Common: text-sm, font-medium
@@ -54,13 +54,13 @@ export const formStyles = {
     // Variant styles
     variants: {
       primary:
-        "bg-primary hover:bg-opacity-90 disabled:hover:bg-accent text-foreground focus:ring-accent shadow-surface",
+        "bg-primary hover:bg-primary/50 disabled:hover:bg-primary text-foreground focus:ring-primary shadow-surface",
       secondary:
-        "bg-secondary hover:bg-opacity-90 disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
+        "bg-secondary hover:bg-secondary/50 disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
       danger:
-        "bg-error hover:bg-opacity-90 disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
+        "bg-error hover:bg-error/50 disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
       success:
-        "bg-success hover:bg-opacity-90 disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
+        "bg-success hover:bg-success/50 disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
       ghost:
         "bg-transparent hover:bg-surface/50 disabled:hover:bg-transparent disabled:hover:text-foreground",
     },
@@ -86,6 +86,8 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface/70 backdrop-blur-sm rounded-2xl border border-border/50 shadow-modal overflow-hidden",
-  },
+      "bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary overflow-hidden"
+    },
+  
+  
 };
