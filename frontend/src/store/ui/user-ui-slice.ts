@@ -1,9 +1,7 @@
 import { StateCreator } from "zustand";
 
-import { createNutritionProfile } from "@/features/settings/utils/calculations";
-import { UserNutritionalProfile, UserSettings } from "@/types/user"; // Unified import
-
-import { validateSettingsComplete as validateSettings } from "../utils/validation";
+import { validateSettingsComplete as validateSettings } from "@/features/settings/utils/validation";
+import { UserSettings } from "@/types/user";
 
 // User UI slice for managing all UI state in the settings page
 export interface UserUISlice {
@@ -15,10 +13,6 @@ export interface UserUISlice {
       duration?: number;
     },
   ) => string;
-
-  // UI state only - server state is now managed by TanStack Query
-  nutritionProfile: UserNutritionalProfile | undefined;
-  setNutritionProfile: (profile: UserNutritionalProfile | undefined) => void;
 
   // Subscription status for UI (derived from server data)
   subscriptionStatus: "free" | "pro" | "canceled";
@@ -60,24 +54,20 @@ export const createUserUISlice: StateCreator<
   },
 
   // Initial UI state only
-  nutritionProfile: undefined,
   subscriptionStatus: "free",
   settings: undefined,
   originalSettings: undefined,
   formErrors: {},
   hasSettingsChanges: false,
 
-  setNutritionProfile: (profile) => set({ nutritionProfile: profile }),
   setSubscriptionStatus: (status: "free" | "pro" | "canceled") =>
     set({ subscriptionStatus: status }),
 
   initializeSettings: (data) => {
     const { settings } = data;
-    const nutritionProfile = createNutritionProfile(settings);
 
     set({
       settings,
-      nutritionProfile,
       originalSettings: structuredClone(settings),
       hasSettingsChanges: false,
       formErrors: {},
