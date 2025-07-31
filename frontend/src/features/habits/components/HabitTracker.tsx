@@ -1,5 +1,6 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
+import { CardContainer } from "@/components/form";
 import {
   Button,
   CheckCircleIcon,
@@ -39,7 +40,7 @@ function HabitTracker({
   const canAddHabit = isPro || habits.length < 2;
 
   return (
-    <div className="bg-surface/40 backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary">
+    <CardContainer>
       <div className="p-5">
         {/* Header with title and add button */}
         <div className="flex items-center justify-between mb-4">
@@ -127,7 +128,7 @@ function HabitTracker({
           </div>
         )}
       </div>
-    </div>
+    </CardContainer>
   );
 }
 
@@ -157,6 +158,41 @@ function getAccentClass(color: string) {
     purple: "text-purple-400 bg-purple-400/10",
   } as const;
   return colors[color as keyof typeof colors] || colors.indigo;
+}
+
+// Limit ProgressBar color to allowed union for type safety
+function resolveProgressColor(
+  accentColor: string,
+  isComplete: boolean | undefined,
+):
+  | "blue"
+  | "green"
+  | "purple"
+  | "red"
+  | "accent"
+  | "protein"
+  | "carbs"
+  | "fats" {
+  if (isComplete) return "green";
+  // Map known habit accent colors to allowed union; default to accent
+  switch (accentColor) {
+    case "green": {
+      return "green";
+    }
+    case "purple": {
+      return "purple";
+    }
+    case "blue": {
+      return "blue";
+    }
+    case "vibrant-accent":
+    case "accent": {
+      return "accent";
+    }
+    default: {
+      return "accent";
+    }
+  }
 }
 
 function HabitCard({
@@ -240,7 +276,7 @@ function HabitCard({
 
         <ProgressBar
           progress={progress}
-          color={isComplete ? "green" : accentColor}
+          color={resolveProgressColor(accentColor, isComplete)}
           height="sm"
         />
       </div>{" "}

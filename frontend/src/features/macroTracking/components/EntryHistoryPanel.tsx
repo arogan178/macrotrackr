@@ -343,7 +343,7 @@ const EntryHistoryComponent = function EntryHistory({
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-2xl border border-border/50 bg-surface/40 backdrop-blur-sm shadow-modal"
+          className="overflow-hidden rounded-2xl border border-border bg-background/50 backdrop-blur-sm shadow-modal"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
