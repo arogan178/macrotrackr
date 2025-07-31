@@ -107,8 +107,7 @@ const getActionConfigs = () =>
     },
     export: {
       icon: ExportIcon,
-      className:
-        "text-emerald-400 hover:text-emerald-200 bg-emerald-900/30 hover:bg-emerald-900/50 focus:ring-emerald-500",
+      className: "text-foreground hover:text-success focus:ring-emerald-500",
     },
     custom: {
       icon: undefined,

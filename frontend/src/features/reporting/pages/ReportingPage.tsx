@@ -59,6 +59,7 @@ export default function ReportingPage() {
   // Use the reporting logic hook to handle all data processing
   const {
     aggregatedData,
+    dailySeries,
     dataProcessed,
     averages,
     handleDownloadCSV,
@@ -81,6 +82,10 @@ export default function ReportingPage() {
 
   const showNoDataMessage =
     !isHistoryLoading && dataProcessed && aggregatedData.length === 0;
+
+  // For the line charts we now show daily data; compute a chart-specific empty state
+  const chartShowNoDataMessage =
+    !isHistoryLoading && dataProcessed && dailySeries.length === 0;
 
   return (
     <FeaturePage
@@ -189,10 +194,10 @@ export default function ReportingPage() {
                       </h2>
                       <div className="h-80 ">
                         <LineChartComponent
-                          data={aggregatedData}
+                          data={dailySeries}
                           lines={calorieChartLines}
                           isLoading={isHistoryLoading || !dataProcessed}
-                          showNoDataMessage={showNoDataMessage}
+                          showNoDataMessage={chartShowNoDataMessage}
                         />
                       </div>
                     </motion.div>
@@ -207,10 +212,10 @@ export default function ReportingPage() {
                       </h2>
                       <div className="h-80">
                         <LineChartComponent
-                          data={aggregatedData}
+                          data={dailySeries}
                           lines={macroChartLines}
                           isLoading={isHistoryLoading || !dataProcessed}
-                          showNoDataMessage={showNoDataMessage}
+                          showNoDataMessage={chartShowNoDataMessage}
                         />
                       </div>
                     </motion.div>

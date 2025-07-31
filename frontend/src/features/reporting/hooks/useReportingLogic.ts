@@ -59,6 +59,16 @@ export function useReportingLogic(
   >([]);
   const [dataProcessed, setDataProcessed] = useState(false);
 
+  const [dailySeries, setDailySeries] = useState<
+    {
+      name: string;
+      calories: number;
+      protein: number;
+      carbs: number;
+      fats: number;
+    }[]
+  >([]);
+
   const mapDateRangeToNumeric = useCallback((range: string): 7 | 30 | 90 => {
     switch (range) {
       case "week": {
@@ -93,6 +103,7 @@ export function useReportingLogic(
     (currentHistory: MacroEntry[], currentRange: string) => {
       if (!currentHistory || currentHistory.length === 0) {
         setAggregatedData([]);
+        setDailySeries([]);
         return;
       }
 
@@ -140,6 +151,25 @@ export function useReportingLogic(
             entry.protein * 4 + entry.carbs * 4 + entry.fats * 9;
         }
       }
+
+      // Build daily series across the entire selected range
+      const daysInRange: string[] = [];
+      const iterDate = new Date(startDate);
+      while (iterDate <= endDate) {
+        const y = iterDate.getFullYear();
+        const m = (iterDate.getMonth() + 1).toString().padStart(2, "0");
+        const d = iterDate.getDate().toString().padStart(2, "0");
+        daysInRange.push(`${y}-${m}-${d}`);
+        iterDate.setDate(iterDate.getDate() + 1);
+      }
+
+      const dailySeriesData = daysInRange.map((date) => ({
+        name: formatDate(date),
+        calories: dailyTotals[date]?.calories || 0,
+        protein: dailyTotals[date]?.protein || 0,
+        carbs: dailyTotals[date]?.carbs || 0,
+        fats: dailyTotals[date]?.fats || 0,
+      }));
 
       let chartData: any[] = [];
 
@@ -263,6 +293,7 @@ export function useReportingLogic(
       }
 
       setAggregatedData(chartData);
+      setDailySeries(dailySeriesData);
     },
     [getDateRangeISOStrings], // formatDate is stable
   );
@@ -273,6 +304,7 @@ export function useReportingLogic(
       setDataProcessed(true);
     } else if (!isLoadingExternal) {
       setAggregatedData([]);
+      setDailySeries([]);
       setDataProcessed(true);
     }
   }, [history, dateRange, isLoadingExternal]); // DO NOT include processDataForCharts in deps to avoid infinite loop
@@ -333,6 +365,7 @@ export function useReportingLogic(
 
   return {
     aggregatedData,
+    dailySeries,
     // macroDensityData removed; use useMacroDensityBreakdown for macro density chart data
     averages,
     handleDownloadCSV,
