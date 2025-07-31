@@ -1,5 +1,5 @@
-import React, { Suspense, useEffect, useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
+import React, { Suspense, useEffect, useState } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
