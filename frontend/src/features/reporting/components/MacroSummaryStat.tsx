@@ -102,7 +102,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
                 duration={0.8}
               />
             </span>
-            <span className="text-foreground text-xs ml-1">
+            <span className="text-muted text-xs ml-1">
               (
               <AnimatedNumber
                 value={avgPercentage}
@@ -126,7 +126,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
                 duration={0.8}
               />
             </span>
-            <span className="text-foreground text-xs ml-1">
+            <span className="text-muted text-xs ml-1">
               (
               <AnimatedNumber
                 value={targetPercentage}
