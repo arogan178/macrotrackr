@@ -136,21 +136,9 @@ export default function AuthPage() {
     <QueryErrorBoundary>
       <ErrorBoundary>
         <div
-          className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
+          className="auth-page min-h-screen flex items-center justify-center bg-background"
           aria-label="Authentication page"
         >
-          {/* Background decorative elements (non-interactive, aria-hidden) */}
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"
-            aria-hidden="true"
-          ></div>
-          <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div className="absolute -inset-[10px] opacity-50">
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full filter blur-3xl"></div>
-              <div className="absolute top-3/4 right-1/3 w-64 h-64 bg-primary/20 rounded-full filter blur-3xl"></div>
-            </div>
-          </div>
-
           <div className="w-full max-w-md relative z-10 px-4">
             {/* Error notifications are now handled by individual components */}
 
