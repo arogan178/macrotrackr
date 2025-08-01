@@ -186,10 +186,10 @@ export function QueryLoadingWrapper({
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
         {errorComponent || (
-          <div className="text-vibrant-accent text-center">
+          <div className="text-center text-vibrant-accent">
             <p className="font-medium">Error loading data</p>
             {error && (
-              <p className="text-sm text-foreground mt-1">{error.message}</p>
+              <p className="mt-1 text-sm text-foreground">{error.message}</p>
             )}
           </div>
         )}
@@ -237,7 +237,7 @@ export function MutationLoadingButton({
     <button
       {...properties}
       disabled={disabled || isLoading}
-      className={`${className} ${isLoading ? "opacity-75 cursor-not-allowed" : ""}`}
+      className={`${className} ${isLoading ? "cursor-not-allowed opacity-75" : ""}`}
     >
       {isLoading ? (
         <div className="flex items-center justify-center space-x-2">

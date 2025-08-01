@@ -21,13 +21,13 @@ export default function MetricCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className={`rounded-lg ${bgGradient} p-4 ${borderColor} h-[160px] flex flex-col`}
+      className={`rounded-lg ${bgGradient} p-4 ${borderColor} flex h-[160px] flex-col`}
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className={`text-sm font-medium ${textColor}`}>{title}</h3>
         <div className={`h-2 w-2 rounded-full ${getScoreColor(score)}`} />
       </div>{" "}
-      <div className="flex items-center justify-between mb-4">
+      <div className="mb-4 flex items-center justify-between">
         <span className="text-2xl font-bold text-foreground">
           <AnimatedNumber
             value={
@@ -41,7 +41,7 @@ export default function MetricCard({
         </span>
         <span className={`text-xs ${textColor}/70`}>{subtitle}</span>
       </div>
-      <div className="flex-1 flex flex-col justify-between">{children}</div>
+      <div className="flex flex-1 flex-col justify-between">{children}</div>
     </motion.div>
   );
 }

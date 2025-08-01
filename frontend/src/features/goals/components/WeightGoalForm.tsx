@@ -153,7 +153,7 @@ function WeightGoalForm({
 
   return (
     <div className="p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <div className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
         <NumberField
           label="Starting Weight"
           value={formValues.startingWeight}
@@ -183,8 +183,8 @@ function WeightGoalForm({
         />
       </div>
       {tdee && calorieIntake !== undefined && formValues.targetWeight && (
-        <div className="space-y-3 mb-6">
-          <div className="flex justify-between items-center">
+        <div className="mb-6 space-y-3">
+          <div className="flex items-center justify-between">
             <label
               htmlFor="calorie-intake-range"
               className="block text-sm font-medium text-foreground"
@@ -215,9 +215,9 @@ function WeightGoalForm({
               onChange={(event) =>
                 handleCalorieIntakeChange(Number(event.target.value))
               }
-              className="appearance-none w-full h-2 bg-surface rounded-lg outline-none cursor-pointer"
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-surface outline-none"
             />
-            <div className="flex justify-between text-xs text-foreground mt-1">
+            <div className="mt-1 flex justify-between text-xs text-foreground">
               {isWeightLoss ? (
                 <>
                   <span>Faster</span>
@@ -241,7 +241,7 @@ function WeightGoalForm({
           </div>
 
           {!isMaintenance && (
-            <div className="bg-surface/30 p-3 rounded-lg">
+            <div className="rounded-lg bg-surface/30 p-3">
               <p className="text-sm text-foreground">
                 <span className="font-medium">
                   Estimated completion:{" "}
@@ -257,21 +257,21 @@ function WeightGoalForm({
                     : "Calculating..."}
                 </span>
               </p>
-              <p className="text-xs text-foreground mt-1">
+              <p className="mt-1 text-xs text-foreground">
                 Expected change:{" "}
                 {typeof weeklyWeightChange === "number" &&
                 !isNaN(weeklyWeightChange)
                   ? `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`
                   : "0 kg per week"}
               </p>
-              <p className="text-xs text-foreground mt-1">
+              <p className="mt-1 text-xs text-foreground">
                 Estimated duration:{" "}
                 {calculatedWeeks === undefined
                   ? "Calculating..."
                   : `${calculatedWeeks} weeks`}
               </p>
-              <div className="mt-2 pt-2 border-t border-border/30">
-                <p className="text-xs text-foreground flex justify-between">
+              <div className="mt-2 border-t border-border/30 pt-2">
+                <p className="flex justify-between text-xs text-foreground">
                   <span>
                     {(() => {
                       const diff = Math.abs(tdee - calorieIntake);
@@ -300,11 +300,11 @@ function WeightGoalForm({
           )}
 
           {isMaintenance && (
-            <div className="bg-surface/30 p-3 rounded-lg">
+            <div className="rounded-lg bg-surface/30 p-3">
               <p className="text-sm text-foreground">
                 <span className="font-medium">Maintenance Goal</span>
               </p>
-              <p className="text-xs text-foreground mt-1">
+              <p className="mt-1 text-xs text-foreground">
                 You're aiming to maintain your current weight with{" "}
                 {calorieIntake < tdee
                   ? "slightly fewer"

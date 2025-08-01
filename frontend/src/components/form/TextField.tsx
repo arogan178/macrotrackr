@@ -122,7 +122,7 @@ function TextField({
             ariaLabel={showPassword ? "Hide password" : "Show password"}
             buttonSize="sm"
             icon={showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-foreground hover:text-foreground focus:outline-none pr-2"
+            className="absolute top-1/2 right-3 -translate-y-1/2 pr-2 text-foreground hover:text-foreground focus:outline-none"
           />
         )}
       </div>

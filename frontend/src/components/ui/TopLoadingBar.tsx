@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+
 import useDeferredVisibility from "@/hooks/useDeferredVisibility";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
@@ -17,8 +18,8 @@ function TopLoadingBar() {
 
   // Respect reduced motion preference
   const prefersReducedMotion = useMemo(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (globalThis.window === undefined || !globalThis.matchMedia) return false;
+    return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
   if (!visible) return null;
@@ -26,7 +27,7 @@ function TopLoadingBar() {
   return (
     <div
       aria-hidden="true"
-      className="fixed top-0 left-0 right-0 z-[9999] pointer-events-none"
+      className="pointer-events-none fixed top-0 right-0 left-0 z-[9999]"
     >
       <div className="h-[3px] bg-transparent">
         <div

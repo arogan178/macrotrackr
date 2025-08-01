@@ -1,8 +1,9 @@
-import { createPortal } from "react-dom";
 import { memo, useEffect, useMemo, useState } from "react";
-import { useCriticalLoading } from "@/hooks/useGlobalLoading";
-import useDeferredVisibility from "@/hooks/useDeferredVisibility";
+import { createPortal } from "react-dom";
+
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import useDeferredVisibility from "@/hooks/useDeferredVisibility";
+import { useCriticalLoading } from "@/hooks/useGlobalLoading";
 
 /**
  * Full-screen overlay that blocks interaction during critical first-loads or any mutation.
@@ -18,7 +19,7 @@ function GlobalLoadingOverlay() {
   });
 
   // Ensure we have a portal target; default to document.body
-  const target = typeof document !== "undefined" ? document.body : null;
+  const target = typeof document === "undefined" ? null : document.body;
 
   // Optionally set aria-busy on the main app container if present
   useEffect(() => {
@@ -33,8 +34,8 @@ function GlobalLoadingOverlay() {
 
   // Respect reduced motion for spinner if desired (spinner already uses simple spin)
   const prefersReducedMotion = useMemo(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (globalThis.window === undefined || !globalThis.matchMedia) return false;
+    return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
   if (!visible || !target) return null;
@@ -51,7 +52,7 @@ function GlobalLoadingOverlay() {
         pointerEvents: "auto",
       }}
     >
-      <div className="rounded-xl bg-surface/90 border border-border/60 shadow-modal px-6 py-5">
+      <div className="rounded-xl border border-border/60 bg-surface/90 px-6 py-5 shadow-modal">
         <LoadingSpinner size="lg" />
       </div>
     </div>

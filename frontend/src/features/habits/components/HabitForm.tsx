@@ -108,7 +108,7 @@ function HabitForm({
           error={errors.target} // Use prop error
           required
         />
-        <p className="text-xs text-foreground mt-1">
+        <p className="mt-1 text-xs text-foreground">
           Set how many times you need to complete this habit to reach your goal
         </p>
       </div>
@@ -117,7 +117,7 @@ function HabitForm({
       <div>
         <label
           htmlFor="icon-button-group"
-          className="block text-sm font-medium text-foreground mb-1"
+          className="mb-1 block text-sm font-medium text-foreground"
         >
           Icon
         </label>
@@ -131,9 +131,9 @@ function HabitForm({
             <button
               key={key}
               type="button"
-              className={`p-3 rounded-lg flex items-center justify-center ${
+              className={`flex items-center justify-center rounded-lg p-3 ${
                 values.iconName === key
-                  ? `bg-${values.accentColor}-500/20 border border-${values.accentColor}-500/50`
+                  ? `bg-${values.accentColor}-500/20 border- border${values.accentColor}-500/50`
                   : "bg-surface/40 hover:bg-surface/60"
               }`}
               onClick={() => handleChange("iconName", key)}
@@ -157,7 +157,7 @@ function HabitForm({
       <div>
         <label
           htmlFor="color-button-group"
-          className="block text-sm font-medium text-foreground mb-1"
+          className="mb-1 block text-sm font-medium text-foreground"
         >
           Color
         </label>
@@ -171,9 +171,9 @@ function HabitForm({
             <button
               key={color.value}
               type="button"
-              className={`w-8 h-8 rounded-full ${color.class} ${
+              className={`h-8 w-8 rounded-full ${color.class} ${
                 values.accentColor === color.value
-                  ? "ring-2 ring-white ring-opacity-60"
+                  ? "ring-opacity-60 ring-2 ring-white"
                   : "opacity-70 hover:opacity-100"
               }`}
               onClick={() => handleChange("accentColor", color.value)}
@@ -186,14 +186,14 @@ function HabitForm({
 
       {/* Preview */}
       <div className="mt-4">
-        <p className="text-sm font-medium text-foreground mb-2">Preview</p>
-        <div className={"bg-surface/30 rounded-lg overflow-hidden"}>
+        <p className="mb-2 text-sm font-medium text-foreground">Preview</p>
+        <div className={"overflow-hidden rounded-lg bg-surface/30"}>
           <div
-            className={`bg-gradient-to-r from-${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
+            className={`from- bg-gradient-to-r${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
           >
-            <div className="flex items-center mb-2">
+            <div className="mb-2 flex items-center">
               <div
-                className={`p-1.5 rounded-lg text-${values.accentColor}-400 bg-${values.accentColor}-400/10 mr-2`}
+                className={`text- rounded-lg p-1.5${values.accentColor}-400 bg-${values.accentColor}-400/10 mr-2`}
               >
                 {selectedIcon}
               </div>
@@ -202,13 +202,13 @@ function HabitForm({
               </h4>
             </div>
 
-            <div className="flex items-center justify-between mb-1.5">
+            <div className="mb-1.5 flex items-center justify-between">
               <div className="flex items-baseline gap-1">
                 {/* Use currentProgress prop here */}
                 <span className="text-xl font-bold text-foreground">
                   {currentProgress}
                 </span>
-                <span className="text-foreground text-sm">
+                <span className="text-sm text-foreground">
                   / {values.target}
                 </span>
               </div>
@@ -218,9 +218,9 @@ function HabitForm({
               </span>
             </div>
 
-            <div className="w-full h-2 bg-surface/60 rounded-full overflow-hidden">
+            <div className="h-2 w-full overflow-hidden rounded-full bg-surface/60">
               <div
-                className={`h-full bg-${values.accentColor}-500 rounded-full`}
+                className={`bg- h-full${values.accentColor}-500 rounded-full`}
                 /* Use calculated preview percentage for width */
                 style={{ width: `${previewProgressPercentage}%` }}
               ></div>

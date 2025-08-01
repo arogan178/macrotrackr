@@ -110,7 +110,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <TextField
             id="calorie-search-input"
@@ -119,7 +119,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="w-5 h-5" />}
+            icon={<SearchIcon className="h-5 w-5" />}
             maxLength={50}
             error={error}
           />
@@ -129,7 +129,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             </div>
           )}
           {showResults && results.length > 0 && (
-            <div className="absolute z-10 bg-surface border border-border rounded shadow-surface mt-2 w-full max-h-64 overflow-y-auto">
+            <div className="absolute z-10 mt-2 max-h-64 w-full overflow-y-auto rounded border border-border bg-surface shadow-surface">
               {results
                 .filter(
                   (item) =>
@@ -169,7 +169,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
                     <button
                       key={index}
                       className={
-                        "w-full text-left px-4 py-2 bg-surface text-foreground hover:bg-surface focus:bg-surface focus:outline-none border-b border-border last:border-b-0"
+                        "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
                       }
                       onClick={() => handleSelect(item)}
                       type="button"
@@ -201,7 +201,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             isLoading={loading}
             disabled={loading || !query}
             text="Search"
-            icon={<ArrowRightIcon className="w-4 h-4 ml-1" />}
+            icon={<ArrowRightIcon className="ml-1 h-4 w-4" />}
             iconPosition="right"
             ariaLabel="Search for food"
             buttonSize="lg"

@@ -175,7 +175,7 @@ function MealTimeBreakdown({
               color: MEAL_COLORS[mealType].base,
             }))}
             formatter={(value) => (
-              <span className="text-foreground capitalize ml-1">{value}</span>
+              <span className="ml-1 text-foreground capitalize">{value}</span>
             )}
           />
 
@@ -215,7 +215,7 @@ const CustomTooltip = (
   const unit = getUnitForStat(selectedStat || "calories");
 
   return (
-    <div className="bg-surface border border-border rounded-md shadow-modal p-2 text-sm">
+    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
       <p className="font-medium text-foreground">{data.name}</p>
       <p className="text-foreground">
         <span className="font-medium">
@@ -226,12 +226,12 @@ const CustomTooltip = (
         <span className="ml-1 text-foreground">({data.percentage}%)</span>
       </p>
       {selectedStat !== "calories" && (
-        <p className="text-foreground text-xs mt-1">
+        <p className="mt-1 text-xs text-foreground">
           ~ {data.calories.toFixed(0)} kcal
         </p>
       )}
       {selectedStat !== "count" && (
-        <p className="text-foreground text-xs">
+        <p className="text-xs text-foreground">
           {data.count} meal{data.count === 1 ? "" : "s"}
         </p>
       )}

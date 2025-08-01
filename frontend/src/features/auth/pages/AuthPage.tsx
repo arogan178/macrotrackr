@@ -136,10 +136,10 @@ export default function AuthPage() {
     <QueryErrorBoundary>
       <ErrorBoundary>
         <div
-          className="auth-page min-h-screen flex items-center justify-center bg-background"
+          className="auth-page flex min-h-screen items-center justify-center bg-background"
           aria-label="Authentication page"
         >
-          <div className="w-full max-w-md relative z-10 px-4">
+          <div className="relative z-10 w-full max-w-md px-4">
             {/* Error notifications are now handled by individual components */}
 
             {/* Animated form container (login/register) */}

@@ -37,10 +37,10 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary mb-4 flex items-center justify-center shadow-primary shadow-primary/30">
-          <EmailIcon className="w-8 h-8 text-foreground" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary shadow-primary/30 shadow-primary">
+          <EmailIcon className="h-8 w-8 text-foreground" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+        <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent">
           Forgot Password
         </h1>
         <p className="mt-2 text-foreground">
@@ -66,7 +66,7 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           Send Reset Link
         </Button>
       </form>
-      <div className="text-right mt-4">
+      <div className="mt-4 text-right">
         <Button
           text="Back to Login"
           type="button"

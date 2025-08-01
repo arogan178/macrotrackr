@@ -34,8 +34,8 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-surface rounded-lg shadow-surface">
-      <h2 className="text-2xl font-bold mb-6 text-center">
+    <div className="mx-auto max-w-md rounded-lg bg-surface p-6 shadow-surface">
+      <h2 className="mb-6 text-center text-2xl font-bold">
         {mode === "login" ? "Login" : "Register"}
       </h2>
       <FloatingNotification

@@ -27,9 +27,9 @@ function WeightProgressTabs() {
   const handleBulkConfirm = () => setIsBulkConfirmModalOpen(false); // Will be handled in WeightLogList
 
   return (
-    <div className="bg-surface/40 backdrop-blur-sm rounded-xl border border-border/50 shadow-primary overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-border/50 bg-surface/40 shadow-primary backdrop-blur-sm">
       {/* Tab Navigation + Delete All Button */}
-      <div className="flex border-b border-border/50 pl-1 pr-8 pt-3 items-center">
+      <div className="flex items-center border-b border-border/50 pt-3 pr-8 pl-1">
         <div className="flex">
           {tabs.map((tab) => (
             <button
@@ -41,11 +41,11 @@ function WeightProgressTabs() {
                   : "text-foreground hover:text-foreground"
               }`}
             >
-              <tab.icon className="h-5 w-5 mr-2" />
+              <tab.icon className="mr-2 h-5 w-5" />
               {tab.label}
               {activeTab === tab.id && (
                 <motion.div
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                  className="absolute right-0 bottom-0 left-0 h-0.5 bg-primary"
                   layoutId="underline" // Animate the underline
                   transition={{ type: "spring", stiffness: 350, damping: 30 }}
                 />
@@ -70,7 +70,7 @@ function WeightProgressTabs() {
       </div>
 
       {/* Tab Content Area */}
-      <div className="px-6 py-3 relative">
+      <div className="relative px-6 py-3">
         {" "}
         {/* Added relative positioning for AnimatePresence */}
         <AnimatePresence mode="wait">

@@ -106,16 +106,16 @@ const BillingForm: React.FC = () => {
     <>
       <CardContainer className="p-6 sm:p-8">
         {/* Enhanced responsive header with improved mobile layout */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
+        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
-            <div className="p-3 bg-gradient-to-br from-yellow-400/20 to-yellow-500/20 rounded-xl mr-4">
-              <AwardIcon className="w-7 h-7 text-warning flex-shrink-0" />
+            <div className="mr-4 rounded-xl bg-gradient-to-br from-yellow-400/20 to-yellow-500/20 p-3">
+              <AwardIcon className="h-7 w-7 flex-shrink-0 text-warning" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold text-foreground truncate">
+              <h3 className="truncate text-xl font-bold text-foreground">
                 Subscription Plan
               </h3>
-              <p className="text-sm text-foreground mt-1">
+              <p className="mt-1 text-sm text-foreground">
                 {isPro
                   ? "Pro features active • Full access"
                   : "Basic plan • Upgrade available"}
@@ -123,10 +123,10 @@ const BillingForm: React.FC = () => {
             </div>
           </div>
           <div
-            className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 self-start sm:self-auto ${
+            className={`self-start rounded-full px-4 py-2 text-sm font-semibold transition-all duration-200 sm:self-auto ${
               isPro
-                ? "bg-gradient-to-r from-yellow-400/25 to-yellow-500/25 border border-yellow-400/40 text-warning shadow-primary"
-                : "bg-gradient-to-r from-gray-600/25 to-gray-700/25 border border-border/40 text-foreground"
+                ? "border border-yellow-400/40 bg-gradient-to-r from-yellow-400/25 to-yellow-500/25 text-warning shadow-primary"
+                : "border border-border/40 bg-gradient-to-r from-gray-600/25 to-gray-700/25 text-foreground"
             }`}
             role="status"
             aria-label={`Current plan: ${isPro ? "Pro" : "Free"}`}

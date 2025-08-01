@@ -93,7 +93,7 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <div className="flex items-center gap-2 font-semibold text-foreground text-sm">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <motion.div
                     key={`chevron-${data.date}`}
                     initial={false}
@@ -102,7 +102,7 @@ const DesktopEntryTable = memo(
                     }}
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
-                    <ChevronDownIcon className="w-4 h-4 " />
+                    <ChevronDownIcon className="h-4 w-4 " />
                   </motion.div>
                   {formatDate(data.date)}
                 </div>
@@ -110,7 +110,7 @@ const DesktopEntryTable = memo(
             } else {
               const entry = data.entries[0];
               return (
-                <div className="pl-11 text-sm text-foreground whitespace-nowrap">
+                <div className="pl-11 text-sm whitespace-nowrap text-foreground">
                   {formatTimeFromEntry(entry)}
                 </div>
               );
@@ -125,12 +125,12 @@ const DesktopEntryTable = memo(
 
             const entry = data.entries[0];
             return (
-              <div className="text-sm text-foreground text-center">
+              <div className="text-center text-sm text-foreground">
                 <span className="font-medium text-muted">
                   {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
                 </span>
                 {(entry.foodName || entry.mealName) && (
-                  <span className="text-foreground block text-xs mt-0.5">
+                  <span className="mt-0.5 block text-xs text-foreground">
                     {entry.foodName || entry.mealName}
                   </span>
                 )}
@@ -141,7 +141,7 @@ const DesktopEntryTable = memo(
         columnHelper.accessor("totals.protein", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="w-2 h-2 bg-protein rounded-full"></div>
+              <div className="h-2 w-2 rounded-full bg-protein"></div>
               Protein
             </div>
           ),
@@ -156,7 +156,7 @@ const DesktopEntryTable = memo(
         columnHelper.accessor("totals.carbs", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="w-2 h-2 bg-carbs rounded-full"></div>
+              <div className="h-2 w-2 rounded-full bg-carbs"></div>
               Carbs
             </div>
           ),
@@ -171,7 +171,7 @@ const DesktopEntryTable = memo(
         columnHelper.accessor("totals.fats", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="w-2 h-2 bg-fats rounded-full"></div>
+              <div className="h-2 w-2 rounded-full bg-fats"></div>
               Fats
             </div>
           ),
@@ -259,7 +259,7 @@ const DesktopEntryTable = memo(
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-center text-xs font-medium text-foreground uppercase tracking-wider border-b border-border/50"
+                      className="border-b border-border/50 px-4 py-3 text-center text-xs font-medium tracking-wider text-foreground uppercase"
                       style={{ width: "14.285%" }}
                     >
                       {header.isPlaceholder
@@ -299,8 +299,8 @@ const DesktopEntryTable = memo(
                       key={animationKey}
                       className={
                         isGroup
-                          ? "bg-primary/10 border-t border-b border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors group"
-                          : "border-b border-border/30 hover:bg-surface/20 transition-colors"
+                          ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/10 transition-colors hover:bg-primary/20"
+                          : "border-b border-border/30 transition-colors hover:bg-surface/20"
                       }
                       onClick={
                         isGroup
