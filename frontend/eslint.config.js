@@ -29,13 +29,12 @@ function getTanStackRouterRules() {
 }
 
 export default [
-  // PascalCase for components
+  // PascalCase for components (include top-level AppRouter)
   {
     files: [
       "src/components/**/*.{js,jsx,ts,tsx}",
       "src/pages/**/*.{js,jsx,ts,tsx}",
-      // Removed hooks here to avoid overlap with camelCase override
-      "src/lib/**/*.{js,jsx,ts,tsx}",
+      "src/AppRouter.tsx",
       "src/features/**/components/**/*.{js,jsx,ts,tsx}",
       "src/features/**/pages/**/*.{js,jsx,ts,tsx}",
     ],
@@ -49,19 +48,20 @@ export default [
       ],
     },
   },
-  // camelCase for utils, types, store, and hooks
+
+  // camelCase for utils, types, store, hooks, and lib
   {
     files: [
-      "src/utils/**/*.{js,ts}",
-      "src/types/**/*.{js,ts}",
+      "src/utils/**/*.{js,ts,tsx}",
+      "src/types/**/*.{js,ts,tsx}",
       "src/hooks/**/*.{js,ts,tsx}",
       "src/loaders/**/*.{js,ts,tsx}",
       "src/constants/**/*.{js,ts,tsx}",
+      "src/lib/**/*.{js,ts,tsx}",
       "src/features/**/hooks/**/*.{js,ts,tsx}",
       "src/features/**/types/**/*.{js,ts,tsx}",
       "src/features/**/utils/**/*.{js,ts,tsx}",
       "src/features/**/constants/**/*.{js,ts,tsx}",
-      "src/appRouter.tsx",
     ],
     rules: {
       "unicorn/filename-case": [
@@ -88,6 +88,7 @@ export default [
   // Main config for all files
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    ignores: ["src/routeTree.gen.ts"],
     languageOptions: {
       globals: globals.browser,
       parser: tseslint.parser,
@@ -132,6 +133,7 @@ export default [
       "import/no-duplicates": "error",
 
       "unicorn/better-regex": "warn",
+      "unicorn/no-null": "warn",
       "react/no-unescaped-entities": "off",
 
       // Remove unicorn/filename-case here, handled by overrides above
@@ -173,6 +175,20 @@ export default [
         callees: ["cn", "clsx", "classnames"],
         removeDuplicates: true,
       },
+    },
+  },
+
+  // Tests override: disable typed linting and prop-types in TS tests
+  {
+    files: ["src/**/*.test.{ts,tsx}", "src/**/__tests__/**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      "react/prop-types": "off",
     },
   },
 
