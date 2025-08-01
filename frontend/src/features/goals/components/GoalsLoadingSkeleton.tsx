@@ -3,8 +3,8 @@ export default function GoalsLoadingSkeleton() {
     <div className="animate-pulse">
       {/* Title and subtitle */}
       <div className="mb-6">
-        <div className="h-8 w-1/3 bg-surface rounded mb-2" />
-        <div className="h-4 w-1/4 bg-surface rounded" />
+        <div className="mb-2 h-8 w-1/3 rounded bg-surface" />
+        <div className="h-4 w-1/4 rounded bg-surface" />
       </div>
 
       {/* Summary cards */}
@@ -13,26 +13,26 @@ export default function GoalsLoadingSkeleton() {
           {[1, 2, 3, 4].map((index) => (
             <div
               key={index}
-              className="flex-1 min-w-[120px] h-24 bg-surface/40 rounded-2xl"
+              className="h-24 min-w-[120px] flex-1 rounded-2xl bg-surface/40"
             />
           ))}
         </div>
       </div>
 
       {/* Main content grids (e.g., progress, habits) */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="h-56 bg-surface/40 rounded-2xl" />
-        <div className="h-56 bg-surface/40 rounded-2xl" />
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="h-56 rounded-2xl bg-surface/40" />
+        <div className="h-56 rounded-2xl bg-surface/40" />
       </div>
 
       {/* Additional charts or sections if needed */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-        <div className="h-80 bg-surface/40 rounded-2xl" />
-        <div className="h-80 bg-surface/40 rounded-2xl" />
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <div className="h-80 rounded-2xl bg-surface/40" />
+        <div className="h-80 rounded-2xl bg-surface/40" />
       </div>
 
       {/* Final section (e.g., insights, actions) */}
-      <div className="h-40 bg-surface/40 rounded-2xl mb-6" />
+      <div className="mb-6 h-40 rounded-2xl bg-surface/40" />
     </div>
   );
 }

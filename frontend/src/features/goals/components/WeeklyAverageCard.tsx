@@ -99,8 +99,8 @@ function WeeklyAverageCard({ weightLog, isLoading }: WeeklyAverageCardProps) {
 
     return (
       <div className="flex items-center">
-        {isLoss && <TrendingDownIcon className="w-5 h-5 text-primary mr-2" />}
-        {isGain && <TrendingUpIcon className="w-5 h-5 text-success mr-2" />}
+        {isLoss && <TrendingDownIcon className="mr-2 h-5 w-5 text-primary" />}
+        {isGain && <TrendingUpIcon className="mr-2 h-5 w-5 text-success" />}
         <span
           className={`text-lg font-semibold ${
             isLoss
@@ -118,7 +118,7 @@ function WeeklyAverageCard({ weightLog, isLoading }: WeeklyAverageCardProps) {
 
   return (
     <CardContainer>
-      <h3 className="text-sm font-medium text-foreground mb-2">
+      <h3 className="mb-2 text-sm font-medium text-foreground">
         Weekly Average
       </h3>
       {renderContent()}

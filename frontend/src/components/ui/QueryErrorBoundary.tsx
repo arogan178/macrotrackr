@@ -38,14 +38,14 @@ class QueryErrorBoundaryInner extends Component<
       }
 
       return (
-        <div className="min-h-[200px] flex items-center justify-center p-4">
-          <div className="bg-surface p-6 rounded-xl shadow-primary max-w-md w-full border border-border">
-            <div className="text-vibrant-accent mb-4">
-              <WarningIcon className="w-8 h-8 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-center text-foreground mb-2">
+        <div className="flex min-h-[200px] items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-primary">
+            <div className="mb-4 text-vibrant-accent">
+              <WarningIcon className="mx-auto mb-3 h-8 w-8" />
+              <h3 className="mb-2 text-center text-lg font-semibold text-foreground">
                 Data Loading Error
               </h3>
-              <p className="text-center text-foreground text-sm mb-4">
+              <p className="mb-4 text-center text-sm text-foreground">
                 {getErrorMessage(this.state.error)}
               </p>
             </div>
@@ -58,7 +58,7 @@ class QueryErrorBoundaryInner extends Component<
                 }}
                 ariaLabel="Try again"
                 variant="primary"
-                className="px-4 py-2 bg-primary hover:bg-primary text-foreground rounded-lg font-medium transition-colors duration-200"
+                className="rounded-lg bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
               >
                 Try Again
               </Button>
@@ -66,7 +66,7 @@ class QueryErrorBoundaryInner extends Component<
                 onClick={() => globalThis.location.reload()}
                 ariaLabel="Reload page"
                 variant="secondary"
-                className="px-4 py-2 bg-surface hover:bg-surface text-foreground rounded-lg font-medium transition-colors duration-200"
+                className="rounded-lg bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
               >
                 Reload Page
               </Button>

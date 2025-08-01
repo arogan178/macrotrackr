@@ -10,8 +10,8 @@ import {
 import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
 
@@ -51,7 +51,7 @@ const PrivacyPolicyPage = React.lazy(
 // Fallback component to show while loading
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-surface flex justify-center items-center">
+    <div className="flex min-h-screen items-center justify-center bg-surface">
       <LoadingSpinner size="lg" />
     </div>
   );
@@ -210,7 +210,7 @@ export const homeRoute = createRoute({
     if (weightGoals) {
       const latestWeight =
         weightLog.length > 0
-          ? weightLog[weightLog.length - 1].weight
+          ? weightLog.at(-1).weight
           : weightGoals.startingWeight;
 
       transformedWeightGoals = {
@@ -339,7 +339,7 @@ export const goalsRoute = createRoute({
     if (weightGoals) {
       const latestWeight =
         weightLog.length > 0
-          ? weightLog[weightLog.length - 1].weight
+          ? weightLog.at(-1).weight
           : weightGoals.startingWeight;
 
       transformedWeightGoals = {
@@ -395,8 +395,8 @@ export const reportingRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
-  loader: async (ctx) => {
-    const { deps, context } = ctx as typeof ctx & {
+  loader: async (context_) => {
+    const { deps, context } = context_ as typeof context_ & {
       deps: { startDate?: string; endDate?: string };
       context: { queryClient: typeof queryClient };
     };

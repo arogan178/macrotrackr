@@ -25,7 +25,7 @@ function ProgressBar({
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`w-full ${PROGRESS_BAR_HEIGHTS[height]} bg-surface/50 rounded-full overflow-hidden`}
+        className={`w-full ${PROGRESS_BAR_HEIGHTS[height]} overflow-hidden rounded-full bg-surface/50`}
       >
         <div
           className={`${PROGRESS_BAR_HEIGHTS[height]} ${
@@ -36,7 +36,7 @@ function ProgressBar({
       </div>
 
       {showPercentage && (
-        <div className="absolute right-0 top-0 transform -translate-y-full -translate-x-1 text-xs text-foreground">
+        <div className="absolute top-0 right-0 -translate-x-1 -translate-y-full transform text-xs text-foreground">
           {Math.round(safeProgress)}%
         </div>
       )}

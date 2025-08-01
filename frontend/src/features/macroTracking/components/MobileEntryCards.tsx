@@ -51,7 +51,7 @@ const EntryCard = memo(
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
   }) => (
     <motion.div
-      className="bg-surface rounded-lg p-4 "
+      className="rounded-lg bg-surface p-4 "
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -59,12 +59,12 @@ const EntryCard = memo(
       layout
       whileHover={{ scale: 1.02 }}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-foreground text-sm font-medium">
+          <span className="text-sm font-medium text-foreground">
             {formatTimeFromEntry(entry)}
           </span>
-          <span className="text-foreground font-medium text-sm">
+          <span className="text-sm font-medium text-foreground">
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
@@ -82,7 +82,7 @@ const EntryCard = memo(
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <span className="text-foreground text-sm">
+          <span className="text-sm text-foreground">
             {entry.foodName || entry.mealName}
           </span>
         </motion.div>
@@ -101,24 +101,24 @@ const EntryCard = memo(
         ].map((macro, index) => (
           <motion.div
             key={macro.label}
-            className="flex items-center justify-between bg-surface/50 rounded-lg p-3"
+            className="flex items-center justify-between rounded-lg bg-surface/50 p-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 * index }}
             whileHover={{ scale: 1.05 }}
           >
-            <span className="text-foreground text-sm">{macro.label}</span>
+            <span className="text-sm text-foreground">{macro.label}</span>
             <MacroCell value={macro.value} suffix="g" color={macro.color} />
           </motion.div>
         ))}
         <motion.div
-          className="flex items-center justify-between bg-surface/50 rounded-lg p-3 col-span-3"
+          className="col-span-3 flex items-center justify-between rounded-lg bg-surface/50 p-3"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           whileHover={{ scale: 1.05 }}
         >
-          <span className="text-foreground text-sm">Calories</span>
+          <span className="text-sm text-foreground">Calories</span>
           <MacroCell
             value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
             suffix=" kcal"
@@ -163,7 +163,7 @@ const MobileEntryCards = memo(
           >
             {/* Date Header */}
             <motion.div
-              className="flex items-center justify-between p-4 bg-primary/10 border-b border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors"
+              className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/10 p-4 transition-colors hover:bg-primary/20"
               onClick={() => toggleDateCollapse(group.date)}
               whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
               transition={{ duration: 0.2 }}
@@ -175,25 +175,25 @@ const MobileEntryCards = memo(
                   }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
-                  <ChevronDownIcon className="w-5 h-5 text-foreground" />
+                  <ChevronDownIcon className="h-5 w-5 text-foreground" />
                 </motion.div>
-                <h3 className="font-semibold text-foreground text-base">
+                <h3 className="text-base font-semibold text-foreground">
                   {formatDate(group.date)}
                 </h3>
               </div>
 
               {/* Date Totals */}
               <div className="flex items-center gap-4 text-xs">
-                <span className="text-protein font-medium">
+                <span className="font-medium text-protein">
                   {group.totals.protein}g P
                 </span>
-                <span className="text-carbs font-medium">
+                <span className="font-medium text-carbs">
                   {group.totals.carbs}g C
                 </span>
-                <span className="text-fats font-medium">
+                <span className="font-medium text-fats">
                   {group.totals.fats}g F
                 </span>
-                <span className="text-vibrant-accent font-medium">
+                <span className="font-medium text-vibrant-accent">
                   {group.totals.calories} kcal
                 </span>
                 <IconButton
@@ -285,7 +285,7 @@ const MobileEntryCards = memo(
               >
                 {/* Date Header */}
                 <motion.div
-                  className="flex items-center justify-between p-4 bg-primary/10 border-b border-primary/20 cursor-pointer hover:bg-primary/20 transition-colors"
+                  className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/10 p-4 transition-colors hover:bg-primary/20"
                   onClick={() => toggleDateCollapse(group.date)}
                   whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
                   transition={{ duration: 0.2 }}
@@ -299,25 +299,25 @@ const MobileEntryCards = memo(
                       }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                     >
-                      <ChevronDownIcon className="w-5 h-5 text-primary" />
+                      <ChevronDownIcon className="h-5 w-5 text-primary" />
                     </motion.div>
-                    <h3 className="font-semibold text-primary text-base">
+                    <h3 className="text-base font-semibold text-primary">
                       {formatDate(group.date)}
                     </h3>
                   </div>
 
                   {/* Date Totals */}
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="text-protein font-medium">
+                    <span className="font-medium text-protein">
                       {group.totals.protein}g P
                     </span>
-                    <span className="text-carbs font-medium">
+                    <span className="font-medium text-carbs">
                       {group.totals.carbs}g C
                     </span>
-                    <span className="text-fats font-medium">
+                    <span className="font-medium text-fats">
                       {group.totals.fats}g F
                     </span>
-                    <span className="text-vibrant-accent font-medium">
+                    <span className="font-medium text-vibrant-accent">
                       {group.totals.calories} kcal
                     </span>
                     <IconButton
