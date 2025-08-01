@@ -48,12 +48,12 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warning">
           <AwardIcon className="h-6 w-6 text-warning" />
         </div>
-        <p className="text-foreground mb-4">{description}</p>
+        <p className="mb-4 text-foreground">{description}</p>
 
         <ul className="space-y-2">
           {proFeatures.map((feature) => (
             <li key={feature} className="flex items-center">
-              <CheckCircleIcon className="h-5 w-5 text-success mr-2 flex-shrink-0" />
+              <CheckCircleIcon className="mr-2 h-5 w-5 flex-shrink-0 text-success" />
               <span className="text-foreground">{feature}</span>
             </li>
           ))}

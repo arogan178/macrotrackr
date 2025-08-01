@@ -92,23 +92,23 @@ const MacroDensityBreakdown = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="bg-surface/70 rounded-xl border border-border/30 p-3 shadow-primary flex flex-col"
+      className="flex flex-col rounded-xl border border-border/30 bg-surface/70 p-3 shadow-primary"
     >
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <h3 className="text-base font-semibold text-foreground">
           Macro Distribution
         </h3>
       </div>
       <div className="h-[300px]">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-pulse text-foreground text-sm">
+          <div className="flex h-full items-center justify-center">
+            <div className="animate-pulse text-sm text-foreground">
               Loading macro distribution...
             </div>
           </div>
         ) : showNoData ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="text-warning text-sm">
+          <div className="flex h-full items-center justify-center">
+            <div className="text-sm text-warning">
               No macro data available for this period.
             </div>
           </div>
@@ -159,7 +159,7 @@ const MacroDensityBreakdown = ({
                   color: MACRO_COLORS[macro].base,
                 }))}
                 formatter={(value) => (
-                  <span className="text-foreground capitalize ml-1">
+                  <span className="ml-1 text-foreground capitalize">
                     {value}
                   </span>
                 )}
@@ -208,25 +208,25 @@ const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
   if (!active || !payload || payload.length === 0) return;
   const data = payload[0].payload as CustomTooltipPayload;
   return (
-    <div className="bg-surface border border-border rounded-md shadow-modal p-2 text-sm">
-      <p className="font-medium text-foreground mb-1">{data.period}</p>
+    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
+      <p className="mb-1 font-medium text-foreground">{data.period}</p>
       <div className="space-y-0.5">
         <p className="text-success">
-          <span className="inline-block w-3 h-3 rounded-full bg-success mr-2" />
+          <span className="mr-2 inline-block h-3 w-3 rounded-full bg-success" />
           <span className="font-medium">
             {(data.protein * 100).toFixed(0)}%
           </span>
         </p>
         <p className="text-primary">
-          <span className="inline-block w-3 h-3 rounded-full bg-primary mr-2" />
+          <span className="mr-2 inline-block h-3 w-3 rounded-full bg-primary" />
           <span className="font-medium">{(data.carbs * 100).toFixed(0)}%</span>
         </p>
         <p className="text-vibrant-accent">
-          <span className="inline-block w-3 h-3 rounded-full bg-vibrant-accent mr-2" />
+          <span className="mr-2 inline-block h-3 w-3 rounded-full bg-vibrant-accent" />
           <span className="font-medium">{(data.fats * 100).toFixed(0)}%</span>
         </p>
       </div>
-      <p className="text-foreground text-xs mt-1 pt-1 border-t border-border">
+      <p className="mt-1 border-t border-border pt-1 text-xs text-foreground">
         {Math.round(data.calories)} calories
       </p>
     </div>

@@ -5,10 +5,10 @@ import { BackIcon, Button } from "@/components/ui";
 
 const PrivacyPolicyPage: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground relative overflow-hidden">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       <header className="border-b border-border bg-surface">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between py-6">
             <Link to="/" className="flex items-center" aria-label="Home">
               <h1 className="text-3xl font-bold text-foreground">
                 MacroTrackr
@@ -28,21 +28,21 @@ const PrivacyPolicyPage: React.FC = () => {
         </div>
       </header>
 
-      <main className="relative z-10 py-12 px-4 sm:px-6 lg:px-8">
+      <main className="relative z-10 px-4 py-12 sm:px-6 lg:px-8">
         <section>
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-surface backdrop-blur-sm border border-border/50 rounded-2xl p-8 lg:p-10 shadow-primary">
-              <h1 className="text-4xl font-bold text-foreground mb-6">
+          <div className="mx-auto max-w-4xl">
+            <div className="rounded-2xl border border-border/50 bg-surface p-8 shadow-primary backdrop-blur-sm lg:p-10">
+              <h1 className="mb-6 text-4xl font-bold text-foreground">
                 Privacy Policy
               </h1>
 
-              <p className="text-sm text-foreground/80 mb-8">
+              <p className="mb-8 text-sm text-foreground/80">
                 <strong>Last updated:</strong> {new Date().toLocaleDateString()}
               </p>
 
               <div className="prose prose-lg prose-invert max-w-none">
                 <section className="mb-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Information We Collect
                   </h2>
                   <p>
@@ -50,7 +50,7 @@ const PrivacyPolicyPage: React.FC = () => {
                     when you create an account, log nutrition data, or contact
                     us for support.
                   </p>
-                  <ul className="list-disc list-inside ml-4 space-y-2">
+                  <ul className="ml-4 list-inside list-disc space-y-2">
                     <li>Account information (email, password)</li>
                     <li>Nutrition tracking data (meals, macros, goals)</li>
                     <li>Usage information and preferences</li>
@@ -58,11 +58,11 @@ const PrivacyPolicyPage: React.FC = () => {
                 </section>
 
                 <section className="mb-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     How We Use Your Information
                   </h2>
                   <p>We use the information we collect to:</p>
-                  <ul className="list-disc list-inside ml-4 space-y-2">
+                  <ul className="ml-4 list-inside list-disc space-y-2">
                     <li>Provide and maintain our service</li>
                     <li>Track your nutrition goals and progress</li>
                     <li>Send you important service notifications</li>
@@ -71,7 +71,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 </section>
 
                 <section className="mb-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Data Security
                   </h2>
                   <p>
@@ -82,7 +82,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 </section>
 
                 <section className="mb-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Data Retention
                   </h2>
                   <p>
@@ -93,11 +93,11 @@ const PrivacyPolicyPage: React.FC = () => {
                 </section>
 
                 <section className="mb-8">
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Your Rights
                   </h2>
                   <p>You have the right to:</p>
-                  <ul className="list-disc list-inside ml-4 space-y-2">
+                  <ul className="ml-4 list-inside list-disc space-y-2">
                     <li>Access your personal data</li>
                     <li>Correct inaccurate data</li>
                     <li>Delete your account and data</li>
@@ -106,7 +106,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 </section>
 
                 <section className="mb-2">
-                  <h2 className="text-2xl font-semibold text-foreground mb-3">
+                  <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Contact Us
                   </h2>
                   <p>
@@ -114,7 +114,7 @@ const PrivacyPolicyPage: React.FC = () => {
                     contact us at{" "}
                     <a
                       href="mailto:contact@macrotrackr.com"
-                      className="text-primary hover:text-primary underline underline-offset-4"
+                      className="text-primary underline underline-offset-4 hover:text-primary"
                     >
                       contact@macrotrackr.com
                     </a>

@@ -63,7 +63,7 @@ export default function MacroSlider({
     <div className="space-y-3">
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
-          <div className={`w-2 h-2 rounded-full ${bg}`}></div>
+          <div className={`h-2 w-2 rounded-full ${bg}`}></div>
           <span className="text-sm text-muted">{name}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -74,27 +74,27 @@ export default function MacroSlider({
               ariaLabel={isLocked ? `Unlock ${name}` : `Lock ${name}`}
               icon={
                 isLocked ? (
-                  <LockIcon className={`w-3.5 h-3.5 ${iconColor}`} />
+                  <LockIcon className={`h-3.5 w-3.5 ${iconColor}`} />
                 ) : (
-                  <UnlockIcon className="w-3.5 h-3.5 text-muted" />
+                  <UnlockIcon className="h-3.5 w-3.5 text-muted" />
                 )
               }
-              className="p-1.5 rounded-full"
+              className="rounded-full p-1.5"
               buttonSize="sm"
               disabled={disabled}
             />
           )}
           <AnimatedNumber
             value={value}
-            className="text-sm font-medium text-muted w-8 text-right"
+            className="w-8 text-right text-sm font-medium text-muted"
             suffix="%"
           />
         </div>
       </div>
 
-      <div className="relative h-4 flex items-center">
+      <div className="relative flex h-4 items-center">
         {/* Background Track */}
-        <div className="absolute w-full h-2 bg-surface/80 rounded-lg" />
+        <div className="absolute h-2 w-full rounded-lg bg-surface/80" />
         {/* Filled Track */}
         <div
           className={`absolute h-2 ${bg} rounded-lg`}
@@ -109,24 +109,24 @@ export default function MacroSlider({
           value={value}
           onChange={handleChange}
           disabled={disabled || (isLocked && !disabled)}
-          className={`relative w-full h-4 bg-transparent appearance-none cursor-pointer
-                    focus:outline-none
-                    [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:w-4 
-                    [&::-webkit-slider-thumb]:h-4 
-                    [&::-webkit-slider-thumb]:${bg} 
-                    [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:cursor-pointer
-                    [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:h-4
-                    [&::-moz-range-thumb]:${bg} [&::-moz-range-thumb]:rounded-full
-                    [&::-moz-range-thumb]:border-none [&::-moz-range-thumb]:cursor-pointer
-                    [&::-webkit-slider-runnable-track]:bg-transparent
+          className={`[&::-webkit-slider-thumb]: relative h-4 w-full cursor-pointer appearance-none
+                    bg-transparent
+                    focus:outline-none [&::-webkit-slider-thumb]:h-4 
+                    [&::-webkit-slider-thumb]:w-4 
+                    [&::-webkit-slider-thumb]:appearance-none${bg} 
+                    [&::-moz-range-thumb]: [&::-moz-range-thumb]:h-4
+                    [&::-moz-range-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer
+                    [&::-webkit-slider-thumb]:rounded-full${bg} [&::-moz-range-thumb]:cursor-pointer
+                    [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-none
                     [&::-moz-range-track]:bg-transparent
+                    [&::-webkit-slider-runnable-track]:bg-transparent
                     ${disabled || (isLocked && !disabled) ? "opacity-50" : ""}`}
         />
       </div>
 
-      <div className="flex justify-between items-center">
+      <div className="flex items-center justify-between">
         <span className="text-xs text-muted">{min}%</span>
-        <span className="text-xs text-muted max-w-[180px] text-center h-4">
+        <span className="h-4 max-w-[180px] text-center text-xs text-muted">
           {recommendationText}
         </span>
         <span className="text-xs text-muted">{max}%</span>
@@ -177,13 +177,13 @@ export function MacroBadge({
   const { border, iconColor } = badgeColorProps;
 
   return (
-    <div className={`bg-background/50 rounded-lg p-3 border ${border}`}>
+    <div className={`rounded-lg border bg-background/50 p-3 ${border}`}>
       <div className="flex items-center gap-1.5">
-        <div className={`w-2 h-2 rounded-full bg-${color}`}></div>
+        <div className={`bg- h-2 w-2 rounded-full${color}`}></div>
         <span className="text-xs text-muted">{name}</span>
-        {isLocked && <LockIcon className={`w-3 h-3 ${iconColor}`} />}
+        {isLocked && <LockIcon className={`h-3 w-3 ${iconColor}`} />}
       </div>{" "}
-      <div className="mt-1 text-lg font-semibold text-muted w-12">
+      <div className="mt-1 w-12 text-lg font-semibold text-muted">
         <AnimatedNumber value={value} suffix="%" />
       </div>
     </div>

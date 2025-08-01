@@ -110,10 +110,10 @@ export default function ReportingPage() {
                 {!isHistoryLoading &&
                   history?.length === 0 &&
                   dataProcessed && (
-                    <div className="mb-6 text-warning bg-warning/30 p-4 rounded-lg border border-yellow-800/30 shadow-primary">
+                    <div className="mb-6 rounded-lg border border-yellow-800/30 bg-warning/30 p-4 text-warning shadow-primary">
                       <div className="flex items-center">
                         <svg
-                          className="h-5 w-5 mr-2 text-warning"
+                          className="mr-2 h-5 w-5 text-warning"
                           fill="none"
                           stroke="currentColor"
                           viewBox="0 0 24 24"
@@ -157,7 +157,7 @@ export default function ReportingPage() {
                   );
                 })()}
                 {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <div className="order-2 md:order-1">
                     {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
                     {(() => {
@@ -183,13 +183,13 @@ export default function ReportingPage() {
                   </div>
                 </div>
                 {/* Charts */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                   <ProFeature>
                     <motion.div
                       layout
-                      className="bg-surface/70 rounded-xl border border-border/50 p-4 shadow-modal"
+                      className="rounded-xl border border-border/50 bg-surface/70 p-4 shadow-modal"
                     >
-                      <h2 className="text-lg font-semibold text-foreground mb-6">
+                      <h2 className="mb-6 text-lg font-semibold text-foreground">
                         Calorie Intake
                       </h2>
                       <div className="h-80 ">
@@ -205,9 +205,9 @@ export default function ReportingPage() {
                   <ProFeature>
                     <motion.div
                       layout
-                      className="bg-surface/70 rounded-xl border border-border/50 p-4 shadow-modal"
+                      className="rounded-xl border border-border/50 bg-surface/70 p-4 shadow-modal"
                     >
-                      <h2 className="text-lg font-semibold text-foreground mb-6">
+                      <h2 className="mb-6 text-lg font-semibold text-foreground">
                         Macronutrient Intake
                       </h2>
                       <div className="h-80">

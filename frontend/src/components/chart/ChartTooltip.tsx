@@ -32,7 +32,7 @@ function ChartTooltip({
   const unit = getUnitForStat(selectedStat);
 
   return (
-    <div className="bg-surface border border-border rounded-md shadow-modal p-2 text-sm">
+    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
       <p className="font-medium text-foreground">{data.name}</p>{" "}
       <p className="text-foreground">
         <span className="font-medium">
@@ -52,7 +52,7 @@ function ChartTooltip({
       </p>
       {/* Show calories if not already displayed */}{" "}
       {selectedStat !== "calories" && typeof data.calories === "number" && (
-        <p className="text-foreground text-xs mt-1">
+        <p className="mt-1 text-xs text-foreground">
           ~{" "}
           <AnimatedNumber
             value={data.calories}
@@ -63,7 +63,7 @@ function ChartTooltip({
       )}
       {/* Show count if available and not the selected stat */}{" "}
       {selectedStat !== "count" && typeof data.count === "number" && (
-        <p className="text-foreground text-xs">
+        <p className="text-xs text-foreground">
           <AnimatedNumber value={data.count} />{" "}
           {data.count === 1 ? "item" : "items"}
         </p>

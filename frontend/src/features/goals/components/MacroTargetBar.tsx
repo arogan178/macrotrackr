@@ -12,7 +12,7 @@ interface MacroTargetBarProps {
 function MacroTargetBar({ target, className = "" }: MacroTargetBarProps) {
   return (
     <div
-      className={`relative h-2 rounded-full overflow-hidden bg-surface/30 ${className}`}
+      className={`relative h-2 overflow-hidden rounded-full bg-surface/30 ${className}`}
     >
       <div
         className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein to-protein/80"

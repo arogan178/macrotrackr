@@ -81,7 +81,7 @@ function Button({
     if (finalIsLoading) {
       return (
         <span className="flex items-center justify-center">
-          <LoadingSpinnerIcon className="w-4 h-4 mr-2 animate-spin" />
+          <LoadingSpinnerIcon className="mr-2 h-4 w-4 animate-spin" />
           <span>{loadingText}</span>
         </span>
       );

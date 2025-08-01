@@ -25,17 +25,17 @@ const FinalCtaSection = React.lazy(
  */
 function ThemedFallback() {
   return (
-    <div className="w-full py-16 flex items-center justify-center">
-      <div className="relative overflow-hidden bg-background border border-border/50 rounded-2xl px-8 py-10 shadow-lg shadow-black/5">
-        <div className="h-6 w-56 mb-6 rounded bg-muted/40 animate-pulse" />
-        <div className="h-4 w-80 mb-3 rounded bg-muted/30 animate-pulse" />
-        <div className="h-4 w-64 mb-8 rounded bg-muted/30 animate-pulse" />
+    <div className="flex w-full items-center justify-center py-16">
+      <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-background px-8 py-10 shadow-lg shadow-black/5">
+        <div className="mb-6 h-6 w-56 animate-pulse rounded bg-muted/40" />
+        <div className="mb-3 h-4 w-80 animate-pulse rounded bg-muted/30" />
+        <div className="mb-8 h-4 w-64 animate-pulse rounded bg-muted/30" />
         <div className="flex items-center gap-3">
-          <div className="h-10 w-28 rounded-md bg-primary/20 animate-pulse" />
-          <div className="h-10 w-28 rounded-md bg-muted/30 animate-pulse" />
+          <div className="h-10 w-28 animate-pulse rounded-md bg-primary/20" />
+          <div className="h-10 w-28 animate-pulse rounded-md bg-muted/30" />
         </div>
         <div className="absolute inset-0 -z-10 [mask-image:radial-gradient(transparent,black)]" />
-        <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-primary/5 via-transparent to-accent/5" />
+        <div className="to-accent/5 pointer-events-none absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent" />
         <div className="mt-6 flex items-center justify-center">
           <LoadingSpinner />
         </div>
@@ -131,7 +131,7 @@ const LandingPage: React.FC = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden scroll-smooth">
+    <div className="relative min-h-screen overflow-hidden scroll-smooth bg-background">
       {/* Background layer with subtle extra accents */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <PageBackground />
@@ -139,18 +139,18 @@ const LandingPage: React.FC = () => {
         {!shouldReduceMotion && (
           <motion.div
             aria-hidden
-            className="absolute -z-10 inset-0"
+            className="absolute inset-0 -z-10"
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.7 }}
             transition={{ duration: 1 }}
           >
             <motion.div
-              className="absolute right-[-10%] top-24 h-64 w-64 rounded-full bg-primary/10 blur-3xl"
+              className="absolute top-24 right-[-10%] h-64 w-64 rounded-full bg-primary/10 blur-3xl"
               animate={{ y: [0, 10, 0], x: [0, -8, 0] }}
               transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute left-[-10%] bottom-32 h-72 w-72 rounded-full bg-accent/10 blur-3xl"
+              className="bg-accent/10 absolute bottom-32 left-[-10%] h-72 w-72 rounded-full blur-3xl"
               animate={{ y: [0, -12, 0], x: [0, 12, 0] }}
               transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
             />

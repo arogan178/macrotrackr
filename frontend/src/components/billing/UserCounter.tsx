@@ -52,19 +52,19 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`inline-flex items-center space-x-2 ${className}`}
     >
-      <div className="flex items-center space-x-2 bg-surface/60 backdrop-blur-sm border border-border/50 rounded-full px-4 py-2">
+      <div className="flex items-center space-x-2 rounded-full border border-border/50 bg-surface/60 px-4 py-2 backdrop-blur-sm">
         <div className="flex -space-x-2">
           {/* Avatar stack for visual appeal */}
-          <div className="w-6 h-6 bg-gradient-to-br from-primary to-primary rounded-full border-2 border-border flex items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-primary">
             <span className="text-xs font-semibold text-foreground">A</span>
           </div>
-          <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-primary rounded-full border-2 border-border flex items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-purple-500 to-primary">
             <span className="text-xs font-semibold text-foreground">M</span>
           </div>
-          <div className="w-6 h-6 bg-gradient-to-br from-primary to-cyan-600 rounded-full border-2 border-border flex items-center justify-center">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-cyan-600">
             <span className="text-xs font-semibold text-foreground">S</span>
           </div>
-          <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full border-2 border-border flex items-center justify-center text-xs font-semibold text-foreground">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-green-500 to-emerald-600 text-xs font-semibold text-foreground">
             +
           </div>
         </div>
@@ -84,7 +84,7 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
 
         {/* Live indicator */}
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-success rounded-full animate-pulse"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-success"></div>
           <span className="text-xs font-medium text-success">Live</span>
         </div>
       </div>

@@ -84,16 +84,16 @@ function EmptyState({
     >
       <div className="mb-4 text-foreground">
         {icon || (
-          <div className="rounded-full bg-surface p-4 inline-block">
+          <div className="inline-block rounded-full bg-surface p-4">
             {defaultIcon}
           </div>
         )}
       </div>
 
-      <h3 className={`${sizeStyles.title} font-medium text-foreground mb-2`}>
+      <h3 className={`${sizeStyles.title} mb-2 font-medium text-foreground`}>
         {title}
       </h3>
-      <p className={`${sizeStyles.message} text-foreground mb-6`}>{message}</p>
+      <p className={`${sizeStyles.message} mb-6 text-foreground`}>{message}</p>
 
       {/* Action buttons */}
       {(action || secondaryAction) && (

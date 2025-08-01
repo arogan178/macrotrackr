@@ -248,7 +248,7 @@ export default function GoalsPage() {
       subtitle="Track your progress and stay motivated on your health journey"
       headerChildren={
         <div
-          className="relative flex space-x-1 p-1 bg-background/60 rounded-lg"
+          className="relative flex space-x-1 rounded-lg bg-background/60 p-1"
           role="tablist"
           aria-label="Goals Tabs"
         >
@@ -258,7 +258,7 @@ export default function GoalsPage() {
             layoutId="goalsTabHighlight"
             isMotion={true}
           >
-            <span className="flex items-center relative z-10">
+            <span className="relative z-10 flex items-center">
               <GoalsIcon size="sm" className="mr-1.5" />
               Goals
             </span>
@@ -269,7 +269,7 @@ export default function GoalsPage() {
             layoutId="goalsTabHighlight"
             isMotion={true}
           >
-            <span className="flex items-center relative z-10">
+            <span className="relative z-10 flex items-center">
               <TargetIcon size="sm" className="mr-1.5" />
               Macro Targets
             </span>
