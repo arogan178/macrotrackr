@@ -5,6 +5,11 @@ import type {
   UserNutritionalProfile,
   UserSettings,
 } from "@/types/user";
+import { calculateBMR as calculateBMRCore } from "@/utils/nutritionCalculations";
+/**
+ * Calculate TDEE based on BMR and activity multiplier
+ */
+import { calculateTDEE as calculateTDEECore } from "@/utils/nutritionCalculations";
 
 import { ACTIVITY_LEVELS } from "./constants";
 
@@ -22,21 +27,19 @@ function calculateAgeValue(birthDate: Date): number {
   }
   return Math.max(0, Math.min(120, age));
 }
-
-import { calculateBMR as calculateBMRCore } from "@/utils/nutritionCalculations";
 function calculateBMRValue(
   weight: number,
   height: number,
   age: number,
   isMale: boolean,
 ): number {
-  return calculateBMRCore(weight, height, age, isMale ? ("male" as Gender) : ("female" as Gender));
+  return calculateBMRCore(
+    weight,
+    height,
+    age,
+    isMale ? ("male" as Gender) : ("female" as Gender),
+  );
 }
-
-/**
- * Calculate TDEE based on BMR and activity multiplier
- */
-import { calculateTDEE as calculateTDEECore } from "@/utils/nutritionCalculations";
 function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
   return calculateTDEECore(bmr, activityMultiplier);
 }
