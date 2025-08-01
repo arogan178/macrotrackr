@@ -70,11 +70,11 @@ const PercentageLabel = (properties: PercentageLabelProps) => {
 };
 
 const MacroDensityBreakdown = ({
-  startDate,
-  endDate,
-  groupBy,
+  startDate: _startDate,
+  endDate: _endDate,
+  groupBy: _groupBy,
   data: propertyData,
-  selectedRange,
+  selectedRange: _selectedRange,
   isLoading: propertyIsLoading,
   dataProcessed,
 }: MacroDensityBreakdownProps) => {

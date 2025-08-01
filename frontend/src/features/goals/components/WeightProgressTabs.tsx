@@ -23,7 +23,7 @@ function WeightProgressTabs() {
   const [isBulkConfirmModalOpen, setIsBulkConfirmModalOpen] = useState(false);
   const handleBulkDelete = () => setIsBulkConfirmModalOpen(true);
   const handleBulkCancel = () => setIsBulkConfirmModalOpen(false);
-  const handleBulkConfirm = () => setIsBulkConfirmModalOpen(false); // Will be handled in WeightLogList
+  // Removed unused handleBulkConfirm placeholder to satisfy no-unused-vars
 
   return (
     <div className="overflow-hidden rounded-xl border border-border/50 bg-surface/40 shadow-primary backdrop-blur-sm">

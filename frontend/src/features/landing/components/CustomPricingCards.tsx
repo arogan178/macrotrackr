@@ -5,7 +5,6 @@ import React, { useState } from "react";
 import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import { useStore } from "@/store/store";
 
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
@@ -67,10 +66,17 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           suffix={PRICING_PLANS.free.suffix}
           features={features.free}
           buttonText={PRICING_PLANS.free.buttonText}
-          buttonVariant={PRICING_PLANS.free.buttonVariant}
-          buttonSize={BUTTON_SIZES.LG}
+          buttonVariant={
+            PRICING_PLANS.free.buttonVariant as
+              | "ghost"
+              | "primary"
+              | "secondary"
+              | "danger"
+              | "success"
+              | undefined
+          }
+          buttonSize={"lg"}
           buttonClassName={PRICING_PLANS.free.buttonClassName}
-          tabIndex={0}
           focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.free.featureIconColor}
           featureTextClass={PRICING_PLANS.free.featureTextClass}
@@ -102,10 +108,17 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           buttonText={
             showUpgradeButtons ? "Upgrade to Pro" : PRICING_PLANS.pro.buttonText
           }
-          buttonVariant={PRICING_PLANS.pro.buttonVariant}
-          buttonSize={BUTTON_SIZES.LG}
+          buttonVariant={
+            PRICING_PLANS.pro.buttonVariant as
+              | "ghost"
+              | "primary"
+              | "secondary"
+              | "danger"
+              | "success"
+              | undefined
+          }
+          buttonSize={"lg"}
           buttonClassName={PRICING_PLANS.pro.buttonClassName}
-          tabIndex={0}
           focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.pro.featureIconColor}
           featureTextClass={PRICING_PLANS.pro.featureTextClass}
