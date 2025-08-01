@@ -122,7 +122,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                 Macro Target Settings
               </h3>
               <div className="rounded-full border border-primary/30 bg-primary/20 px-3 py-1">
-                <span className="text-sm text-primary">Daily Target</span>
+                <span className="text-sm text-foreground">Daily Target</span>
               </div>
             </div>
 
@@ -263,7 +263,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
               <InfoCard
                 title="Tips"
                 color="indigo"
-                icon={<InfoIcon className="h-4 w-4 text-primary" />}
+                icon={<InfoIcon className="h-4 w-4 text-vibrant-accent" />}
               >
                 <ul className="mt-2 space-y-2 text-sm text-foreground">
                   <li>• For muscle growth keep protein between 20-35% </li>

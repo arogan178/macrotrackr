@@ -24,17 +24,14 @@ interface FeaturePageProps {
   loadingSkeleton?: ReactNode;
 }
 
-export function FeaturePage({
+function FeaturePageBase({
   title,
   subtitle,
   headerChildren,
   children,
-  feature,
+  isLoading,
   loadingSkeleton,
-}: FeaturePageProps) {
-  const loading = feature ? useFeatureLoading(feature) : undefined;
-  const isLoading = loading?.isLoading ?? false;
-
+}: Omit<FeaturePageProps, "feature"> & { isLoading: boolean }) {
   return (
     <DashboardPageContainer>
       <Navbar />
@@ -60,6 +57,48 @@ export function FeaturePage({
       </QueryErrorBoundary>
     </DashboardPageContainer>
   );
+}
+
+export function FeaturePage({
+  title,
+  subtitle,
+  headerChildren,
+  children,
+  feature,
+  loadingSkeleton,
+}: FeaturePageProps) {
+  if (!feature) {
+    return (
+      <FeaturePageBase
+        title={title}
+        subtitle={subtitle}
+        headerChildren={headerChildren}
+        loadingSkeleton={loadingSkeleton}
+        isLoading={false}
+      >
+        {children}
+      </FeaturePageBase>
+    );
+  }
+
+  // Wrapper component to keep hooks order stable
+  function FeaturePageWithFeature() {
+    const loading = useFeatureLoading(feature);
+    const isLoading = loading.isLoading;
+    return (
+      <FeaturePageBase
+        title={title}
+        subtitle={subtitle}
+        headerChildren={headerChildren}
+        loadingSkeleton={loadingSkeleton}
+        isLoading={isLoading}
+      >
+        {children}
+      </FeaturePageBase>
+    );
+  }
+
+  return <FeaturePageWithFeature />;
 }
 
 export default FeaturePage;
