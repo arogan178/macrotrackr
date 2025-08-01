@@ -1,10 +1,10 @@
 import { memo } from "react";
 
 import { formStyles } from "@/components/form/styles";
-import type { NumberFieldProps } from "@/components/utils/Types"; // Assuming NumberFieldProps is defined here
+import type { NumberFieldProps } from "@/components/form/types";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
 
-// Update NumberFieldProps in ../utils/types.ts if needed to include 'disabled'
+// Update NumberFieldProps in ../form/types.ts if needed to include 'disabled'
 // interface NumberFieldProps {
 //   // ... other props
 //   disabled?: boolean;
@@ -40,6 +40,7 @@ function NumberField({
 
     // Check if it's a valid number pattern
     if (/^-?\d*\.?\d*$/.test(value_)) {
+      // Use replace for broader runtime compatibility instead of replaceAll
       const digitsOnlyLength = value_.replaceAll(/\D/g, "").length;
       if (maxDigits && digitsOnlyLength > maxDigits) {
         return;

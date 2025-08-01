@@ -1,13 +1,13 @@
 import React, { memo } from "react";
 
 import { LoadingSpinnerIcon } from "@/components/ui";
+import type { ButtonProps } from "@/components/ui/types";
 import {
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
   FORM_BUTTON_SIZES,
   ICON_POSITIONS,
 } from "@/components/utils";
-import type { ButtonProps } from "@/components/utils/Types";
 import { useFeatureLoading, useGlobalLoading } from "@/hooks";
 
 type ButtonAllProps = ButtonProps &
