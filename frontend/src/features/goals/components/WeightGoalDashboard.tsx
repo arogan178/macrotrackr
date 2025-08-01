@@ -33,7 +33,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   macroTarget,
 }: WeightGoalDashboardProps) {
   // Use new loading state hooks
-  const { isLoading: isGoalsLoading } = useFeatureLoading("goals");
+  const { isLoading: _isGoalsLoading } = useFeatureLoading("goals");
 
   // Get log weight modal state from centralized goals UI slice
   const { setLogWeightModalOpen } = useStore();
@@ -101,7 +101,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
     <>
       <div className={`rounded-2xl bg-surface/40 ${className}`}>
         <WeightGoalStatus
-          startingWeight={user.weight ?? 0} // Pass current weight for progress, fallback to 0
+          startingWeight={user.weight ?? 0}
           targetWeight={weightGoals.targetWeight}
           tdee={Number.isFinite(tdee) ? tdee : 0}
           macroDailyTotals={macroDailyTotals}

@@ -56,17 +56,17 @@ interface ChangePasswordData {
 export function useUser(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: queryKeys.auth.user(),
-    queryFn: async (): Promise<UserDetailsResponse | null> => {
+    queryFn: async (): Promise<UserDetailsResponse | undefined> => {
       try {
         return await apiService.user.getUserDetails();
       } catch (error) {
-        // If user is not authenticated, return null instead of throwing
+        // If user is not authenticated, return undefined instead of throwing
         if (
           error instanceof Error &&
           "status" in error &&
           (error as any).status === 401
         ) {
-          return null;
+          return undefined;
         }
         throw error;
       }
