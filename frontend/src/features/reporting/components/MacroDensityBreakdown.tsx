@@ -78,8 +78,9 @@ const MacroDensityBreakdown = ({
   isLoading: propertyIsLoading,
   dataProcessed,
 }: MacroDensityBreakdownProps) => {
-  // If data is not provided, use the macro density breakdown hook
-  const data = propertyData || useMacroDensityBreakdown(undefined, "week");
+  // Always call hook, then prefer provided data if present
+  const hookData = useMacroDensityBreakdown(undefined, "week");
+  const data = propertyData ?? hookData;
   const loading =
     typeof propertyIsLoading === "boolean" ? propertyIsLoading : false;
   // Show a message if there is no data after loading
