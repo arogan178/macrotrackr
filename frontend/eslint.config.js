@@ -88,7 +88,7 @@ export default [
   // Main config for all files
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    ignores: ["src/routeTree.gen.ts"],
+    ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*"],
     languageOptions: {
       globals: globals.browser,
       parser: tseslint.parser,

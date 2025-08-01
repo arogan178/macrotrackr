@@ -11,7 +11,6 @@ import {
   useMacroTarget,
 } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import { useStore } from "@/store/store";
 
 import {
   MacroDensityBreakdown,
@@ -23,6 +22,19 @@ import {
 import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
 
+// Moved to outer scope to satisfy unicorn/consistent-function-scoping
+function getDateRangeISOStrings(range: string) {
+  const today = new Date();
+  const endDateString = today.toISOString().split("T")[0];
+  let days = 7;
+  if (range === "month") days = 30;
+  if (range === "3months") days = 90;
+  const startDateObject = new Date(today);
+  startDateObject.setDate(today.getDate() - (days - 1));
+  const startDateString = startDateObject.toISOString().split("T")[0];
+  return { startDate: startDateString, endDate: endDateString };
+}
+
 export default function ReportingPage() {
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
@@ -31,18 +43,6 @@ export default function ReportingPage() {
   const { data: user } = useUser();
 
   // Calculate date range for the selected period
-  const getDateRangeISOStrings = (range: string) => {
-    const today = new Date();
-    const endDateString = today.toISOString().split("T")[0];
-    let days = 7;
-    if (range === "month") days = 30;
-    if (range === "3months") days = 90;
-    const startDateObject = new Date(today);
-    startDateObject.setDate(today.getDate() - (days - 1));
-    const startDateString = startDateObject.toISOString().split("T")[0];
-    return { startDate: startDateString, endDate: endDateString };
-  };
-
   const { startDate, endDate } = getDateRangeISOStrings(dateRange);
 
   // Use TanStack Query hooks for data fetching
@@ -50,8 +50,6 @@ export default function ReportingPage() {
   const { data: macroTarget } = useMacroTarget();
   const { data: history = [], isLoading: isHistoryLoading } =
     useMacroHistoryForDateRange(startDate, endDate);
-
-  const { nutritionProfile } = useStore();
 
   // Centralize subscription status hydration
   usePageDataSync();
@@ -146,7 +144,7 @@ export default function ReportingPage() {
                 {(() => {
                   const calorieTarget =
                     weightGoals?.calorieTarget ||
-                    nutritionProfile?.tdee ||
+                    /* tdee fallback removed: use available targets only */
                     2000;
                   return (
                     <MacroSummaryStats

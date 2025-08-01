@@ -1,8 +1,7 @@
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
-import { IconButton } from "@/components/ui";
-import { BarChartIcon, BookIcon } from "@/components/ui"; // Using local icons
+import { BarChartIcon, BookIcon, IconButton } from "@/components/ui";
 import { useWeightLog } from "@/hooks/queries/useGoals";
 
 import WeightGoalProgressChart from "./WeightGoalProgressChart";
@@ -63,7 +62,6 @@ function WeightProgressTabs() {
             onClick={handleBulkDelete}
             disabled={isLoading}
             tooltip="Delete All"
-            size="sm"
             className="pl-4"
           />
         )}
@@ -86,7 +84,6 @@ function WeightProgressTabs() {
             {activeTab === "list" && (
               <WeightLogList
                 isBulkConfirmModalOpen={isBulkConfirmModalOpen}
-                onBulkConfirm={handleBulkConfirm}
                 onBulkCancel={handleBulkCancel}
               />
             )}
