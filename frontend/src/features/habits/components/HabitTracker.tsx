@@ -43,8 +43,8 @@ function HabitTracker({
     <CardContainer>
       <div className="p-5">
         {/* Header with title and add button */}
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-medium text-foreground flex items-center">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="flex items-center text-lg font-medium text-foreground">
             <CheckCircleIcon size="md" className="mr-2 text-purple-400" />
             Habit Goals
           </h3>
@@ -59,7 +59,7 @@ function HabitTracker({
                   disabled={!canAddHabit}
                   autoLoadingFeature="habits"
                   loadingText="Adding..."
-                  className="text-primary hover:text-primary transition-colors bg-primary/10 px-3 py-1.5 rounded-lg disabled:opacity-50"
+                  className="rounded-lg bg-primary/10 px-3 py-1.5 text-primary transition-colors hover:text-primary disabled:opacity-50"
                   text="Add Habit"
                   icon={<PlusIcon />}
                   iconPosition="left"
@@ -74,18 +74,18 @@ function HabitTracker({
             {[1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="bg-surface/30 rounded-lg overflow-hidden"
+                className="overflow-hidden rounded-lg bg-surface/30"
               >
                 <div className="bg-gradient-to-r from-gray-600/20 to-gray-600/5 p-3">
-                  <div className="flex items-center mb-2">
-                    <div className="w-8 h-8 rounded-lg bg-surface/30 animate-pulse mr-2"></div>
-                    <div className="h-5 w-24 bg-surface/30 animate-pulse rounded"></div>
+                  <div className="mb-2 flex items-center">
+                    <div className="mr-2 h-8 w-8 animate-pulse rounded-lg bg-surface/30"></div>
+                    <div className="h-5 w-24 animate-pulse rounded bg-surface/30"></div>
                   </div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <div className="h-6 w-16 bg-surface/30 animate-pulse rounded"></div>
-                    <div className="h-4 w-8 bg-surface/30 animate-pulse rounded"></div>
+                  <div className="mb-1.5 flex items-center justify-between">
+                    <div className="h-6 w-16 animate-pulse rounded bg-surface/30"></div>
+                    <div className="h-4 w-8 animate-pulse rounded bg-surface/30"></div>
                   </div>
-                  <div className="h-2 bg-surface/30 animate-pulse rounded-full"></div>
+                  <div className="h-2 animate-pulse rounded-full bg-surface/30"></div>
                 </div>
               </div>
             ))}
@@ -96,7 +96,7 @@ function HabitTracker({
             title="Start Building Habits"
             message="Add your first habit goal to begin tracking your progress."
             icon={
-              <div className="rounded-full bg-surface p-4 inline-block">
+              <div className="inline-block rounded-full bg-surface p-4">
                 <CheckCircleIcon className="h-10 w-10 text-foreground" />
               </div>
             }
@@ -111,7 +111,7 @@ function HabitTracker({
                 : undefined
             }
             size="md"
-            className="bg-surface/30 rounded-lg"
+            className="rounded-lg bg-surface/30"
           />
         ) : (
           <div className="space-y-4">
@@ -217,26 +217,26 @@ function HabitCard({
   const renderIcon = () => {
     const IconComponent =
       HABIT_ICONS[iconName as keyof typeof HABIT_ICONS] || TargetIcon;
-    return <IconComponent className="w-4 h-4" />;
+    return <IconComponent className="h-4 w-4" />;
   };
 
   return (
     // Add overflow-hidden to the outer container
-    <div className="bg-surface/30 rounded-lg overflow-hidden">
+    <div className="overflow-hidden rounded-lg bg-surface/30">
       {/* Move all card content INSIDE the gradient div */}
       <div className={`bg-gradient-to-r ${getGradientClass(accentColor)} p-3`}>
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center">
             <div
-              className={`p-1.5 rounded-lg ${getAccentClass(accentColor)} mr-2`}
+              className={`rounded-lg p-1.5 ${getAccentClass(accentColor)} mr-2`}
             >
               {renderIcon()}
             </div>
-            <h4 className="font-medium text-foreground mr-2">{title}</h4>
+            <h4 className="mr-2 font-medium text-foreground">{title}</h4>
           </div>
 
           {isComplete && (
-            <span className="text-xs text-success flex items-center gap-1 bg-success/10 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-1 rounded-full bg-success/10 px-2 py-0.5 text-xs text-success">
               <CheckIcon size="sm" />
               Complete
             </span>
@@ -257,13 +257,13 @@ function HabitCard({
           )}
         </div>
 
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="mb-1.5 flex items-center justify-between">
           {" "}
           <div className="flex items-baseline gap-1">
             <span className="text-xl font-bold text-foreground">
               <AnimatedNumber value={current} />
             </span>
-            <span className="text-foreground text-sm">
+            <span className="text-sm text-foreground">
               / <AnimatedNumber value={target} />
             </span>
           </div>{" "}

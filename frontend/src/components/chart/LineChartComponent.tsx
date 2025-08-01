@@ -144,7 +144,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
     !isLoading && !error && !hasData && !emptyState && showNoDataMessage;
 
   return (
-    <div className={`w-full relative ${className} `} style={{ height }}>
+    <div className={`relative w-full ${className} `} style={{ height }}>
       {/* Loading State */}
       <AnimatePresence>
         {isLoading && (
@@ -154,11 +154,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center bg-surface/50 backdrop-blur-sm z-10 rounded-lg "
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface/50 backdrop-blur-sm "
           >
             <div className="flex flex-col items-center">
               <LoadingSpinner size="md" />
-              <p className="text-foreground mt-2 text-sm">
+              <p className="mt-2 text-sm text-foreground">
                 Loading chart data...
               </p>
             </div>
@@ -175,12 +175,12 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center z-0 p-4"
+            className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
-            <div className="flex flex-col items-center text-center bg-error/30 border border-red-700/50 rounded-lg p-6 shadow-primary">
+            <div className="flex flex-col items-center rounded-lg border border-red-700/50 bg-error/30 p-6 text-center shadow-primary">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-10 w-10 text-vibrant-accent mb-3"
+                className="mb-3 h-10 w-10 text-vibrant-accent"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
@@ -193,10 +193,10 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                 />
               </svg>
-              <h3 className="text-lg font-medium text-error mb-1">
+              <h3 className="mb-1 text-lg font-medium text-error">
                 Error Loading Chart
               </h3>
-              <p className="text-error max-w-xs text-sm">{error}</p>
+              <p className="max-w-xs text-sm text-error">{error}</p>
             </div>
           </motion.div>
         )}
@@ -211,7 +211,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center z-0 p-4"
+            className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
             {emptyState}
           </motion.div>
@@ -227,11 +227,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 flex items-center justify-center z-0"
+            className="absolute inset-0 z-0 flex items-center justify-center"
           >
             <div className="flex flex-col items-center text-center">
               <svg
-                className="w-16 h-16 text-foreground mb-4"
+                className="mb-4 h-16 w-16 text-foreground"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -245,7 +245,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 ></path>
               </svg>
-              <p className="text-foreground max-w-xs text-sm">
+              <p className="max-w-xs text-sm text-foreground">
                 No data available for the selected period.
               </p>
             </div>
@@ -255,7 +255,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
 
       {/* Chart Container */}
       <div
-        className={`w-full h-full ${
+        className={`h-full w-full ${
           isLoading ||
           error ||
           (!hasData && emptyState) ||

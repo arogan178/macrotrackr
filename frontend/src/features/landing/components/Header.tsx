@@ -5,9 +5,9 @@ import React from "react";
 import { Button } from "@/components/ui";
 
 const Header: React.FC = () => (
-  <header className="relative z-10 border-b border-border/50 backdrop-blur-xl bg-surface supports-[backdrop-filter]:bg-surface">
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center py-6">
+  <header className="relative z-10 border-b border-border/50 bg-surface backdrop-blur-xl supports-[backdrop-filter]:bg-surface">
+    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+      <div className="flex items-center justify-between py-6">
         <motion.div
           className="flex items-center"
           whileHover={{ scale: 1.01 }}

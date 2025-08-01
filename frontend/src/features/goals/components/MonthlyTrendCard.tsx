@@ -96,8 +96,8 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
 
     return (
       <div className="flex items-center">
-        {isLoss && <TrendingDownIcon className="w-5 h-5 text-primary mr-2" />}
-        {isGain && <TrendingUpIcon className="w-5 h-5 text-success mr-2" />}
+        {isLoss && <TrendingDownIcon className="mr-2 h-5 w-5 text-primary" />}
+        {isGain && <TrendingUpIcon className="mr-2 h-5 w-5 text-success" />}
         <span
           className={`text-lg font-semibold ${
             isLoss
@@ -109,7 +109,7 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
         >
           {isLoss ? `-${absChange}` : isGain ? `+${absChange}` : "0.0"} kg
         </span>
-        <span className="text-xs text-foreground ml-1.5">
+        <span className="ml-1.5 text-xs text-foreground">
           in last ~3 months
         </span>
       </div>
@@ -118,7 +118,7 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
 
   return (
     <CardContainer>
-      <h3 className="text-sm font-medium text-foreground mb-2">
+      <h3 className="mb-2 text-sm font-medium text-foreground">
         Monthly Trend
       </h3>
       {renderContent()}

@@ -38,10 +38,10 @@ const ProBillingView: React.FC<{
   return (
     <>
       {isActionRequired && (
-        <div className="mb-6 p-4 bg-gradient-to-r from-amber-900/25 to-orange-900/25 border border-amber-500/30 rounded-lg">
-          <p className="text-amber-200 text-sm flex items-center">
-            <span className="p-1 bg-amber-500/20 rounded mr-2">
-              <WarningIcon className="w-4 h-4 text-amber-400" />
+        <div className="mb-6 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-900/25 to-orange-900/25 p-4">
+          <p className="flex items-center text-sm text-amber-200">
+            <span className="mr-2 rounded bg-amber-500/20 p-1">
+              <WarningIcon className="h-4 w-4 text-amber-400" />
             </span>
             <span>
               <span className="font-bold">Payment Issue:</span> Your
@@ -51,42 +51,42 @@ const ProBillingView: React.FC<{
           </p>
         </div>
       )}
-      <div className="relative bg-gradient-to-br from-green-900/25 via-green-800/20 to-emerald-900/25 p-6 rounded-xl border border-green-500/40 mb-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-success/10 rounded-full blur-xl transform translate-x-16 -translate-y-16"></div>
+      <div className="relative mb-6 overflow-hidden rounded-xl border border-green-500/40 bg-gradient-to-br from-green-900/25 via-green-800/20 to-emerald-900/25 p-6">
+        <div className="absolute top-0 right-0 h-32 w-32 translate-x-16 -translate-y-16 transform rounded-full bg-success/10 blur-xl"></div>
         <div className="relative">
           {/* Header with status */}
-          <div className="flex items-center justify-between mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center">
               <div>
-                <span className="text-success font-semibold text-lg">
+                <span className="text-lg font-semibold text-success">
                   Pro Plan Member
                 </span>
-                <div className="flex items-center mt-1"></div>
+                <div className="mt-1 flex items-center"></div>
               </div>
             </div>
             <StatusBadge status={status} />
           </div>
 
           {/* Subscription details in clean grid */}
-          <div className="bg-black/20 rounded-lg p-4 mb-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="mb-4 rounded-lg bg-black/20 p-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
-                <div className="text-foreground text-xs mb-1">Plan & Price</div>
-                <div className="text-foreground font-semibold">
+                <div className="mb-1 text-xs text-foreground">Plan & Price</div>
+                <div className="font-semibold text-foreground">
                   {price || "-"}
                 </div>
               </div>
               <div className="text-center sm:text-left">
-                <div className="text-foreground text-xs mb-1">
+                <div className="mb-1 text-xs text-foreground">
                   {isCanceled ? "Expires" : "Renews"}
                 </div>
-                <div className="text-foreground font-semibold">
+                <div className="font-semibold text-foreground">
                   {renewalDate || "-"}
                 </div>
               </div>
               <div className="text-center sm:text-left">
-                <div className="text-foreground text-xs mb-1">Payment</div>
-                <div className="text-foreground font-semibold">
+                <div className="mb-1 text-xs text-foreground">Payment</div>
+                <div className="font-semibold text-foreground">
                   {paymentMethod
                     ? `${paymentMethod.brand.toUpperCase()} •••• ${paymentMethod.last4}`
                     : "Not available"}
@@ -95,21 +95,21 @@ const ProBillingView: React.FC<{
             </div>
           </div>
 
-          <p className="text-foreground text-sm leading-relaxed">
+          <p className="text-sm leading-relaxed text-foreground">
             {isCanceled
               ? "Your Pro access will continue until the expiration date shown above. You can reactivate your subscription at any time."
               : "Enjoy unlimited access to all premium features. Manage your subscription, view invoices, or update payment methods below."}
           </p>
         </div>
       </div>
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <Button
           onClick={() => setShow(true)}
           isLoading={isLoading}
           loadingText="Opening Portal..."
           fullWidth
           variant="primary"
-          className={`bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary text-foreground shadow-primary hover:shadow-modal transition-all duration-200 border-0 ${
+          className={`border-0 bg-gradient-to-r from-primary to-primary text-foreground shadow-primary transition-all duration-200 hover:from-primary hover:to-primary hover:shadow-modal ${
             isActionRequired ? "animate-pulse" : ""
           }`}
           icon={<ExternalLinkIcon />}
@@ -122,7 +122,7 @@ const ProBillingView: React.FC<{
             onClick={() => setShowCancel(true)}
             variant="danger"
             fullWidth
-            className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-foreground border-0"
+            className="border-0 bg-gradient-to-r from-red-600 to-red-700 text-foreground hover:from-red-700 hover:to-red-800"
             ariaLabel="Cancel your Pro subscription"
           >
             Cancel Subscription
@@ -141,14 +141,14 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="p-2 bg-vibrant-accent/20 rounded-lg">
-              <WarningIcon className="w-6 h-6 text-vibrant-accent flex-shrink-0" />
+            <div className="rounded-lg bg-vibrant-accent/20 p-2">
+              <WarningIcon className="h-6 w-6 flex-shrink-0 text-vibrant-accent" />
             </div>
             <div>
-              <h4 className="text-foreground font-medium mb-2">
+              <h4 className="mb-2 font-medium text-foreground">
                 Are you sure you want to cancel?
               </h4>
-              <p className="text-foreground text-sm mb-3">
+              <p className="mb-3 text-sm text-foreground">
                 This will immediately cancel your Pro subscription. You will
                 retain access until the end of your current billing period.
               </p>
@@ -201,41 +201,41 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="p-2 bg-primary/20 rounded-lg">
-              <InfoIcon className="w-6 h-6 text-primary flex-shrink-0" />
+            <div className="rounded-lg bg-primary/20 p-2">
+              <InfoIcon className="h-6 w-6 flex-shrink-0 text-primary" />
             </div>
             <div>
-              <h4 className="text-foreground font-medium mb-2">
+              <h4 className="mb-2 font-medium text-foreground">
                 Stripe Billing Portal
               </h4>
-              <p className="text-foreground text-sm mb-3">
+              <p className="mb-3 text-sm text-foreground">
                 You'll be redirected to Stripe's secure billing portal where you
                 can:
               </p>
-              <ul className="text-foreground text-sm space-y-2">
+              <ul className="space-y-2 text-sm text-foreground">
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3 inline-block"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
                   Update your payment method
                 </li>
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3 inline-block"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
                   Download invoices and receipts
                 </li>
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3 inline-block"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
                   Change your billing address
                 </li>
                 <li className="flex items-center">
-                  <span className="w-1.5 h-1.5 bg-primary rounded-full mr-3 inline-block"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
                   Cancel your subscription
                 </li>
               </ul>
             </div>
           </div>
-          <div className="bg-gradient-to-r from-amber-900/25 to-orange-900/25 border border-amber-500/30 p-4 rounded-lg">
-            <p className="text-amber-200 text-sm flex items-center">
-              <span className="p-1 bg-amber-500/20 rounded mr-2">
-                <WarningIcon className="w-3 h-3 text-amber-400" />
+          <div className="rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-900/25 to-orange-900/25 p-4">
+            <p className="flex items-center text-sm text-amber-200">
+              <span className="mr-2 rounded bg-amber-500/20 p-1">
+                <WarningIcon className="h-3 w-3 text-amber-400" />
               </span>
               This will open in a new tab. Your current session will remain
               active.
@@ -256,7 +256,7 @@ const ProBillingView: React.FC<{
               }}
               variant="primary"
               className="flex-1 bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary"
-              icon={<ExternalLinkIcon className="w-4 h-4" />}
+              icon={<ExternalLinkIcon className="h-4 w-4" />}
             >
               Continue to Portal
             </Button>

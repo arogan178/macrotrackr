@@ -25,7 +25,7 @@ import { USER_MINIMUM_AGE } from "@/utils/constants";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-col justify-between h-full">
+  <div className="flex h-full flex-col justify-between">
     <div className="flex-1">{children}</div>
   </div>
 );
@@ -52,8 +52,8 @@ export function StepOne() {
 
   return (
     <StepFormWrapper>
-      <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
-        <div className="space-y-5 flex-1">
+      <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
+        <div className="flex-1 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <TextField
               label="First Name"
@@ -91,7 +91,7 @@ export function StepOne() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="flex-grow min-h-[40px]"></div>
+          <div className="min-h-[40px] flex-grow"></div>
         </div>
 
         <div className="pt-4">
@@ -136,8 +136,8 @@ export function StepTwo() {
 
   return (
     <StepFormWrapper>
-      <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
-        <div className="space-y-5 flex-1">
+      <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
+        <div className="flex-1 space-y-5">
           <DateField
             label="Date of Birth"
             value={register.dateOfBirth}
@@ -179,7 +179,7 @@ export function StepTwo() {
           </div>
 
           {/* Spacer for consistent form height */}
-          <div className="flex-grow min-h-[10px]"></div>
+          <div className="min-h-[10px] flex-grow"></div>
         </div>
 
         <div className="pt-4">
@@ -245,8 +245,8 @@ export function StepThree() {
 
   return (
     <StepFormWrapper>
-      <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
-        <div className="space-y-5 flex-1">
+      <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
+        <div className="flex-1 space-y-5">
           <Dropdown
             label="How active are you on a typical week?"
             value={register.activityLevel}
@@ -274,7 +274,7 @@ export function StepThree() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="flex-grow min-h-[60px]"></div>
+          <div className="min-h-[60px] flex-grow"></div>
         </div>
 
         <div className="pt-4">

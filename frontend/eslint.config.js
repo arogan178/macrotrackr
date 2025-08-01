@@ -10,6 +10,14 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import pluginRouter from "@tanstack/eslint-plugin-router";
+import tailwindPlugin from "eslint-plugin-tailwindcss";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Tailwind v4 root CSS detected at frontend/src/style.css
+const TAILWIND_ROOT_CSS = resolve(__dirname, "src/style.css");
 
 export default [
   // PascalCase for components
@@ -78,6 +86,7 @@ export default [
       prettier: eslintPluginPrettier,
       "simple-import-sort": simpleImportSort,
       import: eslintPluginImport,
+      tailwindcss: tailwindPlugin,
       ...pluginRouter.configs["flat/recommended"],
     },
     rules: {
@@ -87,6 +96,13 @@ export default [
       ...pluginReactHooks.configs.recommended.rules,
       ...pluginJsxA11y.configs.recommended.rules,
       ...eslintPluginUnicorn.configs.recommended.rules,
+
+      // Tailwind CSS plugin: recommend ruleset and key best practices
+      // You can extend with more tailwindcss/* rules as desired
+      "tailwindcss/classnames-order": "warn",
+      "tailwindcss/no-custom-classname": "off", // Allow design-system classnames
+      "tailwindcss/no-contradicting-classname": "error",
+
       "react/react-in-jsx-scope": "off",
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
@@ -116,6 +132,13 @@ export default [
           project: ["./tsconfig.app.json", "./tsconfig.node.json"],
           noWarnOnMultipleProjects: true,
         },
+      },
+      // Tailwind v4 workaround for eslint-plugin-tailwindcss 4.0.0-beta.0:
+      // point to the absolute path of the root Tailwind CSS file.
+      tailwindcss: {
+        config: TAILWIND_ROOT_CSS,
+        callees: ["cn", "clsx", "classnames"],
+        removeDuplicates: true,
       },
     },
   },

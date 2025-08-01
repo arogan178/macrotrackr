@@ -51,30 +51,30 @@ const PricingCard: React.FC<PricingCardProps> = ({
     tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative bg-surface backdrop-blur-sm border border-border/50 rounded-2xl p-8 lg:p-10 flex flex-col h-full outline-none ${focusRingColor} ${cardClassName}`}
+    className={`relative flex h-full flex-col rounded-2xl border border-border/50 bg-surface p-8 backdrop-blur-sm outline-none lg:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-        <span className="bg-primary text-foreground px-4 py-2 rounded-full text-sm font-semibold shadow-surface">
+        <span className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-foreground shadow-surface">
           Most Popular
         </span>
       </div>
     )}
-    <div className="text-center mb-8 mt-4">
-      <h3 className="text-2xl font-bold text-foreground mb-2">{title}</h3>
-      <div className="text-4xl font-bold text-foreground mb-2">
+    <div className="mt-4 mb-8 text-center">
+      <h3 className="mb-2 text-2xl font-bold text-foreground">{title}</h3>
+      <div className="mb-2 text-4xl font-bold text-foreground">
         {price}
         {suffix && (
           <span className="text-lg font-normal text-foreground">{suffix}</span>
         )}
       </div>
       {equivalent && (
-        <p className="text-success text-sm font-medium">{equivalent}</p>
+        <p className="text-sm font-medium text-success">{equivalent}</p>
       )}
       {children}
     </div>
     <motion.ul
-      className="space-y-4 mb-8"
+      className="mb-8 space-y-4"
       initial="hidden"
       animate="visible"
       variants={{
@@ -95,7 +95,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
             },
           }}
         >
-          <CheckIcon className={`w-5 h-5 ${featureIconColor} flex-shrink-0`} />
+          <CheckIcon className={`h-5 w-5 ${featureIconColor} flex-shrink-0`} />
           <span className={featureTextClass}>{feature}</span>
         </motion.li>
       ))}
