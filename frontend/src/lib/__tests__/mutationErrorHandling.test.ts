@@ -1,20 +1,20 @@
 import { QueryClient } from "@tanstack/react-query";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  shouldRetryError,
   calculateRetryDelay,
-  createMutationRetryFn,
-  createMutationRetryDelayFn,
-  retryConfigs,
-  isNetworkError,
-  isServerError,
-  isRateLimitError,
-  isAuthError,
-  isValidationError,
-  MutationErrorHandler,
   createMutationErrorHandler,
+  createMutationRetryDelayFn as createMutationRetryDelayFunction,
+  createMutationRetryFn as createMutationRetryFunction,
+  isAuthError,
+  isNetworkError,
+  isRateLimitError,
+  isServerError,
+  isValidationError,
   type MutationError,
+  MutationErrorHandler,
+  retryConfigs,
+  shouldRetryError,
 } from "../mutationErrorHandling";
 
 describe("mutationErrorHandling", () => {
@@ -130,22 +130,22 @@ describe("mutationErrorHandling", () => {
 
   describe("createMutationRetryFn", () => {
     it("should create retry function with config", () => {
-      const retryFn = createMutationRetryFn(retryConfigs.standard);
+      const retryFunction = createMutationRetryFunction(retryConfigs.standard);
       
       const serverError: MutationError = { name: "Error", message: "Server error", status: 500 };
-      expect(retryFn(1, serverError)).toBe(true);
-      expect(retryFn(3, serverError)).toBe(false); // Exceeds maxRetries
+      expect(retryFunction(1, serverError)).toBe(true);
+      expect(retryFunction(3, serverError)).toBe(false); // Exceeds maxRetries
 
       const authError: MutationError = { name: "Error", message: "Unauthorized", status: 401 };
-      expect(retryFn(1, authError)).toBe(false);
+      expect(retryFunction(1, authError)).toBe(false);
     });
   });
 
   describe("createMutationRetryDelayFn", () => {
     it("should create retry delay function with config", () => {
-      const retryDelayFn = createMutationRetryDelayFn(retryConfigs.standard);
+      const retryDelayFunction = createMutationRetryDelayFunction(retryConfigs.standard);
       
-      const delay = retryDelayFn(1, { name: "Error", message: "Test" });
+      const delay = retryDelayFunction(1, { name: "Error", message: "Test" });
       expect(delay).toBeGreaterThan(0);
       expect(delay).toBeLessThanOrEqual(retryConfigs.standard.maxDelay * 1.5);
     });
@@ -243,14 +243,14 @@ describe("mutationErrorHandling", () => {
     });
 
     it("should have reasonable default values", () => {
-      Object.values(retryConfigs).forEach(config => {
+      for (const config of Object.values(retryConfigs)) {
         expect(config.maxRetries).toBeGreaterThan(0);
         expect(config.baseDelay).toBeGreaterThan(0);
         expect(config.maxDelay).toBeGreaterThan(config.baseDelay);
         expect(config.backoffMultiplier).toBeGreaterThan(1);
         expect(config.jitterFactor).toBeGreaterThan(0);
         expect(config.jitterFactor).toBeLessThan(1);
-      });
+      }
     });
   });
 });
