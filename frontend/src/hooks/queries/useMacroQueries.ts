@@ -281,7 +281,7 @@ export function useUpdateMacroEntry() {
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries?.find((e: any) => e.id === id);
+          const foundEntry = page.entries?.find((entry: any) => entry.id === id);
           if (foundEntry) {
             entryDate = foundEntry.entryDate;
             break;
@@ -304,8 +304,8 @@ export function useUpdateMacroEntry() {
           const newPages = oldData.pages.map((page: any) => ({
             ...page,
             entries:
-              page.entries?.map((e: any) =>
-                e.id === id ? { ...e, ...entry } : e,
+              page.entries?.map((entryItem: any) =>
+                entryItem.id === id ? { ...entryItem, ...entry } : entryItem,
               ) || [],
           }));
 
@@ -321,7 +321,7 @@ export function useUpdateMacroEntry() {
         // Find the original entry to calculate the difference
         const originalEntry = historyData?.pages
           ?.flatMap((page: any) => page.entries || [])
-          ?.find((e: any) => e.id === id);
+          ?.find((entry: any) => entry.id === id);
 
         if (originalEntry) {
           queryClient.setQueryData(
@@ -413,7 +413,9 @@ export function useDeleteMacroEntry() {
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries?.find((e: any) => e.id === id);
+          const foundEntry = page.entries?.find(
+            (entryItem: any) => entryItem.id === id,
+          );
           if (foundEntry) {
             entryToDelete = foundEntry;
             entryDate = foundEntry.entryDate;
@@ -436,7 +438,9 @@ export function useDeleteMacroEntry() {
 
           const newPages = oldData.pages.map((page: any) => ({
             ...page,
-            entries: page.entries?.filter((e: any) => e.id !== id) || [],
+            entries:
+              page.entries?.filter((entryItem: any) => entryItem.id !== id) ||
+              [],
           }));
 
           return {
