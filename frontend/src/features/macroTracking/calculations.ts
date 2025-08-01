@@ -1,55 +1,14 @@
-import { MacroDailyTotals, MacroEntry } from "@/types/macro";
-import { CALORIES_PER_GRAM } from "@/utils/constants/nutrition";
+import type { MacroDailyTotals, MacroEntry } from "@/types/macro";
+import { getTodayDateString } from "./constants";
 
-import { DEFAULT_MACRO_TOTALS, getTodayDateString } from "./constants";
+// Re-export consolidated nutrition calculations
+export {
+  caloriesFromMacrosRaw as calculateCaloriesFromMacros,
+  caloriesFromEntryRaw as calculateEntryCalories,
+} from "@/utils/nutritionCalculations";
 
-// Pure calculation functions
-export const calculateCaloriesFromMacros = (
-  protein: number,
-  carbs: number,
-  fats: number,
-): number => {
-  return (
-    protein * CALORIES_PER_GRAM.protein +
-    carbs * CALORIES_PER_GRAM.carbs +
-    fats * CALORIES_PER_GRAM.fats
-  );
-};
-
-export const calculateEntryCalories = (entry: MacroEntry): number => {
-  return calculateCaloriesFromMacros(
-    entry.protein || 0,
-    entry.carbs || 0,
-    entry.fats || 0,
-  );
-};
-
-export const calculateProteinCalories = (protein: number): number => {
-  return Math.round(protein * CALORIES_PER_GRAM.protein);
-};
-export const calculateCarbsCalories = (carbs: number): number => {
-  return carbs * CALORIES_PER_GRAM.carbs;
-};
-export const calculateFatsCalories = (fats: number): number => {
-  return fats * CALORIES_PER_GRAM.fats;
-};
-// Calculate daily totals from entries
-export const calculateDailyTotals = (
-  entries: MacroEntry[],
-): MacroDailyTotals => {
-  if (!entries || entries.length === 0) {
-    return DEFAULT_MACRO_TOTALS;
-  }
-
-  const totals: MacroDailyTotals = { ...DEFAULT_MACRO_TOTALS };
-  for (const entry of entries) {
-    totals.protein += entry.protein || 0;
-    totals.carbs += entry.carbs || 0;
-    totals.fats += entry.fats || 0;
-    totals.calories += calculateEntryCalories(entry);
-  }
-  return totals;
-};
+// Import calculateDailyTotals for local use
+import { calculateDailyTotals } from "@/utils/nutritionCalculations";
 
 // Get entries for today
 export const getTodayEntries = (entries: MacroEntry[]): MacroEntry[] => {
