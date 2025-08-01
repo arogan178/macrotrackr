@@ -29,17 +29,17 @@ function ChartCard({
   minHeight = 150,
 }: ChartCardProps) {
   return (
-    <CardContainer className={`p-3 h-full ${className}`}>
+    <CardContainer className={`h-full p-3 ${className}`}>
       <motion.div
         layout
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.4 }}
-        className="h-full flex flex-col"
+        className="flex h-full flex-col"
       >
         {/* Header */}
         {(title || action) && (
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             {title && (
               <h3 className="text-base font-semibold text-foreground">
                 {title}
@@ -52,11 +52,11 @@ function ChartCard({
         {/* Content */}
         <div className="flex-1" style={{ minHeight: `${minHeight}px` }}>
           {isLoading ? (
-            <div className="h-full flex items-center justify-center">
+            <div className="flex h-full items-center justify-center">
               <div className="text-foreground">Loading...</div>
             </div>
           ) : isEmpty ? (
-            <div className="h-full flex items-center justify-center">
+            <div className="flex h-full items-center justify-center">
               <div className="text-foreground">{emptyMessage}</div>
             </div>
           ) : (

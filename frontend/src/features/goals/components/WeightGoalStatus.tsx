@@ -106,13 +106,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="p-4 sm:p-6 bg-background/50 rounded-xl border border-border/50 shadow-primary"
+      className="rounded-xl border border-border/50 bg-background/50 p-4 shadow-primary sm:p-6"
     >
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex items-center">
-          <div className={`p-2.5 rounded-lg ${goalBgColorLight} mr-3`}>
-            <WeightIcon className={`w-6 h-6 ${goalTextColor}`} />
+          <div className={`rounded-lg p-2.5 ${goalBgColorLight} mr-3`}>
+            <WeightIcon className={`h-6 w-6 ${goalTextColor}`} />
           </div>
           <div>
             <h2 className="text-xl font-semibold text-foreground">
@@ -144,7 +144,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
 
       {/* Goal Progress Visual */}
       <div className="mb-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 gap-3">
+        <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex items-baseline space-x-2">
             <span className="text-2xl font-bold text-foreground">
               <AnimatedNumber
@@ -195,7 +195,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               height="md"
               className="mb-1"
             />
-            <div className="flex justify-between text-xs text-muted mt-1">
+            <div className="mt-1 flex justify-between text-xs text-muted">
               <span>
                 Start:{" "}
                 <AnimatedNumber
@@ -218,15 +218,15 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg p-3 border ${goalBorderColor}/30`}
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}/30`}
         >
           <TrendingUpIcon
-            className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`}
+            className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
           />
           <div>
-            <p className="text-xs text-muted mb-0.5">Weekly Rate</p>{" "}
+            <p className="mb-0.5 text-xs text-muted">Weekly Rate</p>{" "}
             <p className="text-base font-medium text-muted">
               {isMaintenance ? "Maintenance" : `${isWeightLoss ? "↓" : "↑"} `}
               {!isMaintenance && (
@@ -240,13 +240,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
         </div>
         <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg p-3 border ${goalBorderColor}/30`}
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}/30`}
         >
           <CalendarIcon
-            className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`}
+            className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
           />
           <div>
-            <p className="text-xs text-muted mb-0.5">Est. Duration</p>{" "}
+            <p className="mb-0.5 text-xs text-muted">Est. Duration</p>{" "}
             <p className="text-base font-medium text-muted">
               {isMaintenance ? (
                 "Ongoing"
@@ -259,11 +259,11 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
         </div>
         <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg p-3 border ${goalBorderColor}/30`}
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}/30`}
         >
-          <TargetIcon className={`w-5 h-5 ${goalTextColor} mt-0.5 shrink-0`} />
+          <TargetIcon className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
-            <p className="text-xs text-muted mb-0.5">
+            <p className="mb-0.5 text-xs text-muted">
               {isWeightLoss
                 ? "Daily Deficit"
                 : isWeightGain
@@ -283,20 +283,20 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
 
       {/* Nutrition section */}
       <div>
-        <h3 className="font-semibold text-lg text-muted mb-4">
+        <h3 className="mb-4 text-lg font-semibold text-muted">
           Daily Nutrition Target
         </h3>
         <div className="mb-5">
-          <div className="flex justify-between items-center mb-1.5">
+          <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalorieIcon className="w-4 h-4 text-foreground" />
+              <CalorieIcon className="h-4 w-4 text-foreground" />
               <span className="text-sm font-medium text-muted">Calories</span>
             </div>{" "}
             <div className="text-sm">
               <span className="font-medium text-muted">
                 <AnimatedNumber value={Math.round(macroDailyTotals.calories)} />
               </span>
-              <span className="text-muted mx-1">/</span>
+              <span className="mx-1 text-muted">/</span>
               <span className="text-muted">
                 <AnimatedNumber
                   value={Math.round(effectiveCalorieTarget)}
@@ -318,7 +318,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             height="sm"
           />
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
           <MacroNutrient
             label="Protein"
             current={macroDailyTotals.protein}

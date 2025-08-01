@@ -37,17 +37,17 @@ const MacroTarget = memo(
 
     return (
       <div className="space-y-6 py-2">
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <h3 className="text-md font-medium text-foreground">Macro Target</h3>
           <div className="flex items-center">
             <button
               type="button"
               onClick={() => setHelpVisible(!helpVisible)}
-              className="text-foreground hover:text-primary transition-colors p-1 rounded-full hover:bg-surface/50"
+              className="rounded-full p-1 text-foreground transition-colors hover:bg-surface/50 hover:text-primary"
               aria-label={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
             >
-              <InfoIcon className="w-5 h-5" />
+              <InfoIcon className="h-5 w-5" />
             </button>
           </div>
         </div>
@@ -56,9 +56,9 @@ const MacroTarget = memo(
           <InfoCard
             title="Tips for adjusting your macros:"
             color="accent"
-            icon={<InfoIcon className="w-5 h-5" />}
+            icon={<InfoIcon className="h-5 w-5" />}
           >
-            <ul className="list-disc pl-5 space-y-1.5 text-sm text-foreground mt-2">
+            <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-foreground">
               <li>Drag the sliders to adjust percentages</li>
               <li>
                 Click the lock icon to keep a macro fixed while adjusting others

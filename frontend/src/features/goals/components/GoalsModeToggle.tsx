@@ -7,11 +7,11 @@ interface GoalsModeToggleProps {
 
 function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
   return (
-    <div className="relative flex items-center bg-surface/40 rounded-xl p-1 w-fit">
+    <div className="relative flex w-fit items-center rounded-xl bg-surface/40 p-1">
       <Button
         type="button"
         onClick={activeMode === "achieved" ? onToggle : undefined}
-        className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
           activeMode === "active"
             ? "bg-primary text-foreground shadow-surface"
             : "text-foreground hover:text-foreground"
@@ -19,7 +19,7 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
         variant={activeMode === "active" ? undefined : "ghost"}
         icon={
           <GoalsIcon
-            className={`w-4 h-4 mr-2 ${
+            className={`mr-2 h-4 w-4 ${
               activeMode === "active" ? "text-foreground" : "text-foreground"
             }`}
           />
@@ -30,7 +30,7 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
       <Button
         type="button"
         onClick={activeMode === "active" ? onToggle : undefined}
-        className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
           activeMode === "achieved"
             ? "bg-primary text-foreground shadow-surface"
             : "text-foreground hover:text-foreground"

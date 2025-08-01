@@ -161,8 +161,8 @@ export default function HomePage() {
     >
       <div className="relative min-h-screen">
         <div>
-          <div className="grid grid-cols-1 lg:grid-cols-6 gap-6">
-            <div className="lg:col-span-4 flex flex-col h-full space-y-6">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
+            <div className="flex h-full flex-col space-y-6 lg:col-span-4">
               {/* Metrics Panel */}
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
@@ -181,7 +181,7 @@ export default function HomePage() {
             </div>
 
             {/* Today's Summary - Right side */}
-            <div className="lg:col-span-2 flex flex-col h-full">
+            <div className="flex h-full flex-col lg:col-span-2">
               {isLoading ? (
                 <DailySummaryLoadingSkeleton />
               ) : (
@@ -241,11 +241,11 @@ export default function HomePage() {
 // Loading skeleton components
 const AddEntryLoadingSkeleton = () => (
   <CardContainer>
-    <div className="p-5 animate-pulse">
-      <div className="h-4 bg-surface rounded w-1/2 mb-4"></div>
+    <div className="animate-pulse p-5">
+      <div className="mb-4 h-4 w-1/2 rounded bg-surface"></div>
       <div className="grid grid-cols-3 gap-4">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="h-8 bg-surface rounded"></div>
+          <div key={index} className="h-8 rounded bg-surface"></div>
         ))}
       </div>
     </div>
@@ -254,11 +254,11 @@ const AddEntryLoadingSkeleton = () => (
 
 const DailySummaryLoadingSkeleton = () => (
   <CardContainer className="h-full">
-    <div className="p-5 h-full animate-pulse">
-      <div className="h-5 bg-surface rounded w-1/2 mb-4"></div>
+    <div className="h-full animate-pulse p-5">
+      <div className="mb-4 h-5 w-1/2 rounded bg-surface"></div>
       <div className="space-y-4">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="h-12 bg-surface rounded"></div>
+          <div key={index} className="h-12 rounded bg-surface"></div>
         ))}
       </div>
     </div>
@@ -267,11 +267,11 @@ const DailySummaryLoadingSkeleton = () => (
 
 const HistoryLoadingSkeleton = () => (
   <div className="animate-pulse space-y-4">
-    <div className="h-6 bg-surface rounded w-1/4 mb-6"></div>
+    <div className="mb-6 h-6 w-1/4 rounded bg-surface"></div>
     {[0, 1, 2].map((index) => (
       <div key={index} className="space-y-2">
-        <div className="h-5 bg-surface rounded w-1/6"></div>
-        <div className="h-16 bg-surface/50 rounded"></div>
+        <div className="h-5 w-1/6 rounded bg-surface"></div>
+        <div className="h-16 rounded bg-surface/50"></div>
       </div>
     ))}
   </div>

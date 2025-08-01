@@ -18,7 +18,7 @@ function StatSelector({
   availableStats,
 }: StatSelectorProps) {
   return (
-    <div className="relative flex flex-wrap space-x-1 p-0.5 bg-surface/60 rounded-lg">
+    <div className="relative flex flex-wrap space-x-1 rounded-lg bg-surface/60 p-0.5">
       {availableStats.map((stat) => {
         const bgColor =
           STAT_COLORS[stat as keyof typeof STAT_COLORS] || "bg-primary";
@@ -28,7 +28,7 @@ function StatSelector({
             key={stat}
             onClick={() => onStatChange(stat)}
             ariaLabel={`Select ${stat}`}
-            className={`relative px-2 py-0.5 rounded text-xs font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 ${
+            className={`relative rounded px-2 py-0.5 text-xs font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-1 focus-visible:ring-white/50 ${
               selectedStat === stat
                 ? "text-foreground"
                 : "text-foreground hover:bg-surface/50 hover:text-foreground"

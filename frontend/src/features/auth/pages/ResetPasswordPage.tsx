@@ -7,8 +7,8 @@ function ResetPasswordPage() {
     <QueryErrorBoundary>
       <ErrorBoundary>
         <div className="min-h-screen bg-background">
-          <main className="max-w-md mx-auto px-4 py-16">
-            <div className="bg-surface backdrop-blur-sm border border-border rounded-2xl p-6">
+          <main className="mx-auto max-w-md px-4 py-16">
+            <div className="rounded-2xl border border-border bg-surface p-6 backdrop-blur-sm">
               <ResetPasswordForm />
             </div>
           </main>

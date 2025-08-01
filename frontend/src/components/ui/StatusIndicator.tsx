@@ -86,7 +86,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
       role="status"
       aria-live={ariaLive}
     >
-      {icon || <Icon className="w-4 h-4" />} {message}
+      {icon || <Icon className="h-4 w-4" />} {message}
     </div>
   );
 };

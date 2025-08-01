@@ -258,7 +258,7 @@ function Modal(properties: ModalProps) {
         {/* Header: Only render if close button is shown */}
         {!hideClose && (
           <div
-            className={`flex items-center justify-between p-4 border-b border-border/50 ${variantStyles.header}`}
+            className={`flex items-center justify-between border-b border-border/50 p-4 ${variantStyles.header}`}
           >
             <h2
               id="modal-title"
@@ -272,14 +272,14 @@ function Modal(properties: ModalProps) {
               buttonSize={buttonSize}
               onClick={onClose}
               ariaLabel="Close modal"
-              className="text-foreground hover:text-red transition-colors"
+              className="hover:text-red text-foreground transition-colors"
             />
           </div>
         )}
 
         {/* Body */}
-        <div className="p-5 flex-grow overflow-y-hidden overflow-x-hidden">
-          {message && <p className="text-sm text-foreground mb-4">{message}</p>}
+        <div className="flex-grow overflow-x-hidden overflow-y-hidden p-5">
+          {message && <p className="mb-4 text-sm text-foreground">{message}</p>}
           {children}
         </div>
 
@@ -288,7 +288,7 @@ function Modal(properties: ModalProps) {
           <div
             className={`flex ${
               hideCancelButton ? "justify-center" : "justify-end"
-            } gap-4 p-4 border-t border-border/50 ${variantStyles.footer}`}
+            } gap-4 border-t border-border/50 p-4 ${variantStyles.footer}`}
           >
             {!hideCancelButton && (
               <Button
@@ -296,7 +296,7 @@ function Modal(properties: ModalProps) {
                 ariaLabel={cancelLabel}
                 variant="secondary"
                 buttonSize={buttonSize}
-                className="px-4 py-2 rounded-lg font-medium text-foreground bg-surface/60 hover:bg-surface/90 transition-colors"
+                className="rounded-lg bg-surface/60 px-4 py-2 font-medium text-foreground transition-colors hover:bg-surface/90"
               >
                 {cancelLabel}
               </Button>
@@ -318,7 +318,7 @@ function Modal(properties: ModalProps) {
                 ariaLabel={confirmLabel}
                 variant={isDanger ? "danger" : "primary"}
                 buttonSize={buttonSize}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${variantStyles.confirmButton}`}
+                className={`rounded-lg px-4 py-2 font-medium transition-colors ${variantStyles.confirmButton}`}
               >
                 {confirmLabel}
               </Button>

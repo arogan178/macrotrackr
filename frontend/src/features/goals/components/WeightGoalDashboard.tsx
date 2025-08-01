@@ -67,9 +67,9 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   if (isLoading) {
     return (
       <div
-        className={`bg-surface/40 rounded-2xl h-60 flex items-center justify-center animate-pulse ${className}`}
+        className={`flex h-60 animate-pulse items-center justify-center rounded-2xl bg-surface/40 ${className}`}
       >
-        <div className="w-full h-full bg-surface rounded-2xl" />
+        <div className="h-full w-full rounded-2xl bg-surface" />
       </div>
     );
   }
@@ -77,7 +77,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Empty State
   if (!weightGoals) {
     return (
-      <div className={`bg-surface/40 rounded-2xl ${className}`}>
+      <div className={`rounded-2xl bg-surface/40 ${className}`}>
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
@@ -99,7 +99,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Status View (when weightGoals exist)
   return (
     <>
-      <div className={`bg-surface/40 rounded-2xl ${className}`}>
+      <div className={`rounded-2xl bg-surface/40 ${className}`}>
         <WeightGoalStatus
           startingWeight={user.weight ?? 0} // Pass current weight for progress, fallback to 0
           targetWeight={weightGoals.targetWeight}

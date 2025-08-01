@@ -18,7 +18,7 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
 
   return (
     <div
-      className={`relative h-2 w-full bg-surface/30 rounded-full overflow-hidden ${className}`}
+      className={`relative h-2 w-full overflow-hidden rounded-full bg-surface/30 ${className}`}
     >
       <div
         className="absolute top-0 left-0 h-full bg-protein/80 transition-all duration-500"
@@ -57,15 +57,15 @@ export function MacroTargetLegend({
   return (
     <div className={`flex justify-between text-xs ${className}`}>
       <div className="flex items-center">
-        <span className="inline-block w-2 h-2 bg-protein rounded-full mr-1"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-protein"></span>
         <span className="text-foreground">{proteinPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="inline-block w-2 h-2 bg-carbs rounded-full mr-1"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-carbs"></span>
         <span className="text-foreground">{carbsPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="inline-block w-2 h-2 bg-fats rounded-full mr-1"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-fats"></span>
         <span className="text-foreground">{fatsPercent}%</span>
       </div>
     </div>
@@ -120,17 +120,17 @@ export function MacroIndicator({
 
   return (
     <div className="flex flex-col">
-      <div className="flex items-center gap-2 mb-1">
+      <div className="mb-1 flex items-center gap-2">
         <div
-          className={`w-2 h-2 rounded-full ${colorClasses[color].dot}`}
+          className={`h-2 w-2 rounded-full ${colorClasses[color].dot}`}
         ></div>
         <span className="text-sm text-foreground">{name}</span>
         {showPercentage && percentage !== undefined && (
-          <span className="text-xs text-foreground ml-auto">{percentage}%</span>
+          <span className="ml-auto text-xs text-foreground">{percentage}%</span>
         )}
       </div>
 
-      <div className="flex items-baseline gap-1.5 mb-1">
+      <div className="mb-1 flex items-baseline gap-1.5">
         <span className="text-sm font-semibold text-foreground">
           {Math.round(value)}g
         </span>
@@ -138,7 +138,7 @@ export function MacroIndicator({
       </div>
 
       {target && (
-        <div className="h-1.5 bg-surface/80 rounded-full overflow-hidden">
+        <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
           <div
             className={`h-full rounded-full ${colorClasses[color].bg}`}
             style={{ width: `${percentage}%` }}

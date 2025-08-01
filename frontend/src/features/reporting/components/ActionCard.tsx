@@ -10,11 +10,11 @@ export default function ActionCard({
 }: ActionCardProps) {
   return (
     <CardContainer className="p-3">
-      <div className="flex items-center mb-2">
-        <div className={`${bgColor} rounded-full p-1.5 mr-2`}>{icon}</div>
+      <div className="mb-2 flex items-center">
+        <div className={`${bgColor} mr-2 rounded-full p-1.5`}>{icon}</div>
         <h4 className="text-sm font-medium text-foreground">{title}</h4>
       </div>
-      <p className="text-foreground text-sm">{message}</p>
+      <p className="text-sm text-foreground">{message}</p>
     </CardContainer>
   );
 }

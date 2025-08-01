@@ -24,17 +24,17 @@ export const StepIndicator = memo(function StepIndicator({
   );
 
   return (
-    <div className="w-full mb-6">
+    <div className="mb-6 w-full">
       <div className="relative flex items-center justify-between">
         {/* Background track */}
         <div
-          className="absolute top-4 h-0.5 bg-surface transform -translate-y-1/2"
+          className="absolute top-4 h-0.5 -translate-y-1/2 transform bg-surface"
           style={trackStyle}
         />
 
         {/* Progress line */}
         <div
-          className="absolute top-4 h-0.5 bg-primary transform -translate-y-1/2 transition-all duration-500 ease-in-out"
+          className="absolute top-4 h-0.5 -translate-y-1/2 transform bg-primary transition-all duration-500 ease-in-out"
           style={{
             left: progressLineLeftPosition,
             width: `calc(${progressPercentage}% * ${
@@ -58,16 +58,16 @@ export const StepIndicator = memo(function StepIndicator({
                 }}
               >
                 <div
-                  className={`w-8 h-8 flex items-center justify-center rounded-full mb-1 transition-all duration-300 ${circleClasses}`}
+                  className={`mb-1 flex h-8 w-8 items-center justify-center rounded-full transition-all duration-300 ${circleClasses}`}
                 >
                   {isComplete ? (
-                    <CheckMarkIcon className="w-4 h-4" />
+                    <CheckMarkIcon className="h-4 w-4" />
                   ) : (
                     <span className="text-sm font-medium">{index + 1}</span>
                   )}
                 </div>
                 <span
-                  className={`text-xs mt-1 transition-colors duration-300 ${labelClasses}`}
+                  className={`mt-1 text-xs transition-colors duration-300 ${labelClasses}`}
                 >
                   {info.title}
                 </span>

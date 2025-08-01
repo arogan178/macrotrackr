@@ -12,12 +12,19 @@ function NotificationManager() {
   const { notifications, hideNotification } = useStore();
 
   if (notifications.length === 0) {
-    return null;
+    return;
   }
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-      <div className="flex flex-col gap-3 w-screen max-w-md px-4">
+    <div
+      className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2"
+      style={
+        {
+          top: "var(--floating-notification-top, 16px)",
+        } as React.CSSProperties
+      }
+    >
+      <div className="flex w-screen max-w-md flex-col gap-3 px-4">
         {notifications.map((notification, index) => (
           <div
             key={notification.id}

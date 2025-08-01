@@ -35,7 +35,7 @@ const IconButtonGroup = memo(
           disabled={isDeleting}
           icon={
             isDeleting ? (
-              <LoadingSpinnerIcon className="w-3.5 h-3.5 animate-spin" />
+              <LoadingSpinnerIcon className="h-3.5 w-3.5 animate-spin" />
             ) : (
               <TrashIcon />
             )

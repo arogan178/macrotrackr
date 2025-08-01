@@ -200,25 +200,25 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
   return (
     <CardContainer>
       <div className="p-5">
-        <h2 className="text-lg font-medium text-foreground mb-4">
+        <h2 className="mb-4 text-lg font-medium text-foreground">
           Add Today's Macros
         </h2>
 
         <div className="mb-6">
           <CalorieSearch onResult={handleSearchResult} />
           {searchResult && (
-            <div className="mt-3 text-sm text-success flex items-center justify-between">
+            <div className="mt-3 flex items-center justify-between text-sm text-success">
               <div className="flex items-center">
-                <CheckMarkIcon className="w-4 h-4 mr-2" />
+                <CheckMarkIcon className="mr-2 h-4 w-4" />
                 {searchResult}
               </div>
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="text-xs text-foreground hover:text-foreground flex items-center"
+                className="flex items-center text-xs text-foreground hover:text-foreground"
                 aria-label="Clear search"
               >
-                <TrashIcon className="w-4 h-4 mr-1" />
+                <TrashIcon className="mr-1 h-4 w-4" />
                 Clear
               </button>
             </div>
@@ -226,7 +226,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="sm:col-span-1">
               <NumberField
                 label="Quantity"
@@ -249,7 +249,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <DateField
               label="Date"
               value={entryDate}
@@ -273,7 +273,7 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
             <NumberField
               label="Protein"
               value={protein}
@@ -303,18 +303,18 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="mt-5 flex justify-between items-center">
+          <div className="mt-5 flex items-center justify-between">
             <div className="text-sm text-foreground">
               Total Calories:{" "}
-              <span className="text-primary font-medium">{calories}</span>
+              <span className="font-medium text-primary">{calories}</span>
             </div>
             {allFieldsAreZero && (
-              <div className="text-sm text-vibrant-accent mr-4">
+              <div className="mr-4 text-sm text-vibrant-accent">
                 Macros must be greater than 0
               </div>
             )}
             {!mealName.trim() && !anyFieldIsUndefined && (
-              <div className="text-sm text-vibrant-accent mr-4">
+              <div className="mr-4 text-sm text-vibrant-accent">
                 Please provide a meal name
               </div>
             )}

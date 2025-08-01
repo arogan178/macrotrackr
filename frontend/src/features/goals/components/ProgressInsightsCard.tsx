@@ -128,12 +128,12 @@ function ProgressInsightsCard({
 
   return (
     <CardContainer>
-      <h3 className="text-sm font-medium text-foreground mb-2">
+      <h3 className="mb-2 text-sm font-medium text-foreground">
         Progress Insights
       </h3>
       <div className="flex items-start">
         <LightBulbIcon
-          className={`w-5 h-5 ${insight.color} mr-2 mt-0.5 flex-shrink-0`}
+          className={`h-5 w-5 ${insight.color} mt-0.5 mr-2 flex-shrink-0`}
         />
         <p className={`text-sm ${insight.color}`}>{insight.message}</p>
       </div>
