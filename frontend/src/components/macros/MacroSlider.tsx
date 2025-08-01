@@ -179,11 +179,11 @@ export function MacroBadge({
   return (
     <div className={`rounded-lg border bg-background/50 p-3 ${border}`}>
       <div className="flex items-center gap-1.5">
-        <div className={`bg- h-2 w-2 rounded-full${color}`}></div>
-        <span className="text-xs text-muted">{name}</span>
+        <div className={`bg-${color} h-2 w-2 rounded-full`}></div>
+        <span className="text-xs text-foreground">{name}</span>
         {isLocked && <LockIcon className={`h-3 w-3 ${iconColor}`} />}
       </div>{" "}
-      <div className="mt-1 w-12 text-lg font-semibold text-muted">
+      <div className="mt-1 w-12 text-lg font-semibold text-foreground">
         <AnimatedNumber value={value} suffix="%" />
       </div>
     </div>
