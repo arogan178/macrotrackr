@@ -125,7 +125,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         </div>
         <div className="flex items-center gap-2 self-end sm:self-center">
           <Button
-            variant="secondary"
+            variant="primary"
             onClick={onLogWeight}
             text="Log Weight"
             icon={<WeightIcon />}
@@ -174,13 +174,15 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               </>
             )}
             {isMaintenance && (
-              <span className="text-lg text-muted">Maintaining Weight</span>
+              <span className="text-lg text-foreground">
+                Maintaining Weight
+              </span>
             )}
           </div>
           {!isMaintenance && (
             <div className="flex items-center gap-2 self-end sm:self-center">
-              <span className="text-sm text-muted">Progress:</span>
-              <span className="text-lg font-semibold text-muted">
+              <span className="text-sm text-foreground">Progress:</span>
+              <span className="text-lg font-semibold text-foreground">
                 {progressPercentage}%
               </span>
             </div>
@@ -283,21 +285,23 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
 
       {/* Nutrition section */}
       <div>
-        <h3 className="mb-4 text-lg font-semibold text-muted">
+        <h3 className="mb-4 text-lg font-semibold text-foreground">
           Daily Nutrition Target
         </h3>
         <div className="mb-5">
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CalorieIcon className="h-4 w-4 text-foreground" />
-              <span className="text-sm font-medium text-muted">Calories</span>
+              <span className="text-sm font-medium text-foreground">
+                Calories
+              </span>
             </div>{" "}
             <div className="text-sm">
-              <span className="font-medium text-muted">
+              <span className="font-medium text-foreground">
                 <AnimatedNumber value={Math.round(macroDailyTotals.calories)} />
               </span>
-              <span className="mx-1 text-muted">/</span>
-              <span className="text-muted">
+              <span className="mx-1 text-foreground">/</span>
+              <span className="text-foreground">
                 <AnimatedNumber
                   value={Math.round(effectiveCalorieTarget)}
                   suffix=" kcal"

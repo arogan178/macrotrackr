@@ -38,11 +38,26 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
       <h2 className="mb-6 text-center text-2xl font-bold">
         {mode === "login" ? "Login" : "Register"}
       </h2>
-      <FloatingNotification
-        message={error}
-        type="error"
-        onClose={handleClearMessages}
-      />
+
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 rounded-md border border-error/40 bg-error/10 p-3 text-sm text-error"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <span>{error}</span>
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={handleClearMessages}
+              className="text-error hover:opacity-80"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <TextField
           label="Email"

@@ -260,7 +260,7 @@ function WeightGoalForm({
               <p className="mt-1 text-xs text-foreground">
                 Expected change:{" "}
                 {typeof weeklyWeightChange === "number" &&
-                !isNaN(weeklyWeightChange)
+                !Number.isNaN(weeklyWeightChange)
                   ? `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`
                   : "0 kg per week"}
               </p>
