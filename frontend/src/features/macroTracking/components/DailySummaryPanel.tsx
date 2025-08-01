@@ -64,9 +64,13 @@ export default function DailySummary({
   );
 
   // --- Completion percentages ---
+  // Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
   function percent(actual: number, targetValue: number) {
     if (!targetValue) return 0;
-    return Math.min(100, Math.round((actual / targetValue) * 100) || 0);
+    const ratio = actual / targetValue;
+    const pct = Math.floor(ratio * 100);
+    // Clamp to [0, 100]
+    return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
   }
   const proteinCompletionPercent = percent(
     safeTotal.protein,

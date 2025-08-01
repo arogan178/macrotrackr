@@ -1,4 +1,3 @@
-import { CALORIES_PER_GRAM } from "@/utils/constants/nutrition";
 import {
   CALORIES_PER_KG_FAT,
   DEFAULT_TARGET_WEEKS,
@@ -7,27 +6,59 @@ import {
 } from "@/features/goals/constants";
 import type { MacroDailyTotals, MacroEntry } from "@/types/macro";
 import type { ActivityLevel, Gender } from "@/types/user";
+import {
+  CALORIES_PER_GRAM,
+  DEFAULT_MACRO_TOTALS,
+} from "@/utils/constants/nutrition";
 
 /**
  * Calorie helpers (raw math, no rounding by default)
  */
-export function caloriesFromMacrosRaw(protein: number, carbs: number, fats: number): number {
-  return protein * CALORIES_PER_GRAM.protein + carbs * CALORIES_PER_GRAM.carbs + fats * CALORIES_PER_GRAM.fats;
+export function caloriesFromMacrosRaw(
+  protein: number,
+  carbs: number,
+  fats: number,
+): number {
+  return (
+    protein * CALORIES_PER_GRAM.protein +
+    carbs * CALORIES_PER_GRAM.carbs +
+    fats * CALORIES_PER_GRAM.fats
+  );
 }
 
-export function caloriesFromMacrosRounded(protein: number, carbs: number, fats: number): number {
+export function caloriesFromMacrosRounded(
+  protein: number,
+  carbs: number,
+  fats: number,
+): number {
   return Math.round(caloriesFromMacrosRaw(protein, carbs, fats));
 }
 
+// Per-macro calorie helpers (rounded for UI usage)
+export function calculateProteinCalories(protein: number): number {
+  return Math.round(protein * CALORIES_PER_GRAM.protein);
+}
+export function calculateCarbsCalories(carbs: number): number {
+  return Math.round(carbs * CALORIES_PER_GRAM.carbs);
+}
+export function calculateFatsCalories(fats: number): number {
+  return Math.round(fats * CALORIES_PER_GRAM.fats);
+}
+
 export function caloriesFromEntryRaw(entry: MacroEntry): number {
-  return caloriesFromMacrosRaw(entry.protein || 0, entry.carbs || 0, entry.fats || 0);
+  return caloriesFromMacrosRaw(
+    entry.protein || 0,
+    entry.carbs || 0,
+    entry.fats || 0,
+  );
 }
 
 /**
  * Backwards-compatible names used around the app
  */
 export const calculateCaloriesFromMacros = caloriesFromMacrosRaw;
-export const calculateEntryCalories = (entry: MacroEntry) => caloriesFromEntryRaw(entry);
+export const calculateEntryCalories = (entry: MacroEntry) =>
+  caloriesFromEntryRaw(entry);
 
 /**
  * Macro percentages and targets
@@ -37,13 +68,19 @@ export function calculateCaloriePercentages(
   carbs: number,
   fats: number,
 ) {
-  const totalCalories = caloriesFromMacrosRounded(protein, carbs, fats);
+  const totalCalories = caloriesFromMacrosRaw(protein, carbs, fats);
   if (totalCalories === 0) {
     return { proteinPercent: 0, carbsPercent: 0, fatsPercent: 0 };
   }
-  const proteinPercent = Math.round(((protein * CALORIES_PER_GRAM.protein) / totalCalories) * 100);
-  const carbsPercent = Math.round(((carbs * CALORIES_PER_GRAM.carbs) / totalCalories) * 100);
-  const fatsPercent = Math.round(((fats * CALORIES_PER_GRAM.fats) / totalCalories) * 100);
+  const proteinPercent = Math.round(
+    ((protein * CALORIES_PER_GRAM.protein) / totalCalories) * 100,
+  );
+  const carbsPercent = Math.round(
+    ((carbs * CALORIES_PER_GRAM.carbs) / totalCalories) * 100,
+  );
+  const fatsPercent = Math.round(
+    ((fats * CALORIES_PER_GRAM.fats) / totalCalories) * 100,
+  );
   return { proteinPercent, carbsPercent, fatsPercent };
 }
 
@@ -53,20 +90,24 @@ export function calculateMacroTarget(
   carbsPercentage: number,
   fatsPercentage: number,
 ) {
-  const proteinTarget = Math.round((totalCalories * (proteinPercentage / 100)) / CALORIES_PER_GRAM.protein);
-  const carbsTarget = Math.round((totalCalories * (carbsPercentage / 100)) / CALORIES_PER_GRAM.carbs);
-  const fatsTarget = Math.round((totalCalories * (fatsPercentage / 100)) / CALORIES_PER_GRAM.fats);
+  const proteinTarget = Math.round(
+    (totalCalories * (proteinPercentage / 100)) / CALORIES_PER_GRAM.protein,
+  );
+  const carbsTarget = Math.round(
+    (totalCalories * (carbsPercentage / 100)) / CALORIES_PER_GRAM.carbs,
+  );
+  const fatsTarget = Math.round(
+    (totalCalories * (fatsPercentage / 100)) / CALORIES_PER_GRAM.fats,
+  );
   return { proteinTarget, carbsTarget, fatsTarget };
 }
 
 /**
  * Daily totals
  */
-export const DEFAULT_MACRO_TOTALS: MacroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 };
-
 export function calculateDailyTotals(entries: MacroEntry[]): MacroDailyTotals {
   if (!entries || entries.length === 0) {
-    return DEFAULT_MACRO_TOTALS;
+    return { ...DEFAULT_MACRO_TOTALS };
   }
   const totals: MacroDailyTotals = { ...DEFAULT_MACRO_TOTALS };
   for (const entry of entries) {
@@ -127,7 +168,10 @@ export function calculateTDEE(bmr: number, activityMultiplier: number): number {
 export function calculateTDEEByActivityLevel(
   bmr: number,
   activityLevel: ActivityLevel,
-  activityLevelsMap: Record<number, { value: ActivityLevel; multiplier: number }>,
+  activityLevelsMap: Record<
+    number,
+    { value: ActivityLevel; multiplier: number }
+  >,
 ): number {
   let multiplier = activityLevelsMap[1]?.multiplier ?? 1;
   for (const level of Object.values(activityLevelsMap)) {
@@ -167,12 +211,18 @@ export function calculateTimeToGoal(
   const weeklyCalorieChange = dailyCalorieChange * 7;
   const expectedWeightChangePerWeek = weeklyCalorieChange / CALORIES_PER_KG_FAT;
   const weeksToGoal =
-    expectedWeightChangePerWeek === 0 ? Infinity : weightDifference / Math.abs(expectedWeightChangePerWeek);
+    expectedWeightChangePerWeek === 0
+      ? Infinity
+      : weightDifference / Math.abs(expectedWeightChangePerWeek);
 
   return {
     weeksToGoal: Math.ceil(weeksToGoal),
-    dailyCalorieDeficit: isWeightLoss ? dailyCalorieChange : -dailyCalorieChange,
-    expectedWeightLossPerWeek: isWeightLoss ? expectedWeightChangePerWeek : -expectedWeightChangePerWeek,
+    dailyCalorieDeficit: isWeightLoss
+      ? dailyCalorieChange
+      : -dailyCalorieChange,
+    expectedWeightLossPerWeek: isWeightLoss
+      ? expectedWeightChangePerWeek
+      : -expectedWeightChangePerWeek,
   };
 }
 
@@ -187,7 +237,10 @@ export function calculateRecommendedDeficit(
   const weightDifference = Math.abs(startingWeight - targetWeight);
   const isWeightLoss = startingWeight > targetWeight;
   const weeklyWeightLoss = weightDifference / targetWeeks;
-  const safeWeeklyLoss = Math.min(Math.max(weeklyWeightLoss, MIN_WEEKLY_WEIGHT_LOSS), MAX_WEEKLY_WEIGHT_LOSS);
+  const safeWeeklyLoss = Math.min(
+    Math.max(weeklyWeightLoss, MIN_WEEKLY_WEIGHT_LOSS),
+    MAX_WEEKLY_WEIGHT_LOSS,
+  );
   const dailyChange = (safeWeeklyLoss * CALORIES_PER_KG_FAT) / 7;
   return Math.round(isWeightLoss ? dailyChange : -dailyChange);
 }
@@ -225,10 +278,16 @@ export function generateWeightGoalCalculations(
   targetWeight: number,
   customCalorieIntake?: number,
 ) {
-  let calorieTarget = customCalorieIntake ?? calculateCalorieTarget(tdee, startingWeight, targetWeight);
+  let calorieTarget =
+    customCalorieIntake ??
+    calculateCalorieTarget(tdee, startingWeight, targetWeight);
 
   const weightGoal =
-    startingWeight > targetWeight ? "lose" : startingWeight < targetWeight ? "gain" : "maintain";
+    startingWeight > targetWeight
+      ? "lose"
+      : startingWeight < targetWeight
+        ? "gain"
+        : "maintain";
 
   if (weightGoal !== "maintain") {
     let difference = calorieTarget - tdee;
@@ -255,7 +314,8 @@ export function generateWeightGoalCalculations(
     };
   }
 
-  const effectiveCalorieChange = weightGoal === "lose" ? -calorieDifference : calorieDifference;
+  const effectiveCalorieChange =
+    weightGoal === "lose" ? -calorieDifference : calorieDifference;
 
   if (effectiveCalorieChange <= 0) {
     const fallbackDate = new Date();
@@ -289,7 +349,9 @@ export function generateWeightGoalCalculations(
     calorieTarget,
     targetDate: targetDate.toISOString().split("T")[0],
     calculatedWeeks: finalWeeks,
-    weeklyChange: isFinite(expectedWeightLossPerWeek) ? expectedWeightLossPerWeek : 0,
+    weeklyChange: isFinite(expectedWeightLossPerWeek)
+      ? expectedWeightLossPerWeek
+      : 0,
     dailyChange: calorieDifference,
   };
 }
