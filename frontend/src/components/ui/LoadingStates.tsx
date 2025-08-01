@@ -134,7 +134,7 @@ interface QueryLoadingWrapperProps {
   /**
    * The error object if there is one
    */
-  error?: Error | null;
+  error?: Error | undefined;
 
   /**
    * Content to show when loaded successfully
@@ -168,7 +168,8 @@ interface QueryLoadingWrapperProps {
 export function QueryLoadingWrapper({
   isLoading,
   isError = false,
-  error = null,
+  // Use optional chaining below; keep default to undefined without explicit assignment
+  error,
   children,
   loadingComponent,
   errorComponent,
@@ -189,7 +190,7 @@ export function QueryLoadingWrapper({
         {errorComponent || (
           <div className="text-center text-vibrant-accent">
             <p className="font-medium">Error loading data</p>
-            {error && (
+            {error?.message && (
               <p className="mt-1 text-sm text-foreground">{error.message}</p>
             )}
           </div>

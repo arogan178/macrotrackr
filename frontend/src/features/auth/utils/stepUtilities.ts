@@ -1,8 +1,5 @@
 // Registration step utilities and configurations
 
-import { useNavigate } from "@tanstack/react-router";
-
-const navigate = useNavigate;
 export interface StepInfo {
   title: string;
   icon?: string;
@@ -106,7 +103,8 @@ export async function handleStepSubmit(
   // Handle final step submission
   if (stepNumber === STEP_COUNT && submitRegistration && navigate) {
     await submitRegistration();
-    navigate({ to: "/home", replace: true });
+    // TanStack Router navigate utility expects a string path here
+    navigate("/home", { replace: true });
     return;
   }
 
