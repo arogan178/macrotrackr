@@ -5,11 +5,10 @@ import type {
   UserNutritionalProfile,
   UserSettings,
 } from "@/types/user";
-import { calculateBMR as calculateBMRCore } from "@/utils/nutritionCalculations";
-/**
- * Calculate TDEE based on BMR and activity multiplier
- */
-import { calculateTDEE as calculateTDEECore } from "@/utils/nutritionCalculations";
+import {
+  calculateBMR as calculateBMRCore,
+  calculateTDEE as calculateTDEECore,
+} from "@/utils/nutritionCalculations";
 
 import { ACTIVITY_LEVELS } from "./constants";
 

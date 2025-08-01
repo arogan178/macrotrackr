@@ -5,6 +5,16 @@ import { ArrowRightIcon, Button, SearchIcon } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { apiService } from "@/utils/apiServices";
 
+// Helper moved to module scope to satisfy unicorn/consistent-function-scoping
+function getMetricServing(quantity: number, unit: string) {
+  if (unit === "oz")
+    return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
+  if (unit === "lbs")
+    return { quantity: +(quantity * 0.453_592).toFixed(3), unit: "kg" };
+  // Keep liters and other units as-is
+  return { quantity, unit };
+}
+
 type CalorieSearchProps = {
   onResult: (macros: {
     protein: string;
@@ -71,15 +81,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     }
   };
 
-  // Convert to metric for display and selection
-  const getMetricServing = (quantity: number, unit: string) => {
-    if (unit === "oz")
-      return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
-    if (unit === "lbs")
-      return { quantity: +(quantity * 0.453_592).toFixed(3), unit: "kg" };
-    // If L, keep as L
-    return { quantity, unit };
-  };
+  // Convert to metric for display and selection (moved to module scope)
 
   const handleSelect = (item: FoodResult) => {
     let quantity = item.servingQuantity;

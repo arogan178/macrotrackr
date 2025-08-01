@@ -103,7 +103,8 @@ function ButtonBase({
   );
 }
 
-function ButtonWithAutoLoading(properties: ButtonAllProps) {
+// Unified Button that ensures hooks are always called in a stable order
+function Button(properties: ButtonAllProps) {
   const {
     autoLoadingFeature,
     autoLoadingGlobal = false,
@@ -111,38 +112,26 @@ function ButtonWithAutoLoading(properties: ButtonAllProps) {
     ...rest
   } = properties;
 
-  // Always call global hook to keep order stable
+  // Always call hooks at top-level and in the same order
   const globalLoading = useGlobalLoading();
-
-  // Render a child component that calls feature hook only when feature is provided
-  function FeatureLoadingProbe({
-    children,
-  }: {
-    children: (featureLoadingMutation: boolean) => React.ReactNode;
-  }) {
-    if (!autoLoadingFeature) {
-      return <>{children(false)}</>;
-    }
-    const featureLoading = useFeatureLoading(autoLoadingFeature);
-    return <>{children(featureLoading.isMutationLoading)}</>;
-  }
+  // Call feature loading hook unconditionally with a stable argument.
+  // If no feature is provided, default to "settings" which is a safe feature bucket in this app.
+  // We won't use its value unless autoLoadingFeature is set.
+  const featureKey = (autoLoadingFeature ?? "settings") as Parameters<
+    typeof useFeatureLoading
+  >[0];
+  const featureLoading = useFeatureLoading(featureKey);
 
   const globalMutation = autoLoadingGlobal
     ? globalLoading.isMutationLoading
     : false;
+  const featureMutation = autoLoadingFeature
+    ? featureLoading.isMutationLoading
+    : false;
 
-  return (
-    <FeatureLoadingProbe>
-      {(featureMutation) => {
-        const final = isLoading || featureMutation || globalMutation;
-        return <ButtonBase {...rest} isLoading={final} />;
-      }}
-    </FeatureLoadingProbe>
-  );
-}
+  const final = isLoading || featureMutation || globalMutation;
 
-function Button(properties: ButtonAllProps) {
-  return <ButtonWithAutoLoading {...properties} />;
+  return <ButtonBase {...rest} isLoading={final} />;
 }
 
 export default memo(Button);

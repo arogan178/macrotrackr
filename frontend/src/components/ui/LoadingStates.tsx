@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { LoadingSpinner } from "@/components/ui";
 import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
+/* eslint-disable react/prop-types */
 
 interface LoadingStateProps {
   /**
@@ -236,7 +237,8 @@ export function MutationLoadingButton({
   return (
     <button
       {...properties}
-      disabled={disabled || isLoading}
+      aria-busy={isLoading}
+      disabled={Boolean(disabled) || isLoading}
       className={`${className} ${isLoading ? "cursor-not-allowed opacity-75" : ""}`}
     >
       {isLoading ? (
