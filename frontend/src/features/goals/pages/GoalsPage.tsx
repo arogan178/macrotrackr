@@ -1,8 +1,7 @@
 // src/features/goals/pages/GoalsPage.tsx
 
-import { useLoaderData, useRouter } from "@tanstack/react-router";
+import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect } from "react";
 
 import { goalsRoute } from "@/AppRouter";
 import FeaturePage from "@/components/layout/FeaturePage";
@@ -17,7 +16,7 @@ import {
 } from "@/features/goals/components";
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { HabitModal, HabitTracker } from "@/features/habits/components";
-import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
+import { HabitGoalFormValues } from "@/features/habits/types/types";
 import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useMutationErrorHandler } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
@@ -66,7 +65,6 @@ export default function GoalsPage() {
     openHabitModal,
     closeHabitModal,
     showNotification,
-    setSubscriptionStatus,
   } = useStore();
 
   const { data: user } = useUser();
@@ -84,7 +82,7 @@ export default function GoalsPage() {
       calories: number;
     };
     weightGoals?: WeightGoalsResponse;
-    weightLog?: any;
+    weightLog?: unknown;
     weightGoalsError?: string;
   } = useLoaderData({ from: goalsRoute.id }) || {};
 
@@ -95,7 +93,7 @@ export default function GoalsPage() {
     calories: 0,
   };
 
-  const { weightGoals, weightLog, weightGoalsError } = loaderData;
+  const { weightGoals } = loaderData;
 
   const macroDailyTotals = liveMacroDailyTotals || initialMacroDailyTotals;
 
@@ -103,19 +101,14 @@ export default function GoalsPage() {
     ? createNutritionProfile(toUserSettings(user))
     : undefined;
 
-  const {
-    data: habits = [],
-    isLoading: habitsLoading,
-    error: habitsQueryError,
-  } = useHabits();
+  const { data: habits = [], isLoading: habitsLoading } = useHabits();
   const addHabitMutation = useAddHabit();
   const updateHabitMutation = useUpdateHabit();
   const deleteHabitMutation = useDeleteHabit();
   const incrementProgressMutation = useIncrementHabitProgress();
   const completeHabitMutation = useCompleteHabit();
 
-  const { data: weightGoalsFromQuery, isLoading: weightGoalsLoading } =
-    useWeightGoals();
+  const { data: weightGoalsFromQuery } = useWeightGoals();
   const deleteWeightGoalMutation = useDeleteWeightGoal();
 
   const { handleMutationError, handleMutationSuccess } =
@@ -225,8 +218,6 @@ export default function GoalsPage() {
       handleMutationError(error, "deleting habit");
     }
   };
-
-  const router = useRouter();
 
   const handleDeleteWeightGoalConfirmed = async () => {
     try {
@@ -431,6 +422,8 @@ export default function GoalsPage() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
                 <div className="space-y-6">
+                  {/* Prop expects MacroTargetSettings | null */}
+                  {/* eslint-disable-next-line unicorn/no-null */}
                   <MacroTargetForm macroTarget={macroTarget ?? null} />
                 </div>
               </motion.div>

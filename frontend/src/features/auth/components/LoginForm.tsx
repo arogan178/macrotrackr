@@ -1,6 +1,6 @@
 import { CardContainer, TextField } from "@/components/form";
-import { Button, CalorieIcon, LoadingSpinner } from "@/components/ui";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
+import { Button, CalorieIcon } from "@/components/ui";
+import { useMutationErrorHandler } from "@/hooks";
 import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
@@ -22,7 +22,6 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
   const loginMutation = useLogin();
 
   // Use new loading state hooks
-  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),

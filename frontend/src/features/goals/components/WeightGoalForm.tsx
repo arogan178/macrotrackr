@@ -107,7 +107,6 @@ function WeightGoalForm({
     targetWeight,
     calorieIntake,
     weightGoals,
-    calculations?.calorieTarget,
     isEditing,
   ]);
 

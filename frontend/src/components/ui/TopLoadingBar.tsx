@@ -16,12 +16,14 @@ function TopLoadingBar() {
     minVisibleMs: 400,
   });
 
-  // Respect reduced motion preference
+  // Respect reduced motion preference (memoized)
   const prefersReducedMotion = useMemo(() => {
-    if (globalThis.window === undefined || !globalThis.matchMedia) return false;
+    if (typeof globalThis.matchMedia !== "function") return false;
     return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
+  // Returning null is conventional in React for non-render; disable unicorn/no-null for this line.
+  // eslint-disable-next-line unicorn/no-null
   if (!visible) return null;
 
   return (

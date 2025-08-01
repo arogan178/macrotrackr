@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect } from "react";
 import { createPortal } from "react-dom";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -19,7 +19,7 @@ function GlobalLoadingOverlay() {
   });
 
   // Ensure we have a portal target; default to document.body
-  const target = typeof document === "undefined" ? null : document.body;
+  const target = typeof document === "undefined" ? undefined : document.body;
 
   // Optionally set aria-busy on the main app container if present
   useEffect(() => {
@@ -33,11 +33,14 @@ function GlobalLoadingOverlay() {
   }, [visible]);
 
   // Respect reduced motion for spinner if desired (spinner already uses simple spin)
-  const prefersReducedMotion = useMemo(() => {
-    if (globalThis.window === undefined || !globalThis.matchMedia) return false;
-    return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  }, []);
+  // Currently unused, keep logic for potential future use but comment to satisfy linter
+  // const prefersReducedMotion = useMemo(() => {
+  //   if (globalThis.window === undefined || !globalThis.matchMedia) return false;
+  //   return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  // }, []);
 
+  // Returning null is the conventional React pattern; disable unicorn/no-null for this line.
+  // eslint-disable-next-line unicorn/no-null
   if (!visible || !target) return null;
 
   const overlay = (
