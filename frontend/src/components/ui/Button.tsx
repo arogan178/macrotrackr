@@ -13,7 +13,7 @@ import { useFeatureLoading, useGlobalLoading } from "@/hooks";
 type ButtonAllProps = ButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
 
-function Button({
+function ButtonBase({
   children,
   text,
   type = "button",
@@ -28,23 +28,9 @@ function Button({
   onClick,
   fullWidth = false,
   ariaLabel,
-  autoLoadingFeature,
-  autoLoadingGlobal = false,
   ...rest
-}: ButtonAllProps) {
-  // Auto-detect loading states if requested
-  const featureLoading = autoLoadingFeature
-    ? useFeatureLoading(autoLoadingFeature)
-    : null;
-  const globalLoading = autoLoadingGlobal ? useGlobalLoading() : null;
-
-  // Determine final loading state
-  const autoDetectedLoading =
-    featureLoading?.isMutationLoading ||
-    globalLoading?.isMutationLoading ||
-    false;
-
-  const finalIsLoading = isLoading || autoDetectedLoading;
+}: Omit<ButtonAllProps, "autoLoadingFeature" | "autoLoadingGlobal">) {
+  const finalIsLoading = isLoading;
 
   // Localized button styles (migrated from utils/Styles.ts)
   const sizeStyles = FORM_BUTTON_SIZES;
@@ -115,6 +101,48 @@ function Button({
       {renderContent()}
     </button>
   );
+}
+
+function ButtonWithAutoLoading(properties: ButtonAllProps) {
+  const {
+    autoLoadingFeature,
+    autoLoadingGlobal = false,
+    isLoading = false,
+    ...rest
+  } = properties;
+
+  // Always call global hook to keep order stable
+  const globalLoading = useGlobalLoading();
+
+  // Render a child component that calls feature hook only when feature is provided
+  function FeatureLoadingProbe({
+    children,
+  }: {
+    children: (featureLoadingMutation: boolean) => React.ReactNode;
+  }) {
+    if (!autoLoadingFeature) {
+      return <>{children(false)}</>;
+    }
+    const featureLoading = useFeatureLoading(autoLoadingFeature);
+    return <>{children(featureLoading.isMutationLoading)}</>;
+  }
+
+  const globalMutation = autoLoadingGlobal
+    ? globalLoading.isMutationLoading
+    : false;
+
+  return (
+    <FeatureLoadingProbe>
+      {(featureMutation) => {
+        const final = isLoading || featureMutation || globalMutation;
+        return <ButtonBase {...rest} isLoading={final} />;
+      }}
+    </FeatureLoadingProbe>
+  );
+}
+
+function Button(properties: ButtonAllProps) {
+  return <ButtonWithAutoLoading {...properties} />;
 }
 
 export default memo(Button);
