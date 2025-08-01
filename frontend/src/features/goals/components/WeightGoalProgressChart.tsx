@@ -59,7 +59,7 @@ function WeightGoalProgressChart() {
   const { data: weightLog = [], isLoading: weightLogLoading } = useWeightLog();
   const { data: weightGoals, isLoading: weightGoalsLoading } = useWeightGoals();
   const isLoading = weightLogLoading || weightGoalsLoading;
-  const error = null; // TanStack Query handles errors differently
+  const error = undefined; // TanStack Query handles errors differently
 
   const chartData = React.useMemo(() => {
     const log = Array.isArray(weightLog) ? weightLog : [];
@@ -254,14 +254,22 @@ function WeightGoalProgressChart() {
         {chartData.length > 0 && (
           <span>
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
-            {format(parseISO(chartData.at(-1).fullDate), "MMM d, yyyy")}
+            {format(
+              parseISO(
+                chartData.length > 0
+                  ? (chartData.at(-1)?.fullDate ?? "")
+                  : "",
+              ),
+              "MMM d, yyyy",
+            )}
           </span>
         )}
       </div>
       {/* Chart Component */}{" "}
       <div className="flex-grow">
         <LineChartComponent
-          data={chartData}
+          // Cast to any to satisfy prop signature without importing chart-specific types
+          data={chartData as any}
           lines={lines}
           isLoading={isLoading}
           error={error}

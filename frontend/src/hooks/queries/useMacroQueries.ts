@@ -274,7 +274,7 @@ export function useUpdateMacroEntry() {
       await queryClient.cancelQueries({ queryKey: queryKeys.macros.all() });
 
       // Find the entry date for daily totals invalidation
-      let entryDate: string | null = null;
+      let entryDate: string | undefined;
       const historyData = queryClient.getQueryData<any>(
         queryKeys.macros.historyInfinite(),
       );
@@ -293,7 +293,7 @@ export function useUpdateMacroEntry() {
       const previousHistoryData = historyData;
       const previousDailyTotals = entryDate
         ? queryClient.getQueryData(queryKeys.macros.dailyTotals(entryDate))
-        : null;
+        : undefined;
 
       // Optimistically update infinite query data
       queryClient.setQueryData(
@@ -404,8 +404,8 @@ export function useDeleteMacroEntry() {
       await queryClient.cancelQueries({ queryKey: queryKeys.macros.all() });
 
       // Find the entry to delete and its date
-      let entryToDelete: any = null;
-      let entryDate: string | null = null;
+      let entryToDelete: any;
+      let entryDate: string | undefined;
 
       const historyData = queryClient.getQueryData<any>(
         queryKeys.macros.historyInfinite(),
@@ -428,7 +428,7 @@ export function useDeleteMacroEntry() {
       const previousHistoryData = historyData;
       const previousDailyTotals = entryDate
         ? queryClient.getQueryData(queryKeys.macros.dailyTotals(entryDate))
-        : null;
+        : undefined;
 
       // Optimistically remove from infinite query data
       queryClient.setQueryData(

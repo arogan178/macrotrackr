@@ -13,11 +13,11 @@ import {
 export function useWeightGoals() {
   return useQuery({
     queryKey: queryKeys.goals.weight(),
-    queryFn: async (): Promise<WeightGoals | null> => {
+    queryFn: async (): Promise<WeightGoals | undefined> => {
       const weightGoalsData = await apiService.goals.getWeightGoals();
 
       if (!weightGoalsData) {
-        return null; // Return null instead of undefined
+        return undefined; // Return undefined instead of null
       }
 
       // Get weight log to calculate current weight
@@ -173,7 +173,7 @@ export function useDeleteWeightGoal() {
       );
 
       // Optimistically clear the weight goals
-      queryClient.setQueryData(queryKeys.goals.weight(), null);
+      queryClient.setQueryData(queryKeys.goals.weight(), undefined);
 
       return { previousWeightGoals };
     },
