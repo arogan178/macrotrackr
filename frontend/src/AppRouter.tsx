@@ -11,6 +11,8 @@ import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
+import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
 
 import MainLayout from "./components/layout/MainLayout";
@@ -76,7 +78,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 // Root route with query-based user data prefetching
 export const rootRoute = createRootRoute({
-  loader: async ({ context }) => {
+  // Provide type for context so 'queryClient' is known to exist
+  loader: async ({
+    context,
+  }: {
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Only prefetch user data if there's a token
     const { getToken } = await import("@/utils/tokenStorage");
 
@@ -108,11 +115,17 @@ export const rootRoute = createRootRoute({
   },
   component: () => (
     <ErrorBoundary>
-      <MainLayout>
-        <Suspense fallback={<LoadingFallback />}>
-          <Outlet />
-        </Suspense>
-      </MainLayout>
+      {/* app-root is used by GlobalLoadingOverlay to toggle aria-busy */}
+      <div id="app-root" className="relative min-h-screen">
+        {/* Global loading UI overlays */}
+        <TopLoadingBar />
+        <GlobalLoadingOverlay />
+        <MainLayout>
+          <Suspense fallback={<LoadingFallback />}>
+            <Outlet />
+          </Suspense>
+        </MainLayout>
+      </div>
     </ErrorBoundary>
   ),
   notFoundComponent: () => (
@@ -140,7 +153,13 @@ export const homeRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
-  loader: async ({ deps, context }) => {
+  loader: async ({
+    deps,
+    context,
+  }: {
+    deps: { offset: number; limit: number };
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Use queryClient.ensureQueryData for prefetching macro data
     const limit = deps.limit || 20;
     const offset = deps.offset || 0;
@@ -191,7 +210,7 @@ export const homeRoute = createRoute({
     if (weightGoals) {
       const latestWeight =
         weightLog.length > 0
-          ? weightLog.at(-1).weight
+          ? weightLog[weightLog.length - 1].weight
           : weightGoals.startingWeight;
 
       transformedWeightGoals = {
@@ -232,7 +251,11 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: async ({ context }) => {
+  loader: async ({
+    context,
+  }: {
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Use queryClient.ensureQueryData for prefetching settings and billing data
     await Promise.all([
       context.queryClient.ensureQueryData({
@@ -264,7 +287,11 @@ const settingsRoute = createRoute({
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
-  loader: async ({ context }) => {
+  loader: async ({
+    context,
+  }: {
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Use queryClient.ensureQueryData for prefetching goals and habits data
     const [macroTarget, weightGoals, weightLog] = await Promise.all([
       context.queryClient.ensureQueryData({
@@ -312,7 +339,7 @@ export const goalsRoute = createRoute({
     if (weightGoals) {
       const latestWeight =
         weightLog.length > 0
-          ? weightLog.at(-1).weight
+          ? weightLog[weightLog.length - 1].weight
           : weightGoals.startingWeight;
 
       transformedWeightGoals = {
@@ -368,7 +395,11 @@ export const reportingRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
-  loader: async ({ deps, context }) => {
+  loader: async (ctx) => {
+    const { deps, context } = ctx as typeof ctx & {
+      deps: { startDate?: string; endDate?: string };
+      context: { queryClient: typeof queryClient };
+    };
     // Use queryClient.ensureQueryData for prefetching reporting data
     const today = new Date().toISOString().split("T")[0];
     const queryDate = deps.startDate || today;
