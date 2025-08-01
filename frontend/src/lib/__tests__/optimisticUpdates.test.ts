@@ -1,13 +1,13 @@
 import { QueryClient } from "@tanstack/react-query";
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
-  createOptimisticUpdate,
-  rollbackOptimisticUpdate,
-  createOptimisticMutationCallbacks,
   arrayOptimisticUpdates,
-  objectOptimisticUpdates,
+  createOptimisticMutationCallbacks,
+  createOptimisticUpdate,
   errorClassification,
+  objectOptimisticUpdates,
+  rollbackOptimisticUpdate,
 } from "../optimisticUpdates";
 
 describe("optimisticUpdates", () => {
@@ -28,7 +28,7 @@ describe("optimisticUpdates", () => {
       const initialData = [{ id: 1, name: "Item 1" }];
       queryClient.setQueryData(testQueryKey, initialData);
 
-      const updateFn = (oldData: any[], variables: any) => [
+      const updateFunction = (oldData: any[], variables: any) => [
         ...oldData,
         { id: 2, name: variables.name },
       ];
@@ -36,7 +36,7 @@ describe("optimisticUpdates", () => {
       const context = createOptimisticUpdate({
         queryClient,
         queryKey: testQueryKey,
-        updateFn,
+        updateFn: updateFunction,
         variables: { name: "Item 2" },
       });
 
@@ -51,14 +51,14 @@ describe("optimisticUpdates", () => {
     });
 
     it("should handle undefined previous data", () => {
-      const updateFn = (oldData: any[], variables: any) => [
+      const updateFunction = (oldData: any[], variables: any) => [
         { id: 1, name: variables.name },
       ];
 
       const context = createOptimisticUpdate({
         queryClient,
         queryKey: testQueryKey,
-        updateFn,
+        updateFn: updateFunction,
         variables: { name: "Item 1" },
       });
 
@@ -107,7 +107,7 @@ describe("optimisticUpdates", () => {
       const initialData = [{ id: 1, name: "Item 1" }];
       queryClient.setQueryData(testQueryKey, initialData);
 
-      const updateFn = vi.fn((oldData: any[], variables: any) => [
+      const updateFunction = vi.fn((oldData: any[], variables: any) => [
         ...oldData,
         { id: 2, name: variables.name },
       ]);
@@ -118,7 +118,7 @@ describe("optimisticUpdates", () => {
       const callbacks = createOptimisticMutationCallbacks({
         queryClient,
         queryKey: testQueryKey,
-        updateFn,
+        updateFn: updateFunction,
         invalidateQueries: [testQueryKey],
         onSuccessCallback,
         onErrorCallback,
@@ -126,7 +126,7 @@ describe("optimisticUpdates", () => {
 
       // Test onMutate
       const context = await callbacks.onMutate?.({ name: "Item 2" });
-      expect(updateFn).toHaveBeenCalled();
+      expect(updateFunction).toHaveBeenCalled();
       expect(context?.previousData).toEqual(initialData);
 
       // Test onSuccess
@@ -196,8 +196,8 @@ describe("optimisticUpdates", () => {
 
   describe("objectOptimisticUpdates", () => {
     it("should update object properties", () => {
-      const obj = { id: 1, name: "Original", value: 100 };
-      const result = objectOptimisticUpdates.update(obj, {
+      const object = { id: 1, name: "Original", value: 100 };
+      const result = objectOptimisticUpdates.update(object, {
         name: "Updated",
         value: 200,
       });
@@ -205,10 +205,10 @@ describe("optimisticUpdates", () => {
     });
 
     it("should replace entire object", () => {
-      const obj = { id: 1, name: "Original" };
-      const newObj = { id: 2, name: "New" };
-      const result = objectOptimisticUpdates.replace(obj, newObj);
-      expect(result).toEqual(newObj);
+      const object = { id: 1, name: "Original" };
+      const newObject = { id: 2, name: "New" };
+      const result = objectOptimisticUpdates.replace(object, newObject);
+      expect(result).toEqual(newObject);
     });
 
     it("should handle undefined objects", () => {
