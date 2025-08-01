@@ -67,7 +67,7 @@ export interface CardContainerProps {
 export interface InfoCardProps {
   title: string;
   description?: string;
-  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent";
+  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent" | "protein" | "carbs" | "fats" | "vibrant-accent";
   icon?: ReactNode;
   children?: ReactNode;
 }
