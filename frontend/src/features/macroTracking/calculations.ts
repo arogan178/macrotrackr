@@ -1,14 +1,21 @@
 import type { MacroDailyTotals, MacroEntry } from "@/types/macro";
+// Import calculateDailyTotals for local use
+import { calculateDailyTotals } from "@/utils/nutritionCalculations";
+
 import { getTodayDateString } from "./constants";
 
-// Re-export consolidated nutrition calculations
+// Re-export consolidated nutrition calculations (match exact exported names)
 export {
   caloriesFromMacrosRaw as calculateCaloriesFromMacros,
   caloriesFromEntryRaw as calculateEntryCalories,
 } from "@/utils/nutritionCalculations";
 
-// Import calculateDailyTotals for local use
-import { calculateDailyTotals } from "@/utils/nutritionCalculations";
+// Import helpers directly for consumers that import from this module
+export {
+  calculateCarbsCalories,
+  calculateFatsCalories,
+  calculateProteinCalories,
+} from "@/utils/nutritionCalculations";
 
 // Get entries for today
 export const getTodayEntries = (entries: MacroEntry[]): MacroEntry[] => {

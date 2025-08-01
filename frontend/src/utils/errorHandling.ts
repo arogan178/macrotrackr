@@ -18,7 +18,7 @@ export function getErrorMessage(error: unknown): string {
 export function handleApiError(error: unknown, context?: string) {
   const errorMessage = getErrorMessage(error);
   const contextMessage = context ? `(${context})` : "";
-  // eslint-disable-next-line no-console
+
   console.error(`API Error${contextMessage}:`, error);
 
   // Notify via zustand store if available
