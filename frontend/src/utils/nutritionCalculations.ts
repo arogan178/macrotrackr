@@ -338,7 +338,7 @@ export function generateWeightGoalCalculations(
     effectiveCalorieChange,
   );
 
-  const finalWeeks = isFinite(weeksToGoal) ? weeksToGoal : 52;
+  const finalWeeks = Number.isFinite(weeksToGoal) ? weeksToGoal : 52;
   const targetDate = new Date();
   targetDate.setDate(targetDate.getDate() + finalWeeks * 7);
 
@@ -349,7 +349,7 @@ export function generateWeightGoalCalculations(
     calorieTarget,
     targetDate: targetDate.toISOString().split("T")[0],
     calculatedWeeks: finalWeeks,
-    weeklyChange: isFinite(expectedWeightLossPerWeek)
+    weeklyChange: Number.isFinite(expectedWeightLossPerWeek)
       ? expectedWeightLossPerWeek
       : 0,
     dailyChange: calorieDifference,
