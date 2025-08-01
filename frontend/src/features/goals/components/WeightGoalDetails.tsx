@@ -77,10 +77,10 @@ function WeightGoalDetails({
 
   return (
     <CardContainer>
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
+      <div className="mb-4 flex flex-col justify-between md:flex-row md:items-center">
         <div>
           <h3 className="text-xl font-semibold text-foreground">Weight Goal</h3>
-          <p className="text-foreground text-sm">
+          <p className="text-sm text-foreground">
             {startingWeight && targetWeight ? (
               <>
                 {directionText}{" "}
@@ -91,46 +91,46 @@ function WeightGoalDetails({
             )}
           </p>
         </div>
-        <div className="flex mt-3 md:mt-0 space-x-2">
+        <div className="mt-3 flex space-x-2 md:mt-0">
           <button
             onClick={onEdit}
-            className="flex items-center px-3 py-1.5 bg-surface/50 hover:bg-surface rounded-md text-sm text-foreground transition-colors"
+            className="flex items-center rounded-md bg-surface/50 px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-surface"
           >
-            <EditIcon className="w-4 h-4 mr-1.5" />
+            <EditIcon className="mr-1.5 h-4 w-4" />
             Edit
           </button>
           <button
             onClick={onDelete}
-            className="flex items-center px-3 py-1.5 bg-error/30 hover:bg-error/50 rounded-md text-sm text-error transition-colors"
+            className="flex items-center rounded-md bg-error/30 px-3 py-1.5 text-sm text-error transition-colors hover:bg-error/50"
           >
-            <TrashIcon className="w-4 h-4 mr-1.5" />
+            <TrashIcon className="mr-1.5 h-4 w-4" />
             Delete
           </button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
-        <div className="bg-surface/30 p-3 rounded-md">
-          <div className="text-sm text-foreground mb-1">Starting Weight</div>
+      <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="rounded-md bg-surface/30 p-3">
+          <div className="mb-1 text-sm text-foreground">Starting Weight</div>
           <div className="text-xl font-medium text-foreground">
             {startingWeight === undefined ? "Not set" : `${startingWeight} kg`}
           </div>
         </div>
 
-        <div className="bg-surface/30 p-3 rounded-md">
-          <div className="text-sm text-foreground mb-1">Target Weight</div>
+        <div className="rounded-md bg-surface/30 p-3">
+          <div className="mb-1 text-sm text-foreground">Target Weight</div>
           <div className="text-xl font-medium text-foreground">
             {targetWeight === undefined ? "Not set" : `${targetWeight} kg`}
           </div>
         </div>
 
-        <div className="bg-surface/30 p-3 rounded-md">
-          <div className="text-sm text-foreground mb-1">Daily Calories</div>
+        <div className="rounded-md bg-surface/30 p-3">
+          <div className="mb-1 text-sm text-foreground">Daily Calories</div>
           <div className="text-xl font-medium text-foreground">
             {calorieTarget === undefined ? "Not set" : `${calorieTarget} kcal`}
           </div>
           {calorieTarget && tdee ? (
-            <div className="text-xs text-foreground mt-0.5">
+            <div className="mt-0.5 text-xs text-foreground">
               {isDeficit ? (
                 <span className="text-primary">
                   {Math.abs(calorieAdjustment)} kcal deficit
@@ -144,15 +144,15 @@ function WeightGoalDetails({
           ) : undefined}
         </div>
 
-        <div className="bg-surface/30 p-3 rounded-md">
-          <div className="text-sm text-foreground mb-1">Timeline</div>
+        <div className="rounded-md bg-surface/30 p-3">
+          <div className="mb-1 text-sm text-foreground">Timeline</div>
           <div className="text-xl font-medium text-foreground">
             {daysRemaining === undefined
               ? "No end date"
               : `${daysRemaining} days left`}
           </div>
           {startDate && targetDate ? (
-            <div className="text-xs text-foreground mt-0.5">
+            <div className="mt-0.5 text-xs text-foreground">
               {formattedStartDate} – {formattedTargetDate}
             </div>
           ) : undefined}
@@ -160,14 +160,14 @@ function WeightGoalDetails({
       </div>
 
       <div className="mb-4">
-        <div className="flex justify-between text-sm mb-1.5">
+        <div className="mb-1.5 flex justify-between text-sm">
           <span className="text-foreground">Progress</span>
-          <span className="text-foreground font-medium">
+          <span className="font-medium text-foreground">
             {progressPercentage.toFixed(0)}%
           </span>
         </div>
         <ProgressBar progress={progressPercentage} />
-        <div className="flex justify-between text-xs text-foreground mt-1">
+        <div className="mt-1 flex justify-between text-xs text-foreground">
           <span>
             {startingWeight === undefined
               ? "Starting"
@@ -187,7 +187,7 @@ function WeightGoalDetails({
       </div>
 
       {insight && (
-        <div className="mt-3 bg-primary/20 border border-primary/30 rounded-md p-3 text-sm text-primary">
+        <div className="mt-3 rounded-md border border-primary/30 bg-primary/20 p-3 text-sm text-primary">
           {insight}
         </div>
       )}

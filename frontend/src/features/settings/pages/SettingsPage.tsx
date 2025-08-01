@@ -160,7 +160,7 @@ export default function SettingsPage() {
       subtitle={undefined}
       headerChildren={
         <div
-          className="relative flex space-x-1 p-1 bg-surface/60 rounded-lg"
+          className="relative flex space-x-1 rounded-lg bg-surface/60 p-1"
           role="tablist"
           aria-label="Settings Tabs"
         >
@@ -170,7 +170,7 @@ export default function SettingsPage() {
             layoutId="settingsTabHighlight"
             isMotion={true}
           >
-            <span className="flex items-center relative z-10">
+            <span className="relative z-10 flex items-center">
               <UserIcon size="sm" className="mr-1.5" />
               Profile
             </span>
@@ -181,7 +181,7 @@ export default function SettingsPage() {
             layoutId="settingsTabHighlight"
             isMotion={true}
           >
-            <span className="flex items-center relative z-10">
+            <span className="relative z-10 flex items-center">
               <AwardIcon size="sm" className="mr-1.5" />
               Billing
             </span>
@@ -192,7 +192,7 @@ export default function SettingsPage() {
             layoutId="settingsTabHighlight"
             isMotion={true}
           >
-            <span className="flex items-center relative z-10">
+            <span className="relative z-10 flex items-center">
               <LockIcon size="sm" className="mr-1.5" />
               Security
             </span>

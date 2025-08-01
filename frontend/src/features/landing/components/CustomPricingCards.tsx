@@ -52,14 +52,14 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
       : "";
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="mx-auto w-full max-w-6xl">
       {/* Plan Toggle */}
-      <div className="flex justify-center mb-12">
+      <div className="mb-12 flex justify-center">
         <PlanToggle selectedPlan={selectedPlan} onSelect={setSelectedPlan} />
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
         {/* Free Plan */}
         <PricingCard
           title={PRICING_PLANS.free.name}
@@ -116,7 +116,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
               : handleGetPro
           }
         >
-          <p className="text-foreground mt-2">
+          <p className="mt-2 text-foreground">
             {PRICING_PLANS.pro.description}
           </p>
         </PricingCard>

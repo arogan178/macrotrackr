@@ -6,46 +6,46 @@ import { useEffect, useRef, useState } from "react";
  */
 export default function useDeferredVisibility(
   active: boolean,
-  options?: { delayMs?: number; minVisibleMs?: number }
+  options?: { delayMs?: number; minVisibleMs?: number },
 ) {
   const delayMs = options?.delayMs ?? 200;
   const minVisibleMs = options?.minVisibleMs ?? 400;
 
   const [visible, setVisible] = useState(false);
-  const showTimerRef = useRef<number | null>(null);
-  const hideTimerRef = useRef<number | null>(null);
-  const lastShownAtRef = useRef<number | null>(null);
+  const showTimerReference = useRef<number | null>(null);
+  const hideTimerReference = useRef<number | null>(null);
+  const lastShownAtReference = useRef<number | null>(null);
 
   useEffect(() => {
     // Clear timers helper
     const clearTimers = () => {
-      if (showTimerRef.current) {
-        window.clearTimeout(showTimerRef.current);
-        showTimerRef.current = null;
+      if (showTimerReference.current) {
+        globalThis.clearTimeout(showTimerReference.current);
+        showTimerReference.current = null;
       }
-      if (hideTimerRef.current) {
-        window.clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
+      if (hideTimerReference.current) {
+        globalThis.clearTimeout(hideTimerReference.current);
+        hideTimerReference.current = null;
       }
     };
 
     // When becoming active: start debounce to show
     if (active) {
       // Cancel any pending hide
-      if (hideTimerRef.current) {
-        window.clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
+      if (hideTimerReference.current) {
+        globalThis.clearTimeout(hideTimerReference.current);
+        hideTimerReference.current = null;
       }
       // If already visible, nothing to do
       if (visible) {
         return;
       }
       // Debounce showing
-      if (!showTimerRef.current) {
-        showTimerRef.current = window.setTimeout(() => {
+      if (!showTimerReference.current) {
+        showTimerReference.current = globalThis.setTimeout(() => {
           setVisible(true);
-          lastShownAtRef.current = Date.now();
-          showTimerRef.current = null;
+          lastShownAtReference.current = Date.now();
+          showTimerReference.current = null;
         }, delayMs);
       }
       return () => {
@@ -56,10 +56,10 @@ export default function useDeferredVisibility(
     // When becoming inactive: either hide immediately if min time elapsed,
     // or schedule hide after the remaining time
     if (!active) {
-      if (showTimerRef.current) {
+      if (showTimerReference.current) {
         // Cancel pending show if we never showed
-        window.clearTimeout(showTimerRef.current);
-        showTimerRef.current = null;
+        globalThis.clearTimeout(showTimerReference.current);
+        showTimerReference.current = null;
       }
 
       if (!visible) {
@@ -67,17 +67,17 @@ export default function useDeferredVisibility(
         return;
       }
 
-      const shownAt = lastShownAtRef.current ?? Date.now();
+      const shownAt = lastShownAtReference.current ?? Date.now();
       const elapsed = Date.now() - shownAt;
       const remaining = Math.max(0, minVisibleMs - elapsed);
 
       if (remaining === 0) {
         setVisible(false);
       } else {
-        if (!hideTimerRef.current) {
-          hideTimerRef.current = window.setTimeout(() => {
+        if (!hideTimerReference.current) {
+          hideTimerReference.current = globalThis.setTimeout(() => {
             setVisible(false);
-            hideTimerRef.current = null;
+            hideTimerReference.current = null;
           }, remaining);
         }
       }
@@ -88,19 +88,18 @@ export default function useDeferredVisibility(
       // Do not clear timers needed for minVisibleMs on the inactivation path here,
       // only clear on unmount:
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, delayMs, minVisibleMs, visible]);
 
   // On unmount: clear timers
   useEffect(() => {
     return () => {
-      if (showTimerRef.current) {
-        window.clearTimeout(showTimerRef.current);
-        showTimerRef.current = null;
+      if (showTimerReference.current) {
+        globalThis.clearTimeout(showTimerReference.current);
+        showTimerReference.current = null;
       }
-      if (hideTimerRef.current) {
-        window.clearTimeout(hideTimerRef.current);
-        hideTimerRef.current = null;
+      if (hideTimerReference.current) {
+        globalThis.clearTimeout(hideTimerReference.current);
+        hideTimerReference.current = null;
       }
     };
   }, []);

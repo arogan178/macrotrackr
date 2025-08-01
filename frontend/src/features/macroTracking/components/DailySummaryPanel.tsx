@@ -138,9 +138,9 @@ export default function DailySummary({
 
   return (
     <CardContainer className="h-full">
-      <div className="p-6 flex flex-col h-full">
-        <div className="bg-muted/10 rounded-xl p-4 mb-6">
-          <div className="flex items-center justify-between mb-2">
+      <div className="flex h-full flex-col p-6">
+        <div className="mb-6 rounded-xl bg-muted/10 p-4">
+          <div className="mb-2 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">
               Today's Summary
             </h2>{" "}
@@ -206,11 +206,11 @@ export default function DailySummary({
           {macroData.map((macro) => (
             <div
               key={macro.name}
-              className={`bg-gradient-to-br ${macro.gradientFrom} to-gray-800/10 p-4 rounded-xl border ${macro.borderColor}`}
+              className={`bg-gradient-to-br ${macro.gradientFrom} rounded-xl border to-gray-800/10 p-4 ${macro.borderColor}`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${macro.color}`}></div>
+                  <div className={`h-2 w-2 rounded-full ${macro.color}`}></div>
                   <h3 className={`${macro.textColor} text-sm font-medium`}>
                     {macro.name}
                   </h3>
@@ -224,7 +224,7 @@ export default function DailySummary({
                       duration={0.7}
                     />
                   </span>
-                  <span className="text-xs text-foreground ml-1">
+                  <span className="ml-1 text-xs text-foreground">
                     /{" "}
                     <AnimatedNumber
                       value={macro.targetGrams}

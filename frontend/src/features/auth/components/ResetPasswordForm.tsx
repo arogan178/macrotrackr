@@ -39,10 +39,10 @@ function ResetPasswordForm() {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-green-500 to-teal-400 mb-4 flex items-center justify-center shadow-primary shadow-green-500/30">
-          <LockIcon className="w-8 h-8 text-foreground" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-400 shadow-primary shadow-green-500/30">
+          <LockIcon className="h-8 w-8 text-foreground" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+        <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent">
           Reset Password
         </h1>
         <p className="mt-2 text-foreground">Enter your new password</p>

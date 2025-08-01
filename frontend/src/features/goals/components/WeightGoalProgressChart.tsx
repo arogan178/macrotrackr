@@ -26,16 +26,16 @@ function WeightCustomTooltip({
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
-      <div className="backdrop-blur-lg bg-surface/90 border border-border/50 rounded-lg p-3 shadow-primary">
-        <div className="text-base font-medium text-foreground mb-1">
+      <div className="rounded-lg border border-border/50 bg-surface/90 p-3 shadow-primary backdrop-blur-lg">
+        <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
             : label || "Date Unavailable"}{" "}
           {/* Fallback to label if fullDate is bad */}
         </div>
-        <div className="flex items-center gap-2 mt-1">
+        <div className="mt-1 flex items-center gap-2">
           <div
-            className={"w-3 h-3 rounded-full"}
+            className={"h-3 w-3 rounded-full"}
             style={{ backgroundColor: payload[0].color || payload[0].stroke }}
           ></div>
           <span className="text-sm text-foreground">
@@ -246,9 +246,9 @@ function WeightGoalProgressChart() {
   );
 
   return (
-    <div className="h-96 flex flex-col">
+    <div className="flex h-96 flex-col">
       {/* Date Range Display */}
-      <div className="text-sm text-foreground mb-2 h-5">
+      <div className="mb-2 h-5 text-sm text-foreground">
         {" "}
         {/* Added fixed height */}
         {chartData.length > 0 && (

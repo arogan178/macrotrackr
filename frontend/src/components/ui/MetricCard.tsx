@@ -66,18 +66,18 @@ export default function MetricCard(properties: MetricCardProps) {
       <div className="flex items-start gap-5">
         {Icon && (
           <div
-            className={`p-3 rounded-xl bg-gradient-to-br ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
+            className={`rounded-xl bg-gradient-to-br p-3 ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
           >
             <Icon
-              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""} transform group-hover:scale-120 transition-transform`}
+              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""} transform transition-transform group-hover:scale-120`}
               strokeWidth={1.5}
             />
           </div>
         )}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-2 mb-1">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 flex items-baseline gap-2">
             <h3
-              className={`font-medium text-foreground text-sm truncate ${textColor ?? ""}`}
+              className={`truncate text-sm font-medium text-foreground ${textColor ?? ""}`}
             >
               {title}
             </h3>
@@ -91,9 +91,9 @@ export default function MetricCard(properties: MetricCardProps) {
           </div>
           <p className="text-2xl font-bold text-foreground">
             {value === undefined ? (
-              <span className="text-foreground text-lg">Complete profile</span>
+              <span className="text-lg text-foreground">Complete profile</span>
             ) : (
-              <span className="bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
                 <AnimatedNumber
                   value={
                     typeof value === "number"
@@ -107,7 +107,7 @@ export default function MetricCard(properties: MetricCardProps) {
               </span>
             )}
             {subtitle && (
-              <span className={`text-xs ml-2 ${textColor ?? ""}`}>
+              <span className={`ml-2 text-xs ${textColor ?? ""}`}>
                 {subtitle}
               </span>
             )}
@@ -116,13 +116,13 @@ export default function MetricCard(properties: MetricCardProps) {
       </div>
       {/* Score dot for reporting */}
       {score !== undefined && (
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
           {/* <div className={`h-2 w-2 rounded-full ${getScoreColor(score)}`} /> */}
         </div>
       )}
       {/* Children for extra content */}
       {children && (
-        <div className="flex-1 flex flex-col justify-between">{children}</div>
+        <div className="flex flex-1 flex-col justify-between">{children}</div>
       )}
     </Wrapper>
   );

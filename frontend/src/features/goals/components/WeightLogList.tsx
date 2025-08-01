@@ -104,9 +104,9 @@ function WeightLogList({
   // Loading state
   if (isLoading && sortedLog.length === 0) {
     return (
-      <div className="h-60 flex flex-col items-center justify-center">
+      <div className="flex h-60 flex-col items-center justify-center">
         <LoadingSpinner size="md" />
-        <p className="text-foreground mt-3 text-sm">Loading weight log...</p>
+        <p className="mt-3 text-sm text-foreground">Loading weight log...</p>
       </div>
     );
   }
@@ -139,16 +139,16 @@ function WeightLogList({
             return (
               <li
                 key={entry.id}
-                className="py-2 flex items-center justify-between"
+                className="flex items-center justify-between py-2"
               >
-                <div className="flex flex-col min-w-[200px] max-w-[220px]">
-                  <span className="text-foreground text-sm w-full block truncate">
+                <div className="flex max-w-[220px] min-w-[200px] flex-col">
+                  <span className="block w-full truncate text-sm text-foreground">
                     {/* Format timestamp only if valid */}
                     {isValidDate
                       ? format(entryDate, "MMM d, yyyy 'at' p")
                       : "Invalid Date"}
                   </span>
-                  <span className="font-semibold text-primary text-lg mt-1">
+                  <span className="mt-1 text-lg font-semibold text-primary">
                     {entry.weight.toFixed(1)} kg
                   </span>
                 </div>
@@ -175,7 +175,7 @@ function WeightLogList({
                   }
                   className={
                     (isSaving && itemToDelete?.id === entry.id) || !isValidDate
-                      ? "opacity-50 cursor-not-allowed"
+                      ? "cursor-not-allowed opacity-50"
                       : ""
                   }
                 />

@@ -7,8 +7,8 @@ import { Button, ShieldCheckIcon } from "@/components/ui";
 import { trustElements, trustIndicators } from "../utils/landingPageConstants";
 
 const HeroSection: React.FC = () => (
-  <section className="relative z-10 pt-20 pb-32 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-6xl mx-auto">
+  <section className="relative z-10 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl">
       <div className="text-center">
         <motion.h1
           initial={{ opacity: 0, y: 24 }}
@@ -20,7 +20,7 @@ const HeroSection: React.FC = () => (
             duration: 0.6,
             ease: "easeOut",
           }}
-          className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-8 text-foreground"
+          className="mb-8 text-5xl font-bold text-foreground sm:text-6xl lg:text-7xl"
         >
           <span className="block">Track Your Macros</span>
           <span className="block">Achieve Your Goals</span>
@@ -37,7 +37,7 @@ const HeroSection: React.FC = () => (
             delay: 0.15,
             ease: "easeOut",
           }}
-          className="max-w-3xl mx-auto text-xl sm:text-2xl text-foreground mb-12 leading-relaxed"
+          className="mx-auto mb-12 max-w-3xl text-xl leading-relaxed text-foreground sm:text-2xl"
         >
           The most intuitive macro tracking app designed to help you reach your
           fitness and nutrition goals with precision and ease.
@@ -54,7 +54,7 @@ const HeroSection: React.FC = () => (
             delay: 0.3,
             ease: "easeOut",
           }}
-          className="flex flex-col items-center mb-12"
+          className="mb-12 flex flex-col items-center"
         >
           <Link to="/register">
             <motion.div
@@ -73,7 +73,7 @@ const HeroSection: React.FC = () => (
           </Link>
 
           <motion.p
-            className="text-foreground text-lg font-medium mb-6"
+            className="mb-6 text-lg font-medium text-foreground"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -92,9 +92,9 @@ const HeroSection: React.FC = () => (
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.6, ease: "easeOut" }}
-          className="max-w-4xl mx-auto p-8 mb-8 bg-surface backdrop-blur-sm border border-border/50 rounded-2xl"
+          className="mx-auto mb-8 max-w-4xl rounded-2xl border border-border/50 bg-surface p-8 backdrop-blur-sm"
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {trustIndicators.map((indicator, index) => (
               <motion.div
                 key={indicator.title}
@@ -103,14 +103,14 @@ const HeroSection: React.FC = () => (
                 transition={{ duration: 0.5, delay: 0.7 + index * 0.08 }}
                 className="flex items-center space-x-3"
               >
-                <div className="w-10 h-10 rounded-full flex items-center justify-center bg-surface border border-border/50">
-                  <indicator.icon className="w-5 h-5 text-primary" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-surface">
+                  <indicator.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground">
                     {indicator.title}
                   </h4>
-                  <p className="text-foreground text-sm">
+                  <p className="text-sm text-foreground">
                     {indicator.description}
                   </p>
                 </div>
@@ -122,11 +122,11 @@ const HeroSection: React.FC = () => (
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1.1 }}
-            className="flex flex-col sm:flex-row items-center justify-center mt-6 pt-6 border-t border-border/50 space-y-2 sm:space-y-0 sm:space-x-8 text-foreground text-sm"
+            className="mt-6 flex flex-col items-center justify-center space-y-2 border-t border-border/50 pt-6 text-sm text-foreground sm:flex-row sm:space-y-0 sm:space-x-8"
           >
             {trustElements.map((element) => (
               <div key={element.text} className="flex items-center space-x-2">
-                <ShieldCheckIcon className="w-4 h-4 text-success" />
+                <ShieldCheckIcon className="h-4 w-4 text-success" />
                 <span>{element.text}</span>
               </div>
             ))}
