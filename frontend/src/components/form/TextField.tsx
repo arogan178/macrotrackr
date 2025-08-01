@@ -39,8 +39,8 @@
 import { memo, useId, useState } from "react";
 
 import { formStyles } from "@/components/form/styles";
+import type { TextFieldProps } from "@/components/form/types";
 import { EyeIcon, EyeSlashIcon } from "@/components/ui";
-import type { TextFieldProps } from "@/components/utils/Types";
 
 import IconButton from "../ui/IconButton";
 
@@ -72,6 +72,7 @@ function TextField({
     const newValue = event.target.value;
 
     if (textOnly && newValue !== "") {
+      // Use regex replace compatible with broader TS lib targets
       const textOnlyValue = newValue.replaceAll(/[^\sA-Za-z]/g, "");
       onChange(textOnlyValue);
     } else {

@@ -1,5 +1,4 @@
 // Centralized form and UI styles for consistency across components
-/
 export const formStyles = {
   // Label styles
   label: "block text-sm font-medium text-foreground", // Common: text-sm, font-medium
@@ -86,8 +85,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary overflow-hidden"
-    },
-  
-  
+      "bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary overflow-hidden",
+  },
 };

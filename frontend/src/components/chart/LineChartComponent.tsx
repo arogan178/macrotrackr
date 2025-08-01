@@ -18,8 +18,8 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
+import type { ChartDataPoint, LineConfig } from "@/components/chart/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner"; // Corrected path
-import type { ChartDataPoint, LineConfig } from "@/components/utils/Types";
 
 import { DefaultTooltip } from "./ChartHelper";
 
