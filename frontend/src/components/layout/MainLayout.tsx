@@ -27,11 +27,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const shouldFetchUser = hasToken && !isPublicRoute;
 
   // Conditionally use the user query
-  const {
-    data: user,
-    isLoading,
-    error,
-  } = useUser({ enabled: shouldFetchUser });
+  const { data: user, isLoading } = useUser({ enabled: shouldFetchUser });
   const isAuthenticated = shouldFetchUser && !!user && !isLoading;
 
   return (

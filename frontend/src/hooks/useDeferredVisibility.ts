@@ -12,20 +12,20 @@ export default function useDeferredVisibility(
   const minVisibleMs = options?.minVisibleMs ?? 400;
 
   const [visible, setVisible] = useState(false);
-  const showTimerReference = useRef<number | null>(null);
-  const hideTimerReference = useRef<number | null>(null);
-  const lastShownAtReference = useRef<number | null>(null);
+  const showTimerReference = useRef<number | undefined>(undefined);
+  const hideTimerReference = useRef<number | undefined>(undefined);
+  const lastShownAtReference = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     // Clear timers helper
     const clearTimers = () => {
       if (showTimerReference.current) {
         globalThis.clearTimeout(showTimerReference.current);
-        showTimerReference.current = null;
+        showTimerReference.current = undefined;
       }
       if (hideTimerReference.current) {
         globalThis.clearTimeout(hideTimerReference.current);
-        hideTimerReference.current = null;
+        hideTimerReference.current = undefined;
       }
     };
 
@@ -34,7 +34,7 @@ export default function useDeferredVisibility(
       // Cancel any pending hide
       if (hideTimerReference.current) {
         globalThis.clearTimeout(hideTimerReference.current);
-        hideTimerReference.current = null;
+        hideTimerReference.current = undefined;
       }
       // If already visible, nothing to do
       if (visible) {
@@ -45,7 +45,7 @@ export default function useDeferredVisibility(
         showTimerReference.current = globalThis.setTimeout(() => {
           setVisible(true);
           lastShownAtReference.current = Date.now();
-          showTimerReference.current = null;
+          showTimerReference.current = undefined;
         }, delayMs);
       }
       return () => {
@@ -59,7 +59,7 @@ export default function useDeferredVisibility(
       if (showTimerReference.current) {
         // Cancel pending show if we never showed
         globalThis.clearTimeout(showTimerReference.current);
-        showTimerReference.current = null;
+        showTimerReference.current = undefined;
       }
 
       if (!visible) {
@@ -77,7 +77,7 @@ export default function useDeferredVisibility(
         if (!hideTimerReference.current) {
           hideTimerReference.current = globalThis.setTimeout(() => {
             setVisible(false);
-            hideTimerReference.current = null;
+            hideTimerReference.current = undefined;
           }, remaining);
         }
       }
@@ -95,11 +95,11 @@ export default function useDeferredVisibility(
     return () => {
       if (showTimerReference.current) {
         globalThis.clearTimeout(showTimerReference.current);
-        showTimerReference.current = null;
+        showTimerReference.current = undefined;
       }
       if (hideTimerReference.current) {
         globalThis.clearTimeout(hideTimerReference.current);
-        hideTimerReference.current = null;
+        hideTimerReference.current = undefined;
       }
     };
   }, []);

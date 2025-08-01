@@ -151,7 +151,7 @@ export function calculateRetryDelay(
 /**
  * Creates a standardized retry function for mutations
  */
-export function createMutationRetryFn(config: RetryConfig) {
+export function createMutationRetryFunction(config: RetryConfig) {
   return (failureCount: number, error: MutationError) => {
     return shouldRetryError(error, failureCount, config.maxRetries);
   };
@@ -160,7 +160,7 @@ export function createMutationRetryFn(config: RetryConfig) {
 /**
  * Creates a standardized retry delay function for mutations
  */
-export function createMutationRetryDelayFn(config: RetryConfig) {
+export function createMutationRetryDelayFunction(config: RetryConfig) {
   return (attemptIndex: number, error: MutationError) => {
     return calculateRetryDelay(attemptIndex, config, error);
   };
@@ -314,8 +314,8 @@ export function createStandardMutationOptions<
   const retryConfig = config.retryConfig || retryConfigs.standard;
 
   return {
-    retry: createMutationRetryFn(retryConfig),
-    retryDelay: createMutationRetryDelayFn(retryConfig),
+    retry: createMutationRetryFunction(retryConfig),
+    retryDelay: createMutationRetryDelayFunction(retryConfig),
     onError: (
       error: TError,
       variables: TVariables,

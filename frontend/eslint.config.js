@@ -29,6 +29,12 @@ function getTanStackRouterRules() {
 }
 
 export default [
+  // Global ignores for auto-generated artifacts
+  {
+    name: "global-ignores",
+    ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*"],
+  },
+
   // PascalCase for components (include top-level AppRouter)
   {
     files: [
@@ -88,7 +94,12 @@ export default [
   // Main config for all files
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*"],
+    // Ensure we ignore TanStack Router's auto-generated file(s)
+    ignores: [
+      "src/routeTree.gen.ts",
+      "src/routeTree.gen.*",
+      "src/routes/__root.gen.*",
+    ],
     languageOptions: {
       globals: globals.browser,
       parser: tseslint.parser,
