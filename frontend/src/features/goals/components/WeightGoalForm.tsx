@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { NumberField } from "@/components/form";
 import { Button } from "@/components/ui";
@@ -54,8 +54,8 @@ function WeightGoalForm({
   );
 
   // Recalculate all derived values when calorieIntake or form values change
-  const calculations =
-    tdee && formValues.startingWeight && formValues.targetWeight
+  const calculations = useMemo(() => {
+    return tdee && formValues.startingWeight && formValues.targetWeight
       ? generateWeightGoalCalculations(
           tdee,
           formValues.startingWeight,
@@ -63,6 +63,7 @@ function WeightGoalForm({
           calorieIntake,
         )
       : undefined;
+  }, [tdee, formValues.startingWeight, formValues.targetWeight, calorieIntake]);
 
   // When switching between edit/create, update calorieIntake if not user-adjusted
   useEffect(() => {
@@ -71,7 +72,7 @@ function WeightGoalForm({
     } else if (weightGoals?.calorieTarget) {
       setCalorieIntake(weightGoals.calorieTarget);
     }
-  }, [isEditing, weightGoals?.calorieTarget]);
+  }, [isEditing, weightGoals?.calorieTarget, calculations?.calorieTarget]);
 
   // Derived values for display
   const calculatedTargetDate = calculations?.targetDate;
@@ -156,7 +157,7 @@ function WeightGoalForm({
         <NumberField
           label="Starting Weight"
           value={formValues.startingWeight}
-          onChange={(value) =>
+          onChange={(value: number | undefined) =>
             setFormValues({ ...formValues, startingWeight: value || 0 })
           }
           unit="kg"
@@ -171,7 +172,7 @@ function WeightGoalForm({
         <NumberField
           label="Target Weight"
           value={formValues.targetWeight}
-          onChange={(value) =>
+          onChange={(value: number | undefined) =>
             setFormValues({ ...formValues, targetWeight: value })
           }
           unit="kg"

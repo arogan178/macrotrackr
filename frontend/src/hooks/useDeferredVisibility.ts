@@ -17,17 +17,7 @@ export default function useDeferredVisibility(
   const lastShownAtReference = useRef<number | undefined>(undefined);
 
   useEffect(() => {
-    // Clear timers helper
-    const clearTimers = () => {
-      if (showTimerReference.current) {
-        globalThis.clearTimeout(showTimerReference.current);
-        showTimerReference.current = undefined;
-      }
-      if (hideTimerReference.current) {
-        globalThis.clearTimeout(hideTimerReference.current);
-        hideTimerReference.current = undefined;
-      }
-    };
+    
 
     // When becoming active: start debounce to show
     if (active) {

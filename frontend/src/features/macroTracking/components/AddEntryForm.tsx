@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 
 import {
   CardContainer,
@@ -28,7 +28,7 @@ interface AddEntryProps {
   isSaving: boolean;
 }
 
-function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
+function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   const [protein, setProtein] = useState<number | undefined>();
   const [carbs, setCarbs] = useState<number | undefined>();
   const [fats, setFats] = useState<number | undefined>();
@@ -269,7 +269,9 @@ function AddEntry({ onSubmit, isSaving }: AddEntryProps) {
                 label: option.display,
               }))}
               value={mealType}
-              onChange={(value) => setMealType(value as MealType)}
+              onChange={(value: string | number | undefined) =>
+                setMealType(value as MealType)
+              }
             />
           </div>
 

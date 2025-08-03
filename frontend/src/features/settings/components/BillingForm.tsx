@@ -18,13 +18,12 @@ function handleUpgradeRedirect() {
 const BillingForm: React.FC = () => {
   const { subscriptionStatus, showNotification } = useStore();
   // Get billing details from TanStack Query
-  const { data: billingDetails, isLoading: isBillingLoading } =
-    useBillingDetails();
+  const { data: billingDetails } = useBillingDetails();
   const [isLoading, setIsLoading] = useState(false);
 
   // Use new loading state hooks
-  const { isLoading: isBillingFeatureLoading } = useFeatureLoading("settings");
-  const { handleMutationError, handleMutationSuccess } =
+  const { isLoading: _isBillingFeatureLoading } = useFeatureLoading("settings");
+  const { handleMutationError, handleMutationSuccess: _handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),
       onSuccess: (message) => showNotification(message, "success"),
@@ -47,7 +46,7 @@ const BillingForm: React.FC = () => {
   }, [showNotification]);
 
   // Enhanced error handling with user-friendly messages
-  const handleBillingError = useCallback(
+  const _handleBillingError = useCallback(
     (error: unknown, operation: string) => {
       const billingError = parseBillingError(error);
 
@@ -98,7 +97,7 @@ const BillingForm: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [subscriptionStatus, handleBillingError, showNotification]);
+  }, [subscriptionStatus, showNotification, handleMutationError]);
 
   const isPro = subscriptionStatus === "pro";
 

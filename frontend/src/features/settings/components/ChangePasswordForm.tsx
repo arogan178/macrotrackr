@@ -19,7 +19,7 @@ const ChangePasswordForm = () => {
         showNotification(message, "error");
       },
       onSuccess: (message) => {
-        setSuccessMessage(message);
+        // Local successMessage state removed; use global notification only
         showNotification(message, "success");
       },
     });
@@ -28,7 +28,8 @@ const ChangePasswordForm = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
-  const [successMessage, setSuccessMessage] = useState<string | undefined>();
+  // success message is shown via global notifications; local state removed
+  // const [successMessage, setSuccessMessage] = useState<string | undefined>();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();

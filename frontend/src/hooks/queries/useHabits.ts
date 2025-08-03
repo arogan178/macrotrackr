@@ -114,7 +114,7 @@ export function useDeleteHabit() {
       // Return a context object with the snapshotted value
       return { previousHabits };
     },
-    onError: (error, id, context) => {
+    onError: (error, _id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
         queryClient.setQueryData(
@@ -134,7 +134,7 @@ export function useDeleteHabit() {
 // Mutation hook for incrementing habit progress with optimistic updates
 export function useIncrementHabitProgress() {
   const queryClient = useQueryClient();
-  const showNotification = useStore((state) => state.showNotification);
+  const _showNotification = useStore((state) => state.showNotification);
 
   return useMutation({
     // Accept the full habit object instead of just the id
@@ -188,7 +188,7 @@ export function useIncrementHabitProgress() {
         !previousHabit.isComplete &&
         updatedHabit?.isComplete
       ) {
-        showNotification(
+        _showNotification(
           `🎉 Habit "${updatedHabit.title}" completed!`,
           "success",
           {
@@ -216,7 +216,7 @@ export function useIncrementHabitProgress() {
 // Mutation hook for completing a habit with optimistic updates
 export function useCompleteHabit() {
   const queryClient = useQueryClient();
-  const showNotification = useStore((state) => state.showNotification);
+  const _showNotification = useStore((state) => state.showNotification);
 
   return useMutation({
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
@@ -273,7 +273,7 @@ export function useCompleteHabit() {
       // Return a context object with the snapshotted value
       return { previousHabits };
     },
-    onError: (error, id, context) => {
+    onError: (error, _id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
         queryClient.setQueryData(

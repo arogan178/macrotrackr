@@ -44,7 +44,7 @@ export function useWeightGoals() {
         calorieTarget: weightGoalsData.calorieTarget || 2000,
         calculatedWeeks: weightGoalsData.calculatedWeeks || 1,
         weeklyChange: weightGoalsData.weeklyChange || 0,
-        dailyChange: weightGoalsData.dailyChange || 0,
+        dailyChange: weightGoalsData.dailyChange ?? 0,
       };
     },
     ...queryConfigs.longLived, // 5 minutes stale time for goals
@@ -94,7 +94,7 @@ export function useCreateWeightGoal() {
         // If no entry for today, add the starting weight
         if (!hasEntryForToday) {
           await apiService.goals.addWeightLogEntry({
-            weight: goals.startingWeight,
+            weight: goals.startingWeight ?? 0,
             timestamp: new Date().toISOString(),
           });
         }
@@ -177,12 +177,12 @@ export function useDeleteWeightGoal() {
 
       return { previousWeightGoals };
     },
-    onError: (error, _variables, context) => {
+    onError: (error, _variables, _context) => {
       // Rollback optimistic update
-      if (context?.previousWeightGoals !== undefined) {
+      if (_context?.previousWeightGoals !== undefined) {
         queryClient.setQueryData(
           queryKeys.goals.weight(),
-          context.previousWeightGoals,
+          _context.previousWeightGoals,
         );
       }
       console.error("Error deleting weight goals:", error);
@@ -224,8 +224,6 @@ export function useAddWeightLogEntry() {
         id: `temp-${Date.now()}`, // Temporary ID
         weight: variables.weight,
         timestamp: variables.timestamp,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
 
       // Optimistically update weight log
@@ -248,23 +246,23 @@ export function useAddWeightLogEntry() {
 
       return { previousWeightLog, previousWeightGoals };
     },
-    onError: (error, _variables, context) => {
+    onError: (error, _variables, _context) => {
       // Rollback optimistic updates
-      if (context?.previousWeightLog !== undefined) {
+      if (_context?.previousWeightLog !== undefined) {
         queryClient.setQueryData(
           queryKeys.goals.weightLog(),
-          context.previousWeightLog,
+          _context.previousWeightLog,
         );
       }
-      if (context?.previousWeightGoals !== undefined) {
+      if (_context?.previousWeightGoals !== undefined) {
         queryClient.setQueryData(
           queryKeys.goals.weight(),
-          context.previousWeightGoals,
+          _context.previousWeightGoals,
         );
       }
       console.error("Error adding weight log entry:", error);
     },
-    onSuccess: (newEntry, _variables, context) => {
+    onSuccess: (newEntry, _variables, _context) => {
       // Update with real data from server
       queryClient.setQueryData<WeightLogEntry[]>(
         queryKeys.goals.weightLog(),
