@@ -307,7 +307,7 @@ export function useReportingLogic(
       setDailySeries([]);
       setDataProcessed(true);
     }
-  }, [history, dateRange, isLoadingExternal]); // DO NOT include processDataForCharts in deps to avoid infinite loop
+  }, [history, dateRange, isLoadingExternal, processDataForCharts]);
 
   // macroDensityData logic moved to useMacroDensityBreakdown
   // If you need macro density breakdown, use the new hook instead.
