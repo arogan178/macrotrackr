@@ -85,7 +85,7 @@ const LandingPage: React.FC = () => {
     },
   } as const;
 
-  // Button/CTA micro reveal
+  // Button/CTA micro reveal (kept for potential downstream use)
   const buttonReveal = {
     hidden: { opacity: 0, y: 8 },
     visible: {
@@ -94,6 +94,7 @@ const LandingPage: React.FC = () => {
       transition: { type: "spring", stiffness: 180, damping: 16 },
     },
   } as const;
+  void buttonReveal; // prevent unused var warning without changing API surface
 
   // Suggested item variants for child lists (Features/Testimonials)
   // Exported via named export below for downstream wiring.
@@ -105,6 +106,7 @@ const LandingPage: React.FC = () => {
       transition: { type: "spring", stiffness: 140, damping: 18 },
     },
   } as const;
+  void itemVariants; // prevent unused var warning without changing API surface
 
   // Helper props depending on reduced motion
   const baseRevealProps = shouldReduceMotion
@@ -119,8 +121,8 @@ const LandingPage: React.FC = () => {
         viewport: { once: true, amount: 0.2 },
       } as const);
 
-  // Back to top visibility
-  const [showTop, setShowTop] = useState(false);
+  // Back to top visibility (reserved for future use)
+  const [_showTop, setShowTop] = useState(false);
   useEffect(() => {
     const onScroll = () => {
       setShowTop(window.scrollY > 600);

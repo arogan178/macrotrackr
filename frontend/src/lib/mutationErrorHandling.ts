@@ -302,10 +302,10 @@ export function createMutationErrorHandler(
  * Utility to create standardized mutation options with error handling and retries
  */
 export function createStandardMutationOptions<
-  TData,
-  TError extends MutationError,
-  TVariables,
-  TContext,
+  _TData = unknown,
+  TError extends MutationError = MutationError,
+  TVariables = unknown,
+  TContext = unknown,
 >(config: {
   retryConfig?: RetryConfig;
   errorHandler?: MutationErrorHandler;
@@ -319,7 +319,7 @@ export function createStandardMutationOptions<
     onError: (
       error: TError,
       variables: TVariables,
-      context: TContext | undefined,
+      _context: TContext | undefined,
     ) => {
       if (config.errorHandler) {
         config.errorHandler.handleError(error, {
