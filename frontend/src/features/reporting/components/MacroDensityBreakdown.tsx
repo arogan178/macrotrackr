@@ -1,5 +1,4 @@
 import { motion } from "motion/react";
-import { useEffect, useState } from "react";
 // Custom tooltip component
 import type { TooltipProps } from "recharts";
 import {
