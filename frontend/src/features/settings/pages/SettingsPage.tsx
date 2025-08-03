@@ -36,7 +36,7 @@ export default function SettingsPage() {
     validateSettingsForm,
     updateSetting,
     resetSettings,
-    setSubscriptionStatus,
+
     initializeSettings,
     showNotification,
   } = useStore();
@@ -151,7 +151,15 @@ export default function SettingsPage() {
         handleMutationError(error, "saving settings");
       }
     },
-    [validateSettingsForm, settings, saveSettingsMutation, initializeSettings],
+    [
+      validateSettingsForm,
+      settings,
+      saveSettingsMutation,
+      initializeSettings,
+      showNotification,
+      handleMutationSuccess,
+      handleMutationError,
+    ],
   );
 
   return (

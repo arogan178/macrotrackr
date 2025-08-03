@@ -38,11 +38,10 @@
  */
 import { memo, useId, useState } from "react";
 
-import { formStyles } from "@/components/form/styles";
-import type { TextFieldProps } from "@/components/form/types";
+import { formStyles } from "@/components/form/Styles";
+import type { TextFieldProps } from "@/components/form/Types";
 import { EyeIcon, EyeSlashIcon } from "@/components/ui";
-
-import IconButton from "../ui/IconButton";
+import IconButton from "@/components/ui/IconButton";
 
 function TextField({
   label,

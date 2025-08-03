@@ -2,7 +2,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
-import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 

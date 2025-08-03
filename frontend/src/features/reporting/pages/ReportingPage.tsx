@@ -40,7 +40,7 @@ export default function ReportingPage() {
   const [dateRange, setDateRange] = useState<string>("week");
 
   // Get user data from useUser hook
-  const { data: user } = useUser();
+  const { data: _user } = useUser();
 
   // Calculate date range for the selected period
   const { startDate, endDate } = getDateRangeISOStrings(dateRange);
