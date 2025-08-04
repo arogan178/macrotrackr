@@ -16,6 +16,7 @@ import {
   WeightIcon,
 } from "@/components/ui";
 import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
+import { computeDailyDifferenceForDisplay, computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { formatDate } from "@/features/reporting/utils/dateUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -58,7 +59,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const isMaintenance = weightGoal === "maintain";
 
   const effectiveCalorieTarget =
-    targetCalories || weightGoals?.calorieTarget || tdee;
+    targetCalories || computeEffectiveTargetCalories(tdee, weightGoals);
 
   const goalTypeLabel = isWeightLoss
     ? "Weight Loss"
@@ -92,14 +93,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
 
   const weeklyChange = weightGoals?.weeklyChange || 0;
   const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
-  let dailyDifference = Math.abs(weightGoals?.dailyChange || 0);
-  if (dailyDifference === 0 && weightGoals?.calorieTarget && tdee > 0) {
-    dailyDifference = Math.abs(tdee - weightGoals.calorieTarget);
-  }
-  // Enforce minimum of 50 kcal for weight gain/loss goals
-  if (!isMaintenance && dailyDifference < 50) {
-    dailyDifference = 50;
-  }
+
+  // Mirror existing display behavior via shared helper
+  const dailyDifference = computeDailyDifferenceForDisplay(tdee, weightGoals, true, 50);
 
   return (
     <motion.div
