@@ -75,7 +75,20 @@ export function useUpdateHabit() {
       }
 
       const updatedHabit = updateHabitFromForm(existingHabit, values);
-      return await apiService.habits.updateHabit(id, updatedHabit);
+      // Ensure backend-required fields are present: id, progress, createdAt
+      const payload = {
+        ...updatedHabit,
+        id: existingHabit.id,
+        progress:
+          typeof updatedHabit.progress === "number"
+            ? updatedHabit.progress
+            : Math.min(
+                100,
+                Math.round((existingHabit.current / updatedHabit.target) * 100),
+              ),
+        createdAt: existingHabit.createdAt,
+      };
+      return await apiService.habits.updateHabit(id, payload);
     },
     onSuccess: () => {
       // Invalidate and refetch habits list
@@ -175,28 +188,9 @@ export function useIncrementHabitProgress() {
       }
       return { previousHabits };
     },
-    onSuccess: (data, variables, context) => {
-      const currentHabits = queryClient.getQueryData<HabitGoal[]>(
-        queryKeys.habits.list(),
-      );
-      const updatedHabit = currentHabits?.find((h) => h.id === variables.id);
-      const previousHabit = context?.previousHabits?.find(
-        (h) => h.id === variables.id,
-      );
-      if (
-        previousHabit &&
-        !previousHabit.isComplete &&
-        updatedHabit?.isComplete
-      ) {
-        _showNotification(
-          `🎉 Habit "${updatedHabit.title}" completed!`,
-          "success",
-          {
-            duration: 4000,
-            context: `habit-completion-${updatedHabit.id}`,
-          },
-        );
-      }
+    onSuccess: (_data, _variables, _context) => {
+      // Notification of completion is centralized in Goals mutations to avoid duplicates.
+      // Here we only ensure cache is up to date via onSettled invalidation below.
     },
     onError: (error, _variables, context) => {
       if (context?.previousHabits) {

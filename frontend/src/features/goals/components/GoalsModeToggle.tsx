@@ -10,12 +10,18 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
   const isAchieved = activeMode === "achieved";
 
   return (
-    <div className="relative flex w-fit items-center rounded-xl bg-surface/40 p-1" role="tablist" aria-label="Goals view mode">
+    <div
+      className="bg-surface/ relative flex w-fit items-center rounded-xl p-1"
+      role="tablist"
+      aria-label="Goals view mode"
+    >
       <Button
         type="button"
         onClick={isAchieved ? onToggle : undefined}
         className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
-          isActive ? "bg-primary text-foreground shadow-surface" : "text-foreground hover:text-foreground"
+          isActive
+            ? "bg-primary text-foreground shadow-surface"
+            : "text-foreground hover:text-foreground"
         }`}
         variant={isActive ? undefined : "ghost"}
         icon={<GoalsIcon className="mr-2 h-4 w-4 text-foreground" />}
@@ -28,7 +34,9 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
         type="button"
         onClick={isActive ? onToggle : undefined}
         className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
-          isAchieved ? "bg-primary text-foreground shadow-surface" : "text-foreground hover:text-foreground"
+          isAchieved
+            ? "bg-primary text-foreground shadow-surface"
+            : "text-foreground hover:text-foreground"
         }`}
         variant={isAchieved ? undefined : "ghost"}
         icon={<AwardIcon />}
