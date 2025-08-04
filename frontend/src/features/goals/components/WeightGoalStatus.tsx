@@ -15,8 +15,11 @@ import {
   TrendingUpIcon,
   WeightIcon,
 } from "@/components/ui";
+import {
+  computeDailyDifferenceForDisplay,
+  computeEffectiveTargetCalories,
+} from "@/features/goals/utils/calorie";
 import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
-import { computeDailyDifferenceForDisplay, computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { formatDate } from "@/features/reporting/utils/dateUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -95,14 +98,19 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
 
   // Mirror existing display behavior via shared helper
-  const dailyDifference = computeDailyDifferenceForDisplay(tdee, weightGoals, true, 50);
+  const dailyDifference = computeDailyDifferenceForDisplay(
+    tdee,
+    weightGoals,
+    true,
+    50,
+  );
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl border border-border/50 bg-background/50 p-4 shadow-primary sm:p-6"
+      className="rounded-xl border border-border/50 bg-surface p-4 shadow-primary sm:p-6"
     >
       {/* Header */}
       <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
