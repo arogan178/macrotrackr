@@ -1,7 +1,9 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
+import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
+import Navbar from "@/components/layout/Navbar";
 import {
   AwardIcon,
   LockIcon,
@@ -163,51 +165,53 @@ export default function SettingsPage() {
   );
 
   return (
-    <FeaturePage
-      title="Settings"
-      subtitle={undefined}
-      headerChildren={
-        <div
-          className="relative flex space-x-1 rounded-lg bg-surface/60 p-1"
-          role="tablist"
-          aria-label="Settings Tabs"
-        >
-          <TabButton
-            active={activeTab === "profile"}
-            onClick={() => handleTabChange("profile")}
-            layoutId="settingsTabHighlight"
-            isMotion={true}
+    <DashboardPageContainer>
+      <Navbar />
+      <FeaturePage
+        title="Settings"
+        subtitle={undefined}
+        headerChildren={
+          <div
+            className="relative flex space-x-1 rounded-lg bg-surface/60 p-1"
+            role="tablist"
+            aria-label="Settings Tabs"
           >
-            <span className="relative z-10 flex items-center">
-              <UserIcon size="sm" className="mr-1.5" />
-              Profile
-            </span>
-          </TabButton>
-          <TabButton
-            active={activeTab === "billing"}
-            onClick={() => handleTabChange("billing")}
-            layoutId="settingsTabHighlight"
-            isMotion={true}
-          >
-            <span className="relative z-10 flex items-center">
-              <AwardIcon size="sm" className="mr-1.5" />
-              Billing
-            </span>
-          </TabButton>
-          <TabButton
-            active={activeTab === "security"}
-            onClick={() => handleTabChange("security")}
-            layoutId="settingsTabHighlight"
-            isMotion={true}
-          >
-            <span className="relative z-10 flex items-center">
-              <LockIcon size="sm" className="mr-1.5" />
-              Security
-            </span>
-          </TabButton>
-        </div>
-      }
-    >
+            <TabButton
+              active={activeTab === "profile"}
+              onClick={() => handleTabChange("profile")}
+              layoutId="settingsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <UserIcon size="sm" className="mr-1.5" />
+                Profile
+              </span>
+            </TabButton>
+            <TabButton
+              active={activeTab === "billing"}
+              onClick={() => handleTabChange("billing")}
+              layoutId="settingsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <AwardIcon size="sm" className="mr-1.5" />
+                Billing
+              </span>
+            </TabButton>
+            <TabButton
+              active={activeTab === "security"}
+              onClick={() => handleTabChange("security")}
+              layoutId="settingsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <LockIcon size="sm" className="mr-1.5" />
+                Security
+              </span>
+            </TabButton>
+          </div>
+        }
+      >
       {isSettingsLoading ? (
         <SettingsLoadingSkeleton />
       ) : settingsQueryError ? (
@@ -273,6 +277,7 @@ export default function SettingsPage() {
         onConfirm={confirmTabChange}
         isDanger={true}
       />
-    </FeaturePage>
+      </FeaturePage>
+    </DashboardPageContainer>
   );
 }

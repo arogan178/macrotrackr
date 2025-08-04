@@ -4,7 +4,9 @@ import { useCallback, useMemo } from "react";
 
 import { homeRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
+import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
+import Navbar from "@/components/layout/Navbar";
 import { UserMetricsPanel } from "@/features/dashboard/components";
 import {
   AddEntryForm,
@@ -149,91 +151,98 @@ export default function HomePage() {
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
-  return (
-    <FeaturePage
-      feature="macros"
-      title={`Welcome back, ${isLoading ? "..." : user?.firstName || "User"}`}
-      subtitle={new Date().toLocaleDateString("en-US", {
+  const headerTitle =
+    `Welcome back, ${isLoading ? "..." : user?.firstName || "User"}`;
+  const headerSubtitle = useMemo(
+    () =>
+      new Date().toLocaleDateString("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
-      })}
-    >
-      <div className="relative min-h-screen">
-        <div>
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
-            <div className="flex h-full flex-col space-y-6 lg:col-span-4">
-              {/* Metrics Panel */}
-              <UserMetricsPanel
-                bmr={nutritionProfile?.bmr ?? 0}
-                tdee={nutritionProfile?.tdee ?? 0}
-                isLoading={isLoading}
-              />
+      }),
+    [],
+  );
 
-              {/* Add Entry Section */}
-              <div className="flex-1">
+  return (
+    <DashboardPageContainer>
+      <Navbar />
+      <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
+        <div className="relative min-h-screen">
+          <div>
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
+              <div className="flex h-full flex-col space-y-6 lg:col-span-4">
+                {/* Metrics Panel */}
+                <UserMetricsPanel
+                  bmr={nutritionProfile?.bmr ?? 0}
+                  tdee={nutritionProfile?.tdee ?? 0}
+                  isLoading={isLoading}
+                />
+
+                {/* Add Entry Section */}
+                <div className="flex-1">
+                  {isLoading ? (
+                    <AddEntryLoadingSkeleton />
+                  ) : (
+                    <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
+                  )}
+                </div>
+              </div>
+
+              {/* Today's Summary - Right side */}
+              <div className="flex h-full flex-col lg:col-span-2">
                 {isLoading ? (
-                  <AddEntryLoadingSkeleton />
+                  <DailySummaryLoadingSkeleton />
                 ) : (
-                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
+                  user && (
+                    <DailySummaryPanel
+                      macroDailyTotals={macroDailyTotals}
+                      macroTarget={macroTarget ?? undefined}
+                      calorieTarget={effectiveCalorieTarget}
+                    />
+                  )
                 )}
               </div>
             </div>
 
-            {/* Today's Summary - Right side */}
-            <div className="flex h-full flex-col lg:col-span-2">
-              {isLoading ? (
-                <DailySummaryLoadingSkeleton />
-              ) : (
-                user && (
-                  <DailySummaryPanel
-                    macroDailyTotals={macroDailyTotals}
-                    macroTarget={macroTarget ?? undefined}
-                    calorieTarget={effectiveCalorieTarget}
+            {/* Gap between AddEntryForm and EntryHistoryPanel */}
+            <div className="my-8" />
+
+            {/* History Section */}
+            <CardContainer>
+              <div className="p-6">
+                {isLoading ? (
+                  <HistoryLoadingSkeleton />
+                ) : (
+                  <EntryHistoryPanel
+                    history={history}
+                    deleteEntry={handleDeleteEntry}
+                    onEdit={setEditingEntry}
+                    isDeleting={isDeleting}
+                    isEditing={isEditing}
+                    hasMore={historyHasMore}
+                    onLoadMore={loadMoreHistory}
+                    isLoadingMore={isLoadingMore}
                   />
-                )
-              )}
-            </div>
-          </div>
+                )}
+              </div>
+            </CardContainer>
 
-          {/* Gap between AddEntryForm and EntryHistoryPanel */}
-          <div className="my-8" />
-
-          {/* History Section */}
-          <CardContainer>
-            <div className="p-6">
-              {isLoading ? (
-                <HistoryLoadingSkeleton />
-              ) : (
-                <EntryHistoryPanel
-                  history={history}
-                  deleteEntry={handleDeleteEntry}
-                  onEdit={setEditingEntry}
-                  isDeleting={isDeleting}
-                  isEditing={isEditing}
-                  hasMore={historyHasMore}
-                  onLoadMore={loadMoreHistory}
-                  isLoadingMore={isLoadingMore}
+            {/* Edit Modal - Only render when editingEntry is not undefined */}
+            <AnimatePresence>
+              {editingEntry && (
+                <EditModal
+                  key="edit-modal"
+                  entry={editingEntry}
+                  onSave={handleEditEntry}
+                  onClose={handleCloseModal}
+                  isSaving={isEditing}
                 />
               )}
-            </div>
-          </CardContainer>
-
-          {/* Edit Modal - Only render when editingEntry is not undefined */}
-          <AnimatePresence>
-            {editingEntry && (
-              <EditModal
-                key="edit-modal"
-                entry={editingEntry}
-                onSave={handleEditEntry}
-                onClose={handleCloseModal}
-                isSaving={isEditing}
-              />
-            )}
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
         </div>
-      </div>
-    </FeaturePage>
+      </FeaturePage>
+    </DashboardPageContainer>
   );
 }
 
