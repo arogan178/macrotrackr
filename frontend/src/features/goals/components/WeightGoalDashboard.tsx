@@ -1,12 +1,15 @@
 import { memo } from "react";
 
 import { EmptyState, TargetIcon } from "@/components/ui/";
+import {
+  computeDailyAdjustment,
+  computeEffectiveTargetCalories,
+} from "@/features/goals/utils/calorie";
 import { useFeatureLoading } from "@/hooks";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
-import { computeDailyAdjustment, computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 
 import WeightGoalStatus from "./WeightGoalStatus";
 
@@ -50,13 +53,16 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   const dailyAdjustment = computeDailyAdjustment(tdee, weightGoals);
 
   // Calculate effective target calories via shared helper
-  const effectiveTargetCalories = computeEffectiveTargetCalories(tdee, weightGoals);
+  const effectiveTargetCalories = computeEffectiveTargetCalories(
+    tdee,
+    weightGoals,
+  );
 
   // Loading State
   if (isLoading) {
     return (
       <div
-        className={`flex h-60 animate-pulse items-center justify-center rounded-2xl bg-surface/40 ${className}`}
+        className={`flex h-60 animate-pulse items-center justify-center rounded-2xl bg-surface ${className}`}
       >
         <div className="h-full w-full rounded-2xl bg-surface" />
       </div>
@@ -66,7 +72,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Empty State
   if (!weightGoals) {
     return (
-      <div className={`rounded-2xl bg-surface/40 ${className}`}>
+      <div className={`rounded-2xl bg-surface ${className}`}>
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
@@ -88,7 +94,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Status View (when weightGoals exist)
   return (
     <>
-      <div className={`rounded-2xl bg-surface/40 ${className}`}>
+      <div className={`rounded-2xl bg-surface ${className}`}>
         <WeightGoalStatus
           startingWeight={user.weight ?? 0}
           targetWeight={weightGoals.targetWeight}

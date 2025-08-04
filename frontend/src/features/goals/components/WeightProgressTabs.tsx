@@ -26,7 +26,7 @@ function WeightProgressTabs() {
   // Removed unused handleBulkConfirm placeholder to satisfy no-unused-vars
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border/50 bg-surface/40 shadow-primary backdrop-blur-sm">
+    <div className="overflow-hidden rounded-2xl border border-border/50 bg-surface shadow-primary">
       {/* Tab Navigation + Delete All Button */}
       <div className="flex items-center border-b border-border/50 pt-3 pr-8 pl-1">
         <div className="flex">
@@ -45,7 +45,7 @@ function WeightProgressTabs() {
               {activeTab === tab.id && (
                 <motion.div
                   className="absolute right-0 bottom-0 left-0 h-0.5 bg-primary"
-                  layoutId="underline" // Animate the underline
+                  layoutId="underline"
                   transition={{ type: "spring", stiffness: 350, damping: 30 }}
                 />
               )}
@@ -68,17 +68,14 @@ function WeightProgressTabs() {
       </div>
 
       {/* Tab Content Area */}
-      <div className="relative px-6 py-3">
-        {" "}
-        {/* Added relative positioning for AnimatePresence */}
+      <div className="relative px-6 py-3 backdrop-blur-sm">
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeTab} // Key change triggers animation
-            initial={{ opacity: 0, y: 15 }} // Start slightly below and faded out
-            animate={{ opacity: 1, y: 0 }} // Animate to fully visible and original position
-            exit={{ opacity: 0, y: -15 }} // Exit slightly above and faded out
-            transition={{ duration: 0.25 }} // Smooth transition
-            // Removed absolute positioning to let content flow
+            key={activeTab}
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -15 }}
+            transition={{ duration: 0.25 }}
           >
             {activeTab === "chart" && <WeightGoalProgressChart />}
             {activeTab === "list" && (

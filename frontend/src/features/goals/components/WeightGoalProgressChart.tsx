@@ -8,8 +8,8 @@ import {
 
 import { LineChartComponent } from "@/components/chart";
 import { BarChartIcon, EmptyState } from "@/components/ui";
-import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
+import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 
 // Custom Tooltip specific to Weight Goal Progress
 function WeightCustomTooltip({
@@ -26,7 +26,7 @@ function WeightCustomTooltip({
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
-      <div className="rounded-lg border border-border/50 bg-surface/90 p-3 shadow-primary backdrop-blur-lg">
+      <div className="rounded-lg border border-border/50 bg-surface p-3 shadow-primary backdrop-blur-lg">
         <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
@@ -231,9 +231,7 @@ function WeightGoalProgressChart() {
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
             {format(
               parseISO(
-                chartData.length > 0
-                  ? (chartData.at(-1)?.fullDate ?? "")
-                  : "",
+                chartData.length > 0 ? (chartData.at(-1)?.fullDate ?? "") : "",
               ),
               "MMM d, yyyy",
             )}

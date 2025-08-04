@@ -8,6 +8,7 @@ import {
   subMonths,
   subWeeks,
 } from "date-fns";
+
 import type { WeightLogEntry } from "@/utils/apiServices";
 
 /**
@@ -52,9 +53,9 @@ export function calculateWeeklyAverageChange(
 
   let totalChange = 0;
   let changeCount = 0;
-  for (let i = 1; i < weeklyAverages.length; i++) {
-    if (weeklyAverages[i].week === weeklyAverages[i - 1].week + 1) {
-      totalChange += weeklyAverages[i].avgWeight - weeklyAverages[i - 1].avgWeight;
+  for (let index = 1; index < weeklyAverages.length; index++) {
+    if (weeklyAverages[index].week === weeklyAverages[index - 1].week + 1) {
+      totalChange += weeklyAverages[index].avgWeight - weeklyAverages[index - 1].avgWeight;
       changeCount++;
     }
   }

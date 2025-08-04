@@ -7,10 +7,10 @@ import type {
   DataQualityResult,
   MacroBalanceResult,
   MacroDensityResult,
-  MacroTargetSettings,
   NutritionAverage,
   TrendResult,
 } from "../types/insightsTypes";
+import type { MacroTargetSettings } from "@/types/macro";
 import { calculateStandardDeviation } from "./macroCalculations";
 
 // --- Magic Number Constants ---
@@ -204,11 +204,14 @@ export function calculateTrend(
 
 export function calculateDataQuality(
   data: AggregatedDataPoint[],
+  totalDaysOverride?: number,
 ): DataQualityResult {
+  // If no data at all, still respect a provided override for denominator
   if (!data?.length) {
+    const totalDaysInPeriod = totalDaysOverride ?? 0;
     return {
       daysLogged: 0,
-      totalDaysInPeriod: 0,
+      totalDaysInPeriod,
       completionRate: 0,
       message:
         "Ready to start your nutrition journey? Begin logging your meals to track your progress!",
@@ -216,8 +219,17 @@ export function calculateDataQuality(
   }
 
   const daysWithData = data.filter((d) => d.calories > 0).length;
-  const totalDaysInPeriod = data.length;
-  const completionRate = Math.round((daysWithData / totalDaysInPeriod) * 100);
+
+  // Prefer explicit denominator if provided (e.g., 7/30/90 or custom inclusive range)
+  const totalDaysInPeriod =
+    typeof totalDaysOverride === "number" && totalDaysOverride > 0
+      ? totalDaysOverride
+      : data.length;
+
+  const completionRate =
+    totalDaysInPeriod > 0
+      ? Math.round((daysWithData / totalDaysInPeriod) * 100)
+      : 0;
 
   const message =
     completionRate >= DATA_QUALITY_OUTSTANDING
