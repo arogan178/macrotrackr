@@ -92,9 +92,9 @@ const MacroDensityBreakdown = ({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="flex flex-col rounded-xl border border-border/30 bg-surface/70 p-3 shadow-primary"
+      className="flex flex-col rounded-xl border border-border/30 bg-surface p-3 shadow-primary"
     >
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="text-base font-semibold text-foreground">
           Macro Distribution
         </h3>
