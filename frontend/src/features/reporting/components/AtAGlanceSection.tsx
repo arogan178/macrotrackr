@@ -17,7 +17,7 @@ export default function AtAGlanceSection({ averages }: AtAGlanceSectionProps) {
       transition={{ duration: 0.3, delay: 0.25 }}
       className="mb-4 rounded-lg border border-purple-500/20 bg-purple-900/10 p-4"
     >
-      <h3 className="text-md mb-3 font-medium text-purple-300">At a Glance</h3>
+      <h3 className="text-md mb-4 font-medium text-purple-300">At a Glance</h3>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 ">
         {" "}
         {DAILY_AVERAGES_CONFIG.map((config, index) => (

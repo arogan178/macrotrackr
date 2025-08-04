@@ -4,7 +4,9 @@ import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
 import { goalsRoute } from "@/AppRouter";
+import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
+import Navbar from "@/components/layout/Navbar";
 import { GoalsIcon, Modal, TabButton, TargetIcon } from "@/components/ui";
 import {
   GoalsLoadingSkeleton,
@@ -234,40 +236,42 @@ export default function GoalsPage() {
     currentWeightGoals?.targetWeight || user?.weight || 0;
 
   return (
-    <FeaturePage
-      title="Your Goals"
-      subtitle="Track your progress and stay motivated on your health journey"
-      headerChildren={
-        <div
-          className="relative flex space-x-1 rounded-lg bg-background/60 p-1"
-          role="tablist"
-          aria-label="Goals Tabs"
-        >
-          <TabButton
-            active={activeTab === "goals"}
-            onClick={() => setActiveTab("goals")}
-            layoutId="goalsTabHighlight"
-            isMotion={true}
+    <DashboardPageContainer>
+      <Navbar />
+      <FeaturePage
+        title="Your Goals"
+        subtitle="Track your progress and stay motivated on your health journey"
+        headerChildren={
+          <div
+            className="relative flex space-x-1 rounded-lg bg-background/60 p-1"
+            role="tablist"
+            aria-label="Goals Tabs"
           >
-            <span className="relative z-10 flex items-center">
-              <GoalsIcon size="sm" className="mr-1.5" />
-              Goals
-            </span>
-          </TabButton>
-          <TabButton
-            active={activeTab === "macro targets"}
-            onClick={() => setActiveTab("macro targets")}
-            layoutId="goalsTabHighlight"
-            isMotion={true}
-          >
-            <span className="relative z-10 flex items-center">
-              <TargetIcon size="sm" className="mr-1.5" />
-              Macro Targets
-            </span>
-          </TabButton>
-        </div>
-      }
-    >
+            <TabButton
+              active={activeTab === "goals"}
+              onClick={() => setActiveTab("goals")}
+              layoutId="goalsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <GoalsIcon size="sm" className="mr-1.5" />
+                Goals
+              </span>
+            </TabButton>
+            <TabButton
+              active={activeTab === "macro targets"}
+              onClick={() => setActiveTab("macro targets")}
+              layoutId="goalsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <TargetIcon size="sm" className="mr-1.5" />
+                Macro Targets
+              </span>
+            </TabButton>
+          </div>
+        }
+      >
       <AnimatePresence>
         {isResetModalOpen && (
           <Modal
@@ -433,6 +437,7 @@ export default function GoalsPage() {
           <GoalsLoadingSkeleton />
         )}
       </div>
-    </FeaturePage>
+      </FeaturePage>
+    </DashboardPageContainer>
   );
 }
