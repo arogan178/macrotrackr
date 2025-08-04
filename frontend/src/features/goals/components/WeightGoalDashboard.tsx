@@ -6,6 +6,7 @@ import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import type { UserSettings } from "@/types/user";
+import { computeDailyAdjustment, computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 
 import WeightGoalStatus from "./WeightGoalStatus";
 
@@ -45,23 +46,11 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
 
   // TDEE is now passed as a prop and should be used directly
 
-  // Get daily deficit/surplus from weightGoals
-  // If dailyChange is undefined, calculate it from TDEE and calorieTarget
-  let dailyAdjustment = weightGoals?.dailyChange || 0;
-  if (dailyAdjustment === 0 && weightGoals?.calorieTarget && tdee > 0) {
-    // Calculate daily deficit/surplus: deficit is positive, surplus is negative
-    dailyAdjustment = tdee - weightGoals.calorieTarget;
-  }
+  // Get daily deficit/surplus from weightGoals via shared helper
+  const dailyAdjustment = computeDailyAdjustment(tdee, weightGoals);
 
-  // Calculate effective target calories
-  let effectiveTargetCalories: number = Number.isFinite(tdee) ? tdee : 0;
-  if (weightGoals?.calorieTarget) {
-    effectiveTargetCalories = weightGoals.calorieTarget;
-  }
-  // Always ensure it's a finite number
-  if (!Number.isFinite(effectiveTargetCalories)) {
-    effectiveTargetCalories = 0;
-  }
+  // Calculate effective target calories via shared helper
+  const effectiveTargetCalories = computeEffectiveTargetCalories(tdee, weightGoals);
 
   // Loading State
   if (isLoading) {

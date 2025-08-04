@@ -32,9 +32,7 @@ function WeightGoalModal({
   const updateWeightGoalMutation = useUpdateWeightGoal();
 
   useEffect(() => {
-    if (isOpen) {
-      console.log("WeightGoalModal rendered and open.");
-    }
+    // Modal open effect retained; removed debug log
   }, [isOpen]);
 
   const handleSave = async (values: WeightGoalFormValues) => {
