@@ -141,21 +141,37 @@ interface HabitCardProps {
 }
 
 function getGradientClass(color: string) {
+  // Explicit mappings for all HabitForm colors to prevent Tailwind purge
   const gradients = {
-    indigo: "from-primary/20 to-primary/5",
-    blue: "from-primary/20 to-primary/5",
+    indigo: "from-indigo-500/20 to-indigo-500/5",
+    blue: "from-blue-500/20 to-blue-500/5",
+    cyan: "from-cyan-500/20 to-cyan-500/5",
+    teal: "from-teal-500/20 to-teal-500/5",
     green: "from-green-500/20 to-green-500/5",
+    lime: "from-lime-500/20 to-lime-500/5",
+    yellow: "from-yellow-500/20 to-yellow-500/5",
+    orange: "from-orange-500/20 to-orange-500/5",
+    red: "from-red-500/20 to-red-500/5",
+    pink: "from-pink-500/20 to-pink-500/5",
     purple: "from-purple-500/20 to-purple-500/5",
   } as const;
   return gradients[color as keyof typeof gradients] || gradients.indigo;
 }
 
 function getAccentClass(color: string) {
+  // Chip+text styles for all HabitForm colors using explicit Tailwind classes
   const colors = {
-    indigo: "text-vibrant-accent bg-primary/10",
-    blue: "text-blue-400 bg-blue-400/10",
-    green: "text-success bg-success/10",
-    purple: "text-purple-400 bg-purple-400/10",
+    indigo: "text-indigo-500 bg-indigo-500/10",
+    blue: "text-blue-500 bg-blue-500/10",
+    cyan: "text-cyan-500 bg-cyan-500/10",
+    teal: "text-teal-500 bg-teal-500/10",
+    green: "text-green-500 bg-green-500/10",
+    lime: "text-lime-500 bg-lime-500/10",
+    yellow: "text-yellow-500 bg-yellow-500/10",
+    orange: "text-orange-500 bg-orange-500/10",
+    red: "text-red-500 bg-red-500/10",
+    pink: "text-pink-500 bg-pink-500/10",
+    purple: "text-purple-500 bg-purple-500/10",
   } as const;
   return colors[color as keyof typeof colors] || colors.indigo;
 }
@@ -174,21 +190,42 @@ function resolveProgressColor(
   | "carbs"
   | "fats" {
   if (isComplete) return "green";
-  // Map known habit accent colors to allowed union; default to accent
+
+  // Map all HabitForm colors to nearest ProgressBar union
   switch (accentColor) {
-    case "green": {
-      return "green";
-    }
-    case "purple": {
-      return "purple";
-    }
+    // Blues
+    case "indigo":
     case "blue": {
       return "blue";
     }
+
+    // Greens
+    case "green":
+    case "lime": {
+      return "green";
+    }
+
+    // Purples
+    case "purple": {
+      return "purple";
+    }
+
+    // Reds
+    case "red":
+    case "orange":
+    case "pink": {
+      return "red";
+    }
+
+    // Others map to accent
+    case "cyan":
+    case "teal":
+    case "yellow":
     case "vibrant-accent":
     case "accent": {
       return "accent";
     }
+
     default: {
       return "accent";
     }
@@ -228,7 +265,7 @@ function HabitCard({
         <div className="mb-2 flex items-center justify-between">
           <div className="flex items-center">
             <div
-              className={`rounded-lg p-1.5 ${getAccentClass(accentColor)} mr-2`}
+              className={`mr-2 rounded-lg p-1.5 ${getAccentClass(accentColor)}`}
             >
               {renderIcon()}
             </div>

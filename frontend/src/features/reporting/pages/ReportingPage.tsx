@@ -94,26 +94,25 @@ export default function ReportingPage() {
     !isHistoryLoading && dataProcessed && dailySeries.length === 0;
 
   const headerTitle = "Nutrition Reports";
-  const headerSubtitle =
-    "Track your nutrition trends and progress over time";
+  const headerSubtitle = "Track your nutrition trends and progress over time";
 
   return (
     <DashboardPageContainer>
       <Navbar />
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
-          <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait">
           {
-              <motion.div
+            <motion.div
               key="reporting-main-content"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
             >
-                {isHistoryLoading ? (
-                  <ReportingPageSkeleton />
-                ) : (
-                  <>
+              {isHistoryLoading ? (
+                <ReportingPageSkeleton />
+              ) : (
+                <>
                   {/* Debug info for development - Adjusted condition */}
                   {!isHistoryLoading &&
                     history?.length === 0 &&
@@ -134,22 +133,22 @@ export default function ReportingPage() {
                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             ></path>
                           </svg>
-                          No nutrition history found. Add some entries to see your
-                          reporting data.
+                          No nutrition history found. Add some entries to see
+                          your reporting data.
                         </div>
                       </div>
                     )}
                   {/* Date Range Selector */}
-                    <ProFeature>
-                      <DateRangeSelector
-                        currentRange={dateRange}
-                        onRangeChange={setDateRange}
-                        onExportClick={handleDownloadCSV}
-                        isExportDisabled={
-                          aggregatedData.length === 0 || isHistoryLoading
-                        }
-                      />
-                    </ProFeature>
+                  <ProFeature>
+                    <DateRangeSelector
+                      currentRange={dateRange}
+                      onRangeChange={setDateRange}
+                      onExportClick={handleDownloadCSV}
+                      isExportDisabled={
+                        aggregatedData.length === 0 || isHistoryLoading
+                      }
+                    />
+                  </ProFeature>
                   {/* Summary Stats */}
                   {(() => {
                     const calorieTarget =
@@ -238,6 +237,7 @@ export default function ReportingPage() {
                         isLoading={isHistoryLoading}
                         showNoDataMessage={showNoDataMessage}
                         macroTarget={macroTarget}
+                        denominatorDays={mapDateRangeToNumeric(dateRange)}
                       />
                     </ProFeature>
                   </div>

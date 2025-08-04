@@ -17,11 +17,11 @@ export function safeParseISO(value: string | undefined): Date | undefined {
  * Returns undefined if invalid.
  */
 export function safeParseLocalDateTime(
-  dateStr: string | undefined,
-  timeStr: string | undefined,
+  dateString: string | undefined,
+  timeString: string | undefined,
 ): Date | undefined {
-  if (!dateStr || !timeStr) return undefined;
-  const dt = parse(`${dateStr} ${timeStr}`, "yyyy-MM-dd HH:mm", new Date());
+  if (!dateString || !timeString) return undefined;
+  const dt = parse(`${dateString} ${timeString}`, "yyyy-MM-dd HH:mm", new Date());
   return isValid(dt) ? dt : undefined;
 }
 

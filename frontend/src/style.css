@@ -3,35 +3,37 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #347235;
-  --color-secondary: #d4a276;
-  --color-vibrant-accent: #e67e22;
+  --color-primary: #1f6a2e;
+  --color-secondary: #c8946b;
+  --color-vibrant-accent: #dd7a24;
 
-  --color-background: #0d1117;
-  --color-surface: #161b22;
-  --color-border: #30363d;
-  --color-foreground: #e6edf3;
-  --color-muted: #84909c;
+  --color-background: #0b1220;
+  --color-surface: #151b2b;
+  --color-border: #3a4350;
+  --color-foreground: #eef3f8;
+  --color-muted: #98a6b5;
 
-  --color-protein: #2ecc71;
-  --color-carbs: #3498db;
-  --color-fats: #e74c3c;
+  --color-protein: #23c06b;
+  --color-carbs: #3a9ae6;
+  --color-fats: #e24a46;
 
-  --color-success: #2ecc71;
-  --color-warning: #d4a276;
-  --color-error: #f85149;
+  --color-success: #24c46f;
+  --color-warning: #c69060;
+  --color-error: #ee544d;
 
-  --shadow-surface: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-surface: 0 1px 2px 0 rgba(10, 20, 40, 0.25);
   --shadow-primary:
-    0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+    0 6px 14px -6px rgba(12, 24, 48, 0.35),
+    0 3px 6px -4px rgba(12, 24, 48, 0.25);
   --shadow-modal:
-    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
-  --shadow-warning: 0 4px 14px 0 rgba(212, 162, 118, 0.3);
-  --shadow-error: 0 4px 14px 0 rgba(248, 81, 73, 0.3);
-  --shadow-success: 0 4px 14px 0 rgba(46, 204, 113, 0.3);
-  --shadow-accent: 0 4px 14px 0 rgba(230, 126, 34, 0.3);
-  --shadow-glow: 0 0 20px rgba(100, 100, 255, 0.3);
-  --shadow-border: 0 1px 3px 0 rgba(48, 54, 61, 0.1);
+    0 16px 32px -8px rgba(12, 24, 48, 0.45),
+    0 6px 12px -6px rgba(12, 24, 48, 0.35);
+  --shadow-warning: 0 6px 18px 0 rgba(198, 144, 96, 0.28);
+  --shadow-error: 0 6px 18px 0 rgba(238, 84, 77, 0.28);
+  --shadow-success: 0 6px 18px 0 rgba(36, 196, 111, 0.25);
+  --shadow-accent: 0 6px 18px 0 rgba(221, 122, 36, 0.26);
+  --shadow-glow: 0 0 22px rgba(64, 128, 255, 0.25);
+  --shadow-border: 0 1px 3px 0 rgba(32, 40, 56, 0.18);
 }
 
 /* Mouse action styles */

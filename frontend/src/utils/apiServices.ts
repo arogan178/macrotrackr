@@ -190,7 +190,18 @@ type HabitGoalPayload = {
   current: number;
   target: number;
   progress: number;
-  accentColor?: "indigo" | "blue" | "green" | "purple";
+  accentColor?:
+    | "indigo"
+    | "blue"
+    | "cyan"
+    | "teal"
+    | "green"
+    | "lime"
+    | "yellow"
+    | "orange"
+    | "red"
+    | "pink"
+    | "purple";
   isComplete?: boolean;
   createdAt: string;
   completedAt?: string;

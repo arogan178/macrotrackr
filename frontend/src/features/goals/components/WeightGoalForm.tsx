@@ -241,7 +241,7 @@ function WeightGoalForm({
           </div>
 
           {!isMaintenance && (
-            <div className="rounded-lg bg-surface/30 p-3">
+            <div className="rounded-lg bg-surface p-3">
               <p className="text-sm text-foreground">
                 <span className="font-medium">
                   Estimated completion:{" "}
@@ -300,7 +300,7 @@ function WeightGoalForm({
           )}
 
           {isMaintenance && (
-            <div className="rounded-lg bg-surface/30 p-3">
+            <div className="rounded-lg bg-surface p-3">
               <p className="text-sm text-foreground">
                 <span className="font-medium">Maintenance Goal</span>
               </p>
