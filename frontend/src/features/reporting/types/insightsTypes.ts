@@ -21,6 +21,8 @@ export interface UnifiedInsightsProps {
   isLoading: boolean;
   showNoDataMessage?: boolean;
   macroTarget?: MacroTargetSettings | undefined;
+  // Explicit denominator for selected range (e.g., 7/30/90 or custom inclusive count)
+  denominatorDays?: number;
 }
 
 export interface MacroBalanceResult {

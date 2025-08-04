@@ -141,43 +141,43 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
             ) : (
               <div className="space-y-10">
                 {/* Skeleton for the stacked bar */}
-                <div className="relative mb-6 h-2 animate-pulse overflow-hidden rounded-full bg-surface/30" />
+                <div className="relative mb-6 h-2 animate-pulse overflow-hidden rounded-full bg-surface" />
 
                 {/* Skeleton for sliders */}
                 <div className="space-y-8">
                   {/* Protein slider skeleton */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <div className="h-4 w-20 animate-pulse rounded bg-surface/50" />
-                      <div className="h-4 w-12 animate-pulse rounded bg-surface/50" />
+                      <div className="h-4 w-20 animate-pulse rounded bg-surface" />
+                      <div className="h-4 w-12 animate-pulse rounded bg-surface" />
                     </div>
-                    <div className="h-2 animate-pulse rounded-full bg-surface/50" />
+                    <div className="h-2 animate-pulse rounded-full bg-surface" />
                   </div>
 
                   {/* Carbs slider skeleton */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <div className="h-4 w-20 animate-pulse rounded bg-surface/50" />
-                      <div className="h-4 w-12 animate-pulse rounded bg-surface/50" />
+                      <div className="h-4 w-20 animate-pulse rounded bg-surface" />
+                      <div className="h-4 w-12 animate-pulse rounded bg-surface" />
                     </div>
-                    <div className="h-2 animate-pulse rounded-full bg-surface/50" />
+                    <div className="h-2 animate-pulse rounded-full bg-surface" />
                   </div>
 
                   {/* Fats slider skeleton */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
-                      <div className="h-4 w-20 animate-pulse rounded bg-surface/50" />
-                      <div className="h-4 w-12 animate-pulse rounded bg-surface/50" />
+                      <div className="h-4 w-20 animate-pulse rounded bg-surface" />
+                      <div className="h-4 w-12 animate-pulse rounded bg-surface" />
                     </div>
-                    <div className="h-2 animate-pulse rounded-full bg-surface/50" />
+                    <div className="h-2 animate-pulse rounded-full bg-surface" />
                   </div>
                 </div>
 
                 {/* Skeleton for badges */}
                 <div className="grid grid-cols-3 gap-2 pt-5">
-                  <div className="h-10 animate-pulse rounded bg-surface/50" />
-                  <div className="h-10 animate-pulse rounded bg-surface/50" />
-                  <div className="h-10 animate-pulse rounded bg-surface/50" />
+                  <div className="h-10 animate-pulse rounded bg-surface" />
+                  <div className="h-10 animate-pulse rounded bg-surface" />
+                  <div className="h-10 animate-pulse rounded bg-surface" />
                 </div>
               </div>
             )}
