@@ -1,4 +1,4 @@
-// src/features/goals/pages/GoalsPage.tsx
+ // src/features/goals/pages/GoalsPage.tsx
 
 import { useLoaderData } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -34,19 +34,22 @@ import {
 import {
   useMacroDailyTotals,
   useMacroTarget,
-} from "@/hooks/queries/useMacroQueries"; // <-- FIX: Import the hook
+} from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 import type { UserDetailsResponse } from "@/utils/apiServices";
+import type { UserSettings } from "@/types/user";
 
 // Helper to convert UserDetailsResponse to UserSettings shape
-function toUserSettings(user: UserDetailsResponse | null | undefined): any {
+function toUserSettings(
+  user: UserDetailsResponse | null | undefined,
+): UserSettings | undefined {
   if (!user) return undefined;
   return {
     ...user,
     dateOfBirth: user.dateOfBirth ?? "",
-  };
+  } as UserSettings;
 }
 
 export default function GoalsPage() {
@@ -99,8 +102,9 @@ export default function GoalsPage() {
 
   const macroDailyTotals = liveMacroDailyTotals || initialMacroDailyTotals;
 
-  const nutritionProfile = user
-    ? createNutritionProfile(toUserSettings(user))
+  const safeUserSettings = toUserSettings(user);
+  const nutritionProfile = safeUserSettings
+    ? createNutritionProfile(safeUserSettings)
     : undefined;
 
   const { data: habits = [], isLoading: habitsLoading } = useHabits();
@@ -372,9 +376,9 @@ export default function GoalsPage() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
                 <div className="space-y-6">
-                  {user && (
+                  {safeUserSettings && (
                     <WeightGoalDashboard
-                      user={toUserSettings(user)}
+                      user={safeUserSettings}
                       macroDailyTotals={macroDailyTotals}
                       weightGoals={
                         currentWeightGoals &&
