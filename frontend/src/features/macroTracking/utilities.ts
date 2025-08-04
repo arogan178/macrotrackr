@@ -41,3 +41,60 @@ export const areEntriesSame = (
     entry1.entryTime === entry2.entryTime
   );
 };
+
+/**
+ * List manipulation helpers (moved from calculations.ts)
+ */
+export const updateEntryInList = (
+  entries: MacroEntry[],
+  id: number,
+  updates: Partial<MacroEntry>,
+): MacroEntry[] => {
+  return entries.map((entry) =>
+    entry.id === id ? { ...entry, ...updates } : entry,
+  );
+};
+
+export const removeEntryFromList = (
+  entries: MacroEntry[],
+  id: number,
+): MacroEntry[] => {
+  return entries.filter((entry) => entry.id !== id);
+};
+
+/**
+ * Formatting helpers (moved from calculations.ts)
+ */
+export const formatMacroValue = (value: number): string => {
+  return Math.round(value).toString();
+};
+
+/**
+ * Validation helpers (moved from calculations.ts)
+ */
+export const validateMacroInputs = (
+  protein: string,
+  carbs: string,
+  fats: string,
+): { isValid: boolean; errors: Record<string, string> } => {
+  const errors: Record<string, string> = {};
+
+  const proteinNumber = Number.parseFloat(protein);
+  const carbsNumber = Number.parseFloat(carbs);
+  const fatsNumber = Number.parseFloat(fats);
+
+  if (Number.isNaN(proteinNumber) || proteinNumber < 0) {
+    errors.protein = "Protein must be a valid positive number";
+  }
+  if (Number.isNaN(carbsNumber) || carbsNumber < 0) {
+    errors.carbs = "Carbs must be a valid positive number";
+  }
+  if (Number.isNaN(fatsNumber) || fatsNumber < 0) {
+    errors.fats = "Fats must be a valid positive number";
+  }
+
+  return {
+    isValid: Object.keys(errors).length === 0,
+    errors,
+  };
+};
