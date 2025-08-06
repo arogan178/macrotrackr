@@ -36,7 +36,7 @@ import {
   WarningIcon,
 } from "@/components/ui";
 import type { ButtonSize, IconSize } from "@/components/utils";
-import { BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
+import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
 type ActionVariant =
   | "delete"
@@ -131,7 +131,7 @@ function IconButton({
   // Prefer iconSize, fallback to buttonSize (both are strongly typed)
   const resolvedIconSize: IconSize = iconSize || buttonSize;
   const iconSizeClass = ICON_SIZES[resolvedIconSize] || ICON_SIZES.md;
-  const paddingClass = BUTTON_SIZES[buttonSize] || BUTTON_SIZES.md;
+  const paddingClass = ICON_BUTTON_SIZES[buttonSize] || ICON_BUTTON_SIZES.md;
 
   // Icon logic: use custom icon for 'custom' and 'password-toggle', otherwise use config.icon
   let iconElement: React.ReactNode;

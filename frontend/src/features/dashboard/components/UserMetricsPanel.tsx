@@ -9,7 +9,7 @@ interface UserMetricsPanelProps {
   isLoading?: boolean;
 }
 
-function LoadingSkeleton() {
+const LoadingSkeleton = memo(function LoadingSkeleton() {
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
       {[0, 1].map((index) => (
@@ -19,17 +19,21 @@ function LoadingSkeleton() {
         >
           <div className="flex items-start gap-5">
             <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/20 to-primary/5 p-3">
-              <div className="h-7 w-7 rounded bg-surface"></div>
+              <div className="h-7 w-7 rounded bg-surface" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="mb-2 h-4 w-3/4 rounded bg-surface"></div>
-              <div className="h-7 w-2/5 rounded bg-surface"></div>
+              <div className="mb-2 h-4 w-3/4 rounded bg-surface" />
+              <div className="h-7 w-2/5 rounded bg-surface" />
             </div>
           </div>
         </div>
       ))}
     </div>
   );
+});
+
+function formatOrUndefined(n?: number) {
+  return n ?? undefined;
 }
 
 function UserMetricsPanel({
@@ -45,21 +49,20 @@ function UserMetricsPanel({
         icon={UserIcon}
         title="Basal Metabolic Rate"
         acronym="BMR"
-        value={bmr || undefined}
-        color="accent"
+        value={formatOrUndefined(bmr)}
+        color="primary"
         showKcalSuffix
       />
       <MetricCard
         icon={StarIcon}
         title="Total Daily Energy"
         acronym="TDEE"
-        value={tdee || undefined}
-        color="accent"
+        value={formatOrUndefined(tdee)}
+        color="primary"
         showKcalSuffix
       />
     </div>
   );
 }
 
-// Memoize the component to prevent unnecessary re-renders
 export default memo(UserMetricsPanel);

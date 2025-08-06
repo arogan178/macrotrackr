@@ -1,5 +1,4 @@
-import { useState } from "react";
-import type { LabelProps, TooltipProps } from "recharts";
+import { useMemo, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -8,13 +7,20 @@ import {
   LabelList,
   Legend,
   ResponsiveContainer,
-  Tooltip,
+  Tooltip as RechartsTooltip,
+  type TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
 
-import { ChartCard, StatSelector } from "@/components/chart";
-import { getUnitForStat, MEAL_COLORS } from "@/utils/chartColors";
+import { ChartCard } from "@/components/chart";
+import {
+  legendFormatter,
+  PercentageLabel,
+  standardLegendConfig,
+} from "@/components/chart/ChartUtilities";
+import TabBar from "@/components/ui/TabBar";
+import { getUnitForStat, MEAL_COLORS, STAT_COLORS } from "@/utils/chartColors";
 
 import {
   formatMealType,
@@ -41,12 +47,36 @@ function MealTimeBreakdown({
     endDate,
     selectedStat,
   );
+  // Build TabBar items for stat selection (must be before any early return)
+  const tabItems = useMemo(
+    () => [
+      { key: "calories", label: "Calories", activeBg: STAT_COLORS.calories },
+      { key: "protein", label: "Protein", activeBg: STAT_COLORS.protein },
+      { key: "carbs", label: "Carbs", activeBg: STAT_COLORS.carbs },
+      { key: "fats", label: "Fats", activeBg: STAT_COLORS.fats },
+      { key: "count", label: "Count", activeBg: STAT_COLORS.count },
+    ],
+    [],
+  );
+
   if (mealTypeDistribution.length === 0) {
     return (
       <ChartCard
         title="Meal Distribution"
         isEmpty={true}
         emptyMessage="No meal data available for selected period."
+        action={
+          <TabBar
+            items={tabItems}
+            activeKey={selectedStat}
+            onChange={setSelectedStat}
+            rounded="rounded-lg"
+            isMotion
+            layoutId="statHighlight"
+            size="xs"
+            className="p-0.5 [&_button]:px-2.5 [&_button]:py-0.5 [&_button]:text-xs"
+          />
+        }
       >
         <div />
       </ChartCard>
@@ -76,44 +106,20 @@ function MealTimeBreakdown({
     </defs>
   );
 
-  // Custom label renderer
-  const renderPercentageLabel = (properties: LabelProps) => {
-    const { x = 0, y = 0, width = 0, height = 0, value } = properties;
-    const percent =
-      typeof value === "number"
-        ? value
-        : Number.parseInt((value as string) || "0", 10);
-    const widthNumber = typeof width === "number" ? width : Number(width);
-    const xNumber = typeof x === "number" ? x : Number(x);
-    const yNumber = typeof y === "number" ? y : Number(y);
-    const heightNumber = typeof height === "number" ? height : Number(height);
-
-    if (percent < 5 || widthNumber < 50) return;
-
-    return (
-      <text
-        x={xNumber + widthNumber - 10}
-        y={yNumber + heightNumber / 2}
-        fill="#fff"
-        fontSize={12}
-        fontWeight="bold"
-        textAnchor="end"
-        dominantBaseline="central"
-        style={{ opacity: 0.92 }}
-      >
-        {percent}%
-      </text>
-    );
-  };
   return (
     <ChartCard
       title="Meal Distribution"
       className="h-[300px]"
       action={
-        <StatSelector
-          selectedStat={selectedStat}
-          onStatChange={setSelectedStat}
-          availableStats={["calories", "protein", "carbs", "fats", "count"]}
+        <TabBar
+          items={tabItems}
+          activeKey={selectedStat}
+          onChange={setSelectedStat}
+          rounded="rounded-lg"
+          isMotion
+          layoutId="statHighlight"
+          size="xs"
+          className="p-0.5 [&_button]:px-2.5 [&_button]:py-0.5 [&_button]:text-xs"
         />
       }
     >
@@ -122,7 +128,7 @@ function MealTimeBreakdown({
         <BarChart
           layout="vertical"
           data={mealTypeDistribution}
-          margin={{ top: 5, right: 30, left: 0, bottom: 5 }}
+          margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
           barSize={25}
         >
           {gradientDefs}
@@ -155,28 +161,21 @@ function MealTimeBreakdown({
             interval={0}
           />
 
-          <Tooltip
+          <RechartsTooltip
             content={CustomTooltip}
             cursor={{ fill: "rgba(110,118,145,0.1)" }}
             wrapperStyle={{ outline: "none" }}
           />
 
           <Legend
-            height={14}
-            iconSize={10}
-            iconType="circle"
-            verticalAlign="bottom"
-            align="center"
-            wrapperStyle={{ fontSize: 12, paddingTop: 2 }}
+            {...standardLegendConfig}
             payload={MEAL_TYPES.map((mealType) => ({
               id: mealType,
               value: formatMealType(mealType),
               type: "circle",
               color: MEAL_COLORS[mealType].base,
             }))}
-            formatter={(value) => (
-              <span className="ml-1 text-foreground capitalize">{value}</span>
-            )}
+            formatter={legendFormatter}
           />
 
           <Bar
@@ -195,7 +194,16 @@ function MealTimeBreakdown({
             <LabelList
               dataKey="percentage"
               position="insideRight"
-              content={renderPercentageLabel}
+              content={(properties) => (
+                // Recharts passes a large object; we map to the minimal props our component expects
+                <PercentageLabel
+                  x={(properties as any).x}
+                  y={(properties as any).y}
+                  width={(properties as any).width}
+                  height={(properties as any).height}
+                  value={(properties as any).value as number}
+                />
+              )}
             />
           </Bar>
         </BarChart>

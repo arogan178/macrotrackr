@@ -133,7 +133,7 @@ export const ICON_POSITIONS = {
 } as const;
 
 // Icon button size mapping (square, for icon-only buttons)
-export const BUTTON_SIZES = {
+export const ICON_BUTTON_SIZES = {
   sm: "p-1.5 w-8 h-8 aspect-square", // 32px
   md: "p-2 w-9 h-9 aspect-square", // 36px
   lg: "p-2.5 w-10 h-10 aspect-square", // 40px
@@ -145,7 +145,7 @@ export const BUTTON_SIZES = {
 } as const;
 
 // Button size mapping (rectangular, for text/icon buttons)
-export const FORM_BUTTON_SIZES = {
+export const BUTTON_SIZES = {
   sm: "px-2 py-1 text-xs",
   md: "px-3.5 py-2 text-md",
   lg: "px-5 py-3 text-base",

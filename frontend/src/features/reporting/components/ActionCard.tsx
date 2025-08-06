@@ -9,7 +9,7 @@ export default function ActionCard({
   bgColor,
 }: ActionCardProps) {
   return (
-    <CardContainer className="p-3">
+    <CardContainer className="bg-surface-2 p-3">
       <div className="mb-4 flex items-center">
         <div className={`${bgColor} mr-2 rounded-full p-1.5`}>{icon}</div>
         <h4 className="text-sm font-medium text-foreground">{title}</h4>

@@ -4,9 +4,9 @@ import { LoadingSpinnerIcon } from "@/components/ui";
 // Fixed type import path: Types are defined in ./Types.ts, not "@/components/ui/types"
 import type { ButtonProps } from "@/components/ui/Types";
 import {
+  BUTTON_SIZES,
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
-  FORM_BUTTON_SIZES,
   ICON_POSITIONS,
 } from "@/components/utils";
 import { useFeatureLoading, useGlobalLoading } from "@/hooks";
@@ -34,7 +34,7 @@ function ButtonBase({
   const finalIsLoading = isLoading;
 
   // Localized button styles (migrated from utils/Styles.ts)
-  const sizeStyles = FORM_BUTTON_SIZES;
+  const sizeStyles = BUTTON_SIZES;
 
   const buttonBase =
     "inline-flex items-center justify-center font-medium text-sm gap-1.5 transition-all duration-200 " +
