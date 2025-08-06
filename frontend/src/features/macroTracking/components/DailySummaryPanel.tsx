@@ -139,7 +139,7 @@ export default function DailySummary({
   return (
     <CardContainer className="h-full">
       <div className="flex h-full flex-col p-6">
-        <div className="mb-6 rounded-xl bg-muted/10 p-4">
+        <div className="mb-6 rounded-xl bg-surface-2 p-4">
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">
               Today's Summary
