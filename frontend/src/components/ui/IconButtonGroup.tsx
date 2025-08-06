@@ -2,9 +2,9 @@
 import { memo } from "react";
 
 import { IconButton, LoadingSpinnerIcon, TrashIcon } from "@/components/ui";
-import { BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants";
+import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants";
 
-type ButtonSize = keyof typeof BUTTON_SIZES;
+type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 type IconSize = keyof typeof ICON_SIZES;
 
 export type IconButtonGroupProps = {

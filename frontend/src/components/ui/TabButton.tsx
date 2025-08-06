@@ -1,12 +1,29 @@
 import { motion } from "motion/react";
 
-import type { TabButtonProps } from "@/components/utils/Types";
+import { BUTTON_SIZES } from "@/components/utils/Constants";
 
 import Button from "./Button";
+
+// Local TabButton prop definition to avoid missing '@/components/utils/Types'
+export type TabButtonProps = {
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+  layoutId?: string;
+  isMotion?: boolean;
+  disabled?: boolean;
+  className?: string;
+  ariaLabel?: string;
+  role?: string;
+  "aria-selected"?: boolean;
+};
+
+type ButtonSizeKey = keyof typeof BUTTON_SIZES; // "xs" | "sm" | "md" | "lg"
 
 type ExtendedTabButtonProps = TabButtonProps & {
   rounded?: string;
   activeBg?: string;
+  size?: ButtonSizeKey;
 };
 
 function TabButton({
@@ -14,28 +31,32 @@ function TabButton({
   onClick,
   children,
   layoutId,
-  isMotion,
+  isMotion = true,
   rounded,
   activeBg,
   disabled,
+  size = "md",
+  className,
+  role,
   ...rest
 }: ExtendedTabButtonProps) {
   const baseRounded = rounded || "rounded-md";
   const motionBg = activeBg || "bg-primary";
+  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey]; // e.g. "px-2 py-1 text-xs"
 
   return (
     <Button
       onClick={onClick}
       variant={active ? "primary" : "ghost"}
-      className={`relative px-3 py-1.5 ${baseRounded} text-sm font-medium ${
+      className={`relative ${sizeClasses} ${baseRounded} font-medium ${
         active
           ? "text-foreground"
           : "text-foreground hover:bg-surface/50 hover:text-foreground"
-      }`}
+      } ${className || ""}`}
       ariaLabel={typeof children === "string" ? children : undefined}
       disabled={disabled}
       aria-selected={active}
-      role="tab"
+      role={role || "tab"}
       {...rest}
     >
       <span className="relative z-10">{children}</span>

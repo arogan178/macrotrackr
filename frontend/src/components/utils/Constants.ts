@@ -36,6 +36,15 @@ export const COLOR_MAP = {
     acronym: "text-muted/80",
     gradient: "from-vibrant-accent/30 to-gray-800/10",
   },
+  primary: {
+    bg: "from-primary/30 to-gray-800/10",
+    border: "border-border/20",
+    text: "text-primary",
+    dot: "bg-primary",
+    iconColor: "text-primary",
+    acronym: "text-muted/80",
+    gradient: "from-primary/30 to-gray-800/10",
+  },
   indigo: {
     bg: "from-vibrant-accent/30 to-gray-800/10",
     border: "border-vibrant-accent/20",
@@ -143,7 +152,7 @@ export const BUTTON_VARIANTS = {
 } as const;
 
 // Icon button size mapping (square, for icon-only buttons)
-export const BUTTON_SIZES = {
+export const ICON_BUTTON_SIZES = {
   sm: "p-1.5 w-8 h-8 aspect-square", // 32px
   md: "p-2 w-9 h-9 aspect-square", // 36px
   lg: "p-2.5 w-10 h-10 aspect-square", // 40px
@@ -155,7 +164,8 @@ export const BUTTON_SIZES = {
 } as const;
 
 // Button size mapping (rectangular, for text/icon buttons)
-export const FORM_BUTTON_SIZES = {
+export const BUTTON_SIZES = {
+  xs: "px-1 py-0 text-sm",
   sm: "px-2 py-1 text-xs",
   md: "px-3.5 py-2 text-md",
   lg: "px-5 py-3 text-base",

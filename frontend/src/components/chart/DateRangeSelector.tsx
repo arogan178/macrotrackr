@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-import { Button, ExportIcon, IconButton } from "@/components/ui";
+import { Button, ExportIcon, IconButton, TabBar } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 
 interface DateRangeSelectorProps {
@@ -16,45 +16,34 @@ export default function DateRangeSelector({
   onExportClick,
   isExportDisabled,
 }: DateRangeSelectorProps) {
+  // Map date ranges to TabBar items
+  const items = DATE_RANGE_OPTIONS.map((option) => ({
+    key: option.value,
+    label: option.label,
+    // activeBg inherits TabButton default bg-primary; can be themed later if needed
+  }));
+
   return (
-    // Wrap with motion.div and add layout prop
     <motion.div
-      layout // Add layout for smooth transition
+      layout
       className="sticky top-20 z-30 mb-6 rounded-xl border border-border/50 bg-surface/80 p-3 shadow-modal backdrop-blur-md transition-all duration-300"
-      // Increased top to 20, slightly increased blur/opacity for sticky state
     >
       <div className="flex w-full flex-wrap items-center gap-4">
         {/* Time Period Selector */}
         <div className="flex items-center">
           <span className="mr-3 font-medium text-foreground">Time Period:</span>
-          <div className="relative flex rounded-lg border border-border/50 bg-surface/50 p-1">
-            {DATE_RANGE_OPTIONS.map((option) => (
-              <Button
-                key={option.value}
-                onClick={() => onRangeChange(option.value)}
-                ariaLabel={`Set time period to ${option.label}`}
-                className={`relative rounded-md px-4 py-1.5 font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 ${
-                  currentRange === option.value
-                    ? "text-foreground"
-                    : "text-foreground hover:bg-surface/50 hover:text-foreground"
-                }`}
-                variant={currentRange === option.value ? "primary" : "ghost"}
-                buttonSize="sm"
-                aria-selected={currentRange === option.value}
-                role="tab"
-              >
-                <span className="relative z-10">{option.label}</span>
-                {currentRange === option.value && (
-                  <motion.div
-                    className="absolute inset-0 rounded-md bg-primary shadow-surface"
-                    layoutId="activeRangeHighlight"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-              </Button>
-            ))}
-          </div>
+          <TabBar
+            items={items}
+            activeKey={currentRange}
+            onChange={onRangeChange}
+            rounded="rounded-lg"
+            isMotion
+            layoutId="activeRangeHighlight"
+            size="sm"
+            className="border border-border/50 bg-surface-2"
+          />
         </div>
+
         {/* Mobile Export CSV IconButton aligned right */}
         <div className="ml-auto flex lg:hidden">
           <IconButton
@@ -64,13 +53,14 @@ export default function DateRangeSelector({
             disabled={isExportDisabled}
           />
         </div>
+
         {/* Desktop Export CSV Button */}
         <div className="ml-auto hidden lg:flex">
           <Button
             onClick={onExportClick}
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
-            className=" flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-all duration-200 hover:bg-primary/80 disabled:opacity-50 "
+            className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-all duration-200 hover:bg-primary/80 disabled:opacity-50"
             icon={<ExportIcon />}
             iconPosition="left"
           >

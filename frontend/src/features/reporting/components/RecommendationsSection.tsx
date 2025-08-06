@@ -65,21 +65,21 @@ export default function RecommendationsSection({
           title="Food Quality"
           bgColor="bg-emerald-900/50"
           message={macroDensity.message}
-          icon={<NutrientIcon className="h-4 w-4 text-emerald-400" />}
+          icon={<NutrientIcon className="h-4 w-4 text-primary" />}
         />
 
         {averages.protein < 100 && (
           <ActionCard
             title="Protein Goals"
-            bgColor="bg-success/50"
+            bgColor="bg-emerald-900/50"
             message={getProteinRecommendation(averages.protein)}
-            icon={<ProteinIcon className="h-4 w-4 text-success" />}
+            icon={<ProteinIcon className="h-4 w-4 text-primary" />}
           />
         )}
 
         <ActionCard
           title="Next Steps"
-          bgColor="bg-primary/50"
+          bgColor="bg-emerald-900/50"
           message={getNextStepsRecommendation(dataQuality.completionRate)}
           icon={<ClipboardIcon className="h-4 w-4 text-primary" />}
         />
