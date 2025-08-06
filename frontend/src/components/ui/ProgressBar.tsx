@@ -24,13 +24,15 @@ function ProgressBar({
 
   return (
     <div className={`relative ${className}`}>
+      {/* Higher-contrast track so the fill remains visible on bg-surface */}
       <div
-        className={`w-full ${PROGRESS_BAR_HEIGHTS[height]} overflow-hidden rounded-full bg-surface/50`}
+        className={`w-full ${PROGRESS_BAR_HEIGHTS[height]} overflow-hidden rounded-full border border-border/40 bg-foreground/[0.08] backdrop-blur-[0.5px]`}
       >
+        {/* Slight gradient + glow for the fill to pop on dark/light surfaces */}
         <div
           className={`${PROGRESS_BAR_HEIGHTS[height]} ${
             PROGRESS_BAR_COLORS[color] || PROGRESS_BAR_COLORS.blue
-          } rounded-full transition-all duration-500`}
+          } rounded-full bg-gradient-to-r from-white/10 to-transparent shadow-[0_0_8px_rgba(0,0,0,0.15)] transition-all duration-500`}
           style={{ width: `${safeProgress}%` }}
         />
       </div>
