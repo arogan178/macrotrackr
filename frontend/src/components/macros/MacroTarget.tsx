@@ -1,8 +1,8 @@
 import { memo, useCallback, useState } from "react";
 
 import { InfoCard } from "@/components/form";
+import MacroTargetBar from "@/components/macros/MacroTargetBar";
 import { InfoIcon } from "@/components/ui";
-import MacroTargetBar from "@/features/macroTracking/components/MacroTargetBar";
 import { useMacroTarget } from "@/features/macroTracking/hooks/useMacroTarget";
 import type { MacroTargetProps, MacroType } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";

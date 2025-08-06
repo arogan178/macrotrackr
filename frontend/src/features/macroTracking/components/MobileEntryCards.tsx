@@ -51,7 +51,7 @@ const EntryCard = memo(
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
   }) => (
     <motion.div
-      className="rounded-lg bg-surface p-4 "
+      className="rounded-lg bg-surface-3 p-4 "
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -64,7 +64,7 @@ const EntryCard = memo(
           <span className="text-sm font-medium text-foreground">
             {formatTimeFromEntry(entry)}
           </span>
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-sm font-medium text-secondary">
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
@@ -82,7 +82,7 @@ const EntryCard = memo(
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <span className="text-sm text-foreground">
+          <span className="text-sm text-muted">
             {entry.foodName || entry.mealName}
           </span>
         </motion.div>
@@ -101,7 +101,7 @@ const EntryCard = memo(
         ].map((macro, index) => (
           <motion.div
             key={macro.label}
-            className="flex items-center justify-between rounded-lg bg-surface/50 p-3"
+            className="flex items-center justify-between rounded-lg bg-surface-4 p-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 * index }}
@@ -112,7 +112,7 @@ const EntryCard = memo(
           </motion.div>
         ))}
         <motion.div
-          className="col-span-3 flex items-center justify-between rounded-lg bg-surface/50 p-3"
+          className="col-span-3 flex items-center justify-between rounded-lg bg-surface-4 p-3"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
@@ -163,9 +163,9 @@ const MobileEntryCards = memo(
           >
             {/* Date Header */}
             <motion.div
-              className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/10 p-4 transition-colors hover:bg-primary/20"
+              className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
               onClick={() => toggleDateCollapse(group.date)}
-              whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
+              whileHover={{ backgroundColor: "bg-primary/30" }}
               transition={{ duration: 0.2 }}
             >
               <div className="flex items-center gap-3">
@@ -285,9 +285,9 @@ const MobileEntryCards = memo(
               >
                 {/* Date Header */}
                 <motion.div
-                  className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/10 p-4 transition-colors hover:bg-primary/20"
+                  className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/30"
                   onClick={() => toggleDateCollapse(group.date)}
-                  whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
+                  whileHover={{ backgroundColor: "bg-primary/30" }}
                   transition={{ duration: 0.2 }}
                 >
                   <div className="flex items-center gap-3">
@@ -299,9 +299,9 @@ const MobileEntryCards = memo(
                       }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                     >
-                      <ChevronDownIcon className="h-5 w-5 text-primary" />
+                      <ChevronDownIcon className="h-5 w-5 text-foreground" />
                     </motion.div>
-                    <h3 className="text-base font-semibold text-primary">
+                    <h3 className="text-base font-semibold text-foreground">
                       {formatDate(group.date)}
                     </h3>
                   </div>

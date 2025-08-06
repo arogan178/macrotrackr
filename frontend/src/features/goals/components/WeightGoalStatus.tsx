@@ -70,10 +70,16 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       ? "Weight Gain"
       : "Maintenance";
 
-  const goalColor = isWeightLoss ? "indigo" : isWeightGain ? "green" : "blue";
-  const goalTextColor = `text-${goalColor}-400`;
-  const goalBgColorLight = `bg-${goalColor}-600/10`;
-  const goalBorderColor = `border-${goalColor}-500`;
+  // Normalize goal colors to your tokenized palette so bg classes exist in Tailwind output
+  // Map to token names used across the design system
+  const goalToken = isWeightLoss
+    ? "vibrant-accent"
+    : isWeightGain
+      ? "success"
+      : "carbs";
+  const goalTextColor = `text-${goalToken}`;
+  const goalBgColorLight = `bg-${goalToken}/10`;
+  const goalBorderColor = `border-${goalToken}`;
 
   const formattedStartDate = formatDate(weightGoals?.startDate ?? "");
   const formattedTargetDate = formatDate(weightGoals?.targetDate ?? "");
@@ -197,7 +203,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           <>
             <ProgressBar
               progress={progressPercentage}
-              color={goalColor as any}
+              color={
+                isWeightLoss
+                  ? ("accent" as any)
+                  : isWeightGain
+                    ? ("green" as any)
+                    : ("blue" as any)
+              }
               height="md"
               className="mb-1"
             />
@@ -226,7 +238,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       {/* Stats Grid */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}/30`}
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
         >
           <TrendingUpIcon
             className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
@@ -246,7 +258,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
         </div>
         <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}/30`}
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
         >
           <CalendarIcon
             className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
@@ -265,7 +277,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
         </div>
         <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}/30`}
+          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
         >
           <TargetIcon className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
@@ -295,7 +307,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div className="mb-5">
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalorieIcon className="h-4 w-4 text-foreground" />
+              <CalorieIcon className="h-4 w-4 text-vibrant-accent" />
               <span className="text-sm font-medium text-foreground">
                 Calories
               </span>
