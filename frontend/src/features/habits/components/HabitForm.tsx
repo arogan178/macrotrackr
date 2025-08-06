@@ -2,35 +2,11 @@
 import { useMemo } from "react";
 
 import { NumberField, TextField } from "@/components/form";
-import {
-  AwardIcon,
-  BookIcon,
-  CalendarIcon,
-  CheckCircleIcon,
-  CoffeeIcon,
-  DropletIcon,
-  DumbBellIcon,
-  HeartIcon,
-  MoonIcon,
-  SunIcon,
-  TargetIcon,
-} from "@/components/ui";
+import { TargetIcon } from "@/components/ui";
 
+import { HABIT_ICONS } from "../constants";
 import { HabitGoalFormValues } from "../types/types";
-
-const AVAILABLE_ICONS = {
-  calendar: CalendarIcon,
-  "check-circle": CheckCircleIcon,
-  target: TargetIcon,
-  award: AwardIcon,
-  heart: HeartIcon,
-  book: BookIcon,
-  coffee: CoffeeIcon,
-  droplet: DropletIcon,
-  dumbbell: DumbBellIcon,
-  moon: MoonIcon,
-  sun: SunIcon,
-} as const;
+import HabitCard from "./HabitCard";
 
 /**
  * Curated color options for the swatch buttons (visual preview only).
@@ -174,15 +150,7 @@ function HabitForm({
     }
   };
 
-  const selectedIcon = useMemo(() => {
-    const IconComponent =
-      AVAILABLE_ICONS[values.iconName as keyof typeof AVAILABLE_ICONS];
-    return IconComponent ? (
-      <IconComponent size="sm" />
-    ) : (
-      <TargetIcon size="sm" />
-    );
-  }, [values.iconName]);
+  // Use HABIT_ICONS for preview icon resolution (selection UI updated below)
 
   const previewProgressPercentage = useMemo(() => {
     if (values.target <= 0) return 0;
@@ -240,7 +208,7 @@ function HabitForm({
           role="group"
           aria-label="Icon selection"
         >
-          {Object.entries(AVAILABLE_ICONS).map(([key, IconComponent]) => {
+          {Object.entries(HABIT_ICONS).map(([key, IconComponent]) => {
             const isSelected = values.iconName === key;
             return (
               <button
@@ -258,8 +226,7 @@ function HabitForm({
                 }
               >
                 <IconComponent
-                  size="sm"
-                  className={isSelected ? colorText : "text-foreground"}
+                  className={`h-4 w-4 ${isSelected ? colorText : "text-foreground"}`}
                 />
               </button>
             );
@@ -323,41 +290,20 @@ function HabitForm({
 
       <div className="mt-4">
         <p className="mb-2 text-sm font-medium text-foreground">Preview</p>
-        <div className={"overflow-hidden rounded-lg bg-surface/30"}>
-          <div className={`bg-gradient-to-r ${grad.from} ${grad.to} p-3`}>
-            <div className="mb-2 flex items-center">
-              <div
-                className={`mr-2 rounded-lg ${grad.chip} p-1.5 ${grad.text}`}
-              >
-                {selectedIcon}
-              </div>
-              <h4 className="font-medium text-foreground">
-                {values.title || "Habit Title"}
-              </h4>
-            </div>
-
-            <div className="mb-1.5 flex items-center justify-between">
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold text-foreground">
-                  {currentProgress}
-                </span>
-                <span className="text-sm text-foreground">
-                  / {values.target}
-                </span>
-              </div>
-              <span className="text-sm text-foreground">
-                {previewProgressPercentage}%
-              </span>
-            </div>
-
-            <div className="h-2 w-full overflow-hidden rounded-full bg-surface/60">
-              <div
-                className={`h-full rounded-full ${barBg}`}
-                style={{ width: `${previewProgressPercentage}%` }}
-              />
-            </div>
-          </div>
-        </div>
+        <HabitCard
+          variant="sm"
+          habit={{
+            id: undefined,
+            title: values.title || "Habit Title",
+            iconName: values.iconName || "target",
+            current: currentProgress,
+            target: values.target,
+            progress: undefined, // let component compute from current/target
+            accentColor: values.accentColor || "indigo",
+            isComplete: false,
+          }}
+          show={{ completionBadge: false }}
+        />
       </div>
     </div>
   );
