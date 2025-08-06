@@ -1,3 +1,5 @@
+import type { MacroTargetSettings } from "@/types/macro";
+
 import {
   DEFAULT_MACRO_TARGET,
   TREND_THRESHOLD,
@@ -10,7 +12,6 @@ import type {
   NutritionAverage,
   TrendResult,
 } from "../types/insightsTypes";
-import type { MacroTargetSettings } from "@/types/macro";
 import { calculateStandardDeviation } from "./macroCalculations";
 
 // --- Magic Number Constants ---

@@ -59,12 +59,31 @@ const Navbar: React.FC = () => {
       >
         <div className="flex items-center">
           <Button
-            onClick={() => navigate({ to: "/home" })}
+            onClick={() =>
+              navigate({
+                to: "/home",
+                // Provide required search params explicitly to satisfy route typing
+                search: { limit: 20, offset: 0 },
+              })
+            }
             ariaLabel="Go to home page"
-            className="mr-2 bg-gradient-to-r from-primary to-primary bg-clip-text text-lg font-bold text-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:mr-4 sm:text-xl "
+            title="MacroTrackr — Home"
+            className="group mr-2 bg-gradient-to-r from-primary via-primary to-primary bg-clip-text font-extrabold tracking-wide text-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:mr-4"
             variant="ghost"
           >
-            MacroTrackr
+            <span className="relative inline-block">
+              {/* Glow aura behind text (hover only) */}
+              <span
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-1 rounded-lg bg-transparent opacity-0 blur-md transition-all duration-300 group-hover:bg-primary/25 group-hover:opacity-100"
+              />
+              {/* Gradient text (shadow glow only on hover) */}
+              <span className="relative z-10 text-2xl leading-none transition-shadow duration-300 group-hover:[text-shadow:_0_1px_8px_rgba(0,0,0,0.35)]">
+                <span className="bg-clip-text text-primary text-transparent">
+                  MacroTrackr
+                </span>
+              </span>
+            </span>
           </Button>
 
           {/* Desktop menu */}

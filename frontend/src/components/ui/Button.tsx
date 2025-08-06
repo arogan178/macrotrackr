@@ -1,7 +1,8 @@
 import React, { memo } from "react";
 
 import { LoadingSpinnerIcon } from "@/components/ui";
-import type { ButtonProps } from "@/components/ui/types";
+// Fixed type import path: Types are defined in ./Types.ts, not "@/components/ui/types"
+import type { ButtonProps } from "@/components/ui/Types";
 import {
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
@@ -42,15 +43,17 @@ function ButtonBase({
 
   const buttonVariants: Record<string, string> = {
     primary:
-      "bg-primary hover:bg-primary/50 disabled:hover:bg-primary text-foreground focus:ring-primary shadow-surface",
+      // Add hover shadow for better affordance
+      "bg-primary hover:bg-primary/50 hover:shadow-surface disabled:hover:bg-primary text-foreground focus:ring-primary shadow-surface",
     secondary:
-      "bg-secondary hover:bg-secondary/50 disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
+      "bg-secondary hover:bg-secondary/50 hover:shadow-surface disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
     danger:
-      "bg-error hover:bg-error/50 disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
+      "bg-error hover:bg-error/50 hover:shadow-surface disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
     success:
-      "bg-success hover:bg-success/50 disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
+      "bg-success hover:bg-success/50 hover:shadow-surface disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
+    // Improved contrast for ghost + add hover shadow
     ghost:
-      "bg-transparent hover:bg-surface/50 disabled:hover:bg-transparent disabled:hover:text-foreground",
+      "bg-transparent hover:bg-surface/70 hover:text-foreground hover:shadow-surface disabled:hover:bg-transparent disabled:hover:text-foreground",
   };
 
   const widthStyles = fullWidth ? "w-full" : "";
