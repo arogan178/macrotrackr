@@ -78,7 +78,7 @@ const getActionConfigs = () =>
     edit: {
       icon: EditIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface/50 hover:bg-surface focus:ring-gray-500",
+        "text-foreground hover:text-foreground bg-surface/50 hover:bg-surface/50 focus:ring-gray-500",
     },
     close: {
       icon: CloseIcon,
