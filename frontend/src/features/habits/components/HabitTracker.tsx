@@ -50,7 +50,6 @@ function HabitTracker({
                   disabled={!canAddHabit}
                   autoLoadingFeature="habits"
                   loadingText="Adding..."
-                  className="rounded-lg bg-primary/10 px-3 py-1.5 text-primary transition-colors hover:text-primary disabled:opacity-50"
                   text="Add Habit"
                   icon={<PlusIcon />}
                   iconPosition="left"

@@ -1,8 +1,6 @@
-// src/features/macroTracking/components/MacroTargetBar.tsx
-
 import { memo } from "react";
 
-import type { MacroTargetState } from "@/types/macro";
+import { MacroTargetState } from "../../features/settings/types/types";
 
 interface MacroTargetBarProps {
   target: MacroTargetState;
@@ -15,12 +13,12 @@ function MacroTargetBar({ target, className = "" }: MacroTargetBarProps) {
       className={`relative h-2 overflow-hidden rounded-full bg-surface/30 ${className}`}
     >
       <div
-        className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein to-protein/80"
+        className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein/80 to-protein"
         style={{ width: `${target.proteinPercentage}%` }}
         aria-label={`Protein: ${target.proteinPercentage}%`}
       />
       <div
-        className="absolute top-0 h-2 bg-gradient-to-r from-carbs to-carbs/80"
+        className="absolute top-0 h-2 bg-gradient-to-r from-carbs to-carbs/80 "
         style={{
           width: `${target.carbsPercentage}%`,
           left: `${target.proteinPercentage}%`,

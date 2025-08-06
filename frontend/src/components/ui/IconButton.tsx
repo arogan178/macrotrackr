@@ -68,46 +68,47 @@ const getActionConfigs = () =>
     "password-toggle": {
       icon: undefined, // Icon is always passed as prop for this variant
       className:
-        "text-foreground hover:text-foreground bg-transparent focus:ring-gray-500",
+        "text-foreground hover:text-foreground bg-transparent hover:bg-surface-3/40 focus:ring-gray-500",
     },
     delete: {
       icon: TrashIcon,
       className:
-        "text-error hover:text-error bg-error/30 hover:bg-error/50 focus:ring-red-500",
+        "text-error hover:text-error bg-error/20 hover:bg-error/35 focus:ring-red-500",
     },
     edit: {
       icon: EditIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface/50 hover:bg-surface/50 focus:ring-gray-500",
+        "text-foreground hover:text-foreground bg-surface-2/40 hover:bg-surface-3/60 focus:ring-gray-500",
     },
     close: {
       icon: CloseIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface/50 hover:bg-surface/70 focus:ring-gray-500 !rounded-full",
+        "text-foreground hover:text-foreground bg-surface-2/40 hover:bg-surface-3/70 focus:ring-gray-500 !rounded-full",
     },
     add: {
       icon: PlusIcon,
       className:
-        "text-primary hover:text-primary bg-primary/30 hover:bg-primary/50 focus:ring-primary",
+        "text-primary hover:text-primary bg-primary/25 hover:bg-primary/40 focus:ring-primary",
     },
     more: {
       icon: MoreVerticalIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface/50 hover:bg-surface focus:ring-gray-500",
+        "text-foreground hover:text-foreground bg-surface-2/40 hover:bg-surface-3/70 focus:ring-gray-500",
     },
     info: {
       icon: InfoIcon,
       className:
-        "text-primary hover:text-primary bg-primary/30 hover:bg-primary/50 focus:ring-primary",
+        "text-primary hover:text-primary bg-primary/25 hover:bg-primary/40 focus:ring-primary",
     },
     warning: {
       icon: WarningIcon,
       className:
-        "text-warning hover:text-warning bg-warning/30 hover:bg-warning/50 focus:ring-yellow-500",
+        "text-warning hover:text-warning bg-warning/20 hover:bg-warning/35 focus:ring-yellow-500",
     },
     export: {
       icon: ExportIcon,
-      className: "text-foreground hover:text-success focus:ring-emerald-500",
+      className:
+        "text-foreground hover:text-success bg-surface-2/30 hover:bg-surface-3/50 focus:ring-emerald-500",
     },
     custom: {
       icon: undefined,

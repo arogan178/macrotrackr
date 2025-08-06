@@ -299,7 +299,7 @@ const DesktopEntryTable = memo(
                       key={animationKey}
                       className={
                         isGroup
-                          ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/10 transition-colors hover:bg-primary/20"
+                          ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/20 transition-colors hover:bg-primary/20"
                           : "border-b border-border/30 transition-colors hover:bg-surface/20"
                       }
                       onClick={
