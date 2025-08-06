@@ -64,6 +64,7 @@ export default [
       "src/loaders/**/*.{js,ts,tsx}",
       "src/constants/**/*.{js,ts,tsx}",
       "src/lib/**/*.{js,ts,tsx}",
+      "src/theme/**/*.{js,ts,tsx}",
       "src/features/**/hooks/**/*.{js,ts,tsx}",
       "src/features/**/types/**/*.{js,ts,tsx}",
       "src/features/**/utils/**/*.{js,ts,tsx}",

@@ -1,6 +1,7 @@
 import { memo } from "react";
 
 import { AnimatedNumber } from "@/components/animation";
+import ProgressBar from "@/components/ui/ProgressBar";
 import { calculateCaloriePercentages } from "@/utils/nutrition";
 import type { MacroNutrients } from "@/utils/nutritionTypes";
 
@@ -137,11 +138,18 @@ export function MacroIndicator({
         {target && <span className="text-xs text-foreground">/ {target}g</span>}
       </div>
 
-      {target && (
-        <div className="h-1.5 overflow-hidden rounded-full bg-surface/80">
-          <div
-            className={`h-full rounded-full ${colorClasses[color].bg}`}
-            style={{ width: `${percentage}%` }}
+      {typeof percentage === "number" && (
+        // Reuse shared ProgressBar for consistent visuals
+        // Height matches previous ~6px track: use "md" (h-2) which is closest and visually consistent
+        <div className="mt-0.5">
+          { }
+          {/* Import placed at top of file; see import section */}
+          <ProgressBar
+            progress={percentage}
+            color={color}
+            height="md"
+            showPercentage={false}
+            className=""
           />
         </div>
       )}
