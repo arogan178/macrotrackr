@@ -165,7 +165,14 @@ export default function ReportingPage() {
                   })()}
                   {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
                   <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <div className="order-2 md:order-1">
+                    <motion.div
+                      className="order-2 md:order-1"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      layout
+                    >
                       {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
                       {(() => {
                         const { startDate, endDate } =
@@ -178,8 +185,15 @@ export default function ReportingPage() {
                           />
                         );
                       })()}
-                    </div>
-                    <div className="order-1 md:order-2">
+                    </motion.div>
+                    <motion.div
+                      className="order-1 md:order-2"
+                      initial={{ opacity: 0, y: 12 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -12 }}
+                      transition={{ duration: 0.25, ease: "easeOut" }}
+                      layout
+                    >
                       {/* MacroDensityBreakdown expects pre-aggregated macro density data and numeric range */}
                       <MacroDensityBreakdown
                         data={macroDensityData}
@@ -187,7 +201,7 @@ export default function ReportingPage() {
                         isLoading={isHistoryLoading}
                         dataProcessed={dataProcessed}
                       />
-                    </div>
+                    </motion.div>
                   </div>
                   {/* Charts */}
                   <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">

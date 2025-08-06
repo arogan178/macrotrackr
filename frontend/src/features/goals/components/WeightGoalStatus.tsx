@@ -215,7 +215,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             />
             <div className="mt-1 flex justify-between text-xs text-muted">
               <span>
-                Start:{" "}
+                Start:
                 <AnimatedNumber
                   value={goalStartingWeight}
                   toFixedValue={1}
@@ -223,7 +223,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
                 />
               </span>
               <span>
-                Target:{" "}
+                Target:
                 <AnimatedNumber
                   value={targetWeight}
                   toFixedValue={1}
@@ -244,8 +244,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
           />
           <div>
-            <p className="mb-0.5 text-xs text-muted">Weekly Rate</p>{" "}
-            <p className="text-base font-medium text-muted">
+            <p className=" text-foreground">Weekly Rate</p>
+            <p className="text-base font-medium text-foreground">
               {isMaintenance ? "Maintenance" : `${isWeightLoss ? "↓" : "↑"} `}
               {!isMaintenance && (
                 <AnimatedNumber
@@ -264,8 +264,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
           />
           <div>
-            <p className="mb-0.5 text-xs text-muted">Est. Duration</p>{" "}
-            <p className="text-base font-medium text-muted">
+            <p className=" text-foreground">Est. Duration</p>
+            <p className="text-base text-sm font-medium text-foreground">
               {isMaintenance ? (
                 "Ongoing"
               ) : (
@@ -281,14 +281,14 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         >
           <TargetIcon className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
-            <p className="mb-0.5 text-xs text-muted">
+            <p className="text-foreground">
               {isWeightLoss
                 ? "Daily Deficit"
                 : isWeightGain
                   ? "Daily Surplus"
                   : "Est. TDEE"}
-            </p>{" "}
-            <p className="text-base font-medium text-muted">
+            </p>
+            <p className="text-base text-sm font-medium text-foreground">
               {isMaintenance ? (
                 <AnimatedNumber value={tdee} suffix=" kcal" />
               ) : (
@@ -311,7 +311,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               <span className="text-sm font-medium text-foreground">
                 Calories
               </span>
-            </div>{" "}
+            </div>
             <div className="text-sm">
               <span className="font-medium text-foreground">
                 <AnimatedNumber value={Math.round(macroDailyTotals.calories)} />

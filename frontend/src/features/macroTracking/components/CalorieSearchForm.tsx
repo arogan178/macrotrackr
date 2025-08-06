@@ -121,7 +121,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="h-5 w-5" />}
+            icon={<SearchIcon className="h-5 w-5 text-muted" />}
             maxLength={50}
             error={error}
           />
