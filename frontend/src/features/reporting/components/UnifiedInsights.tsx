@@ -17,16 +17,16 @@ import {
   calculateMacroDensity,
   calculateTrend,
 } from "../utils/insightsCalculations";
-import AtAGlanceSection from "./AtAGlanceSection";
-import MetricCard from "./MetricCard";
-import RecommendationsSection from "./RecommendationsSection";
-import TrendDisplay from "./TrendDisplay";
 import {
   BAR_BASE_CLASSES,
   getColorByScore,
   parseMacroRatio,
   STAGGER,
-} from "./unifiedInsights.utilities";
+} from "../utils/unifiedInsightsUtilities";
+import AtAGlanceSection from "./AtAGlanceSection";
+import MetricCard from "./MetricCard";
+import RecommendationsSection from "./RecommendationsSection";
+import TrendDisplay from "./TrendDisplay";
 
 function UnifiedInsights({
   aggregatedData,
@@ -39,7 +39,7 @@ function UnifiedInsights({
   // Calculate all insights metrics in one pass
   const insights = useMemo(() => {
     if (isLoading || !aggregatedData || aggregatedData.length === 0) {
-      return null;
+      return;
     }
     try {
       // Prefer explicit denominatorDays prop (7/30/90 or custom inclusive count).
