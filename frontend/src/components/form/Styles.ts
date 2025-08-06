@@ -10,7 +10,7 @@ export const formStyles = {
 
   // Input styles
   input: {
-    base: "w-full px-4 py-2 bg-surface/70 border-2 rounded-lg text-foreground focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-200 shadow-surface",
+    base: "w-full px-4 py-2 bg-surface-2 border-2 rounded-lg text-foreground focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-200 shadow-surface",
     error: "border-red-500/70",
     normal: "border-border/70",
     withIcon: "pl-10",

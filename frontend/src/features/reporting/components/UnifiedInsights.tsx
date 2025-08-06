@@ -106,7 +106,7 @@ function UnifiedInsights({
       </h2>
 
       {/* Top metrics grid - key performance indicators */}
-      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-3">
         {/* Consistency Score */}
         <MetricCard
           title="Consistency Score"

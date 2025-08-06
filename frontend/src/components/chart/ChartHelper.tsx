@@ -12,7 +12,7 @@ export function DefaultTooltip({
 }: TooltipProps<ValueType, NameType>) {
   if (active && payload && payload.length > 0) {
     return (
-      <div className="rounded-lg border border-border/50 bg-surface/80 p-3 text-sm shadow-primary backdrop-blur-sm">
+      <div className="rounded-lg border border-border/50 bg-surface-2 p-3 text-sm shadow-primary backdrop-blur-md">
         <p className="label mb-1 font-semibold text-foreground">{label}</p>
         {payload.map((entry) => (
           <p

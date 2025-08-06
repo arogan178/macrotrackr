@@ -1,17 +1,18 @@
 // src/components/macros/MacroSlider.tsx
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { IconButton, LockIcon, UnlockIcon } from "@/components/ui";
+import type { MacroType } from "@/types/macro";
 
-import { COLOR_MAP } from "../utils";
+import { COLOR_MAP, PROGRESS_BAR_COLORS } from "../utils";
 
 interface MacroSliderProps {
   name: string;
   value: number;
   onChange: (value: number) => void;
-  color: "protein" | "carbs" | "fats";
+  color: MacroType;
   isLocked?: boolean;
   onToggleLock?: () => void;
   disabled?: boolean;
@@ -30,40 +31,63 @@ export default function MacroSlider({
   min = 5,
   max = 70,
 }: MacroSliderProps) {
-  const [recommendationText, setRecommendationText] = useState(
-    getRecommendation(
-      name.toLowerCase() as "protein" | "carbs" | "fats",
-      value,
-    ),
+  const macro = useMemo<MacroType>(
+    () =>
+      (["protein", "carbs", "fats"] as readonly MacroType[]).includes(
+        name.toLowerCase() as MacroType,
+      )
+        ? (name.toLowerCase() as MacroType)
+        : color,
+    [name, color],
   );
 
-  let colorProps = COLOR_MAP[color];
-  if (!colorProps) {
-    console.warn(
-      `MacroSlider: Unknown color '${color}', using 'protein' as fallback.`,
-    );
-    colorProps = COLOR_MAP["protein"];
-  }
-  const { bg, iconColor } = colorProps;
+  const [recommendationText, setRecommendationText] = useState(
+    getRecommendation(macro, value),
+  );
+
+  const colorProps = useMemo(() => {
+    const properties = COLOR_MAP[color] ?? COLOR_MAP.protein;
+    // Avoid noisy logs in production; keep a single dev hint
+    const shouldWarn = !COLOR_MAP[color] && import.meta.env?.DEV;
+    if (shouldWarn) {
+       
+      console.warn(
+        `MacroSlider: Unknown color '${color}', using 'protein' as fallback.`,
+      );
+    }
+    return properties;
+  }, [color]);
+
+  const { iconColor, dot } = colorProps;
 
   function handleChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const newValue = Number.parseInt(event.target.value);
+    const parsed = Number.parseInt(event.target.value, 10);
+    const newValue = Number.isFinite(parsed) ? parsed : value;
     onChange(newValue);
-    setRecommendationText(
-      getRecommendation(
-        name.toLowerCase() as "protein" | "carbs" | "fats",
-        newValue,
-      ),
-    );
+    setRecommendationText(getRecommendation(macro, newValue));
   }
 
-  const percentage = ((value - min) / (max - min)) * 100;
+  const percentage = useMemo(() => {
+    const denom = max - min;
+    if (
+      !Number.isFinite(value) ||
+      !Number.isFinite(min) ||
+      !Number.isFinite(max) ||
+      denom <= 0
+    ) {
+      return 0;
+    }
+    const raw = ((value - min) / denom) * 100;
+    return Math.min(100, Math.max(0, raw));
+  }, [value, min, max]);
+
+  const isEffectivelyDisabled = disabled || (isLocked && !disabled);
 
   return (
     <div className="space-y-3">
       <div className="flex justify-between">
         <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${bg}`}></div>
+          <div className={`h-2 w-2 rounded-full ${dot}`} />
           <span className="text-sm text-muted">{name}</span>
         </div>
         <div className="flex items-center gap-2">
@@ -94,10 +118,10 @@ export default function MacroSlider({
 
       <div className="relative flex h-4 items-center">
         {/* Background Track */}
-        <div className="absolute h-2 w-full rounded-lg bg-surface-2" />
+        <div className="absolute z-0 h-2 w-full rounded-lg bg-surface-2" />
         {/* Filled Track */}
         <div
-          className={`absolute h-2 ${bg} rounded-lg `}
+          className={`absolute z-0 h-2 rounded-lg ${PROGRESS_BAR_COLORS[color] ?? PROGRESS_BAR_COLORS.protein}`}
           style={{ width: `${percentage}%` }}
         />
         {/* Actual Slider Input */}
@@ -108,19 +132,25 @@ export default function MacroSlider({
           step="1"
           value={value}
           onChange={handleChange}
-          disabled={disabled || (isLocked && !disabled)}
-          className={`[&::-webkit-slider-thumb]: relative h-4 w-full cursor-pointer appearance-none
-                    bg-transparent
-                    focus:outline-none [&::-webkit-slider-thumb]:h-4 
-                    [&::-webkit-slider-thumb]:w-4 
-                    [&::-webkit-slider-thumb]:appearance-none${bg} 
-                    [&::-moz-range-thumb]: [&::-moz-range-thumb]:h-4
-                    [&::-moz-range-thumb]:w-4 [&::-webkit-slider-thumb]:cursor-pointer
-                    [&::-webkit-slider-thumb]:rounded-full${bg} [&::-moz-range-thumb]:cursor-pointer
-                    [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border-none
-                    [&::-moz-range-track]:bg-transparent
-                    [&::-webkit-slider-runnable-track]:bg-transparent
-                    ${disabled || (isLocked && !disabled) ? "opacity-50" : ""}`}
+          disabled={isEffectivelyDisabled}
+          className={[
+            "relative z-10 h-4 w-full appearance-none bg-transparent focus:outline-none",
+            isEffectivelyDisabled ? "" : "cursor-pointer",
+            // Thumb base [Firefox]
+            "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-transparent [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:shadow-black/20",
+            "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-transparent",
+            // Thumb base [WebKit]
+            "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-runnable-track]:bg-transparent",
+            "[&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-transparent [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:shadow-black/20",
+            // Hover/focus only when interactive
+            isEffectivelyDisabled
+              ? ""
+              : "hover:[&::-moz-range-thumb]:scale-105 focus:[&::-moz-range-thumb]:ring-2 focus:[&::-moz-range-thumb]:ring-offset-2 hover:[&::-webkit-slider-thumb]:scale-105 focus:[&::-webkit-slider-thumb]:ring-2 focus:[&::-webkit-slider-thumb]:ring-offset-2",
+            // Locked but not disabled: keep thumb visible yet disable pointer events
+            isLocked && !disabled
+              ? "pointer-events-none [&::-moz-range-thumb]:opacity-100 [&::-webkit-slider-thumb]:opacity-100"
+              : "",
+          ].join(" ")}
         />
       </div>
 
@@ -135,29 +165,27 @@ export default function MacroSlider({
   );
 }
 
-function getRecommendation(
-  macro: "protein" | "carbs" | "fats",
-  value: number,
-): string {
+function getRecommendation(macro: MacroType, value: number): string {
   if (macro === "protein") {
     if (value < 15) return "Consider increasing for muscle maintenance";
     if (value > 35) return "High protein intake";
     return "Ideal range for most people";
-  } else if (macro === "carbs") {
+  }
+  if (macro === "carbs") {
     if (value < 40) return "Low carb approach";
     if (value > 65) return "High carb approach";
     return "Balanced carb intake";
-  } else {
-    if (value < 20) return "Consider increasing for hormone health";
-    if (value > 40) return "Higher fat approach";
-    return "Healthy fat intake";
   }
+  // fats
+  if (value < 20) return "Consider increasing for hormone health";
+  if (value > 40) return "Higher fat approach";
+  return "Healthy fat intake";
 }
 
 interface MacroBadgeProps {
   name: string;
   value: number;
-  color: "protein" | "carbs" | "fats";
+  color: MacroType;
   isLocked?: boolean;
 }
 
@@ -167,22 +195,19 @@ export function MacroBadge({
   color,
   isLocked = false,
 }: MacroBadgeProps) {
-  let badgeColorProps = COLOR_MAP[color];
-  if (!badgeColorProps) {
-    console.warn(
-      `MacroBadge: Unknown color '${color}', using 'protein' as fallback.`,
-    );
-    badgeColorProps = COLOR_MAP["protein"];
-  }
-  const { border, iconColor } = badgeColorProps;
+  const {
+    border,
+    iconColor,
+    dot: badgeDot,
+  } = useMemo(() => COLOR_MAP[color] ?? COLOR_MAP.protein, [color]);
 
   return (
     <div className={`rounded-lg border bg-surface-2 p-3 ${border}`}>
       <div className="flex items-center gap-1.5">
-        <div className={`bg-${color} h-2 w-2 rounded-full`}></div>
+        <div className={`h-2 w-2 rounded-full ${badgeDot}`} />
         <span className="text-xs text-foreground">{name}</span>
         {isLocked && <LockIcon className={`h-3 w-3 ${iconColor}`} />}
-      </div>{" "}
+      </div>
       <div className="mt-1 w-12 text-lg font-semibold text-foreground">
         <AnimatedNumber value={value} suffix="%" />
       </div>
