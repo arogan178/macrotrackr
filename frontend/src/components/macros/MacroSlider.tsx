@@ -94,10 +94,10 @@ export default function MacroSlider({
 
       <div className="relative flex h-4 items-center">
         {/* Background Track */}
-        <div className="absolute h-2 w-full rounded-lg bg-background/50" />
+        <div className="absolute h-2 w-full rounded-lg bg-surface-2" />
         {/* Filled Track */}
         <div
-          className={`absolute h-2 ${bg} rounded-lg`}
+          className={`absolute h-2 ${bg} rounded-lg `}
           style={{ width: `${percentage}%` }}
         />
         {/* Actual Slider Input */}
@@ -177,7 +177,7 @@ export function MacroBadge({
   const { border, iconColor } = badgeColorProps;
 
   return (
-    <div className={`rounded-lg border bg-background/50 p-3 ${border}`}>
+    <div className={`rounded-lg border bg-surface-2 p-3 ${border}`}>
       <div className="flex items-center gap-1.5">
         <div className={`bg-${color} h-2 w-2 rounded-full`}></div>
         <span className="text-xs text-foreground">{name}</span>

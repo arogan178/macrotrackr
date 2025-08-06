@@ -3,13 +3,24 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1f6a2e;
-  --color-secondary: #c8946b;
+  /* Primary slightly more vibrant while preserving contrast on dark surfaces */
+  --color-primary: #259145;
+  --color-secondary: #6bb38a;
   --color-vibrant-accent: #dd7a24;
 
   --color-background: #0b1220;
   --color-surface: #151b2b;
+  /* Inner surface for nested containers */
+  --color-surface-2: #1b2336;
+  /* Deeper nested surface for elements inside inner cards */
+  --color-surface-3: #202a40;
+  /* Fourth-level surface for micro-containers within subcards */
+  --color-surface-4: #252f48;
+
   --color-border: #3a4350;
+  /* Slightly lighter border for inner containers */
+  --color-border-2: #465064;
+
   --color-foreground: #eef3f8;
   --color-muted: #98a6b5;
 
@@ -36,6 +47,21 @@
   --shadow-border: 0 1px 3px 0 rgba(32, 40, 56, 0.18);
 }
 
+/* Consolidate and de-duplicate utility declarations */
+.bg-surface-2 {
+  background-color: var(--color-surface-2);
+}
+.bg-surface-3 {
+  background-color: var(--color-surface-3);
+}
+.bg-surface-4 {
+  background-color: var(--color-surface-4);
+}
+.border-surface-2,
+.border-border-2 {
+  border-color: var(--color-border-2);
+}
+
 /* Mouse action styles */
 .cursor-pointer {
   cursor: pointer;
@@ -46,6 +72,12 @@
 .cursor-default {
   cursor: default;
 }
+
+/* Tailwind utility mappings for new surface tokens
+   These classes mirror Tailwind naming so you can use them directly:
+   - bg-surface-2, bg-surface-3, bg-surface-4
+   - border-surface-2 (alias: border-border-2)
+*/
 
 /* Example usage for disabled buttons/inputs */
 button:disabled,
