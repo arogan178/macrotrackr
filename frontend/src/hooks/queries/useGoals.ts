@@ -22,10 +22,14 @@ export function useWeightGoals() {
 
       // Get weight log to calculate current weight
       const weightLog = await apiService.goals.getWeightLog();
-      const latestWeight =
-        weightLog.length > 0
-          ? weightLog.at(-1).weight
-          : weightGoalsData.startingWeight;
+
+      // Determine latest weight without using .at() (TS lib compatibility) and satisfying lint
+      let latestWeight = weightGoalsData.startingWeight;
+      if (weightLog.length > 0) {
+        const lastIndex = weightLog.length - 1;
+         
+        latestWeight = weightLog[lastIndex].weight;
+      }
 
       // Transform API response to match WeightGoals interface with defaults
       return {
@@ -235,14 +239,35 @@ export function useAddWeightLogEntry() {
         },
       );
 
-      // Optimistically update weight goals current weight
-      queryClient.setQueryData(queryKeys.goals.weight(), (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          currentWeight: variables.weight,
-        };
-      });
+      // Optimistically update weight goals current weight AND recompute derived fields
+      // Also mirror user.weight so UI numbers (e.g., the number before the > icon) update immediately.
+      queryClient.setQueryData<WeightGoals | undefined>(
+        queryKeys.goals.weight(),
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          const updated: WeightGoals = {
+            ...oldData,
+            currentWeight: variables.weight,
+            // Keep target and starting weights unchanged
+          };
+
+          return updated;
+        },
+      );
+
+      // Also optimistically update the user settings cache so any UI reading user.weight updates immediately.
+      // Adjusted to known query key group present in queryKeys.
+      queryClient.setQueryData(
+        queryKeys.auth.user(),
+        (oldUser: any) => {
+          if (!oldUser) return oldUser;
+          return {
+            ...oldUser,
+            weight: variables.weight,
+          };
+        },
+      );
 
       return { previousWeightLog, previousWeightGoals };
     },

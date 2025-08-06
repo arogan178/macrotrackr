@@ -95,7 +95,7 @@ function EmptyState({
       </h3>
       <p className={`${sizeStyles.message} mb-6 text-foreground`}>{message}</p>
 
-      {/* Action buttons */}
+      {/* Icon buttons */}
       {(action || secondaryAction) && (
         <div className="flex flex-wrap justify-center gap-3">
           {action && (
