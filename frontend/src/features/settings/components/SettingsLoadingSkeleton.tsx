@@ -24,7 +24,7 @@ export default function SettingsLoadingSkeleton() {
           </div>
         ))}
 
-        {/* Action buttons area */}
+        {/* Icon buttons area */}
         <div className="flex justify-end">
           <div className="h-10 w-24 rounded-lg bg-surface/40" />
         </div>

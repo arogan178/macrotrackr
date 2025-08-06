@@ -1,5 +1,5 @@
 import { CardContainer } from "@/components/form";
-import { EditIcon, ProgressBar, TrashIcon } from "@/components/ui";
+import { IconButton, ProgressBar } from "@/components/ui";
 import { WeightGoals } from "@/types/goal";
 
 interface WeightGoalDetailsProps {
@@ -91,21 +91,19 @@ function WeightGoalDetails({
             )}
           </p>
         </div>
-        <div className="mt-3 flex space-x-2 md:mt-0">
-          <button
+        <div className="mt-3 flex items-center gap-2 md:mt-0">
+          <IconButton
+            variant="edit"
+            ariaLabel="Edit weight goal"
             onClick={onEdit}
-            className="flex items-center rounded-md bg-surface/50 px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-surface"
-          >
-            <EditIcon className="mr-1.5 h-4 w-4" />
-            Edit
-          </button>
-          <button
+            buttonSize="md"
+          />
+          <IconButton
+            variant="delete"
+            ariaLabel="Delete weight goal"
             onClick={onDelete}
-            className="flex items-center rounded-md bg-error/30 px-3 py-1.5 text-sm text-error transition-colors hover:bg-error/50"
-          >
-            <TrashIcon className="mr-1.5 h-4 w-4" />
-            Delete
-          </button>
+            buttonSize="md"
+          />
         </div>
       </div>
 
