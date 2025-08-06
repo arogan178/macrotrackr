@@ -142,7 +142,7 @@ export const BUTTON_VARIANTS = {
   GHOST: "ghost",
 } as const;
 
-// Action button size mapping (square, for icon-only buttons)
+// Icon button size mapping (square, for icon-only buttons)
 export const BUTTON_SIZES = {
   sm: "p-1.5 w-8 h-8 aspect-square", // 32px
   md: "p-2 w-9 h-9 aspect-square", // 36px
@@ -154,7 +154,7 @@ export const BUTTON_SIZES = {
   "5xl": "p-7 w-18 h-18 aspect-square", // 72px
 } as const;
 
-// Form button size mapping (rectangular, for text/icon buttons)
+// Button size mapping (rectangular, for text/icon buttons)
 export const FORM_BUTTON_SIZES = {
   sm: "px-2 py-1 text-xs",
   md: "px-3.5 py-2 text-md",

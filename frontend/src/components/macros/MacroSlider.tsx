@@ -94,7 +94,7 @@ export default function MacroSlider({
 
       <div className="relative flex h-4 items-center">
         {/* Background Track */}
-        <div className="absolute h-2 w-full rounded-lg bg-surface/80" />
+        <div className="absolute h-2 w-full rounded-lg bg-background/50" />
         {/* Filled Track */}
         <div
           className={`absolute h-2 ${bg} rounded-lg`}
