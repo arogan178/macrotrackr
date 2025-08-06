@@ -2,7 +2,20 @@
 import { memo } from "react";
 
 import { IconButton, LoadingSpinnerIcon, TrashIcon } from "@/components/ui";
-import type { IconButtonGroupProps } from "@/components/ui/types";
+import { BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants";
+
+type ButtonSize = keyof typeof BUTTON_SIZES;
+type IconSize = keyof typeof ICON_SIZES;
+
+export type IconButtonGroupProps = {
+  onEdit: () => void;
+  onDelete: (event?: React.MouseEvent) => void;
+  isDeleting?: boolean;
+  editLabel?: string;
+  deleteLabel?: string;
+  buttonSize?: ButtonSize;
+  iconSize?: IconSize;
+};
 
 /**
  * Reusable edit/delete icon button group
@@ -25,6 +38,7 @@ const IconButtonGroup = memo(
           iconSize={iconSize}
           onClick={onEdit}
           ariaLabel={editLabel}
+          className="hover:bg-surface-3/60"
         />
         <IconButton
           variant="delete"
@@ -33,6 +47,7 @@ const IconButtonGroup = memo(
           onClick={onDelete}
           ariaLabel={deleteLabel}
           disabled={isDeleting}
+          className="hover:bg-error/35"
           icon={
             isDeleting ? (
               <LoadingSpinnerIcon className="h-3.5 w-3.5 animate-spin" />

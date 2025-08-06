@@ -343,7 +343,7 @@ const EntryHistoryComponent = function EntryHistory({
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-2xl border border-border bg-background/50 shadow-modal backdrop-blur-sm"
+          className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-surface backdrop-blur-sm"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
@@ -394,7 +394,7 @@ const EntryHistoryComponent = function EntryHistory({
               {(hasMoreDates || hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
-                  className={`flex items-center gap-2 rounded-md border border-border/30 bg-transparent px-4 py-2 text-sm text-foreground transition-all duration-200 hover:border-border/50 hover:bg-surface/30 hover:text-foreground ${
+                  className={`flex items-center gap-2 rounded-md border border-border/30 bg-transparent px-4 py-2 text-sm text-muted transition-all duration-200 hover:border-border/50 hover:bg-surface/30 hover:text-foreground ${
                     isLoadingMore ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   disabled={isLoadingMore}
