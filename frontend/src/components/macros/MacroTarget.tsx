@@ -4,10 +4,15 @@ import { InfoCard } from "@/components/form";
 import MacroTargetBar from "@/components/macros/MacroTargetBar";
 import { InfoIcon } from "@/components/ui";
 import { useMacroTarget } from "@/features/macroTracking/hooks/useMacroTarget";
-import type { MacroTargetProps, MacroType } from "@/types/macro";
+import type { MacroTargetState, MacroType } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 
 import MacroSlider, { MacroBadge } from "./MacroSlider";
+
+interface MacroTargetProps {
+  initialValues?: MacroTargetState;
+  onTargetChange: (target: MacroTargetState) => void;
+}
 
 const MacroTarget = memo(
   ({
