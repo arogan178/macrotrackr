@@ -172,7 +172,7 @@ export default function SettingsPage() {
         subtitle={undefined}
         headerChildren={
           <div
-            className="relative flex space-x-1 rounded-lg bg-surface/60 p-1"
+            className="relative flex space-x-1 rounded-lg bg-surface p-1"
             role="tablist"
             aria-label="Settings Tabs"
           >
@@ -212,71 +212,71 @@ export default function SettingsPage() {
           </div>
         }
       >
-      {isSettingsLoading ? (
-        <SettingsLoadingSkeleton />
-      ) : settingsQueryError ? (
-        <div className="p-6 text-center">
-          <p className="text-vibrant-accent">
-            Failed to load settings. Please try again.
-          </p>
-        </div>
-      ) : settings ? (
-        <AnimatePresence mode="wait">
-          {activeTab === "profile" && (
-            <motion.div
-              key="profile"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <ProfileForm
-                settings={settings}
-                updateSetting={updateSetting}
-                formErrors={formErrors}
-                onSubmit={handleSubmit}
-                isSaving={isSaving}
-                hasChanges={hasSettingsChanges}
-              />
-            </motion.div>
-          )}
-          {activeTab === "billing" && (
-            <motion.div
-              key="billing"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <BillingForm />
-            </motion.div>
-          )}
-          {activeTab === "security" && (
-            <motion.div
-              key="security"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              <ChangePasswordForm />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      ) : (
-        <SettingsLoadingSkeleton />
-      )}
-      <Modal
-        isOpen={showConfirmModal}
-        onClose={cancelTabChange}
-        title="Unsaved Changes"
-        variant="confirmation"
-        message="You have unsaved changes that will be lost. Do you want to continue?"
-        confirmLabel="Discard Changes"
-        cancelLabel="Keep Editing"
-        onConfirm={confirmTabChange}
-        isDanger={true}
-      />
+        {isSettingsLoading ? (
+          <SettingsLoadingSkeleton />
+        ) : settingsQueryError ? (
+          <div className="p-6 text-center">
+            <p className="text-vibrant-accent">
+              Failed to load settings. Please try again.
+            </p>
+          </div>
+        ) : settings ? (
+          <AnimatePresence mode="wait">
+            {activeTab === "profile" && (
+              <motion.div
+                key="profile"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <ProfileForm
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  formErrors={formErrors}
+                  onSubmit={handleSubmit}
+                  isSaving={isSaving}
+                  hasChanges={hasSettingsChanges}
+                />
+              </motion.div>
+            )}
+            {activeTab === "billing" && (
+              <motion.div
+                key="billing"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <BillingForm />
+              </motion.div>
+            )}
+            {activeTab === "security" && (
+              <motion.div
+                key="security"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <ChangePasswordForm />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        ) : (
+          <SettingsLoadingSkeleton />
+        )}
+        <Modal
+          isOpen={showConfirmModal}
+          onClose={cancelTabChange}
+          title="Unsaved Changes"
+          variant="confirmation"
+          message="You have unsaved changes that will be lost. Do you want to continue?"
+          confirmLabel="Discard Changes"
+          cancelLabel="Keep Editing"
+          onConfirm={confirmTabChange}
+          isDanger={true}
+        />
       </FeaturePage>
     </DashboardPageContainer>
   );
