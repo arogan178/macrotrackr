@@ -143,7 +143,7 @@ export default function DailySummary({
           <div className="mb-2 flex items-center justify-between">
             <h2 className="text-lg font-semibold text-foreground">
               Today's Summary
-            </h2>{" "}
+            </h2>
             <div className="text-right">
               <div className="text-2xl font-bold text-foreground">
                 <AnimatedNumber
@@ -163,7 +163,7 @@ export default function DailySummary({
                 </span>
                 <span> kcal</span>
 
-                <span className="ml-1 font-medium text-foreground">
+                <span className="ml-1 font-medium text-vibrant-accent">
                   (
                   <AnimatedNumber
                     value={calorieCompletionPercent}
@@ -180,7 +180,7 @@ export default function DailySummary({
           <ProgressBar
             progress={calorieCompletionPercent}
             color="accent"
-            height="md"
+            height="lg"
             className="mb-4"
           />
 
@@ -214,7 +214,7 @@ export default function DailySummary({
                   <h3 className={`${macro.textColor} text-sm font-medium`}>
                     {macro.name}
                   </h3>
-                </div>{" "}
+                </div>
                 <div className="text-right">
                   <span className="text-sm font-bold text-foreground">
                     <AnimatedNumber
@@ -225,7 +225,7 @@ export default function DailySummary({
                     />
                   </span>
                   <span className="ml-1 text-xs text-foreground">
-                    /{" "}
+                    /
                     <AnimatedNumber
                       value={macro.targetGrams}
                       toFixedValue={0}
@@ -240,7 +240,7 @@ export default function DailySummary({
                 color={macro.name.toLowerCase() as "protein" | "carbs" | "fats"}
                 height="md"
                 className="mb-3"
-              />{" "}
+              />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`text-xs ${macro.textColor}`}>
