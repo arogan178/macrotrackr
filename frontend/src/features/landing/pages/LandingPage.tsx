@@ -83,10 +83,14 @@ function ThemedFallback() {
   );
 }
 
-function SectionDivider() {
+function SectionDivider({ inverted = false }: { inverted?: boolean }) {
   return (
     <div className="relative w-full overflow-hidden">
-      <svg viewBox="0 0 1440 80" className="fill-surface">
+      <svg
+        viewBox="0 0 1440 80"
+        className="fill-surface"
+        style={inverted ? { transform: "scaleX(-1)" } : undefined}
+      >
         <path d="M0,0 C480,80 960,0 1440,80 L1440,0 L0,0 Z"></path>
       </svg>
     </div>
@@ -158,7 +162,7 @@ const LandingPage: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
         </motion.section>
-        <SectionDivider />
+        <SectionDivider inverted />
         {/* Pricing - subtle elevate reveal */}
         <motion.section
           {...inViewRevealProps}
@@ -203,6 +207,7 @@ const LandingPage: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
         </motion.section>
+        <SectionDivider inverted />
         {/* Final CTA - reveal and allow CTA buttons to animate using buttonReveal via data attribute if needed */}
         <motion.section
           {...inViewRevealProps}
