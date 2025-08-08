@@ -35,7 +35,7 @@ import {
   TrashIcon,
   WarningIcon,
 } from "@/components/ui";
-import type { ButtonSize, IconSize } from "@/components/utils";
+import type { ButtonSize, IconSize } from "@/components/ui/Types";
 import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
 type ActionVariant =
@@ -60,6 +60,7 @@ interface IconButtonProps {
   icon?: React.ReactNode; // Required for custom variant
   className?: string; // Additional styling for custom variants
   tooltip?: string; // Future: tooltip support
+  buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
 }
 
 // Function to get action configs to avoid temporal dead zone issues
@@ -125,13 +126,16 @@ function IconButton({
   iconSize,
   icon: customIcon,
   className = "",
+  buttonVariant = "ghost",
   ...rest
 }: IconButtonProps) {
   const config = getActionConfigs()[variant];
   // Prefer iconSize, fallback to buttonSize (both are strongly typed)
   const resolvedIconSize: IconSize = iconSize || buttonSize;
-  const iconSizeClass = ICON_SIZES[resolvedIconSize] || ICON_SIZES.md;
-  const paddingClass = ICON_BUTTON_SIZES[buttonSize] || ICON_BUTTON_SIZES.md;
+  const iconSizeKey = resolvedIconSize as keyof typeof ICON_SIZES;
+  const buttonSizeKey = buttonSize as keyof typeof ICON_BUTTON_SIZES;
+  const iconSizeClass = ICON_SIZES[iconSizeKey] || ICON_SIZES.md;
+  const paddingClass = ICON_BUTTON_SIZES[buttonSizeKey] || ICON_BUTTON_SIZES.md;
 
   // Icon logic: use custom icon for 'custom' and 'password-toggle', otherwise use config.icon
   let iconElement: React.ReactNode;
@@ -155,7 +159,7 @@ function IconButton({
 
   return (
     <Button
-      variant="ghost"
+      variant={buttonVariant}
       buttonSize="sm"
       onClick={onClick}
       disabled={disabled}
