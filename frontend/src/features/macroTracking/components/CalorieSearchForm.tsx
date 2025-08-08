@@ -121,7 +121,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="h-5 w-5 text-muted" />}
+            icon={<SearchIcon className=" text-muted" />}
             maxLength={50}
             error={error}
           />
@@ -208,7 +208,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             ariaLabel="Search for food"
             buttonSize="lg"
             variant="primary"
-            className="min-w-[160px] px-6 py-2.5"
+            className="min-w-40 px-6 py-2.5"
           />
         </div>
       </div>

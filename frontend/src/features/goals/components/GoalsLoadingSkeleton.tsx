@@ -13,7 +13,7 @@ export default function GoalsLoadingSkeleton() {
           {[1, 2, 3, 4].map((index) => (
             <div
               key={index}
-              className="bg-surface/ h-24 min-w-[120px] flex-1 rounded-2xl"
+              className="bg-surface/ h-24 min-w-30 flex-1 rounded-2xl"
             />
           ))}
         </div>

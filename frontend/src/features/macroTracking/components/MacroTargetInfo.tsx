@@ -17,7 +17,7 @@ function MacroTargetInfo({ isVisible }: MacroTargetInfoProps) {
     <InfoCard
       title="Tips for adjusting your macros:"
       color="indigo"
-      icon={<InfoIcon className="h-5 w-5" />}
+      icon={<InfoIcon className="" />}
     >
       <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-foreground">
         <li>Drag the sliders to adjust percentages</li>

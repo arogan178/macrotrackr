@@ -91,7 +91,7 @@ export function StepOne() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="min-h-[40px] flex-grow"></div>
+          <div className="min-h-10 flex-grow"></div>
         </div>
 
         <div className="pt-4">
@@ -179,7 +179,7 @@ export function StepTwo() {
           </div>
 
           {/* Spacer for consistent form height */}
-          <div className="min-h-[10px] flex-grow"></div>
+          <div className="min-h-2 flex-grow"></div>
         </div>
 
         <div className="pt-4">
@@ -274,7 +274,7 @@ export function StepThree() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="min-h-[60px] flex-grow"></div>
+          <div className="min-h-15 flex-grow"></div>
         </div>
 
         <div className="pt-4">

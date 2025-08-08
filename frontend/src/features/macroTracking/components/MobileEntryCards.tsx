@@ -175,7 +175,7 @@ const MobileEntryCards = memo(
                   }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
-                  <ChevronDownIcon className="h-5 w-5 text-foreground" />
+                  <ChevronDownIcon className=" text-foreground" />
                 </motion.div>
                 <h3 className="text-base font-semibold text-foreground">
                   {formatDate(group.date)}
@@ -299,7 +299,7 @@ const MobileEntryCards = memo(
                       }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                     >
-                      <ChevronDownIcon className="h-5 w-5 text-foreground" />
+                      <ChevronDownIcon className=" text-foreground" />
                     </motion.div>
                     <h3 className="text-base font-semibold text-foreground">
                       {formatDate(group.date)}

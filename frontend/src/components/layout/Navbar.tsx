@@ -12,7 +12,10 @@ import {
   ReportingIcon2,
   SettingsIcon,
 } from "@/components/ui";
+import IconButton from "@/components/ui/IconButton";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
+
+import LogoButton from "./LogoButton";
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -37,63 +40,32 @@ const Navbar: React.FC = () => {
     { path: "/settings", label: "Settings", icon: SettingsIcon },
   ];
 
-  const getButtonClass = (path: string, isMobile = false) => {
-    const isActive = location.pathname === path;
-    const baseClass = isMobile
-      ? "w-full px-4 py-3 font-medium rounded-lg transition-all duration-200 flex items-center justify-start text-left focus:outline-none focus:ring-2 focus:ring-primary"
-      : "px-3 py-2 font-medium rounded-lg transition-all duration-200 flex items-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 focus:ring-offset-gray-800";
-
-    return `${baseClass} ${
-      isActive
-        ? "bg-gradient-to-r from-primary/90 to-primary/90 text-foreground shadow-primary shadow-primary/20"
-        : "text-foreground hover:bg-surface/50 hover:text-foreground"
-    }`;
-  };
   return (
     <>
       <nav
-        className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between border-b border-border/50 bg-surface/95 p-3 shadow-primary backdrop-blur-sm"
+        className="fixed top-0 right-0 left-0 z-50 flex h-20 items-center justify-between border-b border-border/50 bg-surface p-4 shadow-primary backdrop-blur-sm"
         role="navigation"
         aria-label="Main navigation"
         style={{ touchAction: "none", overscrollBehavior: "none" }}
       >
         <div className="flex items-center">
-          <Button
+          <LogoButton
             onClick={() =>
               navigate({
                 to: "/home",
-                // Provide required search params explicitly to satisfy route typing
                 search: { limit: 20, offset: 0 },
               })
             }
-            ariaLabel="Go to home page"
-            title="MacroTrackr — Home"
-            className="group mr-2 bg-gradient-to-r from-primary via-primary to-primary bg-clip-text font-extrabold tracking-wide text-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:mr-4"
-            variant="ghost"
-          >
-            <span className="relative inline-block">
-              {/* Glow aura behind text (hover only) */}
-              <span
-                aria-hidden="true"
-                className="pointer-events-none absolute -inset-1 rounded-lg bg-transparent opacity-0 blur-md transition-all duration-300 group-hover:bg-primary/25 group-hover:opacity-100"
-              />
-              {/* Gradient text (shadow glow only on hover) */}
-              <span className="relative z-10 text-2xl leading-none transition-shadow duration-300 group-hover:[text-shadow:_0_1px_8px_rgba(0,0,0,0.35)]">
-                <span className="bg-clip-text text-primary text-transparent">
-                  MacroTrackr
-                </span>
-              </span>
-            </span>
-          </Button>
+          />
 
           {/* Desktop menu */}
-          <div className="hidden items-center space-x-2 md:flex">
+          <div className="hidden items-center space-x-2 lg:flex">
             {navItems.map(({ path, label, icon: Icon }) => (
               <Button
                 key={path}
                 onClick={() => handleNavigation(path)}
                 ariaLabel={label}
-                className={`${getButtonClass(path)}, !text-lg `}
+                className="!text-lg"
                 variant={location.pathname === path ? "primary" : "ghost"}
                 aria-current={location.pathname === path ? "page" : undefined}
                 icon={<Icon />}
@@ -106,7 +78,7 @@ const Navbar: React.FC = () => {
         </div>
         <div className="flex items-center space-x-2">
           {/* Desktop logout button */}
-          <div className="hidden md:flex">
+          <div className="hidden lg:flex">
             <Button
               onClick={handleLogout}
               ariaLabel="Logout"
@@ -124,12 +96,10 @@ const Navbar: React.FC = () => {
             whileTap={{ scale: 0.95 }}
             style={{ display: "inline-block" }}
           >
-            <Button
+            <IconButton
+              variant="custom"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               ariaLabel={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              aria-expanded={isMobileMenuOpen}
-              className="rounded-lg p-2 text-foreground transition-all duration-200 hover:bg-surface/50 hover:text-foreground focus:ring-2 focus:ring-primary focus:outline-none md:hidden "
-              variant="ghost"
               icon={
                 isMobileMenuOpen ? (
                   <CloseIcon className="h-6 w-6" />
@@ -137,15 +107,14 @@ const Navbar: React.FC = () => {
                   <MenuIcon className="h-6 w-6" />
                 )
               }
-              iconPosition="left"
-              style={{ touchAction: "manipulation", userSelect: "none" }}
+              className="rounded-lg p-2 lg:hidden"
             />
           </motion.div>
-        </div>{" "}
+        </div>
       </nav>
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className="h-[60px]" />
+      <div className="h-20" />
 
       {/* Mobile menu overlay and menu */}
       <AnimatePresence initial={false}>
@@ -153,7 +122,7 @@ const Navbar: React.FC = () => {
           <>
             {/* Mobile menu overlay */}
             <motion.div
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm md:hidden"
+              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
               aria-hidden="true"
               initial={{ opacity: 0 }}
@@ -165,19 +134,19 @@ const Navbar: React.FC = () => {
 
             {/* Mobile menu */}
             <motion.div
-              className="fixed top-[73px] right-0 left-0 z-50 border-b border-border/50 bg-surface/95 shadow-primary backdrop-blur-sm md:hidden"
+              className="fixed top-20 right-0 left-0 z-50 border-b border-border/50 bg-surface/95 p-4 shadow-primary backdrop-blur-sm lg:hidden"
               initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
             >
-              <div className="space-y-2 p-4">
+              <div className="flex-1 space-y-3 md:space-y-2">
                 {navItems.map(({ path, label, icon: Icon }) => (
                   <Button
                     key={path}
                     onClick={() => handleNavigation(path)}
                     ariaLabel={label}
-                    className={`${getButtonClass(path, true)} `}
+                    className="w-full justify-start"
                     variant={location.pathname === path ? "primary" : "ghost"}
                     aria-current={
                       location.pathname === path ? "page" : undefined
@@ -195,7 +164,7 @@ const Navbar: React.FC = () => {
                   ariaLabel="Logout"
                   className="flex w-full items-center justify-start rounded-lg bg-gradient-to-r from-red-600 to-red-500 px-4 py-3 font-medium text-foreground shadow-primary shadow-red-600/20 transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:shadow-red-500/30 focus:ring-2 focus:ring-red-500 focus:outline-none "
                   variant="danger"
-                  icon={<LogoutIcon className="mr-3 h-5 w-5" />}
+                  icon={<LogoutIcon className="mr-3" />}
                   iconPosition="left"
                 >
                   <span>Logout</span>

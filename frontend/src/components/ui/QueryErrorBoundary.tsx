@@ -38,7 +38,7 @@ class QueryErrorBoundaryInner extends Component<
       }
 
       return (
-        <div className="flex min-h-[200px] items-center justify-center p-4">
+        <div className="flex min-h-50 items-center justify-center p-4">
           <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-primary">
             <div className="mb-4 text-vibrant-accent">
               <WarningIcon className="mx-auto mb-3 h-8 w-8" />

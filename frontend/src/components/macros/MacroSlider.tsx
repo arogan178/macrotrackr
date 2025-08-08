@@ -50,7 +50,6 @@ export default function MacroSlider({
     // Avoid noisy logs in production; keep a single dev hint
     const shouldWarn = !COLOR_MAP[color] && import.meta.env?.DEV;
     if (shouldWarn) {
-       
       console.warn(
         `MacroSlider: Unknown color '${color}', using 'protein' as fallback.`,
       );
@@ -156,7 +155,7 @@ export default function MacroSlider({
 
       <div className="flex items-center justify-between">
         <span className="text-xs text-muted">{min}%</span>
-        <span className="h-4 max-w-[180px] text-center text-xs text-muted">
+        <span className="h-4 max-w-45 text-center text-xs text-muted">
           {recommendationText}
         </span>
         <span className="text-xs text-muted">{max}%</span>
