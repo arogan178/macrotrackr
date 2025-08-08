@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { IconButton } from "@/components/ui";
 
@@ -22,9 +22,15 @@ export default function ProductPreviewSection({
   const scrollByAmount = useCallback((direction: "prev" | "next") => {
     const scroller = scrollerReference.current;
     if (!scroller) return;
-    const viewportWidth = scroller.clientWidth;
-    const delta =
-      direction === "next" ? viewportWidth * 0.9 : -viewportWidth * 0.9;
+    let step = scroller.clientWidth * 0.9;
+    const firstChild = scroller.firstElementChild as HTMLElement | null;
+    if (firstChild) {
+      const rect = firstChild.getBoundingClientRect();
+      const styles = getComputedStyle(scroller);
+      const gapPx = Number.parseFloat(styles.columnGap || styles.gap || "0");
+      step = rect.width + gapPx;
+    }
+    const delta = direction === "next" ? step : -step;
     scroller.scrollBy({ left: delta, behavior: "smooth" });
   }, []);
 
@@ -115,7 +121,8 @@ export default function ProductPreviewSection({
                 ariaLabel="Previous"
                 onClick={() => scrollByAmount("prev")}
                 disabled={isAtStart}
-                className="rounded-full bg-surface ring-1 ring-border/50 backdrop-blur hover:bg-background/90"
+                buttonVariant="ghost"
+                className="rounded-full !bg-surface ring-1 ring-border/50 backdrop-blur hover:!bg-surface-2"
                 icon={
                   <svg
                     width="20"
@@ -139,7 +146,8 @@ export default function ProductPreviewSection({
                 ariaLabel="Next"
                 onClick={() => scrollByAmount("next")}
                 disabled={isAtEnd}
-                className="rounded-full bg-surface ring-1 ring-border/50 backdrop-blur hover:bg-surface-2"
+                buttonVariant="ghost"
+                className="rounded-full !bg-surface ring-1 ring-border/50 backdrop-blur hover:!bg-surface-2"
                 icon={
                   <svg
                     width="20"
