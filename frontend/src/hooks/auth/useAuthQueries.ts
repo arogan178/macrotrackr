@@ -73,7 +73,8 @@ export function useUser(options?: { enabled?: boolean }) {
     },
     ...queryConfigs.auth,
     retry: false, // Don't retry auth queries to avoid infinite loops
-    enabled: options?.enabled === undefined ? !!getToken() : options.enabled,
+    // Enable even if local token is missing; we also send cookies
+    enabled: options?.enabled ?? true,
   });
 }
 
