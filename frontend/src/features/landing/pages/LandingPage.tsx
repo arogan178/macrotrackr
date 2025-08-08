@@ -122,35 +122,10 @@ const LandingPage: React.FC = () => {
 
   return (
     <div
-      className={`relative min-h-screen overflow-hidden bg-background ${
-        shouldReduceMotion ? "" : "scroll-smooth"
-      }`}
+      className={`relative min-h-screen overflow-hidden text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      {/* Background layer with subtle extra accents */}
-      <div className="pointer-events-none absolute inset-0 -z-10">
-        <PageBackground />
-        {/* Extra floating radial accents (very low-contrast) */}
-        {!shouldReduceMotion && (
-          <motion.div
-            aria-hidden
-            className="absolute inset-0 -z-10"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.7 }}
-            transition={{ duration: 1 }}
-          >
-            <motion.div
-              className="absolute top-24 right-[-10%] h-64 w-64 rounded-full bg-primary/10 blur-3xl"
-              animate={{ y: [0, 10, 0], x: [0, -8, 0] }}
-              transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }}
-            />
-            <motion.div
-              className="bg-accent/10 absolute bottom-32 left-[-10%] h-72 w-72 rounded-full blur-3xl"
-              animate={{ y: [0, -12, 0], x: [0, 12, 0] }}
-              transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </motion.div>
-        )}
-      </div>
+      {/* Shared background */}
+      <PageBackground />
 
       {/* Header landmark - enter on mount */}
       <motion.div
@@ -163,6 +138,9 @@ const LandingPage: React.FC = () => {
 
       {/* Main content landmark for accessibility */}
       <main className="relative z-10 bg-background">
+        {/* Shared background */}
+        <PageBackground />
+
         {/* Hero - enter on mount with scale-in */}
         <motion.div {...baseRevealProps} variants={heroVariants}>
           <HeroSection />

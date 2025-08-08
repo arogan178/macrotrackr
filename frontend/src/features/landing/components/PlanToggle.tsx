@@ -33,7 +33,7 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
       className="relative font-semibold"
     >
       Yearly
-      <span className="absolute -top-2 -right-2 rounded-full bg-success px-2 py-1 text-xs text-foreground">
+      <span className="absolute -top-2 -right-5 rounded-full bg-success px-2 py-1 text-xs text-foreground">
         Save 30%
       </span>
     </Button>

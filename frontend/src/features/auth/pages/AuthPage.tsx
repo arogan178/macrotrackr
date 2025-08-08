@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { useCallback, useRef, useState } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
-import { BackIcon, Button } from "@/components/ui";
 import LogoButton from "@/components/layout/LogoButton";
+import { BackIcon, Button } from "@/components/ui";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import {
@@ -12,6 +12,7 @@ import {
   LoginForm,
   RegisterForm,
 } from "@/features/auth/components";
+import PageBackground from "@/features/landing/components/PageBackground";
 
 // --- Animation Constants (keep in local scope, not shared: only used here) ---
 const ANIMATION_HEIGHT_DURATION = 500; // ms
@@ -139,22 +140,13 @@ export default function AuthPage() {
   return (
     <QueryErrorBoundary>
       <ErrorBoundary>
-        <div className="relative flex min-h-screen flex-col bg-background text-foreground">
-          <header className="border-b border-border bg-surface">
+        <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
+          <PageBackground />
+          <header className="z-10 border-b border-border bg-surface-2">
             <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between py-6">
                 <Link to="/" className="flex items-center" aria-label="Home">
                   <LogoButton className="h-0" />
-                </Link>
-                <Link to="/" aria-label="Back to Home">
-                  <Button
-                    text="Back to Home"
-                    variant="ghost"
-                    buttonSize="sm"
-                    ariaLabel="Back"
-                    icon={<BackIcon />}
-                    iconPosition="left"
-                  />
                 </Link>
               </div>
             </div>
