@@ -21,7 +21,7 @@ export default function MetricCard({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay }}
-      className={`rounded-lg ${bgGradient} p-4 ${borderColor} flex h-[160px] flex-col`}
+      className={`rounded-lg ${bgGradient} p-4 ${borderColor} flex h-40 flex-col`}
     >
       <div className="mb-2 flex items-center justify-between">
         <h3 className={`text-sm font-medium ${textColor}`}>{title}</h3>

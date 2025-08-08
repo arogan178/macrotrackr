@@ -95,7 +95,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
             },
           }}
         >
-          <CheckIcon className={`h-5 w-5 ${featureIconColor} flex-shrink-0`} />
+          <CheckIcon className={` ${featureIconColor} flex-shrink-0`} />
           <span className={featureTextClass}>{feature}</span>
         </motion.li>
       ))}

@@ -28,7 +28,7 @@ const FreeBillingView: React.FC<{
         fullWidth
         variant="primary"
         className="bg-gradient-to-r from-yellow-500 to-yellow-600 py-4 text-lg font-bold text-black shadow-primary transition-all duration-200 hover:from-yellow-600 hover:to-yellow-700 hover:shadow-modal"
-        icon={<StarIcon className="h-5 w-5" />}
+        icon={<StarIcon className="" />}
         ariaLabel="Upgrade to Pro"
       >
         Upgrade to Pro

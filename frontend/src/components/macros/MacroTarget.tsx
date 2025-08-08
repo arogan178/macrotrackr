@@ -52,7 +52,7 @@ const MacroTarget = memo(
               aria-label={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
             >
-              <InfoIcon className="h-5 w-5" />
+              <InfoIcon className="" />
             </button>
           </div>
         </div>
@@ -61,7 +61,7 @@ const MacroTarget = memo(
           <InfoCard
             title="Tips for adjusting your macros:"
             color="accent"
-            icon={<InfoIcon className="h-5 w-5" />}
+            icon={<InfoIcon className="" />}
           >
             <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-foreground">
               <li>Drag the sliders to adjust percentages</li>

@@ -51,9 +51,9 @@ function ButtonBase({
       "bg-error hover:bg-error/50 hover:shadow-surface disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
     success:
       "bg-success hover:bg-success/50 hover:shadow-surface disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
-    // Improved contrast for ghost + add hover shadow
+    // Improved contrast for ghost + add hover shadow and border
     ghost:
-      "bg-transparent hover:bg-surface/70 hover:text-foreground hover:shadow-surface disabled:hover:bg-transparent disabled:hover:text-foreground",
+      "bg-transparent hover:bg-surface-2 hover:text-foreground hover:shadow-surface disabled:hover:bg-transparent disabled:hover:text-foreground",
   };
 
   const widthStyles = fullWidth ? "w-full" : "";

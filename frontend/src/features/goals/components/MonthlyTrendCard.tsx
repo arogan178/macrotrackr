@@ -34,8 +34,8 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
 
     return (
       <div className="flex items-center">
-        {isLoss && <TrendingDownIcon className="mr-2 h-5 w-5 text-primary" />}
-        {isGain && <TrendingUpIcon className="mr-2 h-5 w-5 text-success" />}
+        {isLoss && <TrendingDownIcon className="mr-2  text-primary" />}
+        {isGain && <TrendingUpIcon className="mr-2  text-success" />}
         <span
           className={`text-lg font-semibold ${
             isLoss

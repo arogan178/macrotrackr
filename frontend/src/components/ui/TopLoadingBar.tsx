@@ -31,7 +31,7 @@ function TopLoadingBar() {
       aria-hidden="true"
       className="pointer-events-none fixed top-0 right-0 left-0 z-[9999]"
     >
-      <div className="h-[3px] bg-transparent">
+      <div className="h-1 bg-transparent">
         <div
           className={`h-full bg-primary ${
             prefersReducedMotion

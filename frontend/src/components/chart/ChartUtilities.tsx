@@ -187,7 +187,7 @@ export const ChartContainer: React.FC<{
 }> = ({ title, subtitle, children, className = "" }) => {
   return (
     <div
-      className={`flex h-full flex-col rounded-xl border border-border/30 bg-surface/70 p-3 shadow-primary ${className}`}
+      className={`flex h-full flex-col rounded-xl border border-border/30 bg-surface-2 p-3 shadow-primary ${className}`}
     >
       {(title || subtitle) && (
         <div className="mb-2 flex items-center justify-between">
@@ -198,14 +198,14 @@ export const ChartContainer: React.FC<{
               </h3>
             )}
             {subtitle && (
-              <span className="block max-w-[160px] truncate text-sm text-foreground">
+              <span className="block max-w-40 truncate text-sm text-foreground">
                 {subtitle}
               </span>
             )}
           </div>
         </div>
       )}
-      <div className="min-h-[150px] flex-1">{children}</div>
+      <div className="min-h-20 flex-1">{children}</div>
     </div>
   );
 };
