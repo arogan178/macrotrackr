@@ -24,10 +24,26 @@ export function securelyStoreToken(token: string): void {
     // to encrypt the token before storing it
     // For now, we'll use localStorage with a note about encryption
     localStorage.setItem("token", token);
+    try {
+      const [, payloadBase64] = token.split(".");
+      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+      const payload = JSON.parse(payloadJson);
+      if (payload && typeof payload.exp === "number") {
+        localStorage.setItem("token_exp", String(payload.exp));
+      }
+    } catch {}
     localStorage.setItem("token_stored_at", Date.now().toString());
   } else {
     // Fallback to localStorage
     localStorage.setItem("token", token);
+    try {
+      const [, payloadBase64] = token.split(".");
+      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+      const payload = JSON.parse(payloadJson);
+      if (payload && typeof payload.exp === "number") {
+        localStorage.setItem("token_exp", String(payload.exp));
+      }
+    } catch {}
     localStorage.setItem("token_stored_at", Date.now().toString());
   }
 
@@ -42,9 +58,10 @@ export function getToken(): string | undefined {
 
   const token = localStorage.getItem("token");
   const storedAt = localStorage.getItem("token_stored_at");
+  const expSec = localStorage.getItem("token_exp");
 
   if (!token || !storedAt) return undefined;
-  if (isTokenExpired(storedAt)) {
+  if (isTokenExpired(storedAt, expSec)) {
     removeToken();
     return undefined;
   }
@@ -67,18 +84,22 @@ export function removeToken(): void {
 
   localStorage.removeItem("token");
   localStorage.removeItem("token_stored_at");
+  localStorage.removeItem("token_exp");
 }
 
 /**
  * Checks if token has expired based on storage time
  */
-function isTokenExpired(storedAtString: string): boolean {
+function isTokenExpired(storedAtString: string, expSecondsString: string | null): boolean {
   try {
     const storedAt = Number.parseInt(storedAtString, 10);
     const now = Date.now();
-    const maxAge = 24 * 60 * 60 * 1000; // 24 hours
-
-    return now - storedAt > maxAge;
+    if (expSecondsString) {
+      const expMs = Number.parseInt(expSecondsString, 10) * 1000;
+      return now >= expMs;
+    }
+    const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+    return now - storedAt > thirtyDaysMs;
   } catch {
     return true; // If there's any error parsing, consider it expired
   }
