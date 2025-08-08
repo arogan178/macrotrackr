@@ -31,42 +31,91 @@ function ChartTooltip({
     return;
   }
 
-  const data = payload[0].payload as TooltipData;
+  // Type guards for recharts payloads
+  // Line chart: [{ name: dataKey, value, ... }]
+  // Bar chart: [{ payload: { ... } }]
+  let value: number | undefined;
+  let label: string | undefined;
+  let percentage: number | undefined;
+  let calories: number | undefined;
+  let count: number | undefined;
+
+  // Check if this is a line chart payload (has .name and .value)
+  // Try to find a line chart entry (has name and value)
+  const lineEntry = payload.find(
+    (item) =>
+      typeof (item as any).name === "string" &&
+      Object.prototype.hasOwnProperty.call(item, "value") &&
+      (item as any).name === selectedStat,
+  ) as { name: string; value: number; payload?: TooltipData } | undefined;
+
+  if (lineEntry && typeof lineEntry.value === "number") {
+    value = lineEntry.value;
+    label = lineEntry.payload?.name ?? lineEntry.name;
+    percentage =
+      typeof lineEntry.payload?.percentage === "number"
+        ? lineEntry.payload.percentage
+        : undefined;
+    calories =
+      typeof lineEntry.payload?.calories === "number"
+        ? lineEntry.payload.calories
+        : undefined;
+    count =
+      typeof lineEntry.payload?.count === "number"
+        ? lineEntry.payload.count
+        : undefined;
+  } else if (
+    payload[0] &&
+    typeof (payload[0] as any).payload === "object" &&
+    (payload[0] as any).payload !== null
+  ) {
+    // Bar chart fallback
+    const data = (payload[0] as { payload: TooltipData }).payload;
+    value =
+      typeof data[selectedStat] === "number"
+        ? (data[selectedStat] as number)
+        : typeof data.value === "number"
+          ? data.value
+          : undefined;
+    label = typeof data.name === "string" ? data.name : undefined;
+    percentage =
+      typeof data.percentage === "number" ? data.percentage : undefined;
+    calories =
+      typeof (data as any).calories === "number"
+        ? (data as any).calories
+        : undefined;
+    count =
+      typeof (data as any).count === "number" ? (data as any).count : undefined;
+  }
+
   const unit = getUnitForStat(selectedStat);
 
   return (
     <div className="rounded-md border border-border bg-surface-2 p-2 text-sm shadow-modal">
-      <p className="font-medium text-foreground">{data.name}</p>
+      <p className="font-medium text-foreground">{label}</p>
       <p className="text-foreground">
         <span className="font-medium">
           {selectedStat === "calories" ? "~" : ""}
           {formatter ? (
-            formatter(data.value, selectedStat)
+            formatter(value ?? 0, selectedStat)
           ) : (
-            <AnimatedNumber value={data.value} toFixedValue={1} suffix={unit} />
+            <AnimatedNumber value={value ?? 0} toFixedValue={1} suffix={unit} />
           )}
         </span>
-        {typeof data.percentage === "number" && (
+        {typeof percentage === "number" && (
           <span className="ml-1 text-foreground">
-            (<AnimatedNumber value={data.percentage} suffix="%" />)
+            (<AnimatedNumber value={percentage} suffix="%" />)
           </span>
         )}
       </p>
-      {selectedStat !== "calories" &&
-        typeof (data as any).calories === "number" && (
-          <p className="mt-1 text-xs text-foreground">
-            ~{" "}
-            <AnimatedNumber
-              value={(data as any).calories as number}
-              toFixedValue={0}
-              suffix=" kcal"
-            />
-          </p>
-        )}
-      {selectedStat !== "count" && typeof (data as any).count === "number" && (
+      {selectedStat !== "calories" && typeof calories === "number" && (
+        <p className="mt-1 text-xs text-foreground">
+          ~ <AnimatedNumber value={calories} toFixedValue={0} suffix=" kcal" />
+        </p>
+      )}
+      {selectedStat !== "count" && typeof count === "number" && (
         <p className="text-xs text-foreground">
-          <AnimatedNumber value={(data as any).count as number} />{" "}
-          {(data as any).count === 1 ? "item" : "items"}
+          <AnimatedNumber value={count} /> {count === 1 ? "item" : "items"}
         </p>
       )}
     </div>
@@ -179,7 +228,11 @@ export function StackedBarPercentageTooltip({
               />
               <span className="capitalize">{key}</span>{" "}
               <span className="font-medium">
-                {Number.isFinite(pct) ? pct.toFixed(0) : "0"}%
+                <AnimatedNumber
+                  value={Number.isFinite(pct) ? pct : 0}
+                  toFixedValue={0}
+                  suffix="%"
+                />
               </span>
             </p>
           );
@@ -187,7 +240,10 @@ export function StackedBarPercentageTooltip({
       </div>
       {typeof data.calories === "number" && (
         <p className="mt-1 border-t border-border pt-1 text-xs text-foreground">
-          {Math.round(data.calories)} calories
+          <AnimatedNumber
+            value={Math.round(data.calories)}
+            suffix=" calories"
+          />
         </p>
       )}
     </div>

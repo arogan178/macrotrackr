@@ -93,7 +93,7 @@ function RegisterForm() {
       )}
 
       {/* Form content container with fixed height to prevent layout shifts */}
-      <div className="relative flex min-h-[420px] flex-col">
+      <div className="relative flex min-h-105 flex-col">
         <div className="flex-1">{renderCurrentStep()}</div>
       </div>
     </CardContainer>

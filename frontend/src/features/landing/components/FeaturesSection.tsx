@@ -20,9 +20,9 @@ const FeaturesSection: React.FC = () => (
       <div className="grid grid-cols-1 gap-8 md:grid-cols-3 lg:gap-10">
         {features.map((feature, index) => (
           <ScrollTriggeredDiv key={feature.title} delay={0.1 + index * 0.1}>
-            <div className="relative rounded-2xl border border-border/50 bg-surface p-8 backdrop-blur-sm transition-all duration-300 hover:bg-surface">
+            <div className="relative rounded-2xl border border-border/50 bg-surface p-8 backdrop-blur-sm transition-all duration-300 hover:bg-surface-3">
               <div className="relative">
-                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl border border-border/50 bg-surface">
+                <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-xl border border-border/50 bg-surface-2">
                   <feature.icon className="h-8 w-8 text-primary" />
                 </div>
                 <h3 className="mb-3 text-xl font-semibold text-foreground">

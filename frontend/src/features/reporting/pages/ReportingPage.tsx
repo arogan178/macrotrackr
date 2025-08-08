@@ -120,7 +120,7 @@ export default function ReportingPage() {
                       <div className="mb-6 rounded-lg border border-yellow-800/30 bg-warning/30 p-4 text-warning shadow-primary">
                         <div className="flex items-center">
                           <svg
-                            className="mr-2 h-5 w-5 text-warning"
+                            className="mr-2  text-warning"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -208,7 +208,7 @@ export default function ReportingPage() {
                     <ProFeature>
                       <motion.div
                         layout
-                        className="rounded-xl border border-border/50 bg-surface/70 p-4 shadow-modal"
+                        className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal"
                       >
                         <h2 className="mb-6 text-lg font-semibold text-foreground">
                           Calorie Intake
@@ -226,7 +226,7 @@ export default function ReportingPage() {
                     <ProFeature>
                       <motion.div
                         layout
-                        className="rounded-xl border border-border/50 bg-surface/70 p-4 shadow-modal"
+                        className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal"
                       >
                         <h2 className="mb-6 text-lg font-semibold text-foreground">
                           Macronutrient Intake

@@ -13,7 +13,7 @@ export default function ReportingPageSkeleton() {
           {[1, 2, 3, 4].map((index) => (
             <div
               key={index}
-              className="h-24 min-w-[120px] flex-1 rounded-2xl bg-surface/40"
+              className="h-24 min-w-30 flex-1 rounded-2xl bg-surface"
             />
           ))}
         </div>
@@ -21,18 +21,18 @@ export default function ReportingPageSkeleton() {
 
       {/* MealTimeBreakdown & MacroDensityBreakdown (2-column grid on md+) */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="h-56 rounded-2xl bg-surface/40" />
-        <div className="h-56 rounded-2xl bg-surface/40" />
+        <div className="h-56 rounded-2xl bg-surface" />
+        <div className="h-56 rounded-2xl bg-surface" />
       </div>
 
       {/* Charts (2-column grid on md+) */}
       <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="h-80 rounded-2xl bg-surface/40" />
-        <div className="h-80 rounded-2xl bg-surface/40" />
+        <div className="h-80 rounded-2xl bg-surface" />
+        <div className="h-80 rounded-2xl bg-surface" />
       </div>
 
       {/* Unified Insights section */}
-      <div className="mb-6 h-40 rounded-2xl bg-surface/40" />
+      <div className="mb-6 h-40 rounded-2xl bg-surface" />
     </div>
   );
 }

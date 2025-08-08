@@ -1,5 +1,9 @@
+import { Link } from "@tanstack/react-router";
 import { useCallback, useRef, useState } from "react";
 
+import CardContainer from "@/components/form/CardContainer";
+import { BackIcon, Button } from "@/components/ui";
+import LogoButton from "@/components/layout/LogoButton";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import {
@@ -135,32 +139,52 @@ export default function AuthPage() {
   return (
     <QueryErrorBoundary>
       <ErrorBoundary>
-        <div
-          className="auth-page flex min-h-screen items-center justify-center bg-background"
-          aria-label="Authentication page"
-        >
-          <div className="relative z-10 w-full max-w-md px-4">
-            {/* Error notifications are now handled by individual components */}
-
-            {/* Animated form container (login/register) */}
-            <div ref={formContainerReference} style={styles.container}>
-              <div ref={contentReference} style={styles.content}>
-                {renderForm()}
+        <div className="relative flex min-h-screen flex-col bg-background text-foreground">
+          <header className="border-b border-border bg-surface">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between py-6">
+                <Link to="/" className="flex items-center" aria-label="Home">
+                  <LogoButton className="h-0" />
+                </Link>
+                <Link to="/" aria-label="Back to Home">
+                  <Button
+                    text="Back to Home"
+                    variant="ghost"
+                    buttonSize="sm"
+                    ariaLabel="Back"
+                    icon={<BackIcon />}
+                    iconPosition="left"
+                  />
+                </Link>
               </div>
             </div>
+          </header>
 
-            {/* Toggle login/register button */}
-            {mode !== "forgotPassword" && (
-              <div className="mt-8 flex justify-center">
-                <ButtonModeToggle
-                  mode={mode}
-                  onToggle={() =>
-                    toggleMode(mode === "login" ? "register" : "login")
-                  }
-                />
+          <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+            <section className="flex w-full flex-col items-center justify-center">
+              <div className="w-full max-w-md">
+                <CardContainer>
+                  {/* Animated form container (login/register) */}
+                  <div ref={formContainerReference} style={styles.container}>
+                    <div ref={contentReference} style={styles.content}>
+                      {renderForm()}
+                    </div>
+                  </div>
+                </CardContainer>
+                {/* Toggle login/register button */}
+                {mode !== "forgotPassword" && (
+                  <div className="mt-8 flex justify-center">
+                    <ButtonModeToggle
+                      mode={mode}
+                      onToggle={() =>
+                        toggleMode(mode === "login" ? "register" : "login")
+                      }
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </section>
+          </main>
         </div>
       </ErrorBoundary>
     </QueryErrorBoundary>

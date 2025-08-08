@@ -40,6 +40,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary overflow-hidden",
+      "bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-surface overflow-hidden",
   },
 };
