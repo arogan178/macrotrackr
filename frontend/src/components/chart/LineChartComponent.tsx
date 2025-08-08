@@ -18,10 +18,10 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import type { ChartDataPoint, LineConfig } from "@/components/chart/types";
 import LoadingSpinner from "@/components/ui/LoadingSpinner"; // Corrected path
 
-import { DefaultTooltip } from "./ChartHelper";
+import ChartTooltip from "./ChartTooltip";
+import type { ChartDataPoint, LineConfig } from "./Types";
 
 // Interface for CustomDot props to improve type safety
 interface CustomDotProps {
@@ -115,8 +115,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   showNoDataMessage = false, // Default to false, controlled by parent
 }) => {
   const hasData = data && data.length > 0;
-  // Assign the component or element directly
-  const TooltipContent = tooltipContent || DefaultTooltip;
+  // Assign the component or element directly; default to richer ChartTooltip
+  const TooltipContent = tooltipContent || ChartTooltip;
 
   const defaultXAxisProps: Partial<XAxisProps> = {
     dataKey: "name",
@@ -277,7 +277,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             <YAxis {...defaultYAxisProps} />
             <Tooltip
               // Pass the component/element directly to the content prop
-              content={TooltipContent}
+              // Cast to any to accommodate both element and function content types across Recharts generics
+              content={TooltipContent as any}
               cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
             />
             {showLegend && (

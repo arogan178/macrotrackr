@@ -12,6 +12,7 @@ import {
 } from "recharts";
 
 import { ChartCard } from "@/components/chart";
+import { StackedBarPercentageTooltip } from "@/components/chart/ChartTooltip";
 import { MACRO_COLORS } from "@/utils/chartColors";
 
 import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
@@ -129,7 +130,20 @@ const MacroDensityBreakdown = ({
               width={70}
             />
             <Tooltip
-              content={CustomTooltip}
+              // Use standardized stacked bar tooltip with color mapping and macro dots
+              content={
+                ((properties: any) => (
+                  <StackedBarPercentageTooltip
+                    {...properties}
+                    colors={{
+                      protein: MACRO_COLORS.protein.base,
+                      carbs: MACRO_COLORS.carbs.base,
+                      fats: MACRO_COLORS.fats.base,
+                    }}
+                    labelKey="period"
+                  />
+                )) as unknown as any
+              }
               cursor={{ fill: "rgba(110,118,145,0.1)" }}
               wrapperStyle={{ outline: "none" }}
             />
@@ -178,43 +192,6 @@ const MacroDensityBreakdown = ({
         </ResponsiveContainer>
       )}
     </ChartCard>
-  );
-};
-
-interface CustomTooltipPayload {
-  period: string;
-  protein: number;
-  carbs: number;
-  fats: number;
-  calories: number;
-}
-
-const CustomTooltip = ({ active, payload }: TooltipProps<number, string>) => {
-  if (!active || !payload || payload.length === 0) return;
-  const data = payload[0].payload as CustomTooltipPayload;
-  return (
-    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
-      <p className="mb-1 font-medium text-foreground">{data.period}</p>
-      <div className="space-y-0.5">
-        <p className="text-success">
-          <span className="mr-2 inline-block h-3 w-3 rounded-full bg-success" />
-          <span className="font-medium">
-            {(data.protein * 100).toFixed(0)}%
-          </span>
-        </p>
-        <p className="text-primary">
-          <span className="mr-2 inline-block h-3 w-3 rounded-full bg-primary" />
-          <span className="font-medium">{(data.carbs * 100).toFixed(0)}%</span>
-        </p>
-        <p className="text-vibrant-accent">
-          <span className="mr-2 inline-block h-3 w-3 rounded-full bg-vibrant-accent" />
-          <span className="font-medium">{(data.fats * 100).toFixed(0)}%</span>
-        </p>
-      </div>
-      <p className="mt-1 border-t border-border pt-1 text-xs text-foreground">
-        {Math.round(data.calories)} calories
-      </p>
-    </div>
   );
 };
 
