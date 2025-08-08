@@ -40,7 +40,7 @@ function WeightProgressTabs() {
                   : "text-foreground hover:text-foreground"
               }`}
             >
-              <tab.icon className="mr-2 h-5 w-5" />
+              <tab.icon className="mr-2 " />
               {tab.label}
               {activeTab === tab.id && (
                 <motion.div

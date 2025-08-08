@@ -55,10 +55,10 @@ export default function MetricCard(properties: MetricCardProps) {
           initial: { opacity: 0, y: 10 },
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.3, delay },
-          className: `bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary hover:shadow-surface-2 overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-[160px] flex flex-col group ${className}`,
+          className: `bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary hover:shadow-surface-2 overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group ${className}`,
         }
       : {
-          className: `p-3.5 hover:bg-surface/80 hover:shadow-surface-2 transition group ${className}`,
+          className: `p-3.5 hover:bg-surface hover:shadow-surface-2 transition group ${className}`,
         };
 
   return (

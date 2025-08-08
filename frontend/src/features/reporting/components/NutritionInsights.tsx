@@ -16,7 +16,7 @@ export default function NutritionInsights({
   averages,
 }: NutritionInsightsProps) {
   return (
-    <div className="rounded-xl border border-border/50 bg-surface/70 p-4 shadow-modal backdrop-blur-sm">
+    <div className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal backdrop-blur-sm">
       <h2 className="mb-4 text-lg font-semibold text-foreground">
         Nutrition Insights
       </h2>

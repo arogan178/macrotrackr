@@ -2,7 +2,9 @@ import { motion } from "motion/react";
 import { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { CalendarIcon } from "@/components/ui";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import ProgressBar from "@/components/ui/ProgressBar";
 
 import {
   MACRO_COLORS,
@@ -57,14 +59,14 @@ function UnifiedInsights({
         macroDensity: calculateMacroDensity(averages),
       };
     } catch {
-      return null;
+      // No return needed; fallthrough for no insights
     }
   }, [aggregatedData, averages, isLoading, macroTarget, denominatorDays]);
 
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-[250px] items-center justify-center rounded-xl border border-border/50 bg-surface/70 p-6 text-foreground shadow-modal backdrop-blur-sm">
+      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border/50 bg-surface p-6 text-foreground shadow-modal backdrop-blur-sm">
         <LoadingSpinner />
       </div>
     );
@@ -73,7 +75,7 @@ function UnifiedInsights({
   // Handle no data state
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
-      <div className="flex min-h-[250px] items-center justify-center rounded-xl border border-border/50 bg-surface/70 p-6 text-center text-foreground shadow-modal backdrop-blur-sm">
+      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border/50 bg-surface p-6 text-center text-foreground shadow-modal backdrop-blur-sm">
         <div className="space-y-3">
           <div className="text-4xl">📊</div>
           <div>
@@ -100,7 +102,7 @@ function UnifiedInsights({
   } = insights;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-surface/70 p-6 shadow-modal backdrop-blur-sm">
+    <div className="rounded-xl border border-border/50 bg-surface p-6 shadow-modal backdrop-blur-sm">
       <h2 className="mb-6 text-lg font-semibold text-foreground">
         Nutrition Insights
       </h2>
@@ -122,19 +124,14 @@ function UnifiedInsights({
               <span className="text-foreground">Logging frequency</span>
               <span className="text-foreground">Intake variation</span>
             </div>
-            <div
+            <ProgressBar
+              progress={consistencyScore}
+              color="accent"
+              height="lg"
               className={BAR_BASE_CLASSES}
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={consistencyScore}
+              fillClass={getColorByScore(consistencyScore, "consistency")}
               aria-label="Consistency score"
-            >
-              <div
-                className={`h-2 rounded-full transition-all duration-1000 ${getColorByScore(consistencyScore, "consistency")}`}
-                style={{ width: `${consistencyScore}%` }}
-              />
-            </div>
+            />
           </div>
         </MetricCard>
         {/* Macro Balance */}
@@ -177,7 +174,7 @@ function UnifiedInsights({
                         );
                       })}
                     </div>
-                    <div className="mt-1 flex justify-between text-[10px]">
+                    <div className="mt-1 flex justify-between text-xs">
                       {parts.map((pct, index) => {
                         const labels = ["Protein", "Carbs", "Fats"];
                         const colors = [
@@ -213,19 +210,14 @@ function UnifiedInsights({
               <span className="text-foreground">Protein quality</span>
               <span className="text-foreground">Macro balance</span>
             </div>
-            <div
+            <ProgressBar
+              progress={macroDensity.score}
+              color="green"
+              height="lg"
               className={BAR_BASE_CLASSES}
-              role="progressbar"
-              aria-valuemin={0}
-              aria-valuemax={100}
-              aria-valuenow={macroDensity.score}
+              fillClass={getColorByScore(macroDensity.score, "density")}
               aria-label="Nutrient density score"
-            >
-              <div
-                className={`h-2 rounded-full transition-all duration-1000 ${getColorByScore(macroDensity.score, "density")}`}
-                style={{ width: `${macroDensity.score}%` }}
-              />
-            </div>
+            />
           </div>
         </MetricCard>
       </div>
@@ -267,42 +259,46 @@ function UnifiedInsights({
             <div className="mb-2 sm:mb-0">
               <span className="text-foreground">
                 <AnimatedNumber
-                  value={dataQuality.completionRate}
+                  value={
+                    typeof dataQuality.completionRate === "number"
+                      ? dataQuality.completionRate
+                      : 0
+                  }
                   toFixedValue={0}
                   suffix="% tracking completion rate"
                   duration={0.6}
                 />
               </span>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface sm:w-40">
-                <div
-                  className="h-full rounded-full bg-primary"
-                  style={{ width: `${dataQuality.completionRate}%` }}
+              <div className="mt-1 w-full sm:w-40">
+                <ProgressBar
+                  progress={dataQuality.completionRate}
+                  color="blue"
+                  height="md"
+                  fillClass="bg-primary"
+                  className="overflow-hidden rounded-full bg-surface"
+                  aria-label="Tracking completion rate"
                 />
               </div>
             </div>
             <div className="flex items-center text-foreground">
-              <svg
-                className="mr-1 h-5 w-5 text-primary"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
-              </svg>
+              <CalendarIcon className="mr-1" />
               <span>
                 <AnimatedNumber
-                  value={dataQuality.daysLogged}
+                  value={
+                    typeof dataQuality.daysLogged === "number"
+                      ? dataQuality.daysLogged
+                      : 0
+                  }
                   toFixedValue={0}
                   duration={0.5}
                 />
                 /
                 <AnimatedNumber
-                  value={dataQuality.totalDaysInPeriod}
+                  value={
+                    typeof dataQuality.totalDaysInPeriod === "number"
+                      ? dataQuality.totalDaysInPeriod
+                      : 0
+                  }
                   toFixedValue={0}
                   duration={0.5}
                 />

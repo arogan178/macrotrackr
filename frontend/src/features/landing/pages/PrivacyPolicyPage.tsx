@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import React from "react";
 
 import { BackIcon, Button } from "@/components/ui";
+import LogoButton from "@/components/layout/LogoButton";
 
 const PrivacyPolicyPage: React.FC = () => {
   return (
@@ -10,9 +11,7 @@ const PrivacyPolicyPage: React.FC = () => {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <Link to="/" className="flex items-center" aria-label="Home">
-              <h1 className="text-3xl font-bold text-foreground">
-                MacroTrackr
-              </h1>
+              <LogoButton className="h-0" />
             </Link>
             <Link to="/" aria-label="Back to Home">
               <Button

@@ -240,9 +240,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div
           className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
         >
-          <TrendingUpIcon
-            className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
-          />
+          <TrendingUpIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
             <p className=" text-foreground">Weekly Rate</p>
             <p className="text-base font-medium text-foreground">
@@ -260,9 +258,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div
           className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
         >
-          <CalendarIcon
-            className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`}
-          />
+          <CalendarIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
             <p className=" text-foreground">Est. Duration</p>
             <p className="text-base text-sm font-medium text-foreground">
@@ -279,7 +275,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div
           className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
         >
-          <TargetIcon className={`h-5 w-5 ${goalTextColor} mt-0.5 shrink-0`} />
+          <TargetIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
             <p className="text-foreground">
               {isWeightLoss

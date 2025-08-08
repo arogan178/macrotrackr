@@ -53,7 +53,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
         <ul className="space-y-2">
           {proFeatures.map((feature) => (
             <li key={feature} className="flex items-center">
-              <CheckCircleIcon className="mr-2 h-5 w-5 flex-shrink-0 text-success" />
+              <CheckCircleIcon className="mr-2  flex-shrink-0 text-success" />
               <span className="text-foreground">{feature}</span>
             </li>
           ))}

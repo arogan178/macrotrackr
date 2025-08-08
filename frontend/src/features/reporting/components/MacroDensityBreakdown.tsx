@@ -87,7 +87,7 @@ const MacroDensityBreakdown = ({
     !loading && Array.isArray(data) && data.length === 0 && dataProcessed;
 
   return (
-    <ChartCard title="Macro Distribution" className="h-[300px]">
+    <ChartCard title="Macro Distribution" className="h-100">
       {loading || showNoData ? (
         <div className="flex h-full items-center justify-center">
           {loading ? (

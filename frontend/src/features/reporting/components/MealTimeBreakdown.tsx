@@ -110,7 +110,7 @@ function MealTimeBreakdown({
   return (
     <ChartCard
       title="Meal Distribution"
-      className="h-[300px]"
+      className="h-100"
       action={
         <TabBar
           items={tabItems}

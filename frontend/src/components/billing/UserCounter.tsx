@@ -52,7 +52,7 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`inline-flex items-center space-x-2 ${className}`}
     >
-      <div className="flex items-center space-x-2 rounded-full border border-border/50 bg-surface/60 px-4 py-2 backdrop-blur-sm">
+      <div className="flex items-center space-x-2 rounded-full border border-border/50 bg-surface px-4 py-2 backdrop-blur-sm">
         <div className="flex -space-x-2">
           {/* Avatar stack for visual appeal */}
           <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-primary">
