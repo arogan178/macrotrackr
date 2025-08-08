@@ -1,20 +1,23 @@
 import React from "react";
 
-import BackgroundAnimation from "@/components/animation/BackgroundAnimation";
-
 /**
- * PageBackground renders the animated and gradient overlays for the landing page background.
+ * PageBackground renders the static background overlays for all pages.
  * Usage example:
  *   <PageBackground />
  */
 const PageBackground: React.FC = () => (
   <>
-    <BackgroundAnimation />
-    <div className="absolute inset-0">
-      <div className="absolute inset-0 bg-gradient-to-br from-surface via-blue-900/20 to-primary/30"></div>
-      <div className="absolute top-0 left-0 h-full w-full bg-[radial-gradient(circle_at_30%_20%,rgba(120,119,198,0.3),transparent_50%)]"></div>
-      <div className="absolute right-0 bottom-0 h-full w-full bg-[radial-gradient(circle_at_70%_80%,rgba(67,56,202,0.2),transparent_50%)]"></div>
-    </div>
+    {/* Base background */}
+    <div className="absolute inset-0 bg-background" />
+
+    {/* Soft radial spotlight */}
+    <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,var(--color-surface)_0%,transparent_70%)] opacity-60" />
+
+    {/* Subtle grid lines */}
+    <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:40px_40px] opacity-20" />
+
+    {/* Noise texture */}
+    <div className="pointer-events-none absolute inset-0 bg-[url('/noise.png')] opacity-30 mix-blend-overlay" />
   </>
 );
 
