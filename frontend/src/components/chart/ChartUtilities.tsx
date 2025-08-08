@@ -2,25 +2,67 @@ import React from "react";
 
 /**
  * Create a linear gradient definition for a chart
+ * Unified gradient helper used across charts.
+ * - Uses idPrefix "color-" to keep consistent with existing defs usage
+ * - Supports horizontal orientation
+ * - Allows customizing stop opacities for start/end
  */
 export function createGradient(
   id: string,
   colors: [string, string],
   horizontal: boolean = false,
+  options?: {
+    stopOpacityStart?: number;
+    stopOpacityEnd?: number;
+    idPrefix?: string;
+    includeKey?: boolean;
+  },
 ) {
+  const stopOpacityStart = options?.stopOpacityStart ?? 0.8;
+  const stopOpacityEnd = options?.stopOpacityEnd ?? 0.8;
+  const idPrefix = options?.idPrefix ?? "color-";
+  const includeKey = options?.includeKey ?? true;
+
+  const gradientId = `${idPrefix}${id}`;
+
   return (
     <linearGradient
-      key={`color-${id}`}
-      id={`color-${id}`}
+      key={includeKey ? gradientId : undefined}
+      id={gradientId}
       x1={horizontal ? "0" : "1"}
       y1={horizontal ? "1" : "0"}
       x2={horizontal ? "1" : "0"}
       y2={horizontal ? "0" : "0"}
     >
-      <stop offset="0%" stopColor={colors[0]} stopOpacity={0.8} />
-      <stop offset="100%" stopColor={colors[1]} stopOpacity={0.8} />
+      <stop offset="0%" stopColor={colors[0]} stopOpacity={stopOpacityStart} />
+      <stop offset="100%" stopColor={colors[1]} stopOpacity={stopOpacityEnd} />
     </linearGradient>
   );
+}
+
+/**
+ * Reference line config helper for Recharts
+ * Moved from ChartHelper to centralize primitives.
+ */
+export function createReferenceLine({
+  y,
+  label,
+  color = "#8884d8",
+  dash = "3 3",
+}: {
+  y: number;
+  label?: string;
+  color?: string;
+  dash?: string;
+}) {
+  return {
+    y,
+    stroke: color,
+    strokeDasharray: dash,
+    label: label
+      ? { value: label, position: "right" as const, fill: color, fontSize: 12 }
+      : undefined,
+  };
 }
 
 /**

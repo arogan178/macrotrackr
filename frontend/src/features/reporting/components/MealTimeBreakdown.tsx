@@ -14,6 +14,7 @@ import {
 } from "recharts";
 
 import { ChartCard } from "@/components/chart";
+import { BarValueTooltip } from "@/components/chart/ChartTooltip";
 import {
   legendFormatter,
   PercentageLabel,
@@ -162,7 +163,7 @@ function MealTimeBreakdown({
           />
 
           <RechartsTooltip
-            content={CustomTooltip}
+            content={BarValueTooltip as any}
             cursor={{ fill: "rgba(110,118,145,0.1)" }}
             wrapperStyle={{ outline: "none" }}
           />
@@ -211,40 +212,5 @@ function MealTimeBreakdown({
     </ChartCard>
   );
 }
-
-const CustomTooltip = (
-  properties: TooltipProps<number, string> & { selectedStat?: string },
-) => {
-  // selectedStat is passed via ...rest
-  const { active, payload, selectedStat } = properties;
-  if (!active || !payload?.length) return;
-
-  const data = payload[0].payload as MealTypeDistributionData;
-  const unit = getUnitForStat(selectedStat || "calories");
-
-  return (
-    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
-      <p className="font-medium text-foreground">{data.name}</p>
-      <p className="text-foreground">
-        <span className="font-medium">
-          {selectedStat === "calories" ? "~" : ""}
-          {data.value.toFixed(1)}
-          {unit}
-        </span>
-        <span className="ml-1 text-foreground">({data.percentage}%)</span>
-      </p>
-      {selectedStat !== "calories" && (
-        <p className="mt-1 text-xs text-foreground">
-          ~ {data.calories.toFixed(0)} kcal
-        </p>
-      )}
-      {selectedStat !== "count" && (
-        <p className="text-xs text-foreground">
-          {data.count} meal{data.count === 1 ? "" : "s"}
-        </p>
-      )}
-    </div>
-  );
-};
 
 export default MealTimeBreakdown;
