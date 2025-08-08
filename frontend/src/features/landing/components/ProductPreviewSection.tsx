@@ -79,7 +79,7 @@ export default function ProductPreviewSection({
 
           <motion.div
             ref={scrollerReference}
-            className="flex overflow-x-auto snap-x snap-mandatory scroll-p-6 gap-6 pb-4"
+            className="flex snap-x snap-mandatory scroll-p-6 gap-6 overflow-x-auto pb-4"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
