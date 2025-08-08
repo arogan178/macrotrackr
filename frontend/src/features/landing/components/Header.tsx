@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import React from "react";
 
-import { Button } from "@/components/ui";
 import LogoButton from "@/components/layout/LogoButton";
+import { Button } from "@/components/ui";
 
 const Header: React.FC = () => (
   <header className="relative z-10 border-b border-border/50 bg-surface backdrop-blur-xl supports-[backdrop-filter]:bg-surface">
