@@ -1,13 +1,15 @@
 import { Link } from "@tanstack/react-router";
 import React from "react";
 
-import { BackIcon, Button } from "@/components/ui";
 import LogoButton from "@/components/layout/LogoButton";
+import { BackIcon, Button } from "@/components/ui";
+import PageBackground from "@/features/landing/components/PageBackground";
 
 const TermsAndConditionsPage: React.FC = () => {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background">
-      <header className="border border-border bg-surface">
+    <div className="relative min-h-screen overflow-hidden text-foreground">
+      <PageBackground />
+      <header className="z-10 border border-border bg-surface">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between py-6">
             <Link to="/" className="flex items-center" aria-label="Home">
