@@ -133,7 +133,7 @@ function ProgressInsightsCard({
       </h3>
       <div className="flex items-start">
         <LightBulbIcon
-          className={`h-5 w-5 ${insight.color} mt-0.5 mr-2 flex-shrink-0`}
+          className={` ${insight.color} mt-0.5 mr-2 flex-shrink-0`}
         />
         <p className={`text-sm ${insight.color}`}>{insight.message}</p>
       </div>

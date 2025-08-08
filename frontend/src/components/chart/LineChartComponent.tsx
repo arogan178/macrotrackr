@@ -154,7 +154,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface/50 backdrop-blur-sm "
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface backdrop-blur-sm "
           >
             <div className="flex flex-col items-center">
               <LoadingSpinner size="md" />

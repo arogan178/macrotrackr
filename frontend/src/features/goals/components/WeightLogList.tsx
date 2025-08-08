@@ -141,7 +141,7 @@ function WeightLogList({
                 key={entry.id}
                 className="flex items-center justify-between py-2"
               >
-                <div className="flex max-w-[220px] min-w-[200px] flex-col">
+                <div className="flex max-w-55 min-w-50 flex-col">
                   <span className="block w-full truncate text-sm text-foreground">
                     {/* Format timestamp only if valid */}
                     {isValidDate

@@ -1,6 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
-import React, { Suspense, useEffect, useState } from "react";
+import React, { Suspense, useEffect } from "react";
 
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 
 import Footer from "../components/Footer";
@@ -12,12 +13,50 @@ const FeaturesSection = React.lazy(
   () => import("../components/FeaturesSection"),
 );
 const PricingSection = React.lazy(() => import("../components/PricingSection"));
-const TestimonialsSection = React.lazy(
-  () => import("../components/TestimonialsSection"),
+const ProductPreviewSection = React.lazy(
+  () => import("../components/ProductPreviewSection"),
 );
+// const TestimonialsSection = React.lazy(
+//   () => import("../components/TestimonialsSection"),
+// );
 const FinalCtaSection = React.lazy(
   () => import("../components/FinalCtaSection"),
 );
+
+// Static animation variants (hoisted to avoid recreation on each render)
+const headerVariants = {
+  hidden: { opacity: 0, filter: "blur(8px)", y: -6 },
+  visible: {
+    opacity: 1,
+    filter: "blur(0px)",
+    y: 0,
+    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
+  },
+} as const;
+
+const heroVariants = {
+  hidden: { opacity: 0, scale: 0.98, y: 10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 140, damping: 18, mass: 0.7 },
+  },
+} as const;
+
+const wipeVariants = {
+  hidden: { opacity: 0, clipPath: "inset(10% 0% 10% 0% round 16px)" },
+  visible: {
+    opacity: 1,
+    clipPath: "inset(0% 0% 0% 0% round 16px)",
+    transition: {
+      duration: 0.6,
+      ease: [0.22, 1, 0.36, 1],
+      when: "beforeChildren",
+      staggerChildren: 0.08,
+    },
+  },
+} as const;
 
 /**
  * Enhanced Suspense fallback:
@@ -44,69 +83,29 @@ function ThemedFallback() {
   );
 }
 
+function SectionDivider() {
+  return (
+    <div className="relative w-full overflow-hidden">
+      <svg viewBox="0 0 1440 80" className="fill-surface">
+        <path d="M0,0 C480,80 960,0 1440,80 L1440,0 L0,0 Z"></path>
+      </svg>
+    </div>
+  );
+}
 const LandingPage: React.FC = () => {
   // Respect user's reduced motion preferences
   const shouldReduceMotion = useReducedMotion();
 
-  // Header blur-fade-in
-  const headerVariants = {
-    hidden: { opacity: 0, filter: "blur(8px)", y: -6 },
-    visible: {
-      opacity: 1,
-      filter: "blur(0px)",
-      y: 0,
-      transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
-    },
-  } as const;
-
-  // Hero subtle scale-in
-  const heroVariants = {
-    hidden: { opacity: 0, scale: 0.98, y: 10 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 140, damping: 18, mass: 0.7 },
-    },
-  } as const;
-
-  // Section wipe reveal using clipPath
-  const wipeVariants = {
-    hidden: { opacity: 0, clipPath: "inset(10% 0% 10% 0% round 16px)" },
-    visible: {
-      opacity: 1,
-      clipPath: "inset(0% 0% 0% 0% round 16px)",
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-        when: "beforeChildren",
-        staggerChildren: 0.08,
-      },
-    },
-  } as const;
-
-  // Button/CTA micro reveal (kept for potential downstream use)
-  const buttonReveal = {
-    hidden: { opacity: 0, y: 8 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 180, damping: 16 },
-    },
-  } as const;
-  void buttonReveal; // prevent unused var warning without changing API surface
-
-  // Suggested item variants for child lists (Features/Testimonials)
-  // Exported via named export below for downstream wiring.
-  const itemVariants = {
-    hidden: { opacity: 0, y: 12 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { type: "spring", stiffness: 140, damping: 18 },
-    },
-  } as const;
-  void itemVariants; // prevent unused var warning without changing API surface
+  // Idle prefetch for lazy sections to improve perceived performance
+  useEffect(() => {
+    const timer = globalThis.setTimeout(() => {
+      void import("../components/FeaturesSection");
+      void import("../components/PricingSection");
+      void import("../components/ProductPreviewSection");
+      void import("../components/FinalCtaSection");
+    }, 250);
+    return () => globalThis.clearTimeout(timer);
+  }, []);
 
   // Helper props depending on reduced motion
   const baseRevealProps = shouldReduceMotion
@@ -121,19 +120,12 @@ const LandingPage: React.FC = () => {
         viewport: { once: true, amount: 0.2 },
       } as const);
 
-  // Back to top visibility (reserved for future use)
-  const [_showTop, setShowTop] = useState(false);
-  useEffect(() => {
-    const onScroll = () => {
-      setShowTop(window.scrollY > 600);
-    };
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
   return (
-    <div className="relative min-h-screen overflow-hidden scroll-smooth bg-background">
+    <div
+      className={`relative min-h-screen overflow-hidden bg-background ${
+        shouldReduceMotion ? "" : "scroll-smooth"
+      }`}
+    >
       {/* Background layer with subtle extra accents */}
       <div className="pointer-events-none absolute inset-0 -z-10">
         <PageBackground />
@@ -170,45 +162,69 @@ const LandingPage: React.FC = () => {
       </motion.div>
 
       {/* Main content landmark for accessibility */}
-      <main className="relative z-10">
+      <main className="relative z-10 bg-background">
         {/* Hero - enter on mount with scale-in */}
         <motion.div {...baseRevealProps} variants={heroVariants}>
           <HeroSection />
         </motion.div>
-
+        <SectionDivider />
         {/* Features - wipe reveal, parent enables staggerChildren for inner items */}
         <motion.section
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
         >
-          <Suspense fallback={<ThemedFallback />}>
-            <FeaturesSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<ThemedFallback />}>
+              <FeaturesSection />
+            </Suspense>
+          </ErrorBoundary>
         </motion.section>
-
+        <SectionDivider />
         {/* Pricing - subtle elevate reveal */}
         <motion.section
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
         >
-          <Suspense fallback={<ThemedFallback />}>
-            <PricingSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<ThemedFallback />}>
+              <PricingSection />
+            </Suspense>
+          </ErrorBoundary>
         </motion.section>
-
+        <SectionDivider />
         {/* Testimonials - wipe reveal with stagger potential */}
         <motion.section
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
         >
-          <Suspense fallback={<ThemedFallback />}>
-            <TestimonialsSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<ThemedFallback />}>
+              <ProductPreviewSection
+                images={[
+                  {
+                    src: "/screens/dashboard.png",
+                    caption: "Track your daily macros at a glance",
+                  },
+                  {
+                    src: "/screens/food-entry.png",
+                    caption: "Quickly log your meals in seconds",
+                  },
+                  {
+                    src: "/screens/progress.png",
+                    caption: "Visualize your progress over time",
+                  },
+                  {
+                    src: "/screens/settings.png",
+                    caption: "Customizable goals and preferences",
+                  },
+                ]}
+              />
+            </Suspense>
+          </ErrorBoundary>
         </motion.section>
-
         {/* Final CTA - reveal and allow CTA buttons to animate using buttonReveal via data attribute if needed */}
         <motion.section
           {...inViewRevealProps}
@@ -216,9 +232,11 @@ const LandingPage: React.FC = () => {
           className="rounded-2xl"
           data-cta-reveal
         >
-          <Suspense fallback={<ThemedFallback />}>
-            <FinalCtaSection />
-          </Suspense>
+          <ErrorBoundary>
+            <Suspense fallback={<ThemedFallback />}>
+              <FinalCtaSection />
+            </Suspense>
+          </ErrorBoundary>
         </motion.section>
       </main>
 
@@ -236,14 +254,5 @@ const LandingPage: React.FC = () => {
     </div>
   );
 };
-
-export const landingItemVariants = {
-  hidden: { opacity: 0, y: 12 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 140, damping: 18 },
-  },
-} as const;
 
 export default LandingPage;

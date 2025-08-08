@@ -96,7 +96,7 @@ const PricingPage: React.FC = () => {
               >
                 <div className="mb-2 flex items-center">
                   {Array.from({ length: 5 }).map((_, index_) => (
-                    <StarIcon key={index_} className="h-5 w-5 text-warning" />
+                    <StarIcon key={index_} className=" text-warning" />
                   ))}
                 </div>
                 <p className="mb-4 text-foreground">"{testimonial.quote}"</p>
@@ -119,7 +119,7 @@ const PricingPage: React.FC = () => {
                 className="mb-4 rounded-lg border border-border/50 bg-surface/50 p-4"
               >
                 <h3 className="flex items-center text-lg font-semibold">
-                  <CircleQuestionMarkIcon className="mr-2 h-5 w-5 text-primary" />
+                  <CircleQuestionMarkIcon className="mr-2  text-primary" />
                   {faq.question}
                 </h3>
                 <p className="mt-2 ml-7 text-foreground">{faq.answer}</p>

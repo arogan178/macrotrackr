@@ -103,8 +103,8 @@ const HeroSection: React.FC = () => (
                 transition={{ duration: 0.5, delay: 0.7 + index * 0.08 }}
                 className="flex items-center space-x-3"
               >
-                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-surface">
-                  <indicator.icon className="h-5 w-5 text-primary" />
+                <div className="flex h-10 w-10 items-center justify-center rounded-full border border-border/50 bg-surface-2">
+                  <indicator.icon className=" text-primary" />
                 </div>
                 <div>
                   <h4 className="font-semibold text-foreground">
