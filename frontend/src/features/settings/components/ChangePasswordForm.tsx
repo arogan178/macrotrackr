@@ -87,6 +87,8 @@ const ChangePasswordForm = () => {
             value={currentPassword}
             onChange={setCurrentPassword}
             required
+            name="currentPassword"
+            autoComplete="current-password"
           />
           <TextField
             label="New Password"
@@ -96,6 +98,8 @@ const ChangePasswordForm = () => {
             required
             minLength={8}
             helperText="Password must be at least 8 characters long."
+            name="newPassword"
+            autoComplete="new-password"
           />
           <TextField
             label="Confirm New Password"
@@ -104,6 +108,8 @@ const ChangePasswordForm = () => {
             onChange={setConfirmPassword}
             required
             error={formError ?? undefined}
+            name="confirmPassword"
+            autoComplete="new-password"
           />
         </div>
 

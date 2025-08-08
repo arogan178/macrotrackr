@@ -59,6 +59,8 @@ function TextField({
   onKeyDown,
   id,
   ariaLabel,
+  name,
+  autoComplete,
 }: TextFieldProps & { id?: string; ariaLabel?: string }) {
   const autoId = useId();
   const inputId = id || `textfield-${autoId}`;
@@ -110,6 +112,8 @@ function TextField({
           maxLength={maxLength}
           className={inputClasses}
           required={required}
+          name={name}
+          autoComplete={autoComplete}
           aria-describedby={
             describedByIds.length > 0 ? describedByIds.join(" ") : undefined
           }

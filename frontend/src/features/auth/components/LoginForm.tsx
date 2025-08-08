@@ -73,6 +73,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           required={true}
           placeholder="your@email.com"
           maxLength={30}
+          name="email"
+          autoComplete="username"
         />
         <TextField
           label="Password"
@@ -81,6 +83,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           type="password"
           required={true}
           placeholder="••••••••"
+          name="password"
+          autoComplete="current-password"
         />
         <div className="text-right">
           <button

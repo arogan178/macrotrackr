@@ -17,6 +17,8 @@ export interface TextFieldProps extends BaseFieldProps {
   textOnly?: boolean;
   icon?: ReactNode;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  name?: string;
+  autoComplete?: string;
 }
 
 export interface DateFieldProps extends BaseFieldProps {
