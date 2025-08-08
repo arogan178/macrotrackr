@@ -47,7 +47,7 @@ export default function RecommendationsSection({
       className="rounded-lg border border-green-500/20 bg-success/10 p-4"
     >
       <div className="mb-3 flex items-center">
-        <LightningIcon className="mr-2 h-5 w-5 text-success" />
+        <LightningIcon className="mr-2  text-success" />
         <h3 className="text-md font-medium text-success">
           Personalized Action Plan
         </h3>

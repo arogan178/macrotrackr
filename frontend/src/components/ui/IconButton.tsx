@@ -68,37 +68,37 @@ const getActionConfigs = () =>
     "password-toggle": {
       icon: undefined, // Icon is always passed as prop for this variant
       className:
-        "text-foreground hover:text-foreground bg-transparent hover:bg-surface-3/40 focus:ring-gray-500",
+        "text-foreground hover:text-foreground hover:bg-surface-2 focus:ring-gray-500",
     },
     delete: {
       icon: TrashIcon,
       className:
-        "text-error hover:text-error bg-error/20 hover:bg-error/35 focus:ring-red-500",
+        "text-error hover:text-error bg-error hover:bg-error focus:ring-red-500",
     },
     edit: {
       icon: EditIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface-2/40 hover:bg-surface-3/60 focus:ring-gray-500",
+        "text-foreground hover:text-foreground  hover:bg-surface-2 focus:ring-gray-500",
     },
     close: {
       icon: CloseIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface-2/40 hover:bg-surface-3/70 focus:ring-gray-500 !rounded-full",
+        "text-foreground hover:text-foreground  hover:bg-surface-2 focus:ring-gray-500 !rounded-full",
     },
     add: {
       icon: PlusIcon,
       className:
-        "text-primary hover:text-primary bg-primary/25 hover:bg-primary/40 focus:ring-primary",
+        "text-primary hover:text-primary hover:bg-primary/40 focus:ring-primary",
     },
     more: {
       icon: MoreVerticalIcon,
       className:
-        "text-foreground hover:text-foreground bg-surface-2/40 hover:bg-surface-3/70 focus:ring-gray-500",
+        "text-foreground hover:text-foreground hover:bg-surface-3/70 focus:ring-gray-500",
     },
     info: {
       icon: InfoIcon,
       className:
-        "text-primary hover:text-primary bg-primary/25 hover:bg-primary/40 focus:ring-primary",
+        "text-primary hover:text-primary hover:bg-primary/40 focus:ring-primary",
     },
     warning: {
       icon: WarningIcon,
@@ -108,7 +108,7 @@ const getActionConfigs = () =>
     export: {
       icon: ExportIcon,
       className:
-        "text-foreground hover:text-success bg-surface-2/30 hover:bg-surface-3/50 focus:ring-emerald-500",
+        "text-foreground hover:text-success hover:bg-surface-2 focus:ring-emerald-500",
     },
     custom: {
       icon: undefined,

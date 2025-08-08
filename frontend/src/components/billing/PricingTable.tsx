@@ -58,7 +58,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {
         accessorKey: "feature",
         header: () => (
-          <div className="flex min-h-[72px] flex-col items-start justify-center bg-transparent px-5 py-4 text-base font-semibold text-foreground">
+          <div className="flex min-h-18 flex-col items-start justify-center bg-transparent px-5 py-4 text-base font-semibold text-foreground">
             <span>Feature</span>
             <span
               className="block text-transparent select-none"
@@ -80,7 +80,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {
         accessorKey: "free",
         header: () => (
-          <div className="flex min-h-[72px] flex-col items-center justify-center bg-transparent px-5 py-4 text-base font-semibold text-foreground">
+          <div className="flex min-h-18 flex-col items-center justify-center bg-transparent px-5 py-4 text-base font-semibold text-foreground">
             <span>Free</span>
             <span
               className="block text-transparent select-none"

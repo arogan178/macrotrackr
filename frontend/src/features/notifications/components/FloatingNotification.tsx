@@ -127,28 +127,28 @@ function FloatingNotification({
       border: "border-green-500/40",
       icon: "text-success",
       progress: "bg-success",
-      component: <CheckIcon className="h-5 w-5" />,
+      component: <CheckIcon className="" />,
     },
     error: {
       bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
       border: "border-red-500/40",
       icon: "text-error",
       progress: "bg-vibrant-accent",
-      component: <CloseIcon className="h-5 w-5" />,
+      component: <CloseIcon className="" />,
     },
     warning: {
       bg: "bg-gradient-to-r from-amber-800/95 to-yellow-700/95",
       border: "border-amber-500/40",
       icon: "text-amber-300",
       progress: "bg-amber-400",
-      component: <WarningIcon className="h-5 w-5" />,
+      component: <WarningIcon className="" />,
     },
     info: {
       bg: "bg-gradient-to-r from-primary/95 to-primary/95",
       border: "border-primary/40",
       icon: "text-primary",
       progress: "bg-primary",
-      component: <InfoIcon className="h-5 w-5" />,
+      component: <InfoIcon className="" />,
     },
   };
 
