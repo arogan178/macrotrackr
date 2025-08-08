@@ -56,6 +56,8 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           required={true}
           placeholder="your@email.com"
           maxLength={30}
+          name="email"
+          autoComplete="email"
         />
         <Button
           type="submit"
