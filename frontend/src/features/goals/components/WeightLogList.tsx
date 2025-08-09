@@ -1,8 +1,13 @@
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 import { useMemo, useState } from "react";
 
-import { IconButton } from "@/components/form";
-import { EmptyState, LoadingSpinner, Modal, TrashIcon } from "@/components/ui";
+import {
+  EmptyState,
+  IconButton,
+  LoadingSpinner,
+  Modal,
+  TrashIcon,
+} from "@/components/ui";
 import {
   useDeleteWeightLogEntry,
   useWeightLog,
@@ -99,9 +104,9 @@ function WeightLogList({
   // Loading state
   if (isLoading && sortedLog.length === 0) {
     return (
-      <div className="h-60 flex flex-col items-center justify-center">
+      <div className="flex h-60 flex-col items-center justify-center">
         <LoadingSpinner size="md" />
-        <p className="text-gray-400 mt-3 text-sm">Loading weight log...</p>
+        <p className="mt-3 text-sm text-foreground">Loading weight log...</p>
       </div>
     );
   }
@@ -114,7 +119,7 @@ function WeightLogList({
           title="No Weight Logged Yet"
           message="Your recorded weights will appear here."
           icon={
-            <TrashIcon className="h-12 w-12 text-gray-500" strokeWidth={1} />
+            <TrashIcon className="h-12 w-12 text-foreground" strokeWidth={1} />
           } // Placeholder icon
           className="h-full"
         />
@@ -134,16 +139,16 @@ function WeightLogList({
             return (
               <li
                 key={entry.id}
-                className="py-2 flex items-center justify-between"
+                className="flex items-center justify-between py-2"
               >
-                <div className="flex flex-col min-w-[200px] max-w-[220px]">
-                  <span className="text-gray-300 text-sm w-full block truncate">
+                <div className="flex max-w-55 min-w-50 flex-col">
+                  <span className="block w-full truncate text-sm text-foreground">
                     {/* Format timestamp only if valid */}
                     {isValidDate
                       ? format(entryDate, "MMM d, yyyy 'at' p")
                       : "Invalid Date"}
                   </span>
-                  <span className="font-semibold text-indigo-300 text-lg mt-1">
+                  <span className="mt-1 text-lg font-semibold text-primary">
                     {entry.weight.toFixed(1)} kg
                   </span>
                 </div>
@@ -170,7 +175,7 @@ function WeightLogList({
                   }
                   className={
                     (isSaving && itemToDelete?.id === entry.id) || !isValidDate
-                      ? "opacity-50 cursor-not-allowed"
+                      ? "cursor-not-allowed opacity-50"
                       : ""
                   }
                 />

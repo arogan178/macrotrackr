@@ -4,21 +4,21 @@ import React from "react";
 const blobs = [
   {
     style:
-      "top-[-100px] left-[-100px] w-[400px] h-[400px] bg-gradient-to-br from-indigo-500/30 to-purple-500/20",
+      "top-[-100px] left-[-100px] w-[400px] h-[400px] bg-gradient-to-br from-primary/30 to-purple-500/20",
     animate: { x: [0, 40, 0], y: [0, 30, 0] },
     duration: 12,
     delay: 0,
   },
   {
     style:
-      "bottom-[-120px] right-[-120px] w-[500px] h-[500px] bg-gradient-to-tr from-blue-400/20 to-indigo-400/10",
+      "bottom-[-120px] right-[-120px] w-[500px] h-[500px] bg-gradient-to-tr from-primary/20 to-primary/10",
     animate: { x: [0, -30, 0], y: [0, -40, 0] },
     duration: 16,
     delay: 2,
   },
   {
     style:
-      "top-[30%] left-[60%] w-[300px] h-[300px] bg-gradient-to-br from-purple-400/20 to-indigo-400/10",
+      "top-[30%] left-[60%] w-[300px] h-[300px] bg-gradient-to-br from-purple-400/20 to-primary/10",
     animate: { x: [0, 20, 0], y: [0, 20, 0] },
     duration: 18,
     delay: 1,

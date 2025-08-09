@@ -12,6 +12,7 @@ import {
 import { ConflictError, AuthenticationError } from "../../lib/errors";
 import crypto from "crypto";
 import { emailService } from "../../lib/email-service";
+import { config } from "../../config";
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
@@ -114,9 +115,37 @@ export const authRoutes = (app: Elysia) =>
             lastName: userData.lastName,
           });
 
-          // Set JWT as cookie
-          set.headers["Set-Cookie"] =
-            `jwt=${token}; Path=/; HttpOnly; SameSite=Lax`;
+          // Compute cookie attributes
+          const isProduction = config.NODE_ENV === "production";
+          const maxAgeSeconds = (() => {
+            const match = /^([0-9]+)([smhd])$/.exec(config.JWT_EXP);
+            if (!match) return 60 * 60 * 24 * 30; // default 30d
+            const value = Number(match[1]);
+            const unit = match[2];
+            switch (unit) {
+              case "s":
+                return value;
+              case "m":
+                return value * 60;
+              case "h":
+                return value * 60 * 60;
+              case "d":
+              default:
+                return value * 60 * 60 * 24;
+            }
+          })();
+          const cookieFlags = [
+            `Path=/`,
+            `HttpOnly`,
+            `SameSite=Lax`,
+            `Max-Age=${maxAgeSeconds}`,
+            isProduction ? "Secure" : undefined,
+          ]
+            .filter(Boolean)
+            .join("; ");
+
+          // Set JWT as persistent cookie
+          set.headers["Set-Cookie"] = `jwt=${token}; ${cookieFlags}`;
 
           return { token };
         },
@@ -159,9 +188,35 @@ export const authRoutes = (app: Elysia) =>
             lastName: user.last_name,
           });
 
-          // Set JWT as cookie
-          set.headers["Set-Cookie"] =
-            `jwt=${token}; Path=/; HttpOnly; SameSite=Lax`;
+          // Compute cookie attributes
+          const isProduction = config.NODE_ENV === "production";
+          const maxAgeSeconds = (() => {
+            const match = /^([0-9]+)([smhd])$/.exec(config.JWT_EXP);
+            if (!match) return 60 * 60 * 24 * 30; // default 30d
+            const value = Number(match[1]);
+            const unit = match[2];
+            switch (unit) {
+              case "s":
+                return value;
+              case "m":
+                return value * 60;
+              case "h":
+                return value * 60 * 60;
+              case "d":
+              default:
+                return value * 60 * 60 * 24;
+            }
+          })();
+          const cookieFlags = [
+            `Path=/`,
+            `HttpOnly`,
+            `SameSite=Lax`,
+            `Max-Age=${maxAgeSeconds}`,
+            isProduction ? "Secure" : undefined,
+          ]
+            .filter(Boolean)
+            .join("; ");
+          set.headers["Set-Cookie"] = `jwt=${token}; ${cookieFlags}`;
 
           return { token };
         },

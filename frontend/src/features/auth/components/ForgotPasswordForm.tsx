@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { EmailIcon } from "@/components/ui";
+import { CardContainer, TextField } from "@/components/form";
+import { BackIcon, Button, EmailIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useForgotPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
@@ -37,13 +37,13 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 mb-4 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <EmailIcon className="w-8 h-8 text-white" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary shadow-primary/30 shadow-primary">
+          <EmailIcon className="h-8 w-8 text-foreground" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+        <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent">
           Forgot Password
         </h1>
-        <p className="mt-2 text-gray-400">
+        <p className="mt-2 text-foreground">
           Enter your email to get a reset link
         </p>
       </div>
@@ -56,25 +56,28 @@ function ForgotPasswordForm({ onSwitchToLogin }: ForgotPasswordFormProps) {
           required={true}
           placeholder="your@email.com"
           maxLength={30}
+          name="email"
+          autoComplete="email"
         />
-        <FormButton
+        <Button
           type="submit"
           autoLoadingFeature="auth"
           loadingText="Sending..."
           className="w-full"
         >
           Send Reset Link
-        </FormButton>
+        </Button>
       </form>
-      <div className="text-right mt-4">
-        <FormButton
+      <div className="mt-4 text-right">
+        <Button
+          text="Back to Login"
           type="button"
           variant="ghost"
-          className="text-sm"
+          className="text-sm text-muted hover:text-foreground"
           onClick={onSwitchToLogin}
-        >
-          Back to Login
-        </FormButton>
+          icon={<BackIcon />}
+          iconPosition="left"
+        />
       </div>
     </CardContainer>
   );

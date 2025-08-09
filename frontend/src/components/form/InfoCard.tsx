@@ -1,25 +1,29 @@
 import { memo } from "react";
 
+import type { InfoCardProps } from "@/components/form/Types";
 import { COLOR_MAP } from "@/components/utils/Constants";
-import type { InfoCardProps } from "@/components/utils/Types";
 
 function InfoCard({
   title,
   description,
-  color = "indigo",
+  color = "accent",
   icon,
   children,
 }: InfoCardProps) {
-  const { bg, border, text, dot } = COLOR_MAP[color];
+  // Narrow the color key to the known COLOR_MAP keys to satisfy TypeScript
+  const colorKey = (
+    color in COLOR_MAP ? color : "accent"
+  ) as keyof typeof COLOR_MAP;
+  const { bg, border, text, dot } = COLOR_MAP[colorKey];
 
   return (
-    <div className={`bg-gradient-to-br ${bg} p-4 rounded-xl border ${border}`}>
-      <div className="flex items-center gap-2 mb-2">
-        {!icon && <div className={`w-2 h-2 rounded-full ${dot}`}></div>}
+    <div className={`rounded-xl border bg-surface-2 p-4 ${border}`}>
+      <div className="mb-2 flex items-center gap-2">
+        {!icon && <div className={`h-2 w-2 rounded-full ${dot}`}></div>}
         {icon && <div className={text}>{icon}</div>}
         <h4 className={`${text} font-medium`}>{title}</h4>
       </div>
-      {description && <p className="text-sm text-gray-400">{description}</p>}
+      {description && <p className="text-sm text-foreground">{description}</p>}
       {children}
     </div>
   );

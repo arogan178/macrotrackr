@@ -21,6 +21,10 @@ export interface UnifiedInsightsProps {
   isLoading: boolean;
   showNoDataMessage?: boolean;
   macroTarget?: MacroTargetSettings | undefined;
+  // Explicit denominator for selected range (e.g., 7/30/90 or custom inclusive count)
+  denominatorDays?: number;
+  // Optional per-day series for the selected range to compute daily tracking accurately
+  dailySeriesForRange?: AggregatedDataPoint[];
 }
 
 export interface MacroBalanceResult {
