@@ -5,6 +5,7 @@ import ReactDOM from "react-dom/client";
 
 import AppRouter from "./AppRouter";
 import { queryClient } from "./lib/queryClient";
+import { registerServiceWorker } from "./sw-register";
 
 ReactDOM.createRoot(document.querySelector("#root")!).render(
   <React.StrictMode>
@@ -17,3 +18,6 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
     </QueryClientProvider>
   </React.StrictMode>,
 );
+
+// Ensure PWA service worker is registered in production so updates can clean stale caches
+registerServiceWorker();
