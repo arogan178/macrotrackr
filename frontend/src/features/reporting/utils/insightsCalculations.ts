@@ -32,20 +32,31 @@ const NUTRIENT_DENSITY_SCORE_PROTEIN_MULT = 100;
 const SCORE_COLOR_GREEN = 70;
 const SCORE_COLOR_YELLOW = 40;
 
-export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
+export function calculateConsistencyScore(
+  data: AggregatedDataPoint[],
+  denominatorDays?: number,
+): number {
   if (!data?.length) return 0;
 
+  // Frequency: proportion of days with data over the selected window
+  const daysWithData = data.filter((d) => d.calories > 0).length;
+  const denominator =
+    typeof denominatorDays === "number" && denominatorDays > 0
+      ? denominatorDays
+      : data.length;
   const frequencyScore =
-    Math.min(data.length / 14, 1) * CONSISTENCY_FREQUENCY_WEIGHT;
-  if (data.length <= 1) return frequencyScore;
+    Math.min(daysWithData / Math.max(denominator, 1), 1) *
+    CONSISTENCY_FREQUENCY_WEIGHT;
+  if (data.length <= 1) return Math.round(frequencyScore);
 
-  const calories = data.map((d) => d.calories).filter(Boolean);
-  if (calories.length <= 1) return frequencyScore;
+  // Variation: lower variation (CV) yields higher score
+  const calories = data.map((d) => d.calories).filter((v) => v > 0);
+  if (calories.length <= 1) return Math.round(frequencyScore);
 
   const avg = calories.reduce((sum, value) => sum + value, 0) / calories.length;
   const standardDevelopment = calculateStandardDeviation(calories);
   const coefficientOfVariation = standardDevelopment / avg;
-  const consistencyScore = Math.max(
+  const variationScore = Math.max(
     0,
     CONSISTENCY_SCORE_WEIGHT *
       (1 -
@@ -53,7 +64,7 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
           CONSISTENCY_CV_MAX),
   );
 
-  return Math.round(frequencyScore + consistencyScore);
+  return Math.round(frequencyScore + variationScore);
 }
 
 export function calculateMacroBalance(
