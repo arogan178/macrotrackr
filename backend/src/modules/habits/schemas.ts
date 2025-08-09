@@ -2,10 +2,18 @@
 import { t } from "elysia";
 
 // Define the accent color union type
+// Expanded to support all colors used by the frontend HabitForm
 const AccentColor = t.Union([
   t.Literal("indigo"),
   t.Literal("blue"),
+  t.Literal("cyan"),
+  t.Literal("teal"),
   t.Literal("green"),
+  t.Literal("lime"),
+  t.Literal("yellow"),
+  t.Literal("orange"),
+  t.Literal("red"),
+  t.Literal("pink"),
   t.Literal("purple"),
 ]);
 

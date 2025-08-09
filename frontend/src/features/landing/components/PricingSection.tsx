@@ -3,13 +3,13 @@ import React from "react";
 import CustomPricingCards from "./CustomPricingCards";
 
 const PricingSection: React.FC = () => (
-  <section className="relative z-10 py-24 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-7xl mx-auto">
-      <div className="text-center mb-16">
-        <h2 className="text-4xl sm:text-5xl font-bold bg-gradient-to-r from-white to-slate-300 text-transparent bg-clip-text mb-6 pb-2">
+  <section className="relative z-10 px-4 py-24 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-6xl">
+      <div className="mb-16 text-center">
+        <h2 className="mb-6 text-4xl font-bold text-foreground sm:text-5xl">
           Choose Your Plan
         </h2>
-        <p className="text-xl text-slate-400 max-w-3xl mx-auto">
+        <p className="mx-auto max-w-3xl text-xl text-foreground/90">
           Start free and unlock powerful features when you're ready. No hidden
           fees, cancel anytime.
         </p>

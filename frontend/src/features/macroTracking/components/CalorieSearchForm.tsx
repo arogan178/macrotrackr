@@ -1,10 +1,19 @@
 import { useState } from "react";
 
 import { TextField } from "@/components/form";
-import FormButton from "@/components/form/FormButton";
-import { ArrowRightIcon, SearchIcon } from "@/components/ui";
+import { ArrowRightIcon, Button, SearchIcon } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { apiService } from "@/utils/apiServices";
+
+// Helper moved to module scope to satisfy unicorn/consistent-function-scoping
+function getMetricServing(quantity: number, unit: string) {
+  if (unit === "oz")
+    return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
+  if (unit === "lbs")
+    return { quantity: +(quantity * 0.453_592).toFixed(3), unit: "kg" };
+  // Keep liters and other units as-is
+  return { quantity, unit };
+}
 
 type CalorieSearchProps = {
   onResult: (macros: {
@@ -72,15 +81,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     }
   };
 
-  // Convert to metric for display and selection
-  const getMetricServing = (quantity: number, unit: string) => {
-    if (unit === "oz")
-      return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
-    if (unit === "lbs")
-      return { quantity: +(quantity * 0.453_592).toFixed(3), unit: "kg" };
-    // If L, keep as L
-    return { quantity, unit };
-  };
+  // Convert to metric for display and selection (moved to module scope)
 
   const handleSelect = (item: FoodResult) => {
     let quantity = item.servingQuantity;
@@ -111,7 +112,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <div className="relative flex-1">
           <TextField
             id="calorie-search-input"
@@ -120,7 +121,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="w-5 h-5" />}
+            icon={<SearchIcon className=" text-muted" />}
             maxLength={50}
             error={error}
           />
@@ -130,7 +131,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             </div>
           )}
           {showResults && results.length > 0 && (
-            <div className="absolute z-10 bg-white border border-gray-200 rounded shadow-md mt-2 w-full max-h-64 overflow-y-auto">
+            <div className="absolute z-10 mt-2 max-h-64 w-full overflow-y-auto rounded border border-border bg-surface shadow-surface">
               {results
                 .filter(
                   (item) =>
@@ -170,13 +171,13 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
                     <button
                       key={index}
                       className={
-                        "w-full text-left px-4 py-2 bg-white text-gray-900 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none border-b border-gray-100 last:border-b-0"
+                        "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
                       }
                       onClick={() => handleSelect(item)}
                       type="button"
                     >
                       <div className="font-medium">{item.name}</div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-foreground">
                         {quantityDisplay ? `${quantityDisplay} | ` : ""}
                         {calories === undefined
                           ? ""
@@ -185,7 +186,7 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
                         {item.carbs.toFixed(1)}g, Fats: {item.fats.toFixed(1)}g
                       </div>
                       {item.categories && (
-                        <div className="text-xs text-gray-400">
+                        <div className="text-xs text-foreground">
                           {item.categories}
                         </div>
                       )}
@@ -196,18 +197,18 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           )}
         </div>
         <div className="flex items-end">
-          <FormButton
+          <Button
             type="button"
             onClick={handleSearch}
             isLoading={loading}
             disabled={loading || !query}
             text="Search"
-            icon={<ArrowRightIcon className="w-4 h-4 ml-1" />}
+            icon={<ArrowRightIcon className="ml-1 h-4 w-4" />}
             iconPosition="right"
             ariaLabel="Search for food"
             buttonSize="lg"
             variant="primary"
-            className="min-w-[160px] px-6 py-2.5"
+            className="min-w-40 px-6 py-2.5"
           />
         </div>
       </div>

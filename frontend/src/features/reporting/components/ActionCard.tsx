@@ -1,3 +1,5 @@
+import { CardContainer } from "@/components/form";
+
 import type { ActionCardProps as ActionCardProps } from "../types/insightsTypes";
 
 export default function ActionCard({
@@ -7,12 +9,12 @@ export default function ActionCard({
   bgColor,
 }: ActionCardProps) {
   return (
-    <div className="rounded-lg bg-gray-800/50 p-3 border border-gray-700/50">
-      <div className="flex items-center mb-2">
-        <div className={`${bgColor} rounded-full p-1.5 mr-2`}>{icon}</div>
-        <h4 className="text-sm font-medium text-gray-300">{title}</h4>
+    <CardContainer className="bg-surface-2 p-3">
+      <div className="mb-4 flex items-center">
+        <div className={`${bgColor} mr-2 rounded-full p-1.5`}>{icon}</div>
+        <h4 className="text-sm font-medium text-foreground">{title}</h4>
       </div>
-      <p className="text-gray-300 text-sm">{message}</p>
-    </div>
+      <p className="text-sm text-foreground">{message}</p>
+    </CardContainer>
   );
 }

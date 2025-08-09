@@ -25,6 +25,14 @@ export const trustIndicators = [
     color: "purple",
   },
 ];
+export const landingItemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { type: "spring", stiffness: 140, damping: 18 },
+  },
+} as const;
 
 export const trustElements = [
   { text: "Always Free Version" },
