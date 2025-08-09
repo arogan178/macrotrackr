@@ -38,11 +38,10 @@
  */
 import { memo, useId, useState } from "react";
 
+import { formStyles } from "@/components/form/Styles";
+import type { TextFieldProps } from "@/components/form/Types";
 import { EyeIcon, EyeSlashIcon } from "@/components/ui";
-import { formStyles } from "@/components/utils/Styles";
-import type { TextFieldProps } from "@/components/utils/Types";
-
-import IconButton from "./IconButton";
+import IconButton from "@/components/ui/IconButton";
 
 function TextField({
   label,
@@ -60,6 +59,8 @@ function TextField({
   onKeyDown,
   id,
   ariaLabel,
+  name,
+  autoComplete,
 }: TextFieldProps & { id?: string; ariaLabel?: string }) {
   const autoId = useId();
   const inputId = id || `textfield-${autoId}`;
@@ -72,6 +73,7 @@ function TextField({
     const newValue = event.target.value;
 
     if (textOnly && newValue !== "") {
+      // Use regex replace compatible with broader TS lib targets
       const textOnlyValue = newValue.replaceAll(/[^\sA-Za-z]/g, "");
       onChange(textOnlyValue);
     } else {
@@ -90,7 +92,7 @@ function TextField({
     error ? formStyles.input.error : formStyles.input.normal
   } ${type === "password" ? formStyles.input.withPassword : ""} ${
     icon ? formStyles.input.withIcon : ""
-  }`;
+  } placeholder:text-muted`;
 
   return (
     <div className={formStyles.container}>
@@ -110,6 +112,8 @@ function TextField({
           maxLength={maxLength}
           className={inputClasses}
           required={required}
+          name={name}
+          autoComplete={autoComplete}
           aria-describedby={
             describedByIds.length > 0 ? describedByIds.join(" ") : undefined
           }
@@ -122,7 +126,7 @@ function TextField({
             ariaLabel={showPassword ? "Hide password" : "Show password"}
             buttonSize="sm"
             icon={showPassword ? <EyeSlashIcon /> : <EyeIcon />}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-300 focus:outline-none pr-2"
+            className="absolute top-1/2 right-3 -translate-y-1/2 pr-2 text-foreground hover:text-foreground focus:outline-none"
           />
         )}
       </div>

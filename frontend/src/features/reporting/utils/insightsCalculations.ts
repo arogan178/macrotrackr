@@ -1,3 +1,5 @@
+import type { MacroTargetSettings } from "@/types/macro";
+
 import {
   DEFAULT_MACRO_TARGET,
   TREND_THRESHOLD,
@@ -7,7 +9,6 @@ import type {
   DataQualityResult,
   MacroBalanceResult,
   MacroDensityResult,
-  MacroTargetSettings,
   NutritionAverage,
   TrendResult,
 } from "../types/insightsTypes";
@@ -31,20 +32,31 @@ const NUTRIENT_DENSITY_SCORE_PROTEIN_MULT = 100;
 const SCORE_COLOR_GREEN = 70;
 const SCORE_COLOR_YELLOW = 40;
 
-export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
+export function calculateConsistencyScore(
+  data: AggregatedDataPoint[],
+  denominatorDays?: number,
+): number {
   if (!data?.length) return 0;
 
+  // Frequency: proportion of days with data over the selected window
+  const daysWithData = data.filter((d) => d.calories > 0).length;
+  const denominator =
+    typeof denominatorDays === "number" && denominatorDays > 0
+      ? denominatorDays
+      : data.length;
   const frequencyScore =
-    Math.min(data.length / 14, 1) * CONSISTENCY_FREQUENCY_WEIGHT;
-  if (data.length <= 1) return frequencyScore;
+    Math.min(daysWithData / Math.max(denominator, 1), 1) *
+    CONSISTENCY_FREQUENCY_WEIGHT;
+  if (data.length <= 1) return Math.round(frequencyScore);
 
-  const calories = data.map((d) => d.calories).filter(Boolean);
-  if (calories.length <= 1) return frequencyScore;
+  // Variation: lower variation (CV) yields higher score
+  const calories = data.map((d) => d.calories).filter((v) => v > 0);
+  if (calories.length <= 1) return Math.round(frequencyScore);
 
   const avg = calories.reduce((sum, value) => sum + value, 0) / calories.length;
   const standardDevelopment = calculateStandardDeviation(calories);
   const coefficientOfVariation = standardDevelopment / avg;
-  const consistencyScore = Math.max(
+  const variationScore = Math.max(
     0,
     CONSISTENCY_SCORE_WEIGHT *
       (1 -
@@ -52,7 +64,7 @@ export function calculateConsistencyScore(data: AggregatedDataPoint[]): number {
           CONSISTENCY_CV_MAX),
   );
 
-  return Math.round(frequencyScore + consistencyScore);
+  return Math.round(frequencyScore + variationScore);
 }
 
 export function calculateMacroBalance(
@@ -204,11 +216,14 @@ export function calculateTrend(
 
 export function calculateDataQuality(
   data: AggregatedDataPoint[],
+  totalDaysOverride?: number,
 ): DataQualityResult {
+  // If no data at all, still respect a provided override for denominator
   if (!data?.length) {
+    const totalDaysInPeriod = totalDaysOverride ?? 0;
     return {
       daysLogged: 0,
-      totalDaysInPeriod: 0,
+      totalDaysInPeriod,
       completionRate: 0,
       message:
         "Ready to start your nutrition journey? Begin logging your meals to track your progress!",
@@ -216,8 +231,17 @@ export function calculateDataQuality(
   }
 
   const daysWithData = data.filter((d) => d.calories > 0).length;
-  const totalDaysInPeriod = data.length;
-  const completionRate = Math.round((daysWithData / totalDaysInPeriod) * 100);
+
+  // Prefer explicit denominator if provided (e.g., 7/30/90 or custom inclusive range)
+  const totalDaysInPeriod =
+    typeof totalDaysOverride === "number" && totalDaysOverride > 0
+      ? totalDaysOverride
+      : data.length;
+
+  const completionRate =
+    totalDaysInPeriod > 0
+      ? Math.round((daysWithData / totalDaysInPeriod) * 100)
+      : 0;
 
   const message =
     completionRate >= DATA_QUALITY_OUTSTANDING
@@ -271,8 +295,8 @@ export function calculateMacroDensity(
 
 export function getScoreColor(score: number): string {
   return score > SCORE_COLOR_GREEN
-    ? "bg-green-400"
+    ? "bg-success"
     : score > SCORE_COLOR_YELLOW
-      ? "bg-yellow-400"
-      : "bg-red-400";
+      ? "bg-warning"
+      : "bg-vibrant-accent";
 }

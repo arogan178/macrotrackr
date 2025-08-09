@@ -4,12 +4,12 @@ interface MacroNutrientProps {
   label: string;
   current: number;
   target: number;
-  color: "red" | "blue" | "green";
+  color: "protein" | "carbs" | "fats";
 }
 
 function MacroNutrient({ label, current, target, color }: MacroNutrientProps) {
   return (
-    <div className="bg-gray-700/30 rounded-lg p-2">
+    <div className="rounded-lg bg-surface-2 p-2">
       <MacroIndicator
         name={label}
         value={current}

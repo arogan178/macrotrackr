@@ -1,10 +1,10 @@
 import { memo } from "react";
 
-import { formStyles } from "@/components/utils/Styles";
-import type { NumberFieldProps } from "@/components/utils/Types"; // Assuming NumberFieldProps is defined here
+import { formStyles } from "@/components/form/Styles";
+import type { NumberFieldProps } from "@/components/form/types";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
 
-// Update NumberFieldProps in ../utils/types.ts if needed to include 'disabled'
+// Update NumberFieldProps in ../form/types.ts if needed to include 'disabled'
 // interface NumberFieldProps {
 //   // ... other props
 //   disabled?: boolean;
@@ -34,13 +34,15 @@ function NumberField({
 
     // Handle empty input properly
     if (value_ === "") {
-      onChange();
+      onChange(undefined as unknown as number);
       return;
     }
 
     // Check if it's a valid number pattern
     if (/^-?\d*\.?\d*$/.test(value_)) {
-      if (maxDigits && value_.replaceAll(/\D/g, "").length > maxDigits) {
+      // Use replace for broader runtime compatibility instead of replaceAll
+      const digitsOnlyLength = value_.replaceAll(/\D/g, "").length;
+      if (maxDigits && digitsOnlyLength > maxDigits) {
         return;
       }
 
@@ -86,8 +88,8 @@ function NumberField({
   const inputClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
   } ${formStyles.input.numberInput} ${unit ? formStyles.input.withUnit : ""} ${
-    disabled ? formStyles.input.disabled : "" // Add disabled class
-  }`;
+    disabled ? formStyles.input.disabled : ""
+  } placeholder:text-muted`;
 
   return (
     <div className={formStyles.container}>
@@ -111,7 +113,9 @@ function NumberField({
           disabled={disabled} // Pass disabled prop to the input element
           aria-describedby={helperText ? `${label}-helper` : undefined} // Add aria-describedby
         />
-        {unit && <div className={formStyles.unitContainer}>{unit}</div>}
+        {unit && (
+          <div className={`${formStyles.unitContainer} text-muted`}>{unit}</div>
+        )}
       </div>
       {helperText && (
         <p id={`${label}-helper`} className={formStyles.helper}>

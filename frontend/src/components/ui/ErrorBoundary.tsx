@@ -1,7 +1,6 @@
 import { Component, ReactNode } from "react";
 
-import { FormButton } from "@/components/form";
-import { WarningIcon } from "@/components/ui";
+import { Button, WarningIcon } from "@/components/ui";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 interface ErrorBoundaryProps {
@@ -66,27 +65,27 @@ export class ErrorBoundary extends Component<
       // You can render any custom fallback UI
       return (
         this.props.fallback || (
-          <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
-            <div className="bg-gray-800 p-6 rounded-xl shadow-2xl max-w-lg w-full border border-gray-700">
-              <div className="text-red-400 mb-4">
-                <WarningIcon className="w-12 h-12 mx-auto mb-3" />
-                <h2 className="text-xl font-bold text-center text-white mb-1">
+          <div className="flex min-h-screen items-center justify-center bg-surface p-4">
+            <div className="w-full max-w-lg rounded-xl border border-border bg-surface p-6 shadow-modal">
+              <div className="mb-4 text-vibrant-accent">
+                <WarningIcon className="mx-auto mb-3 h-12 w-12" />
+                <h2 className="mb-1 text-center text-xl font-bold text-foreground">
                   {this.state.isQueryError
                     ? "Data Loading Error"
                     : "Something went wrong"}
                 </h2>
-                <p className="text-center text-gray-400">
+                <p className="text-center text-foreground">
                   {getErrorMessage(this.state.error)}
                 </p>
                 {this.state.isQueryError && (
-                  <p className="text-center text-gray-500 text-sm mt-2">
+                  <p className="mt-2 text-center text-sm text-foreground">
                     There was a problem loading your data. Please try again.
                   </p>
                 )}
               </div>
 
               <div className="flex justify-center space-x-3">
-                <FormButton
+                <Button
                   onClick={() => {
                     this.setState({
                       hasError: false,
@@ -96,18 +95,18 @@ export class ErrorBoundary extends Component<
                   }}
                   ariaLabel="Try again"
                   variant="secondary"
-                  className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  className="rounded-lg bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
                 >
                   Try Again
-                </FormButton>
-                <FormButton
+                </Button>
+                <Button
                   onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-medium transition-colors duration-200"
+                  className="rounded-lg bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
                 >
                   Reload page
-                </FormButton>
+                </Button>
               </div>
             </div>
           </div>

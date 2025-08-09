@@ -2,11 +2,10 @@ import {
   CardContainer,
   DateField,
   Dropdown,
-  FormButton,
   NumberField,
   TextField,
 } from "@/components/form";
-import { UserIcon } from "@/components/ui";
+import { Button, UserIcon } from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
@@ -69,23 +68,23 @@ export default function ProfileForm({
     <CardContainer className="p-6 sm:p-8">
       <form onSubmit={onSubmit} className="space-y-8">
         {/* Header section to match BillingForm pattern */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
+        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
-            <div className="p-3 bg-gradient-to-br from-indigo-400/20 to-indigo-500/20 rounded-xl mr-4">
-              <UserIcon className="w-7 h-7 text-indigo-400 flex-shrink-0" />
+            <div className="mr-4 rounded-xl bg-gradient-to-br from-primary/20 to-primary/20 p-3">
+              <UserIcon className="h-7 w-7 flex-shrink-0 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold text-gray-100 truncate">
+              <h3 className="truncate text-xl font-bold text-foreground">
                 Profile Information
               </h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="mt-1 text-sm text-foreground">
                 Update your personal details and preferences
               </p>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <TextField
             label="First Name"
             value={settings.firstName || ""}
@@ -176,7 +175,7 @@ export default function ProfileForm({
 
         {/* Submit button section */}
         <div className="mt-8 flex justify-end">
-          <FormButton
+          <Button
             type="submit"
             isLoading={isSaving}
             disabled={!hasChanges || Object.keys(formErrors).length > 0}

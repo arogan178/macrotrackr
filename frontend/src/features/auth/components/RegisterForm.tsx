@@ -18,13 +18,15 @@ function RegisterForm() {
   const [error, setError] = useState<string | undefined>();
 
   // Use new loading state hooks
-  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
-  const { handleMutationError, handleMutationSuccess } =
-    useMutationErrorHandler({
-      onError: (message) => setError(message),
-      onSuccess: (message) =>
-        console.log("Registration step succeeded:", message),
-    });
+  const { isLoading: _isAuthLoading } = useFeatureLoading("auth");
+  const {
+    handleMutationError: _handleMutationError,
+    handleMutationSuccess: _handleMutationSuccess,
+  } = useMutationErrorHandler({
+    onError: (message) => setError(message),
+    onSuccess: (message) =>
+      console.log("Registration step succeeded:", message),
+  });
 
   // Reset registration data when component unmounts
   useEffect(() => {
@@ -67,16 +69,16 @@ function RegisterForm() {
   return (
     <CardContainer className="p-8">
       <div className="mb-6">
-        <div className="flex items-center mb-6">
+        <div className="mb-6 flex items-center">
           <StepIndicator
             currentStep={register.step}
             steps={REGISTRATION_STEPS}
           />
         </div>
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+        <h2 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-2xl font-bold text-transparent">
           {stepTitles[register.step as keyof typeof stepTitles]}
         </h2>
-        <p className="mt-1 text-gray-400 text-sm">
+        <p className="mt-1 text-sm text-foreground">
           {stepDescriptions[register.step as keyof typeof stepDescriptions]}
         </p>
       </div>
@@ -91,7 +93,7 @@ function RegisterForm() {
       )}
 
       {/* Form content container with fixed height to prevent layout shifts */}
-      <div className="relative min-h-[420px] flex flex-col">
+      <div className="relative flex min-h-105 flex-col">
         <div className="flex-1">{renderCurrentStep()}</div>
       </div>
     </CardContainer>

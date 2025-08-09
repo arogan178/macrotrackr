@@ -1,4 +1,7 @@
+// src/features/macroTracking/components/DailySummaryPanel.tsx
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
@@ -61,9 +64,13 @@ export default function DailySummary({
   );
 
   // --- Completion percentages ---
-  function percent(actual: number, target: number) {
-    if (!target) return 0;
-    return Math.min(100, Math.round((actual / target) * 100) || 0);
+  // Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
+  function percent(actual: number, targetValue: number) {
+    if (!targetValue) return 0;
+    const ratio = actual / targetValue;
+    const pct = Math.floor(ratio * 100);
+    // Clamp to [0, 100]
+    return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
   }
   const proteinCompletionPercent = percent(
     safeTotal.protein,
@@ -95,12 +102,10 @@ export default function DailySummary({
       calories: proteinCalories,
       targetPercent: target.proteinPercentage,
       actualPercent: proteinPercent,
-      color: "bg-green-500",
-      textColor: "text-green-400",
-      borderColor: "border-green-500/20",
-      gradientFrom: "from-green-900/30",
-      barColor: "bg-green-500/80",
-      targetBarColor: "bg-green-700/30",
+      color: "bg-protein",
+      textColor: "text-protein",
+      borderColor: "border-protein/20",
+      gradientFrom: "from-protein/30",
       completionPercent: proteinCompletionPercent,
     },
     {
@@ -110,12 +115,10 @@ export default function DailySummary({
       calories: carbsCalories,
       targetPercent: target.carbsPercentage,
       actualPercent: carbsPercent,
-      color: "bg-blue-500",
-      textColor: "text-blue-400",
-      borderColor: "border-blue-500/20",
-      gradientFrom: "from-blue-900/30",
-      barColor: "bg-blue-500/80",
-      targetBarColor: "bg-blue-700/30",
+      color: "bg-carbs",
+      textColor: "text-carbs",
+      borderColor: "border-carbs/20",
+      gradientFrom: "from-carbs/30",
       completionPercent: carbsCompletionPercent,
     },
     {
@@ -125,35 +128,33 @@ export default function DailySummary({
       calories: fatsCalories,
       targetPercent: target.fatsPercentage,
       actualPercent: fatsPercent,
-      color: "bg-red-500",
-      textColor: "text-red-400",
-      borderColor: "border-red-500/20",
-      gradientFrom: "from-red-900/30",
-      barColor: "bg-red-500/80",
-      targetBarColor: "bg-red-700/30",
+      color: "bg-fats",
+      textColor: "text-fats",
+      borderColor: "border-fats/20",
+      gradientFrom: "from-fats/30",
       completionPercent: fatsCompletionPercent,
     },
   ];
 
   return (
-    <div className="bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden h-full">
-      <div className="p-6 flex flex-col h-full">
-        <div className="bg-gray-900/50 rounded-xl p-4 mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-semibold text-gray-200">
+    <CardContainer className="h-full">
+      <div className="flex h-full flex-col p-6">
+        <div className="mb-6 rounded-xl bg-surface-2 p-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h2 className="text-lg font-semibold text-foreground">
               Today's Summary
-            </h2>{" "}
+            </h2>
             <div className="text-right">
-              <div className="text-2xl font-bold text-white">
+              <div className="text-2xl font-bold text-foreground">
                 <AnimatedNumber
                   value={totalCalories}
                   toFixedValue={0}
                   duration={0.8}
                 />
               </div>
-              <div className="text-xs text-gray-400">
+              <div className="text-xs text-foreground">
                 <span>of </span>
-                <span className="font-medium text-gray-300">
+                <span className="font-medium text-foreground">
                   <AnimatedNumber
                     value={dailyCalorieTarget}
                     toFixedValue={0}
@@ -162,7 +163,7 @@ export default function DailySummary({
                 </span>
                 <span> kcal</span>
 
-                <span className="ml-1 font-medium text-indigo-400">
+                <span className="ml-1 font-medium text-vibrant-accent">
                   (
                   <AnimatedNumber
                     value={calorieCompletionPercent}
@@ -176,15 +177,13 @@ export default function DailySummary({
             </div>
           </div>
 
-          {/* Calories progress bar */}
           <ProgressBar
             progress={calorieCompletionPercent}
-            color="indigo"
-            height="md"
+            color="accent"
+            height="lg"
             className="mb-4"
           />
 
-          {/* Using shared MacroTargetBar component with corrected target values */}
           <MacroTargetBar
             macros={{
               protein: proteinCalories,
@@ -193,7 +192,6 @@ export default function DailySummary({
             }}
           />
 
-          {/* Using shared MacroTargetLegend component with corrected percentage values */}
           <MacroTargetLegend
             macros={{
               protein: safeTotal.protein,
@@ -208,17 +206,17 @@ export default function DailySummary({
           {macroData.map((macro) => (
             <div
               key={macro.name}
-              className={`bg-gradient-to-br ${macro.gradientFrom} to-gray-800/10 p-4 rounded-xl border ${macro.borderColor}`}
+              className={`bg-gradient-to-br ${macro.gradientFrom} rounded-xl border to-gray-800/10 p-4 ${macro.borderColor}`}
             >
-              <div className="flex items-center justify-between mb-2">
+              <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${macro.color}`}></div>
+                  <div className={`h-2 w-2 rounded-full ${macro.color}`}></div>
                   <h3 className={`${macro.textColor} text-sm font-medium`}>
                     {macro.name}
                   </h3>
-                </div>{" "}
+                </div>
                 <div className="text-right">
-                  <span className="text-sm font-bold text-white">
+                  <span className="text-sm font-bold text-foreground">
                     <AnimatedNumber
                       value={macro.grams}
                       toFixedValue={0}
@@ -226,8 +224,8 @@ export default function DailySummary({
                       duration={0.7}
                     />
                   </span>
-                  <span className="text-xs text-gray-400 ml-1">
-                    /{" "}
+                  <span className="ml-1 text-xs text-foreground">
+                    /
                     <AnimatedNumber
                       value={macro.targetGrams}
                       toFixedValue={0}
@@ -237,19 +235,12 @@ export default function DailySummary({
                   </span>
                 </div>
               </div>
-              {/* Progress toward target grams */}
               <ProgressBar
                 progress={macro.completionPercent}
-                color={
-                  macro.name.toLowerCase() === "protein"
-                    ? "green"
-                    : macro.name.toLowerCase() === "carbs"
-                      ? "blue"
-                      : "red"
-                }
+                color={macro.name.toLowerCase() as "protein" | "carbs" | "fats"}
                 height="md"
                 className="mb-3"
-              />{" "}
+              />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className={`text-xs ${macro.textColor}`}>
@@ -276,6 +267,6 @@ export default function DailySummary({
           ))}
         </div>
       </div>
-    </div>
+    </CardContainer>
   );
 }

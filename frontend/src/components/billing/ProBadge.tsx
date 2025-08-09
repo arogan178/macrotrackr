@@ -15,7 +15,7 @@ const ProBadge: React.FC<ProBadgeProps> = memo(function ProBadge({
 }) {
   return (
     <span
-      className={`inline-block bg-yellow-400 text-xs text-black font-bold px-2 py-0.5 rounded uppercase align-middle ml-1 ${className}`.trim()}
+      className={`inline-block bg-vibrant-accent text-xs text-foreground font-bold px-2 py-0.5 rounded uppercase align-middle ml-1 ${className}`.trim()}
       aria-label="Pro feature"
     >
       PRO

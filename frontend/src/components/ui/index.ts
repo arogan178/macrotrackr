@@ -1,5 +1,8 @@
+export { default as Button } from "../ui/Button";
 export { default as EmptyState } from "./EmptyState";
 export { default as ErrorBoundary } from "./ErrorBoundary";
+export { default as IconButton } from "./IconButton";
+export { default as IconButtonGroup } from "./IconButtonGroup";
 export * from "./Icons";
 export { default as LoadingSpinner } from "./LoadingSpinner";
 export * from "./LoadingStates";
@@ -7,3 +10,5 @@ export { default as Modal } from "./Modal";
 export { default as ProgressBar } from "./ProgressBar";
 export { default as QueryErrorBoundary } from "./QueryErrorBoundary";
 export { default as StatusIndicator } from "./StatusIndicator";
+export { default as TabBar } from "./TabBar";
+export { default as TabButton } from "./TabButton";

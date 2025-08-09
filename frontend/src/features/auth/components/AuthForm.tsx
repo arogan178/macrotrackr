@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
-import { FormButton, TextField } from "@/components/form";
+import { TextField } from "@/components/form";
+import { Button } from "@/components/ui";
 // Notifications are handled by the global NotificationManager and store
 
 type AuthMode = "login" | "register";
@@ -33,15 +34,30 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-2xl font-bold mb-6 text-center">
+    <div className="mx-auto max-w-md rounded-lg bg-surface p-6 shadow-surface">
+      <h2 className="mb-6 text-center text-2xl font-bold">
         {mode === "login" ? "Login" : "Register"}
       </h2>
-      <FloatingNotification
-        message={error}
-        type="error"
-        onClose={handleClearMessages}
-      />
+
+      {error && (
+        <div
+          role="alert"
+          className="mb-4 rounded-md border border-error/40 bg-error/10 p-3 text-sm text-error"
+        >
+          <div className="flex items-start justify-between gap-3">
+            <span>{error}</span>
+            <button
+              type="button"
+              aria-label="Dismiss"
+              onClick={handleClearMessages}
+              className="text-error hover:opacity-80"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <TextField
           label="Email"
@@ -58,14 +74,14 @@ export default function AuthForm({ mode, onSubmit }: AuthFormProps) {
           required
           minLength={6}
         />
-        <FormButton
+        <Button
           type="submit"
           isLoading={loading}
           disabled={loading}
           className="w-full"
         >
           {mode === "login" ? "Login" : "Register"}
-        </FormButton>
+        </Button>
       </form>
     </div>
   );

@@ -52,30 +52,30 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`inline-flex items-center space-x-2 ${className}`}
     >
-      <div className="flex items-center space-x-2 bg-slate-800/60 backdrop-blur-sm border border-slate-700/50 rounded-full px-4 py-2">
+      <div className="flex items-center space-x-2 rounded-full border border-border/50 bg-surface px-4 py-2 backdrop-blur-sm">
         <div className="flex -space-x-2">
           {/* Avatar stack for visual appeal */}
-          <div className="w-6 h-6 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-full border-2 border-slate-800 flex items-center justify-center">
-            <span className="text-xs font-semibold text-white">A</span>
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-primary">
+            <span className="text-xs font-semibold text-foreground">A</span>
           </div>
-          <div className="w-6 h-6 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full border-2 border-slate-800 flex items-center justify-center">
-            <span className="text-xs font-semibold text-white">M</span>
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-purple-500 to-primary">
+            <span className="text-xs font-semibold text-foreground">M</span>
           </div>
-          <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-full border-2 border-slate-800 flex items-center justify-center">
-            <span className="text-xs font-semibold text-white">S</span>
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-cyan-600">
+            <span className="text-xs font-semibold text-foreground">S</span>
           </div>
-          <div className="w-6 h-6 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full border-2 border-slate-800 flex items-center justify-center text-xs font-semibold text-white">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-green-500 to-emerald-600 text-xs font-semibold text-foreground">
             +
           </div>
         </div>
 
-        <div className="flex items-center space-x-1 text-slate-300">
+        <div className="flex items-center space-x-1 text-foreground">
           <span className="text-sm font-medium">Join</span>
           <motion.span
             key={userCount}
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-sm font-bold text-indigo-300"
+            className="text-sm font-bold text-primary"
           >
             {userCount.toLocaleString()}+
           </motion.span>
@@ -84,8 +84,8 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
 
         {/* Live indicator */}
         <div className="flex items-center space-x-1">
-          <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-          <span className="text-xs font-medium text-green-400">Live</span>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-success"></div>
+          <span className="text-xs font-medium text-success">Live</span>
         </div>
       </div>
     </motion.div>

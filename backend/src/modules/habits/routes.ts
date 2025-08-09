@@ -60,7 +60,14 @@ export const habitRoutes = (app: Elysia) =>
             accentColor: habit.accent_color as
               | "indigo"
               | "blue"
+              | "cyan"
+              | "teal"
               | "green"
+              | "lime"
+              | "yellow"
+              | "orange"
+              | "red"
+              | "pink"
               | "purple"
               | undefined,
             isComplete: Boolean(habit.is_complete),
@@ -113,6 +120,9 @@ export const habitRoutes = (app: Elysia) =>
             completedAt,
           } = body;
 
+          // Normalize optional string fields to null if empty to avoid storing empty strings
+          const normalizedAccent = accentColor && accentColor.length > 0 ? accentColor : null;
+
           const query = `
             INSERT INTO habits (
               id, user_id, title, icon_name, current, target, 
@@ -127,7 +137,7 @@ export const habitRoutes = (app: Elysia) =>
             iconName,
             current,
             target,
-            accentColor || null,
+            normalizedAccent,
             isComplete ? 1 : 0,
             createdAt,
             completedAt || null,
@@ -165,6 +175,9 @@ export const habitRoutes = (app: Elysia) =>
             completedAt,
           } = body;
 
+          // Normalize optional string fields to null if empty to avoid storing empty strings
+          const normalizedAccent = accentColor && accentColor.length > 0 ? accentColor : null;
+
           const checkQuery = `
             SELECT id FROM habits 
             WHERE id = ? AND user_id = ?
@@ -190,7 +203,7 @@ export const habitRoutes = (app: Elysia) =>
             iconName,
             current,
             target,
-            accentColor || null,
+            normalizedAccent,
             isComplete ? 1 : 0,
             createdAt,
             completedAt || null,

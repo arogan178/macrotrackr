@@ -1,44 +1,107 @@
 // Tailwind color mapping for various UI components
 export const COLOR_MAP = {
   green: {
-    bg: "from-green-900/30 to-gray-800/10",
-    border: "border-green-500/20",
-    text: "text-green-400",
-    dot: "bg-green-500",
+    bg: "from-success-900/30 to-gray-800/10",
+    border: "border-success-500/20",
+    text: "text-success",
+    dot: "bg-success",
+    iconColor: "text-success",
+    acronym: "text-muted/80",
+    gradient: "from-success-900/30 to-gray-800/10",
   },
   blue: {
-    bg: "from-blue-900/30 to-gray-800/10",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    dot: "bg-blue-500",
+    bg: "from-blue/30 to-gray-800/10",
+    border: "border-blue/20",
+    text: "text-blue",
+    dot: "bg-blue",
+    iconColor: "text-blue",
+    acronym: "text-muted/80",
+    gradient: "from-blue/30 to-gray-800/10",
   },
   red: {
-    bg: "from-red-900/30 to-gray-800/10",
-    border: "border-red-500/20",
-    text: "text-red-400",
-    dot: "bg-red-500",
+    bg: "from-error-900/30 to-gray-800/10",
+    border: "border-error-500/20",
+    text: "text-error",
+    dot: "bg-error",
+    iconColor: "text-error",
+    acronym: "text-muted/80",
+    gradient: "from-error-900/30 to-gray-800/10",
+  },
+  accent: {
+    bg: "from-vibrant-accent/30 to-gray-800/10",
+    border: "border-vibrant-accent/20",
+    text: "text-vibrant-accent",
+    dot: "bg-vibrant-accent",
+    iconColor: "text-vibrant-accent",
+    acronym: "text-muted/80",
+    gradient: "from-vibrant-accent/30 to-gray-800/10",
+  },
+  primary: {
+    bg: "from-primary/30 to-gray-800/10",
+    border: "border-border/20",
+    text: "text-primary",
+    dot: "bg-primary",
+    iconColor: "text-primary",
+    acronym: "text-muted/80",
+    gradient: "from-primary/30 to-gray-800/10",
   },
   indigo: {
-    bg: "from-indigo-900/30 to-gray-800/10",
-    border: "border-indigo-500/20",
-    text: "text-indigo-400",
-    dot: "bg-indigo-500",
+    bg: "from-vibrant-accent/30 to-gray-800/10",
+    border: "border-vibrant-accent/20",
+    text: "text-vibrant-accent",
+    dot: "bg-vibrant-accent",
+    iconColor: "text-vibrant-accent",
+    acronym: "text-muted/80",
+    gradient: "from-vibrant-accent/30 to-gray-800/10",
   },
   purple: {
     bg: "from-purple-900/30 to-gray-800/10",
     border: "border-purple-500/20",
     text: "text-purple-400",
     dot: "bg-purple-500",
+    iconColor: "text-purple-400",
+    acronym: "text-muted/80",
+    gradient: "from-purple-900/30 to-gray-800/10",
+  },
+  protein: {
+    bg: "from-protein/30 to-gray-800/10",
+    border: "border-protein/20",
+    text: "text-protein",
+    dot: "bg-protein",
+    iconColor: "text-protein",
+    acronym: "text-muted/80",
+    gradient: "from-protein/30 to-gray-800/10",
+  },
+  carbs: {
+    bg: "from-carbs/30 to-gray-800/10",
+    border: "border-carbs/20",
+    text: "text-carbs",
+    dot: "bg-carbs",
+    iconColor: "text-carbs",
+    acronym: "text-muted/80",
+    gradient: "from-carbs/30 to-gray-800/10",
+  },
+  fats: {
+    bg: "from-fats/30 to-gray-800/10",
+    border: "border-fats/20",
+    text: "text-fats",
+    dot: "bg-fats",
+    iconColor: "text-fats",
+    acronym: "text-muted/80",
+    gradient: "from-fats/30 to-gray-800/10",
   },
 } as const;
 
 // Progress bar colors
 export const PROGRESS_BAR_COLORS = {
-  blue: "bg-blue-500",
-  green: "bg-green-500",
-  red: "bg-red-500",
-  indigo: "bg-indigo-500",
-  purple: "bg-purple-500",
+  blue: "bg-surface",
+  green: "bg-success",
+  red: "bg-error",
+  accent: "bg-vibrant-accent",
+  purple: "bg-secondary",
+  protein: "bg-protein",
+  carbs: "bg-carbs",
+  fats: "bg-fats",
 } as const;
 
 // Progress bar height variants
@@ -51,19 +114,19 @@ export const PROGRESS_BAR_HEIGHTS = {
 // Default macro colors
 export const MACRO_COLORS = {
   protein: {
-    color: "bg-green-500",
-    bgColor: "bg-green-500/80",
-    textColor: "text-green-400",
+    color: "bg-protein",
+    bgColor: "bg-protein/80",
+    textColor: "text-protein",
   },
   carbs: {
-    color: "bg-blue-500",
-    bgColor: "bg-blue-500/80",
-    textColor: "text-blue-400",
+    color: "bg-carbs",
+    bgColor: "bg-carbs/80",
+    textColor: "text-carbs",
   },
   fats: {
-    color: "bg-red-500",
-    bgColor: "bg-red-500/80",
-    textColor: "text-red-400",
+    color: "bg-fats",
+    bgColor: "bg-fats/80",
+    textColor: "text-fats",
   },
 } as const;
 
@@ -88,8 +151,8 @@ export const BUTTON_VARIANTS = {
   GHOST: "ghost",
 } as const;
 
-// Action button size mapping (square, for icon-only buttons)
-export const BUTTON_SIZES = {
+// Icon button size mapping (square, for icon-only buttons)
+export const ICON_BUTTON_SIZES = {
   sm: "p-1.5 w-8 h-8 aspect-square", // 32px
   md: "p-2 w-9 h-9 aspect-square", // 36px
   lg: "p-2.5 w-10 h-10 aspect-square", // 40px
@@ -100,8 +163,9 @@ export const BUTTON_SIZES = {
   "5xl": "p-7 w-18 h-18 aspect-square", // 72px
 } as const;
 
-// Form button size mapping (rectangular, for text/icon buttons)
-export const FORM_BUTTON_SIZES = {
+// Button size mapping (rectangular, for text/icon buttons)
+export const BUTTON_SIZES = {
+  xs: "px-1 py-0 text-sm",
   sm: "px-2 py-1 text-xs",
   md: "px-3.5 py-2 text-md",
   lg: "px-5 py-3 text-base",
