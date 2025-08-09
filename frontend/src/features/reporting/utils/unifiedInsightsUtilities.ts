@@ -5,6 +5,7 @@
  
 export const TRANSITIONS = {
   duration: 0.3,
+  ease: [0.22, 1, 0.36, 1] as const,
 };
 
 export const STAGGER = {
@@ -17,6 +18,13 @@ export const STAGGER = {
 
 export const BAR_BASE_CLASSES =
   "h-2 w-full rounded-full bg-surface overflow-hidden";
+
+export const CARD_BASE_CLASSES =
+  "rounded-xl border border-border/50 bg-surface p-6 shadow-modal backdrop-blur-sm";
+
+export const SECTION_HEADING_CLASSES = "text-lg font-semibold text-foreground";
+
+export const SUBTEXT_MUTED_CLASSES = "text-xs text-foreground";
 
 /**
  * Map a score 0-100 to existing token classes.
