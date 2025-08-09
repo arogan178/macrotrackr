@@ -11,7 +11,7 @@ import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 
-export default defineConfig(({ command, mode }) => {
+export default defineConfig(() => {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   return {
     server: {
@@ -24,7 +24,7 @@ export default defineConfig(({ command, mode }) => {
             proxy.on("error", (err) => {
               console.log("Proxy error:", err);
             });
-            proxy.on("proxyReq", (proxyReq, req) => {
+            proxy.on("proxyReq", (_proxyReq, req) => {
               console.log(
                 "Proxying request:",
                 req.method,
@@ -46,6 +46,7 @@ export default defineConfig(({ command, mode }) => {
       checker({ typescript: true }),
       viteCompression(),
       VitePWA({
+        injectRegister: null,
         registerType: "autoUpdate",
         manifest: {
           name: "Macro Tracker",
@@ -126,8 +127,6 @@ export default defineConfig(({ command, mode }) => {
           assetFileNames: `assets/[name].[hash].[ext]`,
           manualChunks: {
             vendor: ["react", "react-dom"],
-            router: ["react-router-dom"],
-            charts: ["recharts"],
           },
         },
       },

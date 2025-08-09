@@ -61,7 +61,7 @@ export const authMiddleware = new Elysia({ name: "authMiddleware" })
     jwtPlugin({
       name: "jwt",
       secret: config.JWT_SECRET,
-      exp: "7d",
+      exp: config.JWT_EXP,
       schema: AuthSchemas.jwtPayload,
     })
   )

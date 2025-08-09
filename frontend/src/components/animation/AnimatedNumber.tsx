@@ -1,5 +1,5 @@
 import { animate } from "motion/react";
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 
 interface AnimatedNumberProps {
   value: number;
@@ -18,18 +18,34 @@ export default function AnimatedNumber({
   prefix = "",
   suffix = "",
 }: AnimatedNumberProps) {
-  const nodeReference = useRef<HTMLSpanElement>(undefined);
-  const previousValueReference = useRef<number>(value);
+  // Helper to safely format numbers
+  const safeFormat = useCallback(
+    (inputValue: unknown) => {
+      const numericValue =
+        typeof inputValue === "number" && !Number.isNaN(inputValue)
+          ? inputValue
+          : 0;
+      return `${prefix}${numericValue.toFixed(toFixedValue)}${suffix}`;
+    },
+    [prefix, suffix, toFixedValue],
+  );
+
+  const nodeReference = useRef<HTMLSpanElement>(null);
+  // Always store a valid number in the ref
+  const previousValueReference = useRef<number>(
+    typeof value === "number" && !Number.isNaN(value) ? value : 0,
+  );
 
   useEffect(() => {
     const node = nodeReference.current;
     if (!node) return;
 
     const fromValue = previousValueReference.current;
-    const toValue = value;
+    const toValue =
+      typeof value === "number" && !Number.isNaN(value) ? value : 0;
 
     if (fromValue === toValue || duration === 0) {
-      node.textContent = `${prefix}${toValue.toFixed(toFixedValue)}${suffix}`;
+      node.textContent = safeFormat(toValue);
       previousValueReference.current = toValue;
       return;
     }
@@ -39,27 +55,23 @@ export default function AnimatedNumber({
       ease: "easeOut",
       onUpdate: (latest) => {
         if (node) {
-          node.textContent = `${prefix}${latest.toFixed(
-            toFixedValue,
-          )}${suffix}`;
+          node.textContent = safeFormat(latest);
         }
       },
       onComplete: () => {
         if (node) {
-          node.textContent = `${prefix}${toValue.toFixed(
-            toFixedValue,
-          )}${suffix}`;
+          node.textContent = safeFormat(toValue);
         }
       },
     });
 
     previousValueReference.current = toValue;
     return () => controls.stop();
-  }, [value, toFixedValue, duration, prefix, suffix]);
+  }, [value, toFixedValue, duration, prefix, suffix, safeFormat]);
 
   return (
     <span ref={nodeReference} className={className}>
-      {`${prefix}${value.toFixed(toFixedValue)}${suffix}`}
+      {safeFormat(value)}
     </span>
   );
 }

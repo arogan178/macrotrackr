@@ -1,5 +1,4 @@
-import FormButton from "@/components/form/FormButton";
-import { AwardIcon, GoalsIcon } from "@/components/ui";
+import { AwardIcon, Button, GoalsIcon } from "@/components/ui";
 
 interface GoalsModeToggleProps {
   activeMode: "active" | "achieved";
@@ -7,40 +6,45 @@ interface GoalsModeToggleProps {
 }
 
 function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
+  const isActive = activeMode === "active";
+  const isAchieved = activeMode === "achieved";
+
   return (
-    <div className="relative flex items-center bg-gray-800/40 rounded-xl p-1 w-fit">
-      <FormButton
+    <div
+      className="bg-surface/ relative flex w-fit items-center rounded-xl p-1"
+      role="tablist"
+      aria-label="Goals view mode"
+    >
+      <Button
         type="button"
-        onClick={activeMode === "achieved" ? onToggle : undefined}
-        className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          activeMode === "active"
-            ? "bg-blue-600 text-white shadow-md"
-            : "text-gray-400 hover:text-gray-300"
+        onClick={isAchieved ? onToggle : undefined}
+        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+          isActive
+            ? "bg-primary text-foreground shadow-surface"
+            : "text-foreground hover:text-foreground"
         }`}
-        variant={activeMode === "active" ? undefined : "ghost"}
-        icon={
-          <GoalsIcon
-            className={`w-4 h-4 mr-2 ${
-              activeMode === "active" ? "text-white" : "text-gray-400"
-            }`}
-          />
-        }
+        variant={isActive ? undefined : "ghost"}
+        icon={<GoalsIcon className="mr-2 h-4 w-4 text-foreground" />}
+        aria-selected={isActive}
+        aria-label="Show Active Goals"
       >
         <div className="flex items-center">Active Goals</div>
-      </FormButton>
-      <FormButton
+      </Button>
+      <Button
         type="button"
-        onClick={activeMode === "active" ? onToggle : undefined}
-        className={`relative px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-          activeMode === "achieved"
-            ? "bg-blue-600 text-white shadow-md"
-            : "text-gray-400 hover:text-gray-300"
+        onClick={isActive ? onToggle : undefined}
+        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+          isAchieved
+            ? "bg-primary text-foreground shadow-surface"
+            : "text-foreground hover:text-foreground"
         }`}
-        variant={activeMode === "achieved" ? undefined : "ghost"}
+        variant={isAchieved ? undefined : "ghost"}
         icon={<AwardIcon />}
+        aria-selected={isAchieved}
+        aria-label="Show Achievements"
       >
         <div className="flex items-center">Achievements</div>
-      </FormButton>
+      </Button>
     </div>
   );
 }

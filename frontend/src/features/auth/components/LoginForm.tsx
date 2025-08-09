@@ -1,7 +1,6 @@
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { CalorieIcon } from "@/components/ui";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, CalorieIcon } from "@/components/ui";
+import { useMutationErrorHandler } from "@/hooks";
 import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
@@ -23,7 +22,6 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
   const loginMutation = useLogin();
 
   // Use new loading state hooks
-  const { isLoading: isAuthLoading } = useFeatureLoading("auth");
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),
@@ -58,13 +56,13 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-indigo-600 to-blue-500 mb-4 flex items-center justify-center shadow-lg shadow-indigo-500/30">
-          <CalorieIcon className="w-8 h-8 text-white" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary shadow-primary/30 shadow-primary">
+          <CalorieIcon className="h-8 w-8 text-foreground" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
-          Welcome Back
+        <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent">
+          Welcome
         </h1>
-        <p className="mt-2 text-gray-400">Sign in to track your macros</p>
+        <p className="mt-2 text-foreground">Sign in to track your macros</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
@@ -75,6 +73,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           required={true}
           placeholder="your@email.com"
           maxLength={30}
+          name="email"
+          autoComplete="username"
         />
         <TextField
           label="Password"
@@ -83,28 +83,30 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           type="password"
           required={true}
           placeholder="••••••••"
+          name="password"
+          autoComplete="current-password"
         />
         <div className="text-right">
           <button
             type="button"
             onClick={onForgotPassword}
-            className="text-sm text-indigo-400 hover:text-indigo-300 transition-colors"
+            className="text-sm text-primary transition-colors hover:text-primary"
           >
             Forgot Password?
           </button>
         </div>
-        <FormButton
+        <Button
           type="submit"
           autoLoadingFeature="auth"
           loadingText="Signing in..."
           fullWidth={true}
-          className="p-3 rounded-lg font-medium text-white 
-                 bg-gradient-to-r from-indigo-600 to-blue-500 hover:from-indigo-500 hover:to-blue-400
-                 disabled:opacity-50 transition-all duration-300 transform hover:scale-[1.02]
-                 shadow-lg shadow-indigo-500/30"
+          className="transform rounded-lg bg-gradient-to-r from-primary 
+                 to-primary p-3 font-medium text-foreground shadow-primary/30
+                 shadow-primary transition-all duration-300 hover:scale-[1.02] hover:from-primary
+                 hover:to-primary disabled:opacity-50"
         >
           Sign In
-        </FormButton>
+        </Button>
       </form>
     </CardContainer>
   );

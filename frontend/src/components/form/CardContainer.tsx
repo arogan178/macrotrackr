@@ -15,8 +15,8 @@
  */
 import { memo } from "react";
 
-import { formStyles } from "@/components/utils/Styles";
-import type { CardContainerProps } from "@/components/utils/Types";
+import { formStyles } from "@/components/form/Styles";
+import type { CardContainerProps } from "@/components/form/types";
 
 function CardContainer({ children, className = "" }: CardContainerProps) {
   return (

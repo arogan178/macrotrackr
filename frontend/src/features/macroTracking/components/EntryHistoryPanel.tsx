@@ -3,15 +3,15 @@ import { memo, useCallback, useEffect, useMemo, useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
-import { FormButton } from "@/components/form";
-import IconButton from "@/components/form/IconButton";
 import {
+  Button,
   ChevronDownIcon,
   ExportIcon,
   LoadingSpinner,
   PlusCircleIcon,
 } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
+import IconButton from "@/components/ui/IconButton";
 import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
 
@@ -62,7 +62,7 @@ const capitalizeFirstLetter = (string: string): string =>
 
 const exportCSV = (history: MacroEntry[]) => {
   const csvContent = [
-    "Date, Time, Meal Type, Meal Name, Protein (g), Carbs (g), Fats (g), Calories",
+    "Date, Time, Meal Type, Meal Name, Protein (g), Carbs (g), Fats (g), Calories (kcal)",
     ...history.map(
       (entry) =>
         `${
@@ -280,10 +280,12 @@ const EntryHistoryComponent = function EntryHistory({
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
       {/* Heading row for mobile: flex with export button inline */}
-      <div className="flex items-center justify-between mb-6 gap-4 lg:hidden">
+      <div className="mb-6 flex items-center justify-between gap-4 lg:hidden">
         <div>
-          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-lg font-semibold text-foreground">
+            Entry History
+          </h2>
+          <p className="mt-1 text-sm text-foreground">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
             <AnimatedNumber value={totalEntries.length} />{" "}
@@ -303,14 +305,16 @@ const EntryHistoryComponent = function EntryHistory({
       </div>
 
       {/* Heading row for desktop: flex with export button right-aligned */}
-      <div className="hidden lg:flex flex-row justify-between items-center mb-6 gap-4">
+      <div className="mb-6 hidden flex-row items-center justify-between gap-4 lg:flex">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <h2 className="text-lg font-semibold text-gray-100">Entry History</h2>{" "}
-          <p className="text-sm text-gray-400 mt-1">
+          <h2 className="text-lg font-semibold text-foreground">
+            Entry History
+          </h2>{" "}
+          <p className="mt-1 text-sm text-foreground">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
             <AnimatedNumber value={totalEntries.length} />{" "}
@@ -319,15 +323,12 @@ const EntryHistoryComponent = function EntryHistory({
         </motion.div>
         {history.length > 0 && (
           <ProFeature>
-            <FormButton
-              type="button"
+            <Button
               icon={<ExportIcon />}
               iconPosition="left"
               onClick={handleExportCSV}
               text="Export CSV"
-              variant="secondary"
               buttonSize="lg"
-              className="mr-2"
             />
           </ProFeature>
         )}
@@ -337,12 +338,12 @@ const EntryHistoryComponent = function EntryHistory({
         <EmptyState
           title="No entries yet"
           message="Get started by logging your first meal using the form above"
-          icon={<PlusCircleIcon className="w-10 h-10 text-gray-500" />}
+          icon={<PlusCircleIcon className="h-10 w-10 text-foreground" />}
           size="lg"
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-2xl border border-gray-700/50 bg-gray-800/40 backdrop-blur-sm shadow-xl"
+          className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-surface backdrop-blur-sm"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
@@ -393,8 +394,8 @@ const EntryHistoryComponent = function EntryHistory({
               {(hasMoreDates || hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
-                  className={`px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50 ${
-                    isLoadingMore ? "opacity-60 cursor-not-allowed" : ""
+                  className={`flex items-center gap-2 rounded-md border border-border/30 bg-transparent px-4 py-2 text-sm text-muted transition-all duration-200 hover:border-border/50 hover:bg-surface/30 hover:text-foreground ${
+                    isLoadingMore ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   disabled={isLoadingMore}
                   whileHover={{ scale: 1.02 }}
@@ -413,7 +414,7 @@ const EntryHistoryComponent = function EntryHistory({
                       Load More Dates
                     </motion.span>
                   </AnimatePresence>
-                  <ChevronDownIcon className="w-4 h-4" />
+                  <ChevronDownIcon className="h-4 w-4 text-foreground" />
                 </motion.button>
               )}
 
@@ -421,7 +422,7 @@ const EntryHistoryComponent = function EntryHistory({
               {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
                 <motion.button
                   onClick={showLessDates}
-                  className="px-4 py-2 text-sm text-gray-400 hover:text-gray-300 bg-transparent hover:bg-gray-700/30 rounded-md transition-all duration-200 flex items-center gap-2 border border-gray-600/30 hover:border-gray-500/50"
+                  className="flex items-center gap-2 rounded-md border border-border/30 bg-transparent px-4 py-2 text-sm text-foreground transition-all duration-200 hover:border-border/50 hover:bg-surface/30 hover:text-foreground"
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: "spring", stiffness: 400, damping: 17 }}
@@ -437,7 +438,7 @@ const EntryHistoryComponent = function EntryHistory({
                       Show Less
                     </motion.span>
                   </AnimatePresence>
-                  <ChevronDownIcon className="w-4 h-4 rotate-180" />
+                  <ChevronDownIcon className="h-4 w-4 rotate-180" />
                 </motion.button>
               )}
             </motion.div>

@@ -1,8 +1,10 @@
-// Calorie adjustment factors based on goal
+/**
+ * Calorie and macro calculation constants
+ */
 export const CALORIE_ADJUSTMENT_FACTORS = {
-  lose: -500, // 500 calorie deficit
-  maintain: 0, // No adjustment
-  gain: 300, // 300 calorie surplus
+  lose: -500,
+  maintain: 0,
+  gain: 300,
 } as const;
 
 export const DEFAULT_TARGET_VALUES = {
@@ -11,54 +13,35 @@ export const DEFAULT_TARGET_VALUES = {
   fatsPercentage: 30,
   lockedMacros: [],
 };
-export const DAILY_PROTEIN_PER_KG = 2.1; // 2g protein per kg bodyweight
-export const CARBS_PERCENTAGE = 0.5; // 50% of calories from carbs
-export const FATS_PERCENTAGE = 0.25; // 25% of calories from fats
 
-// Constants for weight and calorie calculations
-export const CALORIES_PER_KG_FAT = 7700; // Approximately 7700 calories per kg of body fat
-export const MIN_SAFE_DAILY_CHANGE = 500; // Minimum safe daily calorie deficit
-export const MAX_SAFE_DAILY_CHANGE = 1000; // Maximum safe daily calorie deficit
-export const MIN_WEEKLY_WEIGHT_LOSS = 0.5; // Minimum recommended weight loss per week (kg)
-export const MAX_WEEKLY_WEIGHT_LOSS = 1; // Maximum recommended weight loss per week (kg)
-export const DEFAULT_TARGET_WEEKS = 12; // Default timeframe for goal calculations
+export const DAILY_PROTEIN_PER_KG = 2.1;
+export const CARBS_PERCENTAGE = 0.5;
+export const FATS_PERCENTAGE = 0.25;
 
-// Goal status colors and styling
-export const GOAL_STATUS_COLORS = {
-  "on-track": {
-    bg: "bg-green-500/10",
-    border: "border-green-500/20",
-    text: "text-green-400",
-    icon: "text-green-400",
-  },
-  ahead: {
-    bg: "bg-blue-500/10",
-    border: "border-blue-500/20",
-    text: "text-blue-400",
-    icon: "text-blue-400",
-  },
-  behind: {
-    bg: "bg-orange-500/10",
-    border: "border-orange-500/20",
-    text: "text-orange-400",
-    icon: "text-orange-400",
-  },
-  completed: {
-    bg: "bg-purple-500/10",
-    border: "border-purple-500/20",
-    text: "text-purple-400",
-    icon: "text-purple-400",
-  },
-} as const;
+/**
+ * Weight and calorie calculations
+ */
+export const CALORIES_PER_KG_FAT = 7700;
+export const MIN_SAFE_DAILY_CHANGE = 500;
+export const MAX_SAFE_DAILY_CHANGE = 1000;
+export const MIN_WEEKLY_WEIGHT_LOSS = 0.5;
+export const MAX_WEEKLY_WEIGHT_LOSS = 1;
+export const DEFAULT_TARGET_WEEKS = 12;
 
-// Weight goal options
+/**
+ * Non-Tailwind UI tokens are kept colocated with components.
+ * Tailwind utility class names are NOT centralized here to follow Tailwind best practices.
+ * Only semantic, non-class constants remain in this module.
+ */
+
+// Weight goal options (semantic values only)
 export const WEIGHT_GOAL_OPTIONS = [
-  { value: "lose", label: "Lose Weight", color: "text-red-400" },
-  { value: "maintain", label: "Maintain Weight", color: "text-blue-400" },
-  { value: "gain", label: "Gain Weight", color: "text-green-400" },
+  { value: "lose", label: "Lose Weight", color: "text-vibrant-accent" },
+  { value: "maintain", label: "Maintain Weight", color: "text-primary" },
+  { value: "gain", label: "Gain Weight", color: "text-success" },
 ] as const;
 
-// Chart configuration
+// Chart configuration (semantic hex colors are acceptable centralization)
 export const CHART_COLORS = {
   weight: "#3B82F6", // blue
   target: "#EF4444", // red
@@ -66,15 +49,19 @@ export const CHART_COLORS = {
   progress: "#8B5CF6", // purple
 } as const;
 
-// Validation constants
+/**
+ * Validation constants
+ */
 export const WEIGHT_VALIDATION = {
   min: 1,
   max: 1000,
   minCalories: 1000,
-  maxWeeksInPast: 104, // 2 years
+  maxWeeksInPast: 104,
 } as const;
 
-// Success messages
+/**
+ * Success and error messages
+ */
 export const SUCCESS_MESSAGES = {
   goalCreated: "Weight goal created successfully!",
   goalUpdated: "Weight goal updated successfully!",
@@ -83,7 +70,6 @@ export const SUCCESS_MESSAGES = {
   weightDeleted: "Weight entry deleted successfully!",
 } as const;
 
-// Error messages
 export const ERROR_MESSAGES = {
   goalCreate: "Failed to create weight goal",
   goalUpdate: "Failed to update weight goal",
@@ -95,3 +81,10 @@ export const ERROR_MESSAGES = {
   validation: "Please check your input and try again",
   network: "Network error. Please try again.",
 } as const;
+
+/**
+ * Removed GOAL_STATUS_COLORS of Tailwind class strings from centralized constants
+ * to avoid breaking Tailwind's recommended colocation pattern for utility classes.
+ * Components should keep Tailwind classnames inline where they are used so Purge/scan works
+ * and to maintain local styling clarity.
+ */

@@ -1,39 +1,38 @@
 import React from "react";
 
-import { FormButton } from "@/components/form";
-import { StarIcon } from "@/components/ui";
+import { Button, StarIcon } from "@/components/ui";
 
 const FreeBillingView: React.FC<{
   onUpgrade: () => void;
   isLoading: boolean;
 }> = ({ onUpgrade, isLoading }) => (
   <div className="space-y-6 text-center">
-    <div className="relative bg-gradient-to-br from-gray-800/60 via-gray-800/40 to-gray-900/60 p-6 rounded-xl border border-gray-700/50">
-      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-yellow-400/10 border-2 border-yellow-400/20">
-        <StarIcon className="h-8 w-8 text-yellow-400" />
+    <div className="relative rounded-xl border border-border/50 bg-gradient-to-br from-gray-800/60 via-gray-800/40 to-gray-900/60 p-6">
+      <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-yellow-400/20 bg-warning/10">
+        <StarIcon className="h-8 w-8 text-warning" />
       </div>
-      <h4 className="font-semibold text-gray-100 text-xl mb-2">
+      <h4 className="mb-2 text-xl font-semibold text-foreground">
         Unlock Your Full Potential
       </h4>
-      <p className="text-gray-400 max-w-md mx-auto">
+      <p className="mx-auto max-w-md text-foreground">
         Upgrade to Pro to access exclusive features like advanced reporting,
         unlimited habit tracking, and custom macro targets.
       </p>
     </div>
 
     <div className="space-y-4">
-      <FormButton
+      <Button
         onClick={onUpgrade}
         isLoading={isLoading}
         loadingText="Redirecting..."
         fullWidth
         variant="primary"
-        className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold text-lg py-4 shadow-lg hover:shadow-xl transition-all duration-200"
-        icon={<StarIcon className="w-5 h-5" />}
+        className="bg-gradient-to-r from-yellow-500 to-yellow-600 py-4 text-lg font-bold text-black shadow-primary transition-all duration-200 hover:from-yellow-600 hover:to-yellow-700 hover:shadow-modal"
+        icon={<StarIcon className="" />}
         ariaLabel="Upgrade to Pro"
       >
         Upgrade to Pro
-      </FormButton>
+      </Button>
     </div>
   </div>
 );
