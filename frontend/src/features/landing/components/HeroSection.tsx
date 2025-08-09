@@ -11,33 +11,20 @@ const HeroSection: React.FC = () => (
     <div className="mx-auto max-w-6xl">
       <div className="text-center">
         <motion.h1
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 30,
-            duration: 0.6,
-            ease: "easeOut",
-          }}
-          className="mb-8 text-5xl font-bold text-foreground sm:text-6xl lg:text-7xl"
+          transition={{ duration: 0 }}
+          className="mb-8 text-5xl font-bold text-foreground will-change-auto sm:text-6xl lg:text-7xl"
         >
           <span className="block">Track Your Macros</span>
           <span className="block">Achieve Your Goals</span>
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 1, y: 0 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{
-            type: "spring",
-            stiffness: 380,
-            damping: 30,
-            duration: 0.6,
-            delay: 0.15,
-            ease: "easeOut",
-          }}
-          className="mx-auto mb-12 max-w-3xl text-xl leading-relaxed text-foreground sm:text-2xl"
+          transition={{ duration: 0 }}
+          className="mx-auto mb-12 max-w-3xl text-xl leading-relaxed text-foreground will-change-auto sm:text-2xl"
         >
           The most intuitive macro tracking app designed to help you reach your
           fitness and nutrition goals with precision and ease.

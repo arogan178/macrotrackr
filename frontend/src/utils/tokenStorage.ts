@@ -26,24 +26,30 @@ export function securelyStoreToken(token: string): void {
     localStorage.setItem("token", token);
     try {
       const [, payloadBase64] = token.split(".");
-      const payloadJson = atob(payloadBase64.replaceAll('-', "+").replaceAll('_', "/"));
+      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
       const payload = JSON.parse(payloadJson);
       if (payload && typeof payload.exp === "number") {
         localStorage.setItem("token_exp", String(payload.exp));
       }
-    } catch {}
+    } catch {
+      // Ignore malformed or non-JWT tokens
+      void 0;
+    }
     localStorage.setItem("token_stored_at", Date.now().toString());
   } else {
     // Fallback to localStorage
     localStorage.setItem("token", token);
     try {
       const [, payloadBase64] = token.split(".");
-      const payloadJson = atob(payloadBase64.replaceAll('-', "+").replaceAll('_', "/"));
+      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
       const payload = JSON.parse(payloadJson);
       if (payload && typeof payload.exp === "number") {
         localStorage.setItem("token_exp", String(payload.exp));
       }
-    } catch {}
+    } catch {
+      // Ignore malformed or non-JWT tokens
+      void 0;
+    }
     localStorage.setItem("token_stored_at", Date.now().toString());
   }
 
