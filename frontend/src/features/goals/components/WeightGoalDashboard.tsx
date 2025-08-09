@@ -1,6 +1,10 @@
 import { memo } from "react";
 
 import { EmptyState, TargetIcon } from "@/components/ui/";
+import {
+  computeDailyAdjustment,
+  computeEffectiveTargetCalories,
+} from "@/features/goals/utils/calorie";
 import { useFeatureLoading } from "@/hooks";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
@@ -33,7 +37,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   macroTarget,
 }: WeightGoalDashboardProps) {
   // Use new loading state hooks
-  const { isLoading: isGoalsLoading } = useFeatureLoading("goals");
+  const { isLoading: _isGoalsLoading } = useFeatureLoading("goals");
 
   // Get log weight modal state from centralized goals UI slice
   const { setLogWeightModalOpen } = useStore();
@@ -45,31 +49,22 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
 
   // TDEE is now passed as a prop and should be used directly
 
-  // Get daily deficit/surplus from weightGoals
-  // If dailyChange is undefined, calculate it from TDEE and calorieTarget
-  let dailyAdjustment = weightGoals?.dailyChange || 0;
-  if (dailyAdjustment === 0 && weightGoals?.calorieTarget && tdee > 0) {
-    // Calculate daily deficit/surplus: deficit is positive, surplus is negative
-    dailyAdjustment = tdee - weightGoals.calorieTarget;
-  }
+  // Get daily deficit/surplus from weightGoals via shared helper
+  const dailyAdjustment = computeDailyAdjustment(tdee, weightGoals);
 
-  // Calculate effective target calories
-  let effectiveTargetCalories: number = Number.isFinite(tdee) ? tdee : 0;
-  if (weightGoals?.calorieTarget) {
-    effectiveTargetCalories = weightGoals.calorieTarget;
-  }
-  // Always ensure it's a finite number
-  if (!Number.isFinite(effectiveTargetCalories)) {
-    effectiveTargetCalories = 0;
-  }
+  // Calculate effective target calories via shared helper
+  const effectiveTargetCalories = computeEffectiveTargetCalories(
+    tdee,
+    weightGoals,
+  );
 
   // Loading State
   if (isLoading) {
     return (
       <div
-        className={`bg-gray-800/40 rounded-2xl h-60 flex items-center justify-center animate-pulse ${className}`}
+        className={`flex h-60 animate-pulse items-center justify-center rounded-2xl bg-surface ${className}`}
       >
-        <div className="w-full h-full bg-gray-700 rounded-2xl" />
+        <div className="h-full w-full rounded-2xl bg-surface" />
       </div>
     );
   }
@@ -77,12 +72,12 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Empty State
   if (!weightGoals) {
     return (
-      <div className={`bg-gray-800/40 rounded-2xl ${className}`}>
+      <div className={`rounded-2xl bg-surface ${className}`}>
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
           icon={
-            <TargetIcon className="h-14 w-14 text-indigo-400" strokeWidth={1} />
+            <TargetIcon className="h-14 w-14 text-primary" strokeWidth={1} />
           }
           action={{
             label: "Set Weight Goal",
@@ -99,9 +94,9 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Status View (when weightGoals exist)
   return (
     <>
-      <div className={`bg-gray-800/40 rounded-2xl ${className}`}>
+      <div className={`rounded-2xl bg-surface ${className}`}>
         <WeightGoalStatus
-          startingWeight={user.weight ?? 0} // Pass current weight for progress, fallback to 0
+          startingWeight={user.weight ?? 0}
           targetWeight={weightGoals.targetWeight}
           tdee={Number.isFinite(tdee) ? tdee : 0}
           macroDailyTotals={macroDailyTotals}

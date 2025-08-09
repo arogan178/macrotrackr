@@ -22,21 +22,21 @@ function MacroBadgeGroup({
       <MacroBadge
         name="Protein"
         value={percentages.proteinPercentage}
-        color="green"
+        color="protein"
         isLocked={lockedMacros.includes("protein")}
       />
 
       <MacroBadge
         name="Carbs"
         value={percentages.carbsPercentage}
-        color="blue"
+        color="carbs"
         isLocked={lockedMacros.includes("carbs")}
       />
 
       <MacroBadge
         name="Fats"
         value={percentages.fatsPercentage}
-        color="red"
+        color="fats"
         isLocked={lockedMacros.includes("fats")}
       />
     </div>

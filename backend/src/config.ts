@@ -43,6 +43,11 @@ const EnvSchema = z.object({
     .default("development"),
 
   /**
+   * JWT expiration string compatible with @elysiajs/jwt (e.g., '30d', '12h')
+   */
+  JWT_EXP: z.string().default("30d"),
+
+  /**
    * Stripe secret key
    */
   STRIPE_SECRET_KEY: z.string().min(1, "STRIPE_SECRET_KEY is required"),

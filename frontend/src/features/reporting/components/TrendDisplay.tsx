@@ -6,11 +6,11 @@ import type { TrendDisplayProps as TrendDisplayProps } from "../types/insightsTy
 export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
   return (
     <div>
-      <div className="flex items-center mb-1">
-        <span className="text-gray-300 font-medium">{label}:</span>
+      <div className="mb-1 flex items-center">
+        <span className="font-medium text-foreground">{label}:</span>
         <span className="ml-2 flex items-center">
           <TrendIcon direction={trend.direction} />{" "}
-          <span className="text-gray-200">
+          <span className="text-foreground">
             {trend.direction === "stable" ? (
               "Stable"
             ) : trend.direction === "insufficient" ? (
@@ -30,7 +30,7 @@ export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
           </span>
         </span>
       </div>
-      <p className="text-gray-400 text-sm">{trend.message}</p>
+      <p className="text-sm text-foreground">{trend.message}</p>
     </div>
   );
 }

@@ -75,7 +75,20 @@ export function useUpdateHabit() {
       }
 
       const updatedHabit = updateHabitFromForm(existingHabit, values);
-      return await apiService.habits.updateHabit(id, updatedHabit);
+      // Ensure backend-required fields are present: id, progress, createdAt
+      const payload = {
+        ...updatedHabit,
+        id: existingHabit.id,
+        progress:
+          typeof updatedHabit.progress === "number"
+            ? updatedHabit.progress
+            : Math.min(
+                100,
+                Math.round((existingHabit.current / updatedHabit.target) * 100),
+              ),
+        createdAt: existingHabit.createdAt,
+      };
+      return await apiService.habits.updateHabit(id, payload);
     },
     onSuccess: () => {
       // Invalidate and refetch habits list
@@ -114,7 +127,7 @@ export function useDeleteHabit() {
       // Return a context object with the snapshotted value
       return { previousHabits };
     },
-    onError: (error, id, context) => {
+    onError: (error, _id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
         queryClient.setQueryData(
@@ -134,7 +147,7 @@ export function useDeleteHabit() {
 // Mutation hook for incrementing habit progress with optimistic updates
 export function useIncrementHabitProgress() {
   const queryClient = useQueryClient();
-  const showNotification = useStore((state) => state.showNotification);
+  const _showNotification = useStore((state) => state.showNotification);
 
   return useMutation({
     // Accept the full habit object instead of just the id
@@ -175,28 +188,9 @@ export function useIncrementHabitProgress() {
       }
       return { previousHabits };
     },
-    onSuccess: (data, variables, context) => {
-      const currentHabits = queryClient.getQueryData<HabitGoal[]>(
-        queryKeys.habits.list(),
-      );
-      const updatedHabit = currentHabits?.find((h) => h.id === variables.id);
-      const previousHabit = context?.previousHabits?.find(
-        (h) => h.id === variables.id,
-      );
-      if (
-        previousHabit &&
-        !previousHabit.isComplete &&
-        updatedHabit?.isComplete
-      ) {
-        showNotification(
-          `🎉 Habit "${updatedHabit.title}" completed!`,
-          "success",
-          {
-            duration: 4000,
-            context: `habit-completion-${updatedHabit.id}`,
-          },
-        );
-      }
+    onSuccess: (_data, _variables, _context) => {
+      // Notification of completion is centralized in Goals mutations to avoid duplicates.
+      // Here we only ensure cache is up to date via onSettled invalidation below.
     },
     onError: (error, _variables, context) => {
       if (context?.previousHabits) {
@@ -216,7 +210,7 @@ export function useIncrementHabitProgress() {
 // Mutation hook for completing a habit with optimistic updates
 export function useCompleteHabit() {
   const queryClient = useQueryClient();
-  const showNotification = useStore((state) => state.showNotification);
+  const _showNotification = useStore((state) => state.showNotification);
 
   return useMutation({
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
@@ -273,7 +267,7 @@ export function useCompleteHabit() {
       // Return a context object with the snapshotted value
       return { previousHabits };
     },
-    onError: (error, id, context) => {
+    onError: (error, _id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousHabits) {
         queryClient.setQueryData(

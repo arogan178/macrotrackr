@@ -132,7 +132,16 @@ export function useAddMacroEntry() {
   return useMutation({
     mutationFn: async (entry: MacroEntryCreatePayload) => {
       // This function now returns the newly created entry from the server
-      return await apiService.macros.addEntry(entry);
+      return (await apiService.macros.addEntry(entry)) as {
+        id: number;
+        protein: number;
+        carbs: number;
+        fats: number;
+        mealType: string;
+        mealName: string;
+        entryDate: string;
+        entryTime: string;
+      };
     },
     onMutate: async (variables: MacroEntryCreatePayload) => {
       // 1. Cancel ongoing queries to prevent them from overwriting the optimistic update
@@ -156,15 +165,16 @@ export function useAddMacroEntry() {
       const optimisticEntry = {
         id: temporaryId,
         ...variables,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
+        // mark as optimistic so UI can avoid transitions/skeletons
+        optimistic: true,
       };
 
       // 4. Optimistically update the history list in the cache
       queryClient.setQueryData(
         queryKeys.macros.historyInfinite(),
         (oldData: any) => {
-          if (!oldData) {
+          // Ensure a stable shape to avoid list component remounts
+          if (!oldData || !oldData.pages || oldData.pages.length === 0) {
             return {
               pages: [
                 {
@@ -178,12 +188,14 @@ export function useAddMacroEntry() {
               pageParams: [0],
             };
           }
-          const newPages = [...oldData.pages];
-          newPages[0] = {
-            ...newPages[0],
-            entries: [optimisticEntry, ...newPages[0].entries],
-          };
-          return { ...oldData, pages: newPages };
+          const newPages = oldData.pages.map((page: any, index: number) => {
+            if (index !== 0) return page;
+            return {
+              ...page,
+              entries: [optimisticEntry, ...(page.entries || [])],
+            };
+          });
+          return { ...oldData, pages: newPages, pageParams: oldData.pageParams ?? [0] };
         },
       );
 
@@ -197,6 +209,7 @@ export function useAddMacroEntry() {
             variables.fats,
           );
           if (!oldData) {
+            // Preserve object shape used by DailySummaryPanel to avoid flicker
             return {
               protein: variables.protein,
               carbs: variables.carbs,
@@ -206,10 +219,10 @@ export function useAddMacroEntry() {
           }
           return {
             ...oldData,
-            protein: oldData.protein + variables.protein,
-            carbs: oldData.carbs + variables.carbs,
-            fats: oldData.fats + variables.fats,
-            calories: oldData.calories + entryCalories,
+            protein: (oldData.protein ?? 0) + variables.protein,
+            carbs: (oldData.carbs ?? 0) + variables.carbs,
+            fats: (oldData.fats ?? 0) + variables.fats,
+            calories: (oldData.calories ?? 0) + entryCalories,
           };
         },
       );
@@ -232,7 +245,16 @@ export function useAddMacroEntry() {
         );
       }
     },
-    onSuccess: (newEntryFromServer, variables, context) => {
+    onSuccess: (newEntryFromServer: {
+      id: number;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: string;
+      mealName: string;
+      entryDate: string;
+      entryTime: string;
+    }, variables, context) => {
       // 7. On success, replace the temporary entry with the real one from the server
       queryClient.setQueryData(
         queryKeys.macros.historyInfinite(),
@@ -248,10 +270,42 @@ export function useAddMacroEntry() {
         },
       );
 
-      // By removing the invalidation, we rely on the optimistic update for UI
-      // smoothness. The data will be synchronized on the next stale-time invalidation or manual refetch, which is a good trade-off for UX.
+      // Ensure totals reflect server response in case of server-side adjustments
+      const entryDate = variables.entryDate;
+      if (entryDate) {
+        queryClient.setQueryData(
+          queryKeys.macros.dailyTotals(entryDate),
+          (oldData: MacroDailyTotals | undefined) => {
+            if (!oldData) return oldData;
+            const oldCalories = calculateCaloriesFromMacros(
+              variables.protein,
+              variables.carbs,
+              variables.fats,
+            );
+            const newCalories = calculateCaloriesFromMacros(
+              newEntryFromServer.protein,
+              newEntryFromServer.carbs,
+              newEntryFromServer.fats,
+            );
+            const caloriesDiff = newCalories - oldCalories;
+            return {
+              ...oldData,
+              protein: oldData.protein - variables.protein + newEntryFromServer.protein,
+              carbs: oldData.carbs - variables.carbs + newEntryFromServer.carbs,
+              fats: oldData.fats - variables.fats + newEntryFromServer.fats,
+              calories: oldData.calories + caloriesDiff,
+            };
+          },
+        );
+      }
     },
-    // By removing onSettled, we stop the broad, disruptive invalidation
+    onSettled: (_data, _error, variables) => {
+      // Light, targeted invalidations to avoid remounts but guarantee sync
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
+      });
+      // Do NOT invalidate historyInfinite broadly; optimistic replacement keeps UX smooth
+    },
   });
 }
 
@@ -274,14 +328,14 @@ export function useUpdateMacroEntry() {
       await queryClient.cancelQueries({ queryKey: queryKeys.macros.all() });
 
       // Find the entry date for daily totals invalidation
-      let entryDate: string | null = null;
+      let entryDate: string | undefined;
       const historyData = queryClient.getQueryData<any>(
         queryKeys.macros.historyInfinite(),
       );
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries?.find((e: any) => e.id === id);
+          const foundEntry = page.entries?.find((entry: any) => entry.id === id);
           if (foundEntry) {
             entryDate = foundEntry.entryDate;
             break;
@@ -293,7 +347,7 @@ export function useUpdateMacroEntry() {
       const previousHistoryData = historyData;
       const previousDailyTotals = entryDate
         ? queryClient.getQueryData(queryKeys.macros.dailyTotals(entryDate))
-        : null;
+        : undefined;
 
       // Optimistically update infinite query data
       queryClient.setQueryData(
@@ -304,8 +358,8 @@ export function useUpdateMacroEntry() {
           const newPages = oldData.pages.map((page: any) => ({
             ...page,
             entries:
-              page.entries?.map((e: any) =>
-                e.id === id ? { ...e, ...entry } : e,
+              page.entries?.map((entryItem: any) =>
+                entryItem.id === id ? { ...entryItem, ...entry } : entryItem,
               ) || [],
           }));
 
@@ -321,7 +375,7 @@ export function useUpdateMacroEntry() {
         // Find the original entry to calculate the difference
         const originalEntry = historyData?.pages
           ?.flatMap((page: any) => page.entries || [])
-          ?.find((e: any) => e.id === id);
+          ?.find((entry: any) => entry.id === id);
 
         if (originalEntry) {
           queryClient.setQueryData(
@@ -404,8 +458,8 @@ export function useDeleteMacroEntry() {
       await queryClient.cancelQueries({ queryKey: queryKeys.macros.all() });
 
       // Find the entry to delete and its date
-      let entryToDelete: any = null;
-      let entryDate: string | null = null;
+      let entryToDelete: any;
+      let entryDate: string | undefined;
 
       const historyData = queryClient.getQueryData<any>(
         queryKeys.macros.historyInfinite(),
@@ -413,7 +467,9 @@ export function useDeleteMacroEntry() {
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries?.find((e: any) => e.id === id);
+          const foundEntry = page.entries?.find(
+            (entryItem: any) => entryItem.id === id,
+          );
           if (foundEntry) {
             entryToDelete = foundEntry;
             entryDate = foundEntry.entryDate;
@@ -426,7 +482,7 @@ export function useDeleteMacroEntry() {
       const previousHistoryData = historyData;
       const previousDailyTotals = entryDate
         ? queryClient.getQueryData(queryKeys.macros.dailyTotals(entryDate))
-        : null;
+        : undefined;
 
       // Optimistically remove from infinite query data
       queryClient.setQueryData(
@@ -436,7 +492,9 @@ export function useDeleteMacroEntry() {
 
           const newPages = oldData.pages.map((page: any) => ({
             ...page,
-            entries: page.entries?.filter((e: any) => e.id !== id) || [],
+            entries:
+              page.entries?.filter((entryItem: any) => entryItem.id !== id) ||
+              [],
           }));
 
           return {
