@@ -23,26 +23,7 @@ const FinalCtaSection = React.lazy(
   () => import("../components/FinalCtaSection"),
 );
 
-// Static animation variants (hoisted to avoid recreation on each render)
-const headerVariants = {
-  hidden: { opacity: 0, filter: "blur(8px)", y: -6 },
-  visible: {
-    opacity: 1,
-    filter: "blur(0px)",
-    y: 0,
-    transition: { duration: 0.45, ease: [0.22, 1, 0.36, 1] },
-  },
-} as const;
-
-const heroVariants = {
-  hidden: { opacity: 0, scale: 0.98, y: 10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: "spring", stiffness: 140, damping: 18, mass: 0.7 },
-  },
-} as const;
+// (Animations for header/hero were removed to improve FCP/LCP)
 
 const wipeVariants = {
   hidden: { opacity: 0, clipPath: "inset(10% 0% 10% 0% round 16px)" },
@@ -100,21 +81,33 @@ const LandingPage: React.FC = () => {
   // Respect user's reduced motion preferences
   const shouldReduceMotion = useReducedMotion();
 
-  // Idle prefetch for lazy sections to improve perceived performance
+  // Idle and saver-aware prefetch for lazy sections to improve perceived performance
   useEffect(() => {
-    const timer = globalThis.setTimeout(() => {
+    const connection = (navigator as any).connection as
+      | { saveData?: boolean; effectiveType?: string }
+      | undefined;
+    const isDataSaver = connection?.saveData === true;
+    const isVerySlow = connection?.effectiveType === "2g";
+
+    if (isDataSaver || isVerySlow) {
+      return;
+    }
+    const doPrefetch = () => {
       void import("../components/FeaturesSection");
       void import("../components/PricingSection");
       void import("../components/ProductPreviewSection");
       void import("../components/FinalCtaSection");
-    }, 250);
-    return () => globalThis.clearTimeout(timer);
+    };
+    const schedulePrefetch = () => {
+      if ("requestIdleCallback" in globalThis) {
+        (globalThis as any).requestIdleCallback(doPrefetch, { timeout: 1500 });
+      } else {
+        setTimeout(doPrefetch, 500);
+      }
+    };
+    // Prefer scheduling after first paint
+    requestAnimationFrame(() => schedulePrefetch());
   }, []);
-
-  // Helper props depending on reduced motion
-  const baseRevealProps = shouldReduceMotion
-    ? { initial: false as const, animate: false as const }
-    : { initial: "hidden" as const, animate: "visible" as const };
 
   const inViewRevealProps = shouldReduceMotion
     ? { initial: false as const }
@@ -131,30 +124,27 @@ const LandingPage: React.FC = () => {
       {/* Shared background */}
       <PageBackground />
 
-      {/* Header landmark - enter on mount */}
-      <motion.div
-        {...baseRevealProps}
-        variants={headerVariants}
-        aria-hidden={false}
-      >
+      {/* Header landmark - render immediately without entrance animation */}
+      <div aria-hidden={false}>
         <Header />
-      </motion.div>
+      </div>
 
       {/* Main content landmark for accessibility */}
       <main className="relative z-10 bg-background">
         {/* Shared background */}
         <PageBackground />
 
-        {/* Hero - enter on mount with scale-in */}
-        <motion.div {...baseRevealProps} variants={heroVariants}>
+        {/* Hero - render immediately without entrance animation */}
+        <div>
           <HeroSection />
-        </motion.div>
+        </div>
         <SectionDivider />
         {/* Features - wipe reveal, parent enables staggerChildren for inner items */}
         <motion.section
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
         >
           <ErrorBoundary>
             <Suspense fallback={<ThemedFallback />}>
@@ -168,6 +158,7 @@ const LandingPage: React.FC = () => {
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
         >
           <ErrorBoundary>
             <Suspense fallback={<ThemedFallback />}>
@@ -181,6 +172,7 @@ const LandingPage: React.FC = () => {
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
         >
           <ErrorBoundary>
             <Suspense fallback={<ThemedFallback />}>
@@ -213,6 +205,7 @@ const LandingPage: React.FC = () => {
           {...inViewRevealProps}
           variants={wipeVariants}
           className="rounded-2xl"
+          style={{ contentVisibility: "auto", containIntrinsicSize: "400px" }}
           data-cta-reveal
         >
           <ErrorBoundary>

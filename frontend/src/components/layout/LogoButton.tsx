@@ -27,6 +27,11 @@ const LogoButton: React.FC<LogoButtonProps> = ({
         alt="" // decorative icon
         className="inline-block h-16 w-16 drop-shadow-md"
         aria-hidden="true"
+        width={64}
+        height={64}
+        loading="eager"
+        decoding="async"
+        fetchPriority="high"
       />
       {/* Gradient Text */}
       <span className="relative z-10 text-2xl leading-none transition-shadow duration-300">
