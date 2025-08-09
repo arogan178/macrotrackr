@@ -1,5 +1,4 @@
 import { Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
 import React from "react";
 
 import LogoButton from "@/components/layout/LogoButton";
