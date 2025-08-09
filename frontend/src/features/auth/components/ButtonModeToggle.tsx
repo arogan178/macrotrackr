@@ -10,7 +10,9 @@ function ButtonModeToggle({ mode, onToggle }: ButtonModeToggleProps) {
     <Button
       type="button"
       onClick={onToggle}
-      className="group flex flex-col items-center rounded-lg px-6 py-3 text-foreground transition-colors hover:bg-surface/30 hover:text-foreground"
+      aria-label={mode === "login" ? "Switch to register" : "Switch to login"}
+      title={mode === "login" ? "Register" : "Login"}
+      className="group flex flex-col items-center px-6 py-3 rounded-lg  text-foreground bg-surface/40 hover:bg-surface/70 backdrop-blur-sm shadow-surface transition-colors hover:text-foreground"
       variant="ghost"
     >
       <div className="text-center">
@@ -21,7 +23,7 @@ function ButtonModeToggle({ mode, onToggle }: ButtonModeToggleProps) {
           <span className="font-semibold">
             {mode === "login" ? "Register" : "Login"}
           </span>
-          <ForwardIcon />
+          <ForwardIcon className="ml-2 h-4 w-4" />
         </div>
       </div>
     </Button>
