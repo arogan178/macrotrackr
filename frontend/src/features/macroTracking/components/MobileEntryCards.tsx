@@ -1,9 +1,8 @@
 import { AnimatePresence, motion } from "motion/react";
 import { memo } from "react";
 
-import { IconButton, IconButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/macros";
-import { ChevronDownIcon } from "@/components/ui";
+import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
 interface GroupedEntry {
@@ -52,7 +51,7 @@ const EntryCard = memo(
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
   }) => (
     <motion.div
-      className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30"
+      className="rounded-lg bg-surface-3 p-4 "
       initial={{ opacity: 0, y: 20, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
@@ -60,12 +59,12 @@ const EntryCard = memo(
       layout
       whileHover={{ scale: 1.02 }}
     >
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-gray-300 text-sm font-medium">
+          <span className="text-sm font-medium text-foreground">
             {formatTimeFromEntry(entry)}
           </span>
-          <span className="text-indigo-300 font-medium text-sm">
+          <span className="text-sm font-medium text-secondary">
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
@@ -83,7 +82,7 @@ const EntryCard = memo(
           animate={{ opacity: 1 }}
           transition={{ delay: 0.1 }}
         >
-          <span className="text-gray-400 text-sm">
+          <span className="text-sm text-muted">
             {entry.foodName || entry.mealName}
           </span>
         </motion.div>
@@ -96,34 +95,34 @@ const EntryCard = memo(
         transition={{ delay: 0.2, staggerChildren: 0.05 }}
       >
         {[
-          { label: "Protein", value: entry.protein, color: "text-green-400" },
-          { label: "Carbs", value: entry.carbs, color: "text-blue-400" },
-          { label: "Fats", value: entry.fats, color: "text-red-400" },
+          { label: "Protein", value: entry.protein, color: "text-protein" },
+          { label: "Carbs", value: entry.carbs, color: "text-carbs" },
+          { label: "Fats", value: entry.fats, color: "text-fats" },
         ].map((macro, index) => (
           <motion.div
             key={macro.label}
-            className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3"
+            className="flex items-center justify-between rounded-lg bg-surface-4 p-3"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 * index }}
             whileHover={{ scale: 1.05 }}
           >
-            <span className="text-gray-400 text-sm">{macro.label}</span>
+            <span className="text-sm text-foreground">{macro.label}</span>
             <MacroCell value={macro.value} suffix="g" color={macro.color} />
           </motion.div>
         ))}
         <motion.div
-          className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3 col-span-3"
+          className="col-span-3 flex items-center justify-between rounded-lg bg-surface-4 p-3"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           whileHover={{ scale: 1.05 }}
         >
-          <span className="text-gray-400 text-sm">Calories</span>
+          <span className="text-sm text-foreground">Calories</span>
           <MacroCell
             value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
             suffix=" kcal"
-            color="text-white"
+            color="text-vibrant-accent"
           />
         </motion.div>
       </motion.div>
@@ -157,16 +156,16 @@ const MobileEntryCards = memo(
         {initialEntries.map((group) => (
           <motion.div
             key={group.date}
-            className="border-b border-gray-700/30 last:border-b-0"
+            className="border-b border-border/30 last:border-b-0"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {/* Date Header */}
             <motion.div
-              className="flex items-center justify-between p-4 bg-indigo-600/10 border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors"
+              className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
               onClick={() => toggleDateCollapse(group.date)}
-              whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
+              whileHover={{ backgroundColor: "bg-primary/30" }}
               transition={{ duration: 0.2 }}
             >
               <div className="flex items-center gap-3">
@@ -176,25 +175,25 @@ const MobileEntryCards = memo(
                   }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
                 >
-                  <ChevronDownIcon className="w-5 h-5 text-indigo-300" />
+                  <ChevronDownIcon className=" text-foreground" />
                 </motion.div>
-                <h3 className="font-semibold text-indigo-300 text-base">
+                <h3 className="text-base font-semibold text-foreground">
                   {formatDate(group.date)}
                 </h3>
               </div>
 
               {/* Date Totals */}
               <div className="flex items-center gap-4 text-xs">
-                <span className="text-green-400 font-medium">
+                <span className="font-medium text-protein">
                   {group.totals.protein}g P
                 </span>
-                <span className="text-blue-400 font-medium">
+                <span className="font-medium text-carbs">
                   {group.totals.carbs}g C
                 </span>
-                <span className="text-red-400 font-medium">
+                <span className="font-medium text-fats">
                   {group.totals.fats}g F
                 </span>
-                <span className="text-white font-medium">
+                <span className="font-medium text-vibrant-accent">
                   {group.totals.calories} kcal
                 </span>
                 <IconButton
@@ -264,7 +263,7 @@ const MobileEntryCards = memo(
             additionalEntries.map((group) => (
               <motion.div
                 key={group.date}
-                className="border-b border-gray-700/30 last:border-b-0"
+                className="border-b border-border/30 last:border-b-0"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{
                   opacity: 1,
@@ -286,9 +285,9 @@ const MobileEntryCards = memo(
               >
                 {/* Date Header */}
                 <motion.div
-                  className="flex items-center justify-between p-4 bg-indigo-600/10 border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors"
+                  className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/30"
                   onClick={() => toggleDateCollapse(group.date)}
-                  whileHover={{ backgroundColor: "rgba(99, 102, 241, 0.15)" }}
+                  whileHover={{ backgroundColor: "bg-primary/30" }}
                   transition={{ duration: 0.2 }}
                 >
                   <div className="flex items-center gap-3">
@@ -300,25 +299,25 @@ const MobileEntryCards = memo(
                       }}
                       transition={{ duration: 0.2, ease: "easeInOut" }}
                     >
-                      <ChevronDownIcon className="w-5 h-5 text-indigo-300" />
+                      <ChevronDownIcon className=" text-foreground" />
                     </motion.div>
-                    <h3 className="font-semibold text-indigo-300 text-base">
+                    <h3 className="text-base font-semibold text-foreground">
                       {formatDate(group.date)}
                     </h3>
                   </div>
 
                   {/* Date Totals */}
                   <div className="flex items-center gap-4 text-xs">
-                    <span className="text-green-400 font-medium">
+                    <span className="font-medium text-protein">
                       {group.totals.protein}g P
                     </span>
-                    <span className="text-blue-400 font-medium">
+                    <span className="font-medium text-carbs">
                       {group.totals.carbs}g C
                     </span>
-                    <span className="text-red-400 font-medium">
+                    <span className="font-medium text-fats">
                       {group.totals.fats}g F
                     </span>
-                    <span className="text-white font-medium">
+                    <span className="font-medium text-vibrant-accent">
                       {group.totals.calories} kcal
                     </span>
                     <IconButton

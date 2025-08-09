@@ -3,6 +3,7 @@ import { ReactNode } from "react";
 import { LoadingSpinner } from "@/components/ui";
 import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
+/* eslint-disable react/prop-types */
 
 interface LoadingStateProps {
   /**
@@ -133,7 +134,7 @@ interface QueryLoadingWrapperProps {
   /**
    * The error object if there is one
    */
-  error?: Error | null;
+  error?: Error | undefined;
 
   /**
    * Content to show when loaded successfully
@@ -167,7 +168,8 @@ interface QueryLoadingWrapperProps {
 export function QueryLoadingWrapper({
   isLoading,
   isError = false,
-  error = null,
+  // Use optional chaining below; keep default to undefined without explicit assignment
+  error,
   children,
   loadingComponent,
   errorComponent,
@@ -186,10 +188,10 @@ export function QueryLoadingWrapper({
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
         {errorComponent || (
-          <div className="text-red-400 text-center">
+          <div className="text-center text-vibrant-accent">
             <p className="font-medium">Error loading data</p>
-            {error && (
-              <p className="text-sm text-gray-400 mt-1">{error.message}</p>
+            {error?.message && (
+              <p className="mt-1 text-sm text-foreground">{error.message}</p>
             )}
           </div>
         )}
@@ -236,8 +238,9 @@ export function MutationLoadingButton({
   return (
     <button
       {...properties}
-      disabled={disabled || isLoading}
-      className={`${className} ${isLoading ? "opacity-75 cursor-not-allowed" : ""}`}
+      aria-busy={isLoading}
+      disabled={Boolean(disabled) || isLoading}
+      className={`${className} ${isLoading ? "cursor-not-allowed opacity-75" : ""}`}
     >
       {isLoading ? (
         <div className="flex items-center justify-center space-x-2">

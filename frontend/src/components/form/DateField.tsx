@@ -1,7 +1,7 @@
 import { memo } from "react";
 
-import { formStyles } from "@/components/utils/Styles";
-import type { DateFieldProps } from "@/components/utils/Types";
+import { formStyles } from "@/components/form/Styles";
+import type { DateFieldProps } from "@/components/form/types";
 
 function getTodayISO() {
   const today = new Date();

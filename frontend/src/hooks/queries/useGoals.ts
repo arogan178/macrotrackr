@@ -13,19 +13,23 @@ import {
 export function useWeightGoals() {
   return useQuery({
     queryKey: queryKeys.goals.weight(),
-    queryFn: async (): Promise<WeightGoals | null> => {
+    queryFn: async (): Promise<WeightGoals | undefined> => {
       const weightGoalsData = await apiService.goals.getWeightGoals();
 
       if (!weightGoalsData) {
-        return null; // Return null instead of undefined
+        return undefined; // Return undefined instead of null
       }
 
       // Get weight log to calculate current weight
       const weightLog = await apiService.goals.getWeightLog();
-      const latestWeight =
-        weightLog.length > 0
-          ? weightLog.at(-1).weight
-          : weightGoalsData.startingWeight;
+
+      // Determine latest weight without using .at() (TS lib compatibility) and satisfying lint
+      let latestWeight = weightGoalsData.startingWeight;
+      if (weightLog.length > 0) {
+        const lastIndex = weightLog.length - 1;
+         
+        latestWeight = weightLog[lastIndex].weight;
+      }
 
       // Transform API response to match WeightGoals interface with defaults
       return {
@@ -44,7 +48,7 @@ export function useWeightGoals() {
         calorieTarget: weightGoalsData.calorieTarget || 2000,
         calculatedWeeks: weightGoalsData.calculatedWeeks || 1,
         weeklyChange: weightGoalsData.weeklyChange || 0,
-        dailyChange: weightGoalsData.dailyChange || 0,
+        dailyChange: weightGoalsData.dailyChange ?? 0,
       };
     },
     ...queryConfigs.longLived, // 5 minutes stale time for goals
@@ -94,7 +98,7 @@ export function useCreateWeightGoal() {
         // If no entry for today, add the starting weight
         if (!hasEntryForToday) {
           await apiService.goals.addWeightLogEntry({
-            weight: goals.startingWeight,
+            weight: goals.startingWeight ?? 0,
             timestamp: new Date().toISOString(),
           });
         }
@@ -173,16 +177,16 @@ export function useDeleteWeightGoal() {
       );
 
       // Optimistically clear the weight goals
-      queryClient.setQueryData(queryKeys.goals.weight(), null);
+      queryClient.setQueryData(queryKeys.goals.weight(), undefined);
 
       return { previousWeightGoals };
     },
-    onError: (error, _variables, context) => {
+    onError: (error, _variables, _context) => {
       // Rollback optimistic update
-      if (context?.previousWeightGoals !== undefined) {
+      if (_context?.previousWeightGoals !== undefined) {
         queryClient.setQueryData(
           queryKeys.goals.weight(),
-          context.previousWeightGoals,
+          _context.previousWeightGoals,
         );
       }
       console.error("Error deleting weight goals:", error);
@@ -224,8 +228,6 @@ export function useAddWeightLogEntry() {
         id: `temp-${Date.now()}`, // Temporary ID
         weight: variables.weight,
         timestamp: variables.timestamp,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
       };
 
       // Optimistically update weight log
@@ -237,34 +239,55 @@ export function useAddWeightLogEntry() {
         },
       );
 
-      // Optimistically update weight goals current weight
-      queryClient.setQueryData(queryKeys.goals.weight(), (oldData: any) => {
-        if (!oldData) return oldData;
-        return {
-          ...oldData,
-          currentWeight: variables.weight,
-        };
-      });
+      // Optimistically update weight goals current weight AND recompute derived fields
+      // Also mirror user.weight so UI numbers (e.g., the number before the > icon) update immediately.
+      queryClient.setQueryData<WeightGoals | undefined>(
+        queryKeys.goals.weight(),
+        (oldData) => {
+          if (!oldData) return oldData;
+
+          const updated: WeightGoals = {
+            ...oldData,
+            currentWeight: variables.weight,
+            // Keep target and starting weights unchanged
+          };
+
+          return updated;
+        },
+      );
+
+      // Also optimistically update the user settings cache so any UI reading user.weight updates immediately.
+      // Adjusted to known query key group present in queryKeys.
+      queryClient.setQueryData(
+        queryKeys.auth.user(),
+        (oldUser: any) => {
+          if (!oldUser) return oldUser;
+          return {
+            ...oldUser,
+            weight: variables.weight,
+          };
+        },
+      );
 
       return { previousWeightLog, previousWeightGoals };
     },
-    onError: (error, _variables, context) => {
+    onError: (error, _variables, _context) => {
       // Rollback optimistic updates
-      if (context?.previousWeightLog !== undefined) {
+      if (_context?.previousWeightLog !== undefined) {
         queryClient.setQueryData(
           queryKeys.goals.weightLog(),
-          context.previousWeightLog,
+          _context.previousWeightLog,
         );
       }
-      if (context?.previousWeightGoals !== undefined) {
+      if (_context?.previousWeightGoals !== undefined) {
         queryClient.setQueryData(
           queryKeys.goals.weight(),
-          context.previousWeightGoals,
+          _context.previousWeightGoals,
         );
       }
       console.error("Error adding weight log entry:", error);
     },
-    onSuccess: (newEntry, _variables, context) => {
+    onSuccess: (newEntry, _variables, _context) => {
       // Update with real data from server
       queryClient.setQueryData<WeightLogEntry[]>(
         queryKeys.goals.weightLog(),

@@ -1,65 +1,41 @@
-import { AnimatePresence, motion } from "motion/react";
-import { ReactNode } from "react";
+import { memo, ReactNode } from "react";
 
-import SettingsLoadingSkeleton from "@/features/settings/components/SettingsLoadingSkeleton";
-import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
-
-import ErrorBoundary from "../ui/ErrorBoundary";
-import { QueryErrorBoundary } from "../ui/QueryErrorBoundary";
-import { DashboardPageContainer } from "./DashboardPageContainer";
-import Navbar from "./Navbar";
 import { PageHeader } from "./PageHeader";
 
 /**
- * FeaturePage layout component.
- * - Wraps content in DashboardPageContainer, Navbar, PageHeader, error boundaries, and animation.
- * - Accepts title, subtitle, feature, and children.
+ * FeaturePage (presentation-only)
+ *
+ * Intent:
+ * - Lightweight wrapper that renders only the H1 title, optional subtitle,
+ *   and optional header area (e.g., tabs or actions), followed by children.
+ * - It MUST NOT introduce routing, providers, error boundaries, animations,
+ *   dynamic keys, or any hook-based loading logic.
+ * - Children are rendered directly to preserve identity across renders.
+ *
+ * Usage constraints:
+ * - Do not pass new object/array literals as props on every render; memoize them in the page.
+ * - Place app-wide containers/providers (e.g., DashboardPageContainer, Navbar,
+ *   QueryErrorBoundary, ErrorBoundary) at the page or layout level, not here.
  */
-interface FeaturePageProps {
+export interface FeaturePageProps {
   title: string;
   subtitle?: string;
   headerChildren?: ReactNode;
   children: ReactNode;
-  feature?: FeatureType;
-  loadingSkeleton?: ReactNode;
 }
 
-export function FeaturePage({
-  title,
-  subtitle,
-  headerChildren,
-  children,
-  feature,
-  loadingSkeleton,
-}: FeaturePageProps) {
-  const loading = feature ? useFeatureLoading(feature) : undefined;
-  const isLoading = loading?.isLoading ?? false;
-
+function FeaturePageImpl({ title, subtitle, headerChildren, children }: FeaturePageProps) {
   return (
-    <DashboardPageContainer>
-      <Navbar />
-      <QueryErrorBoundary>
-        <ErrorBoundary>
-          <PageHeader title={title} subtitle={subtitle}>
-            {headerChildren}
-          </PageHeader>
-          <AnimatePresence mode="wait">
-            <motion.div
-              key="feature-page-content"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
-              {isLoading
-                ? (loadingSkeleton ?? <SettingsLoadingSkeleton />)
-                : children}
-            </motion.div>
-          </AnimatePresence>
-        </ErrorBoundary>
-      </QueryErrorBoundary>
-    </DashboardPageContainer>
+    <div>
+      <PageHeader title={title} subtitle={subtitle}>
+        {headerChildren}
+      </PageHeader>
+      {children}
+    </div>
   );
 }
 
+// Memoized to avoid unnecessary re-renders when props are stable.
+// This does not prevent children updates; it only guards the wrapper.
+export const FeaturePage = memo(FeaturePageImpl);
 export default FeaturePage;
