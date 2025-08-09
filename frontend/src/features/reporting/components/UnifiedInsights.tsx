@@ -21,9 +21,13 @@ import {
 } from "../utils/insightsCalculations";
 import {
   BAR_BASE_CLASSES,
+  CARD_BASE_CLASSES,
   getColorByScore,
   parseMacroRatio,
+  SECTION_HEADING_CLASSES,
   STAGGER,
+  SUBTEXT_MUTED_CLASSES,
+  TRANSITIONS,
 } from "../utils/unifiedInsightsUtilities";
 import AtAGlanceSection from "./AtAGlanceSection";
 import MetricCard from "./MetricCard";
@@ -37,6 +41,7 @@ function UnifiedInsights({
   showNoDataMessage = false,
   macroTarget,
   denominatorDays,
+  dailySeriesForRange,
 }: UnifiedInsightsProps) {
   // Calculate all insights metrics in one pass
   const insights = useMemo(() => {
@@ -50,18 +55,36 @@ function UnifiedInsights({
           ? denominatorDays
           : aggregatedData.length;
 
+      // For 7/30/90 day ranges, use dailySeriesForRange if provided so
+      // daysLogged reflects individual tracked days in the selected window.
+      const dataForQuality = Array.isArray(dailySeriesForRange)
+        ? dailySeriesForRange
+        : aggregatedData;
+
       return {
-        consistencyScore: calculateConsistencyScore(aggregatedData),
+        consistencyScore: calculateConsistencyScore(
+          Array.isArray(dailySeriesForRange)
+            ? dailySeriesForRange
+            : aggregatedData,
+          denominator,
+        ),
         macroBalance: calculateMacroBalance(averages, macroTarget),
         caloriesTrend: calculateTrend(aggregatedData, "calories"),
         proteinTrend: calculateTrend(aggregatedData, "protein"),
-        dataQuality: calculateDataQuality(aggregatedData, denominator),
+        dataQuality: calculateDataQuality(dataForQuality as any, denominator),
         macroDensity: calculateMacroDensity(averages),
       };
     } catch {
       // No return needed; fallthrough for no insights
     }
-  }, [aggregatedData, averages, isLoading, macroTarget, denominatorDays]);
+  }, [
+    aggregatedData,
+    averages,
+    isLoading,
+    macroTarget,
+    denominatorDays,
+    dailySeriesForRange,
+  ]);
 
   // Handle loading state
   if (isLoading) {
@@ -102,10 +125,8 @@ function UnifiedInsights({
   } = insights;
 
   return (
-    <div className="rounded-xl border border-border/50 bg-surface p-6 shadow-modal backdrop-blur-sm">
-      <h2 className="mb-6 text-lg font-semibold text-foreground">
-        Nutrition Insights
-      </h2>
+    <div className={CARD_BASE_CLASSES}>
+      <h2 className={`mb-6 ${SECTION_HEADING_CLASSES}`}>Nutrition Insights</h2>
 
       {/* Top metrics grid - key performance indicators */}
       <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-1 md:grid-cols-3">
@@ -174,7 +195,9 @@ function UnifiedInsights({
                         );
                       })}
                     </div>
-                    <div className="mt-1 flex justify-between text-xs">
+                    <div
+                      className={`mt-1 flex justify-between ${SUBTEXT_MUTED_CLASSES}`}
+                    >
                       {parts.map((pct, index) => {
                         const labels = ["Protein", "Carbs", "Fats"];
                         const colors = [
@@ -231,7 +254,11 @@ function UnifiedInsights({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: STAGGER.sectionTrend }}
+          transition={{
+            duration: TRANSITIONS.duration,
+            ease: TRANSITIONS.ease,
+            delay: STAGGER.sectionTrend,
+          }}
           className={SECTION_STYLES.trendAnalysis}
           aria-label="Trend analysis"
         >
@@ -248,7 +275,11 @@ function UnifiedInsights({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3, delay: STAGGER.sectionTracking }}
+          transition={{
+            duration: TRANSITIONS.duration,
+            ease: TRANSITIONS.ease,
+            delay: STAGGER.sectionTracking,
+          }}
           className={SECTION_STYLES.trackingAnalysis}
           aria-label="Tracking analysis"
         >

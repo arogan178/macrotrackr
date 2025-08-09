@@ -252,6 +252,7 @@ export default function ReportingPage() {
                         showNoDataMessage={showNoDataMessage}
                         macroTarget={macroTarget}
                         denominatorDays={mapDateRangeToNumeric(dateRange)}
+                        dailySeriesForRange={dailySeries}
                       />
                     </ProFeature>
                   </div>
