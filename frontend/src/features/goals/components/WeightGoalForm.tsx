@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { FormButton, NumberField } from "@/components/form";
+import { NumberField } from "@/components/form";
+import { Button } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 
 import { generateWeightGoalCalculations } from "../calculations";
@@ -47,29 +48,31 @@ function WeightGoalForm({
     });
   }, [weightGoals, startingWeight, targetWeight, todayString]);
 
-  // Calculate all derived values from current form state and tdee
-  const calculations =
-    tdee && formValues.startingWeight && formValues.targetWeight
+  // Calorie intake is either user-adjusted or default from calculations
+  const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
+    weightGoals?.calorieTarget ?? undefined,
+  );
+
+  // Recalculate all derived values when calorieIntake or form values change
+  const calculations = useMemo(() => {
+    return tdee && formValues.startingWeight && formValues.targetWeight
       ? generateWeightGoalCalculations(
           tdee,
           formValues.startingWeight,
-          formValues.targetWeight, // let calculation use default calorie target
+          formValues.targetWeight,
+          calorieIntake,
         )
       : undefined;
+  }, [tdee, formValues.startingWeight, formValues.targetWeight, calorieIntake]);
 
-  // Calorie intake is either user-adjusted or default from calculations
-  const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-    weightGoals?.calorieTarget ?? calculations?.calorieTarget,
-  );
-
-  // When switching between edit/create or when form values change, update calorieIntake if not user-adjusted
+  // When switching between edit/create, update calorieIntake if not user-adjusted
   useEffect(() => {
     if (!isEditing) {
       setCalorieIntake(calculations?.calorieTarget);
     } else if (weightGoals?.calorieTarget) {
       setCalorieIntake(weightGoals.calorieTarget);
     }
-  }, [calculations?.calorieTarget, isEditing, weightGoals?.calorieTarget]);
+  }, [isEditing, weightGoals?.calorieTarget, calculations?.calorieTarget]);
 
   // Derived values for display
   const calculatedTargetDate = calculations?.targetDate;
@@ -105,7 +108,6 @@ function WeightGoalForm({
     targetWeight,
     calorieIntake,
     weightGoals,
-    calculations?.calorieTarget,
     isEditing,
   ]);
 
@@ -151,11 +153,11 @@ function WeightGoalForm({
 
   return (
     <div className="p-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+      <div className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
         <NumberField
           label="Starting Weight"
           value={formValues.startingWeight}
-          onChange={(value) =>
+          onChange={(value: number | undefined) =>
             setFormValues({ ...formValues, startingWeight: value || 0 })
           }
           unit="kg"
@@ -170,7 +172,7 @@ function WeightGoalForm({
         <NumberField
           label="Target Weight"
           value={formValues.targetWeight}
-          onChange={(value) =>
+          onChange={(value: number | undefined) =>
             setFormValues({ ...formValues, targetWeight: value })
           }
           unit="kg"
@@ -181,15 +183,15 @@ function WeightGoalForm({
         />
       </div>
       {tdee && calorieIntake !== undefined && formValues.targetWeight && (
-        <div className="space-y-3 mb-6">
-          <div className="flex justify-between items-center">
+        <div className="mb-6 space-y-3">
+          <div className="flex items-center justify-between">
             <label
               htmlFor="calorie-intake-range"
-              className="block text-sm font-medium text-gray-200"
+              className="block text-sm font-medium text-foreground"
             >
               Daily Calorie Intake
             </label>
-            <span className="text-sm text-gray-400">
+            <span className="text-sm text-foreground">
               {calorieIntake} calories/day
             </span>
           </div>
@@ -213,9 +215,9 @@ function WeightGoalForm({
               onChange={(event) =>
                 handleCalorieIntakeChange(Number(event.target.value))
               }
-              className="appearance-none w-full h-2 bg-gray-700 rounded-lg outline-none cursor-pointer"
+              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-surface outline-none"
             />
-            <div className="flex justify-between text-xs text-gray-400 mt-1">
+            <div className="mt-1 flex justify-between text-xs text-foreground">
               {isWeightLoss ? (
                 <>
                   <span>Faster</span>
@@ -239,8 +241,8 @@ function WeightGoalForm({
           </div>
 
           {!isMaintenance && (
-            <div className="bg-gray-700/30 p-3 rounded-lg">
-              <p className="text-sm text-gray-300">
+            <div className="rounded-lg bg-surface p-3">
+              <p className="text-sm text-foreground">
                 <span className="font-medium">
                   Estimated completion:{" "}
                   {calculatedTargetDate
@@ -255,31 +257,36 @@ function WeightGoalForm({
                     : "Calculating..."}
                 </span>
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="mt-1 text-xs text-foreground">
                 Expected change:{" "}
-                {weeklyWeightChange === undefined
-                  ? "Calculating..."
-                  : `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`}
+                {typeof weeklyWeightChange === "number" &&
+                !Number.isNaN(weeklyWeightChange)
+                  ? `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`
+                  : "0 kg per week"}
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="mt-1 text-xs text-foreground">
                 Estimated duration:{" "}
                 {calculatedWeeks === undefined
                   ? "Calculating..."
                   : `${calculatedWeeks} weeks`}
               </p>
-              <div className="mt-2 pt-2 border-t border-gray-600/30">
-                <p className="text-xs text-gray-400 flex justify-between">
+              <div className="mt-2 border-t border-border/30 pt-2">
+                <p className="flex justify-between text-xs text-foreground">
                   <span>
-                    {isWeightLoss
-                      ? `Deficit: ${Math.abs(tdee - calorieIntake)} kcal`
-                      : `Surplus: ${Math.abs(tdee - calorieIntake)} kcal`}
+                    {(() => {
+                      const diff = Math.abs(tdee - calorieIntake);
+                      const displayDiff = Math.max(diff, 50);
+                      return isWeightLoss
+                        ? `Deficit: ${displayDiff} kcal`
+                        : `Surplus: ${displayDiff} kcal`;
+                    })()}
                   </span>
                   <span
                     className={
                       (isWeightLoss && Math.abs(tdee - calorieIntake) > 800) ||
                       (!isWeightLoss && Math.abs(tdee - calorieIntake) > 800)
-                        ? "text-orange-400"
-                        : "text-green-400"
+                        ? "text-vibrant-accent"
+                        : "text-success"
                     }
                   >
                     {(isWeightLoss && Math.abs(tdee - calorieIntake) > 800) ||
@@ -293,11 +300,11 @@ function WeightGoalForm({
           )}
 
           {isMaintenance && (
-            <div className="bg-gray-700/30 p-3 rounded-lg">
-              <p className="text-sm text-gray-300">
+            <div className="rounded-lg bg-surface p-3">
+              <p className="text-sm text-foreground">
                 <span className="font-medium">Maintenance Goal</span>
               </p>
-              <p className="text-xs text-gray-400 mt-1">
+              <p className="mt-1 text-xs text-foreground">
                 You're aiming to maintain your current weight with{" "}
                 {calorieIntake < tdee
                   ? "slightly fewer"
@@ -313,11 +320,11 @@ function WeightGoalForm({
 
       <div className="flex justify-end gap-3">
         {weightGoals && (
-          <FormButton type="button" variant="secondary" onClick={onCancel}>
+          <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel
-          </FormButton>
+          </Button>
         )}
-        <FormButton
+        <Button
           type="button"
           variant="primary"
           disabled={!hasChanges || isLoading || !formValues.targetWeight} // Use isLoading prop
@@ -325,7 +332,7 @@ function WeightGoalForm({
           onClick={handleSave}
         >
           {weightGoals ? "Update Goal" : "Set Goal"}{" "}
-        </FormButton>
+        </Button>
       </div>
     </div>
   );

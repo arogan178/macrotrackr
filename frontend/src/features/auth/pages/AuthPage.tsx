@@ -1,5 +1,9 @@
+import { Link } from "@tanstack/react-router";
 import { useCallback, useRef, useState } from "react";
 
+import CardContainer from "@/components/form/CardContainer";
+import LogoButton from "@/components/layout/LogoButton";
+import { BackIcon, Button } from "@/components/ui";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import {
@@ -8,6 +12,7 @@ import {
   LoginForm,
   RegisterForm,
 } from "@/features/auth/components";
+import PageBackground from "@/features/landing/components/PageBackground";
 
 // --- Animation Constants (keep in local scope, not shared: only used here) ---
 const ANIMATION_HEIGHT_DURATION = 500; // ms
@@ -135,44 +140,43 @@ export default function AuthPage() {
   return (
     <QueryErrorBoundary>
       <ErrorBoundary>
-        <div
-          className="auth-page min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900"
-          aria-label="Authentication page"
-        >
-          {/* Background decorative elements (non-interactive, aria-hidden) */}
-          <div
-            className="absolute inset-0 bg-[radial-gradient(circle_at_center,_rgba(67,56,202,0.15),transparent)] pointer-events-none"
-            aria-hidden="true"
-          ></div>
-          <div className="absolute inset-0 overflow-hidden" aria-hidden="true">
-            <div className="absolute -inset-[10px] opacity-50">
-              <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full filter blur-3xl"></div>
-              <div className="absolute top-3/4 right-1/3 w-64 h-64 bg-blue-600/20 rounded-full filter blur-3xl"></div>
-            </div>
-          </div>
-
-          <div className="w-full max-w-md relative z-10 px-4">
-            {/* Error notifications are now handled by individual components */}
-
-            {/* Animated form container (login/register) */}
-            <div ref={formContainerReference} style={styles.container}>
-              <div ref={contentReference} style={styles.content}>
-                {renderForm()}
+        <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
+          <PageBackground />
+          <header className="z-10 border-b border-border bg-surface-2">
+            <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between py-6">
+                <Link to="/" className="flex items-center" aria-label="Home">
+                  <LogoButton className="h-0" />
+                </Link>
               </div>
             </div>
+          </header>
 
-            {/* Toggle login/register button */}
-            {mode !== "forgotPassword" && (
-              <div className="mt-8 flex justify-center">
-                <ButtonModeToggle
-                  mode={mode}
-                  onToggle={() =>
-                    toggleMode(mode === "login" ? "register" : "login")
-                  }
-                />
+          <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+            <section className="flex w-full flex-col items-center justify-center">
+              <div className="w-full max-w-md">
+                <CardContainer>
+                  {/* Animated form container (login/register) */}
+                  <div ref={formContainerReference} style={styles.container}>
+                    <div ref={contentReference} style={styles.content}>
+                      {renderForm()}
+                    </div>
+                  </div>
+                </CardContainer>
+                {/* Toggle login/register button */}
+                {mode !== "forgotPassword" && (
+                  <div className="mt-8 flex justify-center">
+                    <ButtonModeToggle
+                      mode={mode}
+                      onToggle={() =>
+                        toggleMode(mode === "login" ? "register" : "login")
+                      }
+                    />
+                  </div>
+                )}
               </div>
-            )}
-          </div>
+            </section>
+          </main>
         </div>
       </ErrorBoundary>
     </QueryErrorBoundary>
