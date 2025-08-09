@@ -125,80 +125,90 @@ export function useSpecificMutationLoading(mutationKey?: unknown[]) {
 /**
  * Hook for aggregating loading states of multiple features
  */
-export function useMultiFeatureLoading(features: FeatureType[]) {
-  const loadingStates = features.map((feature) => useFeatureLoading(feature));
+export function useMultiFeatureLoading(requested: FeatureType[]) {
+  // Fixed ordered set of features to satisfy rules-of-hooks
+  const ordered: FeatureType[] = ["auth", "habits", "goals", "macros", "settings"];
 
-  const isAnyQueryLoading = loadingStates.some((state) => state.isQueryLoading);
-  const isAnyMutationLoading = loadingStates.some(
-    (state) => state.isMutationLoading,
-  );
-  const isAnyLoading = loadingStates.some((state) => state.isLoading);
+  // For each known feature, compute keys and call query/mutation hooks in a fixed order
+  const authKey = [...queryKeys.auth.all()];
+  const authFetching = useIsFetching({ queryKey: authKey });
+  const authMutating = useIsMutating({ mutationKey: authKey });
 
-  const totalActiveQueries = loadingStates.reduce(
-    (sum, state) => sum + state.activeQueries,
-    0,
-  );
-  const totalActiveMutations = loadingStates.reduce(
-    (sum, state) => sum + state.activeMutations,
-    0,
-  );
+  const habitsKey = [...queryKeys.habits.all()];
+  const habitsFetching = useIsFetching({ queryKey: habitsKey });
+  const habitsMutating = useIsMutating({ mutationKey: habitsKey });
 
-  // Build featureStates object using a for loop for readability
-  const allFeatureTypes: FeatureType[] = [
-    "auth",
-    "habits",
-    "goals",
-    "macros",
-    "settings",
-  ];
-  const featureStates = {} as Record<
-    FeatureType,
-    ReturnType<typeof useFeatureLoading>
-  >;
-  // Initialize all keys to a default state
-  for (const feature of allFeatureTypes) {
-    featureStates[feature] = {
-      isQueryLoading: false,
-      isMutationLoading: false,
-      isLoading: false,
-      activeQueries: 0,
-      activeMutations: 0,
-    };
+  const goalsKey = [...queryKeys.goals.all()];
+  const goalsFetching = useIsFetching({ queryKey: goalsKey });
+  const goalsMutating = useIsMutating({ mutationKey: goalsKey });
+
+  const macrosKey = [...queryKeys.macros.all()];
+  const macrosFetching = useIsFetching({ queryKey: macrosKey });
+  const macrosMutating = useIsMutating({ mutationKey: macrosKey });
+
+  const settingsKey = [...queryKeys.settings.all()];
+  const settingsFetching = useIsFetching({ queryKey: settingsKey });
+  const settingsMutating = useIsMutating({ mutationKey: settingsKey });
+
+  const perFeature = {
+    auth: {
+      isQueryLoading: authFetching > 0,
+      isMutationLoading: authMutating > 0,
+      isLoading: authFetching > 0 || authMutating > 0,
+      activeQueries: authFetching,
+      activeMutations: authMutating,
+    },
+    habits: {
+      isQueryLoading: habitsFetching > 0,
+      isMutationLoading: habitsMutating > 0,
+      isLoading: habitsFetching > 0 || habitsMutating > 0,
+      activeQueries: habitsFetching,
+      activeMutations: habitsMutating,
+    },
+    goals: {
+      isQueryLoading: goalsFetching > 0,
+      isMutationLoading: goalsMutating > 0,
+      isLoading: goalsFetching > 0 || goalsMutating > 0,
+      activeQueries: goalsFetching,
+      activeMutations: goalsMutating,
+    },
+    macros: {
+      isQueryLoading: macrosFetching > 0,
+      isMutationLoading: macrosMutating > 0,
+      isLoading: macrosFetching > 0 || macrosMutating > 0,
+      activeQueries: macrosFetching,
+      activeMutations: macrosMutating,
+    },
+    settings: {
+      isQueryLoading: settingsFetching > 0,
+      isMutationLoading: settingsMutating > 0,
+      isLoading: settingsFetching > 0 || settingsMutating > 0,
+      activeQueries: settingsFetching,
+      activeMutations: settingsMutating,
+    },
+  } as const;
+
+  // Build featureStates for requested features only
+  const featureStates = {} as Record<FeatureType, ReturnType<typeof useFeatureLoading>>;
+  for (const f of ordered) {
+    featureStates[f] = perFeature[f];
   }
-  // Assign actual values for requested features
-  for (const [index, feature] of features.entries()) {
-    featureStates[feature] = loadingStates[index];
-  }
+
+  const filtered = requested.map((f) => perFeature[f]);
+
+  const isAnyQueryLoading = filtered.some((s) => s.isQueryLoading);
+  const isAnyMutationLoading = filtered.some((s) => s.isMutationLoading);
+  const isAnyLoading = filtered.some((s) => s.isLoading);
+
+  const totalActiveQueries = filtered.reduce((sum, s) => sum + s.activeQueries, 0);
+  const totalActiveMutations = filtered.reduce((sum, s) => sum + s.activeMutations, 0);
 
   return {
-    /**
-     * True if any query across the specified features is loading
-     */
     isQueryLoading: isAnyQueryLoading,
-
-    /**
-     * True if any mutation across the specified features is running
-     */
     isMutationLoading: isAnyMutationLoading,
-
-    /**
-     * True if any operation across the specified features is active
-     */
     isLoading: isAnyLoading,
-
-    /**
-     * Total number of active queries across all features
-     */
     totalActiveQueries,
-
-    /**
-     * Total number of active mutations across all features
-     */
     totalActiveMutations,
-
-    /**
-     * Loading state for each individual feature
-     */
     featureStates,
   };
 }

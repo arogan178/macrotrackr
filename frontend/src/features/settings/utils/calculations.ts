@@ -5,6 +5,10 @@ import type {
   UserNutritionalProfile,
   UserSettings,
 } from "@/types/user";
+import {
+  calculateBMR as calculateBMRCore,
+  calculateTDEE as calculateTDEECore,
+} from "@/utils/nutritionCalculations";
 
 import { ACTIVITY_LEVELS } from "./constants";
 
@@ -14,40 +18,29 @@ import { ACTIVITY_LEVELS } from "./constants";
  */
 
 function calculateAgeValue(birthDate: Date): number {
-  const age = new Date().getFullYear() - new Date(birthDate).getFullYear();
-  return age;
+  const now = new Date();
+  let age = now.getFullYear() - birthDate.getFullYear();
+  const m = now.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return Math.max(0, Math.min(120, age));
 }
-
 function calculateBMRValue(
   weight: number,
   height: number,
   age: number,
   isMale: boolean,
 ): number {
-  // Add proper validation to avoid negative values
-  if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
-    return 0;
-  }
-
-  // Ensure we're using the correct formula with reasonable constraints
-  const safeWeight = Math.max(30, Math.min(300, weight)); // Limit weight to realistic range
-  const safeHeight = Math.max(100, Math.min(250, height)); // Limit height to realistic range
-  const safeAge = Math.min(120, Math.max(1, age)); // Limit age to realistic range
-
-  // Mifflin-St Jeor Equation
-  const baseCalculation = 10 * safeWeight + 6.25 * safeHeight - 5 * safeAge;
-  const bmr = isMale ? baseCalculation + 5 : baseCalculation - 161;
-
-  // Ensure BMR is always positive and reasonable
-  return Math.max(500, bmr); // Minimum realistic BMR
+  return calculateBMRCore(
+    weight,
+    height,
+    age,
+    isMale ? ("male" as Gender) : ("female" as Gender),
+  );
 }
-
-/**
- * Calculate TDEE based on BMR and activity multiplier
- */
 function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
-  if (!bmr) return 0;
-  return Math.round(bmr * activityMultiplier);
+  return calculateTDEECore(bmr, activityMultiplier);
 }
 
 /**

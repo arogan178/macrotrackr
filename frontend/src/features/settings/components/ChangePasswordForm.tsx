@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { LockIcon } from "@/components/ui";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, LockIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 // Notifications are handled by the global NotificationManager and store
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
@@ -19,7 +19,7 @@ const ChangePasswordForm = () => {
         showNotification(message, "error");
       },
       onSuccess: (message) => {
-        setSuccessMessage(message);
+        // Local successMessage state removed; use global notification only
         showNotification(message, "success");
       },
     });
@@ -28,7 +28,8 @@ const ChangePasswordForm = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
-  const [successMessage, setSuccessMessage] = useState<string | undefined>();
+  // success message is shown via global notifications; local state removed
+  // const [successMessage, setSuccessMessage] = useState<string | undefined>();
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -61,16 +62,16 @@ const ChangePasswordForm = () => {
     <CardContainer className="p-6 sm:p-8">
       <form onSubmit={handleSubmit} className="space-y-8">
         {/* Header section to match ProfileForm pattern */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 space-y-4 sm:space-y-0">
+        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
-            <div className="p-3 bg-gradient-to-br from-red-400/20 to-red-500/20 rounded-xl mr-4">
-              <LockIcon className="w-7 h-7 text-red-400 flex-shrink-0" />
+            <div className="mr-4 rounded-xl bg-gradient-to-br from-red-400/20 to-red-500/20 p-3">
+              <LockIcon className="h-7 w-7 flex-shrink-0 text-vibrant-accent" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-xl font-bold text-gray-100 truncate">
+              <h3 className="truncate text-xl font-bold text-foreground">
                 Security Settings
               </h3>
-              <p className="text-sm text-gray-400 mt-1">
+              <p className="mt-1 text-sm text-foreground">
                 Update your password to keep your account secure
               </p>
             </div>
@@ -86,6 +87,8 @@ const ChangePasswordForm = () => {
             value={currentPassword}
             onChange={setCurrentPassword}
             required
+            name="currentPassword"
+            autoComplete="current-password"
           />
           <TextField
             label="New Password"
@@ -95,6 +98,8 @@ const ChangePasswordForm = () => {
             required
             minLength={8}
             helperText="Password must be at least 8 characters long."
+            name="newPassword"
+            autoComplete="new-password"
           />
           <TextField
             label="Confirm New Password"
@@ -103,12 +108,14 @@ const ChangePasswordForm = () => {
             onChange={setConfirmPassword}
             required
             error={formError ?? undefined}
+            name="confirmPassword"
+            autoComplete="new-password"
           />
         </div>
 
         {/* Submit button section */}
         <div className="mt-8 flex justify-end">
-          <FormButton
+          <Button
             type="submit"
             isLoading={changePasswordMutation.isPending}
             disabled={!currentPassword || !newPassword || !confirmPassword}

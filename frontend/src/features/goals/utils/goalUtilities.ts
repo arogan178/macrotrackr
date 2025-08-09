@@ -132,13 +132,45 @@ export function calculateGoalProgress(goals: WeightGoals): {
 } {
   const { startingWeight, currentWeight, targetWeight } = goals;
 
-  const totalChange = Math.abs(targetWeight - startingWeight);
-  const currentChange = Math.abs(currentWeight - startingWeight);
+  const start = Number(startingWeight);
+  const current = Number(currentWeight);
+  const target = Number(targetWeight);
 
-  const progress =
-    totalChange > 0 ? Math.min((currentChange / totalChange) * 100, 100) : 0;
-  const remainingWeight = Math.abs(targetWeight - currentWeight);
-  const isCompleted = progress >= 100;
+  // Minimal guard per requirement:
+  // If starting equals target, progress is 0 until current reaches target; then 100.
+  if (Number.isFinite(start) && Number.isFinite(target) && start === target) {
+    const isAtTarget =
+      Number.isFinite(current) && Math.abs(current - target) < 1e-9;
+    const remainingWhenEqual = Number.isFinite(current)
+      ? Math.abs(target - current)
+      : 0;
+
+    return {
+      progress: isAtTarget ? 100 : 0,
+      remainingWeight: Math.round(remainingWhenEqual * 10) / 10,
+      isCompleted: isAtTarget,
+    };
+  }
+
+  const totalChange =
+    Number.isFinite(target) && Number.isFinite(start)
+      ? Math.abs(target - start)
+      : 0;
+
+  const currentChange =
+    Number.isFinite(current) && Number.isFinite(start)
+      ? Math.abs(current - start)
+      : 0;
+
+  const rawProgress =
+    totalChange > 0 ? (currentChange / totalChange) * 100 : 0;
+
+  const progress = Math.max(0, Math.min(rawProgress, 100));
+  const remainingWeight =
+    Number.isFinite(target) && Number.isFinite(current)
+      ? Math.abs(target - current)
+      : 0;
+  const isCompleted = progress >= 100 - 1e-9;
 
   return {
     progress: Math.round(progress * 10) / 10, // Round to 1 decimal place

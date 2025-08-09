@@ -100,7 +100,7 @@ export function initializeSchema(db: Database) {
             icon_name TEXT NOT NULL,
             current INTEGER NOT NULL DEFAULT 0,
             target INTEGER NOT NULL DEFAULT 1,
-            accent_color TEXT CHECK(accent_color IN ('indigo', 'blue', 'green', 'purple')),
+            accent_color TEXT, -- CHECK removed; validated at app layer
             is_complete INTEGER NOT NULL DEFAULT 0, -- SQLite boolean (0=false, 1=true)
             created_at TEXT NOT NULL, -- Store as ISO 8601 date-time string
             completed_at TEXT, -- Store as ISO 8601 date-time string, NULL until completed
@@ -232,6 +232,63 @@ export function initializeSchema(db: Database) {
     logger.debug(
       "Subscription status normalization skipped (column may not exist yet)"
     );
+  }
+
+  // --- Conditional migration: rebuild habits table if old CHECK constraint exists ---
+  try {
+    // Inspect current CREATE TABLE statement for habits
+    const habitsCreate = db
+      .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'habits'")
+      .get() as { sql?: string } | undefined;
+
+    const hasOldCheck =
+      habitsCreate?.sql?.includes(
+        "accent_color TEXT CHECK(accent_color IN ('indigo', 'blue', 'green', 'purple'))"
+      ) ?? false;
+
+    if (hasOldCheck) {
+      logger.info("    🔧 Migrating habits table to remove accent_color CHECK constraint...");
+
+      db.exec("BEGIN IMMEDIATE TRANSACTION;");
+
+      // Create new table without CHECK constraint
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS habits_new (
+          id TEXT PRIMARY KEY NOT NULL,
+          user_id INTEGER NOT NULL,
+          title TEXT NOT NULL,
+          icon_name TEXT NOT NULL,
+          current INTEGER NOT NULL DEFAULT 0,
+          target INTEGER NOT NULL DEFAULT 1,
+          accent_color TEXT,
+          is_complete INTEGER NOT NULL DEFAULT 0,
+          created_at TEXT NOT NULL,
+          completed_at TEXT,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+      `);
+
+      // Copy all existing data
+      db.exec(`
+        INSERT INTO habits_new (
+          id, user_id, title, icon_name, current, target, accent_color, is_complete, created_at, completed_at
+        )
+        SELECT
+          id, user_id, title, icon_name, current, target, accent_color, is_complete, created_at, completed_at
+        FROM habits;
+      `);
+
+      // Replace old table
+      db.exec("DROP TABLE habits;");
+      db.exec("ALTER TABLE habits_new RENAME TO habits;");
+
+      // Recreate indexes for habits (idempotent below will ensure existence)
+      db.exec("COMMIT;");
+      logger.info("    ✅ habits table migrated successfully.");
+    }
+  } catch (error) {
+    logger.error({ error }, "    ❌ Failed migrating habits table; continuing with initialization");
+    try { db.exec("ROLLBACK;"); } catch {}
   }
 
   // --- Indexes for Performance ---

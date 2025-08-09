@@ -9,31 +9,31 @@ import React from "react";
  */
 const indicators = [
   {
-    icon: <ShieldCheck className="w-6 h-6 text-green-400" />,
-    bg: "bg-green-500/20",
-    hoverBg: "rgba(34, 197, 94, 0.3)",
+    icon: <ShieldCheck className="h-6 w-6 text-success" />,
+    bg: "bg-success/20",
+    hoverBg: "hover:bg-success/30",
     title: "Secure & Private",
     desc: "Your data is encrypted and protected",
-    hoverTitle: "text-green-100",
-    hoverDesc: "text-slate-300",
+    hoverTitle: "group-hover:text-success",
+    hoverDesc: "group-hover:text-foreground",
   },
   {
-    icon: <CircleHelp className="w-6 h-6 text-blue-400" />,
-    bg: "bg-blue-500/20",
-    hoverBg: "rgba(59, 130, 246, 0.3)",
+    icon: <CircleHelp className="h-6 w-6 text-primary" />,
+    bg: "bg-primary/20",
+    hoverBg: "hover:bg-primary/30",
     title: "24/7 Support",
     desc: "Get help whenever you need it",
-    hoverTitle: "text-blue-100",
-    hoverDesc: "text-slate-300",
+    hoverTitle: "group-hover:text-primary",
+    hoverDesc: "group-hover:text-foreground",
   },
   {
-    icon: <Sparkles className="w-6 h-6 text-purple-400" />,
-    bg: "bg-purple-500/20",
-    hoverBg: "rgba(147, 51, 234, 0.3)",
+    icon: <Sparkles className="h-6 w-6 text-secondary" />,
+    bg: "bg-secondary/20",
+    hoverBg: "hover:bg-secondary/30",
     title: "Always Improving",
     desc: "Regular updates and new features",
-    hoverTitle: "text-purple-100",
-    hoverDesc: "text-slate-300",
+    hoverTitle: "group-hover:text-secondary",
+    hoverDesc: "group-hover:text-foreground",
   },
 ];
 
@@ -57,11 +57,11 @@ const TrustIndicators: React.FC = () => (
     }}
     className="mt-16 text-center"
   >
-    <motion.div className="grid grid-cols-1 md:grid-cols-3 gap-8" variants={{}}>
+    <motion.div className="grid grid-cols-1 gap-8 md:grid-cols-3" variants={{}}>
       {indicators.map((item) => (
         <motion.div
           key={item.title}
-          className="flex flex-col items-center group"
+          className="group flex flex-col items-center"
           variants={{
             hidden: { opacity: 0, y: 40 },
             visible: {
@@ -74,26 +74,21 @@ const TrustIndicators: React.FC = () => (
               },
             },
           }}
-          whileHover={{ scale: 1.05, y: -5 }}
-          transition={{ type: "spring", stiffness: 400, damping: 30 }}
+          whileHover={{ scale: 1.03, y: -3 }}
+          transition={{ type: "spring", stiffness: 380, damping: 28 }}
         >
-          <motion.div
-            className={`w-12 h-12 ${item.bg} rounded-full flex items-center justify-center mb-3`}
-            whileHover={{
-              scale: 1.1,
-              backgroundColor: item.hoverBg,
-            }}
-            transition={{ duration: 0.2 }}
+          <div
+            className={`h-12 w-12 ${item.bg} ${item.hoverBg} mb-3 flex items-center justify-center rounded-full transition-colors duration-200`}
           >
             {item.icon}
-          </motion.div>
+          </div>
           <h4
-            className={`font-semibold text-white mb-1 group-hover:${item.hoverTitle} transition-colors duration-200`}
+            className={`mb-1 font-semibold text-foreground transition-colors duration-200 ${item.hoverTitle}`}
           >
             {item.title}
           </h4>
           <p
-            className={`text-slate-400 text-sm group-hover:${item.hoverDesc} transition-colors duration-200`}
+            className={`text-sm text-foreground transition-colors duration-200 ${item.hoverDesc}`}
           >
             {item.desc}
           </p>
