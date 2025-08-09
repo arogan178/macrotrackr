@@ -1,4 +1,4 @@
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import { IconButton } from "@/components/ui";
@@ -105,6 +105,8 @@ export default function ProductPreviewSection({
                   className="h-150 w-full object-cover"
                   loading="lazy"
                   decoding="async"
+                  width={800}
+                  height={600}
                 />
                 <div className="p-4 text-center text-sm text-muted">
                   {img.caption}
