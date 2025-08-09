@@ -48,6 +48,9 @@ export default defineConfig(() => {
       VitePWA({
         injectRegister: null,
         registerType: "autoUpdate",
+        devOptions: {
+          enabled: false,
+        },
         manifest: {
           name: "Macro Tracker",
           short_name: "MacroTracker",
@@ -57,29 +60,37 @@ export default defineConfig(() => {
           background_color: "#18181b",
           theme_color: "#6366f1",
           icons: [
+            // Ensure we reference existing PNG assets so installed app icons work
             {
-              src: "/favicon.svg",
-              sizes: "any",
-              type: "image/svg+xml",
+              src: "/icon.png",
+              sizes: "192x192",
+              type: "image/png",
               purpose: "any maskable",
             },
             {
-              src: "/icon-192.svg",
-              sizes: "192x192",
-              type: "image/svg+xml",
-              purpose: "any",
+              src: "/icon.png",
+              sizes: "256x256",
+              type: "image/png",
+              purpose: "any maskable",
             },
             {
-              src: "/icon-512.svg",
+              src: "/icon.png",
+              sizes: "384x384",
+              type: "image/png",
+              purpose: "any maskable",
+            },
+            {
+              src: "/icon.png",
               sizes: "512x512",
-              type: "image/svg+xml",
-              purpose: "any",
+              type: "image/png",
+              purpose: "any maskable",
             },
+            // Fallback favicon
             {
-              src: "/apple-touch-icon.svg",
-              sizes: "180x180",
-              type: "image/svg+xml",
-              purpose: "apple touch icon",
+              src: "/favicon.ico",
+              sizes: "48x48",
+              type: "image/x-icon",
+              purpose: "any",
             },
           ],
           categories: ["health", "fitness", "lifestyle"],
@@ -87,6 +98,9 @@ export default defineConfig(() => {
           orientation: "portrait-primary",
         },
         workbox: {
+          cleanupOutdatedCaches: true,
+          clientsClaim: true,
+          skipWaiting: true,
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
           runtimeCaching: [
             {
