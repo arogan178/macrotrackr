@@ -7,9 +7,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useMemo } from "react";
 
-import { IconButton, IconButtonGroup } from "@/components/form";
 import { MacroCell } from "@/components/macros";
-import { ChevronDownIcon } from "@/components/ui";
+import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
 // Types
@@ -94,7 +93,7 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <div className="flex items-center gap-2 font-semibold text-indigo-300 text-sm">
+                <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
                   <motion.div
                     key={`chevron-${data.date}`}
                     initial={false}
@@ -103,7 +102,7 @@ const DesktopEntryTable = memo(
                     }}
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
-                    <ChevronDownIcon className="w-4 h-4" />
+                    <ChevronDownIcon className="h-4 w-4 " />
                   </motion.div>
                   {formatDate(data.date)}
                 </div>
@@ -111,7 +110,7 @@ const DesktopEntryTable = memo(
             } else {
               const entry = data.entries[0];
               return (
-                <div className="pl-11 text-sm text-gray-300 whitespace-nowrap">
+                <div className="pl-11 text-sm whitespace-nowrap text-foreground">
                   {formatTimeFromEntry(entry)}
                 </div>
               );
@@ -126,12 +125,12 @@ const DesktopEntryTable = memo(
 
             const entry = data.entries[0];
             return (
-              <div className="text-sm text-gray-300 text-center">
-                <span className="font-medium text-indigo-300">
+              <div className="text-center text-sm text-foreground">
+                <span className="font-medium text-muted">
                   {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
                 </span>
                 {(entry.foodName || entry.mealName) && (
-                  <span className="text-gray-400 block text-xs mt-0.5">
+                  <span className="mt-0.5 block text-xs text-foreground">
                     {entry.foodName || entry.mealName}
                   </span>
                 )}
@@ -142,7 +141,7 @@ const DesktopEntryTable = memo(
         columnHelper.accessor("totals.protein", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="h-2 w-2 rounded-full bg-protein"></div>
               Protein
             </div>
           ),
@@ -151,15 +150,13 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.protein
               : data.entries[0].protein;
-            return (
-              <MacroCell value={value} suffix="g" color="text-green-400" />
-            );
+            return <MacroCell value={value} suffix="g" color="text-protein" />;
           },
         }),
         columnHelper.accessor("totals.carbs", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+              <div className="h-2 w-2 rounded-full bg-carbs"></div>
               Carbs
             </div>
           ),
@@ -168,13 +165,13 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.carbs
               : data.entries[0].carbs;
-            return <MacroCell value={value} suffix="g" color="text-blue-400" />;
+            return <MacroCell value={value} suffix="g" color="text-carbs" />;
           },
         }),
         columnHelper.accessor("totals.fats", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+              <div className="h-2 w-2 rounded-full bg-fats"></div>
               Fats
             </div>
           ),
@@ -183,7 +180,7 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.fats
               : data.entries[0].fats;
-            return <MacroCell value={value} suffix="g" color="text-red-400" />;
+            return <MacroCell value={value} suffix="g" color="text-fats" />;
           },
         }),
         columnHelper.accessor("totals.calories", {
@@ -198,7 +195,7 @@ const DesktopEntryTable = memo(
                   data.entries[0].fats,
                 );
             return (
-              <MacroCell value={value} suffix=" kcal" color="text-white" />
+              <MacroCell value={value} suffix=" kcal" color="text-foreground" />
             );
           },
         }),
@@ -254,15 +251,15 @@ const DesktopEntryTable = memo(
 
     return (
       <div className="hidden lg:block">
-        <div className="overflow-hidden rounded-lg border border-gray-700/50">
-          <table className="w-full table-fixed bg-gray-800/40">
+        <div className="overflow-hidden rounded-lg border border-border/50">
+          <table className="w-full table-fixed bg-surface/40">
             <thead>
               {table.getHeaderGroups().map((headerGroup) => (
                 <tr key={headerGroup.id}>
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="px-4 py-3 text-center text-xs font-medium text-gray-400 uppercase tracking-wider border-b border-gray-700/50"
+                      className="border-b border-border/50 px-4 py-3 text-center text-xs font-medium tracking-wider text-foreground uppercase"
                       style={{ width: "14.285%" }}
                     >
                       {header.isPlaceholder
@@ -302,8 +299,8 @@ const DesktopEntryTable = memo(
                       key={animationKey}
                       className={
                         isGroup
-                          ? "bg-indigo-600/10 border-t border-b border-indigo-500/20 cursor-pointer hover:bg-indigo-600/20 transition-colors group"
-                          : "border-b border-gray-700/30 hover:bg-gray-700/20 transition-colors"
+                          ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/20 transition-colors hover:bg-primary/20"
+                          : "border-b border-border/30 transition-colors hover:bg-surface/20"
                       }
                       onClick={
                         isGroup

@@ -1,14 +1,14 @@
 export const SCORE_COLORS = {
-  excellent: "bg-green-400",
-  good: "bg-yellow-400",
-  poor: "bg-red-400",
+  excellent: "bg-success",
+  good: "bg-warning",
+  poor: "bg-vibrant-accent",
 } as const;
 
 export const METRIC_CARD_CONFIGS = {
   consistency: {
-    bgGradient: "bg-gradient-to-br from-indigo-900/60 to-indigo-800/30",
-    borderColor: "border border-indigo-700/30",
-    textColor: "text-indigo-300",
+    bgGradient: "bg-gradient-to-br from-primary/60 to-primary/30",
+    borderColor: "border border-primary/30",
+    textColor: "text-primary",
   },
   macroBalance: {
     bgGradient: "bg-gradient-to-br from-purple-900/60 to-purple-800/30",
@@ -24,25 +24,24 @@ export const METRIC_CARD_CONFIGS = {
 
 export const MACRO_COLORS = {
   protein: {
-    bar: "bg-green-500",
-    text: "text-green-300",
+    bar: "bg-protein",
+    text: "text-protein",
   },
   carbs: {
-    bar: "bg-blue-500",
-    text: "text-blue-300",
+    bar: "bg-carbs",
+    text: "text-carbs",
   },
   fats: {
-    bar: "bg-red-500",
-    text: "text-red-300",
+    bar: "bg-fats",
+    text: "text-fats",
   },
 } as const;
 
 export const SECTION_STYLES = {
   atAGlance: "p-4 rounded-lg border border-purple-500/20 bg-purple-900/10",
-  trendAnalysis: "p-4 rounded-lg border border-blue-500/20 bg-blue-900/10",
-  trackingAnalysis:
-    "p-4 rounded-lg border border-indigo-500/20 bg-indigo-900/10",
-  recommendations: "p-4 rounded-lg border border-green-500/20 bg-green-900/10",
+  trendAnalysis: "p-4 rounded-lg border border-primary/20 bg-primary/10",
+  trackingAnalysis: "p-4 rounded-lg border border-primary/20 bg-primary/10",
+  recommendations: "p-4 rounded-lg border border-green-500/20 bg-success/10",
 } as const;
 
 export const DEFAULT_MACRO_TARGET = {
@@ -60,25 +59,25 @@ export const DAILY_AVERAGES_CONFIG = [
   {
     label: "Calories",
     unit: "cal",
-    color: "text-white",
+    color: "text-vibrant-accent",
     key: "calories" as const,
   },
   {
     label: "Protein",
     unit: "g",
-    color: "text-green-300",
+    color: "text-protein",
     key: "protein" as const,
   },
   {
     label: "Carbs",
     unit: "g",
-    color: "text-blue-300",
+    color: "text-carbs",
     key: "carbs" as const,
   },
   {
     label: "Fats",
     unit: "g",
-    color: "text-red-300",
+    color: "text-fats",
     key: "fats" as const,
   },
 ] as const;

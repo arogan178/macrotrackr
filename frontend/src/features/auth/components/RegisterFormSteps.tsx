@@ -3,12 +3,17 @@ import { useCallback } from "react";
 import {
   DateField,
   Dropdown,
-  FormButton,
   InfoCard,
   NumberField,
   TextField,
 } from "@/components/form";
-import { BackIcon, CheckIcon, ForwardIcon, InfoIcon } from "@/components/ui";
+import {
+  BackIcon,
+  Button,
+  CheckIcon,
+  ForwardIcon,
+  InfoIcon,
+} from "@/components/ui";
 import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
@@ -20,7 +25,7 @@ import { USER_MINIMUM_AGE } from "@/utils/constants";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
-  <div className="flex flex-col justify-between h-full">
+  <div className="flex h-full flex-col justify-between">
     <div className="flex-1">{children}</div>
   </div>
 );
@@ -47,8 +52,8 @@ export function StepOne() {
 
   return (
     <StepFormWrapper>
-      <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
-        <div className="space-y-5 flex-1">
+      <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
+        <div className="flex-1 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <TextField
               label="First Name"
@@ -86,11 +91,11 @@ export function StepOne() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="flex-grow min-h-[40px]"></div>
+          <div className="min-h-10 flex-grow"></div>
         </div>
 
         <div className="pt-4">
-          <FormButton
+          <Button
             type="submit"
             isLoading={isValidating}
             fullWidth={true}
@@ -98,7 +103,7 @@ export function StepOne() {
             icon={<ForwardIcon />}
           >
             Continue
-          </FormButton>
+          </Button>
         </div>
       </form>
     </StepFormWrapper>
@@ -131,8 +136,8 @@ export function StepTwo() {
 
   return (
     <StepFormWrapper>
-      <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
-        <div className="space-y-5 flex-1">
+      <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
+        <div className="flex-1 space-y-5">
           <DateField
             label="Date of Birth"
             value={register.dateOfBirth}
@@ -174,12 +179,12 @@ export function StepTwo() {
           </div>
 
           {/* Spacer for consistent form height */}
-          <div className="flex-grow min-h-[10px]"></div>
+          <div className="min-h-2 flex-grow"></div>
         </div>
 
         <div className="pt-4">
           <div className="flex gap-3">
-            <FormButton
+            <Button
               variant="secondary"
               onClick={handleStepBack}
               isLoading={isValidating}
@@ -188,8 +193,8 @@ export function StepTwo() {
               className="w-1/3"
             >
               Back
-            </FormButton>
-            <FormButton
+            </Button>
+            <Button
               type="submit"
               variant="primary"
               isLoading={isValidating}
@@ -198,7 +203,7 @@ export function StepTwo() {
               className="w-2/3"
             >
               Continue
-            </FormButton>
+            </Button>
           </div>
         </div>
       </form>
@@ -240,8 +245,8 @@ export function StepThree() {
 
   return (
     <StepFormWrapper>
-      <form onSubmit={handleSubmit} className="space-y-5 flex flex-col h-full">
-        <div className="space-y-5 flex-1">
+      <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
+        <div className="flex-1 space-y-5">
           <Dropdown
             label="How active are you on a typical week?"
             value={register.activityLevel}
@@ -269,12 +274,12 @@ export function StepThree() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="flex-grow min-h-[60px]"></div>
+          <div className="min-h-15 flex-grow"></div>
         </div>
 
         <div className="pt-4">
           <div className="flex gap-3">
-            <FormButton
+            <Button
               variant="secondary"
               onClick={handleStepBack}
               isLoading={isValidating || isSubmitting}
@@ -283,8 +288,8 @@ export function StepThree() {
               className="w-1/3"
             >
               Back
-            </FormButton>
-            <FormButton
+            </Button>
+            <Button
               type="submit"
               variant="primary"
               isLoading={isValidating || isSubmitting}
@@ -294,7 +299,7 @@ export function StepThree() {
               className="w-2/3"
             >
               Finish
-            </FormButton>
+            </Button>
           </div>
         </div>
       </form>

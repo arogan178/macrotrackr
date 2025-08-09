@@ -2,8 +2,8 @@ import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
 
 import { resetPasswordRoute } from "@/AppRouter";
-import { CardContainer, FormButton, TextField } from "@/components/form";
-import { LoadingSpinner, LockIcon } from "@/components/ui";
+import { CardContainer, TextField } from "@/components/form";
+import { Button, LoadingSpinner, LockIcon } from "@/components/ui";
 import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
@@ -39,13 +39,13 @@ function ResetPasswordForm() {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="h-16 w-16 rounded-full bg-gradient-to-br from-green-500 to-teal-400 mb-4 flex items-center justify-center shadow-lg shadow-green-500/30">
-          <LockIcon className="w-8 h-8 text-white" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-green-500 to-teal-400 shadow-primary shadow-green-500/30">
+          <LockIcon className="h-8 w-8 text-foreground" />
         </div>
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-white to-gray-300 text-transparent bg-clip-text">
+        <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent">
           Reset Password
         </h1>
-        <p className="mt-2 text-gray-400">Enter your new password</p>
+        <p className="mt-2 text-foreground">Enter your new password</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
@@ -56,7 +56,7 @@ function ResetPasswordForm() {
           required={true}
           placeholder="••••••••"
         />
-        <FormButton
+        <Button
           type="submit"
           className="w-full"
           disabled={resetPasswordMutation.isPending || !token}
@@ -66,7 +66,7 @@ function ResetPasswordForm() {
           ) : (
             "Reset Password"
           )}
-        </FormButton>
+        </Button>
       </form>
     </CardContainer>
   );

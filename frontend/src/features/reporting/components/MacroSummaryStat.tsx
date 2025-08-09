@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import type { MacroType } from "@/types/macro";
 import { MACRO_COLORS } from "@/utils/constants/macro";
 
@@ -76,24 +77,24 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
   const gramDelta = avgGrams - targetGrams;
 
   return (
-    <div className="flex-1 text-xs flex flex-col justify-between h-full">
+    <div className="flex h-full flex-1 flex-col justify-between text-xs">
       {/* Header: Macro Name + Deviation Indicator (now based on grams) */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="mb-2 flex items-center justify-between">
         <span
-          className="font-semibold text-lg"
+          className="text-lg font-semibold"
           style={{ color: MACRO_COLORS[type].base }}
         >
           {type.charAt(0).toUpperCase() + type.slice(1)}
         </span>
       </div>
       {/* Average Intake vs Target */}
-      <div className="space-y-1 mb-2">
+      <div className="mb-2 space-y-1">
         {" "}
         {/* Average Intake Display */}
         <div className="flex items-baseline justify-between">
-          <span className="text-gray-400 text-xs mr-1">Average Intake:</span>
+          <span className="mr-1 text-xs text-foreground">Average Intake:</span>
           <div className="text-right">
-            <span className="text-lg font-bold text-white leading-none">
+            <span className="text-lg leading-none font-bold text-foreground">
               <AnimatedNumber
                 value={avgGrams}
                 toFixedValue={1}
@@ -101,7 +102,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
                 duration={0.8}
               />
             </span>
-            <span className="text-gray-400 text-xs ml-1">
+            <span className="ml-1 text-xs text-muted">
               (
               <AnimatedNumber
                 value={avgPercentage}
@@ -115,9 +116,9 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         </div>{" "}
         {/* Your Target Display */}
         <div className="flex items-baseline justify-between">
-          <span className="text-gray-500 text-xs mr-1">Your Target:</span>
+          <span className="mr-1 text-xs text-foreground">Your Target:</span>
           <div className="text-right">
-            <span className="text-sm font-medium text-gray-300">
+            <span className="text-sm font-medium text-foreground">
               <AnimatedNumber
                 value={targetGrams}
                 toFixedValue={1}
@@ -125,7 +126,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
                 duration={0.8}
               />
             </span>
-            <span className="text-gray-500 text-xs ml-1">
+            <span className="ml-1 text-xs text-muted">
               (
               <AnimatedNumber
                 value={targetPercentage}
@@ -139,8 +140,8 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         </div>
       </div>{" "}
       {/* Difference from Target */}
-      <div className="flex items-baseline justify-between text-gray-400 mt-auto pt-1 border-t border-gray-700/50">
-        <span className="text-xs mr-1.5">Difference:</span>
+      <div className="mt-auto flex items-baseline justify-between border-t border-border/50 pt-1 text-foreground">
+        <span className="mr-1.5 text-xs">Difference:</span>
         <div className="text-right">
           <span
             className={`text-sm font-semibold ${
@@ -156,7 +157,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
             />
           </span>
           <span
-            className={`text-xs ml-1.5 ${
+            className={`ml-1.5 text-xs ${
               percentageDelta >= 0 ? "text-emerald-400" : "text-rose-400"
             }`}
           >
@@ -228,22 +229,21 @@ export default function MacroSummaryStats({
   if (!macroAvg) return; // Updated early return condition
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-      {/* Macro Panels */}
-      {/* "bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 shadow-xl overflow-hidden" */}
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
-        <div className="flex-1 text-xs flex flex-col justify-between h-full">
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-semibold text-sm text-gray-300">
+    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Calories Card */}
+      <CardContainer className="p-3">
+        <div className="flex flex-1 flex-col justify-between">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-sm font-semibold text-foreground">
               Calories
             </span>
-          </div>{" "}
-          <div className="space-y-1 mb-2">
+          </div>
+          <div className="mb-2 space-y-1">
             <div className="flex items-baseline justify-between">
-              <span className="text-gray-400 text-xs mr-1">
+              <span className="mr-1 text-xs text-foreground">
                 Average Intake:
               </span>
-              <span className="text-lg font-bold text-white leading-none">
+              <span className="text-lg leading-none font-bold text-foreground">
                 <AnimatedNumber
                   value={avgCalories}
                   toFixedValue={0}
@@ -253,8 +253,8 @@ export default function MacroSummaryStats({
               </span>
             </div>
             <div className="flex items-baseline justify-between">
-              <span className="text-gray-500 text-xs mr-1">Your Target:</span>
-              <span className="text-sm font-medium text-gray-300">
+              <span className="mr-1 text-xs text-foreground">Your Target:</span>
+              <span className="text-sm font-medium text-foreground">
                 <AnimatedNumber
                   value={effectiveCalorieTarget}
                   toFixedValue={0}
@@ -263,9 +263,9 @@ export default function MacroSummaryStats({
                 />
               </span>
             </div>
-          </div>{" "}
-          <div className="flex items-baseline justify-between text-gray-400 mt-auto pt-1 border-t border-gray-700/50">
-            <span className="text-xs mr-1.5">Difference:</span>
+          </div>
+          <div className="mt-auto flex items-baseline justify-between border-t border-border/50 pt-1 text-foreground">
+            <span className="mr-1.5 text-xs">Difference:</span>
             <span
               className={`text-sm font-semibold ${
                 avgCalories - effectiveCalorieTarget >= 0
@@ -283,8 +283,10 @@ export default function MacroSummaryStats({
             </span>
           </div>
         </div>
-      </div>
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      </CardContainer>
+
+      {/* Protein Card */}
+      <CardContainer className="p-3">
         <MacroSummaryItem
           type="protein"
           avgPercentage={macroAvg.protein}
@@ -292,8 +294,10 @@ export default function MacroSummaryStats({
           targetPercentage={TARGET_MACROS.proteinPercentage}
           targetGrams={targetGrams.protein}
         />
-      </div>
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      </CardContainer>
+
+      {/* Carbs Card */}
+      <CardContainer className="p-3">
         <MacroSummaryItem
           type="carbs"
           avgPercentage={macroAvg.carbs}
@@ -301,8 +305,10 @@ export default function MacroSummaryStats({
           targetPercentage={TARGET_MACROS.carbsPercentage}
           targetGrams={targetGrams.carbs}
         />
-      </div>
-      <div className="flex flex-col bg-gray-800/70 backdrop-blur-sm rounded-2xl border border-gray-700/50 p-3 shadow-xl h-full">
+      </CardContainer>
+
+      {/* Fats Card */}
+      <CardContainer className="p-3">
         <MacroSummaryItem
           type="fats"
           avgPercentage={macroAvg.fats}
@@ -310,7 +316,7 @@ export default function MacroSummaryStats({
           targetPercentage={TARGET_MACROS.fatsPercentage}
           targetGrams={targetGrams.fats}
         />
-      </div>
+      </CardContainer>
     </div>
   );
 }

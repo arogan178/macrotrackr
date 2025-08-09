@@ -1,7 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { IconButton } from "@/components/form";
-import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "@/components/ui";
+import {
+  CheckIcon,
+  CloseIcon,
+  IconButton,
+  InfoIcon,
+  WarningIcon,
+} from "@/components/ui";
 
 import type { NotificationType } from "../types";
 
@@ -11,6 +16,12 @@ export interface FloatingNotificationProps {
   onClose: () => void;
   duration?: number;
   autoClose?: boolean;
+  /**
+   * Optional top offset for per-instance vertical positioning.
+   * Accepts number (px) or any valid CSS length string.
+   * If not provided, NotificationManager's container uses CSS var fallback.
+   */
+  topOffset?: number | string;
 }
 
 function FloatingNotification({
@@ -19,6 +30,7 @@ function FloatingNotification({
   onClose,
   duration = 5000,
   autoClose = true,
+  topOffset,
 }: FloatingNotificationProps) {
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
@@ -113,63 +125,72 @@ function FloatingNotification({
     success: {
       bg: "bg-gradient-to-r from-green-900/95 to-green-800/95",
       border: "border-green-500/40",
-      icon: "text-green-300",
-      progress: "bg-green-400",
-      component: <CheckIcon className="w-5 h-5" />,
+      icon: "text-success",
+      progress: "bg-success",
+      component: <CheckIcon className="" />,
     },
     error: {
       bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
       border: "border-red-500/40",
-      icon: "text-red-300",
-      progress: "bg-red-400",
-      component: <CloseIcon className="w-5 h-5" />,
+      icon: "text-error",
+      progress: "bg-vibrant-accent",
+      component: <CloseIcon className="" />,
     },
     warning: {
       bg: "bg-gradient-to-r from-amber-800/95 to-yellow-700/95",
       border: "border-amber-500/40",
       icon: "text-amber-300",
       progress: "bg-amber-400",
-      component: <WarningIcon className="w-5 h-5" />,
+      component: <WarningIcon className="" />,
     },
     info: {
-      bg: "bg-gradient-to-r from-blue-900/95 to-blue-800/95",
-      border: "border-blue-500/40",
-      icon: "text-blue-300",
-      progress: "bg-blue-400",
-      component: <InfoIcon className="w-5 h-5" />,
+      bg: "bg-gradient-to-r from-primary/95 to-primary/95",
+      border: "border-primary/40",
+      icon: "text-primary",
+      progress: "bg-primary",
+      component: <InfoIcon className="" />,
     },
   };
 
   const { bg, border, icon, progress, component } = styles[type];
 
+  // Resolve per-instance top offset if provided (used when this component is not inside the global manager or when overriding)
+  const resolvedTop =
+    typeof topOffset === "number" ? `${topOffset}px` : topOffset; // leave undefined if not provided
+
   return (
     <div
-      className={`relative max-w-md w-full mx-auto
-                 transition-all duration-300 ease-out transform
+      className={`relative mx-auto w-full max-w-md
+                 transform transition-all duration-300 ease-out
                  ${
                    isVisible && !isLeaving
-                     ? "opacity-100 translate-y-0 scale-100"
-                     : "opacity-0 -translate-y-4 scale-95"
+                     ? "translate-y-0 scale-100 opacity-100"
+                     : "-translate-y-4 scale-95 opacity-0"
                  }`}
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
+      style={
+        resolvedTop
+          ? ({ marginTop: resolvedTop } as React.CSSProperties)
+          : undefined
+      }
     >
       <div
-        className={`flex items-center rounded-lg shadow-2xl backdrop-blur-md 
-                     ${bg} border ${border} overflow-hidden
-                     hover:shadow-3xl transition-shadow duration-200`}
+        className={`flex items-center rounded-lg shadow-modal backdrop-blur-md 
+                     ${bg} border ${border} hover:shadow-3xl
+                     overflow-hidden transition-shadow duration-200`}
       >
         {/* Icon section */}
         <div
-          className={`${icon} p-4 flex items-center justify-center flex-shrink-0`}
+          className={`${icon} flex flex-shrink-0 items-center justify-center p-4`}
         >
           {component}
         </div>
 
         {/* Content area */}
-        <div className="py-3 px-4 flex-1 min-w-0">
-          <p className="text-white font-medium text-sm leading-relaxed break-words">
+        <div className="min-w-0 flex-1 px-4 py-3">
+          <p className="text-sm leading-relaxed font-medium break-words text-foreground">
             {message}
           </p>
         </div>
@@ -180,13 +201,13 @@ function FloatingNotification({
             variant="close"
             onClick={handleClose}
             ariaLabel="Close notification"
-            className="text-white/60 hover:text-white bg-transparent hover:bg-white/10"
+            className="bg-transparent text-foreground/60 hover:bg-surface/10 hover:text-foreground"
           />
         </div>
 
         {/* Progress timer bar */}
         {duration > 0 && autoClose && (
-          <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30 overflow-hidden">
+          <div className="absolute right-0 bottom-0 left-0 h-1 overflow-hidden bg-black/30">
             <div
               ref={progressReference}
               className={`h-full ${progress} transition-all ease-linear`}
