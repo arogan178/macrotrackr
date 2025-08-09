@@ -151,7 +151,9 @@ function LogWeightModal({
           placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
           disabled={addWeightLogMutation.isPending}
         />
-        {formError && <p className="text-sm text-red-400">{formError}</p>}
+        {formError && (
+          <p className="text-sm text-vibrant-accent">{formError}</p>
+        )}
       </div>
     </Modal>
   );

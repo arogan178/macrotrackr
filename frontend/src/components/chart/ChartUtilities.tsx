@@ -2,32 +2,74 @@ import React from "react";
 
 /**
  * Create a linear gradient definition for a chart
+ * Unified gradient helper used across charts.
+ * - Uses idPrefix "color-" to keep consistent with existing defs usage
+ * - Supports horizontal orientation
+ * - Allows customizing stop opacities for start/end
  */
 export function createGradient(
   id: string,
   colors: [string, string],
   horizontal: boolean = false,
+  options?: {
+    stopOpacityStart?: number;
+    stopOpacityEnd?: number;
+    idPrefix?: string;
+    includeKey?: boolean;
+  },
 ) {
+  const stopOpacityStart = options?.stopOpacityStart ?? 0.8;
+  const stopOpacityEnd = options?.stopOpacityEnd ?? 0.8;
+  const idPrefix = options?.idPrefix ?? "color-";
+  const includeKey = options?.includeKey ?? true;
+
+  const gradientId = `${idPrefix}${id}`;
+
   return (
     <linearGradient
-      key={`color-${id}`}
-      id={`color-${id}`}
+      key={includeKey ? gradientId : undefined}
+      id={gradientId}
       x1={horizontal ? "0" : "1"}
       y1={horizontal ? "1" : "0"}
       x2={horizontal ? "1" : "0"}
       y2={horizontal ? "0" : "0"}
     >
-      <stop offset="0%" stopColor={colors[0]} stopOpacity={0.8} />
-      <stop offset="100%" stopColor={colors[1]} stopOpacity={0.8} />
+      <stop offset="0%" stopColor={colors[0]} stopOpacity={stopOpacityStart} />
+      <stop offset="100%" stopColor={colors[1]} stopOpacity={stopOpacityEnd} />
     </linearGradient>
   );
+}
+
+/**
+ * Reference line config helper for Recharts
+ * Moved from ChartHelper to centralize primitives.
+ */
+export function createReferenceLine({
+  y,
+  label,
+  color = "#8884d8",
+  dash = "3 3",
+}: {
+  y: number;
+  label?: string;
+  color?: string;
+  dash?: string;
+}) {
+  return {
+    y,
+    stroke: color,
+    strokeDasharray: dash,
+    label: label
+      ? { value: label, position: "right" as const, fill: color, fontSize: 12 }
+      : undefined,
+  };
 }
 
 /**
  * Recharts Legend formatter
  */
 export const legendFormatter = (value: string) => (
-  <span className="text-gray-300 capitalize ml-1">{value}</span>
+  <span className="ml-1 text-foreground capitalize">{value}</span>
 );
 
 /**
@@ -145,23 +187,25 @@ export const ChartContainer: React.FC<{
 }> = ({ title, subtitle, children, className = "" }) => {
   return (
     <div
-      className={`bg-gray-800/70 rounded-xl border border-gray-700/30 p-3 shadow-lg h-full flex flex-col ${className}`}
+      className={`flex h-full flex-col rounded-xl border border-border/30 bg-surface-2 p-3 shadow-primary ${className}`}
     >
       {(title || subtitle) && (
-        <div className="flex items-center justify-between mb-2">
+        <div className="mb-2 flex items-center justify-between">
           <div className="flex items-baseline gap-1.5">
             {title && (
-              <h3 className="text-base font-semibold text-white">{title}</h3>
+              <h3 className="text-base font-semibold text-foreground">
+                {title}
+              </h3>
             )}
             {subtitle && (
-              <span className="text-sm text-gray-400 truncate max-w-[160px] block">
+              <span className="block max-w-40 truncate text-sm text-foreground">
                 {subtitle}
               </span>
             )}
           </div>
         </div>
       )}
-      <div className="flex-1 min-h-[150px]">{children}</div>
+      <div className="min-h-20 flex-1">{children}</div>
     </div>
   );
 };

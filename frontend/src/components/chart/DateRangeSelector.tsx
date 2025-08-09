@@ -1,7 +1,6 @@
 import { motion } from "motion/react";
 
-import { FormButton, IconButton } from "@/components/form";
-import { ExportIcon } from "@/components/ui";
+import { Button, ExportIcon, IconButton, TabBar } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 
 interface DateRangeSelectorProps {
@@ -17,47 +16,37 @@ export default function DateRangeSelector({
   onExportClick,
   isExportDisabled,
 }: DateRangeSelectorProps) {
+  // Map date ranges to TabBar items
+  const items = DATE_RANGE_OPTIONS.map((option) => ({
+    key: option.value,
+    label: option.label,
+    // activeBg inherits TabButton default bg-primary; can be themed later if needed
+  }));
+
   return (
-    // Wrap with motion.div and add layout prop
     <motion.div
-      layout // Add layout for smooth transition
-      className="sticky top-20 z-30 bg-gray-800/80 backdrop-blur-md rounded-xl border border-gray-700/50 p-3 mb-6 shadow-xl transition-all duration-300"
-      // Increased top to 20, slightly increased blur/opacity for sticky state
+      layout
+      className="sticky top-24 z-40 mb-6 rounded-xl border border-border/50 bg-surface p-3 shadow-modal backdrop-blur-md transition-all duration-300"
+      style={{ position: "sticky" as const }}
     >
-      <div className="flex flex-wrap items-center gap-4 w-full">
+      <div className="flex w-full flex-wrap items-center gap-4">
         {/* Time Period Selector */}
         <div className="flex items-center">
-          <span className="text-gray-300 font-medium mr-3">Time Period:</span>
-          <div className="relative flex bg-gray-900/50 rounded-lg p-1 border border-gray-700/50">
-            {DATE_RANGE_OPTIONS.map((option) => (
-              <FormButton
-                key={option.value}
-                onClick={() => onRangeChange(option.value)}
-                ariaLabel={`Set time period to ${option.label}`}
-                className={`relative px-4 py-1.5 rounded-md font-medium transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-800 ${
-                  currentRange === option.value
-                    ? "text-white"
-                    : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
-                }`}
-                variant={currentRange === option.value ? "primary" : "ghost"}
-                buttonSize="sm"
-                aria-selected={currentRange === option.value}
-                role="tab"
-              >
-                <span className="relative z-10">{option.label}</span>
-                {currentRange === option.value && (
-                  <motion.div
-                    className="absolute inset-0 bg-indigo-600 rounded-md shadow-md"
-                    layoutId="activeRangeHighlight"
-                    transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                  />
-                )}
-              </FormButton>
-            ))}
-          </div>
+          <span className="mr-3 font-medium text-foreground">Time Period:</span>
+          <TabBar
+            items={items}
+            activeKey={currentRange}
+            onChange={onRangeChange}
+            rounded="rounded-lg"
+            isMotion
+            layoutId="activeRangeHighlight"
+            size="sm"
+            className="border border-border/50 bg-surface-2"
+          />
         </div>
+
         {/* Mobile Export CSV IconButton aligned right */}
-        <div className="flex lg:hidden ml-auto">
+        <div className="ml-auto flex lg:hidden">
           <IconButton
             variant="export"
             ariaLabel="Export data as CSV file"
@@ -65,19 +54,19 @@ export default function DateRangeSelector({
             disabled={isExportDisabled}
           />
         </div>
+
         {/* Desktop Export CSV Button */}
-        <div className="hidden lg:flex ml-auto">
-          <FormButton
+        <div className="ml-auto hidden lg:flex">
+          <Button
             onClick={onExportClick}
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
-            className=" bg-indigo-700/60 hover:bg-indigo-700/80 text-indigo-100 rounded-lg font-medium flex items-center transition-all duration-200 border border-indigo-600/30 disabled:opacity-50 "
-            variant="primary"
+            className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-all duration-200 hover:bg-primary/80 disabled:opacity-50"
             icon={<ExportIcon />}
             iconPosition="left"
           >
             Export CSV
-          </FormButton>
+          </Button>
         </div>
       </div>
     </motion.div>

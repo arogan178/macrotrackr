@@ -2,51 +2,134 @@
 import { useMemo } from "react";
 
 import { NumberField, TextField } from "@/components/form";
-import {
-  AwardIcon,
-  BookIcon,
-  CalendarIcon,
-  CheckCircleIcon,
-  CoffeeIcon,
-  DropletIcon,
-  DumbBellIcon,
-  HeartIcon,
-  MoonIcon,
-  SunIcon,
-  TargetIcon,
-} from "@/components/ui";
+import { TargetIcon } from "@/components/ui";
 
+import { HABIT_ICONS } from "../constants";
 import { HabitGoalFormValues } from "../types/types";
+import HabitCard from "./HabitCard";
 
-const AVAILABLE_ICONS = {
-  calendar: CalendarIcon,
-  "check-circle": CheckCircleIcon,
-  target: TargetIcon,
-  award: AwardIcon,
-  heart: HeartIcon,
-  book: BookIcon,
-  coffee: CoffeeIcon,
-  droplet: DropletIcon,
-  dumbbell: DumbBellIcon,
-  moon: MoonIcon,
-  sun: SunIcon,
-} as const;
-
+/**
+ * Curated color options for the swatch buttons (visual preview only).
+ */
 const COLOR_OPTIONS = [
   { value: "indigo", label: "Indigo", class: "bg-indigo-500" },
   { value: "blue", label: "Blue", class: "bg-blue-500" },
+  { value: "cyan", label: "Cyan", class: "bg-cyan-500" },
+  { value: "teal", label: "Teal", class: "bg-teal-500" },
   { value: "green", label: "Green", class: "bg-green-500" },
+  { value: "lime", label: "Lime", class: "bg-lime-500" },
+  { value: "yellow", label: "Yellow", class: "bg-yellow-500" },
+  { value: "orange", label: "Orange", class: "bg-orange-500" },
+  { value: "red", label: "Red", class: "bg-red-500" },
+  { value: "pink", label: "Pink", class: "bg-pink-500" },
   { value: "purple", label: "Purple", class: "bg-purple-500" },
 ] as const;
 
+/**
+ * Static maps for Tailwind classes to avoid purging of dynamic class names.
+ * NOTE: Defined once here.
+ */
+const COLOR_TEXT_RING_MAP = {
+  indigo: { text: "text-indigo-400", ring: "ring-indigo-400" },
+  blue: { text: "text-blue-400", ring: "ring-blue-400" },
+  cyan: { text: "text-cyan-400", ring: "ring-cyan-400" },
+  teal: { text: "text-teal-400", ring: "ring-teal-400" },
+  green: { text: "text-green-400", ring: "ring-green-400" },
+  lime: { text: "text-lime-400", ring: "ring-lime-400" },
+  yellow: { text: "text-yellow-400", ring: "ring-yellow-400" },
+  orange: { text: "text-orange-400", ring: "ring-orange-400" },
+  red: { text: "text-red-400", ring: "ring-red-400" },
+  pink: { text: "text-pink-400", ring: "ring-pink-400" },
+  purple: { text: "text-purple-400", ring: "ring-purple-400" },
+} as const;
+
+const COLOR_GRADIENT_CHIP_MAP = {
+  indigo: {
+    from: "from-indigo-500/20",
+    to: "to-indigo-500/5",
+    chip: "bg-indigo-400/10",
+    text: "text-indigo-400",
+  },
+  blue: {
+    from: "from-blue-500/20",
+    to: "to-blue-500/5",
+    chip: "bg-blue-400/10",
+    text: "text-blue-400",
+  },
+  cyan: {
+    from: "from-cyan-500/20",
+    to: "to-cyan-500/5",
+    chip: "bg-cyan-400/10",
+    text: "text-cyan-400",
+  },
+  teal: {
+    from: "from-teal-500/20",
+    to: "to-teal-500/5",
+    chip: "bg-teal-400/10",
+    text: "text-teal-400",
+  },
+  green: {
+    from: "from-green-500/20",
+    to: "to-green-500/5",
+    chip: "bg-green-400/10",
+    text: "text-green-400",
+  },
+  lime: {
+    from: "from-lime-500/20",
+    to: "to-lime-500/5",
+    chip: "bg-lime-400/10",
+    text: "text-lime-400",
+  },
+  yellow: {
+    from: "from-yellow-500/20",
+    to: "to-yellow-500/5",
+    chip: "bg-yellow-400/10",
+    text: "text-yellow-400",
+  },
+  orange: {
+    from: "from-orange-500/20",
+    to: "to-orange-500/5",
+    chip: "bg-orange-400/10",
+    text: "text-orange-400",
+  },
+  red: {
+    from: "from-red-500/20",
+    to: "to-red-500/5",
+    chip: "bg-red-400/10",
+    text: "text-red-400",
+  },
+  pink: {
+    from: "from-pink-500/20",
+    to: "to-pink-500/5",
+    chip: "bg-pink-400/10",
+    text: "text-pink-400",
+  },
+  purple: {
+    from: "from-purple-500/20",
+    to: "to-purple-500/5",
+    chip: "bg-purple-400/10",
+    text: "text-purple-400",
+  },
+} as const;
+
+const COLOR_BAR_BG_MAP = {
+  indigo: "bg-indigo-500",
+  blue: "bg-blue-500",
+  cyan: "bg-cyan-500",
+  teal: "bg-teal-500",
+  green: "bg-green-500",
+  lime: "bg-lime-500",
+  yellow: "bg-yellow-500",
+  orange: "bg-orange-500",
+  red: "bg-red-500",
+  pink: "bg-pink-500",
+  purple: "bg-purple-500",
+} as const;
+
 interface HabitFormProps {
-  // Changed: Accept current values as a prop
   values: HabitGoalFormValues;
-  // Changed: Accept a single onChange handler for all fields
   onChange: (field: keyof HabitGoalFormValues, value: string | number) => void;
-  // Changed: Accept errors as a prop
   errors: Partial<Record<keyof HabitGoalFormValues, string>>;
-  // Add prop for current progress when editing
   currentProgress?: number;
 }
 
@@ -54,70 +137,68 @@ function HabitForm({
   values,
   onChange,
   errors,
-  currentProgress = 0, // Default to 0 if not provided
+  currentProgress = 0,
 }: HabitFormProps) {
   const handleChange = (
     field: keyof HabitGoalFormValues,
-    value: string | number | undefined, // Allow undefined temporarily from NumberField
+    value: string | number | undefined,
   ) => {
-    // Ensure target is never undefined or less than 1 when passed up
     if (field === "target") {
       onChange(field, Math.max(1, Number(value) || 1));
     } else {
-      onChange(field, value as string | number); // Type assertion needed here
+      onChange(field, value as string | number);
     }
   };
 
-  const selectedIcon = useMemo(() => {
-    const IconComponent =
-      AVAILABLE_ICONS[values.iconName as keyof typeof AVAILABLE_ICONS];
-    return IconComponent ? (
-      <IconComponent size="sm" />
-    ) : (
-      <TargetIcon size="sm" />
-    );
-  }, [values.iconName]);
+  // Use HABIT_ICONS for preview icon resolution (selection UI updated below)
 
   const previewProgressPercentage = useMemo(() => {
     if (values.target <= 0) return 0;
     return Math.min(100, Math.round((currentProgress / values.target) * 100));
   }, [currentProgress, values.target]);
 
+  // Safely map accentColor to our static Tailwind maps to satisfy TS and avoid purge
+  type AccentKey = keyof typeof COLOR_TEXT_RING_MAP;
+  const accentKey = values.accentColor as AccentKey;
+  const colorText = COLOR_TEXT_RING_MAP[accentKey].text;
+  const colorRing = COLOR_TEXT_RING_MAP[accentKey].ring;
+  const grad = COLOR_GRADIENT_CHIP_MAP[accentKey];
+  const barBg = COLOR_BAR_BG_MAP[accentKey];
+
   return (
     <div className="space-y-6">
-      {/* Title field */}
       <div>
         <TextField
           label="Habit Title"
-          value={values.title} // Use prop value
+          value={values.title}
           onChange={(value) => handleChange("title", value)}
           placeholder="Enter a title for your habit"
-          error={errors.title} // Use prop error
+          error={errors.title}
           required
         />
       </div>
 
-      {/* Target number field */}
       <div>
         <NumberField
           label="Target"
-          value={values.target} // Use prop value
-          onChange={(value) => handleChange("target", value)} // Pass undefined directly
+          value={values.target}
+          onChange={(value: number | undefined) =>
+            handleChange("target", value)
+          }
           min={1}
           max={100}
-          error={errors.target} // Use prop error
+          error={errors.target}
           required
         />
-        <p className="text-xs text-gray-400 mt-1">
+        <p className="mt-1 text-xs text-foreground">
           Set how many times you need to complete this habit to reach your goal
         </p>
       </div>
 
-      {/* Icon selection */}
       <div>
         <label
           htmlFor="icon-button-group"
-          className="block text-sm font-medium text-gray-200 mb-1"
+          className="mb-1 block text-sm font-medium text-foreground"
         >
           Icon
         </label>
@@ -127,37 +208,36 @@ function HabitForm({
           role="group"
           aria-label="Icon selection"
         >
-          {Object.entries(AVAILABLE_ICONS).map(([key, IconComponent]) => (
-            <button
-              key={key}
-              type="button"
-              className={`p-3 rounded-lg flex items-center justify-center ${
-                values.iconName === key
-                  ? `bg-${values.accentColor}-500/20 border border-${values.accentColor}-500/50`
-                  : "bg-gray-700/40 hover:bg-gray-700/60"
-              }`}
-              onClick={() => handleChange("iconName", key)}
-              aria-pressed={values.iconName === key}
-              aria-label={key.charAt(0).toUpperCase() + key.slice(1) + " icon"}
-            >
-              <IconComponent
-                size="sm"
-                className={
-                  values.iconName === key
-                    ? `text-${values.accentColor}-400`
-                    : "text-gray-300"
+          {Object.entries(HABIT_ICONS).map(([key, IconComponent]) => {
+            const isSelected = values.iconName === key;
+            return (
+              <button
+                key={key}
+                type="button"
+                className={`flex items-center justify-center rounded-lg p-3 ${
+                  isSelected
+                    ? `${grad.chip} border ${colorRing}/50`
+                    : "bg-surface/40 hover:bg-surface/60"
+                }`}
+                onClick={() => handleChange("iconName", key)}
+                aria-pressed={isSelected}
+                aria-label={
+                  key.charAt(0).toUpperCase() + key.slice(1) + " icon"
                 }
-              />
-            </button>
-          ))}
+              >
+                <IconComponent
+                  className={`h-4 w-4 ${isSelected ? colorText : "text-foreground"}`}
+                />
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Color selection */}
       <div>
         <label
           htmlFor="color-button-group"
-          className="block text-sm font-medium text-gray-200 mb-1"
+          className="mb-1 block text-sm font-medium text-foreground"
         >
           Color
         </label>
@@ -171,9 +251,9 @@ function HabitForm({
             <button
               key={color.value}
               type="button"
-              className={`w-8 h-8 rounded-full ${color.class} ${
+              className={`h-8 w-8 rounded-full ${color.class} ${
                 values.accentColor === color.value
-                  ? "ring-2 ring-white ring-opacity-60"
+                  ? "ring-opacity-60 ring-2 ring-white"
                   : "opacity-70 hover:opacity-100"
               }`}
               onClick={() => handleChange("accentColor", color.value)}
@@ -181,50 +261,49 @@ function HabitForm({
               aria-label={`Select ${color.label} color`}
             />
           ))}
+          {/* Hidden inputs to ensure optional fields serialize predictably */}
+          <input
+            type="hidden"
+            name="accentColor"
+            value={values.accentColor ?? ""}
+          />
         </div>
       </div>
 
-      {/* Preview */}
+      {/* Hidden inputs to include backend-required fields in payload shape (handled by submitter) */}
+      <input type="hidden" name="iconName" value={values.iconName} />
+      <input type="hidden" name="current" value={currentProgress} />
+      <input
+        type="hidden"
+        name="progress"
+        value={Math.min(
+          100,
+          Math.max(
+            0,
+            values.target > 0
+              ? Math.round((currentProgress / values.target) * 100)
+              : 0,
+          ),
+        )}
+      />
+      {/* isComplete, createdAt, completedAt are managed by submitter/backend */}
+
       <div className="mt-4">
-        <p className="text-sm font-medium text-gray-300 mb-2">Preview</p>
-        <div className={"bg-gray-700/30 rounded-lg overflow-hidden"}>
-          <div
-            className={`bg-gradient-to-r from-${values.accentColor}-500/20 to-${values.accentColor}-500/5 p-3`}
-          >
-            <div className="flex items-center mb-2">
-              <div
-                className={`p-1.5 rounded-lg text-${values.accentColor}-400 bg-${values.accentColor}-400/10 mr-2`}
-              >
-                {selectedIcon}
-              </div>
-              <h4 className="font-medium text-gray-200">
-                {values.title || "Habit Title"}
-              </h4>
-            </div>
-
-            <div className="flex items-center justify-between mb-1.5">
-              <div className="flex items-baseline gap-1">
-                {/* Use currentProgress prop here */}
-                <span className="text-xl font-bold text-gray-200">
-                  {currentProgress}
-                </span>
-                <span className="text-gray-400 text-sm">/ {values.target}</span>
-              </div>
-              {/* Use calculated preview percentage */}
-              <span className="text-sm text-gray-400">
-                {previewProgressPercentage}%
-              </span>
-            </div>
-
-            <div className="w-full h-2 bg-gray-700/60 rounded-full overflow-hidden">
-              <div
-                className={`h-full bg-${values.accentColor}-500 rounded-full`}
-                /* Use calculated preview percentage for width */
-                style={{ width: `${previewProgressPercentage}%` }}
-              ></div>
-            </div>
-          </div>
-        </div>
+        <p className="mb-2 text-sm font-medium text-foreground">Preview</p>
+        <HabitCard
+          variant="sm"
+          habit={{
+            id: undefined,
+            title: values.title || "Habit Title",
+            iconName: values.iconName || "target",
+            current: currentProgress,
+            target: values.target,
+            progress: undefined, // let component compute from current/target
+            accentColor: values.accentColor || "indigo",
+            isComplete: false,
+          }}
+          show={{ completionBadge: false }}
+        />
       </div>
     </div>
   );

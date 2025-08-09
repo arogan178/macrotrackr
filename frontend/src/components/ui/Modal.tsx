@@ -59,7 +59,8 @@ import { motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { FormButton, IconButton } from "../form";
+import { Button, IconButton } from "@/components/ui";
+
 import type {
   ConfirmationModalProps,
   FormModalProps,
@@ -136,8 +137,8 @@ function Modal(properties: ModalProps) {
   const getVariantStyles = (variant: string) => {
     // Define default styles matching the base content background
     const defaultStyles = {
-      header: "bg-gray-800/80",
-      footer: "bg-gray-800/80",
+      header: "bg-surface/80",
+      footer: "bg-surface/80",
       confirmButton: "",
     };
 
@@ -147,14 +148,14 @@ function Modal(properties: ModalProps) {
           // Use default header/footer for uniform look, override only confirm button
           ...defaultStyles,
           confirmButton: isDanger
-            ? "bg-red-600 text-white hover:bg-red-700"
-            : "bg-indigo-600 text-white hover:bg-indigo-700",
+            ? "bg-error text-foreground hover:bg-error"
+            : "bg-primary text-foreground hover:bg-primary",
         };
       }
       case "form": {
         return {
           ...defaultStyles, // Use default header/footer
-          confirmButton: "bg-blue-600 text-white hover:bg-blue-700",
+          confirmButton: "bg-primary text-foreground hover:bg-primary",
         };
       }
       default: {
@@ -169,7 +170,7 @@ function Modal(properties: ModalProps) {
 
   // Base styles for the modal content
   const baseContentStyles =
-    "bg-gray-800/80 backdrop-blur-lg rounded-xl shadow-2xl border border-gray-700/50 flex flex-col overflow-hidden";
+    "bg-surface/80 backdrop-blur-lg rounded-xl shadow-modal border border-border/50 flex flex-col overflow-hidden";
 
   // Size styles
   const sizeStyles = {
@@ -257,9 +258,12 @@ function Modal(properties: ModalProps) {
         {/* Header: Only render if close button is shown */}
         {!hideClose && (
           <div
-            className={`flex items-center justify-between p-4 border-b border-gray-700/50 ${variantStyles.header}`}
+            className={`flex items-center justify-between border-b border-border/50 p-4 ${variantStyles.header}`}
           >
-            <h2 id="modal-title" className="text-lg font-medium text-gray-100">
+            <h2
+              id="modal-title"
+              className="text-lg font-medium text-foreground"
+            >
               {title}
             </h2>
             <IconButton
@@ -268,14 +272,14 @@ function Modal(properties: ModalProps) {
               buttonSize={buttonSize}
               onClick={onClose}
               ariaLabel="Close modal"
-              className="text-gray-400 hover:text-red transition-colors"
+              className="hover:text-red text-foreground transition-colors"
             />
           </div>
         )}
 
         {/* Body */}
-        <div className="p-5 flex-grow overflow-y-hidden overflow-x-hidden">
-          {message && <p className="text-sm text-gray-300 mb-4">{message}</p>}
+        <div className="flex-grow overflow-x-hidden overflow-y-hidden p-5">
+          {message && <p className="mb-4 text-sm text-foreground">{message}</p>}
           {children}
         </div>
 
@@ -284,21 +288,21 @@ function Modal(properties: ModalProps) {
           <div
             className={`flex ${
               hideCancelButton ? "justify-center" : "justify-end"
-            } gap-4 p-4 border-t border-gray-700/50 ${variantStyles.footer}`}
+            } gap-4 border-t border-border/50 p-4 ${variantStyles.footer}`}
           >
             {!hideCancelButton && (
-              <FormButton
+              <Button
                 onClick={onClose}
                 ariaLabel={cancelLabel}
                 variant="secondary"
                 buttonSize={buttonSize}
-                className="px-4 py-2 rounded-lg font-medium text-gray-300 bg-gray-700/60 hover:bg-gray-700/90 transition-colors"
+                className="rounded-lg bg-surface/60 px-4 py-2 font-medium text-foreground transition-colors hover:bg-surface/90"
               >
                 {cancelLabel}
-              </FormButton>
+              </Button>
             )}
             {variant === "form" && onSave && (
-              <FormButton
+              <Button
                 type="button"
                 onClick={onSave}
                 disabled={saveDisabled}
@@ -309,15 +313,15 @@ function Modal(properties: ModalProps) {
               />
             )}
             {variant === "confirmation" && onConfirm && (
-              <FormButton
+              <Button
                 onClick={onConfirm}
                 ariaLabel={confirmLabel}
                 variant={isDanger ? "danger" : "primary"}
                 buttonSize={buttonSize}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors ${variantStyles.confirmButton}`}
+                className={`rounded-lg px-4 py-2 font-medium transition-colors ${variantStyles.confirmButton}`}
               >
                 {confirmLabel}
-              </FormButton>
+              </Button>
             )}
           </div>
         )}

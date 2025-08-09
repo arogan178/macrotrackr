@@ -5,20 +5,42 @@ import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
-import eslintPluginPrettier from "eslint-plugin-prettier";
+// Removed eslint-plugin-prettier; we use eslint-config-prettier only
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import pluginRouter from "@tanstack/eslint-plugin-router";
+import tailwindPlugin from "eslint-plugin-tailwindcss";
+import { dirname, resolve } from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+// Tailwind v4 root CSS detected at frontend/src/style.css
+const TAILWIND_ROOT_CSS = resolve(__dirname, "src/style.css");
+
+// Helper to safely extract rules from TanStack Router flat config that may be an array or object
+function getTanStackRouterRules() {
+  const preset = pluginRouter.configs["flat/recommended"];
+  if (Array.isArray(preset)) {
+    return preset[0]?.rules ?? {};
+  }
+  return preset?.rules ?? {};
+}
 
 export default [
-  // PascalCase for components
+  // Global ignores for auto-generated artifacts
+  {
+    name: "global-ignores",
+    ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*"],
+  },
+
+  // PascalCase for components (include top-level AppRouter)
   {
     files: [
       "src/components/**/*.{js,jsx,ts,tsx}",
       "src/pages/**/*.{js,jsx,ts,tsx}",
-      "src/hooks/**/*.{js,jsx,ts,tsx}",
-      "src/lib/**/*.{js,jsx,ts,tsx}",
+      "src/AppRouter.tsx",
       "src/features/**/components/**/*.{js,jsx,ts,tsx}",
       "src/features/**/pages/**/*.{js,jsx,ts,tsx}",
     ],
@@ -32,19 +54,21 @@ export default [
       ],
     },
   },
-  // camelCase for utils, types, store, and hooks
+
+  // camelCase for utils, types, store, hooks, and lib
   {
     files: [
-      "src/utils/**/*.{js,ts}",
-      "src/types/**/*.{js,ts}",
+      "src/utils/**/*.{js,ts,tsx}",
+      "src/types/**/*.{js,ts,tsx}",
       "src/hooks/**/*.{js,ts,tsx}",
       "src/loaders/**/*.{js,ts,tsx}",
       "src/constants/**/*.{js,ts,tsx}",
+      "src/lib/**/*.{js,ts,tsx}",
+      "src/theme/**/*.{js,ts,tsx}",
       "src/features/**/hooks/**/*.{js,ts,tsx}",
       "src/features/**/types/**/*.{js,ts,tsx}",
       "src/features/**/utils/**/*.{js,ts,tsx}",
       "src/features/**/constants/**/*.{js,ts,tsx}",
-      "src/appRouter.tsx",
     ],
     rules: {
       "unicorn/filename-case": [
@@ -56,9 +80,27 @@ export default [
       ],
     },
   },
+
+  // TanStack Router rules applied explicitly to avoid numeric-key flat config issues
+  {
+    files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    plugins: {
+      "@tanstack/router": pluginRouter,
+    },
+    rules: {
+      ...getTanStackRouterRules(),
+    },
+  },
+
   // Main config for all files
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
+    // Ensure we ignore TanStack Router's auto-generated file(s)
+    ignores: [
+      "src/routeTree.gen.ts",
+      "src/routeTree.gen.*",
+      "src/routes/__root.gen.*",
+    ],
     languageOptions: {
       globals: globals.browser,
       parser: tseslint.parser,
@@ -75,26 +117,37 @@ export default [
       "react-hooks": pluginReactHooks,
       "jsx-a11y": pluginJsxA11y,
       unicorn: eslintPluginUnicorn,
-      prettier: eslintPluginPrettier,
       "simple-import-sort": simpleImportSort,
       import: eslintPluginImport,
-      ...pluginRouter.configs["flat/recommended"],
+      tailwindcss: tailwindPlugin,
     },
     rules: {
       ...pluginJs.configs.recommended.rules,
       ...tseslint.configs.recommendedTypeChecked.rules,
+      ...tseslint.configs.stylisticTypeChecked.rules,
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
       ...pluginJsxA11y.configs.recommended.rules,
       ...eslintPluginUnicorn.configs.recommended.rules,
+
+      // Tailwind CSS plugin: key best practices
+      "tailwindcss/classnames-order": "warn",
+      "tailwindcss/no-custom-classname": "off", // Allow design-system classnames
+      "tailwindcss/no-contradicting-classname": "error",
+
       "react/react-in-jsx-scope": "off",
+
+      // Import hygiene and sorted groups
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
       "import/first": "error",
       "import/newline-after-import": "error",
       "import/no-duplicates": "error",
+
       "unicorn/better-regex": "warn",
+      "unicorn/no-null": "warn",
       "react/no-unescaped-entities": "off",
+
       // Remove unicorn/filename-case here, handled by overrides above
       "unicorn/prevent-abbreviations": [
         "error",
@@ -102,10 +155,20 @@ export default [
           allowList: { Props: true },
         },
       ],
-      "prettier/prettier": ["error"],
-      // Disable unused vars globally
+
+      // Core rule disabled in favor of TS rule
       "no-unused-vars": "off",
-      "@typescript-eslint/no-unused-vars": "off",
+
+      // Enabled per user preference with tuned config (warn)
+      "@typescript-eslint/no-unused-vars": [
+        "warn",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          ignoreRestSiblings: true,
+        },
+      ],
+
       // Disable no-undef globally (React/TSX compatibility)
       "no-undef": "off",
     },
@@ -117,8 +180,30 @@ export default [
           noWarnOnMultipleProjects: true,
         },
       },
+      // Tailwind v4 workaround for eslint-plugin-tailwindcss 4.0.0-beta.0:
+      // point to the absolute path of the root Tailwind CSS file.
+      tailwindcss: {
+        config: TAILWIND_ROOT_CSS,
+        callees: ["cn", "clsx", "classnames"],
+        removeDuplicates: true,
+      },
     },
   },
+
+  // Tests override: disable typed linting and prop-types in TS tests
+  {
+    files: ["src/**/*.test.{ts,tsx}", "src/**/__tests__/**/*.{ts,tsx}"],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        project: null,
+      },
+    },
+    rules: {
+      "react/prop-types": "off",
+    },
+  },
+
   // Prettier config disables conflicting rules (must be last in array)
   prettierConfig,
 ];

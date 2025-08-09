@@ -5,7 +5,18 @@ export interface HabitGoal {
   current: number;
   target: number;
   progress: number;
-  accentColor?: "indigo" | "blue" | "green" | "purple"; // Consider using HabitAccentColor from shared constants if reused
+  accentColor?:
+    | "indigo"
+    | "blue"
+    | "cyan"
+    | "teal"
+    | "green"
+    | "lime"
+    | "yellow"
+    | "orange"
+    | "red"
+    | "pink"
+    | "purple"; // Consider using HabitAccentColor from shared constants if reused
   isComplete?: boolean;
   createdAt: string;
   completedAt?: string;
@@ -22,7 +33,18 @@ export interface HabitGoalFormValues {
   title: string;
   iconName: string;
   target: number;
-  accentColor?: "indigo" | "blue" | "green" | "purple";
+  accentColor?:
+    | "indigo"
+    | "blue"
+    | "cyan"
+    | "teal"
+    | "green"
+    | "lime"
+    | "yellow"
+    | "orange"
+    | "red"
+    | "pink"
+    | "purple";
 }
 
 export interface HabitCardProps {

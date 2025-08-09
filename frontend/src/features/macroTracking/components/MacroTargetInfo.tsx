@@ -2,7 +2,10 @@ import { memo } from "react";
 
 import { InfoCard } from "@/components/form";
 import { InfoIcon } from "@/components/ui";
-import type { MacroTargetInfoProps } from "@/types/macro";
+
+interface MacroTargetInfoProps {
+  isVisible: boolean;
+}
 
 /**
  * Component that displays help information for the macro target distribution
@@ -14,9 +17,9 @@ function MacroTargetInfo({ isVisible }: MacroTargetInfoProps) {
     <InfoCard
       title="Tips for adjusting your macros:"
       color="indigo"
-      icon={<InfoIcon className="w-5 h-5" />}
+      icon={<InfoIcon className="" />}
     >
-      <ul className="list-disc pl-5 space-y-1.5 text-sm text-gray-300 mt-2">
+      <ul className="mt-2 list-disc space-y-1.5 pl-5 text-sm text-foreground">
         <li>Drag the sliders to adjust percentages</li>
         <li>
           Click the lock icon to keep a macro fixed while adjusting others

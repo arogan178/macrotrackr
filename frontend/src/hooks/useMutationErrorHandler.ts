@@ -122,7 +122,7 @@ export function useOptimisticMutationHandler<
 
         return handleMutationError(error, context);
       },
-      onSuccess: (data: TData, variables: TVariables, rollbackContext: any) => {
+      onSuccess: (_data: TData, _variables: TVariables, _rollbackContext: any) => {
         handleMutationSuccess();
       },
     }),
