@@ -1,7 +1,6 @@
 import { memo, ReactNode } from "react";
 
-import { FormButton } from "@/components/form";
-import { PlusIcon } from "@/components/ui";
+import { Button, PlusIcon } from "@/components/ui";
 
 interface ActionProps {
   label: string;
@@ -26,16 +25,16 @@ function getButtonStyles(variant: ActionProps["variant"] = "primary") {
 
   switch (variant) {
     case "primary": {
-      return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
+      return `${baseStyles} bg-primary hover:bg-primary text-foreground`;
     }
     case "secondary": {
-      return `${baseStyles} bg-gray-700 hover:bg-gray-600 text-white`;
+      return `${baseStyles} bg-surface hover:bg-surface text-foreground`;
     }
     case "outline": {
-      return `${baseStyles} border border-gray-600 hover:border-gray-500 text-gray-300 hover:text-white`;
+      return `${baseStyles} border border-border hover:border-border text-foreground hover:text-foreground`;
     }
     default: {
-      return `${baseStyles} bg-indigo-600 hover:bg-indigo-700 text-white`;
+      return `${baseStyles} bg-primary hover:bg-primary text-foreground`;
     }
   }
 }
@@ -74,7 +73,7 @@ function EmptyState({
   // Default icon if none provided
   const defaultIcon = (
     <PlusIcon
-      className={`${sizeStyles.iconSize} text-gray-500`}
+      className={`${sizeStyles.iconSize} text-foreground`}
       strokeWidth={1.5}
     />
   );
@@ -83,24 +82,24 @@ function EmptyState({
     <div
       className={`flex flex-col items-center justify-center text-center ${sizeStyles.padding} px-4 ${className}`}
     >
-      <div className="mb-4 text-gray-400">
+      <div className="mb-4 text-foreground">
         {icon || (
-          <div className="rounded-full bg-gray-800 p-4 inline-block">
+          <div className="inline-block rounded-full bg-surface p-4">
             {defaultIcon}
           </div>
         )}
       </div>
 
-      <h3 className={`${sizeStyles.title} font-medium text-gray-200 mb-2`}>
+      <h3 className={`${sizeStyles.title} mb-2 font-medium text-foreground`}>
         {title}
       </h3>
-      <p className={`${sizeStyles.message} text-gray-400 mb-6`}>{message}</p>
+      <p className={`${sizeStyles.message} mb-6 text-foreground`}>{message}</p>
 
-      {/* Action buttons */}
+      {/* Icon buttons */}
       {(action || secondaryAction) && (
         <div className="flex flex-wrap justify-center gap-3">
           {action && (
-            <FormButton
+            <Button
               onClick={action.onClick}
               ariaLabel={action.label}
               variant={
@@ -115,11 +114,11 @@ function EmptyState({
               iconPosition="left"
             >
               {action.label}
-            </FormButton>
+            </Button>
           )}
 
           {secondaryAction && (
-            <FormButton
+            <Button
               onClick={secondaryAction.onClick}
               ariaLabel={secondaryAction.label}
               variant={
@@ -134,7 +133,7 @@ function EmptyState({
               iconPosition="left"
             >
               {secondaryAction.label}
-            </FormButton>
+            </Button>
           )}
         </div>
       )}

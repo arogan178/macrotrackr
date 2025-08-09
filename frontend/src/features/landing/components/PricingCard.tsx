@@ -1,12 +1,11 @@
 import { motion } from "motion/react";
 import React from "react";
 
-import FormButton from "@/components/form/FormButton";
-import { CheckIcon } from "@/components/ui";
+import { Button, CheckIcon } from "@/components/ui";
 
 interface PricingCardProps {
   title: string;
-  price: string;
+  price: React.ReactNode | string;
   suffix?: string;
   equivalent?: string;
   features: string[];
@@ -25,8 +24,6 @@ interface PricingCardProps {
 
 /**
  * PricingCard renders a single pricing plan card for the pricing section.
- * Usage example:
- *   <PricingCard title="Pro" price="$6.99" features={[...]} buttonText="Get Pro Now" onButtonClick={...} />
  */
 const PricingCard: React.FC<PricingCardProps> = ({
   title,
@@ -40,51 +37,44 @@ const PricingCard: React.FC<PricingCardProps> = ({
   buttonSize = "lg",
   buttonClassName = "",
   onButtonClick,
-  focusRingColor = "focus:ring-indigo-500/40",
-  featureIconColor = "text-indigo-400",
-  featureTextClass = "text-white font-medium",
+  focusRingColor = "focus-visible:ring-primary/50",
+  featureIconColor = "text-primary",
+  featureTextClass = "text-foreground font-medium",
   cardClassName = "",
   children,
 }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
-    whileHover={{
-      scale: 1.025,
-      boxShadow: "0 8px 32px 0 rgba(99,102,241,0.15)",
-    }}
-    whileFocus={{
-      scale: 1.02,
-      boxShadow: "0 8px 32px 0 rgba(99,102,241,0.18)",
-    }}
-    transition={{ duration: 0.4, type: "spring", stiffness: 300, damping: 30 }}
+    whileHover={{ scale: 1.01 }}
+    transition={{ duration: 0.3, type: "spring", stiffness: 280, damping: 26 }}
     tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative bg-slate-800/50 backdrop-blur-sm border border-slate-700/50 rounded-3xl p-8 lg:p-10 flex flex-col h-full outline-none focus-visible:ring-4 focus-visible:ring-indigo-400/70 ${focusRingColor} ${cardClassName}`}
+    className={`relative flex h-full flex-col rounded-2xl border border-border/50 bg-surface p-8 backdrop-blur-sm outline-none lg:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
-      <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
-        <span className="bg-gradient-to-r from-indigo-500 to-purple-600 text-white px-4 py-2 rounded-full text-sm font-semibold shadow-lg">
+      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+        <span className="rounded-full bg-primary px-4 py-2 text-sm font-semibold text-foreground shadow-surface">
           Most Popular
         </span>
       </div>
     )}
-    <div className="text-center mb-8 mt-4">
-      <h3 className="text-2xl font-bold text-white mb-2">{title}</h3>
-      <div className="text-4xl font-bold text-white mb-2">
+    <div className="mt-4 mb-8 text-center">
+      <h3 className="mb-2 text-2xl font-bold text-foreground">{title}</h3>
+      <div className="mb-2 text-4xl font-bold text-foreground">
         {price}
         {suffix && (
-          <span className="text-lg font-normal text-slate-300">{suffix}</span>
+          <span className="text-lg font-normal text-foreground">{suffix}</span>
         )}
       </div>
       {equivalent && (
-        <p className="text-green-400 text-sm font-medium">{equivalent}</p>
+        <p className="text-sm font-medium text-success">{equivalent}</p>
       )}
       {children}
     </div>
     <motion.ul
-      className="space-y-4 mb-8"
+      className="mb-8 space-y-4"
       initial="hidden"
       animate="visible"
       variants={{
@@ -97,26 +87,26 @@ const PricingCard: React.FC<PricingCardProps> = ({
           key={index}
           className="flex items-center space-x-3"
           variants={{
-            hidden: { opacity: 0, y: 16 },
+            hidden: { opacity: 0, y: 12 },
             visible: {
               opacity: 1,
               y: 0,
-              transition: { type: "spring", stiffness: 400, damping: 30 },
+              transition: { type: "spring", stiffness: 360, damping: 26 },
             },
           }}
         >
-          <CheckIcon className={`w-5 h-5 ${featureIconColor} flex-shrink-0`} />
+          <CheckIcon className={` ${featureIconColor} flex-shrink-0`} />
           <span className={featureTextClass}>{feature}</span>
         </motion.li>
       ))}
     </motion.ul>
     <div className="mt-auto">
       <motion.div
-        whileHover={{ scale: 1.02, y: -2 }}
-        whileTap={{ scale: 0.98 }}
-        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+        whileHover={{ scale: 1.01, y: -1 }}
+        whileTap={{ scale: 0.99 }}
+        transition={{ type: "spring", stiffness: 350, damping: 26 }}
       >
-        <FormButton
+        <Button
           text={buttonText}
           variant={buttonVariant}
           buttonSize={buttonSize}

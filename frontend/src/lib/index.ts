@@ -6,4 +6,4 @@ export {
   invalidateQueries,
   prefetchQuery,
   type RouterContext,
-} from "./routerQueryUtils";
+} from "./routerQueryUtilities";

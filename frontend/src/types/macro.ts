@@ -56,35 +56,5 @@ export interface MacroDailyTotals {
   calories: number;
 }
 
-export interface MacroTargetProps {
-  initialValues?: MacroTargetState;
-  onTargetChange: (target: MacroTargetState) => void;
-}
-
-export interface MacroSliderProps {
-  name: string;
-  value: number;
-  onChange: (value: number) => void;
-  color: "green" | "blue" | "red";
-  isLocked: boolean;
-  onToggleLock: () => void;
-  disabled?: boolean;
-  min?: number;
-  max?: number;
-}
-
-export interface MacroBadgeProps {
-  name: string;
-  value: number;
-  color: "green" | "blue" | "red";
-  isLocked: boolean;
-}
-
-export interface MacroTargetBarProps {
-  percentages: MacroPercentages;
-  className?: string;
-}
-
-export interface MacroTargetInfoProps {
-  isVisible: boolean;
-}
+/* UI component prop interfaces have been moved next to their owning components.
+   Keep this file for domain and API-level types only. */
