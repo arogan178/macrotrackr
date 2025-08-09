@@ -12,6 +12,7 @@ cd /var/www/macro-tracker/
 
 # Pull the latest changes from the main branch
 echo "Pulling latest changes from git..."
+git stash
 git pull origin master
 
 # Install backend dependencies
