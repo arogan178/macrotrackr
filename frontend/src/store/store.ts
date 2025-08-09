@@ -1,26 +1,14 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import {
-  AuthUISlice,
-  createAuthUISlice,
-} from "@/features/auth/store/auth-ui-slice";
-import {
-  createGoalsUISlice,
-  GoalsUISlice,
-} from "@/features/goals/store/goals-ui-slice";
-import {
-  createMacroUISlice,
-  MacroUISlice,
-} from "@/features/macroTracking/store/macro-ui-slice";
+import { AuthUISlice, createAuthUISlice } from "@/store/ui/auth-ui-slice";
+import { createGoalsUISlice, GoalsUISlice } from "@/store/ui/goals-ui-slice";
+import { createMacroUISlice, MacroUISlice } from "@/store/ui/macro-ui-slice";
 import {
   createNotificationSlice,
   NotificationSlice,
-} from "@/features/notifications/store/notifications-slice";
-import {
-  createUserUISlice,
-  UserUISlice,
-} from "@/features/settings/store/user-ui-slice";
+} from "@/store/ui/notifications-slice";
+import { createUserUISlice, UserUISlice } from "@/store/ui/user-ui-slice";
 
 // Combine all slice types (removed HabitsSlice, GoalsSlice, and MacrosSlice - kept UI slices for UI state)
 export type StoreState = UserUISlice &

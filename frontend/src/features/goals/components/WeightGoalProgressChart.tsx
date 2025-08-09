@@ -8,6 +8,7 @@ import {
 
 import { LineChartComponent } from "@/components/chart";
 import { BarChartIcon, EmptyState } from "@/components/ui";
+import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 
 // Custom Tooltip specific to Weight Goal Progress
@@ -18,7 +19,6 @@ function WeightCustomTooltip({
 }: TooltipProps<ValueType, NameType>) {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
-    // Ensure fullDate exists and is a valid string before parsing
     const entryDate =
       data.fullDate && typeof data.fullDate === "string"
         ? parseISO(data.fullDate)
@@ -26,19 +26,18 @@ function WeightCustomTooltip({
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
-      <div className="backdrop-blur-lg bg-gray-800/90 border border-gray-700/50 rounded-lg p-3 shadow-lg">
-        <div className="text-base font-medium text-gray-200 mb-1">
+      <div className="rounded-lg border border-border/50 bg-surface p-3 shadow-primary backdrop-blur-lg">
+        <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
-            : label || "Date Unavailable"}{" "}
-          {/* Fallback to label if fullDate is bad */}
+            : label || "Date Unavailable"}
         </div>
-        <div className="flex items-center gap-2 mt-1">
+        <div className="mt-1 flex items-center gap-2">
           <div
-            className={"w-3 h-3 rounded-full"}
+            className={"h-3 w-3 rounded-full"}
             style={{ backgroundColor: payload[0].color || payload[0].stroke }}
           ></div>
-          <span className="text-sm text-gray-300">
+          <span className="text-sm text-foreground">
             Weight:{" "}
             <span
               className="font-semibold"
@@ -59,7 +58,7 @@ function WeightGoalProgressChart() {
   const { data: weightLog = [], isLoading: weightLogLoading } = useWeightLog();
   const { data: weightGoals, isLoading: weightGoalsLoading } = useWeightGoals();
   const isLoading = weightLogLoading || weightGoalsLoading;
-  const error = null; // TanStack Query handles errors differently
+  const error = undefined; // TanStack Query handles errors differently
 
   const chartData = React.useMemo(() => {
     const log = Array.isArray(weightLog) ? weightLog : [];
@@ -87,35 +86,18 @@ function WeightGoalProgressChart() {
           (a, b) => parseISO(a).getTime() - parseISO(b).getTime(),
         );
         return {
-          name: format(parseISO(dateKey), "MMM d"), // Use 'name' for LineChartComponent
+          name: format(parseISO(dateKey), "MMM d"),
           weight: avgWeight,
-          fullDate: sortedTimestamps[0], // Keep for tooltip
+          fullDate: sortedTimestamps[0],
           id: ids[0],
         };
       });
   }, [weightLog]);
 
-  // Calculate Y-axis domain
+  // Calculate Y-axis domain using shared helper for identical behavior
   const { domainMin, domainMax } = React.useMemo(() => {
     const weights = chartData.map((d) => d.weight);
-    const minWeight = weights.length > 0 ? Math.min(...weights) : 0;
-    const maxWeight = weights.length > 0 ? Math.max(...weights) : 0;
-    const targetWeight = weightGoals?.targetWeight;
-
-    const effectiveMin = Math.min(minWeight, targetWeight ?? Infinity);
-    const effectiveMax = Math.max(maxWeight, targetWeight ?? 0);
-
-    // Add padding, ensuring min isn't negative unless data is negative
-    const padding = Math.max(1, (effectiveMax - effectiveMin) * 0.05); // 5% padding or at least 1 unit
-    const calculatedMin = Math.floor(Math.max(0, effectiveMin - padding)); // Ensure min is >= 0 unless data is negative
-    const calculatedMax = Math.ceil(effectiveMax + padding);
-
-    // Handle case where min and max are the same or very close
-    if (calculatedMax - calculatedMin < 2) {
-      return { domainMin: calculatedMin - 1, domainMax: calculatedMax + 1 };
-    }
-
-    return { domainMin: calculatedMin, domainMax: calculatedMax };
+    return getChartDomain(weights, weightGoals?.targetWeight);
   }, [chartData, weightGoals?.targetWeight]);
 
   // Determine line color and gradient based on goal
@@ -160,7 +142,7 @@ function WeightGoalProgressChart() {
         dataKey="weight"
         fill={`url(#${gradientId})`}
         stroke="none"
-        fillOpacity={0.3} // Slightly reduced opacity
+        fillOpacity={0.3}
       />
       {targetWeight && (
         <ReferenceLine
@@ -173,15 +155,14 @@ function WeightGoalProgressChart() {
             position: "insideTopRight",
             fill: "rgb(156, 163, 175)",
             fontSize: 11,
-            dy: -5, // Adjust vertical position
-            dx: -5, // Adjust horizontal position
+            dy: -5,
+            dx: -5,
           }}
         />
       )}
     </>
   );
 
-  // Define line configuration
   const lines = [
     {
       dataKey: "weight",
@@ -189,7 +170,7 @@ function WeightGoalProgressChart() {
       strokeWidth: 2.5,
       dot: {
         r: 3,
-        fill: "rgb(17, 24, 39)", // Dark background for contrast
+        fill: "rgb(17, 24, 39)",
         strokeWidth: 1.5,
         stroke: lineColor,
       },
@@ -199,13 +180,12 @@ function WeightGoalProgressChart() {
         strokeWidth: 2,
         stroke: lineColor,
       },
-      connectundefineds: true, // Connect gaps in data
+      connectundefineds: true,
     },
   ];
 
-  // Define axis props
   const xAxisProps = {
-    dataKey: "name", // Use 'name' as defined in chartData
+    dataKey: "name",
     axisLine: { stroke: "rgba(255,255,255,0.1)" },
     tickLine: false,
   };
@@ -215,30 +195,26 @@ function WeightGoalProgressChart() {
     axisLine: false,
     tickLine: false,
     tickFormatter: (value: number) => `${value}`,
-    width: 35, // Slightly increased width for labels
+    width: 35,
     label: {
       value: "kg",
       angle: -90,
       position: "insideLeft",
       fill: "rgb(156, 163, 175)",
       fontSize: 12,
-      dy: 40, // Adjusted position
+      dy: 40,
       dx: -5,
     },
   };
 
-  // Define empty state component
   const emptyStateComponent = (
     <EmptyState
       title="Track Your Progress"
       message="Start logging your weight to see your progress charted over time."
-      icon={
-        <BarChartIcon className="h-14 w-14 text-indigo-400" strokeWidth={1} />
-      }
+      icon={<BarChartIcon className="h-14 w-14 text-primary" strokeWidth={1} />}
       action={{
         label: "Log Weight",
         onClick: () => {
-          console.log("Open log weight modal from empty state");
           // TODO: Implement modal opening logic, likely via parent state/context
         },
         variant: "outline",
@@ -248,22 +224,23 @@ function WeightGoalProgressChart() {
   );
 
   return (
-    <div className="h-96 flex flex-col">
-      {/* Date Range Display */}
-      <div className="text-sm text-gray-400 mb-2 h-5">
-        {" "}
-        {/* Added fixed height */}
+    <div className="flex h-96 flex-col">
+      <div className="mb-2 h-5 text-sm text-foreground">
         {chartData.length > 0 && (
           <span>
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
-            {format(parseISO(chartData.at(-1).fullDate), "MMM d, yyyy")}
+            {format(
+              parseISO(
+                chartData.length > 0 ? (chartData.at(-1)?.fullDate ?? "") : "",
+              ),
+              "MMM d, yyyy",
+            )}
           </span>
         )}
       </div>
-      {/* Chart Component */}{" "}
       <div className="flex-grow">
         <LineChartComponent
-          data={chartData}
+          data={chartData as any}
           lines={lines}
           isLoading={isLoading}
           error={error}
@@ -273,7 +250,7 @@ function WeightGoalProgressChart() {
           chartElements={chartElements}
           xAxisProps={xAxisProps}
           yAxisProps={yAxisProps}
-          margin={{ top: 10, right: 25, bottom: 5, left: 5 }} // Adjusted margins
+          margin={{ top: 10, right: 25, bottom: 5, left: 5 }}
           showLegend={false}
           height="100%"
         />

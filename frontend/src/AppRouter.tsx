@@ -10,7 +10,9 @@ import {
 import React, { Suspense } from "react";
 
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
 
 import MainLayout from "./components/layout/MainLayout";
@@ -45,14 +47,11 @@ const TermsAndConditionsPage = React.lazy(
 const PrivacyPolicyPage = React.lazy(
   () => import("./features/landing/pages/PrivacyPolicyPage"),
 );
-const LoadingStateDemoPage = React.lazy(
-  () => import("./pages/LoadingStateDemoPage"),
-);
 
 // Fallback component to show while loading
 function LoadingFallback() {
   return (
-    <div className="min-h-screen bg-gray-900 flex justify-center items-center">
+    <div className="flex min-h-screen items-center justify-center bg-surface">
       <LoadingSpinner size="lg" />
     </div>
   );
@@ -79,7 +78,12 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 // Root route with query-based user data prefetching
 export const rootRoute = createRootRoute({
-  loader: async ({ context }) => {
+  // Provide type for context so 'queryClient' is known to exist
+  loader: async ({
+    context,
+  }: {
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Only prefetch user data if there's a token
     const { getToken } = await import("@/utils/tokenStorage");
 
@@ -111,11 +115,17 @@ export const rootRoute = createRootRoute({
   },
   component: () => (
     <ErrorBoundary>
-      <MainLayout>
-        <Suspense fallback={<LoadingFallback />}>
-          <Outlet />
-        </Suspense>
-      </MainLayout>
+      {/* app-root is used by GlobalLoadingOverlay to toggle aria-busy */}
+      <div id="app-root" className="relative min-h-screen">
+        {/* Global loading UI overlays */}
+        <TopLoadingBar />
+        <GlobalLoadingOverlay />
+        <MainLayout>
+          <Suspense fallback={<LoadingFallback />}>
+            <Outlet />
+          </Suspense>
+        </MainLayout>
+      </div>
     </ErrorBoundary>
   ),
   notFoundComponent: () => (
@@ -143,7 +153,13 @@ export const homeRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
-  loader: async ({ deps, context }) => {
+  loader: async ({
+    deps,
+    context,
+  }: {
+    deps: { offset: number; limit: number };
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Use queryClient.ensureQueryData for prefetching macro data
     const limit = deps.limit || 20;
     const offset = deps.offset || 0;
@@ -235,7 +251,11 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: async ({ context }) => {
+  loader: async ({
+    context,
+  }: {
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Use queryClient.ensureQueryData for prefetching settings and billing data
     await Promise.all([
       context.queryClient.ensureQueryData({
@@ -267,7 +287,11 @@ const settingsRoute = createRoute({
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
-  loader: async ({ context }) => {
+  loader: async ({
+    context,
+  }: {
+    context: { queryClient: typeof queryClient };
+  }) => {
     // Use queryClient.ensureQueryData for prefetching goals and habits data
     const [macroTarget, weightGoals, weightLog] = await Promise.all([
       context.queryClient.ensureQueryData({
@@ -371,7 +395,11 @@ export const reportingRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
-  loader: async ({ deps, context }) => {
+  loader: async (context_) => {
+    const { deps, context } = context_ as typeof context_ & {
+      deps: { startDate?: string; endDate?: string };
+      context: { queryClient: typeof queryClient };
+    };
     // Use queryClient.ensureQueryData for prefetching reporting data
     const today = new Date().toISOString().split("T")[0];
     const queryDate = deps.startDate || today;
@@ -416,12 +444,6 @@ const privacyRoute = createRoute({
   component: () => <PrivacyPolicyPage />,
 });
 
-const demoRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/demo",
-  component: () => <LoadingStateDemoPage />,
-});
-
 const routeTree = rootRoute.addChildren([
   landingRoute,
   homeRoute,
@@ -434,7 +456,6 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   termsRoute,
   privacyRoute,
-  demoRoute,
 ]);
 
 const router = createRouter({

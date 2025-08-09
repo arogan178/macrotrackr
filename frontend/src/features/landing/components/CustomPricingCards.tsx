@@ -2,10 +2,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
 
-import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import { useStore } from "@/store/store";
 
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
@@ -52,14 +50,14 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
       : "";
 
   return (
-    <div className="w-full max-w-6xl mx-auto">
+    <div className="mx-auto w-full max-w-6xl">
       {/* Plan Toggle */}
-      <div className="flex justify-center mb-12">
+      <div className="mb-12 flex justify-center">
         <PlanToggle selectedPlan={selectedPlan} onSelect={setSelectedPlan} />
       </div>
 
       {/* Pricing Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-12">
         {/* Free Plan */}
         <PricingCard
           title={PRICING_PLANS.free.name}
@@ -67,16 +65,23 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           suffix={PRICING_PLANS.free.suffix}
           features={features.free}
           buttonText={PRICING_PLANS.free.buttonText}
-          buttonVariant={PRICING_PLANS.free.buttonVariant}
-          buttonSize={BUTTON_SIZES.LG}
+          buttonVariant={
+            PRICING_PLANS.free.buttonVariant as
+              | "ghost"
+              | "primary"
+              | "secondary"
+              | "danger"
+              | "success"
+              | undefined
+          }
+          buttonSize={"lg"}
           buttonClassName={PRICING_PLANS.free.buttonClassName}
-          tabIndex={0}
-          focusRingColor="focus:ring-indigo-500/40"
+          focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.free.featureIconColor}
           featureTextClass={PRICING_PLANS.free.featureTextClass}
           cardClassName={PRICING_PLANS.free.cardClassName}
         >
-          <p className="text-slate-400">{PRICING_PLANS.free.description}</p>
+          <p className="text-foreground">{PRICING_PLANS.free.description}</p>
         </PricingCard>
 
         {/* Pro Plan */}
@@ -102,11 +107,18 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           buttonText={
             showUpgradeButtons ? "Upgrade to Pro" : PRICING_PLANS.pro.buttonText
           }
-          buttonVariant={PRICING_PLANS.pro.buttonVariant}
-          buttonSize={BUTTON_SIZES.LG}
+          buttonVariant={
+            PRICING_PLANS.pro.buttonVariant as
+              | "ghost"
+              | "primary"
+              | "secondary"
+              | "danger"
+              | "success"
+              | undefined
+          }
+          buttonSize={"lg"}
           buttonClassName={PRICING_PLANS.pro.buttonClassName}
-          tabIndex={0}
-          focusRingColor="focus:ring-indigo-500/40"
+          focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.pro.featureIconColor}
           featureTextClass={PRICING_PLANS.pro.featureTextClass}
           cardClassName={PRICING_PLANS.pro.cardClassName}
@@ -116,7 +128,9 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
               : handleGetPro
           }
         >
-          <p className="text-slate-400 mt-2">{PRICING_PLANS.pro.description}</p>
+          <p className="mt-2 text-foreground">
+            {PRICING_PLANS.pro.description}
+          </p>
         </PricingCard>
       </div>
 
