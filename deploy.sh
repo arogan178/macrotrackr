@@ -64,8 +64,7 @@ fi
 
 # Build frontend
 echo "Building frontend..."
-cd /frontend
-bun install --frozen-lockfile
+cd frontend
 
 # Clear any existing dist and cache
 echo "Clearing build cache..."
