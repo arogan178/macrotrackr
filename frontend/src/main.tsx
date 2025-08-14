@@ -1,5 +1,6 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
+import { PostHogProvider } from "posthog-js/react";
 import React from "react";
 import ReactDOM from "react-dom/client";
 
@@ -9,13 +10,23 @@ import { registerServiceWorker } from "./sw-register";
 
 ReactDOM.createRoot(document.querySelector("#root")!).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <AppRouter />
-      {/* Only show devtools in development */}
-      {import.meta.env.MODE === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
-    </QueryClientProvider>
+    <PostHogProvider
+      apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY}
+      options={{
+        api_host: import.meta.env.production.VITE_PUBLIC_POSTHOG_HOST,
+        defaults: "2025-05-24",
+        capture_exceptions: true, // This enables capturing exceptions using Error Tracking, set to false if you don't want this
+        debug: import.meta.env.MODE === "development",
+      }}
+    >
+      <QueryClientProvider client={queryClient}>
+        <AppRouter />
+        {/* Only show devtools in development */}
+        {import.meta.env.MODE === "development" && (
+          <ReactQueryDevtools initialIsOpen={false} />
+        )}
+      </QueryClientProvider>
+    </PostHogProvider>
   </React.StrictMode>,
 );
 
