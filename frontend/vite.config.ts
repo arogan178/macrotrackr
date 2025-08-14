@@ -126,13 +126,11 @@ export default defineConfig(() => {
     },
     build: {
       target: "esnext",
-      minify: "terser",
-      terserOptions: {
-        compress: {
-          drop_console: true,
-          dead_code: true,
-        },
-      },
+      // Use esbuild for minification: much faster and far less memory-hungry than terser.
+      // This reduces V8 heap pressure during production builds on small machines.
+      minify: "esbuild",
+      // Disable production sourcemaps to lower memory usage during build.
+      sourcemap: false,
       rollupOptions: {
         output: {
           // Add hash to filenames for cache busting

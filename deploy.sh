@@ -15,35 +15,49 @@ echo "Pulling latest changes from git..."
 git stash
 git pull origin master
 
-# Install backend dependencies
-echo "Installing backend dependencies..."
-cd backend
-bun install --frozen-lockfile
-
-# Copy production environment variables
+# Copy production environment variables (must exist before backend starts)
 echo "Setting up production environment variables..."
-if [ -f .env.production ]; then
-    cp .env.production .env
-    echo "✅ Production environment variables copied"
+if [ -f backend/.env.production ]; then
+        cp backend/.env.production backend/.env
+        echo "✅ Production environment variables copied"
 else
-    echo "❌ Error: .env.production file not found!"
-    echo ""
-    echo "The .env.production file needs to be created manually on the server"
-    echo "because environment files are excluded from git for security reasons."
-    echo ""
-    echo "Please create /var/www/macro-tracker/backend/.env.production with your"
-    echo "production environment variables, then run this script again."
-    echo ""
-    echo "Required variables:"
-    echo "- JWT_SECRET"
-    echo "- STRIPE_SECRET_KEY"
-    echo "- STRIPE_WEBHOOK_SECRET" 
-    echo "- STRIPE_PRICE_ID_MONTHLY"
-    echo "- STRIPE_PRICE_ID_YEARLY"
-    echo "- RESEND_API_KEY"
-    echo "- CORS_ORIGIN"
-    echo ""
-    echo "See DEPLOYMENT.md for detailed instructions."
+        echo "❌ Error: backend/.env.production file not found!"
+        echo ""
+        echo "The backend .env.production file needs to be created manually on the server"
+        echo "because environment files are excluded from git for security reasons."
+        echo ""
+        echo "Please create /var/www/macro-tracker/backend/.env.production with your"
+        echo "production environment variables, then run this script again."
+        echo ""
+        echo "Required variables:"
+        echo "- JWT_SECRET"
+        echo "- STRIPE_SECRET_KEY"
+        echo "- STRIPE_WEBHOOK_SECRET" 
+        echo "- STRIPE_PRICE_ID_MONTHLY"
+        echo "- STRIPE_PRICE_ID_YEARLY"
+        echo "- RESEND_API_KEY"
+        echo "- CORS_ORIGIN"
+        echo ""
+        echo "See DEPLOYMENT.md for detailed instructions."
+        exit 1
+fi
+
+# Install frontend and backend dependencies in parallel to speed up deploy
+echo "Installing frontend and backend dependencies in parallel..."
+# run installs in subshells so cwd doesn't interfere
+( cd backend && bun install --frozen-lockfile ) &
+PID_BACKEND=$!
+( cd frontend && bun install --frozen-lockfile ) &
+PID_FRONTEND=$!
+
+# wait for both to finish and capture exit codes
+wait $PID_BACKEND
+RC_BACKEND=$?
+wait $PID_FRONTEND
+RC_FRONTEND=$?
+
+if [ $RC_BACKEND -ne 0 ] || [ $RC_FRONTEND -ne 0 ]; then
+    echo "One or more dependency installs failed (backend:$RC_BACKEND frontend:$RC_FRONTEND). Exiting."
     exit 1
 fi
 
@@ -61,7 +75,22 @@ rm -rf .tanstack/
 
 # Force clean build
 echo "Building frontend with clean cache..."
-bun run build
+
+# Set V8 heap to 4GB for the build (adjust if you increase swap/RAM)
+export NODE_OPTIONS="--max-old-space-size=2048"
+echo "NODE_OPTIONS set to: $NODE_OPTIONS"
+
+# Preferred: invoke Vite with node so NODE_OPTIONS is honored reliably. If node-based Vite isn't present, fall back to bun.
+if [ -f node_modules/vite/bin/vite.js ]; then
+    echo "Running Vite build via node (honors NODE_OPTIONS)..."
+    node ./node_modules/vite/bin/vite.js build
+else
+    echo "vite not found in node_modules; falling back to bun run build"
+    bun run build
+fi
+
+# Unset NODE_OPTIONS to avoid leaking the setting to later commands
+unset NODE_OPTIONS
 
 # Check if frontend dist folder exists
 echo "Checking frontend dist folder..."
@@ -72,9 +101,9 @@ else
     echo "✅ Frontend dist folder found"
 fi
 
-# Install serve package for static file serving
-echo "Installing serve package..."
-bun add serve
+# # Install serve package for static file serving
+# echo "Installing serve package..."
+# bun add serve
 
 # Go back to root directory for PM2 ecosystem
 cd ..
