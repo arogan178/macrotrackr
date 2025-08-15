@@ -1,5 +1,6 @@
-import { useEffect, useRef } from "react";
 import { usePostHog } from "posthog-js/react";
+import { useEffect, useRef } from "react";
+
 import { useUser } from "@/hooks/auth/useAuthQueries";
 
 /**
