@@ -1,5 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
+import { usePostHog } from "posthog-js/react";
 import React, { useState } from "react";
 
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
@@ -24,14 +25,29 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   const navigate = useNavigate();
   const { data: user } = useUser();
   const isAuthenticated = !!user;
+  const posthog = usePostHog();
 
   const handleGetPro = () => {
     if (isAuthenticated) {
       // If user is logged in, go to pricing page
+      posthog?.capture?.("clicked_pricing_nav", {
+        location: "pricing_cards",
+        source: "pricing_card_pro",
+      });
       navigate({ to: "/pricing" });
     } else {
-      // If user is not logged in, go to register
-      navigate({ to: "/register" });
+      // If user is not logged in, go to register and include a returnTo so
+      // after signup/login the user can be redirected back to /pricing.
+      posthog?.capture?.("clicked_pricing_nav", {
+        location: "pricing_cards",
+        source: "pricing_card_pro_unauth",
+      });
+      try {
+        navigate({ to: "/register", search: { returnTo: "/pricing" } });
+      } catch {
+        // Fallback to full navigation
+        globalThis.location.href = "/register?returnTo=/pricing";
+      }
     }
   };
 
@@ -80,6 +96,13 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           featureIconColor={PRICING_PLANS.free.featureIconColor}
           featureTextClass={PRICING_PLANS.free.featureTextClass}
           cardClassName={PRICING_PLANS.free.cardClassName}
+          onButtonClick={() => {
+            posthog?.capture?.("clicked_pricing_nav", {
+              location: "pricing_cards",
+              source: "pricing_card_free",
+            });
+            navigate({ to: "/register", search: { returnTo: "/pricing" } });
+          }}
         >
           <p className="text-foreground">{PRICING_PLANS.free.description}</p>
         </PricingCard>
