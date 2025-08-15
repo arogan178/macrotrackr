@@ -3,6 +3,7 @@ import React, { Suspense, useEffect } from "react";
 
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import usePageMetadata from "@/hooks/usePageMetadata";
 
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -78,6 +79,13 @@ function SectionDivider({ inverted = false }: { inverted?: boolean }) {
   );
 }
 const LandingPage: React.FC = () => {
+  usePageMetadata({
+    title: "MacroTrackr — Nutrition & Macro Tracking",
+    description:
+      "MacroTrackr helps you track macronutrients, set targets, and reach your health goals with a simple, powerful interface.",
+    canonical: "https://macrotrackr.com/",
+    ogImage: "https://macrotrackr.com/icon.png",
+  });
   // Respect user's reduced motion preferences
   const shouldReduceMotion = useReducedMotion();
 
