@@ -1,12 +1,14 @@
+import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import React from "react";
+import React, { useEffect } from "react";
 
 import { PricingTable } from "@/components/billing";
 import Navbar from "@/components/layout/Navbar";
-import { CircleQuestionMarkIcon, StarIcon } from "@/components/ui";
+import { CircleQuestionMarkIcon } from "@/components/ui";
 import IconButton from "@/components/ui/IconButton";
-import { PRICING } from "@/config/pricing";
 import PageBackground from "@/features/landing/components/PageBackground";
+import { useUser } from "@/hooks/auth/useAuthQueries";
+import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";
 
 // Testimonials array removed (not used)
@@ -47,10 +49,34 @@ const handleUpgrade = async (plan: "monthly" | "yearly") => {
 };
 
 const PricingPage: React.FC = () => {
+  usePageMetadata({
+    title: "Pricing — MacroTrackr",
+    description:
+      "Compare plans and unlock Pro features on MacroTrackr — advanced insights, priority support, and unlimited tracking.",
+    canonical: "https://macrotrackr.com/pricing",
+    ogImage: "https://macrotrackr.com/icon.png",
+  });
   const [selectedPlan, setSelectedPlan] = React.useState<"monthly" | "yearly">(
     "monthly",
   );
   const [openFaq, setOpenFaq] = React.useState<number | undefined>(0);
+  const { data: user, isLoading } = useUser();
+  const navigate = useNavigate();
+
+  // If user is not authenticated, redirect to login and include returnTo
+  // so the login page can redirect back after successful authentication.
+  useEffect(() => {
+    if (isLoading) return;
+    if (!user) {
+      // Use router navigation and include returnTo param
+      try {
+        navigate({ to: "/login", search: { returnTo: "/pricing" } });
+      } catch {
+        // Fallback to full navigation if router navigation fails
+        globalThis.location.href = "/login?returnTo=/pricing";
+      }
+    }
+  }, [user, isLoading, navigate]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq((previous) => (previous === index ? undefined : index));

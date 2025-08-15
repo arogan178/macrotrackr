@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect,useRef, useState } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
 import LogoButton from "@/components/layout/LogoButton";
@@ -57,13 +57,26 @@ const styles: Record<string, React.CSSProperties> = {
  * - Accessible, keyboard-friendly, and follows project conventions.
  */
 export default function AuthPage() {
+  // Default the visible mode from the current route so '/register' opens the
+  // registration form by default and '/login' opens the login form.
+  const initialMode = ((): "login" | "register" | "forgotPassword" => {
+    try {
+      const pathname = globalThis.location?.pathname || "";
+      if (pathname === "/register") return "register";
+      if (pathname === "/reset-password") return "forgotPassword";
+    } catch {
+      /* ignore */
+    }
+    return "login";
+  })();
+
   const [mode, setMode] = useState<"login" | "register" | "forgotPassword">(
-    "login",
+    initialMode,
   );
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [visibleMode, setVisibleMode] = useState<
     "login" | "register" | "forgotPassword"
-  >("login");
+  >(initialMode);
 
   const formContainerReference = useRef<HTMLDivElement>(null);
   const contentReference = useRef<HTMLDivElement>(null);
@@ -136,6 +149,30 @@ export default function AuthPage() {
       }
     }
   };
+
+  // If the incoming URL doesn't include a `returnTo` param but the user came
+  // from a pricing-related flow (referrer or hash), inject a `returnTo`
+  // query param via history.replaceState so downstream login/register handlers
+  // can read it and redirect the user back to /pricing after auth.
+  useEffect(() => {
+    try {
+      const url = new URL(globalThis.location.href);
+      const searchParameters = url.searchParams;
+      if (!searchParameters.get("returnTo")) {
+        const referrer = document.referrer || "";
+        const hash = globalThis.location.hash || "";
+        const looksLikePricing =
+          referrer.includes("/pricing") || hash.includes("#pricing");
+        if (looksLikePricing) {
+          searchParameters.set("returnTo", "/pricing");
+          const newUrl = `${url.pathname}?${searchParameters.toString()}${url.hash}`;
+          globalThis.history.replaceState({}, "", newUrl);
+        }
+      }
+    } catch {
+      // don't block rendering on any errors here
+    }
+  }, []);
 
   return (
     <QueryErrorBoundary>
