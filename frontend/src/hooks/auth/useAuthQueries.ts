@@ -4,7 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { apiService, UserDetailsResponse } from "@/utils/apiServices";
-import { getToken, removeToken, setToken } from "@/utils/tokenStorage";
+import { removeToken, setToken } from "@/utils/tokenStorage";
 
 // Types for authentication mutations
 interface LoginCredentials {
@@ -108,7 +108,7 @@ export function useLogin() {
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
       removeToken(); // Clear any stale token
     },
-    onSuccess: (data) => {
+  onSuccess: (data) => {
       // Store the token
       if (data.token) {
         setToken(data.token);
@@ -122,7 +122,19 @@ export function useLogin() {
       // Invalidate and refetch user query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
 
-      // Navigate to home or intended route
+      // Navigate to intended route if provided via `returnTo` query param,
+      // otherwise fall back to /home.
+      try {
+        const urlSearch = new URLSearchParams(globalThis.location.search || "");
+        const returnTo = urlSearch.get("returnTo");
+        if (returnTo) {
+          navigate({ to: returnTo });
+          return;
+        }
+      } catch {
+        // ignore and fallback
+      }
+
       navigate({ to: "/home", search: { limit: 20, offset: 0 } });
     },
     onError: (error, _variables, _context) => {
@@ -213,7 +225,19 @@ export function useRegister() {
       // Invalidate and refetch user query to ensure fresh data
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
 
-      // Navigate to home
+      // Navigate to intended route if provided via `returnTo` query param,
+      // otherwise fall back to /home.
+      try {
+        const urlSearch = new URLSearchParams(globalThis.location.search || "");
+        const returnTo = urlSearch.get("returnTo");
+        if (returnTo) {
+          navigate({ to: returnTo });
+          return;
+        }
+      } catch {
+        // ignore and fallback
+      }
+
       navigate({ to: "/home", search: { limit: 20, offset: 0 } });
     },
     onError: (error, _variables, _context) => {
