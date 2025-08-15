@@ -1,4 +1,5 @@
-import { Link, useNavigate, useLocation } from "@tanstack/react-router";
+import { Link, useLocation,useNavigate } from "@tanstack/react-router";
+import { usePostHog } from "posthog-js/react";
 import React from "react";
 
 import LogoButton from "@/components/layout/LogoButton";
@@ -7,6 +8,7 @@ import { Button } from "@/components/ui";
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const posthog = usePostHog();
 
   const handlePricingClick = () => {
     // If we're already on the landing page, smooth-scroll to the pricing
@@ -17,6 +19,10 @@ const Header: React.FC = () => {
         const element = document.querySelector("#pricing");
         if (element instanceof HTMLElement) {
           element.scrollIntoView({ behavior: "smooth", block: "start" });
+          posthog?.capture?.("clicked_pricing_nav", {
+            location: "header",
+            source: "landing_header",
+          });
           return;
         }
       }
@@ -27,6 +33,10 @@ const Header: React.FC = () => {
       navigate({ to: "/pricing" });
       // Also set the hash so a subsequent navigation to landing can pick it up
       // or the browser can use it when appropriate.
+      posthog?.capture?.("clicked_pricing_nav", {
+        location: "header",
+        source: "pricing_route",
+      });
       globalThis.location.hash = "#pricing";
     } catch {
       // Fallback to full navigation
