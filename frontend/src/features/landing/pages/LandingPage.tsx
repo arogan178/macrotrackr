@@ -132,6 +132,28 @@ const LandingPage: React.FC = () => {
       {/* Shared background */}
       <PageBackground />
 
+      {/* Structured data: SoftwareApplication + WebSite (helps search engines understand the product) */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SoftwareApplication",
+            name: "MacroTrackr",
+            alternateName: "MacroTracker",
+            url: "https://macrotrackr.com",
+            applicationCategory: "HealthApplication",
+            operatingSystem: "Web",
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+              url: "https://macrotrackr.com/#pricing",
+            },
+          }),
+        }}
+      />
+
       {/* Header landmark - render immediately without entrance animation */}
       <div aria-hidden={false}>
         <Header />
