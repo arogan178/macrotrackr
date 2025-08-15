@@ -11,15 +11,21 @@ import { ApiError } from "@/utils/apiServices";
 function ResetPasswordForm() {
   const search = useSearch({ from: resetPasswordRoute.id });
   const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { showNotification } = useStore();
   const resetPasswordMutation = useResetPassword();
 
-  const token = search.token;
+  // useSearch can be untyped in some setups; cast to any for token access
+  const token = (search as any)?.token as string | undefined;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!token) {
       showNotification("No reset token found.", "error");
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      showNotification("Passwords do not match.", "error");
       return;
     }
     try {
@@ -36,6 +42,9 @@ function ResetPasswordForm() {
     }
   }
 
+  const passwordsMatch =
+    newPassword === confirmPassword && newPassword.length > 0;
+
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
@@ -47,6 +56,7 @@ function ResetPasswordForm() {
         </h1>
         <p className="mt-2 text-foreground">Enter your new password</p>
       </div>
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
           label="New Password"
@@ -56,10 +66,30 @@ function ResetPasswordForm() {
           required={true}
           placeholder="••••••••"
         />
+
+        <TextField
+          label="Confirm New Password"
+          value={confirmPassword}
+          onChange={setConfirmPassword}
+          type="password"
+          required={true}
+          placeholder="••••••••"
+        />
+
+        {confirmPassword.length > 0 && !passwordsMatch && (
+          <p className="text-sm text-red-500">Passwords do not match</p>
+        )}
+
         <Button
           type="submit"
           className="w-full"
-          disabled={resetPasswordMutation.isPending || !token}
+          disabled={
+            resetPasswordMutation.isPending ||
+            !token ||
+            !newPassword ||
+            !confirmPassword ||
+            !passwordsMatch
+          }
         >
           {resetPasswordMutation.isPending ? (
             <LoadingSpinner size="sm" color="white" />
