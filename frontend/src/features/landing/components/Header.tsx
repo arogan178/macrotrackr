@@ -1,4 +1,4 @@
-import { Link, useLocation,useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
 import React from "react";
 
@@ -6,41 +6,19 @@ import LogoButton from "@/components/layout/LogoButton";
 import { Button } from "@/components/ui";
 
 const Header: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
   const posthog = usePostHog();
 
   const handlePricingClick = () => {
-    // If we're already on the landing page, smooth-scroll to the pricing
-    // section. Otherwise navigate to the landing page with hash so the
-    // browser will scroll after navigation.
-    try {
-      if (location.pathname === "/") {
-        const element = document.querySelector("#pricing");
-        if (element instanceof HTMLElement) {
-          element.scrollIntoView({ behavior: "smooth", block: "start" });
-          posthog?.capture?.("clicked_pricing_nav", {
-            location: "header",
-            source: "landing_header",
-          });
-          return;
-        }
-      }
-      // Navigate to the dedicated pricing route; include a hash manually so
-      // the browser can land on the section server-side (or we can scroll on
-      // mount of the landing page component). We use '/pricing' because the
-      // router type system expects that route path.
-      navigate({ to: "/pricing" });
-      // Also set the hash so a subsequent navigation to landing can pick it up
-      // or the browser can use it when appropriate.
+    // Always attempt to smooth-scroll to the pricing section if it exists.
+    // We intentionally do NOT navigate to /pricing here to keep the user on
+    // the same landing page and preserve their scroll context.
+    const element = document.querySelector("#pricing");
+    if (element instanceof HTMLElement) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
       posthog?.capture?.("clicked_pricing_nav", {
         location: "header",
-        source: "pricing_route",
+        source: "landing_header",
       });
-      globalThis.location.hash = "#pricing";
-    } catch {
-      // Fallback to full navigation
-      globalThis.location.href = "/#pricing";
     }
   };
 
@@ -53,7 +31,7 @@ const Header: React.FC = () => {
             <Button
               onClick={handlePricingClick}
               text="Pricing"
-              variant="primary"
+              variant="ghost"
               buttonSize="md"
             />
           </div>
