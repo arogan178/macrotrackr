@@ -6,11 +6,9 @@ function ResetPasswordPage() {
   return (
     <QueryErrorBoundary>
       <ErrorBoundary>
-        <div className="min-h-screen bg-background">
-          <main className="mx-auto max-w-md px-4 py-16">
-            <div className="rounded-2xl border border-border bg-surface p-6 backdrop-blur-sm">
-              <ResetPasswordForm />
-            </div>
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <main className="w-full max-w-md px-4">
+            <ResetPasswordForm />
           </main>
         </div>
       </ErrorBoundary>
