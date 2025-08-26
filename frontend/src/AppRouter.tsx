@@ -78,12 +78,11 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
 
 // Root route with query-based user data prefetching
 export const rootRoute = createRootRoute({
-  // Provide type for context so 'queryClient' is known to exist
-  loader: async ({
-    context,
-  }: {
-    context: { queryClient: typeof queryClient };
-  }) => {
+  // Loader prefetches user data if token present
+  loader: async (context_) => {
+    const { context } = context_ as typeof context_ & {
+      context: { queryClient: typeof queryClient };
+    };
     // Only prefetch user data if there's a token
     const { getToken } = await import("@/utils/tokenStorage");
 
@@ -153,13 +152,11 @@ export const homeRoute = createRoute({
     };
   },
   loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
-  loader: async ({
-    deps,
-    context,
-  }: {
-    deps: { offset: number; limit: number };
-    context: { queryClient: typeof queryClient };
-  }) => {
+  loader: async (context_) => {
+    const { deps, context } = context_ as typeof context_ & {
+      deps: { offset: number; limit: number };
+      context: { queryClient: typeof queryClient };
+    };
     // Use queryClient.ensureQueryData for prefetching macro data
     const limit = deps.limit || 20;
     const offset = deps.offset || 0;
@@ -189,7 +186,9 @@ export const homeRoute = createRoute({
           queryKey: queryKeys.goals.weight(),
           queryFn: async () => {
             const { apiService } = await import("@/utils/apiServices");
-            return await apiService.goals.getWeightGoals();
+            const result = await apiService.goals.getWeightGoals();
+            // eslint-disable-next-line unicorn/no-null
+            return result ?? null; // ensure never undefined
           },
           staleTime: 5 * 60 * 1000, // 5 minutes
           gcTime: 10 * 60 * 1000, // 10 minutes
@@ -210,7 +209,8 @@ export const homeRoute = createRoute({
     if (weightGoals) {
       const latestWeight =
         weightLog.length > 0
-          ? weightLog.at(-1).weight
+          ? // eslint-disable-next-line unicorn/prefer-at
+            weightLog[weightLog.length - 1].weight
           : weightGoals.startingWeight;
 
       transformedWeightGoals = {
@@ -232,11 +232,14 @@ export const homeRoute = createRoute({
       };
     }
 
+    const historyEntries = (macroHistory as any)?.entries || [];
+    const historyHasMore = (macroHistory as any)?.hasMore || false;
+    const historyTotal = (macroHistory as any)?.total || 0;
     return {
       macroTarget,
-      history: macroHistory?.entries || [],
-      historyHasMore: macroHistory?.hasMore || false,
-      historyTotal: macroHistory?.total || 0,
+      history: historyEntries,
+      historyHasMore,
+      historyTotal,
       weightGoals: transformedWeightGoals,
       weightLog: Array.isArray(weightLog) ? weightLog : [],
     };
@@ -251,11 +254,10 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: async ({
-    context,
-  }: {
-    context: { queryClient: typeof queryClient };
-  }) => {
+  loader: async (context_) => {
+    const { context } = context_ as typeof context_ & {
+      context: { queryClient: typeof queryClient };
+    };
     // Use queryClient.ensureQueryData for prefetching settings and billing data
     await Promise.all([
       context.queryClient.ensureQueryData({
@@ -287,11 +289,10 @@ const settingsRoute = createRoute({
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
-  loader: async ({
-    context,
-  }: {
-    context: { queryClient: typeof queryClient };
-  }) => {
+  loader: async (context_) => {
+    const { context } = context_ as typeof context_ & {
+      context: { queryClient: typeof queryClient };
+    };
     // Use queryClient.ensureQueryData for prefetching goals and habits data
     const [macroTarget, weightGoals, weightLog] = await Promise.all([
       context.queryClient.ensureQueryData({
@@ -308,7 +309,9 @@ export const goalsRoute = createRoute({
         queryKey: queryKeys.goals.weight(),
         queryFn: async () => {
           const { apiService } = await import("@/utils/apiServices");
-          return await apiService.goals.getWeightGoals();
+          const result = await apiService.goals.getWeightGoals();
+          // eslint-disable-next-line unicorn/no-null
+          return result ?? null; // ensure never undefined
         },
         staleTime: 5 * 60 * 1000, // 5 minutes
         gcTime: 10 * 60 * 1000, // 10 minutes
@@ -339,7 +342,8 @@ export const goalsRoute = createRoute({
     if (weightGoals) {
       const latestWeight =
         weightLog.length > 0
-          ? weightLog.at(-1).weight
+          ? // eslint-disable-next-line unicorn/prefer-at
+            weightLog[weightLog.length - 1].weight
           : weightGoals.startingWeight;
 
       transformedWeightGoals = {
