@@ -142,7 +142,7 @@ export function MacroIndicator({
         // Reuse shared ProgressBar for consistent visuals
         // Height matches previous ~6px track: use "md" (h-2) which is closest and visually consistent
         <div className="mt-0.5">
-          { }
+          {}
           {/* Import placed at top of file; see import section */}
           <ProgressBar
             progress={percentage}
