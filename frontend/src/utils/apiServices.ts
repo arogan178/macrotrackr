@@ -556,16 +556,18 @@ export const apiService = {
 
   // Goals endpoints
   goals: {
-    /** Gets weight goals (including calorieTarget) */
+    /** Gets weight goals (including calorieTarget); returns undefined when not set */
     getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
-      // Return type might need adjustment based on backend response
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         headers: getHeaders(false),
         credentials: "include",
       });
-      return (await handleResponse(response)) as
+      const result = (await handleResponse(response)) as
         | SetWeightGoalPayload
-        | undefined;
+        | undefined
+        | null;
+      // Normalize null -> undefined (lint preference) so downstream always checks falsy
+      return result === null ? undefined : result;
     },
     /** Creates new weight goals */
     createWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
