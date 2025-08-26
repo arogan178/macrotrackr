@@ -6,5 +6,6 @@ export { default as DateField } from "./DateField";
 export { default as Dropdown } from "./Dropdown";
 export { default as InfoCard } from "./InfoCard";
 export { default as NumberField } from "./NumberField";
+export { default as QuantityUnitField } from "./QuantityUnitField";
 export { default as TextField } from "./TextField";
 export { default as TimeField } from "./TimeField";
