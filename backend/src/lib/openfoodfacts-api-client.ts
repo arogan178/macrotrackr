@@ -112,6 +112,8 @@ function parseQuantity(quantityString: string): QuantityParseResult {
     /([\d.,]+)\s*(?:tbsp|tablespoon|tablespoons)/,
     // "1 tsp", "1 teaspoon"
     /([\d.,]+)\s*(?:tsp|teaspoon|teaspoons)/,
+    // "1 pt", "1 pint"
+    /([\d.,]+)\s*(?:pt|pint|pints)/,
   ];
 
   for (const pattern of patterns) {
@@ -149,6 +151,9 @@ function parseQuantity(quantityString: string): QuantityParseResult {
           tsp: "tsp",
           teaspoon: "tsp",
           teaspoons: "tsp",
+          pt: "pt",
+          pint: "pt",
+          pints: "pt",
         };
 
         const rawUnit = match[2] || "";
