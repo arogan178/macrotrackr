@@ -31,7 +31,7 @@ interface WeightGoalStatusProps {
   targetWeight: number;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
-  weightGoals: WeightGoals | undefined;
+  weightGoals: WeightGoals | undefined | null;
   onEdit: () => void;
   onDelete: () => void;
   onLogWeight: () => void;
@@ -62,7 +62,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const isMaintenance = weightGoal === "maintain";
 
   const effectiveCalorieTarget =
-    targetCalories || computeEffectiveTargetCalories(tdee, weightGoals);
+    targetCalories ||
+    computeEffectiveTargetCalories(tdee, weightGoals || undefined);
 
   const goalTypeLabel = isWeightLoss
     ? "Weight Loss"
@@ -106,7 +107,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   // Mirror existing display behavior via shared helper
   const dailyDifference = computeDailyDifferenceForDisplay(
     tdee,
-    weightGoals,
+    weightGoals || undefined,
     true,
     50,
   );
