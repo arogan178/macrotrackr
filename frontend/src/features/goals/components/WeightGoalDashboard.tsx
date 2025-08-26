@@ -1,10 +1,7 @@
 import { memo } from "react";
 
 import { EmptyState, TargetIcon } from "@/components/ui/";
-import {
-  computeDailyAdjustment,
-  computeEffectiveTargetCalories,
-} from "@/features/goals/utils/calorie";
+import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { useFeatureLoading } from "@/hooks";
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
@@ -17,7 +14,7 @@ interface WeightGoalDashboardProps {
   user: UserSettings;
   tdee: number;
   macroDailyTotals: MacroDailyTotals;
-  weightGoals: WeightGoals | undefined;
+  weightGoals: WeightGoals | undefined | null;
   isLoading?: boolean;
   onOpenModal: () => void;
   onDelete: () => void;
@@ -50,12 +47,11 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // TDEE is now passed as a prop and should be used directly
 
   // Get daily deficit/surplus from weightGoals via shared helper
-  const dailyAdjustment = computeDailyAdjustment(tdee, weightGoals);
 
   // Calculate effective target calories via shared helper
   const effectiveTargetCalories = computeEffectiveTargetCalories(
     tdee,
-    weightGoals,
+    weightGoals || undefined,
   );
 
   // Loading State
