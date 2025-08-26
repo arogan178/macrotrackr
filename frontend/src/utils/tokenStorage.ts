@@ -26,7 +26,7 @@ export function securelyStoreToken(token: string): void {
     localStorage.setItem("token", token);
     try {
       const [, payloadBase64] = token.split(".");
-      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+      const payloadJson = atob(payloadBase64.replaceAll('-', "+").replaceAll('_', "/"));
       const payload = JSON.parse(payloadJson);
       if (payload && typeof payload.exp === "number") {
         localStorage.setItem("token_exp", String(payload.exp));
@@ -41,7 +41,7 @@ export function securelyStoreToken(token: string): void {
     localStorage.setItem("token", token);
     try {
       const [, payloadBase64] = token.split(".");
-      const payloadJson = atob(payloadBase64.replace(/-/g, "+").replace(/_/g, "/"));
+      const payloadJson = atob(payloadBase64.replaceAll('-', "+").replaceAll('_', "/"));
       const payload = JSON.parse(payloadJson);
       if (payload && typeof payload.exp === "number") {
         localStorage.setItem("token_exp", String(payload.exp));
