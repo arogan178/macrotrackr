@@ -1,8 +1,5 @@
 // The updated HabitForm.tsx, removing isSubmitting prop since it's not used
-import { useMemo } from "react";
-
 import { NumberField, TextField } from "@/components/form";
-import { TargetIcon } from "@/components/ui";
 
 import { HABIT_ICONS } from "../constants";
 import { HabitGoalFormValues } from "../types/types";
@@ -112,20 +109,6 @@ const COLOR_GRADIENT_CHIP_MAP = {
   },
 } as const;
 
-const COLOR_BAR_BG_MAP = {
-  indigo: "bg-indigo-500",
-  blue: "bg-blue-500",
-  cyan: "bg-cyan-500",
-  teal: "bg-teal-500",
-  green: "bg-green-500",
-  lime: "bg-lime-500",
-  yellow: "bg-yellow-500",
-  orange: "bg-orange-500",
-  red: "bg-red-500",
-  pink: "bg-pink-500",
-  purple: "bg-purple-500",
-} as const;
-
 interface HabitFormProps {
   values: HabitGoalFormValues;
   onChange: (field: keyof HabitGoalFormValues, value: string | number) => void;
@@ -152,18 +135,12 @@ function HabitForm({
 
   // Use HABIT_ICONS for preview icon resolution (selection UI updated below)
 
-  const previewProgressPercentage = useMemo(() => {
-    if (values.target <= 0) return 0;
-    return Math.min(100, Math.round((currentProgress / values.target) * 100));
-  }, [currentProgress, values.target]);
-
   // Safely map accentColor to our static Tailwind maps to satisfy TS and avoid purge
   type AccentKey = keyof typeof COLOR_TEXT_RING_MAP;
   const accentKey = values.accentColor as AccentKey;
   const colorText = COLOR_TEXT_RING_MAP[accentKey].text;
   const colorRing = COLOR_TEXT_RING_MAP[accentKey].ring;
   const grad = COLOR_GRADIENT_CHIP_MAP[accentKey];
-  const barBg = COLOR_BAR_BG_MAP[accentKey];
 
   return (
     <div className="space-y-6">
