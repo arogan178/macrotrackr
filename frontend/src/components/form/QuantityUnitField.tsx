@@ -40,6 +40,7 @@ const QuantityUnitField = memo(function QuantityUnitField({
     { value: "cup", label: "cup" },
     { value: "tbsp", label: "tbsp" },
     { value: "tsp", label: "tsp" },
+    { value: "pt", label: "pt" },
     { value: "unit", label: "pcs" },
   ];
 
