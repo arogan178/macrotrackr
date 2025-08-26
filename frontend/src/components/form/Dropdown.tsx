@@ -40,6 +40,7 @@ function Dropdown({
           ))}
         </select>
       </div>
+
       {error && <p className={formStyles.error}>{error}</p>}
     </div>
   );
