@@ -14,7 +14,7 @@ import { WeightLogEntry } from "@/utils/apiServices";
 
 interface ProgressInsightsCardProps {
   weightLog: WeightLogEntry[];
-  weightGoals: WeightGoals | undefined;
+  weightGoals: WeightGoals | undefined | null;
   isLoading: boolean;
 }
 
@@ -38,7 +38,8 @@ function calculateRecentWeeklyChange(
 
   // Simple trend: change between first and last point in the last 4 weeks
   const firstLog = recentLogs[0];
-  const lastLog = recentLogs.at(-1);
+  // eslint-disable-next-line unicorn/prefer-at
+  const lastLog = recentLogs[recentLogs.length - 1];
   const weeksBetween = differenceInWeeks(lastLog.date, firstLog.date);
 
   if (weeksBetween <= 0) return undefined; // Avoid division by zero or nonsensical results
