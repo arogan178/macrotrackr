@@ -241,11 +241,32 @@ function normalizeWeightGoalsFromResponse(
   // Otherwise it's a WeightGoalsResponse (loader shape) — map to WeightGoals
   const r = goals as import("@/features/goals/types").WeightGoalsResponse;
   if (r.targetWeight === undefined) return undefined;
+  // Prevent premature 100% progress: if we have no explicit current weight yet
+  // and the only source is userWeight which equals the target while starting differs,
+  // treat current weight as starting weight until a log entry updates it.
+  const starting = r.startingWeight;
+  const target = r.targetWeight ?? 0;
+  const tentativeCurrent = userWeight ?? starting;
+  // Progress glitch fix:
+  // When the loader response does not yet include a derived currentWeight and there are
+  // no weight log entries, we previously defaulted currentWeight to userWeight. If the
+  // userWeight already equals the new targetWeight (common after finishing a prior goal
+  // and immediately setting a new, more aggressive target), progress falsely rendered
+  // as 100% until a refresh. To prevent this, treat the current weight as the starting
+  // weight in the specific case where:
+  //   - startingWeight !== targetWeight (active non-maintenance goal)
+  //   - userWeight (tentativeCurrent) === targetWeight
+  // This defers showing full completion until an actual weight log entry moves the
+  // currentWeight toward the target.
+  const currentWeight =
+    starting !== target && tentativeCurrent === target
+      ? starting
+      : tentativeCurrent;
 
   return {
-    startingWeight: r.startingWeight,
-    currentWeight: userWeight ?? 0,
-    targetWeight: r.targetWeight ?? 0,
+    startingWeight: starting,
+    currentWeight,
+    targetWeight: target,
     weightGoal: (r as any).weightGoal ?? "maintain",
     startDate: (r as any).startDate ?? "",
     targetDate: (r as any).targetDate ?? "",
