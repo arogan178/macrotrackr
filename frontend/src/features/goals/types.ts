@@ -34,10 +34,10 @@ export type UpdateWeightGoalPayload = Omit<
 >;
 
 export interface GoalsState {
-  weightGoals: WeightGoals | undefined;
-  macroTarget: MacroTarget | undefined;
+  weightGoals: WeightGoals |  null;
+  macroTarget: MacroTarget | null;
   isLoading: boolean;
-  error: string | undefined;
+  error: string | null;
 }
 
 export interface TimeToGoalCalculation {

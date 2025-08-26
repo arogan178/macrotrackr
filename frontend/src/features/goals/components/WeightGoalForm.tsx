@@ -11,7 +11,7 @@ interface WeightGoalFormProps {
   startingWeight: number;
   targetWeight: number;
   tdee: number;
-  weightGoals: WeightGoals | undefined; // If this exists, we are editing
+  weightGoals: WeightGoals | undefined | null; // If this exists, we are editing
   isLoading?: boolean; // Prop received from modal (bound to store's isSaving)
   onSave: (values: WeightGoalFormValues) => void;
   onCancel?: () => void;
