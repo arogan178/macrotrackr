@@ -1,21 +1,15 @@
-import { useState } from "react";
+import { memo, useCallback, useMemo, useState } from "react";
 
 import { TextField } from "@/components/form";
 import { ArrowRightIcon, Button, SearchIcon } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { apiService } from "@/utils/apiServices";
 
-// Helper moved to module scope to satisfy unicorn/consistent-function-scoping
-function getMetricServing(quantity: number, unit: string) {
-  if (unit === "oz")
-    return { quantity: +(quantity * 28.3495).toFixed(2), unit: "g" };
-  if (unit === "lbs")
-    return { quantity: +(quantity * 0.453_592).toFixed(3), unit: "kg" };
-  // Keep liters and other units as-is
-  return { quantity, unit };
-}
+import { calculateCaloriesFromMacros } from "../calculations";
+import { UnitConverter, type UnitType } from "../utils/units";
 
-type CalorieSearchProps = {
+// Types for better type safety
+interface CalorieSearchProps {
   onResult: (macros: {
     protein: string;
     carbs: string;
@@ -24,9 +18,9 @@ type CalorieSearchProps = {
     servingQuantity: number;
     servingUnit: string;
   }) => void;
-};
+}
 
-type FoodResult = {
+interface FoodResult {
   name: string;
   protein: number;
   carbs: number;
@@ -35,31 +29,42 @@ type FoodResult = {
   categories: string;
   servingQuantity: number;
   servingUnit: string;
-};
+  rawQuantity?: string;
+}
 
-export default function CalorieSearch({ onResult }: CalorieSearchProps) {
+interface SearchResultDisplayData {
+  item: FoodResult;
+  displayQuantity: string;
+  calories: number;
+  hasNutrients: boolean;
+}
+
+const CalorieSearch = memo(function CalorieSearch({
+  onResult,
+}: CalorieSearchProps) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<FoodResult[]>([]);
   const [showResults, setShowResults] = useState(false);
 
-  const handleQueryChange = (value: string) => {
+  const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
     setResults([]);
     setShowResults(false);
     setError("");
-  };
+  }, []);
 
-  const handleSearch = async () => {
-    if (!query) return;
+  const handleSearch = useCallback(async () => {
+    if (!query.trim()) return;
+
     setLoading(true);
     setError("");
     setShowResults(false);
     setResults([]);
 
     try {
-      const result: any = await apiService.macros.search(query);
+      const result = await apiService.macros.search(query.trim());
       if (Array.isArray(result) && result.length > 0) {
         setResults(result);
         setShowResults(true);
@@ -72,43 +77,186 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [query]);
 
-  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.key === "Enter") {
-      event.preventDefault();
-      handleSearch();
-    }
-  };
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLInputElement>) => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        handleSearch();
+      }
+    },
+    [handleSearch],
+  );
 
   // Convert to metric for display and selection (moved to module scope)
 
-  const handleSelect = (item: FoodResult) => {
+  // Memoized function to process food item selection
+  const processFoodItemSelection = useCallback((item: FoodResult) => {
     let quantity = item.servingQuantity;
     let unit = item.servingUnit;
-    // If unit is 'unit' and rawQuantity contains a gram value, use that
-    if (unit === "unit" && (item as any).rawQuantity) {
-      const raw = (item as any).rawQuantity as string;
-      // Match e.g. '90 g' or '90g'
-      const match = raw.match(/(\d+(?:[,.]\d+)?)\s*g/);
-      if (match) {
-        quantity = Number.parseFloat(match[1].replace(",", "."));
-        unit = "g";
+
+    // Try to extract unit from rawQuantity if available
+    if (item.rawQuantity) {
+      const raw = item.rawQuantity.toLowerCase().trim();
+
+      // Parse various unit patterns from rawQuantity
+      const patterns = [
+        // "330ml", "250 ml", "1.5 L", "10 fl oz (296 mL)"
+        /([\d,.]+)\s*(ml|milliliter|milliliters|l|liter|liters|fl\s*oz|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)/,
+        // "90 g", "90g"
+        /([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds)/,
+      ];
+
+      for (const pattern of patterns) {
+        const match = raw.match(pattern);
+        if (match && match[1] && match[2]) {
+          quantity = Number.parseFloat(match[1].replace(",", "."));
+          const rawUnit = match[2];
+
+          // Map raw units to our UnitType
+          const unitMap: Record<string, UnitType> = {
+            ml: "ml",
+            milliliter: "ml",
+            milliliters: "ml",
+            l: "L",
+            liter: "L",
+            liters: "L",
+            fl: "ml", // fl oz will be handled separately
+            oz: "ml", // fl oz will be handled separately
+            cup: "cup",
+            cups: "cup",
+            tbsp: "tbsp",
+            tablespoon: "tbsp",
+            tablespoons: "tbsp",
+            tsp: "tsp",
+            teaspoon: "tsp",
+            teaspoons: "tsp",
+            pt: "pt",
+            pint: "pt",
+            pints: "pt",
+            g: "g",
+            gram: "g",
+            grams: "g",
+            kg: "kg",
+            kilogram: "kg",
+            kilograms: "kg",
+            lb: "lb",
+            lbs: "lb",
+            pound: "lb",
+            pounds: "lb",
+          };
+
+          // Special handling for fl oz
+          if (raw.includes("fl") && raw.includes("oz")) {
+            unit = "ml"; // Convert fl oz to ml
+            quantity = quantity * 29.5735; // 1 fl oz = 29.5735 ml
+          } else {
+            unit = unitMap[rawUnit] || "g";
+          }
+
+          break; // Found a match, stop looking
+        }
       }
     }
-    const metric = getMetricServing(quantity, unit);
-    onResult({
+
+    // If unit is still 'g' but we have rawQuantity with different unit info, try one more time
+    if (unit === "g" && item.rawQuantity) {
+      const raw = item.rawQuantity.toLowerCase();
+      if (raw.includes("ml") || raw.includes("milliliter")) {
+        unit = "ml";
+      } else if (raw.includes("l") || raw.includes("liter")) {
+        unit = "L";
+      } else if (raw.includes("cup")) {
+        unit = "cup";
+      } else if (raw.includes("tbsp") || raw.includes("tablespoon")) {
+        unit = "tbsp";
+      } else if (raw.includes("tsp") || raw.includes("teaspoon")) {
+        unit = "tsp";
+      } else if (raw.includes("pt") || raw.includes("pint")) {
+        unit = "pt";
+      }
+    }
+
+    // Use the detected unit for display, but convert quantity to metric for calculations
+    const metric = UnitConverter.toMetric(quantity, unit as UnitType);
+
+    return {
       protein: item.protein.toFixed(1),
       carbs: item.carbs.toFixed(1),
       fats: item.fats.toFixed(1),
       name: item.name,
       servingQuantity: metric.quantity,
-      servingUnit: metric.unit,
-    });
-    setShowResults(false);
-    setResults([]);
-    setQuery("");
-  };
+      servingUnit: unit, // Use detected unit for display
+    };
+  }, []);
+
+  const handleSelect = useCallback(
+    (item: FoodResult) => {
+      const result = processFoodItemSelection(item);
+      onResult(result);
+      setShowResults(false);
+      setResults([]);
+      setQuery("");
+    },
+    [onResult, processFoodItemSelection],
+  );
+
+  // Memoized function to calculate calories for display
+  const calculateDisplayCalories = useCallback((item: FoodResult): number => {
+    if (item.energyKcal && item.energyKcal > 0) {
+      return item.energyKcal;
+    }
+    // Fallback: calculate from macros if energyKcal is not available
+    return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
+  }, []);
+
+  // Memoized function to get quantity display string
+  const getQuantityDisplay = useCallback((item: FoodResult): string => {
+    if (item.rawQuantity) {
+      return item.rawQuantity;
+    }
+
+    if (item.servingQuantity && item.servingUnit) {
+      const metric = UnitConverter.toMetric(
+        item.servingQuantity,
+        item.servingUnit as UnitType,
+      );
+      return `${metric.quantity}${metric.unit}`;
+    }
+
+    if (item.servingQuantity) {
+      return `${item.servingQuantity}`;
+    }
+
+    return "";
+  }, []);
+
+  // Memoized function to check if item has meaningful nutrients
+  const hasNutrients = useCallback((item: FoodResult): boolean => {
+    return !(item.protein === 0 && item.carbs === 0 && item.fats === 0);
+  }, []);
+
+  // Memoized filtered and processed results for display
+  const displayResults = useMemo(() => {
+    if (!showResults || results.length === 0) return [];
+
+    return results
+      .filter((item) => hasNutrients(item))
+      .map((item, index) => ({
+        item,
+        displayQuantity: getQuantityDisplay(item),
+        calories: calculateDisplayCalories(item),
+        hasNutrients: hasNutrients(item),
+        id: `${item.name}-${index}`, // Unique key for React
+      }));
+  }, [
+    results,
+    showResults,
+    hasNutrients,
+    getQuantityDisplay,
+    calculateDisplayCalories,
+  ]);
 
   return (
     <div className="flex flex-col gap-3">
@@ -123,76 +271,35 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
             placeholder="e.g. 1 apple, 100g chicken breast"
             icon={<SearchIcon className=" text-muted" />}
             maxLength={50}
-            error={error}
           />
-          {error && (
-            <div className="mt-2">
-              <StatusIndicator status="error" message={error} />
-            </div>
-          )}
-          {showResults && results.length > 0 && (
+          {showResults && displayResults.length > 0 && (
             <div className="absolute z-10 mt-2 max-h-64 w-full overflow-y-auto rounded border border-border bg-surface shadow-surface">
-              {results
-                .filter(
-                  (item) =>
-                    !(
-                      item.protein === 0 &&
-                      item.carbs === 0 &&
-                      item.fats === 0
-                    ),
-                )
-                .map((item, index) => {
-                  // Calculate calories (energyKcal) if available, otherwise compute from macros
-                  let calories = item.energyKcal;
-                  if (
-                    (calories === undefined || calories === 0) &&
-                    (item.protein !== 0 || item.carbs !== 0 || item.fats !== 0)
-                  ) {
-                    calories =
-                      item.protein * 4 + item.carbs * 4 + item.fats * 9;
-                  }
-                  // Prefer rawQuantity if present, fallback to parsed quantity/unit
-                  let quantityDisplay = "";
-                  if ((item as any).rawQuantity) {
-                    quantityDisplay = (item as any).rawQuantity;
-                  } else if (item.servingQuantity && item.servingUnit) {
-                    const metric = getMetricServing(
-                      item.servingQuantity,
-                      item.servingUnit,
-                    );
-                    quantityDisplay = `${metric.quantity}${metric.unit}`;
-                  } else if (item.servingQuantity) {
-                    quantityDisplay = `${item.servingQuantity}`;
-                  } else if ((item as any).quantity) {
-                    quantityDisplay = `${(item as any).quantity}`;
-                  }
-                  // Ensure all rows are fully readable (no opacity or disabled style)
-                  return (
-                    <button
-                      key={index}
-                      className={
-                        "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
-                      }
-                      onClick={() => handleSelect(item)}
-                      type="button"
-                    >
-                      <div className="font-medium">{item.name}</div>
+              {displayResults.map((resultData) => {
+                const { item, displayQuantity, calories } = resultData;
+                return (
+                  <button
+                    key={resultData.id}
+                    className={
+                      "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
+                    }
+                    onClick={() => handleSelect(item)}
+                    type="button"
+                  >
+                    <div className="font-medium">{item.name}</div>
+                    <div className="text-xs text-foreground">
+                      {displayQuantity ? `${displayQuantity} | ` : ""}
+                      Calories: {calories.toFixed(1)} kcal | Protein:{" "}
+                      {item.protein.toFixed(1)}g, Carbs: {item.carbs.toFixed(1)}
+                      g, Fats: {item.fats.toFixed(1)}g
+                    </div>
+                    {item.categories && (
                       <div className="text-xs text-foreground">
-                        {quantityDisplay ? `${quantityDisplay} | ` : ""}
-                        {calories === undefined
-                          ? ""
-                          : `Calories: ${calories.toFixed(1)} kcal | `}
-                        Protein: {item.protein.toFixed(1)}g, Carbs:{" "}
-                        {item.carbs.toFixed(1)}g, Fats: {item.fats.toFixed(1)}g
+                        {item.categories}
                       </div>
-                      {item.categories && (
-                        <div className="text-xs text-foreground">
-                          {item.categories}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+                    )}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
@@ -212,6 +319,13 @@ export default function CalorieSearch({ onResult }: CalorieSearchProps) {
           />
         </div>
       </div>
+      {error && (
+        <div>
+          <StatusIndicator status="error" message={error} />
+        </div>
+      )}
     </div>
   );
-}
+});
+
+export default CalorieSearch;
