@@ -5,6 +5,7 @@ import {
   DateField,
   Dropdown,
   NumberField,
+  QuantityUnitField,
   TextField,
   TimeField,
 } from "@/components/form";
@@ -14,6 +15,7 @@ import { MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
+import { UnitConverter, type UnitType } from "../utils/units";
 
 interface AddEntryProps {
   onSubmit: (entry: {
@@ -33,7 +35,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   const [carbs, setCarbs] = useState<number | undefined>();
   const [fats, setFats] = useState<number | undefined>();
   const [quantity, setQuantity] = useState<number | undefined>(100);
-  const [unit, setUnit] = useState<string>("g");
+  const [unit, setUnit] = useState<UnitType>("g");
   const [baseMacros, setBaseMacros] = useState<
     | {
         protein: number;
@@ -92,15 +94,37 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     }),
   );
 
-  // Effect to recalculate macros when quantity or baseMacros change
+  // Effect to recalculate macros when quantity, unit, or baseMacros change
   useEffect(() => {
-    if (baseMacros && typeof quantity === "number") {
-      const factor = quantity / 100; // Macros are per 100g
+    if (baseMacros && typeof quantity === "number" && quantity > 0) {
+      // Convert the quantity to grams for consistent macro calculations
+      // Base macros are always per 100g, so we need to calculate the factor accordingly
+      let quantityInGrams: number;
+
+      if (UnitConverter.isWeightUnit(unit)) {
+        // Convert weight units to grams
+        quantityInGrams = UnitConverter.convert(quantity, unit, "g");
+      } else if (UnitConverter.isVolumeUnit(unit)) {
+        // For volume units, we'll keep them as-is since macros are typically per volume for liquids
+        // But we still need to handle the conversion for display purposes
+        quantityInGrams = UnitConverter.convert(quantity, unit, "ml");
+      } else {
+        // For unit items (like pieces), treat as 100g equivalent
+        quantityInGrams = quantity * 100;
+      }
+
+      // Calculate macros based on the converted quantity
+      const factor = quantityInGrams / 100; // Macros are per 100g/ml
       setProtein(Number((baseMacros.protein * factor).toFixed(1)));
       setCarbs(Number((baseMacros.carbs * factor).toFixed(1)));
       setFats(Number((baseMacros.fats * factor).toFixed(1)));
+    } else if (!baseMacros) {
+      // Clear macros when no base macros are selected
+      setProtein(undefined);
+      setCarbs(undefined);
+      setFats(undefined);
     }
-  }, [quantity, baseMacros]);
+  }, [quantity, unit, baseMacros]);
 
   const calories = Math.round(
     calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0),
@@ -136,12 +160,20 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       setBaseMacros(per100g);
       setMealName(name);
       setQuantity(servingQuantity);
-      // Only allow metric units: g, kg, L
-      let metricUnit = servingUnit;
-      if (servingUnit === "oz") metricUnit = "g";
-      if (servingUnit === "lbs") metricUnit = "kg";
-      // If L, keep as L
-      setUnit(metricUnit);
+      // Convert to appropriate units - prefer metric but keep original unit for better UX
+      // This allows users to work in their preferred units while ensuring calculations work
+      const originalUnit = servingUnit as UnitType;
+
+      // If it's lbs, convert to kg for better metric consistency
+      if (originalUnit === "lb") {
+        const metric = UnitConverter.toMetric(servingQuantity, originalUnit);
+        setUnit(metric.unit);
+        setQuantity(metric.quantity);
+      } else {
+        // For other units, keep as-is but ensure they're valid UnitType
+        setUnit(originalUnit);
+        setQuantity(servingQuantity);
+      }
       setSearchResult(`Selected: ${name}`);
     },
     [],
@@ -155,7 +187,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     setCarbs(undefined);
     setFats(undefined);
     setQuantity(100);
-    setUnit("g");
+    setUnit("g" as UnitType);
   }, []);
 
   // When user manually edits a macro, break the link to the search result
@@ -226,16 +258,16 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-start">
             <div className="sm:col-span-1">
-              <NumberField
-                label="Quantity"
-                value={quantity}
-                onChange={setQuantity}
-                disabled={!baseMacros}
-                min={0}
-                step={0.01}
+              <QuantityUnitField
+                label="Quantity/Unit"
+                quantity={quantity}
                 unit={unit}
+                onQuantityChange={setQuantity}
+                onUnitChange={setUnit}
+                disabled={!baseMacros}
+                placeholder="100"
               />
             </div>
             <div className="sm:col-span-2">
