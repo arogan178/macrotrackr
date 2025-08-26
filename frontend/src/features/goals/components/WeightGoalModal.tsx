@@ -16,7 +16,7 @@ interface WeightGoalModalProps {
   startingWeight: number;
   targetWeight?: number;
   tdee: number;
-  weightGoals: WeightGoals | undefined; // Used to determine create vs update
+  weightGoals: WeightGoals | undefined | null; // Used to determine create vs update
 }
 
 function WeightGoalModal({
