@@ -160,18 +160,36 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       setBaseMacros(per100g);
       setMealName(name);
       setQuantity(servingQuantity);
-      // Convert to appropriate units - prefer metric but keep original unit for better UX
-      // This allows users to work in their preferred units while ensuring calculations work
-      const originalUnit = servingUnit as UnitType;
+
+      // Use the original unit for display
+      let displayUnit = servingUnit as UnitType;
+
+      // Validate that the unit is actually valid
+      const validUnits: UnitType[] = [
+        "g",
+        "kg",
+        "oz",
+        "lb",
+        "ml",
+        "L",
+        "cup",
+        "tbsp",
+        "tsp",
+        "pt",
+        "unit",
+      ];
+      if (!validUnits.includes(displayUnit)) {
+        displayUnit = "g";
+      }
 
       // If it's lbs, convert to kg for better metric consistency
-      if (originalUnit === "lb") {
-        const metric = UnitConverter.toMetric(servingQuantity, originalUnit);
+      if (displayUnit === "lb") {
+        const metric = UnitConverter.toMetric(servingQuantity, displayUnit);
         setUnit(metric.unit);
         setQuantity(metric.quantity);
       } else {
         // For other units, keep as-is but ensure they're valid UnitType
-        setUnit(originalUnit);
+        setUnit(displayUnit);
         setQuantity(servingQuantity);
       }
       setSearchResult(`Selected: ${name}`);
