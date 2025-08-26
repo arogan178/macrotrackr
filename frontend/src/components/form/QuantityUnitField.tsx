@@ -3,7 +3,10 @@ import { memo } from "react";
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import { formStyles } from "@/components/form/Styles";
-import type { UnitType } from "@/features/macroTracking/utils/units";
+import {
+  UnitConverter,
+  type UnitType,
+} from "@/features/macroTracking/utils/units";
 
 export interface QuantityUnitFieldProps {
   label: string;
@@ -48,8 +51,16 @@ const QuantityUnitField = memo(function QuantityUnitField({
     onQuantityChange(value);
   };
 
-  const handleUnitChange = (value: string) => {
-    onUnitChange(value as UnitType);
+  const handleUnitChange = (value: string | number) => {
+    const newUnit = value as UnitType;
+
+    // Convert quantity to the new unit if we have a valid quantity
+    if (quantity && quantity > 0) {
+      const convertedQuantity = UnitConverter.convert(quantity, unit, newUnit);
+      onQuantityChange(Number(convertedQuantity.toFixed(3)));
+    }
+
+    onUnitChange(newUnit);
   };
 
   return (
@@ -58,22 +69,27 @@ const QuantityUnitField = memo(function QuantityUnitField({
         {label} {required && <span className="text-destructive">*</span>}
       </label>
       <div className="flex space-x-2">
-        <NumberField
-          value={quantity}
-          onChange={handleQuantityChange}
-          min={0}
-          step={0.01}
-          maxDigits={6}
-          placeholder={placeholder}
-          disabled={disabled}
-          required={required}
-        />
-        <Dropdown
-          value={unit}
-          onChange={handleUnitChange}
-          options={unitOptions}
-          required={required}
-        />
+        <div className="flex-1">
+          <NumberField
+            value={quantity}
+            onChange={handleQuantityChange}
+            min={0}
+            step={0.01}
+            maxDigits={6}
+            placeholder={placeholder}
+            disabled={disabled}
+            required={required}
+          />
+        </div>
+        <div className="w-20">
+          <Dropdown
+            value={unit}
+            onChange={handleUnitChange}
+            options={unitOptions}
+            disabled={disabled}
+            required={required}
+          />
+        </div>
       </div>
       {helperText && <p className={formStyles.helper}>{helperText}</p>}
       {error && <p className={formStyles.error}>{error}</p>}

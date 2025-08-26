@@ -1,4 +1,3 @@
-import type { TooltipProps } from "recharts";
 import {
   Bar,
   BarChart,
