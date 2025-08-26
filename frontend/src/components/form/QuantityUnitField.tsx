@@ -58,22 +58,27 @@ const QuantityUnitField = memo(function QuantityUnitField({
         {label} {required && <span className="text-destructive">*</span>}
       </label>
       <div className="flex space-x-2">
-        <NumberField
-          value={quantity}
-          onChange={handleQuantityChange}
-          min={0}
-          step={0.01}
-          maxDigits={6}
-          placeholder={placeholder}
-          disabled={disabled}
-          required={required}
-        />
-        <Dropdown
-          value={unit}
-          onChange={handleUnitChange}
-          options={unitOptions}
-          required={required}
-        />
+        <div className="flex-1">
+          <NumberField
+            value={quantity}
+            onChange={handleQuantityChange}
+            min={0}
+            step={0.01}
+            maxDigits={6}
+            placeholder={placeholder}
+            disabled={disabled}
+            required={required}
+          />
+        </div>
+        <div className="w-20">
+          <Dropdown
+            value={unit}
+            onChange={handleUnitChange}
+            options={unitOptions}
+            disabled={disabled}
+            required={required}
+          />
+        </div>
       </div>
       {helperText && <p className={formStyles.helper}>{helperText}</p>}
       {error && <p className={formStyles.error}>{error}</p>}
