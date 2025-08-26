@@ -13,12 +13,13 @@ import {
 export function useWeightGoals() {
   return useQuery({
     queryKey: queryKeys.goals.weight(),
-    queryFn: async (): Promise<WeightGoals | undefined> => {
+  // Important: TanStack Query throws if ensureQueryData resolves to undefined.
+  // We return null explicitly to represent "no goals set".
+    queryFn: async (): Promise<WeightGoals | null> => {
       const weightGoalsData = await apiService.goals.getWeightGoals();
 
-      if (!weightGoalsData) {
-        return undefined; // Return undefined instead of null
-      }
+      // eslint-disable-next-line unicorn/no-null
+      if (!weightGoalsData) return null;
 
       // Get weight log to calculate current weight
       const weightLog = await apiService.goals.getWeightLog();
@@ -176,8 +177,10 @@ export function useDeleteWeightGoal() {
         queryKeys.goals.weight(),
       );
 
-      // Optimistically clear the weight goals
-      queryClient.setQueryData(queryKeys.goals.weight(), undefined);
+      // Optimistically remove the weight goals query from cache so any components treat it as non-existent
+      // This avoids downstream logic (e.g., ensureQueryData in route loaders) encountering an explicit undefined value
+      // which can trigger "data is undefined" errors.
+      queryClient.removeQueries({ queryKey: queryKeys.goals.weight() });
 
       return { previousWeightGoals };
     },
@@ -241,7 +244,7 @@ export function useAddWeightLogEntry() {
 
       // Optimistically update weight goals current weight AND recompute derived fields
       // Also mirror user.weight so UI numbers (e.g., the number before the > icon) update immediately.
-      queryClient.setQueryData<WeightGoals | undefined>(
+      queryClient.setQueryData<WeightGoals | null>(
         queryKeys.goals.weight(),
         (oldData) => {
           if (!oldData) return oldData;
@@ -340,7 +343,7 @@ export function useDeleteWeightLogEntry() {
       // Return a context object with the snapshotted value
       return { previousWeightLog };
     },
-    onError: (error, id, context) => {
+    onError: (error, _id, context) => {
       // If the mutation fails, use the context returned from onMutate to roll back
       if (context?.previousWeightLog) {
         queryClient.setQueryData(
