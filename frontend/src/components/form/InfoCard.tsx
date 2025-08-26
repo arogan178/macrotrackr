@@ -14,7 +14,7 @@ function InfoCard({
   const colorKey = (
     color in COLOR_MAP ? color : "accent"
   ) as keyof typeof COLOR_MAP;
-  const { bg, border, text, dot } = COLOR_MAP[colorKey];
+  const { border, text, dot } = COLOR_MAP[colorKey];
 
   return (
     <div className={`rounded-xl border bg-surface-2 p-4 ${border}`}>
