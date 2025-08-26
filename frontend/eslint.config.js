@@ -171,6 +171,10 @@ export default [
 
       // Disable no-undef globally (React/TSX compatibility)
       "no-undef": "off",
+      // Allow explicit use of undefined (sometimes needed for TS overloads / API semantics)
+      "no-undefined": "off",
+      // Permit intentional undefined usages without auto-fix noise
+      "unicorn/no-useless-undefined": "off",
     },
     settings: {
       react: { version: "detect" },
