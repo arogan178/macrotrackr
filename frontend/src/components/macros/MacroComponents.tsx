@@ -19,7 +19,7 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
 
   return (
     <div
-      className={`relative h-2 w-full overflow-hidden rounded-full bg-surface/30 ${className}`}
+      className={`relative h-2 w-full overflow-hidden rounded-full bg-surface-3 ${className}`}
     >
       <div
         className="absolute top-0 left-0 h-full bg-protein/80 transition-all duration-500"
@@ -142,7 +142,7 @@ export function MacroIndicator({
         // Reuse shared ProgressBar for consistent visuals
         // Height matches previous ~6px track: use "md" (h-2) which is closest and visually consistent
         <div className="mt-0.5">
-          { }
+          {}
           {/* Import placed at top of file; see import section */}
           <ProgressBar
             progress={percentage}

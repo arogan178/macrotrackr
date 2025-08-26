@@ -32,13 +32,6 @@ interface FoodResult {
   rawQuantity?: string;
 }
 
-interface SearchResultDisplayData {
-  item: FoodResult;
-  displayQuantity: string;
-  calories: number;
-  hasNutrients: boolean;
-}
-
 const CalorieSearch = memo(function CalorieSearch({
   onResult,
 }: CalorieSearchProps) {
