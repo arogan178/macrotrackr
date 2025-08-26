@@ -1,7 +1,7 @@
 import { memo } from "react";
 
 import { formStyles } from "@/components/form/Styles";
-import type { DropdownProps } from "@/components/form/types";
+import type { DropdownProps } from "@/components/form/Types";
 
 function Dropdown({
   label,
@@ -9,11 +9,12 @@ function Dropdown({
   onChange,
   options,
   required = false,
+  disabled = false,
   error,
 }: DropdownProps) {
   const selectClasses = `${formStyles.input.base} ${
     error ? formStyles.input.error : formStyles.input.normal
-  } ${formStyles.select.base} cursor-pointer`;
+  } ${formStyles.select.base} ${disabled ? formStyles.input.disabled : "cursor-pointer"}`;
 
   return (
     <div className={formStyles.container}>
@@ -24,6 +25,7 @@ function Dropdown({
           onChange={(event) => onChange(event.target.value)}
           className={selectClasses}
           required={required}
+          disabled={disabled}
         >
           {options.map((option) => (
             <option
@@ -38,6 +40,7 @@ function Dropdown({
           ))}
         </select>
       </div>
+
       {error && <p className={formStyles.error}>{error}</p>}
     </div>
   );

@@ -54,11 +54,16 @@ export interface SelectOption {
   label: string;
 }
 
-export interface DropdownProps extends BaseFieldProps {
+export interface DropdownProps {
+  label?: string;
   value: string | number | undefined;
   onChange: (value: string | number) => void;
   options: readonly SelectOption[] | SelectOption[];
+  required?: boolean;
+  error?: string;
+  helperText?: string;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export interface CardContainerProps {
