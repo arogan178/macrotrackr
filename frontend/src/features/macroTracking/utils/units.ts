@@ -1,7 +1,7 @@
 // Unit conversion utilities for macro tracking
 // Provides comprehensive unit conversion with proper type safety
 
-export type UnitType = "g" | "kg" | "oz" | "lb" | "ml" | "L" | "cup" | "tbsp" | "tsp" | "unit";
+export type UnitType = "g" | "kg" | "oz" | "lb" | "ml" | "L" | "cup" | "tbsp" | "tsp" | "pt" | "unit";
 
 export interface UnitConversion {
   from: UnitType;
@@ -30,6 +30,7 @@ const UNIT_CONVERSIONS: Record<UnitType, number> = {
   cup: 236.588, // US cup
   tbsp: 14.7868, // US tablespoon
   tsp: 4.928_92, // US teaspoon
+  pt: 500, // EU pint (500ml)
 
   // Special case for items counted by unit (e.g., "1 apple")
   unit: 1, // Will be handled specially based on context
@@ -75,9 +76,9 @@ export const UnitConverter = {
     // Match patterns like "100g", "1.5 kg", "2 cups", etc.
     const patterns = [
       // "100 g", "100g", "100 grams"
-      /^([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds|ml|milliliter|milliliters|l|liter|liters|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons)?(?:\s+(.+))?$/,
+      /^([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds|ml|milliliter|milliliters|l|liter|liters|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)?(?:\s+(.+))?$/,
       // Handle "1 cup flour", "2 tbsp sugar", etc.
-      /^([\d,.]+)\s*(cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons)(?:\s+(.+))?$/,
+      /^([\d,.]+)\s*(cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)(?:\s+(.+))?$/,
     ];
 
     for (const pattern of patterns) {
@@ -124,6 +125,9 @@ export const UnitConverter = {
             tsp: "tsp",
             teaspoon: "tsp",
             teaspoons: "tsp",
+            pt: "pt",
+            pint: "pt",
+            pints: "pt",
           };
 
           unit = unitMap[unitMatch] || "g";
@@ -232,7 +236,7 @@ export const UnitConverter = {
    * Check if unit is a volume unit
    */
   isVolumeUnit(unit: UnitType): boolean {
-    return ["ml", "L", "cup", "tbsp", "tsp"].includes(unit);
+    return ["ml", "L", "cup", "tbsp", "tsp", "pt"].includes(unit);
   },
 
   /**
@@ -268,6 +272,7 @@ export const UnitConverter = {
       cup: "cups",
       tbsp: "tablespoons",
       tsp: "teaspoons",
+      pt: "pints",
       unit: "pieces",
     };
 
