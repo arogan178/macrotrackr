@@ -8,7 +8,6 @@ import {
   Legend,
   ResponsiveContainer,
   Tooltip as RechartsTooltip,
-  type TooltipProps,
   XAxis,
   YAxis,
 } from "recharts";
@@ -26,7 +25,6 @@ import { getUnitForStat, MEAL_COLORS, STAT_COLORS } from "@/utils/chartColors";
 import {
   formatMealType,
   MacroEntry,
-  MealTypeDistributionData,
   useMealTimeBreakdown,
 } from "../hooks/useMealTimeBreakdown";
 
