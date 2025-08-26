@@ -96,25 +96,98 @@ const CalorieSearch = memo(function CalorieSearch({
     let quantity = item.servingQuantity;
     let unit = item.servingUnit;
 
-    // If unit is 'unit' and rawQuantity contains a gram value, extract it
-    if (unit === "unit" && item.rawQuantity) {
-      const raw = item.rawQuantity;
-      // Match e.g. '90 g' or '90g'
-      const match = raw.match(/(\d+(?:[,.]\d+)?)\s*g/);
-      if (match) {
-        quantity = Number.parseFloat(match[1].replace(",", "."));
-        unit = "g";
+    // Try to extract unit from rawQuantity if available
+    if (item.rawQuantity) {
+      const raw = item.rawQuantity.toLowerCase().trim();
+
+      // Parse various unit patterns from rawQuantity
+      const patterns = [
+        // "330ml", "250 ml", "1.5 L", "10 fl oz (296 mL)"
+        /([\d,.]+)\s*(ml|milliliter|milliliters|l|liter|liters|fl\s*oz|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)/,
+        // "90 g", "90g"
+        /([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds)/,
+      ];
+
+      for (const pattern of patterns) {
+        const match = raw.match(pattern);
+        if (match && match[1] && match[2]) {
+          quantity = Number.parseFloat(match[1].replace(",", "."));
+          const rawUnit = match[2];
+
+          // Map raw units to our UnitType
+          const unitMap: Record<string, UnitType> = {
+            ml: "ml",
+            milliliter: "ml",
+            milliliters: "ml",
+            l: "L",
+            liter: "L",
+            liters: "L",
+            fl: "ml", // fl oz will be handled separately
+            oz: "ml", // fl oz will be handled separately
+            cup: "cup",
+            cups: "cup",
+            tbsp: "tbsp",
+            tablespoon: "tbsp",
+            tablespoons: "tbsp",
+            tsp: "tsp",
+            teaspoon: "tsp",
+            teaspoons: "tsp",
+            pt: "pt",
+            pint: "pt",
+            pints: "pt",
+            g: "g",
+            gram: "g",
+            grams: "g",
+            kg: "kg",
+            kilogram: "kg",
+            kilograms: "kg",
+            lb: "lb",
+            lbs: "lb",
+            pound: "lb",
+            pounds: "lb",
+          };
+
+          // Special handling for fl oz
+          if (raw.includes("fl") && raw.includes("oz")) {
+            unit = "ml"; // Convert fl oz to ml
+            quantity = quantity * 29.5735; // 1 fl oz = 29.5735 ml
+          } else {
+            unit = unitMap[rawUnit] || "g";
+          }
+
+          break; // Found a match, stop looking
+        }
       }
     }
 
+    // If unit is still 'g' but we have rawQuantity with different unit info, try one more time
+    if (unit === "g" && item.rawQuantity) {
+      const raw = item.rawQuantity.toLowerCase();
+      if (raw.includes("ml") || raw.includes("milliliter")) {
+        unit = "ml";
+      } else if (raw.includes("l") || raw.includes("liter")) {
+        unit = "L";
+      } else if (raw.includes("cup")) {
+        unit = "cup";
+      } else if (raw.includes("tbsp") || raw.includes("tablespoon")) {
+        unit = "tbsp";
+      } else if (raw.includes("tsp") || raw.includes("teaspoon")) {
+        unit = "tsp";
+      } else if (raw.includes("pt") || raw.includes("pint")) {
+        unit = "pt";
+      }
+    }
+
+    // Use the detected unit for display, but convert quantity to metric for calculations
     const metric = UnitConverter.toMetric(quantity, unit as UnitType);
+
     return {
       protein: item.protein.toFixed(1),
       carbs: item.carbs.toFixed(1),
       fats: item.fats.toFixed(1),
       name: item.name,
       servingQuantity: metric.quantity,
-      servingUnit: metric.unit,
+      servingUnit: unit, // Use detected unit for display
     };
   }, []);
 
