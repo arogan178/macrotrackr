@@ -2,7 +2,7 @@ import { useLoaderData } from "@tanstack/react-router";
 
 import { goalsRoute } from "@/AppRouter";
 import type { WeightGoalsResponse } from "@/features/goals/types";
-import { createNutritionProfile } from "@/features/settings/utils/calculations";
+import { createNutritionProfile } from "@/utils/userConstants";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import { useHabits } from "@/hooks/queries/useHabits";
