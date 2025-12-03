@@ -15,5 +15,8 @@ export {
 } from "./useFeatureLoading";
 export { useCriticalLoading, useGlobalLoading } from "./useGlobalLoading";
 
+// Subscription hooks
+export { useSubscriptionStatus } from "./useSubscriptionStatus";
+
 // Other hooks
 export { default as useBeforeUnload } from "./useBeforeUnload";
