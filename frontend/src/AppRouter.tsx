@@ -20,7 +20,7 @@ import { useUser } from "./hooks/auth/useAuthQueries";
 import { queryClient } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
-const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
+const NotFoundPage = React.lazy(() => import("@/components/ui/NotFoundPage"));
 const LandingPage = React.lazy(
   () => import("./features/landing/pages/LandingPage"),
 );
