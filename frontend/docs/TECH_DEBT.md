@@ -25,6 +25,7 @@ Settings/auth constants now re-export from shared location for backwards compati
 - ✅ `src/pages/` directory removed (was redundant)
 - ✅ `utilities.ts` in macroTracking merged into `utils/index.ts` (naming consistency)
 - ✅ `features/dashboard/` removed (was redundant - UserMetricsPanel moved to shared)
+- ✅ `features/notifications/` moved to `src/components/notifications/` (shared infrastructure)
 
 ---
 
@@ -39,26 +40,24 @@ Per `FRONTEND_STRUCTURE_GUIDELINES.md`, features should NOT import directly from
 | `goals`      | `habits`     | GoalsPage.tsx | Component composition (HabitTracker) |
 | `landing`    | `auth`       | Re-exports    | May be acceptable for landing flow   |
 
-**Note**: GoalsPage importing HabitTracker/HabitModal is page-level composition, which may be acceptable. The type imports have been fixed.
+**Note**: These are page-level compositions which may be acceptable. Consider moving shared components to `src/components/` if they're truly reusable.
 
 ---
 
 ## Priority: Medium
 
-### 2. Date Utility Files (Partially Consolidated)
+### 2. Date Utility Files ✅ Consolidated
 
-Current state:
-
-- `src/utils/dateUtilities.ts` - **Canonical shared location** (uses date-fns) ✅
-- `src/utils/dates.ts` - Simple helpers (getTodayISO, getDisplayDate)
-- `features/reporting/utils/dateUtilities.ts` - Feature-specific with reporting constants
+**Canonical location**: `src/utils/dateUtilities.ts` (uses date-fns)
 
 Completed:
 
 - ✅ Deleted `src/lib/dateUtils.ts` (was duplicate)
 - ✅ Deleted `features/goals/utils/date.ts` (was unused)
+- ✅ Merged `src/utils/dates.ts` into `dateUtilities.ts` (getTodayISO, getDisplayDate)
+- ✅ Removed local duplicate in `DateField.tsx`
 
-Remaining: Consolidate `src/utils/dates.ts` into `dateUtilities.ts` if feasible.
+Remaining: `features/reporting/utils/dateUtilities.ts` has feature-specific constants - acceptable to keep.
 
 ### 3. Misplaced Shared Components
 
@@ -77,14 +76,17 @@ The index.ts barrel exports from root level only. Subdirectories are accessed vi
 
 **Status**: ✅ Structure is reasonable - no immediate action needed. Could benefit from adding exports for auth/queries subdirectories to the barrel if frequently used.
 
-### 5. Rollup Circular Chunk Warnings
+### 5. Rollup Circular Chunk Warnings ✅ Fixed
 
-Build produces many warnings about circular dependencies between `src/components/ui/index.ts` barrel and individual components. Not blocking but indicates architectural issue.
+All circular dependency warnings have been resolved by converting barrel imports to direct sibling imports within component directories:
 
-**Fix**: Either:
+- ✅ `src/components/ui/*.tsx` - now import from `./Icons`, `./Button`, etc.
+- ✅ `src/components/billing/ProFeature.tsx` - now imports from `./ProBadge`, `./UpgradeModal`
 
-- Remove barrel re-exports and use direct imports
-- Configure Rollup `manualChunks` to keep UI components in same chunk
+Remaining build warnings (not blocking):
+
+- Dynamic vs static import warnings for `tokenStorage.ts` and `apiServices.ts` (TanStack Router code-splitting behavior)
+- Large chunk size warning for recharts (LineChartComponent)
 
 ---
 
@@ -96,4 +98,4 @@ Build produces many warnings about circular dependencies between `src/components
 
 ---
 
-_Last updated: January 2025_
+_Last updated: December 2025_
