@@ -20,7 +20,7 @@ import {
   computeEffectiveTargetCalories,
 } from "@/features/goals/utils/calorie";
 import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
-import { formatDate } from "@/lib/dateUtils";
+import { formatDateShort } from "@/utils/dateUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
@@ -82,8 +82,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const goalBgColorLight = `bg-${goalToken}/10`;
   const goalBorderColor = `border-${goalToken}`;
 
-  const formattedStartDate = formatDate(weightGoals?.startDate ?? "");
-  const formattedTargetDate = formatDate(weightGoals?.targetDate ?? "");
+  const formattedStartDate = formatDateShort(weightGoals?.startDate ?? "");
+  const formattedTargetDate = formatDateShort(weightGoals?.targetDate ?? "");
 
   const targetPercentages = macroTarget || {
     proteinPercentage: 30,
