@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import React, { useCallback, useEffect,useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
 import LogoButton from "@/components/layout/LogoButton";

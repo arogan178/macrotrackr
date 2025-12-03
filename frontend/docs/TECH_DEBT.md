@@ -24,13 +24,13 @@ Settings/auth constants now re-export from shared location for backwards compati
 
 Per `FRONTEND_STRUCTURE_GUIDELINES.md`, features should NOT import directly from other features. Remaining violations:
 
-| From Feature    | Imports From          | Example Files                                    |
-| --------------- | --------------------- | ------------------------------------------------ |
-| `goals`         | `habits`              | WeightGoalSection, MacroTargetSection, GoalsPage |
-| `goals`         | `settings`            | TDEEService usage                                |
-| `macroTracking` | `settings`            | TDEEService                                      |
-| `auth`          | `notifications`       | Toast integration                                |
-| `landing`       | `auth`                | Re-exports                                       |
+| From Feature    | Imports From    | Example Files                                    |
+| --------------- | --------------- | ------------------------------------------------ |
+| `goals`         | `habits`        | WeightGoalSection, MacroTargetSection, GoalsPage |
+| `goals`         | `settings`      | TDEEService usage                                |
+| `macroTracking` | `settings`      | TDEEService                                      |
+| `auth`          | `notifications` | Toast integration                                |
+| `landing`       | `auth`          | Re-exports                                       |
 
 **Fix**: Extract remaining shared code to `src/`:
 
@@ -96,6 +96,7 @@ Multiple overlapping date utility files still exist:
 Build produces many warnings about circular dependencies between `src/components/ui/index.ts` barrel and individual components. Not blocking but indicates architectural issue.
 
 **Fix**: Either:
+
 - Remove barrel re-exports and use direct imports
 - Configure Rollup `manualChunks` to keep UI components in same chunk
 
