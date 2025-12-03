@@ -15,8 +15,15 @@ The following shared code has been extracted:
 - ✅ `ACTIVITY_LEVELS`, `GENDER_OPTIONS` → `src/utils/userConstants.ts`
 - ✅ `createNutritionProfile` → `src/utils/userConstants.ts`
 - ✅ `getActivityLevelFromString` → `src/utils/userConstants.ts`
+- ✅ Habit types → `src/types/habit.ts` (HabitGoal, HabitGoalFormValues, etc.)
 
 Settings/auth constants now re-export from shared location for backwards compatibility.
+
+### Structural Cleanup
+
+- ✅ `NotFoundPage.tsx` moved from `src/pages/` to `src/components/ui/`
+- ✅ `src/pages/` directory removed (was redundant)
+- ✅ `utilities.ts` in macroTracking merged into `utils/index.ts` (naming consistency)
 
 ---
 
@@ -26,14 +33,12 @@ Settings/auth constants now re-export from shared location for backwards compati
 
 Per `FRONTEND_STRUCTURE_GUIDELINES.md`, features should NOT import directly from other features. Remaining violations:
 
-| From Feature | Imports From | Example Files                                    |
-| ------------ | ------------ | ------------------------------------------------ |
-| `goals`      | `habits`     | WeightGoalSection, MacroTargetSection, GoalsPage |
-| `landing`    | `auth`       | Re-exports                                       |
+| From Feature | Imports From | Example Files | Notes                                |
+| ------------ | ------------ | ------------- | ------------------------------------ |
+| `goals`      | `habits`     | GoalsPage.tsx | Component composition (HabitTracker) |
+| `landing`    | `auth`       | Re-exports    | May be acceptable for landing flow   |
 
-**Fix**: Extract remaining shared code to `src/`:
-
-- Habit types → `src/types/habit.ts` if used across features
+**Note**: GoalsPage importing HabitTracker/HabitModal is page-level composition, which may be acceptable. The type imports have been fixed.
 
 ---
 
@@ -55,26 +60,7 @@ Multiple overlapping date utility files still exist:
 - `src/components/macros/` - Contains macro-specific components that should be in `features/macroTracking/components/`
 - `src/components/auth/ProRoute.tsx` - Billing-related, should be in `components/billing/` or `features/billing/`
 
-### 4. Redundant `src/pages/` Directory
-
-- Contains only `NotFoundPage.tsx`
-- All other pages are in feature folders
-- Inconsistent with feature-based structure
-
-**Fix**: Move `NotFoundPage.tsx` to `src/components/ui/` and delete `src/pages/`.
-
-### 5. Naming Inconsistency in macroTracking
-
-- Has both `utilities.ts` (file) and `utils/` (folder)
-- Guideline pattern is `utils/` folder only
-
-**Fix**: Merge `utilities.ts` into `utils/index.ts`.
-
----
-
-## Priority: Low
-
-### 6. Dashboard Feature Evaluation
+### 4. Dashboard Feature Evaluation
 
 - `features/dashboard/` contains only `components/` with `UserMetricsPanel`
 - Original `UserMetricsPanel` moved to shared, feature may be empty
@@ -82,14 +68,14 @@ Multiple overlapping date utility files still exist:
 
 **Consider**: Remove dashboard feature entirely if empty, or repurpose for dashboard-specific features.
 
-### 7. Hooks Directory Organization
+### 5. Hooks Directory Organization
 
 - `src/hooks/` has mixed organization: root-level hooks and subdirectories (`auth/`, `queries/`)
 - `hooks/queries/` may duplicate feature-specific query logic
 
 **Fix**: Standardize pattern - either all flat or all in subdirectories.
 
-### 8. Rollup Circular Chunk Warnings
+### 6. Rollup Circular Chunk Warnings
 
 Build produces many warnings about circular dependencies between `src/components/ui/index.ts` barrel and individual components. Not blocking but indicates architectural issue.
 
