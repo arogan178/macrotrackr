@@ -13,6 +13,8 @@ The following shared code has been extracted:
 - ✅ `PageBackground` → `src/components/layout/PageBackground.tsx`
 - ✅ `formatDate` → `src/lib/dateUtils.ts` (shared date utilities)
 - ✅ `ACTIVITY_LEVELS`, `GENDER_OPTIONS` → `src/utils/userConstants.ts`
+- ✅ `createNutritionProfile` → `src/utils/userConstants.ts`
+- ✅ `getActivityLevelFromString` → `src/utils/userConstants.ts`
 
 Settings/auth constants now re-export from shared location for backwards compatibility.
 
@@ -24,17 +26,13 @@ Settings/auth constants now re-export from shared location for backwards compati
 
 Per `FRONTEND_STRUCTURE_GUIDELINES.md`, features should NOT import directly from other features. Remaining violations:
 
-| From Feature    | Imports From    | Example Files                                    |
-| --------------- | --------------- | ------------------------------------------------ |
-| `goals`         | `habits`        | WeightGoalSection, MacroTargetSection, GoalsPage |
-| `goals`         | `settings`      | TDEEService usage                                |
-| `macroTracking` | `settings`      | TDEEService                                      |
-| `auth`          | `notifications` | Toast integration                                |
-| `landing`       | `auth`          | Re-exports                                       |
+| From Feature | Imports From | Example Files                                    |
+| ------------ | ------------ | ------------------------------------------------ |
+| `goals`      | `habits`     | WeightGoalSection, MacroTargetSection, GoalsPage |
+| `landing`    | `auth`       | Re-exports                                       |
 
 **Fix**: Extract remaining shared code to `src/`:
 
-- `TDEEService` → `src/utils/tdeeCalculations.ts`
 - Habit types → `src/types/habit.ts` if used across features
 
 ---
