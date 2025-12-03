@@ -1,7 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import React from "react";
 
-import { NotificationManager } from "@/features/notifications/components";
+import { NotificationManager } from "@/components/notifications/components";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { getToken } from "@/utils/tokenStorage";
 
