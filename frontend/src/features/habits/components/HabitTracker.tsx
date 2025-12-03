@@ -2,7 +2,7 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import { CardContainer } from "@/components/form";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
-import { useSubscriptionStatus } from "@/features/billing/hooks/useSubscriptionStatus";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 
 import { HabitGoal } from "../types/types";
 import HabitCard from "./HabitCard";
