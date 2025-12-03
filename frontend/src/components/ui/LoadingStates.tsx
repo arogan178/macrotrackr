@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-import { LoadingSpinner } from "@/components/ui";
+import LoadingSpinner from "./LoadingSpinner";
 import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
 /* eslint-disable react/prop-types */

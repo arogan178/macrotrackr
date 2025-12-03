@@ -24,8 +24,8 @@
  */
 import React, { memo } from "react";
 
+import Button from "./Button";
 import {
-  Button,
   CloseIcon,
   EditIcon,
   ExportIcon,
@@ -34,8 +34,8 @@ import {
   PlusIcon,
   TrashIcon,
   WarningIcon,
-} from "@/components/ui";
-import type { ButtonSize, IconSize } from "@/components/ui/Types";
+} from "./Icons";
+import type { ButtonSize, IconSize } from "./Types";
 import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
 type ActionVariant =
