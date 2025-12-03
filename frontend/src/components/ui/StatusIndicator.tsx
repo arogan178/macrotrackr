@@ -24,12 +24,7 @@
  */
 import React from "react";
 
-import {
-  CheckMarkIcon,
-  CloseIcon,
-  InfoIcon,
-  WarningIcon,
-} from "@/components/ui";
+import { CheckMarkIcon, CloseIcon, InfoIcon, WarningIcon } from "./Icons";
 
 export type StatusType = "success" | "error" | "warning" | "info";
 

@@ -59,7 +59,8 @@ import { motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { Button, IconButton } from "@/components/ui";
+import Button from "./Button";
+import IconButton from "./IconButton";
 
 import type {
   ConfirmationModalProps,
