@@ -6,7 +6,7 @@ import { PricingTable } from "@/components/billing";
 import Navbar from "@/components/layout/Navbar";
 import { CircleQuestionMarkIcon } from "@/components/ui";
 import IconButton from "@/components/ui/IconButton";
-import PageBackground from "@/features/landing/components/PageBackground";
+import { PageBackground } from "@/components/layout";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";

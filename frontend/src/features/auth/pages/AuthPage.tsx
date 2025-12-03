@@ -12,7 +12,7 @@ import {
   LoginForm,
   RegisterForm,
 } from "@/features/auth/components";
-import PageBackground from "@/features/landing/components/PageBackground";
+import { PageBackground } from "@/components/layout";
 
 // --- Animation Constants (keep in local scope, not shared: only used here) ---
 const ANIMATION_HEIGHT_DURATION = 500; // ms
