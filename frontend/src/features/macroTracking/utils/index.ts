@@ -1,4 +1,12 @@
+/**
+ * Macro Tracking Utilities
+ * List operations, formatting, validation, and state helpers
+ */
+
 import { MacroDailyTotals, MacroEntry, MealType } from "@/types/macro";
+
+// Re-export unit utilities
+export * from "./units";
 
 // State management utilities
 export interface OptimisticUpdateState {
@@ -43,7 +51,7 @@ export const areEntriesSame = (
 };
 
 /**
- * List manipulation helpers (moved from calculations.ts)
+ * List manipulation helpers
  */
 export const updateEntryInList = (
   entries: MacroEntry[],
@@ -63,14 +71,14 @@ export const removeEntryFromList = (
 };
 
 /**
- * Formatting helpers (moved from calculations.ts)
+ * Formatting helpers
  */
 export const formatMacroValue = (value: number): string => {
   return Math.round(value).toString();
 };
 
 /**
- * Validation helpers (moved from calculations.ts)
+ * Validation helpers
  */
 export const validateMacroInputs = (
   protein: string,
