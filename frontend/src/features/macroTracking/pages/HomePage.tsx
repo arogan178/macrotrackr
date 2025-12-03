@@ -38,7 +38,7 @@ import {
 } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
-import { getTodayISO } from "@/utils/dates";
+import { getTodayISO } from "@/utils/dateUtilities";
 
 // Refactored per plan. Behavior and styling remain unchanged.
 // Original file reference for comparison: [frontend/src/features/macroTracking/pages/HomePage.tsx](frontend/src/features/macroTracking/pages/HomePage.tsx:1)

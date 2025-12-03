@@ -6,7 +6,7 @@ import { useCallback, useMemo } from "react";
 import type { UserPublic } from "@/features/macroTracking/types/macro";
 import { createNutritionProfile } from "@/utils/userConstants";
 import { useMacroHistoryInfinite } from "@/hooks/queries/useMacroQueries";
-import { getDisplayDate } from "@/utils/dates";
+import { getDisplayDate } from "@/utils/dateUtilities";
 
 /**
  * Derives the nutrition profile from the provided user with a safe fallback.
