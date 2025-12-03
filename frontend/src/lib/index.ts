@@ -7,3 +7,13 @@ export {
   prefetchQuery,
   type RouterContext,
 } from "./routerQueryUtilities";
+
+// Date utilities
+export {
+  formatDate,
+  formatDateFull,
+  getTodayDate,
+  isValidDateString,
+  getDaysInRange,
+  getDatesBetween,
+} from "./dateUtils";
