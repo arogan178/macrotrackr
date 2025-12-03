@@ -7,7 +7,7 @@ import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import Navbar from "@/components/layout/Navbar";
-import { UserMetricsPanel } from "@/features/dashboard/components";
+import { UserMetricsPanel } from "@/components/metrics";
 import {
   AddEntryForm,
   DailySummaryPanel,
