@@ -2,10 +2,15 @@
 // Usage example:
 // import { UserSettings, Gender, ActivityLevel } from '@/types/user';
 
-import { GENDER_OPTIONS, type ActivityLevel } from "@/utils/userConstants";
+// Re-export from userConstants for backwards compatibility
+export type {
+  ActivityLevel,
+  Gender,
+  UserNutritionalProfile,
+} from "@/utils/userConstants";
 
-export type { ActivityLevel };
-export type Gender = (typeof GENDER_OPTIONS)[number]["value"];
+// Import Gender type for use in this file
+import type { Gender } from "@/utils/userConstants";
 
 export interface UserSettings {
   id: number;
@@ -22,10 +27,4 @@ export interface UserSettings {
     hasStripeCustomer: boolean;
     currentPeriodEnd: string | undefined;
   };
-}
-
-export interface UserNutritionalProfile {
-  userId: number;
-  bmr: number;
-  tdee: number;
 }
