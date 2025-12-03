@@ -15,6 +15,25 @@ export function todayISO(): string {
 }
 
 /**
+ * Returns today's date in ISO YYYY-MM-DD format (UTC-based)
+ * @deprecated Use todayISO() for local time consistency
+ */
+export function getTodayISO(): string {
+  return new Date().toISOString().split("T")[0]!;
+}
+
+/**
+ * Returns a display date string using en-US short format (e.g., "Dec 3, 2025")
+ */
+export function getDisplayDate(date: Date = new Date()): string {
+  return date.toLocaleDateString("en-US", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+/**
  * Format a YYYY-MM-DD string as "MMM d" (e.g., "Jan 5")
  */
 export function formatDateShort(dateString: string): string {
