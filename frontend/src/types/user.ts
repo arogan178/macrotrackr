@@ -2,9 +2,9 @@
 // Usage example:
 // import { UserSettings, Gender, ActivityLevel } from '@/types/user';
 
-import { GENDER_OPTIONS } from "@/features/settings/utils/constants";
+import { GENDER_OPTIONS, type ActivityLevel } from "@/utils/userConstants";
 
-export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
+export type { ActivityLevel };
 export type Gender = (typeof GENDER_OPTIONS)[number]["value"];
 
 export interface UserSettings {
