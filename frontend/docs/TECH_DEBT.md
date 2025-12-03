@@ -11,7 +11,7 @@ The following shared code has been extracted:
 - ✅ `UserMetricsPanel` → `src/components/metrics/UserMetricsPanel.tsx`
 - ✅ `useSubscriptionStatus` → `src/hooks/useSubscriptionStatus.ts`
 - ✅ `PageBackground` → `src/components/layout/PageBackground.tsx`
-- ✅ `formatDate` → `src/lib/dateUtils.ts` (shared date utilities)
+- ✅ `formatDate` → `src/utils/dateUtilities.ts` (consolidated date utilities using date-fns)
 - ✅ `ACTIVITY_LEVELS`, `GENDER_OPTIONS` → `src/utils/userConstants.ts`
 - ✅ `createNutritionProfile` → `src/utils/userConstants.ts`
 - ✅ `getActivityLevelFromString` → `src/utils/userConstants.ts`
@@ -24,6 +24,7 @@ Settings/auth constants now re-export from shared location for backwards compati
 - ✅ `NotFoundPage.tsx` moved from `src/pages/` to `src/components/ui/`
 - ✅ `src/pages/` directory removed (was redundant)
 - ✅ `utilities.ts` in macroTracking merged into `utils/index.ts` (naming consistency)
+- ✅ `features/dashboard/` removed (was redundant - UserMetricsPanel moved to shared)
 
 ---
 
@@ -44,38 +45,39 @@ Per `FRONTEND_STRUCTURE_GUIDELINES.md`, features should NOT import directly from
 
 ## Priority: Medium
 
-### 2. Duplicate Date Utility Files
+### 2. Date Utility Files (Partially Consolidated)
 
-Multiple overlapping date utility files still exist:
+Current state:
 
-- `src/lib/dateUtils.ts` - **Canonical shared location** ✅
-- `src/utils/dateFormatters.ts` - Simpler date functions (potential overlap)
-- `features/reporting/utils/dateUtilities.ts` - Feature-specific (has reporting constants)
-- `features/goals/utils/dateUtils.ts` - Feature-specific
+- `src/utils/dateUtilities.ts` - **Canonical shared location** (uses date-fns) ✅
+- `src/utils/dates.ts` - Simple helpers (getTodayISO, getDisplayDate)
+- `features/reporting/utils/dateUtilities.ts` - Feature-specific with reporting constants
 
-**Fix**: Update remaining imports to use `src/lib/dateUtils.ts`, remove duplicates where possible.
+Completed:
+
+- ✅ Deleted `src/lib/dateUtils.ts` (was duplicate)
+- ✅ Deleted `features/goals/utils/date.ts` (was unused)
+
+Remaining: Consolidate `src/utils/dates.ts` into `dateUtilities.ts` if feasible.
 
 ### 3. Misplaced Shared Components
 
-- `src/components/macros/` - Contains macro-specific components that should be in `features/macroTracking/components/`
-- `src/components/auth/ProRoute.tsx` - Billing-related, should be in `components/billing/` or `features/billing/`
+- ~~`src/components/macros/`~~ - ✅ Actually correct - shared between `macroTracking` and `goals` features
+- ~~`src/components/auth/ProRoute.tsx`~~ - ✅ Removed (was unused)
 
-### 4. Dashboard Feature Evaluation
+### 4. Hooks Directory Organization
 
-- `features/dashboard/` contains only `components/` with `UserMetricsPanel`
-- Original `UserMetricsPanel` moved to shared, feature may be empty
-- Tightly coupled to `macroTracking`
+Current structure (acceptable pattern):
 
-**Consider**: Remove dashboard feature entirely if empty, or repurpose for dashboard-specific features.
+- `src/hooks/` root: General UI/utility hooks (useErrorHandler, useGlobalLoading, etc.)
+- `src/hooks/auth/`: Auth-specific hooks (useAuthQueries, useRegistration)
+- `src/hooks/queries/`: Data fetching hooks (useMacroQueries, useGoals, etc.)
 
-### 5. Hooks Directory Organization
+The index.ts barrel exports from root level only. Subdirectories are accessed via direct imports.
 
-- `src/hooks/` has mixed organization: root-level hooks and subdirectories (`auth/`, `queries/`)
-- `hooks/queries/` may duplicate feature-specific query logic
+**Status**: ✅ Structure is reasonable - no immediate action needed. Could benefit from adding exports for auth/queries subdirectories to the barrel if frequently used.
 
-**Fix**: Standardize pattern - either all flat or all in subdirectories.
-
-### 6. Rollup Circular Chunk Warnings
+### 5. Rollup Circular Chunk Warnings
 
 Build produces many warnings about circular dependencies between `src/components/ui/index.ts` barrel and individual components. Not blocking but indicates architectural issue.
 
