@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { HabitGoal, HabitGoalFormValues } from "@/features/habits/types/types";
+import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import {
   completeHabit,
   createNewHabit,
