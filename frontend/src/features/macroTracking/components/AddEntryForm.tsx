@@ -250,7 +250,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   return (
     <CardContainer>
       <div className="p-5">
-        <h2 className="mb-4 text-lg font-medium text-foreground">
+        <h2 className="mb-4 text-base font-semibold text-foreground">
           Add Today's Macros
         </h2>
 
@@ -265,7 +265,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               <button
                 type="button"
                 onClick={handleClearSearch}
-                className="flex items-center text-xs text-foreground hover:text-foreground"
+                className="flex items-center text-xs text-muted transition-colors hover:text-foreground"
                 aria-label="Clear search"
               >
                 <TrashIcon className="mr-1 h-4 w-4" />
@@ -356,17 +356,17 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
           </div>
 
           <div className="mt-5 flex items-center justify-between">
-            <div className="text-sm text-foreground">
+            <div className="text-sm text-muted">
               Total Calories:{" "}
-              <span className="font-medium text-primary">{calories}</span>
+              <span className="font-semibold text-foreground">{calories}</span>
             </div>
             {allFieldsAreZero && (
-              <div className="mr-4 text-sm text-vibrant-accent">
+              <div className="mr-4 text-sm text-warning">
                 Macros must be greater than 0
               </div>
             )}
             {!mealName.trim() && !anyFieldIsUndefined && (
-              <div className="mr-4 text-sm text-vibrant-accent">
+              <div className="mr-4 text-sm text-warning">
                 Please provide a meal name
               </div>
             )}
