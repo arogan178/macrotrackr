@@ -1,23 +1,25 @@
 import { Resend } from "resend";
 import { config } from "../config";
-import fs from "fs";
-import path from "path";
+import { logger } from "./logger";
 
 const resend = new Resend(config.RESEND_API_KEY);
-const logFile = path.join(process.cwd(), "email-service.log");
-
-function logToFile(message: string) {
-  const timestamp = new Date().toISOString();
-  fs.appendFileSync(logFile, `[${timestamp}] ${message}\n`);
-}
 
 // Log config at startup
-logToFile(`RESEND_API_KEY loaded: ${!!config.RESEND_API_KEY}`);
-logToFile(`CORS_ORIGIN loaded: ${config.CORS_ORIGIN}`);
+logger.info(
+  {
+    type: "email_service_init",
+    hasApiKey: !!config.RESEND_API_KEY,
+    corsOrigin: config.CORS_ORIGIN,
+  },
+  "Email service initialized"
+);
 
 export const emailService = {
   sendPasswordResetEmail: async (to: string, token: string) => {
-    logToFile(`sendPasswordResetEmail called for: ${to}`);
+    logger.info(
+      { type: "email_send", operation: "password_reset", to: to.replace(/(.{2}).*@/, "$1***@") },
+      "Sending password reset email"
+    );
     const resetLink = `${config.CORS_ORIGIN}/reset-password?token=${token}`;
 
     try {
@@ -42,26 +44,25 @@ export const emailService = {
         `,
       });
       if (result && result.error) {
-        logToFile(`Resend API error: ${JSON.stringify(result.error)}`);
-        console.error("Resend API error:", result.error);
-      } else {
-        logToFile(
-          `Password reset email sent to ${to}. Resend response: ${JSON.stringify(
-            result
-          )}`
+        logger.error(
+          { type: "email_error", operation: "password_reset", error: result.error },
+          "Resend API error sending password reset email"
         );
-        console.log(
-          `Password reset email sent to ${to}. Resend response:`,
-          result
+      } else {
+        logger.info(
+          { type: "email_sent", operation: "password_reset", messageId: result?.data?.id },
+          "Password reset email sent successfully"
         );
       }
     } catch (error) {
-      logToFile(
-        `Failed to send password reset email (exception): ${
-          error instanceof Error ? error.stack : error
-        }`
+      logger.error(
+        {
+          type: "email_exception",
+          operation: "password_reset",
+          error: error instanceof Error ? error : new Error(String(error)),
+        },
+        "Failed to send password reset email"
       );
-      console.error("Failed to send password reset email (exception):", error);
     }
   },
 };
