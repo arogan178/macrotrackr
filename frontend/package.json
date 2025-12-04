@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "postbuild": "bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
   },
   "dependencies": {
     "@babel/helper-compilation-targets": "^7.27.2",
