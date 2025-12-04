@@ -20,9 +20,9 @@ import {
   computeEffectiveTargetCalories,
 } from "@/features/goals/utils/calorie";
 import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
-import { formatDate } from "@/features/reporting/utils/dateUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+import { formatDateShort } from "@/utils/dateUtilities";
 
 import MacroNutrient from "./MacroNutrient";
 
@@ -82,8 +82,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const goalBgColorLight = `bg-${goalToken}/10`;
   const goalBorderColor = `border-${goalToken}`;
 
-  const formattedStartDate = formatDate(weightGoals?.startDate ?? "");
-  const formattedTargetDate = formatDate(weightGoals?.targetDate ?? "");
+  const formattedStartDate = formatDateShort(weightGoals?.startDate ?? "");
+  const formattedTargetDate = formatDateShort(weightGoals?.targetDate ?? "");
 
   const targetPercentages = macroTarget || {
     proteinPercentage: 30,
@@ -192,7 +192,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           </div>
           {!isMaintenance && (
             <div className="flex items-center gap-2 self-end sm:self-center">
-              <span className="text-sm text-foreground">Progress:</span>
+              <span className="text-sm text-muted">Progress:</span>
               <span className="text-lg font-semibold text-foreground">
                 {progressPercentage}%
               </span>
@@ -243,7 +243,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         >
           <TrendingUpIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
-            <p className=" text-foreground">Weekly Rate</p>
+            <p className="text-sm text-muted">Weekly Rate</p>
             <p className="text-base font-medium text-foreground">
               {isMaintenance ? "Maintenance" : `${isWeightLoss ? "↓" : "↑"} `}
               {!isMaintenance && (
@@ -261,8 +261,8 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         >
           <CalendarIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
-            <p className=" text-foreground">Est. Duration</p>
-            <p className="text-base text-sm font-medium text-foreground">
+            <p className="text-sm text-muted">Est. Duration</p>
+            <p className="text-base font-medium text-foreground">
               {isMaintenance ? (
                 "Ongoing"
               ) : (
@@ -278,14 +278,14 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         >
           <TargetIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
           <div>
-            <p className="text-foreground">
+            <p className="text-sm text-muted">
               {isWeightLoss
                 ? "Daily Deficit"
                 : isWeightGain
                   ? "Daily Surplus"
                   : "Est. TDEE"}
             </p>
-            <p className="text-base text-sm font-medium text-foreground">
+            <p className="text-base font-medium text-foreground">
               {isMaintenance ? (
                 <AnimatedNumber value={tdee} suffix=" kcal" />
               ) : (

@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { LoadingSpinnerIcon } from "@/components/ui";
+import { LoadingSpinnerIcon } from "./Icons";
 
 interface LoadingSpinnerProps {
   size?: "sm" | "md" | "lg";

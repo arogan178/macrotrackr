@@ -1,6 +1,7 @@
 import { memo, ReactNode } from "react";
 
-import { Button, PlusIcon } from "@/components/ui";
+import Button from "./Button";
+import { PlusIcon } from "./Icons";
 
 interface ActionProps {
   label: string;

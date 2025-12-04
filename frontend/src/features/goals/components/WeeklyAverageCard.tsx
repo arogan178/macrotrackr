@@ -18,11 +18,11 @@ function WeeklyAverageCard({ weightLog, isLoading }: WeeklyAverageCardProps) {
 
   const renderContent = () => {
     if (isLoading) {
-      return <p className="text-xs text-foreground">Calculating...</p>;
+      return <p className="text-xs text-muted">Calculating...</p>;
     }
     if (weeklyChange === undefined) {
       return (
-        <p className="text-xs text-foreground">
+        <p className="text-xs text-muted">
           Not enough data for weekly average.
         </p>
       );

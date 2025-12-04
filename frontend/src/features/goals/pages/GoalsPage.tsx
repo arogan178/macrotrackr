@@ -8,6 +8,8 @@ import Navbar from "@/components/layout/Navbar";
 import { GoalsIcon, Modal, TabButton, TargetIcon } from "@/components/ui";
 import {
   GoalsLoadingSkeleton,
+  HabitModal,
+  HabitTracker,
   LogWeightModal,
   MacroTargetForm,
   WeightGoalDashboard,
@@ -15,7 +17,6 @@ import {
   WeightProgressTabs,
 } from "@/features/goals/components";
 import { useGoalsPage } from "@/features/goals/hooks/page";
-import { HabitModal, HabitTracker } from "@/features/habits/components";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import type { WeightGoals } from "@/types/goal";
 
