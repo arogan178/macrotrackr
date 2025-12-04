@@ -1,15 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import {
   completeHabit,
   createNewHabit,
   incrementHabitProgress,
   updateHabitFromForm,
-} from "@/features/habits/utils";
+} from "@/features/goals/utils/habits";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
+import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import { apiService } from "@/utils/apiServices";
 
 // Query hook for fetching habits

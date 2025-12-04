@@ -4,10 +4,10 @@
  */
 export {
   ACTIVITY_LEVELS,
-  GENDER_OPTIONS,
-  getActivityLevelLabel,
-  getActivityLevelValue,
-  getActivityLevelMultiplier,
-  getActivityLevelFromString,
   type ActivityLevel,
+  GENDER_OPTIONS,
+  getActivityLevelFromString,
+  getActivityLevelLabel,
+  getActivityLevelMultiplier,
+  getActivityLevelValue,
 } from "@/utils/userConstants";
