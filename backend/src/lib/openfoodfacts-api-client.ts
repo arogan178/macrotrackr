@@ -78,7 +78,7 @@ export class OpenFoodFactsTimeoutError extends OpenFoodFactsError {
 }
 
 export class OpenFoodFactsRateLimitError extends OpenFoodFactsError {
-  constructor(retryAfter?: number) {
+  constructor(_retryAfter?: number) {
     super("Rate limit exceeded");
     this.name = "OpenFoodFactsRateLimitError";
   }
