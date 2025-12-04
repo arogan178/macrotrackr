@@ -1,7 +1,7 @@
 // Loading skeleton components extracted from HomePage
 // File: [frontend/src/features/macroTracking/pages/HomePage.Skeletons.tsx](frontend/src/features/macroTracking/pages/HomePage.Skeletons.tsx:1)
 
-import { CardContainer } from '@/components/form';
+import { CardContainer } from "@/components/form";
 
 /**
  * Skeleton shown while AddEntryForm is loading.
@@ -11,10 +11,11 @@ import { CardContainer } from '@/components/form';
 export const AddEntryLoadingSkeleton = () => (
   <CardContainer>
     <div className="animate-pulse p-5">
-      <div className="mb-4 h-4 w-1/2 rounded bg-surface"></div>
+      <div className="mb-4 h-4 w-1/3 rounded bg-surface-2"></div>
+      <div className="mb-4 h-10 w-full rounded bg-surface-2"></div>
       <div className="grid grid-cols-3 gap-4">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="h-8 rounded bg-surface"></div>
+          <div key={index} className="h-10 rounded bg-surface-2"></div>
         ))}
       </div>
     </div>
@@ -29,10 +30,16 @@ export const AddEntryLoadingSkeleton = () => (
 export const DailySummaryLoadingSkeleton = () => (
   <CardContainer className="h-full">
     <div className="h-full animate-pulse p-5">
-      <div className="mb-4 h-5 w-1/2 rounded bg-surface"></div>
-      <div className="space-y-4">
+      <div className="mb-4 rounded-xl bg-surface-2 p-4">
+        <div className="mb-3 h-4 w-1/3 rounded bg-surface-3"></div>
+        <div className="h-3 w-full rounded bg-surface-3"></div>
+      </div>
+      <div className="space-y-3">
         {[0, 1, 2].map((index) => (
-          <div key={index} className="h-12 rounded bg-surface"></div>
+          <div key={index} className="rounded-xl bg-surface-2 p-4">
+            <div className="mb-2 h-3 w-1/4 rounded bg-surface-3"></div>
+            <div className="h-2 w-full rounded bg-surface-3"></div>
+          </div>
         ))}
       </div>
     </div>
@@ -46,11 +53,15 @@ export const DailySummaryLoadingSkeleton = () => (
  */
 export const HistoryLoadingSkeleton = () => (
   <div className="animate-pulse space-y-4">
-    <div className="mb-6 h-6 w-1/4 rounded bg-surface"></div>
-    {[0, 1, 2].map((index) => (
-      <div key={index} className="space-y-2">
-        <div className="h-5 w-1/6 rounded bg-surface"></div>
-        <div className="h-16 rounded bg-surface/50"></div>
+    <div className="mb-4 h-5 w-1/4 rounded bg-surface-2"></div>
+    <div className="h-3 w-1/6 rounded bg-surface-2"></div>
+    {[0, 1].map((index) => (
+      <div
+        key={index}
+        className="space-y-2 rounded-xl border border-border/50 bg-surface-2 p-4"
+      >
+        <div className="h-4 w-1/5 rounded bg-surface-3"></div>
+        <div className="h-10 rounded bg-surface-3"></div>
       </div>
     ))}
   </div>
