@@ -39,7 +39,7 @@ const PricingPage = React.lazy(
   () => import("@/features/billing/pages/PricingPage"),
 );
 const ResetPasswordPage = React.lazy(
-  () => import("./features/landing/pages/ResetPasswordPage"),
+  () => import("@/features/auth/pages/ResetPasswordPage"),
 );
 const TermsAndConditionsPage = React.lazy(
   () => import("./features/landing/pages/TermsAndConditionsPage"),
