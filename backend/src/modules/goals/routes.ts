@@ -3,37 +3,17 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-import { safeQuery, safeExecute, safeQueryAll } from "../../lib/database";
+import {
+  safeQuery,
+  safeExecute,
+  safeQueryAll,
+  withTransaction,
+  type WeightGoalRow,
+  type WeightLogRow,
+} from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
-
-// Define types for DB results (snake_case) for clarity and type safety
-// These should match the columns defined in src/db/schema.ts
-type WeightGoalFromDB = {
-  id: number;
-  user_id: number;
-  starting_weight: number | null;
-  target_weight: number | null;
-  weight_goal: "lose" | "maintain" | "gain" | null;
-  start_date: string | null;
-  target_date: string | null;
-  calorie_target: number | null; // RENAMED
-  calculated_weeks: number | null;
-  weekly_change: number | null;
-  daily_change: number | null; // RENAMED
-  created_at: string; // Assuming DATETIME maps to string from DB driver
-  updated_at: string;
-};
-
-// Type for Weight Log entry from DB
-type WeightLogFromDB = {
-  id: string;
-  user_id: string; // Keep as string if that's how it's consistently used
-  timestamp: string; // Changed from date to timestamp
-  weight: number;
-  created_at: string; // Added created_at if it's selected
-};
 
 export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
@@ -49,7 +29,7 @@ export const goalRoutes = (app: Elysia) =>
             correlationId: (context.request as any)?.correlationId,
           });
 
-          const weightGoalsResult = safeQuery<WeightGoalFromDB>(
+          const weightGoalsResult = safeQuery<WeightGoalRow>(
             db,
             "SELECT id, user_id, starting_weight, target_weight, weight_goal, start_date, target_date, calorie_target, calculated_weeks, weekly_change, daily_change, created_at, updated_at FROM weight_goals WHERE user_id = ?",
             [user.userId]
@@ -93,7 +73,7 @@ export const goalRoutes = (app: Elysia) =>
             body: typeof GoalSchemas.createWeightGoalBody.static;
           };
 
-          const transaction = db.transaction(() => {
+          const savedGoal = withTransaction(db, () => {
             // Check if a goal already exists
             const existingGoal = safeQuery<{ id: number }>(
               db,
@@ -124,7 +104,7 @@ export const goalRoutes = (app: Elysia) =>
               correlationId: (context.request as any)?.correlationId,
             });
 
-            const savedGoalResult = safeQuery<WeightGoalFromDB>(
+            const savedGoalResult = safeQuery<WeightGoalRow>(
               db,
               `INSERT INTO weight_goals (
                   user_id, starting_weight, target_weight, weight_goal, start_date, target_date,
@@ -151,8 +131,6 @@ export const goalRoutes = (app: Elysia) =>
 
             return savedGoalResult;
           });
-
-          const savedGoal = transaction();
 
           // Map response
           return {
@@ -191,7 +169,7 @@ export const goalRoutes = (app: Elysia) =>
             body: typeof GoalSchemas.updateWeightGoalBody.static;
           };
 
-          const transaction = db.transaction(() => {
+          const savedGoal = withTransaction(db, () => {
             // Destructure payload (NO startingWeight here)
             const {
               targetWeight,
@@ -226,7 +204,7 @@ export const goalRoutes = (app: Elysia) =>
             });
 
             // IMPORTANT: Do NOT update starting_weight
-            const savedGoalResult = safeQuery<WeightGoalFromDB>(
+            const savedGoalResult = safeQuery<WeightGoalRow>(
               db,
               `UPDATE weight_goals SET
                   target_weight = ?, weight_goal = ?, start_date = ?, target_date = ?,
@@ -258,8 +236,6 @@ export const goalRoutes = (app: Elysia) =>
 
             return savedGoalResult;
           });
-
-          const savedGoal = transaction();
 
           // Map response
           return {
@@ -296,13 +272,12 @@ export const goalRoutes = (app: Elysia) =>
         async (context: any) => {
           const { user, db } = context as AuthenticatedContext;
 
-          const transaction = db.transaction(() => {
+          withTransaction(db, () => {
             safeExecute(db, "DELETE FROM weight_goals WHERE user_id = ?", [
               user.userId,
             ]);
           });
 
-          transaction();
           return { success: true };
         },
         {
@@ -323,10 +298,11 @@ export const goalRoutes = (app: Elysia) =>
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
 
-          const logs = safeQueryAll(db, query, [user.userId]) as Omit<
-            WeightLogFromDB,
-            "user_id" | "created_at"
-          >[];
+          const logs = safeQueryAll<Pick<WeightLogRow, "id" | "timestamp" | "weight">>(
+            db,
+            query,
+            [user.userId]
+          );
 
           return logs;
         },
@@ -350,7 +326,7 @@ export const goalRoutes = (app: Elysia) =>
           const { timestamp, weight } = body;
           const newId = generateId();
 
-          const transaction = db.transaction(() => {
+          return withTransaction(db, () => {
             const insertWeightLogQuery = `
               INSERT INTO weight_log (id, user_id, timestamp, weight)
               VALUES (?, ?, ?, ?);
@@ -375,8 +351,6 @@ export const goalRoutes = (app: Elysia) =>
               weight: weight,
             };
           });
-
-          return transaction();
         },
         {
           body: GoalSchemas.addWeightLogBody, // Schema needs update
@@ -398,14 +372,15 @@ export const goalRoutes = (app: Elysia) =>
 
           const entryIdToDelete = params.id;
 
-          const transaction = db.transaction(() => {
+          return withTransaction(db, () => {
             const findEntryQuery = `
               SELECT id FROM weight_log WHERE id = ? AND user_id = ?
             `;
-            const deletedEntryResult = safeQueryAll(db, findEntryQuery, [
-              entryIdToDelete,
-              user.userId,
-            ]) as { id: string }[];
+            const deletedEntryResult = safeQueryAll<{ id: string }>(
+              db,
+              findEntryQuery,
+              [entryIdToDelete, user.userId]
+            );
             const deletedEntry = deletedEntryResult[0];
 
             if (!deletedEntry) {
@@ -431,9 +406,11 @@ export const goalRoutes = (app: Elysia) =>
               ORDER BY timestamp DESC, id DESC
               LIMIT 1
             `;
-            const latestEntryResult = safeQueryAll(db, findLatestQuery, [
-              user.userId,
-            ]) as { weight: number; timestamp: string }[];
+            const latestEntryResult = safeQueryAll<{ weight: number; timestamp: string }>(
+              db,
+              findLatestQuery,
+              [user.userId]
+            );
             const latestEntry = latestEntryResult[0];
 
             if (latestEntry) {
@@ -449,8 +426,6 @@ export const goalRoutes = (app: Elysia) =>
 
             return { success: true, id: deletedEntry.id };
           });
-
-          return transaction();
         },
         {
           params: GoalSchemas.deleteWeightLogParams, // Validate URL parameter
