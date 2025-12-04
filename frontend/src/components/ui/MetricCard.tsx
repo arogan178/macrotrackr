@@ -91,9 +91,9 @@ export default function MetricCard(properties: MetricCardProps) {
           </div>
           <p className="text-2xl font-bold text-foreground">
             {value === undefined ? (
-              <span className="text-lg text-foreground">Complete profile</span>
+              <span className="text-base text-muted">Complete profile</span>
             ) : (
-              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
+              <span className="text-foreground">
                 <AnimatedNumber
                   value={
                     typeof value === "number"
