@@ -1,9 +1,10 @@
 import { memo, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import useDeferredVisibility from "@/hooks/useDeferredVisibility";
 import { useCriticalLoading } from "@/hooks/useGlobalLoading";
+
+import LoadingSpinner from "./LoadingSpinner";
 
 /**
  * Full-screen overlay that blocks interaction during critical first-loads or any mutation.

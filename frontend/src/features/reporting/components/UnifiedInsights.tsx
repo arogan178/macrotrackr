@@ -2,9 +2,7 @@ import { motion } from "motion/react";
 import { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { CalendarIcon } from "@/components/ui";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import ProgressBar from "@/components/ui/ProgressBar";
+import { CalendarIcon, LoadingSpinner, ProgressBar } from "@/components/ui";
 
 import {
   MACRO_COLORS,
