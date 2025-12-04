@@ -1,4 +1,3 @@
-// ...existing code...
 // src/modules/billing/routes.ts
 
 import { Elysia } from "elysia";
@@ -8,10 +7,66 @@ import { logger } from "../../lib/logger";
 import { BadRequestError } from "../../lib/errors";
 import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
+import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
 
+// Response schemas for type safety and API documentation
+const SubscriptionInfoSchema = t.Object({
+  id: t.String(),
+  status: t.String(),
+  currentPeriodEnd: t.Nullable(t.String()),
+  stripeSubscriptionId: t.Nullable(t.String()),
+});
+
+const BillingDetailsResponseSchema = t.Object({
+  subscription: t.Nullable(SubscriptionInfoSchema),
+  price: t.Nullable(t.String()),
+  paymentMethod: t.Nullable(
+    t.Object({
+      brand: t.String(),
+      last4: t.String(),
+    })
+  ),
+  stripeDetails: t.Nullable(t.Any()),
+});
+
+const CancelResponseSchema = t.Object({
+  success: t.Boolean(),
+  message: t.String(),
+});
+
+const CheckoutResponseSchema = t.Object({
+  sessionId: t.String(),
+  url: t.String(),
+});
+
+const PortalResponseSchema = t.Object({
+  url: t.String(),
+});
+
+const SubscriptionStatusResponseSchema = t.Object({
+  status: t.String(),
+  hasStripeCustomer: t.Boolean(),
+  subscription: t.Nullable(SubscriptionInfoSchema),
+});
+
+const PlanSchema = t.Object({
+  id: t.Union([t.Literal("free"), t.Literal("pro")]),
+  name: t.String(),
+  description: t.String(),
+  price: t.Number(),
+  currency: t.String(),
+  interval: t.Union([t.Literal("month"), t.Literal("year")]),
+  features: t.Array(t.String()),
+});
+
+const PlansResponseSchema = t.Object({
+  plans: t.Array(PlanSchema),
+});
+
 // Helper for consistent error logging and user-friendly error throwing
-function handleRouteError(error: unknown, operation: string, userId?: number) {
+// Returns `never` to indicate it always throws
+function handleRouteError(error: unknown, operation: string, userId?: number): never {
   logger.error(
     {
       error: error instanceof Error ? error : new Error(String(error)),
@@ -65,6 +120,7 @@ export const billingRoutes = (app: Elysia) =>
           }
         },
         {
+          response: BillingDetailsResponseSchema,
           detail: {
             summary:
               "Get detailed billing and subscription info for the current user",
@@ -110,6 +166,7 @@ export const billingRoutes = (app: Elysia) =>
           }
         },
         {
+          response: CancelResponseSchema,
           detail: {
             summary: "Cancel the current user's subscription",
             tags: ["Billing"],
@@ -186,6 +243,7 @@ export const billingRoutes = (app: Elysia) =>
             cancelUrl: t.String({ format: "uri" }),
             metadata: t.Optional(t.Record(t.String(), t.String())),
           }),
+          response: CheckoutResponseSchema,
           detail: {
             summary:
               "Create Stripe checkout session for Pro subscription (monthly or yearly)",
@@ -227,6 +285,7 @@ export const billingRoutes = (app: Elysia) =>
           body: t.Object({
             returnUrl: t.String({ format: "uri" }),
           }),
+          response: PortalResponseSchema,
           detail: {
             summary: "Create Stripe customer portal session",
             tags: ["Billing"],
@@ -264,6 +323,7 @@ export const billingRoutes = (app: Elysia) =>
           }
         },
         {
+          response: SubscriptionStatusResponseSchema,
           detail: {
             summary: "Get current subscription status",
             tags: ["Billing"],
@@ -274,49 +334,17 @@ export const billingRoutes = (app: Elysia) =>
       // Get subscription plans
       .get(
         "/plans",
-        async () => {
-          // Return static plan information
+        () => {
+          // Return plans from centralized config
           return {
-            plans: [
-              {
-                id: "free",
-                name: "Free",
-                description: "Basic macro tracking with essential features",
-                price: 0,
-                currency: "usd",
-                interval: "month" as const,
-                features: [
-                  "Track daily macros",
-                  "Basic meal logging",
-                  "Weight tracking",
-                  "Simple progress charts",
-                  "Up to 3 goals",
-                  "Basic habit tracking",
-                ],
-              },
-              {
-                id: "pro",
-                name: "Pro",
-                description:
-                  "Advanced features for serious fitness enthusiasts",
-                price: 5,
-                currency: "usd",
-                interval: "month" as const,
-                features: [
-                  "Everything in Free",
-                  "Unlimited goals and habits",
-                  "Advanced analytics and insights",
-                  "Custom meal templates",
-                  "Progress photos",
-                  "Data export",
-                  "Priority support",
-                  "Advanced reporting",
-                ],
-              },
-            ],
+            plans: getPlans().map((plan) => ({
+              ...plan,
+              features: [...plan.features], // Convert readonly to mutable array
+            })),
           };
         },
         {
+          response: PlansResponseSchema,
           detail: {
             summary: "Get available subscription plans",
             tags: ["Billing"],
