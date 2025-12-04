@@ -3,7 +3,13 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { MacroSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-import { safeQuery, safeExecute, safeQueryAll } from "../../lib/database";
+import {
+  safeQuery,
+  safeExecute,
+  safeQueryAll,
+  type MacroTargetRow,
+  type MacroEntryRow,
+} from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
@@ -11,30 +17,6 @@ import { toCamelCase } from "../../lib/responses";
 
 import { OpenFoodFactsApiClient } from "../../lib/openfoodfacts-api-client";
 import { cacheService } from "../../lib/cache-service";
-// Database result types (snake_case)
-type MacroTargetFromDB = {
-  id: number;
-  user_id: number;
-  protein_percentage: number;
-  carbs_percentage: number;
-  fats_percentage: number;
-  locked_macros: string; // JSON array string
-  created_at: string;
-  updated_at: string;
-};
-
-type MacroEntryFromDB = {
-  id: number;
-  user_id: number;
-  protein: number;
-  carbs: number;
-  fats: number;
-  meal_type: string;
-  meal_name: string | null;
-  entry_date: string;
-  entry_time: string;
-  created_at: string | Date;
-};
 
 export const macroRoutes = (app: Elysia) =>
   app.group("/api/macros", (group) =>
@@ -79,7 +61,7 @@ export const macroRoutes = (app: Elysia) =>
             correlationId: (context.request as any)?.correlationId,
           });
 
-          const macroTargetResult = safeQuery<MacroTargetFromDB>(
+          const macroTargetResult = safeQuery<MacroTargetRow>(
             db,
             "SELECT * FROM macro_targets WHERE user_id = ?",
             [user.userId]
@@ -102,10 +84,11 @@ export const macroRoutes = (app: Elysia) =>
           try {
             lockedMacros = JSON.parse(macroTargetResult.locked_macros || "[]");
           } catch (error) {
-            console.error(
-              "[GET /macros/target] Error parsing locked_macros:",
-              error
-            );
+            loggerHelpers.error(error as Error, {
+              operation: "parse_locked_macros",
+              path: "/macros/target",
+              userId: user.userId,
+            });
             lockedMacros = [];
           }
 
@@ -195,10 +178,11 @@ export const macroRoutes = (app: Elysia) =>
               lockedMacros = [];
             }
           } catch (error) {
-            console.error(
-              "[PUT /macros/target] Error parsing saved locked_macros:",
-              error
-            );
+            loggerHelpers.error(error as Error, {
+              operation: "parse_saved_locked_macros",
+              path: "/macros/target",
+              userId: user.userId,
+            });
             lockedMacros = [];
           }
 
@@ -301,7 +285,7 @@ export const macroRoutes = (app: Elysia) =>
           const total = countResult?.count || 0;
 
           // Get paginated results
-          const historyResult = safeQueryAll<MacroEntryFromDB>(
+          const historyResult = safeQueryAll<MacroEntryRow>(
             db,
             `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at 
              FROM macro_entries 
@@ -356,7 +340,7 @@ export const macroRoutes = (app: Elysia) =>
             entryTime,
           } = body;
 
-          const result = safeQuery<MacroEntryFromDB>(
+          const result = safeQuery<MacroEntryRow>(
             db,
             `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time)
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
@@ -460,7 +444,7 @@ export const macroRoutes = (app: Elysia) =>
             .join(", ");
           const queryParams = [...Object.values(updates), id, user.userId];
 
-          const result = safeQuery<MacroEntryFromDB>(
+          const result = safeQuery<MacroEntryRow>(
             db,
             `UPDATE macro_entries SET ${setClause}
              WHERE id = ? AND user_id = ?
