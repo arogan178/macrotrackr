@@ -20,9 +20,9 @@ import {
   computeEffectiveTargetCalories,
 } from "@/features/goals/utils/calorie";
 import { calculateGoalProgress } from "@/features/goals/utils/goalUtilities";
-import { formatDateShort } from "@/utils/dateUtilities";
 import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
+import { formatDateShort } from "@/utils/dateUtilities";
 
 import MacroNutrient from "./MacroNutrient";
 
