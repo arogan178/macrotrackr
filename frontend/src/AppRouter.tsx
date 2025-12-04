@@ -9,9 +9,8 @@ import {
 } from "@tanstack/react-router";
 import React, { Suspense } from "react";
 
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
 
@@ -20,7 +19,7 @@ import { useUser } from "./hooks/auth/useAuthQueries";
 import { queryClient } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
-const NotFoundPage = React.lazy(() => import("./pages/NotFoundPage"));
+const NotFoundPage = React.lazy(() => import("@/components/ui/NotFoundPage"));
 const LandingPage = React.lazy(
   () => import("./features/landing/pages/LandingPage"),
 );
@@ -39,7 +38,7 @@ const PricingPage = React.lazy(
   () => import("@/features/billing/pages/PricingPage"),
 );
 const ResetPasswordPage = React.lazy(
-  () => import("./features/landing/pages/ResetPasswordPage"),
+  () => import("@/features/auth/pages/ResetPasswordPage"),
 );
 const TermsAndConditionsPage = React.lazy(
   () => import("./features/landing/pages/TermsAndConditionsPage"),

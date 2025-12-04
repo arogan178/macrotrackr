@@ -57,12 +57,12 @@ function ProgressInsightsCard({
     color: string;
   } => {
     if (isLoading) {
-      return { message: "Analyzing progress...", color: "text-foreground" };
+      return { message: "Analyzing progress...", color: "text-muted" };
     }
     if (!weightGoals || weightGoals.weightGoal === "maintain") {
       return {
         message: "Set a weight loss or gain goal to see insights.",
-        color: "text-foreground",
+        color: "text-muted",
       };
     }
 
@@ -71,7 +71,7 @@ function ProgressInsightsCard({
     if (actualWeeklyChange === undefined) {
       return {
         message: "Log weight consistently for progress insights.",
-        color: "text-foreground",
+        color: "text-muted",
       };
     }
 
@@ -121,7 +121,7 @@ function ProgressInsightsCard({
 
     return {
       message: "Keep logging to see more insights.",
-      color: "text-foreground",
+      color: "text-muted",
     };
   }, [weightLog, weightGoals, isLoading]);
 

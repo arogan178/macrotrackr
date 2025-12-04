@@ -106,7 +106,7 @@ function WeightLogList({
     return (
       <div className="flex h-60 flex-col items-center justify-center">
         <LoadingSpinner size="md" />
-        <p className="mt-3 text-sm text-foreground">Loading weight log...</p>
+        <p className="mt-3 text-sm text-muted">Loading weight log...</p>
       </div>
     );
   }
@@ -142,7 +142,7 @@ function WeightLogList({
                 className="flex items-center justify-between py-2"
               >
                 <div className="flex max-w-55 min-w-50 flex-col">
-                  <span className="block w-full truncate text-sm text-foreground">
+                  <span className="block w-full truncate text-sm text-muted">
                     {/* Format timestamp only if valid */}
                     {isValidDate
                       ? format(entryDate, "MMM d, yyyy 'at' p")

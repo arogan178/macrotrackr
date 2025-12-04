@@ -6,13 +6,13 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import {
   Button,
   ChevronDownIcon,
+  EmptyState,
   ExportIcon,
+  IconButton,
   LoadingSpinner,
+  Modal,
   PlusCircleIcon,
 } from "@/components/ui";
-import EmptyState from "@/components/ui/EmptyState";
-import IconButton from "@/components/ui/IconButton";
-import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
@@ -282,10 +282,10 @@ const EntryHistoryComponent = function EntryHistory({
       {/* Heading row for mobile: flex with export button inline */}
       <div className="mb-6 flex items-center justify-between gap-4 lg:hidden">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-base font-semibold text-foreground">
             Entry History
           </h2>
-          <p className="mt-1 text-sm text-foreground">
+          <p className="mt-1 text-sm text-muted">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
             <AnimatedNumber value={totalEntries.length} />{" "}
@@ -311,10 +311,10 @@ const EntryHistoryComponent = function EntryHistory({
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <h2 className="text-lg font-semibold text-foreground">
+          <h2 className="text-base font-semibold text-foreground">
             Entry History
           </h2>{" "}
-          <p className="mt-1 text-sm text-foreground">
+          <p className="mt-1 text-sm text-muted">
             <AnimatedNumber value={history.length} />{" "}
             {history.length === 1 ? "entry" : "entries"} across{" "}
             <AnimatedNumber value={totalEntries.length} />{" "}

@@ -64,14 +64,14 @@ const ChangePasswordForm = () => {
         {/* Header section to match ProfileForm pattern */}
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
-            <div className="mr-4 rounded-xl bg-gradient-to-br from-red-400/20 to-red-500/20 p-3">
+            <div className="mr-4 rounded-xl bg-vibrant-accent/10 p-3">
               <LockIcon className="h-7 w-7 flex-shrink-0 text-vibrant-accent" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-xl font-bold text-foreground">
                 Security Settings
               </h3>
-              <p className="mt-1 text-sm text-foreground">
+              <p className="mt-1 text-sm text-muted">
                 Update your password to keep your account secure
               </p>
             </div>

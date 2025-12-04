@@ -37,10 +37,10 @@ const ProBillingView: React.FC<{
   return (
     <>
       {isActionRequired && (
-        <div className="mb-6 rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-900/25 to-orange-900/25 p-4">
-          <p className="flex items-center text-sm text-amber-200">
-            <span className="mr-2 rounded bg-amber-500/20 p-1">
-              <WarningIcon className="h-4 w-4 text-amber-400" />
+        <div className="mb-6 rounded-lg border border-warning/30 bg-warning/10 p-4">
+          <p className="flex items-center text-sm text-warning">
+            <span className="mr-2 rounded bg-warning/20 p-1">
+              <WarningIcon className="h-4 w-4 text-warning" />
             </span>
             <span>
               <span className="font-bold">Payment Issue:</span> Your
@@ -50,8 +50,7 @@ const ProBillingView: React.FC<{
           </p>
         </div>
       )}
-      <div className="relative mb-6 overflow-hidden rounded-xl border border-green-500/40 bg-gradient-to-br from-green-900/25 via-green-800/20 to-emerald-900/25 p-6">
-        <div className="absolute top-0 right-0 h-32 w-32 translate-x-16 -translate-y-16 transform rounded-full bg-success/10 blur-xl"></div>
+      <div className="relative mb-6 overflow-hidden rounded-xl border border-success/30 bg-success/10 p-6">
         <div className="relative">
           {/* Header with status */}
           <div className="mb-4 flex items-center justify-between">
@@ -67,16 +66,16 @@ const ProBillingView: React.FC<{
           </div>
 
           {/* Subscription details in clean grid */}
-          <div className="mb-4 rounded-lg bg-black/20 p-4">
+          <div className="mb-4 rounded-lg bg-surface-2 p-4">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
-                <div className="mb-1 text-xs text-foreground">Plan & Price</div>
+                <div className="mb-1 text-xs text-muted">Plan & Price</div>
                 <div className="font-semibold text-foreground">
                   {price || "-"}
                 </div>
               </div>
               <div className="text-center sm:text-left">
-                <div className="mb-1 text-xs text-foreground">
+                <div className="mb-1 text-xs text-muted">
                   {isCanceled ? "Expires" : "Renews"}
                 </div>
                 <div className="font-semibold text-foreground">
@@ -84,7 +83,7 @@ const ProBillingView: React.FC<{
                 </div>
               </div>
               <div className="text-center sm:text-left">
-                <div className="mb-1 text-xs text-foreground">Payment</div>
+                <div className="mb-1 text-xs text-muted">Payment</div>
                 <div className="font-semibold text-foreground">
                   {paymentMethod
                     ? `${paymentMethod.brand.toUpperCase()} •••• ${paymentMethod.last4}`
@@ -94,7 +93,7 @@ const ProBillingView: React.FC<{
             </div>
           </div>
 
-          <p className="text-sm leading-relaxed text-foreground">
+          <p className="text-sm leading-relaxed text-muted">
             {isCanceled
               ? "Your Pro access will continue until the expiration date shown above. You can reactivate your subscription at any time."
               : "Enjoy unlimited access to all premium features. Manage your subscription, view invoices, or update payment methods below."}
@@ -108,9 +107,7 @@ const ProBillingView: React.FC<{
           loadingText="Opening Portal..."
           fullWidth
           variant="primary"
-          className={`border-0 bg-gradient-to-r from-primary to-primary text-foreground shadow-primary transition-all duration-200 hover:from-primary hover:to-primary hover:shadow-modal ${
-            isActionRequired ? "animate-pulse" : ""
-          }`}
+          className={isActionRequired ? "animate-pulse" : ""}
           icon={<ExternalLinkIcon />}
           ariaLabel="Manage your Pro subscription"
         >
@@ -121,7 +118,6 @@ const ProBillingView: React.FC<{
             onClick={() => setShowCancel(true)}
             variant="danger"
             fullWidth
-            className="border-0 bg-gradient-to-r from-red-600 to-red-700 text-foreground hover:from-red-700 hover:to-red-800"
             ariaLabel="Cancel your Pro subscription"
           >
             Cancel Subscription
@@ -140,14 +136,14 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="rounded-lg bg-vibrant-accent/20 p-2">
-              <WarningIcon className="h-6 w-6 flex-shrink-0 text-vibrant-accent" />
+            <div className="rounded-lg bg-vibrant-accent/10 p-2">
+              <WarningIcon className="h-6 w-6 shrink-0 text-vibrant-accent" />
             </div>
             <div>
               <h4 className="mb-2 font-medium text-foreground">
                 Are you sure you want to cancel?
               </h4>
-              <p className="mb-3 text-sm text-foreground">
+              <p className="mb-3 text-sm text-muted">
                 This will immediately cancel your Pro subscription. You will
                 retain access until the end of your current billing period.
               </p>
@@ -182,7 +178,7 @@ const ProBillingView: React.FC<{
                 }
               }}
               variant="danger"
-              className="flex-1 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800"
+              className="flex-1"
             >
               Confirm Cancel
             </Button>
@@ -200,18 +196,18 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="rounded-lg bg-primary/20 p-2">
-              <InfoIcon className="h-6 w-6 flex-shrink-0 text-primary" />
+            <div className="rounded-lg bg-primary/10 p-2">
+              <InfoIcon className="h-6 w-6 shrink-0 text-primary" />
             </div>
             <div>
               <h4 className="mb-2 font-medium text-foreground">
                 Stripe Billing Portal
               </h4>
-              <p className="mb-3 text-sm text-foreground">
+              <p className="mb-3 text-sm text-muted">
                 You'll be redirected to Stripe's secure billing portal where you
                 can:
               </p>
-              <ul className="space-y-2 text-sm text-foreground">
+              <ul className="space-y-2 text-sm text-muted">
                 <li className="flex items-center">
                   <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
                   Update your payment method
@@ -231,10 +227,10 @@ const ProBillingView: React.FC<{
               </ul>
             </div>
           </div>
-          <div className="rounded-lg border border-amber-500/30 bg-gradient-to-r from-amber-900/25 to-orange-900/25 p-4">
-            <p className="flex items-center text-sm text-amber-200">
-              <span className="mr-2 rounded bg-amber-500/20 p-1">
-                <WarningIcon className="h-3 w-3 text-amber-400" />
+          <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
+            <p className="flex items-center text-sm text-warning">
+              <span className="mr-2 rounded bg-warning/20 p-1">
+                <WarningIcon className="h-3 w-3 text-warning" />
               </span>
               This will open in a new tab. Your current session will remain
               active.
@@ -254,7 +250,7 @@ const ProBillingView: React.FC<{
                 onManage();
               }}
               variant="primary"
-              className="flex-1 bg-gradient-to-r from-primary to-primary hover:from-primary hover:to-primary"
+              className="flex-1"
               icon={<ExternalLinkIcon className="h-4 w-4" />}
             >
               Continue to Portal

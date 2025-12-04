@@ -1,3 +1,20 @@
+/**
+ * Shared habit types used across features
+ */
+
+export type HabitAccentColor =
+  | "indigo"
+  | "blue"
+  | "cyan"
+  | "teal"
+  | "green"
+  | "lime"
+  | "yellow"
+  | "orange"
+  | "red"
+  | "pink"
+  | "purple";
+
 export interface HabitGoal {
   id: string;
   title: string;
@@ -5,18 +22,7 @@ export interface HabitGoal {
   current: number;
   target: number;
   progress: number;
-  accentColor?:
-    | "indigo"
-    | "blue"
-    | "cyan"
-    | "teal"
-    | "green"
-    | "lime"
-    | "yellow"
-    | "orange"
-    | "red"
-    | "pink"
-    | "purple"; // Consider using HabitAccentColor from shared constants if reused
+  accentColor?: HabitAccentColor;
   isComplete?: boolean;
   createdAt: string;
   completedAt?: string;
@@ -33,18 +39,7 @@ export interface HabitGoalFormValues {
   title: string;
   iconName: string;
   target: number;
-  accentColor?:
-    | "indigo"
-    | "blue"
-    | "cyan"
-    | "teal"
-    | "green"
-    | "lime"
-    | "yellow"
-    | "orange"
-    | "red"
-    | "pink"
-    | "purple";
+  accentColor?: HabitAccentColor;
 }
 
 export interface HabitCardProps {
@@ -54,6 +49,7 @@ export interface HabitCardProps {
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => Promise<void>;
 }
+
 export interface HabitTrackerProps {
   habits: HabitGoal[];
   isLoading?: boolean;

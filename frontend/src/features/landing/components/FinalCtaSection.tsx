@@ -7,18 +7,18 @@ import { Button } from "@/components/ui";
 
 const FinalCTASection: React.FC = () => (
   <section className="relative z-10 overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
-    <div className="absolute inset-0 bg-gradient-to-t from-primary/10 via-transparent to-transparent"></div>
+    <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-primary/5 via-transparent to-transparent" />
 
     <ScrollTriggeredDiv className="relative mx-auto max-w-4xl text-center">
       <motion.h2
-        className="mb-6 text-4xl font-bold text-foreground sm:text-5xl"
+        className="mb-4 text-4xl font-bold text-foreground sm:text-5xl"
         whileHover={{ scale: 1.01 }}
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         Ready to Transform Your Nutrition?
       </motion.h2>
       <motion.p
-        className="mb-12 text-xl text-foreground/90"
+        className="mb-10 text-lg text-muted"
         initial={{ opacity: 0.95 }}
         whileHover={{ opacity: 1 }}
         transition={{ duration: 0.2 }}
@@ -36,11 +36,10 @@ const FinalCTASection: React.FC = () => (
             text="Get Started For Free"
             variant="primary"
             buttonSize="lg"
-            className="px-12 py-4 text-xl font-semibold"
+            className="px-10 py-3 text-lg font-semibold"
           />
         </motion.div>
       </Link>
-      <div className="mb-6" />
     </ScrollTriggeredDiv>
   </section>
 );

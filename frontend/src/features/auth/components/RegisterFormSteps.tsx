@@ -14,14 +14,11 @@ import {
   ForwardIcon,
   InfoIcon,
 } from "@/components/ui";
-import {
-  ACTIVITY_LEVELS,
-  GENDER_OPTIONS,
-} from "@/features/settings/utils/constants";
 import { useRegistrationProcess } from "@/hooks/auth/useRegistration";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
 import { USER_MINIMUM_AGE } from "@/utils/constants";
+import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
 
 // Base form wrapper for consistent sizing
 const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
