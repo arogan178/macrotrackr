@@ -1,4 +1,3 @@
-import type { HabitGoalFormValues } from "@/types/habit";
 import { useMutationErrorHandler } from "@/hooks";
 import { useDeleteWeightGoal } from "@/hooks/queries/useGoals";
 import {
@@ -9,6 +8,7 @@ import {
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
 import { useStore } from "@/store/store";
+import type { HabitGoalFormValues } from "@/types/habit";
 import type { Habit } from "@/utils/apiServices";
 
 export function useGoalsMutations() {
