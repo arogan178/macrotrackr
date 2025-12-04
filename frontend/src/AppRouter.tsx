@@ -9,9 +9,8 @@ import {
 } from "@tanstack/react-router";
 import React, { Suspense } from "react";
 
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
+import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
 
