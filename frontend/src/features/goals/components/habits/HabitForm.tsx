@@ -1,8 +1,8 @@
 // The updated HabitForm.tsx, removing isSubmitting prop since it's not used
 import { NumberField, TextField } from "@/components/form";
+import { HabitGoalFormValues } from "@/types/habit";
 
-import { HABIT_ICONS } from "../constants";
-import { HabitGoalFormValues } from "../types/types";
+import { HABIT_ICONS } from "../../constants/habits";
 import HabitCard from "./HabitCard";
 
 /**
