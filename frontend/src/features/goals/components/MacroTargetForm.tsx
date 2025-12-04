@@ -118,15 +118,17 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
         <div className="flex h-full flex-col lg:col-span-4">
           <CardContainer className="h-full p-6">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-foreground">
+              <h3 className="text-base font-semibold text-foreground">
                 Macro Target Settings
               </h3>
-              <div className="rounded-full border border-primary/30 bg-primary/20 px-3 py-1">
-                <span className="text-sm text-foreground">Daily Target</span>
+              <div className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
+                <span className="text-xs font-medium text-primary">
+                  Daily Target
+                </span>
               </div>
             </div>
 
-            <p className="mb-6 text-sm text-foreground">
+            <p className="mb-6 text-sm text-muted">
               Adjust the sliders below to set your preferred macronutrient
               target. These percentages will be used to calculate your daily
               macro target based on your calorie needs.
@@ -238,7 +240,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
         {/* Right side - Info panel (2 cols) */}
         <div className="flex h-full flex-col lg:col-span-2">
           <CardContainer className="h-full p-6">
-            <h3 className="mb-4 text-lg font-semibold text-foreground">
+            <h3 className="mb-4 text-base font-semibold text-foreground">
               Understanding Macros
             </h3>
             <div className="flex-1 space-y-4">
@@ -265,7 +267,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                 color="indigo"
                 icon={<InfoIcon className="h-4 w-4 text-vibrant-accent" />}
               >
-                <ul className="mt-2 space-y-2 text-sm text-foreground">
+                <ul className="mt-2 space-y-2 text-sm text-muted">
                   <li>• For muscle growth keep protein between 20-35% </li>
                   <li>• Carbs work best at 45-65%</li>
                   <li>• Fats should stay between 20-35%</li>

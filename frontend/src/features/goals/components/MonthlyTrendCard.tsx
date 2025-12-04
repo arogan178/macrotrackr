@@ -18,13 +18,11 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
 
   const renderContent = () => {
     if (isLoading) {
-      return <p className="text-xs text-foreground">Calculating...</p>;
+      return <p className="text-xs text-muted">Calculating...</p>;
     }
     if (monthlyChange === undefined) {
       return (
-        <p className="text-xs text-foreground">
-          Not enough data for monthly trend.
-        </p>
+        <p className="text-xs text-muted">Not enough data for monthly trend.</p>
       );
     }
 
@@ -47,9 +45,7 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
         >
           {isLoss ? `-${absChange}` : isGain ? `+${absChange}` : "0.0"} kg
         </span>
-        <span className="ml-1.5 text-xs text-foreground">
-          in last ~3 months
-        </span>
+        <span className="ml-1.5 text-xs text-muted">in last ~3 months</span>
       </div>
     );
   };
