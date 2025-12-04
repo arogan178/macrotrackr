@@ -13,14 +13,14 @@ interface PlanToggleProps {
  *   <PlanToggle selectedPlan={selectedPlan} onSelect={setSelectedPlan} />
  */
 const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
-  <div className="inline-flex rounded-2xl border border-border/50 bg-surface p-2 backdrop-blur-sm">
+  <div className="inline-flex gap-1 rounded-xl border border-border bg-surface-2 p-1.5">
     <Button
       type="button"
       onClick={() => onSelect("monthly")}
       variant={selectedPlan === "monthly" ? "primary" : "ghost"}
       buttonSize="md"
       aria-pressed={selectedPlan === "monthly"}
-      className="font-semibold"
+      className={`font-medium transition-all duration-200 ${selectedPlan === "monthly" ? "" : "hover:bg-surface-3"}`}
     >
       Monthly
     </Button>
@@ -30,11 +30,11 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
       variant={selectedPlan === "yearly" ? "primary" : "ghost"}
       buttonSize="md"
       aria-pressed={selectedPlan === "yearly"}
-      className="relative font-semibold"
+      className={`relative font-medium transition-all duration-200 ${selectedPlan === "yearly" ? "" : "hover:bg-surface-3"}`}
     >
       Yearly
-      <span className="absolute -top-2 -right-5 rounded-full bg-success px-2 py-1 text-xs text-foreground">
-        Save 30%
+      <span className="absolute -top-2.5 -right-3 rounded-md bg-success/90 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-foreground">
+        -30%
       </span>
     </Button>
   </div>
