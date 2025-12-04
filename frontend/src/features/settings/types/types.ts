@@ -2,9 +2,11 @@
  * Type definitions for macro targets and distribution management
  */
 
-// Single consolidated type for all activity/exercise levels
-// NOTE: Backend uses 1-5 numbers. Conversion happens in slice/API service.
-export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
+// Import shared ActivityLevel type
+
+
+// Re-export for backwards compatibility
+
 
 export type Gender = "male" | "female";
 
@@ -28,3 +30,5 @@ export interface UserNutritionalProfile {
   bmr: number;
   tdee: number;
 }
+
+export {type ActivityLevel} from "@/utils/userConstants";

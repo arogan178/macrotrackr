@@ -10,3 +10,6 @@ export { default as WeightGoalProgressChart } from "./WeightGoalProgressChart";
 export { default as WeightGoalStatus } from "./WeightGoalStatus";
 export { default as WeightLogList } from "./WeightLogList";
 export { default as WeightProgressTabs } from "./WeightProgressTabs";
+
+// Habit components (merged from habits feature)
+export * from "./habits";

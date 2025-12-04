@@ -2,9 +2,7 @@ import { motion } from "motion/react";
 import { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { CalendarIcon } from "@/components/ui";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import ProgressBar from "@/components/ui/ProgressBar";
+import { CalendarIcon, LoadingSpinner, ProgressBar } from "@/components/ui";
 
 import {
   MACRO_COLORS,
@@ -98,14 +96,14 @@ function UnifiedInsights({
   // Handle no data state
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
-      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border/50 bg-surface p-6 text-center text-foreground shadow-modal backdrop-blur-sm">
+      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border/50 bg-surface p-6 text-center shadow-modal backdrop-blur-sm">
         <div className="space-y-3">
           <div className="text-4xl">📊</div>
           <div>
             <p className="mb-2 text-xl font-semibold text-foreground">
               Ready for Insights
             </p>
-            <p className="max-w-md text-foreground">
+            <p className="max-w-md text-muted">
               Start logging your meals to unlock personalized nutrition
               insights, trends, and recommendations tailored just for you.
             </p>
@@ -141,9 +139,9 @@ function UnifiedInsights({
           textColor="text-foreground"
         >
           <div className="flex h-full flex-col">
-            <div className="mb-2 flex items-center justify-between text-xs text-primary/70">
-              <span className="text-foreground">Logging frequency</span>
-              <span className="text-foreground">Intake variation</span>
+            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+              <span>Logging frequency</span>
+              <span>Intake variation</span>
             </div>
             <ProgressBar
               progress={consistencyScore}
@@ -166,7 +164,7 @@ function UnifiedInsights({
           textColor="text-foreground"
         >
           <div className="flex h-full flex-col justify-between">
-            <div className="mb-2 flex justify-between text-xs text-purple-300/80">
+            <div className="mb-2 flex justify-between text-xs text-muted">
               <span>Current: {macroBalance.currentRatio}</span>
               <span>Target: {macroBalance.idealRatio}</span>
             </div>
@@ -229,9 +227,9 @@ function UnifiedInsights({
           textColor="text-foreground"
         >
           <div className="flex h-full flex-col">
-            <div className="mb-2 flex items-center justify-between text-xs text-emerald-300/70">
-              <span className="text-foreground">Protein quality</span>
-              <span className="text-foreground">Macro balance</span>
+            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+              <span>Protein quality</span>
+              <span>Macro balance</span>
             </div>
             <ProgressBar
               progress={macroDensity.score}
@@ -337,7 +335,7 @@ function UnifiedInsights({
               </span>
             </div>
           </div>
-          <p className="mt-2 text-sm text-foreground">{dataQuality.message}</p>
+          <p className="mt-2 text-sm text-muted">{dataQuality.message}</p>
         </motion.div>
 
         {/* Recommendations */}

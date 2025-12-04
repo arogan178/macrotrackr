@@ -1,7 +1,7 @@
+import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import { generateId } from "@/utils/idGenerator";
 
-import { DEFAULT_HABIT_COLOR } from "../constants";
-import { HabitGoal, HabitGoalFormValues } from "../types/types";
+import { DEFAULT_HABIT_COLOR } from "../../constants/habits";
 import { calculateProgress, isHabitComplete } from "./calculations";
 
 // Habit creation utilities

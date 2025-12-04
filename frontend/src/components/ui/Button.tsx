@@ -1,8 +1,5 @@
 import React, { memo } from "react";
 
-import { LoadingSpinnerIcon } from "@/components/ui";
-// Fixed type import path: Types are defined in ./Types.ts, not "@/components/ui/types"
-import type { ButtonProps } from "@/components/ui/Types";
 import {
   BUTTON_SIZES,
   BUTTON_VARIANTS,
@@ -10,6 +7,10 @@ import {
   ICON_POSITIONS,
 } from "@/components/utils";
 import { useFeatureLoading, useGlobalLoading } from "@/hooks";
+
+import { LoadingSpinnerIcon } from "./Icons";
+// Fixed type import path: Types are defined in ./Types.ts, not "@/components/ui/types"
+import type { ButtonProps } from "./Types";
 
 type ButtonAllProps = ButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;

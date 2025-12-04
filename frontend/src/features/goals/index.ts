@@ -10,5 +10,8 @@ export * from "./calculations";
 // Export constants
 export * from "./constants";
 
-// Export store
-export * from "./store";
+// Export habit constants (merged from habits feature)
+export * from "./constants/habits";
+
+// Export utility functions
+export * from "./utils";

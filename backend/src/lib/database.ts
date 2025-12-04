@@ -192,6 +192,16 @@ export interface HabitRow {
   completed_at: string | null;
 }
 
+export interface SubscriptionRow {
+  id: string;
+  user_id: number;
+  stripe_subscription_id: string;
+  status: "active" | "canceled" | "past_due" | "unpaid";
+  current_period_end: string;
+  created_at: string;
+  updated_at: string;
+}
+
 // Helper functions for secure logging
 function extractTableName(query: string): string {
   const normalizedQuery = query.trim().toLowerCase();

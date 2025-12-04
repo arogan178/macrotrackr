@@ -2,14 +2,7 @@ import { memo } from "react";
 
 import { formStyles } from "@/components/form/Styles";
 import type { DateFieldProps } from "@/components/form/types";
-
-function getTodayISO() {
-  const today = new Date();
-  const yyyy = today.getFullYear();
-  const mm = String(today.getMonth() + 1).padStart(2, "0");
-  const dd = String(today.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
+import { todayISO } from "@/utils/dateUtilities";
 
 function DateField({
   label,
@@ -29,7 +22,7 @@ function DateField({
   } cursor-pointer`;
 
   // Default max to today if not provided
-  const maxDate = max || getTodayISO();
+  const maxDate = max || todayISO();
 
   return (
     <div className={formStyles.container}>
