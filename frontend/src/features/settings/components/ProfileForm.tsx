@@ -70,14 +70,14 @@ export default function ProfileForm({
         {/* Header section to match BillingForm pattern */}
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
-            <div className="mr-4 rounded-xl bg-gradient-to-br from-primary/20 to-primary/20 p-3">
+            <div className="mr-4 rounded-xl bg-primary/10 p-3">
               <UserIcon className="h-7 w-7 flex-shrink-0 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-xl font-bold text-foreground">
                 Profile Information
               </h3>
-              <p className="mt-1 text-sm text-foreground">
+              <p className="mt-1 text-sm text-muted">
                 Update your personal details and preferences
               </p>
             </div>

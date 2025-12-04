@@ -90,11 +90,11 @@ const MacroDensityBreakdown = ({
       {loading || showNoData ? (
         <div className="flex h-full items-center justify-center">
           {loading ? (
-            <div className="animate-pulse text-sm text-foreground">
+            <div className="animate-pulse text-sm text-muted">
               Loading macro distribution...
             </div>
           ) : (
-            <div className="text-sm text-warning">
+            <div className="text-sm text-muted">
               No macro data available for this period.
             </div>
           )}
