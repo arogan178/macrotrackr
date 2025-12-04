@@ -7,6 +7,7 @@
   "scripts": {
     "start": "dotenvx run --env-file .env.production -- bun run src/index.ts",
     "dev": "dotenvx run --env-file .env.development -- bun --watch src/index.ts",
+    "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
