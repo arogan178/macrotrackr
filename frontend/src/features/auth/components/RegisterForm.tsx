@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { CardContainer } from "@/components/form";
+import FloatingNotification from "@/components/notifications/components/FloatingNotification";
 import {
   StepOne,
   StepThree,
@@ -8,7 +9,6 @@ import {
 } from "@/features/auth/components/RegisterFormSteps";
 import { StepIndicator } from "@/features/auth/components/StepIndicator";
 import { REGISTRATION_STEPS } from "@/features/auth/utils";
-import FloatingNotification from "@/components/notifications/components/FloatingNotification";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 

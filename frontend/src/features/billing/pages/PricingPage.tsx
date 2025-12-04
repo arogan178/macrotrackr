@@ -3,10 +3,10 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect } from "react";
 
 import { PricingTable } from "@/components/billing";
+import { PageBackground } from "@/components/layout";
 import Navbar from "@/components/layout/Navbar";
 import { CircleQuestionMarkIcon } from "@/components/ui";
 import IconButton from "@/components/ui/IconButton";
-import { PageBackground } from "@/components/layout";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";
