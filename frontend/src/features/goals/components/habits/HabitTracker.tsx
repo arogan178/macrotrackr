@@ -3,8 +3,8 @@ import { CardContainer } from "@/components/form";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { HabitGoal } from "@/types/habit";
 
-import { HabitGoal } from "../types/types";
 import HabitCard from "./HabitCard";
 
 interface HabitTrackerProps {

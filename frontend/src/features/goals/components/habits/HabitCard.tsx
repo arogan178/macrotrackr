@@ -1,9 +1,9 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { CheckIcon, TargetIcon } from "@/components/ui";
 import ProgressBar from "@/components/ui/ProgressBar";
+import type { HabitGoal } from "@/types/habit";
 
-import { HABIT_ICONS } from "../constants";
-import type { HabitGoal } from "../types/types";
+import { HABIT_ICONS } from "../../constants/habits";
 import HabitActions from "./HabitActions";
 
 type Variant = "sm" | "md";
