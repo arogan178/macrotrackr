@@ -56,13 +56,11 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary shadow-primary/30 shadow-primary">
-          <CalorieIcon className="h-8 w-8 text-foreground" />
+        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+          <CalorieIcon className="h-8 w-8 text-primary" />
         </div>
-        <h1 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-3xl font-bold text-transparent">
-          Welcome
-        </h1>
-        <p className="mt-2 text-foreground">Sign in to track your macros</p>
+        <h1 className="text-3xl font-bold text-foreground">Welcome</h1>
+        <p className="mt-2 text-muted">Sign in to track your macros</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
@@ -100,10 +98,6 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
           autoLoadingFeature="auth"
           loadingText="Signing in..."
           fullWidth={true}
-          className="transform rounded-lg bg-gradient-to-r from-primary 
-                 to-primary p-3 font-medium text-foreground shadow-primary/30
-                 shadow-primary transition-all duration-300 hover:scale-[1.02] hover:from-primary
-                 hover:to-primary disabled:opacity-50"
         >
           Sign In
         </Button>

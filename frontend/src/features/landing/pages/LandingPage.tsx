@@ -1,8 +1,7 @@
 import { motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect } from "react";
 
-import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import usePageMetadata from "@/hooks/usePageMetadata";
 
 import Footer from "../components/Footer";

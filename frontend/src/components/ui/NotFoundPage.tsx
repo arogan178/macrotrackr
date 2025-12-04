@@ -1,7 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import { useEffect } from "react";
 
-const NotFound = () => {
+const NotFoundPage = () => {
   const location = useLocation();
 
   useEffect(() => {
@@ -24,4 +24,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default NotFoundPage;

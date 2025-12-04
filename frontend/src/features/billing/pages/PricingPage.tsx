@@ -3,10 +3,9 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect } from "react";
 
 import { PricingTable } from "@/components/billing";
+import { PageBackground } from "@/components/layout";
 import Navbar from "@/components/layout/Navbar";
-import { CircleQuestionMarkIcon } from "@/components/ui";
-import IconButton from "@/components/ui/IconButton";
-import PageBackground from "@/features/landing/components/PageBackground";
+import { CircleQuestionMarkIcon, IconButton } from "@/components/ui";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";
@@ -83,7 +82,7 @@ const PricingPage: React.FC = () => {
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-gray-950 via-gray-900 to-gray-950 text-foreground">
+    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Background placed first so later siblings naturally paint above (no z-index hacks needed) */}
       <div className="pointer-events-none absolute inset-0">
         <PageBackground />
@@ -92,12 +91,12 @@ const PricingPage: React.FC = () => {
       <main className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="relative mb-14 text-center">
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-40 -translate-y-1/2 bg-[radial-gradient(circle_at_center,theme(colors.primary/25),transparent_70%)] blur-2xl" />
+          <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-40 -translate-y-1/2 bg-[radial-gradient(circle_at_center,theme(colors.primary/15),transparent_70%)] blur-2xl" />
 
-          <h1 className="bg-gradient-to-r from-primary via-primary to-primary/60 bg-clip-text text-4xl font-extrabold tracking-tight text-transparent sm:text-5xl md:text-6xl">
+          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Unlock Your Full Potential
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl text-lg text-foreground">
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
             Upgrade to Pro and take control with advanced tracking, deeper
             insights & unlimited growth tools.
           </p>

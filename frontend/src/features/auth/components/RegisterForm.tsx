@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import { CardContainer } from "@/components/form";
+import FloatingNotification from "@/components/notifications/components/FloatingNotification";
 import {
   StepOne,
   StepThree,
@@ -8,7 +9,6 @@ import {
 } from "@/features/auth/components/RegisterFormSteps";
 import { StepIndicator } from "@/features/auth/components/StepIndicator";
 import { REGISTRATION_STEPS } from "@/features/auth/utils";
-import FloatingNotification from "@/features/notifications/components/FloatingNotification";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
 
@@ -75,10 +75,10 @@ function RegisterForm() {
             steps={REGISTRATION_STEPS}
           />
         </div>
-        <h2 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-2xl font-bold text-transparent">
+        <h2 className="text-2xl font-bold text-foreground">
           {stepTitles[register.step as keyof typeof stepTitles]}
         </h2>
-        <p className="mt-1 text-sm text-foreground">
+        <p className="mt-1 text-sm text-muted">
           {stepDescriptions[register.step as keyof typeof stepDescriptions]}
         </p>
       </div>

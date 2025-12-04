@@ -1,8 +1,8 @@
 // The updated HabitForm.tsx, removing isSubmitting prop since it's not used
 import { NumberField, TextField } from "@/components/form";
+import { HabitGoalFormValues } from "@/types/habit";
 
-import { HABIT_ICONS } from "../constants";
-import { HabitGoalFormValues } from "../types/types";
+import { HABIT_ICONS } from "../../constants/habits";
 import HabitCard from "./HabitCard";
 
 /**
@@ -167,7 +167,7 @@ function HabitForm({
           error={errors.target}
           required
         />
-        <p className="mt-1 text-xs text-foreground">
+        <p className="mt-1 text-xs text-muted">
           Set how many times you need to complete this habit to reach your goal
         </p>
       </div>

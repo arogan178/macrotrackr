@@ -2,13 +2,13 @@ import { useLoaderData } from "@tanstack/react-router";
 
 import { goalsRoute } from "@/AppRouter";
 import type { WeightGoalsResponse } from "@/features/goals/types";
-import { createNutritionProfile } from "@/features/settings/utils/calculations";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import { useHabits } from "@/hooks/queries/useHabits";
 import { useMacroDailyTotals, useMacroTarget } from "@/hooks/queries/useMacroQueries";
 import type { UserSettings } from "@/types/user";
 import type { UserDetailsResponse } from "@/utils/apiServices";
+import { createNutritionProfile } from "@/utils/userConstants";
 
 function toUserSettings(user: UserDetailsResponse | null | undefined): UserSettings | undefined {
   if (!user) return undefined;

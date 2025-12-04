@@ -140,8 +140,8 @@ export default function DailySummary({
     <CardContainer className="h-full">
       <div className="flex h-full flex-col p-6">
         <div className="mb-6 rounded-xl bg-surface-2 p-4">
-          <div className="mb-2 flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-foreground">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-base font-semibold text-foreground">
               Today's Summary
             </h2>
             <div className="text-right">
@@ -152,9 +152,9 @@ export default function DailySummary({
                   duration={0.8}
                 />
               </div>
-              <div className="text-xs text-foreground">
+              <div className="text-xs text-muted">
                 <span>of </span>
-                <span className="font-medium text-foreground">
+                <span className="font-medium text-muted">
                   <AnimatedNumber
                     value={dailyCalorieTarget}
                     toFixedValue={0}
@@ -163,7 +163,7 @@ export default function DailySummary({
                 </span>
                 <span> kcal</span>
 
-                <span className="ml-1 font-medium text-vibrant-accent">
+                <span className="ml-1 font-medium text-primary">
                   (
                   <AnimatedNumber
                     value={calorieCompletionPercent}
@@ -202,11 +202,11 @@ export default function DailySummary({
           />
         </div>
 
-        <div className="space-y-4">
+        <div className="space-y-3">
           {macroData.map((macro) => (
             <div
               key={macro.name}
-              className={`bg-gradient-to-br ${macro.gradientFrom} rounded-xl border to-gray-800/10 p-4 ${macro.borderColor}`}
+              className={`rounded-xl border bg-surface-2/50 p-4 ${macro.borderColor} transition-colors duration-200 hover:bg-surface-2`}
             >
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -224,7 +224,7 @@ export default function DailySummary({
                       duration={0.7}
                     />
                   </span>
-                  <span className="ml-1 text-xs text-foreground">
+                  <span className="ml-1 text-xs text-muted">
                     /
                     <AnimatedNumber
                       value={macro.targetGrams}
@@ -239,11 +239,11 @@ export default function DailySummary({
                 progress={macro.completionPercent}
                 color={macro.name.toLowerCase() as "protein" | "carbs" | "fats"}
                 height="md"
-                className="mb-3"
+                className="mb-2"
               />
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className={`text-xs ${macro.textColor}`}>
+                  <span className="text-xs text-muted">
                     <AnimatedNumber
                       value={macro.calories}
                       toFixedValue={0}

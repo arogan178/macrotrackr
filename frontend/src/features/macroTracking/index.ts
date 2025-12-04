@@ -29,7 +29,7 @@ export type {
   AddEntryPayload,
   OptimisticUpdateState,
   UpdateEntryPayload,
-} from "./utilities";
+} from "./utils";
 export {
   areEntriesSame,
   createStateSnapshot,
@@ -37,7 +37,7 @@ export {
   removeEntryFromList,
   updateEntryInList,
   validateMacroInputs,
-} from "./utilities";
+} from "./utils";
 
 // Pages / Hooks / Components / Types barrels
 export * from "./components";
