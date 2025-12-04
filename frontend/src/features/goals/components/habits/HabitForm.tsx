@@ -167,7 +167,7 @@ function HabitForm({
           error={errors.target}
           required
         />
-        <p className="mt-1 text-xs text-foreground">
+        <p className="mt-1 text-xs text-muted">
           Set how many times you need to complete this habit to reach your goal
         </p>
       </div>
