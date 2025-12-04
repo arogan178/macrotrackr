@@ -42,25 +42,9 @@ else
         exit 1
 fi
 
-# Install frontend and backend dependencies in parallel to speed up deploy
-echo "Installing frontend and backend dependencies in parallel..."
-# run installs in subshells so cwd doesn't interfere
-( cd backend && bun install --frozen-lockfile ) &
-PID_BACKEND=$!
-( cd frontend && bun install --frozen-lockfile ) &
-PID_FRONTEND=$!
-
-# wait for both to finish and capture exit codes
-wait $PID_BACKEND
-RC_BACKEND=$?
-wait $PID_FRONTEND
-RC_FRONTEND=$?
-
-if [ $RC_BACKEND -ne 0 ] || [ $RC_FRONTEND -ne 0 ]; then
-    echo "One or more dependency installs failed (backend:$RC_BACKEND frontend:$RC_FRONTEND). Exiting."
-    exit 1
-fi
-
+# Install all dependencies using workspaces (from root)
+echo "Installing dependencies..."
+bun install --frozen-lockfile
 
 # Build frontend
 echo "Building frontend..."
