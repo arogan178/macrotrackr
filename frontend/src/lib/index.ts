@@ -12,8 +12,8 @@ export {
 export {
   formatDate,
   formatDateFull,
+  getDatesBetween,
+  getDaysInRange,
   getTodayDate,
   isValidDateString,
-  getDaysInRange,
-  getDatesBetween,
 } from "./dateUtils";

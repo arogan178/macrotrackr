@@ -3,10 +3,10 @@
  */
 
 // Import shared ActivityLevel type
-import type { ActivityLevel } from "@/utils/userConstants";
+
 
 // Re-export for backwards compatibility
-export type { ActivityLevel };
+
 
 export type Gender = "male" | "female";
 
@@ -30,3 +30,5 @@ export interface UserNutritionalProfile {
   bmr: number;
   tdee: number;
 }
+
+export {type ActivityLevel} from "@/utils/userConstants";
