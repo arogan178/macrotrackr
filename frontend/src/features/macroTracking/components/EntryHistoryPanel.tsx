@@ -6,13 +6,13 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import {
   Button,
   ChevronDownIcon,
+  EmptyState,
   ExportIcon,
+  IconButton,
   LoadingSpinner,
+  Modal,
   PlusCircleIcon,
 } from "@/components/ui";
-import EmptyState from "@/components/ui/EmptyState";
-import IconButton from "@/components/ui/IconButton";
-import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
