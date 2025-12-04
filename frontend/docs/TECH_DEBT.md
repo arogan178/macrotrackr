@@ -26,21 +26,34 @@ Settings/auth constants now re-export from shared location for backwards compati
 - ✅ `utilities.ts` in macroTracking merged into `utils/index.ts` (naming consistency)
 - ✅ `features/dashboard/` removed (was redundant - UserMetricsPanel moved to shared)
 - ✅ `features/notifications/` moved to `src/components/notifications/` (shared infrastructure)
+- ✅ `features/habits/` merged into `features/goals/` (habits is a sub-feature of goals)
+- ✅ `features/landing/pages/ResetPasswordPage.tsx` stub removed (router imports directly from auth)
+- ✅ `src/components/auth/ProRoute.tsx` removed (was unused)
+
+### Habits → Goals Merge
+
+The `features/habits/` feature has been merged into `features/goals/` as a sub-module since:
+
+- HabitTracker only appears on GoalsPage
+- Habits has no dedicated route
+- It's functionally a sub-feature of the goals workflow
+
+New structure:
+
+- `features/goals/components/habits/` - HabitActions, HabitCard, HabitForm, HabitModal, HabitTracker
+- `features/goals/utils/habits/` - calculations.ts, habitUtilities.ts
+- `features/goals/constants/habits.ts` - habit icons, colors, validation
 
 ---
 
 ## Priority: High
 
-### 1. Remaining Cross-Feature Import Violations
+### 1. Cross-Feature Import Violations ✅ RESOLVED
 
-Per `FRONTEND_STRUCTURE_GUIDELINES.md`, features should NOT import directly from other features. Remaining violations:
+All cross-feature imports have been resolved:
 
-| From Feature | Imports From | Example Files | Notes                                |
-| ------------ | ------------ | ------------- | ------------------------------------ |
-| `goals`      | `habits`     | GoalsPage.tsx | Component composition (HabitTracker) |
-| `landing`    | `auth`       | Re-exports    | May be acceptable for landing flow   |
-
-**Note**: These are page-level compositions which may be acceptable. Consider moving shared components to `src/components/` if they're truly reusable.
+- ✅ `goals` ← `habits`: Merged habits into goals as sub-module
+- ✅ `landing` ← `auth`: Router now imports directly from auth, stub removed
 
 ---
 
@@ -59,12 +72,7 @@ Completed:
 
 Remaining: `features/reporting/utils/dateUtilities.ts` has feature-specific constants - acceptable to keep.
 
-### 3. Misplaced Shared Components
-
-- ~~`src/components/macros/`~~ - ✅ Actually correct - shared between `macroTracking` and `goals` features
-- ~~`src/components/auth/ProRoute.tsx`~~ - ✅ Removed (was unused)
-
-### 4. Hooks Directory Organization
+### 3. Hooks Directory Organization
 
 Current structure (acceptable pattern):
 
@@ -76,7 +84,7 @@ The index.ts barrel exports from root level only. Subdirectories are accessed vi
 
 **Status**: ✅ Structure is reasonable - no immediate action needed. Could benefit from adding exports for auth/queries subdirectories to the barrel if frequently used.
 
-### 5. Rollup Circular Chunk Warnings ✅ Fixed
+### 4. Rollup Circular Chunk Warnings ✅ Fixed
 
 All circular dependency warnings have been resolved by converting barrel imports to direct sibling imports within component directories:
 
@@ -86,14 +94,22 @@ All circular dependency warnings have been resolved by converting barrel imports
 Remaining build warnings (not blocking):
 
 - Dynamic vs static import warnings for `tokenStorage.ts` and `apiServices.ts` (TanStack Router code-splitting behavior)
-- Large chunk size warning for recharts (LineChartComponent)
+- Large chunk size warning for recharts (LineChartComponent) - already code-split into separate chunk
+
+### 5. Recharts Bundle Size ✅ Optimized
+
+Recharts is already lazy-loaded via route code-splitting:
+
+- `LineChartComponent.BLwSzr3I.js` (404KB) is a separate chunk
+- Only loaded when ReportingPage or GoalsPage (with WeightGoalProgressChart) is visited
+- No further optimization needed
 
 ---
 
 ## Enforcement Suggestions
 
-1. Add ESLint rule to ban `features/*` importing from other `features/*`
-2. Add pre-commit hook or CI check for cross-feature imports
+1. ✅ Cross-feature import convention documented in `FRONTEND_STRUCTURE_GUIDELINES.md`
+2. Note: ESLint `no-restricted-imports` cannot distinguish internal vs cross-feature imports without `eslint-plugin-boundaries`
 3. Schedule periodic structure audits
 
 ---
