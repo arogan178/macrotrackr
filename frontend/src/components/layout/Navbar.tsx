@@ -7,12 +7,12 @@ import {
   CloseIcon,
   GoalsIcon,
   HomeIcon,
+  IconButton,
   LogoutIcon,
   MenuIcon,
   ReportingIcon2,
   SettingsIcon,
 } from "@/components/ui";
-import IconButton from "@/components/ui/IconButton";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
 
 import LogoButton from "./LogoButton";
