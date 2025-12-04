@@ -1,8 +1,9 @@
 import { Component, ReactNode } from "react";
 
+import { getErrorMessage } from "@/utils/errorHandling";
+
 import Button from "./Button";
 import { WarningIcon } from "./Icons";
-import { getErrorMessage } from "@/utils/errorHandling";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
