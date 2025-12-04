@@ -216,7 +216,7 @@ export default function HabitCard({
                 </span>
               )}
               {resolvedShow.numbers && (
-                <span className="text-sm text-foreground">
+                <span className="text-sm text-muted">
                   /{" "}
                   {variant === "sm" ? (
                     target
@@ -227,7 +227,7 @@ export default function HabitCard({
               )}
             </div>
             {!isComplete && resolvedShow.percentage && (
-              <span className="text-sm text-foreground">
+              <span className="text-sm text-muted">
                 {variant === "sm" ? (
                   `${progress}%`
                 ) : (
