@@ -39,7 +39,7 @@ export default function MetricCard({
             duration={0.8}
           />
         </span>
-        <span className={`text-xs ${textColor}/70`}>{subtitle}</span>
+        <span className="text-xs text-muted">{subtitle}</span>
       </div>
       <div className="flex flex-1 flex-col justify-between">{children}</div>
     </motion.div>
