@@ -75,10 +75,10 @@ function RegisterForm() {
             steps={REGISTRATION_STEPS}
           />
         </div>
-        <h2 className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-2xl font-bold text-transparent">
+        <h2 className="text-2xl font-bold text-foreground">
           {stepTitles[register.step as keyof typeof stepTitles]}
         </h2>
-        <p className="mt-1 text-sm text-foreground">
+        <p className="mt-1 text-sm text-muted">
           {stepDescriptions[register.step as keyof typeof stepDescriptions]}
         </p>
       </div>
