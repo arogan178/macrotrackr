@@ -24,6 +24,8 @@
  */
 import React, { memo } from "react";
 
+import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
+
 import Button from "./Button";
 import {
   CloseIcon,
@@ -36,7 +38,6 @@ import {
   WarningIcon,
 } from "./Icons";
 import type { ButtonSize, IconSize } from "./Types";
-import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
 type ActionVariant =
   | "delete"
