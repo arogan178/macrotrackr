@@ -30,7 +30,7 @@ export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
           </span>
         </span>
       </div>
-      <p className="text-sm text-foreground">{trend.message}</p>
+      <p className="text-sm text-muted">{trend.message}</p>
     </div>
   );
 }

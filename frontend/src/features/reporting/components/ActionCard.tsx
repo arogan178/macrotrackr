@@ -14,7 +14,7 @@ export default function ActionCard({
         <div className={`${bgColor} mr-2 rounded-full p-1.5`}>{icon}</div>
         <h4 className="text-sm font-medium text-foreground">{title}</h4>
       </div>
-      <p className="text-sm text-foreground">{message}</p>
+      <p className="text-sm text-muted">{message}</p>
     </CardContainer>
   );
 }
