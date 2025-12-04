@@ -55,7 +55,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   >
     {isPopular && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-        <span className="rounded-full border border-primary/30 bg-primary/90 px-4 py-1.5 text-xs font-semibold uppercase tracking-wide text-foreground shadow-success">
+        <span className="rounded-full border border-primary/30 bg-primary/90 px-4 py-1.5 text-xs font-semibold tracking-wide text-foreground uppercase shadow-success">
           Most Popular
         </span>
       </div>
