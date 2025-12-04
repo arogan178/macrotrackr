@@ -97,9 +97,7 @@ const HeroSection: React.FC = () => (
                   <h4 className="font-semibold text-foreground">
                     {indicator.title}
                   </h4>
-                  <p className="text-sm text-foreground">
-                    {indicator.description}
-                  </p>
+                  <p className="text-sm text-muted">{indicator.description}</p>
                 </div>
               </motion.div>
             ))}
@@ -109,7 +107,7 @@ const HeroSection: React.FC = () => (
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.5, delay: 1.1 }}
-            className="mt-6 flex flex-col items-center justify-center space-y-2 border-t border-border/50 pt-6 text-sm text-foreground sm:flex-row sm:space-y-0 sm:space-x-8"
+            className="mt-6 flex flex-col items-center justify-center space-y-2 border-t border-border/50 pt-6 text-sm text-muted sm:flex-row sm:space-y-0 sm:space-x-8"
           >
             {trustElements.map((element) => (
               <div key={element.text} className="flex items-center space-x-2">
