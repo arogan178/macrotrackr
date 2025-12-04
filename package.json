@@ -17,6 +17,6 @@
     "typecheck": "bun run --cwd backend typecheck & bun run --cwd frontend typecheck"
   },
   "devDependencies": {
-    "typescript": "^5.6.3"
+    "typescript": "^5.9.3"
   }
 }
