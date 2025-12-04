@@ -38,10 +38,10 @@ export const PRICING_PLANS = {
     buttonText: "Get Started For Free",
     buttonVariant: "ghost",
     buttonClassName:
-      "w-full bg-surface/50 hover:bg-surface text-foreground border-2 border-primary hover:border-primary transition-all duration-300 text-xl px-12 py-4 font-semibold",
-    featureIconColor: "text-success",
+      "w-full bg-surface-2 hover:bg-surface-3 text-foreground border border-border hover:border-primary transition-all duration-300 text-xl px-12 py-4 font-semibold",
+    featureIconColor: "text-primary",
     featureTextClass: "text-foreground",
-    cardClassName: "",
+    cardClassName: "bg-surface hover:bg-surface-2 transition-colors duration-300",
     description: "Perfect for getting started",
   },
   pro: {
@@ -63,11 +63,11 @@ export const PRICING_PLANS = {
     buttonText: "Get Pro Now",
     buttonVariant: "primary",
     buttonClassName:
-      "w-full bg-gradient-to-r from-primary to-purple-600 hover:from-primary hover:to-purple-700 shadow-modal transition-all duration-300 text-xl px-12 py-4 font-semibold",
+      "w-full bg-primary hover:bg-secondary shadow-success transition-all duration-300 text-xl px-12 py-4 font-semibold",
     featureIconColor: "text-primary",
     featureTextClass: "text-foreground font-medium",
     cardClassName:
-      "bg-gradient-to-br from-primary/50 to-purple-900/50 border border-primary/50",
+      "bg-surface-2 border-2 border-primary/40 shadow-success",
     isPopular: true,
     description: "Unlock your full potential",
   },
