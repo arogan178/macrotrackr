@@ -2,9 +2,9 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import { CardContainer } from "@/components/form";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
-import { useSubscriptionStatus } from "@/features/billing/hooks/useSubscriptionStatus";
+import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
+import { HabitGoal } from "@/types/habit";
 
-import { HabitGoal } from "../types/types";
 import HabitCard from "./HabitCard";
 
 interface HabitTrackerProps {
@@ -35,7 +35,7 @@ function HabitTracker({
       <div className="p-5">
         {/* Header with title and add button */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="flex items-center text-lg font-medium text-foreground">
+          <h3 className="flex items-center text-base font-semibold text-foreground">
             <CheckCircleIcon size="md" className="mr-2 text-purple-400" />
             Habit Goals
           </h3>
@@ -64,18 +64,18 @@ function HabitTracker({
             {[1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="overflow-hidden rounded-lg bg-surface/30"
+                className="overflow-hidden rounded-lg bg-surface-2"
               >
-                <div className="bg-gradient-to-r from-gray-600/20 to-gray-600/5 p-3">
+                <div className="p-3">
                   <div className="mb-2 flex items-center">
-                    <div className="mr-2 h-8 w-8 animate-pulse rounded-lg bg-surface/30"></div>
-                    <div className="h-5 w-24 animate-pulse rounded bg-surface/30"></div>
+                    <div className="mr-2 h-8 w-8 animate-pulse rounded-lg bg-surface-3"></div>
+                    <div className="h-5 w-24 animate-pulse rounded bg-surface-3"></div>
                   </div>
                   <div className="mb-1.5 flex items-center justify-between">
-                    <div className="h-6 w-16 animate-pulse rounded bg-surface/30"></div>
-                    <div className="h-4 w-8 animate-pulse rounded bg-surface/30"></div>
+                    <div className="h-6 w-16 animate-pulse rounded bg-surface-3"></div>
+                    <div className="h-4 w-8 animate-pulse rounded bg-surface-3"></div>
                   </div>
-                  <div className="h-2 animate-pulse rounded-full bg-surface/30"></div>
+                  <div className="h-2 animate-pulse rounded-full bg-surface-3"></div>
                 </div>
               </div>
             ))}
@@ -101,7 +101,7 @@ function HabitTracker({
                 : undefined
             }
             size="md"
-            className="rounded-lg bg-surface/30"
+            className="rounded-lg bg-surface-2"
           />
         ) : (
           <div className="space-y-4">

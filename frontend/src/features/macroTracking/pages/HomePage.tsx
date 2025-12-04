@@ -7,7 +7,7 @@ import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import Navbar from "@/components/layout/Navbar";
-import { UserMetricsPanel } from "@/features/dashboard/components";
+import { UserMetricsPanel } from "@/components/metrics";
 import {
   AddEntryForm,
   DailySummaryPanel,
@@ -38,7 +38,7 @@ import {
 } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
-import { getTodayISO } from "@/utils/dates";
+import { getTodayISO } from "@/utils/dateUtilities";
 
 // Refactored per plan. Behavior and styling remain unchanged.
 // Original file reference for comparison: [frontend/src/features/macroTracking/pages/HomePage.tsx](frontend/src/features/macroTracking/pages/HomePage.tsx:1)

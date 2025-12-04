@@ -12,7 +12,8 @@ import {
 import { ConflictError, AuthenticationError } from "../../lib/errors";
 import crypto from "crypto";
 import { emailService } from "../../lib/email-service";
-import { config } from "../../config";
+import { loggerHelpers } from "../../lib/logger";
+import { createJwtCookie } from "../../lib/auth-utils";
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
@@ -115,37 +116,8 @@ export const authRoutes = (app: Elysia) =>
             lastName: userData.lastName,
           });
 
-          // Compute cookie attributes
-          const isProduction = config.NODE_ENV === "production";
-          const maxAgeSeconds = (() => {
-            const match = /^([0-9]+)([smhd])$/.exec(config.JWT_EXP);
-            if (!match) return 60 * 60 * 24 * 30; // default 30d
-            const value = Number(match[1]);
-            const unit = match[2];
-            switch (unit) {
-              case "s":
-                return value;
-              case "m":
-                return value * 60;
-              case "h":
-                return value * 60 * 60;
-              case "d":
-              default:
-                return value * 60 * 60 * 24;
-            }
-          })();
-          const cookieFlags = [
-            `Path=/`,
-            `HttpOnly`,
-            `SameSite=Lax`,
-            `Max-Age=${maxAgeSeconds}`,
-            isProduction ? "Secure" : undefined,
-          ]
-            .filter(Boolean)
-            .join("; ");
-
           // Set JWT as persistent cookie
-          set.headers["Set-Cookie"] = `jwt=${token}; ${cookieFlags}`;
+          set.headers["Set-Cookie"] = createJwtCookie(token);
 
           return { token };
         },
@@ -188,35 +160,8 @@ export const authRoutes = (app: Elysia) =>
             lastName: user.last_name,
           });
 
-          // Compute cookie attributes
-          const isProduction = config.NODE_ENV === "production";
-          const maxAgeSeconds = (() => {
-            const match = /^([0-9]+)([smhd])$/.exec(config.JWT_EXP);
-            if (!match) return 60 * 60 * 24 * 30; // default 30d
-            const value = Number(match[1]);
-            const unit = match[2];
-            switch (unit) {
-              case "s":
-                return value;
-              case "m":
-                return value * 60;
-              case "h":
-                return value * 60 * 60;
-              case "d":
-              default:
-                return value * 60 * 60 * 24;
-            }
-          })();
-          const cookieFlags = [
-            `Path=/`,
-            `HttpOnly`,
-            `SameSite=Lax`,
-            `Max-Age=${maxAgeSeconds}`,
-            isProduction ? "Secure" : undefined,
-          ]
-            .filter(Boolean)
-            .join("; ");
-          set.headers["Set-Cookie"] = `jwt=${token}; ${cookieFlags}`;
+          // Set JWT as persistent cookie
+          set.headers["Set-Cookie"] = createJwtCookie(token);
 
           return { token };
         },
@@ -233,31 +178,18 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/forgot-password",
         async ({ body, db }) => {
-          // Log every request to the forgot-password endpoint
-          const logFile = require("path").join(
-            process.cwd(),
-            "email-service.log"
-          );
-          const fs = require("fs");
-          function logToFile(message) {
-            const timestamp = new Date().toISOString();
-            fs.appendFileSync(
-              logFile,
-              `[${timestamp}] [forgot-password] ${message}\n`
-            );
-          }
-
           const { email } = body;
-          logToFile(`Endpoint hit. Email: ${email}`);
-          const user = safeQuery(db, "SELECT id FROM users WHERE email = ?", [
-            email,
-          ]);
-          if (!user) {
-            logToFile(`No user found for email: ${email}`);
-          }
+          
+          loggerHelpers.auth("password_reset_requested", undefined, email);
+          
+          const user = safeQuery<{ id: number }>(
+            db,
+            "SELECT id FROM users WHERE email = ?",
+            [email]
+          );
 
           if (user) {
-            const token = require("crypto").randomBytes(32).toString("hex");
+            const token = crypto.randomBytes(32).toString("hex");
             const expires = new Date(Date.now() + 3600000); // 1 hour from now
 
             safeExecute(
@@ -266,12 +198,11 @@ export const authRoutes = (app: Elysia) =>
               [token, expires.toISOString(), user.id]
             );
 
-            logToFile(`User found. Sending password reset email to: ${email}`);
             // Send password reset email via Resend
-            await require("../../lib/email-service").emailService.sendPasswordResetEmail(
-              email,
-              token
-            );
+            await emailService.sendPasswordResetEmail(email, token);
+          } else {
+            // Log for monitoring but don't reveal to user
+            loggerHelpers.auth("password_reset_no_user", undefined, email, false);
           }
 
           return {

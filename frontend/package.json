@@ -7,7 +7,10 @@
     "dev": "vite",
     "build": "vite build",
     "postbuild": "bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vitest run"
   },
   "dependencies": {
     "@babel/helper-compilation-targets": "^7.27.2",
@@ -28,6 +31,7 @@
     "lucide-react": "^0.525.0",
     "motion": "^12.23.12",
     "posthog-js": "^1.260.2",
+    "prop-types": "^15.8.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-router-dom": "^7.8.2",
