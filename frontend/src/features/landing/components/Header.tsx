@@ -23,25 +23,31 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="relative z-10 border-b border-border/50 bg-surface backdrop-blur-xl supports-[backdrop-filter]:bg-surface">
-      <div className="mx-auto max-w-6xl">
-        <div className="flex items-center justify-between py-6">
-          <div className="flex items-center space-x-4">
+    <header className="relative z-10 border-b border-border/30 bg-surface/80 backdrop-blur-xl">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between py-4">
+          <div className="flex items-center space-x-6">
             <LogoButton className="h-0" />
             <Button
               onClick={handlePricingClick}
               text="Pricing"
               variant="ghost"
-              buttonSize="md"
+              buttonSize="sm"
+              className="text-muted hover:text-foreground"
             />
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             <Link to="/login" className="inline-block">
-              <Button text="Log In" variant="primary" buttonSize="md" />
+              <Button
+                text="Log In"
+                variant="ghost"
+                buttonSize="sm"
+                className="text-muted hover:text-foreground"
+              />
             </Link>
             <Link to="/register" className="inline-block">
-              <Button text="Sign Up" variant="primary" buttonSize="md" />
+              <Button text="Sign Up" variant="primary" buttonSize="sm" />
             </Link>
           </div>
         </div>
