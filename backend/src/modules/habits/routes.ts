@@ -3,23 +3,14 @@ import { Elysia } from "elysia";
 import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
 import type { AuthenticatedContext } from "../../middleware/auth";
-import { safeQuery, safeQueryAll, safeExecute } from "../../lib/database";
+import {
+  safeQuery,
+  safeQueryAll,
+  safeExecute,
+  type HabitRow,
+} from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { featureLimitGuard } from "../../middleware/pro-guard";
-
-// Define types for DB results (snake_case) for clarity and type safety
-type HabitFromDB = {
-  id: string;
-  user_id: number;
-  title: string;
-  icon_name: string;
-  current: number;
-  target: number;
-  accent_color: string | null;
-  is_complete: number; // SQLite stores booleans as 0 or 1
-  created_at: string;
-  completed_at: string | null;
-};
 
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
@@ -42,7 +33,7 @@ export const habitRoutes = (app: Elysia) =>
 
           const habitsResult = safeQueryAll(db, query, [
             user.userId,
-          ]) as HabitFromDB[];
+          ]) as HabitRow[];
 
           const apiResponse = habitsResult.map((habit) => ({
             id: habit.id,
