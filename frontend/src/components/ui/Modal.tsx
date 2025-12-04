@@ -59,13 +59,13 @@ import { motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
-import { Button, IconButton } from "@/components/ui";
-
 import type {
   ConfirmationModalProps,
   FormModalProps,
   ModalProps,
 } from "../utils/Types";
+import Button from "./Button";
+import IconButton from "./IconButton";
 
 function Modal(properties: ModalProps) {
   const {

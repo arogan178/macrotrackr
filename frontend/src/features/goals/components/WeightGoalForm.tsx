@@ -191,7 +191,7 @@ function WeightGoalForm({
             >
               Daily Calorie Intake
             </label>
-            <span className="text-sm text-foreground">
+            <span className="text-sm text-muted">
               {calorieIntake} calories/day
             </span>
           </div>
@@ -217,7 +217,7 @@ function WeightGoalForm({
               }
               className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-surface outline-none"
             />
-            <div className="mt-1 flex justify-between text-xs text-foreground">
+            <div className="mt-1 flex justify-between text-xs text-muted">
               {isWeightLoss ? (
                 <>
                   <span>Faster</span>
@@ -257,21 +257,21 @@ function WeightGoalForm({
                     : "Calculating..."}
                 </span>
               </p>
-              <p className="mt-1 text-xs text-foreground">
+              <p className="mt-1 text-xs text-muted">
                 Expected change:{" "}
                 {typeof weeklyWeightChange === "number" &&
                 !Number.isNaN(weeklyWeightChange)
                   ? `${Math.abs(weeklyWeightChange).toFixed(2)} kg per week`
                   : "0 kg per week"}
               </p>
-              <p className="mt-1 text-xs text-foreground">
+              <p className="mt-1 text-xs text-muted">
                 Estimated duration:{" "}
                 {calculatedWeeks === undefined
                   ? "Calculating..."
                   : `${calculatedWeeks} weeks`}
               </p>
               <div className="mt-2 border-t border-border/30 pt-2">
-                <p className="flex justify-between text-xs text-foreground">
+                <p className="flex justify-between text-xs text-muted">
                   <span>
                     {(() => {
                       const diff = Math.abs(tdee - calorieIntake);
@@ -304,7 +304,7 @@ function WeightGoalForm({
               <p className="text-sm text-foreground">
                 <span className="font-medium">Maintenance Goal</span>
               </p>
-              <p className="mt-1 text-xs text-foreground">
+              <p className="mt-1 text-xs text-muted">
                 You're aiming to maintain your current weight with{" "}
                 {calorieIntake < tdee
                   ? "slightly fewer"

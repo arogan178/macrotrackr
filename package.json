@@ -1,0 +1,22 @@
+{
+  "name": "macro-tracker",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "dev": "bun run --cwd backend dev & bun run --cwd frontend dev",
+    "dev:backend": "bun run --cwd backend dev",
+    "dev:frontend": "bun run --cwd frontend dev",
+    "build": "bun run --cwd frontend build",
+    "build:backend": "bun run --cwd backend build",
+    "start": "bun run --cwd backend start",
+    "test": "bun run --cwd frontend test",
+    "lint": "bun run --cwd frontend lint",
+    "typecheck": "bun run --cwd backend typecheck & bun run --cwd frontend typecheck"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3"
+  }
+}

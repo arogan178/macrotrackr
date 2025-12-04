@@ -1,6 +1,6 @@
 import { StateCreator } from "zustand";
 
-import type { HabitGoal } from "@/features/habits/types/types";
+import type { HabitGoal } from "@/types/habit";
 
 // Tab type for goals page
 export type GoalsTabType = "goals" | "macro targets";

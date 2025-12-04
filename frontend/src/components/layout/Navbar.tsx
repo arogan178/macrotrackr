@@ -7,12 +7,12 @@ import {
   CloseIcon,
   GoalsIcon,
   HomeIcon,
+  IconButton,
   LogoutIcon,
   MenuIcon,
   ReportingIcon2,
   SettingsIcon,
 } from "@/components/ui";
-import IconButton from "@/components/ui/IconButton";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
 
 import LogoButton from "./LogoButton";
@@ -82,7 +82,6 @@ const Navbar: React.FC = () => {
             <Button
               onClick={handleLogout}
               ariaLabel="Logout"
-              className="items-center rounded-lg bg-gradient-to-r from-red-600 to-red-500 px-4 py-2 font-medium text-foreground shadow-primary shadow-red-600/20 transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:shadow-red-500/30 focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 focus:outline-none "
               variant="danger"
               icon={<LogoutIcon />}
               iconPosition="left"
@@ -162,7 +161,7 @@ const Navbar: React.FC = () => {
                 <Button
                   onClick={handleLogout}
                   ariaLabel="Logout"
-                  className="flex w-full items-center justify-start rounded-lg bg-gradient-to-r from-red-600 to-red-500 px-4 py-3 font-medium text-foreground shadow-primary shadow-red-600/20 transition-all duration-200 hover:from-red-500 hover:to-red-400 hover:shadow-red-500/30 focus:ring-2 focus:ring-red-500 focus:outline-none "
+                  className="w-full justify-start"
                   variant="danger"
                   icon={<LogoutIcon className="mr-3" />}
                   iconPosition="left"

@@ -15,15 +15,15 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
       {[0, 1].map((index) => (
         <div
           key={index}
-          className="animate-pulse rounded-2xl border border-border/50 bg-surface/70 p-5 shadow-modal backdrop-blur-sm"
+          className="animate-pulse rounded-2xl border border-border/50 bg-surface p-5"
         >
-          <div className="flex items-start gap-5">
-            <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/20 to-primary/5 p-3">
-              <div className="h-7 w-7 rounded bg-surface" />
+          <div className="flex items-start gap-4">
+            <div className="rounded-xl border border-border/50 bg-surface-2 p-3">
+              <div className="h-6 w-6 rounded bg-surface-3" />
             </div>
             <div className="min-w-0 flex-1">
-              <div className="mb-2 h-4 w-3/4 rounded bg-surface" />
-              <div className="h-7 w-2/5 rounded bg-surface" />
+              <div className="mb-2 h-4 w-3/4 rounded bg-surface-2" />
+              <div className="h-6 w-2/5 rounded bg-surface-2" />
             </div>
           </div>
         </div>

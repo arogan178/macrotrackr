@@ -1,6 +1,6 @@
 import React from "react";
 
-import { CheckCircleIcon, InfoIcon, WarningIcon } from "@/components/ui";
+import { CheckCircleIcon, InfoIcon, WarningIcon } from "./Icons";
 
 const StatusBadge: React.FC<{ status: string }> = ({ status }) => {
   const statusInfo = {

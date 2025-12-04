@@ -1,4 +1,4 @@
-import type { HabitGoalFormValues } from "@/features/habits/types/types";
+import type { HabitGoalFormValues } from "@/types/habit";
 
 import { useGoalsData } from "./useGoalsData";
 import { useGoalsMutations } from "./useGoalsMutations";
