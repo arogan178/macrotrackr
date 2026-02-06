@@ -1,12 +1,13 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 
 import {
   BUTTON_SIZES,
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
   ICON_POSITIONS,
-} from "@/components/utils";
-import { useFeatureLoading, useGlobalLoading } from "@/hooks";
+} from "@/components/utils/Constants";
+import { useFeatureLoading } from "@/hooks/useFeatureLoading";
+import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 import { LoadingSpinnerIcon } from "./Icons";
 // Fixed type import path: Types are defined in ./Types.ts, not "@/components/ui/types"
@@ -34,42 +35,44 @@ function ButtonBase({
 }: Omit<ButtonAllProps, "autoLoadingFeature" | "autoLoadingGlobal">) {
   const finalIsLoading = isLoading;
 
-  // Localized button styles (migrated from utils/Styles.ts)
-  const sizeStyles = BUTTON_SIZES;
+  // Memoize button class computation to avoid recalculation on every render
+  const buttonClasses = useMemo(() => {
+    const sizeStyles = BUTTON_SIZES;
 
-  const buttonBase =
-    "inline-flex items-center justify-center font-medium text-sm gap-1.5 " +
-    "transition-colors duration-150 ease-out " +
-    "focus-visible:outline-2 focus-visible:outline-offset-2 " +
-    "rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+    const buttonBase =
+      "inline-flex items-center justify-center font-medium text-sm gap-1.5 " +
+      "transition-colors duration-150 ease-out " +
+      "focus-visible:outline-2 focus-visible:outline-offset-2 " +
+      "rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
-  const buttonVariants: Record<string, string> = {
-    primary:
-      "bg-primary text-background hover:bg-primary/85 active:bg-primary/70 " +
-      "disabled:hover:bg-primary focus-visible:outline-primary",
-    secondary:
-      "bg-surface-3 text-foreground border border-border hover:bg-surface-4 active:bg-surface-2 " +
-      "disabled:hover:bg-surface-3 focus-visible:outline-primary",
-    danger:
-      "bg-error/15 text-error border border-error/25 hover:bg-error/25 active:bg-error/35 " +
-      "disabled:hover:bg-error/15 focus-visible:outline-error",
-    success:
-      "bg-success/15 text-success border border-success/25 hover:bg-success/25 active:bg-success/35 " +
-      "disabled:hover:bg-success/15 focus-visible:outline-success",
-    ghost:
-      "bg-transparent text-muted hover:bg-surface-2 hover:text-foreground active:bg-surface-3 " +
-      "disabled:hover:bg-transparent focus-visible:outline-primary",
-  };
+    const buttonVariants: Record<string, string> = {
+      primary:
+        "bg-primary text-background hover:bg-primary/85 active:bg-primary/70 " +
+        "disabled:hover:bg-primary focus-visible:outline-primary",
+      secondary:
+        "bg-surface-3 text-foreground border border-border hover:bg-surface-4 active:bg-surface-2 " +
+        "disabled:hover:bg-surface-3 focus-visible:outline-primary",
+      danger:
+        "bg-error/15 text-error border border-error/25 hover:bg-error/25 active:bg-error/35 " +
+        "disabled:hover:bg-error/15 focus-visible:outline-error",
+      success:
+        "bg-success/15 text-success border border-success/25 hover:bg-success/25 active:bg-success/35 " +
+        "disabled:hover:bg-success/15 focus-visible:outline-success",
+      ghost:
+        "bg-transparent text-muted hover:bg-surface-2 hover:text-foreground active:bg-surface-3 " +
+        "disabled:hover:bg-transparent focus-visible:outline-primary",
+    };
 
-  const widthStyles = fullWidth ? "w-full" : "";
+    const widthStyles = fullWidth ? "w-full" : "";
 
-  const buttonClasses = [
-    buttonBase,
-    sizeStyles[buttonSize as keyof typeof sizeStyles],
-    buttonVariants[variant],
-    widthStyles,
-    className,
-  ].join(" ");
+    return [
+      buttonBase,
+      sizeStyles[buttonSize as keyof typeof sizeStyles],
+      buttonVariants[variant],
+      widthStyles,
+      className,
+    ].join(" ");
+  }, [buttonSize, variant, fullWidth, className]);
 
   const renderContent = () => {
     if (finalIsLoading) {
