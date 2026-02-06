@@ -4,7 +4,6 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import Navbar from "@/components/layout/Navbar";
 import { GoalsIcon, Modal, TabButton, TargetIcon } from "@/components/ui";
 import {
   GoalsLoadingSkeleton,
@@ -38,7 +37,6 @@ export default function GoalsPage() {
 
   return (
     <DashboardPageContainer>
-      <Navbar />
       <FeaturePage
         title="Your Goals"
         subtitle="Track your progress and stay motivated on your health journey"

@@ -3,7 +3,6 @@ import { useCallback, useEffect, useState } from "react";
 
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import Navbar from "@/components/layout/Navbar";
 import {
   AwardIcon,
   LockIcon,
@@ -166,7 +165,6 @@ export default function SettingsPage() {
 
   return (
     <DashboardPageContainer>
-      <Navbar />
       <FeaturePage
         title="Settings"
         subtitle={undefined}
