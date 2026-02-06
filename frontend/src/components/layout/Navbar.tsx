@@ -1,21 +1,21 @@
 import { useLocation, useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import React, { useState } from "react";
+import React, { useCallback,useMemo, useState } from "react";
 
-import {
-  Button,
-  CloseIcon,
-  GoalsIcon,
-  HomeIcon,
-  IconButton,
-  LogoutIcon,
-  MenuIcon,
-  ReportingIcon2,
-  SettingsIcon,
-} from "@/components/ui";
+import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import { CloseIcon, GoalsIcon, HomeIcon, LogoutIcon, MenuIcon, ReportingIcon2, SettingsIcon } from "@/components/ui/Icons";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
 
 import LogoButton from "./LogoButton";
+
+// Static nav items configuration - defined outside component
+const NAV_ITEMS_CONFIG = [
+  { path: "/home", label: "Home", icon: HomeIcon },
+  { path: "/goals", label: "Goals", icon: GoalsIcon },
+  { path: "/reporting", label: "Reporting", icon: ReportingIcon2 },
+  { path: "/settings", label: "Settings", icon: SettingsIcon },
+] as const;
 
 const Navbar: React.FC = () => {
   const location = useLocation();
@@ -23,22 +23,20 @@ const Navbar: React.FC = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const logoutMutation = useLogout();
-  const handleLogout = () => {
+  
+  // Use useCallback for event handlers to prevent recreating on every render
+  const handleLogout = useCallback(() => {
     logoutMutation.mutate();
     setIsMobileMenuOpen(false);
-  };
+  }, [logoutMutation]);
 
-  const handleNavigation = (path: string) => {
+  const handleNavigation = useCallback((path: string) => {
     navigate({ to: path });
     setIsMobileMenuOpen(false);
-  };
+  }, [navigate]);
 
-  const navItems = [
-    { path: "/home", label: "Home", icon: HomeIcon },
-    { path: "/goals", label: "Goals", icon: GoalsIcon },
-    { path: "/reporting", label: "Reporting", icon: ReportingIcon2 },
-    { path: "/settings", label: "Settings", icon: SettingsIcon },
-  ];
+  // Memoize nav items to prevent recreating array on every render
+  const navItems = useMemo(() => NAV_ITEMS_CONFIG, []);
 
   return (
     <>

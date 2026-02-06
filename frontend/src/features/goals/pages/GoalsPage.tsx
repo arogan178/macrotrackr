@@ -1,20 +1,21 @@
 // src/features/goals/pages/GoalsPage.tsx
 
 import { AnimatePresence, motion } from "motion/react";
+import { useMemo } from "react";
 
-import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
+import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { GoalsIcon, Modal, TabButton, TargetIcon } from "@/components/ui";
-import {
-  GoalsLoadingSkeleton,
-  HabitModal,
-  HabitTracker,
-  LogWeightModal,
-  MacroTargetForm,
-  WeightGoalDashboard,
-  WeightGoalModal,
-  WeightProgressTabs,
-} from "@/features/goals/components";
+import { GoalsIcon, TargetIcon } from "@/components/ui/Icons";
+import Modal from "@/components/ui/Modal";
+import TabButton from "@/components/ui/TabButton";
+import GoalsLoadingSkeleton from "@/features/goals/components/GoalsLoadingSkeleton";
+import HabitModal from "@/features/goals/components/habits/HabitModal";
+import HabitTracker from "@/features/goals/components/habits/HabitTracker";
+import LogWeightModal from "@/features/goals/components/LogWeightModal";
+import MacroTargetForm from "@/features/goals/components/MacroTargetForm";
+import WeightGoalDashboard from "@/features/goals/components/WeightGoalDashboard";
+import WeightGoalModal from "@/features/goals/components/WeightGoalModal";
+import WeightProgressTabs from "@/features/goals/components/WeightProgressTabs";
 import { useGoalsPage } from "@/features/goals/hooks/page";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import type { WeightGoals } from "@/types/goal";
