@@ -135,10 +135,9 @@ function Modal(properties: ModalProps) {
 
   // Get variant specific styles - Restore default header/footer backgrounds
   const getVariantStyles = (variant: string) => {
-    // Define default styles matching the base content background
     const defaultStyles = {
-      header: "bg-surface/80",
-      footer: "bg-surface/80",
+      header: "bg-surface",
+      footer: "bg-surface-2",
       confirmButton: "",
     };
 
@@ -170,7 +169,7 @@ function Modal(properties: ModalProps) {
 
   // Base styles for the modal content
   const baseContentStyles =
-    "bg-surface/80 backdrop-blur-lg rounded-xl shadow-modal border border-border/50 flex flex-col overflow-hidden";
+    "bg-surface rounded-xl shadow-modal border border-border flex flex-col overflow-hidden";
 
   // Size styles
   const sizeStyles = {
@@ -235,7 +234,7 @@ function Modal(properties: ModalProps) {
     >
       {/* Backdrop with animation */}
       <motion.div
-        className="absolute inset-0 bg-black/60"
+        className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
         variants={backdropVariants}
         initial="hidden"
         animate="visible"
@@ -258,7 +257,7 @@ function Modal(properties: ModalProps) {
         {/* Header: Only render if close button is shown */}
         {!hideClose && (
           <div
-            className={`flex items-center justify-between border-b border-border/50 p-4 ${variantStyles.header}`}
+            className={`flex items-center justify-between border-b border-border p-4 ${variantStyles.header}`}
           >
             <h2
               id="modal-title"
@@ -278,7 +277,7 @@ function Modal(properties: ModalProps) {
         )}
 
         {/* Body */}
-        <div className="flex-grow overflow-x-hidden overflow-y-hidden p-5">
+        <div className="grow overflow-x-hidden overflow-y-auto p-5">
           {message && <p className="mb-4 text-sm text-foreground">{message}</p>}
           {children}
         </div>
@@ -288,7 +287,7 @@ function Modal(properties: ModalProps) {
           <div
             className={`flex ${
               hideCancelButton ? "justify-center" : "justify-end"
-            } gap-4 border-t border-border/50 p-4 ${variantStyles.footer}`}
+            } gap-3 border-t border-border px-4 py-3 ${variantStyles.footer}`}
           >
             {!hideCancelButton && (
               <Button
