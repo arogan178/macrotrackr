@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { NumberField } from "@/components/form";
-import { Button } from "@/components/ui";
+import { Button, RangeSlider } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 
 import { generateWeightGoalCalculations } from "../calculations";
@@ -196,28 +196,16 @@ function WeightGoalForm({
             </span>
           </div>
 
-          <div className="relative">
-            <input
-              id="calorie-intake-range"
-              type="range"
-              min={
-                isWeightLoss
-                  ? Math.max(tdee - 1000, 1200)
-                  : isMaintenance
-                    ? tdee - 300
-                    : tdee
-              }
-              max={
-                isWeightLoss ? tdee : isMaintenance ? tdee + 300 : tdee + 1000
-              }
-              step={50}
-              value={calorieIntake}
-              onChange={(event) =>
-                handleCalorieIntakeChange(Number(event.target.value))
-              }
-              className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-surface outline-none"
-            />
-            <div className="mt-1 flex justify-between text-xs text-muted">
+          <RangeSlider
+            value={calorieIntake}
+            onChange={(value) => handleCalorieIntakeChange(value)}
+            min={minCalorieIntake}
+            max={maxCalorieIntake}
+            step={50}
+            showFillTrack={true}
+            trackColorClass="bg-vibrant-accent"
+          />
+          <div className="mt-1 flex justify-between text-xs text-muted">
               {isWeightLoss ? (
                 <>
                   <span>Faster</span>
@@ -238,7 +226,6 @@ function WeightGoalForm({
                 </>
               )}
             </div>
-          </div>
 
           {!isMaintenance && (
             <div className="rounded-lg bg-surface p-3">
