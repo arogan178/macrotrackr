@@ -122,6 +122,9 @@ export function useCreateWeightGoal() {
       // Invalidate and refetch weight goals and weight log queries immediately
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight(), refetchType: 'active' });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog(), refetchType: 'active' });
+      // Invalidate and refetch weight goals and weight log queries immediately
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight(), refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog(), refetchType: 'active' });
     },
     onError: (error) => {
       console.error("Error creating weight goal:", error);
@@ -358,9 +361,9 @@ export function useAddWeightLogEntry() {
       );
     },
     onSettled: () => {
-      // Always refetch to ensure consistency
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
+      // Always refetch to ensure consistency - use refetchQueries to force immediate refetch
+      queryClient.refetchQueries({ queryKey: queryKeys.goals.weightLog() });
+      queryClient.refetchQueries({ queryKey: queryKeys.goals.weight() });
     },
   });
 }
@@ -409,9 +412,9 @@ export function useDeleteWeightLogEntry() {
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
-      // Also invalidate weight goals to update current weight
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
+      queryClient.refetchQueries({ queryKey: queryKeys.goals.weightLog() });
+      // Also refetch weight goals to update current weight
+      queryClient.refetchQueries({ queryKey: queryKeys.goals.weight() });
     },
   });
 }
