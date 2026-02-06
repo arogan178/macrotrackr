@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import React from "react";
 
 const Footer: React.FC = () => (
-  <footer className="relative z-10 border-t border-border/50 bg-surface/50 px-4 py-12 sm:px-6 lg:px-8">
+  <footer className="relative z-10 border-t border-border bg-surface px-4 py-12 sm:px-6 lg:px-8">
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="">
@@ -16,7 +16,7 @@ const Footer: React.FC = () => (
         </div>
       </div>
 
-      <div className="flex flex-col items-center justify-between border-t border-border/50 pt-8 md:flex-row">
+      <div className="flex flex-col items-center justify-between border-t border-border pt-8 md:flex-row">
         <div className="flex flex-col items-center space-y-2 text-muted md:flex-row md:space-y-0 md:space-x-8">
           <p className="text-sm">
             &copy; {new Date().getFullYear()} MacroTrackr. All rights reserved.
