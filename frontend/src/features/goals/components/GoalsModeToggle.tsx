@@ -11,20 +11,20 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
 
   return (
     <div
-      className="bg-surface/ relative flex w-fit items-center rounded-xl p-1"
+      className="relative flex w-fit items-center rounded-xl bg-surface-2 p-1"
       role="tablist"
       aria-label="Goals view mode"
     >
       <Button
         type="button"
         onClick={isAchieved ? onToggle : undefined}
-        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
           isActive
-            ? "bg-primary text-foreground shadow-surface"
-            : "text-foreground hover:text-foreground"
+            ? "bg-primary text-background"
+            : "text-muted hover:text-foreground"
         }`}
         variant={isActive ? undefined : "ghost"}
-        icon={<GoalsIcon className="mr-2 h-4 w-4 text-foreground" />}
+        icon={<GoalsIcon className="mr-2 h-4 w-4" />}
         aria-selected={isActive}
         aria-label="Show Active Goals"
       >
@@ -33,10 +33,10 @@ function GoalsModeToggle({ activeMode, onToggle }: GoalsModeToggleProps) {
       <Button
         type="button"
         onClick={isActive ? onToggle : undefined}
-        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-all duration-200 ${
+        className={`relative rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
           isAchieved
-            ? "bg-primary text-foreground shadow-surface"
-            : "text-foreground hover:text-foreground"
+            ? "bg-primary text-background"
+            : "text-muted hover:text-foreground"
         }`}
         variant={isAchieved ? undefined : "ghost"}
         icon={<AwardIcon />}
