@@ -28,8 +28,8 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.51.1",
-    "@elysiajs/cors": "^1.4.0",
+    "@dotenvx/dotenvx": "^1.52.0",
+    "@elysiajs/cors": "^1.4.1",
     "@elysiajs/jwt": "^1.4.0",
     "@elysiajs/swagger": "latest",
     "@node-rs/bcrypt": "^1.10.7",
