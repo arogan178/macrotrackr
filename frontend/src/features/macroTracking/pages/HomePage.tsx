@@ -6,7 +6,6 @@ import { homeRoute } from "@/AppRouter";
 import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import Navbar from "@/components/layout/Navbar";
 import { UserMetricsPanel } from "@/components/metrics";
 import {
   AddEntryForm,
@@ -141,7 +140,6 @@ export default function HomePage() {
 
   return (
     <DashboardPageContainer>
-      <Navbar />
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
         <div className="relative min-h-screen">
           <div>
