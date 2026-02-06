@@ -125,74 +125,71 @@ export default function HomePage() {
         <div className="space-y-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
             <div className="flex h-full flex-col space-y-6 lg:col-span-4">
-                {/* Metrics Panel */}
-                <UserMetricsPanel
-                  bmr={nutritionProfile?.bmr ?? 0}
-                  tdee={nutritionProfile?.tdee ?? 0}
-                  isLoading={isLoading}
-                />
+              {/* Metrics Panel */}
+              <UserMetricsPanel
+                bmr={nutritionProfile?.bmr ?? 0}
+                tdee={nutritionProfile?.tdee ?? 0}
+                isLoading={isLoading}
+              />
 
-                {/* Add Entry Section */}
-                <div className="flex-1">
-                  {isLoading ? (
-                    <AddEntryLoadingSkeleton />
-                  ) : (
-                    <AddEntryForm
-                      onSubmit={handleAddEntry}
-                      isSaving={isSaving}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Today's Summary - Right side */}
-              <div className="flex h-full flex-col lg:col-span-2">
+              {/* Add Entry Section */}
+              <div className="flex-1">
                 {isLoading ? (
-                  <DailySummaryLoadingSkeleton />
+                  <AddEntryLoadingSkeleton />
                 ) : (
-                  user && (
-                    <DailySummaryPanel
-                      macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget ?? undefined}
-                      calorieTarget={effectiveCalorieTarget}
-                    />
-                  )
+                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
                 )}
               </div>
             </div>
 
+            {/* Today's Summary - Right side */}
+            <div className="flex h-full flex-col lg:col-span-2">
+              {isLoading ? (
+                <DailySummaryLoadingSkeleton />
+              ) : (
+                user && (
+                  <DailySummaryPanel
+                    macroDailyTotals={macroDailyTotals}
+                    macroTarget={macroTarget ?? undefined}
+                    calorieTarget={effectiveCalorieTarget}
+                  />
+                )
+              )}
+            </div>
+          </div>
+
           {/* History Section */}
           <CardContainer>
-              <div className="p-6">
-                {isLoading ? (
-                  <HistoryLoadingSkeleton />
-                ) : (
-                  <EntryHistoryPanel
-                    history={history}
-                    deleteEntry={handleDeleteEntry}
-                    onEdit={setEditingEntry}
-                    isDeleting={isDeleting}
-                    isEditing={isEditing}
-                    hasMore={historyHasMore}
-                    onLoadMore={loadMoreHistory}
-                    isLoadingMore={isLoadingMore}
-                  />
-                )}
-              </div>
-            </CardContainer>
-
-            {/* Edit Modal - Only render when editingEntry is not undefined */}
-            <AnimatePresence>
-              {editingEntry && (
-                <EditModal
-                  key="edit-modal"
-                  entry={editingEntry}
-                  onSave={handleEditEntry}
-                  onClose={handleCloseModal}
-                  isSaving={isEditing}
+            <div className="p-6">
+              {isLoading ? (
+                <HistoryLoadingSkeleton />
+              ) : (
+                <EntryHistoryPanel
+                  history={history}
+                  deleteEntry={handleDeleteEntry}
+                  onEdit={setEditingEntry}
+                  isDeleting={isDeleting}
+                  isEditing={isEditing}
+                  hasMore={historyHasMore}
+                  onLoadMore={loadMoreHistory}
+                  isLoadingMore={isLoadingMore}
                 />
               )}
-            </AnimatePresence>
+            </div>
+          </CardContainer>
+
+          {/* Edit Modal - Only render when editingEntry is not undefined */}
+          <AnimatePresence>
+            {editingEntry && (
+              <EditModal
+                key="edit-modal"
+                entry={editingEntry}
+                onSave={handleEditEntry}
+                onClose={handleCloseModal}
+                isSaving={isEditing}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </FeaturePage>
     </DashboardPageContainer>
