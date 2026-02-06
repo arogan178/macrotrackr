@@ -117,9 +117,9 @@ export function useCreateWeightGoal() {
       }
     },
     onSuccess: () => {
-      // Invalidate weight goals and weight log queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
+      // Invalidate and refetch weight goals and weight log queries immediately
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight(), refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog(), refetchType: 'active' });
     },
     onError: (error) => {
       console.error("Error creating weight goal:", error);
@@ -150,9 +150,9 @@ export function useUpdateWeightGoal() {
       }
     },
     onSuccess: () => {
-      // Invalidate weight goals and weight log queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
+      // Invalidate and refetch weight goals and weight log queries immediately
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight(), refetchType: 'active' });
+      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog(), refetchType: 'active' });
     },
     onError: (error) => {
       console.error("Error updating weight goal:", error);
