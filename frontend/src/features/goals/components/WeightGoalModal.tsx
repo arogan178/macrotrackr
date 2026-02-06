@@ -43,7 +43,11 @@ function WeightGoalModal({
         weightGoals && weightGoals.startingWeight !== undefined;
 
       await (hasExistingGoal
-        ? updateWeightGoalMutation.mutateAsync({ goals: values, tdee })
+        ? updateWeightGoalMutation.mutateAsync({ 
+            goals: values, 
+            tdee,
+            currentWeight: weightGoals?.currentWeight 
+          })
         : createWeightGoalMutation.mutateAsync({ goals: values, tdee }));
 
       onClose(); // Close modal on success
