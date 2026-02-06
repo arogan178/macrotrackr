@@ -43,13 +43,13 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav
-        className="fixed top-0 right-0 left-0 z-50 border-b border-border/50 bg-surface/90 shadow-primary backdrop-blur-sm"
+        className="fixed top-0 right-0 left-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm"
         role="navigation"
         aria-label="Main navigation"
-        style={{ touchAction: "none", overscrollBehavior: "none" }}
+        style={{ touchAction: "manipulation" }}
       >
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4">
-          <div className="flex items-center">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between px-4 sm:px-6">
+          <div className="flex items-center gap-1">
             <LogoButton
               onClick={() =>
                 navigate({
@@ -60,13 +60,13 @@ const Navbar: React.FC = () => {
             />
 
             {/* Desktop menu */}
-            <div className="hidden items-center space-x-2 lg:flex">
+            <div className="hidden items-center gap-1 lg:flex">
               {navItems.map(({ path, label, icon: Icon }) => (
                 <Button
                   key={path}
                   onClick={() => handleNavigation(path)}
                   ariaLabel={label}
-                  className="text-lg!"
+                  buttonSize="sm"
                   variant={location.pathname === path ? "primary" : "ghost"}
                   aria-current={location.pathname === path ? "page" : undefined}
                   icon={<Icon />}
@@ -77,13 +77,14 @@ const Navbar: React.FC = () => {
               ))}
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2">
             {/* Desktop logout button */}
             <div className="hidden lg:flex">
               <Button
                 onClick={handleLogout}
                 ariaLabel="Logout"
-                variant="danger"
+                variant="ghost"
+                buttonSize="sm"
                 icon={<LogoutIcon />}
                 iconPosition="left"
               >
@@ -115,7 +116,7 @@ const Navbar: React.FC = () => {
       </nav>
 
       {/* Spacer to prevent content from hiding behind fixed navbar */}
-      <div className="h-20" />
+      <div className="h-16" />
 
       {/* Mobile menu overlay and menu */}
       <AnimatePresence initial={false}>
@@ -123,25 +124,25 @@ const Navbar: React.FC = () => {
           <>
             {/* Mobile menu overlay */}
             <motion.div
-              className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-black/60 lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
               aria-hidden="true"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              style={{ touchAction: "none", overscrollBehavior: "none" }}
+              transition={{ duration: 0.15 }}
+              style={{ touchAction: "none", overscrollBehavior: "contain" }}
             />
 
             {/* Mobile menu */}
             <motion.div
-              className="fixed top-20 right-0 left-0 z-50 border-b border-border/50 bg-surface/95 p-4 shadow-primary backdrop-blur-sm lg:hidden"
-              initial={{ opacity: 0, scale: 0.95, y: -20 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: -20 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="fixed top-16 right-0 left-0 z-50 border-b border-border bg-surface p-3 lg:hidden"
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              <div className="flex-1 space-y-3 md:space-y-2">
+              <div className="space-y-1">
                 {navItems.map(({ path, label, icon: Icon }) => (
                   <Button
                     key={path}
@@ -160,16 +161,18 @@ const Navbar: React.FC = () => {
                 ))}
 
                 {/* Mobile logout button */}
-                <Button
-                  onClick={handleLogout}
-                  ariaLabel="Logout"
-                  className="w-full justify-start"
-                  variant="danger"
-                  icon={<LogoutIcon className="mr-3" />}
-                  iconPosition="left"
-                >
-                  <span>Logout</span>
-                </Button>
+                <div className="border-t border-border pt-2 mt-1">
+                  <Button
+                    onClick={handleLogout}
+                    ariaLabel="Logout"
+                    className="w-full justify-start"
+                    variant="ghost"
+                    icon={<LogoutIcon />}
+                    iconPosition="left"
+                  >
+                    <span>Logout</span>
+                  </Button>
+                </div>
               </div>
             </motion.div>
           </>
