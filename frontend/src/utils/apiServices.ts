@@ -37,9 +37,10 @@ export const API_BASE_URL =
 
 // --- Interfaces for Payloads and Responses (camelCase) ---
 
-// Payload for PUT /api/goals/weight (CREATE)
+// Payload for PUT /api/goals/weight (CREATE/UPDATE response)
 type SetWeightGoalPayload = {
   startingWeight: number; // Required for creation
+  currentWeight: number | undefined; // Latest weight from weight log
   targetWeight: number | undefined;
   weightGoal: "lose" | "maintain" | "gain" | undefined;
   startDate: string | undefined;
