@@ -8,7 +8,7 @@ import { trustElements, trustIndicators } from "../utils/landingPageConstants";
 
 const HeroSection: React.FC = () => (
   <section className="relative z-10 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="text-center">
         <motion.h1
           initial={{ opacity: 1, y: 0 }}
