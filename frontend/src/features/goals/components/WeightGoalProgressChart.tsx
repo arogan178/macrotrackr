@@ -26,7 +26,7 @@ function WeightCustomTooltip({
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
-      <div className="rounded-lg border border-border/50 bg-surface p-3 shadow-primary backdrop-blur-lg">
+      <div className="rounded-lg border border-border bg-surface p-3">
         <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
@@ -238,7 +238,7 @@ function WeightGoalProgressChart() {
           </span>
         )}
       </div>
-      <div className="flex-grow">
+      <div className="grow">
         <LineChartComponent
           data={chartData as any}
           lines={lines}
