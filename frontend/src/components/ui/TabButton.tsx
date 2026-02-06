@@ -18,7 +18,7 @@ export type TabButtonProps = {
   "aria-selected"?: boolean;
 };
 
-type ButtonSizeKey = keyof typeof BUTTON_SIZES; // "xs" | "sm" | "md" | "lg"
+type ButtonSizeKey = keyof typeof BUTTON_SIZES;
 
 type ExtendedTabButtonProps = TabButtonProps & {
   rounded?: string;
@@ -40,18 +40,16 @@ function TabButton({
   role,
   ...rest
 }: ExtendedTabButtonProps) {
-  const baseRounded = rounded || "rounded-md";
+  const baseRounded = rounded || "rounded-lg";
   const motionBg = activeBg || "bg-primary";
-  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey]; // e.g. "px-2 py-1 text-xs"
+  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
 
   return (
     <Button
       onClick={onClick}
       variant={active ? "primary" : "ghost"}
       className={`relative ${sizeClasses} ${baseRounded} font-medium ${
-        active
-          ? "text-foreground"
-          : "text-foreground hover:bg-surface/50 hover:text-foreground"
+        active ? "text-background" : "text-muted hover:text-foreground"
       } ${className || ""}`}
       ariaLabel={typeof children === "string" ? children : undefined}
       disabled={disabled}
@@ -62,9 +60,9 @@ function TabButton({
       <span className="relative z-10">{children}</span>
       {isMotion && active && layoutId && (
         <motion.div
-          className={`absolute inset-0 ${motionBg} ${baseRounded} shadow-surface`}
+          className={`absolute inset-0 ${motionBg} ${baseRounded}`}
           layoutId={layoutId}
-          transition={{ type: "spring", stiffness: 350, damping: 30 }}
+          transition={{ type: "spring", stiffness: 400, damping: 28 }}
         />
       )}
     </Button>
