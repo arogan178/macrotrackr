@@ -225,16 +225,16 @@ function normalizeWeightGoalsFromResponse(
   if ("currentWeight" in goals) {
     const g = goals as WeightGoals;
     return {
-      ...g,
-      targetWeight: g.targetWeight ?? 0,
-      weightGoal: (g as any).weightGoal ?? "maintain",
-      startDate: (g as any).startDate ?? "",
-      targetDate: (g as any).targetDate ?? "",
-      calorieTarget: (g as any).calorieTarget ?? 0,
-      calculatedWeeks: (g as any).calculatedWeeks ?? 0,
-      weeklyChange: (g as any).weeklyChange ?? 0,
-      dailyChange: (g as any).dailyChange ?? 0,
+      startingWeight: g.startingWeight ?? 0,
       currentWeight: g.currentWeight ?? userWeight ?? 0,
+      targetWeight: g.targetWeight ?? 0,
+      weightGoal: g.weightGoal ?? "maintain",
+      startDate: g.startDate ?? "",
+      targetDate: g.targetDate ?? "",
+      calorieTarget: g.calorieTarget ?? 0,
+      calculatedWeeks: g.calculatedWeeks ?? 0,
+      weeklyChange: g.weeklyChange ?? 0,
+      dailyChange: g.dailyChange ?? 0,
     };
   }
 
