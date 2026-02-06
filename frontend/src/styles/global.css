@@ -19,7 +19,11 @@ body {
 
 body {
   @apply bg-background text-foreground;
-  font-family: "Inter", system-ui, -apple-system, sans-serif;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 16px;
   line-height: 1.6;
   min-height: 100vh;

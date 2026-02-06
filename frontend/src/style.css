@@ -35,7 +35,8 @@
 
   /* Shadows – minimal, single-layer for modern flat feel */
   --shadow-surface: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-primary: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-primary:
+    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
   --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
   --shadow-warning: 0 4px 14px -3px rgba(245, 158, 11, 0.2);
   --shadow-error: 0 4px 14px -3px rgba(239, 68, 68, 0.2);
