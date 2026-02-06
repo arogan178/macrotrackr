@@ -141,10 +141,9 @@ export default function HomePage() {
   return (
     <DashboardPageContainer>
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
-        <div className="relative min-h-screen">
-          <div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
-              <div className="flex h-full flex-col space-y-6 lg:col-span-4">
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
+            <div className="flex h-full flex-col space-y-6 lg:col-span-4">
                 {/* Metrics Panel */}
                 <UserMetricsPanel
                   bmr={nutritionProfile?.bmr ?? 0}
@@ -181,11 +180,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Gap between AddEntryForm and EntryHistoryPanel */}
-            <div className="my-8" />
-
-            {/* History Section */}
-            <CardContainer>
+          {/* History Section */}
+          <CardContainer>
               <div className="p-6">
                 {isLoading ? (
                   <HistoryLoadingSkeleton />
@@ -216,7 +212,6 @@ export default function HomePage() {
                 />
               )}
             </AnimatePresence>
-          </div>
         </div>
       </FeaturePage>
     </DashboardPageContainer>
