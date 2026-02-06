@@ -43,72 +43,74 @@ const Navbar: React.FC = () => {
   return (
     <>
       <nav
-        className="fixed top-0 right-0 left-0 z-50 flex h-20 items-center justify-between border-b border-border/50 bg-surface p-4 shadow-primary backdrop-blur-sm"
+        className="fixed top-0 right-0 left-0 z-50 border-b border-border/50 bg-surface/90 shadow-primary backdrop-blur-sm"
         role="navigation"
         aria-label="Main navigation"
         style={{ touchAction: "none", overscrollBehavior: "none" }}
       >
-        <div className="flex items-center">
-          <LogoButton
-            onClick={() =>
-              navigate({
-                to: "/home",
-                search: { limit: 20, offset: 0 },
-              })
-            }
-          />
+        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-4">
+          <div className="flex items-center">
+            <LogoButton
+              onClick={() =>
+                navigate({
+                  to: "/home",
+                  search: { limit: 20, offset: 0 },
+                })
+              }
+            />
 
-          {/* Desktop menu */}
-          <div className="hidden items-center space-x-2 lg:flex">
-            {navItems.map(({ path, label, icon: Icon }) => (
+            {/* Desktop menu */}
+            <div className="hidden items-center space-x-2 lg:flex">
+              {navItems.map(({ path, label, icon: Icon }) => (
+                <Button
+                  key={path}
+                  onClick={() => handleNavigation(path)}
+                  ariaLabel={label}
+                  className="text-lg!"
+                  variant={location.pathname === path ? "primary" : "ghost"}
+                  aria-current={location.pathname === path ? "page" : undefined}
+                  icon={<Icon />}
+                  iconPosition="left"
+                >
+                  <span>{label}</span>
+                </Button>
+              ))}
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            {/* Desktop logout button */}
+            <div className="hidden lg:flex">
               <Button
-                key={path}
-                onClick={() => handleNavigation(path)}
-                ariaLabel={label}
-                className="!text-lg"
-                variant={location.pathname === path ? "primary" : "ghost"}
-                aria-current={location.pathname === path ? "page" : undefined}
-                icon={<Icon />}
+                onClick={handleLogout}
+                ariaLabel="Logout"
+                variant="danger"
+                icon={<LogoutIcon />}
                 iconPosition="left"
               >
-                <span>{label}</span>
+                <span>Logout</span>
               </Button>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center space-x-2">
-          {/* Desktop logout button */}
-          <div className="hidden lg:flex">
-            <Button
-              onClick={handleLogout}
-              ariaLabel="Logout"
-              variant="danger"
-              icon={<LogoutIcon />}
-              iconPosition="left"
-            >
-              <span>Logout</span>
-            </Button>
-          </div>
+            </div>
 
-          {/* Mobile menu button */}
-          <motion.div
-            whileTap={{ scale: 0.95 }}
-            style={{ display: "inline-block" }}
-          >
-            <IconButton
-              variant="custom"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              ariaLabel={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              icon={
-                isMobileMenuOpen ? (
-                  <CloseIcon className="h-6 w-6" />
-                ) : (
-                  <MenuIcon className="h-6 w-6" />
-                )
-              }
-              className="rounded-lg p-2 lg:hidden"
-            />
-          </motion.div>
+            {/* Mobile menu button */}
+            <motion.div
+              whileTap={{ scale: 0.95 }}
+              style={{ display: "inline-block" }}
+            >
+              <IconButton
+                variant="custom"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                ariaLabel={isMobileMenuOpen ? "Close menu" : "Open menu"}
+                icon={
+                  isMobileMenuOpen ? (
+                    <CloseIcon className="h-6 w-6" />
+                  ) : (
+                    <MenuIcon className="h-6 w-6" />
+                  )
+                }
+                className="rounded-lg p-2 lg:hidden"
+              />
+            </motion.div>
+          </div>
         </div>
       </nav>
 
