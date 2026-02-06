@@ -31,9 +31,17 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const isAuthenticated = shouldFetchUser && !!user && !isLoading;
 
   return (
-    <div className="min-h-screen bg-surface text-foreground">
+    <div className="min-h-screen bg-background text-foreground">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-60 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground focus:shadow-primary"
+      >
+        Skip to content
+      </a>
       {isAuthenticated && <Navbar />}
-      <main>{children}</main>
+      <main id="main-content" className="relative min-h-screen">
+        {children}
+      </main>
       <NotificationManager />
     </div>
   );
