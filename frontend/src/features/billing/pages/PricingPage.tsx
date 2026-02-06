@@ -4,7 +4,6 @@ import React, { useEffect } from "react";
 
 import { PricingTable } from "@/components/billing";
 import { PageBackground } from "@/components/layout";
-import Navbar from "@/components/layout/Navbar";
 import { CircleQuestionMarkIcon, IconButton } from "@/components/ui";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import usePageMetadata from "@/hooks/usePageMetadata";
@@ -87,12 +86,9 @@ const PricingPage: React.FC = () => {
       <div className="pointer-events-none absolute inset-0">
         <PageBackground />
       </div>
-      <Navbar />
       <main className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="relative mb-14 text-center">
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-40 -translate-y-1/2 bg-[radial-gradient(circle_at_center,theme(colors.primary/15),transparent_70%)] blur-2xl" />
-
           <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
             Unlock Your Full Potential
           </h1>
@@ -120,7 +116,7 @@ const PricingPage: React.FC = () => {
               return (
                 <div
                   key={index}
-                  className={`group rounded-xl border border-border/60 bg-surface/40 px-5 py-4 backdrop-blur-md transition-colors ${open ? "border-primary/60" : "hover:border-primary/40"}`}
+                  className={`group rounded-xl border bg-surface px-5 py-4 transition-colors ${open ? "border-primary/60" : "border-border hover:border-primary/40"}`}
                 >
                   <div
                     className="flex w-full cursor-pointer items-start justify-between gap-4 text-left"
@@ -134,7 +130,7 @@ const PricingPage: React.FC = () => {
                     }
                   >
                     <span className="flex items-start text-base leading-tight font-semibold text-foreground">
-                      <CircleQuestionMarkIcon className="mt-0.5 mr-2 h-5 w-5 flex-shrink-0 text-primary" />
+                      <CircleQuestionMarkIcon className="mt-0.5 mr-2 h-5 w-5 shrink-0 text-primary" />
                       {faq.question}
                     </span>
                     <IconButton
