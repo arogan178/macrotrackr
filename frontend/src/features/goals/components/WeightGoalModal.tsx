@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 
 import Modal from "@/components/ui/Modal";
 import {
@@ -16,7 +16,7 @@ interface WeightGoalModalProps {
   startingWeight: number;
   targetWeight?: number;
   tdee: number;
-  weightGoals: WeightGoals | undefined | null; // Used to determine create vs update
+  weightGoals: WeightGoals | undefined | null;
 }
 
 function WeightGoalModal({
@@ -27,62 +27,63 @@ function WeightGoalModal({
   tdee,
   weightGoals,
 }: WeightGoalModalProps) {
-  // Use query hooks instead of store
   const createWeightGoalMutation = useCreateWeightGoal();
   const updateWeightGoalMutation = useUpdateWeightGoal();
-
-  useEffect(() => {
-    // Modal open effect retained; removed debug log
-  }, [isOpen]);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSave = async (values: WeightGoalFormValues) => {
+    setErrorMessage(null);
+    
     try {
-      // Use update if we have existing weight goals with a startingWeight (indicating it exists)
-      // Otherwise use create
       const hasExistingGoal =
         weightGoals && weightGoals.startingWeight !== undefined;
 
       await (hasExistingGoal
-        ? updateWeightGoalMutation.mutateAsync({ 
-            goals: values, 
-            tdee,
-            currentWeight: weightGoals?.currentWeight 
-          })
+        ? updateWeightGoalMutation.mutateAsync({ goals: values, tdee })
         : createWeightGoalMutation.mutateAsync({ goals: values, tdee }));
 
-      onClose(); // Close modal on success
-    } catch (error) {
-      // Error is handled and displayed by the mutation hooks
+      onClose();
+    } catch (error: any) {
+      const message = error?.message || "Failed to save weight goal. Please try again.";
+      setErrorMessage(message);
       console.error("Save failed in WeightGoalModal:", error);
-      // Optionally keep modal open on error, or handle specific errors
     }
   };
 
-  // Use the goal's startingWeight if editing, otherwise use user weight
+  const handleClose = () => {
+    setErrorMessage(null);
+    onClose();
+  };
+
   const initialStartingWeight = weightGoals?.startingWeight ?? startingWeight;
   const initialTargetWeight =
     weightGoals?.targetWeight ?? targetWeight ?? initialStartingWeight;
 
+  const isLoading =
+    createWeightGoalMutation.isPending || updateWeightGoalMutation.isPending;
+
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleClose}
       title={weightGoals ? "Edit Weight Goal" : "Set Weight Goal"}
       variant="form"
       hideDefaultButtons={true}
       size="lg"
     >
+      {errorMessage && (
+        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
+          {errorMessage}
+        </div>
+      )}
       <WeightGoalForm
         startingWeight={initialStartingWeight}
         targetWeight={initialTargetWeight}
         tdee={tdee}
-        weightGoals={weightGoals} // Pass existing goals to form for disabling startingWeight
-        isLoading={
-          createWeightGoalMutation.isPending ||
-          updateWeightGoalMutation.isPending
-        } // Pass saving state from mutations
-        onSave={handleSave} // Pass the correct handler
-        onCancel={onClose}
+        weightGoals={weightGoals}
+        isLoading={isLoading}
+        onSave={handleSave}
+        onCancel={handleClose}
       />
     </Modal>
   );
