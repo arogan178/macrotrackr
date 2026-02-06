@@ -6,7 +6,7 @@ import { features } from "../utils/landingPageConstants";
 
 const FeaturesSection: React.FC = () => (
   <section className="relative z-10 overflow-visible px-4 py-24 sm:px-6 lg:px-8">
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <ScrollTriggeredDiv className="mb-16 overflow-visible text-center">
         <h2 className="mb-4 text-4xl font-bold text-foreground sm:text-5xl">
           Everything You Need to Succeed
