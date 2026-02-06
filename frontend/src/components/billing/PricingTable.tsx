@@ -202,7 +202,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
         `}</style>
       </div>
 
-      <div className="w-full overflow-x-hidden rounded-2xl border border-border/60 bg-surface/40 p-4 shadow-surface backdrop-blur">
+      <div className="w-full overflow-x-hidden rounded-xl border border-border bg-surface p-4">
         <table className="responsive-pricing-table w-full max-w-full border-separate border-spacing-0 text-sm">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -215,7 +215,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
                         ? "border-b border-border/60 bg-transparent px-5 py-4 text-left text-base font-semibold text-foreground"
                         : header.index === 1
                           ? "border-b border-border/60 bg-transparent px-5 py-4 text-base font-semibold text-foreground"
-                          : "relative border-b border-border/60 bg-gradient-to-br from-primary to-secondary/20 px-5 py-4 text-base font-extrabold text-foreground shadow-surface"
+                          : "relative border-b border-border/60 bg-linear-to-br from-primary to-secondary/20 px-5 py-4 text-base font-extrabold text-foreground shadow-surface"
                     }
                   >
                     {flexRender(
@@ -256,7 +256,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
                                 ? ""
                                 : " md:border-b md:border-border/60"
                             }`
-                          : `bg-gradient-to-br from-primary/10 to-secondary/10 px-3 py-2 text-center${
+                          : `bg-linear-to-br from-primary/10 to-secondary/10 px-3 py-2 text-center${
                               row.index === data.length - 1
                                 ? ""
                                 : " md:border-b md:border-border/50"
