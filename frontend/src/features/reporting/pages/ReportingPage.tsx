@@ -5,7 +5,6 @@ import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import Navbar from "@/components/layout/Navbar";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -98,7 +97,6 @@ export default function ReportingPage() {
 
   return (
     <DashboardPageContainer>
-      <Navbar />
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
         <AnimatePresence mode="wait">
           {
