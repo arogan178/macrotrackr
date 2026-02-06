@@ -3,38 +3,19 @@ import { AnimatePresence } from "motion/react";
 import { useCallback } from "react";
 
 import { homeRoute } from "@/AppRouter";
-import { CardContainer } from "@/components/form";
-import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
+import CardContainer from "@/components/form/CardContainer";
+import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { UserMetricsPanel } from "@/components/metrics";
-import {
-  AddEntryForm,
-  DailySummaryPanel,
-  EditModal,
-  EntryHistoryPanel,
-} from "@/features/macroTracking/components";
-import {
-  AddEntryLoadingSkeleton,
-  DailySummaryLoadingSkeleton,
-  HistoryLoadingSkeleton,
-} from "@/features/macroTracking/components/HomePageSkeletons";
-import {
-  useHistoryPagination,
-  useHomeHeader,
-  useNutritionProfile,
-} from "@/features/macroTracking/hooks/useHomePage";
-import type {
-  EditingEntry,
-  MacroEntryInput,
-} from "@/features/macroTracking/types/macro";
+import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
+import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
+import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
+import EditModal from "@/features/macroTracking/components/EditModal";
+import EntryHistoryPanel from "@/features/macroTracking/components/EntryHistoryPanel";
+import { AddEntryLoadingSkeleton, DailySummaryLoadingSkeleton, HistoryLoadingSkeleton } from "@/features/macroTracking/components/HomePageSkeletons";
+import { useHistoryPagination, useHomeHeader, useNutritionProfile } from "@/features/macroTracking/hooks/useHomePage";
+import type { EditingEntry, MacroEntryInput } from "@/features/macroTracking/types/macro";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import {
-  useAddMacroEntry,
-  useDeleteMacroEntry,
-  useMacroDailyTotals,
-  useMacroTarget,
-  useUpdateMacroEntry,
-} from "@/hooks/queries/useMacroQueries";
+import { useAddMacroEntry, useDeleteMacroEntry, useMacroDailyTotals, useMacroTarget, useUpdateMacroEntry } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import { getTodayISO } from "@/utils/dateUtilities";
