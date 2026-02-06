@@ -48,10 +48,7 @@ const HeroSection: React.FC = () => (
         >
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             {trustIndicators.map((indicator) => (
-              <div
-                key={indicator.title}
-                className="flex items-center gap-3"
-              >
+              <div key={indicator.title} className="flex items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2">
                   <indicator.icon className="text-primary" />
                 </div>

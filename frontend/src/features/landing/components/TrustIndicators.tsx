@@ -26,21 +26,14 @@ const TrustIndicators: React.FC = () => (
   <div className="mt-16 text-center">
     <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
       {indicators.map((item) => (
-        <div
-          key={item.title}
-          className="flex flex-col items-center"
-        >
+        <div key={item.title} className="flex flex-col items-center">
           <div
             className={`h-12 w-12 ${item.bg} mb-3 flex items-center justify-center rounded-full`}
           >
             {item.icon}
           </div>
-          <h4 className="mb-1 font-semibold text-foreground">
-            {item.title}
-          </h4>
-          <p className="text-sm text-muted">
-            {item.desc}
-          </p>
+          <h4 className="mb-1 font-semibold text-foreground">{item.title}</h4>
+          <p className="text-sm text-muted">{item.desc}</p>
         </div>
       ))}
     </div>
