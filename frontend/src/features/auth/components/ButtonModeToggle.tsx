@@ -12,7 +12,7 @@ function ButtonModeToggle({ mode, onToggle }: ButtonModeToggleProps) {
       onClick={onToggle}
       aria-label={mode === "login" ? "Switch to register" : "Switch to login"}
       title={mode === "login" ? "Register" : "Login"}
-      className="group flex flex-col items-center rounded-lg bg-surface/40 px-6  py-3 text-foreground shadow-surface backdrop-blur-sm transition-colors hover:bg-surface/70 hover:text-foreground"
+      className="group flex flex-col items-center rounded-lg bg-surface px-6 py-3 text-foreground transition-colors hover:bg-surface-2"
       variant="ghost"
     >
       <div className="text-center">

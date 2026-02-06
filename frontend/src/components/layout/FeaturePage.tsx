@@ -24,7 +24,12 @@ export interface FeaturePageProps {
   children: ReactNode;
 }
 
-function FeaturePageImpl({ title, subtitle, headerChildren, children }: FeaturePageProps) {
+function FeaturePageImpl({
+  title,
+  subtitle,
+  headerChildren,
+  children,
+}: FeaturePageProps) {
   return (
     <div className="space-y-6">
       <PageHeader title={title} subtitle={subtitle}>

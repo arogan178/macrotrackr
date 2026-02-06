@@ -38,23 +38,27 @@ function ButtonBase({
   const sizeStyles = BUTTON_SIZES;
 
   const buttonBase =
-    "inline-flex items-center justify-center font-medium text-sm gap-1.5 transition-all duration-200 " +
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 " +
-    "rounded-lg cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed";
+    "inline-flex items-center justify-center font-medium text-sm gap-1.5 " +
+    "transition-colors duration-150 ease-out " +
+    "focus-visible:outline-2 focus-visible:outline-offset-2 " +
+    "rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
 
   const buttonVariants: Record<string, string> = {
     primary:
-      // Add hover shadow for better affordance
-      "bg-primary hover:bg-primary/50 hover:shadow-surface disabled:hover:bg-primary text-foreground focus:ring-primary shadow-surface",
+      "bg-primary text-background hover:bg-primary/85 active:bg-primary/70 " +
+      "disabled:hover:bg-primary focus-visible:outline-primary",
     secondary:
-      "bg-secondary hover:bg-secondary/50 hover:shadow-surface disabled:hover:bg-secondary text-foreground focus:ring-secondary shadow-surface",
+      "bg-surface-3 text-foreground border border-border hover:bg-surface-4 active:bg-surface-2 " +
+      "disabled:hover:bg-surface-3 focus-visible:outline-primary",
     danger:
-      "bg-error hover:bg-error/50 hover:shadow-surface disabled:hover:bg-error text-foreground focus:ring-error shadow-surface",
+      "bg-error/15 text-error border border-error/25 hover:bg-error/25 active:bg-error/35 " +
+      "disabled:hover:bg-error/15 focus-visible:outline-error",
     success:
-      "bg-success hover:bg-success/50 hover:shadow-surface disabled:hover:bg-success text-foreground focus:ring-success shadow-surface",
-    // Improved contrast for ghost + add hover shadow and border
+      "bg-success/15 text-success border border-success/25 hover:bg-success/25 active:bg-success/35 " +
+      "disabled:hover:bg-success/15 focus-visible:outline-success",
     ghost:
-      "bg-transparent hover:bg-surface-2 hover:text-foreground hover:shadow-surface disabled:hover:bg-transparent disabled:hover:text-foreground",
+      "bg-transparent text-muted hover:bg-surface-2 hover:text-foreground active:bg-surface-3 " +
+      "disabled:hover:bg-transparent focus-visible:outline-primary",
   };
 
   const widthStyles = fullWidth ? "w-full" : "";
