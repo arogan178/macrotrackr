@@ -65,14 +65,27 @@ function WeightGoalForm({
       : undefined;
   }, [tdee, formValues.startingWeight, formValues.targetWeight, calorieIntake]);
 
-  // When switching between edit/create, update calorieIntake if not user-adjusted
+  // Initialize calorie intake when modal opens or switches between edit/create
+  // Only run when isEditing or weightGoals changes, NOT when calculations change
   useEffect(() => {
     if (!isEditing) {
-      setCalorieIntake(calculations?.calorieTarget);
-    } else if (weightGoals?.calorieTarget) {
+      // Creating new goal - use calculated default
+      const defaultCalories =
+        tdee && formValues.startingWeight && formValues.targetWeight
+          ? generateWeightGoalCalculations(
+              tdee,
+              formValues.startingWeight,
+              formValues.targetWeight,
+              undefined,
+            )?.calorieTarget
+          : undefined;
+      setCalorieIntake(defaultCalories);
+    } else if (weightGoals?.calorieTarget !== undefined) {
+      // Editing existing goal - use saved value
       setCalorieIntake(weightGoals.calorieTarget);
     }
-  }, [isEditing, weightGoals?.calorieTarget, calculations?.calorieTarget]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEditing, weightGoals]);
 
   // Derived values for display
   const calculatedTargetDate = calculations?.targetDate;
@@ -150,6 +163,29 @@ function WeightGoalForm({
   const isMaintenance =
     formValues.startingWeight === formValues.targetWeight &&
     formValues.targetWeight !== undefined;
+
+  const minCalorieIntake = isWeightLoss
+    ? Math.max(tdee - 1000, 1200)
+    : isMaintenance
+      ? tdee - 300
+      : tdee;
+
+  const maxCalorieIntake = isWeightLoss
+    ? tdee
+    : isMaintenance
+      ? tdee + 300
+      : tdee + 1000;
+
+  useEffect(() => {
+    if (calorieIntake === undefined) return;
+    const clamped = Math.min(
+      maxCalorieIntake,
+      Math.max(minCalorieIntake, calorieIntake),
+    );
+    if (clamped !== calorieIntake) {
+      setCalorieIntake(clamped);
+    }
+  }, [calorieIntake, minCalorieIntake, maxCalorieIntake]);
 
   return (
     <div className="p-6">
