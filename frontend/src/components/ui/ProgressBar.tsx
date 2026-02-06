@@ -49,7 +49,7 @@ function ProgressBar({
   return (
     <div className={`relative ${className}`}>
       <div
-        className={`relative w-full ${barHeight} overflow-hidden rounded-full bg-foreground/[0.08]`}
+        className={`relative w-full ${barHeight} overflow-hidden rounded-full bg-foreground/8`}
       >
         {showPercentage && (
           <div className="pointer-events-none absolute inset-0 flex h-full items-center justify-end pr-2 text-xs text-foreground select-none">
