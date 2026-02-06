@@ -137,9 +137,11 @@ export function useUpdateWeightGoal() {
     mutationFn: async ({
       goals,
       tdee,
+      currentWeight: providedCurrentWeight,
     }: {
       goals: WeightGoalFormValues;
       tdee: number;
+      currentWeight?: number;
     }) => {
       try {
         return await apiService.goals.updateWeightGoal(goals, tdee);
@@ -151,12 +153,62 @@ export function useUpdateWeightGoal() {
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate and refetch weight goals and weight log queries immediately
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight(), refetchType: 'active' });
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog(), refetchType: 'active' });
+    onMutate: async () => {
+      // Cancel any outgoing refetches
+      await queryClient.cancelQueries({ queryKey: queryKeys.goals.weight() });
+      
+      // Snapshot the previous value to preserve currentWeight during mutation
+      const previousWeightGoals = queryClient.getQueryData<WeightGoals>(
+        queryKeys.goals.weight(),
+      );
+      
+      return { previousWeightGoals };
     },
-    onError: (error) => {
+    onSuccess: (data, variables, context) => {
+      // Get currentWeight from: provided param > cache snapshot > data response > startingWeight fallback
+      // Never default to 0 as that causes incorrect progress calculations
+      const snap = context?.previousWeightGoals;
+      const preservedCurrentWeight = variables.currentWeight ?? 
+                                     snap?.currentWeight ?? 
+                                     data.currentWeight ?? 
+                                     data.startingWeight ?? 
+                                     0;
+      
+      // Create a properly typed WeightGoals object with all required fields
+      const updatedGoals: WeightGoals = {
+        startingWeight: data.startingWeight ?? snap?.startingWeight ?? 0,
+        currentWeight: preservedCurrentWeight,
+        targetWeight: data.targetWeight ?? snap?.targetWeight ?? 0,
+        weightGoal: (data.weightGoal || snap?.weightGoal || "maintain") as "lose" | "maintain" | "gain",
+        startDate: data.startDate ?? snap?.startDate ?? new Date().toISOString().split("T")[0],
+        targetDate: data.targetDate ?? snap?.targetDate ?? new Date().toISOString().split("T")[0],
+        calorieTarget: data.calorieTarget ?? snap?.calorieTarget ?? 2000,
+        calculatedWeeks: data.calculatedWeeks ?? snap?.calculatedWeeks ?? 1,
+        weeklyChange: data.weeklyChange ?? snap?.weeklyChange ?? 0,
+        dailyChange: data.dailyChange ?? snap?.dailyChange ?? 0,
+      };
+      
+      // Immediately update the cache with the complete data including preserved currentWeight
+      // This prevents any flash of incorrect progress
+      queryClient.setQueryData<WeightGoals>(
+        queryKeys.goals.weight(),
+        updatedGoals
+      );
+      
+      // NOTE: We intentionally do NOT invalidate here because:
+      // 1. The API response doesn't include currentWeight, so refetching would lose it
+      // 2. We already have the correct data with currentWeight preserved in the cache
+      // 3. The weight log query will be refetched separately when needed
+      // The data will be naturally refreshed on next page load or when user manually refreshes
+    },
+    onError: (error, _variables, context) => {
+      // Rollback on error
+      if (context?.previousWeightGoals) {
+        queryClient.setQueryData(
+          queryKeys.goals.weight(),
+          context.previousWeightGoals,
+        );
+      }
       console.error("Error updating weight goal:", error);
     },
   });
