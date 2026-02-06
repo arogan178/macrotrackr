@@ -125,7 +125,7 @@ function HabitActions({
       )}{" "}
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-md border border-border/40 bg-surface/90 py-0.5 text-xs shadow-primary backdrop-blur-sm">
+        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-lg border border-border bg-surface py-0.5 text-xs shadow-lg">
           {onEdit && (
             <button
               onClick={handleEdit}
