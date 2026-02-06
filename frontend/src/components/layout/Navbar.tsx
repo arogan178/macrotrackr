@@ -159,7 +159,7 @@ const Navbar: React.FC = () => {
                 ))}
 
                 {/* Mobile logout button */}
-                <div className="border-t border-border pt-2 mt-1">
+                <div className="mt-1 border-t border-border pt-2">
                   <Button
                     onClick={handleLogout}
                     ariaLabel="Logout"
