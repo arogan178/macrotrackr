@@ -1,5 +1,4 @@
 import { useLoaderData } from "@tanstack/react-router";
-import { useRef } from "react";
 
 import { goalsRoute } from "@/AppRouter";
 import type { WeightGoalsResponse } from "@/features/goals/types";
@@ -45,17 +44,13 @@ export function useGoalsData() {
   const nutritionProfile = safeUserSettings ? createNutritionProfile(safeUserSettings) : undefined;
 
   const { data: habits = [], isLoading: habitsLoading } = useHabits();
-  const { data: weightGoalsFromQuery, isSuccess: weightGoalsQuerySuccess } = useWeightGoals();
-
-  // Track if query has ever successfully loaded (even if data is null)
-  const hasEverLoaded = useRef(false);
-  if (weightGoalsQuerySuccess) {
-    hasEverLoaded.current = true;
-  }
-
-  // Use query data if it has ever loaded, otherwise use loader data
-  // This prevents falling back to loader data during refetch after mutations
-  const currentWeightGoals = hasEverLoaded.current ? weightGoalsFromQuery : loaderData.weightGoals;
+  
+  // With cache persistence, query data is available immediately after first load
+  // placeholderData: 'previousData' in useWeightGoals keeps showing old data during refetch
+  const { data: weightGoalsFromQuery } = useWeightGoals();
+  
+  // Use query data preferentially, fallback to loader data for initial SSR/hydration
+  const currentWeightGoals = weightGoalsFromQuery ?? loaderData.weightGoals;
   const safeTargetWeight = currentWeightGoals?.targetWeight || user?.weight || 0;
 
   return {
