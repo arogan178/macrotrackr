@@ -36,6 +36,12 @@ export default function GoalsPage() {
   const safeTargetWeight =
     currentWeightGoals?.targetWeight || user?.weight || 0;
 
+  // Memoize normalized weight goals to prevent infinite re-renders in WeightGoalForm
+  const normalizedWeightGoals = useMemo(
+    () => normalizeWeightGoalsFromResponse(currentWeightGoals, user?.weight),
+    [currentWeightGoals, user?.weight],
+  );
+
   return (
     <DashboardPageContainer>
       <FeaturePage
@@ -141,10 +147,7 @@ export default function GoalsPage() {
               startingWeight={user?.weight || 0}
               targetWeight={safeTargetWeight}
               tdee={nutritionProfile?.tdee || 0}
-              weightGoals={normalizeWeightGoalsFromResponse(
-                currentWeightGoals,
-                user?.weight,
-              )}
+              weightGoals={normalizedWeightGoals}
             />
           )}
         </AnimatePresence>
@@ -164,10 +167,7 @@ export default function GoalsPage() {
                       <WeightGoalDashboard
                         user={data.safeUserSettings}
                         macroDailyTotals={macroDailyTotals}
-                        weightGoals={normalizeWeightGoalsFromResponse(
-                          currentWeightGoals,
-                          user?.weight,
-                        )}
+                        weightGoals={normalizedWeightGoals}
                         isLoading={false}
                         onOpenModal={actions.openWeightGoalModal}
                         onDelete={actions.openDeleteConfirmModal}
