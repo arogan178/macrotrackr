@@ -53,6 +53,8 @@ export function useWeightGoals() {
       };
     },
     ...queryConfigs.longLived, // 5 minutes stale time for goals
+    // Keep previous data during refetch to prevent UI flashing
+    placeholderData: (previousData) => previousData,
   });
 }
 
