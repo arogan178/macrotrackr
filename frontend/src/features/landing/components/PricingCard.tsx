@@ -70,10 +70,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
     </div>
     <ul className="mb-8 space-y-4">
       {features.map((feature, index) => (
-        <li
-          key={index}
-          className="flex items-center gap-3"
-        >
+        <li key={index} className="flex items-center gap-3">
           <CheckIcon className={`${featureIconColor} shrink-0`} />
           <span className={featureTextClass}>{feature}</span>
         </li>
