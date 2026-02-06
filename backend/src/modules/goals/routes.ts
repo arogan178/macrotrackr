@@ -15,6 +15,29 @@ import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
 
+/**
+ * Helper function to get the current weight from the latest weight log entry
+ * Falls back to starting weight if no weight log entries exist
+ */
+function getCurrentWeight(
+  db: any,
+  userId: number,
+  startingWeight: number | null
+): number | null {
+  const latestLogEntry = safeQuery<{ weight: number }>(
+    db,
+    "SELECT weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1",
+    [userId]
+  );
+
+  if (latestLogEntry) {
+    return latestLogEntry.weight;
+  }
+
+  // Fallback to starting weight if no log entries
+  return startingWeight;
+}
+
 export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
@@ -40,9 +63,17 @@ export const goalRoutes = (app: Elysia) =>
             return null; // Return null if not found (matches schema)
           }
 
+          // Get current weight from weight log (or fallback to starting weight)
+          const currentWeight = getCurrentWeight(
+            db,
+            user.userId,
+            weightGoalsResult.starting_weight
+          );
+
           // Map snake_case from DB to camelCase for API response
           const apiResponse = {
             startingWeight: weightGoalsResult.starting_weight,
+            currentWeight: currentWeight,
             targetWeight: weightGoalsResult.target_weight,
             weightGoal: weightGoalsResult.weight_goal,
             startDate: weightGoalsResult.start_date,
@@ -132,9 +163,17 @@ export const goalRoutes = (app: Elysia) =>
             return savedGoalResult;
           });
 
+          // Get current weight from weight log (or fallback to starting weight)
+          const currentWeight = getCurrentWeight(
+            db,
+            user.userId,
+            savedGoal.starting_weight
+          );
+
           // Map response
           return {
             startingWeight: savedGoal.starting_weight,
+            currentWeight: currentWeight,
             targetWeight: savedGoal.target_weight,
             weightGoal: savedGoal.weight_goal,
             startDate: savedGoal.start_date,
@@ -237,9 +276,17 @@ export const goalRoutes = (app: Elysia) =>
             return savedGoalResult;
           });
 
+          // Get current weight from weight log (or fallback to starting weight)
+          const currentWeight = getCurrentWeight(
+            db,
+            user.userId,
+            savedGoal.starting_weight
+          );
+
           // Map response
           return {
             startingWeight: savedGoal.starting_weight,
+            currentWeight: currentWeight,
             targetWeight: savedGoal.target_weight,
             weightGoal: savedGoal.weight_goal,
             startDate: savedGoal.start_date,
