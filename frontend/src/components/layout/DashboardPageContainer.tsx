@@ -9,9 +9,11 @@ export function DashboardPageContainer({
 }: DashboardPageContainerProps) {
   return (
     <div className="relative min-h-screen text-foreground">
-      <PageBackground />
+      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
+        <PageBackground />
+      </div>
       {/* Page content */}
-      <div className="relative mx-auto max-w-7xl px-4 py-0 pb-10 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
         {children}
       </div>
     </div>
