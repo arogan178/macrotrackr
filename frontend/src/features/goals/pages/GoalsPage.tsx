@@ -1,5 +1,6 @@
 // src/features/goals/pages/GoalsPage.tsx
 
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
 
@@ -8,6 +9,7 @@ import FeaturePage from "@/components/layout/FeaturePage";
 import { GoalsIcon, TargetIcon } from "@/components/ui/Icons";
 import Modal from "@/components/ui/Modal";
 import TabButton from "@/components/ui/TabButton";
+import GoalsErrorState from "@/features/goals/components/GoalsErrorState";
 import GoalsLoadingSkeleton from "@/features/goals/components/GoalsLoadingSkeleton";
 import HabitModal from "@/features/goals/components/habits/HabitModal";
 import HabitTracker from "@/features/goals/components/habits/HabitTracker";
@@ -17,12 +19,14 @@ import WeightGoalDashboard from "@/features/goals/components/WeightGoalDashboard
 import WeightGoalModal from "@/features/goals/components/WeightGoalModal";
 import WeightProgressTabs from "@/features/goals/components/WeightProgressTabs";
 import { useGoalsPage } from "@/features/goals/hooks/page";
+import { queryKeys } from "@/lib/queryKeys";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import type { WeightGoals } from "@/types/goal";
 
 export default function GoalsPage() {
   // Ensure the hook import path is correct and name is in scope
   const { ui, data, actions } = useGoalsPage();
+  const queryClient = useQueryClient();
 
   usePageDataSync();
 
@@ -33,6 +37,7 @@ export default function GoalsPage() {
   const macroDailyTotals = data.macroDailyTotals;
   const habits = data.habits;
   const habitsLoading = data.habitsLoading;
+  const hasErrors = data.hasErrors;
   const safeTargetWeight =
     currentWeightGoals?.targetWeight || user?.weight || 0;
 
@@ -41,6 +46,12 @@ export default function GoalsPage() {
     () => normalizeWeightGoalsFromResponse(currentWeightGoals, user?.weight),
     [currentWeightGoals, user?.weight],
   );
+
+  const handleRetry = () => {
+    // Refetch all goal-related queries
+    queryClient.refetchQueries({ queryKey: queryKeys.goals.all() });
+    queryClient.refetchQueries({ queryKey: queryKeys.auth.user() });
+  };
 
   return (
     <DashboardPageContainer>
@@ -152,7 +163,12 @@ export default function GoalsPage() {
           )}
         </AnimatePresence>
         <div className="relative">
-          {user ? (
+          {hasErrors ? (
+            <GoalsErrorState 
+              onRetry={handleRetry}
+              errorMessage="We couldn't load your goals data. This might be due to a network issue or server problem."
+            />
+          ) : user ? (
             <AnimatePresence mode="wait">
               {ui.activeTab === "goals" ? (
                 <motion.div

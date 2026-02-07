@@ -26,7 +26,7 @@ export function useGoalsData() {
     weightGoalsError?: string;
   } = useLoaderData({ from: goalsRoute.id }) || {};
 
-  const { data: user } = useUser();
+  const { data: user, isError: isUserError, error: userError } = useUser();
   const safeUserSettings = toUserSettings(user);
 
   const { data: macroTarget } = useMacroTarget();
@@ -43,15 +43,32 @@ export function useGoalsData() {
 
   const nutritionProfile = safeUserSettings ? createNutritionProfile(safeUserSettings) : undefined;
 
-  const { data: habits = [], isLoading: habitsLoading } = useHabits();
+  const { 
+    data: habits = [], 
+    isLoading: habitsLoading, 
+    isError: isHabitsError, 
+    error: habitsError 
+  } = useHabits();
   
   // With cache persistence, query data is available immediately after first load
   // placeholderData: 'previousData' in useWeightGoals keeps showing old data during refetch
-  const { data: weightGoalsFromQuery } = useWeightGoals();
+  const { 
+    data: weightGoalsFromQuery, 
+    isError: isWeightGoalsError, 
+    error: weightGoalsError 
+  } = useWeightGoals();
   
   // Use query data preferentially, fallback to loader data for initial SSR/hydration
   const currentWeightGoals = weightGoalsFromQuery ?? loaderData.weightGoals;
   const safeTargetWeight = currentWeightGoals?.targetWeight || user?.weight || 0;
+
+  // Aggregate error states
+  const hasErrors = isUserError || isWeightGoalsError || isHabitsError;
+  const errors = {
+    user: isUserError ? userError : null,
+    weightGoals: isWeightGoalsError ? weightGoalsError : null,
+    habits: isHabitsError ? habitsError : null,
+  };
 
   return {
     loaderData,
@@ -64,5 +81,7 @@ export function useGoalsData() {
     habitsLoading,
     currentWeightGoals,
     safeTargetWeight,
+    hasErrors,
+    errors,
   };
 }
