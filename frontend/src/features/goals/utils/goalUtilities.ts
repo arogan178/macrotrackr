@@ -1,6 +1,60 @@
+import type { WeightGoalsResponse } from "../types";
 import type { WeightGoalFormValues, WeightGoals } from "@/types/goal";
 
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
+
+// Type guard to check if goals is already WeightGoals
+const isWeightGoals = (goals: unknown): goals is WeightGoals => {
+  return goals !== null && typeof goals === "object" && "currentWeight" in goals;
+};
+
+// Normalize WeightGoalsResponse or WeightGoals to WeightGoals
+export function normalizeWeightGoals(
+  goals: WeightGoalsResponse | WeightGoals | undefined,
+  userWeight: number | undefined,
+): WeightGoals | undefined {
+  if (!goals) return undefined;
+
+  if (isWeightGoals(goals)) {
+    return {
+      startingWeight: goals.startingWeight ?? 0,
+      currentWeight: goals.currentWeight ?? userWeight ?? 0,
+      targetWeight: goals.targetWeight ?? 0,
+      weightGoal: goals.weightGoal ?? "maintain",
+      startDate: goals.startDate ?? "",
+      targetDate: goals.targetDate ?? "",
+      calorieTarget: goals.calorieTarget ?? 0,
+      calculatedWeeks: goals.calculatedWeeks ?? 0,
+      weeklyChange: goals.weeklyChange ?? 0,
+      dailyChange: goals.dailyChange ?? 0,
+    };
+  }
+
+  if (goals.targetWeight === undefined) return undefined;
+
+  const starting = goals.startingWeight;
+  const target = goals.targetWeight ?? 0;
+  const tentativeCurrent = userWeight ?? starting;
+
+  // Prevent premature 100% progress when starting a new goal
+  const currentWeight =
+    starting !== target && tentativeCurrent === target
+      ? starting
+      : tentativeCurrent;
+
+  return {
+    startingWeight: starting,
+    currentWeight,
+    targetWeight: target,
+    weightGoal: (goals.weightGoal ?? "maintain") as WeightGoals["weightGoal"],
+    startDate: goals.startDate ?? "",
+    targetDate: goals.targetDate ?? "",
+    calorieTarget: goals.calorieTarget ?? 0,
+    calculatedWeeks: goals.calculatedWeeks ?? 0,
+    weeklyChange: goals.weeklyChange ?? 0,
+    dailyChange: goals.dailyChange ?? 0,
+  };
+}
 
 // Define local payload types since they're not exported from types
 interface GoalPayload {
