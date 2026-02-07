@@ -11,6 +11,10 @@ interface RangeSliderProps {
   className?: string;
   trackColorClass?: string; // Tailwind class for filled track color
   showFillTrack?: boolean;
+  // Accessibility props
+  ariaLabel?: string;
+  ariaLabelledBy?: string;
+  unit?: string; // e.g., "kilograms", "calories", "percent"
 }
 
 export default function RangeSlider({
@@ -23,6 +27,9 @@ export default function RangeSlider({
   className = "",
   trackColorClass = "bg-surface-2",
   showFillTrack = false,
+  ariaLabel,
+  ariaLabelledBy,
+  unit,
 }: RangeSliderProps) {
   const percentage = Math.min(
     100,
@@ -57,6 +64,12 @@ export default function RangeSlider({
         value={value}
         onChange={handleChange}
         disabled={disabled}
+        aria-label={ariaLabel}
+        aria-labelledby={ariaLabelledBy}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
+        aria-valuetext={unit ? `${value} ${unit}` : `${value}`}
         className={[
           "relative z-10 h-4 w-full appearance-none bg-transparent focus:outline-none",
           disabled ? "" : "cursor-pointer",
