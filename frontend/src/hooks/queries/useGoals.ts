@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
@@ -8,39 +9,17 @@ import {
   apiService,
   WeightLogEntry,
 } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
 
 // Query hook for fetching weight goals
 export function useWeightGoals() {
   return useQuery({
     queryKey: queryKeys.goals.weight(),
-    // Important: TanStack Query throws if ensureQueryData resolves to undefined.
-    // We return null explicitly to represent "no goals set".
     queryFn: async (): Promise<WeightGoals | null> => {
-      const weightGoalsData = await apiService.goals.getWeightGoals();
-
-      // eslint-disable-next-line unicorn/no-null
-      if (!weightGoalsData) return null;
-
-      // Transform API response to match WeightGoals interface with defaults
-      // API now returns currentWeight calculated from weight log
-      return {
-        startingWeight: weightGoalsData.startingWeight,
-        currentWeight: weightGoalsData.currentWeight ?? weightGoalsData.startingWeight,
-        targetWeight: weightGoalsData.targetWeight || weightGoalsData.startingWeight,
-        weightGoal: (weightGoalsData.weightGoal || "maintain") as
-          | "lose"
-          | "maintain"
-          | "gain",
-        startDate: weightGoalsData.startDate || new Date().toISOString().split("T")[0],
-        targetDate: weightGoalsData.targetDate || new Date().toISOString().split("T")[0],
-        calorieTarget: weightGoalsData.calorieTarget || 2000,
-        calculatedWeeks: weightGoalsData.calculatedWeeks || 1,
-        weeklyChange: weightGoalsData.weeklyChange || 0,
-        dailyChange: weightGoalsData.dailyChange ?? 0,
-      };
+      const data = await apiService.goals.getWeightGoals();
+      return normalizeWeightGoals(data, undefined);
     },
-    ...queryConfigs.longLived, // 5 minutes stale time for goals
-    // Keep previous data during refetch to prevent UI flashing
+    ...queryConfigs.longLived,
     placeholderData: (previousData) => previousData,
   });
 }
@@ -68,37 +47,36 @@ export function useCreateWeightGoal() {
       goals: WeightGoalFormValues;
       tdee: number;
     }) => {
+      // Start both operations in parallel to avoid waterfall
+      const createPromise = apiService.goals.createWeightGoal(goals, tdee);
+      const weightLogPromise = apiService.goals.getWeightLog();
+
       try {
-        // Create the weight goal
-        const result = await apiService.goals.createWeightGoal(goals, tdee);
+        const [result, weightLog] = await Promise.all([
+          createPromise,
+          weightLogPromise,
+        ]);
 
-        // Also log the starting weight as a weight log entry
-        // Only if we don't already have a weight log entry for today
-        const weightLog = await apiService.goals.getWeightLog();
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-
-        // Check if we already have a weight entry for today
-        const hasEntryForToday = weightLog.some((entry) => {
-          const entryDate = new Date(entry.timestamp)
-            .toISOString()
-            .split("T")[0];
-          return entryDate === today;
-        });
+        const today = todayISO();
+        const hasEntryForToday = weightLog.some((entry) =>
+          entry.timestamp.startsWith(today),
+        );
 
         // If no entry for today, add the starting weight
-        if (!hasEntryForToday) {
+        if (!hasEntryForToday && goals.startingWeight) {
           await apiService.goals.addWeightLogEntry({
-            weight: goals.startingWeight ?? 0,
+            weight: goals.startingWeight,
             timestamp: new Date().toISOString(),
           });
         }
 
         return result;
-      } catch (error: any) {
+      } catch (error) {
         // If create fails because goal already exists, try to update instead
+        const apiError = error as { status?: number; message?: string };
         if (
-          error?.status === 409 ||
-          error?.message?.includes("already exists")
+          apiError?.status === 409 ||
+          apiError?.message?.includes("already exists")
         ) {
           return await apiService.goals.updateWeightGoal(goals, tdee);
         }
@@ -106,7 +84,6 @@ export function useCreateWeightGoal() {
       }
     },
     onSettled: () => {
-      // Always invalidate to ensure consistency after mutation completes (success or error)
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
     },
@@ -127,35 +104,24 @@ export function useUpdateWeightGoal() {
     }) => {
       try {
         return await apiService.goals.updateWeightGoal(goals, tdee);
-      } catch (error: any) {
+      } catch (error) {
         // If update fails with 404 (goal not found), try to create instead
-        if (error?.status === 404) {
+        const apiError = error as { status?: number };
+        if (apiError?.status === 404) {
           return await apiService.goals.createWeightGoal(goals, tdee);
         }
         throw error;
       }
     },
     onSuccess: (data) => {
-      const updatedGoals: WeightGoals = {
-        startingWeight: data.startingWeight ?? 0,
-        currentWeight: data.currentWeight ?? data.startingWeight ?? 0,
-        targetWeight: data.targetWeight ?? 0,
-        weightGoal: (data.weightGoal || "maintain") as "lose" | "maintain" | "gain",
-        startDate: data.startDate || new Date().toISOString().split("T")[0],
-        targetDate: data.targetDate || new Date().toISOString().split("T")[0],
-        calorieTarget: data.calorieTarget || 2000,
-        calculatedWeeks: data.calculatedWeeks || 1,
-        weeklyChange: data.weeklyChange || 0,
-        dailyChange: data.dailyChange ?? 0,
-      };
-      
-      // Update cache with data from API (includes currentWeight)
-      queryClient.setQueryData<WeightGoals>(
-        queryKeys.goals.weight(),
-        updatedGoals
-      );
+      const updatedGoals = normalizeWeightGoals(data, undefined);
+      if (updatedGoals) {
+        queryClient.setQueryData<WeightGoals>(
+          queryKeys.goals.weight(),
+          updatedGoals,
+        );
+      }
     },
-    // No onSettled needed - API returns complete data with currentWeight
   });
 }
 
