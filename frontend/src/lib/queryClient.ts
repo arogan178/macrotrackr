@@ -1,5 +1,6 @@
-import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { QueryClient } from "@tanstack/react-query";
+import type { PersistedClient } from "@tanstack/react-query-persist-client";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -207,13 +208,13 @@ export const queryConfigs = {
  * - Offline support
  * - Reduced API calls
  */
-export const localStoragePersister = createSyncStoragePersister({
+export const localStoragePersister = createAsyncStoragePersister({
   storage: globalThis.localStorage,
   key: "macro-tracker-query-cache",
   // Don't persist mutations - only queries
   // Serialize/deserialize for storage
-  serialize: (data) => JSON.stringify(data),
-  deserialize: (data) => JSON.parse(data),
+  serialize: (data: PersistedClient) => JSON.stringify(data),
+  deserialize: (data: string) => JSON.parse(data) as PersistedClient,
 });
 
 /**
