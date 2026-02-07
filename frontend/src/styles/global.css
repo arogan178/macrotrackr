@@ -82,6 +82,11 @@ textarea {
   }
 }
 
+/* Floating notification offset */
+:root {
+  --floating-notification-top: 16px;
+}
+
 /* Scrollbar styling for webkit */
 ::-webkit-scrollbar {
   width: 6px;
