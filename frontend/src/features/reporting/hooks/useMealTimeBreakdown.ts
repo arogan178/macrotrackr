@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 
-import { MEAL_TYPES, formatMealType } from "@/utils/nutritionVisualizations";
+import { formatMealType,MEAL_TYPES } from "@/utils/nutritionVisualizations";
 
 import { getDayString } from "./useReportingLogic";
 
