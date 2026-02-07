@@ -3,7 +3,9 @@ import { useEffect, useMemo, useState, useCallback } from "react";
 import { NumberField } from "@/components/form";
 import { Button, RangeSlider } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
+import { todayISO } from "@/utils/dateUtilities";
 
+import { CALORIE_RANGE_LABELS } from "../constants";
 import { generateWeightGoalCalculations } from "../calculations";
 import { WeightGoalFormValues } from "../types";
 
@@ -11,35 +13,71 @@ interface WeightGoalFormProps {
   startingWeight: number;
   targetWeight: number;
   tdee: number;
-  weightGoals: WeightGoals | undefined | null; // If this exists, we are editing
-  isLoading?: boolean; // Prop received from modal (bound to store's isSaving)
+  weightGoals: WeightGoals | undefined | null;
+  isLoading?: boolean;
   onSave: (values: WeightGoalFormValues) => void;
   onCancel?: () => void;
 }
+
+type GoalType = keyof typeof CALORIE_RANGE_LABELS;
+
+// Determine goal type from weights
+const getGoalType = (
+  startingWeight: number | undefined,
+  targetWeight: number | undefined,
+): GoalType => {
+  if (!startingWeight || !targetWeight) return "maintain";
+  if (startingWeight > targetWeight) return "lose";
+  if (startingWeight < targetWeight) return "gain";
+  return "maintain";
+};
+
+// Calculate calorie range based on goal type
+const getCalorieRange = (
+  tdee: number,
+  goalType: GoalType,
+): { min: number; max: number } => {
+  const ranges = {
+    lose: { min: Math.max(tdee - 1000, 1200), max: tdee },
+    maintain: { min: tdee - 300, max: tdee + 300 },
+    gain: { min: tdee, max: tdee + 1000 },
+  };
+  return ranges[goalType];
+};
+
+// Get deficit/surplus display info
+const getCalorieAdjustmentInfo = (
+  tdee: number,
+  calorieIntake: number,
+  isWeightLoss: boolean,
+): { label: string; isLargeAdjustment: boolean } => {
+  const diff = Math.abs(tdee - calorieIntake);
+  const displayDiff = Math.max(diff, 50);
+  const label = isWeightLoss
+    ? `Deficit: ${displayDiff} kcal`
+    : `Surplus: ${displayDiff} kcal`;
+  const isLargeAdjustment = diff > 800;
+  return { label, isLargeAdjustment };
+};
 
 function WeightGoalForm({
   startingWeight,
   targetWeight,
   tdee,
   weightGoals,
-  isLoading = false, // Use the prop passed from the modal
+  isLoading = false,
   onSave,
   onCancel,
 }: WeightGoalFormProps) {
-  // Get today's date in YYYY-MM-DD format for the starting date
-  const todayString = new Date().toISOString().split("T")[0];
-
-  // Track if editing or creating
+  const todayString = todayISO();
   const isEditing = Boolean(weightGoals);
 
-  // Only initialize form state on mount or when switching between edit/create
   const [formValues, setFormValues] = useState<WeightGoalFormValues>(() => ({
     startingWeight: weightGoals?.startingWeight ?? startingWeight,
     targetWeight: weightGoals?.targetWeight ?? targetWeight ?? startingWeight,
     startDate: weightGoals?.startDate ?? todayString,
   }));
 
-  // When switching between edit/create, reset form state
   useEffect(() => {
     setFormValues({
       startingWeight: weightGoals?.startingWeight ?? startingWeight,
@@ -48,49 +86,55 @@ function WeightGoalForm({
     });
   }, [weightGoals, startingWeight, targetWeight, todayString]);
 
-  // Calorie intake is either user-adjusted or default from calculations
   const [calorieIntake, setCalorieIntake] = useState<number | undefined>(
-    weightGoals?.calorieTarget ?? undefined,
+    weightGoals?.calorieTarget,
   );
 
-  // Recalculate all derived values when calorieIntake or form values change
   const calculations = useMemo(() => {
-    return tdee && formValues.startingWeight && formValues.targetWeight
-      ? generateWeightGoalCalculations(
-          tdee,
-          formValues.startingWeight,
-          formValues.targetWeight,
-          calorieIntake,
-        )
-      : undefined;
+    if (!tdee || !formValues.startingWeight || !formValues.targetWeight)
+      return undefined;
+    return generateWeightGoalCalculations(
+      tdee,
+      formValues.startingWeight,
+      formValues.targetWeight,
+      calorieIntake,
+    );
   }, [tdee, formValues.startingWeight, formValues.targetWeight, calorieIntake]);
 
   // Initialize calorie intake when modal opens or switches between edit/create
-  // Only run when isEditing or weightGoals changes, NOT when calculations change
   useEffect(() => {
-    if (!isEditing) {
-      // Creating new goal - use calculated default
-      const defaultCalories =
-        tdee && formValues.startingWeight && formValues.targetWeight
-          ? generateWeightGoalCalculations(
-              tdee,
-              formValues.startingWeight,
-              formValues.targetWeight,
-              undefined,
-            )?.calorieTarget
-          : undefined;
-      setCalorieIntake(defaultCalories);
-    } else if (weightGoals?.calorieTarget !== undefined) {
-      // Editing existing goal - use saved value
+    if (isEditing && weightGoals?.calorieTarget !== undefined) {
       setCalorieIntake(weightGoals.calorieTarget);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isEditing, weightGoals]);
 
-  // Derived values for display
-  const calculatedTargetDate = calculations?.targetDate;
-  const weeklyWeightChange = calculations?.weeklyChange;
-  const calculatedWeeks = calculations?.calculatedWeeks;
+    if (
+      !isEditing &&
+      tdee &&
+      formValues.startingWeight &&
+      formValues.targetWeight
+    ) {
+      const defaultCalories = generateWeightGoalCalculations(
+        tdee,
+        formValues.startingWeight,
+        formValues.targetWeight,
+        undefined,
+      )?.calorieTarget;
+      setCalorieIntake(defaultCalories);
+    }
+  }, [
+    isEditing,
+    weightGoals,
+    tdee,
+    formValues.startingWeight,
+    formValues.targetWeight,
+  ]);
+
+  const {
+    targetDate: calculatedTargetDate,
+    weeklyChange: weeklyWeightChange,
+    calculatedWeeks,
+  } = calculations ?? {};
 
   const [hasChanges, setHasChanges] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<{
@@ -98,123 +142,104 @@ function WeightGoalForm({
     targetWeight?: string;
   }>({});
 
-  // Validation functions
-  const validateWeight = (value: number | undefined, fieldName: string): string | undefined => {
-    if (value === undefined || value === null) {
-      return `${fieldName} is required`;
-    }
-    if (value < 30) {
-      return `${fieldName} must be at least 30 kg`;
-    }
-    if (value > 300) {
-      return `${fieldName} must be at most 300 kg`;
-    }
-    return undefined;
-  };
-
-  // Keyboard shortcut: Ctrl+Enter to save
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent) => {
-      if (event.ctrlKey && event.key === "Enter" && hasChanges && !isLoading && formValues.targetWeight) {
-        event.preventDefault();
-        handleSave();
-      }
+  const validateWeight = useCallback(
+    (value: number | undefined, fieldName: string): string | undefined => {
+      if (value == null) return `${fieldName} is required`;
+      if (value < 30) return `${fieldName} must be at least 30 kg`;
+      if (value > 300) return `${fieldName} must be at most 300 kg`;
+      return undefined;
     },
-    [hasChanges, isLoading, formValues.targetWeight],
+    [],
   );
 
-  // Track if form has changes compared to initial values
-  useEffect(() => {
-    if (isEditing && weightGoals) {
-      // For editing, check if values have changed from existing goal
-      setHasChanges(
-        formValues.startingWeight !== weightGoals.startingWeight ||
-          formValues.targetWeight !== weightGoals.targetWeight ||
-          calorieIntake !== weightGoals.calorieTarget,
-      );
-    } else {
-      // For creating new goals, always allow saving if we have valid values
-      // This ensures maintenance goals (starting = target weight) can be created
-      setHasChanges(
-        formValues.startingWeight !== undefined &&
-          formValues.targetWeight !== undefined &&
-          calorieIntake !== undefined &&
-          formValues.startingWeight > 0 &&
-          formValues.targetWeight > 0 &&
-          calorieIntake > 0,
-      );
-    }
-  }, [
-    formValues,
-    startingWeight,
-    targetWeight,
-    calorieIntake,
-    weightGoals,
-    isEditing,
-  ]);
-
-  // Attach keyboard shortcut listener
-  useEffect(() => {
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [handleKeyDown]);
-
-  // Update calculations when calorie intake slider is changed
-  const handleCalorieIntakeChange = (value: number | undefined) => {
-    setCalorieIntake(value);
-  };
-
-  const handleSave = () => {
+  const handleSave = useCallback(() => {
     if (!formValues.targetWeight || !calorieIntake) return;
 
-    // Calculate daily change (deficit/surplus)
     const dailyChange = calorieIntake - tdee;
+    const goalType = getGoalType(
+      formValues.startingWeight,
+      formValues.targetWeight,
+    );
 
-    const completeGoal = {
+    onSave({
       startingWeight: formValues.startingWeight!,
       targetWeight: formValues.targetWeight,
       calorieTarget: calorieIntake,
       startDate: formValues.startDate || todayString,
       targetDate: calculatedTargetDate,
       weeklyChange: weeklyWeightChange,
-      calculatedWeeks: calculatedWeeks,
-      dailyChange: dailyChange,
-      weightGoal:
-        formValues.startingWeight! > formValues.targetWeight!
-          ? "lose"
-          : formValues.startingWeight! < formValues.targetWeight!
-            ? "gain"
-            : "maintain",
-    };
+      calculatedWeeks,
+      dailyChange,
+      weightGoal: goalType,
+    });
+  }, [
+    formValues,
+    calorieIntake,
+    tdee,
+    calculatedTargetDate,
+    weeklyWeightChange,
+    calculatedWeeks,
+    onSave,
+    todayString,
+  ]);
 
-    onSave(completeGoal);
-  };
-
-  // Determine if it's a weight loss, gain, or maintenance goal
-  const isWeightLoss =
-    formValues.startingWeight! > (formValues.targetWeight || 0);
-  // const isWeightGain =
-  //   formValues.startingWeight < (formValues.targetWeight || 0);
-  const isMaintenance =
-    formValues.startingWeight === formValues.targetWeight &&
-    formValues.targetWeight !== undefined;
-
-  const minCalorieIntake = isWeightLoss
-    ? Math.max(tdee - 1000, 1200)
-    : isMaintenance
-      ? tdee - 300
-      : tdee;
-
-  const maxCalorieIntake = isWeightLoss
-    ? tdee
-    : isMaintenance
-      ? tdee + 300
-      : tdee + 1000;
+  // Keyboard shortcut: Ctrl+Enter to save
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (
+        event.ctrlKey &&
+        event.key === "Enter" &&
+        hasChanges &&
+        !isLoading &&
+        formValues.targetWeight
+      ) {
+        event.preventDefault();
+        handleSave();
+      }
+    },
+    [hasChanges, isLoading, formValues.targetWeight, handleSave],
+  );
 
   useEffect(() => {
-    if (calorieIntake === undefined) return;
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [handleKeyDown]);
+
+  // Track form changes
+  useEffect(() => {
+    if (isEditing && weightGoals) {
+      setHasChanges(
+        formValues.startingWeight !== weightGoals.startingWeight ||
+          formValues.targetWeight !== weightGoals.targetWeight ||
+          calorieIntake !== weightGoals.calorieTarget,
+      );
+    } else {
+      setHasChanges(
+        formValues.startingWeight != null &&
+          formValues.targetWeight != null &&
+          calorieIntake != null &&
+          formValues.startingWeight > 0 &&
+          formValues.targetWeight > 0 &&
+          calorieIntake > 0,
+      );
+    }
+  }, [formValues, calorieIntake, weightGoals, isEditing]);
+
+  const goalType = getGoalType(
+    formValues.startingWeight,
+    formValues.targetWeight,
+  );
+  const isWeightLoss = goalType === "lose";
+  const isMaintenance = goalType === "maintain";
+
+  const { min: minCalorieIntake, max: maxCalorieIntake } = getCalorieRange(
+    tdee,
+    goalType,
+  );
+
+  // Clamp calorie intake to valid range
+  useEffect(() => {
+    if (calorieIntake == null) return;
     const clamped = Math.min(
       maxCalorieIntake,
       Math.max(minCalorieIntake, calorieIntake),
@@ -223,6 +248,12 @@ function WeightGoalForm({
       setCalorieIntake(clamped);
     }
   }, [calorieIntake, minCalorieIntake, maxCalorieIntake]);
+
+  const calorieLabels = CALORIE_RANGE_LABELS[goalType];
+  const adjustmentInfo =
+    calorieIntake != null
+      ? getCalorieAdjustmentInfo(tdee, calorieIntake, isWeightLoss)
+      : null;
 
   return (
     <div className="p-6">
@@ -245,7 +276,9 @@ function WeightGoalForm({
             disabled={Boolean(weightGoals)}
           />
           {fieldErrors.startingWeight && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.startingWeight}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {fieldErrors.startingWeight}
+            </p>
           )}
         </div>
 
@@ -265,7 +298,9 @@ function WeightGoalForm({
             required
           />
           {fieldErrors.targetWeight && (
-            <p className="mt-1 text-sm text-red-500">{fieldErrors.targetWeight}</p>
+            <p className="mt-1 text-sm text-red-500">
+              {fieldErrors.targetWeight}
+            </p>
           )}
         </div>
       </div>
@@ -285,7 +320,7 @@ function WeightGoalForm({
 
           <RangeSlider
             value={calorieIntake}
-            onChange={(value) => handleCalorieIntakeChange(value)}
+            onChange={setCalorieIntake}
             min={minCalorieIntake}
             max={maxCalorieIntake}
             step={50}
@@ -295,26 +330,10 @@ function WeightGoalForm({
             unit="calories"
           />
           <div className="mt-1 flex justify-between text-xs text-muted">
-              {isWeightLoss ? (
-                <>
-                  <span>Faster</span>
-                  <span>TDEE ({tdee})</span>
-                  <span>Slower</span>
-                </>
-              ) : isMaintenance ? (
-                <>
-                  <span>Less calories</span>
-                  <span>TDEE ({tdee})</span>
-                  <span>More calories</span>
-                </>
-              ) : (
-                <>
-                  <span>Slower</span>
-                  <span>TDEE ({tdee})</span>
-                  <span>Faster</span>
-                </>
-              )}
-            </div>
+            <span>{calorieLabels.min}</span>
+            <span>TDEE ({tdee})</span>
+            <span>{calorieLabels.max}</span>
+          </div>
 
           {!isMaintenance && (
             <div className="rounded-lg bg-surface p-3">
@@ -346,32 +365,24 @@ function WeightGoalForm({
                   ? "Calculating..."
                   : `${calculatedWeeks} weeks`}
               </p>
-              <div className="mt-2 border-t border-border/30 pt-2">
-                <p className="flex justify-between text-xs text-muted">
-                  <span>
-                    {(() => {
-                      const diff = Math.abs(tdee - calorieIntake);
-                      const displayDiff = Math.max(diff, 50);
-                      return isWeightLoss
-                        ? `Deficit: ${displayDiff} kcal`
-                        : `Surplus: ${displayDiff} kcal`;
-                    })()}
-                  </span>
-                  <span
-                    className={
-                      (isWeightLoss && Math.abs(tdee - calorieIntake) > 800) ||
-                      (!isWeightLoss && Math.abs(tdee - calorieIntake) > 800)
-                        ? "text-vibrant-accent"
-                        : "text-success"
-                    }
-                  >
-                    {(isWeightLoss && Math.abs(tdee - calorieIntake) > 800) ||
-                    (!isWeightLoss && Math.abs(tdee - calorieIntake) > 800)
-                      ? "Large adjustment"
-                      : "Healthy range"}
-                  </span>
-                </p>
-              </div>
+              {adjustmentInfo && (
+                <div className="mt-2 border-t border-border/30 pt-2">
+                  <p className="flex justify-between text-xs text-muted">
+                    <span>{adjustmentInfo.label}</span>
+                    <span
+                      className={
+                        adjustmentInfo.isLargeAdjustment
+                          ? "text-vibrant-accent"
+                          : "text-success"
+                      }
+                    >
+                      {adjustmentInfo.isLargeAdjustment
+                        ? "Large adjustment"
+                        : "Healthy range"}
+                    </span>
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
@@ -403,7 +414,13 @@ function WeightGoalForm({
         <Button
           type="button"
           variant="primary"
-          disabled={!hasChanges || isLoading || !formValues.targetWeight || fieldErrors.startingWeight || fieldErrors.targetWeight}
+          disabled={
+            !hasChanges ||
+            isLoading ||
+            !formValues.targetWeight ||
+            Boolean(fieldErrors.startingWeight) ||
+            Boolean(fieldErrors.targetWeight)
+          }
           isLoading={isLoading}
           onClick={handleSave}
         >
