@@ -195,6 +195,17 @@ export function useAddWeightLogEntry() {
       });
       await queryClient.cancelQueries({ queryKey: queryKeys.goals.weight() });
 
+      // Snapshot previous values for rollback on error
+      const previousWeightLog = queryClient.getQueryData<WeightLogEntry[]>(
+        queryKeys.goals.weightLog(),
+      );
+      const previousWeightGoals = queryClient.getQueryData<WeightGoals | null>(
+        queryKeys.goals.weight(),
+      );
+      const previousUser = queryClient.getQueryData<{ weight?: number } | null>(
+        queryKeys.auth.user(),
+      );
+
       // Create optimistic entry with temporary ID
       const optimisticEntry: WeightLogEntry = {
         id: `temp-${Date.now()}`,
@@ -229,7 +240,20 @@ export function useAddWeightLogEntry() {
         },
       );
 
-      return { optimisticEntry };
+      return { optimisticEntry, previousWeightLog, previousWeightGoals, previousUser };
+    },
+    onError: (error, _variables, context) => {
+      // Rollback all optimistic updates on error
+      if (context?.previousWeightLog) {
+        queryClient.setQueryData(queryKeys.goals.weightLog(), context.previousWeightLog);
+      }
+      if (context?.previousWeightGoals) {
+        queryClient.setQueryData(queryKeys.goals.weight(), context.previousWeightGoals);
+      }
+      if (context?.previousUser) {
+        queryClient.setQueryData(queryKeys.auth.user(), context.previousUser);
+      }
+      console.error("Failed to add weight log entry:", error);
     },
     onSuccess: (newEntry, _variables, context) => {
       // Replace optimistic entry with real data from server
