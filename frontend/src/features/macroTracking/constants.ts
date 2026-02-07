@@ -1,12 +1,7 @@
-import { MacroDailyTotals, MealType } from "@/types/macro";
+import { MealType } from "@/types/macro";
 
-// Default values
-export const DEFAULT_MACRO_TOTALS: MacroDailyTotals = {
-  protein: 0,
-  carbs: 0,
-  fats: 0,
-  calories: 0,
-};
+// Default values - re-export from centralized constants
+export { DEFAULT_MACRO_TOTALS } from "@/utils/constants/nutrition";
 
 // Calorie conversion constants now imported from shared
 
