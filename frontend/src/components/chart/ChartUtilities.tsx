@@ -1,5 +1,8 @@
 import React from "react";
 
+// Re-export color constants from centralized location
+export { MACRO_COLORS, MEAL_COLORS } from "@/utils/chartColors";
+
 /**
  * Create a linear gradient definition for a chart
  * Unified gradient helper used across charts.
@@ -130,44 +133,6 @@ export const PercentageLabel = React.memo(function PercentageLabel(
   );
 });
 PercentageLabel.displayName = "PercentageLabel";
-
-/**
- * Centralized gradient color schemes
- */
-export const COLOR_SCHEMES = {
-  macro: {
-    protein: {
-      base: "#34d399", // green-400
-      gradient: ["#10b981", "#34d399"] as [string, string],
-    },
-    carbs: {
-      base: "#60a5fa", // blue-400
-      gradient: ["#3b82f6", "#60a5fa"] as [string, string],
-    },
-    fats: {
-      base: "#f87171", // red-400
-      gradient: ["#ef4444", "#f87171"] as [string, string],
-    },
-  },
-  mealType: {
-    breakfast: {
-      base: "#60a5fa", // blue-400
-      gradient: ["#3b82f6", "#60a5fa"] as [string, string],
-    },
-    lunch: {
-      base: "#34d399", // green-400
-      gradient: ["#10b981", "#34d399"] as [string, string],
-    },
-    dinner: {
-      base: "#f87171", // red-400
-      gradient: ["#ef4444", "#f87171"] as [string, string],
-    },
-    snack: {
-      base: "#a78bfa", // purple-400
-      gradient: ["#8b5cf6", "#a78bfa"] as [string, string],
-    },
-  },
-};
 
 /**
  * Format to nicely capitalize words
