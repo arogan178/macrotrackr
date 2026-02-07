@@ -5,6 +5,7 @@ import {
   useCreateWeightGoal,
   useUpdateWeightGoal,
 } from "@/hooks/queries/useGoals";
+import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 
 import { WeightGoalFormValues } from "../types";
@@ -29,6 +30,7 @@ function WeightGoalModal({
 }: WeightGoalModalProps) {
   const createWeightGoalMutation = useCreateWeightGoal();
   const updateWeightGoalMutation = useUpdateWeightGoal();
+  const { showNotification } = useStore();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleSave = async (values: WeightGoalFormValues) => {
@@ -41,6 +43,12 @@ function WeightGoalModal({
       await (hasExistingGoal
         ? updateWeightGoalMutation.mutateAsync({ goals: values, tdee })
         : createWeightGoalMutation.mutateAsync({ goals: values, tdee }));
+
+      // Show success notification
+      showNotification(
+        hasExistingGoal ? "Weight goal updated successfully!" : "Weight goal created successfully!",
+        "success"
+      );
 
       onClose();
     } catch (error: any) {
