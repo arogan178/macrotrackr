@@ -20,8 +20,8 @@ import WeightGoalModal from "@/features/goals/components/WeightGoalModal";
 import WeightProgressTabs from "@/features/goals/components/WeightProgressTabs";
 import { useGoalsPage } from "@/features/goals/hooks/page";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
-import { queryKeys } from "@/lib/queryKeys";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { queryKeys } from "@/lib/queryKeys";
 
 export default function GoalsPage() {
   const { ui, data, actions } = useGoalsPage();
