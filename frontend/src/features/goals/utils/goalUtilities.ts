@@ -1,7 +1,7 @@
-import type { WeightGoalsResponse } from "../types";
 import type { WeightGoalFormValues, WeightGoals } from "@/types/goal";
 
 import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
+import type { WeightGoalsResponse } from "../types";
 
 // Type guard to check if goals is already WeightGoals
 const isWeightGoals = (goals: unknown): goals is WeightGoals => {
