@@ -1,12 +1,12 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useCallback,useEffect, useMemo, useState } from "react";
 
 import { NumberField } from "@/components/form";
 import { Button, RangeSlider } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";
 
-import { CALORIE_RANGE_LABELS } from "../constants";
 import { generateWeightGoalCalculations } from "../calculations";
+import { CALORIE_RANGE_LABELS } from "../constants";
 import { WeightGoalFormValues } from "../types";
 
 interface WeightGoalFormProps {
@@ -144,7 +144,7 @@ function WeightGoalForm({
 
   const validateWeight = useCallback(
     (value: number | undefined, fieldName: string): string | undefined => {
-      if (value == null) return `${fieldName} is required`;
+      if (value == undefined) return `${fieldName} is required`;
       if (value < 30) return `${fieldName} must be at least 30 kg`;
       if (value > 300) return `${fieldName} must be at most 300 kg`;
       return undefined;
@@ -215,9 +215,9 @@ function WeightGoalForm({
       );
     } else {
       setHasChanges(
-        formValues.startingWeight != null &&
-          formValues.targetWeight != null &&
-          calorieIntake != null &&
+        formValues.startingWeight != undefined &&
+          formValues.targetWeight != undefined &&
+          calorieIntake != undefined &&
           formValues.startingWeight > 0 &&
           formValues.targetWeight > 0 &&
           calorieIntake > 0,
@@ -239,7 +239,7 @@ function WeightGoalForm({
 
   // Clamp calorie intake to valid range
   useEffect(() => {
-    if (calorieIntake == null) return;
+    if (calorieIntake == undefined) return;
     const clamped = Math.min(
       maxCalorieIntake,
       Math.max(minCalorieIntake, calorieIntake),
@@ -251,9 +251,9 @@ function WeightGoalForm({
 
   const calorieLabels = CALORIE_RANGE_LABELS[goalType];
   const adjustmentInfo =
-    calorieIntake != null
-      ? getCalorieAdjustmentInfo(tdee, calorieIntake, isWeightLoss)
-      : null;
+    calorieIntake == undefined
+      ? null
+      : getCalorieAdjustmentInfo(tdee, calorieIntake, isWeightLoss);
 
   return (
     <div className="p-6">
@@ -265,7 +265,7 @@ function WeightGoalForm({
             onChange={(value: number | undefined) => {
               setFormValues({ ...formValues, startingWeight: value || 0 });
               const error = validateWeight(value, "Starting weight");
-              setFieldErrors((prev) => ({ ...prev, startingWeight: error }));
+              setFieldErrors((previous) => ({ ...previous, startingWeight: error }));
             }}
             unit="kg"
             min={30}
@@ -289,7 +289,7 @@ function WeightGoalForm({
             onChange={(value: number | undefined) => {
               setFormValues({ ...formValues, targetWeight: value });
               const error = validateWeight(value, "Target weight");
-              setFieldErrors((prev) => ({ ...prev, targetWeight: error }));
+              setFieldErrors((previous) => ({ ...previous, targetWeight: error }));
             }}
             unit="kg"
             min={30}
