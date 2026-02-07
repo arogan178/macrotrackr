@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 
 import { NumberField } from "@/components/form";
 import { Button, RangeSlider } from "@/components/ui";
@@ -93,6 +93,35 @@ function WeightGoalForm({
   const calculatedWeeks = calculations?.calculatedWeeks;
 
   const [hasChanges, setHasChanges] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<{
+    startingWeight?: string;
+    targetWeight?: string;
+  }>({});
+
+  // Validation functions
+  const validateWeight = (value: number | undefined, fieldName: string): string | undefined => {
+    if (value === undefined || value === null) {
+      return `${fieldName} is required`;
+    }
+    if (value < 30) {
+      return `${fieldName} must be at least 30 kg`;
+    }
+    if (value > 300) {
+      return `${fieldName} must be at most 300 kg`;
+    }
+    return undefined;
+  };
+
+  // Keyboard shortcut: Ctrl+Enter to save
+  const handleKeyDown = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.key === "Enter" && hasChanges && !isLoading && formValues.targetWeight) {
+        event.preventDefault();
+        handleSave();
+      }
+    },
+    [hasChanges, isLoading, formValues.targetWeight],
+  );
 
   // Track if form has changes compared to initial values
   useEffect(() => {
@@ -123,6 +152,14 @@ function WeightGoalForm({
     weightGoals,
     isEditing,
   ]);
+
+  // Attach keyboard shortcut listener
+  useEffect(() => {
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleKeyDown]);
 
   // Update calculations when calorie intake slider is changed
   const handleCalorieIntakeChange = (value: number | undefined) => {
@@ -190,33 +227,47 @@ function WeightGoalForm({
   return (
     <div className="p-6">
       <div className="mb-5 grid grid-cols-1 gap-5 md:grid-cols-2">
-        <NumberField
-          label="Starting Weight"
-          value={formValues.startingWeight}
-          onChange={(value: number | undefined) =>
-            setFormValues({ ...formValues, startingWeight: value || 0 })
-          }
-          unit="kg"
-          min={30}
-          max={300}
-          step={0.1}
-          required
-          // Disable only if editing an existing goal (weightGoals is not undefined)
-          disabled={Boolean(weightGoals)}
-        />
+        <div>
+          <NumberField
+            label="Starting Weight"
+            value={formValues.startingWeight}
+            onChange={(value: number | undefined) => {
+              setFormValues({ ...formValues, startingWeight: value || 0 });
+              const error = validateWeight(value, "Starting weight");
+              setFieldErrors((prev) => ({ ...prev, startingWeight: error }));
+            }}
+            unit="kg"
+            min={30}
+            max={300}
+            step={0.1}
+            required
+            // Disable only if editing an existing goal (weightGoals is not undefined)
+            disabled={Boolean(weightGoals)}
+          />
+          {fieldErrors.startingWeight && (
+            <p className="mt-1 text-sm text-red-500">{fieldErrors.startingWeight}</p>
+          )}
+        </div>
 
-        <NumberField
-          label="Target Weight"
-          value={formValues.targetWeight}
-          onChange={(value: number | undefined) =>
-            setFormValues({ ...formValues, targetWeight: value })
-          }
-          unit="kg"
-          min={30}
-          max={300}
-          step={0.1}
-          required
-        />
+        <div>
+          <NumberField
+            label="Target Weight"
+            value={formValues.targetWeight}
+            onChange={(value: number | undefined) => {
+              setFormValues({ ...formValues, targetWeight: value });
+              const error = validateWeight(value, "Target weight");
+              setFieldErrors((prev) => ({ ...prev, targetWeight: error }));
+            }}
+            unit="kg"
+            min={30}
+            max={300}
+            step={0.1}
+            required
+          />
+          {fieldErrors.targetWeight && (
+            <p className="mt-1 text-sm text-red-500">{fieldErrors.targetWeight}</p>
+          )}
+        </div>
       </div>
       {tdee && calorieIntake !== undefined && formValues.targetWeight && (
         <div className="mb-6 space-y-3">
@@ -240,6 +291,8 @@ function WeightGoalForm({
             step={50}
             showFillTrack={true}
             trackColorClass="bg-vibrant-accent"
+            ariaLabelledBy="calorie-intake-range"
+            unit="calories"
           />
           <div className="mt-1 flex justify-between text-xs text-muted">
               {isWeightLoss ? (
@@ -350,11 +403,11 @@ function WeightGoalForm({
         <Button
           type="button"
           variant="primary"
-          disabled={!hasChanges || isLoading || !formValues.targetWeight} // Use isLoading prop
-          isLoading={isLoading} // Pass isLoading prop to button
+          disabled={!hasChanges || isLoading || !formValues.targetWeight || fieldErrors.startingWeight || fieldErrors.targetWeight}
+          isLoading={isLoading}
           onClick={handleSave}
         >
-          {weightGoals ? "Update Goal" : "Set Goal"}{" "}
+          {weightGoals ? "Update Goal" : "Set Goal"}
         </Button>
       </div>
     </div>
