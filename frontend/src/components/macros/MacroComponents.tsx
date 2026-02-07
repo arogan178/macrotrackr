@@ -2,7 +2,7 @@ import { memo } from "react";
 
 import { AnimatedNumber } from "@/components/animation";
 import ProgressBar from "@/components/ui/ProgressBar";
-import { calculateCaloriePercentages } from "@/utils/nutrition";
+import { calculateCaloriePercentages } from "@/utils/nutritionCalculations";
 import type { MacroNutrients } from "@/utils/nutritionTypes";
 
 interface MacroBarProps {
