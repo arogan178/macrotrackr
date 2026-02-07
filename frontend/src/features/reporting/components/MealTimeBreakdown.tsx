@@ -21,9 +21,9 @@ import {
 } from "@/components/chart/ChartUtilities";
 import TabBar from "@/components/ui/TabBar";
 import { getUnitForStat, MEAL_COLORS, STAT_COLORS } from "@/utils/chartColors";
+import { formatMealType } from "@/utils/nutritionVisualizations";
 
 import {
-  formatMealType,
   MacroEntry,
   useMealTimeBreakdown,
 } from "../hooks/useMealTimeBreakdown";
