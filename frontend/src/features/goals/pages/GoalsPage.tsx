@@ -2,7 +2,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
@@ -19,39 +19,38 @@ import WeightGoalDashboard from "@/features/goals/components/WeightGoalDashboard
 import WeightGoalModal from "@/features/goals/components/WeightGoalModal";
 import WeightProgressTabs from "@/features/goals/components/WeightProgressTabs";
 import { useGoalsPage } from "@/features/goals/hooks/page";
+import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { queryKeys } from "@/lib/queryKeys";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import type { WeightGoals } from "@/types/goal";
 
 export default function GoalsPage() {
-  // Ensure the hook import path is correct and name is in scope
   const { ui, data, actions } = useGoalsPage();
   const queryClient = useQueryClient();
 
   usePageDataSync();
 
-  const currentWeightGoals = data.currentWeightGoals;
-  const user = data.user;
-  const nutritionProfile = data.nutritionProfile;
-  const macroTarget = data.macroTarget;
-  const macroDailyTotals = data.macroDailyTotals;
-  const habits = data.habits;
-  const habitsLoading = data.habitsLoading;
-  const hasErrors = data.hasErrors;
-  const safeTargetWeight =
-    currentWeightGoals?.targetWeight || user?.weight || 0;
+  const {
+    currentWeightGoals,
+    user,
+    nutritionProfile,
+    macroTarget,
+    macroDailyTotals,
+    habits,
+    habitsLoading,
+    hasErrors,
+  } = data;
 
-  // Memoize normalized weight goals to prevent infinite re-renders in WeightGoalForm
+  const safeTargetWeight = currentWeightGoals?.targetWeight ?? user?.weight ?? 0;
+
   const normalizedWeightGoals = useMemo(
-    () => normalizeWeightGoalsFromResponse(currentWeightGoals, user?.weight),
+    () => normalizeWeightGoals(currentWeightGoals, user?.weight),
     [currentWeightGoals, user?.weight],
   );
 
-  const handleRetry = () => {
-    // Refetch all goal-related queries
+  const handleRetry = useCallback(() => {
     queryClient.refetchQueries({ queryKey: queryKeys.goals.all() });
     queryClient.refetchQueries({ queryKey: queryKeys.auth.user() });
-  };
+  }, [queryClient]);
 
   return (
     <DashboardPageContainer>
@@ -155,9 +154,9 @@ export default function GoalsPage() {
               key="weight-goal-modal"
               isOpen={ui.isWeightGoalModalOpen}
               onClose={actions.closeWeightGoalModal}
-              startingWeight={user?.weight || 0}
+              startingWeight={user?.weight ?? 0}
               targetWeight={safeTargetWeight}
-              tdee={nutritionProfile?.tdee || 0}
+              tdee={nutritionProfile?.tdee ?? 0}
               weightGoals={normalizedWeightGoals}
             />
           )}
@@ -187,8 +186,8 @@ export default function GoalsPage() {
                         isLoading={false}
                         onOpenModal={actions.openWeightGoalModal}
                         onDelete={actions.openDeleteConfirmModal}
-                        macroTarget={macroTarget || undefined}
-                        tdee={nutritionProfile?.tdee || 0}
+                        macroTarget={macroTarget ?? undefined}
+                        tdee={nutritionProfile?.tdee ?? 0}
                       />
                     )}
                     <WeightProgressTabs />
@@ -226,69 +225,4 @@ export default function GoalsPage() {
       </FeaturePage>
     </DashboardPageContainer>
   );
-}
-// Local helper to normalize WeightGoalsResponse to WeightGoals without changing behavior
-function normalizeWeightGoalsFromResponse(
-  goals:
-    | import("@/features/goals/types").WeightGoalsResponse
-    | WeightGoals
-    | undefined,
-  userWeight: number | undefined,
-): WeightGoals | undefined {
-  if (!goals) return undefined;
-
-  // If it's already a WeightGoals (from query in some cases), return as-is with safe defaults
-  if ("currentWeight" in goals) {
-    const g = goals as WeightGoals;
-    return {
-      startingWeight: g.startingWeight ?? 0,
-      currentWeight: g.currentWeight ?? userWeight ?? 0,
-      targetWeight: g.targetWeight ?? 0,
-      weightGoal: g.weightGoal ?? "maintain",
-      startDate: g.startDate ?? "",
-      targetDate: g.targetDate ?? "",
-      calorieTarget: g.calorieTarget ?? 0,
-      calculatedWeeks: g.calculatedWeeks ?? 0,
-      weeklyChange: g.weeklyChange ?? 0,
-      dailyChange: g.dailyChange ?? 0,
-    };
-  }
-
-  // Otherwise it's a WeightGoalsResponse (loader shape) — map to WeightGoals
-  const r = goals as import("@/features/goals/types").WeightGoalsResponse;
-  if (r.targetWeight === undefined) return undefined;
-  // Prevent premature 100% progress: if we have no explicit current weight yet
-  // and the only source is userWeight which equals the target while starting differs,
-  // treat current weight as starting weight until a log entry updates it.
-  const starting = r.startingWeight;
-  const target = r.targetWeight ?? 0;
-  const tentativeCurrent = userWeight ?? starting;
-  // Progress glitch fix:
-  // When the loader response does not yet include a derived currentWeight and there are
-  // no weight log entries, we previously defaulted currentWeight to userWeight. If the
-  // userWeight already equals the new targetWeight (common after finishing a prior goal
-  // and immediately setting a new, more aggressive target), progress falsely rendered
-  // as 100% until a refresh. To prevent this, treat the current weight as the starting
-  // weight in the specific case where:
-  //   - startingWeight !== targetWeight (active non-maintenance goal)
-  //   - userWeight (tentativeCurrent) === targetWeight
-  // This defers showing full completion until an actual weight log entry moves the
-  // currentWeight toward the target.
-  const currentWeight =
-    starting !== target && tentativeCurrent === target
-      ? starting
-      : tentativeCurrent;
-
-  return {
-    startingWeight: starting,
-    currentWeight,
-    targetWeight: target,
-    weightGoal: (r as any).weightGoal ?? "maintain",
-    startDate: (r as any).startDate ?? "",
-    targetDate: (r as any).targetDate ?? "",
-    calorieTarget: (r as any).calorieTarget ?? 0,
-    calculatedWeeks: (r as any).calculatedWeeks ?? 0,
-    weeklyChange: (r as any).weeklyChange ?? 0,
-    dailyChange: (r as any).dailyChange ?? 0,
-  } as WeightGoals;
 }
