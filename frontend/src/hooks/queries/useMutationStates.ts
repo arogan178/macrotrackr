@@ -9,7 +9,7 @@ import { queryKeys } from "@/lib/queryKeys";
 export function useWeightGoalMutationsPending() {
   const mutations = useMutationState({
     filters: {
-      mutationKey: ["goals"],
+      mutationKey: queryKeys.goals.weight(),
     },
   });
 
