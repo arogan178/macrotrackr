@@ -3,6 +3,7 @@ import { getMacroDensitySummary } from "./service";
 import { toCamelCase } from "../../lib/responses";
 import { db } from "../../db";
 import { authMiddleware } from "../../middleware/auth";
+import type { AuthenticatedContext } from "../../middleware/auth";
 
 // Response schema for nutrient density summary
 const NutrientDensityItemSchema = t.Object({
@@ -21,8 +22,8 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
   .use(authMiddleware)
   .get(
     "/nutrient-density-summary",
-    async (ctx: any) => {
-      const { user, query } = ctx;
+    async (context: any) => {
+      const { user, query } = context as AuthenticatedContext & { query?: Record<string, string | undefined> };
       
       // Accepts: startDate, endDate, groupBy (e.g., week, month)
       const { startDate, endDate, groupBy } = query ?? {};
