@@ -1,4 +1,5 @@
 // src/middleware/auth.ts
+import type { Database } from "bun:sqlite";
 import { Elysia, type Static } from "elysia";
 import { jwt as jwtPlugin } from "@elysiajs/jwt";
 import { AuthSchemas } from "../modules/auth/schemas";
@@ -111,9 +112,15 @@ export const authMiddleware = new Elysia({ name: "authMiddleware" })
 // Export types
 export type AuthenticatedUserPayload = Static<typeof AuthSchemas.jwtPayload>;
 
-export type AuthenticatedContext = {
+export interface AuthenticatedContext {
   user: AuthenticatedUserPayload;
-  db: import("bun:sqlite").Database;
+  db: Database;
   jwt: ReturnType<typeof jwtPlugin>["decorator"]["jwt"];
-  set: any;
-};
+  set: {
+    headers: Record<string, string>;
+    status?: number;
+  };
+  request: Request;
+  path: string;
+  query: Record<string, string | undefined>;
+}
