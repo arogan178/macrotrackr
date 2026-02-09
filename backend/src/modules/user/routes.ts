@@ -14,10 +14,25 @@ import { toCamelCase, handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
 import { hashPassword, verifyPassword } from "../../lib/password";
 import { SubscriptionService } from "../billing/subscription-service";
+import type { Database } from "bun:sqlite";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
   value === undefined || value === null ? null : value;
+
+// Type for user details query result
+interface UserDetailsResult {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  created_at: string;
+  date_of_birth: string | null;
+  height: number | null;
+  weight: number | null;
+  gender: "male" | "female" | null;
+  activity_level: number | null;
+}
 
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
@@ -29,10 +44,10 @@ export const userRoutes = (app: Elysia) =>
         "/me",
         async (context: any) => {
           try {
-            const { db, user } = context as AuthenticatedContext;
+            const { db, user } = context as AuthenticatedContext & { db: Database };
 
             // Fetch user details
-            const dbResult = safeQuery<any>(
+            const dbResult = safeQuery<UserDetailsResult>(
               db,
               `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
@@ -51,7 +66,9 @@ export const userRoutes = (app: Elysia) =>
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
             const result = toCamelCase(dbResult);
-            result.subscription = {
+            
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (result as Record<string, any>).subscription = {
               status: subscriptionInfo.subscription_status,
               hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
               currentPeriodEnd:
@@ -78,12 +95,17 @@ export const userRoutes = (app: Elysia) =>
         "/settings",
         async (context: any) => {
           try {
-            const { db, user, body } = context as AuthenticatedContext & {
-              body: typeof UserSchemas.userSettingsUpdate.static;
-            };
+            const { db, user, body, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+
+            if (!body) {
+              throw new Error("Request body is required");
+            }
+
+            // Get correlation ID from request headers if available
+            const correlationId = request.headers.get("x-correlation-id") || undefined;
 
             loggerHelpers.apiRequest("PUT", "/user/settings", user.userId, {
-              correlationId: (context.request as any)?.correlationId,
+              correlationId,
             });
 
             const {
@@ -95,7 +117,16 @@ export const userRoutes = (app: Elysia) =>
               weight,
               gender,
               activityLevel,
-            } = body;
+            } = body as {
+              firstName?: string;
+              lastName?: string;
+              email?: string;
+              dateOfBirth?: string;
+              height?: number;
+              weight?: number;
+              gender?: "male" | "female";
+              activityLevel?: number;
+            };
 
             return await withTransaction(db, async () => {
               // Check for current weight before updates
@@ -220,20 +251,30 @@ export const userRoutes = (app: Elysia) =>
         "/complete-profile",
         async (context: any) => {
           try {
-            const { db, user, body } = context as AuthenticatedContext & {
-              body: typeof UserSchemas.profileCompletion.static;
-            };
+            const { db, user, body, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+
+            if (!body) {
+              throw new Error("Request body is required");
+            }
+
+            // Get correlation ID from request headers if available
+            const correlationId = request.headers.get("x-correlation-id") || undefined;
 
             loggerHelpers.apiRequest(
               "POST",
               "/user/complete-profile",
               user.userId,
               {
-                correlationId: (context.request as any)?.correlationId,
+                correlationId,
               }
             );
 
-            const { dateOfBirth, height, weight, activityLevel } = body;
+            const { dateOfBirth, height, weight, activityLevel } = body as {
+              dateOfBirth?: string;
+              height?: number;
+              weight?: number;
+              activityLevel?: number;
+            };
 
             return await withTransaction(db, async () => {
               // Upsert user_details
@@ -296,11 +337,16 @@ export const userRoutes = (app: Elysia) =>
         "/password",
         async (context: any) => {
           try {
-            const { db, user, body } = context as AuthenticatedContext & {
-              body: typeof UserSchemas.changePassword.static;
-            };
+            const { db, user, body } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown> };
 
-            const { currentPassword, newPassword } = body;
+            if (!body) {
+              throw new Error("Request body is required");
+            }
+
+            const { currentPassword, newPassword } = body as {
+              currentPassword: string;
+              newPassword: string;
+            };
 
             return await withTransaction(db, async () => {
               const dbUser = safeQuery<{ password?: string }>(
