@@ -40,6 +40,7 @@ export function useCreateWeightGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: queryKeys.goals.weight(),
     mutationFn: async ({
       goals,
       tdee,
@@ -95,6 +96,7 @@ export function useUpdateWeightGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: queryKeys.goals.weight(),
     mutationFn: async ({
       goals,
       tdee,
@@ -130,6 +132,7 @@ export function useDeleteWeightGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.goals.weight(), "delete"],
     mutationFn: async () => {
       return await apiService.goals.deleteWeightGoals();
     },
@@ -144,11 +147,24 @@ export function useDeleteWeightGoal() {
   });
 }
 
+// Counter for generating unique optimistic IDs
+let optimisticIdCounter = 0;
+
+/**
+ * Generate a unique client-side ID for optimistic updates
+ * Uses a counter combined with timestamp to ensure uniqueness even with rapid successive calls
+ */
+function generateOptimisticId(): string {
+  optimisticIdCounter += 1;
+  return `optimistic-${Date.now()}-${optimisticIdCounter}`;
+}
+
 // Mutation hook for adding weight log entry with optimistic updates
 export function useAddWeightLogEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.goals.weightLog(), "add"],
     mutationFn: async (
       payload: AddWeightLogPayload,
     ): Promise<WeightLogEntry> => {
@@ -172,9 +188,9 @@ export function useAddWeightLogEntry() {
         queryKeys.auth.user(),
       );
 
-      // Create optimistic entry with temporary ID
+      // Create optimistic entry with unique temporary ID
       const optimisticEntry: WeightLogEntry = {
-        id: `temp-${Date.now()}`,
+        id: generateOptimisticId(),
         weight: variables.weight,
         timestamp: variables.timestamp,
       };
@@ -221,15 +237,48 @@ export function useAddWeightLogEntry() {
       }
       console.error("Failed to add weight log entry:", error);
     },
-    onSuccess: (newEntry, _variables, context) => {
+    onSuccess: (newEntry, variables, context) => {
       // Replace optimistic entry with real data from server
+      // Uses a robust matching strategy: first try ID match, then fall back to weight+timestamp
       queryClient.setQueryData<WeightLogEntry[]>(
         queryKeys.goals.weightLog(),
         (oldData) => {
           if (!oldData) return [newEntry];
-          return oldData.map((entry) =>
-            entry.id === context?.optimisticEntry?.id ? newEntry : entry,
-          );
+
+          // Track if we've performed the replacement
+          let replaced = false;
+
+          const updatedData = oldData.map((entry) => {
+            // First priority: match by optimistic ID
+            if (entry.id === context?.optimisticEntry?.id) {
+              replaced = true;
+              return newEntry;
+            }
+            return entry;
+          });
+
+          // If no ID match found, try to match by weight and timestamp (within 1 second tolerance)
+          if (!replaced) {
+            const targetTimestamp = new Date(variables.timestamp).getTime();
+            const toleranceMs = 1000;
+
+            for (let index = 0; index < updatedData.length; index++) {
+              const entry = updatedData[index];
+              // Check for optimistic ID pattern or matching weight+timestamp
+              if (
+                entry.id.startsWith("optimistic-") ||
+                (entry.weight === variables.weight &&
+                  Math.abs(
+                    new Date(entry.timestamp).getTime() - targetTimestamp,
+                  ) <= toleranceMs)
+              ) {
+                updatedData[index] = newEntry;
+                break;
+              }
+            }
+          }
+
+          return updatedData;
         },
       );
     },
@@ -246,6 +295,7 @@ export function useDeleteWeightLogEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.goals.weightLog(), "delete"],
     mutationFn: async (
       id: string,
     ): Promise<{ success: boolean; id: string }> => {
