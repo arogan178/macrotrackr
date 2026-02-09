@@ -17,6 +17,27 @@ import { toCamelCase } from "../../lib/responses";
 
 import { OpenFoodFactsApiClient } from "../../lib/openfoodfacts-api-client";
 import { cacheService } from "../../lib/cache-service";
+import type { Database } from "bun:sqlite";
+
+// Import types from API client
+import type { FoodProductResult } from "../../lib/openfoodfacts-api-client";
+
+// Cache service interface
+interface CacheService {
+  get: <T>(key: string) => T | undefined;
+  set: <T>(key: string, value: T) => void;
+}
+
+// Extended macros context type for type assertions
+type MacrosRouteContext = AuthenticatedContext & {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  openFoodFactsApiClient?: {
+    search: (query: string) => Promise<FoodProductResult[]>;
+  };
+  cacheService?: CacheService;
+};
 
 export const macroRoutes = (app: Elysia) =>
   app.group("/api/macros", (group) =>
@@ -28,16 +49,32 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/search",
         async (context: any) => {
-          const { query, openFoodFactsApiClient, cacheService } = context;
+          const { query, openFoodFactsApiClient, cacheService: cache } = context as MacrosRouteContext;
 
-          const cacheKey = `food_search:${query.q}`;
-          const cachedResult = cacheService.get(cacheKey);
-          if (cachedResult) {
-            return cachedResult;
+          const searchQuery = query?.q;
+          if (!searchQuery) {
+            throw new Error("Search query is required");
           }
 
-          const results = await openFoodFactsApiClient.search(query.q);
-          cacheService.set(cacheKey, results);
+          const cacheKey = `food_search:${searchQuery}`;
+          
+          if (cache) {
+            const cachedResult = cache.get<FoodProductResult[]>(cacheKey);
+            if (cachedResult) {
+              return cachedResult;
+            }
+          }
+
+          if (!openFoodFactsApiClient) {
+            throw new Error("Food API client not available");
+          }
+
+          const results = await openFoodFactsApiClient.search(searchQuery);
+          
+          if (cache) {
+            cache.set(cacheKey, results);
+          }
+          
           return results;
         },
         {
@@ -55,10 +92,13 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/target",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext;
+          const { user, db, request } = context as MacrosRouteContext & { db: Database };
+
+          // Get correlation ID from request headers if available
+          const correlationId = request.headers.get("x-correlation-id") || undefined;
 
           loggerHelpers.apiRequest("GET", "/macros/target", user.userId, {
-            correlationId: (context.request as any)?.correlationId,
+            correlationId,
           });
 
           const macroTargetResult = safeQuery<MacroTargetRow>(
@@ -120,15 +160,21 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/target",
         async (context: any) => {
-          const { user, db, body } = context as AuthenticatedContext & {
-            body: typeof MacroSchemas.updateMacroTargetBody.static;
-          };
+          const { user, db, body, request } = context as MacrosRouteContext & { db: Database };
+
+          if (!body) {
+            throw new Error("Request body is required");
+          }
+
+          // Get correlation ID from request headers if available
+          const correlationId = request.headers.get("x-correlation-id") || undefined;
 
           loggerHelpers.apiRequest("PUT", "/macros/target", user.userId, {
-            correlationId: (context.request as any)?.correlationId,
+            correlationId,
           });
 
-          const { macroTarget } = body;
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const macroTarget = (body as any).macroTarget;
 
           // Use default values if macroTarget is null
           const proteinPercentage = macroTarget?.proteinPercentage ?? 30;
@@ -215,9 +261,9 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/totals",
         async (context: any) => {
-          const { db, user, query } = context as AuthenticatedContext & { query: any };
-          let startDate = query.startDate;
-          let endDate = query.endDate;
+          const { db, user, query } = context as MacrosRouteContext & { db: Database };
+          let startDate = query?.startDate;
+          let endDate = query?.endDate;
 
           // If no date range provided, default to today
           if (!startDate && !endDate) {
@@ -227,6 +273,10 @@ export const macroRoutes = (app: Elysia) =>
           // If only one date provided, use it for both
           if (startDate && !endDate) endDate = startDate;
           if (endDate && !startDate) startDate = endDate;
+
+          if (!startDate || !endDate) {
+            throw new Error("Date range is required");
+          }
 
           const result = safeQuery<{
             protein: number;
@@ -268,13 +318,11 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/history",
         async (context: any) => {
-          const { db, user, query } = context as AuthenticatedContext & {
-            query: any;
-          };
+          const { db, user, query } = context as MacrosRouteContext & { db: Database };
 
           // Parse pagination params
-          const limit = Math.max(1, Math.min(Number(query.limit) || 20, 100));
-          const offset = Math.max(0, Number(query.offset) || 0);
+          const limit = Math.max(1, Math.min(Number(query?.limit) || 20, 100));
+          const offset = Math.max(0, Number(query?.offset) || 0);
 
           // Get total count for pagination metadata
           const countResult = safeQuery<{ count: number }>(
@@ -326,9 +374,11 @@ export const macroRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { db, user, body } = context as AuthenticatedContext & {
-            body: typeof MacroSchemas.macroEntryCreate.static;
-          };
+          const { db, user, body } = context as MacrosRouteContext & { db: Database };
+
+          if (!body) {
+            throw new Error("Request body is required");
+          }
 
           const {
             protein,
@@ -338,7 +388,15 @@ export const macroRoutes = (app: Elysia) =>
             mealName,
             entryDate,
             entryTime,
-          } = body;
+          } = body as {
+            protein: number;
+            carbs: number;
+            fats: number;
+            mealType: string;
+            mealName?: string;
+            entryDate: string;
+            entryTime: string;
+          };
 
           const result = safeQuery<MacroEntryRow>(
             db,
@@ -380,25 +438,28 @@ export const macroRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { db, user, params } = context as AuthenticatedContext & {
-            params: typeof MacroSchemas.macroIdParam.static;
-          };
+          const { db, user, params } = context as MacrosRouteContext & { db: Database };
+
+          const entryId = params?.id;
+          if (!entryId) {
+            throw new NotFoundError("Macro entry ID is required");
+          }
 
           const result = safeExecute(
             db,
             "DELETE FROM macro_entries WHERE id = ? AND user_id = ?",
-            [params.id, user.userId]
+            [entryId, user.userId]
           );
 
           if (result.changes === 0) {
             throw new NotFoundError(
-              `Macro entry with ID ${params.id} not found or access denied.`
+              `Macro entry with ID ${entryId} not found or access denied.`
             );
           }
 
           return {
             success: true,
-            message: `Macro entry ${params.id} deleted.`,
+            message: `Macro entry ${entryId} deleted.`,
           };
         },
         {
@@ -417,12 +478,18 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { db, user, params, body } = context as AuthenticatedContext & {
-            params: typeof MacroSchemas.macroIdParam.static;
-            body: typeof MacroSchemas.macroEntryUpdate.static;
-          };
+          const { db, user, params, body } = context as MacrosRouteContext & { db: Database };
 
-          const { id } = params;
+          if (!body) {
+            throw new Error("Request body is required");
+          }
+
+          const entryId = params?.id;
+          if (!entryId) {
+            throw new NotFoundError("Macro entry ID is required");
+          }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const updates: Record<string, any> = {};
 
           // Build update object with proper snake_case mapping
@@ -442,7 +509,7 @@ export const macroRoutes = (app: Elysia) =>
           const setClause = fieldsToUpdate
             .map((field) => `${field} = ?`)
             .join(", ");
-          const queryParams = [...Object.values(updates), id, user.userId];
+          const queryParams = [...Object.values(updates), entryId, user.userId];
 
           const result = safeQuery<MacroEntryRow>(
             db,
@@ -457,12 +524,12 @@ export const macroRoutes = (app: Elysia) =>
             const exists = safeQuery<{ id: number }>(
               db,
               "SELECT id FROM macro_entries WHERE id = ? AND user_id = ?",
-              [id, user.userId]
+              [entryId, user.userId]
             );
 
             if (!exists) {
               throw new NotFoundError(
-                `Macro entry with ID ${id} not found or access denied.`
+                `Macro entry with ID ${entryId} not found or access denied.`
               );
             } else {
               throw new Error(
