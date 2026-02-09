@@ -1,9 +1,9 @@
-import { useCallback,useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
 /**
  * Debounce showing a boolean and keep it visible for a minimum duration once shown.
  * Useful to prevent flicker in loading indicators.
- * 
+ *
  * Optimized with useRef for transient timer values to avoid re-render subscriptions.
  */
 export default function useDeferredVisibility(
@@ -14,15 +14,17 @@ export default function useDeferredVisibility(
   const minVisibleMs = options?.minVisibleMs ?? 400;
 
   const [visible, setVisible] = useState(false);
-  
+
   // Use refs for all transient values to avoid subscribing to them in effects
   const showTimerReference = useRef<number | undefined>(undefined);
   const hideTimerReference = useRef<number | undefined>(undefined);
   const lastShownAtReference = useRef<number | undefined>(undefined);
   const activeReference = useRef(active);
-  
-  // Keep ref in sync without triggering re-renders
-  activeReference.current = active;
+
+  // Sync ref immediately before paint to avoid stale values in effects
+  useLayoutEffect(() => {
+    activeReference.current = active;
+  }, [active]);
 
   // Stable callback to show with proper timing
   const doShow = useCallback(() => {
