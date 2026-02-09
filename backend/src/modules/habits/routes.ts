@@ -21,7 +21,7 @@ export const habitRoutes = (app: Elysia) =>
       .get(
         "/",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext;
+          const { user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database };
 
           const query = `
             SELECT id, user_id, title, icon_name, current, target, accent_color, 
@@ -31,9 +31,7 @@ export const habitRoutes = (app: Elysia) =>
             ORDER BY created_at DESC
           `;
 
-          const habitsResult = safeQueryAll(db, query, [
-            user.userId,
-          ]) as HabitRow[];
+          const habitsResult = safeQueryAll(db, query, [user.userId]) as HabitRow[];
 
           const apiResponse = habitsResult.map((habit) => ({
             id: habit.id,
@@ -82,11 +80,11 @@ export const habitRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { body, user, db, checkLimit } =
-            context as AuthenticatedContext & {
-              body: any;
-              checkLimit: (count: number) => Promise<any>;
-            };
+          const { body, user, db, checkLimit } = context as AuthenticatedContext & { db: import("bun:sqlite").Database; body?: Record<string, unknown>; checkLimit?: (count: number) => Promise<void> };
+
+          if (!body) {
+            throw new Error("Request body is required");
+          }
 
           // Check current habit count before creating new one
           const currentHabitCount =
@@ -97,7 +95,9 @@ export const habitRoutes = (app: Elysia) =>
             )?.count || 0;
 
           // Check if user can create another habit
-          await checkLimit(currentHabitCount + 1);
+          if (checkLimit) {
+            await checkLimit(currentHabitCount + 1);
+          }
 
           const {
             id,
@@ -109,7 +109,17 @@ export const habitRoutes = (app: Elysia) =>
             isComplete,
             createdAt,
             completedAt,
-          } = body;
+          } = body as {
+            id: string;
+            title: string;
+            iconName: string;
+            current: number;
+            target: number;
+            accentColor: string | undefined;
+            isComplete: boolean;
+            createdAt: string;
+            completedAt: string | undefined;
+          };
 
           // Normalize optional string fields to null if empty to avoid storing empty strings
           const normalizedAccent = accentColor && accentColor.length > 0 ? accentColor : null;
@@ -134,7 +144,20 @@ export const habitRoutes = (app: Elysia) =>
             completedAt || null,
           ]);
 
-          return body;
+          // Return properly typed response
+          return {
+            id,
+            userId: user.userId.toString(),
+            title,
+            iconName,
+            current,
+            target,
+            progress: target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0,
+            accentColor: normalizedAccent as "indigo" | "blue" | "green" | "purple" | "cyan" | "teal" | "lime" | "yellow" | "orange" | "red" | "pink" | undefined,
+            isComplete,
+            createdAt,
+            completedAt,
+          };
         },
         {
           body: HabitSchemas.createHabitBody,
@@ -150,10 +173,16 @@ export const habitRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { params, body, user, db } = context as AuthenticatedContext & {
-            params: { id: string };
-            body: any;
-          };
+          const { params, body, user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database; body?: Record<string, unknown>; params?: Record<string, string> };
+
+          if (!body) {
+            throw new Error("Request body is required");
+          }
+
+          const habitId = params?.id;
+          if (!habitId) {
+            throw new NotFoundError("Habit ID is required");
+          }
 
           const {
             title,
@@ -164,7 +193,16 @@ export const habitRoutes = (app: Elysia) =>
             isComplete,
             createdAt,
             completedAt,
-          } = body;
+          } = body as {
+            title: string;
+            iconName: string;
+            current: number;
+            target: number;
+            accentColor: string | undefined;
+            isComplete: boolean;
+            createdAt: string;
+            completedAt: string | undefined;
+          };
 
           // Normalize optional string fields to null if empty to avoid storing empty strings
           const normalizedAccent = accentColor && accentColor.length > 0 ? accentColor : null;
@@ -174,7 +212,7 @@ export const habitRoutes = (app: Elysia) =>
             WHERE id = ? AND user_id = ?
           `;
           const existingHabit = safeQuery(db, checkQuery, [
-            params.id,
+            habitId,
             user.userId,
           ]);
 
@@ -198,7 +236,7 @@ export const habitRoutes = (app: Elysia) =>
             isComplete ? 1 : 0,
             createdAt,
             completedAt || null,
-            params.id,
+            habitId,
             user.userId,
           ]);
 
@@ -218,16 +256,19 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { params, user, db } = context as AuthenticatedContext & {
-            params: { id: string };
-          };
+          const { params, user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database; params?: Record<string, string> };
+
+          const habitId = params?.id;
+          if (!habitId) {
+            throw new NotFoundError("Habit ID is required");
+          }
 
           const checkQuery = `
             SELECT id FROM habits 
             WHERE id = ? AND user_id = ?
           `;
           const existingHabit = safeQuery(db, checkQuery, [
-            params.id,
+            habitId,
             user.userId,
           ]);
 
@@ -240,7 +281,7 @@ export const habitRoutes = (app: Elysia) =>
             WHERE id = ? AND user_id = ?
           `;
 
-          safeExecute(db, deleteQuery, [params.id, user.userId]);
+          safeExecute(db, deleteQuery, [habitId, user.userId]);
 
           return { success: true };
         },
@@ -257,7 +298,7 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext;
+          const { user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database };
 
           const query = `
             DELETE FROM habits
