@@ -130,6 +130,7 @@ export function useAddMacroEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.macros.historyInfinite(), "add"],
     mutationFn: async (entry: MacroEntryCreatePayload) => {
       // This function now returns the newly created entry from the server
       return (await apiService.macros.addEntry(entry)) as {
@@ -314,6 +315,7 @@ export function useUpdateMacroEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.macros.historyInfinite(), "update"],
     mutationFn: async ({
       id,
       entry,
@@ -450,6 +452,7 @@ export function useDeleteMacroEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.macros.historyInfinite(), "delete"],
     mutationFn: async (id: number) => {
       return await apiService.macros.deleteEntry(id);
     },
@@ -564,6 +567,7 @@ export function useUpdateMacroTarget() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.macros.targets(), "update"],
     mutationFn: async (settings: MacroTargetSettings) => {
       return await apiService.macros.saveMacroTargetPercentages({
         macroTarget: settings,

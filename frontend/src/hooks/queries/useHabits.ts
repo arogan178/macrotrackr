@@ -28,6 +28,7 @@ export function useAddHabit() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.habits.list(), "add"],
     mutationFn: async (values: HabitGoalFormValues): Promise<HabitGoal> => {
       const newHabit = createNewHabit(values);
       return await apiService.habits.saveHabit(newHabit);
@@ -47,6 +48,7 @@ export function useUpdateHabit() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.habits.list(), "update"],
     mutationFn: async ({
       id,
       values,
@@ -89,6 +91,7 @@ export function useDeleteHabit() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.habits.list(), "delete"],
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
       return await apiService.habits.deleteHabit(id);
     },
@@ -128,6 +131,7 @@ export function useIncrementHabitProgress() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.habits.list(), "increment"],
     mutationFn: async (habit: HabitGoal): Promise<{ success: boolean }> => {
       if (!habit) {
         throw new Error("Habit not found");
@@ -174,6 +178,7 @@ export function useCompleteHabit() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.habits.list(), "complete"],
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
@@ -232,6 +237,7 @@ export function useResetHabits() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.habits.list(), "reset"],
     mutationFn: async (): Promise<{ success: boolean }> => {
       return await apiService.habits.resetHabit();
     },
