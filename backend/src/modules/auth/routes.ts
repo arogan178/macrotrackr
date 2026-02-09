@@ -1,4 +1,5 @@
 // src/modules/auth/routes.ts
+import type { Database } from "bun:sqlite";
 import { Elysia } from "elysia";
 import { db } from "../../db";
 import { AuthSchemas } from "./schemas";
@@ -14,6 +15,7 @@ import crypto from "crypto";
 import { emailService } from "../../lib/email-service";
 import { loggerHelpers } from "../../lib/logger";
 import { createJwtCookie } from "../../lib/auth-utils";
+import type { AuthenticatedContext } from "../../middleware/auth";
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
@@ -26,11 +28,13 @@ export const authRoutes = (app: Elysia) =>
       // Email Validation
       .post(
         "/validate-email",
-        async ({ body, db }) => {
+        async (context: any) => {
+          const { body, db } = context as { body: Record<string, unknown>; db: Database };
+          const email = (body as { email: string }).email;
           const existingUser = safeQuery<UserRow>(
             db,
             "SELECT id FROM users WHERE email = ?",
-            [body.email]
+            [email]
           );
 
           if (existingUser) {
@@ -52,7 +56,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/register",
         async (context: any) => {
-          const { body, db, jwt, set } = context;
+          const { body, db, jwt, set } = context as AuthenticatedContext & { body: Record<string, unknown> };
           const {
             email,
             password,
@@ -63,7 +67,17 @@ export const authRoutes = (app: Elysia) =>
             weight,
             gender,
             activityLevel,
-          } = body;
+          } = body as {
+            email: string;
+            password: string;
+            firstName: string;
+            lastName: string;
+            dateOfBirth: string;
+            height: number;
+            weight: number;
+            gender: "male" | "female";
+            activityLevel: number;
+          };
 
           const hashedPassword = await hashPassword(password);
 
@@ -132,12 +146,13 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/login",
         async (context: any) => {
-          const { body, db, jwt, set } = context;
+          const { body, db, jwt, set } = context as AuthenticatedContext & { body: Record<string, unknown> };
+          const { email, password } = body as { email: string; password: string };
 
           const user = safeQuery<UserRow>(
             db,
             "SELECT id, password, first_name, last_name, email FROM users WHERE email = ?",
-            [body.email]
+            [email]
           );
 
           if (!user || !user.password) {
@@ -145,7 +160,7 @@ export const authRoutes = (app: Elysia) =>
           }
 
           const isPasswordValid = await verifyPassword(
-            body.password,
+            password,
             user.password
           );
           if (!isPasswordValid) {
@@ -177,8 +192,9 @@ export const authRoutes = (app: Elysia) =>
       // Password Reset Request
       .post(
         "/forgot-password",
-        async ({ body, db }) => {
-          const { email } = body;
+        async (context: any) => {
+          const { body, db } = context as { body: Record<string, unknown>; db: Database };
+          const { email } = body as { email: string };
           
           loggerHelpers.auth("password_reset_requested", undefined, email);
           
@@ -222,8 +238,9 @@ export const authRoutes = (app: Elysia) =>
       // Password Reset Handler
       .post(
         "/reset-password",
-        async ({ body, db }) => {
-          const { token, newPassword } = body;
+        async (context: any) => {
+          const { body, db } = context as { body: Record<string, unknown>; db: Database };
+          const { token, newPassword } = body as { token: string; newPassword: string };
 
           const user = safeQuery<UserRow>(
             db,
