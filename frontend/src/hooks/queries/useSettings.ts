@@ -43,6 +43,7 @@ export function useSaveSettings() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.settings.user(), "save"],
     mutationFn: async (settings: UserSettingsPayload) => {
       return await apiService.user.updateSettings(settings);
     },
