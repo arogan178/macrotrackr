@@ -9,6 +9,7 @@ import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
+import type { AuthenticatedContext } from "../../middleware/auth";
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -93,7 +94,7 @@ export const billingRoutes = (app: Elysia) =>
       .get(
         "/details",
         async (context: any) => {
-          const { user } = context;
+          const { user } = context as AuthenticatedContext;
           if (!user) throw new BadRequestError("Authentication required");
           try {
             const subscriptionInfo =
@@ -132,7 +133,8 @@ export const billingRoutes = (app: Elysia) =>
       // Cancel current subscription
       .post(
         "/cancel",
-        async ({ user }) => {
+        async (context: any) => {
+          const { user } = context as AuthenticatedContext;
           if (!user) throw new BadRequestError("Authentication required");
           try {
             const userSubscription =
@@ -175,7 +177,8 @@ export const billingRoutes = (app: Elysia) =>
       )
       .post(
         "/checkout",
-        async ({ body, user }) => {
+        async (context: any) => {
+          const { body, user } = context as AuthenticatedContext & { body?: Record<string, unknown> };
           if (!user) throw new BadRequestError("Authentication required");
           try {
             const userSubscription =
@@ -198,8 +201,12 @@ export const billingRoutes = (app: Elysia) =>
                 customerId
               );
             }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const bodyData = body as any;
+
             // Determine price ID based on plan
-            const plan = body.plan === "yearly" ? "yearly" : "monthly";
+            const plan = bodyData?.plan === "yearly" ? "yearly" : "monthly";
             const priceId =
               plan === "yearly" ?
                 process.env.STRIPE_PRICE_ID_YEARLY || ""
@@ -210,13 +217,13 @@ export const billingRoutes = (app: Elysia) =>
               );
             const session = await StripeService.createCheckoutSession({
               customerId,
-              successUrl: body.successUrl,
-              cancelUrl: body.cancelUrl,
+              successUrl: bodyData?.successUrl,
+              cancelUrl: bodyData?.cancelUrl,
               priceId,
               metadata: {
                 userId: user.userId.toString(),
                 plan,
-                ...body.metadata,
+                ...bodyData?.metadata,
               },
             });
             logger.info(
@@ -255,7 +262,8 @@ export const billingRoutes = (app: Elysia) =>
       // Create customer portal session
       .post(
         "/portal",
-        async ({ body, user }) => {
+        async (context: any) => {
+          const { body, user } = context as AuthenticatedContext & { body?: Record<string, unknown> };
           if (!user) throw new BadRequestError("Authentication required");
           try {
             const userSubscription =
@@ -263,10 +271,17 @@ export const billingRoutes = (app: Elysia) =>
             if (!userSubscription.stripe_customer_id) {
               throw new BadRequestError("User has no Stripe customer ID");
             }
+
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const returnUrl = (body as any)?.returnUrl;
+            if (!returnUrl) {
+              throw new BadRequestError("Return URL is required");
+            }
+
             const portalSession =
               await StripeService.createCustomerPortalSession(
                 userSubscription.stripe_customer_id,
-                body.returnUrl
+                returnUrl
               );
             logger.info(
               {
@@ -296,27 +311,21 @@ export const billingRoutes = (app: Elysia) =>
       // Get current subscription status
       .get(
         "/subscription",
-        async ({ user }) => {
+        async (context: any) => {
+          const { user } = context as AuthenticatedContext;
           if (!user) throw new BadRequestError("Authentication required");
           try {
-            const subscription = await SubscriptionService.getUserSubscription(
-              user.userId
-            );
-            
+            const subscriptionInfo =
+              await SubscriptionService.getUserSubscription(user.userId);
             return {
-              status: subscription.subscription_status,
-              hasStripeCustomer: !!subscription.stripe_customer_id,
-              subscription:
-                subscription.subscription ?
-                  {
-                    id: subscription.subscription.id,
-                    status: subscription.subscription.status,
-                    currentPeriodEnd:
-                      subscription.subscription.current_period_end,
-                    stripeSubscriptionId:
-                      subscription.subscription.stripe_subscription_id,
-                  }
-                : null,
+              status: subscriptionInfo.subscription_status,
+              hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
+              subscription: subscriptionInfo.subscription ? {
+                id: subscriptionInfo.subscription.id,
+                status: subscriptionInfo.subscription.status,
+                currentPeriodEnd: subscriptionInfo.subscription.current_period_end,
+                stripeSubscriptionId: subscriptionInfo.subscription.stripe_subscription_id,
+              } : null,
             };
           } catch (error) {
             handleRouteError(error, "get_subscription_status", user?.userId);
@@ -325,23 +334,25 @@ export const billingRoutes = (app: Elysia) =>
         {
           response: SubscriptionStatusResponseSchema,
           detail: {
-            summary: "Get current subscription status",
+            summary: "Get the current user's subscription status",
             tags: ["Billing"],
           },
         }
       )
 
-      // Get subscription plans
+      // Get available plans
       .get(
         "/plans",
-        () => {
-          // Return plans from centralized config
-          return {
-            plans: getPlans().map((plan) => ({
+        async () => {
+          try {
+            const plans = getPlans().map(plan => ({
               ...plan,
-              features: [...plan.features], // Convert readonly to mutable array
-            })),
-          };
+              features: [...plan.features]
+            }));
+            return { plans };
+          } catch (error) {
+            handleRouteError(error, "get_plans");
+          }
         },
         {
           response: PlansResponseSchema,
