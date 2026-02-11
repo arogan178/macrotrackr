@@ -1,9 +1,9 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useLocation } from "@tanstack/react-router";
 import React, { useMemo } from "react";
 
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import { getToken } from "@/utils/tokenStorage";
 
 import Navbar from "./Navbar";
 
@@ -18,22 +18,32 @@ const PUBLIC_ROUTES = new Set([
   "/reset-password",
 ]);
 
+const NO_NAV_ROUTES = new Set([
+  "/profile-setup",
+  "/auth-ready",
+  "/sso-callback",
+]);
+
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
+  const { isLoaded, isSignedIn } = useAuth();
 
   // Use useMemo for route checking to avoid recreating array each render
   const isPublicRoute = useMemo(() => 
     PUBLIC_ROUTES.has(location.pathname),
     [location.pathname]
   );
+  const isNoNavRoute = useMemo(
+    () => NO_NAV_ROUTES.has(location.pathname),
+    [location.pathname]
+  );
 
-  // Only fetch user data if we have a token and we're not on a public route
-  const hasToken = !!getToken();
-  const shouldFetchUser = hasToken && !isPublicRoute;
+  // For Clerk auth, rely on Clerk session state rather than legacy local token storage
+  const shouldFetchUser = isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
 
   // Conditionally use the user query
-  const { data: user, isLoading } = useUser({ enabled: shouldFetchUser });
-  const isAuthenticated = shouldFetchUser && !!user && !isLoading;
+  useUser({ enabled: shouldFetchUser });
+  const isAuthenticated = isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
