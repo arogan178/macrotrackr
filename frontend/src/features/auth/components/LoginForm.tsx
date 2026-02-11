@@ -1,7 +1,12 @@
-import { CardContainer, TextField } from "@/components/form";
-import { Button, CalorieIcon } from "@/components/ui";
-import { useMutationErrorHandler } from "@/hooks";
+import { useSignIn } from "@clerk/clerk-react";
+import { useNavigate } from "@tanstack/react-router";
+
+import CardContainer from "@/components/form/CardContainer";
+import TextField from "@/components/form/TextField";
+import Button from "@/components/ui/Button";
+import { CalorieIcon, GithubIcon,GoogleIcon } from "@/components/ui/Icons";
 import { useLogin } from "@/hooks/auth/useAuthQueries";
+import { useMutationErrorHandler } from "@/hooks/useMutationErrorHandler";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
 
@@ -10,6 +15,8 @@ interface LoginFormProps {
 }
 
 function FormLogin({ onForgotPassword }: LoginFormProps) {
+  const navigate = useNavigate();
+  const { isLoaded, signIn } = useSignIn();
   const {
     loginEmail,
     loginPassword,
@@ -53,6 +60,28 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
     }
   }
 
+  // Handle social sign-in with Clerk
+  async function handleSocialSignIn(strategy: "oauth_google" | "oauth_github") {
+    if (!isLoaded || !signIn) {
+      showNotification("Authentication not ready. Please try again.", "error");
+      return;
+    }
+
+    try {
+      await signIn.authenticateWithRedirect({
+        strategy,
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/home",
+      });
+    } catch (error) {
+      console.error("Social sign-in error:", error);
+      showNotification(
+        error instanceof Error ? error.message : "Social sign-in failed",
+        "error"
+      );
+    }
+  }
+
   return (
     <CardContainer className="p-8">
       <div className="mb-8 flex flex-col items-center">
@@ -62,6 +91,38 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
         <h1 className="text-3xl font-bold text-foreground">Welcome</h1>
         <p className="mt-2 text-muted">Sign in to track your macros</p>
       </div>
+
+      {/* Social Sign In Buttons */}
+      <div className="mb-6 space-y-3">
+        <Button
+          type="button"
+          variant="outline"
+          fullWidth={true}
+          onClick={() => handleSocialSignIn("oauth_google")}
+          icon={<GoogleIcon className="h-5 w-5" />}
+          iconPosition="left"
+        >
+          Continue with Google
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          fullWidth={true}
+          onClick={() => handleSocialSignIn("oauth_github")}
+          icon={<GithubIcon className="h-5 w-5" />}
+          iconPosition="left"
+        >
+          Continue with GitHub
+        </Button>
+      </div>
+
+      {/* Divider */}
+      <div className="mb-6 flex items-center">
+        <div className="flex-1 border-t border-border"></div>
+        <span className="mx-4 text-sm text-muted">or</span>
+        <div className="flex-1 border-t border-border"></div>
+      </div>
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <TextField
           label="Email"

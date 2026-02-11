@@ -26,7 +26,7 @@ export default function DateRangeSelector({
   return (
     <motion.div
       layout
-      className="sticky top-24 z-40 mb-6 rounded-xl border border-border/50 bg-surface p-3 shadow-modal backdrop-blur-md transition-all duration-300"
+      className="sticky top-24 z-40 mb-6 rounded-xl border border-border bg-surface p-3"
       style={{ position: "sticky" as const }}
     >
       <div className="flex w-full flex-wrap items-center gap-4">

@@ -1,4 +1,3 @@
-import { motion } from "motion/react";
 import React from "react";
 
 import { Button, CheckIcon } from "@/components/ui";
@@ -37,25 +36,21 @@ const PricingCard: React.FC<PricingCardProps> = ({
   buttonSize = "lg",
   buttonClassName = "",
   onButtonClick,
-  focusRingColor = "focus-visible:ring-primary/50",
+  focusRingColor = "focus-visible:outline-primary/50",
   featureIconColor = "text-primary",
   featureTextClass = "text-foreground font-medium",
   cardClassName = "",
   children,
 }) => (
-  <motion.div
-    initial={{ opacity: 0, y: 16 }}
-    animate={{ opacity: 1, y: 0 }}
-    whileHover={{ scale: 1.01 }}
-    transition={{ duration: 0.3, type: "spring", stiffness: 280, damping: 26 }}
+  <div
     tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative flex h-full flex-col rounded-2xl border border-border/50 bg-surface p-8 backdrop-blur-sm outline-none lg:p-10 ${focusRingColor} ${cardClassName}`}
+    className={`relative flex h-full flex-col rounded-xl border border-border bg-surface p-8 outline-none lg:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-        <span className="rounded-full border border-primary/30 bg-primary/90 px-4 py-1.5 text-xs font-semibold tracking-wide text-foreground uppercase shadow-success">
+        <span className="rounded-full border border-primary/30 bg-primary px-4 py-1.5 text-xs font-semibold tracking-wide text-background uppercase">
           Most Popular
         </span>
       </div>
@@ -65,7 +60,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
       <div className="mb-2 text-4xl font-bold text-foreground">
         {price}
         {suffix && (
-          <span className="text-lg font-normal text-foreground">{suffix}</span>
+          <span className="text-lg font-normal text-muted">{suffix}</span>
         )}
       </div>
       {equivalent && (
@@ -73,49 +68,24 @@ const PricingCard: React.FC<PricingCardProps> = ({
       )}
       {children}
     </div>
-    <motion.ul
-      className="mb-8 space-y-4"
-      initial="hidden"
-      animate="visible"
-      variants={{
-        visible: { transition: { staggerChildren: 0.08 } },
-        hidden: {},
-      }}
-    >
+    <ul className="mb-8 space-y-4">
       {features.map((feature, index) => (
-        <motion.li
-          key={index}
-          className="flex items-center space-x-3"
-          variants={{
-            hidden: { opacity: 0, y: 12 },
-            visible: {
-              opacity: 1,
-              y: 0,
-              transition: { type: "spring", stiffness: 360, damping: 26 },
-            },
-          }}
-        >
-          <CheckIcon className={` ${featureIconColor} flex-shrink-0`} />
+        <li key={index} className="flex items-center gap-3">
+          <CheckIcon className={`${featureIconColor} shrink-0`} />
           <span className={featureTextClass}>{feature}</span>
-        </motion.li>
+        </li>
       ))}
-    </motion.ul>
+    </ul>
     <div className="mt-auto">
-      <motion.div
-        whileHover={{ scale: 1.01, y: -1 }}
-        whileTap={{ scale: 0.99 }}
-        transition={{ type: "spring", stiffness: 350, damping: 26 }}
-      >
-        <Button
-          text={buttonText}
-          variant={buttonVariant}
-          buttonSize={buttonSize}
-          className={buttonClassName}
-          onClick={onButtonClick}
-        />
-      </motion.div>
+      <Button
+        text={buttonText}
+        variant={buttonVariant}
+        buttonSize={buttonSize}
+        className={buttonClassName}
+        onClick={onButtonClick}
+      />
     </div>
-  </motion.div>
+  </div>
 );
 
 export default PricingCard;

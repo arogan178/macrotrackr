@@ -1,24 +1,29 @@
 import "./style.css";
 
+import { useAuth } from "@clerk/clerk-react";
 import {
   createRootRoute,
   createRoute,
   createRouter,
+  Navigate,
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
 import React, { Suspense } from "react";
 
-import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
+import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
+import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
 
 import MainLayout from "./components/layout/MainLayout";
-import { useUser } from "./hooks/auth/useAuthQueries";
-import { queryClient } from "./lib/queryClient";
+import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
+import { queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
+// Lazy loaded page components
 const NotFoundPage = React.lazy(() => import("@/components/ui/NotFoundPage"));
 const LandingPage = React.lazy(
   () => import("./features/landing/pages/LandingPage"),
@@ -30,7 +35,21 @@ const SettingsPage = React.lazy(
   () => import("@/features/settings/pages/SettingsPage"),
 );
 const GoalsPage = React.lazy(() => import("@/features/goals/pages/GoalsPage"));
-const AuthPage = React.lazy(() => import("@/features/auth/pages/AuthPage"));
+const SignInPage = React.lazy(
+  () => import("@/features/auth/pages/SignInPage"),
+);
+const SignUpPage = React.lazy(
+  () => import("@/features/auth/pages/SignUpPage"),
+);
+const ProfileSetupPage = React.lazy(
+  () => import("@/features/auth/pages/ProfileSetupPage"),
+);
+const AuthReadyPage = React.lazy(
+  () => import("@/features/auth/pages/AuthReadyPage"),
+);
+const SSOCallbackPage = React.lazy(
+  () => import("@/features/auth/pages/SSOCallbackPage"),
+);
 const ReportingPage = React.lazy(
   () => import("@/features/reporting/pages/ReportingPage"),
 );
@@ -47,7 +66,7 @@ const PrivacyPolicyPage = React.lazy(
   () => import("./features/landing/pages/PrivacyPolicyPage"),
 );
 
-// Fallback component to show while loading
+// Fallback component for suspense
 function LoadingFallback() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface">
@@ -56,66 +75,68 @@ function LoadingFallback() {
   );
 }
 
+// Auth guard component - using Clerk's useAuth
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { data: user, isLoading } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
 
-  // Show loading while checking authentication
-  if (isLoading) {
-    return <LoadingSpinner size="lg" />;
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
-  // Redirect to login if not authenticated
-  if (!user) {
-    if (globalThis.window !== undefined) {
-      globalThis.location.replace("/login");
-    }
-    return;
+  if (!isSignedIn) {
+    return <Navigate to="/login" search={{}} />;
   }
 
   return <>{children}</>;
 }
 
-// Root route with query-based user data prefetching
-export const rootRoute = createRootRoute({
-  // Loader prefetches user data if token present
-  loader: async (context_) => {
-    const { context } = context_ as typeof context_ & {
-      context: { queryClient: typeof queryClient };
-    };
-    // Only prefetch user data if there's a token
-    const { getToken } = await import("@/utils/tokenStorage");
+// Auth guard for unauthenticated routes
+function RequireUnauth({ children }: { children: React.ReactNode }) {
+  const { isSignedIn, isLoaded } = useAuth();
 
-    if (getToken()) {
-      // Prefetch user data using TanStack Query
-      await context.queryClient.ensureQueryData({
-        queryKey: queryKeys.auth.user(),
-        queryFn: async () => {
-          try {
-            const { apiService } = await import("@/utils/apiServices");
-            return await apiService.user.getUserDetails();
-          } catch (error) {
-            // If user is not authenticated, return undefined instead of throwing
-            if (
-              error instanceof Error &&
-              "status" in error &&
-              (error as any).status === 401
-            ) {
-              return;
-            }
-            throw error;
-          }
-        },
-        staleTime: 1 * 60 * 1000, // 1 minute
-        gcTime: 5 * 60 * 1000, // 5 minutes
-        retry: false, // Don't retry auth queries to avoid infinite loops
-      });
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (isSignedIn) {
+    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
+  }
+
+  return <>{children}</>;
+}
+
+// Helper function to safely fetch data with auth error handling
+async function safeFetch<T>(
+  fetchFunction: () => Promise<T>,
+  defaultValue: T,
+): Promise<T> {
+  try {
+    return await fetchFunction();
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "status" in error &&
+      (error as any).status === 401
+    ) {
+      return defaultValue;
     }
-  },
+    throw error;
+  }
+}
+
+// Root route
+export const rootRoute = createRootRoute({
   component: () => (
     <ErrorBoundary>
-      {/* app-root is used by GlobalLoadingOverlay to toggle aria-busy */}
       <div id="app-root" className="relative min-h-screen">
-        {/* Global loading UI overlays */}
         <TopLoadingBar />
         <GlobalLoadingOverlay />
         <MainLayout>
@@ -136,116 +157,95 @@ export const rootRoute = createRootRoute({
 const landingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
-  component: () => <LandingPage />,
+  component: LandingPage,
 });
 
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { limit: number; offset: number } => {
-    return {
-      limit: Number(search.limit) || 20,
-      offset: Number(search.offset) || 0,
-    };
-  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    limit: Number(search.limit) || 20,
+    offset: Number(search.offset) || 0,
+  }),
   loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
   loader: async (context_) => {
     const { deps, context } = context_ as typeof context_ & {
       deps: { offset: number; limit: number };
       context: { queryClient: typeof queryClient };
     };
-    // Use queryClient.ensureQueryData for prefetching macro data
+
     const limit = deps.limit || 20;
     const offset = deps.offset || 0;
+    const page = Math.floor(offset / limit) + 1;
 
     const [macroTarget, macroHistory, weightGoals, weightLog] =
       await Promise.all([
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.macros.targets(),
-          queryFn: async () => {
-            const { apiService } = await import("@/utils/apiServices");
-            const response = await apiService.macros.getMacroTarget();
-            return response?.macroTarget;
-          },
-          staleTime: 5 * 60 * 1000, // 5 minutes
-          gcTime: 30 * 60 * 1000, // 30 minutes
-        }),
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.macros.history(Math.floor(offset / limit) + 1),
-          queryFn: async () => {
-            const { apiService } = await import("@/utils/apiServices");
-            return await apiService.macros.getHistory(limit, offset);
-          },
-          staleTime: 2 * 60 * 1000, // 2 minutes
-          gcTime: 10 * 60 * 1000, // 10 minutes
-        }),
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.goals.weight(),
-          queryFn: async () => {
-            const { apiService } = await import("@/utils/apiServices");
-            const result = await apiService.goals.getWeightGoals();
-            // eslint-disable-next-line unicorn/no-null
-            return result ?? null; // ensure never undefined
-          },
-          staleTime: 5 * 60 * 1000, // 5 minutes
-          gcTime: 10 * 60 * 1000, // 10 minutes
-        }),
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.goals.weightLog(),
-          queryFn: async () => {
-            const { apiService } = await import("@/utils/apiServices");
-            return await apiService.goals.getWeightLog();
-          },
-          staleTime: 5 * 60 * 1000, // 5 minutes
-          gcTime: 10 * 60 * 1000, // 10 minutes
-        }),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.macros.targets(),
+              queryFn: () =>
+                apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+              ...queryConfigs.macros,
+            }),
+          undefined,
+        ),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.macros.history(page),
+              queryFn: () => apiService.macros.getHistory(limit, offset),
+              ...queryConfigs.history,
+            }),
+          { entries: [], hasMore: false, total: 0 },
+        ),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.goals.weight(),
+              queryFn: () =>
+                apiService.goals.getWeightGoals().then((r) => r ?? null),
+              ...queryConfigs.goals,
+            }),
+          null,
+        ),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.goals.weightLog(),
+              queryFn: () => apiService.goals.getWeightLog(),
+              ...queryConfigs.goals,
+            }),
+          [],
+        ),
       ]);
 
-    // Transform weight goals data similar to the old loader
-    let transformedWeightGoals;
-    if (weightGoals) {
-      const latestWeight =
-        weightLog.length > 0
-          ? // eslint-disable-next-line unicorn/prefer-at
-            weightLog[weightLog.length - 1].weight
-          : weightGoals.startingWeight;
+    const latestWeight =
+      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+    const transformedWeightGoals = weightGoals
+      ? normalizeWeightGoals(weightGoals, latestWeight)
+      : undefined;
 
-      transformedWeightGoals = {
-        ...weightGoals,
-        currentWeight: latestWeight,
-        targetWeight: weightGoals.targetWeight || weightGoals.startingWeight,
-        weightGoal: (weightGoals.weightGoal || "maintain") as
-          | "lose"
-          | "maintain"
-          | "gain",
-        startDate:
-          weightGoals.startDate || new Date().toISOString().split("T")[0],
-        targetDate:
-          weightGoals.targetDate || new Date().toISOString().split("T")[0],
-        calorieTarget: weightGoals.calorieTarget || 2000,
-        calculatedWeeks: weightGoals.calculatedWeeks || 1,
-        weeklyChange: weightGoals.weeklyChange || 0,
-        dailyChange: weightGoals.dailyChange || 0,
-      };
-    }
+    const history = macroHistory as {
+      entries: unknown[];
+      hasMore: boolean;
+      total: number;
+    };
 
-    const historyEntries = (macroHistory as any)?.entries || [];
-    const historyHasMore = (macroHistory as any)?.hasMore || false;
-    const historyTotal = (macroHistory as any)?.total || 0;
     return {
       macroTarget,
-      history: historyEntries,
-      historyHasMore,
-      historyTotal,
+      history: history.entries,
+      historyHasMore: history.hasMore,
+      historyTotal: history.total,
       weightGoals: transformedWeightGoals,
       weightLog: Array.isArray(weightLog) ? weightLog : [],
     };
   },
   component: () => (
     <RequireAuth>
-      <HomePage />
+      <RequireCompleteProfile>
+        <HomePage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
@@ -253,38 +253,15 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: async (context_) => {
-    const { context } = context_ as typeof context_ & {
-      context: { queryClient: typeof queryClient };
-    };
-    // Use queryClient.ensureQueryData for prefetching settings and billing data
-    await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.settings.user(),
-        queryFn: async () => {
-          return await apiService.user.getUserDetails();
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.settings.billing(),
-        queryFn: async () => {
-          return await apiService.billing.getBillingDetails();
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-    ]);
-    // No need to return data since components will use query hooks
-    return {};
-  },
   component: () => (
     <RequireAuth>
-      <SettingsPage />
+      <RequireCompleteProfile>
+        <SettingsPage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
+
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
@@ -292,77 +269,53 @@ export const goalsRoute = createRoute({
     const { context } = context_ as typeof context_ & {
       context: { queryClient: typeof queryClient };
     };
-    // Use queryClient.ensureQueryData for prefetching goals and habits data
+
     const [macroTarget, weightGoals, weightLog] = await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.macros.targets(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          const response = await apiService.macros.getMacroTarget();
-          return response?.macroTarget;
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 30 * 60 * 1000, // 30 minutes
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.goals.weight(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          const result = await apiService.goals.getWeightGoals();
-          // eslint-disable-next-line unicorn/no-null
-          return result ?? null; // ensure never undefined
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.goals.weightLog(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          return await apiService.goals.getWeightLog();
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
-      // Prefetch habits data using TanStack Query
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.habits.list(),
-        queryFn: async () => {
-          const { apiService } = await import("@/utils/apiServices");
-          return await apiService.habits.getHabit();
-        },
-        staleTime: 5 * 60 * 1000, // 5 minutes
-        gcTime: 10 * 60 * 1000, // 10 minutes
-      }),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.macros.targets(),
+            queryFn: () =>
+              apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+            ...queryConfigs.macros,
+          }),
+        undefined,
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weight(),
+            queryFn: () =>
+              apiService.goals.getWeightGoals().then((r) => r ?? null),
+            ...queryConfigs.goals,
+          }),
+        null,
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weightLog(),
+            queryFn: () => apiService.goals.getWeightLog(),
+            ...queryConfigs.goals,
+          }),
+        [],
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.habits.list(),
+            queryFn: () => apiService.habits.getHabit(),
+            ...queryConfigs.goals,
+          }),
+        [],
+      ),
     ]);
 
-    // Transform weight goals data similar to the old loader
-    let transformedWeightGoals;
-    if (weightGoals) {
-      const latestWeight =
-        weightLog.length > 0
-          ? // eslint-disable-next-line unicorn/prefer-at
-            weightLog[weightLog.length - 1].weight
-          : weightGoals.startingWeight;
-
-      transformedWeightGoals = {
-        ...weightGoals,
-        currentWeight: latestWeight,
-        targetWeight: weightGoals.targetWeight || weightGoals.startingWeight,
-        weightGoal: (weightGoals.weightGoal || "maintain") as
-          | "lose"
-          | "maintain"
-          | "gain",
-        startDate:
-          weightGoals.startDate || new Date().toISOString().split("T")[0],
-        targetDate:
-          weightGoals.targetDate || new Date().toISOString().split("T")[0],
-        calorieTarget: weightGoals.calorieTarget || 2000,
-        calculatedWeeks: weightGoals.calculatedWeeks || 1,
-        weeklyChange: weightGoals.weeklyChange || 0,
-        dailyChange: weightGoals.dailyChange || 0,
-      };
-    }
+    const latestWeight =
+      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+    const transformedWeightGoals = weightGoals
+      ? normalizeWeightGoals(weightGoals, latestWeight)
+      : undefined;
 
     return {
       macroTarget,
@@ -372,79 +325,120 @@ export const goalsRoute = createRoute({
   },
   component: () => (
     <RequireAuth>
-      <GoalsPage />
+      <RequireCompleteProfile>
+        <GoalsPage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
-const loginRoute = createRoute({
+
+// New Clerk sign-in route
+const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
-  component: () => <AuthPage />,
+  component: () => (
+    <RequireUnauth>
+      <SignInPage />
+    </RequireUnauth>
+  ),
 });
-const registerRoute = createRoute({
+
+// New Clerk sign-up route
+const signUpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
-  component: () => <AuthPage />,
+  component: () => (
+    <RequireUnauth>
+      <SignUpPage />
+    </RequireUnauth>
+  ),
 });
+
+// Profile setup route - for post-authentication profile creation
+const profileSetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/profile-setup",
+  component: ProfileSetupPage,
+});
+
+// Auth ready route - ensures auth token is set before redirecting to protected routes
+const authReadyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/auth-ready",
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: search.redirectTo as string | undefined,
+  }),
+  component: AuthReadyPage,
+});
+
+// SSO Callback route - handles OAuth redirect from Clerk
+const ssoCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/sso-callback",
+  component: SSOCallbackPage,
+});
+
 export const reportingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reporting",
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): { startDate?: string; endDate?: string } => {
-    return {
-      startDate: search.startDate as string | undefined,
-      endDate: search.endDate as string | undefined,
-    };
-  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    startDate: search.startDate as string | undefined,
+    endDate: search.endDate as string | undefined,
+  }),
   loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
   loader: async (context_) => {
     const { deps, context } = context_ as typeof context_ & {
       deps: { startDate?: string; endDate?: string };
       context: { queryClient: typeof queryClient };
     };
-    // Use queryClient.ensureQueryData for prefetching reporting data
-    const today = new Date().toISOString().split("T")[0];
-    const queryDate = deps.startDate || today;
 
-    return await context.queryClient.ensureQueryData({
-      queryKey: queryKeys.macros.dailyTotals(queryDate),
-      queryFn: async () => {
-        const { apiService } = await import("@/utils/apiServices");
-        return await apiService.macros.getDailyTotals({
-          startDate: deps.startDate,
-          endDate: deps.endDate,
-        });
-      },
-      staleTime: 2 * 60 * 1000, // 2 minutes
-      gcTime: 10 * 60 * 1000, // 10 minutes
-    });
+    const queryDate = deps.startDate || new Date().toISOString().split("T")[0]!;
+
+    return safeFetch(
+      () =>
+        context.queryClient.fetchQuery({
+          queryKey: queryKeys.macros.dailyTotals(queryDate),
+          queryFn: () =>
+            apiService.macros.getDailyTotals({
+              startDate: deps.startDate,
+              endDate: deps.endDate,
+            }),
+          ...queryConfigs.history,
+        }),
+      null,
+    );
   },
   component: () => (
     <RequireAuth>
-      <ReportingPage />
+      <RequireCompleteProfile>
+        <ReportingPage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
+
 const pricingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/pricing",
-  component: () => <PricingPage />,
+  component: PricingPage,
 });
+
 export const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reset-password",
-  component: () => <ResetPasswordPage />,
+  component: ResetPasswordPage,
 });
+
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/terms",
-  component: () => <TermsAndConditionsPage />,
+  component: TermsAndConditionsPage,
 });
+
 const privacyRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/privacy",
-  component: () => <PrivacyPolicyPage />,
+  component: PrivacyPolicyPage,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -452,8 +446,11 @@ const routeTree = rootRoute.addChildren([
   homeRoute,
   settingsRoute,
   goalsRoute,
-  loginRoute,
-  registerRoute,
+  signInRoute,
+  signUpRoute,
+  profileSetupRoute,
+  authReadyRoute,
+  ssoCallbackRoute,
   reportingRoute,
   pricingRoute,
   resetPasswordRoute,

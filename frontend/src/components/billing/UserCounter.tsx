@@ -52,19 +52,19 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
       transition={{ duration: 0.6, ease: "easeOut" }}
       className={`inline-flex items-center space-x-2 ${className}`}
     >
-      <div className="flex items-center space-x-2 rounded-full border border-border/50 bg-surface px-4 py-2 backdrop-blur-sm">
+      <div className="flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2">
         <div className="flex -space-x-2">
           {/* Avatar stack for visual appeal */}
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-primary">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-linear-to-br from-primary to-primary">
             <span className="text-xs font-semibold text-foreground">A</span>
           </div>
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-purple-500 to-primary">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-linear-to-br from-purple-500 to-primary">
             <span className="text-xs font-semibold text-foreground">M</span>
           </div>
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-primary to-cyan-600">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-linear-to-br from-primary to-cyan-600">
             <span className="text-xs font-semibold text-foreground">S</span>
           </div>
-          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-gradient-to-br from-green-500 to-emerald-600 text-xs font-semibold text-foreground">
+          <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-border bg-linear-to-br from-green-500 to-emerald-600 text-xs font-semibold text-foreground">
             +
           </div>
         </div>

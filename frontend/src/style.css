@@ -3,51 +3,50 @@
 @import "tailwindcss";
 
 @theme {
-  /* Primary slightly more vibrant while preserving contrast on dark surfaces */
-  --color-primary: #259145;
-  --color-secondary: #6bb38a;
-  --color-vibrant-accent: #dd7a24;
+  /* Brand palette */
+  --color-primary: #22c55e;
+  --color-secondary: #6ee7a0;
+  --color-vibrant-accent: #f59e0b;
 
-  --color-background: #0b1220;
-  --color-surface: #151b2b;
-  /* Inner surface for nested containers */
-  --color-surface-2: #1b2336;
-  /* Deeper nested surface for elements inside inner cards */
-  --color-surface-3: #202a40;
-  /* Fourth-level surface for micro-containers within subcards */
-  --color-surface-4: #252f48;
+  /* Surfaces – tighter progression for depth without faux-glass */
+  --color-background: #09090b;
+  --color-surface: #121218;
+  --color-surface-2: #1a1a22;
+  --color-surface-3: #22222c;
+  --color-surface-4: #2a2a36;
 
-  --color-border: #3a4350;
-  /* Slightly lighter border for inner containers */
-  --color-border-2: #465064;
+  /* Borders */
+  --color-border: #27272a;
+  --color-border-2: #3f3f46;
 
-  --color-foreground: #eef3f8;
-  --color-muted: #98a6b5;
+  /* Text */
+  --color-foreground: #fafafa;
+  --color-muted: #a1a1aa;
 
-  --color-protein: #23c06b;
-  --color-carbs: #3a9ae6;
-  --color-fats: #e24a46;
+  /* Macro colors */
+  --color-protein: #22c55e;
+  --color-carbs: #3b82f6;
+  --color-fats: #ef4444;
 
-  --color-success: #24c46f;
-  --color-warning: #c69060;
-  --color-error: #ee544d;
+  /* Feedback */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
 
-  --shadow-surface: 0 1px 2px 0 rgba(10, 20, 40, 0.25);
+  /* Shadows – minimal, single-layer for modern flat feel */
+  --shadow-surface: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-primary:
-    0 6px 14px -6px rgba(12, 24, 48, 0.35),
-    0 3px 6px -4px rgba(12, 24, 48, 0.25);
-  --shadow-modal:
-    0 16px 32px -8px rgba(12, 24, 48, 0.45),
-    0 6px 12px -6px rgba(12, 24, 48, 0.35);
-  --shadow-warning: 0 6px 18px 0 rgba(198, 144, 96, 0.28);
-  --shadow-error: 0 6px 18px 0 rgba(238, 84, 77, 0.28);
-  --shadow-success: 0 6px 18px 0 rgba(36, 196, 111, 0.25);
-  --shadow-accent: 0 6px 18px 0 rgba(221, 122, 36, 0.26);
-  --shadow-glow: 0 0 22px rgba(64, 128, 255, 0.25);
-  --shadow-border: 0 1px 3px 0 rgba(32, 40, 56, 0.18);
+    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  --shadow-warning: 0 4px 14px -3px rgba(245, 158, 11, 0.2);
+  --shadow-error: 0 4px 14px -3px rgba(239, 68, 68, 0.2);
+  --shadow-success: 0 4px 14px -3px rgba(34, 197, 94, 0.2);
+  --shadow-accent: 0 4px 14px -3px rgba(245, 158, 11, 0.2);
+  --shadow-glow: 0 0 16px rgba(34, 197, 94, 0.15);
+  --shadow-border: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
 
-/* Consolidate and de-duplicate utility declarations */
+/* Surface utility classes */
 .bg-surface-2 {
   background-color: var(--color-surface-2);
 }
@@ -62,26 +61,9 @@
   border-color: var(--color-border-2);
 }
 
-/* Mouse action styles */
-.cursor-pointer {
-  cursor: pointer;
-}
-.cursor-not-allowed {
-  cursor: not-allowed;
-}
-.cursor-default {
-  cursor: default;
-}
-
-/* Tailwind utility mappings for new surface tokens
-   These classes mirror Tailwind naming so you can use them directly:
-   - bg-surface-2, bg-surface-3, bg-surface-4
-   - border-surface-2 (alias: border-border-2)
-*/
-
-/* Example usage for disabled buttons/inputs */
+/* Disabled state */
 button:disabled,
 input:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.5;
 }

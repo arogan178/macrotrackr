@@ -10,6 +10,7 @@ const WeightGoalEnum = t.Union(
 // --- Base Properties (used in response) ---
 const BaseWeightGoalProperties = {
   startingWeight: t.Nullable(t.Number()), // Starting weight is part of the goal record
+  currentWeight: t.Nullable(t.Number()), // Latest weight from weight log
   targetWeight: t.Nullable(t.Number()),
   weightGoal: t.Nullable(WeightGoalEnum),
   startDate: t.Nullable(t.String({ format: "date" })), // ISO 8601 date string YYYY-MM-DD
