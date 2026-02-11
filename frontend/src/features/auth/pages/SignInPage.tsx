@@ -23,7 +23,7 @@ export default function SignInPage() {
     <QueryErrorBoundary>
       <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
         <PageBackground />
-        <header className="z-10 border-b border-border bg-surface-2">
+        <header className="z-10 border-b border-border bg-surface/80 backdrop-blur-sm">
           <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between py-6">
               <Link to="/" className="flex items-center" aria-label="Home">
