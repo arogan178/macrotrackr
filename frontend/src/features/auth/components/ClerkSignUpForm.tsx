@@ -174,7 +174,7 @@ export function ClerkSignUpForm({ onSwitchToSignIn }: ClerkSignUpFormProps) {
           </Button>
         </form>
 
-        <div className="text-center mt-6">
+        <div className="mt-6 text-center">
           <button
             type="button"
             onClick={() => setVerifying(false)}
@@ -232,7 +232,7 @@ export function ClerkSignUpForm({ onSwitchToSignIn }: ClerkSignUpFormProps) {
 
       <div className="mb-6 flex items-center">
         <div className="flex-1 border-t border-border" />
-        <span className="mx-4 text-xs font-semibold uppercase tracking-wide text-muted">
+        <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
           or
         </span>
         <div className="flex-1 border-t border-border" />

@@ -94,7 +94,8 @@ export function ClerkSignInForm({
         secondFactorVerification: result.secondFactorVerification
       });
 
-      if (result.status === "complete") {
+      switch (result.status) {
+      case "complete": {
         // Sign-in complete, set session and redirect to auth-ready
         // AuthReadyPage will set the token and then redirect to home
         console.log("[ClerkSignInForm] Sign-in complete, setting active session");
@@ -106,7 +107,10 @@ export function ClerkSignInForm({
         await setActive({ session: result.createdSessionId });
         showNotification("Signed in successfully!", "success");
         navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
-      } else if (result.status === "needs_first_factor") {
+      
+      break;
+      }
+      case "needs_first_factor": {
         // Handle cases like email verification or password reset needed
         console.log("[ClerkSignInForm] Needs first factor, checking requirements...");
         const supportedStrategies = result.supportedFirstFactors?.map((f: any) => f.strategy);
@@ -120,20 +124,30 @@ export function ClerkSignInForm({
         } else {
           showNotification("Please complete the verification process.", "info");
         }
-      } else if (result.status === "needs_new_password") {
+      
+      break;
+      }
+      case "needs_new_password": {
         // Password was changed or expired
         console.log("[ClerkSignInForm] Needs new password");
         showNotification("Your password has been changed. Please check your email or reset your password.", "info");
         // Redirect to forgot password page
         onForgotPassword();
-      } else if (result.status === "needs_second_factor") {
+      
+      break;
+      }
+      case "needs_second_factor": {
         // 2FA required
         console.log("[ClerkSignInForm] Needs second factor (2FA)");
         showNotification("Two-factor authentication required.", "info");
-      } else {
+      
+      break;
+      }
+      default: {
         // Handle any other status
         console.warn("[ClerkSignInForm] Unhandled sign-in status:", result.status);
         showNotification(`Sign-in status: ${result.status}. Please try again or contact support.`, "warning");
+      }
       }
     } catch (error) {
       console.error("[ClerkSignInForm] Sign-in error:", error);
@@ -152,14 +166,26 @@ export function ClerkSignInForm({
         // Check for specific Clerk error codes
         if (clerkError.errors && Array.isArray(clerkError.errors)) {
           const firstError = clerkError.errors[0];
-          if (firstError?.code === "form_password_incorrect") {
+          switch (firstError?.code) {
+          case "form_password_incorrect": {
             errorMessage = "Incorrect password. If you recently changed your password, please use the new password.";
-          } else if (firstError?.code === "form_identifier_not_found") {
+          
+          break;
+          }
+          case "form_identifier_not_found": {
             errorMessage = "Email not found. Please check your email or sign up.";
-          } else if (firstError?.code === "session_exists") {
+          
+          break;
+          }
+          case "session_exists": {
             errorMessage = "You already have an active session. Please sign out and try again.";
-          } else if (firstError?.message) {
+          
+          break;
+          }
+          default: { if (firstError?.message) {
             errorMessage = firstError.message;
+          }
+          }
           }
         } else if (clerkError.message) {
           errorMessage = clerkError.message;
@@ -219,7 +245,7 @@ export function ClerkSignInForm({
 
       <div className="mb-6 flex items-center">
         <div className="flex-1 border-t border-border" />
-        <span className="mx-4 text-xs font-semibold uppercase tracking-wide text-muted">
+        <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
           or
         </span>
         <div className="flex-1 border-t border-border" />
