@@ -78,6 +78,23 @@ const EnvSchema = z.object({
    * Resend API key for the email service
    */
   RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
+
+  /**
+   * Clerk Publishable Key (frontend-facing)
+   */
+  CLERK_PUBLISHABLE_KEY: z
+    .string()
+    .min(1, "CLERK_PUBLISHABLE_KEY is required"),
+
+  /**
+   * Clerk Secret Key (backend-only)
+   */
+  CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
+
+  /**
+   * Clerk Webhook Secret for verifying webhooks
+   */
+  CLERK_WEBHOOK_SECRET: z.string().optional(),
 });
 
 // Validate environment variables on startup
