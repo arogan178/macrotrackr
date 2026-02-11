@@ -65,6 +65,9 @@ jobs:
             cp backend/.env.production backend/.env
           fi
           
+          # Add bun to PATH
+          export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
           # Install dependencies
           bun install --frozen-lockfile
           
@@ -93,7 +96,10 @@ jobs:
           
           # Create logs directory if it doesn't exist
           mkdir -p logs
-          
+
+          # Add bun and pm2 to PATH
+          export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
           # Restart applications using PM2 ecosystem file
           pm2 reload ecosystem.config.js || {
             echo "PM2 reload failed, attempting restart..."
