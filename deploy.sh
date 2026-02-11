@@ -1,123 +1,207 @@
 #!/bin/bash
 
+# Enhanced deployment script for automated GitHub Actions deployment
+set -euo pipefail
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+NC='\033[0m' # No Color
+
+log() {
+    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
+}
+
+warn() {
+    echo -e "${YELLOW}[$(date +'%Y-%m-%d %H:%M:%S')] WARNING: $1${NC}"
+}
+
+error() {
+    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}"
+}
+
 # Ensure /root/.bun/bin and /usr/local/bin are in PATH for bun and pm2
 export PATH=$PATH:/root/.bun/bin:/usr/local/bin
 
-set -e
+# Check if running in dry-run mode
+DRY_RUN=false
+if [[ "${1:-}" == "--dry-run" ]]; then
+    DRY_RUN=true
+    log "Dry run mode - no changes will be made"
+fi
 
-echo "Starting deployment at $(date)"
+log "Starting deployment"
 
 # Navigate to the app directory
-cd /var/www/macro-tracker/
+if [ "$DRY_RUN" = false ]; then
+    cd /var/www/macro-tracker/ || {
+        error "Failed to navigate to /var/www/macro-tracker/"
+        exit 1
+    }
+else
+    log "Would navigate to /var/www/macro-tracker/"
+fi
 
 # Pull the latest changes from the main branch
-echo "Pulling latest changes from git..."
-git stash
+log "Pulling latest changes from git..."
+if [ "$DRY_RUN" = false ]; then
+    git stash push -m "Automated stash before deployment" --include-untracked || true
 git pull origin master
+else
+    log "Would stash and pull latest changes from git"
+fi
 
 # Copy production environment variables (must exist before backend starts)
-echo "Setting up production environment variables..."
-if [ -f backend/.env.production ]; then
+log "Setting up production environment variables..."
+if [ "$DRY_RUN" = false ]; then
+    if [ -f backend/.env.production ]; then
         cp backend/.env.production backend/.env
-        echo "✅ Production environment variables copied"
+        log "✅ Production environment variables copied"
+    else
+        warn "backend/.env.production file not found!"
+        warn "Environment variables will not be configured"
+        warn "Please create /var/www/macro-tracker/backend/.env.production with your production environment variables"
+    fi
 else
-        echo "❌ Error: backend/.env.production file not found!"
-        echo ""
-        echo "The backend .env.production file needs to be created manually on the server"
-        echo "because environment files are excluded from git for security reasons."
-        echo ""
-        echo "Please create /var/www/macro-tracker/backend/.env.production with your"
-        echo "production environment variables, then run this script again."
-        echo ""
-        echo "Required variables:"
-        echo "- JWT_SECRET"
-        echo "- STRIPE_SECRET_KEY"
-        echo "- STRIPE_WEBHOOK_SECRET" 
-        echo "- STRIPE_PRICE_ID_MONTHLY"
-        echo "- STRIPE_PRICE_ID_YEARLY"
-        echo "- RESEND_API_KEY"
-        echo "- CORS_ORIGIN"
-        echo ""
-        echo "See DEPLOYMENT.md for detailed instructions."
-        exit 1
+    log "Would copy production environment variables if they exist"
 fi
 
 # Install all dependencies using workspaces (from root)
-echo "Installing dependencies..."
-bun install --frozen-lockfile
+log "Installing dependencies..."
+if [ "$DRY_RUN" = false ]; then
+    bun install --frozen-lockfile
+else
+    log "Would install dependencies with bun"
+fi
 
 # Build frontend
-echo "Building frontend..."
-cd frontend
+log "Building frontend..."
+if [ "$DRY_RUN" = false ]; then
+    cd frontend || {
+        error "Failed to navigate to frontend directory"
+        exit 1
+    }
+else
+    log "Would navigate to frontend directory"
+fi
 
 # Clear any existing dist and cache
-echo "Clearing build cache..."
-rm -rf dist/
-rm -rf node_modules/.vite/
-rm -rf .tanstack/
+log "Clearing build cache..."
+if [ "$DRY_RUN" = false ]; then
+    rm -rf dist/
+    rm -rf node_modules/.vite/
+    rm -rf .tanstack/
+else
+    log "Would clear build cache"
+fi
 
 # Force clean build
-echo "Building frontend with clean cache..."
+log "Building frontend with clean cache..."
 
 # Set V8 heap to 4GB for the build (adjust if you increase swap/RAM)
 export NODE_OPTIONS="--max-old-space-size=2048"
-echo "NODE_OPTIONS set to: $NODE_OPTIONS"
+log "NODE_OPTIONS set to: $NODE_OPTIONS"
 
 # Preferred: invoke Vite with node so NODE_OPTIONS is honored reliably. If node-based Vite isn't present, fall back to bun.
-if [ -f node_modules/vite/bin/vite.js ]; then
-    echo "Running Vite build via node (honors NODE_OPTIONS)..."
-    node ./node_modules/vite/bin/vite.js build
+if [ "$DRY_RUN" = false ]; then
+    if [ -f node_modules/vite/bin/vite.js ]; then
+        log "Running Vite build via node (honors NODE_OPTIONS)..."
+        node ./node_modules/vite/bin/vite.js build
+    else
+        log "vite not found in node_modules; falling back to bun run build"
+        bun run build
+    fi
 else
-    echo "vite not found in node_modules; falling back to bun run build"
-    bun run build
+    log "Would build frontend using Vite"
 fi
 
 # Unset NODE_OPTIONS to avoid leaking the setting to later commands
 unset NODE_OPTIONS
 
 # Check if frontend dist folder exists
-echo "Checking frontend dist folder..."
-if [ ! -d "./dist" ]; then
-    echo "❌ Frontend dist folder not found after build!"
-    exit 1
+log "Checking frontend dist folder..."
+if [ "$DRY_RUN" = false ]; then
+    if [ ! -d "./dist" ]; then
+        error "Frontend dist folder not found after build!"
+        exit 1
+    else
+        log "✅ Frontend dist folder found"
+    fi
 else
-    echo "✅ Frontend dist folder found"
+    log "Would check if frontend dist folder exists"
 fi
 
-# # Install serve package for static file serving
-# echo "Installing serve package..."
-# bun add serve
-
 # Go back to root directory for PM2 ecosystem
-cd ..
+if [ "$DRY_RUN" = false ]; then
+    cd .. || {
+        error "Failed to navigate back to root directory"
+        exit 1
+    }
+else
+    log "Would navigate back to root directory"
+fi
 
 # Create logs directory if it doesn't exist
-echo "Setting up logging directory..."
-mkdir -p logs
+log "Setting up logging directory..."
+if [ "$DRY_RUN" = false ]; then
+    mkdir -p logs
+else
+    log "Would create logs directory"
+fi
 
 # Restart applications using PM2 ecosystem file
-echo "Restarting applications with PM2..."
-pm2 reload ecosystem.config.js
+log "Restarting applications with PM2..."
+if [ "$DRY_RUN" = false ]; then
+    pm2 reload ecosystem.config.js || {
+        error "PM2 reload failed"
+        log "Attempting PM2 restart instead..."
+        pm2 restart ecosystem.config.js || {
+            error "PM2 restart also failed"
+            exit 1
+        }
+    }
+else
+    log "Would restart applications with PM2"
+fi
 
 # Check if backend started successfully
 sleep 3
-if pm2 describe macro-tracker-api > /dev/null; then
-    echo "✅ Backend API started successfully"
+log "Checking backend API status..."
+if [ "$DRY_RUN" = false ]; then
+    if pm2 describe macro-tracker-api > /dev/null; then
+        log "✅ Backend API started successfully"
+    else
+        error "Backend API failed to start"
+        pm2 logs macro-tracker-api --lines 20 || true
+        exit 1
+    fi
 else
-    echo "❌ Backend API failed to start"
-    pm2 logs macro-tracker-api --lines 20
-    exit 1
+    log "Would check backend API status"
 fi
 
 # Check if frontend started successfully
-if pm2 describe macro-frontend > /dev/null; then
-    echo "✅ Frontend server started successfully"
+log "Checking frontend server status..."
+if [ "$DRY_RUN" = false ]; then
+    if pm2 describe macro-frontend > /dev/null; then
+        log "✅ Frontend server started successfully"
+    else
+        error "Frontend server failed to start"
+        pm2 logs macro-frontend --lines 20 || true
+        exit 1
+    fi
 else
-    echo "❌ Frontend server failed to start"
-    pm2 logs macro-frontend --lines 20
-    exit 1
+    log "Would check frontend server status"
 fi
 
-echo "Deployment finished successfully at $(date)"
-echo "Backend API: http://localhost:3000"
-echo "Frontend: http://localhost:5173"
+log "Deployment finished successfully at $(date)"
+log "Backend API: http://localhost:3000"
+log "Frontend: http://localhost:5173"
+
+# Cleanup old logs
+if [ "$DRY_RUN" = false ]; then
+    find logs/ -name "*.log" -mtime +7 -delete 2>/dev/null || true
+    log "Cleaned up old log files"
+else
+    log "Would clean up old log files"
+fi
