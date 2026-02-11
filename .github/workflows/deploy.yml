@@ -40,7 +40,13 @@ jobs:
     - name: Test backend
       run: |
         cd backend
-        bun test
+        shopt -s globstar nullglob
+        test_files=(**/*.test.* **/*_test_* **/*.spec.* **/*_spec_*)
+        if [ ${#test_files[@]} -eq 0 ]; then
+          echo "No tests found, skipping"
+        else
+          bun test
+        fi
         
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.0
