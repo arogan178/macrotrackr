@@ -90,10 +90,18 @@ export const createUserUISlice: StateCreator<
           JSON.stringify(state.originalSettings)
         : true;
 
+      // Keep form errors in sync with edits so stale validation doesn't lock the Save button.
+      const settingsForValidation = {
+        ...updatedSettings,
+        gender: updatedSettings.gender === "" ? undefined : updatedSettings.gender,
+      };
+      const formErrors = validateSettings(settingsForValidation);
+
       return {
         ...state,
         settings: updatedSettings,
         hasSettingsChanges: hasChanged,
+        formErrors,
       };
     });
   },
