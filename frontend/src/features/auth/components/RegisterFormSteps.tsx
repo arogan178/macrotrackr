@@ -1,3 +1,4 @@
+import { useSignUp } from "@clerk/clerk-react";
 import { useCallback } from "react";
 
 import {
@@ -12,6 +13,8 @@ import {
   Button,
   CheckIcon,
   ForwardIcon,
+  GithubIcon,
+  GoogleIcon,
   InfoIcon,
 } from "@/components/ui";
 import { useRegistrationProcess } from "@/hooks/auth/useRegistration";
@@ -29,6 +32,7 @@ const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
 
 // Step One Component - Account Information
 export function StepOne() {
+  const { isLoaded, signUp } = useSignUp();
   const { register, setRegisterField, setRegisterStep, showNotification } =
     useStore();
   const { validateStep, isValidating } = useRegistrationProcess();
@@ -47,8 +51,61 @@ export function StepOne() {
     [validateStep, register, setRegisterStep, showNotification],
   );
 
+  // Handle social sign-up with Clerk
+  async function handleSocialSignUp(strategy: "oauth_google" | "oauth_github") {
+    if (!isLoaded || !signUp) {
+      showNotification("Authentication not ready. Please try again.", "error");
+      return;
+    }
+
+    try {
+      await signUp.authenticateWithRedirect({
+        strategy,
+        redirectUrl: "/sso-callback",
+        redirectUrlComplete: "/home",
+      });
+    } catch (error) {
+      console.error("Social sign-up error:", error);
+      showNotification(
+        error instanceof Error ? error.message : "Social sign-up failed",
+        "error"
+      );
+    }
+  }
+
   return (
     <StepFormWrapper>
+      {/* Social Sign Up Buttons */}
+      <div className="mb-6 space-y-3">
+        <Button
+          type="button"
+          variant="outline"
+          fullWidth={true}
+          onClick={() => handleSocialSignUp("oauth_google")}
+          icon={<GoogleIcon className="h-5 w-5" />}
+          iconPosition="left"
+        >
+          Continue with Google
+        </Button>
+        <Button
+          type="button"
+          variant="outline"
+          fullWidth={true}
+          onClick={() => handleSocialSignUp("oauth_github")}
+          icon={<GithubIcon className="h-5 w-5" />}
+          iconPosition="left"
+        >
+          Continue with GitHub
+        </Button>
+      </div>
+
+      {/* Divider */}
+      <div className="mb-6 flex items-center">
+        <div className="flex-1 border-t border-border"></div>
+        <span className="mx-4 text-sm text-muted">or</span>
+        <div className="flex-1 border-t border-border"></div>
+      </div>
+
       <form onSubmit={handleSubmit} className="flex h-full flex-col space-y-5">
         <div className="flex-1 space-y-5">
           <div className="grid grid-cols-2 gap-4">
@@ -88,7 +145,7 @@ export function StepOne() {
           />
 
           {/* Spacer for consistent form height */}
-          <div className="min-h-10 flex-grow"></div>
+          <div className="min-h-2 flex-grow"></div>
         </div>
 
         <div className="pt-4">
