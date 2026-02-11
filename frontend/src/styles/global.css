@@ -1,5 +1,13 @@
 /* src/styles/global.css */
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Roboto+Flex:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+html {
+  color-scheme: dark;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+}
 
 html,
 body {
@@ -10,14 +18,16 @@ body {
 }
 
 body {
-  @apply bg-surface text-foreground; /* Uses your new Tailwind theme colors */
-  font-family: "Roboto Flex", "Montserrat", Arial, Helvetica, sans-serif;
+  @apply bg-background text-foreground;
+  font-family:
+    "Inter",
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.6;
   min-height: 100vh;
-  transition:
-    background 0.2s,
-    color 0.2s;
+  font-variant-numeric: tabular-nums;
 }
 
 *,
@@ -27,15 +37,14 @@ body {
 }
 
 a {
-  @apply text-foreground; /* Uses your new Tailwind theme color */
+  @apply text-foreground;
   text-decoration: none;
-  transition: color 0.2s;
+  transition: color 0.15s ease;
 }
 
 a:hover,
-a:focus {
-  @apply text-secondary; /* Uses your new Tailwind theme color */
-  text-decoration: underline;
+a:focus-visible {
+  @apply text-primary;
 }
 
 button,
@@ -46,13 +55,52 @@ textarea {
   font-size: inherit;
 }
 
-:focus {
-  @apply outline-primary; /* Uses your new Tailwind theme color */
-  outline-offset: 2px;
+:focus-visible {
+  @apply outline-2 outline-offset-2 outline-primary;
+}
+
+/* Remove default focus ring — only show on keyboard navigation */
+:focus:not(:focus-visible) {
+  outline: none;
 }
 
 [aria-disabled="true"],
 :disabled {
   opacity: 0.5;
   pointer-events: auto;
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Floating notification offset */
+:root {
+  --floating-notification-top: 16px;
+}
+
+/* Scrollbar styling for webkit */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-border-2;
 }

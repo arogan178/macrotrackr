@@ -28,6 +28,7 @@ export const UserSchemas = {
     weight: t.Nullable(t.Number()),
     gender: t.Nullable(t.Union([t.Literal("male"), t.Literal("female")])),
     activityLevel: t.Nullable(t.Integer({ minimum: 1, maximum: 5 })),
+    isProfileComplete: t.Boolean(),
     subscription: t.Object({
       status: t.Union([
         t.Literal("free"),
@@ -58,6 +59,7 @@ export const UserSchemas = {
     dateOfBirth: OptionalDateString,
     height: OptionalPositiveNumber,
     weight: OptionalPositiveNumber,
+    gender: OptionalGender,
     activityLevel: OptionalActivityLevel,
   }),
 

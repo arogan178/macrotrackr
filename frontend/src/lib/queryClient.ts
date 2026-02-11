@@ -1,4 +1,6 @@
+import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
 import { QueryClient } from "@tanstack/react-query";
+import type { PersistedClient } from "@tanstack/react-query-persist-client";
 
 export const queryClient = new QueryClient({
   defaultOptions: {
@@ -198,3 +200,31 @@ export const queryConfigs = {
     refetchOnReconnect: true,
   },
 } as const;
+
+/**
+ * Storage persister for caching query data in localStorage
+ * This enables:
+ * - Instant page loads on revisit (data restored from storage)
+ * - Offline support
+ * - Reduced API calls
+ */
+export const localStoragePersister = createAsyncStoragePersister({
+  storage: globalThis.localStorage,
+  key: "macro-tracker-query-cache",
+  // Don't persist mutations - only queries
+  // Serialize/deserialize for storage
+  serialize: (data: PersistedClient) => JSON.stringify(data),
+  deserialize: (data: string) => JSON.parse(data) as PersistedClient,
+});
+
+/**
+ * Query keys that should NOT be persisted
+ * - Auth data (security)
+ * - User settings (might have sensitive info)
+ * - Real-time data that should always be fresh
+ */
+export const doNotPersistKeys = [
+  ["auth"],
+  ["settings", "user"],
+  ["settings", "billing"],
+] as const;

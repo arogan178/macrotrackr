@@ -23,10 +23,10 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="relative z-10 border-b border-border/30 bg-surface/80 backdrop-blur-xl">
-      <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-4">
-          <div className="flex items-center space-x-6">
+    <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between py-3">
+          <div className="flex items-center gap-6">
             <LogoButton className="h-0" />
             <Button
               onClick={handlePricingClick}
@@ -37,7 +37,7 @@ const Header: React.FC = () => {
             />
           </div>
 
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center gap-3">
             <Link to="/login" className="inline-block">
               <Button
                 text="Log In"

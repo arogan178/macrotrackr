@@ -1,6 +1,9 @@
 // Macro percentage keys for consistent use across the app
 import type { MacroTargetState } from "@/types/macro";
 
+// Re-export MACRO_COLORS from centralized chart colors
+export { MACRO_COLORS } from "@/utils/chartColors";
+
 export const MACRO_PERCENTAGE_KEYS = [
   "proteinPercentage",
   "carbsPercentage",
@@ -12,19 +15,4 @@ export const DEFAULT_MACRO_TARGET: MacroTargetState = {
   carbsPercentage: 40,
   fatsPercentage: 30,
   lockedMacros: [],
-};
-
-export const MACRO_COLORS = {
-  protein: {
-    base: "#34d399", // green-400
-    gradient: ["#10b981", "#34d399"],
-  },
-  carbs: {
-    base: "#60a5fa", // blue-400
-    gradient: ["#3b82f6", "#60a5fa"],
-  },
-  fats: {
-    base: "#f87171", // red-400
-    gradient: ["#ef4444", "#f87171"],
-  },
 };

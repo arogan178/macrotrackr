@@ -4,6 +4,23 @@ import { generateId } from "@/utils/idGenerator";
 import { DEFAULT_HABIT_COLOR } from "../../constants/habits";
 import { calculateProgress, isHabitComplete } from "./calculations";
 
+// Build update payload with required backend fields
+export const buildHabitUpdatePayload = (
+  existingHabit: HabitGoal,
+  updatedHabit: HabitGoal,
+): HabitGoal => ({
+  ...updatedHabit,
+  id: existingHabit.id,
+  progress:
+    typeof updatedHabit.progress === "number"
+      ? updatedHabit.progress
+      : Math.min(
+          100,
+          Math.round((existingHabit.current / updatedHabit.target) * 100),
+        ),
+  createdAt: existingHabit.createdAt,
+});
+
 // Habit creation utilities
 export const createNewHabit = (values: HabitGoalFormValues): HabitGoal => {
   const current = 0;

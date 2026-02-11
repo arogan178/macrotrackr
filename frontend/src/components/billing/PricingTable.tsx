@@ -148,23 +148,11 @@ const PricingTable: React.FC<PricingTableProps> = ({
   });
 
   return (
-    <div>
-      <style>{`
-        @media (max-width: 767px) {
-          .responsive-pricing-table thead { display: none; }
-          .responsive-pricing-table tr { display:block; margin-bottom:0.75rem; border:1px solid rgb(55 65 81 / 0.6); border-radius:0.5rem; overflow:hidden; }
-          .responsive-pricing-table td { display:flex; justify-content:space-between; align-items:center; padding:0.6rem 0.9rem; border-bottom:1px solid rgb(55 65 81 / 0.6); }
-          .responsive-pricing-table tr td:last-child { border-bottom:0; }
-          .responsive-pricing-table td[data-label]::before { content: attr(data-label); font-weight:600; color:#d1d5db; }
-          .responsive-pricing-table .feature-cell { background:rgb(55 65 81 / 0.2); font-weight:600; }
-          .responsive-pricing-table .feature-cell::before { display:none; }
-        }
-      `}</style>
-
+    <div className="space-y-5">
       {/* Plan toggle (pill group) */}
-      <div className="mb-4 flex justify-center">
+      <div className="flex justify-center">
         <div
-          className="pricing-pill-group inline-flex gap-0 overflow-hidden rounded-full border border-border bg-surface p-1 select-none"
+          className="inline-flex gap-1 overflow-hidden rounded-full border border-border bg-surface p-1 select-none"
           role="tablist"
           aria-label="Plan Toggle"
         >
@@ -176,9 +164,9 @@ const PricingTable: React.FC<PricingTableProps> = ({
             rounded="rounded-full"
             activeBg="bg-primary"
             ariaLabel="Monthly plan"
-            className="overflow-hidden rounded-full"
+            className="overflow-hidden rounded-full px-5"
           >
-            <span className={"text-sm font-semibold "}>Monthly</span>
+            <span className="text-sm font-semibold">Monthly</span>
           </TabButton>
           <TabButton
             active={selectedPlan === "yearly"}
@@ -188,22 +176,15 @@ const PricingTable: React.FC<PricingTableProps> = ({
             rounded="rounded-full"
             activeBg="bg-primary"
             ariaLabel="Yearly plan"
-            className="overflow-hidden rounded-full"
+            className="overflow-hidden rounded-full px-5"
           >
-            <span className={"text-sm font-semibold "}>Yearly</span>
+            <span className="text-sm font-semibold">Yearly</span>
           </TabButton>
         </div>
-        <style>{`
-          .pricing-pill-group [role=tab] { min-width:90px; height:40px; padding:0 18px; border-radius:9999px; position:relative; }
-          .pricing-pill-group [role=tab]:first-child { border-top-right-radius:0; border-bottom-right-radius:0; }
-          .pricing-pill-group [role=tab]:last-child { border-top-left-radius:0; border-bottom-left-radius:0; }
-          .pricing-pill-group { background:rgba(255,255,255,0.04); }
-          .pricing-pill-group [role=tab] > div.motion-div, .pricing-pill-group [role=tab] > span { border-radius:inherit; }
-        `}</style>
       </div>
 
-      <div className="w-full overflow-x-hidden rounded-2xl border border-border/60 bg-surface/40 p-4 shadow-surface backdrop-blur">
-        <table className="responsive-pricing-table w-full max-w-full border-separate border-spacing-0 text-sm">
+      <div className="w-full overflow-x-auto rounded-xl border border-border bg-surface-2">
+        <table className="w-full min-w-[680px] border-separate border-spacing-0 text-sm">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
               <tr key={headerGroup.id} className="border-b border-border/60">
@@ -215,7 +196,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
                         ? "border-b border-border/60 bg-transparent px-5 py-4 text-left text-base font-semibold text-foreground"
                         : header.index === 1
                           ? "border-b border-border/60 bg-transparent px-5 py-4 text-base font-semibold text-foreground"
-                          : "relative border-b border-border/60 bg-gradient-to-br from-primary to-secondary/20 px-5 py-4 text-base font-extrabold text-foreground shadow-surface"
+                          : "relative border-b border-warning/30 bg-warning/10 px-5 py-4 text-base font-extrabold text-foreground"
                     }
                   >
                     {flexRender(
@@ -231,7 +212,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
             {table.getRowModel().rows.map((row, index) => (
               <tr
                 key={row.id}
-                className="md:transition-transform md:duration-200 md:hover:-translate-y-1 md:hover:shadow-surface"
+                className="transition-colors duration-150 hover:bg-surface"
               >
                 {row.getVisibleCells().map((cell) => (
                   <td
@@ -245,27 +226,19 @@ const PricingTable: React.FC<PricingTableProps> = ({
                     }
                     className={
                       cell.column.id === "feature"
-                        ? `feature-cell px-3 py-2 text-left font-medium text-foreground${
+                        ? `px-5 py-3 text-left font-medium text-foreground${
                             index === data.length - 1
-                              ? ""
-                              : " md:border-b md:border-border/60"
+                              ? "" : " border-b border-border/60"
                           }`
                         : cell.column.id === "free"
-                          ? `px-3 py-2 text-center${
+                          ? `px-5 py-3 text-center${
                               row.index === data.length - 1
-                                ? ""
-                                : " md:border-b md:border-border/60"
+                                ? "" : " border-b border-border/60"
                             }`
-                          : `bg-gradient-to-br from-primary/10 to-secondary/10 px-3 py-2 text-center${
+                          : `bg-warning/5 px-5 py-3 text-center ${
                               row.index === data.length - 1
-                                ? ""
-                                : " md:border-b md:border-border/50"
+                                ? "" : " border-b border-warning/20"
                             }`
-                    }
-                    style={
-                      cell.column.id === "feature"
-                        ? { lineHeight: "1.5" }
-                        : undefined
                     }
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
@@ -280,7 +253,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {showProButton && (
         <div className="mt-5 flex flex-col items-center">
           <Button
-            className="mb-2 w-full max-w-xs rounded-xl bg-primary px-10 py-4 font-semibold  text-foreground shadow hover:bg-primary/90 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            className="mb-2 w-full max-w-xs rounded-xl bg-warning px-10 py-4 text-lg font-bold text-black hover:bg-warning/90"
             onClick={() => onUpgrade && onUpgrade(selectedPlan)}
             ariaLabel="Upgrade to Pro"
           >
