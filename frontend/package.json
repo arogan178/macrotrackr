@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@babel/helper-compilation-targets": "^7.28.6",
+    "@clerk/clerk-react": "^5.60.0",
     "@tailwindcss/postcss": "^4.1.18",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
