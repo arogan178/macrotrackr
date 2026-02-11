@@ -1,9 +1,10 @@
+import { useAuth, useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, UserDetailsResponse } from "@/utils/apiServices";
+import { apiService, setAuthToken, UserDetailsResponse } from "@/utils/apiServices";
 import { removeToken, setToken } from "@/utils/tokenStorage";
 
 // Types for authentication mutations
@@ -54,27 +55,30 @@ interface ChangePasswordData {
  * @param options - Optional configuration
  */
 export function useUser(options?: { enabled?: boolean }) {
+  const { isLoaded, isSignedIn } = useAuth();
+
   return useQuery({
     queryKey: queryKeys.auth.user(),
-    queryFn: async (): Promise<UserDetailsResponse | undefined> => {
+    queryFn: async (): Promise<UserDetailsResponse | null> => {
       try {
         return await apiService.user.getUserDetails();
       } catch (error) {
-        // If user is not authenticated, return undefined instead of throwing
+        // If user is not authenticated, return null instead of throwing.
+        // TanStack Query does not allow undefined query data.
         if (
           error instanceof Error &&
           "status" in error &&
           (error as any).status === 401
         ) {
-          return undefined;
+          return null;
         }
         throw error;
       }
     },
     ...queryConfigs.auth,
     retry: false, // Don't retry auth queries to avoid infinite loops
-    // Enable even if local token is missing; we also send cookies
-    enabled: options?.enabled ?? true,
+    // Only fetch user data once Clerk auth is loaded and a user is signed in.
+    enabled: options?.enabled ?? (isLoaded && isSignedIn),
   });
 }
 
@@ -165,15 +169,16 @@ export function useLogin() {
 export function useLogout() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+  const { signOut } = useClerk();
 
   return useMutation({
     mutationFn: async (): Promise<void> => {
       // Remove token from storage
       removeToken();
+      setAuthToken(null);
 
-      // Note: The current API doesn't have a logout endpoint
-      // but we'll clear local state regardless
-      return;
+      // Sign out from Clerk to clear session cookies
+      await signOut();
     },
     onSuccess: () => {
       // Clear all cached data
@@ -182,8 +187,8 @@ export function useLogout() {
       // Also specifically invalidate auth queries to ensure they're cleared
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
 
-      // Navigate to login
-      navigate({ to: "/login" });
+      // Navigate to landing page
+      navigate({ to: "/" });
     },
   });
 }

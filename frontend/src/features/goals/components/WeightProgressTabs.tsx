@@ -68,7 +68,7 @@ function WeightProgressTabs() {
       </div>
 
       {/* Tab Content Area */}
-      <div className="relative px-6 py-3 backdrop-blur-sm">
+      <div className="relative px-6 py-3">
         <AnimatePresence mode="wait">
           <motion.div
             key={activeTab}

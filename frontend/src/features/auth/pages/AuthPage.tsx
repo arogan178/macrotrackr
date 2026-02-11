@@ -2,17 +2,15 @@ import { Link } from "@tanstack/react-router";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
-import { PageBackground } from "@/components/layout";
 import LogoButton from "@/components/layout/LogoButton";
+import PageBackground from "@/components/layout/PageBackground";
 // UI imports are used via subcomponents; no direct Button usage here
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
-import {
-  ButtonModeToggle,
-  ForgotPasswordForm,
-  LoginForm,
-  RegisterForm,
-} from "@/features/auth/components";
+import ButtonModeToggle from "@/features/auth/components/ButtonModeToggle";
+import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm";
+import LoginForm from "@/features/auth/components/LoginForm";
+import RegisterForm from "@/features/auth/components/RegisterForm";
 
 // --- Animation Constants (keep in local scope, not shared: only used here) ---
 const ANIMATION_HEIGHT_DURATION = 500; // ms

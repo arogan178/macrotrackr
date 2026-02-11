@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
@@ -8,51 +9,18 @@ import {
   apiService,
   WeightLogEntry,
 } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
 
 // Query hook for fetching weight goals
 export function useWeightGoals() {
   return useQuery({
     queryKey: queryKeys.goals.weight(),
-  // Important: TanStack Query throws if ensureQueryData resolves to undefined.
-  // We return null explicitly to represent "no goals set".
     queryFn: async (): Promise<WeightGoals | null> => {
-      const weightGoalsData = await apiService.goals.getWeightGoals();
-
-      // eslint-disable-next-line unicorn/no-null
-      if (!weightGoalsData) return null;
-
-      // Get weight log to calculate current weight
-      const weightLog = await apiService.goals.getWeightLog();
-
-      // Determine latest weight without using .at() (TS lib compatibility) and satisfying lint
-      let latestWeight = weightGoalsData.startingWeight;
-      if (weightLog.length > 0) {
-        const lastIndex = weightLog.length - 1;
-         
-        latestWeight = weightLog[lastIndex].weight;
-      }
-
-      // Transform API response to match WeightGoals interface with defaults
-      return {
-        ...weightGoalsData,
-        currentWeight: latestWeight,
-        targetWeight:
-          weightGoalsData.targetWeight || weightGoalsData.startingWeight,
-        weightGoal: (weightGoalsData.weightGoal || "maintain") as
-          | "lose"
-          | "maintain"
-          | "gain",
-        startDate:
-          weightGoalsData.startDate || new Date().toISOString().split("T")[0],
-        targetDate:
-          weightGoalsData.targetDate || new Date().toISOString().split("T")[0],
-        calorieTarget: weightGoalsData.calorieTarget || 2000,
-        calculatedWeeks: weightGoalsData.calculatedWeeks || 1,
-        weeklyChange: weightGoalsData.weeklyChange || 0,
-        dailyChange: weightGoalsData.dailyChange ?? 0,
-      };
+      const data = await apiService.goals.getWeightGoals();
+      return normalizeWeightGoals(data, undefined);
     },
-    ...queryConfigs.longLived, // 5 minutes stale time for goals
+    ...queryConfigs.longLived,
+    placeholderData: (previousData) => previousData,
   });
 }
 
@@ -72,6 +40,7 @@ export function useCreateWeightGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: queryKeys.goals.weight(),
     mutationFn: async ({
       goals,
       tdee,
@@ -79,50 +48,45 @@ export function useCreateWeightGoal() {
       goals: WeightGoalFormValues;
       tdee: number;
     }) => {
+      // Start both operations in parallel to avoid waterfall
+      const createPromise = apiService.goals.createWeightGoal(goals, tdee);
+      const weightLogPromise = apiService.goals.getWeightLog();
+
       try {
-        // Create the weight goal
-        const result = await apiService.goals.createWeightGoal(goals, tdee);
+        const [result, weightLog] = await Promise.all([
+          createPromise,
+          weightLogPromise,
+        ]);
 
-        // Also log the starting weight as a weight log entry
-        // Only if we don't already have a weight log entry for today
-        const weightLog = await apiService.goals.getWeightLog();
-        const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
-
-        // Check if we already have a weight entry for today
-        const hasEntryForToday = weightLog.some((entry) => {
-          const entryDate = new Date(entry.timestamp)
-            .toISOString()
-            .split("T")[0];
-          return entryDate === today;
-        });
+        const today = todayISO();
+        const hasEntryForToday = weightLog.some((entry) =>
+          entry.timestamp.startsWith(today),
+        );
 
         // If no entry for today, add the starting weight
-        if (!hasEntryForToday) {
+        if (!hasEntryForToday && goals.startingWeight) {
           await apiService.goals.addWeightLogEntry({
-            weight: goals.startingWeight ?? 0,
+            weight: goals.startingWeight,
             timestamp: new Date().toISOString(),
           });
         }
 
         return result;
-      } catch (error: any) {
+      } catch (error) {
         // If create fails because goal already exists, try to update instead
+        const apiError = error as { status?: number; message?: string };
         if (
-          error?.status === 409 ||
-          error?.message?.includes("already exists")
+          apiError?.status === 409 ||
+          apiError?.message?.includes("already exists")
         ) {
           return await apiService.goals.updateWeightGoal(goals, tdee);
         }
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate weight goals and weight log queries
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
-    },
-    onError: (error) => {
-      console.error("Error creating weight goal:", error);
     },
   });
 }
@@ -132,6 +96,7 @@ export function useUpdateWeightGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: queryKeys.goals.weight(),
     mutationFn: async ({
       goals,
       tdee,
@@ -141,64 +106,57 @@ export function useUpdateWeightGoal() {
     }) => {
       try {
         return await apiService.goals.updateWeightGoal(goals, tdee);
-      } catch (error: any) {
+      } catch (error) {
         // If update fails with 404 (goal not found), try to create instead
-        if (error?.status === 404) {
+        const apiError = error as { status?: number };
+        if (apiError?.status === 404) {
           return await apiService.goals.createWeightGoal(goals, tdee);
         }
         throw error;
       }
     },
-    onSuccess: () => {
-      // Invalidate weight goals and weight log queries
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
-    },
-    onError: (error) => {
-      console.error("Error updating weight goal:", error);
+    onSuccess: (data) => {
+      const updatedGoals = normalizeWeightGoals(data, undefined);
+      if (updatedGoals) {
+        queryClient.setQueryData<WeightGoals>(
+          queryKeys.goals.weight(),
+          updatedGoals,
+        );
+      }
     },
   });
 }
 
-// Mutation hook for deleting weight goals with optimistic updates
+// Mutation hook for deleting weight goals
 export function useDeleteWeightGoal() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.goals.weight(), "delete"],
     mutationFn: async () => {
       return await apiService.goals.deleteWeightGoals();
     },
-    onMutate: async () => {
-      // Cancel any outgoing refetches
-      await queryClient.cancelQueries({ queryKey: queryKeys.goals.weight() });
-
-      // Snapshot the previous value
-      const previousWeightGoals = queryClient.getQueryData(
-        queryKeys.goals.weight(),
-      );
-
-      // Optimistically remove the weight goals query from cache so any components treat it as non-existent
-      // This avoids downstream logic (e.g., ensureQueryData in route loaders) encountering an explicit undefined value
-      // which can trigger "data is undefined" errors.
+    onSuccess: () => {
+      // Remove from cache immediately for instant UI feedback
       queryClient.removeQueries({ queryKey: queryKeys.goals.weight() });
-
-      return { previousWeightGoals };
-    },
-    onError: (error, _variables, _context) => {
-      // Rollback optimistic update
-      if (_context?.previousWeightGoals !== undefined) {
-        queryClient.setQueryData(
-          queryKeys.goals.weight(),
-          _context.previousWeightGoals,
-        );
-      }
-      console.error("Error deleting weight goals:", error);
     },
     onSettled: () => {
-      // Always refetch to ensure consistency
+      // Always invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
     },
   });
+}
+
+// Counter for generating unique optimistic IDs
+let optimisticIdCounter = 0;
+
+/**
+ * Generate a unique client-side ID for optimistic updates
+ * Uses a counter combined with timestamp to ensure uniqueness even with rapid successive calls
+ */
+function generateOptimisticId(): string {
+  optimisticIdCounter += 1;
+  return `optimistic-${Date.now()}-${optimisticIdCounter}`;
 }
 
 // Mutation hook for adding weight log entry with optimistic updates
@@ -206,29 +164,33 @@ export function useAddWeightLogEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.goals.weightLog(), "add"],
     mutationFn: async (
       payload: AddWeightLogPayload,
     ): Promise<WeightLogEntry> => {
       return await apiService.goals.addWeightLogEntry(payload);
     },
     onMutate: async (variables: AddWeightLogPayload) => {
-      // Cancel any outgoing refetches
+      // Cancel any outgoing refetches to prevent overwriting optimistic update
       await queryClient.cancelQueries({
         queryKey: queryKeys.goals.weightLog(),
       });
       await queryClient.cancelQueries({ queryKey: queryKeys.goals.weight() });
 
-      // Snapshot previous data
+      // Snapshot previous values for rollback on error
       const previousWeightLog = queryClient.getQueryData<WeightLogEntry[]>(
         queryKeys.goals.weightLog(),
       );
-      const previousWeightGoals = queryClient.getQueryData(
+      const previousWeightGoals = queryClient.getQueryData<WeightGoals | null>(
         queryKeys.goals.weight(),
       );
+      const previousUser = queryClient.getQueryData<{ weight?: number } | null>(
+        queryKeys.auth.user(),
+      );
 
-      // Create optimistic entry
+      // Create optimistic entry with unique temporary ID
       const optimisticEntry: WeightLogEntry = {
-        id: `temp-${Date.now()}`, // Temporary ID
+        id: generateOptimisticId(),
         weight: variables.weight,
         timestamp: variables.timestamp,
       };
@@ -242,64 +204,81 @@ export function useAddWeightLogEntry() {
         },
       );
 
-      // Optimistically update weight goals current weight AND recompute derived fields
-      // Also mirror user.weight so UI numbers (e.g., the number before the > icon) update immediately.
+      // Optimistically update weight goals current weight
       queryClient.setQueryData<WeightGoals | null>(
         queryKeys.goals.weight(),
         (oldData) => {
           if (!oldData) return oldData;
-
-          const updated: WeightGoals = {
-            ...oldData,
-            currentWeight: variables.weight,
-            // Keep target and starting weights unchanged
-          };
-
-          return updated;
+          return { ...oldData, currentWeight: variables.weight };
         },
       );
 
-      // Also optimistically update the user settings cache so any UI reading user.weight updates immediately.
-      // Adjusted to known query key group present in queryKeys.
+      // Optimistically update user weight
       queryClient.setQueryData(
         queryKeys.auth.user(),
-        (oldUser: any) => {
+        (oldUser: { weight?: number } | null) => {
           if (!oldUser) return oldUser;
-          return {
-            ...oldUser,
-            weight: variables.weight,
-          };
+          return { ...oldUser, weight: variables.weight };
         },
       );
 
-      return { previousWeightLog, previousWeightGoals };
+      return { optimisticEntry, previousWeightLog, previousWeightGoals, previousUser };
     },
-    onError: (error, _variables, _context) => {
-      // Rollback optimistic updates
-      if (_context?.previousWeightLog !== undefined) {
-        queryClient.setQueryData(
-          queryKeys.goals.weightLog(),
-          _context.previousWeightLog,
-        );
+    onError: (error, _variables, context) => {
+      // Rollback all optimistic updates on error
+      if (context?.previousWeightLog) {
+        queryClient.setQueryData(queryKeys.goals.weightLog(), context.previousWeightLog);
       }
-      if (_context?.previousWeightGoals !== undefined) {
-        queryClient.setQueryData(
-          queryKeys.goals.weight(),
-          _context.previousWeightGoals,
-        );
+      if (context?.previousWeightGoals) {
+        queryClient.setQueryData(queryKeys.goals.weight(), context.previousWeightGoals);
       }
-      console.error("Error adding weight log entry:", error);
+      if (context?.previousUser) {
+        queryClient.setQueryData(queryKeys.auth.user(), context.previousUser);
+      }
+      console.error("Failed to add weight log entry:", error);
     },
-    onSuccess: (newEntry, _variables, _context) => {
-      // Update with real data from server
+    onSuccess: (newEntry, variables, context) => {
+      // Replace optimistic entry with real data from server
+      // Uses a robust matching strategy: first try ID match, then fall back to weight+timestamp
       queryClient.setQueryData<WeightLogEntry[]>(
         queryKeys.goals.weightLog(),
         (oldData) => {
           if (!oldData) return [newEntry];
-          // Replace the optimistic entry with the real one
-          return oldData.map((entry) =>
-            entry.id.toString().startsWith("temp-") ? newEntry : entry,
-          );
+
+          // Track if we've performed the replacement
+          let replaced = false;
+
+          const updatedData = oldData.map((entry) => {
+            // First priority: match by optimistic ID
+            if (entry.id === context?.optimisticEntry?.id) {
+              replaced = true;
+              return newEntry;
+            }
+            return entry;
+          });
+
+          // If no ID match found, try to match by weight and timestamp (within 1 second tolerance)
+          if (!replaced) {
+            const targetTimestamp = new Date(variables.timestamp).getTime();
+            const toleranceMs = 1000;
+
+            for (let index = 0; index < updatedData.length; index++) {
+              const entry = updatedData[index];
+              // Check for optimistic ID pattern or matching weight+timestamp
+              if (
+                entry.id.startsWith("optimistic-") ||
+                (entry.weight === variables.weight &&
+                  Math.abs(
+                    new Date(entry.timestamp).getTime() - targetTimestamp,
+                  ) <= toleranceMs)
+              ) {
+                updatedData[index] = newEntry;
+                break;
+              }
+            }
+          }
+
+          return updatedData;
         },
       );
     },
@@ -316,6 +295,7 @@ export function useDeleteWeightLogEntry() {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: [...queryKeys.goals.weightLog(), "delete"],
     mutationFn: async (
       id: string,
     ): Promise<{ success: boolean; id: string }> => {
@@ -355,9 +335,9 @@ export function useDeleteWeightLogEntry() {
     },
     onSettled: () => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
-      // Also invalidate weight goals to update current weight
-      queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
+      queryClient.refetchQueries({ queryKey: queryKeys.goals.weightLog() });
+      // Also refetch weight goals to update current weight
+      queryClient.refetchQueries({ queryKey: queryKeys.goals.weight() });
     },
   });
 }
