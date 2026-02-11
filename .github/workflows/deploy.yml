@@ -1,0 +1,162 @@
+name: Deploy Macro Tracker
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+        
+    - name: Install dependencies
+      run: |
+        bun install --frozen-lockfile
+        cd frontend
+        bun install --frozen-lockfile
+        cd ../backend
+        bun install --frozen-lockfile
+        cd ..
+      
+    - name: Build frontend
+      run: |
+        cd frontend
+        rm -rf dist/
+        rm -rf node_modules/.vite/
+        rm -rf .tanstack/
+        export NODE_OPTIONS="--max-old-space-size=2048"
+        bun run build
+        unset NODE_OPTIONS
+        
+    - name: Test backend
+      run: |
+        cd backend
+        shopt -s globstar nullglob
+        test_files=(**/*.test.* **/*_test_* **/*.spec.* **/*_spec_*)
+        if [ ${#test_files[@]} -eq 0 ]; then
+          echo "No tests found, skipping"
+        else
+          bun test
+        fi
+        
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: root
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        script: |
+          cd /var/www/macro-tracker
+
+          # Add bun and pm2 to PATH
+          export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
+           git stash push -m "Automated stash before deployment" --include-untracked || true
+           git pull origin master
+
+           # Write backend .env from GitHub secrets
+           echo "Writing backend environment variables..."
+           printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > backend/.env
+           echo "✅ Backend environment variables written"
+
+           # Write frontend .env from GitHub secrets
+           echo "Writing frontend environment variables..."
+           printf '%s\n' "VITE_API_URL=${{ secrets.FRONTEND_VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_HOST }}" > frontend/.env
+           echo "✅ Frontend environment variables written"
+          
+          # Add bun to PATH
+          export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
+          # Install dependencies
+          bun install --frozen-lockfile
+          
+          # Build frontend
+          cd frontend
+          rm -rf dist/
+          rm -rf node_modules/.vite/
+          rm -rf .tanstack/
+          export NODE_OPTIONS="--max-old-space-size=2048"
+          # Try bun first, fallback to node if needed
+          if command -v bun > /dev/null 2>&1; then
+              bun run build
+          else
+              # Fallback to node-based Vite
+              if [ -f node_modules/vite/bin/vite.js ]; then
+                  node ./node_modules/vite/bin/vite.js build
+              else
+                  echo "❌ Vite not found in node_modules"
+                  exit 1
+              fi
+          fi
+          unset NODE_OPTIONS
+          
+          # Go back to root
+          cd ..
+          
+          # Create logs directory if it doesn't exist
+          mkdir -p logs
+
+          # Add bun and pm2 to PATH
+          export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
+          # Restart applications using PM2 ecosystem file
+          pm2 reload ecosystem.config.js || {
+            echo "PM2 reload failed, attempting restart..."
+            pm2 restart ecosystem.config.js || {
+              echo "PM2 restart also failed"
+              exit 1
+            }
+          }
+          
+          # Check if backend started successfully
+          sleep 3
+          if pm2 describe macro-tracker-api > /dev/null; then
+            echo "✅ Backend API started successfully"
+          else
+            echo "❌ Backend API failed to start"
+            pm2 logs macro-tracker-api --lines 20 || true
+            exit 1
+          fi
+          
+          # Check if frontend started successfully
+          if pm2 describe macro-frontend > /dev/null; then
+            echo "✅ Frontend server started successfully"
+          else
+            echo "❌ Frontend server failed to start"
+            pm2 logs macro-frontend --lines 20 || true
+            exit 1
+          fi
+          
+          echo "Deployment finished successfully at $(date)"
+          echo "Backend API: http://localhost:3000"
+          echo "Frontend: http://localhost:5173"
+      
+    - name: Post-deployment notification
+      if: always()
+      run: |
+        echo "Deployment ${{ job.status }} for Macro Tracker"
+        echo "Commit: ${{ github.sha }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Workflow: ${{ github.workflow }}"
+        echo "Status: ${{ job.status }}"
+      
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-logs
+        path: |
+          /var/www/macro-tracker/logs/*.log
+          /var/www/macro-tracker/frontend/dist/
+        retention-days: 7
