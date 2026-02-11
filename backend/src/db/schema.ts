@@ -22,6 +22,7 @@ export function initializeSchema(db: Database) {
             last_name TEXT NOT NULL,
             email TEXT UNIQUE NOT NULL,
             password TEXT NOT NULL, -- Store hashed password
+            clerk_id TEXT UNIQUE,
             subscription_status TEXT DEFAULT 'free' CHECK(subscription_status IN ('free', 'pro', 'canceled')),
             stripe_customer_id TEXT UNIQUE,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -180,6 +181,7 @@ export function initializeSchema(db: Database) {
   // Apply necessary column additions for existing tables (idempotent)
   checkAndAddColumn("users", "password_reset_token", "TEXT");
   checkAndAddColumn("users", "password_reset_expires", "DATETIME");
+  checkAndAddColumn("users", "clerk_id", "TEXT");
   checkAndAddColumn(
     "macro_entries",
     "meal_type",
@@ -299,6 +301,7 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits(user_id)");
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
