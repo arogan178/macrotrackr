@@ -1,9 +1,11 @@
 import "./style.css";
 
+import { useAuth } from "@clerk/clerk-react";
 import {
   createRootRoute,
   createRoute,
   createRouter,
+  Navigate,
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
@@ -14,10 +16,10 @@ import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
+import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
 
 import MainLayout from "./components/layout/MainLayout";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
-import { useUser } from "./hooks/auth/useAuthQueries";
 import { queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
@@ -33,7 +35,21 @@ const SettingsPage = React.lazy(
   () => import("@/features/settings/pages/SettingsPage"),
 );
 const GoalsPage = React.lazy(() => import("@/features/goals/pages/GoalsPage"));
-const AuthPage = React.lazy(() => import("@/features/auth/pages/AuthPage"));
+const SignInPage = React.lazy(
+  () => import("@/features/auth/pages/SignInPage"),
+);
+const SignUpPage = React.lazy(
+  () => import("@/features/auth/pages/SignUpPage"),
+);
+const ProfileSetupPage = React.lazy(
+  () => import("@/features/auth/pages/ProfileSetupPage"),
+);
+const AuthReadyPage = React.lazy(
+  () => import("@/features/auth/pages/AuthReadyPage"),
+);
+const SSOCallbackPage = React.lazy(
+  () => import("@/features/auth/pages/SSOCallbackPage"),
+);
 const ReportingPage = React.lazy(
   () => import("@/features/reporting/pages/ReportingPage"),
 );
@@ -59,52 +75,65 @@ function LoadingFallback() {
   );
 }
 
-// Auth guard component
+// Auth guard component - using Clerk's useAuth
 function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { data: user, isLoading } = useUser();
+  const { isSignedIn, isLoaded } = useAuth();
 
-  if (isLoading) {
-    return <LoadingSpinner size="lg" />;
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
-  if (!user && globalThis.window !== undefined) {
-    globalThis.location.replace("/login");
-    return null;
+  if (!isSignedIn) {
+    return <Navigate to="/login" search={{}} />;
   }
 
   return <>{children}</>;
 }
 
-// Root route with query-based user data prefetching
+// Auth guard for unauthenticated routes
+function RequireUnauth({ children }: { children: React.ReactNode }) {
+  const { isSignedIn, isLoaded } = useAuth();
+
+  if (!isLoaded) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-surface">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (isSignedIn) {
+    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
+  }
+
+  return <>{children}</>;
+}
+
+// Helper function to safely fetch data with auth error handling
+async function safeFetch<T>(
+  fetchFunction: () => Promise<T>,
+  defaultValue: T,
+): Promise<T> {
+  try {
+    return await fetchFunction();
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      "status" in error &&
+      (error as any).status === 401
+    ) {
+      return defaultValue;
+    }
+    throw error;
+  }
+}
+
+// Root route
 export const rootRoute = createRootRoute({
-  loader: async (context_) => {
-    const { context } = context_ as typeof context_ & {
-      context: { queryClient: typeof queryClient };
-    };
-
-    const { getToken } = await import("@/utils/tokenStorage");
-    if (!getToken()) return;
-
-    await context.queryClient.ensureQueryData({
-      queryKey: queryKeys.auth.user(),
-      queryFn: async () => {
-        try {
-          return await apiService.user.getUserDetails();
-        } catch (error) {
-          if (
-            error instanceof Error &&
-            "status" in error &&
-            (error as any).status === 401
-          ) {
-            return undefined;
-          }
-          throw error;
-        }
-      },
-      ...queryConfigs.auth,
-      retry: false,
-    });
-  },
   component: () => (
     <ErrorBoundary>
       <div id="app-root" className="relative min-h-screen">
@@ -151,32 +180,48 @@ export const homeRoute = createRoute({
 
     const [macroTarget, macroHistory, weightGoals, weightLog] =
       await Promise.all([
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.macros.targets(),
-          queryFn: () =>
-            apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
-          ...queryConfigs.macros,
-        }),
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.macros.history(page),
-          queryFn: () => apiService.macros.getHistory(limit, offset),
-          ...queryConfigs.history,
-        }),
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.goals.weight(),
-          queryFn: () =>
-            apiService.goals.getWeightGoals().then((r) => r ?? null),
-          ...queryConfigs.goals,
-        }),
-        context.queryClient.ensureQueryData({
-          queryKey: queryKeys.goals.weightLog(),
-          queryFn: () => apiService.goals.getWeightLog(),
-          ...queryConfigs.goals,
-        }),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.macros.targets(),
+              queryFn: () =>
+                apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+              ...queryConfigs.macros,
+            }),
+          undefined,
+        ),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.macros.history(page),
+              queryFn: () => apiService.macros.getHistory(limit, offset),
+              ...queryConfigs.history,
+            }),
+          { entries: [], hasMore: false, total: 0 },
+        ),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.goals.weight(),
+              queryFn: () =>
+                apiService.goals.getWeightGoals().then((r) => r ?? null),
+              ...queryConfigs.goals,
+            }),
+          null,
+        ),
+        safeFetch(
+          () =>
+            context.queryClient.fetchQuery({
+              queryKey: queryKeys.goals.weightLog(),
+              queryFn: () => apiService.goals.getWeightLog(),
+              ...queryConfigs.goals,
+            }),
+          [],
+        ),
       ]);
 
     const latestWeight =
-      weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
@@ -198,7 +243,9 @@ export const homeRoute = createRoute({
   },
   component: () => (
     <RequireAuth>
-      <HomePage />
+      <RequireCompleteProfile>
+        <HomePage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
@@ -206,32 +253,15 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
-  loader: async (context_) => {
-    const { context } = context_ as typeof context_ & {
-      context: { queryClient: typeof queryClient };
-    };
-
-    await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.settings.user(),
-        queryFn: () => apiService.user.getUserDetails(),
-        ...queryConfigs.settings,
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.settings.billing(),
-        queryFn: () => apiService.billing.getBillingDetails(),
-        ...queryConfigs.settings,
-      }),
-    ]);
-
-    return {};
-  },
   component: () => (
     <RequireAuth>
-      <SettingsPage />
+      <RequireCompleteProfile>
+        <SettingsPage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
+
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
@@ -241,31 +271,48 @@ export const goalsRoute = createRoute({
     };
 
     const [macroTarget, weightGoals, weightLog] = await Promise.all([
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.macros.targets(),
-        queryFn: () =>
-          apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
-        ...queryConfigs.macros,
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.goals.weight(),
-        queryFn: () => apiService.goals.getWeightGoals().then((r) => r ?? null),
-        ...queryConfigs.goals,
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.goals.weightLog(),
-        queryFn: () => apiService.goals.getWeightLog(),
-        ...queryConfigs.goals,
-      }),
-      context.queryClient.ensureQueryData({
-        queryKey: queryKeys.habits.list(),
-        queryFn: () => apiService.habits.getHabit(),
-        ...queryConfigs.goals,
-      }),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.macros.targets(),
+            queryFn: () =>
+              apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+            ...queryConfigs.macros,
+          }),
+        undefined,
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weight(),
+            queryFn: () =>
+              apiService.goals.getWeightGoals().then((r) => r ?? null),
+            ...queryConfigs.goals,
+          }),
+        null,
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weightLog(),
+            queryFn: () => apiService.goals.getWeightLog(),
+            ...queryConfigs.goals,
+          }),
+        [],
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.habits.list(),
+            queryFn: () => apiService.habits.getHabit(),
+            ...queryConfigs.goals,
+          }),
+        [],
+      ),
     ]);
 
     const latestWeight =
-      weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
@@ -278,21 +325,59 @@ export const goalsRoute = createRoute({
   },
   component: () => (
     <RequireAuth>
-      <GoalsPage />
+      <RequireCompleteProfile>
+        <GoalsPage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
-const loginRoute = createRoute({
+
+// New Clerk sign-in route
+const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
-  component: AuthPage,
+  component: () => (
+    <RequireUnauth>
+      <SignInPage />
+    </RequireUnauth>
+  ),
 });
 
-const registerRoute = createRoute({
+// New Clerk sign-up route
+const signUpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
-  component: AuthPage,
+  component: () => (
+    <RequireUnauth>
+      <SignUpPage />
+    </RequireUnauth>
+  ),
 });
+
+// Profile setup route - for post-authentication profile creation
+const profileSetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/profile-setup",
+  component: ProfileSetupPage,
+});
+
+// Auth ready route - ensures auth token is set before redirecting to protected routes
+const authReadyRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/auth-ready",
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: search.redirectTo as string | undefined,
+  }),
+  component: AuthReadyPage,
+});
+
+// SSO Callback route - handles OAuth redirect from Clerk
+const ssoCallbackRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/sso-callback",
+  component: SSOCallbackPage,
+});
+
 export const reportingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reporting",
@@ -309,22 +394,29 @@ export const reportingRoute = createRoute({
 
     const queryDate = deps.startDate || new Date().toISOString().split("T")[0]!;
 
-    return context.queryClient.ensureQueryData({
-      queryKey: queryKeys.macros.dailyTotals(queryDate),
-      queryFn: () =>
-        apiService.macros.getDailyTotals({
-          startDate: deps.startDate,
-          endDate: deps.endDate,
+    return safeFetch(
+      () =>
+        context.queryClient.fetchQuery({
+          queryKey: queryKeys.macros.dailyTotals(queryDate),
+          queryFn: () =>
+            apiService.macros.getDailyTotals({
+              startDate: deps.startDate,
+              endDate: deps.endDate,
+            }),
+          ...queryConfigs.history,
         }),
-      ...queryConfigs.history,
-    });
+      null,
+    );
   },
   component: () => (
     <RequireAuth>
-      <ReportingPage />
+      <RequireCompleteProfile>
+        <ReportingPage />
+      </RequireCompleteProfile>
     </RequireAuth>
   ),
 });
+
 const pricingRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/pricing",
@@ -354,8 +446,11 @@ const routeTree = rootRoute.addChildren([
   homeRoute,
   settingsRoute,
   goalsRoute,
-  loginRoute,
-  registerRoute,
+  signInRoute,
+  signUpRoute,
+  profileSetupRoute,
+  authReadyRoute,
+  ssoCallbackRoute,
   reportingRoute,
   pricingRoute,
   resetPasswordRoute,
