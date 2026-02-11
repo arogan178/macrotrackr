@@ -62,40 +62,18 @@ jobs:
           # Add bun and pm2 to PATH
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
 
-          git stash push -m "Automated stash before deployment" --include-untracked || true
-          git pull origin master
-          
-          # Write backend .env from GitHub secrets
-          echo "Writing backend environment variables..."
-          cat > backend/.env << 'ENVEOF'
-NODE_ENV=production
-PORT=3000
-HOST=0.0.0.0
-DATABASE_PATH=./macro_tracker.db
-JWT_SECRET=${{ secrets.JWT_SECRET }}
-CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}
-CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}
-CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}
-CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}
-STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}
-STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}
-STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}
-STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}
-RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}
-VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}
-ENVEOF
-          echo "✅ Backend environment variables written"
+           git stash push -m "Automated stash before deployment" --include-untracked || true
+           git pull origin master
 
-          # Write frontend .env from GitHub secrets
-          echo "Writing frontend environment variables..."
-          cat > frontend/.env << 'ENVEOF'
-VITE_API_URL=${{ secrets.FRONTEND_VITE_API_URL }}
-VITE_PUBLIC_POSTHOG_KEY=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_KEY }}
-VITE_PUBLIC_POSTHOG_HOST=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_HOST }}
-ENVEOF
-          echo "✅ Frontend environment variables written"
-            cp backend/.env.production backend/.env
-          fi
+           # Write backend .env from GitHub secrets
+           echo "Writing backend environment variables..."
+           printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > backend/.env
+           echo "✅ Backend environment variables written"
+
+           # Write frontend .env from GitHub secrets
+           echo "Writing frontend environment variables..."
+           printf '%s\n' "VITE_API_URL=${{ secrets.FRONTEND_VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_HOST }}" > frontend/.env
+           echo "✅ Frontend environment variables written"
           
           # Add bun to PATH
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
