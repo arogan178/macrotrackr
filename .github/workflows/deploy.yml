@@ -19,7 +19,13 @@ jobs:
         bun-version: latest
         
     - name: Install dependencies
-      run: bun install --frozen-lockfile
+      run: |
+        bun install --frozen-lockfile
+        cd frontend
+        bun install --frozen-lockfile
+        cd ../backend
+        bun install --frozen-lockfile
+        cd ..
       
     - name: Build frontend
       run: |
@@ -28,7 +34,7 @@ jobs:
         rm -rf node_modules/.vite/
         rm -rf .tanstack/
         export NODE_OPTIONS="--max-old-space-size=2048"
-        node ./node_modules/vite/bin/vite.js build
+        bun run build
         unset NODE_OPTIONS
         
     - name: Test backend
