@@ -4,9 +4,9 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect } from "react";
 
 import { PricingTable } from "@/components/billing";
+import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { CardContainer } from "@/components/form";
 import { CircleQuestionMarkIcon, IconButton } from "@/components/ui";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";
