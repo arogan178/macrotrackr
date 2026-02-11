@@ -12,7 +12,7 @@ jobs:
     - name: Trigger deployment repository
       uses: peter-evans/repository-dispatch@v2
       with:
-        token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
         repository: arogan178/macro_tracker_deploy
         event-type: deploy-macro-tracker
         client-payload: |
