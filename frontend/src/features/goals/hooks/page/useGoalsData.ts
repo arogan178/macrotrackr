@@ -10,44 +10,57 @@ import type { UserSettings } from "@/types/user";
 import type { UserDetailsResponse } from "@/utils/apiServices";
 import { createNutritionProfile } from "@/utils/userConstants";
 
-function toUserSettings(user: UserDetailsResponse | null | undefined): UserSettings | undefined {
+interface GoalsLoaderData {
+  macroDailyTotals?: { protein: number; carbs: number; fats: number; calories: number };
+  weightGoals?: WeightGoalsResponse;
+  weightLog?: unknown;
+  weightGoalsError?: string;
+}
+
+// Transform UserDetailsResponse to UserSettings with required fields
+const toUserSettings = (user: UserDetailsResponse | null | undefined): UserSettings | undefined => {
   if (!user) return undefined;
   return {
     ...user,
     dateOfBirth: user.dateOfBirth ?? "",
-  } as UserSettings;
-}
+  };
+};
 
 export function useGoalsData() {
-  const loaderData: {
-    macroDailyTotals?: { protein: number; carbs: number; fats: number; calories: number };
-    weightGoals?: WeightGoalsResponse;
-    weightLog?: unknown;
-    weightGoalsError?: string;
-  } = useLoaderData({ from: goalsRoute.id }) || {};
+  const loaderData = useLoaderData({ from: goalsRoute.id }) as GoalsLoaderData || {};
 
-  const { data: user } = useUser();
+  const { data: user, isError: isUserError, error: userError } = useUser();
   const safeUserSettings = toUserSettings(user);
 
   const { data: macroTarget } = useMacroTarget();
   const { data: liveMacroDailyTotals } = useMacroDailyTotals();
 
-  const initialMacroDailyTotals = loaderData.macroDailyTotals || {
-    protein: 0,
-    carbs: 0,
-    fats: 0,
-    calories: 0,
-  };
-
-  const macroDailyTotals = liveMacroDailyTotals || initialMacroDailyTotals;
-
+  const macroDailyTotals = liveMacroDailyTotals ?? loaderData.macroDailyTotals ?? DEFAULT_MACRO_TOTALS;
   const nutritionProfile = safeUserSettings ? createNutritionProfile(safeUserSettings) : undefined;
 
-  const { data: habits = [], isLoading: habitsLoading } = useHabits();
-  const { data: weightGoalsFromQuery } = useWeightGoals();
+  const { 
+    data: habits = [], 
+    isLoading: habitsLoading, 
+    isError: isHabitsError, 
+    error: habitsError 
+  } = useHabits();
 
-  const currentWeightGoals = weightGoalsFromQuery || loaderData.weightGoals;
-  const safeTargetWeight = currentWeightGoals?.targetWeight || user?.weight || 0;
+  const { 
+    data: weightGoalsFromQuery, 
+    isError: isWeightGoalsError, 
+    error: weightGoalsError 
+  } = useWeightGoals();
+
+  const currentWeightGoals = weightGoalsFromQuery ?? loaderData.weightGoals;
+  const safeTargetWeight = currentWeightGoals?.targetWeight ?? user?.weight ?? 0;
+
+  // Aggregate error states
+  const hasErrors = isUserError || isWeightGoalsError || isHabitsError;
+  const errors = {
+    user: isUserError ? userError : null,
+    weightGoals: isWeightGoalsError ? weightGoalsError : null,
+    habits: isHabitsError ? habitsError : null,
+  };
 
   return {
     loaderData,
@@ -60,5 +73,7 @@ export function useGoalsData() {
     habitsLoading,
     currentWeightGoals,
     safeTargetWeight,
+    hasErrors,
+    errors,
   };
 }

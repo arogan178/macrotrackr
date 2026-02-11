@@ -343,10 +343,10 @@ const EntryHistoryComponent = function EntryHistory({
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-2xl border border-border bg-surface-2 shadow-surface backdrop-blur-sm"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.4, ease: "easeOut" }}
+          className="overflow-hidden rounded-xl border border-border bg-surface-2"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
         >
           {/* Desktop Table View */}
           <div className="hidden lg:block">
@@ -394,26 +394,13 @@ const EntryHistoryComponent = function EntryHistory({
               {(hasMoreDates || hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
-                  className={`flex items-center gap-2 rounded-md border border-border/30 bg-transparent px-4 py-2 text-sm text-muted transition-all duration-200 hover:border-border/50 hover:bg-surface/30 hover:text-foreground ${
+                  className={`flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
                     isLoadingMore ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   disabled={isLoadingMore}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
                 >
                   {isLoadingMore && <LoadingSpinner />}
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key="load-more"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Load More Dates
-                    </motion.span>
-                  </AnimatePresence>
+                  <span>Load More Dates</span>
                   <ChevronDownIcon className="h-4 w-4 text-foreground" />
                 </motion.button>
               )}
@@ -422,10 +409,7 @@ const EntryHistoryComponent = function EntryHistory({
               {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
                 <motion.button
                   onClick={showLessDates}
-                  className="flex items-center gap-2 rounded-md border border-border/30 bg-transparent px-4 py-2 text-sm text-foreground transition-all duration-200 hover:border-border/50 hover:bg-surface/30 hover:text-foreground"
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  className="flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
                 >
                   <AnimatePresence mode="wait">
                     <motion.span

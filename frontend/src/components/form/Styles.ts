@@ -1,6 +1,6 @@
 export const formStyles = {
   // Label styles
-  label: "block text-sm font-medium text-foreground",
+  label: "block text-sm font-medium text-muted",
   labelBase: "block text-base font-medium text-foreground",
   labelLg: "block text-lg font-semibold text-foreground",
   labelXl: "block text-xl font-bold text-foreground",
@@ -10,26 +10,26 @@ export const formStyles = {
 
   // Input styles
   input: {
-    base: "w-full px-4 py-2 bg-surface-2 border-2 rounded-lg text-foreground focus:border-primary focus:ring-2 focus:ring-primary/50 focus:outline-none transition-all duration-200 shadow-surface",
-    error: "border-red-500/70",
-    normal: "border-border/70",
+    base: "w-full px-3.5 py-2.5 bg-surface-2 border rounded-lg text-foreground placeholder:text-muted/50 focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary/50 transition-colors duration-150",
+    error: "border-error/60",
+    normal: "border-border",
     withIcon: "pl-10",
     withUnit: "pr-10",
     withPassword: "pr-10",
     numberInput:
       "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]",
     disabled:
-      "bg-surface/40 border-border/50 text-foreground cursor-not-allowed opacity-70",
+      "bg-surface/60 border-border/40 text-muted cursor-not-allowed opacity-50",
   },
 
   // Error and helper text
-  error: "text-xs text-vibrant-accent font-medium",
-  helper: "text-xs text-foreground",
-  maxLength: "text-xs text-foreground",
+  error: "text-xs text-error font-medium",
+  helper: "text-xs text-muted",
+  maxLength: "text-xs text-muted",
 
   // Icon/unit containers
-  iconContainer: "absolute left-3 top-1/2 -translate-y-1/2 text-foreground",
-  unitContainer: "absolute right-4 top-1/2 -translate-y-1/2 text-foreground",
+  iconContainer: "absolute left-3 top-1/2 -translate-y-1/2 text-muted",
+  unitContainer: "absolute right-4 top-1/2 -translate-y-1/2 text-muted",
 
   // Select styles
   select: {
@@ -40,6 +40,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-surface overflow-hidden",
+      "bg-surface rounded-xl border border-border overflow-hidden",
   },
 };

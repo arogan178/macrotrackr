@@ -31,7 +31,7 @@ const TermsAndConditionsPage: React.FC = () => {
 
       <main className="relative z-10 px-4 py-12 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-2xl border border-border/50 bg-surface p-8 shadow-primary backdrop-blur-sm lg:p-12">
+          <div className="rounded-xl border border-border bg-surface p-8 lg:p-12">
             <h1 className="mb-8 text-4xl font-bold text-foreground">
               Terms and Conditions
             </h1>

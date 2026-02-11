@@ -1,12 +1,13 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import React, { useEffect } from "react";
 
 import { PricingTable } from "@/components/billing";
-import { PageBackground } from "@/components/layout";
-import Navbar from "@/components/layout/Navbar";
+import { CardContainer } from "@/components/form";
+import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
+import FeaturePage from "@/components/layout/FeaturePage";
 import { CircleQuestionMarkIcon, IconButton } from "@/components/ui";
-import { useUser } from "@/hooks/auth/useAuthQueries";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";
 
@@ -59,14 +60,14 @@ const PricingPage: React.FC = () => {
     "monthly",
   );
   const [openFaq, setOpenFaq] = React.useState<number | undefined>(0);
-  const { data: user, isLoading } = useUser();
+  const { isLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
 
   // If user is not authenticated, redirect to login and include returnTo
   // so the login page can redirect back after successful authentication.
   useEffect(() => {
-    if (isLoading) return;
-    if (!user) {
+    if (!isLoaded) return;
+    if (!isSignedIn) {
       // Use router navigation and include returnTo param
       try {
         navigate({ to: "/login", search: { returnTo: "/pricing" } });
@@ -75,109 +76,98 @@ const PricingPage: React.FC = () => {
         globalThis.location.href = "/login?returnTo=/pricing";
       }
     }
-  }, [user, isLoading, navigate]);
+  }, [isLoaded, isSignedIn, navigate]);
 
   const toggleFaq = (index: number) => {
     setOpenFaq((previous) => (previous === index ? undefined : index));
   };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      {/* Background placed first so later siblings naturally paint above (no z-index hacks needed) */}
-      <div className="pointer-events-none absolute inset-0">
-        <PageBackground />
-      </div>
-      <Navbar />
-      <main className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <div className="relative mb-14 text-center">
-          <div className="pointer-events-none absolute inset-x-0 top-1/2 -z-10 h-40 -translate-y-1/2 bg-[radial-gradient(circle_at_center,theme(colors.primary/15),transparent_70%)] blur-2xl" />
+    <DashboardPageContainer>
+      <FeaturePage
+        title="Pricing"
+        subtitle="Upgrade to Pro for advanced insights, unlimited tracking, and premium tools."
+      >
+        <div className="space-y-8">
+          <CardContainer className="p-6 sm:p-8">
+            <PricingTable
+              onUpgrade={handleUpgrade}
+              selectedPlan={selectedPlan}
+              setSelectedPlan={setSelectedPlan}
+            />
+          </CardContainer>
 
-          <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-            Unlock Your Full Potential
-          </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted">
-            Upgrade to Pro and take control with advanced tracking, deeper
-            insights & unlimited growth tools.
-          </p>
-        </div>
-
-        {/* Pricing Table Card */}
-        <PricingTable
-          onUpgrade={handleUpgrade}
-          selectedPlan={selectedPlan}
-          setSelectedPlan={setSelectedPlan}
-        />
-
-        {/* FAQ Section */}
-        <div className="relative ">
-          <h2 className="m-10 text-center text-3xl font-bold tracking-tight">
-            Frequently Asked Questions
-          </h2>
-          <div className="mx-auto max-w-3xl space-y-4">
-            {faqs.map((faq, index) => {
-              const open = openFaq === index;
-              return (
-                <div
-                  key={index}
-                  className={`group rounded-xl border border-border/60 bg-surface/40 px-5 py-4 backdrop-blur-md transition-colors ${open ? "border-primary/60" : "hover:border-primary/40"}`}
-                >
+          {/* FAQ Section */}
+          <CardContainer className="p-6 sm:p-8">
+            <h2 className="mb-8 text-center text-2xl font-bold tracking-tight sm:text-3xl">
+              Frequently Asked Questions
+            </h2>
+            <div className="mx-auto max-w-3xl space-y-4">
+              {faqs.map((faq, index) => {
+                const open = openFaq === index;
+                return (
                   <div
-                    className="flex w-full cursor-pointer items-start justify-between gap-4 text-left"
-                    role="button"
-                    tabIndex={0}
-                    aria-expanded={open}
-                    onClick={() => toggleFaq(index)}
-                    onKeyDown={(event_) =>
-                      (event_.key === "Enter" || event_.key === " ") &&
-                      toggleFaq(index)
-                    }
+                    key={index}
+                    className={`group rounded-xl border bg-surface-2 px-5 py-4 transition-colors ${
+                      open ? "border-primary/60" : "border-border hover:border-primary/40"
+                    }`}
                   >
-                    <span className="flex items-start text-base leading-tight font-semibold text-foreground">
-                      <CircleQuestionMarkIcon className="mt-0.5 mr-2 h-5 w-5 flex-shrink-0 text-primary" />
-                      {faq.question}
-                    </span>
-                    <IconButton
-                      variant="custom"
-                      ariaLabel={open ? "Collapse FAQ" : "Expand FAQ"}
-                      onClick={(event_) => {
-                        event_.stopPropagation();
-                        toggleFaq(index);
-                      }}
-                      icon={
-                        <span
-                          className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold transition-transform ${open ? "rotate-45 bg-primary/10 text-primary" : "group-hover:bg-primary/10 group-hover:text-primary"}`}
-                          aria-hidden="true"
+                    <button
+                      type="button"
+                      className="flex w-full items-start justify-between gap-4 text-left"
+                      aria-expanded={open}
+                      onClick={() => toggleFaq(index)}
+                    >
+                      <span className="flex items-start text-base leading-tight font-semibold text-foreground">
+                        <CircleQuestionMarkIcon className="mt-0.5 mr-2 h-5 w-5 shrink-0 text-primary" />
+                        {faq.question}
+                      </span>
+                      <IconButton
+                        variant="custom"
+                        ariaLabel={open ? "Collapse FAQ" : "Expand FAQ"}
+                        onClick={(event_) => {
+                          event_.stopPropagation();
+                          toggleFaq(index);
+                        }}
+                        icon={
+                          <span
+                            className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold transition-all ${
+                              open
+                                ? "rotate-45 bg-primary/10 text-primary"
+                                : "group-hover:bg-primary/10 group-hover:text-primary"
+                            }`}
+                            aria-hidden="true"
+                          >
+                            +
+                          </span>
+                        }
+                        className="mt-0.5"
+                      />
+                    </button>
+                    <AnimatePresence initial={false}>
+                      {open && (
+                        <motion.div
+                          key="content"
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: "auto", opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: "easeInOut" }}
+                          className="overflow-hidden"
                         >
-                          +
-                        </span>
-                      }
-                      className="mt-0.5"
-                    />
+                          <p className="pt-3 pr-2 pl-7 text-sm leading-relaxed text-muted">
+                            {faq.answer}
+                          </p>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
-                  <AnimatePresence initial={false}>
-                    {open && (
-                      <motion.div
-                        key="content"
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <p className="pt-3 pr-2 pl-7 text-sm leading-relaxed text-muted">
-                          {faq.answer}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          </CardContainer>
         </div>
-      </main>
-    </div>
+      </FeaturePage>
+    </DashboardPageContainer>
   );
 };
 

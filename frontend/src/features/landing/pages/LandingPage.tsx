@@ -25,17 +25,12 @@ const FinalCtaSection = React.lazy(
 
 // (Animations for header/hero were removed to improve FCP/LCP)
 
-const wipeVariants = {
-  hidden: { opacity: 0, clipPath: "inset(10% 0% 10% 0% round 16px)" },
+const sectionRevealVariants = {
+  hidden: { opacity: 0, y: 16 },
   visible: {
     opacity: 1,
-    clipPath: "inset(0% 0% 0% 0% round 16px)",
-    transition: {
-      duration: 0.6,
-      ease: [0.22, 1, 0.36, 1],
-      when: "beforeChildren",
-      staggerChildren: 0.08,
-    },
+    y: 0,
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
   },
 } as const;
 
@@ -46,16 +41,14 @@ const wipeVariants = {
 function ThemedFallback() {
   return (
     <div className="flex w-full items-center justify-center py-16">
-      <div className="relative overflow-hidden rounded-2xl border border-border/50 bg-background px-8 py-10 shadow-lg shadow-black/5">
+      <div className="rounded-xl border border-border bg-surface px-8 py-10">
         <div className="mb-6 h-6 w-56 animate-pulse rounded bg-muted/40" />
         <div className="mb-3 h-4 w-80 animate-pulse rounded bg-muted/30" />
         <div className="mb-8 h-4 w-64 animate-pulse rounded bg-muted/30" />
         <div className="flex items-center gap-3">
-          <div className="h-10 w-28 animate-pulse rounded-md bg-primary/20" />
-          <div className="h-10 w-28 animate-pulse rounded-md bg-muted/30" />
+          <div className="h-10 w-28 animate-pulse rounded-lg bg-primary/20" />
+          <div className="h-10 w-28 animate-pulse rounded-lg bg-muted/30" />
         </div>
-        <div className="absolute inset-0 -z-10 [mask-image:radial-gradient(transparent,black)]" />
-        <div className="to-accent/5 pointer-events-none absolute inset-0 bg-gradient-to-tr from-primary/5 via-transparent" />
         <div className="mt-6 flex items-center justify-center">
           <LoadingSpinner />
         </div>
@@ -168,11 +161,10 @@ const LandingPage: React.FC = () => {
           <HeroSection />
         </div>
         <SectionDivider />
-        {/* Features - wipe reveal, parent enables staggerChildren for inner items */}
+        {/* Features */}
         <motion.section
           {...inViewRevealProps}
-          variants={wipeVariants}
-          className="rounded-2xl"
+          variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
         >
           <ErrorBoundary>
@@ -182,11 +174,10 @@ const LandingPage: React.FC = () => {
           </ErrorBoundary>
         </motion.section>
         <SectionDivider inverted />
-        {/* Pricing - subtle elevate reveal */}
+        {/* Pricing */}
         <motion.section
           {...inViewRevealProps}
-          variants={wipeVariants}
-          className="rounded-2xl"
+          variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
         >
           <ErrorBoundary>
@@ -196,11 +187,10 @@ const LandingPage: React.FC = () => {
           </ErrorBoundary>
         </motion.section>
         <SectionDivider />
-        {/* Testimonials - wipe reveal with stagger potential */}
+        {/* Product Preview */}
         <motion.section
           {...inViewRevealProps}
-          variants={wipeVariants}
-          className="rounded-2xl"
+          variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
         >
           <ErrorBoundary>
@@ -229,13 +219,11 @@ const LandingPage: React.FC = () => {
           </ErrorBoundary>
         </motion.section>
         <SectionDivider inverted />
-        {/* Final CTA - reveal and allow CTA buttons to animate using buttonReveal via data attribute if needed */}
+        {/* Final CTA */}
         <motion.section
           {...inViewRevealProps}
-          variants={wipeVariants}
-          className="rounded-2xl"
+          variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "400px" }}
-          data-cta-reveal
         >
           <ErrorBoundary>
             <Suspense fallback={<ThemedFallback />}>
@@ -246,16 +234,6 @@ const LandingPage: React.FC = () => {
       </main>
 
       <Footer />
-
-      {/* Expose variants via data for downstream usage if needed */}
-      <style>
-        {`
-          [data-cta-reveal] .cta-reveal {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-        `}
-      </style>
     </div>
   );
 };

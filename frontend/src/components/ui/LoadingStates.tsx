@@ -1,7 +1,8 @@
-import { ReactNode } from "react";
+import { ReactNode, useMemo } from "react";
 
-import { FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
-import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
+import type { FeatureType } from "@/hooks/useFeatureLoading";
+import { useFeatureLoading } from "@/hooks/useFeatureLoading";
+import { useCriticalLoading , useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 import LoadingSpinner from "./LoadingSpinner";
 /* eslint-disable react/prop-types */
@@ -104,13 +105,14 @@ export function FeatureLoadingIndicator({
   const { isQueryLoading, isMutationLoading, isLoading } =
     useFeatureLoading(feature);
 
-  const shouldShowLoading = () => {
+  // Memoize the loading check to avoid recalculating on every render
+  const shouldShowLoading = useMemo(() => {
     if (queriesOnly) return isQueryLoading;
     if (mutationsOnly) return isMutationLoading;
     return isLoading;
-  };
+  }, [queriesOnly, mutationsOnly, isQueryLoading, isMutationLoading, isLoading]);
 
-  if (!shouldShowLoading()) {
+  if (!shouldShowLoading) {
     return <>{children}</>;
   }
 

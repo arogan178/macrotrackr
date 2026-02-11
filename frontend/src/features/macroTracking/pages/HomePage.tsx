@@ -3,39 +3,19 @@ import { AnimatePresence } from "motion/react";
 import { useCallback } from "react";
 
 import { homeRoute } from "@/AppRouter";
-import { CardContainer } from "@/components/form";
-import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
+import CardContainer from "@/components/form/CardContainer";
+import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import Navbar from "@/components/layout/Navbar";
-import { UserMetricsPanel } from "@/components/metrics";
-import {
-  AddEntryForm,
-  DailySummaryPanel,
-  EditModal,
-  EntryHistoryPanel,
-} from "@/features/macroTracking/components";
-import {
-  AddEntryLoadingSkeleton,
-  DailySummaryLoadingSkeleton,
-  HistoryLoadingSkeleton,
-} from "@/features/macroTracking/components/HomePageSkeletons";
-import {
-  useHistoryPagination,
-  useHomeHeader,
-  useNutritionProfile,
-} from "@/features/macroTracking/hooks/useHomePage";
-import type {
-  EditingEntry,
-  MacroEntryInput,
-} from "@/features/macroTracking/types/macro";
+import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
+import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
+import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
+import EditModal from "@/features/macroTracking/components/EditModal";
+import EntryHistoryPanel from "@/features/macroTracking/components/EntryHistoryPanel";
+import { AddEntryLoadingSkeleton, DailySummaryLoadingSkeleton, HistoryLoadingSkeleton } from "@/features/macroTracking/components/HomePageSkeletons";
+import { useHistoryPagination, useHomeHeader, useNutritionProfile } from "@/features/macroTracking/hooks/useHomePage";
+import type { EditingEntry, MacroEntryInput } from "@/features/macroTracking/types/macro";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import {
-  useAddMacroEntry,
-  useDeleteMacroEntry,
-  useMacroDailyTotals,
-  useMacroTarget,
-  useUpdateMacroEntry,
-} from "@/hooks/queries/useMacroQueries";
+import { useAddMacroEntry, useDeleteMacroEntry, useMacroDailyTotals, useMacroTarget, useUpdateMacroEntry } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import { getTodayISO } from "@/utils/dateUtilities";
@@ -141,84 +121,75 @@ export default function HomePage() {
 
   return (
     <DashboardPageContainer>
-      <Navbar />
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
-        <div className="relative min-h-screen">
-          <div>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
-              <div className="flex h-full flex-col space-y-6 lg:col-span-4">
-                {/* Metrics Panel */}
-                <UserMetricsPanel
-                  bmr={nutritionProfile?.bmr ?? 0}
-                  tdee={nutritionProfile?.tdee ?? 0}
-                  isLoading={isLoading}
-                />
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
+            <div className="flex h-full flex-col space-y-6 lg:col-span-4">
+              {/* Metrics Panel */}
+              <UserMetricsPanel
+                bmr={nutritionProfile?.bmr ?? 0}
+                tdee={nutritionProfile?.tdee ?? 0}
+                isLoading={isLoading}
+              />
 
-                {/* Add Entry Section */}
-                <div className="flex-1">
-                  {isLoading ? (
-                    <AddEntryLoadingSkeleton />
-                  ) : (
-                    <AddEntryForm
-                      onSubmit={handleAddEntry}
-                      isSaving={isSaving}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Today's Summary - Right side */}
-              <div className="flex h-full flex-col lg:col-span-2">
+              {/* Add Entry Section */}
+              <div className="flex-1">
                 {isLoading ? (
-                  <DailySummaryLoadingSkeleton />
+                  <AddEntryLoadingSkeleton />
                 ) : (
-                  user && (
-                    <DailySummaryPanel
-                      macroDailyTotals={macroDailyTotals}
-                      macroTarget={macroTarget ?? undefined}
-                      calorieTarget={effectiveCalorieTarget}
-                    />
-                  )
+                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
                 )}
               </div>
             </div>
 
-            {/* Gap between AddEntryForm and EntryHistoryPanel */}
-            <div className="my-8" />
-
-            {/* History Section */}
-            <CardContainer>
-              <div className="p-6">
-                {isLoading ? (
-                  <HistoryLoadingSkeleton />
-                ) : (
-                  <EntryHistoryPanel
-                    history={history}
-                    deleteEntry={handleDeleteEntry}
-                    onEdit={setEditingEntry}
-                    isDeleting={isDeleting}
-                    isEditing={isEditing}
-                    hasMore={historyHasMore}
-                    onLoadMore={loadMoreHistory}
-                    isLoadingMore={isLoadingMore}
+            {/* Today's Summary - Right side */}
+            <div className="flex h-full flex-col lg:col-span-2">
+              {isLoading ? (
+                <DailySummaryLoadingSkeleton />
+              ) : (
+                user && (
+                  <DailySummaryPanel
+                    macroDailyTotals={macroDailyTotals}
+                    macroTarget={macroTarget ?? undefined}
+                    calorieTarget={effectiveCalorieTarget}
                   />
-                )}
-              </div>
-            </CardContainer>
+                )
+              )}
+            </div>
+          </div>
 
-            {/* Edit Modal - Only render when editingEntry is not undefined */}
-            <AnimatePresence>
-              {editingEntry && (
-                <EditModal
-                  key="edit-modal"
-                  entry={editingEntry}
-                  onSave={handleEditEntry}
-                  onClose={handleCloseModal}
-                  isSaving={isEditing}
+          {/* History Section */}
+          <CardContainer>
+            <div className="p-6">
+              {isLoading ? (
+                <HistoryLoadingSkeleton />
+              ) : (
+                <EntryHistoryPanel
+                  history={history}
+                  deleteEntry={handleDeleteEntry}
+                  onEdit={setEditingEntry}
+                  isDeleting={isDeleting}
+                  isEditing={isEditing}
+                  hasMore={historyHasMore}
+                  onLoadMore={loadMoreHistory}
+                  isLoadingMore={isLoadingMore}
                 />
               )}
-            </AnimatePresence>
-          </div>
+            </div>
+          </CardContainer>
+
+          {/* Edit Modal - Only render when editingEntry is not undefined */}
+          <AnimatePresence>
+            {editingEntry && (
+              <EditModal
+                key="edit-modal"
+                entry={editingEntry}
+                onSave={handleEditEntry}
+                onClose={handleCloseModal}
+                isSaving={isEditing}
+              />
+            )}
+          </AnimatePresence>
         </div>
       </FeaturePage>
     </DashboardPageContainer>

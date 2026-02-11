@@ -87,7 +87,7 @@ function UnifiedInsights({
   // Handle loading state
   if (isLoading) {
     return (
-      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border/50 bg-surface p-6 text-foreground shadow-modal backdrop-blur-sm">
+      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border bg-surface p-6 text-foreground">
         <LoadingSpinner />
       </div>
     );
@@ -96,7 +96,7 @@ function UnifiedInsights({
   // Handle no data state
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
-      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border/50 bg-surface p-6 text-center shadow-modal backdrop-blur-sm">
+      <div className="flex min-h-60 items-center justify-center rounded-xl border border-border bg-surface p-6 text-center">
         <div className="space-y-3">
           <div className="text-4xl">📊</div>
           <div>

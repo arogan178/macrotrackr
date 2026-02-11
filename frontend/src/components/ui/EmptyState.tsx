@@ -20,24 +20,8 @@ interface EmptyStateProps {
   size?: "sm" | "md" | "lg";
 }
 
-function getButtonStyles(variant: ActionProps["variant"] = "primary") {
-  const baseStyles =
-    "px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center";
-
-  switch (variant) {
-    case "primary": {
-      return `${baseStyles} bg-primary hover:bg-primary text-foreground`;
-    }
-    case "secondary": {
-      return `${baseStyles} bg-surface hover:bg-surface text-foreground`;
-    }
-    case "outline": {
-      return `${baseStyles} border border-border hover:border-border text-foreground hover:text-foreground`;
-    }
-    default: {
-      return `${baseStyles} bg-primary hover:bg-primary text-foreground`;
-    }
-  }
+function getButtonStyles(_variant: ActionProps["variant"] = "primary") {
+  return "";
 }
 
 function EmptyState({
@@ -74,7 +58,7 @@ function EmptyState({
   // Default icon if none provided
   const defaultIcon = (
     <PlusIcon
-      className={`${sizeStyles.iconSize} text-foreground`}
+      className={`${sizeStyles.iconSize} text-muted`}
       strokeWidth={1.5}
     />
   );
@@ -83,9 +67,9 @@ function EmptyState({
     <div
       className={`flex flex-col items-center justify-center text-center ${sizeStyles.padding} px-4 ${className}`}
     >
-      <div className="mb-4 text-foreground">
+      <div className="mb-4 text-muted">
         {icon || (
-          <div className="inline-block rounded-full bg-surface p-4">
+          <div className="inline-block rounded-full bg-surface-2 p-4">
             {defaultIcon}
           </div>
         )}
@@ -94,7 +78,7 @@ function EmptyState({
       <h3 className={`${sizeStyles.title} mb-2 font-medium text-foreground`}>
         {title}
       </h3>
-      <p className={`${sizeStyles.message} mb-6 text-foreground`}>{message}</p>
+      <p className={`${sizeStyles.message} mb-6 text-muted`}>{message}</p>
 
       {/* Icon buttons */}
       {(action || secondaryAction) && (

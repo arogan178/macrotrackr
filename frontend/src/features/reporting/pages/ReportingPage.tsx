@@ -5,7 +5,6 @@ import { ProFeature } from "@/components/billing";
 import { DateRangeSelector, LineChartComponent } from "@/components/chart";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import Navbar from "@/components/layout/Navbar";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -98,7 +97,6 @@ export default function ReportingPage() {
 
   return (
     <DashboardPageContainer>
-      <Navbar />
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
         <AnimatePresence mode="wait">
           {
@@ -117,10 +115,10 @@ export default function ReportingPage() {
                   {!isHistoryLoading &&
                     history?.length === 0 &&
                     dataProcessed && (
-                      <div className="mb-6 rounded-lg border border-yellow-800/30 bg-warning/30 p-4 text-warning shadow-primary">
-                        <div className="flex items-center">
+                      <div className="mb-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
+                        <div className="flex items-center gap-2">
                           <svg
-                            className="mr-2  text-warning"
+                            className="h-4 w-4 shrink-0 text-warning"
                             fill="none"
                             stroke="currentColor"
                             viewBox="0 0 24 24"
@@ -133,8 +131,10 @@ export default function ReportingPage() {
                               d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
                             ></path>
                           </svg>
-                          No nutrition history found. Add some entries to see
-                          your reporting data.
+                          <span>
+                            No nutrition history found. Add some entries to see
+                            your reporting data.
+                          </span>
                         </div>
                       </div>
                     )}

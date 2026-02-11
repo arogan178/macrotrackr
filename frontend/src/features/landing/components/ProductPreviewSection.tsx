@@ -74,8 +74,8 @@ export default function ProductPreviewSection({
 
         <div className="relative">
           {/* edge fades */}
-          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-gradient-to-r from-background to-transparent" />
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-gradient-to-l from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-10 bg-linear-to-r from-background to-transparent" />
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-10 bg-linear-to-l from-background to-transparent" />
 
           <motion.div
             ref={scrollerReference}
@@ -92,11 +92,10 @@ export default function ProductPreviewSection({
             {images.map((img, index) => (
               <motion.div
                 key={index}
-                className="group min-w-70 flex-shrink-0 snap-start overflow-hidden rounded-2xl bg-surface ring-1 ring-border/50 transition-shadow hover:shadow-lg hover:ring-primary/40 md:min-w-100"
-                whileHover={{ scale: 1.02 }}
+                className="group min-w-70 shrink-0 snap-start overflow-hidden rounded-xl bg-surface ring-1 ring-border md:min-w-100"
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.06 }}
+                transition={{ duration: 0.4, delay: index * 0.06 }}
                 viewport={{ once: true, amount: 0.3 }}
               >
                 <img
@@ -124,7 +123,7 @@ export default function ProductPreviewSection({
                 onClick={() => scrollByAmount("prev")}
                 disabled={isAtStart}
                 buttonVariant="ghost"
-                className="rounded-full !bg-surface ring-1 ring-border/50 backdrop-blur hover:!bg-surface-2"
+                className="rounded-full bg-surface! ring-1 ring-border hover:bg-surface-2!"
                 icon={
                   <svg
                     width="20"
@@ -149,7 +148,7 @@ export default function ProductPreviewSection({
                 onClick={() => scrollByAmount("next")}
                 disabled={isAtEnd}
                 buttonVariant="ghost"
-                className="rounded-full !bg-surface ring-1 ring-border/50 backdrop-blur hover:!bg-surface-2"
+                className="rounded-full bg-surface! ring-1 ring-border hover:bg-surface-2!"
                 icon={
                   <svg
                     width="20"
