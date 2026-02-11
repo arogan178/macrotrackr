@@ -4,7 +4,7 @@ import CustomPricingCards from "./CustomPricingCards";
 
 const PricingSection: React.FC = () => (
   <section id="pricing" className="relative z-10 px-4 py-24 sm:px-6 lg:px-8">
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-7xl">
       <div className="mb-16 text-center">
         <h2 className="mb-4 text-4xl font-bold text-foreground sm:text-5xl">
           Simple, Transparent Pricing

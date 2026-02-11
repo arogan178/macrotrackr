@@ -47,10 +47,10 @@ export const MEAL_COLORS: ColorPalette = {
 // Stat type color mapping
 export const STAT_COLORS = {
   calories: "bg-primary",
-  protein: "bg-success",
+  protein: "bg-primary",
   carbs: "bg-primary",
-  fats: "bg-error",
-  count: "bg-purple-600",
+  fats: "bg-primary",
+  count: "bg-primary",
 };
 
 // Get unit based on stat type

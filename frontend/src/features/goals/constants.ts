@@ -7,6 +7,16 @@ export const CALORIE_ADJUSTMENT_FACTORS = {
   gain: 300,
 } as const;
 
+// Calorie range slider labels by goal type
+export const CALORIE_RANGE_LABELS = {
+  lose: { min: "Faster", mid: "TDEE", max: "Slower" },
+  maintain: { min: "Less calories", mid: "TDEE", max: "More calories" },
+  gain: { min: "Slower", mid: "TDEE", max: "Faster" },
+} as const;
+
+// Default macro totals - imported from centralized location
+export { DEFAULT_MACRO_TOTALS } from "@/utils/constants/nutrition";
+
 export const DEFAULT_TARGET_VALUES = {
   proteinPercentage: 30,
   carbsPercentage: 40,

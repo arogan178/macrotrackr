@@ -1,9 +1,10 @@
 import { useMemo } from "react";
 
+import { formatMealType,MEAL_TYPES } from "@/utils/nutritionVisualizations";
+
 import { getDayString } from "./useReportingLogic";
 
-// Define meal types and their display order
-const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
+// Re-export MealType from shared utilities
 type MealType = (typeof MEAL_TYPES)[number];
 
 export interface MacroEntry {
@@ -28,9 +29,6 @@ export interface MealTypeDistributionData {
   value: number;
   percentage: number;
 }
-
-export const formatMealType = (mealType: string) =>
-  mealType.charAt(0).toUpperCase() + mealType.slice(1);
 
 const calculateCalories = (entry: MacroEntry) =>
   (entry.protein || 0) * 4 + (entry.carbs || 0) * 4 + (entry.fats || 0) * 9;
