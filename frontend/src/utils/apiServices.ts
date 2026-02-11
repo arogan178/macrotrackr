@@ -2,6 +2,7 @@
 /**
  * API Service - Centralizes API calls and standardizes error handling
  * Updated for simplified calorie target model and refactored goal/macro endpoints.
+ * Updated for Clerk SSO integration.
  */
 
 // Assuming these imports exist and work as intended in your frontend structure
@@ -13,8 +14,6 @@ import {
 import type { WeightGoalFormValues } from "@/features/goals/types";
 import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 import { getActivityLevelFromString } from "@/utils/userConstants";
-
-import { getToken } from "./tokenStorage";
 
 export interface MacroDensitySummaryParameters {
   startDate?: string;
@@ -37,9 +36,10 @@ export const API_BASE_URL =
 
 // --- Interfaces for Payloads and Responses (camelCase) ---
 
-// Payload for PUT /api/goals/weight (CREATE)
+// Payload for PUT /api/goals/weight (CREATE/UPDATE response)
 type SetWeightGoalPayload = {
   startingWeight: number; // Required for creation
+  currentWeight: number | undefined; // Latest weight from weight log
   targetWeight: number | undefined;
   weightGoal: "lose" | "maintain" | "gain" | undefined;
   startDate: string | undefined;
@@ -100,6 +100,7 @@ export interface UserDetailsResponse {
   weight?: number;
   gender?: string;
   activityLevel?: number;
+  isProfileComplete: boolean;
   subscription: {
     status: "free" | "pro" | "canceled";
     hasStripeCustomer: boolean;
@@ -258,9 +259,56 @@ export async function handleResponse(response: Response): Promise<unknown> {
   throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
 }
 
+// Clerk token getter - will be set by useClerkAuth hook
+let getClerkToken: (() => Promise<string | null>) | null = null;
+
+/**
+ * Set the Clerk token getter function
+ * Called by useClerkAuth hook to provide fresh tokens
+ */
+export function setGetToken(function_: () => Promise<string | null>) {
+  getClerkToken = function_;
+}
+
+/**
+ * Set a static auth token (for immediate use after sign in)
+ */
+let staticAuthToken: string | null = null;
+export function setAuthToken(token: string | null) {
+  staticAuthToken = token;
+}
+
+/**
+ * Get the current auth token (Clerk or static)
+ */
+export async function getAuthToken(): Promise<string | null> {
+  if (staticAuthToken) {
+    return staticAuthToken;
+  }
+  if (getClerkToken) {
+    return await getClerkToken();
+  }
+  return null;
+}
+
 export function getHeaders(includeContentType = true): Record<string, string> {
   const headers: Record<string, string> = {};
-  const token = getToken();
+  // Note: This synchronous version is for backward compatibility
+  // Use getHeadersAsync for async token retrieval with Clerk
+  if (includeContentType) {
+    headers["Content-Type"] = "application/json";
+  }
+  return headers;
+}
+
+/**
+ * Async version of getHeaders that properly retrieves Clerk tokens
+ */
+export async function getHeadersAsync(
+  includeContentType = true,
+): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {};
+  const token = await getAuthToken();
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -279,7 +327,7 @@ export async function post<T = unknown>(
 ): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     method: "POST",
-    headers: getHeaders(),
+    headers: await getHeadersAsync(),
     body: body ? JSON.stringify(body) : undefined,
     credentials: "include",
   });
@@ -305,7 +353,7 @@ export const apiService = {
       if (parameters.groupBy)
         url.searchParams.append("groupBy", parameters.groupBy);
       const response = await fetch(url.toString(), {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return (await handleResponse(response)) as MacroDensitySummaryItem[];
@@ -316,7 +364,7 @@ export const apiService = {
     /** Fetches the current authenticated user's profile */
     getUserDetails: async (): Promise<UserDetailsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return (await handleResponse(response)) as UserDetailsResponse;
@@ -336,7 +384,7 @@ export const apiService = {
       }
       const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
         method: "PUT",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(payloadToSend), // Send payload with only user details
         credentials: "include",
       });
@@ -357,7 +405,7 @@ export const apiService = {
         `${API_BASE_URL}/api/user/complete-profile`,
         {
           method: "POST",
-          headers: getHeaders(),
+          headers: await getHeadersAsync(),
           body: JSON.stringify(profileData),
           credentials: "include",
         },
@@ -367,11 +415,17 @@ export const apiService = {
   },
 
   // Authentication endpoints
+  // Note: Login/Register/Forgot Password are now handled by Clerk
+  // The backend validates Clerk JWT tokens for authenticated requests
   auth: {
+    /**
+     * @deprecated Use Clerk's SignIn component instead
+     * Kept for backward compatibility during migration
+     */
     login: async (email: string, password: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify({ email, password }),
         credentials: "include",
       });
@@ -380,19 +434,26 @@ export const apiService = {
         user?: UserDetailsResponse;
       };
     },
+    /**
+     * @deprecated Clerk handles email validation automatically
+     */
     validateEmail: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/validate-email`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify({ email }),
         credentials: "include",
       });
       return (await handleResponse(response)) as { valid: boolean };
     },
+    /**
+     * @deprecated Use Clerk's SignUp component instead
+     * Kept for backward compatibility during migration
+     */
     register: async (userData: Record<string, unknown>) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(userData),
         credentials: "include",
       });
@@ -401,10 +462,13 @@ export const apiService = {
         user?: UserDetailsResponse;
       };
     },
+    /**
+     * @deprecated Use Clerk's password reset flow instead
+     */
     forgotPassword: async (email: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify({ email }),
         credentials: "include",
       });
@@ -413,10 +477,13 @@ export const apiService = {
         message?: string;
       };
     },
+    /**
+     * @deprecated Use Clerk's password reset flow instead
+     */
     resetPassword: async (token: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify({ token, newPassword }),
         credentials: "include",
       });
@@ -425,10 +492,13 @@ export const apiService = {
         message?: string;
       };
     },
+    /**
+     * @deprecated Use Clerk's password management instead
+     */
     changePassword: async (currentPassword: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/user/password`, {
         method: "PUT",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify({ currentPassword, newPassword }),
         credentials: "include",
       });
@@ -436,6 +506,24 @@ export const apiService = {
         success: boolean;
         message?: string;
       };
+    },
+    /**
+     * Sync Clerk user with backend database
+     * Called after successful Clerk authentication to ensure user exists in our DB
+     */
+    syncUser: async (token?: string): Promise<UserDetailsResponse> => {
+      const headers = token
+        ? {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          }
+        : await getHeadersAsync();
+      const response = await fetch(`${API_BASE_URL}/api/auth/clerk-sync`, {
+        method: "POST",
+        headers,
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as UserDetailsResponse;
     },
   },
 
@@ -452,7 +540,7 @@ export const apiService = {
       if (endDate) parameters.push(`endDate=${encodeURIComponent(endDate)}`);
       if (parameters.length > 0) url += `?${parameters.join("&")}`;
       const response = await fetch(url, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return handleResponse(response);
@@ -472,7 +560,7 @@ export const apiService = {
       if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
       if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
       const response = await fetch(url, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return handleResponse(response);
@@ -489,7 +577,7 @@ export const apiService = {
       };
       const response = await fetch(`${API_BASE_URL}/api/macros`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
@@ -506,7 +594,7 @@ export const apiService = {
       if (entry.entryTime !== undefined) payload.entryTime = entry.entryTime;
       const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
         method: "PUT",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
@@ -515,7 +603,7 @@ export const apiService = {
     deleteEntry: async (id: number) => {
       const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
         method: "DELETE",
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return handleResponse(response);
@@ -524,7 +612,7 @@ export const apiService = {
     /** Gets ONLY macro target percentages object */
     getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return (await handleResponse(response)) as MacroTargetGetResponse;
@@ -536,7 +624,7 @@ export const apiService = {
       }
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
         method: "PUT",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify({ macroTarget: payload.macroTarget }),
         credentials: "include",
       });
@@ -546,7 +634,7 @@ export const apiService = {
       const response = await fetch(
         `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(query)}`,
         {
-          headers: getHeaders(false),
+          headers: await getHeadersAsync(false),
           credentials: "include",
         },
       );
@@ -559,7 +647,7 @@ export const apiService = {
     /** Gets weight goals (including calorieTarget); returns undefined when not set */
     getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       const result = (await handleResponse(response)) as
@@ -590,7 +678,7 @@ export const apiService = {
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
@@ -618,7 +706,7 @@ export const apiService = {
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "PUT",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
@@ -628,7 +716,7 @@ export const apiService = {
     deleteWeightGoals: async () => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "DELETE",
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return handleResponse(response);
@@ -638,7 +726,7 @@ export const apiService = {
     /** Fetches the user's weight log history */
     getWeightLog: async (): Promise<WeightLogEntry[]> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       // The backend returns an array, potentially empty, matching WeightLogEntry[]
@@ -651,7 +739,7 @@ export const apiService = {
     ): Promise<WeightLogEntry> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
@@ -672,7 +760,7 @@ export const apiService = {
         `${API_BASE_URL}/api/goals/weight-log/${id}`,
         {
           method: "DELETE",
-          headers: getHeaders(false),
+          headers: await getHeadersAsync(false),
           credentials: "include",
         },
       );
@@ -688,7 +776,7 @@ export const apiService = {
     /** Fetches detailed billing and subscription info for the current user */
     getBillingDetails: async (): Promise<BillingDetailsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/billing/details`, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return (await handleResponse(response)) as BillingDetailsResponse;
@@ -698,7 +786,7 @@ export const apiService = {
     /** Get all habit goals */
     getHabit: async (): Promise<HabitGoalPayload[]> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
-        headers: getHeaders(false),
+        headers: await getHeadersAsync(false),
         credentials: "include",
       });
       return (await handleResponse(response)) as HabitGoalPayload[];
@@ -710,7 +798,7 @@ export const apiService = {
     ): Promise<HabitGoalPayload> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         method: "POST",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(habitGoal),
         credentials: "include",
       });
@@ -724,7 +812,7 @@ export const apiService = {
     ): Promise<{ success: boolean }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "PUT",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         body: JSON.stringify(habitGoal),
         credentials: "include",
       });
@@ -735,7 +823,7 @@ export const apiService = {
     deleteHabit: async (id: string): Promise<{ success: boolean }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "DELETE",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         credentials: "include",
       });
       return (await handleResponse(response)) as { success: boolean };
@@ -745,10 +833,15 @@ export const apiService = {
     resetHabit: async (): Promise<{ success: boolean }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         method: "DELETE",
-        headers: getHeaders(),
+        headers: await getHeadersAsync(),
         credentials: "include",
       });
       return (await handleResponse(response)) as { success: boolean };
     },
   },
+  
+  // Add methods for Clerk integration
+  setGetToken,
+  setAuthToken,
+  getAuthToken,
 };

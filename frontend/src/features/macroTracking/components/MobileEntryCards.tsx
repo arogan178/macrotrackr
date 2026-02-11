@@ -51,13 +51,12 @@ const EntryCard = memo(
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
   }) => (
     <motion.div
-      className="rounded-lg bg-surface-3 p-4 "
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      exit={{ opacity: 0, y: -20, scale: 0.95 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      className="rounded-lg bg-surface-3 p-4"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -12 }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       layout
-      whileHover={{ scale: 1.02 }}
     >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -76,56 +75,36 @@ const EntryCard = memo(
       </div>
 
       {(entry.foodName || entry.mealName) && (
-        <motion.div
-          className="mb-3"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.1 }}
-        >
+        <div className="mb-3">
           <span className="text-sm text-muted">
             {entry.foodName || entry.mealName}
           </span>
-        </motion.div>
+        </div>
       )}
 
-      <motion.div
-        className="grid grid-cols-3 gap-3"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.2, staggerChildren: 0.05 }}
-      >
+      <div className="grid grid-cols-3 gap-3">
         {[
           { label: "Protein", value: entry.protein, color: "text-protein" },
           { label: "Carbs", value: entry.carbs, color: "text-carbs" },
           { label: "Fats", value: entry.fats, color: "text-fats" },
-        ].map((macro, index) => (
-          <motion.div
+        ].map((macro) => (
+          <div
             key={macro.label}
             className="flex items-center justify-between rounded-lg bg-surface-4 p-3"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 * index }}
-            whileHover={{ scale: 1.05 }}
           >
             <span className="text-sm text-foreground">{macro.label}</span>
             <MacroCell value={macro.value} suffix="g" color={macro.color} />
-          </motion.div>
+          </div>
         ))}
-        <motion.div
-          className="col-span-3 flex items-center justify-between rounded-lg bg-surface-4 p-3"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          whileHover={{ scale: 1.05 }}
-        >
+        <div className="col-span-3 flex items-center justify-between rounded-lg bg-surface-4 p-3">
           <span className="text-sm text-foreground">Calories</span>
           <MacroCell
             value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
             suffix=" kcal"
             color="text-vibrant-accent"
           />
-        </motion.div>
-      </motion.div>
+        </div>
+      </div>
     </motion.div>
   ),
 );

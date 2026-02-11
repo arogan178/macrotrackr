@@ -32,7 +32,15 @@ export default [
   // Global ignores for auto-generated artifacts
   {
     name: "global-ignores",
-    ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*"],
+    ignores: [
+      "dist",
+      "build",
+      "coverage",
+      ".vite",
+      "node_modules",
+      "src/routeTree.gen.ts",
+      "src/routeTree.gen.*",
+    ],
   },
 
   // PascalCase for components (include top-level AppRouter)
@@ -110,6 +118,9 @@ export default [
         project: ["./tsconfig.app.json"],
         tsconfigRootDir: import.meta.dirname,
       },
+    },
+    linterOptions: {
+      reportUnusedDisableDirectives: true,
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,

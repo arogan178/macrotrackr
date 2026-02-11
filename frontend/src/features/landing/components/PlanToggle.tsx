@@ -20,7 +20,7 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
       variant={selectedPlan === "monthly" ? "primary" : "ghost"}
       buttonSize="md"
       aria-pressed={selectedPlan === "monthly"}
-      className={`font-medium transition-all duration-200 ${selectedPlan === "monthly" ? "" : "hover:bg-surface-3"}`}
+      className={`font-medium transition-colors ${selectedPlan === "monthly" ? "" : "hover:bg-surface-3"}`}
     >
       Monthly
     </Button>
@@ -30,10 +30,10 @@ const PlanToggle: React.FC<PlanToggleProps> = ({ selectedPlan, onSelect }) => (
       variant={selectedPlan === "yearly" ? "primary" : "ghost"}
       buttonSize="md"
       aria-pressed={selectedPlan === "yearly"}
-      className={`relative font-medium transition-all duration-200 ${selectedPlan === "yearly" ? "" : "hover:bg-surface-3"}`}
+      className={`relative font-medium transition-colors ${selectedPlan === "yearly" ? "" : "hover:bg-surface-3"}`}
     >
       Yearly
-      <span className="absolute -top-2.5 -right-3 rounded-md bg-success/90 px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-foreground uppercase">
+      <span className="absolute -top-2.5 -right-3 rounded-md bg-success px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-background uppercase">
         -30%
       </span>
     </Button>

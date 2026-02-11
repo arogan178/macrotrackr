@@ -1,4 +1,5 @@
 // src/modules/goals/routes.ts
+import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
@@ -15,6 +16,29 @@ import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
 
+/**
+ * Helper function to get the current weight from the latest weight log entry
+ * Falls back to starting weight if no weight log entries exist
+ */
+function getCurrentWeight(
+  db: Database,
+  userId: number,
+  startingWeight: number | null
+): number | null {
+  const latestLogEntry = safeQuery<{ weight: number }>(
+    db,
+    "SELECT weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC LIMIT 1",
+    [userId]
+  );
+
+  if (latestLogEntry) {
+    return latestLogEntry.weight;
+  }
+
+  // Fallback to starting weight if no log entries
+  return startingWeight;
+}
+
 export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
@@ -23,10 +47,13 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext;
+          const { user, db, request } = context as AuthenticatedContext & { db: Database; request: Request };
+
+          // Get correlation ID from request headers if available
+          const correlationId = request.headers.get("x-correlation-id") || undefined;
 
           loggerHelpers.apiRequest("GET", "/goals/weight", user.userId, {
-            correlationId: (context.request as any)?.correlationId,
+            correlationId,
           });
 
           const weightGoalsResult = safeQuery<WeightGoalRow>(
@@ -40,9 +67,17 @@ export const goalRoutes = (app: Elysia) =>
             return null; // Return null if not found (matches schema)
           }
 
+          // Get current weight from weight log (or fallback to starting weight)
+          const currentWeight = getCurrentWeight(
+            db,
+            user.userId,
+            weightGoalsResult.starting_weight
+          );
+
           // Map snake_case from DB to camelCase for API response
           const apiResponse = {
             startingWeight: weightGoalsResult.starting_weight,
+            currentWeight: currentWeight,
             targetWeight: weightGoalsResult.target_weight,
             weightGoal: weightGoalsResult.weight_goal,
             startDate: weightGoalsResult.start_date,
@@ -69,9 +104,11 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight",
         async (context: any) => {
-          const { user, body, db } = context as AuthenticatedContext & {
-            body: typeof GoalSchemas.createWeightGoalBody.static;
-          };
+          const { user, body, db, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+
+          if (!body) {
+            throw new Error("Request body is required");
+          }
 
           const savedGoal = withTransaction(db, () => {
             // Check if a goal already exists
@@ -98,10 +135,23 @@ export const goalRoutes = (app: Elysia) =>
               calculatedWeeks,
               weeklyChange,
               dailyChange,
-            } = body;
+            } = body as {
+              startingWeight: number;
+              targetWeight: number;
+              weightGoal: "lose" | "maintain" | "gain";
+              startDate: string;
+              targetDate: string;
+              calorieTarget: number;
+              calculatedWeeks: number;
+              weeklyChange: number;
+              dailyChange: number;
+            };
+
+            // Get correlation ID from request headers if available
+            const correlationId = request.headers.get("x-correlation-id") || undefined;
 
             loggerHelpers.apiRequest("POST", "/goals/weight", user.userId, {
-              correlationId: (context.request as any)?.correlationId,
+              correlationId,
             });
 
             const savedGoalResult = safeQuery<WeightGoalRow>(
@@ -132,9 +182,17 @@ export const goalRoutes = (app: Elysia) =>
             return savedGoalResult;
           });
 
+          // Get current weight from weight log (or fallback to starting weight)
+          const currentWeight = getCurrentWeight(
+            db,
+            user.userId,
+            savedGoal.starting_weight
+          );
+
           // Map response
           return {
             startingWeight: savedGoal.starting_weight,
+            currentWeight: currentWeight,
             targetWeight: savedGoal.target_weight,
             weightGoal: savedGoal.weight_goal,
             startDate: savedGoal.start_date,
@@ -165,9 +223,11 @@ export const goalRoutes = (app: Elysia) =>
       .put(
         "/weight",
         async (context: any) => {
-          const { user, body, db } = context as AuthenticatedContext & {
-            body: typeof GoalSchemas.updateWeightGoalBody.static;
-          };
+          const { user, body, db, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+
+          if (!body) {
+            throw new Error("Request body is required");
+          }
 
           const savedGoal = withTransaction(db, () => {
             // Destructure payload (NO startingWeight here)
@@ -180,7 +240,16 @@ export const goalRoutes = (app: Elysia) =>
               calculatedWeeks,
               weeklyChange,
               dailyChange,
-            } = body;
+            } = body as {
+              targetWeight: number;
+              weightGoal: "lose" | "maintain" | "gain";
+              startDate: string;
+              targetDate: string;
+              calorieTarget: number;
+              calculatedWeeks: number;
+              weeklyChange: number;
+              dailyChange: number;
+            };
 
             // Check if a goal exists to update
             const existingGoal = safeQuery<{
@@ -199,8 +268,12 @@ export const goalRoutes = (app: Elysia) =>
             }
 
             const effectiveStartingWeight = existingGoal.starting_weight;
+
+            // Get correlation ID from request headers if available
+            const correlationId = request.headers.get("x-correlation-id") || undefined;
+
             loggerHelpers.apiRequest("PUT", "/goals/weight", user.userId, {
-              correlationId: (context.request as any)?.correlationId,
+              correlationId,
             });
 
             // IMPORTANT: Do NOT update starting_weight
@@ -237,9 +310,17 @@ export const goalRoutes = (app: Elysia) =>
             return savedGoalResult;
           });
 
+          // Get current weight from weight log (or fallback to starting weight)
+          const currentWeight = getCurrentWeight(
+            db,
+            user.userId,
+            savedGoal.starting_weight
+          );
+
           // Map response
           return {
             startingWeight: savedGoal.starting_weight,
+            currentWeight: currentWeight,
             targetWeight: savedGoal.target_weight,
             weightGoal: savedGoal.weight_goal,
             startDate: savedGoal.start_date,
@@ -270,7 +351,7 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext;
+          const { user, db } = context as AuthenticatedContext & { db: Database };
 
           withTransaction(db, () => {
             safeExecute(db, "DELETE FROM weight_goals WHERE user_id = ?", [
@@ -293,7 +374,7 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight-log",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext;
+          const { user, db } = context as AuthenticatedContext & { db: Database };
 
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
@@ -319,11 +400,16 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight-log",
         async (context: any) => {
-          const { user, body, db } = context as AuthenticatedContext & {
-            body: typeof GoalSchemas.addWeightLogBody.static;
-          };
+          const { user, body, db } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown> };
 
-          const { timestamp, weight } = body;
+          if (!body) {
+            throw new Error("Request body is required");
+          }
+
+          const { timestamp, weight } = body as {
+            timestamp: string;
+            weight: number;
+          };
           const newId = generateId();
 
           return withTransaction(db, () => {
@@ -366,11 +452,12 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight-log/:id",
         async (context: any) => {
-          const { user, params, db } = context as AuthenticatedContext & {
-            params: typeof GoalSchemas.deleteWeightLogParams.static;
-          };
+          const { user, params, db } = context as AuthenticatedContext & { db: Database; params?: Record<string, string> };
 
-          const entryIdToDelete = params.id;
+          const entryIdToDelete = params?.id;
+          if (!entryIdToDelete) {
+            throw new NotFoundError("Weight log entry ID is required");
+          }
 
           return withTransaction(db, () => {
             const findEntryQuery = `

@@ -55,10 +55,10 @@ export default function MetricCard(properties: MetricCardProps) {
           initial: { opacity: 0, y: 10 },
           animate: { opacity: 1, y: 0 },
           transition: { duration: 0.3, delay },
-          className: `bg-surface backdrop-blur-sm rounded-2xl border border-border/50 shadow-primary hover:shadow-surface-2 overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group ${className}`,
+          className: `bg-surface rounded-xl border border-border overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group ${className}`,
         }
       : {
-          className: `p-3.5 hover:bg-surface hover:shadow-surface-2 transition group ${className}`,
+          className: `p-3.5 hover:bg-surface-2 transition-colors group ${className}`,
         };
 
   return (
@@ -66,10 +66,10 @@ export default function MetricCard(properties: MetricCardProps) {
       <div className="flex items-start gap-5">
         {Icon && (
           <div
-            className={`rounded-xl bg-gradient-to-br p-3 ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
+            className={`rounded-xl bg-linear-to-br p-3 ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
           >
             <Icon
-              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""} transform transition-transform group-hover:scale-120`}
+              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""}`}
               strokeWidth={1.5}
             />
           </div>
