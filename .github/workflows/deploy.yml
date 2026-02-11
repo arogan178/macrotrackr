@@ -99,4 +99,4 @@ jobs:
           echo "Running remote deploy script"
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && ./deploy.sh"
 
-*** End Patch
+          echo "Deployment completed successfully"
