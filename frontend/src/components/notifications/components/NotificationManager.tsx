@@ -20,7 +20,7 @@ function NotificationManager() {
       className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2"
       style={
         {
-          top: "var(--floating-notification-top, 16px)",
+          top: "var(--floating-notification-top, 80px)",
         } as React.CSSProperties
       }
     >
