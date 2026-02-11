@@ -23,10 +23,10 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Setup Bun
-        uses: oven-sh/bun@v1
-        with:
-          bun-version: '1.x'
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: '1.x'
 
       - name: Install frontend deps (bun)
         working-directory: frontend
