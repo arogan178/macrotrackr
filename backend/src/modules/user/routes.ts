@@ -2,7 +2,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { UserSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import type { ClerkAuthContext } from "../../middleware/clerkAuth";
 import { generateId } from "../../utils/id-generator";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import {
@@ -15,6 +15,7 @@ import { loggerHelpers } from "../../lib/logger";
 import { hashPassword, verifyPassword } from "../../lib/password";
 import { SubscriptionService } from "../billing/subscription-service";
 import type { Database } from "bun:sqlite";
+import { logger } from "../../lib/logger";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -34,6 +35,45 @@ interface UserDetailsResult {
   activity_level: number | null;
 }
 
+// Helper to get internal user ID from Clerk ID or email
+function getInternalUserId(
+  db: Database,
+  clerkUserId: string,
+  email?: string
+): number | null {
+  // First try to find by Clerk ID
+  const userByClerkId = safeQuery<{ id: number }>(
+    db,
+    "SELECT id FROM users WHERE clerk_id = ?",
+    [clerkUserId]
+  );
+
+  if (userByClerkId) {
+    return userByClerkId.id;
+  }
+
+  // Fall back to email lookup
+  if (email) {
+    const userByEmail = safeQuery<{ id: number }>(
+      db,
+      "SELECT id FROM users WHERE email = ?",
+      [email]
+    );
+
+    if (userByEmail) {
+      // Update the user with the Clerk ID for future lookups
+      safeExecute(
+        db,
+        "UPDATE users SET clerk_id = ? WHERE id = ?",
+        [clerkUserId, userByEmail.id]
+      );
+      return userByEmail.id;
+    }
+  }
+
+  return null;
+}
+
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
     group
@@ -44,7 +84,34 @@ export const userRoutes = (app: Elysia) =>
         "/me",
         async (context: any) => {
           try {
-            const { db, user } = context as AuthenticatedContext & { db: Database };
+            const { db, user } = context as ClerkAuthContext & { db: Database };
+
+            if (!user?.clerkUserId) {
+              throw new AuthenticationError("Unauthorized");
+            }
+
+            // Get internal user ID from Clerk ID
+            logger.info({ clerkUserId: user.clerkUserId, email: user.email }, "[/api/user/me] Looking up internal user ID");
+            
+            const internalUserId = getInternalUserId(
+              db,
+              user.clerkUserId,
+              user.email
+            );
+
+            if (!internalUserId) {
+              // User doesn't exist in our DB yet - this shouldn't happen
+              // if they called /auth/clerk-sync first, but handle it gracefully
+              logger.error(
+                { clerkUserId: user.clerkUserId, email: user.email },
+                "[/api/user/me] User not found in database - sync may have failed"
+              );
+              throw new NotFoundError(
+                "User not found. Please sign out and sign in again."
+              );
+            }
+            
+            logger.info({ internalUserId, clerkUserId: user.clerkUserId }, "[/api/user/me] Found internal user");
 
             // Fetch user details
             const dbResult = safeQuery<UserDetailsResult>(
@@ -55,7 +122,7 @@ export const userRoutes = (app: Elysia) =>
                LEFT JOIN user_details ud ON u.id = ud.user_id
                WHERE u.id = ?
                LIMIT 1`,
-              [user.userId]
+              [internalUserId]
             );
 
             if (!dbResult) {
@@ -64,9 +131,9 @@ export const userRoutes = (app: Elysia) =>
 
             // Get only summary subscription info
             const subscriptionInfo =
-              await SubscriptionService.getUserSubscription(user.userId);
+              await SubscriptionService.getUserSubscription(internalUserId);
             const result = toCamelCase(dbResult);
-            
+
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (result as Record<string, any>).subscription = {
               status: subscriptionInfo.subscription_status,
@@ -74,6 +141,10 @@ export const userRoutes = (app: Elysia) =>
               currentPeriodEnd:
                 subscriptionInfo.subscription?.current_period_end || null,
             };
+
+            // Add profile completion flag based on date of birth
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (result as Record<string, any>).isProfileComplete = !!dbResult.date_of_birth;
 
             // Do NOT include any detailed billing or payment info here
             return result;
@@ -95,16 +166,38 @@ export const userRoutes = (app: Elysia) =>
         "/settings",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+            const { db, user, body, request } = context as ClerkAuthContext & {
+              db: Database;
+              body?: Record<string, unknown>;
+              request: Request;
+            };
+
+            if (!user?.clerkUserId) {
+              throw new AuthenticationError("Unauthorized");
+            }
 
             if (!body) {
               throw new Error("Request body is required");
             }
 
-            // Get correlation ID from request headers if available
-            const correlationId = request.headers.get("x-correlation-id") || undefined;
+            // Get internal user ID from Clerk ID
+            const internalUserId = getInternalUserId(
+              db,
+              user.clerkUserId,
+              user.email
+            );
 
-            loggerHelpers.apiRequest("PUT", "/user/settings", user.userId, {
+            if (!internalUserId) {
+              throw new NotFoundError(
+                "User not found. Please sign out and sign in again."
+              );
+            }
+
+            // Get correlation ID from request headers if available
+            const correlationId =
+              request.headers.get("x-correlation-id") || undefined;
+
+            loggerHelpers.apiRequest("PUT", "/user/settings", internalUserId, {
               correlationId,
             });
 
@@ -134,7 +227,7 @@ export const userRoutes = (app: Elysia) =>
               const currentDetails = safeQuery<{ weight: number | null }>(
                 db,
                 "SELECT weight FROM user_details WHERE user_id = ?",
-                [user.userId]
+                [internalUserId]
               );
               if (currentDetails) {
                 currentWeight = currentDetails.weight;
@@ -145,7 +238,7 @@ export const userRoutes = (app: Elysia) =>
                 const existingEmail = safeQuery<{ id: number }>(
                   db,
                   "SELECT id FROM users WHERE email = ? AND id != ?",
-                  [email, user.userId]
+                  [email, internalUserId]
                 );
                 if (existingEmail) {
                   throw new ConflictError(
@@ -172,7 +265,7 @@ export const userRoutes = (app: Elysia) =>
               }
 
               if (userUpdateFields.length > 0) {
-                userParams.push(user.userId);
+                userParams.push(internalUserId);
                 safeExecute(
                   db,
                   `UPDATE users SET ${userUpdateFields.join(
@@ -197,7 +290,7 @@ export const userRoutes = (app: Elysia) =>
                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
                    updated_at = CURRENT_TIMESTAMP`,
                 [
-                  user.userId,
+                  internalUserId,
                   nullify(dateOfBirth),
                   nullify(height),
                   nullify(weight),
@@ -218,10 +311,10 @@ export const userRoutes = (app: Elysia) =>
                 safeExecute(
                   db,
                   "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
-                  [logId, user.userId, logTimestamp, weight]
+                  [logId, internalUserId, logTimestamp, weight]
                 );
 
-                loggerHelpers.dbQuery("INSERT", "weight_log", user.userId, 1);
+                loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
               }
 
               return {
@@ -251,28 +344,51 @@ export const userRoutes = (app: Elysia) =>
         "/complete-profile",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+            const { db, user, body, request } = context as ClerkAuthContext & {
+              db: Database;
+              body?: Record<string, unknown>;
+              request: Request;
+            };
+
+            if (!user?.clerkUserId) {
+              throw new AuthenticationError("Unauthorized");
+            }
 
             if (!body) {
               throw new Error("Request body is required");
             }
 
+            // Get internal user ID from Clerk ID
+            const internalUserId = getInternalUserId(
+              db,
+              user.clerkUserId,
+              user.email
+            );
+
+            if (!internalUserId) {
+              throw new NotFoundError(
+                "User not found. Please sign out and sign in again."
+              );
+            }
+
             // Get correlation ID from request headers if available
-            const correlationId = request.headers.get("x-correlation-id") || undefined;
+            const correlationId =
+              request.headers.get("x-correlation-id") || undefined;
 
             loggerHelpers.apiRequest(
               "POST",
               "/user/complete-profile",
-              user.userId,
+              internalUserId,
               {
                 correlationId,
               }
             );
 
-            const { dateOfBirth, height, weight, activityLevel } = body as {
+            const { dateOfBirth, height, weight, gender, activityLevel } = body as {
               dateOfBirth?: string;
               height?: number;
               weight?: number;
+              gender?: "male" | "female";
               activityLevel?: number;
             };
 
@@ -281,20 +397,22 @@ export const userRoutes = (app: Elysia) =>
               safeExecute(
                 db,
                 `INSERT INTO user_details (
-                   user_id, date_of_birth, height, weight, activity_level, updated_at
+                   user_id, date_of_birth, height, weight, gender, activity_level, updated_at
                  )
-                 VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+                 VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
                  ON CONFLICT(user_id) DO UPDATE SET
                    date_of_birth = COALESCE(excluded.date_of_birth, user_details.date_of_birth),
                    height = COALESCE(excluded.height, user_details.height),
                    weight = COALESCE(excluded.weight, user_details.weight),
+                   gender = COALESCE(excluded.gender, user_details.gender),
                    activity_level = COALESCE(excluded.activity_level, user_details.activity_level),
                    updated_at = CURRENT_TIMESTAMP`,
                 [
-                  user.userId,
+                  internalUserId,
                   nullify(dateOfBirth),
                   nullify(height),
                   nullify(weight),
+                  nullify(gender),
                   nullify(activityLevel),
                 ]
               );
@@ -307,10 +425,10 @@ export const userRoutes = (app: Elysia) =>
                 safeExecute(
                   db,
                   "INSERT INTO weight_log (id, user_id, timestamp, weight) VALUES (?, ?, ?, ?)",
-                  [logId, user.userId, logTimestamp, weight]
+                  [logId, internalUserId, logTimestamp, weight]
                 );
 
-                loggerHelpers.dbQuery("INSERT", "weight_log", user.userId, 1);
+                loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
               }
 
               return { success: true, message: "Profile details updated." };
@@ -337,7 +455,27 @@ export const userRoutes = (app: Elysia) =>
         "/password",
         async (context: any) => {
           try {
-            const { db, user, body } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown> };
+            const { db, user, body } = context as ClerkAuthContext & {
+              db: Database;
+              body?: Record<string, unknown>;
+            };
+
+            if (!user?.clerkUserId) {
+              throw new AuthenticationError("Unauthorized");
+            }
+
+            // Get internal user ID from Clerk ID
+            const internalUserId = getInternalUserId(
+              db,
+              user.clerkUserId,
+              user.email
+            );
+
+            if (!internalUserId) {
+              throw new NotFoundError(
+                "User not found. Please sign out and sign in again."
+              );
+            }
 
             if (!body) {
               throw new Error("Request body is required");
@@ -352,11 +490,14 @@ export const userRoutes = (app: Elysia) =>
               const dbUser = safeQuery<{ password?: string }>(
                 db,
                 "SELECT password FROM users WHERE id = ?",
-                [user.userId]
+                [internalUserId]
               );
 
-              if (!dbUser?.password) {
-                throw new NotFoundError("User not found or no password set.");
+              // Note: Clerk users may not have a password in our DB
+              if (!dbUser?.password || dbUser.password === "clerk-auth") {
+                throw new AuthenticationError(
+                  "Password change not available for Clerk-authenticated users. Please use Clerk's password management."
+                );
               }
 
               const isPasswordValid = await verifyPassword(
@@ -372,7 +513,7 @@ export const userRoutes = (app: Elysia) =>
 
               safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
                 hashedNewPassword,
-                user.userId,
+                internalUserId,
               ]);
 
               return {
@@ -390,7 +531,9 @@ export const userRoutes = (app: Elysia) =>
             200: t.Object({ success: t.Boolean(), message: t.String() }),
           },
           detail: {
-            summary: "Change the current user's password",
+            summary: "[DEPRECATED] Change the current user's password",
+            description:
+              "This endpoint is deprecated for Clerk users. Use Clerk's password management instead.",
             tags: ["User"],
           },
         }
