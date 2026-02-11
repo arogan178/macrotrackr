@@ -14,10 +14,10 @@ import { registerServiceWorker } from "./sw-register";
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST;
-const posthogEnabledInDev = import.meta.env.VITE_ENABLE_POSTHOG === "true";
+const posthogEnabledInDevelopment = import.meta.env.VITE_ENABLE_POSTHOG === "true";
 const shouldEnablePostHog =
   Boolean(posthogApiKey && posthogHost) &&
-  (import.meta.env.MODE !== "development" || posthogEnabledInDev);
+  (import.meta.env.MODE !== "development" || posthogEnabledInDevelopment);
 
 if (!clerkPublishableKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");

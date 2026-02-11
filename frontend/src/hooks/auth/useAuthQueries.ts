@@ -1,6 +1,6 @@
+import { useAuth, useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
-import { useAuth, useClerk } from "@clerk/clerk-react";
 
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";

@@ -96,8 +96,8 @@ export default function AuthReadyPage() {
         } else {
           navigate({ to: redirectTo as any });
         }
-      } catch (err) {
-        console.error("[AuthReadyPage] Error setting up auth:", err);
+      } catch (error_) {
+        console.error("[AuthReadyPage] Error setting up auth:", error_);
         setError("Failed to complete authentication. Please try again.");
       }
     }

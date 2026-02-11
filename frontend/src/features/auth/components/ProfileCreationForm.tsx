@@ -18,8 +18,8 @@ import {
   USER_MINIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
 } from "@/utils/constants";
-import { isOldEnough } from "@/utils/validation";
 import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
+import { isOldEnough } from "@/utils/validation";
 
 interface SocialProfileData {
   firstName: string;
@@ -124,8 +124,7 @@ export function ProfileCreationForm() {
   };
 
   const handleNext = () => {
-    if (step === 1) {
-      if (!validateStep1()) {
+    if (step === 1 && !validateStep1()) {
         // Show first error as notification
         const firstError = Object.values(errors)[0];
         if (firstError) {
@@ -133,16 +132,13 @@ export function ProfileCreationForm() {
         }
         return;
       }
-    }
-    if (step === 2) {
-      if (!validateStep2()) {
+    if (step === 2 && !validateStep2()) {
         const firstError = Object.values(errors)[0];
         if (firstError) {
           showNotification(firstError, "error");
         }
         return;
       }
-    }
     setErrors({});
     setStep(step + 1);
   };
@@ -289,7 +285,7 @@ export function ProfileCreationForm() {
               onChange={(value) => {
                 setDateOfBirth(value);
                 if (errors.dateOfBirth) {
-                  setErrors((prev) => ({ ...prev, dateOfBirth: "" }));
+                  setErrors((previous) => ({ ...previous, dateOfBirth: "" }));
                 }
               }}
               required
@@ -307,7 +303,7 @@ export function ProfileCreationForm() {
               onChange={(value) => {
                 setGender(value as Gender);
                 if (errors.gender) {
-                  setErrors((prev) => ({ ...prev, gender: "" }));
+                  setErrors((previous) => ({ ...previous, gender: "" }));
                 }
               }}
               options={GENDER_OPTIONS}
@@ -326,7 +322,7 @@ export function ProfileCreationForm() {
                 onChange={(value) => {
                   setHeight(value);
                   if (errors.height) {
-                    setErrors((prev) => ({ ...prev, height: "" }));
+                    setErrors((previous) => ({ ...previous, height: "" }));
                   }
                 }}
                 min={USER_MINIMUM_HEIGHT}
@@ -347,7 +343,7 @@ export function ProfileCreationForm() {
                 onChange={(value) => {
                   setWeight(value);
                   if (errors.weight) {
-                    setErrors((prev) => ({ ...prev, weight: "" }));
+                    setErrors((previous) => ({ ...previous, weight: "" }));
                   }
                 }}
                 min={USER_MINIMUM_WEIGHT}
@@ -389,7 +385,7 @@ export function ProfileCreationForm() {
               onChange={(value) => {
                 setActivityLevel(value ? Number(value) : null);
                 if (errors.activityLevel) {
-                  setErrors((prev) => ({ ...prev, activityLevel: "" }));
+                  setErrors((previous) => ({ ...previous, activityLevel: "" }));
                 }
               }}
               options={[
@@ -457,7 +453,7 @@ export function ProfileCreationForm() {
         </div>
         <div className="flex justify-between">
           <span className="text-muted">Activity Level</span>
-          <span className="font-medium text-right">
+          <span className="text-right font-medium">
             {activityLevel ? ACTIVITY_LEVELS[activityLevel]?.label : "-"}
           </span>
         </div>
