@@ -1,102 +1,123 @@
-name: Build and Deploy
+name: Deploy Macro Tracker
 
 on:
   push:
-    branches:
-      - master
-
-permissions:
-  contents: read
-  id-token: write
+    branches: [ master ]
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: Build frontend & backend
+  deploy:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node (for vite build fallback)
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
     - name: Setup Bun
       uses: oven-sh/setup-bun@v1
       with:
-        bun-version: '1.x'
-
-      - name: Install frontend deps (bun)
-        working-directory: frontend
-        run: bun install --frozen-lockfile
-
-      - name: Build frontend
-        working-directory: frontend
-        env:
-          NODE_OPTIONS: '--max-old-space-size=2048'
-        run: |
-          # ensure clean build
-          rm -rf dist/ node_modules/.vite/ .tanstack/ || true
-          bun run build
-
-      - name: Install backend deps (bun)
-        working-directory: backend
-        run: bun install --frozen-lockfile
-
-      - name: Archive compiled frontend
-        run: |
-          tar -czf frontend-dist.tar.gz -C frontend dist
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: frontend-dist.tar.gz
-
-  deploy:
-    name: Deploy to server
-    runs-on: ubuntu-latest
-    needs: build
-
-    steps:
-      - name: Download artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-
-      - name: Install rsync and ssh
-        run: sudo apt-get update && sudo apt-get install -y rsync openssh-client
-
-      - name: Copy code & run remote deploy
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.DEPLOY_SSH_PRIVATE_KEY }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          set -e
-
-          # Setup SSH key
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-
-          # Ensure host key checking disabled if required (optionally add known_hosts)
-          # NOTE: For production, it's better to add the server's host key to known_hosts
-          export RSYNC_RSH="ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no"
-
-          echo "Uploading repository to server..."
-
-          # Use rsync to copy repository files to the server (excluding .git and node_modules)
-          rsync -av --delete --exclude='.git' --exclude='node_modules' --exclude='frontend/node_modules' --exclude='frontend/dist' ./ $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH
-
-          echo "Uploading frontend dist artifact..."
-          # Upload the built dist archive
-          scp -i ~/.ssh/deploy_key frontend-dist.tar.gz $DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/frontend-dist.tar.gz
-
-          echo "Running remote deploy script"
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no $DEPLOY_USER@$DEPLOY_HOST "cd $DEPLOY_PATH && ./deploy.sh"
-
-          echo "Deployment completed successfully"
+        bun-version: latest
+        
+    - name: Install dependencies
+      run: bun install --frozen-lockfile
+      
+    - name: Build frontend
+      run: |
+        cd frontend
+        rm -rf dist/
+        rm -rf node_modules/.vite/
+        rm -rf .tanstack/
+        export NODE_OPTIONS="--max-old-space-size=2048"
+        node ./node_modules/vite/bin/vite.js build
+        unset NODE_OPTIONS
+        
+    - name: Test backend
+      run: |
+        cd backend
+        bun test
+        
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.0
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: root
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        script: |
+          cd /var/www/macro-tracker
+          git stash push -m "Automated stash before deployment" --include-untracked || true
+git pull origin master
+          
+          # Copy production environment variables if they exist
+          if [ -f backend/.env.production ]; then
+            cp backend/.env.production backend/.env
+          fi
+          
+          # Install dependencies
+          bun install --frozen-lockfile
+          
+          # Build frontend
+          cd frontend
+          rm -rf dist/
+          rm -rf node_modules/.vite/
+          rm -rf .tanstack/
+          export NODE_OPTIONS="--max-old-space-size=2048"
+          node ./node_modules/vite/bin/vite.js build
+          unset NODE_OPTIONS
+          
+          # Go back to root
+          cd ..
+          
+          # Create logs directory if it doesn't exist
+          mkdir -p logs
+          
+          # Restart applications using PM2 ecosystem file
+          pm2 reload ecosystem.config.js || {
+            echo "PM2 reload failed, attempting restart..."
+            pm2 restart ecosystem.config.js || {
+              echo "PM2 restart also failed"
+              exit 1
+            }
+          }
+          
+          # Check if backend started successfully
+          sleep 3
+          if pm2 describe macro-tracker-api > /dev/null; then
+            echo "✅ Backend API started successfully"
+          else
+            echo "❌ Backend API failed to start"
+            pm2 logs macro-tracker-api --lines 20 || true
+            exit 1
+          fi
+          
+          # Check if frontend started successfully
+          if pm2 describe macro-frontend > /dev/null; then
+            echo "✅ Frontend server started successfully"
+          else
+            echo "❌ Frontend server failed to start"
+            pm2 logs macro-frontend --lines 20 || true
+            exit 1
+          fi
+          
+          echo "Deployment finished successfully at $(date)"
+          echo "Backend API: http://localhost:3000"
+          echo "Frontend: http://localhost:5173"
+      
+    - name: Post-deployment notification
+      if: always()
+      run: |
+        echo "Deployment ${{ job.status }} for Macro Tracker"
+        echo "Commit: ${{ github.sha }}"
+        echo "Branch: ${{ github.ref_name }}"
+        echo "Workflow: ${{ github.workflow }}"
+        echo "Status: ${{ job.status }}"
+      
+    - name: Upload logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-logs
+        path: |
+          /var/www/macro-tracker/logs/*.log
+          /var/www/macro-tracker/frontend/dist/
+        retention-days: 7
