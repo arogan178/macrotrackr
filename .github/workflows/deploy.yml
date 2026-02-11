@@ -8,6 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     environment: production
     
     steps:
@@ -72,7 +73,7 @@ jobs:
 
            # Write frontend .env from GitHub secrets
            echo "Writing frontend environment variables..."
-           printf '%s\n' "VITE_API_URL=${{ secrets.FRONTEND_VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_HOST }}" > frontend/.env
+           printf '%s\n' "VITE_API_URL=${{ secrets.FRONTEND_VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.FRONTEND_VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > frontend/.env
            echo "✅ Frontend environment variables written"
           
           # Add bun to PATH
