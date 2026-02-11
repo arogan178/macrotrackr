@@ -16,6 +16,7 @@ import { emailService } from "../../lib/email-service";
 import { loggerHelpers } from "../../lib/logger";
 import { createJwtCookie } from "../../lib/auth-utils";
 import type { AuthenticatedContext } from "../../middleware/auth";
+import { logger } from "../../lib/logger";
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
@@ -25,7 +26,7 @@ export const authRoutes = (app: Elysia) =>
       // .use(rateLimiters.auth) // Temporarily disabled for testing
       .decorate("db", db)
 
-      // Email Validation
+      // Email Validation (deprecated - Clerk handles this)
       .post(
         "/validate-email",
         async (context: any) => {
@@ -46,13 +47,14 @@ export const authRoutes = (app: Elysia) =>
         {
           body: AuthSchemas.validateEmail,
           detail: {
-            summary: "Check if an email is available for registration",
+            summary: "[DEPRECATED] Check if an email is available for registration",
+            description: "This endpoint is deprecated. Clerk now handles email validation.",
             tags: ["Auth"],
           },
         }
       )
 
-      // User Registration
+      // User Registration (deprecated - use Clerk SignUp instead)
       .post(
         "/register",
         async (context: any) => {
@@ -138,11 +140,15 @@ export const authRoutes = (app: Elysia) =>
         {
           body: AuthSchemas.register,
           response: AuthSchemas.tokenResponse,
-          detail: { summary: "Register a new user account", tags: ["Auth"] },
+          detail: { 
+            summary: "[DEPRECATED] Register a new user account", 
+            description: "This endpoint is deprecated. Use Clerk's SignUp component instead.",
+            tags: ["Auth"] 
+          },
         }
       )
 
-      // User Login
+      // User Login (deprecated - use Clerk SignIn instead)
       .post(
         "/login",
         async (context: any) => {
@@ -184,12 +190,14 @@ export const authRoutes = (app: Elysia) =>
           body: AuthSchemas.login,
           response: AuthSchemas.tokenResponse,
           detail: {
-            summary: "Authenticate user and retrieve JWT token",
+            summary: "[DEPRECATED] Authenticate user and retrieve JWT token",
+            description: "This endpoint is deprecated. Use Clerk's SignIn component instead.",
             tags: ["Auth"],
           },
         }
       )
-      // Password Reset Request
+      
+      // Password Reset Request (deprecated - use Clerk instead)
       .post(
         "/forgot-password",
         async (context: any) => {
@@ -229,13 +237,14 @@ export const authRoutes = (app: Elysia) =>
         {
           body: AuthSchemas.forgotPassword,
           detail: {
-            summary: "Request a password reset link",
+            summary: "[DEPRECATED] Request a password reset link",
+            description: "This endpoint is deprecated. Use Clerk's password reset flow instead.",
             tags: ["Auth"],
           },
         }
       )
 
-      // Password Reset Handler
+      // Password Reset Handler (deprecated - use Clerk instead)
       .post(
         "/reset-password",
         async (context: any) => {
@@ -274,7 +283,144 @@ export const authRoutes = (app: Elysia) =>
         {
           body: AuthSchemas.resetPassword,
           detail: {
-            summary: "Reset password using a valid token",
+            summary: "[DEPRECATED] Reset password using a valid token",
+            description: "This endpoint is deprecated. Use Clerk's password reset flow instead.",
+            tags: ["Auth"],
+          },
+        }
+      )
+
+      // Clerk User Sync - Sync Clerk user with our database
+      .post(
+        "/clerk-sync",
+        async (context: any) => {
+          const { db, user, clerkClient } = context as {
+            db: Database;
+            user: any;
+            clerkClient?: any;
+          };
+          
+          if (!user?.clerkUserId) {
+            throw new AuthenticationError("Unauthorized - No Clerk user ID found");
+          }
+
+          const clerkUserId = user.clerkUserId;
+          let email = user.email as string | undefined;
+          let firstName = (user.firstName as string | undefined) || "";
+          let lastName = (user.lastName as string | undefined) || "";
+
+          // Defensive fallback: resolve missing Clerk profile fields from Clerk API.
+          if (!email || !firstName || !lastName) {
+            try {
+              const clerkUser = await clerkClient?.users?.getUser?.(clerkUserId);
+              email = email || clerkUser?.emailAddresses?.[0]?.emailAddress;
+              firstName = firstName || clerkUser?.firstName || "";
+              lastName = lastName || clerkUser?.lastName || "";
+            } catch (error) {
+              logger.warn(
+                { clerkUserId, error },
+                "Failed to resolve Clerk user details during sync"
+              );
+            }
+          }
+
+          if (!email) {
+            throw new AuthenticationError(
+              "Unable to resolve Clerk account email. Please verify your email and try again."
+            );
+          }
+
+          logger.info({ clerkUserId, email, firstName, lastName }, "[clerk-sync] Syncing Clerk user with database");
+
+          // Check if user already exists (prefer clerk_id match).
+          const existingByClerkId = safeQuery<UserRow & { email: string }>(
+            db,
+            "SELECT id, email FROM users WHERE clerk_id = ?",
+            [clerkUserId]
+          );
+          
+          const existingByEmail = safeQuery<UserRow & { clerk_id: string | null }>(
+            db,
+            "SELECT id, clerk_id FROM users WHERE email = ?",
+            [email]
+          );
+          
+          logger.info({ 
+            foundByClerkId: !!existingByClerkId, 
+            foundByEmail: !!existingByEmail,
+            clerkUserId,
+            email 
+          }, "[clerk-sync] User lookup results");
+          
+          const existingUser = existingByClerkId || existingByEmail;
+
+          if (existingUser) {
+            // Update existing user with Clerk ID
+            logger.info({ 
+              userId: existingUser.id, 
+              clerkUserId,
+              existingClerkId: existingByEmail?.clerk_id,
+              matchedBy: existingByClerkId ? "clerk_id" : "email"
+            }, "[clerk-sync] Updating existing user");
+            
+            safeExecute(
+              db,
+              "UPDATE users SET clerk_id = ?, email = ?, first_name = ?, last_name = ? WHERE id = ?",
+              [clerkUserId, email, firstName, lastName, existingUser.id]
+            );
+
+            return {
+              id: existingUser.id,
+              clerkId: clerkUserId,
+              email,
+              firstName,
+              lastName,
+              message: "User synced successfully",
+            };
+          }
+
+          // Create new user
+          const userData = withTransaction(db, () => {
+            // Insert user
+            const userResult = safeExecute(
+              db,
+              "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)",
+              [email, firstName, lastName, clerkUserId, "clerk-auth"] // No password for Clerk users
+            );
+            const userId = Number(userResult.lastInsertRowid);
+
+            // Insert default user details (empty, can be filled later)
+            safeExecute(
+              db,
+              `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
+               VALUES (?, NULL, NULL, NULL, NULL, NULL)`,
+              [userId]
+            );
+
+            // Insert default macro targets
+            safeExecute(
+              db,
+              `INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
+               VALUES (?, 30, 40, 30, '[]')`,
+              [userId]
+            );
+
+            return { userId };
+          });
+
+          return {
+            id: userData.userId,
+            clerkId: clerkUserId,
+            email,
+            firstName,
+            lastName,
+            message: "User created and synced successfully",
+          };
+        },
+        {
+          detail: {
+            summary: "Sync Clerk user with database",
+            description: "Creates or updates a user in our database based on Clerk authentication",
             tags: ["Auth"],
           },
         }
