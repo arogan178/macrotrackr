@@ -1,17 +1,18 @@
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 
-import { PricingTable } from "@/components/billing";
 import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { CircleQuestionMarkIcon, IconButton } from "@/components/ui";
+import { CheckIcon, CircleQuestionMarkIcon, IconButton } from "@/components/ui";
+import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { createCheckoutSession } from "@/utils/apiBilling";
 
-// Testimonials array removed (not used)
+// --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
 
 const faqs = [
   {
@@ -31,9 +32,7 @@ const faqs = [
   },
 ];
 
-/**
- * /pricing page - Feature comparison and upgrade flow
- */
+// --- Handlers hoisted outside component (stable reference) ---
 
 const handleUpgrade = async (plan: "monthly" | "yearly") => {
   try {
@@ -48,6 +47,12 @@ const handleUpgrade = async (plan: "monthly" | "yearly") => {
   }
 };
 
+/**
+ * /pricing page – Cards + FAQ.
+ *
+ * Simpler layout avoiding duplicate information between cards and table.
+ * Cards provide the full feature list comparison.
+ */
 const PricingPage: React.FC = () => {
   usePageMetadata({
     title: "Pricing — MacroTrackr",
@@ -56,23 +61,17 @@ const PricingPage: React.FC = () => {
     canonical: "https://macrotrackr.com/pricing",
     ogImage: "https://macrotrackr.com/icon.png",
   });
-  const [selectedPlan, setSelectedPlan] = React.useState<"monthly" | "yearly">(
-    "monthly",
-  );
-  const [openFaq, setOpenFaq] = React.useState<number | undefined>(0);
+
+  const [openFaq, setOpenFaq] = useState<number | undefined>(0);
   const { isLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
 
-  // If user is not authenticated, redirect to login and include returnTo
-  // so the login page can redirect back after successful authentication.
   useEffect(() => {
     if (!isLoaded) return;
     if (!isSignedIn) {
-      // Use router navigation and include returnTo param
       try {
         navigate({ to: "/login", search: { returnTo: "/pricing" } });
       } catch {
-        // Fallback to full navigation if router navigation fails
         globalThis.location.href = "/login?returnTo=/pricing";
       }
     }
@@ -88,34 +87,39 @@ const PricingPage: React.FC = () => {
         title="Pricing"
         subtitle="Upgrade to Pro for advanced insights, unlimited tracking, and premium tools."
       >
-        <div className="space-y-8">
-          <CardContainer className="p-6 sm:p-8">
-            <PricingTable
-              onUpgrade={handleUpgrade}
-              selectedPlan={selectedPlan}
-              setSelectedPlan={setSelectedPlan}
-            />
-          </CardContainer>
+        <div className="space-y-12">
+          {/* Card-based pricing — matches landing page */}
+          <CustomPricingCards
+            onUpgrade={handleUpgrade}
+            showUpgradeButtons={true}
+          />
 
           {/* FAQ Section */}
           <CardContainer className="p-6 sm:p-8">
-            <h2 className="mb-8 text-center text-2xl font-bold tracking-tight sm:text-3xl">
-              Frequently Asked Questions
-            </h2>
+            <div className="mb-8 text-center">
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                Frequently Asked Questions
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-sm text-muted">
+                Everything you need to know about our plans
+              </p>
+            </div>
             <div className="mx-auto max-w-3xl space-y-4">
               {faqs.map((faq, index) => {
-                const open = openFaq === index;
+                const isOpen = openFaq === index;
                 return (
                   <div
                     key={index}
                     className={`group rounded-xl border bg-surface-2 px-5 py-4 transition-colors ${
-                      open ? "border-primary/60" : "border-border hover:border-primary/40"
+                      isOpen
+                        ? "border-primary/60"
+                        : "border-border hover:border-primary/40"
                     }`}
                   >
                     <button
                       type="button"
                       className="flex w-full items-start justify-between gap-4 text-left"
-                      aria-expanded={open}
+                      aria-expanded={isOpen}
                       onClick={() => toggleFaq(index)}
                     >
                       <span className="flex items-start text-base leading-tight font-semibold text-foreground">
@@ -124,7 +128,7 @@ const PricingPage: React.FC = () => {
                       </span>
                       <IconButton
                         variant="custom"
-                        ariaLabel={open ? "Collapse FAQ" : "Expand FAQ"}
+                        ariaLabel={isOpen ? "Collapse FAQ" : "Expand FAQ"}
                         onClick={(event_) => {
                           event_.stopPropagation();
                           toggleFaq(index);
@@ -132,7 +136,7 @@ const PricingPage: React.FC = () => {
                         icon={
                           <span
                             className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold transition-all ${
-                              open
+                              isOpen
                                 ? "rotate-45 bg-primary/10 text-primary"
                                 : "group-hover:bg-primary/10 group-hover:text-primary"
                             }`}
@@ -145,7 +149,7 @@ const PricingPage: React.FC = () => {
                       />
                     </button>
                     <AnimatePresence initial={false}>
-                      {open && (
+                      {isOpen ? (
                         <motion.div
                           key="content"
                           initial={{ height: 0, opacity: 0 }}
@@ -158,7 +162,7 @@ const PricingPage: React.FC = () => {
                             {faq.answer}
                           </p>
                         </motion.div>
-                      )}
+                      ) : null}
                     </AnimatePresence>
                   </div>
                 );
@@ -172,5 +176,3 @@ const PricingPage: React.FC = () => {
 };
 
 export default PricingPage;
-
-// Usage: Add route /pricing -> <PricingPage />
