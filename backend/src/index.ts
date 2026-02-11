@@ -4,7 +4,7 @@ import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { config } from "./config";
 import { db } from "./db";
-import { authMiddleware } from "./middleware/auth";
+import { clerkAuthMiddleware } from "./middleware/clerkAuth";
 import { rateLimiters } from "./middleware/rate-limit";
 import { requestLimitsMiddleware } from "./middleware/request-limits";
 import {
@@ -17,6 +17,7 @@ import { logger } from "./lib/logger";
 
 // Import route modules
 import { authRoutes } from "./modules/auth/routes";
+import { clerkWebhookHandler } from "./modules/auth/clerk-webhook";
 import { userRoutes } from "./modules/user/routes";
 import { macroRoutes } from "./modules/macros/routes";
 import { goalRoutes } from "./modules/goals/routes";
@@ -70,6 +71,9 @@ app.decorate("db", db);
 // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
 app.use(webhookHandler);
 
+// Clerk webhook handler (NO AUTH) - handles user sync from Clerk
+app.use(clerkWebhookHandler);
+
 // Apply middleware after webhook routes to avoid body consumption conflicts
 app.use(correlationMiddleware);
 app.use(enhancedApiLogging);
@@ -77,11 +81,14 @@ app.use(enhancedApiLogging);
 // Apply rate limiting
 app.use(rateLimiters.api);
 
-// Public auth routes (no authentication required)
-app.use(authRoutes);
+// Apply Clerk auth middleware globally (it has path exemptions built-in)
+// This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
+app.use(clerkAuthMiddleware);
 
-// Apply auth middleware globally (it has path exemptions built-in)
-app.use(authMiddleware);
+// Public auth routes (no authentication required)
+// Note: Legacy login/register are kept for backward compatibility
+// but are deprecated in favor of Clerk authentication
+app.use(authRoutes);
 
 // All other routes
 app.use(userRoutes);
@@ -176,4 +183,7 @@ logger.info(
 logger.info(`    CORS Origin: ${config.CORS_ORIGIN}`);
 logger.info(
   `    API Docs: http://${app.server?.hostname}:${app.server?.port}/api/docs`
+);
+logger.info(
+  `    Clerk Authentication: Enabled`
 );
