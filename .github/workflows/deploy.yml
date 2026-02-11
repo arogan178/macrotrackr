@@ -46,7 +46,7 @@ jobs:
         script: |
           cd /var/www/macro-tracker
           git stash push -m "Automated stash before deployment" --include-untracked || true
-git pull origin master
+          git pull origin master
           
           # Copy production environment variables if they exist
           if [ -f backend/.env.production ]; then
