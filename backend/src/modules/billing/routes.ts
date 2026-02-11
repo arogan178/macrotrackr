@@ -2,14 +2,14 @@
 
 import { Elysia } from "elysia";
 import { db } from "../../db";
-import { authMiddleware } from "../../middleware/auth";
 import { logger } from "../../lib/logger";
-import { BadRequestError } from "../../lib/errors";
+import { BadRequestError, NotFoundError } from "../../lib/errors";
 import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import { adaptClerkToLegacy } from "../../lib/route-adapter";
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -76,10 +76,24 @@ function handleRouteError(error: unknown, operation: string, userId?: number): n
     },
     `Failed to ${operation.replace(/_/g, " ")}`
   );
-  if (error instanceof BadRequestError) throw error;
+  if (error instanceof BadRequestError || error instanceof NotFoundError) {
+    throw error;
+  }
   throw new BadRequestError(
     "An unexpected error occurred. Please try again later."
   );
+}
+
+function resolveBillingUser(context: ClerkAuthContext & { db?: unknown }) {
+  const legacyUser = adaptClerkToLegacy(context as any);
+  const clerkUser = context.user;
+
+  return {
+    userId: legacyUser.userId,
+    email: legacyUser.email || "",
+    firstName: legacyUser.firstName || clerkUser?.firstName || "",
+    lastName: legacyUser.lastName || clerkUser?.lastName || "",
+  };
 }
 
 export const billingRoutes = (app: Elysia) =>
@@ -87,15 +101,11 @@ export const billingRoutes = (app: Elysia) =>
     group
       .decorate("db", db)
 
-      // All routes require authentication
-      .use(authMiddleware)
-
       // Get detailed billing/subscription info
       .get(
         "/details",
         async (context: any) => {
-          const { user } = context as AuthenticatedContext;
-          if (!user) throw new BadRequestError("Authentication required");
+          const user = resolveBillingUser(context as ClerkAuthContext);
           try {
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -134,8 +144,7 @@ export const billingRoutes = (app: Elysia) =>
       .post(
         "/cancel",
         async (context: any) => {
-          const { user } = context as AuthenticatedContext;
-          if (!user) throw new BadRequestError("Authentication required");
+          const user = resolveBillingUser(context as ClerkAuthContext);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -178,8 +187,8 @@ export const billingRoutes = (app: Elysia) =>
       .post(
         "/checkout",
         async (context: any) => {
-          const { body, user } = context as AuthenticatedContext & { body?: Record<string, unknown> };
-          if (!user) throw new BadRequestError("Authentication required");
+          const { body } = context as { body?: Record<string, unknown> };
+          const user = resolveBillingUser(context as ClerkAuthContext);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -263,8 +272,8 @@ export const billingRoutes = (app: Elysia) =>
       .post(
         "/portal",
         async (context: any) => {
-          const { body, user } = context as AuthenticatedContext & { body?: Record<string, unknown> };
-          if (!user) throw new BadRequestError("Authentication required");
+          const { body } = context as { body?: Record<string, unknown> };
+          const user = resolveBillingUser(context as ClerkAuthContext);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -312,8 +321,7 @@ export const billingRoutes = (app: Elysia) =>
       .get(
         "/subscription",
         async (context: any) => {
-          const { user } = context as AuthenticatedContext;
-          if (!user) throw new BadRequestError("Authentication required");
+          const user = resolveBillingUser(context as ClerkAuthContext);
           try {
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);

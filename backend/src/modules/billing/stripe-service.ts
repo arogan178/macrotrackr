@@ -6,7 +6,7 @@ import { handleServiceError } from "../../lib/error-handler";
 
 // Initialize Stripe with secret key
 export const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-07-30.basil",
+  apiVersion: "2025-08-27.basil",
   typescript: true,
 });
 
