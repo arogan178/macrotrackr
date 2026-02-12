@@ -41,7 +41,7 @@ function GlobalLoadingOverlay() {
   // }, []);
 
   // Returning null is the conventional React pattern; disable unicorn/no-null for this line.
-  // eslint-disable-next-line unicorn/no-null
+   
   if (!visible || !target) return null;
 
   const overlay = (
