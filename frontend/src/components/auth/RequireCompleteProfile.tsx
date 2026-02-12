@@ -40,9 +40,14 @@ export function RequireCompleteProfile({ children }: RequireCompleteProfileProps
     return <Navigate to="/login" search={{}} />;
   }
 
+  // If user is null, it means backend returned 401 (not authenticated)
+  // Redirect to login to re-establish session
+  if (user === null) {
+    return <Navigate to="/login" search={{}} />;
+  }
+
   // If user data is loaded but profile is incomplete, redirect to setup
-  // Also handle case where user is undefined (auth error or user not synced yet)
-  if (!user || !user.isProfileComplete) {
+  if (!user.isProfileComplete) {
     return <Navigate to="/profile-setup" />;
   }
 
