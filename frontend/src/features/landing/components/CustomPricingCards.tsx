@@ -1,10 +1,10 @@
+import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { usePostHog } from "posthog-js/react";
 import React, { useState } from "react";
 
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
-import { useUser } from "@/hooks/auth/useAuthQueries";
 
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
@@ -23,8 +23,8 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
     "monthly",
   );
   const navigate = useNavigate();
-  const { data: user } = useUser();
-  const isAuthenticated = !!user;
+  const { isSignedIn } = useAuth();
+  const isAuthenticated = !!isSignedIn;
   const posthog = usePostHog();
 
   const handleGetPro = () => {
@@ -101,7 +101,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
               location: "pricing_cards",
               source: "pricing_card_free",
             });
-            navigate({ to: "/register", search: { returnTo: "/pricing" } });
+            navigate({ to: "/register", search: { returnTo: undefined } });
           }}
         >
           <p className="text-foreground">{PRICING_PLANS.free.description}</p>
