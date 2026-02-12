@@ -104,7 +104,7 @@ export default defineConfig(() => {
         injectManifest: {
           injectionPoint: "self.__WB_MANIFEST",
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-          globDirectory: "dist",
+          // globDirectory removed - vite-plugin-pwa uses build.outDir automatically
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         },
       }),
