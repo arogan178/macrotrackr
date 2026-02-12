@@ -14,9 +14,10 @@ import { useStore } from "@/store/store";
 
 interface ClerkSignUpFormProps {
   onSwitchToSignIn: () => void;
+  redirectTo?: string;
 }
 
-export function ClerkSignUpForm({ onSwitchToSignIn }: ClerkSignUpFormProps) {
+export function ClerkSignUpForm({ onSwitchToSignIn, redirectTo }: ClerkSignUpFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
   const { showNotification } = useStore();
@@ -39,10 +40,11 @@ export function ClerkSignUpForm({ onSwitchToSignIn }: ClerkSignUpFormProps) {
     }
 
     try {
+      const destination = redirectTo || "/home";
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/auth-ready",
+        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(destination)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(destination)}`,
       });
     } catch (error) {
       console.error("Social sign-up error:", error);
@@ -74,9 +76,9 @@ export function ClerkSignUpForm({ onSwitchToSignIn }: ClerkSignUpFormProps) {
 
       if (result.status === "complete") {
         // Sign-up complete, set session and redirect to auth-ready
-        // AuthReadyPage will set the token and then redirect to home
+        // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
-        navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
+        navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
       } else if (result.status === "missing_requirements") {
         // Email verification required
         await signUp.prepareEmailAddressVerification({
@@ -114,10 +116,10 @@ export function ClerkSignUpForm({ onSwitchToSignIn }: ClerkSignUpFormProps) {
 
       if (result.status === "complete") {
         // Verification complete, set session and redirect to auth-ready
-        // AuthReadyPage will set the token and then redirect to home
+        // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
         showNotification("Email verified successfully!", "success");
-        navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
+        navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
       } else {
         showNotification(
           "Invalid verification code. Please try again.",
