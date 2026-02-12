@@ -107,7 +107,7 @@ function RequireUnauth({ children }: { children: React.ReactNode }) {
   }
 
   if (isSignedIn) {
-    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
+    return <Navigate to="/auth-ready" search={{ redirectTo: "/home" }} />;
   }
 
   return <>{children}</>;
