@@ -35,12 +35,8 @@ const SettingsPage = React.lazy(
   () => import("@/features/settings/pages/SettingsPage"),
 );
 const GoalsPage = React.lazy(() => import("@/features/goals/pages/GoalsPage"));
-const SignInPage = React.lazy(
-  () => import("@/features/auth/pages/SignInPage"),
-);
-const SignUpPage = React.lazy(
-  () => import("@/features/auth/pages/SignUpPage"),
-);
+const SignInPage = React.lazy(() => import("@/features/auth/pages/SignInPage"));
+const SignUpPage = React.lazy(() => import("@/features/auth/pages/SignUpPage"));
 const ProfileSetupPage = React.lazy(
   () => import("@/features/auth/pages/ProfileSetupPage"),
 );
