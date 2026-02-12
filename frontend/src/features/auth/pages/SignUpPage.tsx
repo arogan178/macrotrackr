@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useSearch } from "@tanstack/react-router";
 
 import CardContainer from "@/components/form/CardContainer";
 import LogoButton from "@/components/layout/LogoButton";
@@ -6,8 +6,9 @@ import PageBackground from "@/components/layout/PageBackground";
 import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
 import { ClerkSignUpForm } from "@/features/auth/components/ClerkSignUpForm";
 
-const handleSwitchToSignIn = () => {
-  globalThis.location.href = "/login";
+const handleSwitchToSignIn = (returnTo?: string) => {
+  const url = returnTo ? `/login?returnTo=${encodeURIComponent(returnTo)}` : "/login";
+  globalThis.location.href = url;
 };
 
 /**
@@ -15,6 +16,9 @@ const handleSwitchToSignIn = () => {
  * Supports email/password with verification and social providers (Google, Facebook, Apple)
  */
 export default function SignUpPage() {
+  const search = useSearch({ from: "/register" });
+  const returnTo = search.returnTo as string | undefined;
+
   return (
     <QueryErrorBoundary>
       <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
@@ -33,7 +37,10 @@ export default function SignUpPage() {
           <section className="flex w-full flex-col items-center justify-center">
             <div className="w-full max-w-md">
               <CardContainer className="bg-surface-2/90 p-8 shadow-lg ring-1 ring-border/40 backdrop-blur-xl">
-                <ClerkSignUpForm onSwitchToSignIn={handleSwitchToSignIn} />
+                <ClerkSignUpForm 
+                  onSwitchToSignIn={() => handleSwitchToSignIn(returnTo)} 
+                  redirectTo={returnTo}
+                />
               </CardContainer>
             </div>
           </section>
