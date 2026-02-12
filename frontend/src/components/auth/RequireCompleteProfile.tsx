@@ -22,7 +22,9 @@ interface RequireCompleteProfileProps {
   children: React.ReactNode;
 }
 
-export function RequireCompleteProfile({ children }: RequireCompleteProfileProps) {
+export function RequireCompleteProfile({
+  children,
+}: RequireCompleteProfileProps) {
   const location = useLocation();
   const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
   const { data: user, isLoading: isUserLoading } = useUser();
