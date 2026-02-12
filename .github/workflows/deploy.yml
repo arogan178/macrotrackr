@@ -207,7 +207,7 @@ jobs:
 
           # Validate built assets before swapping
           test -f "${NEW_DIST}/index.html"
-          test -f "${NEW_DIST}/sw.js"
+          test -f "${NEW_DIST}/service-worker.js"
 
           ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' "${NEW_DIST}/index.html" | head -n1 || true)
           if [ -z "${ENTRY_JS}" ]; then
