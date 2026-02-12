@@ -57,7 +57,7 @@ export default function AuthReadyPage() {
         }
 
         // Give a small moment for the token to be set
-        await new Promise(resolve => setTimeout(resolve, 50));
+        await new Promise((resolve) => setTimeout(resolve, 50));
 
         // Sync the Clerk user with our backend.
         let syncSuccess = false;
@@ -71,10 +71,10 @@ export default function AuthReadyPage() {
             return;
           }
         }
-        
+
         // Small delay after successful sync to ensure DB is updated
         if (syncSuccess) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
         }
 
@@ -87,7 +87,7 @@ export default function AuthReadyPage() {
             break;
           } catch (userError) {
             if (userError instanceof ApiError && userError.status === 401) {
-              await new Promise(resolve => setTimeout(resolve, 120));
+              await new Promise((resolve) => setTimeout(resolve, 120));
               continue;
             }
             throw userError;
@@ -164,9 +164,7 @@ export default function AuthReadyPage() {
         <h1 className="text-xl font-semibold text-foreground">
           Preparing your account...
         </h1>
-        <p className="mt-2 text-muted">
-          Please wait while we set things up
-        </p>
+        <p className="mt-2 text-muted">Please wait while we set things up</p>
       </div>
     </div>
   );
