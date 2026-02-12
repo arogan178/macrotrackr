@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, ApiError, setAuthToken } from "@/utils/apiServices";
+import { ApiError, apiService, setAuthToken } from "@/utils/apiServices";
 
 /**
  * AuthReadyPage - Intermediate page that ensures auth token is set before redirecting
@@ -23,14 +23,14 @@ export default function AuthReadyPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const { session } = useSession();
   const [error, setError] = useState<string | null>(null);
-  const hasInitializedRef = useRef(false);
+  const hasInitializedReference = useRef(false);
 
   const redirectTo = search.redirectTo || "/home";
 
   useEffect(() => {
     async function setupAuth() {
       try {
-        if (hasInitializedRef.current) {
+        if (hasInitializedReference.current) {
           return;
         }
 
@@ -39,11 +39,11 @@ export default function AuthReadyPage() {
           return;
         }
 
-        hasInitializedRef.current = true;
+        hasInitializedReference.current = true;
 
         // If not signed in, redirect to login
         if (!isSignedIn) {
-          navigate({ to: "/login" });
+          navigate({ to: "/login", search: { returnTo: undefined } });
           return;
         }
 
@@ -107,16 +107,24 @@ export default function AuthReadyPage() {
           return;
         }
 
-        const normalizedRedirectTo = redirectTo.startsWith("/auth-ready")
-          ? "/home"
-          : redirectTo;
+        // Validate redirect URL to prevent open redirect attacks
+        // Must be a relative path starting with '/' but not '//' (protocol-relative)
+        const isValidRedirect = (url: string): boolean =>
+          url.startsWith("/") && !url.startsWith("//");
+
+        const normalizedRedirectTo =
+          !redirectTo ||
+          !isValidRedirect(redirectTo) ||
+          redirectTo.startsWith("/auth-ready")
+            ? "/home"
+            : redirectTo;
 
         if (normalizedRedirectTo === "/home") {
           navigate({ to: "/home", search: { limit: 20, offset: 0 } });
         } else {
           navigate({ to: normalizedRedirectTo as any });
         }
-      } catch (error_) {
+      } catch {
         setError("Failed to complete authentication. Please try again.");
       }
     }
@@ -147,7 +155,9 @@ export default function AuthReadyPage() {
           </h1>
           <p className="mb-6 text-muted">{error}</p>
           <button
-            onClick={() => navigate({ to: "/login" })}
+            onClick={() =>
+              navigate({ to: "/login", search: { returnTo: undefined } })
+            }
             className="rounded-md bg-primary px-6 py-2 text-white transition-colors hover:bg-primary/90"
           >
             Back to Login
