@@ -84,6 +84,8 @@
     "vite": "^6.4.1",
     "vite-plugin-pwa": "^1.2.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "workbox-core": "^7.4.0",
+    "workbox-precaching": "^7.4.0"
   }
 }
