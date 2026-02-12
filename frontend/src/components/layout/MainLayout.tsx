@@ -12,7 +12,6 @@ const PUBLIC_ROUTES = new Set([
   "/",
   "/login",
   "/register",
-  "/pricing",
   "/terms",
   "/privacy",
   "/reset-password",
@@ -29,21 +28,23 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { isLoaded, isSignedIn } = useAuth();
 
   // Use useMemo for route checking to avoid recreating array each render
-  const isPublicRoute = useMemo(() => 
-    PUBLIC_ROUTES.has(location.pathname),
-    [location.pathname]
+  const isPublicRoute = useMemo(
+    () => PUBLIC_ROUTES.has(location.pathname),
+    [location.pathname],
   );
   const isNoNavRoute = useMemo(
     () => NO_NAV_ROUTES.has(location.pathname),
-    [location.pathname]
+    [location.pathname],
   );
 
   // For Clerk auth, rely on Clerk session state rather than legacy local token storage
-  const shouldFetchUser = isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
+  const shouldFetchUser =
+    isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
 
   // Conditionally use the user query
   useUser({ enabled: shouldFetchUser });
-  const isAuthenticated = isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
+  const isAuthenticated =
+    isLoaded && isSignedIn && !isPublicRoute && !isNoNavRoute;
 
   return (
     <div className="min-h-screen bg-background text-foreground">

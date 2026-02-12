@@ -40,7 +40,8 @@ export default function GoalsPage() {
     hasErrors,
   } = data;
 
-  const safeTargetWeight = currentWeightGoals?.targetWeight ?? user?.weight ?? 0;
+  const safeTargetWeight =
+    currentWeightGoals?.targetWeight ?? user?.weight ?? 0;
 
   const normalizedWeightGoals = useMemo(
     () => normalizeWeightGoals(currentWeightGoals, user?.weight),
@@ -163,7 +164,7 @@ export default function GoalsPage() {
         </AnimatePresence>
         <div className="relative">
           {hasErrors ? (
-            <GoalsErrorState 
+            <GoalsErrorState
               onRetry={handleRetry}
               errorMessage="We couldn't load your goals data. This might be due to a network issue or server problem."
             />
@@ -212,7 +213,6 @@ export default function GoalsPage() {
                 >
                   <div className="space-y-6">
                     {/* Prop expects MacroTargetSettings | null */}
-                    {/* eslint-disable-next-line unicorn/no-null */}
                     <MacroTargetForm macroTarget={macroTarget ?? null} />
                   </div>
                 </motion.div>
