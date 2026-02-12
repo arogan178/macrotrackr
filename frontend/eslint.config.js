@@ -156,7 +156,7 @@ export default [
       "import/no-duplicates": "error",
 
       "unicorn/better-regex": "warn",
-      "unicorn/no-null": "warn",
+      "unicorn/no-null": "off",
       "react/no-unescaped-entities": "off",
 
       // Remove unicorn/filename-case here, handled by overrides above
