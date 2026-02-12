@@ -1,5 +1,5 @@
 import { useClerk } from "@clerk/clerk-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
@@ -7,13 +7,13 @@ import { apiService } from "@/utils/apiServices";
 
 /**
  * SSOCallbackPage - Handles the callback from Clerk OAuth providers
- * 
+ *
  * This page is shown after the user authenticates with Google/Facebook/Apple.
- * 
+ *
  * Important: The Clerk user account is already created at this point (OAuth flow).
  * However, we DON'T create the user in our database yet - that happens only
  * after they complete the profile setup form.
- * 
+ *
  * Flow:
  * 1. User clicks "Sign up with Google" → Clerk creates account, redirects here
  * 2. We extract profile data and store it temporarily
@@ -23,8 +23,13 @@ import { apiService } from "@/utils/apiServices";
 export default function SSOCallbackPage() {
   const { user, session } = useClerk();
   const navigate = useNavigate();
+  const search = useSearch({ from: "/sso-callback" }) as {
+    redirectTo?: string;
+  };
   const [error, setError] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
+
+  const redirectTo = search.redirectTo || "/home";
 
   useEffect(() => {
     async function handleCallback() {
@@ -36,7 +41,7 @@ export default function SSOCallbackPage() {
 
         // Get the Clerk session token
         const token = await session.getToken();
-        
+
         if (!token) {
           setError("Failed to get authentication token");
           setIsProcessing(false);
@@ -62,14 +67,22 @@ export default function SSOCallbackPage() {
         // Store social data temporarily for profile setup
         sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
 
-        // Redirect to auth-ready - AuthReadyPage will set token and then redirect to home
-        navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
+        // Validate redirect URL to prevent open redirect attacks
+        // Must be a relative path starting with '/' but not '//' (protocol-relative)
+        const isValidRedirect = (url: string): boolean =>
+          url.startsWith("/") && !url.startsWith("//");
+
+        const safeRedirectTo =
+          redirectTo && isValidRedirect(redirectTo) ? redirectTo : "/home";
+
+        // Redirect to auth-ready - AuthReadyPage will set token and then redirect
+        navigate({ to: "/auth-ready", search: { redirectTo: safeRedirectTo } });
       } catch (error_) {
         console.error("SSO callback error:", error_);
         setError(
           error_ instanceof Error
             ? error_.message
-            : "Failed to complete sign-in. Please try again."
+            : "Failed to complete sign-in. Please try again.",
         );
         setIsProcessing(false);
       }
@@ -102,7 +115,9 @@ export default function SSOCallbackPage() {
           </h1>
           <p className="mb-6 text-muted">{error}</p>
           <button
-            onClick={() => navigate({ to: "/login" })}
+            onClick={() =>
+              navigate({ to: "/login", search: { returnTo: undefined } })
+            }
             className="rounded-md bg-primary px-6 py-2 text-white transition-colors hover:bg-primary/90"
           >
             Try Again
