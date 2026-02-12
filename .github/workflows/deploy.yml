@@ -5,6 +5,10 @@ on:
     branches: [ master ]
   workflow_dispatch:
 
+concurrency:
+  group: macro-tracker-production-deploy
+  cancel-in-progress: false
+
 jobs:
   deploy-backend:
     runs-on: ubuntu-latest
@@ -75,6 +79,7 @@ jobs:
           echo "Backend deployment finished successfully at $(date)"
 
   deploy-frontend:
+    needs: deploy-backend
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: frontend
@@ -103,6 +108,30 @@ jobs:
         bun run build
         unset NODE_OPTIONS
 
+    - name: Preflight verify built frontend artifacts
+      run: |
+        cd frontend
+        test -f dist/index.html
+        test -f dist/sw.js
+
+        ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' dist/index.html | head -n1 || true)
+        if [ -z "${ENTRY_JS}" ]; then
+          echo "❌ Could not find hashed index bundle in dist/index.html"
+          exit 1
+        fi
+
+        if [ ! -f "dist/${ENTRY_JS}" ]; then
+          echo "❌ dist/index.html references missing bundle: ${ENTRY_JS}"
+          exit 1
+        fi
+
+        grep -q '<div id="root"></div>' dist/index.html || {
+          echo "❌ dist/index.html is missing #root mount node"
+          exit 1
+        }
+
+        echo "✅ Frontend build preflight checks passed"
+
     - name: Deploy frontend to server
       uses: appleboy/ssh-action@v1.0.0
       with:
@@ -111,10 +140,19 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: 22
         script: |
+          set -euo pipefail
+
           cd /var/www/macro-tracker
 
           # Add bun and pm2 to PATH
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
+
+          # Prevent concurrent deploy scripts on the server
+          exec 9>/var/lock/macro-tracker-frontend-deploy.lock
+          if ! flock -n 9; then
+            echo "❌ Another frontend deployment is currently running"
+            exit 1
+          fi
 
           git stash push -m "Automated stash before deployment" --include-untracked || true
           git pull origin master
@@ -126,26 +164,46 @@ jobs:
 
           # Install frontend dependencies
           cd frontend
-          bun install
+          bun install --frozen-lockfile
+
+          # Build frontend into a new directory to avoid serving partial assets
+          BUILD_TIMESTAMP=$(date +%s)
+          NEW_DIST="dist.__new__.${BUILD_TIMESTAMP}"
+          BACKUP_DIST="dist.__backup__.${BUILD_TIMESTAMP}"
+
+          rm -rf "${NEW_DIST}"
+          rm -rf node_modules/.vite/
+          rm -rf .tanstack/
+
+          export NODE_OPTIONS="--max-old-space-size=2048"
+          bunx vite build --outDir "${NEW_DIST}"
+          unset NODE_OPTIONS
+
+          # Validate built assets before swapping
+          test -f "${NEW_DIST}/index.html"
+          test -f "${NEW_DIST}/sw.js"
+
+          ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' "${NEW_DIST}/index.html" | head -n1 || true)
+          if [ -z "${ENTRY_JS}" ]; then
+            echo "❌ Could not find hashed entry bundle in ${NEW_DIST}/index.html"
+            exit 1
+          fi
+          if [ ! -f "${NEW_DIST}/${ENTRY_JS}" ]; then
+            echo "❌ ${NEW_DIST}/index.html references missing bundle: ${ENTRY_JS}"
+            exit 1
+          fi
+
+          # Atomic swap: keep backup for rollback
+          if [ -d dist ]; then
+            mv dist "${BACKUP_DIST}"
+          fi
+          mv "${NEW_DIST}" dist
+
           cd ..
 
-           # Build frontend
-           cd frontend
-           rm -rf dist/
-           rm -rf node_modules/.vite/
-           rm -rf .tanstack/
-           export NODE_OPTIONS="--max-old-space-size=2048"
-           bun run build
-           unset NODE_OPTIONS
-           cd ..
+          echo "Build timestamp: ${BUILD_TIMESTAMP}"
 
-           # Inject cache-busting timestamp into service worker
-           echo "Injecting cache-busting timestamp into service worker..."
-           BUILD_TIMESTAMP=$(date +%s)
-           sed -i "s/const BUILD_TIMESTAMP = .*/const BUILD_TIMESTAMP = ${BUILD_TIMESTAMP};/g" frontend/dist/sw.js 2>/dev/null || echo "const BUILD_TIMESTAMP = ${BUILD_TIMESTAMP};" >> frontend/dist/sw.js
-           echo "Build timestamp: ${BUILD_TIMESTAMP}"
-
-           # Restart frontend
+          # Restart frontend
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
           pm2 reload ecosystem.config.js || {
             echo "PM2 reload failed, attempting restart..."
@@ -155,7 +213,7 @@ jobs:
             }
           }
 
-          # Check if frontend started successfully
+          # Check if frontend process started successfully
           sleep 3
           if pm2 describe macro-frontend > /dev/null; then
             echo "✅ Frontend server started successfully"
@@ -165,4 +223,84 @@ jobs:
             exit 1
           fi
 
+          # Smoke check served HTML and referenced entry asset
+          FRONT_HTML=$(mktemp)
+          if ! curl -fsS http://127.0.0.1:5173/ > "${FRONT_HTML}"; then
+            echo "❌ Frontend smoke check failed (cannot fetch /)"
+            if [ -d "frontend/${BACKUP_DIST}" ]; then
+              rm -rf frontend/dist
+              mv "frontend/${BACKUP_DIST}" frontend/dist
+              pm2 restart macro-frontend || true
+            fi
+            exit 1
+          fi
+
+          if ! grep -q '<div id="root"></div>' "${FRONT_HTML}"; then
+            echo "❌ Frontend smoke check failed (#root missing in served HTML)"
+            if [ -d "frontend/${BACKUP_DIST}" ]; then
+              rm -rf frontend/dist
+              mv "frontend/${BACKUP_DIST}" frontend/dist
+              pm2 restart macro-frontend || true
+            fi
+            exit 1
+          fi
+
+          SERVED_ENTRY=$(grep -oE 'assets/index\.[^"]+\.js' "${FRONT_HTML}" | head -n1 || true)
+          if [ -z "${SERVED_ENTRY}" ] || [ ! -f "frontend/dist/${SERVED_ENTRY}" ]; then
+            echo "❌ Frontend smoke check failed (served HTML references missing entry asset)"
+            if [ -d "frontend/${BACKUP_DIST}" ]; then
+              rm -rf frontend/dist
+              mv "frontend/${BACKUP_DIST}" frontend/dist
+              pm2 restart macro-frontend || true
+            fi
+            exit 1
+          fi
+
+          echo "✅ Frontend smoke checks passed"
+
+          # Cleanup old backups, keep only 3
+          cd frontend
+          ls -1dt dist.__backup__.* 2>/dev/null | tail -n +4 | xargs -r rm -rf
+          cd ..
+
           echo "Frontend deployment finished successfully at $(date)"
+
+    - name: Purge Cloudflare cache (optional)
+      if: ${{ secrets.CLOUDFLARE_API_TOKEN != '' && secrets.CLOUDFLARE_ZONE_ID != '' }}
+      env:
+        CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      run: |
+        set -euo pipefail
+
+        PURGE_PAYLOAD=$(cat <<'JSON'
+        {
+          "files": [
+            "https://macrotrackr.com/",
+            "https://macrotrackr.com/index.html",
+            "https://macrotrackr.com/sw.js",
+            "https://macrotrackr.com/manifest.webmanifest",
+            "https://macrotrackr.com/sitemap.xml"
+          ]
+        }
+        JSON
+        )
+
+        RESPONSE=$(curl -sS -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
+          -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
+          -H "Content-Type: application/json" \
+          --data "${PURGE_PAYLOAD}")
+
+        echo "Cloudflare response: ${RESPONSE}"
+
+        echo "${RESPONSE}" | grep -q '"success":true' || {
+          echo "❌ Cloudflare cache purge failed"
+          exit 1
+        }
+
+        echo "✅ Cloudflare cache purge completed"
+
+    - name: Skip Cloudflare cache purge (secrets not configured)
+      if: ${{ secrets.CLOUDFLARE_API_TOKEN == '' || secrets.CLOUDFLARE_ZONE_ID == '' }}
+      run: |
+        echo "ℹ️ Skipping Cloudflare cache purge. Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID to enable it."
