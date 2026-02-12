@@ -108,43 +108,33 @@ jobs:
         rm -rf dist/
         rm -rf node_modules/.vite/
         rm -rf .tanstack/
-        
+
         # Write frontend .env for build
         printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
-        
+
         export NODE_OPTIONS="--max-old-space-size=4096"
         bun run build
         unset NODE_OPTIONS
 
     - name: Preflight verify built frontend artifacts
       run: |
-        set -x
-        pwd
-        ls -la
-        cd frontend || { echo "Failed to cd frontend"; exit 1; }
-        pwd
-        ls -la
-        echo "Checking for dist/index.html..."
+        cd frontend
+
         if [ ! -f dist/index.html ]; then
           echo "ERROR: dist/index.html not found"
           ls -la dist/ 2>/dev/null || echo "dist/ does not exist"
           exit 1
         fi
-        echo "dist/index.html found"
-        
-        echo "Checking for dist/service-worker.js..."
+
         if [ ! -f dist/service-worker.js ]; then
           echo "ERROR: dist/service-worker.js not found"
           ls -la dist/
           exit 1
         fi
-        echo "dist/service-worker.js found"
 
         ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' dist/index.html | head -n1 || true)
         if [ -z "${ENTRY_JS}" ]; then
           echo "Could not find hashed index bundle in dist/index.html"
-          echo "Contents of dist/index.html:"
-          cat dist/index.html
           exit 1
         fi
 
@@ -183,9 +173,9 @@ jobs:
         port: 22
         script: |
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
-          
+
           cd /var/www/macro-tracker
-          
+
           # Restart frontend
           pm2 reload ecosystem.config.js || {
             echo "PM2 reload failed, attempting restart..."
