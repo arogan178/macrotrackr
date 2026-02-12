@@ -42,7 +42,7 @@ export function ClerkSignInForm({
       await signIn.authenticateWithRedirect({
         strategy,
         redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/home",
+        redirectUrlComplete: "/auth-ready?redirectTo=/home",
       });
     } catch (error) {
       console.error("Social sign-in error:", error);
