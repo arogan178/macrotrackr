@@ -49,7 +49,7 @@ jobs:
           # Write backend .env from GitHub environment secrets
           echo "Writing backend environment variables..."
           printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env
-          echo "Backend environment variables written"
+          echo "✅ Backend environment variables written"
 
           # Install backend dependencies
           cd backend
@@ -70,9 +70,9 @@ jobs:
           # Check if backend started successfully
           sleep 3
           if pm2 describe macro-tracker-api > /dev/null; then
-            echo "Backend API started successfully"
+            echo "✅ Backend API started successfully"
           else
-            echo "Backend API failed to start"
+            echo "❌ Backend API failed to start"
             pm2 logs macro-tracker-api --lines 20 || true
             exit 1
           fi
@@ -108,7 +108,11 @@ jobs:
         rm -rf dist/
         rm -rf node_modules/.vite/
         rm -rf .tanstack/
-        export NODE_OPTIONS="--max-old-space-size=2048"
+        
+        # Write frontend .env for build
+        printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
+        
+        export NODE_OPTIONS="--max-old-space-size=4096"
         bun run build
         unset NODE_OPTIONS
 
@@ -127,7 +131,7 @@ jobs:
           exit 1
         fi
         echo "dist/index.html found"
-
+        
         echo "Checking for dist/service-worker.js..."
         if [ ! -f dist/service-worker.js ]; then
           echo "ERROR: dist/service-worker.js not found"
@@ -156,9 +160,21 @@ jobs:
           exit 1
         }
 
-        echo "Frontend build preflight checks passed"
+        echo "✅ Frontend build preflight checks passed"
 
-    - name: Deploy frontend to server
+    - name: Deploy frontend dist to server
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: root
+        key: ${{ secrets.SERVER_SSH_KEY }}
+        port: 22
+        source: "frontend/dist/"
+        target: "/var/www/macro-tracker/frontend/"
+        strip_components: 1
+        rm: true
+
+    - name: Restart frontend on server
       uses: appleboy/ssh-action@v1.0.0
       with:
         host: ${{ secrets.SERVER_HOST }}
@@ -166,71 +182,9 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: 22
         script: |
-          set -euo pipefail
-
-          cd /var/www/macro-tracker
-
-          # Add bun and pm2 to PATH
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
-
-          # Prevent concurrent deploy scripts on the server
-          exec 9>/var/lock/macro-tracker-frontend-deploy.lock
-          if ! flock -n 9; then
-            echo "Another frontend deployment is currently running"
-            exit 1
-          fi
-
-          git stash push -m "Automated stash before deployment" --include-untracked || true
-          git pull origin master
-
-          # Write frontend .env from GitHub environment secrets
-          echo "Writing frontend environment variables..."
-          printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > frontend/.env
-          echo "Frontend environment variables written"
-
-          # Install frontend dependencies
-          cd frontend
-          bun install --frozen-lockfile
-
-          # Build frontend into a new directory to avoid serving partial assets
-          BUILD_TIMESTAMP=$(date +%s)
-          NEW_DIST="dist.__new__.${BUILD_TIMESTAMP}"
-          BACKUP_DIST="dist.__backup__.${BUILD_TIMESTAMP}"
-
-          rm -rf "${NEW_DIST}"
-          rm -rf node_modules/.vite/
-          rm -rf .tanstack/
-
-          export NODE_OPTIONS="--max-old-space-size=2048"
-          bunx vite build --outDir "${NEW_DIST}"
-          unset NODE_OPTIONS
-
-          # Validate built assets before swapping
-          test -f "${NEW_DIST}/index.html" || { echo "Missing ${NEW_DIST}/index.html"; exit 1; }
-          test -f "${NEW_DIST}/service-worker.js" || { echo "Missing ${NEW_DIST}/service-worker.js"; exit 1; }
-
-          ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' "${NEW_DIST}/index.html" | head -n1 || true)
-          if [ -z "${ENTRY_JS}" ]; then
-            echo "Could not find hashed entry bundle in ${NEW_DIST}/index.html"
-            exit 1
-          fi
-          if [ ! -f "${NEW_DIST}/${ENTRY_JS}" ]; then
-            echo "${NEW_DIST}/index.html references missing bundle: ${ENTRY_JS}"
-            exit 1
-          fi
-
-          # Atomic swap: keep backup for rollback
-          if [ -d dist ]; then
-            mv dist "${BACKUP_DIST}"
-          fi
-          mv "${NEW_DIST}" dist
-
-          cd ..
-
-          echo "Build timestamp: ${BUILD_TIMESTAMP}"
-
+          
           # Restart frontend
-          export PATH=$PATH:/root/.bun/bin:/usr/local/bin
           pm2 reload ecosystem.config.js || {
             echo "PM2 reload failed, attempting restart..."
             pm2 restart ecosystem.config.js || {
@@ -242,52 +196,12 @@ jobs:
           # Check if frontend process started successfully
           sleep 3
           if pm2 describe macro-frontend > /dev/null; then
-            echo "Frontend server started successfully"
+            echo "✅ Frontend server started successfully"
           else
-            echo "Frontend server failed to start"
+            echo "❌ Frontend server failed to start"
             pm2 logs macro-frontend --lines 20 || true
             exit 1
           fi
-
-          # Smoke check served HTML and referenced entry asset
-          FRONT_HTML=$(mktemp)
-          if ! curl -fsS http://127.0.0.1:5173/ > "${FRONT_HTML}"; then
-            echo "Frontend smoke check failed (cannot fetch /)"
-            if [ -d "frontend/${BACKUP_DIST}" ]; then
-              rm -rf frontend/dist
-              mv "frontend/${BACKUP_DIST}" frontend/dist
-              pm2 restart macro-frontend || true
-            fi
-            exit 1
-          fi
-
-          if ! grep -q '<div id="root"></div>' "${FRONT_HTML}"; then
-            echo "Frontend smoke check failed (#root missing in served HTML)"
-            if [ -d "frontend/${BACKUP_DIST}" ]; then
-              rm -rf frontend/dist
-              mv "frontend/${BACKUP_DIST}" frontend/dist
-              pm2 restart macro-frontend || true
-            fi
-            exit 1
-          fi
-
-          SERVED_ENTRY=$(grep -oE 'assets/index\.[^"]+\.js' "${FRONT_HTML}" | head -n1 || true)
-          if [ -z "${SERVED_ENTRY}" ] || [ ! -f "frontend/dist/${SERVED_ENTRY}" ]; then
-            echo "Frontend smoke check failed (served HTML references missing entry asset)"
-            if [ -d "frontend/${BACKUP_DIST}" ]; then
-              rm -rf frontend/dist
-              mv "frontend/${BACKUP_DIST}" frontend/dist
-              pm2 restart macro-frontend || true
-            fi
-            exit 1
-          fi
-
-          echo "Frontend smoke checks passed"
-
-          # Cleanup old backups, keep only 3
-          cd frontend
-          ls -1dt dist.__backup__.* 2>/dev/null | tail -n +4 | xargs -r rm -rf
-          cd ..
 
           echo "Frontend deployment finished successfully at $(date)"
 
@@ -302,7 +216,6 @@ jobs:
             "https://macrotrackr.com/",
             "https://macrotrackr.com/index.html",
             "https://macrotrackr.com/sw.js",
-            "https://macrotrackr.com/service-worker.js",
             "https://macrotrackr.com/manifest.webmanifest",
             "https://macrotrackr.com/sitemap.xml"
           ]
@@ -318,11 +231,11 @@ jobs:
         echo "Cloudflare response: ${RESPONSE}"
 
         echo "${RESPONSE}" | grep -q '"success":true' || {
-          echo "Cloudflare cache purge failed"
+          echo "❌ Cloudflare cache purge failed"
           exit 1
         }
 
-        echo "Cloudflare cache purge completed"
+        echo "✅ Cloudflare cache purge completed"
 
     - name: Skip Cloudflare cache purge (secrets not configured)
       if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ZONE_ID == '' }}
