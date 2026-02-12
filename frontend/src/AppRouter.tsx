@@ -84,7 +84,7 @@ function RequireAuth({ children }: { children: React.ReactNode }) {
   }
 
   if (!isSignedIn) {
-    return <Navigate to="/login" search={{}} />;
+    return <Navigate to="/login" search={{ returnTo: undefined }} />;
   }
 
   return <>{children}</>;
@@ -332,6 +332,9 @@ export const goalsRoute = createRoute({
 const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/login",
+  validateSearch: (search: Record<string, unknown>) => ({
+    returnTo: search.returnTo as string | undefined,
+  }),
   component: () => (
     <RequireUnauth>
       <SignInPage />
@@ -343,6 +346,9 @@ const signInRoute = createRoute({
 const signUpRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/register",
+  validateSearch: (search: Record<string, unknown>) => ({
+    returnTo: search.returnTo as string | undefined,
+  }),
   component: () => (
     <RequireUnauth>
       <SignUpPage />
@@ -371,6 +377,9 @@ const authReadyRoute = createRoute({
 const ssoCallbackRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/sso-callback",
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: search.redirectTo as string | undefined,
+  }),
   component: SSOCallbackPage,
 });
 
