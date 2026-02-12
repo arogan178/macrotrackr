@@ -107,10 +107,6 @@ export default defineConfig(() => {
           globDirectory: "dist",
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
         },
-        devOptions: {
-          enabled: false,
-          type: "module",
-        },
       }),
       tsconfigPaths(),
     ],
