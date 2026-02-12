@@ -128,13 +128,13 @@ jobs:
         fi
         echo "dist/index.html found"
         
-        echo "Checking for dist/sw.js..."
-        if [ ! -f dist/sw.js ]; then
-          echo "ERROR: dist/sw.js not found"
+        echo "Checking for dist/service-worker.js..."
+        if [ ! -f dist/service-worker.js ]; then
+          echo "ERROR: dist/service-worker.js not found"
           ls -la dist/
           exit 1
         fi
-        echo "dist/sw.js found"
+        echo "dist/service-worker.js found"
 
         ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' dist/index.html | head -n1 || true)
         if [ -z "${ENTRY_JS}" ]; then
