@@ -49,7 +49,7 @@ jobs:
           # Write backend .env from GitHub environment secrets
           echo "Writing backend environment variables..."
           printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env
-          echo "✅ Backend environment variables written"
+          echo "Backend environment variables written"
 
           # Install backend dependencies
           cd backend
@@ -70,9 +70,9 @@ jobs:
           # Check if backend started successfully
           sleep 3
           if pm2 describe macro-tracker-api > /dev/null; then
-            echo "✅ Backend API started successfully"
+            echo "Backend API started successfully"
           else
-            echo "❌ Backend API failed to start"
+            echo "Backend API failed to start"
             pm2 logs macro-tracker-api --lines 20 || true
             exit 1
           fi
@@ -114,46 +114,27 @@ jobs:
 
     - name: Preflight verify built frontend artifacts
       run: |
-        echo "Current directory: $(pwd)"
-        ls -la
-
         cd frontend
-        echo "After cd frontend: $(pwd)"
-        ls -la
-
-        echo "Checking dist/index.html..."
-        if [ -f dist/index.html ]; then
-          echo "✅ dist/index.html exists"
-        else
-          echo "❌ dist/index.html NOT FOUND"
-          ls -la dist/ || echo "dist/ directory does not exist"
-          exit 1
-        fi
-
-        if [ -f dist/sw.js ]; then
-          echo "✅ dist/sw.js exists"
-        else
-          echo "❌ dist/sw.js NOT FOUND"
-          exit 1
-        fi
+        test -f dist/index.html
+        test -f dist/sw.js
 
         ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' dist/index.html | head -n1 || true)
         if [ -z "${ENTRY_JS}" ]; then
-          echo "❌ Could not find hashed index bundle in dist/index.html"
+          echo "Could not find hashed index bundle in dist/index.html"
           exit 1
         fi
 
         if [ ! -f "dist/${ENTRY_JS}" ]; then
-          echo "❌ dist/index.html references missing bundle: ${ENTRY_JS}"
+          echo "dist/index.html references missing bundle: ${ENTRY_JS}"
           exit 1
         fi
 
         grep -q '<div id="root"></div>' dist/index.html || {
-          echo "❌ dist/index.html is missing #root mount node"
+          echo "dist/index.html is missing #root mount node"
           exit 1
         }
 
-        echo "✅ Frontend build preflight checks passed"
+        echo "Frontend build preflight checks passed"
 
     - name: Deploy frontend to server
       uses: appleboy/ssh-action@v1.0.0
@@ -173,7 +154,7 @@ jobs:
           # Prevent concurrent deploy scripts on the server
           exec 9>/var/lock/macro-tracker-frontend-deploy.lock
           if ! flock -n 9; then
-            echo "❌ Another frontend deployment is currently running"
+            echo "Another frontend deployment is currently running"
             exit 1
           fi
 
@@ -183,7 +164,7 @@ jobs:
           # Write frontend .env from GitHub environment secrets
           echo "Writing frontend environment variables..."
           printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > frontend/.env
-          echo "✅ Frontend environment variables written"
+          echo "Frontend environment variables written"
 
           # Install frontend dependencies
           cd frontend
@@ -208,11 +189,11 @@ jobs:
 
           ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' "${NEW_DIST}/index.html" | head -n1 || true)
           if [ -z "${ENTRY_JS}" ]; then
-            echo "❌ Could not find hashed entry bundle in ${NEW_DIST}/index.html"
+            echo "Could not find hashed entry bundle in ${NEW_DIST}/index.html"
             exit 1
           fi
           if [ ! -f "${NEW_DIST}/${ENTRY_JS}" ]; then
-            echo "❌ ${NEW_DIST}/index.html references missing bundle: ${ENTRY_JS}"
+            echo "${NEW_DIST}/index.html references missing bundle: ${ENTRY_JS}"
             exit 1
           fi
 
@@ -239,9 +220,9 @@ jobs:
           # Check if frontend process started successfully
           sleep 3
           if pm2 describe macro-frontend > /dev/null; then
-            echo "✅ Frontend server started successfully"
+            echo "Frontend server started successfully"
           else
-            echo "❌ Frontend server failed to start"
+            echo "Frontend server failed to start"
             pm2 logs macro-frontend --lines 20 || true
             exit 1
           fi
@@ -249,7 +230,7 @@ jobs:
           # Smoke check served HTML and referenced entry asset
           FRONT_HTML=$(mktemp)
           if ! curl -fsS http://127.0.0.1:5173/ > "${FRONT_HTML}"; then
-            echo "❌ Frontend smoke check failed (cannot fetch /)"
+            echo "Frontend smoke check failed (cannot fetch /)"
             if [ -d "frontend/${BACKUP_DIST}" ]; then
               rm -rf frontend/dist
               mv "frontend/${BACKUP_DIST}" frontend/dist
@@ -259,7 +240,7 @@ jobs:
           fi
 
           if ! grep -q '<div id="root"></div>' "${FRONT_HTML}"; then
-            echo "❌ Frontend smoke check failed (#root missing in served HTML)"
+            echo "Frontend smoke check failed (#root missing in served HTML)"
             if [ -d "frontend/${BACKUP_DIST}" ]; then
               rm -rf frontend/dist
               mv "frontend/${BACKUP_DIST}" frontend/dist
@@ -270,7 +251,7 @@ jobs:
 
           SERVED_ENTRY=$(grep -oE 'assets/index\.[^"]+\.js' "${FRONT_HTML}" | head -n1 || true)
           if [ -z "${SERVED_ENTRY}" ] || [ ! -f "frontend/dist/${SERVED_ENTRY}" ]; then
-            echo "❌ Frontend smoke check failed (served HTML references missing entry asset)"
+            echo "Frontend smoke check failed (served HTML references missing entry asset)"
             if [ -d "frontend/${BACKUP_DIST}" ]; then
               rm -rf frontend/dist
               mv "frontend/${BACKUP_DIST}" frontend/dist
@@ -279,7 +260,7 @@ jobs:
             exit 1
           fi
 
-          echo "✅ Frontend smoke checks passed"
+          echo "Frontend smoke checks passed"
 
           # Cleanup old backups, keep only 3
           cd frontend
@@ -314,11 +295,11 @@ jobs:
         echo "Cloudflare response: ${RESPONSE}"
 
         echo "${RESPONSE}" | grep -q '"success":true' || {
-          echo "❌ Cloudflare cache purge failed"
+          echo "Cloudflare cache purge failed"
           exit 1
         }
 
-        echo "✅ Cloudflare cache purge completed"
+        echo "Cloudflare cache purge completed"
 
     - name: Skip Cloudflare cache purge (secrets not configured)
       if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ZONE_ID == '' }}
