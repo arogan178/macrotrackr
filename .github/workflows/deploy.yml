@@ -206,8 +206,8 @@ jobs:
           unset NODE_OPTIONS
 
           # Validate built assets before swapping
-          test -f "${NEW_DIST}/index.html"
-          test -f "${NEW_DIST}/service-worker.js"
+          test -f "${NEW_DIST}/index.html" || { echo "Missing ${NEW_DIST}/index.html"; exit 1; }
+          test -f "${NEW_DIST}/service-worker.js" || { echo "Missing ${NEW_DIST}/service-worker.js"; exit 1; }
 
           ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' "${NEW_DIST}/index.html" | head -n1 || true)
           if [ -z "${ENTRY_JS}" ]; then
