@@ -1,11 +1,11 @@
 import { useAuth, useSession } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, setAuthToken } from "@/utils/apiServices";
+import { apiService, ApiError, setAuthToken } from "@/utils/apiServices";
 
 /**
  * AuthReadyPage - Intermediate page that ensures auth token is set before redirecting
@@ -23,16 +23,23 @@ export default function AuthReadyPage() {
   const { isLoaded, isSignedIn } = useAuth();
   const { session } = useSession();
   const [error, setError] = useState<string | null>(null);
+  const hasInitializedRef = useRef(false);
 
   const redirectTo = search.redirectTo || "/home";
 
   useEffect(() => {
     async function setupAuth() {
       try {
+        if (hasInitializedRef.current) {
+          return;
+        }
+
         // Wait for Clerk to be fully loaded
         if (!isLoaded) {
           return;
         }
+
+        hasInitializedRef.current = true;
 
         // If not signed in, redirect to login
         if (!isSignedIn) {
@@ -46,37 +53,20 @@ export default function AuthReadyPage() {
           token = await session.getToken();
           if (token) {
             setAuthToken(token);
-            console.log("[AuthReadyPage] Token set successfully");
-          } else {
-            console.warn("[AuthReadyPage] No token available from session");
           }
         }
 
         // Give a small moment for the token to be set
         await new Promise(resolve => setTimeout(resolve, 50));
 
-        // Sync the Clerk user with our backend
-        // This ensures the user exists in our database even if they logged in
-        // (not just signed up) and haven't completed profile setup yet
-        console.log("[AuthReadyPage] Syncing user with backend...");
+        // Sync the Clerk user with our backend.
         let syncSuccess = false;
         try {
-          const syncedUser = await apiService.auth.syncUser(token || undefined);
-          console.log("[AuthReadyPage] User synced successfully:", syncedUser);
+          await apiService.auth.syncUser(token || undefined);
           syncSuccess = true;
         } catch (syncError: any) {
-          // Log the error but don't block navigation
-          // The user will be redirected to profile setup if needed
-          console.error("[AuthReadyPage] User sync failed:", {
-            status: syncError?.status,
-            message: syncError?.message,
-            code: syncError?.code,
-          });
-          
-          // If it's a 401, the token might be invalid - force a logout
+          // If it's a 401, the token might be invalid.
           if (syncError?.status === 401) {
-            console.error("[AuthReadyPage] Authentication failed during sync - redirecting to login");
-            // Show error and don't navigate
             setError("Authentication failed. Please sign in again.");
             return;
           }
@@ -85,19 +75,48 @@ export default function AuthReadyPage() {
         // Small delay after successful sync to ensure DB is updated
         if (syncSuccess) {
           await new Promise(resolve => setTimeout(resolve, 100));
-          // Invalidate user query to force refetch with new synced data
           queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
-          console.log("[AuthReadyPage] Invalidated user query");
         }
 
-        // Navigate to the target route
-        if (redirectTo === "/home") {
+        // Resolve backend user details before leaving auth-ready.
+        // This avoids bouncing to protected routes while /api/user/me still returns 401.
+        let userDetails = null;
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          try {
+            userDetails = await apiService.user.getUserDetails();
+            break;
+          } catch (userError) {
+            if (userError instanceof ApiError && userError.status === 401) {
+              await new Promise(resolve => setTimeout(resolve, 120));
+              continue;
+            }
+            throw userError;
+          }
+        }
+
+        if (!userDetails) {
+          setError("Authentication is not ready yet. Please sign in again.");
+          return;
+        }
+
+        queryClient.setQueryData(queryKeys.auth.user(), userDetails);
+
+        // Route by profile completion first.
+        if (!userDetails.isProfileComplete) {
+          navigate({ to: "/profile-setup" });
+          return;
+        }
+
+        const normalizedRedirectTo = redirectTo.startsWith("/auth-ready")
+          ? "/home"
+          : redirectTo;
+
+        if (normalizedRedirectTo === "/home") {
           navigate({ to: "/home", search: { limit: 20, offset: 0 } });
         } else {
-          navigate({ to: redirectTo as any });
+          navigate({ to: normalizedRedirectTo as any });
         }
       } catch (error_) {
-        console.error("[AuthReadyPage] Error setting up auth:", error_);
         setError("Failed to complete authentication. Please try again.");
       }
     }
