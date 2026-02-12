@@ -39,7 +39,7 @@ export async function registerServiceWorker() {
       if (event.data && event.data.type === "SW_ACTIVATED") {
         console.log("[SW] Service Worker activated - reloading page for fresh content");
         // Reload the page to get fresh content
-        window.location.reload();
+        globalThis.location.reload();
       }
     });
 
