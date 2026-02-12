@@ -1,5 +1,5 @@
 import { useSignIn } from "@clerk/clerk-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import CardContainer from "@/components/form/CardContainer";
 import TextField from "@/components/form/TextField";
@@ -16,7 +16,9 @@ interface LoginFormProps {
 
 function FormLogin({ onForgotPassword }: LoginFormProps) {
   const navigate = useNavigate();
+  const search = useSearch({ from: "/login" }) as { returnTo?: string };
   const { isLoaded, signIn } = useSignIn();
+  const redirectTo = search.returnTo || "/home";
   const {
     loginEmail,
     loginPassword,
@@ -70,8 +72,8 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
     try {
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/home",
+        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(redirectTo)}`,
       });
     } catch (error) {
       console.error("Social sign-in error:", error);

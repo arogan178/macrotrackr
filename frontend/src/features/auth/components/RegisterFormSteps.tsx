@@ -1,4 +1,5 @@
 import { useSignUp } from "@clerk/clerk-react";
+import { useSearch } from "@tanstack/react-router";
 import { useCallback } from "react";
 
 import {
@@ -33,9 +34,11 @@ const StepFormWrapper = ({ children }: { children: React.ReactNode }) => (
 // Step One Component - Account Information
 export function StepOne() {
   const { isLoaded, signUp } = useSignUp();
+  const search = useSearch({ from: "/register" }) as { returnTo?: string };
   const { register, setRegisterField, setRegisterStep, showNotification } =
     useStore();
   const { validateStep, isValidating } = useRegistrationProcess();
+  const redirectTo = search.returnTo || "/home";
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
@@ -61,8 +64,8 @@ export function StepOne() {
     try {
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/home",
+        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(redirectTo)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(redirectTo)}`,
       });
     } catch (error) {
       console.error("Social sign-up error:", error);
