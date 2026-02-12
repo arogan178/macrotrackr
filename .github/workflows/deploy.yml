@@ -114,18 +114,40 @@ jobs:
 
     - name: Preflight verify built frontend artifacts
       run: |
-        cd frontend
-        test -f dist/index.html
-        test -f dist/sw.js
+        set -x
+        pwd
+        ls -la
+        cd frontend || { echo "Failed to cd frontend"; exit 1; }
+        pwd
+        ls -la
+        echo "Checking for dist/index.html..."
+        if [ ! -f dist/index.html ]; then
+          echo "ERROR: dist/index.html not found"
+          ls -la dist/ 2>/dev/null || echo "dist/ does not exist"
+          exit 1
+        fi
+        echo "dist/index.html found"
+        
+        echo "Checking for dist/sw.js..."
+        if [ ! -f dist/sw.js ]; then
+          echo "ERROR: dist/sw.js not found"
+          ls -la dist/
+          exit 1
+        fi
+        echo "dist/sw.js found"
 
         ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' dist/index.html | head -n1 || true)
         if [ -z "${ENTRY_JS}" ]; then
           echo "Could not find hashed index bundle in dist/index.html"
+          echo "Contents of dist/index.html:"
+          cat dist/index.html
           exit 1
         fi
 
         if [ ! -f "dist/${ENTRY_JS}" ]; then
           echo "dist/index.html references missing bundle: ${ENTRY_JS}"
+          echo "Files in dist/assets/:"
+          ls -la dist/assets/
           exit 1
         fi
 
