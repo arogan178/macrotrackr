@@ -83,4 +83,6 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
   </React.StrictMode>,
 );
 
-registerServiceWorker();
+// Temporarily disable service worker to debug QueryClient issue
+// registerServiceWorker();
+console.log("[DEBUG] Service worker registration disabled for debugging");
