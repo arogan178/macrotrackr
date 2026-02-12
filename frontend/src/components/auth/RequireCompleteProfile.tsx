@@ -40,7 +40,7 @@ export function RequireCompleteProfile({
 
   // If not signed in, RequireAuth should handle this, but double-check
   if (!isSignedIn) {
-    return <Navigate to="/login" search={{}} />;
+    return <Navigate to="/login" search={{ returnTo: undefined }} />;
   }
 
   // If user is null, Clerk says we're signed in but backend auth isn't ready yet
