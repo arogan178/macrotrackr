@@ -4,7 +4,21 @@ export async function registerServiceWorker() {
   if (!("serviceWorker" in navigator)) return;
 
   try {
-    const registration = await navigator.serviceWorker.register("/sw.js");
+    let registration: ServiceWorkerRegistration | null = null;
+
+    // Prefer current VitePWA output name; keep legacy fallback for compatibility.
+    for (const swPath of ["/service-worker.js", "/sw.js"]) {
+      try {
+        registration = await navigator.serviceWorker.register(swPath);
+        break;
+      } catch {
+        // Try next candidate.
+      }
+    }
+
+    if (!registration) {
+      throw new Error("No service worker script found at /service-worker.js or /sw.js");
+    }
 
     // Listen for updates
     registration.addEventListener("updatefound", () => {
