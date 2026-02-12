@@ -45,7 +45,7 @@ export function RequireCompleteProfile({ children }: RequireCompleteProfileProps
   // (usually token sync race). Route through auth-ready to establish session
   // and sync backend user before trying protected pages again.
   if (user === null) {
-    const redirectTo = `${location.pathname}${location.searchStr || ""}`;
+    const redirectTo = location.pathname || "/home";
     return <Navigate to="/auth-ready" search={{ redirectTo }} />;
   }
 
