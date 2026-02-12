@@ -184,6 +184,8 @@ jobs:
         script: |
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
           
+          cd /var/www/macro-tracker
+          
           # Restart frontend
           pm2 reload ecosystem.config.js || {
             echo "PM2 reload failed, attempting restart..."
