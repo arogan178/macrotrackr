@@ -97,24 +97,19 @@ export default defineConfig(() => {
           lang: "en",
           orientation: "portrait-primary",
         },
-        workbox: {
-          cleanupOutdatedCaches: true,
-          clientsClaim: true,
-          skipWaiting: true,
+        // Use custom service worker for better cache control
+        srcDir: "src",
+        filename: "service-worker.ts",
+        strategies: "injectManifest",
+        injectManifest: {
+          injectionPoint: "self.__WB_MANIFEST",
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-          runtimeCaching: [
-            {
-              urlPattern: /^https:\/\/api\./,
-              handler: "NetworkFirst",
-              options: {
-                cacheName: "api-cache",
-                expiration: {
-                  maxEntries: 100,
-                  maxAgeSeconds: 300, // 5 minutes
-                },
-              },
-            },
-          ],
+          globDirectory: "dist",
+          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+        },
+        devOptions: {
+          enabled: false,
+          type: "module",
         },
       }),
       tsconfigPaths(),
