@@ -28,7 +28,9 @@ export async function registerServiceWorker() {
       newWorker.addEventListener("statechange", () => {
         if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
           // New service worker is installed but waiting
-          console.log("[SW] New version available, skipping waiting...");
+          if (import.meta.env.DEV) {
+            console.log("[SW] New version available, skipping waiting...");
+          }
           newWorker.postMessage({ type: "SKIP_WAITING" });
         }
       });
@@ -37,7 +39,9 @@ export async function registerServiceWorker() {
     // Listen for messages from service worker
     navigator.serviceWorker.addEventListener("message", (event) => {
       if (event.data && event.data.type === "SW_ACTIVATED") {
-        console.log("[SW] Service Worker activated - reloading page for fresh content");
+        if (import.meta.env.DEV) {
+          console.log("[SW] Service Worker activated - reloading page for fresh content");
+        }
         // Reload the page to get fresh content
         globalThis.location.reload();
       }
@@ -48,8 +52,8 @@ export async function registerServiceWorker() {
       registration.update();
     }, 60 * 60 * 1000); // Check every hour
 
-    console.log("[SW] Service Worker registered successfully");
+    if (import.meta.env.DEV) console.log("[SW] Service Worker registered successfully");
   } catch (error) {
-    console.error("[SW] Service Worker registration failed:", error);
+    if (import.meta.env.DEV) console.error("[SW] Service Worker registration failed:", error);
   }
 }
