@@ -15,11 +15,13 @@ import { useStore } from "@/store/store";
 interface ClerkSignInFormProps {
   onSwitchToSignUp: () => void;
   onForgotPassword: () => void;
+  redirectTo?: string;
 }
 
 export function ClerkSignInForm({
   onSwitchToSignUp,
   onForgotPassword,
+  redirectTo,
 }: ClerkSignInFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signIn, setActive } = useSignIn();
@@ -39,10 +41,11 @@ export function ClerkSignInForm({
     }
 
     try {
+      const destination = redirectTo || "/home";
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: "/sso-callback",
-        redirectUrlComplete: "/auth-ready?redirectTo=/home",
+        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(destination)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(destination)}`,
       });
     } catch (error) {
       console.error("Social sign-in error:", error);
@@ -103,7 +106,7 @@ export function ClerkSignInForm({
       switch (result.status) {
         case "complete": {
           // Sign-in complete, set session and redirect to auth-ready
-          // AuthReadyPage will set the token and then redirect to home
+          // AuthReadyPage will set the token and then redirect to the intended destination
           console.log(
             "[ClerkSignInForm] Sign-in complete, setting active session",
           );
@@ -119,7 +122,7 @@ export function ClerkSignInForm({
           }
           await setActive({ session: result.createdSessionId });
           showNotification("Signed in successfully!", "success");
-          navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
+          navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
 
           break;
         }
