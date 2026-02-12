@@ -114,9 +114,28 @@ jobs:
 
     - name: Preflight verify built frontend artifacts
       run: |
+        echo "Current directory: $(pwd)"
+        ls -la
+
         cd frontend
-        test -f dist/index.html
-        test -f dist/sw.js
+        echo "After cd frontend: $(pwd)"
+        ls -la
+
+        echo "Checking dist/index.html..."
+        if [ -f dist/index.html ]; then
+          echo "✅ dist/index.html exists"
+        else
+          echo "❌ dist/index.html NOT FOUND"
+          ls -la dist/ || echo "dist/ directory does not exist"
+          exit 1
+        fi
+
+        if [ -f dist/sw.js ]; then
+          echo "✅ dist/sw.js exists"
+        else
+          echo "❌ dist/sw.js NOT FOUND"
+          exit 1
+        fi
 
         ENTRY_JS=$(grep -oE 'assets/index\.[^"]+\.js' dist/index.html | head -n1 || true)
         if [ -z "${ENTRY_JS}" ]; then
