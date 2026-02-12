@@ -25,6 +25,18 @@ if (!clerkPublishableKey) {
 
 function AppContent({ includePostHogSync }: { includePostHogSync: boolean }) {
   return (
+    <>
+      {includePostHogSync && <PostHogUserSync />}
+      <AppRouter />
+      {import.meta.env.MODE === "development" && (
+        <ReactQueryDevtools initialIsOpen={false} />
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.querySelector("#root")!).render(
+  <React.StrictMode>
     <PersistQueryClientProvider
       client={queryClient}
       persistOptions={{
@@ -43,40 +55,30 @@ function AppContent({ includePostHogSync }: { includePostHogSync: boolean }) {
         buster: "macro-tracker-v1",
       }}
     >
-      {includePostHogSync && <PostHogUserSync />}
-      <AppRouter />
-      {import.meta.env.MODE === "development" && (
-        <ReactQueryDevtools initialIsOpen={false} />
-      )}
+      <ClerkProvider
+        publishableKey={clerkPublishableKey}
+        afterSignOutUrl="/"
+        signInFallbackRedirectUrl="/home"
+        signUpFallbackRedirectUrl="/home"
+      >
+        <ClerkTokenSync />
+        {shouldEnablePostHog ? (
+          <PostHogProvider
+            apiKey={posthogApiKey}
+            options={{
+              api_host: posthogHost,
+              defaults: "2025-05-24",
+              capture_exceptions: true,
+              debug: import.meta.env.MODE === "development",
+            }}
+          >
+            <AppContent includePostHogSync={true} />
+          </PostHogProvider>
+        ) : (
+          <AppContent includePostHogSync={false} />
+        )}
+      </ClerkProvider>
     </PersistQueryClientProvider>
-  );
-}
-
-ReactDOM.createRoot(document.querySelector("#root")!).render(
-  <React.StrictMode>
-    <ClerkProvider
-      publishableKey={clerkPublishableKey}
-      afterSignOutUrl="/"
-      signInFallbackRedirectUrl="/home"
-      signUpFallbackRedirectUrl="/home"
-    >
-      <ClerkTokenSync />
-      {shouldEnablePostHog ? (
-        <PostHogProvider
-          apiKey={posthogApiKey}
-          options={{
-            api_host: posthogHost,
-            defaults: "2025-05-24",
-            capture_exceptions: true,
-            debug: import.meta.env.MODE === "development",
-          }}
-        >
-          <AppContent includePostHogSync={true} />
-        </PostHogProvider>
-      ) : (
-        <AppContent includePostHogSync={false} />
-      )}
-    </ClerkProvider>
   </React.StrictMode>,
 );
 
