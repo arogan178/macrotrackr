@@ -1,11 +1,41 @@
-// Register the service worker in production builds to ensure PWA updates are managed.
-// This file is safe to import conditionally and won't run in dev.
+// Register the service worker in production builds with automatic updates
 export async function registerServiceWorker() {
   if (import.meta.env.MODE !== "production") return;
   if (!("serviceWorker" in navigator)) return;
+
   try {
-    await navigator.serviceWorker.register("/sw.js");
-  } catch {
-    // ignore registration errors; app still works without SW
+    const registration = await navigator.serviceWorker.register("/sw.js");
+
+    // Listen for updates
+    registration.addEventListener("updatefound", () => {
+      const newWorker = registration.installing;
+      if (!newWorker) return;
+
+      newWorker.addEventListener("statechange", () => {
+        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
+          // New service worker is installed but waiting
+          console.log("[SW] New version available, skipping waiting...");
+          newWorker.postMessage({ type: "SKIP_WAITING" });
+        }
+      });
+    });
+
+    // Listen for messages from service worker
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      if (event.data && event.data.type === "SW_ACTIVATED") {
+        console.log("[SW] Service Worker activated - reloading page for fresh content");
+        // Reload the page to get fresh content
+        window.location.reload();
+      }
+    });
+
+    // Check for updates periodically
+    setInterval(() => {
+      registration.update();
+    }, 60 * 60 * 1000); // Check every hour
+
+    console.log("[SW] Service Worker registered successfully");
+  } catch (error) {
+    console.error("[SW] Service Worker registration failed:", error);
   }
 }

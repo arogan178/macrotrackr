@@ -129,17 +129,23 @@ jobs:
           bun install
           cd ..
 
-          # Build frontend
-          cd frontend
-          rm -rf dist/
-          rm -rf node_modules/.vite/
-          rm -rf .tanstack/
-          export NODE_OPTIONS="--max-old-space-size=2048"
-          bun run build
-          unset NODE_OPTIONS
-          cd ..
+           # Build frontend
+           cd frontend
+           rm -rf dist/
+           rm -rf node_modules/.vite/
+           rm -rf .tanstack/
+           export NODE_OPTIONS="--max-old-space-size=2048"
+           bun run build
+           unset NODE_OPTIONS
+           cd ..
 
-          # Restart frontend
+           # Inject cache-busting timestamp into service worker
+           echo "Injecting cache-busting timestamp into service worker..."
+           BUILD_TIMESTAMP=$(date +%s)
+           sed -i "s/const BUILD_TIMESTAMP = .*/const BUILD_TIMESTAMP = ${BUILD_TIMESTAMP};/g" frontend/dist/sw.js 2>/dev/null || echo "const BUILD_TIMESTAMP = ${BUILD_TIMESTAMP};" >> frontend/dist/sw.js
+           echo "Build timestamp: ${BUILD_TIMESTAMP}"
+
+           # Restart frontend
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
           pm2 reload ecosystem.config.js || {
             echo "PM2 reload failed, attempting restart..."
