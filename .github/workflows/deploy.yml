@@ -127,7 +127,7 @@ jobs:
           exit 1
         fi
         echo "dist/index.html found"
-        
+
         echo "Checking for dist/service-worker.js..."
         if [ ! -f dist/service-worker.js ]; then
           echo "ERROR: dist/service-worker.js not found"
@@ -302,6 +302,7 @@ jobs:
             "https://macrotrackr.com/",
             "https://macrotrackr.com/index.html",
             "https://macrotrackr.com/sw.js",
+            "https://macrotrackr.com/service-worker.js",
             "https://macrotrackr.com/manifest.webmanifest",
             "https://macrotrackr.com/sitemap.xml"
           ]
