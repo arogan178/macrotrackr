@@ -23,7 +23,7 @@ function TopLoadingBar() {
   }, []);
 
   // Returning null is conventional in React for non-render; disable unicorn/no-null for this line.
-  // eslint-disable-next-line unicorn/no-null
+   
   if (!visible) return null;
 
   return (
