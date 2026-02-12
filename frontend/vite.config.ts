@@ -102,7 +102,7 @@ export default defineConfig(() => {
         filename: "service-worker.ts",
         strategies: "injectManifest",
         injectManifest: {
-          injectionPoint: "self.__WB_MANIFEST",
+          injectionPoint: "globalThis.__WB_MANIFEST",
           globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
           // globDirectory removed - vite-plugin-pwa uses build.outDir automatically
           maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
