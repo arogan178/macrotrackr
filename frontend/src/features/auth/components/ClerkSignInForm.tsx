@@ -65,10 +65,12 @@ export function ClerkSignInForm({
     // Check if there's an existing sign-in state that needs to be cleared
     // This can happen when password was changed in Clerk
     console.log("[ClerkSignInForm] Current sign-in status:", signIn.status);
-    
+
     // If there's a previous sign-in attempt in progress, we should handle it
     if (signIn.status && signIn.status !== "needs_identifier") {
-      console.log("[ClerkSignInForm] Existing sign-in state detected, creating fresh attempt");
+      console.log(
+        "[ClerkSignInForm] Existing sign-in state detected, creating fresh attempt",
+      );
     }
 
     console.log("[ClerkSignInForm] Starting sign-in attempt");
@@ -82,116 +84,156 @@ export function ClerkSignInForm({
         password,
       });
 
-      console.log("[ClerkSignInForm] Sign-in result:", { 
-        status: result.status, 
+      console.log("[ClerkSignInForm] Sign-in result:", {
+        status: result.status,
         hasSessionId: !!result.createdSessionId,
         sessionId: result.createdSessionId,
         userData: result.userData,
         identifier: result.identifier,
-        supportedFirstFactors: result.supportedFirstFactors?.map((f: any) => f.strategy),
-        supportedSecondFactors: result.supportedSecondFactors?.map((f: any) => f.strategy),
+        supportedFirstFactors: result.supportedFirstFactors?.map(
+          (f: any) => f.strategy,
+        ),
+        supportedSecondFactors: result.supportedSecondFactors?.map(
+          (f: any) => f.strategy,
+        ),
         firstFactorVerification: result.firstFactorVerification,
-        secondFactorVerification: result.secondFactorVerification
+        secondFactorVerification: result.secondFactorVerification,
       });
 
       switch (result.status) {
-      case "complete": {
-        // Sign-in complete, set session and redirect to auth-ready
-        // AuthReadyPage will set the token and then redirect to home
-        console.log("[ClerkSignInForm] Sign-in complete, setting active session");
-        if (!result.createdSessionId) {
-          console.error("[ClerkSignInForm] No session ID available despite complete status");
-          showNotification("Sign-in completed but session could not be created. Please try again.", "error");
-          return;
+        case "complete": {
+          // Sign-in complete, set session and redirect to auth-ready
+          // AuthReadyPage will set the token and then redirect to home
+          console.log(
+            "[ClerkSignInForm] Sign-in complete, setting active session",
+          );
+          if (!result.createdSessionId) {
+            console.error(
+              "[ClerkSignInForm] No session ID available despite complete status",
+            );
+            showNotification(
+              "Sign-in completed but session could not be created. Please try again.",
+              "error",
+            );
+            return;
+          }
+          await setActive({ session: result.createdSessionId });
+          showNotification("Signed in successfully!", "success");
+          navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
+
+          break;
         }
-        await setActive({ session: result.createdSessionId });
-        showNotification("Signed in successfully!", "success");
-        navigate({ to: "/auth-ready", search: { redirectTo: "/home" } });
-      
-      break;
-      }
-      case "needs_first_factor": {
-        // Handle cases like email verification or password reset needed
-        console.log("[ClerkSignInForm] Needs first factor, checking requirements...");
-        const supportedStrategies = result.supportedFirstFactors?.map((f: any) => f.strategy);
-        console.log("[ClerkSignInForm] Supported strategies:", supportedStrategies);
-        
-        if (supportedStrategies?.includes("reset_password_email_code")) {
-          showNotification("Your password needs to be reset. Please check your email for reset instructions.", "info");
+        case "needs_first_factor": {
+          // Handle cases like email verification or password reset needed
+          console.log(
+            "[ClerkSignInForm] Needs first factor, checking requirements...",
+          );
+          const supportedStrategies = result.supportedFirstFactors?.map(
+            (f: any) => f.strategy,
+          );
+          console.log(
+            "[ClerkSignInForm] Supported strategies:",
+            supportedStrategies,
+          );
+
+          if (supportedStrategies?.includes("reset_password_email_code")) {
+            showNotification(
+              "Your password needs to be reset. Please check your email for reset instructions.",
+              "info",
+            );
+            onForgotPassword();
+          } else if (supportedStrategies?.includes("email_code")) {
+            showNotification(
+              "Please check your email for the verification code.",
+              "info",
+            );
+          } else {
+            showNotification(
+              "Please complete the verification process.",
+              "info",
+            );
+          }
+
+          break;
+        }
+        case "needs_new_password": {
+          // Password was changed or expired
+          console.log("[ClerkSignInForm] Needs new password");
+          showNotification(
+            "Your password has been changed. Please check your email or reset your password.",
+            "info",
+          );
+          // Redirect to forgot password page
           onForgotPassword();
-        } else if (supportedStrategies?.includes("email_code")) {
-          showNotification("Please check your email for the verification code.", "info");
-        } else {
-          showNotification("Please complete the verification process.", "info");
+
+          break;
         }
-      
-      break;
-      }
-      case "needs_new_password": {
-        // Password was changed or expired
-        console.log("[ClerkSignInForm] Needs new password");
-        showNotification("Your password has been changed. Please check your email or reset your password.", "info");
-        // Redirect to forgot password page
-        onForgotPassword();
-      
-      break;
-      }
-      case "needs_second_factor": {
-        // 2FA required
-        console.log("[ClerkSignInForm] Needs second factor (2FA)");
-        showNotification("Two-factor authentication required.", "info");
-      
-      break;
-      }
-      default: {
-        // Handle any other status
-        console.warn("[ClerkSignInForm] Unhandled sign-in status:", result.status);
-        showNotification(`Sign-in status: ${result.status}. Please try again or contact support.`, "warning");
-      }
+        case "needs_second_factor": {
+          // 2FA required
+          console.log("[ClerkSignInForm] Needs second factor (2FA)");
+          showNotification("Two-factor authentication required.", "info");
+
+          break;
+        }
+        default: {
+          // Handle any other status
+          console.warn(
+            "[ClerkSignInForm] Unhandled sign-in status:",
+            result.status,
+          );
+          showNotification(
+            `Sign-in status: ${result.status}. Please try again or contact support.`,
+            "warning",
+          );
+        }
       }
     } catch (error) {
       console.error("[ClerkSignInForm] Sign-in error:", error);
-      
+
       // Handle Clerk-specific error structures
       let errorMessage = "Invalid email or password";
-      
-      if (error && typeof error === 'object') {
+
+      if (error && typeof error === "object") {
         const clerkError = error as any;
         console.error("[ClerkSignInForm] Error details:", {
           message: clerkError.message,
           status: clerkError.status,
           errors: clerkError.errors,
         });
-        
+
         // Check for specific Clerk error codes
         if (clerkError.errors && Array.isArray(clerkError.errors)) {
           const firstError = clerkError.errors[0];
           switch (firstError?.code) {
-          case "form_password_incorrect": {
-            errorMessage = "Incorrect password. If you recently changed your password, please use the new password.";
-          
-          break;
-          }
-          case "form_identifier_not_found": {
-            errorMessage = "Email not found. Please check your email or sign up.";
-          
-          break;
-          }
-          case "session_exists": {
-            errorMessage = "You already have an active session. Please sign out and try again.";
-          
-          break;
-          }
-          default: { if (firstError?.message) {
-            errorMessage = firstError.message;
-          }
-          }
+            case "form_password_incorrect": {
+              errorMessage =
+                "Incorrect password. If you recently changed your password, please use the new password.";
+
+              break;
+            }
+            case "form_identifier_not_found": {
+              errorMessage =
+                "Email not found. Please check your email or sign up.";
+
+              break;
+            }
+            case "session_exists": {
+              errorMessage =
+                "You already have an active session. Please sign out and try again.";
+
+              break;
+            }
+            default: {
+              if (firstError?.message) {
+                errorMessage = firstError.message;
+              }
+            }
           }
         } else if (clerkError.message) {
           errorMessage = clerkError.message;
         }
       }
-      
+
       showNotification(errorMessage, "error");
     } finally {
       setIsLoading(false);
