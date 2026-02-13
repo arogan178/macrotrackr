@@ -24,6 +24,7 @@ import {
   Dumbbell,
   Edit,
   ExternalLink,
+  Link,
   Eye,
   EyeOff,
   Flame,
@@ -172,6 +173,7 @@ export const LightningIcon = createIcon(Zap);
 export const ClipboardIcon = createIcon(Clipboard);
 export const NutrientIcon = createIcon(Apple);
 export const ProteinIcon = createIcon(Beef);
+export const LinkIcon = createIcon(Link);
 export const ExternalLinkIcon = createIcon(ExternalLink);
 export const ShieldCheckIcon = createIcon(ShieldCheck);
 
