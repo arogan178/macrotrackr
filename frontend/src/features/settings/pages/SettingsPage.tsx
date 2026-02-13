@@ -1,3 +1,4 @@
+import { useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -5,6 +6,7 @@ import { DashboardPageContainer } from "@/components/layout/DashboardPageContain
 import FeaturePage from "@/components/layout/FeaturePage";
 import {
   AwardIcon,
+  LinkIcon,
   LockIcon,
   Modal,
   TabButton,
@@ -13,6 +15,7 @@ import {
 import {
   BillingForm,
   ChangePasswordForm,
+  ConnectedAccountsForm,
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
@@ -21,7 +24,15 @@ import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 
+type TabType = "profile" | "billing" | "accounts" | "security";
+
+// Valid tab values for validation
+const VALID_TABS: TabType[] = ["profile", "billing", "accounts", "security"];
+
 export default function SettingsPage() {
+  // Read tab from URL search params
+  const search = useSearch({ from: "/settings" }) as { tab?: string };
+  
   // Use TanStack Query for settings data and mutations
   const {
     data: settingsData,
@@ -57,12 +68,31 @@ export default function SettingsPage() {
   // Centralize subscription status hydration
   usePageDataSync();
 
-  type TabType = "profile" | "billing" | "security";
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+  // Initialize active tab from URL param or default to "profile"
+  const getInitialTab = (): TabType => {
+    const tabParam = search?.tab;
+    if (tabParam && VALID_TABS.includes(tabParam as TabType)) {
+      return tabParam as TabType;
+    }
+    return "profile";
+  };
+
+  const [activeTab, setActiveTab] = useState<TabType>(getInitialTab);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<
     TabType | undefined
   >();
+
+  // Update tab when URL changes
+  useEffect(() => {
+    const tabParam = search?.tab;
+    if (tabParam && VALID_TABS.includes(tabParam as TabType)) {
+      const newTab = tabParam as TabType;
+      if (newTab !== activeTab && !hasSettingsChanges) {
+        setActiveTab(newTab);
+      }
+    }
+  }, [search?.tab, hasSettingsChanges, activeTab]);
 
   // Initialize settings from query data on component mount
   useEffect(() => {
@@ -197,6 +227,17 @@ export default function SettingsPage() {
               </span>
             </TabButton>
             <TabButton
+              active={activeTab === "accounts"}
+              onClick={() => handleTabChange("accounts")}
+              layoutId="settingsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <LinkIcon size="sm" className="mr-1.5" />
+                Accounts
+              </span>
+            </TabButton>
+            <TabButton
               active={activeTab === "security"}
               onClick={() => handleTabChange("security")}
               layoutId="settingsTabHighlight"
@@ -247,6 +288,17 @@ export default function SettingsPage() {
                 transition={{ duration: 0.3, ease: "easeInOut" }}
               >
                 <BillingForm />
+              </motion.div>
+            )}
+            {activeTab === "accounts" && (
+              <motion.div
+                key="accounts"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+              >
+                <ConnectedAccountsForm />
               </motion.div>
             )}
             {activeTab === "security" && (
