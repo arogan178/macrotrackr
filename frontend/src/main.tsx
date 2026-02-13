@@ -7,6 +7,7 @@ import ReactDOM from "react-dom/client";
 
 import AppRouter from "./AppRouter";
 import { ClerkTokenSync } from "./components/auth/ClerkTokenSync";
+import { clerkAppearance } from "./lib/clerkAppearance";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
 import { registerServiceWorker } from "./sw-register";
@@ -61,6 +62,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
         afterSignOutUrl="/"
         signInFallbackRedirectUrl="/home"
         signUpFallbackRedirectUrl="/home"
+        appearance={clerkAppearance}
       >
         <ClerkTokenSync />
         {shouldEnablePostHog ? (
