@@ -1,4 +1,4 @@
-import { useAuth, useClerk } from "@clerk/clerk-react";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -112,7 +112,7 @@ export function useLogin() {
       queryClient.removeQueries({ queryKey: queryKeys.auth.user() });
       removeToken(); // Clear any stale token
     },
-  onSuccess: (data) => {
+    onSuccess: (data) => {
       // Store the token
       if (data.token) {
         setToken(data.token);
@@ -306,14 +306,23 @@ export function useResetPassword() {
 
 /**
  * Mutation hook for changing password (authenticated users)
+ * Uses Clerk's API for password management
  */
 export function useChangePassword() {
+  const { user } = useUser();
+
   return useMutation({
     mutationFn: async (data: ChangePasswordData): Promise<void> => {
-      await apiService.auth.changePassword(
-        data.currentPassword,
-        data.newPassword,
-      );
+      if (!user) {
+        throw new Error("User not authenticated");
+      }
+
+      // Use Clerk's updatePassword method for password changes
+      // This handles verification of current password and sets the new one
+      await user.updatePassword({
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword,
+      });
     },
     onSuccess: () => {
       // Success notification will be handled by the component
