@@ -1,15 +1,14 @@
+import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
 
 import { CardContainer, TextField } from "@/components/form";
 import { Button, LockIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
-// Notifications are handled by the global NotificationManager and store
-import { useChangePassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 const ChangePasswordForm = () => {
   const { showNotification } = useStore();
-  const changePasswordMutation = useChangePassword();
+  const { user, isLoaded } = useUser();
 
   // Use new mutation error handling
   const { handleMutationError, handleMutationSuccess } =
@@ -19,7 +18,6 @@ const ChangePasswordForm = () => {
         showNotification(message, "error");
       },
       onSuccess: (message) => {
-        // Local successMessage state removed; use global notification only
         showNotification(message, "success");
       },
     });
@@ -28,40 +26,161 @@ const ChangePasswordForm = () => {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [formError, setFormError] = useState<string | undefined>();
-  // success message is shown via global notifications; local state removed
-  // const [successMessage, setSuccessMessage] = useState<string | undefined>();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Check if user has password authentication enabled
+  const hasPassword = user?.passwordEnabled ?? false;
+
+  // Password strength requirements
+  const passwordRequirements = [
+    { met: newPassword.length >= 8, text: "At least 8 characters" },
+    { met: /[A-Z]/.test(newPassword), text: "One uppercase letter" },
+    { met: /[a-z]/.test(newPassword), text: "One lowercase letter" },
+    { met: /[0-9]/.test(newPassword), text: "One number" },
+  ];
+
+  const passwordStrength = passwordRequirements.filter((r) => r.met).length;
+
+  const getStrengthColor = () => {
+    if (passwordStrength <= 1) return "bg-error";
+    if (passwordStrength <= 2) return "bg-warning";
+    if (passwordStrength <= 3) return "bg-primary";
+    return "bg-success";
+  };
+
+  const getStrengthLabel = () => {
+    if (passwordStrength <= 1) return "Weak";
+    if (passwordStrength <= 2) return "Fair";
+    if (passwordStrength <= 3) return "Good";
+    return "Strong";
+  };
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setFormError(undefined);
 
+    // Validate passwords match
     if (newPassword !== confirmPassword) {
       setFormError("New passwords do not match.");
-      return;
-    }
-    if (newPassword.length < 8) {
-      setFormError("New password must be at least 8 characters long.");
+      showNotification("New passwords do not match.", "error");
       return;
     }
 
+    // Validate password strength
+    if (passwordStrength < 3) {
+      setFormError("Please choose a stronger password.");
+      showNotification("Please choose a stronger password.", "error");
+      return;
+    }
+
+    // Validate current password is provided
+    if (!currentPassword) {
+      setFormError("Current password is required.");
+      showNotification("Current password is required.", "error");
+      return;
+    }
+
+    if (!user) {
+      showNotification("User not authenticated.", "error");
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await changePasswordMutation.mutateAsync({
+      // Use Clerk's updatePassword method
+      // This verifies the current password and sets the new one
+      await user.updatePassword({
         currentPassword,
         newPassword,
       });
+
       handleMutationSuccess("Password changed successfully.");
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      handleMutationError(error, "changing password");
+      console.error("Password change error:", error);
+
+      // Handle specific Clerk errors
+      let errorMessage = "Failed to change password";
+
+      if (error && typeof error === "object" && "errors" in error) {
+        const clerkError = error as { errors: Array<{ code?: string; message?: string }> };
+        const firstError = clerkError.errors?.[0];
+
+        if (firstError?.code === "form_password_incorrect") {
+          errorMessage = "Current password is incorrect.";
+        } else if (firstError?.code === "form_password_not_strong_enough") {
+          errorMessage = "New password is not strong enough.";
+        } else if (firstError?.code === "form_password_same_as_current") {
+          errorMessage = "New password must be different from your current password.";
+        } else if (firstError?.message) {
+          errorMessage = firstError.message;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      handleMutationError(new Error(errorMessage), "changing password");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
+  // Show message for OAuth-only users
+  if (isLoaded && !hasPassword) {
+    return (
+      <CardContainer className="p-6 sm:p-8">
+        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
+          <div className="flex items-center">
+            <div className="mr-4 rounded-xl bg-vibrant-accent/10 p-3">
+              <LockIcon className="h-7 w-7 flex-shrink-0 text-vibrant-accent" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="truncate text-xl font-bold text-foreground">
+                Security Settings
+              </h3>
+              <p className="mt-1 text-sm text-muted">
+                Password settings for your account
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 text-center">
+          <LockIcon className="mx-auto h-12 w-12 text-primary mb-4" />
+          <h4 className="text-lg font-semibold text-foreground mb-2">
+            Password Not Set
+          </h4>
+          <p className="text-muted mb-4">
+            You signed up using a social provider (Google, Facebook, or Apple).
+            You can add a password to your account for additional sign-in options.
+          </p>
+          <p className="text-sm text-muted">
+            Visit the Connected Accounts section to manage your sign-in methods.
+          </p>
+        </div>
+      </CardContainer>
+    );
+  }
+
+  if (!isLoaded) {
+    return (
+      <CardContainer className="p-6 sm:p-8">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 w-48 rounded bg-surface-3" />
+          <div className="h-12 rounded-lg bg-surface-3" />
+          <div className="h-12 rounded-lg bg-surface-3" />
+        </div>
+      </CardContainer>
+    );
+  }
 
   return (
     <CardContainer className="p-6 sm:p-8">
       <form onSubmit={handleSubmit} className="space-y-8">
-        {/* Header section to match ProfileForm pattern */}
+        {/* Header section */}
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
             <div className="mr-4 rounded-xl bg-vibrant-accent/10 p-3">
@@ -78,9 +197,17 @@ const ChangePasswordForm = () => {
           </div>
         </div>
 
-        {/* Success notifications are now handled by the global NotificationManager */}
+        {/* Security info */}
+        <div className="rounded-lg border border-border bg-surface-2 p-4">
+          <p className="text-sm text-muted">
+            <strong className="text-foreground">Security note:</strong> For your protection, 
+            you must enter your current password to set a new one. This prevents unauthorized 
+            changes if your session is left unattended.
+          </p>
+        </div>
 
         <div className="grid grid-cols-1 gap-6">
+          {/* Current Password */}
           <TextField
             label="Current Password"
             type="password"
@@ -89,36 +216,79 @@ const ChangePasswordForm = () => {
             required
             name="currentPassword"
             autoComplete="current-password"
+            helperText="Enter your current password to verify your identity"
           />
-          <TextField
-            label="New Password"
-            type="password"
-            value={newPassword}
-            onChange={setNewPassword}
-            required
-            minLength={8}
-            helperText="Password must be at least 8 characters long."
-            name="newPassword"
-            autoComplete="new-password"
-          />
+
+          {/* New Password */}
+          <div className="space-y-2">
+            <TextField
+              label="New Password"
+              type="password"
+              value={newPassword}
+              onChange={setNewPassword}
+              required
+              minLength={8}
+              name="newPassword"
+              autoComplete="new-password"
+            />
+            
+            {/* Password strength indicator */}
+            {newPassword && (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
+                    <div
+                      className={`h-full transition-all duration-300 ${getStrengthColor()}`}
+                      style={{ width: `${(passwordStrength / 4) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs font-medium text-muted">
+                    {getStrengthLabel()}
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {passwordRequirements.map((req, idx) => (
+                    <span
+                      key={idx}
+                      className={`text-xs ${
+                        req.met ? "text-success" : "text-muted"
+                      }`}
+                    >
+                      {req.met ? "✓" : "○"} {req.text}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Confirm New Password */}
           <TextField
             label="Confirm New Password"
             type="password"
             value={confirmPassword}
             onChange={setConfirmPassword}
             required
-            error={formError ?? undefined}
+            error={formError && formError.includes("match") ? formError : undefined}
             name="confirmPassword"
             autoComplete="new-password"
+            helperText="Re-enter your new password to confirm"
           />
         </div>
 
-        {/* Submit button section */}
+        {/* Error message */}
+        {formError && !formError.includes("match") && (
+          <div className="rounded-lg border border-error/30 bg-error/10 p-4">
+            <p className="text-sm text-error">{formError}</p>
+          </div>
+        )}
+
+        {/* Submit button */}
         <div className="mt-8 flex justify-end">
           <Button
             type="submit"
-            isLoading={changePasswordMutation.isPending}
-            disabled={!currentPassword || !newPassword || !confirmPassword}
+            isLoading={isSubmitting}
+            disabled={!currentPassword || !newPassword || !confirmPassword || passwordStrength < 3}
             text="Change Password"
             buttonSize="lg"
             variant="primary"
