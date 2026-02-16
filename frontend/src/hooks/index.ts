@@ -18,5 +18,8 @@ export { useCriticalLoading, useGlobalLoading } from "./useGlobalLoading";
 // Subscription hooks
 export { useSubscriptionStatus } from "./useSubscriptionStatus";
 
+// Animation hooks
+export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
+
 // Other hooks
 export { default as useBeforeUnload } from "./useBeforeUnload";
