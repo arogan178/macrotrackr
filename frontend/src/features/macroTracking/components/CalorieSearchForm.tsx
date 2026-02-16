@@ -1,7 +1,12 @@
 import { memo, useCallback, useMemo, useState } from "react";
 
 import { TextField } from "@/components/form";
-import { ArrowRightIcon, Button, SearchIcon } from "@/components/ui";
+import {
+  ArrowRightIcon,
+  Button,
+  ProgressiveBlur,
+  SearchIcon,
+} from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { apiService } from "@/utils/apiServices";
 
@@ -40,6 +45,8 @@ const CalorieSearch = memo(function CalorieSearch({
   const [error, setError] = useState("");
   const [results, setResults] = useState<FoodResult[]>([]);
   const [showResults, setShowResults] = useState(false);
+  // State for scroll position detection
+  const [isAtBottom, setIsAtBottom] = useState(false);
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -81,6 +88,15 @@ const CalorieSearch = memo(function CalorieSearch({
     },
     [handleSearch],
   );
+
+  // Handle scroll to detect when at bottom
+  const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
+    const target = event.currentTarget;
+    const { scrollTop, scrollHeight, clientHeight } = target;
+    // Consider "at bottom" when within 10px of the bottom
+    const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
+    setIsAtBottom(atBottom);
+  }, []);
 
   // Convert to metric for display and selection (moved to module scope)
 
@@ -253,8 +269,9 @@ const CalorieSearch = memo(function CalorieSearch({
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Fixed search input and button row */}
       <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="relative flex-1">
+        <div className="flex-1">
           <TextField
             id="calorie-search-input"
             label="Search for food"
@@ -265,36 +282,6 @@ const CalorieSearch = memo(function CalorieSearch({
             icon={<SearchIcon className=" text-muted" />}
             maxLength={50}
           />
-          {showResults && displayResults.length > 0 && (
-            <div className="absolute z-10 mt-2 max-h-64 w-full overflow-y-auto rounded border border-border bg-surface shadow-surface">
-              {displayResults.map((resultData) => {
-                const { item, displayQuantity, calories } = resultData;
-                return (
-                  <button
-                    key={resultData.id}
-                    className={
-                      "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
-                    }
-                    onClick={() => handleSelect(item)}
-                    type="button"
-                  >
-                    <div className="font-medium">{item.name}</div>
-                    <div className="text-xs text-foreground">
-                      {displayQuantity ? `${displayQuantity} | ` : ""}
-                      Calories: {calories.toFixed(1)} kcal | Protein:{" "}
-                      {item.protein.toFixed(1)}g, Carbs: {item.carbs.toFixed(1)}
-                      g, Fats: {item.fats.toFixed(1)}g
-                    </div>
-                    {item.categories && (
-                      <div className="text-xs text-foreground">
-                        {item.categories}
-                      </div>
-                    )}
-                  </button>
-                );
-              })}
-            </div>
-          )}
         </div>
         <div className="flex items-end">
           <Button
@@ -312,6 +299,47 @@ const CalorieSearch = memo(function CalorieSearch({
           />
         </div>
       </div>
+
+      {/* Results dropdown - positioned below the fixed search row */}
+      {showResults && displayResults.length > 0 && (
+        <div className="relative z-10 h-64 w-full overflow-hidden rounded border border-border bg-surface shadow-surface">
+          <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
+            {displayResults.map((resultData) => {
+              const { item, displayQuantity, calories } = resultData;
+              return (
+                <button
+                  key={resultData.id}
+                  className={
+                    "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
+                  }
+                  onClick={() => handleSelect(item)}
+                  type="button"
+                >
+                  <div className="font-medium">{item.name}</div>
+                  <div className="text-xs text-foreground">
+                    {displayQuantity ? `${displayQuantity} | ` : ""}
+                    Calories: {calories.toFixed(1)} kcal | Protein:{" "}
+                    {item.protein.toFixed(1)}g, Carbs: {item.carbs.toFixed(1)}
+                    g, Fats: {item.fats.toFixed(1)}g
+                  </div>
+                  {item.categories && (
+                    <div className="text-xs text-foreground">
+                      {item.categories}
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+          <ProgressiveBlur
+            direction="up"
+            intensity={0.2}
+            height="40px"
+            show={!isAtBottom}
+          />
+        </div>
+      )}
+
       {error && (
         <div>
           <StatusIndicator status="error" message={error} />

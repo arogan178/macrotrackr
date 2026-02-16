@@ -36,7 +36,7 @@ const ChangePasswordForm = () => {
     { met: newPassword.length >= 8, text: "At least 8 characters" },
     { met: /[A-Z]/.test(newPassword), text: "One uppercase letter" },
     { met: /[a-z]/.test(newPassword), text: "One lowercase letter" },
-    { met: /[0-9]/.test(newPassword), text: "One number" },
+    { met: /\d/.test(newPassword), text: "One number" },
   ];
 
   const passwordStrength = passwordRequirements.filter((r) => r.met).length;
@@ -109,14 +109,26 @@ const ChangePasswordForm = () => {
         const clerkError = error as { errors: Array<{ code?: string; message?: string }> };
         const firstError = clerkError.errors?.[0];
 
-        if (firstError?.code === "form_password_incorrect") {
+        switch (firstError?.code) {
+        case "form_password_incorrect": {
           errorMessage = "Current password is incorrect.";
-        } else if (firstError?.code === "form_password_not_strong_enough") {
+        
+        break;
+        }
+        case "form_password_not_strong_enough": {
           errorMessage = "New password is not strong enough.";
-        } else if (firstError?.code === "form_password_same_as_current") {
+        
+        break;
+        }
+        case "form_password_same_as_current": {
           errorMessage = "New password must be different from your current password.";
-        } else if (firstError?.message) {
+        
+        break;
+        }
+        default: { if (firstError?.message) {
           errorMessage = firstError.message;
+        }
+        }
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
@@ -149,11 +161,11 @@ const ChangePasswordForm = () => {
         </div>
 
         <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 text-center">
-          <LockIcon className="mx-auto h-12 w-12 text-primary mb-4" />
-          <h4 className="text-lg font-semibold text-foreground mb-2">
+          <LockIcon className="mx-auto mb-4 h-12 w-12 text-primary" />
+          <h4 className="mb-2 text-lg font-semibold text-foreground">
             Password Not Set
           </h4>
-          <p className="text-muted mb-4">
+          <p className="mb-4 text-muted">
             You signed up using a social provider (Google, Facebook, or Apple).
             You can add a password to your account for additional sign-in options.
           </p>
@@ -236,7 +248,7 @@ const ChangePasswordForm = () => {
             {newPassword && (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
-                  <div className="flex-1 h-2 bg-surface-3 rounded-full overflow-hidden">
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-3">
                     <div
                       className={`h-full transition-all duration-300 ${getStrengthColor()}`}
                       style={{ width: `${(passwordStrength / 4) * 100}%` }}
@@ -247,14 +259,14 @@ const ChangePasswordForm = () => {
                   </span>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {passwordRequirements.map((req, idx) => (
+                  {passwordRequirements.map((request, index) => (
                     <span
-                      key={idx}
+                      key={index}
                       className={`text-xs ${
-                        req.met ? "text-success" : "text-muted"
+                        request.met ? "text-success" : "text-muted"
                       }`}
                     >
-                      {req.met ? "✓" : "○"} {req.text}
+                      {request.met ? "✓" : "○"} {request.text}
                     </span>
                   ))}
                 </div>

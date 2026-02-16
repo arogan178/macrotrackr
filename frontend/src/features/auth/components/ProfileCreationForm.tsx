@@ -29,7 +29,7 @@ interface SocialProfileData {
 
 export function ProfileCreationForm() {
   const navigate = useNavigate();
-  const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
+  const { user: clerkUser, isLoaded: _isUserLoaded } = useUser();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const { showNotification } = useStore();
 
@@ -54,7 +54,7 @@ export function ProfileCreationForm() {
       try {
         const parsed = JSON.parse(storedData) as SocialProfileData;
         setSocialData(parsed);
-        
+
         // Pre-populate date of birth if available from social login
         if (parsed.dateOfBirth) {
           setDateOfBirth(parsed.dateOfBirth);
@@ -90,20 +90,14 @@ export function ProfileCreationForm() {
     // Height validation
     if (!height) {
       newErrors.height = AUTH_ERROR_MESSAGES.heightRequired;
-    } else if (
-      height < USER_MINIMUM_HEIGHT ||
-      height > USER_MAXIMUM_HEIGHT
-    ) {
+    } else if (height < USER_MINIMUM_HEIGHT || height > USER_MAXIMUM_HEIGHT) {
       newErrors.height = `Please enter a valid height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`;
     }
 
     // Weight validation
     if (!weight) {
       newErrors.weight = AUTH_ERROR_MESSAGES.weightRequired;
-    } else if (
-      weight < USER_MINIMUM_WEIGHT ||
-      weight > USER_MAXIMUM_WEIGHT
-    ) {
+    } else if (weight < USER_MINIMUM_WEIGHT || weight > USER_MAXIMUM_WEIGHT) {
       newErrors.weight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
     }
 
@@ -125,20 +119,20 @@ export function ProfileCreationForm() {
 
   const handleNext = () => {
     if (step === 1 && !validateStep1()) {
-        // Show first error as notification
-        const firstError = Object.values(errors)[0];
-        if (firstError) {
-          showNotification(firstError, "error");
-        }
-        return;
+      // Show first error as notification
+      const firstError = Object.values(errors)[0];
+      if (firstError) {
+        showNotification(firstError, "error");
       }
+      return;
+    }
     if (step === 2 && !validateStep2()) {
-        const firstError = Object.values(errors)[0];
-        if (firstError) {
-          showNotification(firstError, "error");
-        }
-        return;
+      const firstError = Object.values(errors)[0];
+      if (firstError) {
+        showNotification(firstError, "error");
       }
+      return;
+    }
     setErrors({});
     setStep(step + 1);
   };
@@ -149,8 +143,12 @@ export function ProfileCreationForm() {
   };
 
   const handleSubmit = async () => {
-    console.log("[ProfileCreationForm] handleSubmit called", { isAuthLoaded, isSignedIn, hasGetToken: !!getToken });
-    
+    console.log("[ProfileCreationForm] handleSubmit called", {
+      isAuthLoaded,
+      isSignedIn,
+      hasGetToken: !!getToken,
+    });
+
     if (!validateStep2()) {
       const firstError = Object.values(errors)[0];
       if (firstError) {
@@ -161,14 +159,23 @@ export function ProfileCreationForm() {
 
     // Wait for Clerk to be fully loaded
     if (!isAuthLoaded) {
-      showNotification("Authentication is still loading. Please wait...", "info");
+      showNotification(
+        "Authentication is still loading. Please wait...",
+        "info",
+      );
       return;
     }
 
     // Ensure user is authenticated
     if (!isSignedIn || !getToken) {
-      console.error("[ProfileCreationForm] Not authenticated:", { isSignedIn, hasGetToken: !!getToken });
-      showNotification("Authentication required. Please sign in again.", "error");
+      console.error("[ProfileCreationForm] Not authenticated:", {
+        isSignedIn,
+        hasGetToken: !!getToken,
+      });
+      showNotification(
+        "Authentication required. Please sign in again.",
+        "error",
+      );
       navigate({ to: "/login" });
       return;
     }
@@ -180,21 +187,24 @@ export function ProfileCreationForm() {
       // Retry a few times if token is not immediately available
       let token: string | null = null;
       let retries = 3;
-      
+
       while (retries > 0 && !token) {
         token = await getToken();
         if (!token && retries > 1) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           retries--;
         }
       }
-      
+
       if (!token) {
-        showNotification("Authentication failed. Please sign in again.", "error");
+        showNotification(
+          "Authentication failed. Please sign in again.",
+          "error",
+        );
         navigate({ to: "/login" });
         return;
       }
-      
+
       // Set the token for API calls
       setAuthToken(token);
       console.log("[ProfileCreationForm] Token set successfully");
@@ -209,7 +219,9 @@ export function ProfileCreationForm() {
       } catch (syncError: any) {
         // If user already exists (409), that's fine - continue with profile completion
         if (syncError?.status === 409) {
-          console.log("[ProfileCreationForm] User already exists, continuing...");
+          console.log(
+            "[ProfileCreationForm] User already exists, continuing...",
+          );
         } else {
           throw syncError;
         }
@@ -235,17 +247,25 @@ export function ProfileCreationForm() {
         queryFn: () => apiService.user.getUserDetails(),
         staleTime: 0,
       });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.settings.user() });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.settings.user(),
+      });
 
       showNotification("Profile created successfully!", "success");
 
       // Redirect to home with replace for a clean onboarding transition.
-      navigate({ to: "/home", search: { limit: 20, offset: 0 }, replace: true });
+      navigate({
+        to: "/home",
+        search: { limit: 20, offset: 0 },
+        replace: true,
+      });
     } catch (error) {
       console.error("[ProfileCreationForm] Profile creation error:", error);
       // Log additional context for debugging
-      if (error && typeof error === 'object' && 'status' in error) {
-        console.error(`[ProfileCreationForm] Error status: ${(error as any).status}`);
+      if (error && typeof error === "object" && "status" in error) {
+        console.error(
+          `[ProfileCreationForm] Error status: ${(error as any).status}`,
+        );
       }
       showNotification(
         error instanceof Error ? error.message : "Failed to create profile",

@@ -145,7 +145,7 @@ export default function DailySummary({
               Today's Summary
             </h2>
             <div className="text-right">
-              <div className="text-2xl font-bold text-foreground">
+              <div className="text-2xl font-light tracking-tight text-foreground">
                 <AnimatedNumber
                   value={totalCalories}
                   toFixedValue={0}
