@@ -6,24 +6,48 @@
  * Props:
  * @prop {React.ReactNode} children - Card content
  * @prop {string} [className] - Additional classes for the card
+ * @prop {"default" | "transparent"} [variant="default"] - Visual style variant
  *
  * @example
  * <CardContainer>
  *   <h2>Section Title</h2>
  *   <p>Some content here.</p>
  * </CardContainer>
+ *
+ * @example
+ * <CardContainer variant="transparent">
+ *   <h2>Transparent Card</h2>
+ * </CardContainer>
  */
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
 import { formStyles } from "@/components/form/Styles";
-import type { CardContainerProps } from "@/components/form/types";
+import type { CardContainerProps } from "@/components/form/Types";
+import { cn } from "@/lib/classnameUtilities";
 
-function CardContainer({ children, className = "" }: CardContainerProps) {
-  return (
-    <div className={`${formStyles.card.container} ${className}`}>
-      {children}
-    </div>
-  );
+/**
+ * Card variant styles following Memoria Design System
+ */
+const cardVariants = {
+  default: formStyles.card.container,
+  transparent: cn(
+    "rounded-xl border border-neutral-800/60",
+    "bg-neutral-900/60 p-4",
+    "hover:border-neutral-700 hover:bg-neutral-900/80",
+    "transition-colors duration-150",
+  ),
+};
+
+function CardContainer({
+  children,
+  className = "",
+  variant = "default",
+}: CardContainerProps) {
+  const containerClasses = useMemo(() => {
+    return cn(cardVariants[variant ?? "default"], className);
+  }, [variant, className]);
+
+  return <div className={containerClasses}>{children}</div>;
 }
 
 export default memo(CardContainer);

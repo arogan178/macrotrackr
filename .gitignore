@@ -39,7 +39,6 @@ frontend/.tanstack/tmp/router-generator-QwK0SG/b71a3937b1b59cff23ad5de484ba2a50
 frontend/.tanstack/tmp/*
 frontend/src/routeTree.*
 .roo/mcp.json
-.github/copilot-instructions.md
 .github/chatmodes/BeastMode.chatmode.md
 frontend/.github/instructions/tanstack-react-router_api.instructions.md
 frontend/.github/instructions/tanstack-react-router_guide.instructions.md

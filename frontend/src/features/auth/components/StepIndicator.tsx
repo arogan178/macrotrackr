@@ -67,7 +67,7 @@ export const StepIndicator = memo(function StepIndicator({
                   )}
                 </div>
                 <span
-                  className={`mt-1 text-xs transition-colors duration-300 ${labelClasses}`}
+                  className={`mt-1 text-xs tracking-[0.2em] transition-colors duration-300 ${labelClasses}`}
                 >
                   {info.title}
                 </span>
