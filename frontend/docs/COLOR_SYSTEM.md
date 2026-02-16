@@ -18,9 +18,9 @@ All colors are defined as CSS custom properties and automatically generate Tailw
 
 | Token            | Value     | Usage                             |
 | ---------------- | --------- | --------------------------------- |
-| `primary`        | `#259145` | Primary brand color, CTAs, links  |
-| `secondary`      | `#6bb38a` | Secondary accents, hover states   |
-| `vibrant-accent` | `#dd7a24` | High-impact CTAs, attention items |
+| `primary`        | `#22c55e` | Primary brand color, CTAs, links  |
+| `secondary`      | `#6ee7a0` | Secondary accents, hover states   |
+| `vibrant-accent` | `#f59e0b` | High-impact CTAs, attention items |
 
 ### Surface System (Elevation)
 
@@ -28,54 +28,105 @@ Surfaces get progressively lighter to indicate elevation:
 
 | Token        | Value     | Usage                            |
 | ------------ | --------- | -------------------------------- |
-| `background` | `#0b1220` | Page background (Level 0)        |
-| `surface`    | `#151b2b` | Cards, modals (Level 1)          |
-| `surface-2`  | `#1b2336` | Nested elements (Level 2)        |
-| `surface-3`  | `#202a40` | High-emphasis elements (Level 3) |
-| `surface-4`  | `#252f48` | Highest emphasis (Level 4)       |
+| `background` | `#09090b` | Page background (Level 0)        |
+| `surface`    | `#121218` | Cards, modals (Level 1)          |
+| `surface-2`  | `#1a1a22` | Nested elements (Level 2)        |
+| `surface-3`  | `#22222c` | High-emphasis elements (Level 3) |
+| `surface-4`  | `#2a2a36` | Highest emphasis (Level 4)       |
 
 ### Text Colors
 
 | Token        | Value     | Usage                         |
 | ------------ | --------- | ----------------------------- |
-| `foreground` | `#eef3f8` | Primary text (high emphasis)  |
-| `muted`      | `#98a6b5` | Secondary text, labels, hints |
+| `foreground` | `#fafafa` | Primary text (high emphasis)  |
+| `muted`      | `#a1a1aa` | Secondary text, labels, hints |
 
 ### Border Colors
 
 | Token      | Value     | Usage              |
 | ---------- | --------- | ------------------ |
-| `border`   | `#3a4350` | Standard borders   |
-| `border-2` | `#465064` | Emphasized borders |
+| `border`   | `#27272a` | Standard borders   |
+| `border-2` | `#3f3f46` | Emphasized borders |
 
 ### Macro Colors
 
 | Token     | Value     | Usage                      |
 | --------- | --------- | -------------------------- |
-| `protein` | `#23c06b` | Protein indicators, charts |
-| `carbs`   | `#3a9ae6` | Carbohydrate indicators    |
-| `fats`    | `#e24a46` | Fat indicators, charts     |
+| `protein` | `#22c55e` | Protein indicators, charts |
+| `carbs`   | `#3b82f6` | Carbohydrate indicators    |
+| `fats`    | `#ef4444` | Fat indicators, charts     |
 
 ### System Colors
 
 | Token     | Value     | Usage                         |
 | --------- | --------- | ----------------------------- |
-| `success` | `#24c46f` | Success states, confirmations |
-| `warning` | `#c69060` | Warnings, cautions            |
-| `error`   | `#ee544d` | Errors, destructive actions   |
+| `success` | `#22c55e` | Success states, confirmations |
+| `warning` | `#f59e0b` | Warnings, cautions            |
+| `error`   | `#ef4444` | Errors, destructive actions   |
 
 ---
 
 ## Shadow System
 
-| Token        | Value                                                   |
-| ------------ | ------------------------------------------------------- |
-| `shadow-xs`  | `0 1px 2px 0 rgba(0,0,0,0.05)`                          |
-| `shadow-sm`  | `0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px ...`       |
-| `shadow-md`  | `0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px ...`    |
-| `shadow-lg`  | `0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px ...`  |
-| `shadow-xl`  | `0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px ...` |
-| `shadow-2xl` | `0 25px 50px -12px rgba(0,0,0,0.25)`                    |
+Minimal shadows following Memoria Design System principles. Shadows are subtle and used sparingly.
+
+| Token               | Value                                              | Usage                    |
+| ------------------- | -------------------------------------------------- | ------------------------ |
+| `shadow-surface`    | `0 1px 2px 0 rgba(0,0,0,0.03)`                     | Subtle surface elevation |
+| `shadow-primary`    | `0 1px 3px 0 rgba(0,0,0,0.06), 0 1px 2px -1px ...` | Primary elements         |
+| `shadow-card`       | `0 1px 3px rgba(0,0,0,0.1)`                        | Card components          |
+| `shadow-card-hover` | `0 4px 12px rgba(0,0,0,0.15)`                      | Card hover state         |
+| `shadow-modal`      | `0 20px 40px -12px rgba(0,0,0,0.2)`                | Modal dialogs            |
+| `shadow-warning`    | `0 2px 8px -2px rgba(245,158,11,0.1)`              | Warning elements         |
+| `shadow-error`      | `0 2px 8px -2px rgba(239,68,68,0.1)`               | Error elements           |
+| `shadow-success`    | `0 2px 8px -2px rgba(34,197,94,0.1)`               | Success elements         |
+| `shadow-accent`     | `0 2px 8px -2px rgba(245,158,11,0.1)`              | Accent elements          |
+| `shadow-glow`       | `0 0 12px rgba(34,197,94,0.08)`                    | Subtle glow effect       |
+| `shadow-border`     | `0 1px 2px 0 rgba(0,0,0,0.03)`                     | Border elevation         |
+
+### Shadow Usage Guidelines
+
+1. **Cards**: Use `shadow-card` with `hover:shadow-card-hover` for interactive cards
+2. **Modals**: Use `shadow-modal` for dialog overlays
+3. **Colored shadows**: Use sparingly - the colored glow shadows (`shadow-warning`, `shadow-error`, `shadow-success`, `shadow-accent`) are intentionally subtle
+4. **Avoid overuse**: The Memoria system prefers depth through surface colors over heavy shadows
+
+---
+
+## Neutral Opacity Backgrounds
+
+For depth and overlay effects:
+
+| Token            | Value                   | Usage                 |
+| ---------------- | ----------------------- | --------------------- |
+| `neutral-950-80` | `rgba(9, 9, 11, 0.8)`   | Modal/drawer overlays |
+| `neutral-950-90` | `rgba(9, 9, 11, 0.9)`   | High-opacity overlays |
+| `neutral-900-50` | `rgba(24, 24, 27, 0.5)` | Subtle overlays       |
+| `neutral-900-80` | `rgba(24, 24, 27, 0.8)` | Standard overlays     |
+
+---
+
+## Easing Curves
+
+Design system animation easing:
+
+| Token         | Value                                     | Usage                    |
+| ------------- | ----------------------------------------- | ------------------------ |
+| `ease-modal`  | `cubic-bezier(0.32, 0.72, 0, 1)`          | Modal animations         |
+| `ease-drawer` | `cubic-bezier(0.32, 0.72, 0, 1)`          | Drawer/sheet animations  |
+| `ease-spring` | `cubic-bezier(0.175, 0.885, 0.32, 1.275)` | Bouncy/spring animations |
+
+---
+
+## Letter Spacing Tokens
+
+For consistent typography:
+
+| Token            | Value     | Usage                    |
+| ---------------- | --------- | ------------------------ |
+| `tracking-label` | `0.025em` | Labels, small text       |
+| `tracking-wide`  | `0.05em`  | Standard wide tracking   |
+| `tracking-wider` | `0.1em`   | Extra wide for uppercase |
 
 ---
 
@@ -108,10 +159,10 @@ Surfaces get progressively lighter to indicate elevation:
 
 ```tsx
 // Standard card
-<div className="bg-surface border border-border rounded-lg shadow-md">Content</div>
+<div className="bg-surface border border-border rounded-xl shadow-surface">Content</div>
 
 // Elevated card
-<div className="bg-surface-2 border border-border rounded-lg shadow-lg">Elevated</div>
+<div className="bg-surface-2 border border-border rounded-xl shadow-primary">Elevated</div>
 ```
 
 ### Macro Display
@@ -142,25 +193,66 @@ All tokens are defined in `src/style.css`:
 
 ```css
 @theme {
-  --color-primary: #259145;
-  --color-secondary: #6bb38a;
-  --color-vibrant-accent: #dd7a24;
-  --color-background: #0b1220;
-  --color-surface: #151b2b;
-  --color-surface-2: #1b2336;
-  --color-surface-3: #202a40;
-  --color-surface-4: #252f48;
-  --color-border: #3a4350;
-  --color-border-2: #465064;
-  --color-foreground: #eef3f8;
-  --color-muted: #98a6b5;
-  --color-protein: #23c06b;
-  --color-carbs: #3a9ae6;
-  --color-fats: #e24a46;
-  --color-success: #24c46f;
-  --color-warning: #c69060;
-  --color-error: #ee544d;
-  /* shadows defined here too */
+  /* Brand palette */
+  --color-primary: #22c55e;
+  --color-secondary: #6ee7a0;
+  --color-vibrant-accent: #f59e0b;
+
+  /* Surfaces */
+  --color-background: #09090b;
+  --color-surface: #121218;
+  --color-surface-2: #1a1a22;
+  --color-surface-3: #22222c;
+  --color-surface-4: #2a2a36;
+
+  /* Borders */
+  --color-border: #27272a;
+  --color-border-2: #3f3f46;
+
+  /* Text */
+  --color-foreground: #fafafa;
+  --color-muted: #a1a1aa;
+
+  /* Macro colors */
+  --color-protein: #22c55e;
+  --color-carbs: #3b82f6;
+  --color-fats: #ef4444;
+
+  /* Feedback */
+  --color-success: #22c55e;
+  --color-warning: #f59e0b;
+  --color-error: #ef4444;
+
+  /* Shadows – minimal, subtle for modern flat feel (Memoria style) */
+  --shadow-surface: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  --shadow-primary:
+    0 1px 3px 0 rgba(0, 0, 0, 0.06), 0 1px 2px -1px rgba(0, 0, 0, 0.06);
+  --shadow-modal: 0 20px 40px -12px rgba(0, 0, 0, 0.2);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.1);
+  --shadow-card-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+  --shadow-warning: 0 2px 8px -2px rgba(245, 158, 11, 0.1);
+  --shadow-error: 0 2px 8px -2px rgba(239, 68, 68, 0.1);
+  --shadow-success: 0 2px 8px -2px rgba(34, 197, 94, 0.1);
+  --shadow-accent: 0 2px 8px -2px rgba(245, 158, 11, 0.1);
+  --shadow-glow: 0 0 12px rgba(34, 197, 94, 0.08);
+  --shadow-border: 0 1px 2px 0 rgba(0, 0, 0, 0.03);
+  /* ... more shadows */
+
+  /* Neutral opacity backgrounds */
+  --color-neutral-950-80: rgba(9, 9, 11, 0.8);
+  --color-neutral-950-90: rgba(9, 9, 11, 0.9);
+  --color-neutral-900-50: rgba(24, 24, 27, 0.5);
+  --color-neutral-900-80: rgba(24, 24, 27, 0.8);
+
+  /* Easing curves */
+  --ease-modal: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Letter spacing */
+  --tracking-label: 0.025em;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
 }
 ```
 
@@ -178,16 +270,72 @@ Surface variants have manual utilities defined:
 .bg-surface-4 {
   background-color: var(--color-surface-4);
 }
-.text-surface-2 {
-  color: var(--color-surface-2);
-}
-.text-surface-3 {
-  color: var(--color-surface-3);
-}
-.text-surface-4 {
-  color: var(--color-surface-4);
+.border-surface-2,
+.border-border-2 {
+  border-color: var(--color-border-2);
 }
 ```
+
+---
+
+## Typography Guidelines
+
+### Font Weight Usage
+
+| Weight   | Class           | Usage                        |
+| -------- | --------------- | ---------------------------- |
+| Light    | `font-light`    | Hero numbers, large displays |
+| Normal   | `font-normal`   | Body text                    |
+| Medium   | `font-medium`   | Emphasized body text, labels |
+| Semibold | `font-semibold` | Headings, buttons, labels    |
+
+**Note**: Avoid `font-bold` and `font-extrabold` in most cases. Use `font-semibold` for emphasis.
+
+### Letter Spacing
+
+- Use `tracking-wide` for section labels and uppercase text
+- Use `tracking-tight` for large headings
+- Use default tracking for body text
+
+#### Letter Spacing Guidelines
+
+| Element Type     | Class            | Value      | Usage                           |
+| ---------------- | ---------------- | ---------- | ------------------------------- |
+| Section labels   | `tracking-wide`  | `0.025em`  | Form labels, section titles     |
+| Uppercase badges | `tracking-wider` | `0.05em`   | Status badges, uppercase labels |
+| Hero numbers     | `tracking-tight` | `-0.025em` | Large display numbers           |
+| Body text        | (default)        | `0`        | Paragraphs, descriptions        |
+
+---
+
+## Spacing Standards
+
+Consistent spacing patterns ensure visual harmony across the application.
+
+### Page Layout Spacing
+
+| Context   | Classes                | Usage                   |
+| --------- | ---------------------- | ----------------------- |
+| Page edge | `px-4 sm:px-6 lg:px-8` | Horizontal page padding |
+| Sections  | `space-y-6`            | Vertical section gaps   |
+| Cards     | `p-4` to `p-6`         | Card internal padding   |
+| Forms     | `space-y-4`            | Form field spacing      |
+
+### Component Spacing
+
+| Component   | Internal Spacing | Example Usage                    |
+| ----------- | ---------------- | -------------------------------- |
+| Cards       | `p-4` to `p-6`   | `<div className="p-4">...</div>` |
+| Form groups | `space-y-2`      | Label + input pairs              |
+| Buttons     | `px-4 py-2`      | Standard button padding          |
+| Badges      | `px-2 py-0.5`    | Compact badge padding            |
+
+### Spacing Guidelines
+
+1. **Use Tailwind's spacing scale** - Never use arbitrary pixel values
+2. **Maintain consistent gaps** - Use `space-y-*` for vertical rhythm
+3. **Responsive padding** - Start with `p-4`, increase for larger screens
+4. **Group related elements** - Use `gap-*` in flex/grid containers
 
 ---
 
@@ -197,7 +345,9 @@ Surface variants have manual utilities defined:
 2. **Use the elevation ladder** – `surface` → `surface-2` → `surface-3` for nested elements
 3. **Pair macro colors consistently** – protein=green, carbs=blue, fats=red
 4. **Use muted for secondary text** – reserve `foreground` for primary content
+5. **Use font-semibold instead of font-bold** – for better visual hierarchy
+6. **Add tracking-wide to uppercase labels** – improves readability
 
 ---
 
-_Last updated: Documented from actual implementation in `src/style.css`_
+_Last updated: Phase 5 Polish - Shadows & Spacing (2026-02-13)_

@@ -69,6 +69,8 @@ export interface DropdownProps {
 export interface CardContainerProps {
   children: ReactNode;
   className?: string;
+  /** Visual style variant for the card */
+  variant?: "default" | "transparent";
 }
 
 export interface InfoCardProps {

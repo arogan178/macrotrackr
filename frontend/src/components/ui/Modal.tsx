@@ -17,31 +17,36 @@
  * @prop {function} onConfirm - Confirm handler
  * @prop {string} [confirmLabel] - Confirm button label
  * @prop {string} [cancelLabel] - Cancel button label
-  let message: string | undefined,
-    confirmLabel: string | undefined,
-    cancelLabel: string | undefined,
-    onConfirm: (() => void) | undefined,
-    isDanger: boolean | undefined,
-    hideCancelButton: boolean = false,
-    onSave: (() => void) | undefined,
-    saveDisabled: boolean | undefined,
-    saveLabel: string | undefined;
+ * @prop {boolean} [isDanger] - Whether to style as dangerous action
+ * @prop {boolean} [hideCancelButton] - Hide the cancel button
+ *
+ * Props (Form):
+ * @prop {boolean} isOpen - Whether the modal is open
+ * @prop {function} onClose - Close handler
+ * @prop {string} title - Modal title
+ * @prop {function} onSave - Save handler
+ * @prop {boolean} [saveDisabled] - Disable save button
+ * @prop {string} [saveLabel] - Save button label
+ * @prop {string} [cancelLabel] - Cancel button label
+ * @prop {boolean} [hideCancelButton] - Hide the cancel button
+ *
  * Common Props:
  * @prop {ReactNode} children - Modal content
  * @prop {"sm"|"md"|"lg"|"xl"|"2xl"} [size] - Modal size
  * @prop {boolean} [hideClose] - Hide close (X) button
  *
  * @example
+ * // Confirmation modal
  * <Modal
-      hideCancelButton,
+ *   isOpen={open}
  *   onClose={close}
  *   title="Delete item?"
  *   variant="confirmation"
  *   message="Are you sure you want to delete this?"
  *   onConfirm={handleDelete}
+ *   isDanger
  * />
-  hideCancelButton = false, // Set default for hideCancelButton here
-      hideCancelButton,
+ *
  * @example
  * // Form modal
  * <Modal
@@ -55,17 +60,18 @@
  *   <ProfileForm />
  * </Modal>
  */
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
+import Button from "./Button";
+import IconButton from "./IconButton";
+import ProgressiveBlur from "./ProgressiveBlur";
 import type {
   ConfirmationModalProps,
   FormModalProps,
   ModalProps,
-} from "../utils/Types";
-import Button from "./Button";
-import IconButton from "./IconButton";
+} from "./Types";
 
 function Modal(properties: ModalProps) {
   const {
@@ -81,34 +87,51 @@ function Modal(properties: ModalProps) {
   // Discriminated union for variant-specific props
   const variant: ConfirmationModalProps["variant"] | FormModalProps["variant"] =
     (properties as ModalProps & { variant: "confirmation" | "form" }).variant;
-  let message: string | undefined,
-    confirmLabel: string | undefined,
-    cancelLabel: string | undefined,
-    onConfirm: (() => void) | undefined,
-    isDanger: boolean | undefined,
-    onSave: (() => void) | undefined,
-    saveDisabled: boolean | undefined,
-    saveLabel: string | undefined,
-    hideCancelButton = false;
-  if (variant === "confirmation") {
-    ({
-      message,
-      confirmLabel = "Confirm",
-      cancelLabel = "Cancel",
-      onConfirm,
-      isDanger = false,
-      hideCancelButton = false,
-    } = properties as ConfirmationModalProps);
-  } else if (variant === "form") {
-    ({
-      onSave,
-      saveDisabled,
-      saveLabel = "Save",
-      cancelLabel = "Cancel",
-      hideCancelButton = false,
-    } = properties as FormModalProps);
-  }
-  const modalReference = useRef<HTMLDivElement>(undefined);
+
+  // Helper functions to extract variant-specific props with type narrowing
+  const getConfirmationProps = (
+    properties_: ModalProps,
+  ): Partial<ConfirmationModalProps> => {
+    if (variant !== "confirmation") return {};
+    const confirmationProps = properties_ as ConfirmationModalProps;
+    return {
+      message: confirmationProps.message,
+      confirmLabel: confirmationProps.confirmLabel ?? "Confirm",
+      cancelLabel: confirmationProps.cancelLabel ?? "Cancel",
+      onConfirm: confirmationProps.onConfirm,
+      isDanger: confirmationProps.isDanger ?? false,
+      hideCancelButton: confirmationProps.hideCancelButton ?? false,
+    };
+  };
+
+  const getFormProps = (properties_: ModalProps): Partial<FormModalProps> => {
+    if (variant !== "form") return {};
+    const formProps = properties_ as FormModalProps;
+    return {
+      onSave: formProps.onSave,
+      saveDisabled: formProps.saveDisabled,
+      saveLabel: formProps.saveLabel ?? "Save",
+      cancelLabel: formProps.cancelLabel ?? "Cancel",
+      hideCancelButton: formProps.hideCancelButton ?? false,
+    };
+  };
+
+  // Derive variant-specific values
+  const confirmationProps = getConfirmationProps(properties);
+  const formProps = getFormProps(properties);
+
+  const message = confirmationProps.message;
+  const confirmLabel = confirmationProps.confirmLabel;
+  const cancelLabel = confirmationProps.cancelLabel ?? formProps.cancelLabel;
+  const onConfirm = confirmationProps.onConfirm;
+  const isDanger = confirmationProps.isDanger;
+  const onSave = formProps.onSave;
+  const saveDisabled = formProps.saveDisabled;
+  const saveLabel = formProps.saveLabel;
+  const hideCancelButton =
+    confirmationProps.hideCancelButton ?? formProps.hideCancelButton ?? false;
+
+  const modalReference = useRef<HTMLDivElement>(null);
   const modalRoot = document.querySelector("#modal-root"); // Get the portal target
 
   // Handle escape key press and body scroll lock
@@ -182,27 +205,34 @@ function Modal(properties: ModalProps) {
 
   const variantStyles = getVariantStyles(variant);
 
-  // Animation variants for motion.div
+  // Animation variants for motion.div - 3D spring animation
   const modalVariants = {
     hidden: {
       opacity: 0,
       scale: 0.95,
       y: 20,
+      rotateX: -10,
     },
     visible: {
       opacity: 1,
       scale: 1,
       y: 0,
+      rotateX: 0,
       transition: {
-        duration: 0.2,
+        type: "spring" as const,
+        stiffness: 300,
+        damping: 30,
       },
     },
     exit: {
       opacity: 0,
       scale: 0.95,
       y: 20,
+      rotateX: 10,
       transition: {
-        duration: 0.15,
+        type: "spring" as const,
+        stiffness: 300,
+        damping: 30,
       },
     },
   };
@@ -221,111 +251,126 @@ function Modal(properties: ModalProps) {
     return () => setIsMounted(false);
   }, []);
 
-  // Prevent rendering if not open or not mounted or portal root not found
-  if (!isOpen || !isMounted || !modalRoot) return;
+  // Prevent rendering if not mounted or portal root not found
+  if (!isMounted || !modalRoot) return null;
 
   // Use ReactDOM.createPortal to render the modal into #modal-root
   return ReactDOM.createPortal(
-    <div
-      className={`${baseContainerStyles}`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      {/* Backdrop with animation */}
-      <motion.div
-        className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
-        variants={backdropVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        onClick={onClose} // Close on backdrop click
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          className={`${baseContainerStyles}`}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          style={{ perspective: "1000px" }}
+        >
+          {/* Backdrop with animation */}
+          <motion.div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={onClose} // Close on backdrop click
+          />
 
-      {/* Modal Content with animation */}
-      <motion.div
-        ref={modalReference}
-        className={`${baseContentStyles} ${sizeStyles} relative`}
-        style={{ overflowX: "hidden" }}
-        variants={modalVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        role="document"
-        onClick={(event) => event.stopPropagation()}
-      >
-        {/* Header: Only render if close button is shown */}
-        {!hideClose && (
-          <div
-            className={`flex items-center justify-between border-b border-border p-4 ${variantStyles.header}`}
+          {/* Modal Content with animation */}
+          <motion.div
+            ref={modalReference}
+            className={`${baseContentStyles} ${sizeStyles} relative`}
+            style={{ overflowX: "hidden" }}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            role="document"
+            onClick={(event) => event.stopPropagation()}
           >
-            <h2
-              id="modal-title"
-              className="text-lg font-medium text-foreground"
-            >
-              {title}
-            </h2>
-            <IconButton
-              variant="close"
-              iconSize={buttonSize}
-              buttonSize={buttonSize}
-              onClick={onClose}
-              ariaLabel="Close modal"
-              className="hover:text-red text-foreground transition-colors"
-            />
-          </div>
-        )}
-
-        {/* Body */}
-        <div className="grow overflow-x-hidden overflow-y-auto p-5">
-          {message && <p className="mb-4 text-sm text-foreground">{message}</p>}
-          {children}
-        </div>
-
-        {/* Footer */}
-        {(onSave || onConfirm || variant === "confirmation") && (
-          <div
-            className={`flex ${
-              hideCancelButton ? "justify-center" : "justify-end"
-            } gap-3 border-t border-border px-4 py-3 ${variantStyles.footer}`}
-          >
-            {!hideCancelButton && (
-              <Button
-                onClick={onClose}
-                ariaLabel={cancelLabel}
-                variant="secondary"
-                buttonSize={buttonSize}
-                className="rounded-lg bg-surface/60 px-4 py-2 font-medium text-foreground transition-colors hover:bg-surface/90"
+            {/* Header: Only render if close button is shown */}
+            {!hideClose && (
+              <div
+                className={`flex items-center justify-between border-b border-border p-4 ${variantStyles.header}`}
               >
-                {cancelLabel}
-              </Button>
+                <h2
+                  id="modal-title"
+                  className="text-lg font-medium text-foreground"
+                >
+                  {title}
+                </h2>
+                <IconButton
+                  variant="close"
+                  iconSize={buttonSize}
+                  buttonSize={buttonSize}
+                  onClick={onClose}
+                  ariaLabel="Close modal"
+                  className="hover:text-red text-foreground transition-colors"
+                />
+              </div>
             )}
-            {variant === "form" && onSave && (
-              <Button
-                type="button"
-                onClick={onSave}
-                disabled={saveDisabled}
-                text={saveLabel}
-                buttonSize={buttonSize}
-                variant="primary"
-                className="px-8 py-3 text-lg"
+
+            {/* Body */}
+            <div className="relative grow overflow-x-hidden overflow-y-auto p-5">
+              <div className="relative z-10">
+                {message && (
+                  <p className="mb-4 text-sm text-foreground">{message}</p>
+                )}
+                {children}
+              </div>
+              <ProgressiveBlur
+                direction="up"
+                intensity={0.3}
+                height="50px"
+                className="pointer-events-none z-0"
               />
-            )}
-            {variant === "confirmation" && onConfirm && (
-              <Button
-                onClick={onConfirm}
-                ariaLabel={confirmLabel}
-                variant={isDanger ? "danger" : "primary"}
-                buttonSize={buttonSize}
-                className={`rounded-lg px-4 py-2 font-medium transition-colors ${variantStyles.confirmButton}`}
+            </div>
+
+            {/* Footer */}
+            {(onSave || onConfirm || variant === "confirmation") && (
+              <div
+                className={`flex ${
+                  hideCancelButton ? "justify-center" : "justify-end"
+                } gap-3 border-t border-border px-4 py-3 ${variantStyles.footer}`}
               >
-                {confirmLabel}
-              </Button>
+                {!hideCancelButton && (
+                  <Button
+                    onClick={onClose}
+                    ariaLabel={cancelLabel}
+                    variant="secondary"
+                    buttonSize={buttonSize}
+                    className="rounded-lg bg-surface/60 px-4 py-2 font-medium text-foreground transition-colors hover:bg-surface/90"
+                  >
+                    {cancelLabel}
+                  </Button>
+                )}
+                {variant === "form" && onSave && (
+                  <Button
+                    type="button"
+                    onClick={onSave}
+                    disabled={saveDisabled}
+                    text={saveLabel}
+                    buttonSize={buttonSize}
+                    variant="primary"
+                    className="px-8 py-3 text-lg"
+                  />
+                )}
+                {variant === "confirmation" && onConfirm && (
+                  <Button
+                    onClick={onConfirm}
+                    ariaLabel={confirmLabel}
+                    variant={isDanger ? "danger" : "primary"}
+                    buttonSize={buttonSize}
+                    className={`rounded-lg px-4 py-2 font-medium transition-colors ${variantStyles.confirmButton}`}
+                  >
+                    {confirmLabel}
+                  </Button>
+                )}
+              </div>
             )}
-          </div>
-        )}
-      </motion.div>
-    </div>,
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
     modalRoot, // Target element for the portal
   );
 }

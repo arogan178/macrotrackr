@@ -53,7 +53,7 @@ function WeeklyAverageCard({ weightLog, isLoading }: WeeklyAverageCardProps) {
 
   return (
     <CardContainer>
-      <h3 className="mb-2 text-sm font-medium text-foreground">
+      <h3 className="mb-2 text-sm font-medium tracking-wider text-foreground uppercase">
         Weekly Average
       </h3>
       {renderContent()}

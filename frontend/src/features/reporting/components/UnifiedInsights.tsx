@@ -139,7 +139,7 @@ function UnifiedInsights({
           textColor="text-foreground"
         >
           <div className="flex h-full flex-col">
-            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+            <div className="mb-2 flex items-center justify-between text-xs tracking-wider text-muted uppercase">
               <span>Logging frequency</span>
               <span>Intake variation</span>
             </div>
@@ -164,7 +164,7 @@ function UnifiedInsights({
           textColor="text-foreground"
         >
           <div className="flex h-full flex-col justify-between">
-            <div className="mb-2 flex justify-between text-xs text-muted">
+            <div className="mb-2 flex justify-between text-xs tracking-wider text-muted uppercase">
               <span>Current: {macroBalance.currentRatio}</span>
               <span>Target: {macroBalance.idealRatio}</span>
             </div>
@@ -227,7 +227,7 @@ function UnifiedInsights({
           textColor="text-foreground"
         >
           <div className="flex h-full flex-col">
-            <div className="mb-2 flex items-center justify-between text-xs text-muted">
+            <div className="mb-2 flex items-center justify-between text-xs tracking-wider text-muted uppercase">
               <span>Protein quality</span>
               <span>Macro balance</span>
             </div>
