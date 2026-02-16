@@ -17,7 +17,10 @@ interface ClerkSignUpFormProps {
   redirectTo?: string;
 }
 
-export function ClerkSignUpForm({ onSwitchToSignIn, redirectTo }: ClerkSignUpFormProps) {
+export function ClerkSignUpForm({
+  onSwitchToSignIn,
+  redirectTo,
+}: ClerkSignUpFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
   const { showNotification } = useStore();
@@ -56,8 +59,8 @@ export function ClerkSignUpForm({ onSwitchToSignIn, redirectTo }: ClerkSignUpFor
   };
 
   // Handle email/password sign-up
-  const handleEmailSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailSignUp = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     if (!isLoaded || !signUp) {
       showNotification("Authentication not ready. Please try again.", "error");
@@ -78,7 +81,10 @@ export function ClerkSignUpForm({ onSwitchToSignIn, redirectTo }: ClerkSignUpFor
         // Sign-up complete, set session and redirect to auth-ready
         // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
-        navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
+        navigate({
+          to: "/auth-ready",
+          search: { redirectTo: redirectTo || "/home" },
+        });
       } else if (result.status === "missing_requirements") {
         // Email verification required
         await signUp.prepareEmailAddressVerification({
@@ -102,8 +108,8 @@ export function ClerkSignUpForm({ onSwitchToSignIn, redirectTo }: ClerkSignUpFor
   };
 
   // Handle verification code submission
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleVerify = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     if (!isLoaded || !signUp) return;
 
@@ -119,7 +125,10 @@ export function ClerkSignUpForm({ onSwitchToSignIn, redirectTo }: ClerkSignUpFor
         // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
         showNotification("Email verified successfully!", "success");
-        navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
+        navigate({
+          to: "/auth-ready",
+          search: { redirectTo: redirectTo || "/home" },
+        });
       } else {
         showNotification(
           "Invalid verification code. Please try again.",

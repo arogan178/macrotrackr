@@ -4,7 +4,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import CardContainer from "@/components/form/CardContainer";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
-import { CalorieIcon, GithubIcon,GoogleIcon } from "@/components/ui/Icons";
+import { CalorieIcon, GithubIcon, GoogleIcon } from "@/components/ui/Icons";
 import { useLogin } from "@/hooks/auth/useAuthQueries";
 import { useMutationErrorHandler } from "@/hooks/useMutationErrorHandler";
 import { useStore } from "@/store/store";
@@ -15,7 +15,7 @@ interface LoginFormProps {
 }
 
 function FormLogin({ onForgotPassword }: LoginFormProps) {
-  const navigate = useNavigate();
+  const _navigate = useNavigate();
   const search = useSearch({ from: "/login" }) as { returnTo?: string };
   const { isLoaded, signIn } = useSignIn();
   const redirectTo = search.returnTo || "/home";
@@ -79,7 +79,7 @@ function FormLogin({ onForgotPassword }: LoginFormProps) {
       console.error("Social sign-in error:", error);
       showNotification(
         error instanceof Error ? error.message : "Social sign-in failed",
-        "error"
+        "error",
       );
     }
   }

@@ -5,10 +5,11 @@ import Modal from "@/components/ui/Modal";
 import { MacroEntry } from "@/types/macro";
 
 interface EditModalProps {
-  entry: MacroEntry;
+  entry: MacroEntry | undefined;
   onSave: (entry: MacroEntry) => void;
   onClose: () => void;
   isSaving: boolean;
+  isOpen: boolean;
 }
 
 export default function EditModal({
@@ -16,51 +17,67 @@ export default function EditModal({
   onSave,
   onClose,
   isSaving,
+  isOpen,
 }: EditModalProps) {
-  const [editedEntry, setEditedEntry] = useState<MacroEntry>({ ...entry });
+  const [editedEntry, setEditedEntry] = useState<MacroEntry | null>(null);
   const [formValid, setFormValid] = useState(true);
 
   // Update editedEntry when entry prop changes (to handle fresh data from cache)
   useEffect(() => {
-    setEditedEntry({ ...entry });
+    if (entry) {
+      setEditedEntry({ ...entry });
+    }
   }, [entry]);
 
   // Validate form whenever entry changes
   useEffect(() => {
-    const isValid =
-      editedEntry.mealName.trim() !== "" &&
-      editedEntry.protein >= 0 &&
-      editedEntry.carbs >= 0 &&
-      editedEntry.fats >= 0;
+    if (editedEntry) {
+      const isValid =
+        editedEntry.mealName.trim() !== "" &&
+        editedEntry.protein >= 0 &&
+        editedEntry.carbs >= 0 &&
+        editedEntry.fats >= 0;
 
-    setFormValid(isValid);
+      setFormValid(isValid);
+    }
   }, [editedEntry]);
 
   const handleInputChange = (field: keyof MacroEntry, value: string) => {
-    setEditedEntry((previous) => ({
-      ...previous,
-      [field]: field === "mealName" ? value : Number(value) || 0,
-    }));
+    setEditedEntry((previous) =>
+      previous
+        ? {
+            ...previous,
+            [field]: field === "mealName" ? value : Number(value) || 0,
+          }
+        : null,
+    );
   };
 
   const handleNumberChange = (
     field: keyof MacroEntry,
     value: number | undefined,
   ) => {
-    setEditedEntry((previous) => ({
-      ...previous,
-      [field]: value ?? 0,
-    }));
+    setEditedEntry((previous) =>
+      previous
+        ? {
+            ...previous,
+            [field]: value ?? 0,
+          }
+        : null,
+    );
   };
 
   const handleSave = () => {
-    if (!formValid) return;
+    if (!formValid || !editedEntry) return;
     onSave(editedEntry);
   };
 
+  // Don't render if no entry data
+  if (!editedEntry) return null;
+
   return (
     <Modal
-      isOpen={true}
+      isOpen={isOpen}
       onClose={onClose}
       title="Edit Nutrition Entry"
       variant="form"
@@ -80,21 +97,27 @@ export default function EditModal({
           <NumberField
             label="Protein (g)"
             value={editedEntry.protein}
-            onChange={(value) => handleNumberChange("protein", value)}
+            onChange={(value: number | undefined) =>
+              handleNumberChange("protein", value)
+            }
             min={0}
             step={0.1}
           />
           <NumberField
             label="Carbs (g)"
             value={editedEntry.carbs}
-            onChange={(value) => handleNumberChange("carbs", value)}
+            onChange={(value: number | undefined) =>
+              handleNumberChange("carbs", value)
+            }
             min={0}
             step={0.1}
           />
           <NumberField
             label="Fats (g)"
             value={editedEntry.fats}
-            onChange={(value) => handleNumberChange("fats", value)}
+            onChange={(value: number | undefined) =>
+              handleNumberChange("fats", value)
+            }
             min={0}
             step={0.1}
           />

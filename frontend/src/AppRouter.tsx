@@ -9,8 +9,10 @@ import {
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
+import { AnimatePresence } from "motion/react";
 import React, { Suspense } from "react";
 
+import { PageTransition } from "@/components/animation";
 import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
@@ -44,7 +46,7 @@ const AuthReadyPage = React.lazy(
   () => import("@/features/auth/pages/AuthReadyPage"),
 );
 const SSOCallbackPage = React.lazy(
-  () => import("@/features/auth/pages/SSOCallbackPage"),
+  () => import("@/features/auth/pages/SsoCallbackPage"),
 );
 const ReportingPage = React.lazy(
   () => import("@/features/reporting/pages/ReportingPage"),
@@ -137,7 +139,11 @@ export const rootRoute = createRootRoute({
         <GlobalLoadingOverlay />
         <MainLayout>
           <Suspense fallback={<LoadingFallback />}>
-            <Outlet />
+            <AnimatePresence mode="wait">
+              <PageTransition key={globalThis.location.pathname}>
+                <Outlet />
+              </PageTransition>
+            </AnimatePresence>
           </Suspense>
         </MainLayout>
       </div>
