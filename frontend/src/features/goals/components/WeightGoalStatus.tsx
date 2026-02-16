@@ -117,7 +117,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl border border-border/50 bg-surface p-4 shadow-primary sm:p-6"
+      className="rounded-xl border border-border/50 bg-surface p-4 shadow-primary transition-all duration-200 hover:border-border sm:p-6"
     >
       {/* Header */}
       <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">

@@ -17,7 +17,9 @@ function InfoCard({
   const { border, text, dot } = COLOR_MAP[colorKey];
 
   return (
-    <div className={`rounded-xl border bg-surface-2 p-4 ${border}`}>
+    <div
+      className={`rounded-xl border bg-surface-2 p-4 shadow-card transition-colors duration-150 hover:border-border-2 hover:shadow-card-hover ${border}`}
+    >
       <div className="mb-2 flex items-center gap-2">
         {!icon && <div className={`h-2 w-2 rounded-full ${dot}`}></div>}
         {icon && <div className={text}>{icon}</div>}

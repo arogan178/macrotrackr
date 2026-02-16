@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 import Modal from "@/components/ui/Modal";
 import {
@@ -9,7 +9,7 @@ import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 
 import { WeightGoalFormValues } from "../types";
-import WeightGoalForm from "./WeightGoalForm";
+import WeightGoalForm, { WeightGoalFormHandle } from "./WeightGoalForm";
 
 interface WeightGoalModalProps {
   isOpen: boolean;
@@ -32,10 +32,12 @@ function WeightGoalModal({
   const updateWeightGoalMutation = useUpdateWeightGoal();
   const { showNotification } = useStore();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [canSave, setCanSave] = useState(false);
+  const formReference = useRef<WeightGoalFormHandle>(null);
 
   const handleSave = async (values: WeightGoalFormValues) => {
     setErrorMessage(null);
-    
+
     try {
       const hasExistingGoal =
         weightGoals && weightGoals.startingWeight !== undefined;
@@ -46,13 +48,16 @@ function WeightGoalModal({
 
       // Show success notification
       showNotification(
-        hasExistingGoal ? "Weight goal updated successfully!" : "Weight goal created successfully!",
-        "success"
+        hasExistingGoal
+          ? "Weight goal updated successfully!"
+          : "Weight goal created successfully!",
+        "success",
       );
 
       onClose();
     } catch (error: any) {
-      const message = error?.message || "Failed to save weight goal. Please try again.";
+      const message =
+        error?.message || "Failed to save weight goal. Please try again.";
       setErrorMessage(message);
       console.error("Save failed in WeightGoalModal:", error);
     }
@@ -61,6 +66,10 @@ function WeightGoalModal({
   const handleClose = () => {
     setErrorMessage(null);
     onClose();
+  };
+
+  const handleModalSave = () => {
+    formReference.current?.save();
   };
 
   const initialStartingWeight = weightGoals?.startingWeight ?? startingWeight;
@@ -76,7 +85,9 @@ function WeightGoalModal({
       onClose={handleClose}
       title={weightGoals ? "Edit Weight Goal" : "Set Weight Goal"}
       variant="form"
-      hideDefaultButtons={true}
+      onSave={handleModalSave}
+      saveDisabled={!canSave || isLoading}
+      saveLabel={weightGoals ? "Update Goal" : "Set Goal"}
       size="lg"
     >
       {errorMessage && (
@@ -85,13 +96,14 @@ function WeightGoalModal({
         </div>
       )}
       <WeightGoalForm
+        ref={formReference}
         startingWeight={initialStartingWeight}
         targetWeight={initialTargetWeight}
         tdee={tdee}
         weightGoals={weightGoals}
         isLoading={isLoading}
         onSave={handleSave}
-        onCancel={handleClose}
+        onCanSaveChange={setCanSave}
       />
     </Modal>
   );

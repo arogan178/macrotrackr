@@ -1,7 +1,6 @@
 import React from "react";
 
 import logoIcon from "/icon.png";
-import { Button } from "@/components/ui";
 
 interface LogoButtonProps {
   onClick?: () => void;
@@ -14,31 +13,31 @@ const LogoButton: React.FC<LogoButtonProps> = ({
   className = "",
   ariaLabel = "Go to home page",
 }) => (
-  <Button
+  <button
+    type="button"
     onClick={onClick}
     aria-label={ariaLabel}
-    className={`mr-2 flex items-center bg-gradient-to-r from-primary via-primary to-primary bg-clip-text font-extrabold tracking-wide text-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-gray-900 sm:mr-4 ${className}`}
-    variant="ghost"
+    className={`hover:bg-surface-hover mr-2 flex h-full cursor-pointer items-center rounded px-2 font-light tracking-wide text-primary transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:mr-4 ${className}`}
   >
     <span className="relative flex items-center">
       {/* Icon */}
       <img
         src={logoIcon}
         alt="" // decorative icon
-        className="inline-block h-16 w-16 drop-shadow-md"
+        className="inline-block h-8 w-8 drop-shadow-md sm:h-10 sm:w-10"
         aria-hidden="true"
-        width={64}
-        height={64}
+        width={40}
+        height={40}
         loading="eager"
         decoding="async"
         fetchPriority="high"
       />
-      {/* Gradient Text */}
-      <span className="relative z-10 text-2xl leading-none transition-shadow duration-300">
-        <span className="bg-clip-text text-primary">MacroTrackr</span>
+      {/* Logo Text - solid color per Memoria Design System (no gradients) */}
+      <span className="relative z-10 ml-1 text-xl leading-none transition-shadow duration-300 sm:text-2xl">
+        <span className="text-primary">MacroTrackr</span>
       </span>
     </span>
-  </Button>
+  </button>
 );
 
 export default LogoButton;
