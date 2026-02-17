@@ -220,7 +220,11 @@ Implication: static analysis is present, but test safety net is missing.
 
 ## Multi-track roadmaps
 
-## Roadmap A — Authentication and authorization consolidation
+## Roadmap A — Authentication and authorization consolidation ✅ COMPLETE
+
+> **Status**: Completed 2026-02-17
+> **Branch**: `feat/clerk-auth-cleanup`
+> **Merged to**: `develop`
 
 ### Goal
 
@@ -228,23 +232,23 @@ Single, predictable auth model (Clerk-first) across all routes and guards.
 
 ### Scope
 
-- `backend/src/middleware/auth.ts`
-- `backend/src/middleware/clerkAuth.ts`
-- `backend/src/middleware/pro-guard.ts`
-- `backend/src/modules/reporting/routes.ts`
-- Any routes/guards still typed against legacy `AuthenticatedContext`
+- ~~`backend/src/middleware/auth.ts`~~ — DELETED
+- `backend/src/middleware/clerkAuth.ts` — Active (global middleware)
+- `backend/src/middleware/clerk-guards.ts` — NEW (requireAuth, requirePro, checkFeatureLimit)
+- ~~`backend/src/middleware/pro-guard.ts`~~ — DELETED
+- All route modules — Updated to use ClerkAuthContext
 
 ### Milestones
 
-1. Build Clerk-compatible guard helpers (`requireAuth`, `requirePro`, `checkFeatureLimit`).
-2. Replace legacy middleware usages in reporting and pro guard paths.
-3. Add route-level integration tests for auth-required endpoints.
-4. Remove legacy JWT middleware from active codepaths.
+1. ✅ Build Clerk-compatible guard helpers (`requireAuth`, `requirePro`, `checkFeatureLimit`).
+2. ✅ Replace legacy middleware usages in reporting and pro guard paths.
+3. ⏳ Add route-level integration tests for auth-required endpoints. (Deferred to Roadmap B)
+4. ✅ Remove legacy JWT middleware from active codepaths.
 
 ### Success criteria
 
-- No route imports `middleware/auth.ts` in runtime auth flow.
-- All protected endpoints authenticate Clerk tokens consistently.
+- ✅ No route imports `middleware/auth.ts` in runtime auth flow.
+- ✅ All protected endpoints authenticate Clerk tokens consistently.
 
 ---
 
@@ -436,7 +440,7 @@ Sustain responsiveness as data and usage scale.
 
 ## Immediate actionable backlog (next 2 sprints)
 
-1. Replace legacy auth middleware usage in reporting/pro-guard paths.
+1. ~~Replace legacy auth middleware usage in reporting/pro-guard paths.~~ ✅ DONE
 2. Stand up initial test suite (frontend + backend integration).
 3. Add CI quality-gate workflow and make deploy depend on it.
 4. Refactor `useMacroQueries` totals field consistency + add tests.
