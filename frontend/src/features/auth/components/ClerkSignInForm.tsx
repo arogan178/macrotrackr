@@ -57,8 +57,8 @@ export function ClerkSignInForm({
   };
 
   // Handle email/password sign-in
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     if (!isLoaded || !signIn) {
       showNotification("Authentication not ready. Please try again.", "error");
@@ -122,7 +122,10 @@ export function ClerkSignInForm({
           }
           await setActive({ session: result.createdSessionId });
           showNotification("Signed in successfully!", "success");
-          navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
+          navigate({
+            to: "/auth-ready",
+            search: { redirectTo: redirectTo || "/home" },
+          });
 
           break;
         }
