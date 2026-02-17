@@ -2,8 +2,7 @@ import { Elysia, t } from "elysia";
 import { getMacroDensitySummary } from "./service";
 import { toCamelCase } from "../../lib/responses";
 import { db } from "../../db";
-import { authMiddleware } from "../../middleware/auth";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import { requireAuth } from "../../middleware/clerk-guards";
 
 // Response schema for nutrient density summary
 const NutrientDensityItemSchema = t.Object({
@@ -19,12 +18,10 @@ const NutrientDensitySummaryResponseSchema = t.Array(NutrientDensityItemSchema);
 
 export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
   .decorate("db", db)
-  .use(authMiddleware)
+  .use(requireAuth)
   .get(
     "/nutrient-density-summary",
-    async (context: any) => {
-      const { user, query } = context as AuthenticatedContext & { query?: Record<string, string | undefined> };
-      
+    async ({ authenticatedUser, query }: { authenticatedUser: { userId: number }; query?: Record<string, string | undefined> }) => {
       // Accepts: startDate, endDate, groupBy (e.g., week, month)
       const { startDate, endDate, groupBy } = query ?? {};
       
@@ -33,7 +30,7 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
         groupBy === "week" || groupBy === "month" ? groupBy : undefined;
       
       const summary = await getMacroDensitySummary({
-        userId: user.userId.toString(),
+        userId: authenticatedUser.userId.toString(),
         startDate,
         endDate,
         groupBy: groupByValue,
