@@ -1,4 +1,4 @@
-import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
+import { useAuth, useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
@@ -309,7 +309,7 @@ export function useResetPassword() {
  * Uses Clerk's API for password management
  */
 export function useChangePassword() {
-  const { user } = useUser();
+  const { user } = useClerkUser();
 
   return useMutation({
     mutationFn: async (data: ChangePasswordData): Promise<void> => {

@@ -89,79 +89,50 @@ export default function GoalsPage() {
           </div>
         }
       >
-        <AnimatePresence>
-          {ui.isResetModalOpen && (
-            <Modal
-              key="reset-modal"
-              isOpen={ui.isResetModalOpen}
-              onClose={() => ui.setResetModalOpen(false)}
-              title="Reset Goals"
-              variant="confirmation"
-              message="This will reset all your current goals and progress. Are you sure you want to continue?"
-              confirmLabel="Reset Goals"
-              cancelLabel="Cancel"
-              onConfirm={actions.resetGoals}
-              isDanger={true}
-              size="md"
-            />
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {ui.isDeleteConfirmModalOpen && (
-            <Modal
-              key="delete-weight-goal-confirm-modal"
-              isOpen={ui.isDeleteConfirmModalOpen}
-              onClose={actions.closeDeleteConfirmModal}
-              title="Delete Weight Goal"
-              variant="confirmation"
-              message="Are you sure you want to delete your current weight goal? This action cannot be undone."
-              confirmLabel="Delete Goal"
-              cancelLabel="Cancel"
-              onConfirm={actions.deleteWeightGoalConfirmed}
-              isDanger={true}
-              size="md"
-            />
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {ui.isHabitModalOpen && (
-            <HabitModal
-              key={
-                ui.habitModalMode === "edit" && ui.currentHabit
-                  ? `habit-modal-edit-${ui.currentHabit.id}`
-                  : "habit-modal-add"
-              }
-              isOpen={ui.isHabitModalOpen}
-              onClose={actions.closeHabitModal}
-              onSubmit={actions.submitHabit}
-              habit={ui.currentHabit}
-              mode={ui.habitModalMode}
-            />
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {ui.isLogWeightModalOpen && (
-            <LogWeightModal
-              key="log-weight-modal"
-              isOpen={ui.isLogWeightModalOpen}
-              onClose={actions.closeLogWeightModal}
-              initialWeight={user?.weight}
-            />
-          )}
-        </AnimatePresence>
-        <AnimatePresence>
-          {ui.isWeightGoalModalOpen && (
-            <WeightGoalModal
-              key="weight-goal-modal"
-              isOpen={ui.isWeightGoalModalOpen}
-              onClose={actions.closeWeightGoalModal}
-              startingWeight={user?.weight ?? 0}
-              targetWeight={safeTargetWeight}
-              tdee={nutritionProfile?.tdee ?? 0}
-              weightGoals={normalizedWeightGoals}
-            />
-          )}
-        </AnimatePresence>
+        <Modal
+          isOpen={ui.isResetModalOpen}
+          onClose={() => ui.setResetModalOpen(false)}
+          title="Reset Goals"
+          variant="confirmation"
+          message="This will reset all your current goals and progress. Are you sure you want to continue?"
+          confirmLabel="Reset Goals"
+          cancelLabel="Cancel"
+          onConfirm={actions.resetGoals}
+          isDanger={true}
+          size="md"
+        />
+        <Modal
+          isOpen={ui.isDeleteConfirmModalOpen}
+          onClose={actions.closeDeleteConfirmModal}
+          title="Delete Weight Goal"
+          variant="confirmation"
+          message="Are you sure you want to delete your current weight goal? This action cannot be undone."
+          confirmLabel="Delete Goal"
+          cancelLabel="Cancel"
+          onConfirm={actions.deleteWeightGoalConfirmed}
+          isDanger={true}
+          size="md"
+        />
+        <HabitModal
+          isOpen={ui.isHabitModalOpen}
+          onClose={actions.closeHabitModal}
+          onSubmit={actions.submitHabit}
+          habit={ui.currentHabit}
+          mode={ui.habitModalMode}
+        />
+        <LogWeightModal
+          isOpen={ui.isLogWeightModalOpen}
+          onClose={actions.closeLogWeightModal}
+          initialWeight={user?.weight}
+        />
+        <WeightGoalModal
+          isOpen={ui.isWeightGoalModalOpen}
+          onClose={actions.closeWeightGoalModal}
+          startingWeight={user?.weight ?? 0}
+          targetWeight={safeTargetWeight}
+          tdee={nutritionProfile?.tdee ?? 0}
+          weightGoals={normalizedWeightGoals}
+        />
         <div className="relative">
           {hasErrors ? (
             <GoalsErrorState
