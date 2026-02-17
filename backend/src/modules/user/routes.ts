@@ -16,6 +16,7 @@ import { hashPassword, verifyPassword } from "../../lib/password";
 import { SubscriptionService } from "../billing/subscription-service";
 import type { Database } from "bun:sqlite";
 import { logger } from "../../lib/logger";
+import { getInternalUserId } from "../../lib/clerk-utils";
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -33,45 +34,6 @@ interface UserDetailsResult {
   weight: number | null;
   gender: "male" | "female" | null;
   activity_level: number | null;
-}
-
-// Helper to get internal user ID from Clerk ID or email
-function getInternalUserId(
-  db: Database,
-  clerkUserId: string,
-  email?: string
-): number | null {
-  // First try to find by Clerk ID
-  const userByClerkId = safeQuery<{ id: number }>(
-    db,
-    "SELECT id FROM users WHERE clerk_id = ?",
-    [clerkUserId]
-  );
-
-  if (userByClerkId) {
-    return userByClerkId.id;
-  }
-
-  // Fall back to email lookup
-  if (email) {
-    const userByEmail = safeQuery<{ id: number }>(
-      db,
-      "SELECT id FROM users WHERE email = ?",
-      [email]
-    );
-
-    if (userByEmail) {
-      // Update the user with the Clerk ID for future lookups
-      safeExecute(
-        db,
-        "UPDATE users SET clerk_id = ? WHERE id = ?",
-        [clerkUserId, userByEmail.id]
-      );
-      return userByEmail.id;
-    }
-  }
-
-  return null;
 }
 
 export const userRoutes = (app: Elysia) =>
@@ -450,7 +412,15 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      // PUT /password - Change user password
+      /**
+       * PUT /password - Change user password
+       * 
+       * @deprecated This endpoint is deprecated and will be removed in v2.0.0.
+       * Clerk-authenticated users should use Clerk's password management instead.
+       * This endpoint only works for legacy users who haven't migrated to Clerk auth.
+       * 
+       * @see https://clerk.com/docs/custom-flows/passwords for Clerk password management
+       */
       .put(
         "/password",
         async (context: any) => {
@@ -459,6 +429,12 @@ export const userRoutes = (app: Elysia) =>
               db: Database;
               body?: Record<string, unknown>;
             };
+
+            // Log deprecation warning
+            logger.warn(
+              { operation: "deprecated_endpoint", endpoint: "/api/user/password" },
+              "DEPRECATED: /api/user/password endpoint called. This will be removed in v2.0.0."
+            );
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -531,10 +507,12 @@ export const userRoutes = (app: Elysia) =>
             200: t.Object({ success: t.Boolean(), message: t.String() }),
           },
           detail: {
-            summary: "[DEPRECATED] Change the current user's password",
+            summary: "[DEPRECATED] Change the current user's password - Will be removed in v2.0.0",
             description:
-              "This endpoint is deprecated for Clerk users. Use Clerk's password management instead.",
-            tags: ["User"],
+              "This endpoint is deprecated and will be removed in v2.0.0. " +
+              "Clerk-authenticated users should use Clerk's password management instead. " +
+              "This endpoint only works for legacy users who haven't migrated to Clerk auth.",
+            tags: ["User", "Deprecated"],
           },
         }
       )
