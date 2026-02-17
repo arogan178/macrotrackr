@@ -5,7 +5,7 @@ export * from "./components";
 export * from "./hooks";
 
 // Types
-export * from "./types";
+export * from "./Types";
 
 // Constants
-export * from "./constants";
+export * from "./Constants";

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import type { WeightGoalsResponse } from "@/features/goals/types";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -17,7 +18,7 @@ export function useWeightGoals() {
     queryKey: queryKeys.goals.weight(),
     queryFn: async (): Promise<WeightGoals | null> => {
       const data = await apiService.goals.getWeightGoals();
-      return normalizeWeightGoals(data, undefined);
+      return normalizeWeightGoals(data, undefined) ?? null;
     },
     ...queryConfigs.longLived,
     placeholderData: (previousData) => previousData,
@@ -116,7 +117,7 @@ export function useUpdateWeightGoal() {
       }
     },
     onSuccess: (data) => {
-      const updatedGoals = normalizeWeightGoals(data, undefined);
+      const updatedGoals = normalizeWeightGoals(data as WeightGoalsResponse, undefined);
       if (updatedGoals) {
         queryClient.setQueryData<WeightGoals>(
           queryKeys.goals.weight(),
@@ -147,16 +148,14 @@ export function useDeleteWeightGoal() {
   });
 }
 
-// Counter for generating unique optimistic IDs
-let optimisticIdCounter = 0;
-
 /**
  * Generate a unique client-side ID for optimistic updates
- * Uses a counter combined with timestamp to ensure uniqueness even with rapid successive calls
+ * Uses timestamp combined with random string for uniqueness without module-level state
+ * This approach is safe for SSR and React StrictMode
  */
 function generateOptimisticId(): string {
-  optimisticIdCounter += 1;
-  return `optimistic-${Date.now()}-${optimisticIdCounter}`;
+  const randomPart = Math.random().toString(36).slice(2, 9);
+  return `optimistic-${Date.now()}-${randomPart}`;
 }
 
 // Mutation hook for adding weight log entry with optimistic updates

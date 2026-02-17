@@ -16,6 +16,21 @@ import type { ButtonProps } from "./Types";
 type ButtonAllProps = ButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
 
+/**
+ * Enhanced Button component with multiple variants, loading states, and icon support.
+ *
+ * @example
+ * // Primary button with left icon
+ * <Button variant="primary" leftIcon={<PlusIcon />}>Add Item</Button>
+ *
+ * @example
+ * // Outline button with loading state
+ * <Button variant="outline" isLoading>Processing...</Button>
+ *
+ * @example
+ * // Ghost button with right icon
+ * <Button variant="ghost" rightIcon={<ArrowRightIcon />}>Continue</Button>
+ */
 function ButtonBase({
   children,
   text,
@@ -24,6 +39,8 @@ function ButtonBase({
   buttonSize = "md",
   icon,
   iconPosition = ICON_POSITIONS.RIGHT,
+  leftIcon,
+  rightIcon,
   isLoading = false,
   loadingText = DEFAULT_LOADING_TEXT,
   disabled = false,
@@ -41,26 +58,35 @@ function ButtonBase({
 
     const buttonBase =
       "inline-flex items-center justify-center font-medium text-sm gap-1.5 " +
-      "transition-colors duration-150 ease-out " +
-      "focus-visible:outline-2 focus-visible:outline-offset-2 " +
-      "rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
+      "transition-all duration-150 ease-out " +
+      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background " +
+      "rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed " +
+      "active:scale-[0.98]";
 
     const buttonVariants: Record<string, string> = {
       primary:
         "bg-primary text-background hover:bg-primary/85 active:bg-primary/70 " +
-        "disabled:hover:bg-primary focus-visible:outline-primary",
+        "disabled:hover:bg-primary focus-visible:ring-primary",
       secondary:
         "bg-surface-3 text-foreground border border-border hover:bg-surface-4 active:bg-surface-2 " +
-        "disabled:hover:bg-surface-3 focus-visible:outline-primary",
+        "disabled:hover:bg-surface-3 focus-visible:ring-primary",
+      neutral:
+        "bg-neutral-800 border border-neutral-700 text-white " +
+        "hover:bg-neutral-700 hover:border-neutral-600 " +
+        "active:bg-neutral-600 focus-visible:ring-neutral-500",
       danger:
         "bg-error/15 text-error border border-error/25 hover:bg-error/25 active:bg-error/35 " +
-        "disabled:hover:bg-error/15 focus-visible:outline-error",
+        "disabled:hover:bg-error/15 focus-visible:ring-error",
       success:
         "bg-success/15 text-success border border-success/25 hover:bg-success/25 active:bg-success/35 " +
-        "disabled:hover:bg-success/15 focus-visible:outline-success",
+        "disabled:hover:bg-success/15 focus-visible:ring-success",
       ghost:
         "bg-transparent text-muted hover:bg-surface-2 hover:text-foreground active:bg-surface-3 " +
-        "disabled:hover:bg-transparent focus-visible:outline-primary",
+        "disabled:hover:bg-transparent focus-visible:ring-primary",
+      outline:
+        "bg-transparent text-foreground border border-border hover:bg-surface-3 hover:border-primary/50 " +
+        "active:bg-surface-2 disabled:hover:bg-transparent disabled:hover:border-border " +
+        "focus-visible:ring-primary focus-visible:border-primary",
     };
 
     const widthStyles = fullWidth ? "w-full" : "";
@@ -73,6 +99,12 @@ function ButtonBase({
       className,
     ].join(" ");
   }, [buttonSize, variant, fullWidth, className]);
+
+  // Determine which icons to render (support both old and new API)
+  const effectiveLeftIcon =
+    leftIcon ?? (icon && iconPosition === ICON_POSITIONS.LEFT ? icon : null);
+  const effectiveRightIcon =
+    rightIcon ?? (icon && iconPosition === ICON_POSITIONS.RIGHT ? icon : null);
 
   const renderContent = () => {
     if (finalIsLoading) {
@@ -87,12 +119,16 @@ function ButtonBase({
     const content = children || text;
     return (
       <span className="flex items-center justify-center">
-        {icon && iconPosition === ICON_POSITIONS.LEFT && (
-          <span className="mr-2 flex items-center">{icon}</span>
+        {effectiveLeftIcon && (
+          <span className="mr-2 flex shrink-0 items-center">
+            {effectiveLeftIcon}
+          </span>
         )}
         {content && <span>{content}</span>}
-        {icon && iconPosition === ICON_POSITIONS.RIGHT && (
-          <span className="ml-2 flex items-center">{icon}</span>
+        {effectiveRightIcon && (
+          <span className="ml-2 flex shrink-0 items-center">
+            {effectiveRightIcon}
+          </span>
         )}
       </span>
     );

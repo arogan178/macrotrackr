@@ -15,14 +15,16 @@ export default function AtAGlanceSection({ averages }: AtAGlanceSectionProps) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.25 }}
-      className="mb-4 rounded-lg border border-border/50 bg-surface-2 p-4"
+      className="mb-4 rounded-lg border border-border/50 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface"
     >
       <h3 className="text-md mb-4 font-medium text-foreground">At a Glance</h3>
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4 ">
         {" "}
         {DAILY_AVERAGES_CONFIG.map((config, index) => (
           <div key={index} className="flex flex-col">
-            <span className="text-xs text-muted">Daily Average</span>
+            <span className="text-xs tracking-wider text-muted uppercase">
+              Daily Average
+            </span>
             <span className={`text-xl font-bold ${config.color}`}>
               <AnimatedNumber
                 value={Math.round(averages[config.key])}

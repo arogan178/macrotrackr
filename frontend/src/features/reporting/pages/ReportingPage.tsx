@@ -2,7 +2,11 @@ import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
 
 import { ProFeature } from "@/components/billing";
-import { DateRangeSelector, LineChartComponent } from "@/components/chart";
+import {
+  ChartCard,
+  DateRangeSelector,
+  LineChartComponent,
+} from "@/components/chart";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { useUser } from "@/hooks/auth/useAuthQueries";
@@ -206,40 +210,32 @@ export default function ReportingPage() {
                   {/* Charts */}
                   <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
                     <ProFeature>
-                      <motion.div
-                        layout
-                        className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal"
+                      <ChartCard
+                        title="Calorie Intake"
+                        className="h-100"
+                        minHeight={300}
                       >
-                        <h2 className="mb-6 text-lg font-semibold text-foreground">
-                          Calorie Intake
-                        </h2>
-                        <div className="h-80 ">
-                          <LineChartComponent
-                            data={dailySeries}
-                            lines={calorieChartLines}
-                            isLoading={isHistoryLoading || !dataProcessed}
-                            showNoDataMessage={chartShowNoDataMessage}
-                          />
-                        </div>
-                      </motion.div>
+                        <LineChartComponent
+                          data={dailySeries}
+                          lines={calorieChartLines}
+                          isLoading={isHistoryLoading || !dataProcessed}
+                          showNoDataMessage={chartShowNoDataMessage}
+                        />
+                      </ChartCard>
                     </ProFeature>
                     <ProFeature>
-                      <motion.div
-                        layout
-                        className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal"
+                      <ChartCard
+                        title="Macronutrient Intake"
+                        className="h-100"
+                        minHeight={300}
                       >
-                        <h2 className="mb-6 text-lg font-semibold text-foreground">
-                          Macronutrient Intake
-                        </h2>
-                        <div className="h-80">
-                          <LineChartComponent
-                            data={dailySeries}
-                            lines={macroChartLines}
-                            isLoading={isHistoryLoading || !dataProcessed}
-                            showNoDataMessage={chartShowNoDataMessage}
-                          />
-                        </div>
-                      </motion.div>
+                        <LineChartComponent
+                          data={dailySeries}
+                          lines={macroChartLines}
+                          isLoading={isHistoryLoading || !dataProcessed}
+                          showNoDataMessage={chartShowNoDataMessage}
+                        />
+                      </ChartCard>
                     </ProFeature>
                   </div>
                   {/* Unified Insights Dashboard */}

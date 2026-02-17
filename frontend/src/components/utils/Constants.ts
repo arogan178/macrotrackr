@@ -149,6 +149,7 @@ export const BUTTON_VARIANTS = {
   DANGER: "danger",
   SUCCESS: "success",
   GHOST: "ghost",
+  OUTLINE: "outline",
 } as const;
 
 // Icon button size mapping (square, for icon-only buttons)

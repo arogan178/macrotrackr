@@ -99,7 +99,7 @@ export default function NutritionInsights({
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           {/* Consistency Card */}
-          <div className="rounded-lg border border-border/30 bg-surface-2 p-4">
+          <div className="rounded-lg border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
             <div className="mb-3 flex items-center gap-2">
               <div
                 className={`rounded-lg p-2 ${isConsistent ? "bg-primary/10" : "bg-surface-3"}`}
@@ -126,7 +126,7 @@ export default function NutritionInsights({
           </div>
 
           {/* Protein Card */}
-          <div className="rounded-lg border border-border/30 bg-surface-2 p-4">
+          <div className="rounded-lg border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
             <div className="mb-3 flex items-center gap-2">
               <div
                 className={`rounded-lg p-2 ${proteinInsight.status === "good" ? "bg-success/10" : "bg-surface-3"}`}
@@ -145,7 +145,7 @@ export default function NutritionInsights({
           </div>
 
           {/* Carbs Card */}
-          <div className="rounded-lg border border-border/30 bg-surface-2 p-4">
+          <div className="rounded-lg border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
             <div className="mb-3 flex items-center gap-2">
               <div
                 className={`rounded-lg p-2 ${carbInsight.status === "stable" ? "bg-primary/10" : "bg-surface-3"}`}

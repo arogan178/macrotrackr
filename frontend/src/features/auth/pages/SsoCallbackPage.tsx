@@ -27,7 +27,7 @@ export default function SSOCallbackPage() {
     redirectTo?: string;
   };
   const [error, setError] = useState<string | null>(null);
-  const [isProcessing, setIsProcessing] = useState(true);
+  const [_isProcessing, setIsProcessing] = useState(true);
 
   const redirectTo = search.redirectTo || "/home";
 
@@ -89,7 +89,7 @@ export default function SSOCallbackPage() {
     }
 
     handleCallback();
-  }, [session, user, navigate]);
+  }, [session, user, navigate, redirectTo]);
 
   if (error) {
     return (
