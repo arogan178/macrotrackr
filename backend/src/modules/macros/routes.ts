@@ -2,7 +2,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { MacroSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import type { ClerkAuthContext } from "../../middleware/clerkAuth";
 import {
   safeQuery,
   safeExecute,
@@ -29,10 +29,12 @@ interface CacheService {
 }
 
 // Extended macros context type for type assertions
-type MacrosRouteContext = AuthenticatedContext & {
+// Uses internalUserId from ClerkAuthContext for database operations
+type MacrosRouteContext = ClerkAuthContext & {
   body?: Record<string, unknown>;
   params?: Record<string, string>;
   query: Record<string, string | undefined>;
+  request: Request;
   openFoodFactsApiClient?: {
     search: (query: string) => Promise<FoodProductResult[]>;
   };
@@ -92,24 +94,24 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/target",
         async (context: any) => {
-          const { user, db, request } = context as MacrosRouteContext & { db: Database };
+          const { internalUserId, db, request } = context as MacrosRouteContext & { db: Database };
 
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
 
-          loggerHelpers.apiRequest("GET", "/macros/target", user.userId, {
+          loggerHelpers.apiRequest("GET", "/macros/target", internalUserId ?? undefined, {
             correlationId,
           });
 
           const macroTargetResult = safeQuery<MacroTargetRow>(
             db,
             "SELECT * FROM macro_targets WHERE user_id = ?",
-            [user.userId]
+            [internalUserId]
           );
 
           // If no row exists, return defaults
           if (!macroTargetResult) {
-            loggerHelpers.dbQuery("SELECT", "macro_targets", user.userId, 0);
+            loggerHelpers.dbQuery("SELECT", "macro_targets", internalUserId ?? undefined, 0);
             return {
               macroTarget: {
                 proteinPercentage: 30,
@@ -127,7 +129,7 @@ export const macroRoutes = (app: Elysia) =>
             loggerHelpers.error(error as Error, {
               operation: "parse_locked_macros",
               path: "/macros/target",
-              userId: user.userId,
+              userId: internalUserId ?? undefined,
             });
             lockedMacros = [];
           }
@@ -160,7 +162,7 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/target",
         async (context: any) => {
-          const { user, db, body, request } = context as MacrosRouteContext & { db: Database };
+          const { internalUserId, db, body, request } = context as MacrosRouteContext & { db: Database };
 
           if (!body) {
             throw new Error("Request body is required");
@@ -169,7 +171,7 @@ export const macroRoutes = (app: Elysia) =>
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
 
-          loggerHelpers.apiRequest("PUT", "/macros/target", user.userId, {
+          loggerHelpers.apiRequest("PUT", "/macros/target", internalUserId ?? undefined, {
             correlationId,
           });
 
@@ -204,7 +206,7 @@ export const macroRoutes = (app: Elysia) =>
                updated_at = CURRENT_TIMESTAMP
              RETURNING protein_percentage, carbs_percentage, fats_percentage, locked_macros`,
             [
-              user.userId,
+              internalUserId,
               proteinPercentage,
               carbsPercentage,
               fatsPercentage,
@@ -227,7 +229,7 @@ export const macroRoutes = (app: Elysia) =>
             loggerHelpers.error(error as Error, {
               operation: "parse_saved_locked_macros",
               path: "/macros/target",
-              userId: user.userId,
+              userId: internalUserId ?? undefined,
             });
             lockedMacros = [];
           }
@@ -242,7 +244,7 @@ export const macroRoutes = (app: Elysia) =>
             ),
           };
 
-          loggerHelpers.dbQuery("UPSERT", "macro_targets", user.userId, 1);
+          loggerHelpers.dbQuery("UPSERT", "macro_targets", internalUserId ?? undefined, 1);
           return { macroTarget: macroTargetResponse };
         },
         {
@@ -261,7 +263,7 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/totals",
         async (context: any) => {
-          const { db, user, query } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, query } = context as MacrosRouteContext & { db: Database };
           let startDate = query?.startDate;
           let endDate = query?.endDate;
 
@@ -288,7 +290,7 @@ export const macroRoutes = (app: Elysia) =>
                     COALESCE(SUM(carbs), 0) AS carbs, 
                     COALESCE(SUM(fats), 0) AS fats
              FROM macro_entries WHERE user_id = ? AND entry_date >= ? AND entry_date <= ?`,
-            [user.userId, startDate, endDate]
+            [internalUserId, startDate, endDate]
           );
 
           if (!result) {
@@ -318,7 +320,7 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/history",
         async (context: any) => {
-          const { db, user, query } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, query } = context as MacrosRouteContext & { db: Database };
 
           // Parse pagination params
           const limit = Math.max(1, Math.min(Number(query?.limit) || 20, 100));
@@ -328,7 +330,7 @@ export const macroRoutes = (app: Elysia) =>
           const countResult = safeQuery<{ count: number }>(
             db,
             `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`,
-            [user.userId]
+            [internalUserId]
           );
           const total = countResult?.count || 0;
 
@@ -340,7 +342,7 @@ export const macroRoutes = (app: Elysia) =>
              WHERE user_id = ? 
              ORDER BY entry_date DESC, entry_time DESC, created_at DESC
              LIMIT ? OFFSET ?`,
-            [user.userId, limit, offset]
+            [internalUserId, limit, offset]
           );
 
           return {
@@ -374,7 +376,7 @@ export const macroRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { db, user, body } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, body } = context as MacrosRouteContext & { db: Database };
 
           if (!body) {
             throw new Error("Request body is required");
@@ -404,7 +406,7 @@ export const macroRoutes = (app: Elysia) =>
              VALUES (?, ?, ?, ?, ?, ?, ?, ?)
              RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at`,
             [
-              user.userId,
+              internalUserId,
               protein,
               carbs,
               fats,
@@ -438,7 +440,7 @@ export const macroRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { db, user, params } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, params } = context as MacrosRouteContext & { db: Database };
 
           const entryId = params?.id;
           if (!entryId) {
@@ -448,7 +450,7 @@ export const macroRoutes = (app: Elysia) =>
           const result = safeExecute(
             db,
             "DELETE FROM macro_entries WHERE id = ? AND user_id = ?",
-            [entryId, user.userId]
+            [entryId, internalUserId]
           );
 
           if (result.changes === 0) {
@@ -478,7 +480,7 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { db, user, params, body } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, params, body } = context as MacrosRouteContext & { db: Database };
 
           if (!body) {
             throw new Error("Request body is required");
@@ -509,7 +511,7 @@ export const macroRoutes = (app: Elysia) =>
           const setClause = fieldsToUpdate
             .map((field) => `${field} = ?`)
             .join(", ");
-          const queryParams = [...Object.values(updates), entryId, user.userId];
+          const queryParams = [...Object.values(updates), entryId, internalUserId];
 
           const result = safeQuery<MacroEntryRow>(
             db,
@@ -524,7 +526,7 @@ export const macroRoutes = (app: Elysia) =>
             const exists = safeQuery<{ id: number }>(
               db,
               "SELECT id FROM macro_entries WHERE id = ? AND user_id = ?",
-              [entryId, user.userId]
+              [entryId, internalUserId]
             );
 
             if (!exists) {
