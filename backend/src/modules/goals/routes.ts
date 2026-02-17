@@ -3,7 +3,7 @@ import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import type { ClerkAuthContext } from "../../middleware/clerkAuth";
 import {
   safeQuery,
   safeExecute,
@@ -47,30 +47,30 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight",
         async (context: any) => {
-          const { user, db, request } = context as AuthenticatedContext & { db: Database; request: Request };
+          const { internalUserId, db, request } = context as ClerkAuthContext & { db: Database; request: Request };
 
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
 
-          loggerHelpers.apiRequest("GET", "/goals/weight", user.userId, {
+          loggerHelpers.apiRequest("GET", "/goals/weight", internalUserId ?? undefined, {
             correlationId,
           });
 
           const weightGoalsResult = safeQuery<WeightGoalRow>(
             db,
             "SELECT id, user_id, starting_weight, target_weight, weight_goal, start_date, target_date, calorie_target, calculated_weeks, weekly_change, daily_change, created_at, updated_at FROM weight_goals WHERE user_id = ?",
-            [user.userId]
+            [internalUserId]
           );
 
           if (!weightGoalsResult) {
-            loggerHelpers.dbQuery("SELECT", "weight_goals", user.userId, 0);
+            loggerHelpers.dbQuery("SELECT", "weight_goals", internalUserId ?? undefined, 0);
             return null; // Return null if not found (matches schema)
           }
 
           // Get current weight from weight log (or fallback to starting weight)
           const currentWeight = getCurrentWeight(
             db,
-            user.userId,
+            internalUserId!,
             weightGoalsResult.starting_weight
           );
 
@@ -88,7 +88,7 @@ export const goalRoutes = (app: Elysia) =>
             dailyChange: weightGoalsResult.daily_change,
           };
 
-          loggerHelpers.dbQuery("SELECT", "weight_goals", user.userId, 1);
+          loggerHelpers.dbQuery("SELECT", "weight_goals", internalUserId ?? undefined, 1);
           return apiResponse;
         },
         {
@@ -104,7 +104,7 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight",
         async (context: any) => {
-          const { user, body, db, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+          const { internalUserId, body, db, request } = context as ClerkAuthContext & { db: Database; body?: Record<string, unknown>; request: Request };
 
           if (!body) {
             throw new Error("Request body is required");
@@ -115,7 +115,7 @@ export const goalRoutes = (app: Elysia) =>
             const existingGoal = safeQuery<{ id: number }>(
               db,
               "SELECT id FROM weight_goals WHERE user_id = ?",
-              [user.userId]
+              [internalUserId]
             );
 
             if (existingGoal) {
@@ -150,7 +150,7 @@ export const goalRoutes = (app: Elysia) =>
             // Get correlation ID from request headers if available
             const correlationId = request.headers.get("x-correlation-id") || undefined;
 
-            loggerHelpers.apiRequest("POST", "/goals/weight", user.userId, {
+            loggerHelpers.apiRequest("POST", "/goals/weight", internalUserId ?? undefined, {
               correlationId,
             });
 
@@ -162,7 +162,7 @@ export const goalRoutes = (app: Elysia) =>
               ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
               RETURNING *`,
               [
-                user.userId,
+                internalUserId,
                 startingWeight,
                 targetWeight,
                 weightGoal,
@@ -185,7 +185,7 @@ export const goalRoutes = (app: Elysia) =>
           // Get current weight from weight log (or fallback to starting weight)
           const currentWeight = getCurrentWeight(
             db,
-            user.userId,
+            internalUserId!,
             savedGoal.starting_weight
           );
 
@@ -223,7 +223,7 @@ export const goalRoutes = (app: Elysia) =>
       .put(
         "/weight",
         async (context: any) => {
-          const { user, body, db, request } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown>; request: Request };
+          const { internalUserId, body, db, request } = context as ClerkAuthContext & { db: Database; body?: Record<string, unknown>; request: Request };
 
           if (!body) {
             throw new Error("Request body is required");
@@ -258,7 +258,7 @@ export const goalRoutes = (app: Elysia) =>
             }>(
               db,
               "SELECT id, starting_weight FROM weight_goals WHERE user_id = ?",
-              [user.userId]
+              [internalUserId]
             );
 
             if (!existingGoal) {
@@ -272,7 +272,7 @@ export const goalRoutes = (app: Elysia) =>
             // Get correlation ID from request headers if available
             const correlationId = request.headers.get("x-correlation-id") || undefined;
 
-            loggerHelpers.apiRequest("PUT", "/goals/weight", user.userId, {
+            loggerHelpers.apiRequest("PUT", "/goals/weight", internalUserId ?? undefined, {
               correlationId,
             });
 
@@ -294,7 +294,7 @@ export const goalRoutes = (app: Elysia) =>
                 calculatedWeeks,
                 weeklyChange,
                 dailyChange,
-                user.userId,
+                internalUserId,
               ]
             );
 
@@ -313,7 +313,7 @@ export const goalRoutes = (app: Elysia) =>
           // Get current weight from weight log (or fallback to starting weight)
           const currentWeight = getCurrentWeight(
             db,
-            user.userId,
+            internalUserId!,
             savedGoal.starting_weight
           );
 
@@ -351,11 +351,11 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext & { db: Database };
+          const { internalUserId, db } = context as ClerkAuthContext & { db: Database };
 
           withTransaction(db, () => {
             safeExecute(db, "DELETE FROM weight_goals WHERE user_id = ?", [
-              user.userId,
+              internalUserId,
             ]);
           });
 
@@ -374,7 +374,7 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight-log",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext & { db: Database };
+          const { internalUserId, db } = context as ClerkAuthContext & { db: Database };
 
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
@@ -382,7 +382,7 @@ export const goalRoutes = (app: Elysia) =>
           const logs = safeQueryAll<Pick<WeightLogRow, "id" | "timestamp" | "weight">>(
             db,
             query,
-            [user.userId]
+            [internalUserId]
           );
 
           return logs;
@@ -400,7 +400,7 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight-log",
         async (context: any) => {
-          const { user, body, db } = context as AuthenticatedContext & { db: Database; body?: Record<string, unknown> };
+          const { internalUserId, body, db } = context as ClerkAuthContext & { db: Database; body?: Record<string, unknown> };
 
           if (!body) {
             throw new Error("Request body is required");
@@ -419,7 +419,7 @@ export const goalRoutes = (app: Elysia) =>
             `;
             safeExecute(db, insertWeightLogQuery, [
               newId,
-              user.userId,
+              internalUserId,
               timestamp,
               weight,
             ]);
@@ -428,11 +428,11 @@ export const goalRoutes = (app: Elysia) =>
               UPDATE user_details SET weight = ?, updated_at = CURRENT_TIMESTAMP
               WHERE user_id = ?
             `;
-            safeExecute(db, updateUserDetailQuery, [weight, user.userId]);
+            safeExecute(db, updateUserDetailQuery, [weight, internalUserId]);
 
             return {
               id: newId,
-              userId: user.userId.toString(),
+              userId: String(internalUserId),
               timestamp: timestamp,
               weight: weight,
             };
@@ -452,7 +452,7 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight-log/:id",
         async (context: any) => {
-          const { user, params, db } = context as AuthenticatedContext & { db: Database; params?: Record<string, string> };
+          const { internalUserId, params, db } = context as ClerkAuthContext & { db: Database; params?: Record<string, string> };
 
           const entryIdToDelete = params?.id;
           if (!entryIdToDelete) {
@@ -466,7 +466,7 @@ export const goalRoutes = (app: Elysia) =>
             const deletedEntryResult = safeQueryAll<{ id: string }>(
               db,
               findEntryQuery,
-              [entryIdToDelete, user.userId]
+              [entryIdToDelete, internalUserId]
             );
             const deletedEntry = deletedEntryResult[0];
 
@@ -496,7 +496,7 @@ export const goalRoutes = (app: Elysia) =>
             const latestEntryResult = safeQueryAll<{ weight: number; timestamp: string }>(
               db,
               findLatestQuery,
-              [user.userId]
+              [internalUserId]
             );
             const latestEntry = latestEntryResult[0];
 
@@ -507,7 +507,7 @@ export const goalRoutes = (app: Elysia) =>
               `;
               safeExecute(db, updateUserDetailQuery, [
                 latestEntry.weight,
-                user.userId,
+                internalUserId,
               ]);
             }
 

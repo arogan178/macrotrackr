@@ -15,7 +15,6 @@ import crypto from "crypto";
 import { emailService } from "../../lib/email-service";
 import { loggerHelpers } from "../../lib/logger";
 import { createJwtCookie } from "../../lib/auth-utils";
-import type { AuthenticatedContext } from "../../middleware/auth";
 import { logger } from "../../lib/logger";
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
@@ -58,7 +57,12 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/register",
         async (context: any) => {
-          const { body, db, jwt, set } = context as AuthenticatedContext & { body: Record<string, unknown> };
+          const { body, db, jwt, set } = context as { 
+            body: Record<string, unknown>; 
+            db: Database;
+            jwt: { sign: (payload: any) => Promise<string> };
+            set: { headers: Record<string, string> };
+          };
           const {
             email,
             password,
@@ -152,7 +156,12 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/login",
         async (context: any) => {
-          const { body, db, jwt, set } = context as AuthenticatedContext & { body: Record<string, unknown> };
+          const { body, db, jwt, set } = context as { 
+            body: Record<string, unknown>; 
+            db: Database;
+            jwt: { sign: (payload: any) => Promise<string> };
+            set: { headers: Record<string, string> };
+          };
           const { email, password } = body as { email: string; password: string };
 
           const user = safeQuery<UserRow>(
