@@ -43,10 +43,9 @@ const PricingCard: React.FC<PricingCardProps> = ({
   children,
 }) => (
   <div
-    tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative flex h-full flex-col rounded-xl border border-border bg-surface p-8 outline-none lg:p-10 ${focusRingColor} ${cardClassName}`}
+    className={`relative flex h-full flex-col rounded-xl border border-border bg-surface p-8 transition-all duration-200 outline-none hover:border-border-2 hover:bg-surface-2 lg:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
       <div className="absolute -top-4 left-1/2 -translate-x-1/2">

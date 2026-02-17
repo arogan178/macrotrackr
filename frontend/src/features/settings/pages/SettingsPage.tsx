@@ -27,12 +27,17 @@ import { useStore } from "@/store/store";
 type TabType = "profile" | "billing" | "accounts" | "security";
 
 // Valid tab values for validation
-const VALID_TABS: TabType[] = ["profile", "billing", "accounts", "security"];
+const VALID_TABS = new Set<TabType>([
+  "profile",
+  "billing",
+  "accounts",
+  "security",
+]);
 
 export default function SettingsPage() {
   // Read tab from URL search params
   const search = useSearch({ from: "/settings" }) as { tab?: string };
-  
+
   // Use TanStack Query for settings data and mutations
   const {
     data: settingsData,
@@ -70,9 +75,9 @@ export default function SettingsPage() {
 
   // Initialize active tab from URL param or default to "profile"
   const getInitialTab = (): TabType => {
-    const tabParam = search?.tab;
-    if (tabParam && VALID_TABS.includes(tabParam as TabType)) {
-      return tabParam as TabType;
+    const tabParameter = search?.tab;
+    if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
+      return tabParameter as TabType;
     }
     return "profile";
   };
@@ -85,9 +90,9 @@ export default function SettingsPage() {
 
   // Update tab when URL changes
   useEffect(() => {
-    const tabParam = search?.tab;
-    if (tabParam && VALID_TABS.includes(tabParam as TabType)) {
-      const newTab = tabParam as TabType;
+    const tabParameter = search?.tab;
+    if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
+      const newTab = tabParameter as TabType;
       if (newTab !== activeTab && !hasSettingsChanges) {
         setActiveTab(newTab);
       }

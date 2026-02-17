@@ -7,7 +7,7 @@ const FreeBillingView: React.FC<{
   isLoading: boolean;
 }> = ({ onUpgrade, isLoading }) => (
   <div className="space-y-6 text-center">
-    <div className="relative rounded-xl border border-border/50 bg-surface-2 p-6">
+    <div className="relative rounded-xl border border-border/50 bg-surface-2 p-6 transition-all duration-200 hover:border-border hover:bg-surface">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-warning/20 bg-warning/10">
         <StarIcon className="h-8 w-8 text-warning" />
       </div>

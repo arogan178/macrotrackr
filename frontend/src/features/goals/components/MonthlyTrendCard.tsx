@@ -52,7 +52,7 @@ function MonthlyTrendCard({ weightLog, isLoading }: MonthlyTrendCardProps) {
 
   return (
     <CardContainer>
-      <h3 className="mb-2 text-sm font-medium text-foreground">
+      <h3 className="mb-2 text-sm font-medium tracking-wider text-foreground uppercase">
         Monthly Trend
       </h3>
       {renderContent()}
