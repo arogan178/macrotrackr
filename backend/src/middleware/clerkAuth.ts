@@ -7,9 +7,8 @@ import { getInternalUserId } from "../lib/clerk-utils";
 import type { Database } from "bun:sqlite";
 
 // Define paths exempt from authentication checks
+// Note: Login and register paths removed - now handled by Clerk
 const AUTH_EXEMPT_PATHS = new Set([
-  "/api/auth/login",
-  "/api/auth/register",
   "/api/auth/validate-email",
   "/api/auth/forgot-password",
   "/api/auth/reset-password",
@@ -61,18 +60,22 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
   .resolve({ as: "scoped" }, async (context: any) => {
     const { auth, clerk, path, db, request } = context;
     
-    // Debug logging
-    logger.debug({ 
-      path, 
-      hasAuth: !!auth, 
-      authType: typeof auth,
-      hasClerk: !!clerk,
-      headers: request?.headers ? Object.fromEntries(request.headers.entries()) : 'no headers'
-    }, "Clerk auth middleware called");
+    // Debug logging - only in development
+    if (config.NODE_ENV === 'development') {
+      logger.debug({ 
+        path, 
+        hasAuth: !!auth, 
+        authType: typeof auth,
+        hasClerk: !!clerk,
+        headers: request?.headers ? Object.fromEntries(request.headers.entries()) : 'no headers'
+      }, "Clerk auth middleware called");
+    }
     
     // Skip authentication for exempt paths
     if (isExemptPath(path)) {
-      logger.debug({ path }, "Skipping auth for exempt path");
+      if (config.NODE_ENV === 'development') {
+        logger.debug({ path }, "Skipping auth for exempt path");
+      }
       return { user: null, clerkUserId: null, internalUserId: null };
     }
 
@@ -165,12 +168,15 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
 
       const userId = authResult?.userId;
       
-      logger.debug({ 
-        path, 
-        userId, 
-        sessionId: authResult?.sessionId,
-        hasAuthResult: !!authResult 
-      }, "Auth function called");
+      // Debug logging - only in development
+      if (config.NODE_ENV === 'development') {
+        logger.debug({ 
+          path, 
+          userId, 
+          sessionId: authResult?.sessionId,
+          hasAuthResult: !!authResult 
+        }, "Auth function called");
+      }
       
       if (!userId) {
         logger.warn(
@@ -190,12 +196,15 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
 
       const email = clerkUser?.emailAddresses?.[0]?.emailAddress;
       
-      logger.debug({ 
-        path, 
-        userId, 
-        email,
-        firstName: clerkUser?.firstName 
-      }, "User authenticated successfully");
+      // Debug logging - only in development
+      if (config.NODE_ENV === 'development') {
+        logger.debug({ 
+          path, 
+          userId, 
+          email,
+          firstName: clerkUser?.firstName 
+        }, "User authenticated successfully");
+      }
 
       // Look up internal user ID from database
       const internalUserId = db 
