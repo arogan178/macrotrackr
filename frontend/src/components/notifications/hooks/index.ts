@@ -1,1 +1,1 @@
-export { useNotificationManager } from "./useNotificationManager";
+export { useNotificationManager } from "./UseNotificationManager";
