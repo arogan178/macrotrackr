@@ -29,7 +29,7 @@ function ChartCard({
   minHeight = 150,
 }: ChartCardProps) {
   return (
-    <CardContainer className={`h-full p-3 ${className}`}>
+    <CardContainer className={`relative h-full p-3 ${className}`}>
       <motion.div
         layout
         initial={{ opacity: 0 }}

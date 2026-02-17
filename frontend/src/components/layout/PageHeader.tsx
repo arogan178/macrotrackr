@@ -2,11 +2,15 @@
 
 import { ReactNode } from "react";
 
+import TextGenerateEffect from "@/components/animation/TextGenerateEffect";
+
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
   hasChanges?: boolean;
   children?: ReactNode; // For tab navigation or badges
+  /** Enable animated text reveal effect for the title */
+  animateTitle?: boolean;
 }
 
 export const PageHeader = ({
@@ -14,12 +18,23 @@ export const PageHeader = ({
   subtitle,
   hasChanges = false,
   children,
+  animateTitle = false,
 }: PageHeaderProps) => (
   <div className="flex flex-col items-start justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-center">
     {/* Left Side: Title and subtitle */}
     <div>
-      <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-        {title}
+      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+        {animateTitle ? (
+          <TextGenerateEffect
+            text={title}
+            mode="word"
+            speed={0.1}
+            duration={0.5}
+            className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
+          />
+        ) : (
+          title
+        )}
       </h1>
       {subtitle && <p className="mt-1 max-w-2xl text-muted">{subtitle}</p>}
     </div>

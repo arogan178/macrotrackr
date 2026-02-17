@@ -95,7 +95,7 @@ export default function ProductPreviewSection({
                 className="group min-w-70 shrink-0 snap-start overflow-hidden rounded-xl bg-surface ring-1 ring-border md:min-w-100"
                 initial={{ opacity: 0, y: 12 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: index * 0.06 }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
                 viewport={{ once: true, amount: 0.3 }}
               >
                 <img

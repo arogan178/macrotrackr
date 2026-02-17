@@ -1,5 +1,4 @@
 import { useLoaderData } from "@tanstack/react-router";
-import { AnimatePresence } from "motion/react";
 import { useCallback } from "react";
 
 import { homeRoute } from "@/AppRouter";
@@ -11,11 +10,28 @@ import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
 import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
 import EditModal from "@/features/macroTracking/components/EditModal";
 import EntryHistoryPanel from "@/features/macroTracking/components/EntryHistoryPanel";
-import { AddEntryLoadingSkeleton, DailySummaryLoadingSkeleton, HistoryLoadingSkeleton } from "@/features/macroTracking/components/HomePageSkeletons";
-import { useHistoryPagination, useHomeHeader, useNutritionProfile } from "@/features/macroTracking/hooks/useHomePage";
-import type { EditingEntry, MacroEntryInput } from "@/features/macroTracking/types/macro";
+import {
+  AddEntryLoadingSkeleton,
+  DailySummaryLoadingSkeleton,
+  HistoryLoadingSkeleton,
+} from "@/features/macroTracking/components/HomePageSkeletons";
+import {
+  useHistoryPagination,
+  useHomeHeader,
+  useNutritionProfile,
+} from "@/features/macroTracking/hooks/useHomePage";
+import type {
+  EditingEntry,
+  MacroEntryInput,
+} from "@/features/macroTracking/types/macro";
 import { useUser } from "@/hooks/auth/useAuthQueries";
-import { useAddMacroEntry, useDeleteMacroEntry, useMacroDailyTotals, useMacroTarget, useUpdateMacroEntry } from "@/hooks/queries/useMacroQueries";
+import {
+  useAddMacroEntry,
+  useDeleteMacroEntry,
+  useMacroDailyTotals,
+  useMacroTarget,
+  useUpdateMacroEntry,
+} from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import { getTodayISO } from "@/utils/dateUtilities";
@@ -121,7 +137,7 @@ export default function HomePage() {
 
   return (
     <DashboardPageContainer>
-      <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
+      <FeaturePage title={headerTitle} subtitle={headerSubtitle} animateTitle>
         <div className="space-y-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
             <div className="flex h-full flex-col space-y-6 lg:col-span-4">
@@ -178,18 +194,14 @@ export default function HomePage() {
             </div>
           </CardContainer>
 
-          {/* Edit Modal - Only render when editingEntry is not undefined */}
-          <AnimatePresence>
-            {editingEntry && (
-              <EditModal
-                key="edit-modal"
-                entry={editingEntry}
-                onSave={handleEditEntry}
-                onClose={handleCloseModal}
-                isSaving={isEditing}
-              />
-            )}
-          </AnimatePresence>
+          {/* Edit Modal - Modal handles its own AnimatePresence internally */}
+          <EditModal
+            entry={editingEntry}
+            onSave={handleEditEntry}
+            onClose={handleCloseModal}
+            isSaving={isEditing}
+            isOpen={!!editingEntry}
+          />
         </div>
       </FeaturePage>
     </DashboardPageContainer>

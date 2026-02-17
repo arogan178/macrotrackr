@@ -58,29 +58,29 @@ const ConnectedAccountsForm = () => {
     email: "",
   });
   const [isConnecting, setIsConnecting] = useState<ProviderKey | null>(null);
-  const [isDisconnecting, setIsDisconnecting] = useState(false);
+  const [_isDisconnecting, setIsDisconnecting] = useState(false);
 
   // Wrap both operations with reverification
   const createExternalAccount = useReverification(
-    (params: { strategy: string; redirectUrl: string }) =>
-      user?.createExternalAccount(params)
+    (parameters: { strategy: string; redirectUrl: string }) =>
+      user?.createExternalAccount(parameters),
   );
 
   const destroyExternalAccount = useReverification(
-    (account: { destroy: () => Promise<void> }) => account.destroy()
+    (account: { destroy: () => Promise<void> }) => account.destroy(),
   );
 
   // Get connected external accounts
   const externalAccounts = user?.externalAccounts ?? [];
   const connectedProviders = new Set(
-    externalAccounts.map((account) => account.provider as ProviderKey)
+    externalAccounts.map((account) => account.provider as ProviderKey),
   );
 
   // Check if user has password authentication
   const hasPassword = user?.passwordEnabled ?? false;
 
   // Check if disconnecting would leave user with no auth method
-  const wouldBeLastAuthMethod = (provider: ProviderKey): boolean => {
+  const wouldBeLastAuthMethod = (_provider: ProviderKey): boolean => {
     if (hasPassword) return false;
     return externalAccounts.length === 1;
   };
@@ -98,19 +98,26 @@ const ConnectedAccountsForm = () => {
       // 2. Return the external account with verification URL
       const result = await createExternalAccount({
         strategy: provider.strategy,
-        redirectUrl: window.location.origin + "/sso-callback?redirectTo=/settings?tab=accounts",
+        redirectUrl:
+          globalThis.location.origin +
+          "/sso-callback?redirectTo=/settings?tab=accounts",
       });
 
       // The result contains a verification URL that we need to redirect to
       // This is the OAuth provider's authorization URL
       if (result?.verification?.externalVerificationRedirectURL) {
         // Redirect to the OAuth provider
-        window.location.href = result.verification.externalVerificationRedirectURL.href;
+        globalThis.location.href =
+          result.verification.externalVerificationRedirectURL.href;
       }
     } catch (error) {
       console.error("Error connecting provider:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to connect provider";
-      if (!errorMessage.includes("cancelled") && !errorMessage.includes("Cancel")) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to connect provider";
+      if (
+        !errorMessage.includes("cancelled") &&
+        !errorMessage.includes("Cancel")
+      ) {
         showNotification(errorMessage, "error");
       }
       setIsConnecting(null);
@@ -136,7 +143,7 @@ const ConnectedAccountsForm = () => {
     }
 
     const account = externalAccounts.find(
-      (acc) => acc.provider === modal.provider
+      (accumulator) => accumulator.provider === modal.provider,
     );
 
     if (!account) {
@@ -151,12 +158,15 @@ const ConnectedAccountsForm = () => {
       await destroyExternalAccount(account);
       showNotification(
         `${PROVIDERS[modal.provider].name} account disconnected successfully.`,
-        "success"
+        "success",
       );
       closeModal();
     } catch (error) {
       console.error("Error disconnecting provider:", error);
-      const errorMessage = error instanceof Error ? error.message : "Failed to disconnect provider";
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Failed to disconnect provider";
       if (!errorMessage.includes("cancelled")) {
         showNotification(errorMessage, "error");
       }
@@ -204,7 +214,9 @@ const ConnectedAccountsForm = () => {
           <Button
             variant="ghost"
             buttonSize="sm"
-            onClick={() => handleDisconnectClick(providerKey, account.emailAddress || "")}
+            onClick={() =>
+              handleDisconnectClick(providerKey, account.emailAddress || "")
+            }
             className="text-muted hover:text-error"
             ariaLabel={`Disconnect ${provider.name}`}
           >
@@ -213,8 +225,11 @@ const ConnectedAccountsForm = () => {
         </div>
         <div className="mt-3 rounded-md bg-surface-3 px-3 py-2">
           <p className="text-xs text-muted">
-            <span className="font-medium text-foreground">Sign in with {provider.name}:</span>{" "}
-            Use <span className="font-medium text-primary">{displayEmail}</span> to access this account
+            <span className="font-medium text-foreground">
+              Sign in with {provider.name}:
+            </span>{" "}
+            Use <span className="font-medium text-primary">{displayEmail}</span>{" "}
+            to access this account
           </p>
         </div>
       </div>
@@ -251,13 +266,13 @@ const ConnectedAccountsForm = () => {
 
   // Get list of providers that can be connected
   const availableProviders = (Object.keys(PROVIDERS) as ProviderKey[]).filter(
-    (key) => !connectedProviders.has(key)
+    (key) => !connectedProviders.has(key),
   );
 
   // Get all login emails for summary
   const allLoginEmails = [
     ...(hasPassword ? [user?.primaryEmailAddress?.emailAddress] : []),
-    ...externalAccounts.map((acc) => acc.emailAddress),
+    ...externalAccounts.map((accumulator) => accumulator.emailAddress),
   ].filter(Boolean);
 
   if (!isLoaded) {
@@ -295,21 +310,24 @@ const ConnectedAccountsForm = () => {
         {/* Login summary */}
         <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
           <div className="flex items-start gap-3">
-            <EmailIcon className="h-5 w-5 flex-shrink-0 text-primary mt-0.5" />
+            <EmailIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
             <div>
-              <p className="font-medium text-foreground">Your account can be accessed with:</p>
+              <p className="font-medium text-foreground">
+                Your account can be accessed with:
+              </p>
               <div className="mt-2 flex flex-wrap gap-2">
                 {allLoginEmails.map((email) => (
                   <span
                     key={email}
-                    className="rounded-full bg-surface-2 px-3 py-1 text-sm font-medium text-foreground border border-border"
+                    className="rounded-full border border-border bg-surface-2 px-3 py-1 text-sm font-medium text-foreground"
                   >
                     {email}
                   </span>
                 ))}
               </div>
               <p className="mt-3 text-xs text-muted">
-                Use any of these emails/providers to sign in. All methods link to the same account.
+                Use any of these emails/providers to sign in. All methods link
+                to the same account.
               </p>
             </div>
           </div>
@@ -318,7 +336,7 @@ const ConnectedAccountsForm = () => {
         {/* Email/Password authentication status */}
         {hasPassword && (
           <div className="mb-6">
-            <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
+            <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Email & Password
             </h4>
             <div className="rounded-lg border border-border bg-surface-2 p-4">
@@ -343,8 +361,13 @@ const ConnectedAccountsForm = () => {
               </div>
               <div className="mt-3 rounded-md bg-surface-3 px-3 py-2">
                 <p className="text-xs text-muted">
-                  <span className="font-medium text-foreground">Sign in with password:</span>{" "}
-                  Use <span className="font-medium text-primary">{user?.primaryEmailAddress?.emailAddress}</span>
+                  <span className="font-medium text-foreground">
+                    Sign in with password:
+                  </span>{" "}
+                  Use{" "}
+                  <span className="font-medium text-primary">
+                    {user?.primaryEmailAddress?.emailAddress}
+                  </span>
                 </p>
               </div>
             </div>
@@ -354,7 +377,7 @@ const ConnectedAccountsForm = () => {
         {/* Connected social accounts */}
         {externalAccounts.length > 0 && (
           <div className="mb-6">
-            <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
+            <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Social Accounts
             </h4>
             <div className="space-y-3">
@@ -362,7 +385,7 @@ const ConnectedAccountsForm = () => {
                 renderConnectedAccount({
                   provider: account.provider,
                   emailAddress: account.emailAddress,
-                })
+                }),
               )}
             </div>
           </div>
@@ -371,12 +394,12 @@ const ConnectedAccountsForm = () => {
         {/* Available providers to connect */}
         {availableProviders.length > 0 && (
           <div>
-            <h4 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted">
+            <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Connect More Accounts
             </h4>
             <div className="space-y-4">
               {availableProviders.map((providerKey) =>
-                renderAvailableProvider(providerKey)
+                renderAvailableProvider(providerKey),
               )}
             </div>
           </div>
@@ -409,7 +432,9 @@ const ConnectedAccountsForm = () => {
             : `Are you sure you want to disconnect your ${modal.provider ? PROVIDERS[modal.provider].name : ""} account (${modal.email})? You'll need to verify your identity to complete this action.`
         }
         confirmLabel={modal.type === "warning" ? "Understood" : "Disconnect"}
-        onConfirm={modal.type === "warning" ? closeModal : handleDisconnectConfirm}
+        onConfirm={
+          modal.type === "warning" ? closeModal : handleDisconnectConfirm
+        }
         isDanger={modal.type !== "warning"}
         hideCancelButton={modal.type === "warning"}
       />
