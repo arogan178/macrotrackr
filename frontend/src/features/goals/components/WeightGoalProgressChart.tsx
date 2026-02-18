@@ -7,6 +7,7 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { LineChartComponent } from "@/components/chart";
+import type { ChartDataPoint } from "@/components/chart/Types";
 import { BarChartIcon, EmptyState } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
@@ -240,7 +241,7 @@ function WeightGoalProgressChart() {
       </div>
       <div className="grow">
         <LineChartComponent
-          data={chartData as any}
+          data={chartData as ChartDataPoint[]}
           lines={lines}
           isLoading={isLoading}
           error={error}

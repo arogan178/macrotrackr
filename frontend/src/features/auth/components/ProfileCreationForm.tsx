@@ -6,7 +6,7 @@ import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
 import { AUTH_ERROR_MESSAGES } from "@/features/auth/constants";
-import { queryClient } from "@/lib/queryClient";
+import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
@@ -262,10 +262,8 @@ export function ProfileCreationForm() {
     } catch (error) {
       console.error("[ProfileCreationForm] Profile creation error:", error);
       // Log additional context for debugging
-      if (error && typeof error === "object" && "status" in error) {
-        console.error(
-          `[ProfileCreationForm] Error status: ${(error as any).status}`,
-        );
+      if (error instanceof Error && hasStatus(error)) {
+        console.error(`[ProfileCreationForm] Error status: ${error.status}`);
       }
       showNotification(
         error instanceof Error ? error.message : "Failed to create profile",
