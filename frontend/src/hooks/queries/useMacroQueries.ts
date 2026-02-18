@@ -407,10 +407,10 @@ export function useUpdateMacroEntry() {
 
               return {
                 ...oldData,
-                totalCalories: oldData.totalCalories + caloriesDiff,
-                totalProtein: oldData.totalProtein + proteinDiff,
-                totalCarbs: oldData.totalCarbs + carbsDiff,
-                totalFat: oldData.totalFat + fatsDiff,
+                calories: oldData.calories + caloriesDiff,
+                protein: oldData.protein + proteinDiff,
+                carbs: oldData.carbs + carbsDiff,
+                fats: oldData.fats + fatsDiff,
               };
             },
           );
@@ -516,16 +516,16 @@ export function useDeleteMacroEntry() {
 
             return {
               ...oldData,
-              totalCalories: Math.max(
+              calories: Math.max(
                 0,
-                oldData.totalCalories - entryToDelete.calories,
+                oldData.calories - entryToDelete.calories,
               ),
-              totalProtein: Math.max(
+              protein: Math.max(
                 0,
-                oldData.totalProtein - entryToDelete.protein,
+                oldData.protein - entryToDelete.protein,
               ),
-              totalCarbs: Math.max(0, oldData.totalCarbs - entryToDelete.carbs),
-              totalFat: Math.max(0, oldData.totalFat - entryToDelete.fat),
+              carbs: Math.max(0, oldData.carbs - entryToDelete.carbs),
+              fats: Math.max(0, oldData.fats - entryToDelete.fat),
               entryCount: Math.max(0, oldData.entryCount - 1),
             };
           },
