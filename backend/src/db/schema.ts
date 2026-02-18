@@ -290,7 +290,7 @@ export function initializeSchema(db: Database) {
     }
   } catch (error) {
     logger.error({ error }, "    ❌ Failed migrating habits table; continuing with initialization");
-    try { db.exec("ROLLBACK;"); } catch {}
+    try { db.exec("ROLLBACK;"); } catch { /* ROLLBACK can fail if transaction not active */ }
   }
 
   // --- Indexes for Performance ---
