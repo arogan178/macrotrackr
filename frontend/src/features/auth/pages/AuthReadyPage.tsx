@@ -64,11 +64,14 @@ export default function AuthReadyPage() {
         try {
           await apiService.auth.syncUser(token || undefined);
           syncSuccess = true;
-        } catch (syncError: any) {
+        } catch (syncError: unknown) {
           // If it's a 401, the token might be invalid.
-          if (syncError?.status === 401) {
-            setError("Authentication failed. Please sign in again.");
-            return;
+          if (syncError instanceof Error && "status" in syncError) {
+            const errorWithStatus = syncError as { status: number };
+            if (errorWithStatus.status === 401) {
+              setError("Authentication failed. Please sign in again.");
+              return;
+            }
           }
         }
 

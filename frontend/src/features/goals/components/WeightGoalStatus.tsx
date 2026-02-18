@@ -204,13 +204,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           <>
             <ProgressBar
               progress={progressPercentage}
-              color={
-                isWeightLoss
-                  ? ("accent" as any)
-                  : isWeightGain
-                    ? ("green" as any)
-                    : ("blue" as any)
-              }
+              color={isWeightLoss ? "accent" : isWeightGain ? "green" : "blue"}
               height="md"
               className="mb-1"
             />
