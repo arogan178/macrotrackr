@@ -16,8 +16,20 @@ import { emailService } from "../../lib/email-service";
 import { loggerHelpers } from "../../lib/logger";
 import { createJwtCookie } from "../../lib/auth-utils";
 import { logger } from "../../lib/logger";
+import type { AuthenticatedContext } from "../../types";
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
+
+// Extended auth context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface AuthRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+  jwt?: { sign: (payload: any) => Promise<string> };
+  clerkClient?: any;
+}
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
@@ -29,7 +41,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/validate-email",
         async (context: any) => {
-          const { body, db } = context as { body: Record<string, unknown>; db: Database };
+          const { body, db } = context as AuthRouteContext;
           const email = (body as { email: string }).email;
           const existingUser = safeQuery<UserRow>(
             db,
@@ -57,9 +69,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/register",
         async (context: any) => {
-          const { body, db, jwt, set } = context as { 
-            body: Record<string, unknown>; 
-            db: Database;
+          const { body, db, jwt, set } = context as AuthRouteContext & {
             jwt: { sign: (payload: any) => Promise<string> };
             set: { headers: Record<string, string> };
           };
@@ -156,9 +166,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/login",
         async (context: any) => {
-          const { body, db, jwt, set } = context as { 
-            body: Record<string, unknown>; 
-            db: Database;
+          const { body, db, jwt, set } = context as AuthRouteContext & {
             jwt: { sign: (payload: any) => Promise<string> };
             set: { headers: Record<string, string> };
           };
@@ -210,7 +218,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/forgot-password",
         async (context: any) => {
-          const { body, db } = context as { body: Record<string, unknown>; db: Database };
+          const { body, db } = context as AuthRouteContext;
           const { email } = body as { email: string };
           
           loggerHelpers.auth("password_reset_requested", undefined, email);
@@ -257,7 +265,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/reset-password",
         async (context: any) => {
-          const { body, db } = context as { body: Record<string, unknown>; db: Database };
+          const { body, db } = context as AuthRouteContext;
           const { token, newPassword } = body as { token: string; newPassword: string };
 
           const user = safeQuery<UserRow>(
@@ -303,11 +311,7 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/clerk-sync",
         async (context: any) => {
-          const { db, user, clerkClient } = context as {
-            db: Database;
-            user: any;
-            clerkClient?: any;
-          };
+          const { db, user, clerkClient } = context as AuthRouteContext;
           
           if (!user?.clerkUserId) {
             throw new AuthenticationError("Unauthorized - No Clerk user ID found");
