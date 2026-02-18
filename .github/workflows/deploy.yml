@@ -11,7 +11,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  quality:
+    uses: ./.github/workflows/quality-gate.yml
+
   deploy-backend:
+    needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: backend
@@ -111,10 +115,10 @@ jobs:
 
         # Write frontend .env for build
         printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
-        
+
         echo "📋 Frontend env file contents (API URL):"
         grep VITE_API_URL .env || echo "⚠️ VITE_API_URL not found in .env"
-        
+
         export NODE_OPTIONS="--max-old-space-size=4096"
         bun run build
         unset NODE_OPTIONS
