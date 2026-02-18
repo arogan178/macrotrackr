@@ -2,6 +2,21 @@ import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persi
 import { QueryClient } from "@tanstack/react-query";
 import type { PersistedClient } from "@tanstack/react-query-persist-client";
 
+/**
+ * Error type that includes HTTP status code
+ * Used for API errors that have a status property
+ */
+export interface ErrorWithStatus extends Error {
+  status: number;
+}
+
+/**
+ * Type guard to check if an error has a status property
+ */
+export function hasStatus(error: Error): error is ErrorWithStatus {
+  return "status" in error && typeof (error as ErrorWithStatus).status === "number";
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -12,8 +27,8 @@ export const queryClient = new QueryClient({
       // Enhanced retry logic with different strategies for different error types
       retry: (failureCount, error) => {
         // Don't retry on 4xx errors (client errors) except for specific cases
-        if (error instanceof Error && "status" in error) {
-          const status = (error as any).status;
+        if (error instanceof Error && hasStatus(error)) {
+          const status = error.status;
 
           // Never retry authentication errors
           if (status === 401 || status === 403) {
@@ -64,11 +79,7 @@ export const queryClient = new QueryClient({
         const jitter = Math.random() * 0.3 * baseDelay;
 
         // Special handling for rate limiting
-        if (
-          error instanceof Error &&
-          "status" in error &&
-          (error as any).status === 429
-        ) {
+        if (error instanceof Error && hasStatus(error) && error.status === 429) {
           // Longer delays for rate limiting
           return Math.min(5000 * 2 ** attemptIndex, 60_000) + jitter;
         }
@@ -97,8 +108,8 @@ export const queryClient = new QueryClient({
       // Enhanced mutation retry logic
       retry: (failureCount, error) => {
         // Don't retry authentication errors
-        if (error instanceof Error && "status" in error) {
-          const status = (error as any).status;
+        if (error instanceof Error && hasStatus(error)) {
+          const status = error.status;
 
           if (status === 401 || status === 403) {
             return false;
@@ -145,11 +156,7 @@ export const queryClient = new QueryClient({
         const jitter = Math.random() * 0.2 * baseDelay;
 
         // Special handling for rate limiting
-        if (
-          error instanceof Error &&
-          "status" in error &&
-          (error as any).status === 429
-        ) {
+        if (error instanceof Error && hasStatus(error) && error.status === 429) {
           return Math.min(3000 * 2 ** attemptIndex, 30_000) + jitter;
         }
 
