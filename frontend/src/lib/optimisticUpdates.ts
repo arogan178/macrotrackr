@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+import { hasStatus } from "@/lib/queryClient";
+
 /**
  * Utility types for optimistic updates
  */
@@ -242,8 +244,8 @@ export const errorClassification = {
   isServerError: (error: unknown): boolean => {
     if (!(error instanceof Error)) return false;
 
-    if ("status" in error) {
-      const status = (error as any).status;
+    if (hasStatus(error)) {
+      const status = error.status;
       return status >= 500 && status < 600;
     }
 
@@ -256,8 +258,8 @@ export const errorClassification = {
   isRateLimitError: (error: unknown): boolean => {
     if (!(error instanceof Error)) return false;
 
-    if ("status" in error) {
-      const status = (error as any).status;
+    if (hasStatus(error)) {
+      const status = error.status;
       return status === 429;
     }
 
@@ -270,8 +272,8 @@ export const errorClassification = {
   isNonRetryableError: (error: unknown): boolean => {
     if (!(error instanceof Error)) return false;
 
-    if ("status" in error) {
-      const status = (error as any).status;
+    if (hasStatus(error)) {
+      const status = error.status;
       // Don't retry auth errors, validation errors, not found, etc.
       return (
         status === 401 ||
