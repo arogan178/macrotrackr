@@ -22,7 +22,7 @@ import { apiService } from "@/utils/apiServices";
 
 import MainLayout from "./components/layout/MainLayout";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
-import { queryClient, queryConfigs } from "./lib/queryClient";
+import { hasStatus, queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
 // Lazy loaded page components
@@ -119,11 +119,7 @@ async function safeFetch<T>(
   try {
     return await fetchFunction();
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "status" in error &&
-      (error as any).status === 401
-    ) {
+    if (error instanceof Error && hasStatus(error) && error.status === 401) {
       return defaultValue;
     }
     throw error;
