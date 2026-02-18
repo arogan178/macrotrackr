@@ -8,12 +8,39 @@ interface TooltipData {
   name: string;
   value: number;
   percentage?: number;
+  calories?: number;
+  count?: number;
   [key: string]: unknown;
+}
+
+/**
+ * Line chart payload entry from recharts
+ */
+interface LineChartPayloadEntry {
+  name: string;
+  value: number;
+  payload?: TooltipData;
+}
+
+/**
+ * Bar chart payload entry from recharts
+ */
+interface BarChartPayloadEntry {
+  payload: TooltipData;
+}
+
+/**
+ * Generic recharts payload entry that could be either line or bar chart
+ */
+interface RechartsPayloadEntry {
+  name?: string;
+  value?: number;
+  payload?: TooltipData;
 }
 
 export interface ChartTooltipProps {
   active?: boolean;
-  payload?: Array<{ payload: TooltipData }>;
+  payload?: Array<RechartsPayloadEntry>;
   selectedStat?: string;
   formatter?: (value: number, key?: string) => string;
 }
@@ -43,11 +70,11 @@ function ChartTooltip({
   // Check if this is a line chart payload (has .name and .value)
   // Try to find a line chart entry (has name and value)
   const lineEntry = payload.find(
-    (item) =>
-      typeof (item as any).name === "string" &&
+    (item): item is LineChartPayloadEntry =>
+      typeof item.name === "string" &&
       Object.prototype.hasOwnProperty.call(item, "value") &&
-      (item as any).name === selectedStat,
-  ) as { name: string; value: number; payload?: TooltipData } | undefined;
+      item.name === selectedStat,
+  );
 
   if (lineEntry && typeof lineEntry.value === "number") {
     value = lineEntry.value;
@@ -66,11 +93,11 @@ function ChartTooltip({
         : undefined;
   } else if (
     payload[0] &&
-    typeof (payload[0] as any).payload === "object" &&
-    (payload[0] as any).payload !== null
+    typeof payload[0].payload === "object" &&
+    payload[0].payload !== null
   ) {
     // Bar chart fallback
-    const data = (payload[0] as { payload: TooltipData }).payload;
+    const data = payload[0].payload;
     value =
       typeof data[selectedStat] === "number"
         ? (data[selectedStat] as number)
@@ -80,12 +107,8 @@ function ChartTooltip({
     label = typeof data.name === "string" ? data.name : undefined;
     percentage =
       typeof data.percentage === "number" ? data.percentage : undefined;
-    calories =
-      typeof (data as any).calories === "number"
-        ? (data as any).calories
-        : undefined;
-    count =
-      typeof (data as any).count === "number" ? (data as any).count : undefined;
+    calories = typeof data.calories === "number" ? data.calories : undefined;
+    count = typeof data.count === "number" ? data.count : undefined;
   }
 
   const unit = getUnitForStat(selectedStat);
@@ -193,6 +216,18 @@ export function BarValueTooltip({
 }
 
 /**
+ * Stacked bar chart payload data for macro breakdown
+ */
+interface StackedBarPayloadData {
+  period: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  calories?: number;
+  [key: string]: unknown;
+}
+
+/**
  * StackedBarPercentageTooltip - Reusable tooltip for stacked bar charts showing per-macro percentages + calories
  * Intended for MacroDensityBreakdown.
  */
@@ -203,12 +238,12 @@ export function StackedBarPercentageTooltip({
   labelKey = "period",
 }: {
   active?: boolean;
-  payload?: Array<{ payload: Record<string, any> }>;
+  payload?: Array<{ payload: StackedBarPayloadData }>;
   colors?: Record<string, string>; // e.g., { protein: '#34d399', carbs: '#60a5fa', fats: '#f87171' }
   labelKey?: string;
 }) {
   if (!active || !payload || payload.length === 0) return;
-  const data = payload[0].payload as Record<string, any>;
+  const data = payload[0].payload;
   const macroKeys = ["protein", "carbs", "fats"] as const;
 
   return (
