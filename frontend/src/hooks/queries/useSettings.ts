@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { queryConfigs } from "@/lib/queryClient";
+import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { apiService, UserDetailsResponse } from "@/utils/apiServices";
 
@@ -59,13 +59,13 @@ export function useSaveSettings() {
       const previousAuthUser = queryClient.getQueryData(queryKeys.auth.user());
 
       // Optimistically update settings
-      queryClient.setQueryData(queryKeys.settings.user(), (oldData: any) => {
+      queryClient.setQueryData(queryKeys.settings.user(), (oldData: UserDetailsResponse | undefined) => {
         if (!oldData) return oldData;
         return { ...oldData, ...variables };
       });
 
       // Optimistically update auth user data
-      queryClient.setQueryData(queryKeys.auth.user(), (oldData: any) => {
+      queryClient.setQueryData(queryKeys.auth.user(), (oldData: UserDetailsResponse | undefined) => {
         if (!oldData) return oldData;
         return { ...oldData, ...variables };
       });
@@ -100,8 +100,8 @@ export function useSaveSettings() {
     // Enhanced retry logic for settings
     retry: (failureCount, error) => {
       // Don't retry on validation errors (400, 422) or auth errors (401, 403)
-      if (error instanceof Error && "status" in error) {
-        const status = (error as any).status;
+      if (error instanceof Error && hasStatus(error)) {
+        const status = error.status;
         if (
           status === 400 ||
           status === 401 ||
