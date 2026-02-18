@@ -116,30 +116,16 @@ export function withErrorHandling<T extends any[], R>(
 }
 
 /**
- * Converts snake_case object keys to camelCase
+ * Centralized snake_case ↔ camelCase conversion utilities
+ * Re-exported from the dedicated mappers module for backward compatibility
  */
-export function toCamelCase<T extends Record<string, any>>(obj: T): any {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    const camelKey = key.replace(/_([a-z])/g, (_, letter) =>
-      letter.toUpperCase()
-    );
-    result[camelKey] = value;
-  }
-  return result;
-}
-
-/**
- * Converts camelCase object keys to snake_case
- */
-export function toSnakeCase<T extends Record<string, any>>(obj: T): any {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    const snakeKey = key.replace(
-      /[A-Z]/g,
-      (letter) => `_${letter.toLowerCase()}`
-    );
-    result[snakeKey] = value;
-  }
-  return result;
-}
+export {
+  toCamelCase,
+  toSnakeCase,
+  toCamelCaseString,
+  toSnakeCaseString,
+  transformKeysToCamel,
+  transformKeysToSnake,
+  transformArrayToCamel,
+  transformArrayToSnake,
+} from './mappers';
