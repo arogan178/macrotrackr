@@ -299,7 +299,10 @@ Establish regression protection and release confidence.
 
 ---
 
-## Roadmap C — Type-safety recovery
+## Roadmap C — Type-safety recovery ✅ COMPLETE
+
+> **Status**: Completed 2026-02-18
+> **Branch**: `feat/roadmap-c-type-safety`
 
 ### Goal
 
@@ -313,15 +316,15 @@ Reduce runtime uncertainty by removing strategic `any` usage.
 
 ### Milestones
 
-1. Create typed handler context aliases per module.
-2. Replace `context: any` in top-traffic backend routes.
-3. Replace `as any` in `useMacroQueries` and auth pages first.
-4. Add lint rule and PR check to prevent new `any` proliferation in critical paths.
+1. ✅ Create typed handler context aliases per module (`backend/src/types/context.ts`).
+2. ✅ Replace `context: any` in top-traffic backend routes (39 occurrences in 6 files).
+3. ✅ Replace `as any` in frontend (15 files, 137 insertions, 87 deletions).
+4. ✅ Add lint rule and PR check to prevent new `any` proliferation in critical paths (backend + frontend ESLint configs).
 
 ### Success criteria
 
-- `any` usage reduced significantly in runtime paths.
-- Fewer type assertions in auth/query/billing layers.
+- ✅ `any` usage reduced significantly in runtime paths.
+- ✅ Fewer type assertions in auth/query/billing layers.
 
 ---
 
