@@ -2,7 +2,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { MacroSchemas } from "./schemas";
-import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import type { AuthenticatedContext } from "../../types";
 import {
   safeQuery,
   safeExecute,
@@ -28,18 +28,18 @@ interface CacheService {
   set: <T>(key: string, value: T) => void;
 }
 
-// Extended macros context type for type assertions
-// Uses internalUserId from ClerkAuthContext for database operations
-type MacrosRouteContext = ClerkAuthContext & {
+// Extended macros context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface MacrosRouteContext extends AuthenticatedContext {
   body?: Record<string, unknown>;
   params?: Record<string, string>;
   query: Record<string, string | undefined>;
-  request: Request;
+  db: Database;
   openFoodFactsApiClient?: {
     search: (query: string) => Promise<FoodProductResult[]>;
   };
   cacheService?: CacheService;
-};
+}
 
 export const macroRoutes = (app: Elysia) =>
   app.group("/api/macros", (group) =>
@@ -94,7 +94,7 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/target",
         async (context: any) => {
-          const { internalUserId, db, request } = context as MacrosRouteContext & { db: Database };
+          const { internalUserId, db, request } = context as MacrosRouteContext;
 
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
@@ -162,7 +162,7 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/target",
         async (context: any) => {
-          const { internalUserId, db, body, request } = context as MacrosRouteContext & { db: Database };
+          const { internalUserId, db, body, request } = context as MacrosRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -263,7 +263,7 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/totals",
         async (context: any) => {
-          const { db, internalUserId, query } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, query } = context as MacrosRouteContext;
           let startDate = query?.startDate;
           let endDate = query?.endDate;
 
@@ -320,7 +320,7 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/history",
         async (context: any) => {
-          const { db, internalUserId, query } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, query } = context as MacrosRouteContext;
 
           // Parse pagination params
           const limit = Math.max(1, Math.min(Number(query?.limit) || 20, 100));
@@ -376,7 +376,7 @@ export const macroRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { db, internalUserId, body } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, body } = context as MacrosRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -440,7 +440,7 @@ export const macroRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { db, internalUserId, params } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, params } = context as MacrosRouteContext;
 
           const entryId = params?.id;
           if (!entryId) {
@@ -480,7 +480,7 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { db, internalUserId, params, body } = context as MacrosRouteContext & { db: Database };
+          const { db, internalUserId, params, body } = context as MacrosRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
