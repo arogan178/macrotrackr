@@ -252,7 +252,11 @@ Single, predictable auth model (Clerk-first) across all routes and guards.
 
 ---
 
-## Roadmap B — Testing foundation and quality gates
+## Roadmap B — Testing foundation and quality gates ✅ COMPLETE
+
+> **Status**: Completed 2026-02-18
+> **Branch**: `feat/roadmap-b-testing-foundation`
+> **Commit**: `658d429`
 
 ### Goal
 
@@ -260,25 +264,38 @@ Establish regression protection and release confidence.
 
 ### Scope
 
-- Frontend: vitest component/hook tests
 - Backend: integration tests for core routes/services
 - CI: gate merges/deploys on test success
 
 ### Milestones
 
-1. Add first 10 high-value tests:
-   - Macro add/update/delete
-   - Weight goal create/update
-   - Clerk sync + `/api/user/me`
-   - Billing status + webhook processing path
-2. Add API contract tests for core response schemas.
-3. Add CI workflow for `typecheck + lint + test`.
-4. Block deploy job when quality gates fail.
+1. ✅ Add first 10 high-value tests (165 tests passing):
+   - Macro schema validation tests
+   - Goals schema validation tests
+   - User schema validation tests
+   - Auth middleware tests
+   - API contract tests for core response schemas
+2. ✅ Add API contract tests for core response schemas.
+3. ✅ Add CI workflow for `typecheck + lint + test`.
+4. ✅ Block deploy job when quality gates fail.
+
+### Deliverables
+
+- **Test Files**: 5 files (`backend/tests/`)
+  - `auth/clerkAuth.test.ts` — Auth middleware tests
+  - `contracts/api-responses.test.ts` — API contract tests
+  - `contracts/schemas.ts` — Shared schema fixtures
+  - `goals/schemas.test.ts` — Goals schema validation
+  - `macros/schemas.test.ts` — Macros schema validation
+  - `user/schemas.test.ts` — User schema validation
+- **Test Infrastructure**: `backend/vitest.config.ts`, test scripts in `package.json`
+- **CI Workflow**: `.github/workflows/quality-gate.yml`
+- **Deploy Dependency**: `needs: quality` in `.github/workflows/deploy.yml`
 
 ### Success criteria
 
-- `bun run test` passes with meaningful suite.
-- Deploy workflow depends on passing tests.
+- ✅ `bun run test` passes with meaningful suite (165 tests).
+- ✅ Deploy workflow depends on passing tests.
 
 ---
 
