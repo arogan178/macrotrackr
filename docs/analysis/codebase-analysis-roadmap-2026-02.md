@@ -254,6 +254,8 @@ Single, predictable auth model (Clerk-first) across all routes and guards.
 
 ## Roadmap B — Testing foundation and quality gates
 
+> **Status**: In Progress (started 2026-02-17)
+
 ### Goal
 
 Establish regression protection and release confidence.
@@ -274,6 +276,18 @@ Establish regression protection and release confidence.
 2. Add API contract tests for core response schemas.
 3. Add CI workflow for `typecheck + lint + test`.
 4. Block deploy job when quality gates fail.
+
+### Progress
+
+- [x] Set up backend test infrastructure (vitest.config.ts)
+- [x] Add vitest dependencies to backend
+- [x] Create first test file: `backend/tests/auth/clerkAuth.test.ts` (26 tests)
+- [ ] Add macro route tests
+- [ ] Add goals route tests
+- [ ] Add user route tests
+- [ ] Add billing route tests
+- [ ] Add CI workflow for quality gates
+- [ ] Block deploy on quality gate failure
 
 ### Success criteria
 
