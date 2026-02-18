@@ -8,6 +8,10 @@ import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 import { ApiError } from "@/utils/apiServices";
 
+interface ResetPasswordSearchParameters {
+  token?: string;
+}
+
 function ResetPasswordForm() {
   const search = useSearch({ from: resetPasswordRoute.id });
   const [newPassword, setNewPassword] = useState("");
@@ -15,8 +19,8 @@ function ResetPasswordForm() {
   const { showNotification } = useStore();
   const resetPasswordMutation = useResetPassword();
 
-  // useSearch can be untyped in some setups; cast to any for token access
-  const token = (search as any)?.token as string | undefined;
+  // Extract token from search params with proper typing
+  const token = (search as ResetPasswordSearchParameters).token;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

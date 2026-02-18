@@ -200,7 +200,11 @@ export function ClerkSignInForm({
       let errorMessage = "Invalid email or password";
 
       if (error && typeof error === "object") {
-        const clerkError = error as any;
+        const clerkError = error as {
+          message?: string;
+          status?: number;
+          errors?: Array<{ code?: string; message?: string }>;
+        };
         console.error("[ClerkSignInForm] Error details:", {
           message: clerkError.message,
           status: clerkError.status,
