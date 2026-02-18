@@ -37,11 +37,25 @@ export const authRoutes = (app: Elysia) =>
       // .use(rateLimiters.auth) // Temporarily disabled for testing
       .decorate("db", db)
 
-      // Email Validation (deprecated - Clerk handles this)
+      /**
+       * POST /validate-email - Check if an email is available for registration
+       * 
+       * @deprecated Use Clerk authentication instead.
+       * This endpoint will be removed in a future version.
+       * Clerk handles email validation during the signup process.
+       */
       .post(
         "/validate-email",
         async (context: any) => {
-          const { body, db } = context as AuthRouteContext;
+          const { body, db, set } = context as AuthRouteContext & {
+            set: { headers: Record<string, string> };
+          };
+          
+          // Add deprecation headers
+          set.headers = set.headers || {};
+          set.headers["X-Deprecated"] = "true";
+          set.headers["X-Deprecation-Message"] = "Use Clerk authentication. This endpoint will be removed.";
+          
           const email = (body as { email: string }).email;
           const existingUser = safeQuery<UserRow>(
             db,
@@ -60,12 +74,18 @@ export const authRoutes = (app: Elysia) =>
           detail: {
             summary: "[DEPRECATED] Check if an email is available for registration",
             description: "This endpoint is deprecated. Clerk now handles email validation.",
-            tags: ["Auth"],
+            tags: ["Auth", "Deprecated"],
           },
         }
       )
 
-      // User Registration (deprecated - use Clerk SignUp instead)
+      /**
+       * POST /register - Register a new user account
+       * 
+       * @deprecated Use Clerk authentication instead.
+       * This endpoint will be removed in a future version.
+       * Use Clerk's SignUp component for new user registration.
+       */
       .post(
         "/register",
         async (context: any) => {
@@ -73,6 +93,12 @@ export const authRoutes = (app: Elysia) =>
             jwt: { sign: (payload: any) => Promise<string> };
             set: { headers: Record<string, string> };
           };
+          
+          // Add deprecation headers
+          set.headers = set.headers || {};
+          set.headers["X-Deprecated"] = "true";
+          set.headers["X-Deprecation-Message"] = "Use Clerk authentication. This endpoint will be removed.";
+          
           const {
             email,
             password,
@@ -157,12 +183,18 @@ export const authRoutes = (app: Elysia) =>
           detail: { 
             summary: "[DEPRECATED] Register a new user account", 
             description: "This endpoint is deprecated. Use Clerk's SignUp component instead.",
-            tags: ["Auth"] 
+            tags: ["Auth", "Deprecated"] 
           },
         }
       )
 
-      // User Login (deprecated - use Clerk SignIn instead)
+      /**
+       * POST /login - Authenticate user and retrieve JWT token
+       * 
+       * @deprecated Use Clerk authentication instead.
+       * This endpoint will be removed in a future version.
+       * Use Clerk's SignIn component for authentication.
+       */
       .post(
         "/login",
         async (context: any) => {
@@ -170,6 +202,12 @@ export const authRoutes = (app: Elysia) =>
             jwt: { sign: (payload: any) => Promise<string> };
             set: { headers: Record<string, string> };
           };
+          
+          // Add deprecation headers
+          set.headers = set.headers || {};
+          set.headers["X-Deprecated"] = "true";
+          set.headers["X-Deprecation-Message"] = "Use Clerk authentication. This endpoint will be removed.";
+          
           const { email, password } = body as { email: string; password: string };
 
           const user = safeQuery<UserRow>(
@@ -209,16 +247,30 @@ export const authRoutes = (app: Elysia) =>
           detail: {
             summary: "[DEPRECATED] Authenticate user and retrieve JWT token",
             description: "This endpoint is deprecated. Use Clerk's SignIn component instead.",
-            tags: ["Auth"],
+            tags: ["Auth", "Deprecated"],
           },
         }
       )
       
-      // Password Reset Request (deprecated - use Clerk instead)
+      /**
+       * POST /forgot-password - Request a password reset link
+       * 
+       * @deprecated Use Clerk authentication instead.
+       * This endpoint will be removed in a future version.
+       * Use Clerk's password reset flow for password recovery.
+       */
       .post(
         "/forgot-password",
         async (context: any) => {
-          const { body, db } = context as AuthRouteContext;
+          const { body, db, set } = context as AuthRouteContext & {
+            set: { headers: Record<string, string> };
+          };
+          
+          // Add deprecation headers
+          set.headers = set.headers || {};
+          set.headers["X-Deprecated"] = "true";
+          set.headers["X-Deprecation-Message"] = "Use Clerk authentication. This endpoint will be removed.";
+          
           const { email } = body as { email: string };
           
           loggerHelpers.auth("password_reset_requested", undefined, email);
@@ -256,16 +308,30 @@ export const authRoutes = (app: Elysia) =>
           detail: {
             summary: "[DEPRECATED] Request a password reset link",
             description: "This endpoint is deprecated. Use Clerk's password reset flow instead.",
-            tags: ["Auth"],
+            tags: ["Auth", "Deprecated"],
           },
         }
       )
 
-      // Password Reset Handler (deprecated - use Clerk instead)
+      /**
+       * POST /reset-password - Reset password using a valid token
+       * 
+       * @deprecated Use Clerk authentication instead.
+       * This endpoint will be removed in a future version.
+       * Use Clerk's password reset flow for password recovery.
+       */
       .post(
         "/reset-password",
         async (context: any) => {
-          const { body, db } = context as AuthRouteContext;
+          const { body, db, set } = context as AuthRouteContext & {
+            set: { headers: Record<string, string> };
+          };
+          
+          // Add deprecation headers
+          set.headers = set.headers || {};
+          set.headers["X-Deprecated"] = "true";
+          set.headers["X-Deprecation-Message"] = "Use Clerk authentication. This endpoint will be removed.";
+          
           const { token, newPassword } = body as { token: string; newPassword: string };
 
           const user = safeQuery<UserRow>(
@@ -302,7 +368,7 @@ export const authRoutes = (app: Elysia) =>
           detail: {
             summary: "[DEPRECATED] Reset password using a valid token",
             description: "This endpoint is deprecated. Use Clerk's password reset flow instead.",
-            tags: ["Auth"],
+            tags: ["Auth", "Deprecated"],
           },
         }
       )
