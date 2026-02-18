@@ -83,9 +83,11 @@ const LandingPage: React.FC = () => {
 
   // Idle and saver-aware prefetch for lazy sections to improve perceived performance
   useEffect(() => {
-    const connection = (navigator as any).connection as
-      | { saveData?: boolean; effectiveType?: string }
-      | undefined;
+    // Network Information API type (not in standard Navigator type)
+    const navigatorWithConnection = navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    };
+    const connection = navigatorWithConnection.connection;
     const isDataSaver = connection?.saveData === true;
     const isVerySlow = connection?.effectiveType === "2g";
 
@@ -100,7 +102,12 @@ const LandingPage: React.FC = () => {
     };
     const schedulePrefetch = () => {
       if ("requestIdleCallback" in globalThis) {
-        (globalThis as any).requestIdleCallback(doPrefetch, { timeout: 1500 });
+        (
+          globalThis.requestIdleCallback as (
+            callback: () => void,
+            options?: { timeout: number },
+          ) => number
+        )(doPrefetch, { timeout: 1500 });
       } else {
         setTimeout(doPrefetch, 500);
       }

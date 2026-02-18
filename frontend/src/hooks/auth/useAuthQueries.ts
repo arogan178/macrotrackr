@@ -2,7 +2,7 @@ import { useAuth, useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
-import { queryConfigs } from "@/lib/queryClient";
+import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { apiService, setAuthToken, UserDetailsResponse } from "@/utils/apiServices";
 import { removeToken, setToken } from "@/utils/tokenStorage";
@@ -65,11 +65,7 @@ export function useUser(options?: { enabled?: boolean }) {
       } catch (error) {
         // If user is not authenticated, return null instead of throwing.
         // TanStack Query does not allow undefined query data.
-        if (
-          error instanceof Error &&
-          "status" in error &&
-          (error as any).status === 401
-        ) {
+        if (error instanceof Error && hasStatus(error) && error.status === 401) {
           return null;
         }
         throw error;
@@ -150,8 +146,8 @@ export function useLogin() {
     // Enhanced retry logic for login
     retry: (failureCount, error) => {
       // Don't retry on authentication errors (401, 403)
-      if (error instanceof Error && "status" in error) {
-        const status = (error as any).status;
+      if (error instanceof Error && hasStatus(error)) {
+        const status = error.status;
         if (status === 401 || status === 403 || status === 400) {
           return false;
         }
@@ -254,8 +250,8 @@ export function useRegister() {
     // Enhanced retry logic for registration
     retry: (failureCount, error) => {
       // Don't retry on validation errors (400, 422) or conflicts (409)
-      if (error instanceof Error && "status" in error) {
-        const status = (error as any).status;
+      if (error instanceof Error && hasStatus(error)) {
+        const status = error.status;
         if (status === 400 || status === 409 || status === 422) {
           return false;
         }
