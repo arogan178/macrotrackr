@@ -8,8 +8,18 @@ import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
-import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import type { AuthenticatedContext } from "../../types";
 import { adaptClerkToLegacy } from "../../lib/route-adapter";
+import type { Database } from "bun:sqlite";
+
+// Extended billing context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface BillingRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+}
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -84,7 +94,7 @@ function handleRouteError(error: unknown, operation: string, userId?: number): n
   );
 }
 
-function resolveBillingUser(context: ClerkAuthContext & { db?: unknown }) {
+function resolveBillingUser(context: BillingRouteContext) {
   const legacyUser = adaptClerkToLegacy(context as any);
   const clerkUser = context.user;
 
@@ -105,7 +115,7 @@ export const billingRoutes = (app: Elysia) =>
       .get(
         "/details",
         async (context: any) => {
-          const user = resolveBillingUser(context as ClerkAuthContext);
+          const user = resolveBillingUser(context as BillingRouteContext);
           try {
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -144,7 +154,7 @@ export const billingRoutes = (app: Elysia) =>
       .post(
         "/cancel",
         async (context: any) => {
-          const user = resolveBillingUser(context as ClerkAuthContext);
+          const user = resolveBillingUser(context as BillingRouteContext);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -188,7 +198,7 @@ export const billingRoutes = (app: Elysia) =>
         "/checkout",
         async (context: any) => {
           const { body } = context as { body?: Record<string, unknown> };
-          const user = resolveBillingUser(context as ClerkAuthContext);
+          const user = resolveBillingUser(context as BillingRouteContext);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -273,7 +283,7 @@ export const billingRoutes = (app: Elysia) =>
         "/portal",
         async (context: any) => {
           const { body } = context as { body?: Record<string, unknown> };
-          const user = resolveBillingUser(context as ClerkAuthContext);
+          const user = resolveBillingUser(context as BillingRouteContext);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -321,7 +331,7 @@ export const billingRoutes = (app: Elysia) =>
       .get(
         "/subscription",
         async (context: any) => {
-          const user = resolveBillingUser(context as ClerkAuthContext);
+          const user = resolveBillingUser(context as BillingRouteContext);
           try {
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);

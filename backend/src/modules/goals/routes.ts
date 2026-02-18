@@ -3,7 +3,7 @@ import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
-import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import type { AuthenticatedContext } from "../../types";
 import {
   safeQuery,
   safeExecute,
@@ -15,6 +15,15 @@ import {
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
+
+// Extended goals context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface GoalsRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+}
 
 /**
  * Helper function to get the current weight from the latest weight log entry
@@ -47,7 +56,7 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight",
         async (context: any) => {
-          const { internalUserId, db, request } = context as ClerkAuthContext & { db: Database; request: Request };
+          const { internalUserId, db, request } = context as GoalsRouteContext;
 
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
@@ -104,7 +113,7 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight",
         async (context: any) => {
-          const { internalUserId, body, db, request } = context as ClerkAuthContext & { db: Database; body?: Record<string, unknown>; request: Request };
+          const { internalUserId, body, db, request } = context as GoalsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -223,7 +232,7 @@ export const goalRoutes = (app: Elysia) =>
       .put(
         "/weight",
         async (context: any) => {
-          const { internalUserId, body, db, request } = context as ClerkAuthContext & { db: Database; body?: Record<string, unknown>; request: Request };
+          const { internalUserId, body, db, request } = context as GoalsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -351,7 +360,7 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight",
         async (context: any) => {
-          const { internalUserId, db } = context as ClerkAuthContext & { db: Database };
+          const { internalUserId, db } = context as GoalsRouteContext;
 
           withTransaction(db, () => {
             safeExecute(db, "DELETE FROM weight_goals WHERE user_id = ?", [
@@ -374,7 +383,7 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight-log",
         async (context: any) => {
-          const { internalUserId, db } = context as ClerkAuthContext & { db: Database };
+          const { internalUserId, db } = context as GoalsRouteContext;
 
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
@@ -400,7 +409,7 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight-log",
         async (context: any) => {
-          const { internalUserId, body, db } = context as ClerkAuthContext & { db: Database; body?: Record<string, unknown> };
+          const { internalUserId, body, db } = context as GoalsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -452,7 +461,7 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight-log/:id",
         async (context: any) => {
-          const { internalUserId, params, db } = context as ClerkAuthContext & { db: Database; params?: Record<string, string> };
+          const { internalUserId, params, db } = context as GoalsRouteContext;
 
           const entryIdToDelete = params?.id;
           if (!entryIdToDelete) {

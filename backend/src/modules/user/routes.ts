@@ -2,7 +2,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { UserSchemas } from "./schemas";
-import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import type { AuthenticatedContext } from "../../types";
 import { generateId } from "../../utils/id-generator";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import {
@@ -17,6 +17,15 @@ import { SubscriptionService } from "../billing/subscription-service";
 import type { Database } from "bun:sqlite";
 import { logger } from "../../lib/logger";
 import { getInternalUserId } from "../../lib/clerk-utils";
+
+// Extended user context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface UserRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+}
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -46,7 +55,7 @@ export const userRoutes = (app: Elysia) =>
         "/me",
         async (context: any) => {
           try {
-            const { db, user } = context as ClerkAuthContext & { db: Database };
+            const { db, user } = context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -128,11 +137,7 @@ export const userRoutes = (app: Elysia) =>
         "/settings",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as ClerkAuthContext & {
-              db: Database;
-              body?: Record<string, unknown>;
-              request: Request;
-            };
+            const { db, user, body, request } = context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -306,11 +311,7 @@ export const userRoutes = (app: Elysia) =>
         "/complete-profile",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as ClerkAuthContext & {
-              db: Database;
-              body?: Record<string, unknown>;
-              request: Request;
-            };
+            const { db, user, body, request } = context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -425,10 +426,7 @@ export const userRoutes = (app: Elysia) =>
         "/password",
         async (context: any) => {
           try {
-            const { db, user, body } = context as ClerkAuthContext & {
-              db: Database;
-              body?: Record<string, unknown>;
-            };
+            const { db, user, body } = context as UserRouteContext;
 
             // Log deprecation warning
             logger.warn(

@@ -2,7 +2,7 @@
 import { Elysia } from "elysia";
 import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
-import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import type { AuthenticatedContext } from "../../types";
 import {
   safeQuery,
   safeQueryAll,
@@ -11,6 +11,17 @@ import {
 } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { featureLimitGuard } from "../../middleware/clerk-guards";
+import type { Database } from "bun:sqlite";
+
+// Extended habits context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface HabitsRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+  checkLimit?: (count: number) => Promise<void>;
+}
 
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
@@ -21,7 +32,7 @@ export const habitRoutes = (app: Elysia) =>
       .get(
         "/",
         async (context: any) => {
-          const { internalUserId, db } = context as ClerkAuthContext & { db: import("bun:sqlite").Database };
+          const { internalUserId, db } = context as HabitsRouteContext;
 
           const query = `
             SELECT id, user_id, title, icon_name, current, target, accent_color, 
@@ -80,7 +91,7 @@ export const habitRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { body, internalUserId, db, checkLimit } = context as ClerkAuthContext & { db: import("bun:sqlite").Database; body?: Record<string, unknown>; checkLimit?: (count: number) => Promise<void> };
+          const { body, internalUserId, db, checkLimit } = context as HabitsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -173,7 +184,7 @@ export const habitRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { params, body, internalUserId, db } = context as ClerkAuthContext & { db: import("bun:sqlite").Database; body?: Record<string, unknown>; params?: Record<string, string> };
+          const { params, body, internalUserId, db } = context as HabitsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -256,7 +267,7 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { params, internalUserId, db } = context as ClerkAuthContext & { db: import("bun:sqlite").Database; params?: Record<string, string> };
+          const { params, internalUserId, db } = context as HabitsRouteContext;
 
           const habitId = params?.id;
           if (!habitId) {
@@ -298,7 +309,7 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/",
         async (context: any) => {
-          const { internalUserId, db } = context as ClerkAuthContext & { db: import("bun:sqlite").Database };
+          const { internalUserId, db } = context as HabitsRouteContext;
 
           const query = `
             DELETE FROM habits
