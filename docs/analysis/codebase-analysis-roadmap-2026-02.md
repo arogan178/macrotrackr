@@ -328,7 +328,10 @@ Reduce runtime uncertainty by removing strategic `any` usage.
 
 ---
 
-## Roadmap D — Data correctness and API contract integrity
+## Roadmap D — Data correctness and API contract integrity ✅ COMPLETE
+
+> **Status**: Completed 2026-02-20
+> **Branch**: `feat/roadmap-d-data-correctness`
 
 ### Goal
 
@@ -343,15 +346,26 @@ Canonical, consistent domain models across backend and frontend.
 
 ### Milestones
 
-1. Normalize macro totals naming and response shapes.
-2. Add central mappers between DB snake_case and API camelCase.
-3. Split legacy endpoints into compatibility namespace.
-4. Add contract fixtures and schema snapshots.
+1. ✅ Normalize macro totals naming and response shapes (fixed `totalProtein` → `protein`, etc.).
+2. ✅ Add central mappers between DB snake_case and API camelCase (`backend/src/lib/mappers/index.ts`).
+3. ✅ Split legacy endpoints into compatibility namespace (deprecated 6 auth endpoints with headers).
+4. ✅ Add contract fixtures and schema snapshots (38 tests, 25 snapshots).
+
+### Deliverables
+
+- **Mappers**: `backend/src/lib/mappers/index.ts` — Central snake_case ↔ camelCase transformations
+- **Deprecated Endpoints**: 6 legacy auth endpoints marked with `Deprecation` headers
+- **Contract Tests**:
+  - `backend/tests/contracts/api-responses.test.ts` — API contract tests
+  - `backend/tests/contracts/response-snapshots.test.ts` — Response snapshot tests
+  - `backend/tests/contracts/schemas.ts` — Shared schema fixtures
+  - `backend/tests/contracts/__snapshots__/` — 25 response snapshots
+  - `backend/tests/fixtures/macro-responses.ts` — Macro response fixtures
 
 ### Success criteria
 
-- No duplicated/ambiguous totals fields.
-- Frontend consumes stable response contracts.
+- ✅ No duplicated/ambiguous totals fields.
+- ✅ Frontend consumes stable response contracts.
 
 ---
 
