@@ -1,0 +1,415 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Database Row Transformation Snapshots > transforms macro entry row to camelCase 1`] = `
+{
+  "carbs": 40,
+  "createdAt": "2026-02-18T12:30:00Z",
+  "entryDate": "2026-02-18",
+  "entryTime": "12:30",
+  "fats": 15,
+  "id": 1,
+  "mealName": "Grilled Chicken Salad",
+  "mealType": "lunch",
+  "protein": 30,
+  "userId": 1,
+}
+`;
+
+exports[`Database Row Transformation Snapshots > transforms user details row to camelCase 1`] = `
+{
+  "activityLevel": 3,
+  "createdAt": "2026-01-01T00:00:00Z",
+  "dateOfBirth": "1990-05-15",
+  "gender": "male",
+  "height": 180,
+  "id": 1,
+  "updatedAt": "2026-02-18T00:00:00Z",
+  "userId": 1,
+  "weight": 75,
+}
+`;
+
+exports[`Database Row Transformation Snapshots > transforms user row to camelCase 1`] = `
+{
+  "clerkId": "clerk_user_123",
+  "createdAt": "2026-01-01T00:00:00Z",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "id": 1,
+  "lastName": "Doe",
+  "stripeCustomerId": "cus_abc123",
+  "subscriptionStatus": "pro",
+}
+`;
+
+exports[`Database Row Transformation Snapshots > transforms weight goal row to camelCase 1`] = `
+{
+  "calculatedWeeks": 22,
+  "calorieTarget": 2000,
+  "createdAt": "2026-01-01T00:00:00Z",
+  "dailyChange": 250,
+  "id": 1,
+  "startDate": "2026-01-01",
+  "startingWeight": 85.5,
+  "targetDate": "2026-06-01",
+  "targetWeight": 80,
+  "updatedAt": "2026-02-18T00:00:00Z",
+  "userId": 1,
+  "weeklyChange": 0.25,
+  "weightGoal": "lose",
+}
+`;
+
+exports[`Macro Entry Response Snapshots > matches snapshot for breakfast entry 1`] = `
+{
+  "carbs": 50,
+  "createdAt": "2026-02-18T08:00:00Z",
+  "entryDate": "2026-02-18",
+  "entryTime": "08:00",
+  "fats": 10,
+  "id": 2,
+  "mealName": "Oatmeal with Berries",
+  "mealType": "breakfast",
+  "protein": 20,
+}
+`;
+
+exports[`Macro Entry Response Snapshots > matches snapshot for dinner entry 1`] = `
+{
+  "carbs": 45,
+  "createdAt": "2026-02-18T19:00:00Z",
+  "entryDate": "2026-02-18",
+  "entryTime": "19:00",
+  "fats": 20,
+  "id": 3,
+  "mealName": "Salmon with Rice",
+  "mealType": "dinner",
+  "protein": 35,
+}
+`;
+
+exports[`Macro Entry Response Snapshots > matches snapshot for lunch entry 1`] = `
+{
+  "carbs": 40,
+  "createdAt": "2026-02-18T12:30:00Z",
+  "entryDate": "2026-02-18",
+  "entryTime": "12:30",
+  "fats": 15,
+  "id": 1,
+  "mealName": "Grilled Chicken Salad",
+  "mealType": "lunch",
+  "protein": 30,
+}
+`;
+
+exports[`Macro Entry Response Snapshots > matches snapshot for snack entry 1`] = `
+{
+  "carbs": 25,
+  "createdAt": "2026-02-18T15:00:00Z",
+  "entryDate": "2026-02-18",
+  "entryTime": "15:00",
+  "fats": 8,
+  "id": 4,
+  "mealName": "Greek Yogurt",
+  "mealType": "snack",
+  "protein": 10,
+}
+`;
+
+exports[`Macro History Response Snapshots > matches snapshot for empty history 1`] = `
+{
+  "entries": [],
+  "hasMore": false,
+  "limit": 20,
+  "offset": 0,
+  "total": 0,
+}
+`;
+
+exports[`Macro History Response Snapshots > matches snapshot for history with entries 1`] = `
+{
+  "entries": [
+    {
+      "carbs": 45,
+      "createdAt": "2026-02-18T19:00:00Z",
+      "entryDate": "2026-02-18",
+      "entryTime": "19:00",
+      "fats": 20,
+      "id": 3,
+      "mealName": "Salmon with Rice",
+      "mealType": "dinner",
+      "protein": 35,
+    },
+    {
+      "carbs": 25,
+      "createdAt": "2026-02-18T15:00:00Z",
+      "entryDate": "2026-02-18",
+      "entryTime": "15:00",
+      "fats": 8,
+      "id": 4,
+      "mealName": "Greek Yogurt",
+      "mealType": "snack",
+      "protein": 10,
+    },
+    {
+      "carbs": 40,
+      "createdAt": "2026-02-18T12:30:00Z",
+      "entryDate": "2026-02-18",
+      "entryTime": "12:30",
+      "fats": 15,
+      "id": 1,
+      "mealName": "Grilled Chicken Salad",
+      "mealType": "lunch",
+      "protein": 30,
+    },
+    {
+      "carbs": 50,
+      "createdAt": "2026-02-18T08:00:00Z",
+      "entryDate": "2026-02-18",
+      "entryTime": "08:00",
+      "fats": 10,
+      "id": 2,
+      "mealName": "Oatmeal with Berries",
+      "mealType": "breakfast",
+      "protein": 20,
+    },
+  ],
+  "hasMore": false,
+  "limit": 20,
+  "offset": 0,
+  "total": 4,
+}
+`;
+
+exports[`Macro History Response Snapshots > matches snapshot for history with pagination 1`] = `
+{
+  "entries": [
+    {
+      "carbs": 40,
+      "createdAt": "2026-02-18T12:30:00Z",
+      "entryDate": "2026-02-18",
+      "entryTime": "12:30",
+      "fats": 15,
+      "id": 1,
+      "mealName": "Grilled Chicken Salad",
+      "mealType": "lunch",
+      "protein": 30,
+    },
+    {
+      "carbs": 50,
+      "createdAt": "2026-02-18T08:00:00Z",
+      "entryDate": "2026-02-18",
+      "entryTime": "08:00",
+      "fats": 10,
+      "id": 2,
+      "mealName": "Oatmeal with Berries",
+      "mealType": "breakfast",
+      "protein": 20,
+    },
+  ],
+  "hasMore": true,
+  "limit": 20,
+  "offset": 0,
+  "total": 50,
+}
+`;
+
+exports[`Macro Target Response Snapshots > matches snapshot for default target 1`] = `
+{
+  "macroTarget": {
+    "carbsPercentage": 40,
+    "fatsPercentage": 30,
+    "lockedMacros": [],
+    "proteinPercentage": 30,
+  },
+}
+`;
+
+exports[`Macro Target Response Snapshots > matches snapshot for target with locked macros 1`] = `
+{
+  "macroTarget": {
+    "carbsPercentage": 40,
+    "fatsPercentage": 25,
+    "lockedMacros": [
+      "protein",
+      "fats",
+    ],
+    "proteinPercentage": 35,
+  },
+}
+`;
+
+exports[`Macro Totals Response Snapshots > matches snapshot for daily totals 1`] = `
+{
+  "calories": 2000,
+  "carbs": 250,
+  "fats": 67,
+  "protein": 150,
+}
+`;
+
+exports[`Macro Totals Response Snapshots > matches snapshot for empty totals 1`] = `
+{
+  "calories": 0,
+  "carbs": 0,
+  "fats": 0,
+  "protein": 0,
+}
+`;
+
+exports[`Macro Totals Response Snapshots > matches snapshot for high totals (athlete) 1`] = `
+{
+  "calories": 3200,
+  "carbs": 400,
+  "fats": 90,
+  "protein": 200,
+}
+`;
+
+exports[`User Profile Response Snapshots > matches snapshot for complete profile 1`] = `
+{
+  "activityLevel": 3,
+  "createdAt": "2026-01-01T00:00:00Z",
+  "dateOfBirth": "1990-05-15",
+  "email": "john.doe@example.com",
+  "firstName": "John",
+  "gender": "male",
+  "height": 180,
+  "id": 1,
+  "isProfileComplete": true,
+  "lastName": "Doe",
+  "subscription": {
+    "currentPeriodEnd": "2026-03-18T00:00:00Z",
+    "hasStripeCustomer": true,
+    "status": "pro",
+  },
+  "weight": 75,
+}
+`;
+
+exports[`User Profile Response Snapshots > matches snapshot for female profile 1`] = `
+{
+  "activityLevel": 4,
+  "createdAt": "2025-12-15T00:00:00Z",
+  "dateOfBirth": "1992-08-20",
+  "email": "sarah.jones@example.com",
+  "firstName": "Sarah",
+  "gender": "female",
+  "height": 165,
+  "id": 3,
+  "isProfileComplete": true,
+  "lastName": "Jones",
+  "subscription": {
+    "hasStripeCustomer": false,
+    "status": "free",
+  },
+  "weight": 60,
+}
+`;
+
+exports[`User Profile Response Snapshots > matches snapshot for incomplete profile 1`] = `
+{
+  "activityLevel": null,
+  "createdAt": "2026-02-01T00:00:00Z",
+  "dateOfBirth": null,
+  "email": "jane.smith@example.com",
+  "firstName": "Jane",
+  "gender": null,
+  "height": null,
+  "id": 2,
+  "isProfileComplete": false,
+  "lastName": "Smith",
+  "subscription": {
+    "hasStripeCustomer": false,
+    "status": "free",
+  },
+  "weight": null,
+}
+`;
+
+exports[`Weight Goal Response Snapshots > matches snapshot for empty goal (not set) 1`] = `
+{
+  "calculatedWeeks": null,
+  "calorieTarget": null,
+  "currentWeight": null,
+  "dailyChange": null,
+  "startDate": null,
+  "startingWeight": null,
+  "targetDate": null,
+  "targetWeight": null,
+  "weeklyChange": null,
+  "weightGoal": null,
+}
+`;
+
+exports[`Weight Goal Response Snapshots > matches snapshot for maintenance goal 1`] = `
+{
+  "calculatedWeeks": null,
+  "calorieTarget": 2200,
+  "currentWeight": 75,
+  "dailyChange": null,
+  "startDate": "2026-01-01",
+  "startingWeight": 75,
+  "targetDate": null,
+  "targetWeight": 75,
+  "weeklyChange": null,
+  "weightGoal": "maintain",
+}
+`;
+
+exports[`Weight Goal Response Snapshots > matches snapshot for weight gain goal 1`] = `
+{
+  "calculatedWeeks": 13,
+  "calorieTarget": 2800,
+  "currentWeight": 71.5,
+  "dailyChange": 250,
+  "startDate": "2026-01-01",
+  "startingWeight": 70,
+  "targetDate": "2026-04-01",
+  "targetWeight": 75,
+  "weeklyChange": 0.25,
+  "weightGoal": "gain",
+}
+`;
+
+exports[`Weight Goal Response Snapshots > matches snapshot for weight loss goal 1`] = `
+{
+  "calculatedWeeks": 22,
+  "calorieTarget": 2000,
+  "currentWeight": 83.2,
+  "dailyChange": 250,
+  "startDate": "2026-01-01",
+  "startingWeight": 85.5,
+  "targetDate": "2026-06-01",
+  "targetWeight": 80,
+  "weeklyChange": 0.25,
+  "weightGoal": "lose",
+}
+`;
+
+exports[`Weight Log Response Snapshots > matches snapshot for empty weight log 1`] = `[]`;
+
+exports[`Weight Log Response Snapshots > matches snapshot for weight log with entries 1`] = `
+[
+  {
+    "id": "weight-1",
+    "timestamp": "2026-02-18T08:00:00Z",
+    "weight": 83.2,
+  },
+  {
+    "id": "weight-2",
+    "timestamp": "2026-02-17T08:00:00Z",
+    "weight": 83.5,
+  },
+  {
+    "id": "weight-3",
+    "timestamp": "2026-02-16T08:00:00Z",
+    "weight": 83.7,
+  },
+  {
+    "id": "weight-4",
+    "timestamp": "2026-02-15T08:00:00Z",
+    "weight": 84,
+  },
+]
+`;
