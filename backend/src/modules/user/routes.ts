@@ -426,7 +426,14 @@ export const userRoutes = (app: Elysia) =>
         "/password",
         async (context: any) => {
           try {
-            const { db, user, body } = context as UserRouteContext;
+            const { db, user, body, set } = context as UserRouteContext & {
+              set: { headers: Record<string, string> };
+            };
+
+            // Add deprecation headers
+            set.headers = set.headers || {};
+            set.headers["X-Deprecated"] = "true";
+            set.headers["X-Deprecation-Message"] = "Use Clerk password management. This endpoint will be removed in v2.0.0.";
 
             // Log deprecation warning
             logger.warn(
