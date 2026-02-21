@@ -24,6 +24,7 @@
     "@tanstack/react-query-persist-client": "^5.90.22",
     "@tanstack/react-router-devtools": "^1.158.1",
     "@tanstack/react-table": "^8.21.3",
+    "@tanstack/react-virtual": "^3.13.18",
     "caniuse-lite": "^1.0.30001769",
     "chart.js": "^4.5.1",
     "clsx": "^2.1.1",

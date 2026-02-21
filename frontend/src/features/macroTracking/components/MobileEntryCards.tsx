@@ -1,5 +1,6 @@
+import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
-import { memo } from "react";
+import { memo, useMemo, useRef } from "react";
 
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
@@ -126,6 +127,154 @@ const MobileEntryCards = memo(
     isDeleting,
     showAllDates = true,
   }: MobileEntryCardsProps) => {
+    const containerReference = useRef<HTMLDivElement>(null);
+
+    // Calculate total entries for virtualization threshold
+    const totalEntries = useMemo(() => {
+      return groupedEntries.reduce(
+        (sum, group) => sum + group.entries.length,
+        0,
+      );
+    }, [groupedEntries]);
+
+    // Only virtualize when we have more than 50 entries
+    const shouldVirtualize = totalEntries > 50;
+
+    // Create a flattened list of items for virtualization
+    // Each item is either a date header or an entry card
+    const virtualItems = useMemo(() => {
+      const items: Array<
+        | { type: "header"; group: GroupedEntry }
+        | { type: "entry"; entry: MacroEntry; groupDate: string }
+      > = [];
+
+      const entriesToProcess = showAllDates
+        ? groupedEntries
+        : groupedEntries.slice(0, 5);
+
+      for (const group of entriesToProcess) {
+        items.push({ type: "header", group });
+        if (!collapsedDates.has(group.date)) {
+          for (const entry of group.entries) {
+            items.push({ type: "entry", entry, groupDate: group.date });
+          }
+        }
+      }
+
+      return items;
+    }, [groupedEntries, showAllDates, collapsedDates]);
+
+    // Virtualizer for large lists
+    const virtualizer = useVirtualizer({
+      count: virtualItems.length,
+      getScrollElement: () => containerReference.current,
+      estimateSize: (index) => {
+        const item = virtualItems[index];
+        if (item.type === "header") return 60; // Header height
+        return 200; // Entry card height (approximate)
+      },
+      overscan: 5,
+    });
+
+    // Render date header
+    const renderDateHeader = (group: GroupedEntry) => (
+      <motion.div
+        className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
+        onClick={() => toggleDateCollapse(group.date)}
+        whileHover={{ backgroundColor: "bg-primary/30" }}
+        transition={{ duration: 0.2 }}
+      >
+        <div className="flex items-center gap-3">
+          <motion.div
+            animate={{
+              rotate: collapsedDates.has(group.date) ? -90 : 0,
+            }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+          >
+            <ChevronDownIcon className=" text-foreground" />
+          </motion.div>
+          <h3 className="text-base font-semibold text-foreground">
+            {formatDate(group.date)}
+          </h3>
+        </div>
+
+        {/* Date Totals */}
+        <div className="flex items-center gap-4 text-xs">
+          <span className="font-medium text-protein">
+            {group.totals.protein}g P
+          </span>
+          <span className="font-medium text-carbs">
+            {group.totals.carbs}g C
+          </span>
+          <span className="font-medium text-fats">{group.totals.fats}g F</span>
+          <span className="font-medium text-vibrant-accent">
+            {group.totals.calories} kcal
+          </span>
+          <IconButton
+            variant="delete"
+            onClick={(event) => handleDeleteDate(group.date, event)}
+            ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
+          />
+        </div>
+      </motion.div>
+    );
+
+    // Render virtualized list
+    if (shouldVirtualize) {
+      const items = virtualizer.getVirtualItems();
+
+      return (
+        <div
+          ref={containerReference}
+          className="lg:hidden max-h-[70vh] overflow-auto"
+        >
+          <div
+            style={{
+              height: `${virtualizer.getTotalSize()}px`,
+              width: "100%",
+              position: "relative",
+            }}
+          >
+            {items.map((virtualRow) => {
+              const item = virtualItems[virtualRow.index];
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  {item.type === "header" ? (
+                    <div className="border-b border-border/30">
+                      {renderDateHeader(item.group)}
+                    </div>
+                  ) : (
+                    <div className="p-4 pt-0">
+                      <EntryCard
+                        entry={item.entry}
+                        onEdit={onEdit}
+                        deleteEntry={deleteEntry}
+                        isDeleting={isDeleting}
+                        formatTimeFromEntry={formatTimeFromEntry}
+                        capitalizeFirstLetter={capitalizeFirstLetter}
+                        calculateCalories={calculateCalories}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+
+    // Non-virtualized rendering for smaller lists
     const initialEntries = groupedEntries.slice(0, 5);
     const additionalEntries = groupedEntries.slice(5);
 
@@ -141,47 +290,7 @@ const MobileEntryCards = memo(
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
             {/* Date Header */}
-            <motion.div
-              className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
-              onClick={() => toggleDateCollapse(group.date)}
-              whileHover={{ backgroundColor: "bg-primary/30" }}
-              transition={{ duration: 0.2 }}
-            >
-              <div className="flex items-center gap-3">
-                <motion.div
-                  animate={{
-                    rotate: collapsedDates.has(group.date) ? -90 : 0,
-                  }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                >
-                  <ChevronDownIcon className=" text-foreground" />
-                </motion.div>
-                <h3 className="text-base font-semibold text-foreground">
-                  {formatDate(group.date)}
-                </h3>
-              </div>
-
-              {/* Date Totals */}
-              <div className="flex items-center gap-4 text-xs">
-                <span className="font-medium text-protein">
-                  {group.totals.protein}g P
-                </span>
-                <span className="font-medium text-carbs">
-                  {group.totals.carbs}g C
-                </span>
-                <span className="font-medium text-fats">
-                  {group.totals.fats}g F
-                </span>
-                <span className="font-medium text-vibrant-accent">
-                  {group.totals.calories} kcal
-                </span>
-                <IconButton
-                  variant="delete"
-                  onClick={(event) => handleDeleteDate(group.date, event)}
-                  ariaLabel={`Delete all entries for ${formatDate(group.date)}`}
-                />
-              </div>
-            </motion.div>
+            {renderDateHeader(group)}
 
             {/* Entries */}
             <AnimatePresence>
@@ -263,51 +372,7 @@ const MobileEntryCards = memo(
                 style={{ overflow: "hidden" }}
               >
                 {/* Date Header */}
-                <motion.div
-                  className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/30"
-                  onClick={() => toggleDateCollapse(group.date)}
-                  whileHover={{ backgroundColor: "bg-primary/30" }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center gap-3">
-                    <motion.div
-                      key={`chevron-${group.date}`}
-                      initial={false}
-                      animate={{
-                        rotate: collapsedDates.has(group.date) ? -90 : 0,
-                      }}
-                      transition={{ duration: 0.2, ease: "easeInOut" }}
-                    >
-                      <ChevronDownIcon className=" text-foreground" />
-                    </motion.div>
-                    <h3 className="text-base font-semibold text-foreground">
-                      {formatDate(group.date)}
-                    </h3>
-                  </div>
-
-                  {/* Date Totals */}
-                  <div className="flex items-center gap-4 text-xs">
-                    <span className="font-medium text-protein">
-                      {group.totals.protein}g P
-                    </span>
-                    <span className="font-medium text-carbs">
-                      {group.totals.carbs}g C
-                    </span>
-                    <span className="font-medium text-fats">
-                      {group.totals.fats}g F
-                    </span>
-                    <span className="font-medium text-vibrant-accent">
-                      {group.totals.calories} kcal
-                    </span>
-                    <IconButton
-                      variant="delete"
-                      onClick={(event) => handleDeleteDate(group.date, event)}
-                      ariaLabel={`Delete all entries for ${formatDate(
-                        group.date,
-                      )}`}
-                    />
-                  </div>
-                </motion.div>
+                {renderDateHeader(group)}
 
                 {/* Entries */}
                 <AnimatePresence>
