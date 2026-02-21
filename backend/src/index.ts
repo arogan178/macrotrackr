@@ -26,12 +26,29 @@ import { billingRoutes } from "./modules/billing/routes";
 import { reportingRoutes } from "./modules/reporting/routes";
 import { webhookHandler } from "./modules/billing/webhook-handler";
 import { healthRoutes } from "./routes/health";
+import { metricsRoutes } from "./routes/metrics";
+import { recordRequest } from "./lib/metrics";
 
 logger.info("🚀 Starting Elysia server...");
 
 const app = new Elysia()
   // Request size limits for security
   .use(requestLimitsMiddleware)
+
+  // Request timing middleware for metrics collection
+  .onRequest(({ request }) => {
+    const start = Date.now();
+    const url = new URL(request.url);
+    const path = url.pathname;
+    return {
+      afterResponse: () => {
+        const duration = Date.now() - start;
+        // Record request metrics - status will be 200 by default for successful responses
+        // Error responses are tracked via onError handler
+        recordRequest(request.method, path, 200, duration);
+      }
+    };
+  })
 
   // Global middleware & plugins
   .use(
@@ -100,6 +117,9 @@ app.use(reportingRoutes);
 
 // Health check routes (public, no auth)
 app.use(healthRoutes);
+
+// Metrics endpoint (public, no auth) - Prometheus-compatible
+app.use(metricsRoutes);
 
 // Global error handling
 app.onError(({ code, error, set, path }: any) => {
