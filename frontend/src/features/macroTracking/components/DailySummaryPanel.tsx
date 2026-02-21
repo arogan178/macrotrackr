@@ -1,5 +1,7 @@
 // src/features/macroTracking/components/DailySummaryPanel.tsx
 
+import { memo, useMemo } from "react";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
 import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
@@ -13,128 +15,168 @@ import {
   calculateProteinCalories,
 } from "../calculations";
 
+// --- Constants (moved outside component to prevent recreation) ---
+const DEFAULT_TARGET = {
+  proteinPercentage: 30,
+  carbsPercentage: 40,
+  fatsPercentage: 30,
+} as const;
+
+const EMPTY_TOTALS: MacroDailyTotals = {
+  protein: 0,
+  carbs: 0,
+  fats: 0,
+  calories: 0,
+};
+
+// --- Helper function (moved outside component for stability) ---
+// Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
+function calculatePercent(actual: number, targetValue: number): number {
+  if (!targetValue) return 0;
+  const ratio = actual / targetValue;
+  const pct = Math.floor(ratio * 100);
+  // Clamp to [0, 100]
+  return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
+}
+
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
   macroTarget?: MacroTargetSettings;
   calorieTarget?: number;
 }
 
-export default function DailySummary({
+function DailySummaryInner({
   macroDailyTotals,
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
-  // --- Defaults ---
-  const DEFAULT_TARGET = {
-    proteinPercentage: 30,
-    carbsPercentage: 40,
-    fatsPercentage: 30,
-  };
-  const EMPTY_TOTALS: MacroDailyTotals = {
-    protein: 0,
-    carbs: 0,
-    fats: 0,
-    calories: 0,
-  };
-
   // --- Safe values ---
   const safeTotal = macroDailyTotals || EMPTY_TOTALS;
   const target = macroTarget || DEFAULT_TARGET;
   const dailyCalorieTarget = calorieTarget || 0;
 
-  // --- Macro calorie calculations ---
-  const totalCalories = calculateCaloriesFromMacros(
-    safeTotal.protein,
-    safeTotal.carbs,
-    safeTotal.fats,
-  );
-  const proteinCalories = calculateProteinCalories(safeTotal.protein);
-  const carbsCalories = calculateCarbsCalories(safeTotal.carbs);
-  const fatsCalories = calculateFatsCalories(safeTotal.fats);
-
-  // --- Macro targets (grams) ---
-  const targetProteinGrams = Math.round(
-    (dailyCalorieTarget * target.proteinPercentage) / 100 / 4,
-  );
-  const targetCarbsGrams = Math.round(
-    (dailyCalorieTarget * target.carbsPercentage) / 100 / 4,
-  );
-  const targetFatsGrams = Math.round(
-    (dailyCalorieTarget * target.fatsPercentage) / 100 / 9,
+  // --- Memoized macro calorie calculations ---
+  const macroCalories = useMemo(
+    () => ({
+      total: calculateCaloriesFromMacros(
+        safeTotal.protein,
+        safeTotal.carbs,
+        safeTotal.fats,
+      ),
+      protein: calculateProteinCalories(safeTotal.protein),
+      carbs: calculateCarbsCalories(safeTotal.carbs),
+      fats: calculateFatsCalories(safeTotal.fats),
+    }),
+    [safeTotal.protein, safeTotal.carbs, safeTotal.fats],
   );
 
-  // --- Completion percentages ---
-  // Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
-  function percent(actual: number, targetValue: number) {
-    if (!targetValue) return 0;
-    const ratio = actual / targetValue;
-    const pct = Math.floor(ratio * 100);
-    // Clamp to [0, 100]
-    return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
-  }
-  const proteinCompletionPercent = percent(
-    safeTotal.protein,
-    targetProteinGrams,
+  // --- Memoized macro targets (grams) ---
+  const targetGrams = useMemo(
+    () => ({
+      protein: Math.round(
+        (dailyCalorieTarget * target.proteinPercentage) / 100 / 4,
+      ),
+      carbs: Math.round(
+        (dailyCalorieTarget * target.carbsPercentage) / 100 / 4,
+      ),
+      fats: Math.round((dailyCalorieTarget * target.fatsPercentage) / 100 / 9),
+    }),
+    [
+      dailyCalorieTarget,
+      target.proteinPercentage,
+      target.carbsPercentage,
+      target.fatsPercentage,
+    ],
   );
-  const carbsCompletionPercent = percent(safeTotal.carbs, targetCarbsGrams);
-  const fatsCompletionPercent = percent(safeTotal.fats, targetFatsGrams);
-  const calorieCompletionPercent = percent(totalCalories, dailyCalorieTarget);
 
-  // --- Macro calorie percentages ---
-  const totalMacroCalories = totalCalories;
-  const proteinPercent =
-    totalMacroCalories === 0
-      ? 0
-      : Math.round((proteinCalories / totalMacroCalories) * 100);
-  const carbsPercent =
-    totalMacroCalories === 0
-      ? 0
-      : Math.round((carbsCalories / totalMacroCalories) * 100);
-  const fatsPercent =
-    totalMacroCalories === 0 ? 0 : 100 - proteinPercent - carbsPercent;
+  // --- Memoized completion percentages ---
+  const completionPercentages = useMemo(
+    () => ({
+      protein: calculatePercent(safeTotal.protein, targetGrams.protein),
+      carbs: calculatePercent(safeTotal.carbs, targetGrams.carbs),
+      fats: calculatePercent(safeTotal.fats, targetGrams.fats),
+      calories: calculatePercent(macroCalories.total, dailyCalorieTarget),
+    }),
+    [
+      safeTotal.protein,
+      safeTotal.carbs,
+      safeTotal.fats,
+      targetGrams,
+      macroCalories.total,
+      dailyCalorieTarget,
+    ],
+  );
 
-  // --- Macro data for rendering ---
-  const macroData = [
-    {
-      name: "Protein",
-      grams: Math.round(safeTotal.protein),
-      targetGrams: targetProteinGrams,
-      calories: proteinCalories,
-      targetPercent: target.proteinPercentage,
-      actualPercent: proteinPercent,
-      color: "bg-protein",
-      textColor: "text-protein",
-      borderColor: "border-protein/20",
-      gradientFrom: "from-protein/30",
-      completionPercent: proteinCompletionPercent,
-    },
-    {
-      name: "Carbs",
-      grams: Math.round(safeTotal.carbs),
-      targetGrams: targetCarbsGrams,
-      calories: carbsCalories,
-      targetPercent: target.carbsPercentage,
-      actualPercent: carbsPercent,
-      color: "bg-carbs",
-      textColor: "text-carbs",
-      borderColor: "border-carbs/20",
-      gradientFrom: "from-carbs/30",
-      completionPercent: carbsCompletionPercent,
-    },
-    {
-      name: "Fats",
-      grams: Math.round(safeTotal.fats),
-      targetGrams: targetFatsGrams,
-      calories: fatsCalories,
-      targetPercent: target.fatsPercentage,
-      actualPercent: fatsPercent,
-      color: "bg-fats",
-      textColor: "text-fats",
-      borderColor: "border-fats/20",
-      gradientFrom: "from-fats/30",
-      completionPercent: fatsCompletionPercent,
-    },
-  ];
+  // --- Memoized macro calorie percentages ---
+  const macroPercentages = useMemo(() => {
+    const totalMacroCalories = macroCalories.total;
+    if (totalMacroCalories === 0) {
+      return { protein: 0, carbs: 0, fats: 0 };
+    }
+    const protein = Math.round(
+      (macroCalories.protein / totalMacroCalories) * 100,
+    );
+    const carbs = Math.round((macroCalories.carbs / totalMacroCalories) * 100);
+    const fats = 100 - protein - carbs;
+    return { protein, carbs, fats };
+  }, [macroCalories]);
+
+  // --- Memoized macro data for rendering ---
+  const macroData = useMemo(
+    () => [
+      {
+        name: "Protein",
+        grams: Math.round(safeTotal.protein),
+        targetGrams: targetGrams.protein,
+        calories: macroCalories.protein,
+        targetPercent: target.proteinPercentage,
+        actualPercent: macroPercentages.protein,
+        color: "bg-protein",
+        textColor: "text-protein",
+        borderColor: "border-protein/20",
+        gradientFrom: "from-protein/30",
+        completionPercent: completionPercentages.protein,
+      },
+      {
+        name: "Carbs",
+        grams: Math.round(safeTotal.carbs),
+        targetGrams: targetGrams.carbs,
+        calories: macroCalories.carbs,
+        targetPercent: target.carbsPercentage,
+        actualPercent: macroPercentages.carbs,
+        color: "bg-carbs",
+        textColor: "text-carbs",
+        borderColor: "border-carbs/20",
+        gradientFrom: "from-carbs/30",
+        completionPercent: completionPercentages.carbs,
+      },
+      {
+        name: "Fats",
+        grams: Math.round(safeTotal.fats),
+        targetGrams: targetGrams.fats,
+        calories: macroCalories.fats,
+        targetPercent: target.fatsPercentage,
+        actualPercent: macroPercentages.fats,
+        color: "bg-fats",
+        textColor: "text-fats",
+        borderColor: "border-fats/20",
+        gradientFrom: "from-fats/30",
+        completionPercent: completionPercentages.fats,
+      },
+    ],
+    [
+      safeTotal.protein,
+      safeTotal.carbs,
+      safeTotal.fats,
+      targetGrams,
+      macroCalories,
+      target.proteinPercentage,
+      target.carbsPercentage,
+      target.fatsPercentage,
+      macroPercentages,
+      completionPercentages,
+    ],
+  );
 
   return (
     <CardContainer className="h-full">
@@ -147,7 +189,7 @@ export default function DailySummary({
             <div className="text-right">
               <div className="text-2xl font-light tracking-tight text-foreground">
                 <AnimatedNumber
-                  value={totalCalories}
+                  value={macroCalories.total}
                   toFixedValue={0}
                   duration={0.8}
                 />
@@ -166,7 +208,7 @@ export default function DailySummary({
                 <span className="ml-1 font-medium text-primary">
                   (
                   <AnimatedNumber
-                    value={calorieCompletionPercent}
+                    value={completionPercentages.calories}
                     toFixedValue={0}
                     suffix="%"
                     duration={0.5}
@@ -178,7 +220,7 @@ export default function DailySummary({
           </div>
 
           <ProgressBar
-            progress={calorieCompletionPercent}
+            progress={completionPercentages.calories}
             color="accent"
             height="lg"
             className="mb-4"
@@ -186,9 +228,9 @@ export default function DailySummary({
 
           <MacroTargetBar
             macros={{
-              protein: proteinCalories,
-              carbs: carbsCalories,
-              fats: fatsCalories,
+              protein: macroCalories.protein,
+              carbs: macroCalories.carbs,
+              fats: macroCalories.fats,
             }}
           />
 
@@ -270,3 +312,8 @@ export default function DailySummary({
     </CardContainer>
   );
 }
+
+// Wrap with React.memo for performance optimization
+const DailySummary = memo(DailySummaryInner);
+
+export default DailySummary;
