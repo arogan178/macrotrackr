@@ -300,11 +300,26 @@ export function initializeSchema(db: Database) {
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
+  // Additional performance indexes for macro_entries
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_id ON macro_entries(user_id)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_date ON macro_entries(entry_date)"
+  );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits(user_id)");
+  // Additional performance index for habits active status
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, is_complete)"
+  );
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
+  );
+  // Additional performance index for goals (weight_goals) active status
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_goals_user_id ON weight_goals(user_id)"
   );
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
