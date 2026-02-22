@@ -1,4 +1,5 @@
 import { motion } from "motion/react";
+import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
@@ -28,7 +29,7 @@ export interface MetricCardProps {
   enableGlare?: boolean;
 }
 
-export default function MetricCard(properties: MetricCardProps) {
+function MetricCardInner(properties: MetricCardProps) {
   const {
     icon: Icon,
     title,
@@ -56,10 +57,40 @@ export default function MetricCard(properties: MetricCardProps) {
     enableRotation: enableGlare,
   });
 
-  // Resolve color classes for icon with safe fallbacks for optional keys
-  const colorClasses = color
-    ? COLOR_MAP[color]
-    : ({} as Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>);
+  // Memoize color classes for icon with safe fallbacks for optional keys
+  const colorClasses = useMemo(
+    () =>
+      color
+        ? COLOR_MAP[color]
+        : ({} as Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>),
+    [color],
+  );
+
+  // Memoize parsed numeric value for AnimatedNumber
+  const numericValue = useMemo(() => {
+    if (value === undefined) return undefined;
+    return typeof value === "number"
+      ? value
+      : Number.parseFloat(value.toString());
+  }, [value]);
+
+  // Memoize wrapper component and props
+  const wrapperConfig = useMemo(() => {
+    const useMotion = score !== undefined || delay > 0;
+    return {
+      Wrapper: useMotion ? motion.div : CardContainer,
+      wrapperProps: useMotion
+        ? {
+            initial: { opacity: 0, y: 10 },
+            animate: { opacity: 1, y: 0 },
+            transition: { duration: 0.3, delay },
+            className: `bg-surface rounded-xl border border-border overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group transition-colors duration-150 hover:border-border-2 hover:bg-surface-2 ${className}`,
+          }
+        : {
+            className: `p-3.5 hover:bg-surface-2 hover:border-border-2 transition-colors duration-150 group ${className}`,
+          },
+    };
+  }, [score, delay, bgGradient, borderColor, className]);
 
   // If glare is enabled, always use motion.div with glare wrapper
   if (enableGlare) {
@@ -104,16 +135,12 @@ export default function MetricCard(properties: MetricCardProps) {
               )}
             </div>
             <p className="text-2xl font-light tracking-tight text-foreground">
-              {value === undefined ? (
+              {numericValue === undefined ? (
                 <span className="text-base text-muted">Complete profile</span>
               ) : (
                 <span className="text-foreground">
                   <AnimatedNumber
-                    value={
-                      typeof value === "number"
-                        ? value
-                        : Number.parseFloat(value.toString())
-                    }
+                    value={numericValue}
                     toFixedValue={0}
                     suffix={showKcalSuffix ? " kcal" : ""}
                     duration={0.8}
@@ -144,19 +171,7 @@ export default function MetricCard(properties: MetricCardProps) {
     );
   }
 
-  // Use motion.div for animation if delay or score is provided, else CardContainer
-  const Wrapper = score !== undefined || delay > 0 ? motion.div : CardContainer;
-  const wrapperProps =
-    score !== undefined || delay > 0
-      ? {
-          initial: { opacity: 0, y: 10 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.3, delay },
-          className: `bg-surface rounded-xl border border-border overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group transition-colors duration-150 hover:border-border-2 hover:bg-surface-2 ${className}`,
-        }
-      : {
-          className: `p-3.5 hover:bg-surface-2 hover:border-border-2 transition-colors duration-150 group ${className}`,
-        };
+  const { Wrapper, wrapperProps } = wrapperConfig;
 
   return (
     <Wrapper {...wrapperProps}>
@@ -187,16 +202,12 @@ export default function MetricCard(properties: MetricCardProps) {
             )}
           </div>
           <p className="text-2xl font-light tracking-tight text-foreground">
-            {value === undefined ? (
+            {numericValue === undefined ? (
               <span className="text-base text-muted">Complete profile</span>
             ) : (
               <span className="text-foreground">
                 <AnimatedNumber
-                  value={
-                    typeof value === "number"
-                      ? value
-                      : Number.parseFloat(value.toString())
-                  }
+                  value={numericValue}
                   toFixedValue={0}
                   suffix={showKcalSuffix ? " kcal" : ""}
                   duration={0.8}
@@ -224,3 +235,8 @@ export default function MetricCard(properties: MetricCardProps) {
     </Wrapper>
   );
 }
+
+// Wrap with React.memo for performance optimization
+const MetricCard = memo(MetricCardInner);
+
+export default MetricCard;
