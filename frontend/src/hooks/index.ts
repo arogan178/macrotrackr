@@ -21,5 +21,8 @@ export { useSubscriptionStatus } from "./useSubscriptionStatus";
 // Animation hooks
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
 
+// Performance monitoring hooks
+export { useRenderCount } from "./useRenderCount";
+
 // Other hooks
 export { default as useBeforeUnload } from "./useBeforeUnload";
