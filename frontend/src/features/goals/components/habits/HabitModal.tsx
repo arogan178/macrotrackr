@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 
 import Modal from "@/components/ui/Modal";
 import { useMutationErrorHandler } from "@/hooks";
+import { useStore } from "@/store/store";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 
 import HabitForm from "./HabitForm";
@@ -29,6 +30,7 @@ function HabitModal({
   habit,
   mode,
 }: HabitModalProps) {
+  const { showNotification } = useStore();
   const [isSubmitting, setIsSubmitting] = useState(false);
   // State lifted from HabitForm
   const [formValues, setFormValues] =
@@ -41,10 +43,8 @@ function HabitModal({
   // Use new mutation error handling
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
-      onError: (message) =>
-        console.error("Habit modal operation failed:", message),
-      onSuccess: (message) =>
-        console.log("Habit modal operation succeeded:", message),
+      onError: (message) => showNotification(message, "error"),
+      onSuccess: (message) => showNotification(message, "success"),
     });
 
   const isEditMode = mode === "edit";
