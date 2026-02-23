@@ -6,7 +6,6 @@ import { StepOne, StepThree, StepTwo } from "@/features/auth/components/Register
 import { StepIndicator } from "@/features/auth/components/StepIndicator";
 import { REGISTRATION_STEPS } from "@/features/auth/utils/stepUtilities";
 import { useFeatureLoading } from "@/hooks/useFeatureLoading";
-import { useMutationErrorHandler } from "@/hooks/useMutationErrorHandler";
 import { useStore } from "@/store/store";
 
 // Main RegisterForm Component
@@ -16,14 +15,6 @@ function RegisterForm() {
 
   // Use new loading state hooks
   const { isLoading: _isAuthLoading } = useFeatureLoading("auth");
-  const {
-    handleMutationError: _handleMutationError,
-    handleMutationSuccess: _handleMutationSuccess,
-  } = useMutationErrorHandler({
-    onError: (message) => setError(message),
-    onSuccess: (message) =>
-      console.log("Registration step succeeded:", message),
-  });
 
   // Reset registration data when component unmounts
   useEffect(() => {
