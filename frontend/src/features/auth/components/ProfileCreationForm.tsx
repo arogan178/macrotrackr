@@ -6,6 +6,7 @@ import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
 import { AUTH_ERROR_MESSAGES } from "@/features/auth/constants";
+import { logger } from "@/lib/logger";
 import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
@@ -25,6 +26,10 @@ interface SocialProfileData {
   firstName: string;
   lastName: string;
   dateOfBirth?: string;
+}
+
+function getFirstErrorMessage(validationErrors: Record<string, string>) {
+  return Object.values(validationErrors)[0];
 }
 
 export function ProfileCreationForm() {
@@ -72,7 +77,7 @@ export function ProfileCreationForm() {
     };
   }, []);
 
-  const validateStep1 = (): boolean => {
+  const validateStep1 = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     // Date of Birth validation
@@ -102,10 +107,10 @@ export function ProfileCreationForm() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
-  const validateStep2 = (): boolean => {
+  const validateStep2 = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     // Activity level validation
@@ -114,46 +119,42 @@ export function ProfileCreationForm() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleNext = () => {
-    if (step === 1 && !validateStep1()) {
-      // Show first error as notification
-      const firstError = Object.values(errors)[0];
+    if (step === 1) {
+      const stepErrors = validateStep1();
+      const firstError = getFirstErrorMessage(stepErrors);
       if (firstError) {
         showNotification(firstError, "error");
+        return;
       }
-      return;
     }
-    if (step === 2 && !validateStep2()) {
-      const firstError = Object.values(errors)[0];
+
+    if (step === 2) {
+      const stepErrors = validateStep2();
+      const firstError = getFirstErrorMessage(stepErrors);
       if (firstError) {
         showNotification(firstError, "error");
+        return;
       }
-      return;
     }
+
     setErrors({});
-    setStep(step + 1);
+    setStep((previousStep) => previousStep + 1);
   };
 
   const handleBack = () => {
     setErrors({});
-    setStep(step - 1);
+    setStep((previousStep) => previousStep - 1);
   };
 
   const handleSubmit = async () => {
-    console.log("[ProfileCreationForm] handleSubmit called", {
-      isAuthLoaded,
-      isSignedIn,
-      hasGetToken: !!getToken,
-    });
-
-    if (!validateStep2()) {
-      const firstError = Object.values(errors)[0];
-      if (firstError) {
-        showNotification(firstError, "error");
-      }
+    const stepErrors = validateStep2();
+    const firstError = getFirstErrorMessage(stepErrors);
+    if (firstError) {
+      showNotification(firstError, "error");
       return;
     }
 
@@ -168,7 +169,7 @@ export function ProfileCreationForm() {
 
     // Ensure user is authenticated
     if (!isSignedIn || !getToken) {
-      console.error("[ProfileCreationForm] Not authenticated:", {
+      logger.error("Profile creation attempted without authentication:", {
         isSignedIn,
         hasGetToken: !!getToken,
       });
@@ -176,7 +177,7 @@ export function ProfileCreationForm() {
         "Authentication required. Please sign in again.",
         "error",
       );
-      navigate({ to: "/login" });
+      navigate({ to: "/login", search: { returnTo: undefined } });
       return;
     }
 
@@ -201,55 +202,50 @@ export function ProfileCreationForm() {
           "Authentication failed. Please sign in again.",
           "error",
         );
-        navigate({ to: "/login" });
+        navigate({ to: "/login", search: { returnTo: undefined } });
         return;
       }
 
       // Set the token for API calls
       setAuthToken(token);
-      console.log("[ProfileCreationForm] Token set successfully");
 
       // Step 1: Sync the Clerk user to our backend
       // This creates the user record in our database
       // Note: User may already be synced from AuthReadyPage, so we handle conflicts gracefully
-      console.log("[ProfileCreationForm] Syncing user with backend...");
       try {
         await apiService.auth.syncUser(token);
-        console.log("[ProfileCreationForm] User synced successfully");
-      } catch (syncError: any) {
+      } catch (syncError: unknown) {
         // If user already exists (409), that's fine - continue with profile completion
-        if (syncError?.status === 409) {
-          console.log(
-            "[ProfileCreationForm] User already exists, continuing...",
-          );
+        if (syncError instanceof Error && hasStatus(syncError) && syncError.status === 409) {
+          // User already exists, safe to continue profile completion.
         } else {
           throw syncError;
         }
       }
 
       // Step 2: Complete the user profile with the provided data
-      console.log("[ProfileCreationForm] Completing profile...");
       await apiService.user.completeProfile({
         dateOfBirth,
         height: height || undefined,
         weight: weight || undefined,
         gender: gender || undefined,
-        activityLevel,
+        activityLevel: activityLevel || undefined,
       });
-      console.log("[ProfileCreationForm] Profile completed successfully");
 
       // Clear social data on success
       sessionStorage.removeItem("socialProfileData");
 
       // Refresh cached user state before navigation so guards see profile as complete.
-      await queryClient.fetchQuery({
-        queryKey: queryKeys.auth.user(),
-        queryFn: () => apiService.user.getUserDetails(),
-        staleTime: 0,
-      });
-      await queryClient.invalidateQueries({
-        queryKey: queryKeys.settings.user(),
-      });
+      await Promise.all([
+        queryClient.fetchQuery({
+          queryKey: queryKeys.auth.user(),
+          queryFn: () => apiService.user.getUserDetails(),
+          staleTime: 0,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.settings.user(),
+        }),
+      ]);
 
       showNotification("Profile created successfully!", "success");
 
@@ -260,11 +256,7 @@ export function ProfileCreationForm() {
         replace: true,
       });
     } catch (error) {
-      console.error("[ProfileCreationForm] Profile creation error:", error);
-      // Log additional context for debugging
-      if (error instanceof Error && hasStatus(error)) {
-        console.error(`[ProfileCreationForm] Error status: ${error.status}`);
-      }
+      logger.error("Profile creation error:", error);
       showNotification(
         error instanceof Error ? error.message : "Failed to create profile",
         "error",
@@ -300,7 +292,7 @@ export function ProfileCreationForm() {
             <DateField
               label="Date of Birth"
               value={dateOfBirth}
-              onChange={(value) => {
+              onChange={(value: string) => {
                 setDateOfBirth(value);
                 if (errors.dateOfBirth) {
                   setErrors((previous) => ({ ...previous, dateOfBirth: "" }));
@@ -318,8 +310,8 @@ export function ProfileCreationForm() {
             <Dropdown
               label="Gender"
               value={gender}
-              onChange={(value) => {
-                setGender(value as Gender);
+              onChange={(value: string | number) => {
+                setGender(String(value) as Gender);
                 if (errors.gender) {
                   setErrors((previous) => ({ ...previous, gender: "" }));
                 }
@@ -337,7 +329,7 @@ export function ProfileCreationForm() {
               <NumberField
                 label={`Height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`}
                 value={height}
-                onChange={(value) => {
+                onChange={(value: number | null) => {
                   setHeight(value);
                   if (errors.height) {
                     setErrors((previous) => ({ ...previous, height: "" }));
@@ -358,7 +350,7 @@ export function ProfileCreationForm() {
               <NumberField
                 label={`Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
                 value={weight}
-                onChange={(value) => {
+                onChange={(value: number | null) => {
                   setWeight(value);
                   if (errors.weight) {
                     setErrors((previous) => ({ ...previous, weight: "" }));
@@ -400,8 +392,9 @@ export function ProfileCreationForm() {
             <Dropdown
               label="How active are you on a typical week?"
               value={activityLevel?.toString() || ""}
-              onChange={(value) => {
-                setActivityLevel(value ? Number(value) : null);
+              onChange={(value: string | number) => {
+                const normalizedValue = String(value);
+                setActivityLevel(normalizedValue ? Number(normalizedValue) : null);
                 if (errors.activityLevel) {
                   setErrors((previous) => ({ ...previous, activityLevel: "" }));
                 }
