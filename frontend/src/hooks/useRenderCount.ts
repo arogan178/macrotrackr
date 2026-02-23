@@ -1,5 +1,7 @@
 import { useEffect, useRef } from "react";
 
+import { logger } from "@/lib/logger";
+
 /**
  * Performance monitoring hook for debugging component re-renders.
  * Logs render count to console in development mode only.
@@ -21,7 +23,7 @@ export function useRenderCount(componentName: string): number {
   useEffect(() => {
     count.current++;
     if (import.meta.env.DEV) {
-      console.log(`${componentName} rendered ${count.current} times`);
+      logger.debug(`${componentName} rendered ${count.current} times`);
     }
   });
 
