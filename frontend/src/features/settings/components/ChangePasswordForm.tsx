@@ -147,7 +147,7 @@ const ChangePasswordForm = () => {
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
             <div className="mr-4 rounded-xl bg-vibrant-accent/10 p-3">
-              <LockIcon className="h-7 w-7 flex-shrink-0 text-vibrant-accent" />
+              <LockIcon className="h-7 w-7 shrink-0 text-vibrant-accent" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-xl font-bold text-foreground">
@@ -196,7 +196,7 @@ const ChangePasswordForm = () => {
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
             <div className="mr-4 rounded-xl bg-vibrant-accent/10 p-3">
-              <LockIcon className="h-7 w-7 flex-shrink-0 text-vibrant-accent" />
+              <LockIcon className="h-7 w-7 shrink-0 text-vibrant-accent" />
             </div>
             <div className="min-w-0 flex-1">
               <h3 className="truncate text-xl font-bold text-foreground">
