@@ -8,8 +8,7 @@ import {
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
 import { useStore } from "@/store/store";
-import type { HabitGoalFormValues } from "@/types/habit";
-import type { Habit } from "@/utils/apiServices";
+import type { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 
 export function useGoalsMutations() {
   const { showNotification } = useStore();
