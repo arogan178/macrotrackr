@@ -87,7 +87,7 @@ async function runSmokeTests(): Promise<void> {
   console.log('Results:');
   console.log('--------');
   tests.forEach((test) => {
-    const status = test.passed ? '✅' : '❌';
+    const status = test.passed ? 'PASS' : 'FAIL';
     console.log(`${status} ${test.name} (${test.duration}ms)`);
     if (test.error) {
       console.log(`   Error: ${test.error}`);

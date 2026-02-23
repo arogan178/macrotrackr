@@ -282,19 +282,19 @@ export function getMotivationalMessage(
 ): string {
   switch (status) {
     case "completed": {
-      return "🎉 Congratulations! You've reached your goal!";
+      return "Congratulations! You've reached your goal!";
     }
     case "ahead": {
-      return "🚀 Great job! You're ahead of schedule!";
+      return "Great job! You're ahead of schedule!";
     }
     case "on-track": {
-      return "💪 Keep it up! You're right on track!";
+      return "Keep it up! You're right on track!";
     }
     case "behind": {
-      return "📈 Don't give up! Small consistent changes make a big difference!";
+      return "Don't give up! Small consistent changes make a big difference!";
     }
     default: {
-      return "🎯 Stay focused on your goal!";
+      return "Stay focused on your goal!";
     }
   }
 }

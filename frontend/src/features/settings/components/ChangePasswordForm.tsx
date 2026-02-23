@@ -266,7 +266,7 @@ const ChangePasswordForm = () => {
                         request.met ? "text-success" : "text-muted"
                       }`}
                     >
-                      {request.met ? "✓" : "○"} {request.text}
+                      {request.met ? "Met" : "Not met"}: {request.text}
                     </span>
                   ))}
                 </div>
