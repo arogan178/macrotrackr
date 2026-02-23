@@ -64,10 +64,8 @@ export default function SettingsPage() {
   // Use new loading state hooks
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
-      onError: (message) =>
-        console.error("Settings operation failed:", message),
-      onSuccess: (message) =>
-        console.log("Settings operation succeeded:", message),
+      logError: false,
+      showSuccess: false,
     });
 
   // Centralize subscription status hydration
