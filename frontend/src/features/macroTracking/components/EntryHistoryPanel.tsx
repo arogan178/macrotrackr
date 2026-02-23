@@ -52,10 +52,7 @@ const calculateCalories = (
 ): number => Math.round(protein * 4 + carbs * 4 + fats * 9);
 
 const capitalizeFirstLetter = (string: string): string =>
-  string
-    ? string.charAt(0).toUpperCase() +
-      string.slice(1)
-    : "";
+  string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
 
 const exportCSV = (history: MacroEntry[]) => {
   const csvContent = [

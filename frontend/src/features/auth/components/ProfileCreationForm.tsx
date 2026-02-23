@@ -216,7 +216,11 @@ export function ProfileCreationForm() {
         await apiService.auth.syncUser(token);
       } catch (syncError: unknown) {
         // If user already exists (409), that's fine - continue with profile completion
-        if (syncError instanceof Error && hasStatus(syncError) && syncError.status === 409) {
+        if (
+          syncError instanceof Error &&
+          hasStatus(syncError) &&
+          syncError.status === 409
+        ) {
           // User already exists, safe to continue profile completion.
         } else {
           throw syncError;
@@ -394,7 +398,9 @@ export function ProfileCreationForm() {
               value={activityLevel?.toString() || ""}
               onChange={(value: string | number) => {
                 const normalizedValue = String(value);
-                setActivityLevel(normalizedValue ? Number(normalizedValue) : null);
+                setActivityLevel(
+                  normalizedValue ? Number(normalizedValue) : null,
+                );
                 if (errors.activityLevel) {
                   setErrors((previous) => ({ ...previous, activityLevel: "" }));
                 }
