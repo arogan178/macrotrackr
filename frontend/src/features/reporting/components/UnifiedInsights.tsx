@@ -98,7 +98,7 @@ function UnifiedInsights({
     return (
       <div className="flex min-h-60 items-center justify-center rounded-xl border border-border bg-surface p-6 text-center">
         <div className="space-y-3">
-          <div className="text-4xl">📊</div>
+          <div className="text-4xl">Insights</div>
           <div>
             <p className="mb-2 text-xl font-semibold text-foreground">
               Ready for Insights

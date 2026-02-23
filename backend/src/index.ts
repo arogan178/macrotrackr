@@ -29,7 +29,7 @@ import { healthRoutes } from "./routes/health";
 import { metricsRoutes } from "./routes/metrics";
 import { recordRequest } from "./lib/metrics";
 
-logger.info("🚀 Starting Elysia server...");
+logger.info("Starting Elysia server...");
 
 const app = new Elysia()
   // Request size limits for security
@@ -197,7 +197,7 @@ logger.info(
     corsOrigin: config.CORS_ORIGIN,
     environment: config.NODE_ENV,
   },
-  `✅ Server listening on http://${app.server?.hostname}:${app.server?.port}`
+  `Server listening on http://${app.server?.hostname}:${app.server?.port}`
 );
 
 logger.info(`    CORS Origin: ${config.CORS_ORIGIN}`);

@@ -103,7 +103,7 @@ const parsedEnv = EnvSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {
   console.error(
-    "❌ Invalid environment variables:",
+    "Invalid environment variables:",
     parsedEnv.error.flatten().fieldErrors
   );
   // Throwing an error prevents the application from starting with invalid config
@@ -127,5 +127,5 @@ const nodeEnv =
     ? config.NODE_ENV
     : "unknown");
 if (nodeEnv !== "test") {
-  console.log(`✅ Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
+  console.log(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
 }
