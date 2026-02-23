@@ -216,10 +216,8 @@ export function initializeSchema(db: Database) {
     db.exec(`
       UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL;
     `);
-  } catch (error) {
-    logger.debug(
-      "Backfill for users.updated_at skipped (column may not exist yet)"
-    );
+  } catch {
+    // Intentionally ignored: column may not exist on older DB versions during idempotent migration.
   }
 
   // Apply data constraints for subscription_status (SQLite doesn't support CHECK in ALTER)
@@ -230,10 +228,8 @@ export function initializeSchema(db: Database) {
       SET subscription_status = 'free' 
       WHERE subscription_status NOT IN ('free', 'pro', 'canceled') OR subscription_status IS NULL
     `);
-  } catch (error) {
-    logger.debug(
-      "Subscription status normalization skipped (column may not exist yet)"
-    );
+  } catch {
+    // Intentionally ignored: column may not exist on older DB versions during idempotent migration.
   }
 
   // --- Conditional migration: rebuild habits table if old CHECK constraint exists ---
