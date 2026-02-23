@@ -397,7 +397,7 @@ export const apiService = {
       profileData: Partial<
         Pick<
           UserSettingsPayload,
-          "dateOfBirth" | "height" | "weight" | "activityLevel"
+          "dateOfBirth" | "height" | "weight" | "gender" | "activityLevel"
         >
       >,
     ) => {
