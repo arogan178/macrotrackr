@@ -10,12 +10,31 @@ import {
   FacebookIcon,
   GoogleIcon,
 } from "@/components/ui/Icons";
+import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
 interface ClerkSignInFormProps {
   onSwitchToSignUp: () => void;
   onForgotPassword: () => void;
   redirectTo?: string;
+}
+
+function getStrategies(
+  factors: Array<unknown> | null | undefined,
+): string[] | undefined {
+  return factors
+    ?.map((factor) => {
+      if (
+        typeof factor === "object" &&
+        factor !== null &&
+        "strategy" in factor &&
+        typeof factor.strategy === "string"
+      ) {
+        return factor.strategy;
+      }
+      return undefined;
+    })
+    .filter((strategy): strategy is string => strategy !== undefined);
 }
 
 export function ClerkSignInForm({
@@ -48,7 +67,7 @@ export function ClerkSignInForm({
         redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(destination)}`,
       });
     } catch (error) {
-      console.error("Social sign-in error:", error);
+      logger.error("Social sign-in error:", error);
       showNotification(
         error instanceof Error ? error.message : "Social sign-in failed",
         "error",
@@ -65,54 +84,21 @@ export function ClerkSignInForm({
       return;
     }
 
-    // Check if there's an existing sign-in state that needs to be cleared
-    // This can happen when password was changed in Clerk
-    console.log("[ClerkSignInForm] Current sign-in status:", signIn.status);
-
-    // If there's a previous sign-in attempt in progress, we should handle it
-    if (signIn.status && signIn.status !== "needs_identifier") {
-      console.log(
-        "[ClerkSignInForm] Existing sign-in state detected, creating fresh attempt",
-      );
-    }
-
-    console.log("[ClerkSignInForm] Starting sign-in attempt");
-
     setIsLoading(true);
 
     try {
-      console.log("[ClerkSignInForm] Attempting sign-in with:", { email });
       const result = await signIn.create({
         identifier: email,
         password,
-      });
-
-      console.log("[ClerkSignInForm] Sign-in result:", {
-        status: result.status,
-        hasSessionId: !!result.createdSessionId,
-        sessionId: result.createdSessionId,
-        userData: result.userData,
-        identifier: result.identifier,
-        supportedFirstFactors: result.supportedFirstFactors?.map(
-          (f: any) => f.strategy,
-        ),
-        supportedSecondFactors: result.supportedSecondFactors?.map(
-          (f: any) => f.strategy,
-        ),
-        firstFactorVerification: result.firstFactorVerification,
-        secondFactorVerification: result.secondFactorVerification,
       });
 
       switch (result.status) {
         case "complete": {
           // Sign-in complete, set session and redirect to auth-ready
           // AuthReadyPage will set the token and then redirect to the intended destination
-          console.log(
-            "[ClerkSignInForm] Sign-in complete, setting active session",
-          );
           if (!result.createdSessionId) {
-            console.error(
-              "[ClerkSignInForm] No session ID available despite complete status",
+            logger.error(
+              "No session ID available despite complete sign-in status",
             );
             showNotification(
               "Sign-in completed but session could not be created. Please try again.",
@@ -131,16 +117,7 @@ export function ClerkSignInForm({
         }
         case "needs_first_factor": {
           // Handle cases like email verification or password reset needed
-          console.log(
-            "[ClerkSignInForm] Needs first factor, checking requirements...",
-          );
-          const supportedStrategies = result.supportedFirstFactors?.map(
-            (f: any) => f.strategy,
-          );
-          console.log(
-            "[ClerkSignInForm] Supported strategies:",
-            supportedStrategies,
-          );
+          const supportedStrategies = getStrategies(result.supportedFirstFactors);
 
           if (supportedStrategies?.includes("reset_password_email_code")) {
             showNotification(
@@ -164,7 +141,6 @@ export function ClerkSignInForm({
         }
         case "needs_new_password": {
           // Password was changed or expired
-          console.log("[ClerkSignInForm] Needs new password");
           showNotification(
             "Your password has been changed. Please check your email or reset your password.",
             "info",
@@ -176,15 +152,14 @@ export function ClerkSignInForm({
         }
         case "needs_second_factor": {
           // 2FA required
-          console.log("[ClerkSignInForm] Needs second factor (2FA)");
           showNotification("Two-factor authentication required.", "info");
 
           break;
         }
         default: {
           // Handle any other status
-          console.warn(
-            "[ClerkSignInForm] Unhandled sign-in status:",
+          logger.warn(
+            "Unhandled sign-in status:",
             result.status,
           );
           showNotification(
@@ -194,7 +169,7 @@ export function ClerkSignInForm({
         }
       }
     } catch (error) {
-      console.error("[ClerkSignInForm] Sign-in error:", error);
+      logger.error("Sign-in error:", error);
 
       // Handle Clerk-specific error structures
       let errorMessage = "Invalid email or password";
@@ -205,7 +180,7 @@ export function ClerkSignInForm({
           status?: number;
           errors?: Array<{ code?: string; message?: string }>;
         };
-        console.error("[ClerkSignInForm] Error details:", {
+        logger.error("Sign-in error details:", {
           message: clerkError.message,
           status: clerkError.status,
           errors: clerkError.errors,
