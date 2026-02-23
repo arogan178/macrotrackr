@@ -2,7 +2,11 @@ import { useEffect, useMemo, useState } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
 import FloatingNotification from "@/components/notifications/components/FloatingNotification";
-import { StepOne, StepThree, StepTwo } from "@/features/auth/components/RegisterFormSteps";
+import {
+  StepOne,
+  StepThree,
+  StepTwo,
+} from "@/features/auth/components/RegisterFormSteps";
 import { StepIndicator } from "@/features/auth/components/StepIndicator";
 import { REGISTRATION_STEPS } from "@/features/auth/utils/stepUtilities";
 import { useFeatureLoading } from "@/hooks/useFeatureLoading";
@@ -24,17 +28,23 @@ function RegisterForm() {
   }, [resetRegistration]);
 
   // Step titles and descriptions - memoized to prevent recreating objects on every render
-  const stepTitles = useMemo(() => ({
-    1: "Create Your Account",
-    2: "Tell Us About Yourself",
-    3: "Almost Done!",
-  }), []);
+  const stepTitles = useMemo(
+    () => ({
+      1: "Create Your Account",
+      2: "Tell Us About Yourself",
+      3: "Almost Done!",
+    }),
+    [],
+  );
 
-  const stepDescriptions = useMemo(() => ({
-    1: "Enter your basic details to get started",
-    2: "This helps us customize your experience",
-    3: "Just one more step to complete your profile",
-  }), []);
+  const stepDescriptions = useMemo(
+    () => ({
+      1: "Enter your basic details to get started",
+      2: "This helps us customize your experience",
+      3: "Just one more step to complete your profile",
+    }),
+    [],
+  );
 
   // Render current step content
   const renderCurrentStep = () => {
