@@ -106,29 +106,33 @@ const ChangePasswordForm = () => {
       let errorMessage = "Failed to change password";
 
       if (error && typeof error === "object" && "errors" in error) {
-        const clerkError = error as { errors: Array<{ code?: string; message?: string }> };
+        const clerkError = error as {
+          errors: Array<{ code?: string; message?: string }>;
+        };
         const firstError = clerkError.errors?.[0];
 
         switch (firstError?.code) {
-        case "form_password_incorrect": {
-          errorMessage = "Current password is incorrect.";
-        
-        break;
-        }
-        case "form_password_not_strong_enough": {
-          errorMessage = "New password is not strong enough.";
-        
-        break;
-        }
-        case "form_password_same_as_current": {
-          errorMessage = "New password must be different from your current password.";
-        
-        break;
-        }
-        default: { if (firstError?.message) {
-          errorMessage = firstError.message;
-        }
-        }
+          case "form_password_incorrect": {
+            errorMessage = "Current password is incorrect.";
+
+            break;
+          }
+          case "form_password_not_strong_enough": {
+            errorMessage = "New password is not strong enough.";
+
+            break;
+          }
+          case "form_password_same_as_current": {
+            errorMessage =
+              "New password must be different from your current password.";
+
+            break;
+          }
+          default: {
+            if (firstError?.message) {
+              errorMessage = firstError.message;
+            }
+          }
         }
       } else if (error instanceof Error) {
         errorMessage = error.message;
@@ -167,7 +171,8 @@ const ChangePasswordForm = () => {
           </h4>
           <p className="mb-4 text-muted">
             You signed up using a social provider (Google, Facebook, or Apple).
-            You can add a password to your account for additional sign-in options.
+            You can add a password to your account for additional sign-in
+            options.
           </p>
           <p className="text-sm text-muted">
             Visit the Connected Accounts section to manage your sign-in methods.
@@ -212,9 +217,10 @@ const ChangePasswordForm = () => {
         {/* Security info */}
         <div className="rounded-lg border border-border bg-surface-2 p-4">
           <p className="text-sm text-muted">
-            <strong className="text-foreground">Security note:</strong> For your protection, 
-            you must enter your current password to set a new one. This prevents unauthorized 
-            changes if your session is left unattended.
+            <strong className="text-foreground">Security note:</strong> For your
+            protection, you must enter your current password to set a new one.
+            This prevents unauthorized changes if your session is left
+            unattended.
           </p>
         </div>
 
@@ -243,7 +249,7 @@ const ChangePasswordForm = () => {
               name="newPassword"
               autoComplete="new-password"
             />
-            
+
             {/* Password strength indicator */}
             {newPassword && (
               <div className="space-y-2">
@@ -281,7 +287,9 @@ const ChangePasswordForm = () => {
             value={confirmPassword}
             onChange={setConfirmPassword}
             required
-            error={formError && formError.includes("match") ? formError : undefined}
+            error={
+              formError && formError.includes("match") ? formError : undefined
+            }
             name="confirmPassword"
             autoComplete="new-password"
             helperText="Re-enter your new password to confirm"
@@ -300,7 +308,12 @@ const ChangePasswordForm = () => {
           <Button
             type="submit"
             isLoading={isSubmitting}
-            disabled={!currentPassword || !newPassword || !confirmPassword || passwordStrength < 3}
+            disabled={
+              !currentPassword ||
+              !newPassword ||
+              !confirmPassword ||
+              passwordStrength < 3
+            }
             text="Change Password"
             buttonSize="lg"
             variant="primary"

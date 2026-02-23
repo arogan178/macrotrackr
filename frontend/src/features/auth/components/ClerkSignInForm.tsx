@@ -117,7 +117,9 @@ export function ClerkSignInForm({
         }
         case "needs_first_factor": {
           // Handle cases like email verification or password reset needed
-          const supportedStrategies = getStrategies(result.supportedFirstFactors);
+          const supportedStrategies = getStrategies(
+            result.supportedFirstFactors,
+          );
 
           if (supportedStrategies?.includes("reset_password_email_code")) {
             showNotification(
@@ -158,10 +160,7 @@ export function ClerkSignInForm({
         }
         default: {
           // Handle any other status
-          logger.warn(
-            "Unhandled sign-in status:",
-            result.status,
-          );
+          logger.warn("Unhandled sign-in status:", result.status);
           showNotification(
             `Sign-in status: ${result.status}. Please try again or contact support.`,
             "warning",
