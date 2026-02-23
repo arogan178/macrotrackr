@@ -29,9 +29,9 @@ If addressed in sequence, this codebase can move from “works today” to “ro
 
 The following baseline checks were run during this analysis:
 
-- `bun run typecheck` ✅ (backend + frontend passed)
-- `bun run lint` ✅ (frontend lint passed)
-- `bun run test` ❌ (fails because no test files found)
+- `bun run typecheck` [PASS] (backend + frontend passed)
+- `bun run lint` [PASS] (frontend lint passed)
+- `bun run test` [FAIL] (fails because no test files found)
 
 Implication: static analysis is present, but test safety net is missing.
 
@@ -220,7 +220,7 @@ Implication: static analysis is present, but test safety net is missing.
 
 ## Multi-track roadmaps
 
-## Roadmap A — Authentication and authorization consolidation ✅ COMPLETE
+## Roadmap A — Authentication and authorization consolidation [COMPLETE]
 
 > **Status**: Completed 2026-02-17
 > **Branch**: `feat/clerk-auth-cleanup`
@@ -240,19 +240,19 @@ Single, predictable auth model (Clerk-first) across all routes and guards.
 
 ### Milestones
 
-1. ✅ Build Clerk-compatible guard helpers (`requireAuth`, `requirePro`, `checkFeatureLimit`).
-2. ✅ Replace legacy middleware usages in reporting and pro guard paths.
-3. ⏳ Add route-level integration tests for auth-required endpoints. (Deferred to Roadmap B)
-4. ✅ Remove legacy JWT middleware from active codepaths.
+1. [DONE] Build Clerk-compatible guard helpers (`requireAuth`, `requirePro`, `checkFeatureLimit`).
+2. [DONE] Replace legacy middleware usages in reporting and pro guard paths.
+3. [DEFERRED] Add route-level integration tests for auth-required endpoints. (Deferred to Roadmap B)
+4. [DONE] Remove legacy JWT middleware from active codepaths.
 
 ### Success criteria
 
-- ✅ No route imports `middleware/auth.ts` in runtime auth flow.
-- ✅ All protected endpoints authenticate Clerk tokens consistently.
+- [DONE] No route imports `middleware/auth.ts` in runtime auth flow.
+- [DONE] All protected endpoints authenticate Clerk tokens consistently.
 
 ---
 
-## Roadmap B — Testing foundation and quality gates ✅ COMPLETE
+## Roadmap B — Testing foundation and quality gates [COMPLETE]
 
 > **Status**: Completed 2026-02-18
 > **Branch**: `feat/roadmap-b-testing-foundation`
@@ -269,15 +269,15 @@ Establish regression protection and release confidence.
 
 ### Milestones
 
-1. ✅ Add first 10 high-value tests (165 tests passing):
+1. [DONE] Add first 10 high-value tests (165 tests passing):
    - Macro schema validation tests
    - Goals schema validation tests
    - User schema validation tests
    - Auth middleware tests
    - API contract tests for core response schemas
-2. ✅ Add API contract tests for core response schemas.
-3. ✅ Add CI workflow for `typecheck + lint + test`.
-4. ✅ Block deploy job when quality gates fail.
+2. [DONE] Add API contract tests for core response schemas.
+3. [DONE] Add CI workflow for `typecheck + lint + test`.
+4. [DONE] Block deploy job when quality gates fail.
 
 ### Deliverables
 
@@ -294,12 +294,12 @@ Establish regression protection and release confidence.
 
 ### Success criteria
 
-- ✅ `bun run test` passes with meaningful suite (165 tests).
-- ✅ Deploy workflow depends on passing tests.
+- [DONE] `bun run test` passes with meaningful suite (165 tests).
+- [DONE] Deploy workflow depends on passing tests.
 
 ---
 
-## Roadmap C — Type-safety recovery ✅ COMPLETE
+## Roadmap C — Type-safety recovery [COMPLETE]
 
 > **Status**: Completed 2026-02-18
 > **Branch**: `feat/roadmap-c-type-safety`
@@ -316,19 +316,19 @@ Reduce runtime uncertainty by removing strategic `any` usage.
 
 ### Milestones
 
-1. ✅ Create typed handler context aliases per module (`backend/src/types/context.ts`).
-2. ✅ Replace `context: any` in top-traffic backend routes (39 occurrences in 6 files).
-3. ✅ Replace `as any` in frontend (15 files, 137 insertions, 87 deletions).
-4. ✅ Add lint rule and PR check to prevent new `any` proliferation in critical paths (backend + frontend ESLint configs).
+1. [DONE] Create typed handler context aliases per module (`backend/src/types/context.ts`).
+2. [DONE] Replace `context: any` in top-traffic backend routes (39 occurrences in 6 files).
+3. [DONE] Replace `as any` in frontend (15 files, 137 insertions, 87 deletions).
+4. [DONE] Add lint rule and PR check to prevent new `any` proliferation in critical paths (backend + frontend ESLint configs).
 
 ### Success criteria
 
-- ✅ `any` usage reduced significantly in runtime paths.
-- ✅ Fewer type assertions in auth/query/billing layers.
+- [DONE] `any` usage reduced significantly in runtime paths.
+- [DONE] Fewer type assertions in auth/query/billing layers.
 
 ---
 
-## Roadmap D — Data correctness and API contract integrity ✅ COMPLETE
+## Roadmap D — Data correctness and API contract integrity [COMPLETE]
 
 > **Status**: Completed 2026-02-20
 > **Branch**: `feat/roadmap-d-data-correctness`
@@ -346,10 +346,10 @@ Canonical, consistent domain models across backend and frontend.
 
 ### Milestones
 
-1. ✅ Normalize macro totals naming and response shapes (fixed `totalProtein` → `protein`, etc.).
-2. ✅ Add central mappers between DB snake_case and API camelCase (`backend/src/lib/mappers/index.ts`).
-3. ✅ Split legacy endpoints into compatibility namespace (deprecated 6 auth endpoints with headers).
-4. ✅ Add contract fixtures and schema snapshots (38 tests, 25 snapshots).
+1. [DONE] Normalize macro totals naming and response shapes (fixed `totalProtein` → `protein`, etc.).
+2. [DONE] Add central mappers between DB snake_case and API camelCase (`backend/src/lib/mappers/index.ts`).
+3. [DONE] Split legacy endpoints into compatibility namespace (deprecated 6 auth endpoints with headers).
+4. [DONE] Add contract fixtures and schema snapshots (38 tests, 25 snapshots).
 
 ### Deliverables
 
@@ -364,8 +364,8 @@ Canonical, consistent domain models across backend and frontend.
 
 ### Success criteria
 
-- ✅ No duplicated/ambiguous totals fields.
-- ✅ Frontend consumes stable response contracts.
+- [DONE] No duplicated/ambiguous totals fields.
+- [DONE] Frontend consumes stable response contracts.
 
 ---
 
@@ -474,7 +474,7 @@ Sustain responsiveness as data and usage scale.
 
 ## Immediate actionable backlog (next 2 sprints)
 
-1. ~~Replace legacy auth middleware usage in reporting/pro-guard paths.~~ ✅ DONE
+1. ~~Replace legacy auth middleware usage in reporting/pro-guard paths.~~ [DONE]
 2. Stand up initial test suite (frontend + backend integration).
 3. Add CI quality-gate workflow and make deploy depend on it.
 4. Refactor `useMacroQueries` totals field consistency + add tests.

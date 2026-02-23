@@ -34,7 +34,7 @@ function getBundleSizes() {
     process.exit(1);
   }
 
-  console.log("\n📦 Bundle Sizes (gzipped):");
+  console.log("\nBundle Sizes (gzipped):");
   console.log("==========================");
 
   // Read all JS files and get their sizes
@@ -71,9 +71,9 @@ function getBundleSizes() {
   const totalRawKB = (totalRaw / 1024).toFixed(2);
   const totalGzipKB = (totalGzip / 1024).toFixed(2);
 
-  console.log(`\n📊 Initial Bundle (index.js): ${initialGzipKB} KB gzipped`);
+  console.log(`\nInitial Bundle (index.js): ${initialGzipKB} KB gzipped`);
   console.log(
-    `📊 Total JS Size: ${totalGzipKB} KB gzipped (${totalRawKB} KB raw)`,
+    `Total JS Size: ${totalGzipKB} KB gzipped (${totalRawKB} KB raw)`,
   );
 
   // Check thresholds
@@ -84,14 +84,14 @@ function getBundleSizes() {
     initialBundle.gzipSize / 1024 > INITIAL_BUNDLE_THRESHOLD_KB
   ) {
     console.log(
-      `\n⚠️  WARNING: Initial bundle size (${initialGzipKB} KB) exceeds ${INITIAL_BUNDLE_THRESHOLD_KB} KB threshold`,
+      `\nWARNING: Initial bundle size (${initialGzipKB} KB) exceeds ${INITIAL_BUNDLE_THRESHOLD_KB} KB threshold`,
     );
     hasWarning = true;
   }
 
   if (totalGzip / 1024 > TOTAL_BUNDLE_THRESHOLD_KB) {
     console.log(
-      `\n⚠️  WARNING: Total bundle size (${totalGzipKB} KB) exceeds ${TOTAL_BUNDLE_THRESHOLD_KB} KB threshold`,
+      `\nWARNING: Total bundle size (${totalGzipKB} KB) exceeds ${TOTAL_BUNDLE_THRESHOLD_KB} KB threshold`,
     );
     hasWarning = true;
   }
@@ -100,7 +100,7 @@ function getBundleSizes() {
     process.exit(1);
   }
 
-  console.log("\n✅ Bundle sizes within thresholds");
+  console.log("\nBundle sizes within thresholds");
   console.log(
     `   Initial bundle: ${initialGzipKB} KB < ${INITIAL_BUNDLE_THRESHOLD_KB} KB threshold`,
   );
