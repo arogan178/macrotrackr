@@ -54,10 +54,7 @@ const calculateCalories = (
 const capitalizeFirstLetter = (string: string): string =>
   string
     ? string.charAt(0).toUpperCase() +
-      string
-        .slice(1)
-        .replace(/🍳|🍗|🍽️|🧃/, "")
-        .trim()
+      string.slice(1)
     : "";
 
 const exportCSV = (history: MacroEntry[]) => {
