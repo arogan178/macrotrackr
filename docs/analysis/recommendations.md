@@ -773,9 +773,9 @@ Desktop sidebar navigation with collapsible behavior:
 ```
 ┌──────────────┬──────────────────────────────────────────┐
 │              │                                          │
-│  🏠 Home     │         Main Content Area               │
-│  📊 Goals    │                                          │
-│  ⚙️ Settings │                                          │
+│  Home        │         Main Content Area               │
+│  Goals       │                                          │
+│  Settings    │                                          │
 │              │                                          │
 │              │                                          │
 │              │                                          │
