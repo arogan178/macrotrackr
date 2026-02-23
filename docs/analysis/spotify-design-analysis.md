@@ -271,14 +271,14 @@ Spotify's motion design philosophy centers on **"Rhythm and Flow"** - animations
 │  [Logo]                                    [Profile]     │
 ├──────────────┬──────────────────────────────────────────┤
 │              │                                          │
-│  🏠 Home     │         Main Content Area               │
-│  🔍 Search   │                                          │
-│  📚 Library  │                                          │
+│  Home        │         Main Content Area               │
+│  Search      │                                          │
+│  Library     │                                          │
 │              │                                          │
 │  Playlists   │                                          │
 │  ──────────  │                                          │
 │  + New       │                                          │
-│  📁 Folder   │                                          │
+│  Folder      │                                          │
 │              │                                          │
 └──────────────┴──────────────────────────────────────────┘
 ```
@@ -832,7 +832,7 @@ flowchart TD
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │ [Album]  Title - Artist    [Controls]    [Progress]    [Volume]  │
-│  56x56   Subdued text      ◀ ▶ ⏸ ▶▶      ────●────     🔊 ───   │
+│  56x56   Subdued text      Prev Play/Pause Next         Volume    │
 └──────────────────────────────────────────────────────────────────┘
 ```
 

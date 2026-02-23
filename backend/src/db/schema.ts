@@ -8,7 +8,7 @@ import { logger } from "../lib/logger";
  * @param db - The Bun SQLite database instance.
  */
 export function initializeSchema(db: Database) {
-  logger.info("🚀 Initializing database schema...");
+  logger.info("Initializing database schema...");
 
   // Enable Foreign Key support (important for relationships)
   db.exec("PRAGMA foreign_keys = ON;");
@@ -152,7 +152,7 @@ export function initializeSchema(db: Database) {
 
     if (columnExists.count === 0) {
       logger.info(
-        `    ➕ Adding column '${columnName}' to table '${tableName}'...`
+        `    Adding column '${columnName}' to table '${tableName}'...`
       );
       try {
         db.exec(
@@ -160,7 +160,7 @@ export function initializeSchema(db: Database) {
         );
         if (updateLogic) {
           logger.info(
-            `       🔄 Running update logic for new column '${columnName}'...`
+            `       Running update logic for new column '${columnName}'...`
           );
           db.exec(updateLogic);
         }
@@ -249,7 +249,7 @@ export function initializeSchema(db: Database) {
       ) ?? false;
 
     if (hasOldCheck) {
-      logger.info("    🔧 Migrating habits table to remove accent_color CHECK constraint...");
+      logger.info("    Migrating habits table to remove accent_color CHECK constraint...");
 
       db.exec("BEGIN IMMEDIATE TRANSACTION;");
 
@@ -286,15 +286,15 @@ export function initializeSchema(db: Database) {
 
       // Recreate indexes for habits (idempotent below will ensure existence)
       db.exec("COMMIT;");
-      logger.info("    ✅ habits table migrated successfully.");
+      logger.info("    habits table migrated successfully.");
     }
   } catch (error) {
-    logger.error({ error }, "    ❌ Failed migrating habits table; continuing with initialization");
+    logger.error({ error }, "    Failed migrating habits table; continuing with initialization");
     try { db.exec("ROLLBACK;"); } catch { /* ROLLBACK can fail if transaction not active */ }
   }
 
   // --- Indexes for Performance ---
-  logger.info("    ⚡ Creating indexes...");
+  logger.info("    Creating indexes...");
 
   // Basic single-column indexes
   db.exec(
@@ -334,7 +334,7 @@ export function initializeSchema(db: Database) {
   );
 
   // --- Advanced Compound Indexes for Performance Optimization ---
-  logger.info("    🚀 Creating compound performance indexes...");
+  logger.info("    Creating compound performance indexes...");
 
   // Macro entries optimized for common query patterns
   db.exec(
@@ -382,5 +382,5 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)"
   );
 
-  logger.info("✅ Database schema initialized successfully.");
+  logger.info("Database schema initialized successfully.");
 }

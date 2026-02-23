@@ -130,7 +130,7 @@ const BillingForm: React.FC = () => {
             role="status"
             aria-label={`Current plan: ${isPro ? "Pro" : "Free"}`}
           >
-            {isPro ? "✨ Pro Plan" : "Free Plan"}
+            {isPro ? "Pro Plan" : "Free Plan"}
           </div>
         </div>
 
