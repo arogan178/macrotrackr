@@ -183,10 +183,12 @@ export const homeRoute = createRoute({
             context.queryClient.fetchQuery({
               queryKey: queryKeys.macros.targets(),
               queryFn: () =>
-                apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+                apiService.macros
+                  .getMacroTarget()
+                  .then((r) => r?.macroTarget ?? null),
               ...queryConfigs.macros,
             }),
-          undefined,
+          null,
         ),
         safeFetch(
           () =>
@@ -277,10 +279,12 @@ export const goalsRoute = createRoute({
           context.queryClient.fetchQuery({
             queryKey: queryKeys.macros.targets(),
             queryFn: () =>
-              apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+              apiService.macros
+                .getMacroTarget()
+                .then((r) => r?.macroTarget ?? null),
             ...queryConfigs.macros,
           }),
-        undefined,
+        null,
       ),
       safeFetch(
         () =>
