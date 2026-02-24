@@ -10,9 +10,6 @@ const Header: React.FC = () => {
 
   const handlePricingClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
-    // Always attempt to smooth-scroll to the pricing section if it exists.
-    // We intentionally do NOT navigate to /pricing here to keep the user on
-    // the same landing page and preserve their scroll context.
     const element = document.querySelector("#pricing");
     if (element instanceof HTMLElement) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -23,37 +20,65 @@ const Header: React.FC = () => {
     }
   };
 
-  return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between py-3">
-          <div className="flex items-center gap-6">
-            <LogoButton className="h-0" />
-            <a
-              href="#pricing"
-              onClick={handlePricingClick}
-              className={getButtonClasses("ghost", "sm", false, "text-muted hover:text-foreground")}
-            >
-              Pricing
-            </a>
-          </div>
+  const handleFeaturesClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const element = document.querySelector("#features");
+    if (element instanceof HTMLElement) {
+      element.scrollIntoView({ behavior: "smooth", block: "start" });
+      posthog?.capture?.("clicked_features_nav", {
+        location: "header",
+        source: "landing_header",
+      });
+    }
+  };
 
-          <div className="flex items-center gap-3">
-            <Link
-              to="/login"
-              search={{ returnTo: undefined }}
-              className={getButtonClasses("ghost", "sm", false, "text-muted hover:text-foreground inline-block")}
-            >
-              Log In
-            </Link>
-            <Link
-              to="/register"
-              search={{ returnTo: undefined }}
-              className={getButtonClasses("primary", "sm", false, "inline-block")}
-            >
-              Sign Up
-            </Link>
-          </div>
+  return (
+    <header className="fixed top-0 right-0 left-0 z-50 border-b border-border bg-background/80 backdrop-blur-md transition-colors duration-200">
+      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+        {/* Left: Brand */}
+        <div className="flex w-1/3 items-center justify-start">
+          <LogoButton className="!h-auto !p-0" />
+        </div>
+
+        {/* Center: Navigation (Desktop) */}
+        <nav className="hidden w-1/3 items-center justify-center gap-1 sm:flex">
+          <a
+            href="#features"
+            onClick={handleFeaturesClick}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+          >
+            Features
+          </a>
+          <a
+            href="#pricing"
+            onClick={handlePricingClick}
+            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+          >
+            Pricing
+          </a>
+        </nav>
+
+        {/* Right: Auth */}
+        <div className="flex w-1/3 items-center justify-end gap-3">
+          <Link
+            to="/login"
+            search={{ returnTo: undefined }}
+            className="hidden rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground sm:inline-block"
+          >
+            Log In
+          </Link>
+          <Link
+            to="/register"
+            search={{ returnTo: undefined }}
+            className={getButtonClasses(
+              "primary",
+              "sm",
+              false,
+              "rounded-full font-semibold",
+            )}
+          >
+            Start Free
+          </Link>
         </div>
       </div>
     </header>

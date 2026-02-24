@@ -136,8 +136,8 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="rounded-lg bg-vibrant-accent/10 p-2">
-              <WarningIcon className="h-6 w-6 shrink-0 text-vibrant-accent" />
+            <div className="rounded-lg bg-error/10 p-2">
+              <WarningIcon className="h-6 w-6 shrink-0 text-error" />
             </div>
             <div>
               <h4 className="mb-2 font-medium text-foreground">

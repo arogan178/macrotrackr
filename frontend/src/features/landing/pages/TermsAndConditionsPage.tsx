@@ -180,7 +180,7 @@ const TermsAndConditionsPage: React.FC = () => {
                 <h2 className="mb-3 text-2xl font-semibold text-foreground">
                   13. Contact Information
                 </h2>
-                <div className="rounded-lg border border-border/50 bg-surface/50 p-4 text-foreground">
+                <div className="rounded-lg border border-border bg-surface/50 p-4 text-foreground">
                   <p>Website: www.macrotrackr.com</p>
                   <p>Email: contact@macrotrackr.com</p>
                 </div>

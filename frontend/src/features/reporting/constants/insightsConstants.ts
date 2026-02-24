@@ -1,7 +1,7 @@
 export const SCORE_COLORS = {
   excellent: "bg-success",
   good: "bg-warning",
-  poor: "bg-vibrant-accent",
+  poor: "bg-error",
 } as const;
 
 export const METRIC_CARD_CONFIGS = {
@@ -59,7 +59,7 @@ export const DAILY_AVERAGES_CONFIG = [
   {
     label: "Calories",
     unit: "cal",
-    color: "text-vibrant-accent",
+    color: "text-error",
     key: "calories" as const,
   },
   {

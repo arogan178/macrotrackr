@@ -7,6 +7,7 @@ import usePageMetadata from "@/hooks/usePageMetadata";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
+import PageBackground from "../components/PageBackground";
 
 const FeaturesSection = React.lazy(
   () => import("../components/FeaturesSection"),
@@ -47,9 +48,9 @@ function ThemedFallback() {
 
 const LandingPage: React.FC = () => {
   usePageMetadata({
-    title: "MacroTrackr — Precision Nutrition",
+    title: "MacroTrackr — Macro Tracking That Fits Real Life",
     description:
-      "MacroTrackr helps you track macronutrients and achieve your goals with a simple, modern interface.",
+      "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
     canonical: "https://macrotrackr.com/",
     ogImage: "https://macrotrackr.com/icon.png",
   });
@@ -117,6 +118,8 @@ const LandingPage: React.FC = () => {
           }),
         }}
       />
+
+      <PageBackground />
 
       <div aria-hidden={false}>
         <Header />

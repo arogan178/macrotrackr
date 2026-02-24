@@ -13,7 +13,7 @@ export default function GoalsErrorState({
   return (
     <div className="flex min-h-[400px] items-center justify-center p-4">
       <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6">
-        <div className="mb-4 text-vibrant-accent">
+        <div className="mb-4 text-error">
           <WarningIcon className="mx-auto mb-3 h-12 w-12" />
           <h3 className="mb-2 text-center text-lg font-semibold text-foreground">
             Unable to Load Data

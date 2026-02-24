@@ -191,7 +191,7 @@ export function QueryLoadingWrapper({
     return (
       <div className={`flex items-center justify-center p-4 ${className}`}>
         {errorComponent || (
-          <div className="text-center text-vibrant-accent">
+          <div className="text-center text-error">
             <p className="font-medium">Error loading data</p>
             {error?.message && (
               <p className="mt-1 text-sm text-foreground">{error.message}</p>

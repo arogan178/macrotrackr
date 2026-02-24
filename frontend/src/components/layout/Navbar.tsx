@@ -65,7 +65,7 @@ const Navbar: React.FC = () => {
                   onClick={() => handleNavigation(path)}
                   ariaLabel={label}
                   buttonSize="sm"
-                  variant={location.pathname === path ? "primary" : "ghost"}
+                  variant={location.pathname.startsWith(path) ? "secondary" : "ghost"}
                   aria-current={location.pathname === path ? "page" : undefined}
                   icon={<Icon />}
                   iconPosition="left"
@@ -147,7 +147,7 @@ const Navbar: React.FC = () => {
                     onClick={() => handleNavigation(path)}
                     ariaLabel={label}
                     className="w-full justify-start"
-                    variant={location.pathname === path ? "primary" : "ghost"}
+                    variant={location.pathname.startsWith(path) ? "secondary" : "ghost"}
                     aria-current={
                       location.pathname === path ? "page" : undefined
                     }

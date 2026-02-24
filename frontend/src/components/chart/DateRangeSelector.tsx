@@ -41,7 +41,7 @@ export default function DateRangeSelector({
             isMotion
             layoutId="activeRangeHighlight"
             size="sm"
-            className="border border-border/50 bg-surface-2"
+            className="border border-border bg-surface-2"
           />
         </div>
 

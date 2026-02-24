@@ -280,70 +280,6 @@ const DesktopEntryTable = memo(
       getCoreRowModel: getCoreRowModel(),
     });
 
-    // Render a single row
-    const renderRow = (data: TableRowData, index: number) => {
-      const isGroup = data.isGroup;
-      const parentDate = data.parentDate || data.date;
-      const animationKey = isGroup
-        ? `group-${data.date}`
-        : `entry-${data.entries[0].id}-${parentDate}`;
-
-      return (
-        <motion.tr
-          key={animationKey}
-          className={
-            isGroup
-              ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/20 transition-colors hover:bg-primary/20"
-              : "border-b border-border/30 transition-colors hover:bg-surface/20"
-          }
-          onClick={isGroup ? () => toggleDateCollapse(data.date) : undefined}
-          initial={{
-            opacity: 0,
-            y: isGroup ? 0 : -8,
-            scaleY: isGroup ? 1 : 0.8,
-          }}
-          animate={{
-            opacity: 1,
-            y: 0,
-            scaleY: 1,
-          }}
-          exit={{
-            opacity: 0,
-            y: isGroup ? 0 : -8,
-            scaleY: isGroup ? 1 : 0.8,
-          }}
-          transition={{
-            duration: 0.2,
-            delay: isGroup ? 0 : 0.02,
-            ease: "easeInOut",
-            opacity: { duration: 0.15 },
-            y: { duration: 0.2 },
-            scaleY: { duration: 0.2 },
-          }}
-          layout
-        >
-          {/* Use the original table data to get the correct row */}
-          {table
-            .getRowModel()
-            .rows.find((row) => {
-              const rowData = row.original;
-              if (rowData.isGroup) return rowData.date === data.date;
-              return rowData.entries[0].id === data.entries[0].id;
-            })
-            ?.getVisibleCells()
-            .map((cell) => (
-              <td
-                key={cell.id}
-                className="px-4 py-2.5 text-center"
-                style={{ width: "14.285%" }}
-              >
-                {flexRender(cell.column.columnDef.cell, cell.getContext())}
-              </td>
-            ))}
-        </motion.tr>
-      );
-    };
-
     // Virtualized table body for large lists
     const renderVirtualizedBody = () => {
       const virtualItems = virtualizer.getVirtualItems();
@@ -491,9 +427,9 @@ const DesktopEntryTable = memo(
       <div className="hidden lg:block">
         <div
           ref={tableContainerReference}
-          className={`overflow-hidden rounded-lg border border-border/50 ${shouldVirtualize ? "max-h-[600px] overflow-auto" : ""}`}
+          className={`overflow-hidden rounded-lg border border-border ${shouldVirtualize ? "max-h-[600px] overflow-auto" : ""}`}
         >
-          <table className="w-full table-fixed bg-surface/40">
+          <table className="w-full table-fixed bg-surface">
             <thead
               className={
                 shouldVirtualize ? "sticky top-0 z-10 bg-surface/95" : ""
@@ -504,7 +440,7 @@ const DesktopEntryTable = memo(
                   {headerGroup.headers.map((header) => (
                     <th
                       key={header.id}
-                      className="border-b border-border/50 px-4 py-3 text-center text-xs font-medium tracking-wider text-foreground uppercase"
+                      className="border-b border-border px-4 py-3 text-center text-xs font-medium tracking-wider text-foreground uppercase"
                       style={{ width: "14.285%" }}
                     >
                       {header.isPlaceholder
