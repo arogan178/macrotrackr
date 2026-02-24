@@ -119,6 +119,9 @@ const EntryHistoryComponent = function EntryHistory({
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
     const grouped: Record<string, MacroEntry[]> = {};
     for (const entry of history) {
+      if (!entry) {
+        continue;
+      }
       const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
       if (!grouped[dateKey]) grouped[dateKey] = [];
       grouped[dateKey].push(entry);
