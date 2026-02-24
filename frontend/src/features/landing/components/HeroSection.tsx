@@ -2,76 +2,71 @@ import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import React from "react";
 
-import { Button, ShieldCheckIcon } from "@/components/ui";
-
-import { trustElements, trustIndicators } from "../utils/landingPageConstants";
+import { getButtonClasses } from "@/components/ui/Button";
 
 const HeroSection: React.FC = () => (
-  <section className="relative z-10 px-4 pt-20 pb-32 sm:px-6 lg:px-8">
-    <div className="mx-auto max-w-7xl">
-      <div className="text-center">
-        <h1 className="mb-8 text-5xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl">
-          <span className="block">Track Your Macros</span>
-          <span className="block">Achieve Your Goals</span>
+  <section className="relative z-10 pt-20 pb-16 sm:pt-28 sm:pb-24">
+    <div className="mx-auto max-w-5xl text-center">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
+      >
+        <span className="mb-4 inline-block rounded-full bg-surface-2 px-3 py-1 text-sm font-medium text-primary ring-1 ring-border">
+          MacroTrackr 2.0 is here
+        </span>
+        <h1 className="mb-6 text-5xl font-bold tracking-tight text-balance text-foreground sm:text-6xl lg:text-8xl">
+          Fuel your body.
+          <br />
+          <span className="text-primary">Hit your goals.</span>
         </h1>
 
-        <p className="mx-auto mb-12 max-w-3xl text-xl leading-relaxed text-muted sm:text-2xl">
-          The most intuitive macro tracking app designed to help you reach your
-          fitness and nutrition goals with precision and ease.
+        <p className="mx-auto mb-10 max-w-2xl text-xl leading-relaxed text-balance text-muted sm:text-2xl">
+          The sleekest, fastest way to track your macros. No bloated features, just precision nutrition designed for modern lifestyles.
         </p>
 
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
-          className="mb-12 flex flex-col items-center"
-        >
-          <Link to="/register" className="mb-6">
-            <Button
-              text="Start Your Journey Free"
-              variant="primary"
-              buttonSize="lg"
-              className="px-12 py-4 text-xl font-semibold"
-            />
+        <div className="mb-14 flex flex-col items-center justify-center gap-4 sm:flex-row">
+          <Link
+            to="/register"
+            search={{ returnTo: undefined }}
+            className={getButtonClasses("primary", "lg", false, "px-10 py-4 text-lg font-semibold rounded-full")}
+          >
+            Start Tracking Free
           </Link>
+          <a
+            href="#features"
+            className={getButtonClasses("outline", "lg", false, "px-10 py-4 text-lg font-semibold rounded-full bg-surface hover:bg-surface-2")}
+          >
+            See How It Works
+          </a>
+        </div>
+      </motion.div>
 
-          <p className="text-lg font-medium text-muted">
-            Join others taking control of their nutrition
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.3, ease: "easeOut" }}
-          className="mx-auto mb-8 max-w-4xl rounded-xl border border-border bg-surface p-8"
-        >
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {trustIndicators.map((indicator) => (
-              <div key={indicator.title} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-2">
-                  <indicator.icon className="text-primary" />
-                </div>
-                <div className="text-left">
-                  <h4 className="font-semibold text-foreground">
-                    {indicator.title}
-                  </h4>
-                  <p className="text-sm text-muted">{indicator.description}</p>
-                </div>
-              </div>
-            ))}
+      {/* Modern inline product preview shot to replace the long scrolling carousel */}
+      <motion.div
+        initial={{ opacity: 0, y: 40 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
+        className="relative mx-auto mt-16 max-w-5xl"
+      >
+        <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-2xl">
+          {/* Faux browser/app top bar */}
+          <div className="flex items-center gap-2 border-b border-border bg-surface-2 px-4 py-3">
+            <div className="h-3 w-3 rounded-full bg-error" />
+            <div className="h-3 w-3 rounded-full bg-warning" />
+            <div className="h-3 w-3 rounded-full bg-success" />
           </div>
-
-          <div className="mt-6 flex flex-col items-center justify-center gap-2 border-t border-border pt-6 text-sm text-muted sm:flex-row sm:gap-8">
-            {trustElements.map((element) => (
-              <div key={element.text} className="flex items-center gap-2">
-                <ShieldCheckIcon className="h-4 w-4 text-success" />
-                <span>{element.text}</span>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      </div>
+          <img
+            src="/screens/dashboard.png"
+            alt="MacroTrackr Dashboard Preview"
+            className="w-full object-cover"
+            loading="eager"
+            decoding="async"
+            width={1200}
+            height={800}
+          />
+        </div>
+      </motion.div>
     </div>
   </section>
 );

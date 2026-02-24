@@ -3,12 +3,13 @@ import { usePostHog } from "posthog-js/react";
 import React from "react";
 
 import LogoButton from "@/components/layout/LogoButton";
-import { Button } from "@/components/ui";
+import { getButtonClasses } from "@/components/ui/Button";
 
 const Header: React.FC = () => {
   const posthog = usePostHog();
 
-  const handlePricingClick = () => {
+  const handlePricingClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
     // Always attempt to smooth-scroll to the pricing section if it exists.
     // We intentionally do NOT navigate to /pricing here to keep the user on
     // the same landing page and preserve their scroll context.
@@ -28,26 +29,29 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between py-3">
           <div className="flex items-center gap-6">
             <LogoButton className="h-0" />
-            <Button
+            <a
+              href="#pricing"
               onClick={handlePricingClick}
-              text="Pricing"
-              variant="ghost"
-              buttonSize="sm"
-              className="text-muted hover:text-foreground"
-            />
+              className={getButtonClasses("ghost", "sm", false, "text-muted hover:text-foreground")}
+            >
+              Pricing
+            </a>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link to="/login" className="inline-block">
-              <Button
-                text="Log In"
-                variant="ghost"
-                buttonSize="sm"
-                className="text-muted hover:text-foreground"
-              />
+            <Link
+              to="/login"
+              search={{ returnTo: undefined }}
+              className={getButtonClasses("ghost", "sm", false, "text-muted hover:text-foreground inline-block")}
+            >
+              Log In
             </Link>
-            <Link to="/register" className="inline-block">
-              <Button text="Sign Up" variant="primary" buttonSize="sm" />
+            <Link
+              to="/register"
+              search={{ returnTo: undefined }}
+              className={getButtonClasses("primary", "sm", false, "inline-block")}
+            >
+              Sign Up
             </Link>
           </div>
         </div>

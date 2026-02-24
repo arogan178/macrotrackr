@@ -6,10 +6,10 @@ const Footer: React.FC = () => (
     <div className="mx-auto max-w-7xl">
       <div className="mb-8 grid grid-cols-1 gap-8 md:grid-cols-2">
         <div className="">
-          <h3 className="mb-4 text-2xl font-bold text-foreground">
+          <h3 className="mb-4 text-2xl font-bold tracking-tight text-foreground">
             MacroTrackr
           </h3>
-          <p className="max-w-md text-muted">
+          <p className="max-w-md text-balance text-muted">
             The most intuitive macro tracking app for achieving your fitness and
             nutrition goals.
           </p>

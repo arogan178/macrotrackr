@@ -7,23 +7,11 @@ import usePageMetadata from "@/hooks/usePageMetadata";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
-import PageBackground from "../components/PageBackground";
 
 const FeaturesSection = React.lazy(
   () => import("../components/FeaturesSection"),
 );
 const PricingSection = React.lazy(() => import("../components/PricingSection"));
-const ProductPreviewSection = React.lazy(
-  () => import("../components/ProductPreviewSection"),
-);
-// const TestimonialsSection = React.lazy(
-//   () => import("../components/TestimonialsSection"),
-// );
-const FinalCtaSection = React.lazy(
-  () => import("../components/FinalCtaSection"),
-);
-
-// (Animations for header/hero were removed to improve FCP/LCP)
 
 const sectionRevealVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -57,33 +45,17 @@ function ThemedFallback() {
   );
 }
 
-function SectionDivider({ inverted = false }: { inverted?: boolean }) {
-  return (
-    <div className="relative w-full overflow-hidden">
-      <svg
-        viewBox="0 0 1440 80"
-        className="fill-surface"
-        style={inverted ? { transform: "scaleX(-1)" } : undefined}
-      >
-        <path d="M0,0 C480,80 960,0 1440,80 L1440,0 L0,0 Z"></path>
-      </svg>
-    </div>
-  );
-}
 const LandingPage: React.FC = () => {
   usePageMetadata({
-    title: "MacroTrackr — Nutrition & Macro Tracking",
+    title: "MacroTrackr — Precision Nutrition",
     description:
-      "MacroTrackr helps you track macronutrients, set targets, and reach your health goals with a simple, powerful interface.",
+      "MacroTrackr helps you track macronutrients and achieve your goals with a simple, modern interface.",
     canonical: "https://macrotrackr.com/",
     ogImage: "https://macrotrackr.com/icon.png",
   });
-  // Respect user's reduced motion preferences
   const shouldReduceMotion = useReducedMotion();
 
-  // Idle and saver-aware prefetch for lazy sections to improve perceived performance
   useEffect(() => {
-    // Network Information API type (not in standard Navigator type)
     const navigatorWithConnection = navigator as Navigator & {
       connection?: { saveData?: boolean; effectiveType?: string };
     };
@@ -97,8 +69,6 @@ const LandingPage: React.FC = () => {
     const doPrefetch = () => {
       void import("../components/FeaturesSection");
       void import("../components/PricingSection");
-      void import("../components/ProductPreviewSection");
-      void import("../components/FinalCtaSection");
     };
     const schedulePrefetch = () => {
       if ("requestIdleCallback" in globalThis) {
@@ -112,7 +82,6 @@ const LandingPage: React.FC = () => {
         setTimeout(doPrefetch, 500);
       }
     };
-    // Prefer scheduling after first paint
     requestAnimationFrame(() => schedulePrefetch());
   }, []);
 
@@ -126,12 +95,8 @@ const LandingPage: React.FC = () => {
 
   return (
     <div
-      className={`relative min-h-screen overflow-hidden text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
+      className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      {/* Shared background */}
-      <PageBackground />
-
-      {/* Structured data: SoftwareApplication + WebSite (helps search engines understand the product) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -153,22 +118,15 @@ const LandingPage: React.FC = () => {
         }}
       />
 
-      {/* Header landmark - render immediately without entrance animation */}
       <div aria-hidden={false}>
         <Header />
       </div>
 
-      {/* Main content landmark for accessibility */}
-      <main className="relative z-10 bg-background">
-        {/* Shared background */}
-        <PageBackground />
-
-        {/* Hero - render immediately without entrance animation */}
+      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div>
           <HeroSection />
         </div>
-        <SectionDivider />
-        {/* Features */}
+
         <motion.section
           {...inViewRevealProps}
           variants={sectionRevealVariants}
@@ -180,61 +138,16 @@ const LandingPage: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
         </motion.section>
-        <SectionDivider inverted />
-        {/* Pricing */}
+
         <motion.section
           {...inViewRevealProps}
           variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
+          className="pb-24"
         >
           <ErrorBoundary>
             <Suspense fallback={<ThemedFallback />}>
               <PricingSection />
-            </Suspense>
-          </ErrorBoundary>
-        </motion.section>
-        <SectionDivider />
-        {/* Product Preview */}
-        <motion.section
-          {...inViewRevealProps}
-          variants={sectionRevealVariants}
-          style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
-        >
-          <ErrorBoundary>
-            <Suspense fallback={<ThemedFallback />}>
-              <ProductPreviewSection
-                images={[
-                  {
-                    src: "/screens/dashboard.png",
-                    caption: "Track your daily macros at a glance",
-                  },
-                  {
-                    src: "/screens/food-entry.png",
-                    caption: "Quickly log your meals in seconds",
-                  },
-                  {
-                    src: "/screens/progress.png",
-                    caption: "Visualize your progress over time",
-                  },
-                  {
-                    src: "/screens/settings.png",
-                    caption: "Customizable goals and preferences",
-                  },
-                ]}
-              />
-            </Suspense>
-          </ErrorBoundary>
-        </motion.section>
-        <SectionDivider inverted />
-        {/* Final CTA */}
-        <motion.section
-          {...inViewRevealProps}
-          variants={sectionRevealVariants}
-          style={{ contentVisibility: "auto", containIntrinsicSize: "400px" }}
-        >
-          <ErrorBoundary>
-            <Suspense fallback={<ThemedFallback />}>
-              <FinalCtaSection />
             </Suspense>
           </ErrorBoundary>
         </motion.section>

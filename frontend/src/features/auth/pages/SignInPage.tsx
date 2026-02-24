@@ -41,7 +41,7 @@ export default function SignInPage() {
         <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
           <section className="flex w-full flex-col items-center justify-center">
             <div className="w-full max-w-md">
-              <CardContainer className="bg-surface-2/90 p-8 shadow-lg ring-1 ring-border/40 backdrop-blur-xl">
+              <CardContainer className="bg-surface-2/90 p-8 backdrop-blur-xl">
                 <ClerkSignInForm
                   onSwitchToSignUp={() => handleSwitchToSignUp(returnTo)}
                   onForgotPassword={() => handleForgotPassword(returnTo)}

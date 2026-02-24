@@ -226,7 +226,7 @@ const MobileEntryCards = memo(
       return (
         <div
           ref={containerReference}
-          className="lg:hidden max-h-[70vh] overflow-auto"
+          className="max-h-[70vh] overflow-auto lg:hidden"
         >
           <div
             style={{

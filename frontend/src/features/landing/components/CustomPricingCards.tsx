@@ -91,11 +91,11 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
               | undefined
           }
           buttonSize={"lg"}
-          buttonClassName={PRICING_PLANS.free.buttonClassName}
+          buttonClassName="rounded-full w-full"
           focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.free.featureIconColor}
           featureTextClass={PRICING_PLANS.free.featureTextClass}
-          cardClassName={PRICING_PLANS.free.cardClassName}
+          cardClassName={`${PRICING_PLANS.free.cardClassName} rounded-3xl`}
           onButtonClick={() => {
             posthog?.capture?.("clicked_pricing_nav", {
               location: "pricing_cards",
@@ -140,11 +140,11 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
               | undefined
           }
           buttonSize={"lg"}
-          buttonClassName={PRICING_PLANS.pro.buttonClassName}
+          buttonClassName="rounded-full w-full"
           focusRingColor="focus:ring-primary/40"
           featureIconColor={PRICING_PLANS.pro.featureIconColor}
           featureTextClass={PRICING_PLANS.pro.featureTextClass}
-          cardClassName={PRICING_PLANS.pro.cardClassName}
+          cardClassName={`${PRICING_PLANS.pro.cardClassName} rounded-3xl border-primary/20 bg-primary/5`}
           onButtonClick={
             showUpgradeButtons
               ? () => onUpgrade && onUpgrade(selectedPlan)

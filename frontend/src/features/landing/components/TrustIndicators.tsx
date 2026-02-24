@@ -3,19 +3,19 @@ import React from "react";
 
 const indicators = [
   {
-    icon: <ShieldCheck className="h-6 w-6 text-success" />,
+    icon: <ShieldCheck className="h-6 w-6 text-success" aria-hidden="true" />,
     bg: "bg-success/15",
     title: "Secure & Private",
     desc: "Your data is encrypted and protected",
   },
   {
-    icon: <CircleHelp className="h-6 w-6 text-primary" />,
+    icon: <CircleHelp className="h-6 w-6 text-primary" aria-hidden="true" />,
     bg: "bg-primary/15",
     title: "24/7 Support",
     desc: "Get help whenever you need it",
   },
   {
-    icon: <Sparkles className="h-6 w-6 text-secondary" />,
+    icon: <Sparkles className="h-6 w-6 text-secondary" aria-hidden="true" />,
     bg: "bg-secondary/15",
     title: "Always Improving",
     desc: "Regular updates and new features",

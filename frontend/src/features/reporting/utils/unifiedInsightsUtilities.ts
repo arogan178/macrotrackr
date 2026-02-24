@@ -20,7 +20,7 @@ export const BAR_BASE_CLASSES =
   "h-2 w-full rounded-full bg-surface overflow-hidden";
 
 export const CARD_BASE_CLASSES =
-  "rounded-xl border border-border/50 bg-surface p-6 shadow-modal backdrop-blur-sm";
+  "rounded-2xl border border-border bg-surface p-6 backdrop-blur-sm";
 
 export const SECTION_HEADING_CLASSES = "text-lg font-semibold text-foreground";
 

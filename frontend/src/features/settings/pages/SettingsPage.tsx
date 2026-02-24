@@ -203,7 +203,7 @@ export default function SettingsPage() {
         subtitle={undefined}
         headerChildren={
           <div
-            className="relative flex space-x-1 rounded-lg bg-surface p-1"
+            className="relative flex space-x-1 rounded-xl bg-surface p-1"
             role="tablist"
             aria-label="Settings Tabs"
           >
