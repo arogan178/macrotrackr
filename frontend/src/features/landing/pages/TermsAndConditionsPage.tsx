@@ -2,8 +2,8 @@ import { Link } from "@tanstack/react-router";
 import React from "react";
 
 import LogoButton from "@/components/layout/LogoButton";
+import PageBackground from "@/components/layout/PageBackground";
 import { BackIcon, Button } from "@/components/ui";
-import PageBackground from "@/features/landing/components/PageBackground";
 
 const TermsAndConditionsPage: React.FC = () => {
   return (

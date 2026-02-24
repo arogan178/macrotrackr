@@ -1,4 +1,6 @@
-import PageBackground from "@/features/landing/components/PageBackground";
+import { ReactNode } from "react";
+
+import PageBackground from "@/components/layout/PageBackground";
 
 interface DashboardPageContainerProps {
   children: ReactNode;
