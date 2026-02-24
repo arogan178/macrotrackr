@@ -136,7 +136,7 @@ export function TabButtonGroup({
     <div
       className={`
         relative inline-flex items-center gap-1 p-1
-        bg-surface-2/50 rounded-lg
+        bg-surface-2 rounded-lg
         ${fullWidth ? "w-full" : ""}
         ${className}
       `

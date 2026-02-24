@@ -131,9 +131,7 @@ function WeightLogList({
         <EmptyState
           title="No Weight Logged Yet"
           message="Your recorded weights will appear here."
-          icon={
-            <TrashIcon className="h-12 w-12 text-foreground" strokeWidth={1} />
-          } // Placeholder icon
+          icon={<TrashIcon className="h-12 w-12 text-foreground" />} // Placeholder icon
           className="h-full"
         />
       </div>
@@ -147,7 +145,7 @@ function WeightLogList({
           className="absolute inset-0 overflow-y-auto pr-2"
           onScroll={handleScroll}
         >
-          <ul className="divide-y divide-gray-700/50">
+          <ul className="divide-y divide-border">
             {sortedLog.map((entry) => {
               // Double-check validity here just in case, though filter should handle it
               const entryDate = parseISO(entry.timestamp);

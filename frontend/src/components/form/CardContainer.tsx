@@ -31,9 +31,9 @@ import { cn } from "@/lib/classnameUtilities";
 const cardVariants = {
   default: formStyles.card.container,
   transparent: cn(
-    "rounded-xl border border-neutral-800/60",
-    "bg-neutral-900/60 p-4",
-    "hover:border-neutral-700 hover:bg-neutral-900/80",
+    "rounded-xl border border-border",
+    "bg-transparent p-4",
+    "hover:border-border-2",
     "transition-colors duration-150",
   ),
 };

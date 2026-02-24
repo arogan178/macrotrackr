@@ -159,7 +159,7 @@ export default function HabitCard({
   const iconWrapperPadding = "p-1.5";
 
   return (
-    <div className="overflow-hidden rounded-lg bg-surface/30">
+    <div className="overflow-hidden rounded-lg bg-surface-2">
       <div
         className={`bg-gradient-to-r ${getGradientClass(accentColor)} ${paddingClass}`}
       >

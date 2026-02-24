@@ -308,8 +308,8 @@ const DesktopEntryTable = memo(
                   }}
                   className={
                     data.isGroup
-                      ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/20 transition-colors hover:bg-primary/20"
-                      : "border-b border-border/30 transition-colors hover:bg-surface/20"
+              ? "group cursor-pointer border-y border-primary/20 bg-primary/10 transition-colors hover:bg-primary/20"
+              : "border-b border-border transition-colors hover:bg-surface-3"
                   }
                   onClick={
                     data.isGroup
@@ -376,8 +376,8 @@ const DesktopEntryTable = memo(
                 key={animationKey}
                 className={
                   isGroup
-                    ? "group cursor-pointer border-t border-b border-primary/20 bg-primary/20 transition-colors hover:bg-primary/20"
-                    : "border-b border-border/30 transition-colors hover:bg-surface/20"
+                    ? "group cursor-pointer border-y border-primary/20 bg-primary/10 transition-colors hover:bg-primary/20"
+                    : "border-b border-border transition-colors hover:bg-surface-3"
                 }
                 onClick={
                   isGroup ? () => toggleDateCollapse(data.date) : undefined
@@ -429,10 +429,10 @@ const DesktopEntryTable = memo(
           ref={tableContainerReference}
           className={`overflow-hidden rounded-lg border border-border ${shouldVirtualize ? "max-h-[600px] overflow-auto" : ""}`}
         >
-          <table className="w-full table-fixed bg-surface">
+          <table className="w-full table-fixed">
             <thead
               className={
-                shouldVirtualize ? "sticky top-0 z-10 bg-surface/95" : ""
+                shouldVirtualize ? "sticky top-0 z-10 bg-surface-2/95" : ""
               }
             >
               {table.getHeaderGroups().map((headerGroup) => (

@@ -1,5 +1,5 @@
 import { useAuth } from "@clerk/clerk-react";
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, useNavigate } from "@tanstack/react-router";
 
 import CardContainer from "@/components/form/CardContainer";
 import LogoButton from "@/components/layout/LogoButton";
@@ -32,6 +32,7 @@ function resolveProfileCompletion(user: unknown): boolean | undefined {
  * Collects additional profile information (DOB, height, weight, activity level)
  */
 export default function ProfileSetupPage() {
+  const navigate = useNavigate();
   const { isSignedIn, isLoaded } = useAuth();
   const { data: user, isLoading: isUserLoading } = useUser({
     enabled: isLoaded && isSignedIn,
@@ -59,18 +60,22 @@ export default function ProfileSetupPage() {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
       <PageBackground />
-      <header className="z-10 border-b border-border bg-surface-2">
+      <header className="z-10 border-b border-border bg-background/80 backdrop-blur-md transition-colors duration-200">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <LogoButton className="h-0" />
+          <div className="flex h-14 items-center justify-between">
+            <LogoButton
+              className="!h-auto !p-0"
+              onClick={() => navigate({ to: "/" })}
+              ariaLabel="Home"
+            />
           </div>
         </div>
       </header>
 
-      <main className="flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
+      <main className="relative z-10 flex flex-1 items-center justify-center px-4 py-12 sm:px-6 lg:px-8">
         <section className="flex w-full flex-col items-center justify-center">
           <div className="w-full max-w-md">
-            <CardContainer className="bg-surface-2/90 p-8 backdrop-blur-xl">
+            <CardContainer className="bg-surface p-8">
               <ProfileCreationForm />
             </CardContainer>
           </div>
