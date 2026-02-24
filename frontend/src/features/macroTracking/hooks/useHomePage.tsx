@@ -77,7 +77,7 @@ export function useHistoryPagination(pageSize: number) {
 
     return pages
       .flatMap((page) => (Array.isArray(page?.entries) ? page.entries : []))
-      .filter(isMacroEntry);
+      .filter((entry) => isMacroEntry(entry));
   }, [macroHistoryData]);
 
   const historyHasMore = hasNextPage;

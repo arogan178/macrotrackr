@@ -77,7 +77,7 @@ export default function NutritionInsights({
   const carbInsight = getCarbInsight();
 
   return (
-    <div className="rounded-xl border border-border/50 bg-surface p-5 shadow-modal">
+    <div className="rounded-2xl border border-border bg-surface p-5">
       <h2 className="mb-5 text-lg font-semibold text-foreground">
         Nutrition Insights
       </h2>
@@ -99,10 +99,10 @@ export default function NutritionInsights({
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           {/* Consistency Card */}
-          <div className="rounded-lg border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
+          <div className="rounded-xl border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
             <div className="mb-3 flex items-center gap-2">
               <div
-                className={`rounded-lg p-2 ${isConsistent ? "bg-primary/10" : "bg-surface-3"}`}
+                className={`rounded-xl p-2 ${isConsistent ? "bg-primary/10" : "bg-surface-3"}`}
               >
                 <CheckCircleIcon
                   className={`h-4 w-4 ${isConsistent ? "text-primary" : "text-muted"}`}
@@ -126,10 +126,10 @@ export default function NutritionInsights({
           </div>
 
           {/* Protein Card */}
-          <div className="rounded-lg border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
+          <div className="rounded-xl border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
             <div className="mb-3 flex items-center gap-2">
               <div
-                className={`rounded-lg p-2 ${proteinInsight.status === "good" ? "bg-success/10" : "bg-surface-3"}`}
+                className={`rounded-xl p-2 ${proteinInsight.status === "good" ? "bg-success/10" : "bg-surface-3"}`}
               >
                 <ProteinIcon
                   className={`h-4 w-4 ${proteinInsight.status === "good" ? "text-success" : "text-muted"}`}
@@ -145,10 +145,10 @@ export default function NutritionInsights({
           </div>
 
           {/* Carbs Card */}
-          <div className="rounded-lg border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
+          <div className="rounded-xl border border-border/30 bg-surface-2 p-4 transition-all duration-200 hover:border-border hover:bg-surface">
             <div className="mb-3 flex items-center gap-2">
               <div
-                className={`rounded-lg p-2 ${carbInsight.status === "stable" ? "bg-primary/10" : "bg-surface-3"}`}
+                className={`rounded-xl p-2 ${carbInsight.status === "stable" ? "bg-primary/10" : "bg-surface-3"}`}
               >
                 <LightningIcon
                   className={`h-4 w-4 ${carbInsight.status === "stable" ? "text-primary" : "text-muted"}`}

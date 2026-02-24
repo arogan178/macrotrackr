@@ -302,7 +302,7 @@ const CalorieSearch = memo(function CalorieSearch({
 
       {/* Results dropdown - positioned below the fixed search row */}
       {showResults && displayResults.length > 0 && (
-        <div className="relative z-10 h-64 w-full overflow-hidden rounded border border-border bg-surface shadow-surface">
+        <div className="relative z-10 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface">
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
             {displayResults.map((resultData) => {
               const { item, displayQuantity, calories } = resultData;

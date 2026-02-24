@@ -27,7 +27,7 @@ function HabitActions({
 }: HabitActionsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
-  const menuReference = useRef<HTMLDivElement>(undefined);
+  const menuReference = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -125,7 +125,7 @@ function HabitActions({
       )}{" "}
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-lg border border-border bg-surface py-0.5 text-xs shadow-lg">
+        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-xl border border-border bg-surface py-0.5 text-xs">
           {onEdit && (
             <button
               onClick={handleEdit}
