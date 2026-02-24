@@ -1,13 +1,13 @@
 import { motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect } from "react";
 
+import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import usePageMetadata from "@/hooks/usePageMetadata";
 
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
-import PageBackground from "../components/PageBackground";
 
 const FeaturesSection = React.lazy(
   () => import("../components/FeaturesSection"),
