@@ -5,8 +5,23 @@ import { useCallback, useMemo } from "react";
 
 import type { UserPublic } from "@/features/macroTracking/types/macro";
 import { useMacroHistoryInfinite } from "@/hooks/queries/useMacroQueries";
+import type { MacroEntry } from "@/types/macro";
 import { getDisplayDate } from "@/utils/dateUtilities";
 import { createNutritionProfile } from "@/utils/userConstants";
+
+function isMacroEntry(entry: unknown): entry is MacroEntry {
+  if (!entry || typeof entry !== "object") {
+    return false;
+  }
+
+  const candidate = entry as Record<string, unknown>;
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.protein === "number" &&
+    typeof candidate.carbs === "number" &&
+    typeof candidate.fats === "number"
+  );
+}
 
 /**
  * Derives the nutrition profile from the provided user with a safe fallback.
@@ -54,10 +69,16 @@ export function useHistoryPagination(pageSize: number) {
     isFetchingNextPage,
   } = useMacroHistoryInfinite(pageSize);
 
-  const history = useMemo(
-    () => macroHistoryData?.pages?.flatMap((page) => page.entries) || [],
-    [macroHistoryData],
-  );
+  const history = useMemo(() => {
+    const pages = macroHistoryData?.pages;
+    if (!Array.isArray(pages)) {
+      return [];
+    }
+
+    return pages
+      .flatMap((page) => (Array.isArray(page?.entries) ? page.entries : []))
+      .filter(isMacroEntry);
+  }, [macroHistoryData]);
 
   const historyHasMore = hasNextPage;
   const isLoadingMore = isFetchingNextPage;
