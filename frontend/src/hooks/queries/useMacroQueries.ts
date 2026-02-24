@@ -118,7 +118,7 @@ export function useMacroTarget() {
     queryKey: queryKeys.macros.targets(),
     queryFn: async () => {
       const response = await apiService.macros.getMacroTarget();
-      return response?.macroTarget;
+      return response?.macroTarget ?? null;
     },
     ...queryConfigs.longLived, // 5 minutes stale time for targets (less frequently changed)
     gcTime: 30 * 60 * 1000, // Keep longer cache time for targets
