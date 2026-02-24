@@ -60,7 +60,7 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
   // Check if user already exists
   const existingUser = safeQuery<{ id: number }>(
     db,
-    "SELECT id FROM users WHERE email = ? OR clerk_id = ?",
+    "SELECT id FROM users WHERE LOWER(email) = LOWER(?) OR clerk_id = ?",
     [email, clerkUserId]
   );
 
