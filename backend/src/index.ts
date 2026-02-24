@@ -36,18 +36,22 @@ const app = new Elysia()
   .use(requestLimitsMiddleware)
 
   // Request timing middleware for metrics collection
-  .onRequest(({ request }) => {
-    const start = Date.now();
-    const url = new URL(request.url);
-    const path = url.pathname;
-    return {
-      afterResponse: () => {
-        const duration = Date.now() - start;
-        // Record request metrics - status will be 200 by default for successful responses
-        // Error responses are tracked via onError handler
-        recordRequest(request.method, path, 200, duration);
-      }
-    };
+  .onRequest((context: any) => {
+    context.requestStartTime = Date.now();
+  })
+
+  .onAfterResponse((context: any) => {
+    const { request, set } = context;
+    const start =
+      typeof context.requestStartTime === "number"
+        ? context.requestStartTime
+        : Date.now();
+    const duration = Date.now() - start;
+    const path = new URL(request.url).pathname;
+    const statusCode =
+      typeof set?.status === "number" ? set.status : 200;
+
+    recordRequest(request.method, path, statusCode, duration);
   })
 
   // Global middleware & plugins
