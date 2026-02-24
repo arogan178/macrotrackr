@@ -1,5 +1,6 @@
 // src/config.ts
 import { z } from "zod";
+import { isAbsolute, resolve } from "node:path";
 
 // Define a schema for environment variables for validation and type safety
 const EnvSchema = z.object({
@@ -16,7 +17,12 @@ const EnvSchema = z.object({
   /**
    * Path to SQLite database file
    */
-  DATABASE_PATH: z.string().default("./macro_tracker.db"),
+  DATABASE_PATH: z
+    .string()
+    .default("./macro_tracker.db")
+    .transform((path) =>
+      isAbsolute(path) ? path : resolve(import.meta.dir, "..", path)
+    ),
 
   /**
    * JWT secret for signing tokens (must be at least 32 chars)
