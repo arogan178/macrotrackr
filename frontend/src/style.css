@@ -6,7 +6,7 @@
   /* Brand palette - Modern / Spotify Inspired */
   --color-primary: #1ed760;
   --color-secondary: #1db954;
-  --color-vibrant-accent: #ffffff;
+  --color-vibrant-accent: #1ed760;
 
   /* Surfaces – Modern contrast hierarchy */
   --color-background: #000000;
@@ -85,4 +85,26 @@ button:disabled,
 input:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Marquee animation for stock ticker-style feature display */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 50s linear infinite;
+  will-change: transform;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

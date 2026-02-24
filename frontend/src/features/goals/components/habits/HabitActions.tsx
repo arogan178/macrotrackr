@@ -117,7 +117,7 @@ function HabitActions({
       {!isComplete && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="rounded-full p-1.5 text-foreground hover:bg-surface/50 hover:text-foreground"
+          className="rounded-full p-1.5 text-foreground hover:bg-surface-2 hover:text-foreground"
           title="More actions"
         >
           <MoreVerticalIcon size="sm" />
@@ -129,7 +129,7 @@ function HabitActions({
           {onEdit && (
             <button
               onClick={handleEdit}
-              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface/50"
+              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
             >
               <EditIcon size="sm" className="mr-1.5" />
               Edit
@@ -141,7 +141,7 @@ function HabitActions({
             <button
               onClick={handleDelete}
               disabled={isActionInProgress}
-              className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface/50"
+              className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface-2"
             >
               <TrashIcon size="sm" className="mr-1.5" />
               Delete

@@ -180,7 +180,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             <div className="flex flex-col items-center rounded-lg border border-red-700/50 bg-error/30 p-6 text-center shadow-primary">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="mb-3 h-10 w-10 text-vibrant-accent"
+                className="mb-3 h-10 w-10 text-error"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"

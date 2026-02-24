@@ -422,7 +422,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                       <span
                         className={
                           adjustmentInfo.isLargeAdjustment
-                            ? "text-vibrant-accent"
+                            ? "text-warning"
                             : "text-success"
                         }
                       >

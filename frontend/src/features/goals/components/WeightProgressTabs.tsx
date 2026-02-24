@@ -28,7 +28,7 @@ function WeightProgressTabs() {
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-surface transition-all duration-200 hover:border-border-2">
       {/* Tab Navigation + Delete All Button */}
-      <div className="flex items-center border-b border-border/50 pt-3 pr-8 pl-1">
+      <div className="flex items-center border-b border-border pt-3 pr-8 pl-1">
         <div className="flex">
           {tabs.map((tab) => (
             <button

@@ -258,7 +258,7 @@ export default function SettingsPage() {
           <SettingsLoadingSkeleton />
         ) : settingsQueryError ? (
           <div className="p-6 text-center">
-            <p className="text-vibrant-accent">
+            <p className="text-error">
               Failed to load settings. Please try again.
             </p>
           </div>

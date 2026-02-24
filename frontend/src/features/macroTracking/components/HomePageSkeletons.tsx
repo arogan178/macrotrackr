@@ -58,7 +58,7 @@ export const HistoryLoadingSkeleton = () => (
     {[0, 1].map((index) => (
       <div
         key={index}
-        className="space-y-2 rounded-xl border border-border/50 bg-surface-2 p-4"
+        className="space-y-2 rounded-xl border border-border bg-surface-2 p-4"
       >
         <div className="h-4 w-1/5 rounded bg-surface-3"></div>
         <div className="h-10 rounded bg-surface-3"></div>

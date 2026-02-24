@@ -108,9 +108,9 @@ export function MacroIndicator({
       bg: "bg-fats/80",
     },
     calories: {
-      dot: "bg-vibrant-accent",
-      text: "text-vibrant-accent",
-      bg: "bg-vibrant-accent/80",
+      dot: "bg-foreground",
+      text: "text-foreground",
+      bg: "bg-foreground/80",
     },
   };
 

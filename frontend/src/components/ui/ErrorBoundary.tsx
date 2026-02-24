@@ -69,7 +69,7 @@ export class ErrorBoundary extends Component<
         this.props.fallback || (
           <div className="flex min-h-screen items-center justify-center bg-surface p-4">
             <div className="w-full max-w-lg rounded-xl border border-border bg-surface p-6 shadow-modal">
-              <div className="mb-4 text-vibrant-accent">
+              <div className="mb-4 text-error">
                 <WarningIcon className="mx-auto mb-3 h-12 w-12" />
                 <h2 className="mb-1 text-center text-xl font-bold text-foreground">
                   {this.state.isQueryError

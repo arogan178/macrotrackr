@@ -40,10 +40,10 @@ export function getColorByScore(
     if (score > 40) return "bg-warning";
     return "bg-error";
   }
-  // consistency: success >70, warning >40, else vibrant-accent
+  // consistency: success >70, warning >40, else error
   if (score > 70) return "bg-success";
   if (score > 40) return "bg-warning";
-  return "bg-vibrant-accent";
+  return "bg-error";
 }
 
 /**

@@ -97,7 +97,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
         header: () => {
           return (
             <div className="flex min-h-18 flex-col items-center justify-center bg-transparent px-5 py-4 text-center text-base font-semibold text-foreground">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border/50 bg-secondary/30 px-3 py-1 text-xs font-semibold tracking-wide text-foreground">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/30 px-3 py-1 text-xs font-semibold tracking-wide text-foreground">
                 PRO
               </span>
               <span

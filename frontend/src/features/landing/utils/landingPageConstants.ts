@@ -1,15 +1,39 @@
 import {
   BarChartIcon,
+  CheckCircleIcon,
   CheckIcon,
+  ExternalLinkIcon,
+  NutrientIcon,
   PlusCircleIcon,
+  SearchIcon,
+  ShieldCheckIcon,
+  StarIcon,
+  TargetIcon,
   TrendingUpIcon,
+  WeightIcon,
 } from "@/components/ui";
+
+/**
+ * Features for the stock ticker-style display on the landing page
+ */
+export const FEATURES = [
+  { name: "Macro Tracking", description: "Log protein, carbs, and fats instantly with automatic calorie calculation.", icon: NutrientIcon },
+  { name: "Food Search", description: "Find any food in seconds with our comprehensive, searchable database.", icon: SearchIcon },
+  { name: "Goal Setting", description: "Set personalized targets aligned with your fitness goals and timeline.", icon: TargetIcon },
+  { name: "Weight Logging", description: "Track your weight journey with clear, visual progress charts.", icon: WeightIcon },
+  { name: "Habit Tracking", description: "Build lasting habits with daily check-ins and streak tracking.", icon: CheckCircleIcon },
+  { name: "Custom Macro Targets", description: "Fine-tune your macro split to match your lifestyle and preferences.", icon: BarChartIcon },
+  { name: "Progress Insights", description: "Spot trends instantly with visual analytics that reveal what's working.", icon: TrendingUpIcon },
+  { name: "Secure Authentication", description: "Your data stays safe with Google or email sign-in via Clerk.", icon: ShieldCheckIcon },
+  { name: "Pro Subscription", description: "Unlock advanced analytics, custom insights, and priority support.", icon: StarIcon },
+  { name: "Cross-Platform", description: "Seamless tracking on desktop or mobile—wherever life takes you.", icon: ExternalLinkIcon },
+];
 
 export const trustIndicators = [
   {
     icon: CheckIcon,
     title: "Easy Setup",
-    description: "Get started in under 2 minutes",
+    description: "Start tracking in under 2 minutes",
     color: "green",
   },
   {
@@ -21,7 +45,7 @@ export const trustIndicators = [
   {
     icon: CheckIcon,
     title: "Advanced Analytics",
-    description: "Deep insights & trends",
+    description: "Actionable insights at a glance",
     color: "purple",
   },
 ];
@@ -45,19 +69,19 @@ export const features = [
     icon: PlusCircleIcon,
     title: "Smart Meal Logging",
     description:
-      "Quickly log meals with our intelligent food database and barcode scanner. Get accurate macro breakdowns instantly.",
+      "Log meals in seconds with our intelligent food database and barcode scanner. Get accurate macro breakdowns instantly.",
   },
   {
     icon: BarChartIcon,
     title: "Personal Goal Setting",
     description:
-      "Set personalized macro targets based on your goals, activity level, and preferences. Track progress in real-time.",
+      "Set custom macro targets tailored to your goals and lifestyle. Watch your progress unfold in real-time.",
   },
   {
     icon: TrendingUpIcon,
     title: "Advanced Analytics",
     description:
-      "Visualize your progress with detailed charts, trends, and insights that help you optimize your nutrition strategy.",
+      "Transform data into insights with detailed charts and trend analysis that guide smarter nutrition decisions.",
   },
 ];
 

@@ -102,7 +102,7 @@ const EntryCard = memo(
           <MacroCell
             value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
             suffix=" kcal"
-            color="text-vibrant-accent"
+            color="text-foreground"
           />
         </div>
       </div>
@@ -207,7 +207,7 @@ const MobileEntryCards = memo(
             {group.totals.carbs}g C
           </span>
           <span className="font-medium text-fats">{group.totals.fats}g F</span>
-          <span className="font-medium text-vibrant-accent">
+          <span className="font-medium text-foreground">
             {group.totals.calories} kcal
           </span>
           <IconButton
@@ -250,7 +250,7 @@ const MobileEntryCards = memo(
                   }}
                 >
                   {item.type === "header" ? (
-                    <div className="border-b border-border/30">
+                    <div className="border-b border-border">
                       {renderDateHeader(item.group)}
                     </div>
                   ) : (
@@ -284,7 +284,7 @@ const MobileEntryCards = memo(
         {initialEntries.map((group) => (
           <motion.div
             key={group.date}
-            className="border-b border-border/30 last:border-b-0"
+            className="border-b border-border last:border-b-0"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
@@ -351,7 +351,7 @@ const MobileEntryCards = memo(
             additionalEntries.map((group) => (
               <motion.div
                 key={group.date}
-                className="border-b border-border/30 last:border-b-0"
+                className="border-b border-border last:border-b-0"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{
                   opacity: 1,

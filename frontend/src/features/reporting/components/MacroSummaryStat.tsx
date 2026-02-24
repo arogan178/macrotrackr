@@ -140,7 +140,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         </div>
       </div>{" "}
       {/* Difference from Target */}
-      <div className="mt-auto flex items-baseline justify-between border-t border-border/50 pt-1">
+      <div className="mt-auto flex items-baseline justify-between border-t border-border pt-1">
         <span className="mr-1.5 text-xs text-muted">Difference:</span>
         <div className="text-right">
           <span
@@ -262,7 +262,7 @@ export default function MacroSummaryStats({
               </span>
             </div>
           </div>
-          <div className="mt-auto flex items-baseline justify-between border-t border-border/50 pt-1">
+          <div className="mt-auto flex items-baseline justify-between border-t border-border pt-1">
             <span className="mr-1.5 text-xs text-muted">Difference:</span>
             <span
               className={`text-sm font-semibold ${
