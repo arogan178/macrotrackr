@@ -6,9 +6,6 @@ import { usePrefersReducedMotion } from "@/hooks";
 
 import { FEATURES } from "../utils/landingPageConstants";
 
-/**
- * Feature card component for the horizontal ticker
- */
 interface FeatureCardProps {
   name: string;
   description: string;
@@ -38,10 +35,6 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
   </div>
 );
 
-/**
- * Horizontal scrolling ticker with feature cards.
- * Falls back to a static grid for users who prefer reduced motion.
- */
 const FeaturesSection: React.FC = () => {
   const prefersReducedMotion = usePrefersReducedMotion();
 

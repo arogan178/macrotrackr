@@ -1,5 +1,3 @@
-// src/features/macroTracking/components/DailySummaryPanel.tsx
-
 import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
@@ -15,7 +13,6 @@ import {
   calculateProteinCalories,
 } from "../calculations";
 
-// --- Constants (moved outside component to prevent recreation) ---
 const DEFAULT_TARGET = {
   proteinPercentage: 30,
   carbsPercentage: 40,
@@ -29,13 +26,10 @@ const EMPTY_TOTALS: MacroDailyTotals = {
   calories: 0,
 };
 
-// --- Helper function (moved outside component for stability) ---
-// Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
 function calculatePercent(actual: number, targetValue: number): number {
   if (!targetValue) return 0;
   const ratio = actual / targetValue;
   const pct = Math.floor(ratio * 100);
-  // Clamp to [0, 100]
   return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
 }
 
@@ -50,12 +44,10 @@ function DailySummaryInner({
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
-  // --- Safe values ---
   const safeTotal = macroDailyTotals || EMPTY_TOTALS;
   const target = macroTarget || DEFAULT_TARGET;
   const dailyCalorieTarget = calorieTarget || 0;
 
-  // --- Memoized macro calorie calculations ---
   const macroCalories = useMemo(
     () => ({
       total: calculateCaloriesFromMacros(
@@ -70,7 +62,6 @@ function DailySummaryInner({
     [safeTotal.protein, safeTotal.carbs, safeTotal.fats],
   );
 
-  // --- Memoized macro targets (grams) ---
   const targetGrams = useMemo(
     () => ({
       protein: Math.round(
@@ -89,7 +80,6 @@ function DailySummaryInner({
     ],
   );
 
-  // --- Memoized completion percentages ---
   const completionPercentages = useMemo(
     () => ({
       protein: calculatePercent(safeTotal.protein, targetGrams.protein),
@@ -107,7 +97,6 @@ function DailySummaryInner({
     ],
   );
 
-  // --- Memoized macro calorie percentages ---
   const macroPercentages = useMemo(() => {
     const totalMacroCalories = macroCalories.total;
     if (totalMacroCalories === 0) {
@@ -121,7 +110,6 @@ function DailySummaryInner({
     return { protein, carbs, fats };
   }, [macroCalories]);
 
-  // --- Memoized macro data for rendering ---
   const macroData = useMemo(
     () => [
       {
@@ -313,7 +301,6 @@ function DailySummaryInner({
   );
 }
 
-// Wrap with React.memo for performance optimization
 const DailySummary = memo(DailySummaryInner);
 
 export default DailySummary;

@@ -12,7 +12,6 @@ import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
-// Types
 interface GroupedEntry {
   date: string;
   entries: MacroEntry[];
@@ -39,7 +38,6 @@ interface DesktopEntryTableProps {
   showAllDates?: boolean;
 }
 
-// Combined type for table rows - can be either a date group or individual entry
 type TableRowData = GroupedEntry & {
   isGroup: boolean;
   parentDate?: string;
@@ -85,9 +83,8 @@ const DesktopEntryTable = memo(
       ]);
 
       return data;
-    }, [groupedEntries, showAllDates]); // Remove collapsedDates from dependencies
+    }, [groupedEntries, showAllDates]);
 
-    // Filter visible rows (exclude collapsed entries)
     const visibleRows = useMemo(() => {
       return tableData.filter((data) => {
         if (data.isGroup) return true;
@@ -96,7 +93,6 @@ const DesktopEntryTable = memo(
       });
     }, [tableData, collapsedDates]);
 
-    // Calculate total entries for virtualization threshold
     const totalEntries = useMemo(() => {
       return groupedEntries.reduce(
         (sum, group) => sum + group.entries.length,
@@ -104,18 +100,15 @@ const DesktopEntryTable = memo(
       );
     }, [groupedEntries]);
 
-    // Only virtualize when we have more than 50 entries
     const shouldVirtualize = totalEntries > 50;
 
-    // Virtualizer for large lists
     const virtualizer = useVirtualizer({
       count: visibleRows.length,
       getScrollElement: () => tableContainerReference.current,
-      estimateSize: () => 48, // Approximate row height
+      estimateSize: () => 48,
       overscan: 10,
     });
 
-    // Define columns
     const columns = useMemo(
       () => [
         columnHelper.accessor("date", {
@@ -273,14 +266,12 @@ const DesktopEntryTable = memo(
       ],
     );
 
-    // Initialize table
     const table = useReactTable({
       data: tableData,
       columns,
       getCoreRowModel: getCoreRowModel(),
     });
 
-    // Virtualized table body for large lists
     const renderVirtualizedBody = () => {
       const virtualItems = virtualizer.getVirtualItems();
 
@@ -349,7 +340,6 @@ const DesktopEntryTable = memo(
       );
     };
 
-    // Non-virtualized table body for smaller lists
     const renderNonVirtualizedBody = () => (
       <tbody>
         <AnimatePresence initial={false}>
@@ -358,15 +348,12 @@ const DesktopEntryTable = memo(
             const isGroup = data.isGroup;
             const parentDate = data.parentDate || data.date;
 
-            // Skip rendering individual entries if their parent date is collapsed
             const isEntryCollapsed = !isGroup && collapsedDates.has(parentDate);
 
-            // Better key for animations that includes parent date for individual entries
             const animationKey = isGroup
               ? `group-${data.date}`
               : `entry-${data.entries[0].id}-${parentDate}`;
 
-            // Don't render collapsed entries
             if (isEntryCollapsed) {
               return;
             }

@@ -17,7 +17,7 @@ const HeroSection: React.FC = () => (
       >
         <span className="mb-6 flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-surface-3">
           <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          New: Smarter tracking, faster results
+          MacroTrackr 2.0 is now LIVE!
         </span>
         <h1 className="mb-6 max-w-4xl text-5xl font-bold tracking-tighter text-balance text-foreground sm:text-6xl lg:text-[5rem] lg:leading-[1.1]">
           Master your macros.
@@ -56,7 +56,6 @@ const HeroSection: React.FC = () => (
         </div>
       </motion.div>
 
-      {/* Modern inline product preview shot to replace the long scrolling carousel */}
       <motion.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}

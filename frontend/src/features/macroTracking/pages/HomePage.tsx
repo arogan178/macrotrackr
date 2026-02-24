@@ -36,24 +36,17 @@ import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import { getTodayISO } from "@/utils/dateUtilities";
 
-// Refactored per plan. Behavior and styling remain unchanged.
-// Original file reference for comparison: [frontend/src/features/macroTracking/pages/HomePage.tsx](frontend/src/features/macroTracking/pages/HomePage.tsx:1)
-
 export default function HomePage() {
-  // Centralize subscription status hydration
   usePageDataSync();
 
-  // Get user data from useUser hook
   const { data: user } = useUser();
 
-  // Get macro data from TanStack Query hooks
   const today = getTodayISO();
   const {
     data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
   } = useMacroDailyTotals(today);
   const { data: macroTarget } = useMacroTarget();
 
-  // History pagination via hook (wraps infinite query)
   const {
     history,
     historyHasMore,
@@ -62,23 +55,18 @@ export default function HomePage() {
     loadMoreHistory,
   } = useHistoryPagination(20);
 
-  // Get weight goals from home route loader
   const { weightGoals } = useLoaderData({
     from: homeRoute.id,
   }) as any;
 
-  // Macro mutations
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
   const deleteMacroEntryMutation = useDeleteMacroEntry();
 
-  // Only UI state from zustand
   const { editingEntry, setEditingEntry } = useStore();
 
-  // Derive nutritionProfile locally from server user data
   const nutritionProfile = useNutritionProfile(user);
 
-  // Handler for adding entries
   const handleAddEntry = useCallback(
     async (entry: MacroEntryInput) => {
       await addMacroEntryMutation.mutateAsync(entry);
@@ -86,7 +74,6 @@ export default function HomePage() {
     [addMacroEntryMutation],
   );
 
-  // Handler for editing entries that matches EditModal's expected signature
   const handleEditEntry = useCallback(
     async (entry: EditingEntry | undefined) => {
       if (!entry) return;
@@ -107,7 +94,6 @@ export default function HomePage() {
     [updateMacroEntryMutation, setEditingEntry],
   );
 
-  // Handler for deleting entries
   const handleDeleteEntry = useCallback(
     async (id: number) => {
       await deleteMacroEntryMutation.mutateAsync(id);
@@ -115,13 +101,11 @@ export default function HomePage() {
     [deleteMacroEntryMutation],
   );
 
-  // Memoized close handler to prevent unnecessary re-renders
   const handleCloseModal = useCallback(() => {
     setEditingEntry(undefined);
   }, [setEditingEntry]);
 
-  // Determine loading states from mutations and queries
-  const isLoading = isHistoryLoading; // Use history loading state for initial load
+  const isLoading = isHistoryLoading;
   const isSaving = addMacroEntryMutation.isPending;
   const isEditing = updateMacroEntryMutation.isPending;
   const isDeleting = deleteMacroEntryMutation.isPending;
@@ -129,7 +113,6 @@ export default function HomePage() {
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
-  // Header data via hook (memoized)
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
     user,
     isLoading,
@@ -141,14 +124,12 @@ export default function HomePage() {
         <div className="space-y-8">
           <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
             <div className="flex h-full flex-col space-y-6 lg:col-span-4">
-              {/* Metrics Panel */}
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
                 tdee={nutritionProfile?.tdee ?? 0}
                 isLoading={isLoading}
               />
 
-              {/* Add Entry Section */}
               <div className="flex-1">
                 {isLoading ? (
                   <AddEntryLoadingSkeleton />
@@ -158,7 +139,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Today's Summary - Right side */}
             <div className="flex h-full flex-col lg:col-span-2">
               {isLoading ? (
                 <DailySummaryLoadingSkeleton />
@@ -174,7 +154,6 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* History Section */}
           <CardContainer>
             <div className="p-6">
               {isLoading ? (
@@ -194,7 +173,6 @@ export default function HomePage() {
             </div>
           </CardContainer>
 
-          {/* Edit Modal - Modal handles its own AnimatePresence internally */}
           <EditModal
             entry={editingEntry}
             onSave={handleEditEntry}

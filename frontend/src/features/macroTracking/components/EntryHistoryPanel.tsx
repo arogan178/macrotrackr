@@ -29,7 +29,6 @@ interface EntryHistoryProps {
   isLoadingMore?: boolean;
 }
 
-// Consolidated helper functions
 const formatEntryDate = (dateString: string): string =>
   new Date(dateString).toLocaleDateString("en-UK", {
     year: "numeric",
@@ -98,7 +97,6 @@ const EntryHistoryComponent = function EntryHistory({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | undefined>();
 
-  // Memoize today's date
   const todayFormatted = useMemo(() => {
     return new Date().toLocaleDateString("en-UK", {
       year: "numeric",
@@ -107,7 +105,6 @@ const EntryHistoryComponent = function EntryHistory({
     });
   }, []);
 
-  // Memoize the formatDate function
   const formatDate = useCallback(
     (dateString: string) => {
       return dateString === todayFormatted ? "Today" : dateString;
@@ -115,7 +112,6 @@ const EntryHistoryComponent = function EntryHistory({
     [todayFormatted],
   );
 
-  // Memoize grouped entries with totals and incremental pagination
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
     const grouped: Record<string, MacroEntry[]> = {};
     for (const entry of history) {
@@ -129,7 +125,6 @@ const EntryHistoryComponent = function EntryHistory({
 
     const allEntries = Object.entries(grouped)
       .map(([date, entries]) => {
-        // Replace reduce with a loop for totals
         const totals = { protein: 0, carbs: 0, fats: 0, calories: 0 };
         for (const entry of entries) {
           totals.protein += entry.protein || 0;
@@ -162,7 +157,6 @@ const EntryHistoryComponent = function EntryHistory({
           new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime(),
       );
 
-    // Show entries up to displayedDateCount
     const displayed = allEntries.slice(0, displayedDateCount);
 
     return {
@@ -172,36 +166,18 @@ const EntryHistoryComponent = function EntryHistory({
     };
   }, [history, displayedDateCount]);
 
-  // Reset displayed count when history changes significantly (new data loaded)
-  const [previousTotalDates, setPreviousTotalDates] = useState(0);
-
-  useEffect(() => {
-    const currentTotalDates = totalEntries.length;
-    // If we have significantly more dates than before, it means new data was loaded
-    if (currentTotalDates > previousTotalDates + 3) {
-      // Keep the current displayedDateCount to show all the data that was loaded
-      // This ensures that when server loads more data, user sees it immediately
-    }
-    setPreviousTotalDates(currentTotalDates);
-  }, [totalEntries.length, previousTotalDates]);
-
-  // Initialize collapsed dates
-  // Always add any new dates (except today) to the collapsed set
   useEffect(() => {
     setCollapsedDates((previous) => {
       const allDates = totalEntries.map((group) => group.date);
 
-      // Check if we need to add any new dates
       const newDatesToAdd = allDates.filter(
         (date) => date !== todayFormatted && !previous.has(date),
       );
 
-      // Check if we need to remove any dates that no longer exist
       const datesToRemove = [...previous].filter(
         (date) => !allDates.includes(date),
       );
 
-      // Only create new Set if there are actual changes
       if (newDatesToAdd.length > 0 || datesToRemove.length > 0) {
         const newSet = new Set(previous);
         for (const date of newDatesToAdd) newSet.add(date);
@@ -209,12 +185,10 @@ const EntryHistoryComponent = function EntryHistory({
         return newSet;
       }
 
-      // Return the same reference if no changes
       return previous;
     });
   }, [totalEntries, todayFormatted]);
 
-  // Memoized event handlers
   const toggleDateCollapse = useCallback((date: string) => {
     setCollapsedDates((previous) => {
       const newSet = new Set(previous);
@@ -224,23 +198,18 @@ const EntryHistoryComponent = function EntryHistory({
   }, []);
 
   const loadMoreDates = useCallback(async () => {
-    // First, try to fetch more data from server if needed
-    // We want to ensure we have enough data to show 5 more dates
     const currentlyShowing = displayedDateCount;
     const targetDateCount = currentlyShowing + 5;
     const availableDates = totalEntries.length;
 
-    // If we don't have enough dates locally to reach our target, fetch more from server first
     if (availableDates < targetDateCount && hasMore && onLoadMore) {
       await onLoadMore();
     }
 
-    // Then increment the displayed count
     setDisplayedDateCount(targetDateCount);
   }, [displayedDateCount, hasMore, onLoadMore, totalEntries.length]);
 
   const showLessDates = useCallback(() => {
-    // Reset to initial 5 dates
     setDisplayedDateCount(5);
   }, []);
 
@@ -276,7 +245,6 @@ const EntryHistoryComponent = function EntryHistory({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      {/* Heading row for mobile: flex with export button inline */}
       <div className="mb-6 flex items-center justify-between gap-4 lg:hidden">
         <div>
           <h2 className="text-base font-semibold text-foreground">
@@ -301,7 +269,6 @@ const EntryHistoryComponent = function EntryHistory({
         )}
       </div>
 
-      {/* Heading row for desktop: flex with export button right-aligned */}
       <div className="mb-6 hidden flex-row items-center justify-between gap-4 lg:flex">
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -345,7 +312,6 @@ const EntryHistoryComponent = function EntryHistory({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          {/* Desktop Table View */}
           <div className="hidden lg:block">
             <DesktopEntryTable
               groupedEntries={displayedEntries}
@@ -362,7 +328,6 @@ const EntryHistoryComponent = function EntryHistory({
             />
           </div>
 
-          {/* Mobile Card View */}
           <div className="lg:hidden">
             <MobileEntryCards
               groupedEntries={displayedEntries}
@@ -379,7 +344,6 @@ const EntryHistoryComponent = function EntryHistory({
             />
           </div>
 
-          {/* Load More / Show Less Button */}
           {(hasMoreDates || hasMore || displayedDateCount > 5) && (
             <motion.div
               className="flex justify-center py-4"
@@ -387,7 +351,6 @@ const EntryHistoryComponent = function EntryHistory({
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Show "Load More" button when there's more data to show */}
               {(hasMoreDates || hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
@@ -402,7 +365,6 @@ const EntryHistoryComponent = function EntryHistory({
                 </motion.button>
               )}
 
-              {/* Show "Show Less" button when no more data and showing more than 5 dates */}
               {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
                 <motion.button
                   onClick={showLessDates}
@@ -424,11 +386,9 @@ const EntryHistoryComponent = function EntryHistory({
               )}
             </motion.div>
           )}
-          {/* Remove old Load More Pagination Button */}
         </motion.div>
       )}
 
-      {/* Add ConfirmationModal component */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={closeDeleteModal}
@@ -446,5 +406,4 @@ const EntryHistoryComponent = function EntryHistory({
   );
 };
 
-// Export memoized component
 export default memo(EntryHistoryComponent);
