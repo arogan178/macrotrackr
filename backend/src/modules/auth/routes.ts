@@ -418,9 +418,9 @@ export const authRoutes = (app: Elysia) =>
             [clerkUserId]
           );
           
-          const existingByEmail = safeQuery<UserRow & { clerk_id: string | null }>(
+          const existingByEmail = safeQuery<UserRow & { clerk_id: string | null; email: string }>(
             db,
-            "SELECT id, clerk_id FROM users WHERE email = ?",
+            "SELECT id, clerk_id, email FROM users WHERE LOWER(email) = LOWER(?)",
             [email]
           );
           
@@ -442,16 +442,47 @@ export const authRoutes = (app: Elysia) =>
               matchedBy: existingByClerkId ? "clerk_id" : "email"
             }, "[clerk-sync] Updating existing user");
             
+            // Handle email updates carefully for multi-provider account linking and account merges
+            const currentEmail = existingUser.email;
+            let emailToUpdate = email;
+            
+            // Check if incoming email belongs to a DIFFERENT existing user (account merge scenario)
+            const emailOwner = safeQuery<{ id: number; clerk_id: string | null }>(
+              db,
+              "SELECT id, clerk_id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?",
+              [email, existingUser.id]
+            );
+            
+            if (emailOwner) {
+              // Account merge scenario: incoming email exists on another database record
+              // This happens when Clerk merges two accounts (e.g., Google link to existing account)
+              // We should NOT update email - it would violate unique constraint
+              // Both accounts need manual merge or the other account should be deleted first
+              logger.warn({
+                userId: existingUser.id,
+                currentEmail,
+                incomingEmail: email,
+                emailOwnerId: emailOwner.id,
+                emailOwnerClerkId: emailOwner.clerk_id,
+                clerkUserId,
+                matchedBy: existingByClerkId ? "clerk_id" : "email"
+              }, "[clerk-sync] Account merge scenario detected: incoming email belongs to different user, keeping existing email");
+              emailToUpdate = currentEmail;
+            } else if (currentEmail && currentEmail.toLowerCase() !== email.toLowerCase()) {
+              // Email is different and NOT owned by another user - safe to update
+              emailToUpdate = email;
+            }
+            
             safeExecute(
               db,
               "UPDATE users SET clerk_id = ?, email = ?, first_name = ?, last_name = ? WHERE id = ?",
-              [clerkUserId, email, firstName, lastName, existingUser.id]
+              [clerkUserId, emailToUpdate, firstName, lastName, existingUser.id]
             );
 
             return {
               id: existingUser.id,
               clerkId: clerkUserId,
-              email,
+              email: emailToUpdate,
               firstName,
               lastName,
               message: "User synced successfully",
