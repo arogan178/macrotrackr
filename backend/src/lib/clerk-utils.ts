@@ -37,7 +37,7 @@ export function getInternalUserId(
   if (email) {
     const userByEmail = safeQuery<{ id: number; clerk_id: string | null }>(
       db,
-      "SELECT id, clerk_id FROM users WHERE email = ?",
+      "SELECT id, clerk_id FROM users WHERE LOWER(email) = LOWER(?)",
       [email]
     );
 
