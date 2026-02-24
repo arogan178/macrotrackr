@@ -34,13 +34,15 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
           | { health: number }
           | undefined;
 
-        return {
+        const response = {
           status: "healthy",
           timestamp: new Date().toISOString(),
           version: "1.0.0",
           environment: config.NODE_ENV,
           database: dbCheck?.health === 1 ? "connected" : "disconnected",
         };
+
+        return response;
       } catch (error) {
         logger.error({ error }, "Health check failed");
         return {
