@@ -194,31 +194,51 @@ export const userRoutes = (app: Elysia) =>
               throw new NotFoundError("User data not found.");
             }
 
-            // Get only summary subscription info
-            const subscriptionInfo =
-              await SubscriptionService.getUserSubscription(internalUserId);
-            const result = toCamelCase(dbResult);
+            let currentPeriodEnd: string | null = null;
+            try {
+              const subscriptionInfo =
+                await SubscriptionService.getUserSubscription(internalUserId);
+              currentPeriodEnd =
+                subscriptionInfo.subscription?.current_period_end || null;
+            } catch (subscriptionError) {
+              logger.warn(
+                {
+                  internalUserId,
+                  subscriptionError,
+                },
+                "[/api/user/me] Failed to resolve subscription period end, using fallback values",
+              );
+            }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (result as Record<string, any>).subscription = {
-              status: subscriptionInfo.subscription_status,
-              hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
-              currentPeriodEnd:
-                subscriptionInfo.subscription?.current_period_end || null,
+            return {
+              id: dbResult.id,
+              email: dbResult.email,
+              firstName: dbResult.first_name ?? "",
+              lastName: dbResult.last_name ?? "",
+              createdAt: dbResult.created_at,
+              dateOfBirth: dbResult.date_of_birth,
+              height: dbResult.height,
+              weight: dbResult.weight,
+              gender: dbResult.gender,
+              activityLevel: dbResult.activity_level,
+              isProfileComplete: !!dbResult.date_of_birth,
+              subscription: {
+                status: normalizeSubscriptionStatus(dbResult.subscription_status),
+                hasStripeCustomer: !!dbResult.stripe_customer_id,
+                currentPeriodEnd,
+              },
             };
-
-            // Add profile completion flag based on date of birth
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (result as Record<string, any>).isProfileComplete = !!dbResult.date_of_birth;
-
-            // Do NOT include any detailed billing or payment info here
-            return result;
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
-          response: UserSchemas.userDetailsResponse,
+          response: {
+            200: UserSchemas.userDetailsResponse,
+            401: ErrorResponseSchema,
+            404: ErrorResponseSchema,
+            500: ErrorResponseSchema,
+          },
           detail: {
             summary: "Get current authenticated user's profile and settings",
             tags: ["User"],
@@ -384,7 +404,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
@@ -491,7 +511,7 @@ export const userRoutes = (app: Elysia) =>
               return { success: true, message: "Profile details updated." };
             });
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
@@ -597,7 +617,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
