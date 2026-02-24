@@ -22,6 +22,24 @@ interface RequireCompleteProfileProps {
   children: React.ReactNode;
 }
 
+function resolveProfileCompletion(user: unknown): boolean | undefined {
+  if (!user || typeof user !== "object") {
+    return undefined;
+  }
+
+  const userRecord = user as Record<string, unknown>;
+
+  if (typeof userRecord.isProfileComplete === "boolean") {
+    return userRecord.isProfileComplete;
+  }
+
+  if ("dateOfBirth" in userRecord) {
+    return Boolean(userRecord.dateOfBirth);
+  }
+
+  return undefined;
+}
+
 export function RequireCompleteProfile({
   children,
 }: RequireCompleteProfileProps) {
@@ -60,8 +78,9 @@ export function RequireCompleteProfile({
     );
   }
 
-  // If user data is loaded but profile is incomplete, redirect to setup
-  if (!user.isProfileComplete) {
+  // Only redirect when we can explicitly determine the profile is incomplete.
+  const isProfileComplete = resolveProfileCompletion(user);
+  if (isProfileComplete === false) {
     return <Navigate to="/profile-setup" />;
   }
 
