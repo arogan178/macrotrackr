@@ -22,6 +22,11 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/health/ready",
 ]);
 
+// Paths that can be called before the Clerk account is linked to an internal DB user.
+const UNLINKED_ALLOWED_PATHS = new Set([
+  "/api/auth/clerk-sync",
+]);
+
 /**
  * Check if a path is exempt from authentication
  */
@@ -41,6 +46,19 @@ function isExemptPath(path: string): boolean {
     return true;
   }
   
+  return false;
+}
+
+function isAllowedForUnlinkedUser(path: string): boolean {
+  if (UNLINKED_ALLOWED_PATHS.has(path)) {
+    return true;
+  }
+
+  // Keep diagnostics path available while account linking is being established.
+  if (path === "/api/user/me") {
+    return true;
+  }
+
   return false;
 }
 
@@ -211,6 +229,14 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         ? getInternalUserId(db as Database, userId, email)
         : null;
 
+      logger.debug({
+        path,
+        clerkUserId: userId,
+        email,
+        internalUserId,
+        hasDb: !!db
+      }, "Clerk auth middleware - internal user ID lookup result");
+
       // Return user info for use in route handlers
       return {
         user: {
@@ -233,7 +259,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
   })
   // Authentication guard - must be after the derive to check if user exists
   .onBeforeHandle({ as: "scoped" }, (context: any) => {
-    const { user, path, set } = context;
+    const { user, internalUserId, path, set } = context;
     
     // Skip authentication for exempt paths
     if (isExemptPath(path)) {
@@ -247,6 +273,19 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       return {
         code: "UNAUTHORIZED",
         message: "Authentication required. Please sign in.",
+      };
+    }
+
+    if (!internalUserId && !isAllowedForUnlinkedUser(path)) {
+      logger.warn(
+        { path, clerkUserId: user?.clerkUserId },
+        "Authenticated Clerk user is not linked to an internal account",
+      );
+      set.status = 409;
+      return {
+        code: "ACCOUNT_NOT_SYNCED",
+        message:
+          "Your account is not linked yet. Please retry sign-in so we can finish setup.",
       };
     }
   });
