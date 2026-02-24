@@ -416,7 +416,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
                     : `${calculatedWeeks} weeks`}
                 </p>
                 {adjustmentInfo && (
-                  <div className="mt-2 border-t border-border/30 pt-2">
+                  <div className="mt-2 border-t border-border pt-2">
                     <p className="flex justify-between text-xs text-muted">
                       <span>{adjustmentInfo.label}</span>
                       <span

@@ -20,7 +20,7 @@ export const PageHeader = ({
   children,
   animateTitle = false,
 }: PageHeaderProps) => (
-  <div className="flex flex-col items-start justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-center">
+  <div className="flex flex-col items-start justify-between gap-4 border-b border-border pb-4 sm:flex-row sm:items-center">
     {/* Left Side: Title and subtitle */}
     <div>
       <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">

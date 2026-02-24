@@ -10,8 +10,8 @@ export const formStyles = {
 
   // Input styles
   input: {
-    base: "w-full px-3.5 py-2.5 bg-surface-2 border rounded-xl text-foreground placeholder:text-muted/50 focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary/50 transition-colors duration-150",
-    error: "border-error/60",
+    base: "w-full px-3.5 py-2.5 bg-surface-2 border rounded-xl text-foreground placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-150",
+    error: "border-error",
     normal: "border-border",
     withIcon: "pl-10",
     withUnit: "pr-10",
@@ -19,7 +19,7 @@ export const formStyles = {
     numberInput:
       "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]",
     disabled:
-      "bg-surface/60 border-border/40 text-muted cursor-not-allowed opacity-50",
+      "bg-surface border-border text-muted cursor-not-allowed opacity-50",
   },
 
   // Error and helper text
@@ -40,6 +40,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface rounded-2xl border border-border overflow-hidden shadow-card transition-colors duration-150 hover:shadow-card-hover hover:border-border-2",
+      "bg-surface rounded-2xl border border-border overflow-hidden transition-colors duration-150 hover:border-border-2",
   },
 };

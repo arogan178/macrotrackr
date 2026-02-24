@@ -104,7 +104,7 @@ const BillingForm: React.FC = () => {
             className={`self-start rounded-full px-4 py-2 text-sm font-semibold sm:self-auto ${
               isPro
                 ? "border border-warning/30 bg-warning/10 text-warning"
-                : "border border-border/40 bg-surface-2 text-muted"
+                : "border border-border bg-surface-2 text-muted"
             }`}
             role="status"
             aria-label={`Current plan: ${isPro ? "Pro" : "Free"}`}

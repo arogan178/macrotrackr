@@ -191,10 +191,10 @@ function HabitForm({
               <button
                 key={key}
                 type="button"
-                className={`flex items-center justify-center rounded-lg p-3 ${
+                className={`flex items-center justify-center rounded-lg p-3 transition-colors ${
                   isSelected
-                    ? `${grad.chip} border ${colorRing}/50`
-                    : "bg-surface/40 hover:bg-surface/60"
+                    ? `${grad.chip} border ${colorRing}`
+                    : "bg-surface-2 hover:bg-surface-3"
                 }`}
                 onClick={() => handleChange("iconName", key)}
                 aria-pressed={isSelected}

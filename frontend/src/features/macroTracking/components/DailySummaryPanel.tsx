@@ -248,7 +248,7 @@ function DailySummaryInner({
           {macroData.map((macro) => (
             <div
               key={macro.name}
-              className={`rounded-xl border bg-surface-2/50 p-4 ${macro.borderColor} transition-colors duration-200 hover:bg-surface-2`}
+              className={`rounded-xl border bg-surface-2 p-4 ${macro.borderColor} transition-colors duration-200 hover:bg-surface-3`}
             >
               <div className="mb-2 flex items-center justify-between">
                 <div className="flex items-center gap-2">
