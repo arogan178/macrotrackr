@@ -4,8 +4,33 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { logger } from "@/lib/logger";
 import { queryKeys } from "@/lib/queryKeys";
 import { ApiError, apiService, setAuthToken } from "@/utils/apiServices";
+
+function isLikelyUserDetailsPayload(
+  value: unknown,
+): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && Object.keys(value).length > 0;
+}
+
+function resolveProfileCompletion(
+  userDetails: Record<string, unknown> | null,
+): boolean | undefined {
+  if (!userDetails) {
+    return undefined;
+  }
+
+  if (typeof userDetails.isProfileComplete === "boolean") {
+    return userDetails.isProfileComplete;
+  }
+
+  if ("dateOfBirth" in userDetails) {
+    return Boolean(userDetails.dateOfBirth);
+  }
+
+  return undefined;
+}
 
 /**
  * AuthReadyPage - Intermediate page that ensures auth token is set before redirecting
@@ -73,6 +98,15 @@ export default function AuthReadyPage() {
               return;
             }
           }
+
+          logger.error(
+            "[AuthReadyPage] Failed to sync Clerk user with backend",
+            syncError,
+          );
+          setError(
+            "We couldn't link your account yet. Please try signing in again.",
+          );
+          return;
         }
 
         // Small delay after successful sync to ensure DB is updated
@@ -83,12 +117,31 @@ export default function AuthReadyPage() {
 
         // Resolve backend user details before leaving auth-ready.
         // This avoids bouncing to protected routes while /api/user/me still returns 401.
-        let userDetails = null;
+        let userDetails: Record<string, unknown> | null = null;
         for (let attempt = 0; attempt < 3; attempt += 1) {
           try {
-            userDetails = await apiService.user.getUserDetails();
+            console.log(
+              `[AuthReadyPage] Fetching user details, attempt ${attempt + 1}`,
+            );
+            const response = await apiService.user.getUserDetails();
+            console.log(`[AuthReadyPage] Raw API response:`, response);
+
+            if (!isLikelyUserDetailsPayload(response)) {
+              console.warn(
+                `[AuthReadyPage] Malformed user details payload on attempt ${attempt + 1}`,
+                response,
+              );
+              await new Promise((resolve) => setTimeout(resolve, 120));
+              continue;
+            }
+
+            userDetails = response;
             break;
           } catch (userError) {
+            console.error(
+              `[AuthReadyPage] Attempt ${attempt + 1} failed:`,
+              userError,
+            );
             if (userError instanceof ApiError && userError.status === 401) {
               await new Promise((resolve) => setTimeout(resolve, 120));
               continue;
@@ -97,17 +150,24 @@ export default function AuthReadyPage() {
           }
         }
 
-        if (!userDetails) {
-          setError("Authentication is not ready yet. Please sign in again.");
+        if (userDetails) {
+          queryClient.setQueryData(queryKeys.auth.user(), userDetails);
+        }
+
+        // Route by profile completion only when we can confidently determine it.
+        const isProfileComplete = resolveProfileCompletion(userDetails);
+        if (isProfileComplete === false) {
+          console.warn(
+            "[AuthReadyPage] Profile incomplete - redirecting to /profile-setup",
+          );
+          navigate({ to: "/profile-setup" });
           return;
         }
 
-        queryClient.setQueryData(queryKeys.auth.user(), userDetails);
-
-        // Route by profile completion first.
-        if (!userDetails.isProfileComplete) {
-          navigate({ to: "/profile-setup" });
-          return;
+        if (isProfileComplete === undefined) {
+          logger.warn(
+            "[AuthReadyPage] Could not determine profile completion from /api/user/me. Continuing to requested route.",
+          );
         }
 
         // Validate redirect URL to prevent open redirect attacks
@@ -125,7 +185,8 @@ export default function AuthReadyPage() {
         if (normalizedRedirectTo === "/home") {
           navigate({ to: "/home", search: { limit: 20, offset: 0 } });
         } else {
-          navigate({ to: normalizedRedirectTo as any });
+          globalThis.location.assign(normalizedRedirectTo);
+          return;
         }
       } catch {
         setError("Failed to complete authentication. Please try again.");
@@ -173,7 +234,9 @@ export default function AuthReadyPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-surface">
       <div className="text-center">
-        <LoadingSpinner size="lg" className="mx-auto mb-4" />
+        <div className="mx-auto mb-4">
+          <LoadingSpinner size="lg" />
+        </div>
         <h1 className="text-xl font-semibold text-foreground">
           Preparing your account...
         </h1>
