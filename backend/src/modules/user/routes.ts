@@ -147,7 +147,8 @@ export const userRoutes = (app: Elysia) =>
         "/me",
         async (context: any) => {
           try {
-            const { db, user } = context as UserRouteContext;
+            const { db, user, internalUserId: internalUserIdFromContext } =
+              context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -156,10 +157,10 @@ export const userRoutes = (app: Elysia) =>
             // Get internal user ID from Clerk ID
             logger.info({ clerkUserId: user.clerkUserId, email: user.email }, "[/api/user/me] Looking up internal user ID");
             
-            const internalUserId = getInternalUserId(
+            const internalUserId = await resolveOrCreateInternalUserId(
               db,
-              user.clerkUserId,
-              user.email
+              user,
+              internalUserIdFromContext,
             );
 
             if (!internalUserId) {
@@ -179,7 +180,8 @@ export const userRoutes = (app: Elysia) =>
             // Fetch user details
             const dbResult = safeQuery<UserDetailsResult>(
               db,
-              `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
+                  `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
+                    u.subscription_status, u.stripe_customer_id,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
