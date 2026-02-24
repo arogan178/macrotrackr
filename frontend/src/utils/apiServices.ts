@@ -108,6 +108,120 @@ export interface UserDetailsResponse {
   };
 }
 
+function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
+  if (!value || typeof value !== "object") {
+    console.log("[DEBUG] isUserDetailsResponse: value is not an object", value);
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+  
+  // DEBUG: Log the validation checks
+  console.log("[DEBUG] isUserDetailsResponse validation:", {
+    hasId: typeof candidate.id === "number",
+    idValue: candidate.id,
+    hasEmail: typeof candidate.email === "string",
+    emailValue: candidate.email,
+    hasFirstName: typeof candidate.firstName === "string",
+    firstNameValue: candidate.firstName,
+    hasLastName: typeof candidate.lastName === "string",
+    lastNameValue: candidate.lastName,
+  });
+  
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.email === "string" &&
+    typeof candidate.firstName === "string" &&
+    typeof candidate.lastName === "string"
+  );
+}
+
+function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | null {
+  // DEBUG: Log the raw response
+  console.log("[DEBUG] normalizeUserDetailsResponse - raw value:", JSON.stringify(value, null, 2));
+  
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const root = value as Record<string, unknown>;
+  const candidateRaw =
+    root && typeof root.data === "object" && root.data !== null
+      ? (root.data as Record<string, unknown>)
+      : root;
+
+  // DEBUG: Log the candidate extraction
+  console.log("[DEBUG] normalizeUserDetailsResponse - candidateRaw:", JSON.stringify(candidateRaw, null, 2));
+
+  const candidate: Record<string, unknown> = {
+    ...candidateRaw,
+    firstName: candidateRaw.firstName ?? candidateRaw.first_name,
+    lastName: candidateRaw.lastName ?? candidateRaw.last_name,
+    createdAt: candidateRaw.createdAt ?? candidateRaw.created_at,
+    dateOfBirth: candidateRaw.dateOfBirth ?? candidateRaw.date_of_birth,
+    activityLevel: candidateRaw.activityLevel ?? candidateRaw.activity_level,
+  };
+
+  if (!isUserDetailsResponse(candidate)) {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    email: candidate.email,
+    firstName: candidate.firstName,
+    lastName: candidate.lastName,
+    createdAt:
+      typeof candidate.createdAt === "string"
+        ? candidate.createdAt
+        : new Date().toISOString(),
+    dateOfBirth:
+      typeof candidate.dateOfBirth === "string"
+        ? candidate.dateOfBirth
+        : undefined,
+    height: typeof candidate.height === "number" ? candidate.height : undefined,
+    weight: typeof candidate.weight === "number" ? candidate.weight : undefined,
+    gender:
+      typeof candidate.gender === "string" ? candidate.gender : undefined,
+    activityLevel:
+      typeof candidate.activityLevel === "number"
+        ? candidate.activityLevel
+        : undefined,
+    isProfileComplete:
+      typeof candidate.isProfileComplete === "boolean"
+        ? candidate.isProfileComplete
+        : Boolean(candidate.dateOfBirth),
+    subscription:
+      candidate.subscription && typeof candidate.subscription === "object"
+        ? {
+            status:
+              (candidate.subscription as Record<string, unknown>).status === "pro" ||
+              (candidate.subscription as Record<string, unknown>).status === "canceled"
+                ? ((candidate.subscription as Record<string, unknown>).status as
+                    | "pro"
+                    | "canceled")
+                : "free",
+            hasStripeCustomer:
+              typeof (candidate.subscription as Record<string, unknown>)
+                .hasStripeCustomer === "boolean"
+                ? ((candidate.subscription as Record<string, unknown>)
+                    .hasStripeCustomer as boolean)
+                : false,
+            currentPeriodEnd:
+              typeof (candidate.subscription as Record<string, unknown>)
+                .currentPeriodEnd === "string"
+                ? ((candidate.subscription as Record<string, unknown>)
+                    .currentPeriodEnd as string)
+                : undefined,
+          }
+        : {
+            status: "free",
+            hasStripeCustomer: false,
+            currentPeriodEnd: undefined,
+          },
+  };
+}
+
 export interface BillingDetailsResponse {
   subscription:
     | {
@@ -309,6 +423,14 @@ export async function getHeadersAsync(
 ): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
   const token = await getAuthToken();
+  
+  // DEBUG: Log token retrieval
+  console.log("[DEBUG] getHeadersAsync - Token retrieval:", {
+    hasToken: !!token,
+    tokenLength: token?.length,
+    tokenPreview: token ? `${token.slice(0, 20)}...` : null
+  });
+  
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -363,11 +485,53 @@ export const apiService = {
   user: {
     /** Fetches the current authenticated user's profile */
     getUserDetails: async (): Promise<UserDetailsResponse> => {
-      const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-        headers: await getHeadersAsync(false),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as UserDetailsResponse;
+      const fetchUserDetails = async (): Promise<unknown> => {
+        const url = `${API_BASE_URL}/api/user/me`;
+        console.log("[DEBUG] getUserDetails - Fetching from:", url);
+        
+        const response = await fetch(url, {
+          headers: await getHeadersAsync(false),
+          credentials: "include",
+        });
+        
+        console.log("[DEBUG] getUserDetails - Response status:", response.status);
+        console.log("[DEBUG] getUserDetails - Response OK:", response.ok);
+        
+        const responseText = await response.text();
+        console.log("[DEBUG] getUserDetails - Response text:", responseText);
+        
+        // Parse the text back to JSON for handleResponse
+        const parsedResponse = new Response(responseText, {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+        });
+        
+        return handleResponse(parsedResponse);
+      };
+
+      const initialResult = await fetchUserDetails();
+      const normalizedInitialResult = normalizeUserDetailsResponse(initialResult);
+      if (normalizedInitialResult) {
+        return normalizedInitialResult;
+      }
+
+      // If backend returned an unexpected payload (e.g. {}), try to re-sync Clerk linkage once.
+      const token = await getAuthToken();
+      await apiService.auth.syncUser(token || undefined);
+
+      const retryResult = await fetchUserDetails();
+      const normalizedRetryResult = normalizeUserDetailsResponse(retryResult);
+      if (normalizedRetryResult) {
+        return normalizedRetryResult;
+      }
+
+      throw new ApiError(
+        "Invalid user profile response from server",
+        500,
+        "INVALID_USER_RESPONSE",
+        retryResult,
+      );
     },
     /** Updates user settings (profile details only) */
     updateSettings: async (settings: UserSettingsPayload) => {
