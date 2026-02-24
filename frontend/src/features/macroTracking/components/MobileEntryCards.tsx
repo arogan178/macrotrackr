@@ -32,7 +32,6 @@ interface MobileEntryCardsProps {
   showAllDates?: boolean;
 }
 
-// Entry Card Component
 const EntryCard = memo(
   ({
     entry,
@@ -129,7 +128,6 @@ const MobileEntryCards = memo(
   }: MobileEntryCardsProps) => {
     const containerReference = useRef<HTMLDivElement>(null);
 
-    // Calculate total entries for virtualization threshold
     const totalEntries = useMemo(() => {
       return groupedEntries.reduce(
         (sum, group) => sum + group.entries.length,
@@ -137,11 +135,8 @@ const MobileEntryCards = memo(
       );
     }, [groupedEntries]);
 
-    // Only virtualize when we have more than 50 entries
     const shouldVirtualize = totalEntries > 50;
 
-    // Create a flattened list of items for virtualization
-    // Each item is either a date header or an entry card
     const virtualItems = useMemo(() => {
       const items: Array<
         | { type: "header"; group: GroupedEntry }
@@ -164,19 +159,17 @@ const MobileEntryCards = memo(
       return items;
     }, [groupedEntries, showAllDates, collapsedDates]);
 
-    // Virtualizer for large lists
     const virtualizer = useVirtualizer({
       count: virtualItems.length,
       getScrollElement: () => containerReference.current,
       estimateSize: (index) => {
         const item = virtualItems[index];
-        if (item.type === "header") return 60; // Header height
-        return 200; // Entry card height (approximate)
+        if (item.type === "header") return 60;
+        return 200;
       },
       overscan: 5,
     });
 
-    // Render date header
     const renderDateHeader = (group: GroupedEntry) => (
       <motion.div
         className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
@@ -198,7 +191,6 @@ const MobileEntryCards = memo(
           </h3>
         </div>
 
-        {/* Date Totals */}
         <div className="flex items-center gap-4 text-xs">
           <span className="font-medium text-protein">
             {group.totals.protein}g P
@@ -219,7 +211,6 @@ const MobileEntryCards = memo(
       </motion.div>
     );
 
-    // Render virtualized list
     if (shouldVirtualize) {
       const items = virtualizer.getVirtualItems();
 
@@ -274,13 +265,11 @@ const MobileEntryCards = memo(
       );
     }
 
-    // Non-virtualized rendering for smaller lists
     const initialEntries = groupedEntries.slice(0, 5);
     const additionalEntries = groupedEntries.slice(5);
 
     return (
       <div className="lg:hidden">
-        {/* Initial 5 entries */}
         {initialEntries.map((group) => (
           <motion.div
             key={group.date}
@@ -289,10 +278,8 @@ const MobileEntryCards = memo(
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            {/* Date Header */}
             {renderDateHeader(group)}
 
-            {/* Entries */}
             <AnimatePresence>
               {!collapsedDates.has(group.date) && (
                 <motion.div
@@ -345,7 +332,6 @@ const MobileEntryCards = memo(
           </motion.div>
         ))}
 
-        {/* Additional entries with animation */}
         <AnimatePresence>
           {showAllDates &&
             additionalEntries.map((group) => (
@@ -371,10 +357,8 @@ const MobileEntryCards = memo(
                 }}
                 style={{ overflow: "hidden" }}
               >
-                {/* Date Header */}
                 {renderDateHeader(group)}
 
-                {/* Entries */}
                 <AnimatePresence>
                   {!collapsedDates.has(group.date) && (
                     <motion.div

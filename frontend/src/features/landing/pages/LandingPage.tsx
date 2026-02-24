@@ -121,14 +121,12 @@ const LandingPage: React.FC = () => {
 
       <PageBackground />
 
-      <div aria-hidden={false}>
+      <div>
         <Header />
       </div>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div>
-          <HeroSection />
-        </div>
+        <HeroSection />
 
         <motion.section
           {...inViewRevealProps}

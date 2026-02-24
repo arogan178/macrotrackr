@@ -13,7 +13,6 @@ import { apiService } from "@/utils/apiServices";
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
 
-// Types for better type safety
 interface CalorieSearchProps {
   onResult: (macros: {
     protein: string;
@@ -45,7 +44,6 @@ const CalorieSearch = memo(function CalorieSearch({
   const [error, setError] = useState("");
   const [results, setResults] = useState<FoodResult[]>([]);
   const [showResults, setShowResults] = useState(false);
-  // State for scroll position detection
   const [isAtBottom, setIsAtBottom] = useState(false);
 
   const handleQueryChange = useCallback((value: string) => {
@@ -89,31 +87,22 @@ const CalorieSearch = memo(function CalorieSearch({
     [handleSearch],
   );
 
-  // Handle scroll to detect when at bottom
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = target;
-    // Consider "at bottom" when within 10px of the bottom
     const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
     setIsAtBottom(atBottom);
   }, []);
 
-  // Convert to metric for display and selection (moved to module scope)
-
-  // Memoized function to process food item selection
   const processFoodItemSelection = useCallback((item: FoodResult) => {
     let quantity = item.servingQuantity;
     let unit = item.servingUnit;
 
-    // Try to extract unit from rawQuantity if available
     if (item.rawQuantity) {
       const raw = item.rawQuantity.toLowerCase().trim();
 
-      // Parse various unit patterns from rawQuantity
       const patterns = [
-        // "330ml", "250 ml", "1.5 L", "10 fl oz (296 mL)"
         /([\d,.]+)\s*(ml|milliliter|milliliters|l|liter|liters|fl\s*oz|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)/,
-        // "90 g", "90g"
         /([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds)/,
       ];
 
@@ -123,7 +112,6 @@ const CalorieSearch = memo(function CalorieSearch({
           quantity = Number.parseFloat(match[1].replace(",", "."));
           const rawUnit = match[2];
 
-          // Map raw units to our UnitType
           const unitMap: Record<string, UnitType> = {
             ml: "ml",
             milliliter: "ml",
@@ -156,20 +144,18 @@ const CalorieSearch = memo(function CalorieSearch({
             pounds: "lb",
           };
 
-          // Special handling for fl oz
           if (raw.includes("fl") && raw.includes("oz")) {
-            unit = "ml"; // Convert fl oz to ml
-            quantity = quantity * 29.5735; // 1 fl oz = 29.5735 ml
+            unit = "ml";
+            quantity = quantity * 29.5735;
           } else {
             unit = unitMap[rawUnit] || "g";
           }
 
-          break; // Found a match, stop looking
+          break;
         }
       }
     }
 
-    // If unit is still 'g' but we have rawQuantity with different unit info, try one more time
     if (unit === "g" && item.rawQuantity) {
       const raw = item.rawQuantity.toLowerCase();
       if (raw.includes("ml") || raw.includes("milliliter")) {
@@ -187,7 +173,6 @@ const CalorieSearch = memo(function CalorieSearch({
       }
     }
 
-    // Use the detected unit for display, but convert quantity to metric for calculations
     const metric = UnitConverter.toMetric(quantity, unit as UnitType);
 
     return {
@@ -196,7 +181,7 @@ const CalorieSearch = memo(function CalorieSearch({
       fats: item.fats.toFixed(1),
       name: item.name,
       servingQuantity: metric.quantity,
-      servingUnit: unit, // Use detected unit for display
+      servingUnit: unit,
     };
   }, []);
 
@@ -211,16 +196,13 @@ const CalorieSearch = memo(function CalorieSearch({
     [onResult, processFoodItemSelection],
   );
 
-  // Memoized function to calculate calories for display
   const calculateDisplayCalories = useCallback((item: FoodResult): number => {
     if (item.energyKcal && item.energyKcal > 0) {
       return item.energyKcal;
     }
-    // Fallback: calculate from macros if energyKcal is not available
     return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
   }, []);
 
-  // Memoized function to get quantity display string
   const getQuantityDisplay = useCallback((item: FoodResult): string => {
     if (item.rawQuantity) {
       return item.rawQuantity;
@@ -241,12 +223,10 @@ const CalorieSearch = memo(function CalorieSearch({
     return "";
   }, []);
 
-  // Memoized function to check if item has meaningful nutrients
   const hasNutrients = useCallback((item: FoodResult): boolean => {
     return !(item.protein === 0 && item.carbs === 0 && item.fats === 0);
   }, []);
 
-  // Memoized filtered and processed results for display
   const displayResults = useMemo(() => {
     if (!showResults || results.length === 0) return [];
 
@@ -257,7 +237,7 @@ const CalorieSearch = memo(function CalorieSearch({
         displayQuantity: getQuantityDisplay(item),
         calories: calculateDisplayCalories(item),
         hasNutrients: hasNutrients(item),
-        id: `${item.name}-${index}`, // Unique key for React
+        id: `${item.name}-${index}`,
       }));
   }, [
     results,
@@ -269,7 +249,6 @@ const CalorieSearch = memo(function CalorieSearch({
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Fixed search input and button row */}
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <TextField
@@ -300,7 +279,6 @@ const CalorieSearch = memo(function CalorieSearch({
         </div>
       </div>
 
-      {/* Results dropdown - positioned below the fixed search row */}
       {showResults && displayResults.length > 0 && (
         <div className="relative z-10 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface">
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
