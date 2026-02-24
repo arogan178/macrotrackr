@@ -20,6 +20,25 @@ import type {
 } from "@/utils/apiServices";
 import { apiService } from "@/utils/apiServices";
 
+function normalizePaginatedHistory(
+  response: unknown,
+  limit: number,
+  offset: number,
+): PaginatedMacroHistory {
+  if (!response || typeof response !== "object") {
+    return { entries: [], total: 0, limit, offset, hasMore: false };
+  }
+
+  const result = response as Record<string, unknown>;
+  return {
+    entries: Array.isArray(result.entries) ? (result.entries as any[]) : [],
+    total: typeof result.total === "number" ? result.total : 0,
+    limit: typeof result.limit === "number" ? result.limit : limit,
+    offset: typeof result.offset === "number" ? result.offset : offset,
+    hasMore: typeof result.hasMore === "boolean" ? result.hasMore : false,
+  };
+}
+
 // Query hook for paginated macro history
 export function useMacroHistory(
   limit = 20,
@@ -40,7 +59,7 @@ export function useMacroHistory(
         offset,
         options,
       );
-      return response as PaginatedMacroHistory;
+      return normalizePaginatedHistory(response, limit, offset);
     },
     ...queryConfigs.macros, // 2 minutes stale time for macro data
   });
@@ -62,7 +81,7 @@ export function useMacroHistoryInfinite(
         pageParameter,
         options,
       );
-      return response as PaginatedMacroHistory;
+      return normalizePaginatedHistory(response, limit, pageParameter);
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return;
