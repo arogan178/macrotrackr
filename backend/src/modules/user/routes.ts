@@ -10,7 +10,7 @@ import {
   ConflictError,
   AuthenticationError,
 } from "../../lib/errors";
-import { toCamelCase, handleError } from "../../lib/responses";
+import { handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
 import { hashPassword, verifyPassword } from "../../lib/password";
 import { SubscriptionService } from "../billing/subscription-service";
@@ -27,6 +27,12 @@ interface UserRouteContext extends AuthenticatedContext {
   db: Database;
 }
 
+const ErrorResponseSchema = t.Object({
+  code: t.String(),
+  message: t.String(),
+  details: t.Optional(t.Unknown()),
+});
+
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
   value === undefined || value === null ? null : value;
@@ -35,14 +41,100 @@ const nullify = <T>(value: T | undefined | null): T | null =>
 interface UserDetailsResult {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   created_at: string;
+  subscription_status: "free" | "pro" | "canceled" | string | null;
+  stripe_customer_id: string | null;
   date_of_birth: string | null;
   height: number | null;
   weight: number | null;
   gender: "male" | "female" | null;
   activity_level: number | null;
+}
+
+function normalizeSubscriptionStatus(
+  status: string | null | undefined,
+): "free" | "pro" | "canceled" {
+  if (status === "pro" || status === "canceled") {
+    return status;
+  }
+  return "free";
+}
+
+async function resolveOrCreateInternalUserId(
+  db: Database,
+  user: NonNullable<UserRouteContext["user"]>,
+  internalUserIdFromContext: number | null | undefined,
+): Promise<number | null> {
+  if (internalUserIdFromContext) {
+    return internalUserIdFromContext;
+  }
+
+  const resolvedInternalUserId = getInternalUserId(
+    db,
+    user.clerkUserId,
+    user.email,
+  );
+
+  if (resolvedInternalUserId) {
+    return resolvedInternalUserId;
+  }
+
+  const email = user.email;
+  if (!email) {
+    return null;
+  }
+
+  logger.warn(
+    { clerkUserId: user.clerkUserId, email: user.email },
+    "[/api/user/me] Clerk user not linked. Creating internal user record as fallback.",
+  );
+
+  const fallbackFirstName = user.firstName ?? "";
+  const fallbackLastName = user.lastName ?? "";
+
+  const createdUserId = withTransaction(db, () => {
+    const existingByEmail = safeQuery<{ id: number }>(
+      db,
+      "SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
+      [email],
+    );
+
+    if (existingByEmail) {
+      safeExecute(db, "UPDATE users SET clerk_id = ? WHERE id = ?", [
+        user.clerkUserId,
+        existingByEmail.id,
+      ]);
+      return existingByEmail.id;
+    }
+
+    const insertUserResult = safeExecute(
+      db,
+      "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)",
+      [email, fallbackFirstName, fallbackLastName, user.clerkUserId, "clerk-auth"],
+    );
+
+    const newUserId = Number(insertUserResult.lastInsertRowid);
+
+    safeExecute(
+      db,
+      `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
+       VALUES (?, NULL, NULL, NULL, NULL, NULL)`,
+      [newUserId],
+    );
+
+    safeExecute(
+      db,
+      `INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
+       VALUES (?, 30, 40, 30, '[]')`,
+      [newUserId],
+    );
+
+    return newUserId;
+  });
+
+  return createdUserId;
 }
 
 export const userRoutes = (app: Elysia) =>
