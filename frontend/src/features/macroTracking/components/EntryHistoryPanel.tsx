@@ -245,9 +245,9 @@ const EntryHistoryComponent = function EntryHistory({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
-      <div className="mb-6 flex items-center justify-between gap-4 lg:hidden">
+      <div className="mb-5 flex items-center justify-between gap-4 lg:hidden">
         <div>
-          <h2 className="text-base font-semibold text-foreground">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Entry History
           </h2>
           <p className="mt-1 text-sm text-muted">
@@ -275,7 +275,7 @@ const EntryHistoryComponent = function EntryHistory({
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.3 }}
         >
-          <h2 className="text-base font-semibold text-foreground">
+          <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Entry History
           </h2>{" "}
           <p className="mt-1 text-sm text-muted">
@@ -307,7 +307,7 @@ const EntryHistoryComponent = function EntryHistory({
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-xl border border-border bg-surface-2"
+          className="overflow-hidden rounded-xl border border-border bg-transparent"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}

@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -100,16 +101,16 @@ export function useMacroHistoryForDateRange(
   return useQuery({
     queryKey: queryKeys.macros.historyRange(startDate, endDate),
     queryFn: async () => {
-      // Get a large number of entries to ensure we get all data for the date range
       const response = await apiService.macros.getHistory(10_000, 0, {
         startDate,
         endDate,
       });
       return (response as PaginatedMacroHistory).entries;
     },
-    ...queryConfigs.longLived, // 5 minutes stale time for reporting data
-    gcTime: 15 * 60 * 1000, // 15 minutes for longer cache retention
-    enabled: !!(startDate && endDate), // Only run if both dates are provided
+    ...queryConfigs.longLived,
+    gcTime: 15 * 60 * 1000,
+    enabled: !!(startDate && endDate),
+    placeholderData: keepPreviousData,
   });
 }
 

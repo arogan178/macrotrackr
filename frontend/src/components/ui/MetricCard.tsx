@@ -84,10 +84,10 @@ function MetricCardInner(properties: MetricCardProps) {
             initial: { opacity: 0, y: 10 },
             animate: { opacity: 1, y: 0 },
             transition: { duration: 0.3, delay },
-            className: `bg-surface rounded-xl border border-border overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group transition-colors duration-150 hover:border-border-2 hover:bg-surface-2 ${className}`,
+            className: `bg-surface rounded-2xl border border-border/60 overflow-hidden ${bgGradient ?? ""} p-5 ${borderColor ?? ""} flex flex-col group transition-all duration-300 ease-out hover:border-border-hover hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.02)] hover:-translate-y-0.5 ${className}`,
           }
         : {
-            className: `p-3.5 hover:bg-surface-2 hover:border-border-2 transition-colors duration-150 group ${className}`,
+            className: `p-5 hover:bg-surface-2 transition-all duration-300 ease-out rounded-2xl border-border/60 hover:border-border-hover hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.02)] hover:-translate-y-0.5 group ${className}`,
           },
     };
   }, [score, delay, bgGradient, borderColor, className]);
@@ -101,7 +101,7 @@ function MetricCardInner(properties: MetricCardProps) {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay }}
-        className={`relative overflow-hidden rounded-xl border border-border bg-surface ${bgGradient ?? ""} ${borderColor ?? ""} group flex h-40 flex-col p-4 transition-colors duration-150 hover:border-border-2 ${className}`}
+        className={`relative overflow-hidden rounded-xl border border-border bg-surface ${bgGradient ?? ""} ${borderColor ?? ""} group flex flex-col p-4 transition-colors duration-150 hover:border-border-2 ${className}`}
         {...handlers}
       >
         {/* Glare overlay */}
@@ -122,7 +122,7 @@ function MetricCardInner(properties: MetricCardProps) {
           <div className="min-w-0 flex-1">
             <div className="mb-1 flex items-baseline gap-2">
               <h3
-                className={`truncate text-sm font-medium text-foreground ${textColor ?? ""}`}
+            className={`truncate text-sm font-medium text-foreground/80 ${textColor ?? ""}`}
               >
                 {title}
               </h3>
@@ -134,7 +134,7 @@ function MetricCardInner(properties: MetricCardProps) {
                 </span>
               )}
             </div>
-            <p className="text-2xl font-light tracking-tight text-foreground">
+            <p className="text-3xl font-light tracking-tight text-foreground">
               {numericValue === undefined ? (
                 <span className="text-base text-muted">Complete profile</span>
               ) : (
@@ -175,13 +175,13 @@ function MetricCardInner(properties: MetricCardProps) {
 
   return (
     <Wrapper {...wrapperProps}>
-      <div className="flex items-start gap-5">
+        <div className="flex items-start gap-4">
         {Icon && (
           <div
-            className={`rounded-xl bg-linear-to-br p-3 ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
+            className={`rounded-2xl border border-border/40 bg-surface-2 p-3.5 shadow-sm transition-transform duration-300 group-hover:scale-105 ${colorClasses?.gradient ?? ""} ${colorClasses?.border ?? borderColor ?? ""}`}
           >
             <Icon
-              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""}`}
+              className={`h-6 w-6 ${colorClasses?.text ?? textColor ?? "text-foreground/80"}`}
               strokeWidth={1.5}
             />
           </div>
@@ -201,7 +201,7 @@ function MetricCardInner(properties: MetricCardProps) {
               </span>
             )}
           </div>
-          <p className="text-2xl font-light tracking-tight text-foreground">
+            <p className="text-3xl font-light tracking-tight text-foreground">
             {numericValue === undefined ? (
               <span className="text-base text-muted">Complete profile</span>
             ) : (

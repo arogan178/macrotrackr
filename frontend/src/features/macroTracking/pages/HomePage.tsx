@@ -65,7 +65,7 @@ export default function HomePage() {
 
   const { editingEntry, setEditingEntry } = useStore();
 
-  const nutritionProfile = useNutritionProfile(user);
+  const nutritionProfile = useNutritionProfile(user ?? undefined);
 
   const handleAddEntry = useCallback(
     async (entry: MacroEntryInput) => {
@@ -114,16 +114,16 @@ export default function HomePage() {
     weightGoals?.calorieTarget || nutritionProfile?.tdee;
 
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
-    user,
+    user ?? undefined,
     isLoading,
   );
 
   return (
     <DashboardPageContainer>
       <FeaturePage title={headerTitle} subtitle={headerSubtitle} animateTitle>
-        <div className="space-y-8">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
-            <div className="flex h-full flex-col space-y-6 lg:col-span-4">
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
+            <div className="flex h-full flex-col space-y-5 lg:col-span-4">
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
                 tdee={nutritionProfile?.tdee ?? 0}
@@ -154,8 +154,8 @@ export default function HomePage() {
             </div>
           </div>
 
-          <CardContainer>
-            <div className="p-6">
+          <CardContainer className="rounded-2xl border border-border/60">
+            <div className="p-5">
               {isLoading ? (
                 <HistoryLoadingSkeleton />
               ) : (
