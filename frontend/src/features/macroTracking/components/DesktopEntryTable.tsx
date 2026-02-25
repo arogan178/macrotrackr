@@ -149,12 +149,12 @@ const DesktopEntryTable = memo(
 
             const entry = data.entries[0];
             return (
-              <div className="text-center text-sm text-foreground">
-                <span className="font-medium text-muted">
+              <div className="flex flex-col items-center text-center text-sm text-foreground">
+                <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
                   {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
                 </span>
                 {(entry.foodName || entry.mealName) && (
-                  <span className="mt-0.5 block text-xs text-foreground">
+                  <span className="mt-1 block text-xs font-medium text-foreground">
                     {entry.foodName || entry.mealName}
                   </span>
                 )}
@@ -276,18 +276,18 @@ const DesktopEntryTable = memo(
       const virtualItems = virtualizer.getVirtualItems();
 
       return (
-        <tbody
+        <div
           style={{
-            display: "block",
             position: "relative",
             height: `${virtualizer.getTotalSize()}px`,
+            width: "100%",
           }}
         >
           <AnimatePresence initial={false}>
             {virtualItems.map((virtualRow) => {
               const data = visibleRows[virtualRow.index];
               return (
-                <motion.tr
+                <motion.div
                   key={`virtual-${virtualRow.key}`}
                   style={{
                     position: "absolute",
@@ -297,11 +297,11 @@ const DesktopEntryTable = memo(
                     height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
-                  className={
+                  className={`flex items-center overflow-hidden ${
                     data.isGroup
-              ? "group cursor-pointer border-y border-primary/20 bg-primary/10 transition-colors hover:bg-primary/20"
-              : "border-b border-border transition-colors hover:bg-surface-3"
-                  }
+                      ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
+                      : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
+                  }`}
                   onClick={
                     data.isGroup
                       ? () => toggleDateCollapse(data.date)
@@ -321,27 +321,29 @@ const DesktopEntryTable = memo(
                     })
                     ?.getVisibleCells()
                     .map((cell) => (
-                      <td
+                      <div
                         key={cell.id}
-                        className="px-4 py-2.5 text-center"
-                        style={{ width: "14.285%", display: "inline-block" }}
+                        className="flex h-full items-center justify-center px-4 py-2.5 text-center"
+                        style={{ width: "14.285%" }}
                       >
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </td>
+                        <div className="w-full">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
+                          )}
+                        </div>
+                      </div>
                     ))}
-                </motion.tr>
+                </motion.div>
               );
             })}
           </AnimatePresence>
-        </tbody>
+        </div>
       );
     };
 
     const renderNonVirtualizedBody = () => (
-      <tbody>
+      <div className="flex w-full flex-col">
         <AnimatePresence initial={false}>
           {table.getRowModel().rows.map((row) => {
             const data = row.original;
@@ -355,79 +357,74 @@ const DesktopEntryTable = memo(
               : `entry-${data.entries[0].id}-${parentDate}`;
 
             if (isEntryCollapsed) {
-              return;
+              return null;
             }
 
             return (
-              <motion.tr
+              <motion.div
                 key={animationKey}
-                className={
+                className={`flex w-full items-center overflow-hidden ${
                   isGroup
-                    ? "group cursor-pointer border-y border-primary/20 bg-primary/10 transition-colors hover:bg-primary/20"
-                    : "border-b border-border transition-colors hover:bg-surface-3"
-                }
+                    ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
+                    : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
+                }`}
                 onClick={
                   isGroup ? () => toggleDateCollapse(data.date) : undefined
                 }
                 initial={{
+                  height: 0,
                   opacity: 0,
-                  y: isGroup ? 0 : -8,
-                  scaleY: isGroup ? 1 : 0.8,
                 }}
                 animate={{
+                  height: "auto",
                   opacity: 1,
-                  y: 0,
-                  scaleY: 1,
                 }}
                 exit={{
+                  height: 0,
                   opacity: 0,
-                  y: isGroup ? 0 : -8,
-                  scaleY: isGroup ? 1 : 0.8,
                 }}
                 transition={{
-                  duration: 0.2,
-                  delay: isGroup ? 0 : 0.02,
-                  ease: "easeInOut",
-                  opacity: { duration: 0.15 },
-                  y: { duration: 0.2 },
-                  scaleY: { duration: 0.2 },
+                  height: { duration: 0.3, ease: "easeInOut" },
+                  opacity: { duration: 0.2 },
                 }}
                 layout
               >
                 {row.getVisibleCells().map((cell) => (
-                  <td
+                  <div
                     key={cell.id}
-                    className="px-4 py-2.5 text-center"
+                    className="flex h-full items-center justify-center px-4 py-2.5 text-center"
                     style={{ width: "14.285%" }}
                   >
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </td>
+                    <div className="w-full">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </div>
+                  </div>
                 ))}
-              </motion.tr>
+              </motion.div>
             );
           })}
         </AnimatePresence>
-      </tbody>
+      </div>
     );
 
     return (
       <div className="hidden lg:block">
         <div
           ref={tableContainerReference}
-          className={`overflow-hidden rounded-lg border border-border ${shouldVirtualize ? "max-h-[600px] overflow-auto" : ""}`}
+          className={`overflow-hidden rounded-xl border border-border/60 bg-surface shadow-xs ${shouldVirtualize ? "max-h-[600px] overflow-auto" : ""}`}
         >
-          <table className="w-full table-fixed">
-            <thead
-              className={
-                shouldVirtualize ? "sticky top-0 z-10 bg-surface-2/95" : ""
-              }
+          <div className="flex w-full flex-col">
+            <div
+              className={`flex w-full border-b border-border/60 bg-surface-2/80 ${
+                shouldVirtualize ? "sticky top-0 z-10" : ""
+              }`}
             >
               {table.getHeaderGroups().map((headerGroup) => (
-                <tr key={headerGroup.id}>
+                <div key={headerGroup.id} className="flex w-full">
                   {headerGroup.headers.map((header) => (
-                    <th
+                    <div
                       key={header.id}
-                      className="border-b border-border px-4 py-3 text-center text-xs font-medium tracking-wider text-foreground uppercase"
+                      className="flex items-center justify-center px-4 py-3 text-center text-[10px] font-medium tracking-wider text-muted uppercase"
                       style={{ width: "14.285%" }}
                     >
                       {header.isPlaceholder
@@ -436,15 +433,15 @@ const DesktopEntryTable = memo(
                             header.column.columnDef.header,
                             header.getContext(),
                           )}
-                    </th>
+                    </div>
                   ))}
-                </tr>
+                </div>
               ))}
-            </thead>
+            </div>
             {shouldVirtualize
               ? renderVirtualizedBody()
               : renderNonVirtualizedBody()}
-          </table>
+          </div>
         </div>
       </div>
     );

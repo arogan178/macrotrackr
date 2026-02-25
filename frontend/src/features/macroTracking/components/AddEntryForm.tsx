@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useState } from "react";
 
 import {
@@ -6,10 +7,9 @@ import {
   Dropdown,
   NumberField,
   QuantityUnitField,
-  TextField,
   TimeField,
 } from "@/components/form";
-import { Button, CheckMarkIcon, TrashIcon } from "@/components/ui";
+import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { MealType } from "@/types/macro";
 
@@ -176,7 +176,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         setUnit(displayUnit);
         setQuantity(servingQuantity);
       }
-      setSearchResult(`Selected: ${name}`);
+      setSearchResult(name);
     },
     [],
   );
@@ -231,35 +231,21 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   );
 
   return (
-    <CardContainer>
-      <div className="p-5">
-        <h2 className="mb-4 text-base font-semibold text-foreground">
-          Add Today's Macros
-        </h2>
+    <CardContainer className="group hover:border-border-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border-border/60 transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.02)]">
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50"></div>
+      <div className="relative z-10 p-5">
+        <div className="mb-5">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
+            Log a Meal
+          </h2>
+        </div>
 
-        <div className="mb-6">
+        <div className="mb-5">
           <CalorieSearch onResult={handleSearchResult} />
-          {searchResult && (
-            <div className="mt-3 flex items-center justify-between text-sm text-success">
-              <div className="flex items-center">
-                <CheckMarkIcon className="mr-2 h-4 w-4" />
-                {searchResult}
-              </div>
-              <button
-                type="button"
-                onClick={handleClearSearch}
-                className="flex items-center text-xs text-muted transition-colors hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <TrashIcon className="mr-1 h-4 w-4" />
-                Clear
-              </button>
-            </div>
-          )}
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-start">
+          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:items-start">
             <div className="sm:col-span-1">
               <QuantityUnitField
                 label="Quantity/Unit"
@@ -272,17 +258,43 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               />
             </div>
             <div className="sm:col-span-2">
-              <TextField
-                label="Meal Name"
-                value={mealName}
-                onChange={setMealName}
-                placeholder="e.g. Chicken Salad"
-                required
-              />
+              <div className="space-y-2">
+                <div className="relative flex items-center">
+                  <label className="block text-sm font-medium text-muted">
+                    Meal Name
+                  </label>
+                  <AnimatePresence>
+                    {searchResult && (
+                      <motion.button
+                        type="button"
+                        onClick={handleClearSearch}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
+                        aria-label="Clear search"
+                        title="Clear search result"
+                      >
+                        <TrashIcon className="h-3 w-3" />
+                        Clear
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <input
+                  type="text"
+                  value={mealName}
+                  onChange={(e) => setMealName(e.target.value)}
+                  placeholder="e.g. Chicken Salad"
+                  required
+                  className="w-full rounded-xl border border-border bg-surface-2 px-3.5 py-2.5 text-foreground transition-colors duration-150 placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary"
+                />
+              </div>
             </div>
           </div>
 
-          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
             <DateField
               label="Date"
               value={entryDate}
@@ -308,7 +320,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <NumberField
               label="Protein"
               value={protein}
@@ -338,28 +350,37 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="mt-5 flex items-center justify-between">
-            <div className="text-sm text-muted">
-              Total Calories:{" "}
-              <span className="font-semibold text-foreground">{calories}</span>
+          <div className="mt-5 flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="flex flex-col gap-1">
+              <div className="text-sm font-medium tracking-wide text-muted uppercase">
+                Total Calories
+              </div>
+              <div className="text-2xl font-light tracking-tight text-foreground">
+                {calories}
+              </div>
             </div>
             {allFieldsAreZero && (
-              <div className="mr-4 text-sm text-warning">
+              <div className="mr-4 rounded-md bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning">
                 Macros must be greater than 0
               </div>
             )}
             {!mealName.trim() && !anyFieldIsUndefined && (
-              <div className="mr-4 text-sm text-warning">
+              <div className="mr-4 rounded-md bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning">
                 Please provide a meal name
               </div>
             )}
             <Button
               type="submit"
-              disabled={!isFormValid}
-              autoLoadingFeature="macros"
-              loadingText="Saving..."
-              text="Add Entry"
+              disabled={!isFormValid || _isSaving}
+              isLoading={_isSaving}
+              text={_isSaving ? "Saving..." : "Add Entry"}
+              icon={
+                <PlusIcon className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+              }
+              iconPosition="left"
+              buttonSize="lg"
               variant="primary"
+              className="group min-w-40 font-medium shadow-[0_8px_30px_rgb(var(--primary),0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(var(--primary),0.3)]"
             />
           </div>
         </form>

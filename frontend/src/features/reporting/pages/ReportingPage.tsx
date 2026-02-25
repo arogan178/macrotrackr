@@ -1,5 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ProFeature } from "@/components/billing";
 import {
@@ -16,6 +17,8 @@ import {
   useMacroTarget,
 } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { queryKeys } from "@/lib/queryKeys";
+import { apiService } from "@/utils/apiServices";
 
 import {
   MacroDensityBreakdown,
@@ -41,8 +44,43 @@ function getDateRangeISOStrings(range: string) {
 }
 
 export default function ReportingPage() {
+  const queryClient = useQueryClient();
+
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
+
+  // Prefetch other date ranges on mount for faster tab switching
+  useEffect(() => {
+    const { startDate: monthStart, endDate: monthEnd } =
+      getDateRangeISOStrings("month");
+    const { startDate: threeMonthsStart, endDate: threeMonthsEnd } =
+      getDateRangeISOStrings("3months");
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.macros.historyRange(monthStart, monthEnd),
+      queryFn: async () => {
+        const response = await apiService.macros.getHistory(10_000, 0, {
+          startDate: monthStart,
+          endDate: monthEnd,
+        });
+        return (response as { entries: unknown[] }).entries;
+      },
+    });
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.macros.historyRange(
+        threeMonthsStart,
+        threeMonthsEnd,
+      ),
+      queryFn: async () => {
+        const response = await apiService.macros.getHistory(10_000, 0, {
+          startDate: threeMonthsStart,
+          endDate: threeMonthsEnd,
+        });
+        return (response as { entries: unknown[] }).entries;
+      },
+    });
+  }, [queryClient]);
 
   // Get user data from useUser hook
   const { data: _user } = useUser();

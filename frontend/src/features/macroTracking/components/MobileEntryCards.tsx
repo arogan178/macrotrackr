@@ -51,7 +51,7 @@ const EntryCard = memo(
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
   }) => (
     <motion.div
-      className="rounded-lg bg-surface-3 p-4"
+      className="rounded-xl border border-border/60 bg-surface p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(255,255,255,0.01)]"
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -12 }}
@@ -60,10 +60,10 @@ const EntryCard = memo(
     >
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-foreground">
+          <span className="text-sm font-medium tracking-tight text-foreground">
             {formatTimeFromEntry(entry)}
           </span>
-          <span className="text-sm font-medium text-secondary">
+          <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
             {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
           </span>
         </div>
@@ -82,22 +82,22 @@ const EntryCard = memo(
         </div>
       )}
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3">
         {[
-          { label: "Protein", value: entry.protein, color: "text-protein" },
-          { label: "Carbs", value: entry.carbs, color: "text-carbs" },
-          { label: "Fats", value: entry.fats, color: "text-fats" },
+          { label: "Protein", value: entry.protein, color: "text-protein", bg: "bg-surface-2" },
+          { label: "Carbs", value: entry.carbs, color: "text-carbs", bg: "bg-surface-2" },
+          { label: "Fats", value: entry.fats, color: "text-fats", bg: "bg-surface-2" },
         ].map((macro) => (
           <div
             key={macro.label}
-            className="flex items-center justify-between rounded-lg bg-surface-4 p-3"
+            className={`flex flex-col items-center justify-center rounded-xl ${macro.bg} border border-border/40 p-3`}
           >
-            <span className="text-sm text-foreground">{macro.label}</span>
+            <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">{macro.label}</span>
             <MacroCell value={macro.value} suffix="g" color={macro.color} />
           </div>
         ))}
-        <div className="col-span-3 flex items-center justify-between rounded-lg bg-surface-4 p-3">
-          <span className="text-sm text-foreground">Calories</span>
+        <div className="col-span-3 mt-1 flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-3.5">
+          <span className="text-xs font-medium tracking-wider text-muted uppercase">Calories</span>
           <MacroCell
             value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
             suffix=" kcal"
@@ -172,9 +172,9 @@ const MobileEntryCards = memo(
 
     const renderDateHeader = (group: GroupedEntry) => (
       <motion.div
-        className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
+        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-4 transition-all duration-300 hover:bg-surface-2/60"
         onClick={() => toggleDateCollapse(group.date)}
-        whileHover={{ backgroundColor: "bg-primary/30" }}
+        whileHover={{ backgroundColor: "var(--color-surface-2)" }}
         transition={{ duration: 0.2 }}
       >
         <div className="flex items-center gap-3">
@@ -186,20 +186,20 @@ const MobileEntryCards = memo(
           >
             <ChevronDownIcon className=" text-foreground" />
           </motion.div>
-          <h3 className="text-base font-semibold text-foreground">
+          <h3 className="text-base font-semibold tracking-tight text-foreground">
             {formatDate(group.date)}
           </h3>
         </div>
 
         <div className="flex items-center gap-4 text-xs">
-          <span className="font-medium text-protein">
+          <span className="font-medium tracking-tight text-protein">
             {group.totals.protein}g P
           </span>
-          <span className="font-medium text-carbs">
+          <span className="font-medium tracking-tight text-carbs">
             {group.totals.carbs}g C
           </span>
-          <span className="font-medium text-fats">{group.totals.fats}g F</span>
-          <span className="font-medium text-foreground">
+          <span className="font-medium tracking-tight text-fats">{group.totals.fats}g F</span>
+          <span className="font-medium tracking-tight text-foreground">
             {group.totals.calories} kcal
           </span>
           <IconButton
@@ -241,7 +241,7 @@ const MobileEntryCards = memo(
                   }}
                 >
                   {item.type === "header" ? (
-                    <div className="border-b border-border">
+                    <div className="border-b border-border/40">
                       {renderDateHeader(item.group)}
                     </div>
                   ) : (
@@ -273,7 +273,7 @@ const MobileEntryCards = memo(
         {initialEntries.map((group) => (
           <motion.div
             key={group.date}
-            className="border-b border-border last:border-b-0"
+            className="border-b border-border/40 last:border-b-0"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
@@ -337,7 +337,7 @@ const MobileEntryCards = memo(
             additionalEntries.map((group) => (
               <motion.div
                 key={group.date}
-                className="border-b border-border last:border-b-0"
+                className="border-b border-border/40 last:border-b-0"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{
                   opacity: 1,

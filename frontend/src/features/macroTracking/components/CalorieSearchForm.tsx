@@ -248,7 +248,7 @@ const CalorieSearch = memo(function CalorieSearch({
   ]);
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="relative flex flex-col gap-3">
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <TextField
@@ -258,7 +258,7 @@ const CalorieSearch = memo(function CalorieSearch({
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className=" text-muted" />}
+            icon={<SearchIcon className="text-muted" />}
             maxLength={50}
           />
         </div>
@@ -280,7 +280,7 @@ const CalorieSearch = memo(function CalorieSearch({
       </div>
 
       {showResults && displayResults.length > 0 && (
-        <div className="relative z-10 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface">
+        <div className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
             {displayResults.map((resultData) => {
               const { item, displayQuantity, calories } = resultData;
@@ -288,7 +288,7 @@ const CalorieSearch = memo(function CalorieSearch({
                 <button
                   key={resultData.id}
                   className={
-                    "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
+                    "w-full border-b border-border bg-surface px-4 py-3 text-left text-foreground transition-colors last:border-b-0 hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
                   }
                   onClick={() => handleSelect(item)}
                   type="button"
