@@ -167,9 +167,8 @@ export function useIncrementHabitProgress() {
       }
       console.error("Error incrementing habit progress:", error);
     },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
-    },
+    // Don't invalidate queries - optimistic update already reflects the change in UI
+    // The server will eventually sync in the background
   });
 }
 
@@ -226,9 +225,8 @@ export function useCompleteHabit() {
       }
       console.error("Error completing habit:", error);
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
-    },
+    // Don't invalidate queries - optimistic update already reflects the change in UI
+    // The server will eventually sync in the background
   });
 }
 

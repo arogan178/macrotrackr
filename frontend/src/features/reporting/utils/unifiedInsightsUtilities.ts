@@ -20,9 +20,9 @@ export const BAR_BASE_CLASSES =
   "h-2 w-full rounded-full bg-surface overflow-hidden";
 
 export const CARD_BASE_CLASSES =
-  "rounded-2xl border border-border bg-surface p-6 backdrop-blur-sm";
+  "rounded-2xl border border-border/40 bg-surface p-6";
 
-export const SECTION_HEADING_CLASSES = "text-lg font-semibold text-foreground";
+export const SECTION_HEADING_CLASSES = "text-lg font-semibold tracking-tight text-foreground/90";
 
 export const SUBTEXT_MUTED_CLASSES = "text-xs text-foreground";
 

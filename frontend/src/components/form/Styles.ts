@@ -40,6 +40,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface rounded-2xl border border-border overflow-hidden transition-colors duration-150 hover:border-border-2",
+      "bg-surface rounded-2xl border border-border/40 overflow-hidden",
   },
 };

@@ -260,7 +260,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             <div className="sm:col-span-2">
               <div className="space-y-2">
                 <div className="relative flex items-center">
-                  <label className="block text-sm font-medium text-muted">
+                  <label htmlFor="meal-name-input" className="block text-sm font-medium text-muted">
                     Meal Name
                   </label>
                   <AnimatePresence>
@@ -283,9 +283,10 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                   </AnimatePresence>
                 </div>
                 <input
+                  id="meal-name-input"
                   type="text"
                   value={mealName}
-                  onChange={(e) => setMealName(e.target.value)}
+                  onChange={(event_) => setMealName(event_.target.value)}
                   placeholder="e.g. Chicken Salad"
                   required
                   className="w-full rounded-xl border border-border bg-surface-2 px-3.5 py-2.5 text-foreground transition-colors duration-150 placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary"

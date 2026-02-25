@@ -164,7 +164,7 @@ const ChangePasswordForm = () => {
           </div>
         </div>
 
-        <div className="rounded-lg border border-primary/20 bg-primary/5 p-6 text-center">
+        <div className="rounded-2xl border border-primary/20 bg-primary/5 p-6 text-center">
           <LockIcon className="mx-auto mb-4 h-12 w-12 text-primary" />
           <h4 className="mb-2 text-lg font-semibold text-foreground">
             Password Not Set
@@ -215,7 +215,7 @@ const ChangePasswordForm = () => {
         </div>
 
         {/* Security info */}
-        <div className="rounded-lg border border-border bg-surface-2 p-4">
+        <div className="rounded-2xl border border-border/60 bg-surface-2 p-5">
           <p className="text-sm text-muted">
             <strong className="text-foreground">Security note:</strong> For your
             protection, you must enter your current password to set a new one.
@@ -298,7 +298,7 @@ const ChangePasswordForm = () => {
 
         {/* Error message */}
         {formError && !formError.includes("match") && (
-          <div className="rounded-lg border border-error/30 bg-error/10 p-4">
+          <div className="rounded-2xl border border-error/30 bg-error/10 p-5">
             <p className="text-sm text-error">{formError}</p>
           </div>
         )}

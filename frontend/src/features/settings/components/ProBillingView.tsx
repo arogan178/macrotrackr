@@ -37,7 +37,7 @@ const ProBillingView: React.FC<{
   return (
     <>
       {isActionRequired && (
-        <div className="mb-6 rounded-lg border border-warning/30 bg-warning/10 p-4">
+        <div className="mb-6 rounded-2xl border border-warning/30 bg-warning/10 p-5">
           <p className="flex items-center text-sm text-warning">
             <span className="mr-2 rounded bg-warning/20 p-1">
               <WarningIcon className="h-4 w-4 text-warning" />
@@ -50,7 +50,7 @@ const ProBillingView: React.FC<{
           </p>
         </div>
       )}
-      <div className="relative mb-6 overflow-hidden rounded-xl border border-success/30 bg-success/10 p-6">
+      <div className="relative mb-6 overflow-hidden rounded-2xl border border-success/30 bg-success/10 p-6">
         <div className="relative">
           {/* Header with status */}
           <div className="mb-4 flex items-center justify-between">
@@ -66,7 +66,7 @@ const ProBillingView: React.FC<{
           </div>
 
           {/* Subscription details in clean grid */}
-          <div className="mb-4 rounded-lg bg-surface-2 p-4">
+          <div className="mb-4 rounded-2xl border border-border/60 bg-surface-2 p-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
                 <div className="mb-1 text-xs text-muted">Plan & Price</div>
