@@ -155,25 +155,25 @@ export default function HabitCard({
 
   // Size styles
   const numberClass = variant === "sm" ? "text-lg" : "text-xl";
-  const paddingClass = "p-3";
-  const iconWrapperPadding = "p-1.5";
+  const paddingClass = variant === "sm" ? "p-3" : "p-4";
+  const iconWrapperPadding = variant === "sm" ? "p-1.5" : "p-2";
 
   return (
-    <div className="overflow-hidden rounded-lg bg-surface-2">
+    <div className="group overflow-hidden rounded-2xl border border-border/40 bg-surface-2 transition-colors duration-300 hover:border-border-hover">
       <div
         className={`bg-gradient-to-r ${getGradientClass(accentColor)} ${paddingClass}`}
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center">
             <div
-              className={`mr-2 rounded-lg ${iconWrapperPadding} ${getAccentClass(accentColor)}`}
+              className={`mr-3 rounded-xl ${iconWrapperPadding} ${getAccentClass(accentColor)}`}
             >
               <IconComponent
-                className={variant === "sm" ? "h-4 w-4" : "h-4 w-4"}
+                className={variant === "sm" ? "h-4 w-4" : "h-5 w-5"}
               />
             </div>
             {resolvedShow.title && (
-              <h4 className="mr-2 font-medium text-foreground">{title}</h4>
+              <h4 className="mr-2 font-semibold tracking-tight text-foreground/90">{title}</h4>
             )}
           </div>
 

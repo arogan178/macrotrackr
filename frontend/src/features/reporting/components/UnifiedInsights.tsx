@@ -260,7 +260,7 @@ function UnifiedInsights({
           className={SECTION_STYLES.trendAnalysis}
           aria-label="Trend analysis"
         >
-          <h3 className="text-md mb-2 font-medium text-primary">
+          <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
             Trend Analysis
           </h3>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -281,7 +281,7 @@ function UnifiedInsights({
           className={SECTION_STYLES.trackingAnalysis}
           aria-label="Tracking analysis"
         >
-          <h3 className="text-md mb-2 font-medium text-primary">
+          <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
             Tracking Analysis
           </h3>
           <div className="flex flex-col justify-between sm:flex-row sm:items-center">

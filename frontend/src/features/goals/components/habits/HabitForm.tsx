@@ -267,20 +267,22 @@ function HabitForm({
 
       <div className="mt-4">
         <p className="mb-2 text-sm font-medium text-foreground">Preview</p>
-        <HabitCard
-          variant="sm"
-          habit={{
-            id: undefined,
-            title: values.title || "Habit Title",
-            iconName: values.iconName || "target",
-            current: currentProgress,
-            target: values.target,
-            progress: undefined, // let component compute from current/target
-            accentColor: values.accentColor || "indigo",
-            isComplete: false,
-          }}
-          show={{ completionBadge: false }}
-        />
+        <div className="pointer-events-none">
+          <HabitCard
+            variant="sm"
+            habit={{
+              id: undefined,
+              title: values.title || "Habit Title",
+              iconName: values.iconName || "target",
+              current: currentProgress,
+              target: values.target,
+              progress: undefined, // let component compute from current/target
+              accentColor: values.accentColor || "indigo",
+              isComplete: false,
+            }}
+            show={{ completionBadge: false }}
+          />
+        </div>
       </div>
     </div>
   );

@@ -62,7 +62,7 @@ const ConnectedAccountsForm = () => {
 
   // Wrap both operations with reverification
   const createExternalAccount = useReverification(
-    (parameters: { strategy: string; redirectUrl: string }) =>
+    (parameters: { strategy: any; redirectUrl: string }) =>
       user?.createExternalAccount(parameters),
   );
 
@@ -197,10 +197,10 @@ const ConnectedAccountsForm = () => {
     const displayEmail = account.emailAddress || "Connected";
 
     return (
-      <div
-        key={account.provider}
-        className="rounded-lg border border-border bg-surface-2 p-4"
-      >
+        <div
+          key={account.provider}
+          className="hover:border-border-hover rounded-2xl border border-border/60 bg-surface-2 p-5 transition-all duration-300"
+        >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className={`rounded-lg p-2 ${provider.bgColor}`}>
@@ -308,7 +308,7 @@ const ConnectedAccountsForm = () => {
         </div>
 
         {/* Login summary */}
-        <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-start gap-3">
             <EmailIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
             <div>
@@ -339,7 +339,7 @@ const ConnectedAccountsForm = () => {
             <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Email & Password
             </h4>
-            <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <div className="hover:border-border-hover rounded-2xl border border-border/60 bg-surface-2 p-5 transition-all duration-300">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-2">
@@ -407,7 +407,7 @@ const ConnectedAccountsForm = () => {
 
         {/* No accounts message */}
         {!hasPassword && externalAccounts.length === 0 && (
-          <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
+          <div className="rounded-2xl border border-warning/30 bg-warning/10 p-5">
             <p className="text-sm text-warning">
               You don&apos;t have any sign-in methods configured. Please add at
               least one method to secure your account.
