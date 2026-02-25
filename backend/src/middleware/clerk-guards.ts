@@ -253,12 +253,31 @@ export const featureLimitGuard = (feature: FeatureLimitKey) =>
   new Elysia({ name: `featureLimitGuard_${feature}` })
     .use(requireAuth)
     .derive({ as: "scoped" }, async (context: any) => {
-      const { authenticatedUser } = context;
+      const authenticatedUser = context.authenticatedUser as
+        | AuthenticatedUser
+        | undefined;
+      const resolvedUserId =
+        authenticatedUser?.userId ??
+        (typeof context.internalUserId === "number" ? context.internalUserId : null) ??
+        (typeof context.user?.userId === "number" ? context.user.userId : null);
+
+      if (!resolvedUserId) {
+        logger.warn(
+          {
+            path: context.path,
+            hasAuthenticatedUser: Boolean(authenticatedUser),
+            hasInternalUserId: typeof context.internalUserId === "number",
+            hasContextUserId: typeof context.user?.userId === "number",
+          },
+          `featureLimitGuard_${feature}: Unable to resolve authenticated user ID`
+        );
+        throw new AuthenticationError("Authentication required. Please sign in.");
+      }
       
       return {
         async checkLimit(currentCount: number): Promise<FeatureLimitResult> {
           const result = await checkFeatureLimit(
-            authenticatedUser.userId,
+            resolvedUserId,
             feature,
             currentCount
           );
@@ -271,6 +290,6 @@ export const featureLimitGuard = (feature: FeatureLimitKey) =>
 
           return result;
         },
-        isProUser: await checkProStatus(authenticatedUser.userId),
+        isProUser: await checkProStatus(resolvedUserId),
       };
     });

@@ -62,6 +62,20 @@ function isAllowedForUnlinkedUser(path: string): boolean {
   return false;
 }
 
+function getRequestPath(context: { request?: Request; path?: string }): string {
+  const requestUrl = context.request?.url;
+
+  if (typeof requestUrl === "string" && requestUrl.length > 0) {
+    try {
+      return new URL(requestUrl).pathname;
+    } catch {
+      // Fall through to context.path
+    }
+  }
+
+  return context.path ?? "";
+}
+
 /**
  * Clerk authentication middleware for Elysia
  * Validates Clerk JWT tokens and extracts user information
@@ -77,11 +91,13 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
   )
   .resolve({ as: "scoped" }, async (context: any) => {
     const { auth, clerk, path, db, request } = context;
+    const requestPath = getRequestPath(context);
     
     // Debug logging - only in development
     if (config.NODE_ENV === 'development') {
       logger.debug({ 
         path, 
+        requestPath,
         hasAuth: !!auth, 
         authType: typeof auth,
         hasClerk: !!clerk,
@@ -90,9 +106,9 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
     }
     
     // Skip authentication for exempt paths
-    if (isExemptPath(path)) {
+    if (isExemptPath(requestPath)) {
       if (config.NODE_ENV === 'development') {
-        logger.debug({ path }, "Skipping auth for exempt path");
+        logger.debug({ path, requestPath }, "Skipping auth for exempt path");
       }
       return { user: null, clerkUserId: null, internalUserId: null };
     }
@@ -133,7 +149,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
           };
         } catch (error) {
           logger.warn(
-            { path, error },
+            { path, requestPath, error },
             "Bearer token verification fallback failed"
           );
           return null;
@@ -164,7 +180,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         }
 
         logger.warn(
-          { path },
+          { path, requestPath },
           "No compatible Clerk auth resolver found on context"
         );
         return null;
@@ -180,7 +196,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       }
 
       if (!authResult) {
-        logger.warn({ path }, "No auth function available in context");
+        logger.warn({ path, requestPath }, "No auth function available in context");
         return { user: null, clerkUserId: null, internalUserId: null };
       }
 
@@ -190,6 +206,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       if (config.NODE_ENV === 'development') {
         logger.debug({ 
           path, 
+          requestPath,
           userId, 
           sessionId: authResult?.sessionId,
           hasAuthResult: !!authResult 
@@ -198,7 +215,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       
       if (!userId) {
         logger.warn(
-          { path, authResult },
+          { path, requestPath, authResult },
           "No userId in auth result - no valid Clerk session token found"
         );
         return { user: null, clerkUserId: null, internalUserId: null };
@@ -218,6 +235,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       if (config.NODE_ENV === 'development') {
         logger.debug({ 
           path, 
+          requestPath,
           userId, 
           email,
           firstName: clerkUser?.firstName 
@@ -231,6 +249,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
 
       logger.debug({
         path,
+        requestPath,
         clerkUserId: userId,
         email,
         internalUserId,
@@ -253,22 +272,23 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         clerkClient: clerk,
       };
     } catch (err) {
-      logger.error({ error: err, path }, "Clerk authentication error");
+      logger.error({ error: err, path, requestPath }, "Clerk authentication error");
       return { user: null, clerkUserId: null, internalUserId: null };
     }
   })
   // Authentication guard - must be after the derive to check if user exists
   .onBeforeHandle({ as: "scoped" }, (context: any) => {
     const { user, internalUserId, path, set } = context;
+    const requestPath = getRequestPath(context);
     
     // Skip authentication for exempt paths
-    if (isExemptPath(path)) {
+    if (isExemptPath(requestPath)) {
       return;
     }
 
     // Require authentication for all other paths
     if (!user) {
-      logger.warn({ path }, "Authentication required but no user found");
+      logger.warn({ path, requestPath }, "Authentication required but no user found");
       set.status = 401;
       return {
         code: "UNAUTHORIZED",
@@ -276,9 +296,9 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       };
     }
 
-    if (!internalUserId && !isAllowedForUnlinkedUser(path)) {
+    if (!internalUserId && !isAllowedForUnlinkedUser(requestPath)) {
       logger.warn(
-        { path, clerkUserId: user?.clerkUserId },
+        { path, requestPath, clerkUserId: user?.clerkUserId },
         "Authenticated Clerk user is not linked to an internal account",
       );
       set.status = 409;
