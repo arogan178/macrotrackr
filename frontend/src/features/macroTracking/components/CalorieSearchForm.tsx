@@ -258,7 +258,7 @@ const CalorieSearch = memo(function CalorieSearch({
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="text-muted" />}
+            icon={<SearchIcon className="!text-foreground" />}
             maxLength={50}
           />
         </div>

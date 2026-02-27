@@ -1,3 +1,4 @@
+import { CardContainer } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { WarningIcon } from "@/components/ui/Icons";
 
@@ -12,7 +13,7 @@ export default function GoalsErrorState({
 }: GoalsErrorStateProps) {
   return (
     <div className="flex min-h-[400px] items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6">
+      <CardContainer className="w-full max-w-md p-6">
         <div className="mb-4 text-error">
           <WarningIcon className="mx-auto mb-3 h-12 w-12" />
           <h3 className="mb-2 text-center text-lg font-semibold text-foreground">
@@ -41,7 +42,7 @@ export default function GoalsErrorState({
             Reload Page
           </Button>
         </div>
-      </div>
+      </CardContainer>
     </div>
   );
 }

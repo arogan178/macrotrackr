@@ -2,10 +2,8 @@ import { motion } from "motion/react";
 import { memo } from "react";
 
 import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { cn } from "@/lib/classnameUtilities";
 
-import Button from "./Button";
-
-// Local TabButton prop definition to avoid missing '@/components/utils/Types'
 export type TabButtonProps = {
   active: boolean;
   onClick: () => void;
@@ -32,22 +30,6 @@ type ExtendedTabButtonProps = TabButtonProps & {
 /**
  * TabButton with smooth background transition for active state.
  * Uses background color change to indicate active tab.
- *
- * @example
- * // Basic usage
- * <TabButton active={isActive} onClick={handleClick}>Tab Name</TabButton>
- *
- * @example
- * // With layout animation
- * <TabButton active={isActive} onClick={handleClick} layoutId="tab-indicator">
- *   Tab Name
- * </TabButton>
- *
- * @example
- * // Full width tabs
- * <TabButton active={isActive} onClick={handleClick} fullWidth>
- *   Tab Name
- * </TabButton>
  */
 function TabButton({
   active,
@@ -65,8 +47,8 @@ function TabButton({
   ...rest
 }: ExtendedTabButtonProps) {
   const baseRounded = rounded ?? "rounded-lg";
-  const motionBg = activeBg ?? "bg-primary";
-  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
+  const motionBg = activeBg ?? "bg-surface-3"; // Darker, premium active state
+  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey] || BUTTON_SIZES.md;
 
   // Check for reduced motion preference
   const prefersReducedMotion =
@@ -74,46 +56,41 @@ function TabButton({
     globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
   return (
-    <motion.div
-      className={`relative ${fullWidth ? "flex-1" : ""}`}
-      whileHover={!disabled && !prefersReducedMotion ? { scale: 1.02 } : {}}
-      whileTap={!disabled && !prefersReducedMotion ? { scale: 0.98 } : {}}
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      role={role ?? "tab"}
+      aria-selected={active}
+      aria-label={typeof children === "string" ? children : undefined}
+      className={cn(
+        "relative inline-flex items-center justify-center font-medium transition-colors duration-200 outline-none",
+        "focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "disabled:cursor-not-allowed disabled:opacity-50",
+        sizeClasses,
+        baseRounded,
+        fullWidth ? "w-full flex-1" : "",
+        active ? "text-foreground" : "text-muted hover:bg-surface-2/50 hover:text-foreground",
+        className
+      )}
+      {...rest}
     >
-      <Button
-        onClick={onClick}
-        variant={active ? "primary" : "ghost"}
-        className={`
-          relative ${sizeClasses} ${baseRounded} font-medium
-          ${active ? "text-background" : "text-muted hover:text-foreground"}
-          ${fullWidth ? "w-full" : ""}
-          ${className ?? ""}
-        `
-          .trim()
-          .replaceAll(/\s+/g, " ")}
-        ariaLabel={typeof children === "string" ? children : undefined}
-        disabled={disabled}
-        aria-selected={active}
-        role={role ?? "tab"}
-        {...rest}
-      >
-        <span className="relative z-10 flex items-center justify-center gap-1.5">
-          {children}
-        </span>
-        {isMotion && active && layoutId && !prefersReducedMotion && (
-          <motion.div
-            className={`absolute inset-0 ${motionBg} ${baseRounded}`}
-            layoutId={layoutId}
-            transition={{
-              type: "spring",
-              stiffness: 400,
-              damping: 28,
-              mass: 0.8,
-            }}
-            initial={false}
-          />
-        )}
-      </Button>
-    </motion.div>
+      <span className="relative z-10 flex items-center justify-center gap-1.5">
+        {children}
+      </span>
+      {active && (
+        <motion.div
+          layoutId={layoutId}
+          className={cn("absolute inset-0 z-0 border border-border/50 shadow-sm", baseRounded, motionBg)}
+          initial={isMotion && !prefersReducedMotion ? false : { opacity: 1 }}
+          transition={{
+            type: "spring",
+            stiffness: 400,
+            damping: 30,
+            mass: 0.8,
+          }}
+        />
+      )}
+    </button>
   );
 }
 
@@ -134,14 +111,12 @@ export function TabButtonGroup({
 }: TabButtonGroupProps) {
   return (
     <div
-      className={`
-        relative inline-flex items-center gap-1 p-1
-        bg-surface-2 rounded-lg
-        ${fullWidth ? "w-full" : ""}
-        ${className}
-      `
-        .trim()
-        .replaceAll(/\s+/g, " ")}
+      className={cn(
+        "relative inline-flex items-center gap-1 p-1",
+        "rounded-xl border border-white/5 bg-surface-2/80 backdrop-blur-md",
+        fullWidth ? "w-full" : "",
+        className
+      )}
       role="tablist"
     >
       {children}

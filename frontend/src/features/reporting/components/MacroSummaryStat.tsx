@@ -228,13 +228,12 @@ export default function MacroSummaryStats({
 
   if (!macroAvg) return; // Updated early return condition
 
-  const vercelCardClasses =
-    "group hover:border-border-hover transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.02)] p-4";
+  const cardClasses = "p-5 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Calories Card */}
-      <CardContainer className={vercelCardClasses}>
+      <CardContainer variant="interactive" className={cardClasses}>
         <div className="flex flex-1 flex-col justify-between">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">
@@ -287,7 +286,7 @@ export default function MacroSummaryStats({
       </CardContainer>
 
       {/* Protein Card */}
-      <CardContainer className={vercelCardClasses}>
+      <CardContainer variant="interactive" className={cardClasses}>
         <MacroSummaryItem
           type="protein"
           avgPercentage={macroAvg.protein}
@@ -298,7 +297,7 @@ export default function MacroSummaryStats({
       </CardContainer>
 
       {/* Carbs Card */}
-      <CardContainer className={vercelCardClasses}>
+      <CardContainer variant="interactive" className={cardClasses}>
         <MacroSummaryItem
           type="carbs"
           avgPercentage={macroAvg.carbs}
@@ -309,7 +308,7 @@ export default function MacroSummaryStats({
       </CardContainer>
 
       {/* Fats Card */}
-      <CardContainer className={vercelCardClasses}>
+      <CardContainer variant="interactive" className={cardClasses}>
         <MacroSummaryItem
           type="fats"
           avgPercentage={macroAvg.fats}

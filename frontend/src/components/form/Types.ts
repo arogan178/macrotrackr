@@ -66,11 +66,11 @@ export interface DropdownProps {
   disabled?: boolean;
 }
 
-export interface CardContainerProps {
+export interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: ReactNode;
   className?: string;
   /** Visual style variant for the card */
-  variant?: "default" | "transparent";
+  variant?: "default" | "transparent" | "interactive";
 }
 
 export interface InfoCardProps {

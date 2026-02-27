@@ -42,6 +42,8 @@ import { formStyles } from "@/components/form/Styles";
 import type { TextFieldProps } from "@/components/form/Types";
 import { EyeIcon, EyeSlashIcon, IconButton } from "@/components/ui";
 
+import { cn } from "../../lib/classnameUtilities";
+
 function TextField({
   label,
   value,
@@ -87,11 +89,13 @@ function TextField({
   const inputType =
     type === "password" ? (showPassword ? "text" : "password") : type;
 
-  const inputClasses = `${formStyles.input.base} ${
-    error ? formStyles.input.error : formStyles.input.normal
-  } ${type === "password" ? formStyles.input.withPassword : ""} ${
-    icon ? formStyles.input.withIcon : ""
-  } placeholder:text-muted`;
+  const inputClasses = cn(
+    formStyles.input.base,
+    error ? formStyles.input.error : formStyles.input.normal,
+    type === "password" && formStyles.input.withPassword,
+    icon && formStyles.input.withIcon,
+    "placeholder:text-muted"
+  );
 
   return (
     <div className={formStyles.container}>

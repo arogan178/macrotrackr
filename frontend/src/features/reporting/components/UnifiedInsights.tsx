@@ -2,11 +2,11 @@ import { motion } from "motion/react";
 import { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import { CardContainer } from "@/components/form";
 import { CalendarIcon, LoadingSpinner, ProgressBar } from "@/components/ui";
 
 import {
   MACRO_COLORS,
-  METRIC_CARD_CONFIGS,
   SECTION_STYLES,
 } from "../constants";
 import type { UnifiedInsightsProps as UnifiedInsightsProps } from "../types/insightsTypes";
@@ -19,7 +19,6 @@ import {
 } from "../utils/insightsCalculations";
 import {
   BAR_BASE_CLASSES,
-  CARD_BASE_CLASSES,
   getColorByScore,
   parseMacroRatio,
   SECTION_HEADING_CLASSES,
@@ -27,7 +26,6 @@ import {
   SUBTEXT_MUTED_CLASSES,
   TRANSITIONS,
 } from "../utils/unifiedInsightsUtilities";
-import AtAGlanceSection from "./AtAGlanceSection";
 import MetricCard from "./MetricCard";
 import RecommendationsSection from "./RecommendationsSection";
 import TrendDisplay from "./TrendDisplay";
@@ -123,7 +121,7 @@ function UnifiedInsights({
   } = insights;
 
   return (
-    <div className={CARD_BASE_CLASSES}>
+    <CardContainer className="p-6">
       <h2 className={`mb-6 ${SECTION_HEADING_CLASSES}`}>Nutrition Insights</h2>
 
       {/* Top metrics grid - key performance indicators */}
@@ -134,9 +132,7 @@ function UnifiedInsights({
           value={consistencyScore}
           subtitle="out of 100"
           score={consistencyScore}
-          {...METRIC_CARD_CONFIGS.consistency}
           delay={0}
-          textColor="text-foreground"
         >
           <div className="flex h-full flex-col">
             <div className="mb-2 flex items-center justify-between text-xs tracking-wider text-muted uppercase">
@@ -159,9 +155,7 @@ function UnifiedInsights({
           value={macroBalance.score}
           subtitle="P/C/F Balance"
           score={macroBalance.score}
-          {...METRIC_CARD_CONFIGS.macroBalance}
           delay={0.1}
-          textColor="text-foreground"
         >
           <div className="flex h-full flex-col justify-between">
             <div className="mb-2 flex justify-between text-xs tracking-wider text-muted uppercase">
@@ -202,7 +196,7 @@ function UnifiedInsights({
                           MACRO_COLORS.protein.text,
                           MACRO_COLORS.carbs.text,
                           MACRO_COLORS.fats.text,
-                        ];
+                          ];
                         return (
                           <span key={index} className={colors[index]}>
                             {labels[index]}: {pct}%
@@ -222,9 +216,7 @@ function UnifiedInsights({
           value={macroDensity.score}
           subtitle="quality score"
           score={macroDensity.score}
-          {...METRIC_CARD_CONFIGS.macroDensity}
           delay={0.2}
-          textColor="text-foreground"
         >
           <div className="flex h-full flex-col">
             <div className="mb-2 flex items-center justify-between text-xs tracking-wider text-muted uppercase">
@@ -243,11 +235,8 @@ function UnifiedInsights({
         </MetricCard>
       </div>
 
-      {/* At a Glance Section */}
-      <AtAGlanceSection averages={averages} />
-
       {/* Detailed insights section */}
-      <div className="space-y-4">
+      <div className="mt-8 space-y-6">
         {/* Trend Analysis */}
         <motion.div
           initial={{ opacity: 0, y: 10 }}
@@ -341,7 +330,7 @@ function UnifiedInsights({
         {/* Recommendations */}
         <RecommendationsSection insights={insights} averages={averages} />
       </div>
-    </div>
+    </CardContainer>
   );
 }
 

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import { CardContainer } from "@/components/form";
 import {
   Button,
   ExternalLinkIcon,
@@ -66,7 +67,7 @@ const ProBillingView: React.FC<{
           </div>
 
           {/* Subscription details in clean grid */}
-          <div className="mb-4 rounded-2xl border border-border/60 bg-surface-2 p-5">
+          <CardContainer variant="transparent" className="mb-4 bg-surface-2/40 p-5">
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
                 <div className="mb-1 text-xs text-muted">Plan & Price</div>
@@ -91,7 +92,7 @@ const ProBillingView: React.FC<{
                 </div>
               </div>
             </div>
-          </div>
+          </CardContainer>
 
           <p className="text-sm leading-relaxed text-muted">
             {isCanceled

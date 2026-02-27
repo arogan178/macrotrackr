@@ -64,6 +64,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom";
 
+import { cn } from "../../lib/classnameUtilities";
 import Button from "./Button";
 import IconButton from "./IconButton";
 import ProgressiveBlur from "./ProgressiveBlur";
@@ -159,25 +160,24 @@ function Modal(properties: ModalProps) {
   // Get variant specific styles - Restore default header/footer backgrounds
   const getVariantStyles = (variant: string) => {
     const defaultStyles = {
-      header: "bg-surface",
-      footer: "bg-surface-2",
+      header: "bg-surface/80 backdrop-blur-md",
+      footer: "bg-surface/80 backdrop-blur-md",
       confirmButton: "",
     };
 
     switch (variant) {
       case "confirmation": {
         return {
-          // Use default header/footer for uniform look, override only confirm button
           ...defaultStyles,
           confirmButton: isDanger
-            ? "bg-error text-foreground hover:bg-error"
-            : "bg-primary text-foreground hover:bg-primary",
+            ? "bg-error text-white hover:bg-error/90 active:scale-95"
+            : "bg-primary text-black hover:bg-primary/90 active:scale-95",
         };
       }
       case "form": {
         return {
-          ...defaultStyles, // Use default header/footer
-          confirmButton: "bg-primary text-foreground hover:bg-primary",
+          ...defaultStyles,
+          confirmButton: "bg-primary text-black hover:bg-primary/90 active:scale-95",
         };
       }
       default: {
@@ -188,11 +188,11 @@ function Modal(properties: ModalProps) {
 
   // Base styles for the modal container
   const baseContainerStyles =
-    "fixed inset-0 z-50 flex items-center justify-center p-4";
+    "fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6";
 
   // Base styles for the modal content
   const baseContentStyles =
-    "bg-surface rounded-xl shadow-modal border border-border flex flex-col overflow-hidden";
+    "bg-surface/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden ring-1 ring-black/5";
 
   // Size styles
   const sizeStyles = {
@@ -205,42 +205,45 @@ function Modal(properties: ModalProps) {
 
   const variantStyles = getVariantStyles(variant);
 
-  // Animation variants for motion.div - 3D spring animation
+  // Animation variants for motion.div - Subtle and premium scaling
   const modalVariants = {
     hidden: {
       opacity: 0,
-      scale: 0.95,
-      y: 20,
-      rotateX: -10,
+      scale: 0.96,
+      y: 10,
     },
     visible: {
       opacity: 1,
       scale: 1,
       y: 0,
-      rotateX: 0,
       transition: {
         type: "spring" as const,
-        stiffness: 300,
+        stiffness: 400,
         damping: 30,
+        mass: 0.8,
       },
     },
     exit: {
       opacity: 0,
-      scale: 0.95,
-      y: 20,
-      rotateX: 10,
+      scale: 0.98,
+      y: -5,
       transition: {
-        type: "spring" as const,
-        stiffness: 300,
-        damping: 30,
+        duration: 0.15,
+        ease: "easeOut" as const,
       },
     },
   };
 
   const backdropVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.2 } },
-    exit: { opacity: 0, transition: { duration: 0.15 } },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.3, ease: "easeOut" as const },
+    },
+    exit: {
+      opacity: 0,
+      transition: { duration: 0.2, ease: "easeIn" as const },
+    },
   };
 
   // State to manage mounting for portal
@@ -259,7 +262,7 @@ function Modal(properties: ModalProps) {
     <AnimatePresence>
       {isOpen && (
         <div
-          className={`${baseContainerStyles}`}
+          className={baseContainerStyles}
           role="dialog"
           aria-modal="true"
           aria-labelledby="modal-title"
@@ -267,7 +270,7 @@ function Modal(properties: ModalProps) {
         >
           {/* Backdrop with animation */}
           <motion.div
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
             variants={backdropVariants}
             initial="hidden"
             animate="visible"
@@ -278,7 +281,7 @@ function Modal(properties: ModalProps) {
           {/* Modal Content with animation */}
           <motion.div
             ref={modalReference}
-            className={`${baseContentStyles} ${sizeStyles} relative`}
+            className={cn(baseContentStyles, sizeStyles, "relative")}
             style={{ overflowX: "hidden" }}
             variants={modalVariants}
             initial="hidden"
@@ -290,11 +293,14 @@ function Modal(properties: ModalProps) {
             {/* Header: Only render if close button is shown */}
             {!hideClose && (
               <div
-                className={`flex items-center justify-between border-b border-border p-4 ${variantStyles.header}`}
+                className={cn(
+                  "flex items-center justify-between border-b border-white/5 px-6 py-5",
+                  variantStyles.header
+                )}
               >
                 <h2
                   id="modal-title"
-                  className="text-lg font-medium text-foreground"
+                  className="text-lg font-semibold tracking-tight text-foreground"
                 >
                   {title}
                 </h2>
@@ -304,16 +310,16 @@ function Modal(properties: ModalProps) {
                   buttonSize={buttonSize}
                   onClick={onClose}
                   ariaLabel="Close modal"
-                  className="hover:text-red text-foreground transition-colors"
+                  className="hover:text-red text-muted transition-colors hover:bg-white/5"
                 />
               </div>
             )}
 
             {/* Body */}
-            <div className="relative grow overflow-x-hidden overflow-y-auto p-5">
+            <div className="relative grow overflow-x-hidden overflow-y-auto px-6 py-5">
               <div className="relative z-10">
                 {message && (
-                  <p className="mb-4 text-sm text-foreground">{message}</p>
+                  <p className="mb-5 text-sm leading-relaxed text-muted">{message}</p>
                 )}
                 {children}
               </div>
@@ -328,9 +334,11 @@ function Modal(properties: ModalProps) {
             {/* Footer */}
             {(onSave || onConfirm || variant === "confirmation") && (
               <div
-                className={`flex ${
-                  hideCancelButton ? "justify-center" : "justify-end"
-                } gap-3 border-t border-border px-4 py-3 ${variantStyles.footer}`}
+                className={cn(
+                  "flex gap-3 border-t border-white/5 px-6 py-4",
+                  hideCancelButton ? "justify-center" : "justify-end",
+                  variantStyles.footer
+                )}
               >
                 {!hideCancelButton && (
                   <Button
@@ -338,7 +346,7 @@ function Modal(properties: ModalProps) {
                     ariaLabel={cancelLabel}
                     variant="secondary"
                     buttonSize={buttonSize}
-                    className="rounded-lg bg-surface/60 px-4 py-2 font-medium text-foreground transition-colors hover:bg-surface/90"
+                    className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
                   >
                     {cancelLabel}
                   </Button>
@@ -351,7 +359,7 @@ function Modal(properties: ModalProps) {
                     text={saveLabel}
                     buttonSize={buttonSize}
                     variant="primary"
-                    className="px-8 py-3 text-lg"
+                    className="px-6 font-medium"
                   />
                 )}
                 {variant === "confirmation" && onConfirm && (
@@ -360,7 +368,7 @@ function Modal(properties: ModalProps) {
                     ariaLabel={confirmLabel}
                     variant={isDanger ? "danger" : "primary"}
                     buttonSize={buttonSize}
-                    className={`rounded-lg px-4 py-2 font-medium transition-colors ${variantStyles.confirmButton}`}
+                    className={cn("px-6 font-medium", variantStyles.confirmButton)}
                   >
                     {confirmLabel}
                   </Button>

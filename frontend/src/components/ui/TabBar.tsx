@@ -1,6 +1,7 @@
 import React from "react";
 
 import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { cn } from "@/lib/classnameUtilities";
 
 import TabButton from "./TabButton";
 
@@ -30,14 +31,19 @@ function TabBar({
   onChange,
   layoutId = "tabbar-highlight",
   isMotion = true,
-  rounded = "rounded-md",
+  rounded = "rounded-xl",
   className = "",
   size = "md",
 }: TabBarProps) {
   return (
     <div
       role="tablist"
-      className={`relative flex flex-wrap space-x-1 bg-surface-2 p-0.5 ${rounded} ${className}`}
+      className={cn(
+        "relative inline-flex flex-wrap items-center gap-1 p-1",
+        "border border-white/5 bg-surface-2/80 backdrop-blur-md",
+        rounded,
+        className
+      )}
     >
       {items.map((item) => (
         <TabButton
@@ -46,7 +52,7 @@ function TabBar({
           onClick={() => onChange(item.key)}
           layoutId={layoutId}
           isMotion={isMotion}
-          rounded={rounded}
+          rounded="rounded-lg" // Inner tabs should be slightly less rounded than the container usually
           activeBg={item.activeBg}
           disabled={item.disabled}
           aria-selected={activeKey === item.key}

@@ -4,6 +4,7 @@ import { CardContainer } from "@/components/form";
 import { AwardIcon } from "@/components/ui";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
+import { cn } from "@/lib/classnameUtilities";
 import { useStore } from "@/store/store";
 import { createPortalSession } from "@/utils/apiBilling";
 
@@ -90,7 +91,7 @@ const BillingForm: React.FC = () => {
               <AwardIcon className="h-7 w-7 shrink-0 text-warning" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-bold text-foreground">
+              <h3 className="truncate text-xl font-semibold text-foreground">
                 Subscription Plan
               </h3>
               <p className="mt-1 text-sm text-muted">
@@ -101,11 +102,12 @@ const BillingForm: React.FC = () => {
             </div>
           </div>
           <div
-            className={`self-start rounded-full px-4 py-2 text-sm font-semibold sm:self-auto ${
+            className={cn(
+              "self-start rounded-full border px-4 py-2 text-sm font-semibold sm:self-auto",
               isPro
-                ? "border border-warning/30 bg-warning/10 text-warning"
-                : "border border-border bg-surface-2 text-muted"
-            }`}
+                ? "border-warning/30 bg-warning/10 text-warning"
+                : "border-border bg-surface-2 text-muted"
+            )}
             role="status"
             aria-label={`Current plan: ${isPro ? "Pro" : "Free"}`}
           >

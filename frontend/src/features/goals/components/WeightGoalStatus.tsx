@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { memo } from "react";
 
 import { AnimatedNumber } from "@/components/animation/";
+import { CardContainer } from "@/components/form";
 import {
   Button,
   CalendarIcon,
@@ -154,7 +155,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       </div>
 
       {/* Goal Progress Visual */}
-      <div className="mb-8 rounded-2xl border border-border/60 bg-surface-2 p-5">
+      <CardContainer className="mb-8 border-border/60 bg-surface-2 p-5">
         <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex items-baseline space-x-2">
             <span className="text-2xl font-bold text-foreground">
@@ -228,12 +229,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             </div>
           </>
         )}
-      </div>
+      </CardContainer>
 
       {/* Stats Grid */}
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div
-          className={`flex items-start gap-4 ${goalBgColorLight} rounded-2xl border p-5 ${goalBorderColor} transition-all duration-300 hover:shadow-sm`}
+        <CardContainer
+          variant="transparent"
+          className={`flex items-start gap-4 p-5 transition-all duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
           <TrendingUpIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
@@ -249,9 +251,10 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </div>
-        <div
-          className={`flex items-start gap-4 ${goalBgColorLight} rounded-2xl border p-5 ${goalBorderColor} transition-all duration-300 hover:shadow-sm`}
+        </CardContainer>
+        <CardContainer
+          variant="transparent"
+          className={`flex items-start gap-4 p-5 transition-all duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
           <CalendarIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
@@ -266,9 +269,10 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </div>
-        <div
-          className={`flex items-start gap-4 ${goalBgColorLight} rounded-2xl border p-5 ${goalBorderColor} transition-all duration-300 hover:shadow-sm`}
+        </CardContainer>
+        <CardContainer
+          variant="transparent"
+          className={`flex items-start gap-4 p-5 transition-all duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
           <TargetIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
@@ -287,11 +291,11 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </div>
+        </CardContainer>
       </div>
 
       {/* Nutrition section */}
-      <div className="rounded-2xl border border-border/60 bg-surface-2 p-5">
+      <CardContainer className="border-border/60 bg-surface-2 p-5">
         <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
           Daily Nutrition Target
         </h3>
@@ -349,7 +353,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             color="fats"
           />
         </div>
-      </div>
+      </CardContainer>
     </motion.div>
   );
 });

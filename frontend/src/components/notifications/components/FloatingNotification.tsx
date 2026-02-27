@@ -8,7 +8,7 @@ import {
   WarningIcon,
 } from "@/components/ui";
 
-import type { NotificationType } from "../types";
+import type { NotificationType } from "../Types";
 
 export interface FloatingNotificationProps {
   message: string;
@@ -178,8 +178,8 @@ function FloatingNotification({
     >
       <div
         className={`flex items-center rounded-lg shadow-modal backdrop-blur-md 
-                     ${bg} border ${border} hover:shadow-3xl
-                     overflow-hidden transition-shadow duration-200`}
+                     ${bg} border ${border}
+                     overflow-hidden`}
       >
         {/* Icon section */}
         <div

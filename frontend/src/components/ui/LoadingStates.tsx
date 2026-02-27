@@ -4,6 +4,7 @@ import type { FeatureType } from "@/hooks/useFeatureLoading";
 import { useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useCriticalLoading , useGlobalLoading } from "@/hooks/useGlobalLoading";
 
+import { cn } from "../../lib/classnameUtilities";
 import LoadingSpinner from "./LoadingSpinner";
 /* eslint-disable react/prop-types */
 
@@ -45,7 +46,7 @@ export function GlobalLoadingIndicator({
   }
 
   return (
-    <div className={`flex items-center justify-center p-4 ${className}`}>
+    <div className={cn("flex items-center justify-center p-4", className)}>
       {loadingComponent || <LoadingSpinner size={size} />}
     </div>
   );
@@ -67,7 +68,7 @@ export function CriticalLoadingIndicator({
   }
 
   return (
-    <div className={`flex items-center justify-center p-4 ${className}`}>
+    <div className={cn("flex items-center justify-center p-4", className)}>
       {loadingComponent || <LoadingSpinner size={size} />}
     </div>
   );
@@ -117,7 +118,7 @@ export function FeatureLoadingIndicator({
   }
 
   return (
-    <div className={`flex items-center justify-center p-4 ${className}`}>
+    <div className={cn("flex items-center justify-center p-4", className)}>
       {loadingComponent || <LoadingSpinner size={size} />}
     </div>
   );
@@ -181,7 +182,7 @@ export function QueryLoadingWrapper({
 }: QueryLoadingWrapperProps) {
   if (isLoading) {
     return (
-      <div className={`flex items-center justify-center p-4 ${className}`}>
+      <div className={cn("flex items-center justify-center p-4", className)}>
         {loadingComponent || <LoadingSpinner size={size} />}
       </div>
     );
@@ -189,7 +190,7 @@ export function QueryLoadingWrapper({
 
   if (isError) {
     return (
-      <div className={`flex items-center justify-center p-4 ${className}`}>
+      <div className={cn("flex items-center justify-center p-4", className)}>
         {errorComponent || (
           <div className="text-center text-error">
             <p className="font-medium">Error loading data</p>
@@ -243,7 +244,7 @@ export function MutationLoadingButton({
       {...properties}
       aria-busy={isLoading}
       disabled={Boolean(disabled) || isLoading}
-      className={`${className} ${isLoading ? "cursor-not-allowed opacity-75" : ""}`}
+      className={cn(className, isLoading && "cursor-not-allowed opacity-75")}
     >
       {isLoading ? (
         <div className="flex items-center justify-center space-x-2">
