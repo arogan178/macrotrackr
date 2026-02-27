@@ -11,6 +11,10 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint src",
     "test": "vitest run",
+    "test:e2e": "playwright test --config ./playwright.config.ts",
+    "test:e2e:ui": "playwright test --config ./playwright.config.ts --ui",
+    "test:e2e:debug": "playwright test --config ./playwright.config.ts --debug",
+    "test:e2e:headed": "playwright test --config ./playwright.config.ts --headed",
     "build:analyze": "vite build --mode analyze",
     "bundle:size": "node scripts/analyze-bundle.js"
   },
@@ -52,7 +56,9 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@clerk/testing": "^1.14.2",
     "@eslint/js": "^9.39.3",
+    "@playwright/test": "^1.58.2",
     "@stylistic/eslint-plugin": "^5.9.0",
     "@tailwindcss/aspect-ratio": "^0.4.2",
     "@tailwindcss/forms": "^0.5.11",
@@ -67,6 +73,7 @@
     "@vitest/coverage-v8": "^3.2.4",
     "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.24",
+    "dotenv": "^17.3.1",
     "eslint": "^9.39.3",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-depend": "^1.4.0",
