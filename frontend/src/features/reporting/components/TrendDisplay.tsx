@@ -5,7 +5,7 @@ import type { TrendDisplayProps as TrendDisplayProps } from "../types/insightsTy
 
 export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
   return (
-    <div className="flex flex-col rounded-xl border border-border/40 bg-surface p-4 transition-colors duration-200">
+    <div className="flex flex-col border-b border-border/40 pb-4 last:border-0 last:pb-0">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-sm font-semibold tracking-tight text-foreground/90">{label}</span>
         <span className="flex items-center text-sm font-medium">

@@ -14,7 +14,7 @@ export default function MetricCard({
   score,
   delay = 0,
   children,
-}: Omit<MetricCardProps, "bgGradient" | "borderColor" | "textColor">) {
+}: MetricCardProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}

@@ -44,9 +44,9 @@ export default function RecommendationsSection({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.5 }}
-      className="mt-8"
+      className="flex flex-col gap-6"
     >
-      <div className="mb-6 flex items-center text-foreground/90">
+      <div className="flex items-center text-foreground/90">
         <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
           <LightningIcon className="h-5 w-5 text-primary" />
         </div>
@@ -55,7 +55,7 @@ export default function RecommendationsSection({
         </h3>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <ActionCard
           title="Macro Balance"
           bgColor="bg-purple-500/10 text-purple-400"
