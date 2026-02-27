@@ -73,9 +73,9 @@ export interface MetricCardProps {
   value: string | number;
   subtitle: string;
   score: number;
-  bgGradient: string;
-  borderColor: string;
-  textColor: string;
+  bgGradient?: string;
+  borderColor?: string;
+  textColor?: string;
   delay?: number;
   children?: React.ReactNode;
 }

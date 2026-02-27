@@ -44,7 +44,7 @@ export default function RecommendationsSection({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.5 }}
-      className="mt-8 rounded-2xl border border-border/60 bg-surface-2 p-5"
+      className="mt-8"
     >
       <div className="mb-6 flex items-center text-foreground/90">
         <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">

@@ -86,9 +86,9 @@ const MacroDensityBreakdown = ({
     !loading && Array.isArray(data) && data.length === 0 && dataProcessed;
 
   return (
-    <ChartCard title="Macro Distribution" className="h-100">
+    <ChartCard title="Macro Distribution" className="w-full">
       {loading || showNoData ? (
-        <div className="flex h-full items-center justify-center">
+        <div className="flex h-[300px] w-full items-center justify-center">
           {loading ? (
             <div className="animate-pulse text-sm text-muted">
               Loading macro distribution...
@@ -100,7 +100,7 @@ const MacroDensityBreakdown = ({
           )}
         </div>
       ) : (
-        <ResponsiveContainer width="100%" height="100%">
+        <ResponsiveContainer width="100%" height="100%" minHeight={300}>
           <BarChart
             data={Array.isArray(data) ? data : []}
             stackOffset="expand"

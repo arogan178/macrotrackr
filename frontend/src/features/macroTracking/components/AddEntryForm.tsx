@@ -9,8 +9,10 @@ import {
   QuantityUnitField,
   TimeField,
 } from "@/components/form";
+import { formStyles } from "@/components/form/Styles";
 import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
+import { cn } from "@/lib/classnameUtilities";
 import { MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -231,7 +233,10 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   );
 
   return (
-    <CardContainer className="group hover:border-border-hover relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border-border/60 transition-all duration-500 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.02)]">
+    <CardContainer
+      variant="interactive"
+      className="relative flex h-full flex-col justify-between overflow-hidden"
+    >
       <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50"></div>
       <div className="relative z-10 p-5">
         <div className="mb-5">
@@ -260,11 +265,11 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             <div className="sm:col-span-2">
               <div className="space-y-2">
                 <div className="relative flex items-center">
-                  <label htmlFor="meal-name-input" className="block text-sm font-medium text-muted">
+                  <label htmlFor="meal-name-input" className={formStyles.label}>
                     Meal Name
                   </label>
                   <AnimatePresence>
-                    {searchResult && (
+                    {(searchResult || mealName.length > 0) && (
                       <motion.button
                         type="button"
                         onClick={handleClearSearch}
@@ -289,7 +294,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                   onChange={(event_) => setMealName(event_.target.value)}
                   placeholder="e.g. Chicken Salad"
                   required
-                  className="w-full rounded-xl border border-border bg-surface-2 px-3.5 py-2.5 text-foreground transition-colors duration-150 placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary"
+                  className={cn(formStyles.input.base, formStyles.input.normal)}
                 />
               </div>
             </div>
@@ -376,12 +381,17 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               isLoading={_isSaving}
               text={_isSaving ? "Saving..." : "Add Entry"}
               icon={
-                <PlusIcon className="mr-2 h-4 w-4 transition-transform duration-300 group-hover:rotate-90" />
+                <PlusIcon 
+                  className={cn(
+                    "mr-2 h-4 w-4 transition-transform duration-300",
+                    isFormValid && !_isSaving ? "group-hover:rotate-90" : ""
+                  )} 
+                />
               }
               iconPosition="left"
               buttonSize="lg"
               variant="primary"
-              className="group min-w-40 font-medium shadow-[0_8px_30px_rgb(var(--primary),0.2)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(var(--primary),0.3)]"
+              className="group min-w-40 font-medium transition-colors duration-200"
             />
           </div>
         </form>

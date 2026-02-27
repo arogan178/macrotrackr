@@ -154,7 +154,7 @@ const ChangePasswordForm = () => {
               <LockIcon className="h-7 w-7 shrink-0 text-vibrant-accent" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-bold text-foreground">
+              <h3 className="truncate text-xl font-semibold text-foreground">
                 Security Settings
               </h3>
               <p className="mt-1 text-sm text-muted">
@@ -204,7 +204,7 @@ const ChangePasswordForm = () => {
               <LockIcon className="h-7 w-7 shrink-0 text-vibrant-accent" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-bold text-foreground">
+              <h3 className="truncate text-xl font-semibold text-foreground">
                 Security Settings
               </h3>
               <p className="mt-1 text-sm text-muted">

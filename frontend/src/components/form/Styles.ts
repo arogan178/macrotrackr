@@ -10,16 +10,16 @@ export const formStyles = {
 
   // Input styles
   input: {
-    base: "w-full px-3.5 py-2.5 bg-surface-2 border rounded-xl text-foreground placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-150",
+    base: "w-full px-3.5 py-2.5 bg-surface-2/80 backdrop-blur-sm border rounded-xl text-foreground placeholder:text-muted focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-200 shadow-sm",
     error: "border-error",
-    normal: "border-border",
+    normal: "border-white/10 hover:border-white/20",
     withIcon: "pl-10",
     withUnit: "pr-10",
     withPassword: "pr-10",
     numberInput:
       "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]",
     disabled:
-      "bg-surface border-border text-muted cursor-not-allowed opacity-50",
+      "bg-surface border-white/5 text-muted cursor-not-allowed opacity-50",
   },
 
   // Error and helper text
@@ -40,6 +40,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface rounded-2xl border border-border/40 overflow-hidden",
+      "bg-surface/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-sm",
   },
 };

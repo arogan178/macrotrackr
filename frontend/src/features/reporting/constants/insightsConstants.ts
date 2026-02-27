@@ -38,10 +38,9 @@ export const MACRO_COLORS = {
 } as const;
 
 export const SECTION_STYLES = {
-  atAGlance: "p-6 rounded-2xl border border-border/40 bg-surface-2",
-  trendAnalysis: "p-6 rounded-2xl border border-border/40 bg-surface-2",
-  trackingAnalysis: "p-6 rounded-2xl border border-border/40 bg-surface-2",
-  recommendations: "p-6 rounded-2xl border border-border/40 bg-surface-2",
+  trendAnalysis: "pt-4",
+  trackingAnalysis: "pt-4",
+  recommendations: "pt-4",
 } as const;
 
 export const DEFAULT_MACRO_TARGET = {

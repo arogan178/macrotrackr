@@ -230,15 +230,16 @@ const DesktopEntryTable = memo(
             const data = row.original;
             if (data.isGroup) {
               return (
-                <IconButton
-                  variant="delete"
-                  buttonSize="sm"
-                  onClick={(event: React.MouseEvent) =>
-                    handleDeleteDate(data.date, event)
-                  }
-                  ariaLabel={`Delete all entries for ${formatDate(data.date)}`}
-                  className="opacity-0 group-hover:opacity-100"
-                />
+                <div className="flex w-full items-center justify-center">
+                  <IconButton
+                    variant="delete"
+                    buttonSize="sm"
+                    onClick={(event: React.MouseEvent) =>
+                      handleDeleteDate(data.date, event)
+                    }
+                    ariaLabel={`Delete all entries for ${formatDate(data.date)}`}
+                  />
+                </div>
               );
             } else {
               const entry = data.entries[0];

@@ -169,7 +169,7 @@ function DailySummaryInner({
   return (
     <CardContainer className="h-full">
       <div className="flex h-full flex-col gap-3 p-3">
-        <div className="rounded-2xl border border-border/60 bg-surface-2 p-4">
+        <CardContainer className="border-border/60 bg-surface-2 p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
               Today's Summary
@@ -230,13 +230,14 @@ function DailySummaryInner({
             }}
             className="mt-2"
           />
-        </div>
+        </CardContainer>
 
         <div className="flex flex-1 flex-col gap-3">
           {macroData.map((macro) => (
-            <div
+            <CardContainer
+              variant="interactive"
               key={macro.name}
-              className="group hover:border-border-hover flex flex-1 flex-col justify-center rounded-2xl border border-border/60 bg-surface-2 p-4 transition-all duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_8px_30px_rgb(0,0,0,0.1)] dark:hover:shadow-[0_8px_30px_rgb(255,255,255,0.03)]"
+              className="group flex flex-1 flex-col justify-center bg-surface-2 p-4"
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -297,7 +298,7 @@ function DailySummaryInner({
                   </span>
                 </div>
               </div>
-            </div>
+            </CardContainer>
           ))}
         </div>
       </div>

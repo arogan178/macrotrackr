@@ -3,6 +3,8 @@ import { memo, useMemo } from "react";
 import useDeferredVisibility from "@/hooks/useDeferredVisibility";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 
+import { cn } from "../../lib/classnameUtilities";
+
 /**
  * A thin, fixed top loading bar that overlays the app without affecting layout.
  * Visible for any fetching (queries or mutations). Uses debounce and minimum visibility to reduce flicker.
@@ -33,11 +35,10 @@ function TopLoadingBar() {
     >
       <div className="h-1 bg-transparent">
         <div
-          className={`h-full bg-primary ${
-            prefersReducedMotion
-              ? ""
-              : "animate-[loadingbar_1.2s_ease-in-out_infinite]"
-          }`}
+          className={cn(
+            "h-full bg-primary",
+            !prefersReducedMotion && "animate-[loadingbar_1.2s_ease-in-out_infinite]"
+          )}
           style={{
             width: prefersReducedMotion ? "100%" : "30%",
             // Provide a subtle gradient if desired; fallback to solid color via bg-primary

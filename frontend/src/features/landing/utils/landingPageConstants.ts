@@ -84,27 +84,3 @@ export const features = [
       "Transform data into insights with detailed charts and trend analysis that guide smarter nutrition decisions.",
   },
 ];
-
-export const testimonials = [
-  {
-    name: "Alex Peterson",
-    title: "Fitness Enthusiast",
-    quote:
-      "MacroTrackr completely transformed my approach to nutrition. The interface is intuitive, and the analytics help me stay consistent with my goals.",
-    initials: "AP",
-  },
-  {
-    name: "Jamie Lewis",
-    title: "Certified Nutrition Coach",
-    quote:
-      "As a nutrition coach, I recommend MacroTrackr to all my clients. It's the perfect balance of simplicity and powerful features.",
-    initials: "JL",
-  },
-  {
-    name: "Maria Rodriguez",
-    title: "Busy Professional",
-    quote:
-      "I've tried many tracking apps, but MacroTrackr is by far the most user-friendly. Lost 20 pounds and gained so much energy!",
-    initials: "MR",
-  },
-];

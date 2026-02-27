@@ -55,16 +55,22 @@ const PricingCard: React.FC<PricingCardProps> = ({
       </div>
     )}
     <div className="mt-4 mb-8 text-center">
-      <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground">{title}</h3>
+      <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
+        {title}
+      </h3>
       <div className="mb-2 flex min-h-[3.5rem] items-center justify-center text-4xl font-bold tracking-tight text-foreground">
         {price}
         {suffix && (
-          <span className="ml-1 text-lg font-normal tracking-normal text-muted">{suffix}</span>
+          <span className="ml-1 text-lg font-normal tracking-normal text-muted">
+            {suffix}
+          </span>
         )}
       </div>
       <div className="min-h-[1.5rem]">
         {equivalent && (
-          <p className="text-sm font-medium tracking-wide text-muted">{equivalent}</p>
+          <p className="text-sm font-medium tracking-wide text-muted">
+            {equivalent}
+          </p>
         )}
       </div>
       {children}
@@ -72,13 +78,19 @@ const PricingCard: React.FC<PricingCardProps> = ({
     <ul className="mb-10 space-y-4">
       {features.map((feature, index) => (
         <li key={index} className="flex items-center gap-4">
-          <div className={`flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 ${isPopular ? 'border border-border-2 bg-surface-3' : 'border border-border'}`}>
+          <div
+            className={`flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 ${isPopular ? "border border-border-2 bg-surface-3" : "border border-border"}`}
+          >
             <CheckIcon
               className={`h-3.5 w-3.5 ${featureIconColor} shrink-0`}
               aria-hidden="true"
             />
           </div>
-          <span className={`leading-relaxed tracking-tight ${featureTextClass}`}>{feature}</span>
+          <span
+            className={`leading-relaxed tracking-tight ${featureTextClass}`}
+          >
+            {feature}
+          </span>
         </li>
       ))}
     </ul>
