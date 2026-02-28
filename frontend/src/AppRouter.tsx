@@ -337,6 +337,26 @@ export const goalsRoute = createRoute({
   ),
 });
 
+// Blog routes
+const BlogIndexPage = React.lazy(
+  () => import("./features/landing/pages/BlogIndexPage"),
+);
+const BlogArticlePage = React.lazy(
+  () => import("./features/landing/pages/BlogArticlePage"),
+);
+
+const blogIndexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog",
+  component: BlogIndexPage,
+});
+
+const blogArticleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog/$slug",
+  component: BlogArticlePage,
+});
+
 // New Clerk sign-in route
 const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -470,6 +490,8 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   termsRoute,
   privacyRoute,
+  blogIndexRoute,
+  blogArticleRoute,
 ]);
 
 const router = createRouter({

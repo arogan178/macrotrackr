@@ -10,6 +10,7 @@ import {
   YAxis,
 } from "recharts";
 
+import { AnimatedNumber } from "@/components/animation";
 import { ChartCard } from "@/components/chart";
 import { StackedBarPercentageTooltip } from "@/components/chart/ChartTooltip";
 import { MACRO_COLORS } from "@/utils/chartColors";
@@ -51,19 +52,26 @@ const PercentageLabel = (properties: PercentageLabelProps) => {
         ? Number(properties.value)
         : 0;
   // Only show label if value is significant enough to fit
-  if (value < 0.05 || width < 20) return;
+  if (value < 0.05 || height < 20) return;
   return (
-    <text
-      x={x + width / 2}
-      y={y + height / 2}
-      fill="#ffffff"
-      fontSize={12}
-      textAnchor="middle"
-      dominantBaseline="central"
-      fontWeight={600}
+    <foreignObject
+      x={x}
+      y={y}
+      width={width}
+      height={height}
+      style={{ overflow: "visible" }}
     >
-      {`${(value * 100).toFixed(0)}%`}
-    </text>
+      <div className="flex h-full w-full items-center justify-center overflow-visible">
+        <span
+          className="whitespace-nowrap rounded-sm bg-black/60 px-1.5 py-0.5 text-[13px] font-bold text-white"
+          style={{
+            textShadow: "0 1px 2px rgba(0,0,0,0.8)",
+          }}
+        >
+          <AnimatedNumber value={value * 100} toFixedValue={0} suffix="%" />
+        </span>
+      </div>
+    </foreignObject>
   );
 };
 
@@ -104,29 +112,28 @@ const MacroDensityBreakdown = ({
           <BarChart
             data={Array.isArray(data) ? data : []}
             stackOffset="expand"
-            layout="vertical"
-            margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-            barSize={25}
+            margin={{ top: 10, right: 10, left: -20, bottom: 10 }}
+            barSize={20}
           >
             <CartesianGrid
               strokeDasharray="3 3"
               opacity={0.1}
-              horizontal={false}
+              vertical={false}
             />
             <XAxis
+              dataKey="period"
+              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              axisLine={false}
+              tickLine={false}
+              dy={10}
+            />
+            <YAxis
               type="number"
               tickFormatter={(value) => `${Math.round(value * 100)}%`}
               domain={[0, 1]}
-              hide={false}
               tick={{ fill: "#9ca3af", fontSize: 10 }}
-            />
-            <YAxis
-              dataKey="period"
-              type="category"
-              tick={{ fill: "#d1d5db", fontSize: 12 }}
               axisLine={false}
               tickLine={false}
-              width={70}
             />
             <Tooltip
               // Use standardized stacked bar tooltip with color mapping and macro dots
@@ -152,7 +159,7 @@ const MacroDensityBreakdown = ({
               iconType="circle"
               verticalAlign="bottom"
               align="center"
-              wrapperStyle={{ fontSize: 12, paddingTop: 2 }}
+              wrapperStyle={{ fontSize: 12, paddingTop: 10 }}
               payload={["protein", "carbs", "fats"].map((macro) => ({
                 id: macro,
                 value: macro.charAt(0).toUpperCase() + macro.slice(1),
@@ -167,7 +174,7 @@ const MacroDensityBreakdown = ({
               dataKey="protein"
               stackId="1"
               fill={MACRO_COLORS.protein.gradient[0]}
-              radius={[20, 0, 0, 20]}
+              radius={[0, 0, 4, 4]}
             >
               <LabelList dataKey="protein" content={PercentageLabel} />
             </Bar>
@@ -175,7 +182,6 @@ const MacroDensityBreakdown = ({
               dataKey="carbs"
               stackId="1"
               fill={MACRO_COLORS.carbs.gradient[0]}
-              radius={[0, 0, 0, 0]}
             >
               <LabelList dataKey="carbs" content={PercentageLabel} />
             </Bar>
@@ -183,7 +189,7 @@ const MacroDensityBreakdown = ({
               dataKey="fats"
               stackId="1"
               fill={MACRO_COLORS.fats.gradient[0]}
-              radius={[0, 20, 20, 0]}
+              radius={[4, 4, 0, 0]}
             >
               <LabelList dataKey="fats" content={PercentageLabel} />
             </Bar>

@@ -316,7 +316,7 @@ function Modal(properties: ModalProps) {
             )}
 
             {/* Body */}
-            <div className="relative grow overflow-x-hidden overflow-y-auto px-6 py-5">
+            <div className="relative grow overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5">
               <div className="relative z-10">
                 {message && (
                   <p className="mb-5 text-sm leading-relaxed text-muted">{message}</p>

@@ -1,3 +1,11 @@
+// Limits metadata for free tier restrictions
+export interface HistoryLimits {
+  totalAvailable: number;
+  visibleCount: number;
+  isRestricted: boolean;
+  upgradePrompt?: string;
+}
+
 // Paginated macro history response for API pagination
 export interface PaginatedMacroHistory {
   entries: MacroEntry[];
@@ -5,6 +13,7 @@ export interface PaginatedMacroHistory {
   limit: number;
   offset: number;
   hasMore: boolean;
+  limits?: HistoryLimits;
 }
 // Utility type for macro percentage keys
 export type MacroType = "protein" | "carbs" | "fats";
@@ -36,6 +45,15 @@ export interface MacroTargetState extends MacroPercentages {
 export interface MacroTarget {
   macroTarget?: MacroTargetSettings;
 }
+export interface Ingredient {
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  quantity?: number;
+  unit?: string;
+}
+
 export interface MacroEntry {
   id: number;
   createdAt: string;
@@ -47,6 +65,7 @@ export interface MacroEntry {
   entryDate: string;
   entryTime: string;
   foodName?: string;
+  ingredients?: Ingredient[];
 }
 
 export interface MacroDailyTotals {

@@ -18,7 +18,7 @@ interface RecommendationsSectionProps {
 
 function getProteinRecommendation(proteinAverage: number): string {
   if (proteinAverage === 0) {
-    return "Ready to optimize your protein intake? Start tracking to get personalized muscle recovery recommendations!";
+    return "Ready to optimise your protein intake? Start tracking to get personalised muscle recovery recommendations!";
   }
   if (proteinAverage >= 120) {
     return "Excellent protein intake! You're supporting optimal muscle recovery and growth.";
@@ -51,7 +51,7 @@ export default function RecommendationsSection({
           <LightningIcon className="h-5 w-5 text-primary" />
         </div>
         <h3 className="text-xl font-bold tracking-tight">
-          Personalized Action Plan
+          Personalised Action Plan
         </h3>
       </div>
 

@@ -1,13 +1,14 @@
+import { Flame, Target, TrendingUp, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 import { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { CardContainer } from "@/components/form";
-import { CalendarIcon, LoadingSpinner, ProgressBar } from "@/components/ui";
+import { LoadingSpinner } from "@/components/ui";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import { RadialProgress } from "@/components/ui/RadialProgress";
 
-import {
-  MACRO_COLORS,
-} from "../constants";
+import { MACRO_COLORS } from "../constants";
 import type { UnifiedInsightsProps as UnifiedInsightsProps } from "../types/insightsTypes";
 import {
   calculateConsistencyScore,
@@ -17,11 +18,9 @@ import {
   calculateTrend,
 } from "../utils/insightsCalculations";
 import {
-  BAR_BASE_CLASSES,
-  getColorByScore,
+  getTextColorByScore,
   parseMacroRatio,
   STAGGER,
-  SUBTEXT_MUTED_CLASSES,
   TRANSITIONS,
 } from "../utils/unifiedInsightsUtilities";
 import MetricCard from "./MetricCard";
@@ -100,7 +99,7 @@ function UnifiedInsights({
               Ready for Insights
             </p>
             <p className="max-w-md text-muted">
-              Start logging your meals to unlock personalized nutrition
+              Start logging your meals to unlock personalised nutrition
               insights, trends, and recommendations tailored just for you.
             </p>
           </div>
@@ -128,227 +127,283 @@ function UnifiedInsights({
             viewBox="0 0 24 24"
             stroke="currentColor"
           >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 10V3L4 14h7v7l9-11h-7z"
+            />
           </svg>
         </div>
         <h2 className="text-xl font-bold tracking-tight text-foreground/90">
-          AI Insights
+          Insights
         </h2>
-        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-bold tracking-wider text-primary uppercase">
-          Beta
-        </span>
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
         {/* Top metrics grid - key performance indicators */}
-        <div className="col-span-1 grid grid-cols-1 gap-6 md:col-span-3 md:grid-cols-3">
+        <div className="col-span-1 grid grid-cols-1 gap-6 md:col-span-3 lg:grid-cols-4">
           {/* Consistency Score */}
-          <MetricCard
-            title="Consistency Score"
-            value={consistencyScore}
-            subtitle="out of 100"
-            score={consistencyScore}
-            delay={0}
-          >
-            <div className="flex h-full flex-col">
-              <div className="mb-2 flex items-center justify-between text-xs tracking-wider text-muted uppercase">
-                <span>Logging frequency</span>
-                <span>Intake variation</span>
+          <div className="lg:col-span-1">
+            <MetricCard
+              title="Consistency Score"
+              tooltipText="Measures how consistently you track meals and hit your targets over time."
+              score={consistencyScore}
+              delay={0}
+              variant="custom"
+            >
+              <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
+                <RadialProgress
+                  progress={consistencyScore}
+                  size={100}
+                  strokeWidth={8}
+                  colorClass={getTextColorByScore(consistencyScore, "consistency")}
+                  trackColorClass="text-surface border border-border/10 rounded-full"
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold tracking-tight text-foreground">
+                      <AnimatedNumber value={consistencyScore} toFixedValue={0} duration={0.8} />
+                    </span>
+                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">score</span>
+                  </div>
+                </RadialProgress>
               </div>
-              <ProgressBar
-                progress={consistencyScore}
-                color="accent"
-                height="lg"
-                className={BAR_BASE_CLASSES}
-                fillClass={getColorByScore(consistencyScore, "consistency")}
-                aria-label="Consistency score"
-              />
-            </div>
-          </MetricCard>
+            </MetricCard>
+          </div>
 
           {/* Macro Balance */}
-          <MetricCard
-            title="Macro Balance"
-            value={macroBalance.score}
-            subtitle="P/C/F Balance"
-            score={macroBalance.score}
-            delay={0.1}
-          >
-            <div className="flex h-full flex-col justify-between">
-              <div className="mb-2 flex justify-between text-xs tracking-wider text-muted uppercase">
-                <span>Current: {macroBalance.currentRatio}</span>
-                <span>Target: {macroBalance.idealRatio}</span>
-              </div>
-              <div>
-                {(() => {
-                  const parts = parseMacroRatio(macroBalance.currentRatio);
-                  return (
-                    <>
-                      <div
-                        className="flex h-2 overflow-hidden rounded-full bg-surface"
-                        role="img"
-                        aria-label={`Macro ratio current ${macroBalance.currentRatio} target ${macroBalance.idealRatio}`}
-                      >
-                        {parts.map((pct, index) => {
-                          const colors = [
-                            MACRO_COLORS.protein.bar,
-                            MACRO_COLORS.carbs.bar,
-                            MACRO_COLORS.fats.bar,
-                          ];
-                          return (
-                            <div
-                              key={index}
-                              className={`${colors[index]} h-full transition-all duration-1000`}
-                              style={{ width: `${pct}%` }}
-                            />
-                          );
-                        })}
+          <div className="lg:col-span-2">
+            <MetricCard
+              title="Macro Balance"
+              tooltipText="Shows how close your current intake of Protein, Carbs, and Fats aligns with your set targets."
+              score={macroBalance.score}
+              delay={0.1}
+              variant="custom"
+            >
+              <div className="flex h-full flex-col justify-center pt-2">
+                <div className="flex justify-around px-1 md:px-6">
+                  {(() => {
+                    const currentParts = parseMacroRatio(macroBalance.currentRatio);
+                    const targetParts = parseMacroRatio(macroBalance.idealRatio);
+                    const labels = ["Pro", "Carb", "Fat"];
+                    const colors = [
+                      MACRO_COLORS.protein.text,
+                      MACRO_COLORS.carbs.text,
+                      MACRO_COLORS.fats.text,
+                    ];
+
+                    return currentParts.map((pct, index) => (
+                      <div key={index} className="flex flex-col items-center">
+                        <RadialProgress
+                          progress={pct}
+                          size={80}
+                          strokeWidth={6}
+                          colorClass={colors[index]}
+                          trackColorClass="text-surface border border-border/10 rounded-full"
+                        >
+                          <span className="text-xl font-bold text-foreground">{pct}%</span>
+                        </RadialProgress>
+                        <span className="mt-2 text-xs font-medium tracking-wider text-muted uppercase">
+                          {labels[index]}
+                        </span>
+                        <span className="text-[10px] text-muted/60">
+                          {targetParts[index]}% trg
+                        </span>
                       </div>
-                      <div
-                        className={`mt-1 flex justify-between ${SUBTEXT_MUTED_CLASSES}`}
-                      >
-                        {parts.map((pct, index) => {
-                          const labels = ["Protein", "Carbs", "Fats"];
-                          const colors = [
-                            MACRO_COLORS.protein.text,
-                            MACRO_COLORS.carbs.text,
-                            MACRO_COLORS.fats.text,
-                          ];
-                          return (
-                            <span key={index} className={colors[index]}>
-                              {labels[index]}: {pct}%
-                            </span>
-                          );
-                        })}
-                      </div>
-                    </>
-                  );
-                })()}
+                    ));
+                  })()}
+                </div>
               </div>
-            </div>
-          </MetricCard>
+            </MetricCard>
+          </div>
 
           {/* Nutrient Density */}
-          <MetricCard
-            title="Nutrient Density"
-            value={macroDensity.score}
-            subtitle="quality score"
-            score={macroDensity.score}
-            delay={0.2}
-          >
-            <div className="flex h-full flex-col">
-              <div className="mb-2 flex items-center justify-between text-xs tracking-wider text-muted uppercase">
-                <span>Protein quality</span>
-                <span>Macro balance</span>
+          <div className="lg:col-span-1">
+            <MetricCard
+              title="Nutrient Density"
+              tooltipText="Evaluates the quality of your macros based on your intake of essential nutrients."
+              score={macroDensity.score}
+              delay={0.2}
+              variant="custom"
+            >
+              <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
+                <RadialProgress
+                  progress={macroDensity.score}
+                  size={100}
+                  strokeWidth={8}
+                  colorClass={getTextColorByScore(macroDensity.score, "density")}
+                  trackColorClass="text-surface border border-border/10 rounded-full"
+                >
+                  <div className="flex flex-col items-center justify-center">
+                    <span className="text-3xl font-bold tracking-tight text-foreground">
+                      <AnimatedNumber value={macroDensity.score} toFixedValue={0} duration={0.8} />
+                    </span>
+                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">quality</span>
+                  </div>
+                </RadialProgress>
               </div>
-              <ProgressBar
-                progress={macroDensity.score}
-                color="green"
-                height="lg"
-                className={BAR_BASE_CLASSES}
-                fillClass={getColorByScore(macroDensity.score, "density")}
-                aria-label="Nutrient density score"
-              />
-            </div>
-          </MetricCard>
+            </MetricCard>
+          </div>
         </div>
 
-        {/* Tracking Analysis - Takes up 2 columns */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: TRANSITIONS.duration,
-            ease: TRANSITIONS.ease,
-            delay: STAGGER.sectionTracking,
-          }}
-          className="col-span-1 md:col-span-2"
-        >
-          <CardContainer variant="interactive" className="flex h-full flex-col p-6">
-            <h3 className="mb-6 text-sm font-semibold tracking-tight text-foreground/90 uppercase">
-              Tracking Analysis
-            </h3>
-            <div className="mb-4 flex flex-col justify-between sm:flex-row sm:items-center">
-              <div className="mb-4 sm:mb-0">
-                <span className="mb-1 block text-3xl font-bold tracking-tight text-foreground">
+        {/* Tracking & Trend Analysis - 50/50 split */}
+        <div className="col-span-1 grid grid-cols-1 gap-6 md:col-span-3 md:grid-cols-2">
+          {/* Tracking Analysis */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: TRANSITIONS.duration,
+              ease: TRANSITIONS.ease,
+              delay: STAGGER.sectionTracking,
+            }}
+          >
+            <CardContainer
+              variant="interactive"
+              className="flex h-full flex-col p-5"
+            >
+              <div className="mb-4 flex items-center gap-2">
+                <h3 className="text-sm font-semibold tracking-tight text-foreground/90 uppercase">
+                  Tracking Analysis
+                </h3>
+                <InfoTooltip text="Evaluates how regularly and completely you log your meals over the selected period." />
+              </div>
+
+              {/* Days Tracked Header */}
+              <div className="mb-4 flex items-baseline gap-1">
+                <span className="text-3xl font-bold text-foreground">
                   <AnimatedNumber
-                    value={
-                      typeof dataQuality.completionRate === "number"
-                        ? dataQuality.completionRate
-                        : 0
-                    }
+                    value={typeof dataQuality.daysLogged === "number" ? dataQuality.daysLogged : 0}
                     toFixedValue={0}
-                    suffix="%"
-                    duration={0.6}
+                    duration={0.5}
                   />
                 </span>
-                <span className="text-xs font-medium tracking-wider text-muted uppercase">Completion Rate</span>
-                <div className="mt-3 w-full sm:w-48">
-                  <ProgressBar
-                    progress={dataQuality.completionRate}
-                    color="blue"
-                    height="md"
-                    fillClass="bg-primary"
-                    className="overflow-hidden rounded-full bg-surface"
-                    aria-label="Tracking completion rate"
+                <span className="text-lg text-muted/40">/</span>
+                <span className="text-lg text-muted">
+                  <AnimatedNumber
+                    value={typeof dataQuality.totalDaysInPeriod === "number" ? dataQuality.totalDaysInPeriod : 0}
+                    toFixedValue={0}
+                    duration={0.5}
                   />
-                </div>
+                </span>
+                <span className="ml-2 text-sm text-muted">days tracked</span>
               </div>
-              <div className="flex items-center text-foreground sm:text-right">
-                <CalendarIcon className="mr-2 h-5 w-5 text-muted" />
-                <div className="flex flex-col">
-                  <span className="text-xl font-bold tracking-tight">
-                    <AnimatedNumber
-                      value={
-                        typeof dataQuality.daysLogged === "number"
-                          ? dataQuality.daysLogged
-                          : 0
-                      }
-                      toFixedValue={0}
-                      duration={0.5}
-                    />
-                    <span className="text-muted/50 mx-1">/</span>
-                    <AnimatedNumber
-                      value={
-                        typeof dataQuality.totalDaysInPeriod === "number"
-                          ? dataQuality.totalDaysInPeriod
-                          : 0
-                      }
-                      toFixedValue={0}
-                      duration={0.5}
-                    />
-                  </span>
-                  <span className="text-xs font-medium tracking-wider text-muted uppercase">Days Logged</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-auto rounded-xl border border-primary/20 bg-primary/5 p-4">
-              <p className="text-sm font-medium leading-relaxed text-primary/90">{dataQuality.message}</p>
-            </div>
-          </CardContainer>
-        </motion.div>
 
-        {/* Trend Analysis - Takes up 1 column */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{
-            duration: TRANSITIONS.duration,
-            ease: TRANSITIONS.ease,
-            delay: STAGGER.sectionTrend,
-          }}
-          className="col-span-1 md:col-span-1"
-        >
-          <CardContainer variant="interactive" className="flex h-full flex-col p-6">
-            <h3 className="mb-6 text-sm font-semibold tracking-tight text-foreground/90 uppercase">
-              Trend Analysis
-            </h3>
-            <div className="flex flex-col gap-5">
-              <TrendDisplay label="Calories" trend={caloriesTrend} />
-              <TrendDisplay label="Protein" trend={proteinTrend} />
-            </div>
-          </CardContainer>
-        </motion.div>
+              {/* Stats Grid 2x2 */}
+              <div className="grid flex-1 grid-cols-2 gap-3">
+                {/* Current Streak */}
+                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/10">
+                    <Flame className="h-4 w-4 text-orange-500" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">
+                    <AnimatedNumber
+                      value={dataQuality.currentStreak}
+                      toFixedValue={0}
+                      duration={0.5}
+                    />
+                  </p>
+                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                    Current Streak
+                  </p>
+                </div>
+
+                {/* Best Streak */}
+                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/10">
+                    <TrendingUp className="h-4 w-4 text-success" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">
+                    <AnimatedNumber
+                      value={dataQuality.longestStreak}
+                      toFixedValue={0}
+                      duration={0.5}
+                    />
+                  </p>
+                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                    Best Streak
+                  </p>
+                </div>
+
+                {/* Missed Days */}
+                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-error/10">
+                    <XCircle className="h-4 w-4 text-error" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">
+                    <AnimatedNumber
+                      value={dataQuality.missedDays}
+                      toFixedValue={0}
+                      duration={0.5}
+                    />
+                  </p>
+                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                    Missed Days
+                  </p>
+                </div>
+
+                {/* Completion Rate */}
+                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+                    <Target className="h-4 w-4 text-primary" />
+                  </div>
+                  <p className="text-2xl font-bold text-foreground">
+                    <AnimatedNumber
+                      value={typeof dataQuality.completionRate === "number" ? dataQuality.completionRate : 0}
+                      toFixedValue={0}
+                      duration={0.6}
+                    />
+                    <span className="text-lg text-muted/60">%</span>
+                  </p>
+                  <p className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                    Complete
+                  </p>
+                </div>
+              </div>
+
+              {/* Message Banner */}
+              <div className="mt-4 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+                <p className="text-xs leading-relaxed font-medium text-primary/90">
+                  {dataQuality.message}
+                </p>
+              </div>
+            </CardContainer>
+          </motion.div>
+
+          {/* Trend Analysis */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: TRANSITIONS.duration,
+              ease: TRANSITIONS.ease,
+              delay: STAGGER.sectionTrend,
+            }}
+          >
+            <CardContainer
+              variant="interactive"
+              className="flex h-full flex-col p-6"
+            >
+              <h3 className="mb-6 text-sm font-semibold tracking-tight text-foreground/90 uppercase">
+                Trend Analysis
+              </h3>
+              <div className="flex flex-1 flex-col justify-center gap-5">
+                <TrendDisplay
+                  label="Calories"
+                  trend={caloriesTrend}
+                  data={aggregatedData}
+                  dataKey="calories"
+                />
+                <TrendDisplay
+                  label="Protein"
+                  trend={proteinTrend}
+                  data={aggregatedData}
+                  dataKey="protein"
+                />
+              </div>
+            </CardContainer>
+          </motion.div>
+        </div>
 
         {/* Recommendations - Full width at bottom */}
         <div className="col-span-1 md:col-span-3">

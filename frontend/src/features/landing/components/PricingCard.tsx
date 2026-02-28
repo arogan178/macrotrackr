@@ -13,6 +13,7 @@ interface PricingCardProps {
   buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
   buttonSize?: "sm" | "md" | "lg";
   buttonClassName?: string;
+  buttonDisabled?: boolean;
   onButtonClick?: () => void;
   focusRingColor?: string;
   featureIconColor?: string;
@@ -35,6 +36,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   buttonVariant = "primary",
   buttonSize = "lg",
   buttonClassName = "",
+  buttonDisabled = false,
   onButtonClick,
   focusRingColor = "focus-visible:outline-primary/50",
   featureIconColor = "text-primary",
@@ -101,6 +103,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         buttonSize={buttonSize}
         className={buttonClassName}
         onClick={onButtonClick}
+        disabled={buttonDisabled}
       />
     </div>
   </div>

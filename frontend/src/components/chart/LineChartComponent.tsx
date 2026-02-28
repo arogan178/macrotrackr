@@ -1,10 +1,11 @@
 import { AnimatePresence, motion } from "motion/react";
 import React from "react";
 import {
+  Area,
   CartesianGrid,
+  ComposedChart,
   Legend,
   Line,
-  LineChart,
   ResponsiveContainer,
   Tooltip,
   TooltipProps,
@@ -265,7 +266,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
         }`}
       >
         <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data} margin={margin}>
+          <ComposedChart data={data} margin={margin}>
             {/* Inject custom elements like <defs> */}
             {chartElements}{" "}
             <CartesianGrid
@@ -306,7 +307,28 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                     ? { r: 5 }
                     : (line.activeDot ?? { r: 6 });
 
-              return (
+              return line.isArea ? (
+                <Area
+                  key={line.dataKey}
+                  type={line.type || "monotone"}
+                  dataKey={line.dataKey}
+                  name={line.name}
+                  stroke={line.color || "#8884d8"}
+                  fill={line.color || "#8884d8"}
+                  fillOpacity={0.15}
+                  strokeWidth={adaptiveStrokeWidth}
+                  activeDot={adaptiveActiveDot}
+                  dot={
+                    line.dot ?? (
+                      <CustomDot
+                        dataKey={line.dataKey}
+                        dataLength={dataLength}
+                      />
+                    )
+                  }
+                  connectNulls={line.connectNulls ?? false}
+                />
+              ) : (
                 <Line
                   key={line.dataKey}
                   type={line.type || "monotone"}
@@ -327,7 +349,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                 />
               );
             })}
-          </LineChart>
+          </ComposedChart>
         </ResponsiveContainer>
       </div>
     </div>

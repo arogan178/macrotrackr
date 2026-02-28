@@ -40,7 +40,7 @@ function RegisterForm() {
   const stepDescriptions = useMemo(
     () => ({
       1: "Enter your basic details to get started",
-      2: "This helps us customize your experience",
+      2: "This helps us customise your experience",
       3: "Just one more step to complete your profile",
     }),
     [],

@@ -17,6 +17,8 @@ export interface TextFieldProps extends BaseFieldProps {
   textOnly?: boolean;
   icon?: ReactNode;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  onFocus?: (event: React.FocusEvent<HTMLInputElement>) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   name?: string;
   autoComplete?: string;
 }

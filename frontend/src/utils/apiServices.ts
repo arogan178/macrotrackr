@@ -269,6 +269,7 @@ interface MacroEntryCreatePayload {
   mealName?: string; // camelCase
   entryDate: string; // Updated to camelCase
   entryTime: string; // Updated to camelCase
+  ingredients?: import("@/types/macro").Ingredient[];
 }
 export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
 
@@ -738,6 +739,7 @@ export const apiService = {
         mealName: entry.mealName || "",
         entryDate: entry.entryDate,
         entryTime: entry.entryTime,
+        ingredients: entry.ingredients,
       };
       const response = await fetch(`${API_BASE_URL}/api/macros`, {
         method: "POST",
@@ -756,6 +758,7 @@ export const apiService = {
       if (entry.mealName !== undefined) payload.mealName = entry.mealName;
       if (entry.entryDate !== undefined) payload.entryDate = entry.entryDate;
       if (entry.entryTime !== undefined) payload.entryTime = entry.entryTime;
+      if (entry.ingredients !== undefined) payload.ingredients = entry.ingredients;
       const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
         method: "PUT",
         headers: await getHeadersAsync(),
@@ -1004,6 +1007,99 @@ export const apiService = {
     },
   },
   
+  // Saved Meals API
+  savedMeals: {
+    /** Get all saved meals for the current user */
+    getAll: async (): Promise<{
+      meals: Array<{
+        id: number;
+        userId: number;
+        name: string;
+        protein: number;
+        carbs: number;
+        fats: number;
+        mealType: string;
+        createdAt: string;
+        updatedAt: string;
+        ingredients?: import("@/types/macro").Ingredient[];
+      }>;
+      count: number;
+      limit: number;
+      isPro: boolean;
+    }> => {
+      const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
+        headers: await getHeadersAsync(false),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as {
+        meals: Array<{
+          id: number;
+          userId: number;
+          name: string;
+          protein: number;
+          carbs: number;
+          fats: number;
+          mealType: string;
+          createdAt: string;
+          updatedAt: string;
+          ingredients?: import("@/types/macro").Ingredient[];
+        }>;
+        count: number;
+        limit: number;
+        isPro: boolean;
+      };
+    },
+
+    /** Create a new saved meal */
+    create: async (payload: {
+      name: string;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+      ingredients?: import("@/types/macro").Ingredient[];
+    }): Promise<{
+      id: number;
+      userId: number;
+      name: string;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: string;
+      createdAt: string;
+      updatedAt: string;
+      ingredients?: import("@/types/macro").Ingredient[];
+    }> => {
+      const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
+        method: "POST",
+        headers: await getHeadersAsync(),
+        body: JSON.stringify(payload),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as {
+        id: number;
+        userId: number;
+        name: string;
+        protein: number;
+        carbs: number;
+        fats: number;
+        mealType: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    },
+
+    /** Delete a saved meal */
+    delete: async (id: number): Promise<{ success: boolean; message: string }> => {
+      const response = await fetch(`${API_BASE_URL}/api/saved-meals/${id}`, {
+        method: "DELETE",
+        headers: await getHeadersAsync(false),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as { success: boolean; message: string };
+    },
+  },
+
   // Add methods for Clerk integration
   setGetToken,
   setAuthToken,

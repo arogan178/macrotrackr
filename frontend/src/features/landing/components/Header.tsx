@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useLocation } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
 import React from "react";
 
@@ -7,6 +7,8 @@ import { getButtonClasses } from "@/components/ui/Button";
 
 const Header: React.FC = () => {
   const posthog = usePostHog();
+  const location = useLocation();
+  const isLandingPage = location.pathname === "/";
 
   const handlePricingClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -42,20 +44,30 @@ const Header: React.FC = () => {
 
         {/* Center: Navigation (Desktop) */}
         <nav className="hidden w-1/3 items-center justify-center gap-1 sm:flex">
-          <a
-            href="#features"
-            onClick={handleFeaturesClick}
+          {isLandingPage ? (
+            <>
+              <a
+                href="#features"
+                onClick={handleFeaturesClick}
+                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+              >
+                Features
+              </a>
+              <a
+                href="#pricing"
+                onClick={handlePricingClick}
+                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+              >
+                Pricing
+              </a>
+            </>
+          ) : null}
+          <Link
+            to="/blog"
             className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
           >
-            Features
-          </a>
-          <a
-            href="#pricing"
-            onClick={handlePricingClick}
-            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
-          >
-            Pricing
-          </a>
+            Blog
+          </Link>
         </nav>
 
         {/* Right: Auth */}

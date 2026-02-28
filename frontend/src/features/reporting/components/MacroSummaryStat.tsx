@@ -228,7 +228,7 @@ export default function MacroSummaryStats({
 
   if (!macroAvg) return; // Updated early return condition
 
-  const cardClasses = "p-5 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+  const cardClasses = "px-4 py-3 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
