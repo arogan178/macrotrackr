@@ -46,6 +46,12 @@ export const queryKeys = {
     user: () => ["settings", "user"] as const,
     billing: () => ["settings", "billing"] as const,
   },
+
+  // Saved meals queries
+  savedMeals: {
+    all: () => ["saved-meals"] as const,
+    list: () => ["saved-meals", "list"] as const,
+  },
 } as const;
 
 // Type helper for query keys

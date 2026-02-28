@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useMemo, useState, useRef, useEffect } from "react";
 
 import { TextField } from "@/components/form";
 import {
@@ -8,7 +8,9 @@ import {
   SearchIcon,
 } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
+import SavedMealsList from "@/components/ui/SavedMealsList";
 import { apiService } from "@/utils/apiServices";
+import type { Ingredient } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
@@ -21,6 +23,14 @@ interface CalorieSearchProps {
     name: string;
     servingQuantity: number;
     servingUnit: string;
+  }) => void;
+  onSelectSavedMeal: (meal: {
+    name: string;
+    protein: number;
+    carbs: number;
+    fats: number;
+    mealType: string;
+    ingredients?: Ingredient[];
   }) => void;
 }
 
@@ -38,6 +48,7 @@ interface FoodResult {
 
 const CalorieSearch = memo(function CalorieSearch({
   onResult,
+  onSelectSavedMeal,
 }: CalorieSearchProps) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
@@ -45,6 +56,18 @@ const CalorieSearch = memo(function CalorieSearch({
   const [results, setResults] = useState<FoodResult[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -248,7 +271,7 @@ const CalorieSearch = memo(function CalorieSearch({
   ]);
 
   return (
-    <div className="relative flex flex-col gap-3">
+    <div className="relative flex flex-col gap-3" ref={wrapperRef}>
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <TextField
@@ -257,6 +280,7 @@ const CalorieSearch = memo(function CalorieSearch({
             value={query}
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
             placeholder="e.g. 1 apple, 100g chicken breast"
             icon={<SearchIcon className="!text-foreground" />}
             maxLength={50}
@@ -314,6 +338,17 @@ const CalorieSearch = memo(function CalorieSearch({
             intensity={0.2}
             height="40px"
             show={!isAtBottom}
+          />
+        </div>
+      )}
+
+      {isFocused && query.length === 0 && (
+        <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl">
+          <SavedMealsList 
+            onSelectMeal={(meal) => {
+              onSelectSavedMeal(meal);
+              setIsFocused(false);
+            }} 
           />
         </div>
       )}

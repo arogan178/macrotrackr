@@ -19,7 +19,7 @@ import {
 export const FEATURES = [
   { name: "Macro Tracking", description: "Log protein, carbs, and fats instantly with automatic calorie calculation.", icon: NutrientIcon },
   { name: "Food Search", description: "Find any food in seconds with our comprehensive, searchable database.", icon: SearchIcon },
-  { name: "Goal Setting", description: "Set personalized targets aligned with your fitness goals and timeline.", icon: TargetIcon },
+  { name: "Goal Setting", description: "Set personalised targets aligned with your fitness goals and timeline.", icon: TargetIcon },
   { name: "Weight Logging", description: "Track your weight journey with clear, visual progress charts.", icon: WeightIcon },
   { name: "Habit Tracking", description: "Build lasting habits with daily check-ins and streak tracking.", icon: CheckCircleIcon },
   { name: "Custom Macro Targets", description: "Fine-tune your macro split to match your lifestyle and preferences.", icon: BarChartIcon },

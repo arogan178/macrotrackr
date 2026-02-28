@@ -1,3 +1,4 @@
+import { Flame, PieChart } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { ChartCard, LineChartComponent } from "@/components/chart";
@@ -24,8 +25,24 @@ export default function TrendsChartSection({
 
   const tabItems = useMemo(
     () => [
-      { key: "calories", label: "Calories" },
-      { key: "macros", label: "Macros" },
+      { 
+        key: "calories", 
+        label: (
+          <div className="flex items-center gap-1.5 px-1">
+            <Flame className="h-3.5 w-3.5 text-amber-500" />
+            <span>Calories</span>
+          </div>
+        )
+      },
+      { 
+        key: "macros", 
+        label: (
+          <div className="flex items-center gap-1.5 px-1">
+            <PieChart className="h-3.5 w-3.5 text-blue-500" />
+            <span>Macros</span>
+          </div>
+        )
+      },
     ],
     []
   );

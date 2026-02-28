@@ -8,7 +8,9 @@ import { DashboardPageContainer } from "@/components/layout/DashboardPageContain
 import FeaturePage from "@/components/layout/FeaturePage";
 import { CircleQuestionMarkIcon, IconButton } from "@/components/ui";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 import usePageMetadata from "@/hooks/usePageMetadata";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { createCheckoutSession } from "@/utils/apiBilling";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
@@ -64,6 +66,10 @@ const PricingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | undefined>(0);
   const { isLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
+
+  // Sync subscription status from user data
+  useUser();
+  usePageDataSync();
 
   useEffect(() => {
     if (!isLoaded) return;

@@ -5,6 +5,7 @@ import React, { useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import { useStore } from "@/store/store";
 
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
@@ -25,6 +26,8 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
   const isAuthenticated = !!isSignedIn;
+  const subscriptionStatus = useStore((s) => s.subscriptionStatus);
+  const isProUser = subscriptionStatus === "pro" || subscriptionStatus === "canceled";
   const posthog = usePostHog();
 
   const handleGetPro = () => {
@@ -80,20 +83,27 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           price={PRICING_PLANS.free.price}
           suffix={PRICING_PLANS.free.suffix}
           features={features.free}
-          buttonText="Create Free Account"
+          buttonText={
+            isProUser ? "Free Plan" : isAuthenticated ? "Current Plan" : "Create Free Account"
+          }
           buttonVariant="ghost"
           buttonSize="lg"
           buttonClassName="w-full rounded-full border border-border bg-surface-2 transition-colors duration-200 hover:border-border-2 hover:bg-surface-3 hover:text-foreground"
           featureIconColor="text-primary/70"
           featureTextClass="text-muted"
           cardClassName="border-border bg-surface hover:border-border-2"
-          onButtonClick={() => {
-            posthog?.capture?.("clicked_pricing_nav", {
-              location: "pricing_cards",
-              source: "pricing_card_free",
-            });
-            navigate({ to: "/register", search: { returnTo: undefined } });
-          }}
+          buttonDisabled={isAuthenticated}
+          onButtonClick={
+            isAuthenticated
+              ? undefined
+              : () => {
+                  posthog?.capture?.("clicked_pricing_nav", {
+                    location: "pricing_cards",
+                    source: "pricing_card_free",
+                  });
+                  navigate({ to: "/register", search: { returnTo: undefined } });
+                }
+          }
         >
           <p className="mt-2 text-balance text-muted">
             Everything you need to start tracking and build lasting healthy habits.
@@ -115,17 +125,26 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           equivalent={proEquivalent}
           features={features.pro}
           isPopular={true}
-          buttonText={showUpgradeButtons ? "Upgrade to Pro" : "Unlock Pro"}
+          buttonText={
+            isProUser
+              ? "Current Plan"
+              : showUpgradeButtons
+                ? "Upgrade to Pro"
+                : "Unlock Pro"
+          }
           buttonVariant="primary"
           buttonSize="lg"
           buttonClassName="w-full rounded-full font-semibold transition-colors duration-200 hover:bg-primary/90"
           featureIconColor="text-primary"
           featureTextClass="text-foreground font-medium"
           cardClassName="border-border-2 bg-surface-2 hover:border-primary/50"
+          buttonDisabled={isProUser}
           onButtonClick={
-            showUpgradeButtons
-              ? () => onUpgrade && onUpgrade(selectedPlan)
-              : handleGetPro
+            isProUser
+              ? undefined
+              : showUpgradeButtons
+                ? () => onUpgrade && onUpgrade(selectedPlan)
+                : handleGetPro
           }
         >
           <p className="mt-2 text-balance text-muted">

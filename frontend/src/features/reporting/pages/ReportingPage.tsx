@@ -14,6 +14,7 @@ import {
 } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
+import { useStore } from "@/store/store";
 import { apiService } from "@/utils/apiServices";
 
 import {
@@ -43,8 +44,20 @@ function getDateRangeISOStrings(range: string) {
 export default function ReportingPage() {
   const queryClient = useQueryClient();
 
+  // Get subscription status from store
+  const { subscriptionStatus } = useStore();
+  const isProUser = subscriptionStatus === "pro";
+
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
+
+  // Redirect to week view if free user tries to access Pro ranges
+  const handleRangeChange = (range: string) => {
+    if (!isProUser && range !== "week") {
+      return; // Don't allow free users to select Pro ranges
+    }
+    setDateRange(range);
+  };
 
   // Prefetch other date ranges on mount for faster tab switching
   useEffect(() => {
@@ -110,16 +123,16 @@ export default function ReportingPage() {
   // Define chart configurations for the new component (memoized for stable identity)
   const calorieChartLines = useMemo(
     () => [
-      { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)" }, // vibrant-accent approx
+      { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)", isArea: true }, // vibrant-accent approx
     ],
     [],
   );
 
   const macroChartLines = useMemo(
     () => [
-      { dataKey: "protein", name: "Protein (g)", color: "hsl(145, 63%, 49%)" }, // green-500 approx
-      { dataKey: "carbs", name: "Carbs (g)", color: "hsl(217, 91%, 60%)" }, // blue-500 approx
-      { dataKey: "fats", name: "Fats (g)", color: "hsl(0, 84%, 60%)" }, // red-500 approx
+      { dataKey: "protein", name: "Protein (g)", color: "hsl(145, 63%, 49%)", isArea: true }, // green-500 approx
+      { dataKey: "carbs", name: "Carbs (g)", color: "hsl(217, 91%, 60%)", isArea: true }, // blue-500 approx
+      { dataKey: "fats", name: "Fats (g)", color: "hsl(0, 84%, 60%)", isArea: true }, // red-500 approx
     ],
     [],
   );
@@ -175,16 +188,16 @@ export default function ReportingPage() {
                     )}
 
                   {/* Date Range Selector */}
-                  <ProFeature>
-                    <DateRangeSelector
-                      currentRange={dateRange}
-                      onRangeChange={setDateRange}
-                      onExportClick={handleDownloadCSV}
-                      isExportDisabled={
-                        aggregatedData.length === 0 || isHistoryLoading
-                      }
-                    />
-                  </ProFeature>
+                  <DateRangeSelector
+                    currentRange={dateRange}
+                    onRangeChange={handleRangeChange}
+                    onExportClick={handleDownloadCSV}
+                    isExportDisabled={
+                      aggregatedData.length === 0 || isHistoryLoading
+                    }
+                    disabledRanges={isProUser ? [] : ["month", "3months"]}
+                    isPro={isProUser}
+                  />
 
                   {/* Summary Stats Grid */}
                   {(() => {

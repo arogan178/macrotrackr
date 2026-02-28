@@ -164,7 +164,7 @@ const ProBillingView: React.FC<{
                   const response = await cancelSubscription();
                   setShowCancel(false);
                   showNotification(
-                    response?.message || "Subscription canceled.",
+                    response?.message || "Subscription cancelled.",
                     "success",
                   );
                   // Refresh user details to update UI

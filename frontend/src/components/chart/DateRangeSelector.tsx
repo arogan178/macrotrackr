@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-import { Button, ExportIcon, IconButton, TabBar } from "@/components/ui";
+import { Button, ExportIcon, IconButton, LockIcon, TabBar } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 
 interface DateRangeSelectorProps {
@@ -8,6 +8,8 @@ interface DateRangeSelectorProps {
   onRangeChange: (range: string) => void;
   onExportClick: () => void;
   isExportDisabled: boolean;
+  disabledRanges?: string[];
+  isPro?: boolean;
 }
 
 export default function DateRangeSelector({
@@ -15,12 +17,29 @@ export default function DateRangeSelector({
   onRangeChange,
   onExportClick,
   isExportDisabled,
+  disabledRanges = [],
+  isPro = false,
 }: DateRangeSelectorProps) {
+  // Handle range change with free tier restrictions
+  const handleRangeChange = (range: string) => {
+    if (disabledRanges.includes(range)) {
+      return; // Don't allow selection of disabled ranges
+    }
+    onRangeChange(range);
+  };
+
   // Map date ranges to TabBar items
   const items = DATE_RANGE_OPTIONS.map((option) => ({
     key: option.value,
-    label: option.label,
-    // activeBg inherits TabButton default bg-primary; can be themed later if needed
+    label: (
+      <span className="flex items-center gap-1">
+        {option.label}
+        {disabledRanges.includes(option.value) && (
+          <LockIcon className="h-3 w-3 text-muted" />
+        )}
+      </span>
+    ),
+    disabled: disabledRanges.includes(option.value),
   }));
 
   return (
@@ -36,13 +55,18 @@ export default function DateRangeSelector({
           <TabBar
             items={items}
             activeKey={currentRange}
-            onChange={onRangeChange}
+            onChange={handleRangeChange}
             rounded="rounded-lg"
             isMotion
             layoutId="activeRangeHighlight"
             size="sm"
             className="border border-border bg-surface-2"
           />
+          {!isPro && (
+            <span className="ml-2 text-xs text-muted">
+              Pro: Unlock 30 & 90 day views
+            </span>
+          )}
         </div>
 
         {/* Mobile Export CSV IconButton aligned right */}

@@ -70,6 +70,7 @@ function TabButton({
         baseRounded,
         fullWidth ? "w-full flex-1" : "",
         active ? "text-foreground" : "text-muted hover:bg-surface-2/50 hover:text-foreground",
+        "disabled:hover:bg-transparent disabled:hover:text-muted",
         className
       )}
       {...rest}

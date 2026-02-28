@@ -1,5 +1,5 @@
 import { useLoaderData } from "@tanstack/react-router";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 
 import { homeRoute } from "@/AppRouter";
 import CardContainer from "@/components/form/CardContainer";
@@ -24,6 +24,7 @@ import type {
   EditingEntry,
   MacroEntryInput,
 } from "@/features/macroTracking/types/macro";
+import type { MacroEntry } from "@/types/macro";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import {
   useAddMacroEntry,
@@ -32,6 +33,7 @@ import {
   useMacroTarget,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
+import { useCreateSavedMeal, useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import { getTodayISO } from "@/utils/dateUtilities";
@@ -53,6 +55,7 @@ export default function HomePage() {
     isHistoryLoading,
     isLoadingMore,
     loadMoreHistory,
+    limits,
   } = useHistoryPagination(20);
 
   const { weightGoals } = useLoaderData({
@@ -62,6 +65,28 @@ export default function HomePage() {
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
   const deleteMacroEntryMutation = useDeleteMacroEntry();
+  const createSavedMealMutation = useCreateSavedMeal();
+  const deleteSavedMealMutation = useDeleteSavedMeal();
+  const { data: savedMealsData } = useSavedMeals();
+  const savedMeals = savedMealsData?.meals ?? [];
+
+  const savedEntryIds = useMemo(() => {
+    const ids = new Set<number>();
+    history.forEach((entry) => {
+      const entryName = entry.foodName || entry.mealName || "Saved Meal";
+      const isSaved = savedMeals.some((sm) => 
+        sm.name === entryName && 
+        sm.protein === entry.protein && 
+        sm.carbs === entry.carbs && 
+        sm.fats === entry.fats && 
+        sm.mealType === entry.mealType
+      );
+      if (isSaved) {
+        ids.add(entry.id);
+      }
+    });
+    return ids;
+  }, [history, savedMeals]);
 
   const { editingEntry, setEditingEntry } = useStore();
 
@@ -72,6 +97,76 @@ export default function HomePage() {
       await addMacroEntryMutation.mutateAsync(entry);
     },
     [addMacroEntryMutation],
+  );
+
+  const handleSaveMeal = useCallback(
+    async (entry: MacroEntry) => {
+      if (!entry.foodName && !entry.mealName) return;
+      
+      try {
+        await createSavedMealMutation.mutateAsync({
+          name: entry.foodName || entry.mealName || "Saved Meal",
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          mealType: entry.mealType as any,
+        });
+      } catch (error) {
+        console.error("Failed to save meal", error);
+      }
+    },
+    [createSavedMealMutation]
+  );
+
+  const handleUnsaveMeal = useCallback(
+    async (entry: MacroEntry) => {
+      const entryName = entry.foodName || entry.mealName || "Saved Meal";
+      const savedMeal = savedMeals.find((sm) => 
+        sm.name === entryName && 
+        sm.protein === entry.protein && 
+        sm.carbs === entry.carbs && 
+        sm.fats === entry.fats && 
+        sm.mealType === entry.mealType
+      );
+      
+      if (savedMeal) {
+        try {
+          await deleteSavedMealMutation.mutateAsync(savedMeal.id);
+        } catch (error) {
+          console.error("Failed to unsave meal", error);
+        }
+      }
+    },
+    [savedMeals, deleteSavedMealMutation]
+  );
+
+  const handleGroupMeals = useCallback(
+    async (name: string, mealType: string, selectedEntries: MacroEntry[]) => {
+      const totalProtein = selectedEntries.reduce((sum, e) => sum + e.protein, 0);
+      const totalCarbs = selectedEntries.reduce((sum, e) => sum + e.carbs, 0);
+      const totalFats = selectedEntries.reduce((sum, e) => sum + e.fats, 0);
+      
+      const ingredients = selectedEntries.map(e => ({
+        name: e.foodName || e.mealName || "Ingredient",
+        protein: e.protein,
+        carbs: e.carbs,
+        fats: e.fats,
+      }));
+
+      try {
+        await createSavedMealMutation.mutateAsync({
+          name,
+          protein: totalProtein,
+          carbs: totalCarbs,
+          fats: totalFats,
+          mealType: mealType as any,
+          ingredients,
+        });
+      } catch (error) {
+        console.error("Failed to save grouped meal", error);
+      }
+    },
+    [createSavedMealMutation]
   );
 
   const handleEditEntry = useCallback(
@@ -87,6 +182,7 @@ export default function HomePage() {
           mealName: entry.mealName,
           entryDate: entry.entryDate || "",
           entryTime: entry.entryTime || "",
+          ingredients: entry.ingredients,
         },
       });
       setEditingEntry(undefined);
@@ -168,6 +264,11 @@ export default function HomePage() {
                   hasMore={historyHasMore}
                   onLoadMore={loadMoreHistory}
                   isLoadingMore={isLoadingMore}
+                  limits={limits}
+                  onSaveMeal={handleSaveMeal}
+                  onUnsaveMeal={handleUnsaveMeal}
+                  savedMealIds={savedEntryIds}
+                  onGroupMeals={handleGroupMeals}
                 />
               )}
             </div>

@@ -82,7 +82,7 @@ export function calculateMacroBalance(
       idealRatio: idealRatioString,
       currentRatio: "0/0/0",
       recommendations:
-        "Start logging your meals to get personalized macro balance insights!",
+        "Start logging your meals to get personalised macro balance insights!",
     };
   }
 
@@ -138,7 +138,7 @@ export function calculateMacroBalance(
 
     recommendations =
       suggestions.length > 0
-        ? `To optimize your macro balance, ${suggestions.join(", and ")}.`
+        ? `To optimise your macro balance, ${suggestions.join(", and ")}.`
         : "You're close to your target! Small adjustments will help you reach optimal balance.";
   }
 
@@ -158,7 +158,7 @@ export function calculateTrend(
     return {
       direction: "insufficient" as const,
       percentage: 0,
-      message: `Need at least ${TREND_DAYS_REQUIRED} days of data to analyze trends.`,
+      message: `Need at least ${TREND_DAYS_REQUIRED} days of data to analyse trends.`,
     };
   }
 
@@ -214,6 +214,40 @@ export function calculateTrend(
   };
 }
 
+function calculateStreaks(data: AggregatedDataPoint[]): {
+  currentStreak: number;
+  longestStreak: number;
+} {
+  if (!data?.length) return { currentStreak: 0, longestStreak: 0 };
+
+  // Create array of booleans indicating if day has data (calories > 0)
+  const hasDataArray = data.map((d) => d.calories > 0);
+
+  // Calculate current streak (consecutive days from the end)
+  let currentStreak = 0;
+  for (let i = hasDataArray.length - 1; i >= 0; i--) {
+    if (hasDataArray[i]) {
+      currentStreak++;
+    } else {
+      break;
+    }
+  }
+
+  // Calculate longest streak
+  let longestStreak = 0;
+  let currentRun = 0;
+  for (const hasData of hasDataArray) {
+    if (hasData) {
+      currentRun++;
+      longestStreak = Math.max(longestStreak, currentRun);
+    } else {
+      currentRun = 0;
+    }
+  }
+
+  return { currentStreak, longestStreak };
+}
+
 export function calculateDataQuality(
   data: AggregatedDataPoint[],
   totalDaysOverride?: number,
@@ -227,6 +261,9 @@ export function calculateDataQuality(
       completionRate: 0,
       message:
         "Ready to start your nutrition journey? Begin logging your meals to track your progress!",
+      currentStreak: 0,
+      longestStreak: 0,
+      missedDays: totalDaysInPeriod,
     };
   }
 
@@ -245,18 +282,23 @@ export function calculateDataQuality(
 
   const message =
     completionRate >= DATA_QUALITY_OUTSTANDING
-      ? "Outstanding consistency! You're building excellent tracking habits."
+      ? "Excellent tracking habits! Keep it up."
       : completionRate >= DATA_QUALITY_GREAT
-        ? "Great job keeping up with your nutrition tracking!"
+        ? "Great job keeping up with your tracking!"
         : completionRate >= DATA_QUALITY_GOOD
-          ? "You're on the right track! Try logging more consistently for better insights."
-          : "Every entry counts! More consistent tracking will unlock powerful insights about your nutrition patterns.";
+          ? "Good start! Log more consistently for better insights."
+          : "Log daily to unlock powerful nutrition insights.";
+
+  const { currentStreak, longestStreak } = calculateStreaks(data);
 
   return {
     daysLogged: daysWithData,
     totalDaysInPeriod,
     completionRate,
     message,
+    currentStreak,
+    longestStreak,
+    missedDays: totalDaysInPeriod - daysWithData,
   };
 }
 
@@ -298,5 +340,5 @@ export function getScoreColor(score: number): string {
     ? "bg-success"
     : score > SCORE_COLOR_YELLOW
       ? "bg-warning"
-      : "bg-vibrant-accent";
+      : "bg-error";
 }

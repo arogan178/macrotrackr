@@ -6,7 +6,7 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
-import { memo, useMemo, useRef } from "react";
+import React, { memo, useMemo, useRef, useState } from "react";
 
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
@@ -36,6 +36,12 @@ interface DesktopEntryTableProps {
   deleteEntry: (id: number) => void;
   isDeleting: boolean;
   showAllDates?: boolean;
+  onSaveMeal?: (entry: MacroEntry) => void;
+  onUnsaveMeal?: (entry: MacroEntry) => void;
+  savedMealIds?: Set<number>;
+  isSelectionMode?: boolean;
+  selectedEntryIds?: Set<number>;
+  onToggleEntrySelection?: (id: number) => void;
 }
 
 type TableRowData = GroupedEntry & {
@@ -59,8 +65,28 @@ const DesktopEntryTable = memo(
     deleteEntry,
     isDeleting,
     showAllDates = true,
+    onSaveMeal,
+    onUnsaveMeal,
+    savedMealIds = new Set(),
+    isSelectionMode = false,
+    selectedEntryIds = new Set(),
+    onToggleEntrySelection,
   }: DesktopEntryTableProps) => {
     const tableContainerReference = useRef<HTMLDivElement>(null);
+    const [expandedEntries, setExpandedEntries] = useState<Set<number>>(new Set());
+
+    const toggleEntryExpand = (id: number, event: React.MouseEvent) => {
+      event.stopPropagation();
+      setExpandedEntries((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) {
+          newSet.delete(id);
+        } else {
+          newSet.add(id);
+        }
+        return newSet;
+      });
+    };
 
     // Transform data for TanStack Table
     const tableData = useMemo(() => {
@@ -133,8 +159,34 @@ const DesktopEntryTable = memo(
               );
             } else {
               const entry = data.entries[0];
+              const hasIngredients = entry.ingredients && entry.ingredients.length > 0;
               return (
-                <div className="pl-11 text-sm whitespace-nowrap text-foreground">
+                <div className="pl-6 flex items-center gap-2 text-sm whitespace-nowrap text-foreground">
+                  {isSelectionMode && (
+                    <input
+                      type="checkbox"
+                      className="mr-2 h-4 w-4 rounded border-border text-primary focus:ring-primary/50"
+                      checked={selectedEntryIds.has(entry.id)}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        onToggleEntrySelection?.(entry.id);
+                      }}
+                    />
+                  )}
+                  {hasIngredients && (
+                    <div 
+                      className="cursor-pointer p-1 hover:bg-surface-3 rounded-md"
+                      onClick={(e) => toggleEntryExpand(entry.id, e)}
+                    >
+                      <motion.div
+                        initial={false}
+                        animate={{ rotate: expandedEntries.has(entry.id) ? -180 : 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
+                        <ChevronDownIcon className="h-4 w-4" />
+                      </motion.div>
+                    </div>
+                  )}
                   {formatTimeFromEntry(entry)}
                 </div>
               );
@@ -248,6 +300,9 @@ const DesktopEntryTable = memo(
                   onEdit={() => onEdit(entry)}
                   onDelete={() => deleteEntry(entry.id)}
                   isDeleting={isDeleting}
+                  onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
+                  onUnsaveMeal={onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined}
+                  isMealSaved={savedMealIds.has(entry.id)}
                 />
               );
             }
@@ -256,6 +311,7 @@ const DesktopEntryTable = memo(
       ],
       [
         collapsedDates,
+        expandedEntries,
         formatDate,
         formatTimeFromEntry,
         capitalizeFirstLetter,
@@ -264,6 +320,12 @@ const DesktopEntryTable = memo(
         onEdit,
         deleteEntry,
         isDeleting,
+        onSaveMeal,
+        onUnsaveMeal,
+        savedMealIds,
+        isSelectionMode,
+        selectedEntryIds,
+        onToggleEntrySelection,
       ],
     );
 
@@ -272,6 +334,32 @@ const DesktopEntryTable = memo(
       columns,
       getCoreRowModel: getCoreRowModel(),
     });
+
+    const renderIngredients = (entry: MacroEntry) => {
+      if (!entry.ingredients || entry.ingredients.length === 0) return null;
+      return (
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={{ height: "auto", opacity: 1 }}
+          exit={{ height: 0, opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="bg-surface-2/40 overflow-hidden w-full border-b border-border/40"
+        >
+          <div className="py-3 px-[10%] flex flex-col gap-2">
+            {entry.ingredients.map((ing, idx) => (
+              <div key={idx} className="flex items-center text-xs text-muted">
+                <div className="flex-1 font-medium text-foreground">{ing.name} {ing.quantity ? `(${ing.quantity}${ing.unit || ''})` : ''}</div>
+                <div className="w-[14%] text-center"><MacroCell value={ing.protein} suffix="g" color="text-protein" /></div>
+                <div className="w-[14%] text-center"><MacroCell value={ing.carbs} suffix="g" color="text-carbs" /></div>
+                <div className="w-[14%] text-center"><MacroCell value={ing.fats} suffix="g" color="text-fats" /></div>
+                <div className="w-[14%] text-center"><MacroCell value={calculateCalories(ing.protein, ing.carbs, ing.fats)} suffix=" kcal" color="text-foreground" /></div>
+                <div className="w-[14%]"></div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
+      );
+    };
 
     const renderVirtualizedBody = () => {
       const virtualItems = virtualizer.getVirtualItems();
@@ -298,7 +386,7 @@ const DesktopEntryTable = memo(
                     height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
-                  className={`flex items-center overflow-hidden ${
+                  className={`flex flex-col overflow-hidden ${
                     data.isGroup
                       ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
                       : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
@@ -313,28 +401,31 @@ const DesktopEntryTable = memo(
                   exit={{ opacity: 0 }}
                   transition={{ duration: 0.15 }}
                 >
-                  {table
-                    .getRowModel()
-                    .rows.find((row) => {
-                      const rowData = row.original;
-                      if (rowData.isGroup) return rowData.date === data.date;
-                      return rowData.entries[0].id === data.entries[0].id;
-                    })
-                    ?.getVisibleCells()
-                    .map((cell) => (
-                      <div
-                        key={cell.id}
-                        className="flex h-full items-center justify-center px-4 py-2.5 text-center"
-                        style={{ width: "14.285%" }}
-                      >
-                        <div className="w-full">
-                          {flexRender(
-                            cell.column.columnDef.cell,
-                            cell.getContext(),
-                          )}
+                  <div className="flex w-full items-center h-full">
+                    {table
+                      .getRowModel()
+                      .rows.find((row) => {
+                        const rowData = row.original;
+                        if (rowData.isGroup) return rowData.date === data.date;
+                        return rowData.entries[0].id === data.entries[0].id;
+                      })
+                      ?.getVisibleCells()
+                      .map((cell) => (
+                        <div
+                          key={cell.id}
+                          className="flex h-full items-center justify-center px-4 py-2.5 text-center"
+                          style={{ width: "14.285%" }}
+                        >
+                          <div className="w-full">
+                            {flexRender(
+                              cell.column.columnDef.cell,
+                              cell.getContext(),
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
+                  </div>
+                  {!data.isGroup && expandedEntries.has(data.entries[0].id) && renderIngredients(data.entries[0])}
                 </motion.div>
               );
             })}
@@ -364,10 +455,10 @@ const DesktopEntryTable = memo(
             return (
               <motion.div
                 key={animationKey}
-                className={`flex w-full items-center overflow-hidden ${
+                className={`flex flex-col w-full overflow-hidden ${
                   isGroup
                     ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
-                    : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
+                    : "relative transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50 border-b border-border/40"
                 }`}
                 onClick={
                   isGroup ? () => toggleDateCollapse(data.date) : undefined
@@ -390,17 +481,20 @@ const DesktopEntryTable = memo(
                 }}
                 layout
               >
-                {row.getVisibleCells().map((cell) => (
-                  <div
-                    key={cell.id}
-                    className="flex h-full items-center justify-center px-4 py-2.5 text-center"
-                    style={{ width: "14.285%" }}
-                  >
-                    <div className="w-full">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                <div className="flex w-full items-center">
+                  {row.getVisibleCells().map((cell) => (
+                    <div
+                      key={cell.id}
+                      className="flex h-full items-center justify-center px-4 py-2.5 text-center"
+                      style={{ width: "14.285%" }}
+                    >
+                      <div className="w-full">
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                {!isGroup && expandedEntries.has(data.entries[0].id) && renderIngredients(data.entries[0])}
               </motion.div>
             );
           })}

@@ -24,6 +24,7 @@ import { goalRoutes } from "./modules/goals/routes";
 import { habitRoutes } from "./modules/habits/routes";
 import { billingRoutes } from "./modules/billing/routes";
 import { reportingRoutes } from "./modules/reporting/routes";
+import { savedMealRoutes } from "./modules/saved-meals/routes";
 import { webhookHandler } from "./modules/billing/webhook-handler";
 import { healthRoutes } from "./routes/health";
 import { metricsRoutes } from "./routes/metrics";
@@ -118,6 +119,7 @@ app.use(goalRoutes);
 app.use(habitRoutes);
 app.use(billingRoutes);
 app.use(reportingRoutes);
+app.use(savedMealRoutes);
 
 // Health check routes (public, no auth)
 app.use(healthRoutes);

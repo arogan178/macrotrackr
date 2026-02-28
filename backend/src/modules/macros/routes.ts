@@ -18,6 +18,7 @@ import { toCamelCase } from "../../lib/responses";
 import { OpenFoodFactsApiClient } from "../../lib/openfoodfacts-api-client";
 import { cacheService } from "../../lib/cache-service";
 import type { Database } from "bun:sqlite";
+import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
 
 // Import types from API client
 import type { FoodProductResult } from "../../lib/openfoodfacts-api-client";
@@ -322,36 +323,113 @@ export const macroRoutes = (app: Elysia) =>
         async (context: any) => {
           const { db, internalUserId, query } = context as MacrosRouteContext;
 
+          if (!internalUserId) {
+            throw new Error("User ID is required");
+          }
+
+          const userId = internalUserId as number;
+
           // Parse pagination params
           const limit = Math.max(1, Math.min(Number(query?.limit) || 20, 100));
           const offset = Math.max(0, Number(query?.offset) || 0);
 
-          // Get total count for pagination metadata
+          // Check if user is Pro
+          const isProUser = await checkProStatus(userId);
+
+          // Calculate the cutoff date for free users (60 days ago)
+          const retentionDays = FREE_TIER_LIMITS.DATA_RETENTION_DAYS;
+          const cutoffDate = new Date();
+          cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+          const cutoffDateString = cutoffDate.toISOString().split('T')[0] as string;
+
+          // Get total count (all entries for Pro, filtered for Free)
+          let countQuery = `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`;
+          const countParams: (number | string)[] = [userId];
+
+          if (!isProUser) {
+            countQuery += ` AND entry_date >= ?`;
+            countParams.push(cutoffDateString);
+          }
+
           const countResult = safeQuery<{ count: number }>(
             db,
-            `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`,
-            [internalUserId]
+            countQuery,
+            countParams
           );
-          const total = countResult?.count || 0;
+          const visibleTotal = countResult?.count || 0;
+
+          // Get total available (for upgrade prompt)
+          const totalAvailableResult = safeQuery<{ count: number }>(
+            db,
+            `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`,
+            [userId]
+          );
+          const totalAvailable = totalAvailableResult?.count || 0;
 
           // Get paginated results
-          const historyResult = safeQueryAll<MacroEntryRow>(
-            db,
-            `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at 
+          let historyQuery = `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at 
              FROM macro_entries 
-             WHERE user_id = ? 
-             ORDER BY entry_date DESC, entry_time DESC, created_at DESC
-             LIMIT ? OFFSET ?`,
-            [internalUserId, limit, offset]
+             WHERE user_id = ?`;
+          const historyParams: (number | string)[] = [userId];
+
+          if (!isProUser) {
+            historyQuery += ` AND entry_date >= ?`;
+            historyParams.push(cutoffDateString);
+          }
+
+          historyQuery += ` ORDER BY entry_date DESC, entry_time DESC, created_at DESC
+             LIMIT ? OFFSET ?`;
+          historyParams.push(limit, offset);
+
+          const historyResult = safeQueryAll<MacroEntryRow & { ingredients: string }>(
+            db,
+            historyQuery,
+            historyParams
           );
 
-          return {
-            entries: historyResult.map(toCamelCase),
-            total,
+          // Build response with limits metadata for free users
+          const response: {
+            entries: any[];
+            total: number;
+            limit: number;
+            offset: number;
+            hasMore: boolean;
+            limits?: {
+              totalAvailable: number;
+              visibleCount: number;
+              isRestricted: boolean;
+              upgradePrompt?: string;
+            };
+          } = {
+            entries: historyResult.map((m) => {
+              const camel = toCamelCase(m) as any;
+              if (camel.ingredients) {
+                try {
+                  camel.ingredients = JSON.parse(camel.ingredients);
+                } catch {
+                  camel.ingredients = [];
+                }
+              }
+              return camel;
+            }),
+            total: visibleTotal,
             limit,
             offset,
-            hasMore: offset + limit < total,
+            hasMore: offset + limit < visibleTotal,
           };
+
+          // Add limits metadata for free users
+          if (!isProUser && totalAvailable > visibleTotal) {
+            const hiddenCount = totalAvailable - visibleTotal;
+            response.limits = {
+              totalAvailable,
+              visibleCount: visibleTotal,
+              isRestricted: true,
+              upgradePrompt: `${hiddenCount} older ${hiddenCount === 1 ? 'entry' : 'entries'} available with Pro`,
+            };
+          }
+
+          return response;
         },
         {
           query: t.Object({
@@ -364,6 +442,12 @@ export const macroRoutes = (app: Elysia) =>
             limit: t.Numeric(),
             offset: t.Numeric(),
             hasMore: t.Boolean(),
+            limits: t.Optional(t.Object({
+              totalAvailable: t.Numeric(),
+              visibleCount: t.Numeric(),
+              isRestricted: t.Boolean(),
+              upgradePrompt: t.Optional(t.String()),
+            })),
           }),
           detail: {
             summary: "Get paginated macro entries recorded by the user",
@@ -390,6 +474,7 @@ export const macroRoutes = (app: Elysia) =>
             mealName,
             entryDate,
             entryTime,
+            ingredients,
           } = body as {
             protein: number;
             carbs: number;
@@ -398,13 +483,16 @@ export const macroRoutes = (app: Elysia) =>
             mealName?: string;
             entryDate: string;
             entryTime: string;
+            ingredients?: any[];
           };
+
+          const ingredientsJson = ingredients ? JSON.stringify(ingredients) : null;
 
           const result = safeQuery<MacroEntryRow>(
             db,
-            `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-             RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at`,
+            `INSERT INTO macro_entries (user_id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+             RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at`,
             [
               internalUserId,
               protein,
@@ -414,6 +502,7 @@ export const macroRoutes = (app: Elysia) =>
               mealName ?? "",
               entryDate,
               entryTime,
+              ingredientsJson,
             ]
           );
 
@@ -423,7 +512,15 @@ export const macroRoutes = (app: Elysia) =>
             );
           }
 
-          return toCamelCase(result);
+          const response = toCamelCase(result) as any;
+          if (response.ingredients) {
+            try {
+              response.ingredients = JSON.parse(response.ingredients);
+            } catch {
+              response.ingredients = [];
+            }
+          }
+          return response;
         },
         {
           // Ensure body/response schemas use camelCase for mealType/mealName
@@ -502,6 +599,7 @@ export const macroRoutes = (app: Elysia) =>
           if (body.mealName !== undefined) updates.meal_name = body.mealName;
           if (body.entryDate !== undefined) updates.entry_date = body.entryDate;
           if (body.entryTime !== undefined) updates.entry_time = body.entryTime;
+          if (body.ingredients !== undefined) updates.ingredients = JSON.stringify(body.ingredients);
 
           const fieldsToUpdate = Object.keys(updates);
           if (fieldsToUpdate.length === 0) {
@@ -517,7 +615,7 @@ export const macroRoutes = (app: Elysia) =>
             db,
             `UPDATE macro_entries SET ${setClause}
              WHERE id = ? AND user_id = ?
-             RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, created_at`,
+             RETURNING id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at`,
             queryParams
           );
 
@@ -540,7 +638,15 @@ export const macroRoutes = (app: Elysia) =>
             }
           }
 
-          return toCamelCase(result);
+          const response = toCamelCase(result) as any;
+          if (response.ingredients) {
+            try {
+              response.ingredients = JSON.parse(response.ingredients);
+            } catch {
+              response.ingredients = [];
+            }
+          }
+          return response;
         },
         {
           params: MacroSchemas.macroIdParam,

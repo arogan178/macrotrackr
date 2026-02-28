@@ -1,0 +1,52 @@
+[
+  {
+    "slug": "v2-launch-complete-ui-overhaul",
+    "title": "MacroTrackr v2.0: A Complete UI Overhaul",
+    "excerpt": "We're thrilled to announce the launch of MacroTrackr v2.0, featuring a completely redesigned interface, MDX-powered blog, new Hybrid Meal Grouping, and enhanced tracking capabilities.",
+    "date": "2026-03-01",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "5 min",
+    "image": "https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&q=80&w=1000"
+  },
+  {
+    "slug": "macro-tracking-tips-for-beginners",
+    "title": "Macro Tracking Tips for Beginners",
+    "excerpt": "Starting your macro tracking journey? Here are 7 practical tips to help you stay consistent and achieve your nutrition goals.",
+    "date": "2026-02-15",
+    "category": "Tips",
+    "author": "MacroTrackr Team",
+    "readingTime": "4 min",
+    "image": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=1000"
+  },
+  {
+    "slug": "understanding-protein-intake",
+    "title": "Understanding Protein Intake: The Complete Guide",
+    "excerpt": "Everything you need to know about protein: how much you need, the best sources, and how to hit your targets consistently.",
+    "date": "2026-01-28",
+    "category": "Nutrition Guides",
+    "author": "MacroTrackr Team",
+    "readingTime": "8 min",
+    "image": "https://images.unsplash.com/photo-1533709475502-dfa69b76c8c4?auto=format&fit=crop&q=80&w=1000"
+  },
+  {
+    "slug": "meal-prep-for-macro-tracking",
+    "title": "Meal Prep Strategies for Accurate Macro Tracking",
+    "excerpt": "Learn how to meal prep effectively to make macro tracking easier and more accurate throughout your week.",
+    "date": "2026-01-10",
+    "category": "Tips",
+    "author": "MacroTrackr Team",
+    "readingTime": "6 min",
+    "image": "https://images.unsplash.com/photo-1543352634-99a5d50ae78e?auto=format&fit=crop&q=80&w=1000"
+  },
+  {
+    "slug": "carbs-fats-balance",
+    "title": "Finding Your Optimal Carb-to-Fat Ratio",
+    "excerpt": "How to determine the right balance of carbohydrates and fats for your goals, lifestyle, and preferences.",
+    "date": "2025-12-20",
+    "category": "Nutrition Guides",
+    "author": "MacroTrackr Team",
+    "readingTime": "7 min",
+    "image": "https://images.unsplash.com/photo-1490818387583-1baba5e638ca?auto=format&fit=crop&q=80&w=1000"
+  }
+]

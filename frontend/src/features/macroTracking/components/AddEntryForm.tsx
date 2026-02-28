@@ -19,6 +19,8 @@ import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
 import { UnitConverter, type UnitType } from "../utils/units";
 
+import type { Ingredient } from "@/types/macro";
+
 interface AddEntryProps {
   onSubmit: (entry: {
     protein: number;
@@ -28,6 +30,7 @@ interface AddEntryProps {
     mealName: string;
     entryDate: string;
     entryTime: string;
+    ingredients?: Ingredient[];
   }) => Promise<void>;
   isSaving: boolean;
 }
@@ -46,6 +49,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       }
     | undefined
   >();
+  const [baseIngredients, setBaseIngredients] = useState<Ingredient[] | undefined>();
 
   const [searchResult, setSearchResult] = useState<string | undefined>();
   const currentHour = new Date().getHours();
@@ -109,10 +113,6 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       setProtein(Number((baseMacros.protein * factor).toFixed(1)));
       setCarbs(Number((baseMacros.carbs * factor).toFixed(1)));
       setFats(Number((baseMacros.fats * factor).toFixed(1)));
-    } else if (!baseMacros) {
-      setProtein(undefined);
-      setCarbs(undefined);
-      setFats(undefined);
     }
   }, [quantity, unit, baseMacros]);
 
@@ -148,6 +148,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         fats: Number.parseFloat(f),
       };
       setBaseMacros(per100g);
+      setBaseIngredients(undefined);
       setMealName(name);
       setQuantity(servingQuantity);
 
@@ -185,6 +186,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
 
   const handleClearSearch = useCallback(() => {
     setBaseMacros(undefined);
+    setBaseIngredients(undefined);
     setMealName("");
     setSearchResult(undefined);
     setProtein(undefined);
@@ -199,12 +201,77 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     (value: number | undefined) => {
       setter(value);
       setBaseMacros(undefined);
+      setBaseIngredients(undefined);
     };
+
+  const handleSelectSavedMeal = useCallback(
+    (meal: {
+      name: string;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: string;
+      ingredients?: Ingredient[];
+    }) => {
+      if (meal.ingredients && meal.ingredients.length > 0) {
+        setBaseMacros({
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fats: meal.fats,
+        });
+        setBaseIngredients(meal.ingredients);
+        setMealName(meal.name);
+        setQuantity(1);
+        setUnit("unit");
+      } else {
+        setBaseMacros(undefined);
+        setBaseIngredients(undefined);
+        setMealName(meal.name);
+        setProtein(meal.protein);
+        setCarbs(meal.carbs);
+        setFats(meal.fats);
+        setQuantity(undefined);
+        setUnit("g"); // Default to g for saved meals or arbitrary since no base macros
+      }
+      
+      if (meal.mealType && MEAL_TYPE_OPTIONS.some((o) => o.value === meal.mealType)) {
+        setMealType(meal.mealType as MealType);
+      }
+      setSearchResult(undefined);
+    },
+    []
+  );
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (!isFormValid) return;
+
+      let finalIngredients = baseIngredients;
+      if (baseIngredients && typeof quantity === "number" && quantity > 0) {
+        let factor = 1;
+        if (unit === "unit") {
+          factor = quantity;
+        } else {
+          let quantityInGrams: number;
+          if (UnitConverter.isWeightUnit(unit)) {
+            quantityInGrams = UnitConverter.convert(quantity, unit, "g");
+          } else if (UnitConverter.isVolumeUnit(unit)) {
+            quantityInGrams = UnitConverter.convert(quantity, unit, "ml");
+          } else {
+            quantityInGrams = quantity * 100;
+          }
+          factor = quantityInGrams / 100;
+        }
+
+        finalIngredients = baseIngredients.map((ing) => ({
+          ...ing,
+          protein: Number((ing.protein * factor).toFixed(1)),
+          carbs: Number((ing.carbs * factor).toFixed(1)),
+          fats: Number((ing.fats * factor).toFixed(1)),
+          quantity: ing.quantity ? Number((ing.quantity * factor).toFixed(1)) : undefined,
+        }));
+      }
 
       await onSubmit({
         protein: protein as number,
@@ -214,6 +281,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         mealName,
         entryDate,
         entryTime,
+        ingredients: finalIngredients,
       });
 
       handleClearSearch();
@@ -229,6 +297,9 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       onSubmit,
       isFormValid,
       handleClearSearch,
+      baseIngredients,
+      quantity,
+      unit,
     ],
   );
 
@@ -246,7 +317,10 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         </div>
 
         <div className="mb-5">
-          <CalorieSearch onResult={handleSearchResult} />
+          <CalorieSearch
+            onResult={handleSearchResult}
+            onSelectSavedMeal={handleSelectSavedMeal}
+          />
         </div>
 
         <form onSubmit={handleSubmit}>

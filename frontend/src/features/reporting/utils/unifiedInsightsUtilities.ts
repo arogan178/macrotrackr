@@ -46,6 +46,13 @@ export function getColorByScore(
   return "bg-error";
 }
 
+export function getTextColorByScore(
+  score: number,
+  variant: "consistency" | "density" = "consistency",
+): string {
+  return getColorByScore(score, variant).replace("bg-", "text-");
+}
+
 /**
  * Parse macro ratio string like "30/40/30" to number array.
  * Ensures we always return 3 numbers that sum close to 100.

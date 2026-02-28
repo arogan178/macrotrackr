@@ -58,6 +58,8 @@ function TextField({
   textOnly = false,
   icon,
   onKeyDown,
+  onFocus,
+  onBlur,
   id,
   ariaLabel,
   name,
@@ -110,6 +112,8 @@ function TextField({
           value={value}
           onChange={handleChange}
           onKeyDown={onKeyDown}
+          onFocus={onFocus}
+          onBlur={onBlur}
           placeholder={placeholder}
           minLength={minLength}
           maxLength={maxLength}
