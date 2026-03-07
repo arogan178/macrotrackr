@@ -140,7 +140,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         </div>
       </div>{" "}
       {/* Difference from Target */}
-      <div className="mt-auto flex items-baseline justify-between border-t border-border/50 pt-1">
+      <div className="mt-auto flex items-baseline justify-between border-t border-border pt-1">
         <span className="mr-1.5 text-xs text-muted">Difference:</span>
         <div className="text-right">
           <span
@@ -228,10 +228,12 @@ export default function MacroSummaryStats({
 
   if (!macroAvg) return; // Updated early return condition
 
+  const cardClasses = "px-4 py-3 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
       {/* Calories Card */}
-      <CardContainer className="p-3">
+      <CardContainer variant="interactive" className={cardClasses}>
         <div className="flex flex-1 flex-col justify-between">
           <div className="mb-2 flex items-center justify-between">
             <span className="text-sm font-semibold text-foreground">
@@ -262,7 +264,7 @@ export default function MacroSummaryStats({
               </span>
             </div>
           </div>
-          <div className="mt-auto flex items-baseline justify-between border-t border-border/50 pt-1">
+          <div className="mt-auto flex items-baseline justify-between border-t border-border pt-1">
             <span className="mr-1.5 text-xs text-muted">Difference:</span>
             <span
               className={`text-sm font-semibold ${
@@ -284,7 +286,7 @@ export default function MacroSummaryStats({
       </CardContainer>
 
       {/* Protein Card */}
-      <CardContainer className="p-3">
+      <CardContainer variant="interactive" className={cardClasses}>
         <MacroSummaryItem
           type="protein"
           avgPercentage={macroAvg.protein}
@@ -295,7 +297,7 @@ export default function MacroSummaryStats({
       </CardContainer>
 
       {/* Carbs Card */}
-      <CardContainer className="p-3">
+      <CardContainer variant="interactive" className={cardClasses}>
         <MacroSummaryItem
           type="carbs"
           avgPercentage={macroAvg.carbs}
@@ -306,7 +308,7 @@ export default function MacroSummaryStats({
       </CardContainer>
 
       {/* Fats Card */}
-      <CardContainer className="p-3">
+      <CardContainer variant="interactive" className={cardClasses}>
         <MacroSummaryItem
           type="fats"
           avgPercentage={macroAvg.fats}

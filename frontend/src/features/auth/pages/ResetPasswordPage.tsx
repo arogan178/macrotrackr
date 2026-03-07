@@ -1,16 +1,19 @@
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
+import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import ResetPasswordForm from "@/features/auth/components/ResetPasswordForm";
 
 function ResetPasswordPage() {
   return (
     <QueryErrorBoundary>
       <ErrorBoundary>
-        <div className="flex min-h-screen items-center justify-center bg-background">
-          <main className="w-full max-w-md px-4">
-            <ResetPasswordForm />
-          </main>
-        </div>
+        <AuthPageShell
+          eyebrow="Account Recovery"
+          title="Reset your password"
+          description="Choose a new password and get back into your account without losing your tracking data."
+        >
+          <ResetPasswordForm />
+        </AuthPageShell>
       </ErrorBoundary>
     </QueryErrorBoundary>
   );

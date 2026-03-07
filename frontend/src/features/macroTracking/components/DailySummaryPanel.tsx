@@ -1,5 +1,3 @@
-// src/features/macroTracking/components/DailySummaryPanel.tsx
-
 import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
@@ -15,7 +13,6 @@ import {
   calculateProteinCalories,
 } from "../calculations";
 
-// --- Constants (moved outside component to prevent recreation) ---
 const DEFAULT_TARGET = {
   proteinPercentage: 30,
   carbsPercentage: 40,
@@ -29,13 +26,10 @@ const EMPTY_TOTALS: MacroDailyTotals = {
   calories: 0,
 };
 
-// --- Helper function (moved outside component for stability) ---
-// Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
 function calculatePercent(actual: number, targetValue: number): number {
   if (!targetValue) return 0;
   const ratio = actual / targetValue;
   const pct = Math.floor(ratio * 100);
-  // Clamp to [0, 100]
   return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
 }
 
@@ -50,12 +44,10 @@ function DailySummaryInner({
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
-  // --- Safe values ---
   const safeTotal = macroDailyTotals || EMPTY_TOTALS;
   const target = macroTarget || DEFAULT_TARGET;
   const dailyCalorieTarget = calorieTarget || 0;
 
-  // --- Memoized macro calorie calculations ---
   const macroCalories = useMemo(
     () => ({
       total: calculateCaloriesFromMacros(
@@ -70,7 +62,6 @@ function DailySummaryInner({
     [safeTotal.protein, safeTotal.carbs, safeTotal.fats],
   );
 
-  // --- Memoized macro targets (grams) ---
   const targetGrams = useMemo(
     () => ({
       protein: Math.round(
@@ -89,7 +80,6 @@ function DailySummaryInner({
     ],
   );
 
-  // --- Memoized completion percentages ---
   const completionPercentages = useMemo(
     () => ({
       protein: calculatePercent(safeTotal.protein, targetGrams.protein),
@@ -107,7 +97,6 @@ function DailySummaryInner({
     ],
   );
 
-  // --- Memoized macro calorie percentages ---
   const macroPercentages = useMemo(() => {
     const totalMacroCalories = macroCalories.total;
     if (totalMacroCalories === 0) {
@@ -121,7 +110,6 @@ function DailySummaryInner({
     return { protein, carbs, fats };
   }, [macroCalories]);
 
-  // --- Memoized macro data for rendering ---
   const macroData = useMemo(
     () => [
       {
@@ -180,23 +168,23 @@ function DailySummaryInner({
 
   return (
     <CardContainer className="h-full">
-      <div className="flex h-full flex-col p-6">
-        <div className="mb-6 rounded-xl bg-surface-2 p-4">
+      <div className="flex h-full flex-col gap-3 p-3">
+        <CardContainer className="border-border/60 bg-surface-2 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
               Today's Summary
             </h2>
             <div className="text-right">
-              <div className="text-2xl font-light tracking-tight text-foreground">
+              <div className="text-3xl font-light tracking-tight text-foreground">
                 <AnimatedNumber
                   value={macroCalories.total}
                   toFixedValue={0}
                   duration={0.8}
                 />
               </div>
-              <div className="text-xs text-muted">
+              <div className="mt-1 text-sm text-muted">
                 <span>of </span>
-                <span className="font-medium text-muted">
+                <span className="font-medium text-foreground/80">
                   <AnimatedNumber
                     value={dailyCalorieTarget}
                     toFixedValue={0}
@@ -205,7 +193,7 @@ function DailySummaryInner({
                 </span>
                 <span> kcal</span>
 
-                <span className="ml-1 font-medium text-primary">
+                <span className="ml-1.5 font-medium text-primary">
                   (
                   <AnimatedNumber
                     value={completionPercentages.calories}
@@ -242,18 +230,23 @@ function DailySummaryInner({
             }}
             className="mt-2"
           />
-        </div>
+        </CardContainer>
 
-        <div className="space-y-3">
+        <div className="flex flex-1 flex-col gap-3">
           {macroData.map((macro) => (
-            <div
+            <CardContainer
+              variant="interactive"
               key={macro.name}
-              className={`rounded-xl border bg-surface-2/50 p-4 ${macro.borderColor} transition-colors duration-200 hover:bg-surface-2`}
+              className="group flex flex-1 flex-col justify-center bg-surface-2 p-4"
             >
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${macro.color}`}></div>
-                  <h3 className={`${macro.textColor} text-sm font-medium`}>
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110`}
+                  ></div>
+                  <h3
+                    className={`${macro.textColor} text-sm font-medium tracking-wide`}
+                  >
                     {macro.name}
                   </h3>
                 </div>
@@ -305,7 +298,7 @@ function DailySummaryInner({
                   </span>
                 </div>
               </div>
-            </div>
+            </CardContainer>
           ))}
         </div>
       </div>
@@ -313,7 +306,6 @@ function DailySummaryInner({
   );
 }
 
-// Wrap with React.memo for performance optimization
 const DailySummary = memo(DailySummaryInner);
 
 export default DailySummary;

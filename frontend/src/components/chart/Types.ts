@@ -22,6 +22,7 @@ export interface LineConfig {
   activeDot?: React.ReactElement | object | boolean;
   type?: "monotone" | "linear" | "step" | "stepBefore" | "stepAfter";
   connectNulls?: boolean;
+  isArea?: boolean;
 }
 
 export interface NutritionAverage {
