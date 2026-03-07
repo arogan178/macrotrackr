@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TextField } from "@/components/form";
 import {
@@ -7,13 +7,14 @@ import {
   ProgressiveBlur,
   SearchIcon,
 } from "@/components/ui";
+import SavedMealsList from "@/components/ui/SavedMealsList";
 import StatusIndicator from "@/components/ui/StatusIndicator";
+import type { Ingredient } from "@/types/macro";
 import { apiService } from "@/utils/apiServices";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
 
-// Types for better type safety
 interface CalorieSearchProps {
   onResult: (macros: {
     protein: string;
@@ -22,6 +23,14 @@ interface CalorieSearchProps {
     name: string;
     servingQuantity: number;
     servingUnit: string;
+  }) => void;
+  onSelectSavedMeal: (meal: {
+    name: string;
+    protein: number;
+    carbs: number;
+    fats: number;
+    mealType: string;
+    ingredients?: Ingredient[];
   }) => void;
 }
 
@@ -39,14 +48,29 @@ interface FoodResult {
 
 const CalorieSearch = memo(function CalorieSearch({
   onResult,
+  onSelectSavedMeal,
 }: CalorieSearchProps) {
   const [query, setQuery] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [results, setResults] = useState<FoodResult[]>([]);
   const [showResults, setShowResults] = useState(false);
-  // State for scroll position detection
   const [isAtBottom, setIsAtBottom] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const wrapperReference = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        wrapperReference.current &&
+        !wrapperReference.current.contains(event.target as Node)
+      ) {
+        setIsFocused(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
@@ -89,31 +113,22 @@ const CalorieSearch = memo(function CalorieSearch({
     [handleSearch],
   );
 
-  // Handle scroll to detect when at bottom
   const handleScroll = useCallback((event: React.UIEvent<HTMLDivElement>) => {
     const target = event.currentTarget;
     const { scrollTop, scrollHeight, clientHeight } = target;
-    // Consider "at bottom" when within 10px of the bottom
     const atBottom = scrollTop + clientHeight >= scrollHeight - 10;
     setIsAtBottom(atBottom);
   }, []);
 
-  // Convert to metric for display and selection (moved to module scope)
-
-  // Memoized function to process food item selection
   const processFoodItemSelection = useCallback((item: FoodResult) => {
     let quantity = item.servingQuantity;
     let unit = item.servingUnit;
 
-    // Try to extract unit from rawQuantity if available
     if (item.rawQuantity) {
       const raw = item.rawQuantity.toLowerCase().trim();
 
-      // Parse various unit patterns from rawQuantity
       const patterns = [
-        // "330ml", "250 ml", "1.5 L", "10 fl oz (296 mL)"
         /([\d,.]+)\s*(ml|milliliter|milliliters|l|liter|liters|fl\s*oz|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)/,
-        // "90 g", "90g"
         /([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds)/,
       ];
 
@@ -123,7 +138,6 @@ const CalorieSearch = memo(function CalorieSearch({
           quantity = Number.parseFloat(match[1].replace(",", "."));
           const rawUnit = match[2];
 
-          // Map raw units to our UnitType
           const unitMap: Record<string, UnitType> = {
             ml: "ml",
             milliliter: "ml",
@@ -156,20 +170,18 @@ const CalorieSearch = memo(function CalorieSearch({
             pounds: "lb",
           };
 
-          // Special handling for fl oz
           if (raw.includes("fl") && raw.includes("oz")) {
-            unit = "ml"; // Convert fl oz to ml
-            quantity = quantity * 29.5735; // 1 fl oz = 29.5735 ml
+            unit = "ml";
+            quantity = quantity * 29.5735;
           } else {
             unit = unitMap[rawUnit] || "g";
           }
 
-          break; // Found a match, stop looking
+          break;
         }
       }
     }
 
-    // If unit is still 'g' but we have rawQuantity with different unit info, try one more time
     if (unit === "g" && item.rawQuantity) {
       const raw = item.rawQuantity.toLowerCase();
       if (raw.includes("ml") || raw.includes("milliliter")) {
@@ -187,7 +199,6 @@ const CalorieSearch = memo(function CalorieSearch({
       }
     }
 
-    // Use the detected unit for display, but convert quantity to metric for calculations
     const metric = UnitConverter.toMetric(quantity, unit as UnitType);
 
     return {
@@ -196,7 +207,7 @@ const CalorieSearch = memo(function CalorieSearch({
       fats: item.fats.toFixed(1),
       name: item.name,
       servingQuantity: metric.quantity,
-      servingUnit: unit, // Use detected unit for display
+      servingUnit: unit,
     };
   }, []);
 
@@ -211,16 +222,13 @@ const CalorieSearch = memo(function CalorieSearch({
     [onResult, processFoodItemSelection],
   );
 
-  // Memoized function to calculate calories for display
   const calculateDisplayCalories = useCallback((item: FoodResult): number => {
     if (item.energyKcal && item.energyKcal > 0) {
       return item.energyKcal;
     }
-    // Fallback: calculate from macros if energyKcal is not available
     return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
   }, []);
 
-  // Memoized function to get quantity display string
   const getQuantityDisplay = useCallback((item: FoodResult): string => {
     if (item.rawQuantity) {
       return item.rawQuantity;
@@ -241,12 +249,10 @@ const CalorieSearch = memo(function CalorieSearch({
     return "";
   }, []);
 
-  // Memoized function to check if item has meaningful nutrients
   const hasNutrients = useCallback((item: FoodResult): boolean => {
     return !(item.protein === 0 && item.carbs === 0 && item.fats === 0);
   }, []);
 
-  // Memoized filtered and processed results for display
   const displayResults = useMemo(() => {
     if (!showResults || results.length === 0) return [];
 
@@ -257,7 +263,7 @@ const CalorieSearch = memo(function CalorieSearch({
         displayQuantity: getQuantityDisplay(item),
         calories: calculateDisplayCalories(item),
         hasNutrients: hasNutrients(item),
-        id: `${item.name}-${index}`, // Unique key for React
+        id: `${item.name}-${index}`,
       }));
   }, [
     results,
@@ -268,8 +274,7 @@ const CalorieSearch = memo(function CalorieSearch({
   ]);
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Fixed search input and button row */}
+    <div className="relative flex flex-col gap-3" ref={wrapperReference}>
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <TextField
@@ -278,8 +283,9 @@ const CalorieSearch = memo(function CalorieSearch({
             value={query}
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
+            onFocus={() => setIsFocused(true)}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className=" text-muted" />}
+            icon={<SearchIcon className="text-foreground!" />}
             maxLength={50}
           />
         </div>
@@ -300,9 +306,8 @@ const CalorieSearch = memo(function CalorieSearch({
         </div>
       </div>
 
-      {/* Results dropdown - positioned below the fixed search row */}
       {showResults && displayResults.length > 0 && (
-        <div className="relative z-10 h-64 w-full overflow-hidden rounded border border-border bg-surface shadow-surface">
+        <div className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
             {displayResults.map((resultData) => {
               const { item, displayQuantity, calories } = resultData;
@@ -310,7 +315,7 @@ const CalorieSearch = memo(function CalorieSearch({
                 <button
                   key={resultData.id}
                   className={
-                    "w-full border-b border-border bg-surface px-4 py-2 text-left text-foreground last:border-b-0 hover:bg-surface focus:bg-surface focus:outline-none"
+                    "w-full border-b border-border bg-surface px-4 py-3 text-left text-foreground transition-colors last:border-b-0 hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
                   }
                   onClick={() => handleSelect(item)}
                   type="button"
@@ -336,6 +341,17 @@ const CalorieSearch = memo(function CalorieSearch({
             intensity={0.2}
             height="40px"
             show={!isAtBottom}
+          />
+        </div>
+      )}
+
+      {isFocused && query.length === 0 && (
+        <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl">
+          <SavedMealsList
+            onSelectMeal={(meal) => {
+              onSelectSavedMeal(meal);
+              setIsFocused(false);
+            }}
           />
         </div>
       )}

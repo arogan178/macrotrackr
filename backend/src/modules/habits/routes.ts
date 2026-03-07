@@ -9,8 +9,12 @@ import {
   safeExecute,
   type HabitRow,
 } from "../../lib/database";
-import { NotFoundError } from "../../lib/errors";
-import { featureLimitGuard } from "../../middleware/clerk-guards";
+import {
+  AuthorizationError,
+  AuthenticationError,
+  NotFoundError,
+} from "../../lib/errors";
+import { checkFeatureLimit } from "../../middleware/clerk-guards";
 import type { Database } from "bun:sqlite";
 
 // Extended habits context type for route handlers
@@ -20,7 +24,6 @@ interface HabitsRouteContext extends AuthenticatedContext {
   params?: Record<string, string>;
   query: Record<string, string | undefined>;
   db: Database;
-  checkLimit?: (count: number) => Promise<void>;
 }
 
 export const habitRoutes = (app: Elysia) =>
@@ -87,14 +90,17 @@ export const habitRoutes = (app: Elysia) =>
       )
 
       // --- Create New Habit ---
-      .use(featureLimitGuard("MAX_HABITS"))
       .post(
         "/",
         async (context: any) => {
-          const { body, internalUserId, db, checkLimit } = context as HabitsRouteContext;
+          const { body, internalUserId, db } = context as HabitsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
+          }
+
+          if (!internalUserId) {
+            throw new AuthenticationError("Authentication required. Please sign in.");
           }
 
           // Check current habit count before creating new one
@@ -105,9 +111,16 @@ export const habitRoutes = (app: Elysia) =>
               [internalUserId]
             )?.count || 0;
 
-          // Check if user can create another habit
-          if (checkLimit) {
-            await checkLimit(currentHabitCount + 1);
+          // Check if user can create another habit based on Free/Pro limits
+          const featureLimitResult = await checkFeatureLimit(
+            internalUserId,
+            "MAX_HABITS",
+            currentHabitCount + 1
+          );
+          if (!featureLimitResult.allowed) {
+            throw new AuthorizationError(
+              featureLimitResult.message || "Feature limit reached"
+            );
           }
 
           const {

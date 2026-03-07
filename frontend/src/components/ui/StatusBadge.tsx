@@ -2,13 +2,14 @@
 import { motion } from "motion/react";
 import { memo, useMemo } from "react";
 
+import { cn } from "../../lib/classnameUtilities";
 import { CheckCircleIcon, InfoIcon, WarningIcon } from "./Icons";
 
 // Size variants for the badge
 type BadgeSize = "sm" | "md" | "lg";
 
 // Visual style variants
-type BadgeVariant = "solid" | "outline" | "subtle";
+type BadgeVariant = "solid" | "outline" | "subtle" | "glass";
 
 // Status types with their visual configurations
 type StatusType =
@@ -120,32 +121,37 @@ const getVariantClasses = (
   colorClass: string,
   variant: BadgeVariant,
 ): string => {
-  const colorMap: Record<string, { bg: string; text: string; border: string }> =
+  const colorMap: Record<string, { bg: string; text: string; border: string; glass: string }> =
     {
       success: {
         bg: "bg-success/20",
         text: "text-success",
         border: "border-success/40",
+        glass: "bg-success/10 border-success/20",
       },
       warning: {
         bg: "bg-warning/20",
         text: "text-warning",
         border: "border-warning/40",
+        glass: "bg-warning/10 border-warning/20",
       },
       error: {
         bg: "bg-error/20",
         text: "text-error",
         border: "border-error/40",
+        glass: "bg-error/10 border-error/20",
       },
       neutral: {
         bg: "bg-surface-3",
         text: "text-foreground",
         border: "border-border/40",
+        glass: "bg-surface-2/40 border-white/5",
       },
       info: {
         bg: "bg-blue/20",
         text: "text-blue",
         border: "border-blue/40",
+        glass: "bg-blue/10 border-blue/20",
       },
     };
 
@@ -153,16 +159,19 @@ const getVariantClasses = (
 
   switch (variant) {
     case "solid": {
-      return `${colors.bg} ${colors.text} border ${colors.border}`;
+      return cn(colors.bg, colors.text, "border", colors.border);
     }
     case "outline": {
-      return `bg-transparent ${colors.text} border ${colors.border}`;
+      return cn("bg-transparent", colors.text, "border", colors.border);
     }
     case "subtle": {
-      return `${colors.bg}/50 ${colors.text} border border-transparent`;
+      return cn(`${colors.bg}/50`, colors.text, "border border-transparent");
+    }
+    case "glass": {
+      return cn(colors.glass, colors.text, "border backdrop-blur-md");
     }
     default: {
-      return `${colors.bg} ${colors.text} border ${colors.border}`;
+      return cn(colors.bg, colors.text, "border", colors.border);
     }
   }
 };
@@ -232,30 +241,29 @@ const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
 
   return (
     <div
-      className={`
-        inline-flex items-center rounded-full font-semibold
-        ${sizeClasses.container}
-        ${sizeClasses.text}
-        ${variantClasses}
-        ${className}
-      `
-        .trim()
-        .replaceAll(/\s+/g, " ")}
+      className={cn(
+        "inline-flex items-center rounded-full font-semibold",
+        sizeClasses.container,
+        sizeClasses.text,
+        variantClasses,
+        className
+      )}
       role="status"
       aria-label={text ?? statusConfig.text}
     >
       {showIcon && (
-        <span className={`relative ${sizeClasses.icon}`}>
+        <span className={cn("relative", sizeClasses.icon)}>
           {icon ?? statusConfig.icon}
           {shouldPulse && !prefersReducedMotion && (
             <motion.span
-              className={`absolute inset-0 rounded-full ${
+              className={cn(
+                "absolute inset-0 rounded-full",
                 statusConfig.colorClass === "success"
                   ? "bg-success"
                   : statusConfig.colorClass === "error"
                     ? "bg-error"
                     : "bg-warning"
-              }`}
+              )}
               initial={{ scale: 1, opacity: 0.5 }}
               animate={{ scale: 1.5, opacity: 0 }}
               transition={{

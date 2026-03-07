@@ -153,6 +153,9 @@ Elements appear sequentially—hero content first, then supporting sections, the
 ### Signature Easing Curves
 
 ```tsx
+// Section reveal (smooth deceleration)
+ease: [0.22, 1, 0.36, 1];
+
 // Page transitions (smooth deceleration)
 ease: [0.25, 0.46, 0.45, 0.94];
 
@@ -163,6 +166,28 @@ ease: [0.32, 0.72, 0, 1];
 type: "spring";
 stiffness: 260 - 420;
 damping: 15 - 32;
+```
+
+### Section Reveals & Performance
+
+```tsx
+const sectionRevealVariants = {
+  hidden: { opacity: 0, y: 16 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.4, ease: [0.22, 1, 0.36, 1] },
+  },
+};
+
+// Usage with performance optimizations
+<motion.section
+  variants={sectionRevealVariants}
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true, amount: 0.2 }}
+  style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
+>
 ```
 
 ### Page Transitions (Blur-to-Clear)
@@ -223,20 +248,43 @@ toFixedValue: 0
 
 ### Accessibility
 
-All animations respect `prefers-reduced-motion`:
+All animations respect `prefers-reduced-motion` using `motion/react`:
 
 ```tsx
-const prefersReducedMotion = window.matchMedia(
-  "(prefers-reduced-motion: reduce)",
-).matches;
+import { useReducedMotion } from "motion/react";
 
-// Fallback variants
-const reducedMotionVariants = {
-  initial: { opacity: 0 },
-  animate: { opacity: 1 },
-  exit: { opacity: 0 },
-};
+const shouldReduceMotion = useReducedMotion();
+
+// Fallback variants or conditional props
+const inViewRevealProps =
+  shouldReduceMotion ?
+    { initial: false as const }
+  : {
+      initial: "hidden",
+      whileInView: "visible",
+      viewport: { once: true, amount: 0.2 },
+    };
 ```
+
+---
+
+## Loading States & Skeletons
+
+### Themed Fallbacks
+
+For Suspense boundaries, use themed fallbacks that match the surface they replace, utilizing `animate-pulse` with specific opacity backgrounds:
+
+```tsx
+<div className="rounded-xl border border-border bg-surface px-8 py-10">
+  <div className="mb-6 h-6 w-56 animate-pulse rounded bg-muted/40" />
+  <div className="mb-3 h-4 w-80 animate-pulse rounded bg-muted/30" />
+  <div className="h-10 w-28 animate-pulse rounded-lg bg-primary/20" />
+</div>
+```
+
+### Component Skeletons
+
+Prefer specific skeleton components (e.g., `AddEntryLoadingSkeleton`, `DailySummaryLoadingSkeleton`) over generic spinners for content areas to prevent layout shift.
 
 ---
 
@@ -361,6 +409,36 @@ Tab with animated background indicator.
 
 ## Layout Patterns
 
+### Page Containers
+
+Use standard wrappers for consistent page layouts:
+
+- `DashboardPageContainer`: Main wrapper for authenticated dashboard pages.
+- `FeaturePage`: Inner wrapper with animated title and subtitle.
+
+```tsx
+<DashboardPageContainer>
+  <FeaturePage title="Dashboard" subtitle="Welcome back" animateTitle>
+    {/* Content */}
+  </FeaturePage>
+</DashboardPageContainer>
+```
+
+### Grid Layouts
+
+Standard responsive grid for dashboard panels:
+
+```tsx
+<div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
+  <div className="flex h-full flex-col space-y-5 lg:col-span-4">
+    {/* Main content */}
+  </div>
+  <div className="flex h-full flex-col lg:col-span-2">
+    {/* Sidebar/Summary */}
+  </div>
+</div>
+```
+
 ### Spacing Scale
 
 ```css
@@ -399,6 +477,44 @@ rounded-full    /* Pills, tabs, badges, avatars */
   <ProgressiveBlur direction="up" height="80px" position="bottom" />
 </div>
 ```
+
+### Card Containers
+
+```tsx
+// Standard CardContainer
+<CardContainer className="rounded-2xl border border-border/60">
+  <div className="p-5">{/* Content */}</div>
+</CardContainer>
+```
+
+---
+
+## Performance Patterns
+
+### Component Prefetching
+
+Use `requestIdleCallback` to prefetch lazy-loaded components without blocking the main thread, respecting data saver preferences:
+
+```tsx
+useEffect(() => {
+  const connection = (navigator as any).connection;
+  if (connection?.saveData || connection?.effectiveType === "2g") return;
+
+  const doPrefetch = () => {
+    void import("../components/HeavyComponent");
+  };
+
+  if ("requestIdleCallback" in globalThis) {
+    globalThis.requestIdleCallback(doPrefetch, { timeout: 1500 });
+  } else {
+    setTimeout(doPrefetch, 500);
+  }
+}, []);
+```
+
+### Rendering Optimization
+
+Use `contentVisibility: "auto"` and `containIntrinsicSize` on large animated sections to defer rendering of off-screen content.
 
 ---
 
@@ -498,6 +614,33 @@ neutral: "bg-surface-3 text-foreground border border-border/40";
 - **motion/react** (Framer Motion) - Animations
 - **TanStack Query** - Data fetching
 - **TanStack Router** - Routing
+- **Vitest** - Unit testing
+- **Playwright / Puppeteer** - E2E testing
+
+---
+
+## Testing Patterns
+
+### UI Testability
+
+Design components to be easily testable by E2E frameworks (Playwright/Puppeteer) without relying on brittle CSS classes:
+
+1. **Semantic HTML First**: Prefer native elements (`<button>`, `<select>`, `<nav>`) that can be selected by role or text.
+2. **Accessible Text**: Ensure buttons and links have clear, predictable text content (e.g., `button:has-text("Sign In")`).
+3. **ARIA Attributes**: Use `aria-label` for icon-only buttons or complex interactive elements (e.g., `[aria-label="User menu"]`).
+4. **Test IDs**: Use `data-testid` as a fallback for elements that lack semantic meaning or text (e.g., `data-testid="user-menu"`).
+
+```tsx
+// ✅ Good: Testable via semantic text or ARIA
+<button onClick={submit}>Save Entry</button>
+<button aria-label="Close modal" onClick={close}><Icon name="x" /></button>
+
+// ✅ Good: Testable via data-testid when necessary
+<div data-testid="macro-summary-chart">...</div>
+
+// ❌ Bad: Relying on CSS classes for tests
+<div className="btn-primary submit-btn" onClick={submit}>Save</div>
+```
 
 ---
 
@@ -514,6 +657,8 @@ Before considering a feature complete:
 - [ ] Are macro colors consistent (protein=green, carbs=blue, fats=red)?
 - [ ] Is there generous whitespace between sections?
 - [ ] Are animations staggered sequentially?
+- [ ] Are utility functions covered by Vitest unit tests?
+- [ ] Are critical user flows testable via semantic HTML, ARIA labels, or `data-testid`?
 
 ---
 
