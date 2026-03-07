@@ -1,36 +1,74 @@
+import { Area, AreaChart, ResponsiveContainer } from "recharts";
+
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { TrendIcon } from "@/components/ui";
 
 import type { TrendDisplayProps as TrendDisplayProps } from "../types/insightsTypes";
 
-export default function TrendDisplay({ label, trend }: TrendDisplayProps) {
+export default function TrendDisplay({ label, trend, data, dataKey }: TrendDisplayProps) {
+  const isPositive = trend.direction === "up";
+  
+  // Choose color based on trend direction
+  let color = "#8b5cf6"; // Default/Stable
+  if (isPositive) color = "#10b981"; // Success/Up
+  if (trend.direction === "down") color = "#ef4444"; // Error/Down
+
+  const gradientId = `sparkline-${dataKey || label.toLowerCase().replaceAll(/\s+/g, '-')}`;
+
   return (
-    <div>
-      <div className="mb-1 flex items-center">
-        <span className="font-medium text-foreground">{label}:</span>
-        <span className="ml-2 flex items-center">
+    <div className="flex flex-col border-b border-border/40 pb-5 last:border-0 last:pb-0">
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold tracking-tight text-foreground/90">{label}</span>
+          <span className="mt-0.5 text-xs text-muted">
+            {trend.message}
+          </span>
+        </div>
+        
+        <div className="flex items-center rounded-lg border border-border/40 bg-surface-2 px-2.5 py-1.5 text-sm font-medium">
           <TrendIcon direction={trend.direction} />{" "}
-          <span className="text-foreground">
+          <span className="ml-1.5 text-foreground">
             {trend.direction === "stable" ? (
               "Stable"
             ) : trend.direction === "insufficient" ? (
-              "Insufficient data"
+              "N/A"
             ) : (
-              <>
+              <div className="flex items-center gap-1">
                 <AnimatedNumber
                   value={trend.percentage}
                   toFixedValue={0}
-                  suffix={`% ${
-                    trend.direction === "up" ? "increase" : "decrease"
-                  }`}
+                  suffix="%"
                   duration={0.6}
                 />
-              </>
+              </div>
             )}
           </span>
-        </span>
+        </div>
       </div>
-      <p className="text-sm text-muted">{trend.message}</p>
+
+      {/* Sparkline */}
+      {data && data.length > 0 && dataKey && trend.direction !== "insufficient" && (
+        <div className="mt-1 h-12 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart data={data} margin={{ top: 5, right: 0, left: 0, bottom: 0 }}>
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+                  <stop offset="95%" stopColor={color} stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <Area 
+                type="monotone" 
+                dataKey={dataKey} 
+                stroke={color} 
+                strokeWidth={2}
+                fill={`url(#${gradientId})`} 
+                isAnimationActive={true}
+              />
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </div>
   );
 }

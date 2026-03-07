@@ -24,6 +24,7 @@ import { goalRoutes } from "./modules/goals/routes";
 import { habitRoutes } from "./modules/habits/routes";
 import { billingRoutes } from "./modules/billing/routes";
 import { reportingRoutes } from "./modules/reporting/routes";
+import { savedMealRoutes } from "./modules/saved-meals/routes";
 import { webhookHandler } from "./modules/billing/webhook-handler";
 import { healthRoutes } from "./routes/health";
 import { metricsRoutes } from "./routes/metrics";
@@ -106,9 +107,7 @@ app.use(rateLimiters.api);
 // This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
 app.use(clerkAuthMiddleware);
 
-// Public auth routes (no authentication required)
-// Note: Legacy login/register are kept for backward compatibility
-// but are deprecated in favor of Clerk authentication
+// Public auth routes (password reset + Clerk sync)
 app.use(authRoutes);
 
 // All other routes
@@ -118,6 +117,7 @@ app.use(goalRoutes);
 app.use(habitRoutes);
 app.use(billingRoutes);
 app.use(reportingRoutes);
+app.use(savedMealRoutes);
 
 // Health check routes (public, no auth)
 app.use(healthRoutes);
