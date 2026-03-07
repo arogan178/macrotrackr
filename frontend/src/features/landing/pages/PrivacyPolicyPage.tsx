@@ -23,7 +23,7 @@ const PrivacyPolicyPage: React.FC = () => {
                 <strong>Last updated:</strong> {new Date().toLocaleDateString()}
               </p>
 
-              <div className="prose prose-lg max-w-none prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert">
+              <div className="prose prose-lg prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert max-w-none">
                 <section className="mb-8">
                   <h2 className="mb-3 text-2xl font-semibold text-foreground">
                     Information We Collect

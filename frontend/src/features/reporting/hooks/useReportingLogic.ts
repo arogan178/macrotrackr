@@ -177,7 +177,7 @@ export function useReportingLogic(
   const dataProcessed = !isLoadingExternal;
 
   const averages = useMemo(() => {
-    if (!aggregatedData.length) {
+    if (aggregatedData.length === 0) {
       return { calories: 0, protein: 0, carbs: 0, fats: 0 };
     }
 
@@ -200,7 +200,7 @@ export function useReportingLogic(
   }, [aggregatedData]);
 
   const handleDownloadCSV = useCallback(() => {
-    if (!aggregatedData.length) {
+    if (aggregatedData.length === 0) {
       return;
     }
 

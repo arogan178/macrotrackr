@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { UnitConverter, type UnitType } from "@/features/macroTracking/utils/units";
 import Modal from "@/components/ui/Modal";
-import { useBeforeUnload } from "@/hooks";
-import { Ingredient, MacroEntry } from "@/types/macro";
 import IngredientsPanel from "@/features/macroTracking/components/edit-modal/IngredientsPanel";
 import MealDetailsSection from "@/features/macroTracking/components/edit-modal/MealDetailsSection";
+import { UnitConverter, type UnitType } from "@/features/macroTracking/utils/units";
+import { useBeforeUnload } from "@/hooks";
+import { Ingredient, MacroEntry } from "@/types/macro";
 
 interface EditModalProps {
   entry: MacroEntry | undefined;

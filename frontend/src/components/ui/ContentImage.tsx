@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
 import type { ImgHTMLAttributes } from "react";
+import { useEffect, useState } from "react";
 
 import { cn } from "@/lib/classnameUtilities";
 

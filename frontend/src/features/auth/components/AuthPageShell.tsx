@@ -27,7 +27,7 @@ export default function AuthPageShell({
       <PageBackground />
       <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-6xl">
-          <div className="supports-backdrop-filter:bg-background/75 flex min-h-14 items-center justify-between rounded-2xl border border-border/70 bg-background/85 px-4 shadow-lg shadow-black/5 backdrop-blur-md transition-colors duration-200 sm:px-6">
+          <div className="flex min-h-14 items-center justify-between rounded-2xl border border-border/70 bg-background/85 px-4 shadow-lg shadow-black/5 backdrop-blur-md transition-colors duration-200 supports-backdrop-filter:bg-background/75 sm:px-6">
             <LogoButton
               compact
               onClick={() => navigate({ to: "/" })}

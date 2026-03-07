@@ -118,8 +118,8 @@ export default function IngredientsPanel({
                         onClick={() => onScale(factor)}
                         className={`rounded-xl px-2.5 py-2 text-center text-xs font-medium transition-[background-color,border-color,color,transform] duration-200 ${
                           Math.abs(scaleFactor - factor) < 0.01
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-surface hover:bg-surface-2 text-foreground"
+                            ? "text-primary-foreground bg-primary"
+                            : "bg-surface text-foreground hover:bg-surface-2"
                         }`}
                       >
                         {factor === 1 ? "1x" : `${factor}x`}

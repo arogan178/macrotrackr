@@ -22,7 +22,7 @@ function calculateCalories(entry: MacroEntry) {
 function escapeCsvValue(value: string | number | undefined) {
   const normalized = value === undefined ? "" : String(value);
   const escaped = normalized.replaceAll('"', '""');
-  return /[",\n]/.test(escaped) ? `"${escaped}"` : escaped;
+  return /[\n",]/.test(escaped) ? `"${escaped}"` : escaped;
 }
 
 function formatIngredient(ingredient: Ingredient) {
@@ -31,9 +31,9 @@ function formatIngredient(ingredient: Ingredient) {
   const amount =
     quantity !== undefined && ingredient.unit
       ? `${quantity}${ingredient.unit}`
-      : quantity !== undefined
-        ? String(quantity)
-        : ingredient.unit || "";
+      : quantity === undefined
+        ? ingredient.unit || ""
+        : String(quantity);
 
   const macros = `${ingredient.protein}P/${ingredient.carbs}C/${ingredient.fats}F`;
   return [ingredient.name, amount, macros].filter(Boolean).join(" ");

@@ -330,7 +330,7 @@ const BlogArticlePage: React.FC = () => {
             transition={{ duration: 0.45 }}
             className="text-center"
           >
-            <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-2 text-xs font-medium uppercase tracking-[0.16em]">
+            <div className="text-muted-foreground flex flex-wrap items-center justify-center gap-2 text-xs font-medium tracking-[0.16em] uppercase">
               <span className="font-semibold text-primary">
                 {post.category}
               </span>

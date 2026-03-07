@@ -25,7 +25,7 @@ const AnimatedUserFlow: React.FC<AnimatedUserFlowProps> = ({
     if (!autoPlay || steps.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentStep((prev) => (prev + 1) % steps.length);
+      setCurrentStep((previous) => (previous + 1) % steps.length);
     }, interval);
 
     return () => clearInterval(timer);

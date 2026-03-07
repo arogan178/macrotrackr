@@ -1,5 +1,7 @@
 // src/lib/errors.ts
 
+import { loggerHelpers } from "./logger";
+
 /**
  * Base application error class
  */
@@ -121,8 +123,6 @@ export function formatErrorResponse(error: unknown) {
   }
 
   // Generic error fallback
-  // Import logger only when needed to avoid circular dependencies
-  const { loggerHelpers } = require("./logger");
   loggerHelpers.error(
     error instanceof Error ? error : new Error(String(error)),
     { type: "unexpected_error" }

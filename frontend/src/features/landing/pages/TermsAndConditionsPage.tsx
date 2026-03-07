@@ -18,7 +18,7 @@ const TermsAndConditionsPage: React.FC = () => {
               Terms and Conditions
             </h1>
 
-            <div className="prose prose-slate max-w-none prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert">
+            <div className="prose prose-slate prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert max-w-none">
               <p className="mb-8 text-lg text-foreground">
                 Last updated: {new Date().toLocaleDateString()}
               </p>
