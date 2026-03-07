@@ -1,6 +1,8 @@
 // Types for Macro Tracking feature
 // File: [frontend/src/features/macroTracking/types/macro.ts](frontend/src/features/macroTracking/types/macro.ts:1)
 
+import type { Ingredient } from "@/types/macro";
+
 /**
  * Meal types supported by the app.
  */
@@ -18,6 +20,7 @@ export type MacroEntryInput = {
   mealName: string;
   entryDate: string; // YYYY-MM-DD
   entryTime: string; // HH:mm
+  ingredients?: Ingredient[];
 };
 
 /**
@@ -33,6 +36,7 @@ export type EditingEntry = {
   mealName: string;
   entryDate?: string; // optional
   entryTime?: string; // optional
+  ingredients?: Ingredient[];
 };
 
 /**

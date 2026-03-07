@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -19,6 +20,7 @@ import type {
   MacroEntryUpdatePayload,
 } from "@/utils/apiServices";
 import { apiService } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
 
 function normalizePaginatedHistory(
   response: unknown,
@@ -100,22 +102,22 @@ export function useMacroHistoryForDateRange(
   return useQuery({
     queryKey: queryKeys.macros.historyRange(startDate, endDate),
     queryFn: async () => {
-      // Get a large number of entries to ensure we get all data for the date range
-      const response = await apiService.macros.getHistory(10_000, 0, {
+      const response = await apiService.macros.getAllHistory({
         startDate,
         endDate,
       });
-      return (response as PaginatedMacroHistory).entries;
+      return response.entries;
     },
-    ...queryConfigs.longLived, // 5 minutes stale time for reporting data
-    gcTime: 15 * 60 * 1000, // 15 minutes for longer cache retention
-    enabled: !!(startDate && endDate), // Only run if both dates are provided
+    ...queryConfigs.longLived,
+    gcTime: 15 * 60 * 1000,
+    enabled: !!(startDate && endDate),
+    placeholderData: keepPreviousData,
   });
 }
 
 // Query hook for daily macro totals by date
 export function useMacroDailyTotals(date?: string) {
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayISO();
   const queryDate = date || today;
 
   return useQuery({

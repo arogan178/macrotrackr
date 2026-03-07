@@ -1,15 +1,11 @@
 import { useSignIn } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
-import {
-  AppleIcon,
-  CalorieIcon,
-  FacebookIcon,
-  GoogleIcon,
-} from "@/components/ui/Icons";
+import { AppleIcon, FacebookIcon, GoogleIcon } from "@/components/ui/Icons";
 import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
@@ -49,6 +45,9 @@ export function ClerkSignInForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailMode, setIsEmailMode] = useState(false);
+
+  const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
 
   // Handle social sign-in
   const handleSocialSignIn = async (
@@ -226,106 +225,151 @@ export function ClerkSignInForm({
 
   return (
     <div className="w-full">
-      <div className="mb-8 flex flex-col items-center text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-          <CalorieIcon className="h-8 w-8 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
-        <p className="mt-2 text-muted">
-          Sign in to continue tracking your macros
-        </p>
-      </div>
-
-      <div className="mb-6 space-y-3">
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignIn("oauth_google")}
-          icon={<GoogleIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Google
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignIn("oauth_facebook")}
-          icon={<FacebookIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Facebook
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignIn("oauth_apple")}
-          icon={<AppleIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Apple
-        </Button>
-      </div>
-
-      <div className="mb-6 flex items-center">
-        <div className="flex-1 border-t border-border" />
-        <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
-          or
-        </span>
-        <div className="flex-1 border-t border-border" />
-      </div>
-
-      <form onSubmit={handleEmailSignIn} className="space-y-5">
-        <TextField
-          label="Email"
-          value={email}
-          onChange={setEmail}
-          type="email"
-          required
-          placeholder="your@email.com"
-          name="email"
-          autoComplete="username"
-        />
-
-        <TextField
-          label="Password"
-          value={password}
-          onChange={setPassword}
-          type="password"
-          required
-          placeholder="••••••••"
-          name="password"
-          autoComplete="current-password"
-        />
-
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="text-sm text-primary transition-colors hover:text-primary"
+      <AnimatePresence mode="wait" initial={false}>
+        {isEmailMode ? (
+          <motion.div
+            key="email-sign-in"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            Forgot password?
-          </button>
-        </div>
+            <div className="mb-5 flex items-center justify-between">
+              <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+                Email sign in
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsEmailMode(false)}
+                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+              >
+                Back
+              </button>
+            </div>
 
-        <Button
-          type="submit"
-          fullWidth
-          isLoading={isLoading}
-          loadingText="Signing in..."
-        >
-          Sign In
-        </Button>
-      </form>
+            <form onSubmit={handleEmailSignIn} className="space-y-4">
+              <TextField
+                label="Email"
+                value={email}
+                onChange={setEmail}
+                type="email"
+                required
+                placeholder="your@email.com"
+                name="email"
+                autoComplete="username"
+              />
+
+              <AnimatePresence initial={false}>
+                {showPasswordField ? (
+                  <motion.div
+                    key="password-field"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.24, ease: "easeOut" }}
+                    className="space-y-3 overflow-hidden"
+                  >
+                    <TextField
+                      label="Password"
+                      value={password}
+                      onChange={setPassword}
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      name="password"
+                      autoComplete="current-password"
+                    />
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={onForgotPassword}
+                        className="inline-flex min-h-11 items-center rounded-md px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+
+              <Button
+                type="submit"
+                fullWidth
+                isLoading={isLoading}
+                loadingText="Signing in..."
+              >
+                Sign In
+              </Button>
+            </form>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="social-sign-in"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignIn("oauth_google")}
+                icon={<GoogleIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Google
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignIn("oauth_facebook")}
+                icon={<FacebookIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Facebook
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignIn("oauth_apple")}
+                icon={<AppleIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Apple
+              </Button>
+            </div>
+
+            <div className="my-6 flex items-center">
+              <div className="flex-1 border-t border-border" />
+              <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
+                or
+              </span>
+              <div className="flex-1 border-t border-border" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              onClick={() => setIsEmailMode(true)}
+            >
+              Continue with email
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="mt-6 border-t border-border pt-6 text-center text-sm">
         <span className="text-muted">Don&apos;t have an account? </span>
         <button
           type="button"
           onClick={onSwitchToSignUp}
-          className="font-medium text-primary hover:underline"
+          className="inline-flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
         >
           Sign up
         </button>

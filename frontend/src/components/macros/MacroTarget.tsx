@@ -48,7 +48,7 @@ const MacroTarget = memo(
             <button
               type="button"
               onClick={() => setHelpVisible(!helpVisible)}
-              className="rounded-full p-1 text-foreground transition-colors hover:bg-surface/50 hover:text-primary"
+              className="rounded-full p-1 text-foreground transition-colors hover:bg-surface-2 hover:text-primary"
               aria-label={helpVisible ? "Hide help" : "Show help"}
               title="How to use this tool"
             >

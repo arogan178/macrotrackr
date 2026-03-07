@@ -131,9 +131,7 @@ function WeightLogList({
         <EmptyState
           title="No Weight Logged Yet"
           message="Your recorded weights will appear here."
-          icon={
-            <TrashIcon className="h-12 w-12 text-foreground" strokeWidth={1} />
-          } // Placeholder icon
+          icon={<TrashIcon className="h-12 w-12 text-foreground" />} // Placeholder icon
           className="h-full"
         />
       </div>
@@ -147,7 +145,7 @@ function WeightLogList({
           className="absolute inset-0 overflow-y-auto pr-2"
           onScroll={handleScroll}
         >
-          <ul className="divide-y divide-gray-700/50">
+          <ul className="space-y-2 pb-8">
             {sortedLog.map((entry) => {
               // Double-check validity here just in case, though filter should handle it
               const entryDate = parseISO(entry.timestamp);
@@ -156,16 +154,16 @@ function WeightLogList({
               return (
                 <li
                   key={entry.id}
-                  className="flex items-center justify-between py-2"
+                  className="group/item flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-4 transition-colors duration-200 hover:border-white/20"
                 >
                   <div className="flex max-w-55 min-w-50 flex-col">
-                    <span className="block w-full truncate text-sm text-muted">
+                    <span className="block w-full truncate text-sm font-medium text-muted">
                       {/* Format timestamp only if valid */}
                       {isValidDate
                         ? format(entryDate, "MMM d, yyyy 'at' p")
                         : "Invalid Date"}
                     </span>
-                    <span className="mt-1 text-lg font-semibold text-primary">
+                    <span className="mt-1 text-lg font-bold tracking-tight text-foreground/90">
                       {entry.weight.toFixed(1)} kg
                     </span>
                   </div>
@@ -190,12 +188,12 @@ function WeightLogList({
                         <LoadingSpinner size="sm" />
                       ) : undefined
                     }
-                    className={
+                    className={`opacity-0 transition-opacity duration-200 group-hover/item:opacity-100 ${
                       (isSaving && itemToDelete?.id === entry.id) ||
                       !isValidDate
                         ? "cursor-not-allowed opacity-50"
                         : ""
-                    }
+                    }`}
                   />
                 </li>
               );

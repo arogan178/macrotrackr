@@ -135,6 +135,20 @@ export function initializeSchema(db: Database) {
           id TEXT PRIMARY KEY,
           received_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- Saved Meals Table (Pro Feature) --
+        CREATE TABLE IF NOT EXISTS saved_meals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          protein REAL NOT NULL CHECK(protein >= 0.0),
+          carbs REAL NOT NULL CHECK(carbs >= 0.0),
+          fats REAL NOT NULL CHECK(fats >= 0.0),
+          meal_type TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
@@ -377,6 +391,15 @@ export function initializeSchema(db: Database) {
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)"
   );
+
+  // Saved meals indexes
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)"
+  );
+
+  // Apply ingredients column additions for hybrid meal support
+  checkAndAddColumn("macro_entries", "ingredients", "TEXT DEFAULT '[]'");
+  checkAndAddColumn("saved_meals", "ingredients", "TEXT DEFAULT '[]'");
 
   logger.info("Database schema initialized successfully.");
 }

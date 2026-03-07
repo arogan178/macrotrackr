@@ -203,7 +203,7 @@ export default function SettingsPage() {
         subtitle={undefined}
         headerChildren={
           <div
-            className="relative flex space-x-1 rounded-lg bg-surface p-1"
+            className="relative flex space-x-1 rounded-xl bg-surface p-1"
             role="tablist"
             aria-label="Settings Tabs"
           >
@@ -258,7 +258,7 @@ export default function SettingsPage() {
           <SettingsLoadingSkeleton />
         ) : settingsQueryError ? (
           <div className="p-6 text-center">
-            <p className="text-vibrant-accent">
+            <p className="text-error">
               Failed to load settings. Please try again.
             </p>
           </div>
@@ -270,7 +270,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <ProfileForm
                   settings={settings}
@@ -288,7 +288,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <BillingForm />
               </motion.div>
@@ -299,7 +299,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <ConnectedAccountsForm />
               </motion.div>
@@ -310,7 +310,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <ChangePasswordForm />
               </motion.div>

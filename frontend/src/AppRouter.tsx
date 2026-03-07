@@ -19,6 +19,7 @@ import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
 
 import MainLayout from "./components/layout/MainLayout";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
@@ -161,64 +162,32 @@ const landingRoute = createRoute({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
-  validateSearch: (search: Record<string, unknown>) => ({
-    limit: Number(search.limit) || 20,
-    offset: Number(search.offset) || 0,
-  }),
-  loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
   loader: async (context_) => {
-    const { deps, context } = context_ as typeof context_ & {
-      deps: { offset: number; limit: number };
+    const { context } = context_ as typeof context_ & {
       context: { queryClient: typeof queryClient };
     };
 
-    const limit = deps.limit || 20;
-    const offset = deps.offset || 0;
-    const page = Math.floor(offset / limit) + 1;
-
-    const [macroTarget, macroHistory, weightGoals, weightLog] =
-      await Promise.all([
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.macros.targets(),
-              queryFn: () =>
-                apiService.macros
-                  .getMacroTarget()
-                  .then((r) => r?.macroTarget ?? null),
-              ...queryConfigs.macros,
-            }),
-          null,
-        ),
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.macros.history(page),
-              queryFn: () => apiService.macros.getHistory(limit, offset),
-              ...queryConfigs.history,
-            }),
-          { entries: [], hasMore: false, total: 0 },
-        ),
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.goals.weight(),
-              queryFn: () =>
-                apiService.goals.getWeightGoals().then((r) => r ?? null),
-              ...queryConfigs.goals,
-            }),
-          null,
-        ),
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.goals.weightLog(),
-              queryFn: () => apiService.goals.getWeightLog(),
-              ...queryConfigs.goals,
-            }),
-          [],
-        ),
-      ]);
+    const [weightGoals, weightLog] = await Promise.all([
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weight(),
+            queryFn: () =>
+              apiService.goals.getWeightGoals().then((r) => r ?? null),
+            ...queryConfigs.goals,
+          }),
+        null,
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weightLog(),
+            queryFn: () => apiService.goals.getWeightLog(),
+            ...queryConfigs.goals,
+          }),
+        [],
+      ),
+    ]);
 
     const latestWeight =
       weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
@@ -226,17 +195,7 @@ export const homeRoute = createRoute({
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
 
-    const history = macroHistory as {
-      entries: unknown[];
-      hasMore: boolean;
-      total: number;
-    };
-
     return {
-      macroTarget,
-      history: history.entries,
-      historyHasMore: history.hasMore,
-      historyTotal: history.total,
       weightGoals: transformedWeightGoals,
       weightLog: Array.isArray(weightLog) ? weightLog : [],
     };
@@ -337,6 +296,30 @@ export const goalsRoute = createRoute({
   ),
 });
 
+const BlogIndexPage = React.lazy(
+  () => import("./features/landing/pages/BlogIndexPage"),
+);
+const BlogArticlePage = React.lazy(
+  () => import("./features/landing/pages/BlogArticlePage"),
+);
+
+const blogIndexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog",
+  validateSearch: (search: Record<string, unknown>) => ({
+    category: search.category as string | undefined,
+    tag: search.tag as string | undefined,
+    q: search.q as string | undefined,
+  }),
+  component: BlogIndexPage,
+});
+
+const blogArticleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog/$slug",
+  component: BlogArticlePage,
+});
+
 // New Clerk sign-in route
 const signInRoute = createRoute({
   getParentRoute: () => rootRoute,
@@ -406,7 +389,7 @@ export const reportingRoute = createRoute({
       context: { queryClient: typeof queryClient };
     };
 
-    const queryDate = deps.startDate || new Date().toISOString().split("T")[0]!;
+    const queryDate = deps.startDate || todayISO();
 
     return safeFetch(
       () =>
@@ -470,6 +453,8 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   termsRoute,
   privacyRoute,
+  blogIndexRoute,
+  blogArticleRoute,
 ]);
 
 const router = createRouter({
