@@ -9,7 +9,7 @@ const contentModules = import.meta.glob("../data/blog-content/*.md", {
 });
 
 function slugify(value: string) {
-  return value.toLowerCase().replaceAll(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return value.toLowerCase().replaceAll(/[^\da-z]+/g, "-").replaceAll(/^-|-$/g, "");
 }
 
 const normalizedPosts: BlogPost[] = [...blogPosts]

@@ -95,8 +95,8 @@ const BlogIndexPage: React.FC = () => {
               onClick={() => handleCategorySelection(undefined)}
               className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                 activeCategory === "all"
-                  ? "text-primary-foreground bg-primary scale-105"
-                  : "text-muted-foreground bg-surface hover:bg-surface-2 hover:text-foreground hover:scale-105 active:scale-95"
+                  ? "text-primary-foreground scale-105 bg-primary"
+                  : "text-muted-foreground bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
               }`}
             >
               All
@@ -113,8 +113,8 @@ const BlogIndexPage: React.FC = () => {
                   }
                   className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                     isActive
-                      ? "text-primary-foreground bg-primary scale-105"
-                      : "text-muted-foreground bg-surface hover:bg-surface-2 hover:text-foreground hover:scale-105 active:scale-95"
+                      ? "text-primary-foreground scale-105 bg-primary"
+                      : "text-muted-foreground bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
                   }`}
                 >
                   {cat.name}
@@ -180,8 +180,8 @@ const BlogIndexPage: React.FC = () => {
                     </div>
                     <div className="flex flex-col justify-between p-6">
                       <div>
-                        <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground">
-                          <span className="text-primary font-semibold">
+                        <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
+                          <span className="font-semibold text-primary">
                             {featuredPost.category}
                           </span>
                           <span>·</span>

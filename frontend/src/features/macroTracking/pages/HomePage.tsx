@@ -20,11 +20,11 @@ import {
   useHomeHeader,
   useNutritionProfile,
 } from "@/features/macroTracking/hooks/useHomePage";
-import { downloadHistoryCsv } from "@/features/macroTracking/utils";
 import type {
   EditingEntry,
   MacroEntryInput,
 } from "@/features/macroTracking/types/macro";
+import { downloadHistoryCsv } from "@/features/macroTracking/utils";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import {
   useAddMacroEntry,
@@ -149,7 +149,7 @@ export default function HomePage() {
       const totalCarbs = selectedEntries.reduce((sum, e) => sum + e.carbs, 0);
       const totalFats = selectedEntries.reduce((sum, e) => sum + e.fats, 0);
 
-      const ingredients = selectedEntries.map((entry) => {
+      const ingredients = selectedEntries.flatMap((entry) => {
         const ingredientName = entry.foodName || entry.mealName || "Ingredient";
         const singleIngredient =
           entry.ingredients && entry.ingredients.length === 1
@@ -198,7 +198,7 @@ export default function HomePage() {
           baseQuantity: 1,
           baseUnit: "unit",
         };
-      }).flat();
+      });
 
       try {
         await createSavedMealMutation.mutateAsync({

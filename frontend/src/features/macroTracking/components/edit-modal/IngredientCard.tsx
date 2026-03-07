@@ -31,7 +31,7 @@ export default function IngredientCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, height: 0, scale: 0.95 }}
       transition={{ duration: 0.2, delay: index * 0.03 }}
-      className="group rounded-2xl border border-border/60 bg-surface p-4 shadow-sm transition-[background-color,border-color,box-shadow] duration-200 hover:border-border hover:shadow-md focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20"
+      className="group rounded-2xl border border-border/60 bg-surface p-4 shadow-sm transition-[background-color,border-color,box-shadow] duration-200 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20 hover:border-border hover:shadow-md"
     >
       <div className="mb-3 flex items-start gap-3">
         <div className="flex-1">
@@ -49,13 +49,13 @@ export default function IngredientCard({
               onUpdateIngredient(index, "name", event_.target.value)
             }
             placeholder="e.g., Chicken Breast"
-            className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-sm font-medium text-foreground placeholder:text-muted/60 transition-colors focus:bg-surface focus:ring-2 focus:ring-primary/40 focus:outline-none"
+            className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-sm font-medium text-foreground transition-colors placeholder:text-muted/60 focus:bg-surface focus:ring-2 focus:ring-primary/40 focus:outline-none"
           />
         </div>
         <button
           type="button"
           onClick={() => onRemoveIngredient(index)}
-          className="mt-5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-transparent text-muted transition-[background-color,border-color,color,transform] duration-200 hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive focus-visible:ring-2 focus-visible:ring-destructive/40 focus-visible:outline-none"
+          className="hover:border-destructive/20 hover:bg-destructive/10 hover:text-destructive focus-visible:ring-destructive/40 mt-5 flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-transparent text-muted transition-[background-color,border-color,color,transform] duration-200 focus-visible:ring-2 focus-visible:outline-none"
           title="Remove ingredient"
           aria-label={`Remove ${ingredient.name || "ingredient"}`}
         >
@@ -100,7 +100,7 @@ export default function IngredientCard({
               placeholder="0"
               min={0}
               step={0.1}
-              className="w-full rounded-xl bg-surface-2 py-2.5 pr-8 pl-4 text-right text-sm font-medium text-foreground tabular-nums placeholder:text-muted/60 transition-colors focus:bg-surface focus:ring-2 focus:ring-protein/40 focus:outline-none"
+              className="w-full rounded-xl bg-surface-2 py-2.5 pr-8 pl-4 text-right text-sm font-medium text-foreground tabular-nums transition-colors placeholder:text-muted/60 focus:bg-surface focus:ring-2 focus:ring-protein/40 focus:outline-none"
             />
             <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-xs text-muted">
               g
@@ -132,7 +132,7 @@ export default function IngredientCard({
               placeholder="0"
               min={0}
               step={0.1}
-              className="w-full rounded-xl bg-surface-2 py-2.5 pr-8 pl-4 text-right text-sm font-medium text-foreground tabular-nums placeholder:text-muted/60 transition-colors focus:bg-surface focus:ring-2 focus:ring-carbs/40 focus:outline-none"
+              className="w-full rounded-xl bg-surface-2 py-2.5 pr-8 pl-4 text-right text-sm font-medium text-foreground tabular-nums transition-colors placeholder:text-muted/60 focus:bg-surface focus:ring-2 focus:ring-carbs/40 focus:outline-none"
             />
             <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-xs text-muted">
               g
@@ -164,7 +164,7 @@ export default function IngredientCard({
               placeholder="0"
               min={0}
               step={0.1}
-              className="w-full rounded-xl bg-surface-2 py-2.5 pr-8 pl-4 text-right text-sm font-medium text-foreground tabular-nums placeholder:text-muted/60 transition-colors focus:bg-surface focus:ring-2 focus:ring-fats/40 focus:outline-none"
+              className="w-full rounded-xl bg-surface-2 py-2.5 pr-8 pl-4 text-right text-sm font-medium text-foreground tabular-nums transition-colors placeholder:text-muted/60 focus:bg-surface focus:ring-2 focus:ring-fats/40 focus:outline-none"
             />
             <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-xs text-muted">
               g
@@ -200,7 +200,7 @@ export default function IngredientCard({
                 placeholder="Amount"
                 min={0}
                 step={0.1}
-                className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-sm font-medium text-foreground tabular-nums placeholder:text-muted/60 transition-colors focus:bg-surface focus:ring-2 focus:ring-primary/40 focus:outline-none"
+                className="w-full rounded-xl bg-surface-2 px-4 py-2.5 text-sm font-medium text-foreground tabular-nums transition-colors placeholder:text-muted/60 focus:bg-surface focus:ring-2 focus:ring-primary/40 focus:outline-none"
               />
             </div>
             <input
@@ -212,7 +212,7 @@ export default function IngredientCard({
               }
               placeholder="g"
               list={`units-${index}`}
-              className="w-20 rounded-xl bg-surface-2 px-3 py-2.5 text-center text-sm font-medium text-foreground placeholder:text-muted/60 transition-colors focus:bg-surface focus:ring-2 focus:ring-primary/40 focus:outline-none"
+              className="w-20 rounded-xl bg-surface-2 px-3 py-2.5 text-center text-sm font-medium text-foreground transition-colors placeholder:text-muted/60 focus:bg-surface focus:ring-2 focus:ring-primary/40 focus:outline-none"
             />
             <datalist id={`units-${index}`}>
               <option value="g" />
@@ -232,7 +232,7 @@ export default function IngredientCard({
 
         <div>
           <div className="mb-2 block text-xs font-medium text-muted">Cals</div>
-          <div className="flex h-10.5 items-center justify-end rounded-xl bg-surface-2 px-4 text-right text-base font-semibold tabular-nums text-foreground">
+          <div className="flex h-10.5 items-center justify-end rounded-xl bg-surface-2 px-4 text-right text-base font-semibold text-foreground tabular-nums">
             {calories}
           </div>
         </div>

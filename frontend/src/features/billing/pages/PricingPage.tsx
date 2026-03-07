@@ -10,8 +10,8 @@ import { CircleQuestionMarkIcon } from "@/components/ui";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import { useStore } from "@/store/store";
 import usePageMetadata from "@/hooks/usePageMetadata";
+import { useStore } from "@/store/store";
 import { createCheckoutSession } from "@/utils/apiBilling";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
