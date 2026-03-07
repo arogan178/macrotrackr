@@ -31,23 +31,30 @@ import { cn } from "@/lib/classnameUtilities";
 const cardVariants = {
   default: formStyles.card.container,
   transparent: cn(
-    "rounded-xl border border-neutral-800/60",
-    "bg-neutral-900/60 p-4",
-    "hover:border-neutral-700 hover:bg-neutral-900/80",
+    "rounded-xl border border-border",
+    "bg-transparent p-4",
+    "hover:border-white/20",
     "transition-colors duration-150",
   ),
+  interactive: cn(
+    formStyles.card.container,
+    "group cursor-pointer",
+    "transition-colors duration-300 ease-out",
+    "hover:border-white/20"
+  )
 };
 
 function CardContainer({
   children,
   className = "",
   variant = "default",
+  ...properties
 }: CardContainerProps) {
   const containerClasses = useMemo(() => {
     return cn(cardVariants[variant ?? "default"], className);
   }, [variant, className]);
 
-  return <div className={containerClasses}>{children}</div>;
+  return <div className={containerClasses} {...properties}>{children}</div>;
 }
 
 export default memo(CardContainer);

@@ -1,7 +1,5 @@
-export { default as AuthForm } from "./AuthForm";
-export { default as ButtonModeToggle } from "./ButtonModeToggle";
-export { default as ForgotPasswordForm } from "./ForgotPasswordForm";
-export { default as LoginForm } from "./LoginForm";
-export { default as RegisterForm } from "./RegisterForm";
-export { StepOne, StepThree, StepTwo } from "./RegisterFormSteps";
-export { StepIndicator } from "./StepIndicator";
+export { default as AuthPageShell } from "./AuthPageShell";
+export { ClerkSignInForm } from "./ClerkSignInForm";
+export { ClerkSignUpForm } from "./ClerkSignUpForm";
+export { ProfileCreationForm } from "./ProfileCreationForm";
+export { default as ResetPasswordForm } from "./ResetPasswordForm";

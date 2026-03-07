@@ -2,6 +2,7 @@ import { useClerk } from "@clerk/clerk-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 
+import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { apiService } from "@/utils/apiServices";
 
@@ -93,8 +94,9 @@ export default function SSOCallbackPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-surface p-4">
-        <div className="w-full max-w-md rounded-lg border border-border bg-surface-2 p-8 text-center shadow-lg">
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
+        <PageBackground />
+        <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-surface p-8 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
             <svg
               className="h-8 w-8 text-error"
@@ -115,10 +117,11 @@ export default function SSOCallbackPage() {
           </h1>
           <p className="mb-6 text-muted">{error}</p>
           <button
+            type="button"
             onClick={() =>
               navigate({ to: "/login", search: { returnTo: undefined } })
             }
-            className="rounded-md bg-primary px-6 py-2 text-white transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
             Try Again
           </button>
@@ -128,9 +131,12 @@ export default function SSOCallbackPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface">
-      <div className="text-center">
-        <LoadingSpinner size="lg" className="mx-auto mb-4" />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background text-foreground">
+      <PageBackground />
+      <div className="relative z-10 text-center">
+        <div className="mx-auto mb-4">
+          <LoadingSpinner size="lg" />
+        </div>
         <h1 className="text-xl font-semibold text-foreground">
           Completing sign-in...
         </h1>

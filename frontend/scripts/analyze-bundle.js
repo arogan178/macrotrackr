@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { execSync } from "child_process";
-import { existsSync, readdirSync, statSync } from "fs";
-import { join } from "path";
+import { existsSync, readdirSync, readFileSync, statSync } from "fs";
+import { basename, join } from "path";
 
 const DIST_DIR = join(process.cwd(), "dist");
 const INITIAL_BUNDLE_THRESHOLD_KB = 200; // Alert if initial JS > 200KB gzipped
@@ -15,6 +15,25 @@ function getGzippedSize(filePath) {
   }
   // Estimate gzip ratio (~33% of original)
   return Math.floor(statSync(filePath).size * 0.33);
+}
+
+function getEntryChunkName() {
+  const indexHtmlPath = join(DIST_DIR, "index.html");
+
+  if (!existsSync(indexHtmlPath)) {
+    return null;
+  }
+
+  const indexHtml = readFileSync(indexHtmlPath, "utf8");
+  const entryScriptMatch = indexHtml.match(
+    /<script[^>]*type="module"[^>]*src="([^"]+\.js)"/,
+  );
+
+  if (!entryScriptMatch) {
+    return null;
+  }
+
+  return basename(entryScriptMatch[1]);
 }
 
 function getBundleSizes() {
@@ -54,8 +73,12 @@ function getBundleSizes() {
   let totalRaw = 0;
   let totalGzip = 0;
 
-  // Identify initial bundle (index.js - the main entry point)
-  const initialBundle = fileSizes.find((f) => f.name.startsWith("index."));
+  // Identify the actual entry bundle from dist/index.html rather than
+  // assuming the largest index.* chunk is the initial page bundle.
+  const entryChunkName = getEntryChunkName();
+  const initialBundle = entryChunkName
+    ? fileSizes.find((file) => file.name === entryChunkName)
+    : null;
   const initialGzipKB = initialBundle
     ? (initialBundle.gzipSize / 1024).toFixed(2)
     : "N/A";
@@ -71,7 +94,9 @@ function getBundleSizes() {
   const totalRawKB = (totalRaw / 1024).toFixed(2);
   const totalGzipKB = (totalGzip / 1024).toFixed(2);
 
-  console.log(`\nInitial Bundle (index.js): ${initialGzipKB} KB gzipped`);
+  console.log(
+    `\nInitial Bundle (${entryChunkName || "entry script not found"}): ${initialGzipKB} KB gzipped`,
+  );
   console.log(
     `Total JS Size: ${totalGzipKB} KB gzipped (${totalRawKB} KB raw)`,
   );

@@ -1,14 +1,14 @@
 // src/lib/route-adapter.ts
-import type { ClerkAuthContext } from "../middleware/clerkAuth";
 import type { Database } from "bun:sqlite";
+
+import type { ClerkAuthContext } from "../middleware/clerkAuth";
 import { getInternalUserId } from "./clerk-utils";
 import { NotFoundError } from "./errors";
 
 /**
- * Adapts Clerk auth context to legacy format expected by existing routes
- * This provides backward compatibility during migration
+ * Resolve the internal application user identity from Clerk auth context.
  */
-export function adaptClerkToLegacy(
+export function resolveAuthenticatedUser(
   context: ClerkAuthContext & { db?: Database }
 ): { userId: number; email?: string; firstName?: string; lastName?: string } {
   const { user, internalUserId, db } = context;
@@ -34,23 +34,4 @@ export function adaptClerkToLegacy(
     firstName: user.firstName,
     lastName: user.lastName,
   };
-}
-
-/**
- * Type guard to check if context has Clerk auth
- */
-export function hasClerkAuth(context: any): context is ClerkAuthContext {
-  return context?.user?.clerkUserId !== undefined;
-}
-
-/**
- * Get user ID from context (handles both legacy and Clerk auth)
- */
-export function getUserId(context: any): number {
-  if (hasClerkAuth(context)) {
-    const legacy = adaptClerkToLegacy(context);
-    return legacy.userId;
-  }
-  // Legacy format
-  return context?.user?.userId;
 }

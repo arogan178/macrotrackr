@@ -68,7 +68,7 @@ export default function ProductPreviewSection({
   return (
     <section className="w-full py-16" aria-label="Product preview gallery">
       <div className="mx-auto max-w-6xl px-6">
-        <h2 className="mb-8 text-center text-3xl font-bold tracking-tight">
+        <h2 className="mb-8 text-center text-3xl font-bold tracking-tight text-balance">
           See MacroTrackr in Action
         </h2>
 
