@@ -7,6 +7,7 @@ import { MacroDailyTotals, MacroEntry, MealType } from "@/types/macro";
 
 // Re-export unit utilities
 export * from "./units";
+export * from "./historyExport";
 
 // State management utilities
 export interface OptimisticUpdateState {

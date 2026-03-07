@@ -3,11 +3,11 @@ import { useMemo } from "react";
 import { MacroEntry } from "@/types/macro";
 
 import {
-  getDateRangeISOStrings,
   getDayString,
+  getDateRangeData,
   getMonthString,
   getWeekString,
-} from "./useReportingLogic";
+} from "../utils";
 
 /**
  * Custom hook to compute macro density breakdown (grouped by day/week/month) for charting.
@@ -27,7 +27,7 @@ export function useMacroDensityBreakdown(
       return [];
     }
     const { startDate: startDateString, endDate: endDateString } =
-      getDateRangeISOStrings(dateRange);
+      getDateRangeData(dateRange);
     const startDate = new Date(startDateString + "T00:00:00");
     const endDate = new Date(endDateString + "T23:59:59");
 

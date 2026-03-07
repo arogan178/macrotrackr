@@ -1,60 +1,93 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import React from "react";
 
-const Footer: React.FC = () => (
-    <footer className="relative z-10 border-t border-border bg-background px-6 py-12 lg:px-8">
+import LogoButton from "@/components/layout/LogoButton";
+
+const footerLinkClasses =
+  "inline-flex min-h-11 items-center rounded-lg py-1 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+
+const Footer: React.FC = () => {
+  const navigate = useNavigate();
+
+  return (
+    <footer className="relative z-10 border-t border-border/70 bg-background/90 px-6 py-8 backdrop-blur-sm lg:px-8">
       <div className="mx-auto max-w-7xl">
-        <div className="mb-12 grid grid-cols-1 gap-8 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.2fr)_repeat(2,minmax(0,0.7fr))] md:items-start md:gap-6">
           <div>
-            <h3 className="mb-4 text-xl font-semibold tracking-tight text-foreground">
-              MacroTrackr
-            </h3>
-            <p className="max-w-md text-sm text-balance text-muted">
+            <div className="mb-3 -ml-2">
+              <LogoButton
+                compact
+                onClick={() => navigate({ to: "/" })}
+                ariaLabel="MacroTrackr home"
+              />
+            </div>
+            <p className="max-w-md text-sm leading-7 text-muted">
               The nutrition tracker built for real results. Log faster, see
-              clearer, and stay consistent with tools that work as hard as you do.
+              clearer, and stay consistent with tools that work as hard as you
+              do.
+            </p>
+            <p className="mt-3 text-xs text-muted">
+              &copy; {new Date().getFullYear()} MacroTrackr. All rights
+              reserved.
             </p>
           </div>
-        </div>
 
-        <div className="flex flex-col items-center justify-between border-t border-border-2 pt-8 md:flex-row">
-          <div className="flex flex-col items-center gap-4 text-muted md:flex-row md:gap-8">
-            <p className="text-sm">
-              &copy; {new Date().getFullYear()} MacroTrackr. All rights reserved.
-            </p>
-            <nav className="flex items-center gap-4">
-              <Link
-                to="/terms"
-                className="text-sm transition-colors hover:text-foreground"
-              >
-                Terms
-              </Link>
-              <Link
-                to="/privacy"
-                className="text-sm transition-colors hover:text-foreground"
-              >
-                Privacy
-              </Link>
-              <a
-                href="mailto:contact@macrotrackr.com"
-                className="text-sm transition-colors hover:text-foreground"
-              >
-                Contact
-              </a>
-              <a
-                href="mailto:support@macrotrackr.com"
-                className="text-sm transition-colors hover:text-foreground"
-              >
-                Support
-              </a>
-            </nav>
+          <div>
+            <h4 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
+              Product
+            </h4>
+            <ul className="flex flex-col gap-1 text-sm text-muted">
+              <li>
+                <a href="/#features" className={footerLinkClasses}>
+                  Features
+                </a>
+              </li>
+              <li>
+                <a href="/#pricing" className={footerLinkClasses}>
+                  Pricing
+                </a>
+              </li>
+              <li>
+                <Link
+                  to="/blog"
+                  search={{ category: undefined, tag: undefined, q: undefined }}
+                  className={footerLinkClasses}
+                >
+                  Blog
+                </Link>
+              </li>
+            </ul>
           </div>
 
-          <div className="mt-6 md:mt-0">
-            <p className="text-sm tracking-tight text-muted">Your goals, tracked daily.</p>
+          <div>
+            <h4 className="mb-3 text-sm font-semibold tracking-tight text-foreground">
+              Legal
+            </h4>
+            <ul className="flex flex-col gap-1 text-sm text-muted">
+              <li>
+                <Link to="/terms" className={footerLinkClasses}>
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className={footerLinkClasses}>
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <a
+                  href="mailto:contact@macrotrackr.com"
+                  className={footerLinkClasses}
+                >
+                  Contact
+                </a>
+              </li>
+            </ul>
           </div>
         </div>
       </div>
     </footer>
-);
+  );
+};
 
 export default Footer;

@@ -1,13 +1,37 @@
 [
   {
     "slug": "v2-launch-complete-ui-overhaul",
-    "title": "MacroTrackr v2.0: A Complete UI Overhaul",
-    "excerpt": "We're thrilled to announce the launch of MacroTrackr v2.0, featuring a completely redesigned interface, MDX-powered blog, new Hybrid Meal Grouping, and enhanced tracking capabilities.",
+    "title": "MacroTrackr v2.0: Faster Editing, Better Grouping, Cleaner Reporting",
+    "excerpt": "What changed in v2.0, why grouped meals are more trustworthy now, and where the reporting and edit flows got tighter.",
     "date": "2026-03-01",
     "category": "Releases",
     "author": "MacroTrackr Team",
-    "readingTime": "5 min",
-    "image": "https://images.unsplash.com/photo-1618761714954-0b8cd0026356?auto=format&fit=crop&q=80&w=1000"
+    "readingTime": "2 min",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Product", "Release Notes", "Meal Grouping", "Reporting"],
+    "featured": true
+  },
+  {
+    "slug": "how-to-estimate-restaurant-meals-without-guessing-blind",
+    "title": "How to Estimate Restaurant Meals Without Guessing Blind",
+    "excerpt": "A practical framework for logging restaurant meals when there is no nutrition label, no exact recipe, and no time for perfectionism.",
+    "date": "2026-02-24",
+    "category": "Tips",
+    "author": "MacroTrackr Team",
+    "readingTime": "3 min",
+    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Eating Out", "Consistency", "Calories", "Protein"]
+  },
+  {
+    "slug": "why-weekly-averages-beat-perfect-days",
+    "title": "Why Weekly Averages Beat Perfect Days",
+    "excerpt": "If you keep swinging between over-control and all-or-nothing weekends, your weekly average is the metric that will calm everything down.",
+    "date": "2026-02-18",
+    "category": "Nutrition Guides",
+    "author": "MacroTrackr Team",
+    "readingTime": "3 min",
+    "image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Mindset", "Fat Loss", "Consistency", "Analytics"]
   },
   {
     "slug": "macro-tracking-tips-for-beginners",
@@ -17,7 +41,8 @@
     "category": "Tips",
     "author": "MacroTrackr Team",
     "readingTime": "4 min",
-    "image": "https://images.unsplash.com/photo-1490645935967-10de6ba17061?auto=format&fit=crop&q=80&w=1000"
+    "image": "https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Beginners", "Habits", "Meal Prep", "Tracking Basics"]
   },
   {
     "slug": "understanding-protein-intake",
@@ -26,8 +51,9 @@
     "date": "2026-01-28",
     "category": "Nutrition Guides",
     "author": "MacroTrackr Team",
-    "readingTime": "8 min",
-    "image": "https://images.unsplash.com/photo-1533709475502-dfa69b76c8c4?auto=format&fit=crop&q=80&w=1000"
+    "readingTime": "6 min",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Protein", "Recovery", "Muscle Gain", "Nutrition Basics"]
   },
   {
     "slug": "meal-prep-for-macro-tracking",
@@ -37,7 +63,8 @@
     "category": "Tips",
     "author": "MacroTrackr Team",
     "readingTime": "6 min",
-    "image": "https://images.unsplash.com/photo-1543352634-99a5d50ae78e?auto=format&fit=crop&q=80&w=1000"
+    "image": "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Meal Prep", "Batch Cooking", "Planning", "Food Scale"]
   },
   {
     "slug": "carbs-fats-balance",
@@ -46,7 +73,8 @@
     "date": "2025-12-20",
     "category": "Nutrition Guides",
     "author": "MacroTrackr Team",
-    "readingTime": "7 min",
-    "image": "https://images.unsplash.com/photo-1490818387583-1baba5e638ca?auto=format&fit=crop&q=80&w=1000"
+    "readingTime": "6 min",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Carbs", "Fats", "Performance", "Personalization"]
   }
 ]

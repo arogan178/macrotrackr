@@ -107,9 +107,7 @@ app.use(rateLimiters.api);
 // This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
 app.use(clerkAuthMiddleware);
 
-// Public auth routes (no authentication required)
-// Note: Legacy login/register are kept for backward compatibility
-// but are deprecated in favor of Clerk authentication
+// Public auth routes (password reset + Clerk sync)
 app.use(authRoutes);
 
 // All other routes

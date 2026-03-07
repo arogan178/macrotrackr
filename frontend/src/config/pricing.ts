@@ -40,7 +40,7 @@ export const PRICING_PLANS = {
     buttonText: "Get Started For Free",
     buttonVariant: "ghost",
     buttonClassName:
-      "w-full bg-surface-2 hover:bg-surface-3 text-foreground border border-border hover:border-primary transition-all duration-300 text-xl px-12 py-4 font-semibold",
+      "w-full border border-border bg-surface-2 px-12 py-4 text-xl font-semibold text-foreground transition-[background-color,border-color,box-shadow] duration-300 hover:border-primary hover:bg-surface-3",
     featureIconColor: "text-primary",
     featureTextClass: "text-foreground",
     cardClassName: "bg-surface hover:bg-surface-2 transition-colors duration-300",
@@ -63,7 +63,7 @@ export const PRICING_PLANS = {
     buttonText: "Get Pro Now",
     buttonVariant: "primary",
     buttonClassName:
-      "w-full bg-primary hover:bg-secondary shadow-success transition-all duration-300 text-xl px-12 py-4 font-semibold",
+      "w-full bg-primary px-12 py-4 text-xl font-semibold shadow-success transition-[background-color,box-shadow,transform] duration-300 hover:bg-secondary",
     featureIconColor: "text-primary",
     featureTextClass: "text-foreground font-medium",
     cardClassName:

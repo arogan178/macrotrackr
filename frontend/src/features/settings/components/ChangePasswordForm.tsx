@@ -256,7 +256,7 @@ const ChangePasswordForm = () => {
                 <div className="flex items-center gap-2">
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-3">
                     <div
-                      className={`h-full transition-all duration-300 ${getStrengthColor()}`}
+                      className={`h-full transition-[width,background-color] duration-300 ${getStrengthColor()}`}
                       style={{ width: `${(passwordStrength / 4) * 100}%` }}
                     />
                   </div>

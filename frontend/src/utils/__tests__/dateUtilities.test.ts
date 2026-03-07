@@ -8,7 +8,6 @@ import {
   getDatesBetween,
   getDaysInRange,
   getDisplayDate,
-  getTodayISO,
   isValidDateString,
   isWithinDateRange,
   todayISO,
@@ -25,13 +24,6 @@ describe('Date Utilities', () => {
       const result = todayISO()
       const date = new Date(result)
       expect(date.getTime()).not.toBeNaN()
-    })
-  })
-
-  describe('getTodayISO', () => {
-    it('should return today in ISO format', () => {
-      const result = getTodayISO()
-      expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/)
     })
   })
 

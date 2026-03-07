@@ -17,6 +17,7 @@
     "typecheck": "bun run --cwd backend typecheck & bun run --cwd frontend typecheck"
   },
   "devDependencies": {
+    "@types/react-syntax-highlighter": "^15.5.13",
     "typescript": "^5.9.3"
   },
   "dependencies": {

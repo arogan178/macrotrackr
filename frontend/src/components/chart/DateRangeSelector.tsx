@@ -1,7 +1,6 @@
-import { motion } from "motion/react";
-
 import { Button, ExportIcon, IconButton, LockIcon, TabBar } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
+import AnalyticsToolbar from "./AnalyticsToolbar";
 
 interface DateRangeSelectorProps {
   currentRange: string;
@@ -43,13 +42,8 @@ export default function DateRangeSelector({
   }));
 
   return (
-    <motion.div
-      layout
-      className="sticky top-24 z-40 mb-6 rounded-xl border border-border bg-surface p-3"
-      style={{ position: "sticky" as const }}
-    >
+    <AnalyticsToolbar>
       <div className="flex w-full flex-wrap items-center gap-4">
-        {/* Time Period Selector */}
         <div className="flex items-center">
           <span className="mr-3 font-medium text-foreground">Time Period:</span>
           <TabBar
@@ -85,7 +79,7 @@ export default function DateRangeSelector({
             onClick={onExportClick}
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
-            className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-all duration-200 hover:bg-primary/80 disabled:opacity-50"
+            className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
             icon={<ExportIcon />}
             iconPosition="left"
           >
@@ -93,6 +87,6 @@ export default function DateRangeSelector({
           </Button>
         </div>
       </div>
-    </motion.div>
+    </AnalyticsToolbar>
   );
 }

@@ -235,7 +235,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
         <CardContainer
           variant="transparent"
-          className={`flex items-start gap-4 p-5 transition-all duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
+          className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
           <TrendingUpIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
@@ -254,7 +254,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         </CardContainer>
         <CardContainer
           variant="transparent"
-          className={`flex items-start gap-4 p-5 transition-all duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
+          className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
           <CalendarIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
@@ -272,7 +272,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         </CardContainer>
         <CardContainer
           variant="transparent"
-          className={`flex items-start gap-4 p-5 transition-all duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
+          className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
           <TargetIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>

@@ -1,4 +1,4 @@
-import { Link, useLocation } from "@tanstack/react-router";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
 import React from "react";
 
@@ -8,7 +8,9 @@ import { getButtonClasses } from "@/components/ui/Button";
 const Header: React.FC = () => {
   const posthog = usePostHog();
   const location = useLocation();
+  const navigate = useNavigate({ from: "/" });
   const isLandingPage = location.pathname === "/";
+  const isBlogPage = location.pathname.startsWith("/blog");
 
   const handlePricingClick = (event: React.MouseEvent<HTMLAnchorElement>) => {
     event.preventDefault();
@@ -35,11 +37,11 @@ const Header: React.FC = () => {
   };
 
   return (
-    <header className="fixed top-0 right-0 left-0 z-50 border-b border-border bg-background/80 backdrop-blur-md transition-colors duration-200">
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between px-6">
+    <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
+      <div className="supports-backdrop-filter:bg-background/75 mx-auto flex min-h-14 max-w-7xl items-center justify-between rounded-2xl border border-border/70 bg-background/85 px-4 shadow-lg shadow-black/5 backdrop-blur-md transition-colors duration-200 sm:px-6">
         {/* Left: Brand */}
         <div className="flex w-1/3 items-center justify-start">
-          <LogoButton className="!h-auto !p-0" />
+          <LogoButton compact onClick={() => navigate({ to: "/" })} />
         </div>
 
         {/* Center: Navigation (Desktop) */}
@@ -49,25 +51,28 @@ const Header: React.FC = () => {
               <a
                 href="#features"
                 onClick={handleFeaturesClick}
-                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+                className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
               >
                 Features
               </a>
               <a
                 href="#pricing"
                 onClick={handlePricingClick}
-                className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
+                className="inline-flex min-h-11 cursor-pointer items-center rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
               >
                 Pricing
               </a>
             </>
           ) : null}
-          <Link
-            to="/blog"
-            className="rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground"
-          >
-            Blog
-          </Link>
+          {!isBlogPage && (
+            <Link
+              to="/blog"
+              search={{ category: undefined, tag: undefined, q: undefined }}
+              className="inline-flex min-h-11 items-center rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+            >
+              Blog
+            </Link>
+          )}
         </nav>
 
         {/* Right: Auth */}
@@ -75,7 +80,7 @@ const Header: React.FC = () => {
           <Link
             to="/login"
             search={{ returnTo: undefined }}
-            className="hidden rounded-full px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-surface hover:text-foreground sm:inline-block"
+            className="hidden min-h-11 items-center rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:inline-flex"
           >
             Log In
           </Link>

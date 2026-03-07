@@ -3,8 +3,8 @@ import { useState } from "react";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
 import { useStore } from "@/store/store";
 
-import { StarIcon } from "./Icons";
 import IconButton from "./IconButton";
+import { StarIcon } from "./Icons";
 
 interface SavedMealButtonProps {
   mealName: string;

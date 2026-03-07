@@ -63,7 +63,7 @@ const PercentageLabel = (properties: PercentageLabelProps) => {
     >
       <div className="flex h-full w-full items-center justify-center overflow-visible">
         <span
-          className="whitespace-nowrap rounded-sm bg-black/60 px-1.5 py-0.5 text-[13px] font-bold text-white"
+          className="rounded-sm bg-black/60 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-white"
           style={{
             textShadow: "0 1px 2px rgba(0,0,0,0.8)",
           }}
@@ -96,7 +96,7 @@ const MacroDensityBreakdown = ({
   return (
     <ChartCard title="Macro Distribution" className="w-full">
       {loading || showNoData ? (
-        <div className="flex h-[300px] w-full items-center justify-center">
+        <div className="flex h-75 w-full items-center justify-center">
           {loading ? (
             <div className="animate-pulse text-sm text-muted">
               Loading macro distribution...

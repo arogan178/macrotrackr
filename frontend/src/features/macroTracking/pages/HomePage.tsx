@@ -1,5 +1,5 @@
 import { useLoaderData } from "@tanstack/react-router";
-import { useCallback, useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 
 import { homeRoute } from "@/AppRouter";
 import CardContainer from "@/components/form/CardContainer";
@@ -20,11 +20,11 @@ import {
   useHomeHeader,
   useNutritionProfile,
 } from "@/features/macroTracking/hooks/useHomePage";
+import { downloadHistoryCsv } from "@/features/macroTracking/utils";
 import type {
   EditingEntry,
   MacroEntryInput,
 } from "@/features/macroTracking/types/macro";
-import type { MacroEntry } from "@/types/macro";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import {
   useAddMacroEntry,
@@ -36,14 +36,16 @@ import {
 import { useCreateSavedMeal, useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
-import { getTodayISO } from "@/utils/dateUtilities";
+import type { MacroEntry } from "@/types/macro";
+import { apiService } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
 
 export default function HomePage() {
   usePageDataSync();
 
   const { data: user } = useUser();
 
-  const today = getTodayISO();
+  const today = todayISO();
   const {
     data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
   } = useMacroDailyTotals(today);
@@ -69,10 +71,11 @@ export default function HomePage() {
   const deleteSavedMealMutation = useDeleteSavedMeal();
   const { data: savedMealsData } = useSavedMeals();
   const savedMeals = savedMealsData?.meals ?? [];
+  const [isExportingHistory, setIsExportingHistory] = React.useState(false);
 
   const savedEntryIds = useMemo(() => {
     const ids = new Set<number>();
-    history.forEach((entry) => {
+    for (const entry of history) {
       const entryName = entry.foodName || entry.mealName || "Saved Meal";
       const isSaved = savedMeals.some((sm) => 
         sm.name === entryName && 
@@ -84,7 +87,7 @@ export default function HomePage() {
       if (isSaved) {
         ids.add(entry.id);
       }
-    });
+    }
     return ids;
   }, [history, savedMeals]);
 
@@ -145,13 +148,57 @@ export default function HomePage() {
       const totalProtein = selectedEntries.reduce((sum, e) => sum + e.protein, 0);
       const totalCarbs = selectedEntries.reduce((sum, e) => sum + e.carbs, 0);
       const totalFats = selectedEntries.reduce((sum, e) => sum + e.fats, 0);
-      
-      const ingredients = selectedEntries.map(e => ({
-        name: e.foodName || e.mealName || "Ingredient",
-        protein: e.protein,
-        carbs: e.carbs,
-        fats: e.fats,
-      }));
+
+      const ingredients = selectedEntries.map((entry) => {
+        const ingredientName = entry.foodName || entry.mealName || "Ingredient";
+        const singleIngredient =
+          entry.ingredients && entry.ingredients.length === 1
+            ? entry.ingredients[0]
+            : undefined;
+
+        if (singleIngredient) {
+          return {
+            ...singleIngredient,
+            name: singleIngredient.name || ingredientName,
+            sourceEntryName: ingredientName,
+            sourceEntryId: entry.id,
+            baseProtein: singleIngredient.baseProtein ?? singleIngredient.protein,
+            baseCarbs: singleIngredient.baseCarbs ?? singleIngredient.carbs,
+            baseFats: singleIngredient.baseFats ?? singleIngredient.fats,
+            baseQuantity: singleIngredient.baseQuantity ?? singleIngredient.quantity,
+            baseUnit: singleIngredient.baseUnit ?? singleIngredient.unit,
+          };
+        }
+
+        if (entry.ingredients && entry.ingredients.length > 1) {
+          return entry.ingredients.map((ingredient) => ({
+            ...ingredient,
+            sourceEntryName: ingredientName,
+            sourceEntryId: entry.id,
+            baseProtein: ingredient.baseProtein ?? ingredient.protein,
+            baseCarbs: ingredient.baseCarbs ?? ingredient.carbs,
+            baseFats: ingredient.baseFats ?? ingredient.fats,
+            baseQuantity: ingredient.baseQuantity ?? ingredient.quantity,
+            baseUnit: ingredient.baseUnit ?? ingredient.unit,
+          }));
+        }
+
+        return {
+          name: ingredientName,
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          quantity: 1,
+          unit: "unit",
+          sourceEntryName: ingredientName,
+          sourceEntryId: entry.id,
+          baseProtein: entry.protein,
+          baseCarbs: entry.carbs,
+          baseFats: entry.fats,
+          baseQuantity: 1,
+          baseUnit: "unit",
+        };
+      }).flat();
 
       try {
         await createSavedMealMutation.mutateAsync({
@@ -196,6 +243,16 @@ export default function HomePage() {
     },
     [deleteMacroEntryMutation],
   );
+
+  const handleExportHistory = useCallback(async () => {
+    setIsExportingHistory(true);
+    try {
+      const response = await apiService.macros.getAllHistory();
+      downloadHistoryCsv(response.entries as MacroEntry[]);
+    } finally {
+      setIsExportingHistory(false);
+    }
+  }, []);
 
   const handleCloseModal = useCallback(() => {
     setEditingEntry(undefined);
@@ -269,6 +326,8 @@ export default function HomePage() {
                   onUnsaveMeal={handleUnsaveMeal}
                   savedMealIds={savedEntryIds}
                   onGroupMeals={handleGroupMeals}
+                  onExportCsv={handleExportHistory}
+                  isExportingCsv={isExportingHistory}
                 />
               )}
             </div>

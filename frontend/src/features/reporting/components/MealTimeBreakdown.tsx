@@ -169,11 +169,11 @@ function MealTimeBreakdown({
                 <div className="text-3xl font-bold tracking-tight text-foreground">
                   <AnimatedNumber value={totalValue} toFixedValue={0} duration={0.5} />
                 </div>
-                <div className="text-xs font-medium uppercase tracking-wider text-muted">
+                <div className="text-xs font-medium tracking-wider text-muted uppercase">
                   {selectedStat === "count" ? "Total Meals" : "Avg / Day"}
                 </div>
                 {selectedStat !== "count" && (
-                  <div className="text-[10px] uppercase text-muted/60">
+                  <div className="text-[10px] text-muted/60 uppercase">
                     {getUnitForStat(selectedStat)}
                   </div>
                 )}

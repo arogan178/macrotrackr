@@ -1,13 +1,15 @@
-import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
-import { NumberField, TextField } from "@/components/form";
+import { UnitConverter, type UnitType } from "@/features/macroTracking/utils/units";
 import Modal from "@/components/ui/Modal";
+import { useBeforeUnload } from "@/hooks";
 import { Ingredient, MacroEntry } from "@/types/macro";
+import IngredientsPanel from "@/features/macroTracking/components/edit-modal/IngredientsPanel";
+import MealDetailsSection from "@/features/macroTracking/components/edit-modal/MealDetailsSection";
 
 interface EditModalProps {
   entry: MacroEntry | undefined;
-  onSave: (entry: MacroEntry) => void;
+  onSave: (entry: MacroEntry) => void | Promise<void>;
   onClose: () => void;
   isSaving: boolean;
   isOpen: boolean;
@@ -18,14 +20,30 @@ const calculateTotalsFromIngredients = (ingredients: Ingredient[]) => {
   let totalProtein = 0;
   let totalCarbs = 0;
   let totalFats = 0;
-  
+
   for (const ingredient of ingredients) {
     totalProtein += ingredient.protein || 0;
     totalCarbs += ingredient.carbs || 0;
     totalFats += ingredient.fats || 0;
   }
-  
+
   return { protein: totalProtein, carbs: totalCarbs, fats: totalFats };
+};
+
+const roundValue = (value: number) => Number(value.toFixed(1));
+
+// Normalize quantity to comparable value (weight in grams, volume in ml, or unit)
+const normalizeQuantity = (quantity: number, unit: string): { value: number; type: 'weight' | 'volume' | 'unit' } => {
+  const normalizedUnit = unit === "l" ? "L" : unit;
+  const unitType = normalizedUnit as UnitType;
+
+  if (UnitConverter.isWeightUnit(unitType)) {
+    return { value: UnitConverter.convert(quantity, unitType, "g"), type: 'weight' };
+  }
+  if (UnitConverter.isVolumeUnit(unitType)) {
+    return { value: UnitConverter.convert(quantity, unitType, "ml"), type: 'volume' };
+  }
+  return { value: quantity, type: 'unit' };
 };
 
 export default function EditModal({
@@ -36,15 +54,70 @@ export default function EditModal({
   isOpen,
 }: EditModalProps) {
   const [editedEntry, setEditedEntry] = useState<MacroEntry | null>(null);
+  const [originalEntry, setOriginalEntry] = useState<MacroEntry | null>(null);
   const [formValid, setFormValid] = useState(true);
   const [showIngredients, setShowIngredients] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [baseIngredientsForScaling, setBaseIngredientsForScaling] = useState<Ingredient[] | null>(null);
+  const [scaleFactor, setScaleFactor] = useState<number>(1);
 
   // Update editedEntry when entry prop changes (to handle fresh data from cache)
   useEffect(() => {
     if (entry) {
-      setEditedEntry({ ...entry });
+      const ingredientsWithBase = entry.ingredients?.map(ing => ({
+        ...ing,
+        protein: roundValue(ing.protein),
+        carbs: roundValue(ing.carbs),
+        fats: roundValue(ing.fats),
+        quantity: ing.quantity === undefined ? undefined : roundValue(ing.quantity),
+        baseProtein: ing.baseProtein ?? ing.protein,
+        baseCarbs: ing.baseCarbs ?? ing.carbs,
+        baseFats: ing.baseFats ?? ing.fats,
+        baseQuantity: ing.baseQuantity ?? ing.quantity,
+        baseUnit: ing.baseUnit ?? ing.unit,
+      })) || [];
+      
+      const roundedEntry = {
+        ...entry,
+        protein: roundValue(entry.protein),
+        carbs: roundValue(entry.carbs),
+        fats: roundValue(entry.fats),
+        ingredients: ingredientsWithBase,
+      };
+
+      setEditedEntry(roundedEntry);
+      setOriginalEntry(roundedEntry);
+      setBaseIngredientsForScaling(ingredientsWithBase);
+      setScaleFactor(1);
     }
   }, [entry]);
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (!originalEntry || !editedEntry) return false;
+    return JSON.stringify(originalEntry) !== JSON.stringify(editedEntry);
+  }, [editedEntry, originalEntry]);
+
+  useBeforeUnload(isOpen && hasUnsavedChanges);
+
+  // Handle close with unsaved changes check
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedWarning(true);
+    } else {
+      onClose();
+    }
+  };
+
+  // Confirm discard changes
+  const confirmDiscard = () => {
+    setShowUnsavedWarning(false);
+    onClose();
+  };
+
+  // Cancel discard and stay in modal
+  const cancelDiscard = () => {
+    setShowUnsavedWarning(false);
+  };
 
   // Validate form whenever entry changes
   useEffect(() => {
@@ -78,15 +151,22 @@ export default function EditModal({
       previous
         ? {
             ...previous,
-            [field]: value ?? 0,
+            [field]: roundValue(value ?? 0),
           }
         : null,
     );
   };
 
-  const handleSave = () => {
+  // Reset the baseline only after persistence succeeds.
+  const handleSaveWithReset = () => {
     if (!formValid || !editedEntry) return;
-    onSave(editedEntry);
+
+    void Promise.resolve()
+      .then(() => onSave(editedEntry))
+      .then(() => {
+        setOriginalEntry({ ...editedEntry });
+      })
+      .catch(() => {});
   };
 
   // Ingredient management functions
@@ -103,6 +183,8 @@ export default function EditModal({
       newIngredient,
     ];
     const totals = calculateTotalsFromIngredients(updatedIngredients);
+    setBaseIngredientsForScaling(updatedIngredients);
+    setScaleFactor(1);
     setEditedEntry({
       ...editedEntry,
       ingredients: updatedIngredients,
@@ -116,6 +198,8 @@ export default function EditModal({
     if (!editedEntry) return;
     const updatedIngredients = editedEntry.ingredients?.filter((_, index_) => index_ !== index) || [];
     const totals = calculateTotalsFromIngredients(updatedIngredients);
+    setBaseIngredientsForScaling(updatedIngredients);
+    setScaleFactor(1);
     setEditedEntry({
       ...editedEntry,
       ingredients: updatedIngredients,
@@ -131,12 +215,75 @@ export default function EditModal({
     value: string | number | undefined
   ) => {
     if (!editedEntry) return;
-    const updatedIngredients = editedEntry.ingredients?.map((ing, index_) =>
-      index_ === index
-        ? { ...ing, [field]: field === "name" || field === "unit" ? value : Number(value) || 0 }
-        : ing
-    ) || [];
+
+    const updatedIngredients = editedEntry.ingredients?.map((ing, index_) => {
+      if (index_ !== index) return ing;
+
+      let updatedIng = { ...ing };
+
+      // Handle quantity or unit change - recalculate macros from base values
+      if (field === 'quantity' || field === 'unit') {
+        const newQuantity = field === 'quantity' 
+          ? (typeof value === 'number' ? value : (value ? Number(value) : undefined))
+          : ing.quantity;
+        const newUnit = field === 'unit' ? String(value) : ing.unit;
+
+        // Get base values - use stored base or current as base if not set
+        const baseQty = ing.baseQuantity ?? ing.quantity ?? 100;
+        const baseU = ing.baseUnit ?? ing.unit ?? 'g';
+        const baseP = ing.baseProtein ?? ing.protein;
+        const baseC = ing.baseCarbs ?? ing.carbs;
+        const baseF = ing.baseFats ?? ing.fats;
+
+        // Calculate scaling factor
+        const baseNormalized = normalizeQuantity(baseQty, baseU);
+        const newNormalized = normalizeQuantity(newQuantity ?? 100, newUnit ?? 'g');
+
+        let scaleFactor = 1;
+        if (baseNormalized.type === newNormalized.type && baseNormalized.value > 0) {
+          scaleFactor = newNormalized.value / baseNormalized.value;
+        }
+
+        // Update the ingredient with recalculated macros
+        updatedIng = {
+          ...updatedIng,
+          quantity: newQuantity,
+          unit: newUnit,
+          protein: roundValue(baseP * scaleFactor),
+          carbs: roundValue(baseC * scaleFactor),
+          fats: roundValue(baseF * scaleFactor),
+        };
+      } else {
+        // Regular field update (name, protein, carbs, fats)
+        const stringFields = ['name', 'unit'];
+        const isStringField = stringFields.includes(field as string);
+        
+        updatedIng = {
+          ...updatedIng,
+          [field]: isStringField ? value : roundValue(Number(value) || 0),
+        };
+        
+        // If macros changed directly, update base values to track new reference
+        if (field === 'protein' || field === 'carbs' || field === 'fats') {
+          const currentQty = ing.quantity ?? 100;
+          const currentUnit = ing.unit ?? 'g';
+          updatedIng = {
+            ...updatedIng,
+            baseProtein: field === 'protein' ? roundValue(Number(value)) : ing.protein,
+            baseCarbs: field === 'carbs' ? roundValue(Number(value)) : ing.carbs,
+            baseFats: field === 'fats' ? roundValue(Number(value)) : ing.fats,
+            baseQuantity: currentQty,
+            baseUnit: currentUnit,
+          };
+        }
+      }
+
+      return updatedIng;
+    }) || [];
+
     const totals = calculateTotalsFromIngredients(updatedIngredients);
+    setBaseIngredientsForScaling(updatedIngredients);
+    setScaleFactor(1);
     setEditedEntry({
       ...editedEntry,
       ingredients: updatedIngredients,
@@ -148,253 +295,82 @@ export default function EditModal({
 
   const hasIngredients = editedEntry?.ingredients && editedEntry.ingredients.length > 0;
 
+  // Scale all ingredients by a factor
+  const handleScaleIngredients = (newFactor: number) => {
+    if (!editedEntry || !baseIngredientsForScaling || baseIngredientsForScaling.length === 0) return;
+
+    setScaleFactor(newFactor);
+    const scaledIngredients = baseIngredientsForScaling.map((ing) => ({
+      ...ing,
+      protein: roundValue(ing.protein * newFactor),
+      carbs: roundValue(ing.carbs * newFactor),
+      fats: roundValue(ing.fats * newFactor),
+      quantity: ing.quantity ? roundValue(ing.quantity * newFactor) : undefined,
+    }));
+
+    const totals = calculateTotalsFromIngredients(scaledIngredients);
+    setEditedEntry({
+      ...editedEntry,
+      ingredients: scaledIngredients,
+      protein: totals.protein,
+      carbs: totals.carbs,
+      fats: totals.fats,
+    });
+  };
+
   // Don't render if no entry data
   if (!editedEntry) return null;
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onClose={onClose}
-      title="Edit Nutrition Entry"
-      variant="form"
-      onSave={handleSave}
-      saveDisabled={!formValid || isSaving}
-      size="md"
-    >
-      <div className="space-y-4">
-        <TextField
-          label="Food Name"
-          value={String(editedEntry.mealName)}
-          onChange={(value) => handleInputChange("mealName", value)}
-          placeholder="Enter food name"
-          required
-        />
-        <div className="grid grid-cols-3 gap-4">
-          <NumberField
-            label="Protein (g)"
-            value={editedEntry.protein}
-            onChange={(value: number | undefined) =>
-              handleNumberChange("protein", value)
-            }
-            min={0}
-            step={0.1}
+    <>
+      {showUnsavedWarning && (
+        <Modal
+          isOpen={showUnsavedWarning}
+          onClose={cancelDiscard}
+          title="Unsaved Changes"
+          variant="form"
+          onSave={confirmDiscard}
+          saveLabel="Discard Changes"
+          cancelLabel="Keep Editing"
+          size="sm"
+        >
+          <p className="text-sm text-foreground">
+            You have unsaved changes. If you leave now, your changes will be lost.
+          </p>
+        </Modal>
+      )}
+
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        title="Edit Nutrition Entry"
+        variant="form"
+        onSave={handleSaveWithReset}
+        saveDisabled={!formValid || isSaving || !hasUnsavedChanges}
+        size="2xl"
+      >
+        <div className="space-y-5 md:space-y-6">
+          <MealDetailsSection
+            mealName={String(editedEntry.mealName)}
+            protein={editedEntry.protein}
+            carbs={editedEntry.carbs}
+            fats={editedEntry.fats}
+            onMealNameChange={(value) => handleInputChange("mealName", value)}
+            onMacroChange={handleNumberChange}
           />
-          <NumberField
-            label="Carbs (g)"
-            value={editedEntry.carbs}
-            onChange={(value: number | undefined) =>
-              handleNumberChange("carbs", value)
-            }
-            min={0}
-            step={0.1}
-          />
-          <NumberField
-            label="Fats (g)"
-            value={editedEntry.fats}
-            onChange={(value: number | undefined) =>
-              handleNumberChange("fats", value)
-            }
-            min={0}
-            step={0.1}
+          <IngredientsPanel
+            ingredients={editedEntry.ingredients || []}
+            hasIngredients={Boolean(hasIngredients)}
+            showIngredients={showIngredients}
+            scaleFactor={scaleFactor}
+            onToggle={() => setShowIngredients(!showIngredients)}
+            onScale={handleScaleIngredients}
+            onUpdateIngredient={updateIngredient}
+            onRemoveIngredient={removeIngredient}
+            onAddIngredient={addIngredient}
           />
         </div>
-
-        <div className="mt-2 text-sm">
-          <div className="flex justify-between text-foreground">
-            <span>Total Calories:</span>
-            <span className="font-medium text-foreground">
-              {Math.round(
-                editedEntry.protein * 4 +
-                  editedEntry.carbs * 4 +
-                  editedEntry.fats * 9,
-              )}
-            </span>
-          </div>
-        </div>
-
-        {/* Ingredients Section */}
-        <div className="mt-6 border-t border-border/40 pt-4">
-          <button
-            type="button"
-            onClick={() => setShowIngredients(!showIngredients)}
-            className="flex w-full items-center justify-between text-sm font-medium text-foreground hover:text-foreground/80"
-          >
-            <span>Ingredients</span>
-            <motion.div
-              animate={{ rotate: showIngredients ? -180 : 0 }}
-              transition={{ duration: 0.2 }}
-            >
-              <svg
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M19 9l-7 7-7-7"
-                />
-              </svg>
-            </motion.div>
-          </button>
-
-          <AnimatePresence>
-            {showIngredients && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: "auto", opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-hidden"
-              >
-                <div className="mt-3">
-                  {hasIngredients ? (
-                    <div className="max-h-[280px] space-y-2 overflow-y-auto overscroll-contain pr-1">
-                      {editedEntry.ingredients?.map((ingredient, index) => (
-                        <motion.div
-                          key={index}
-                          initial={{ opacity: 0, y: -10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -10 }}
-                          transition={{ duration: 0.15, delay: index * 0.03 }}
-                          className="rounded-md border border-border/30 bg-surface-2/30 p-2"
-                        >
-                          {/* Compact header with name and remove button */}
-                          <div className="mb-1.5 flex items-center gap-2">
-                            <input
-                              type="text"
-                              value={ingredient.name}
-                              onChange={(event_) =>
-                                updateIngredient(index, "name", event_.target.value)
-                              }
-                              placeholder="Ingredient name"
-                              className="min-w-0 flex-1 border-0 border-b border-border/30 bg-transparent px-2 py-1 text-sm placeholder:text-muted focus:border-primary focus:outline-none"
-                            />
-                            <button
-                              type="button"
-                              onClick={() => removeIngredient(index)}
-                              className="hover:text-destructive shrink-0 p-1 text-muted transition-colors"
-                              title="Remove ingredient"
-                              aria-label="Remove ingredient"
-                            >
-                              <svg
-                                className="h-3.5 w-3.5"
-                                fill="none"
-                                stroke="currentColor"
-                                viewBox="0 0 24 24"
-                              >
-                                <path
-                                  strokeLinecap="round"
-                                  strokeLinejoin="round"
-                                  strokeWidth={2}
-                                  d="M6 18L18 6M6 6l12 12"
-                                />
-                              </svg>
-                            </button>
-                          </div>
-                          {/* Compact macro row */}
-                          <div className="flex items-center gap-1.5">
-                            <div className="flex-1">
-                              <input
-                                type="number"
-                                value={ingredient.protein || ""}
-                                onChange={(event_) =>
-                                  updateIngredient(index, "protein", event_.target.value === "" ? 0 : Number(event_.target.value))
-                                }
-                                placeholder="P"
-                                min={0}
-                                step={0.1}
-                                className="w-full rounded bg-protein/10 px-1.5 py-0.5 text-center text-xs text-protein placeholder:text-protein/50 focus:ring-1 focus:ring-protein/30 focus:outline-none"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <input
-                                type="number"
-                                value={ingredient.carbs || ""}
-                                onChange={(event_) =>
-                                  updateIngredient(index, "carbs", event_.target.value === "" ? 0 : Number(event_.target.value))
-                                }
-                                placeholder="C"
-                                min={0}
-                                step={0.1}
-                                className="w-full rounded bg-carbs/10 px-1.5 py-0.5 text-center text-xs text-carbs placeholder:text-carbs/50 focus:ring-1 focus:ring-carbs/30 focus:outline-none"
-                              />
-                            </div>
-                            <div className="flex-1">
-                              <input
-                                type="number"
-                                value={ingredient.fats || ""}
-                                onChange={(event_) =>
-                                  updateIngredient(index, "fats", event_.target.value === "" ? 0 : Number(event_.target.value))
-                                }
-                                placeholder="F"
-                                min={0}
-                                step={0.1}
-                                className="w-full rounded bg-fats/10 px-1.5 py-0.5 text-center text-xs text-fats placeholder:text-fats/50 focus:ring-1 focus:ring-fats/30 focus:outline-none"
-                              />
-                            </div>
-                            <div className="w-12">
-                              <input
-                                type="number"
-                                value={ingredient.quantity || ""}
-                                onChange={(event_) =>
-                                  updateIngredient(index, "quantity", event_.target.value === "" ? undefined : Number(event_.target.value))
-                                }
-                                placeholder="Qty"
-                                min={0}
-                                step={0.1}
-                                className="w-full rounded bg-surface-3 px-1 py-0.5 text-center text-xs placeholder:text-muted focus:ring-1 focus:ring-primary/30 focus:outline-none"
-                              />
-                            </div>
-                            <div className="w-10">
-                              <input
-                                type="text"
-                                value={ingredient.unit || ""}
-                                onChange={(event_) =>
-                                  updateIngredient(index, "unit", event_.target.value)
-                                }
-                                placeholder="g"
-                                className="w-full rounded bg-surface-3 px-1 py-0.5 text-center text-xs placeholder:text-muted focus:ring-1 focus:ring-primary/30 focus:outline-none"
-                              />
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="py-4 text-center text-sm text-muted">
-                      No ingredients added yet
-                    </div>
-                  )}
-
-                  <button
-                    type="button"
-                    onClick={addIngredient}
-                    className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-md border border-dashed border-border/50 bg-surface-2/20 py-1.5 text-xs font-medium text-muted transition-colors hover:border-border hover:bg-surface-2/40 hover:text-foreground"
-                  >
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 4v16m8-8H4"
-                      />
-                    </svg>
-                    Add Ingredient
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
-      </div>
-    </Modal>
+      </Modal>
+    </>
   );
 }

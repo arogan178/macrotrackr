@@ -118,6 +118,17 @@ More than 40g? You're not getting extra MPS benefit, but the protein isn't waste
 - Quinoa (4g protein per 100g cooked)
 - Nuts and seeds (varies by type)
 
+### Quick Reference Table
+
+| Food Source | Protein per 100g | Protein Quality | Best For |
+|-------------|------------------|-----------------|----------|
+| Chicken Breast | 31g | Excellent | Lean muscle building |
+| Salmon | 25g | Excellent | Omega-3s + protein |
+| Greek Yogurt | 10g | Excellent | Breakfast/snacks |
+| Lentils | 9g | Good (combine with grains) | Budget-friendly |
+| Tofu | 8g | Good | Vegetarian/vegan |
+| Eggs | 13g | Excellent | Any meal |
+
 **The fix for plant proteins:** Combine complementary sources throughout the day. You don't need them in the same meal—just within the same 24-hour period.
 
 **Classic combinations:**

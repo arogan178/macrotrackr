@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo, useState, useRef, useEffect } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { TextField } from "@/components/form";
 import {
@@ -7,10 +7,10 @@ import {
   ProgressiveBlur,
   SearchIcon,
 } from "@/components/ui";
-import StatusIndicator from "@/components/ui/StatusIndicator";
 import SavedMealsList from "@/components/ui/SavedMealsList";
-import { apiService } from "@/utils/apiServices";
+import StatusIndicator from "@/components/ui/StatusIndicator";
 import type { Ingredient } from "@/types/macro";
+import { apiService } from "@/utils/apiServices";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
@@ -57,11 +57,14 @@ const CalorieSearch = memo(function CalorieSearch({
   const [showResults, setShowResults] = useState(false);
   const [isAtBottom, setIsAtBottom] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const wrapperReference = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
+      if (
+        wrapperReference.current &&
+        !wrapperReference.current.contains(event.target as Node)
+      ) {
         setIsFocused(false);
       }
     }
@@ -271,7 +274,7 @@ const CalorieSearch = memo(function CalorieSearch({
   ]);
 
   return (
-    <div className="relative flex flex-col gap-3" ref={wrapperRef}>
+    <div className="relative flex flex-col gap-3" ref={wrapperReference}>
       <div className="flex flex-col gap-3 sm:flex-row">
         <div className="flex-1">
           <TextField
@@ -282,7 +285,7 @@ const CalorieSearch = memo(function CalorieSearch({
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
             placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="!text-foreground" />}
+            icon={<SearchIcon className="text-foreground!" />}
             maxLength={50}
           />
         </div>
@@ -344,11 +347,11 @@ const CalorieSearch = memo(function CalorieSearch({
 
       {isFocused && query.length === 0 && (
         <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl">
-          <SavedMealsList 
+          <SavedMealsList
             onSelectMeal={(meal) => {
               onSelectSavedMeal(meal);
               setIsFocused(false);
-            }} 
+            }}
           />
         </div>
       )}
