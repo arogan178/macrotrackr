@@ -7,9 +7,6 @@ import {
 import { REPORTING_PERIODS } from "../constants";
 import type { DateRangeData, ReportingPeriod } from "../types";
 
-
-
-
 export const getTodayDate = (): string => {
   return todayISO();
 };
@@ -46,4 +43,11 @@ export function getMonthString(date: Date) {
   return `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, "0")}`;
 }
 
-export {formatDateShort as formatDate,formatDateFull, getDatesBetween, getDaysInRange, isValidDateString, isWithinDateRange} from "@/utils/dateUtilities";
+export {
+  formatDateShort as formatDate,
+  formatDateFull,
+  getDatesBetween,
+  getDaysInRange,
+  isValidDateString,
+  isWithinDateRange,
+} from "@/utils/dateUtilities";

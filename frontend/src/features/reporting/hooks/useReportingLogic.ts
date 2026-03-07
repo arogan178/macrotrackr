@@ -181,15 +181,14 @@ export function useReportingLogic(
       return { calories: 0, protein: 0, carbs: 0, fats: 0 };
     }
 
-    const totals = aggregatedData.reduce(
-      (accumulator, value) => ({
-        calories: accumulator.calories + value.calories,
-        protein: accumulator.protein + value.protein,
-        carbs: accumulator.carbs + value.carbs,
-        fats: accumulator.fats + value.fats,
-      }),
-      { calories: 0, protein: 0, carbs: 0, fats: 0 },
-    );
+    const totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+
+    for (const value of aggregatedData) {
+      totals.calories += value.calories;
+      totals.protein += value.protein;
+      totals.carbs += value.carbs;
+      totals.fats += value.fats;
+    }
 
     return {
       calories: Math.round(totals.calories / aggregatedData.length),

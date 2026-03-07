@@ -87,8 +87,8 @@ const EntryCard = memo(
                 type="checkbox"
                 className="h-5 w-5 rounded border-border text-primary focus:ring-primary/50"
                 checked={isSelected}
-                onChange={(e) => {
-                  e.stopPropagation();
+                onChange={(event_) => {
+                  event_.stopPropagation();
                   onToggleSelection?.(entry.id);
                 }}
               />

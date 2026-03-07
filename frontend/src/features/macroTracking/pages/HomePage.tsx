@@ -145,9 +145,18 @@ export default function HomePage() {
 
   const handleGroupMeals = useCallback(
     async (name: string, mealType: string, selectedEntries: MacroEntry[]) => {
-      const totalProtein = selectedEntries.reduce((sum, e) => sum + e.protein, 0);
-      const totalCarbs = selectedEntries.reduce((sum, e) => sum + e.carbs, 0);
-      const totalFats = selectedEntries.reduce((sum, e) => sum + e.fats, 0);
+      const totalProtein = selectedEntries.reduce(
+        (sum, entry) => sum + entry.protein,
+        0,
+      );
+      const totalCarbs = selectedEntries.reduce(
+        (sum, entry) => sum + entry.carbs,
+        0,
+      );
+      const totalFats = selectedEntries.reduce(
+        (sum, entry) => sum + entry.fats,
+        0,
+      );
 
       const ingredients = selectedEntries.flatMap((entry) => {
         const ingredientName = entry.foodName || entry.mealName || "Ingredient";
