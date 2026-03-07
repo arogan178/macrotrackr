@@ -191,10 +191,10 @@ function HabitForm({
               <button
                 key={key}
                 type="button"
-                className={`flex items-center justify-center rounded-lg p-3 ${
+                className={`flex items-center justify-center rounded-lg p-3 transition-colors ${
                   isSelected
-                    ? `${grad.chip} border ${colorRing}/50`
-                    : "bg-surface/40 hover:bg-surface/60"
+                    ? `${grad.chip} border ${colorRing}`
+                    : "bg-surface-2 hover:bg-surface-3"
                 }`}
                 onClick={() => handleChange("iconName", key)}
                 aria-pressed={isSelected}
@@ -267,20 +267,22 @@ function HabitForm({
 
       <div className="mt-4">
         <p className="mb-2 text-sm font-medium text-foreground">Preview</p>
-        <HabitCard
-          variant="sm"
-          habit={{
-            id: undefined,
-            title: values.title || "Habit Title",
-            iconName: values.iconName || "target",
-            current: currentProgress,
-            target: values.target,
-            progress: undefined, // let component compute from current/target
-            accentColor: values.accentColor || "indigo",
-            isComplete: false,
-          }}
-          show={{ completionBadge: false }}
-        />
+        <div className="pointer-events-none">
+          <HabitCard
+            variant="sm"
+            habit={{
+              id: undefined,
+              title: values.title || "Habit Title",
+              iconName: values.iconName || "target",
+              current: currentProgress,
+              target: values.target,
+              progress: undefined, // let component compute from current/target
+              accentColor: values.accentColor || "indigo",
+              isComplete: false,
+            }}
+            show={{ completionBadge: false }}
+          />
+        </div>
       </div>
     </div>
   );

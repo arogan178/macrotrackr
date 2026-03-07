@@ -1,6 +1,6 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
-import { memo, useMemo, useRef } from "react";
+import React, { memo, useMemo, useRef, useState } from "react";
 
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
@@ -30,9 +30,14 @@ interface MobileEntryCardsProps {
   deleteEntry: (id: number) => void;
   isDeleting: boolean;
   showAllDates?: boolean;
+  onSaveMeal?: (entry: MacroEntry) => void;
+  onUnsaveMeal?: (entry: MacroEntry) => void;
+  savedMealIds?: Set<number>;
+  isSelectionMode?: boolean;
+  selectedEntryIds?: Set<number>;
+  onToggleEntrySelection?: (id: number) => void;
 }
 
-// Entry Card Component
 const EntryCard = memo(
   ({
     entry,
@@ -42,6 +47,12 @@ const EntryCard = memo(
     formatTimeFromEntry,
     capitalizeFirstLetter,
     calculateCalories,
+    onSaveMeal,
+    onUnsaveMeal,
+    isMealSaved,
+    isSelectionMode,
+    isSelected,
+    onToggleSelection,
   }: {
     entry: MacroEntry;
     onEdit: (entry: MacroEntry) => void;
@@ -50,64 +61,139 @@ const EntryCard = memo(
     formatTimeFromEntry: (entry: MacroEntry) => string;
     capitalizeFirstLetter: (string: string) => string;
     calculateCalories: (protein: number, carbs: number, fats: number) => number;
-  }) => (
-    <motion.div
-      className="rounded-lg bg-surface-3 p-4"
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -12 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      layout
-    >
-      <div className="mb-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-foreground">
-            {formatTimeFromEntry(entry)}
-          </span>
-          <span className="text-sm font-medium text-secondary">
-            {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
-          </span>
-        </div>
-        <IconButtonGroup
-          onEdit={() => onEdit(entry)}
-          onDelete={() => deleteEntry(entry.id)}
-          isDeleting={isDeleting}
-        />
-      </div>
+    onSaveMeal?: (entry: MacroEntry) => void;
+    onUnsaveMeal?: (entry: MacroEntry) => void;
+    isMealSaved?: boolean;
+    isSelectionMode?: boolean;
+    isSelected?: boolean;
+    onToggleSelection?: (id: number) => void;
+  }) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+    const hasIngredients = entry.ingredients && entry.ingredients.length > 0;
 
-      {(entry.foodName || entry.mealName) && (
-        <div className="mb-3">
-          <span className="text-sm text-muted">
-            {entry.foodName || entry.mealName}
-          </span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-3 gap-3">
-        {[
-          { label: "Protein", value: entry.protein, color: "text-protein" },
-          { label: "Carbs", value: entry.carbs, color: "text-carbs" },
-          { label: "Fats", value: entry.fats, color: "text-fats" },
-        ].map((macro) => (
-          <div
-            key={macro.label}
-            className="flex items-center justify-between rounded-lg bg-surface-4 p-3"
-          >
-            <span className="text-sm text-foreground">{macro.label}</span>
-            <MacroCell value={macro.value} suffix="g" color={macro.color} />
+    return (
+      <motion.div
+        className="rounded-xl border border-border/60 bg-surface p-5 shadow-[0_4px_20px_rgb(0,0,0,0.03)] dark:shadow-[0_4px_20px_rgb(255,255,255,0.01)]"
+        initial={{ opacity: 0, y: 12 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -12 }}
+        transition={{ duration: 0.25, ease: "easeOut" }}
+        layout
+      >
+        <div className="mb-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {isSelectionMode && (
+              <input
+                type="checkbox"
+                className="h-5 w-5 rounded border-border text-primary focus:ring-primary/50"
+                checked={isSelected}
+                onChange={(event_) => {
+                  event_.stopPropagation();
+                  onToggleSelection?.(entry.id);
+                }}
+              />
+            )}
+            {hasIngredients && (
+              <button 
+                type="button"
+                className="cursor-pointer rounded-md p-1 hover:bg-surface-3"
+                onClick={() => setIsExpanded(!isExpanded)}
+                aria-label="Toggle ingredients"
+              >
+                <motion.div
+                  initial={false}
+                  animate={{ rotate: isExpanded ? -180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <ChevronDownIcon className="h-4 w-4" />
+                </motion.div>
+              </button>
+            )}
+            <span className="text-sm font-medium tracking-tight text-foreground">
+              {formatTimeFromEntry(entry)}
+            </span>
+            <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
+              {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
+            </span>
           </div>
-        ))}
-        <div className="col-span-3 flex items-center justify-between rounded-lg bg-surface-4 p-3">
-          <span className="text-sm text-foreground">Calories</span>
-          <MacroCell
-            value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
-            suffix=" kcal"
-            color="text-vibrant-accent"
+          <IconButtonGroup
+            onEdit={() => onEdit(entry)}
+            onDelete={() => deleteEntry(entry.id)}
+            isDeleting={isDeleting}
+            onSaveMeal={onSaveMeal ? () => onSaveMeal(entry) : undefined}
+            onUnsaveMeal={onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined}
+            isMealSaved={isMealSaved}
           />
         </div>
-      </div>
-    </motion.div>
-  ),
+
+        {(entry.foodName || entry.mealName) && (
+          <div className="mb-3">
+            <span className="text-sm text-muted">
+              {entry.foodName || entry.mealName}
+            </span>
+          </div>
+        )}
+
+        <div className="mt-4 grid grid-cols-3 gap-3">
+          {[
+            { label: "Protein", value: entry.protein, color: "text-protein", bg: "bg-surface-2" },
+            { label: "Carbs", value: entry.carbs, color: "text-carbs", bg: "bg-surface-2" },
+            { label: "Fats", value: entry.fats, color: "text-fats", bg: "bg-surface-2" },
+          ].map((macro) => (
+            <div
+              key={macro.label}
+              className={`flex flex-col items-center justify-center rounded-xl ${macro.bg} border border-border/40 p-3`}
+            >
+              <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">{macro.label}</span>
+              <MacroCell value={macro.value} suffix="g" color={macro.color} />
+            </div>
+          ))}
+          <div className="col-span-3 mt-1 flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-3.5">
+            <span className="text-xs font-medium tracking-wider text-muted uppercase">Calories</span>
+            <MacroCell
+              value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
+              suffix=" kcal"
+              color="text-foreground"
+            />
+          </div>
+        </div>
+
+        <AnimatePresence>
+          {isExpanded && hasIngredients && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ height: { duration: 0.3, ease: "easeInOut" }, opacity: { duration: 0.2 } }}
+              className="mt-4 overflow-hidden border-t border-border/40"
+            >
+              <div className="pt-4">
+                <h4 className="mb-3 text-xs font-semibold text-muted uppercase">Ingredients</h4>
+                <div className="space-y-3">
+                  {entry.ingredients?.map((ing, index) => (
+                    <div key={index} className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">{ing.name}</span>
+                        <span className="text-xs font-medium text-foreground">{calculateCalories(ing.protein, ing.carbs, ing.fats)} kcal</span>
+                      </div>
+                      {ing.quantity && (
+                        <span className="text-xs text-muted">{ing.quantity}{ing.unit || ''}</span>
+                      )}
+                      <div className="mt-1 flex gap-3 text-[10px] font-medium uppercase">
+                        <span className="text-protein">{ing.protein}g P</span>
+                        <span className="text-carbs">{ing.carbs}g C</span>
+                        <span className="text-fats">{ing.fats}g F</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </motion.div>
+    );
+  }
 );
 
 EntryCard.displayName = "EntryCard";
@@ -126,10 +212,15 @@ const MobileEntryCards = memo(
     deleteEntry,
     isDeleting,
     showAllDates = true,
+    onSaveMeal,
+    onUnsaveMeal,
+    savedMealIds,
+    isSelectionMode = false,
+    selectedEntryIds = new Set(),
+    onToggleEntrySelection,
   }: MobileEntryCardsProps) => {
     const containerReference = useRef<HTMLDivElement>(null);
 
-    // Calculate total entries for virtualization threshold
     const totalEntries = useMemo(() => {
       return groupedEntries.reduce(
         (sum, group) => sum + group.entries.length,
@@ -137,11 +228,8 @@ const MobileEntryCards = memo(
       );
     }, [groupedEntries]);
 
-    // Only virtualize when we have more than 50 entries
     const shouldVirtualize = totalEntries > 50;
 
-    // Create a flattened list of items for virtualization
-    // Each item is either a date header or an entry card
     const virtualItems = useMemo(() => {
       const items: Array<
         | { type: "header"; group: GroupedEntry }
@@ -164,24 +252,22 @@ const MobileEntryCards = memo(
       return items;
     }, [groupedEntries, showAllDates, collapsedDates]);
 
-    // Virtualizer for large lists
     const virtualizer = useVirtualizer({
       count: virtualItems.length,
       getScrollElement: () => containerReference.current,
       estimateSize: (index) => {
         const item = virtualItems[index];
-        if (item.type === "header") return 60; // Header height
-        return 200; // Entry card height (approximate)
+        if (item.type === "header") return 60;
+        return 200;
       },
       overscan: 5,
     });
 
-    // Render date header
     const renderDateHeader = (group: GroupedEntry) => (
       <motion.div
-        className="flex cursor-pointer items-center justify-between border-b border-primary/20 bg-primary/20 p-4 transition-colors hover:bg-primary/20"
+        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-4 transition-colors duration-300 hover:bg-surface-2/60"
         onClick={() => toggleDateCollapse(group.date)}
-        whileHover={{ backgroundColor: "bg-primary/30" }}
+        whileHover={{ backgroundColor: "var(--color-surface-2)" }}
         transition={{ duration: 0.2 }}
       >
         <div className="flex items-center gap-3">
@@ -193,21 +279,20 @@ const MobileEntryCards = memo(
           >
             <ChevronDownIcon className=" text-foreground" />
           </motion.div>
-          <h3 className="text-base font-semibold text-foreground">
+          <h3 className="text-base font-semibold tracking-tight text-foreground">
             {formatDate(group.date)}
           </h3>
         </div>
 
-        {/* Date Totals */}
         <div className="flex items-center gap-4 text-xs">
-          <span className="font-medium text-protein">
+          <span className="font-medium tracking-tight text-protein">
             {group.totals.protein}g P
           </span>
-          <span className="font-medium text-carbs">
+          <span className="font-medium tracking-tight text-carbs">
             {group.totals.carbs}g C
           </span>
-          <span className="font-medium text-fats">{group.totals.fats}g F</span>
-          <span className="font-medium text-vibrant-accent">
+          <span className="font-medium tracking-tight text-fats">{group.totals.fats}g F</span>
+          <span className="font-medium tracking-tight text-foreground">
             {group.totals.calories} kcal
           </span>
           <IconButton
@@ -219,14 +304,13 @@ const MobileEntryCards = memo(
       </motion.div>
     );
 
-    // Render virtualized list
     if (shouldVirtualize) {
       const items = virtualizer.getVirtualItems();
 
       return (
         <div
           ref={containerReference}
-          className="lg:hidden max-h-[70vh] overflow-auto"
+          className="max-h-[70vh] overflow-auto lg:hidden"
         >
           <div
             style={{
@@ -240,31 +324,38 @@ const MobileEntryCards = memo(
               return (
                 <div
                   key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
-                    height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
                   {item.type === "header" ? (
-                    <div className="border-b border-border/30">
+                    <div className="border-b border-border/40">
                       {renderDateHeader(item.group)}
                     </div>
                   ) : (
-                    <div className="p-4 pt-0">
-                      <EntryCard
-                        entry={item.entry}
-                        onEdit={onEdit}
-                        deleteEntry={deleteEntry}
-                        isDeleting={isDeleting}
-                        formatTimeFromEntry={formatTimeFromEntry}
-                        capitalizeFirstLetter={capitalizeFirstLetter}
-                        calculateCalories={calculateCalories}
-                      />
-                    </div>
+                      <div className="p-4 pt-0">
+                        <EntryCard
+                          entry={item.entry}
+                          onEdit={onEdit}
+                          deleteEntry={deleteEntry}
+                          isDeleting={isDeleting}
+                          formatTimeFromEntry={formatTimeFromEntry}
+                          capitalizeFirstLetter={capitalizeFirstLetter}
+                          calculateCalories={calculateCalories}
+                          onSaveMeal={onSaveMeal}
+                          onUnsaveMeal={onUnsaveMeal}
+                          isMealSaved={savedMealIds?.has(item.entry.id)}
+                          isSelectionMode={isSelectionMode}
+                          isSelected={selectedEntryIds.has(item.entry.id)}
+                          onToggleSelection={onToggleEntrySelection}
+                        />
+                      </div>
                   )}
                 </div>
               );
@@ -274,25 +365,21 @@ const MobileEntryCards = memo(
       );
     }
 
-    // Non-virtualized rendering for smaller lists
     const initialEntries = groupedEntries.slice(0, 5);
     const additionalEntries = groupedEntries.slice(5);
 
     return (
       <div className="lg:hidden">
-        {/* Initial 5 entries */}
         {initialEntries.map((group) => (
           <motion.div
             key={group.date}
-            className="border-b border-border/30 last:border-b-0"
+            className="border-b border-border/40 last:border-b-0"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            {/* Date Header */}
             {renderDateHeader(group)}
 
-            {/* Entries */}
             <AnimatePresence>
               {!collapsedDates.has(group.date) && (
                 <motion.div
@@ -335,6 +422,12 @@ const MobileEntryCards = memo(
                           formatTimeFromEntry={formatTimeFromEntry}
                           capitalizeFirstLetter={capitalizeFirstLetter}
                           calculateCalories={calculateCalories}
+                          onSaveMeal={onSaveMeal}
+                          onUnsaveMeal={onUnsaveMeal}
+                          isMealSaved={savedMealIds?.has(entry.id)}
+                          isSelectionMode={isSelectionMode}
+                          isSelected={selectedEntryIds.has(entry.id)}
+                          onToggleSelection={onToggleEntrySelection}
                         />
                       </motion.div>
                     ))}
@@ -345,13 +438,12 @@ const MobileEntryCards = memo(
           </motion.div>
         ))}
 
-        {/* Additional entries with animation */}
         <AnimatePresence>
           {showAllDates &&
             additionalEntries.map((group) => (
               <motion.div
                 key={group.date}
-                className="border-b border-border/30 last:border-b-0"
+                className="border-b border-border/40 last:border-b-0"
                 initial={{ opacity: 0, height: 0 }}
                 animate={{
                   opacity: 1,
@@ -371,10 +463,8 @@ const MobileEntryCards = memo(
                 }}
                 style={{ overflow: "hidden" }}
               >
-                {/* Date Header */}
                 {renderDateHeader(group)}
 
-                {/* Entries */}
                 <AnimatePresence>
                   {!collapsedDates.has(group.date) && (
                     <motion.div
@@ -417,6 +507,12 @@ const MobileEntryCards = memo(
                               formatTimeFromEntry={formatTimeFromEntry}
                               capitalizeFirstLetter={capitalizeFirstLetter}
                               calculateCalories={calculateCalories}
+                              onSaveMeal={onSaveMeal}
+                              onUnsaveMeal={onUnsaveMeal}
+                              isMealSaved={savedMealIds?.has(entry.id)}
+                              isSelectionMode={isSelectionMode}
+                              isSelected={selectedEntryIds.has(entry.id)}
+                              onToggleSelection={onToggleEntrySelection}
                             />
                           </motion.div>
                         ))}

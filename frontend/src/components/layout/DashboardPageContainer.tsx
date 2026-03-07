@@ -1,4 +1,6 @@
-import PageBackground from "@/features/landing/components/PageBackground";
+import { ReactNode } from "react";
+
+import PageBackground from "@/components/layout/PageBackground";
 
 interface DashboardPageContainerProps {
   children: ReactNode;
@@ -13,7 +15,7 @@ export function DashboardPageContainer({
         <PageBackground />
       </div>
       {/* Page content */}
-      <div className="relative mx-auto max-w-7xl px-4 pt-8 pb-12 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 pt-4 pb-12 sm:px-6 sm:pt-6 lg:px-8">
         {children}
       </div>
     </div>

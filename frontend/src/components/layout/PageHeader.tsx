@@ -20,7 +20,7 @@ export const PageHeader = ({
   children,
   animateTitle = false,
 }: PageHeaderProps) => (
-  <div className="flex flex-col items-start justify-between gap-4 border-b border-border/60 pb-4 sm:flex-row sm:items-center">
+  <div className="flex flex-col items-start justify-between gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-center">
     {/* Left Side: Title and subtitle */}
     <div>
       <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
@@ -36,14 +36,14 @@ export const PageHeader = ({
           title
         )}
       </h1>
-      {subtitle && <p className="mt-1 max-w-2xl text-muted">{subtitle}</p>}
+      {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">{subtitle}</p>}
     </div>
     {/* Right Side: Badges and Tabs */}
     <div className="flex items-center gap-3">
       {/* Badges */}
       <div className="flex space-x-2">
         {hasChanges && (
-          <span className="rounded-full border border-warning/30 bg-warning/20 px-3 py-1 text-sm font-medium text-warning">
+          <span className="rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-sm font-medium text-warning">
             Unsaved Changes
           </span>
         )}

@@ -77,7 +77,13 @@ export function useHistoryPagination(pageSize: number) {
 
     return pages
       .flatMap((page) => (Array.isArray(page?.entries) ? page.entries : []))
-      .filter(isMacroEntry);
+      .filter((entry) => isMacroEntry(entry));
+  }, [macroHistoryData]);
+
+  // Get limits from the first page (all pages have same limits data)
+  const limits = useMemo(() => {
+    const firstPage = macroHistoryData?.pages?.[0];
+    return firstPage?.limits;
   }, [macroHistoryData]);
 
   const historyHasMore = hasNextPage;
@@ -95,5 +101,6 @@ export function useHistoryPagination(pageSize: number) {
     isHistoryLoading,
     isLoadingMore,
     loadMoreHistory,
+    limits,
   };
 }

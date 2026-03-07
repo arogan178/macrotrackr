@@ -1,27 +1,17 @@
 import { useMemo, useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
   Cell,
-  LabelList,
   Legend,
+  Pie,
+  PieChart,
   ResponsiveContainer,
   Tooltip as RechartsTooltip,
-  XAxis,
-  YAxis,
 } from "recharts";
 
+import { AnimatedNumber } from "@/components/animation";
 import { ChartCard } from "@/components/chart";
-import { BarValueTooltip } from "@/components/chart/ChartTooltip";
-import {
-  legendFormatter,
-  PercentageLabel,
-  standardLegendConfig,
-} from "@/components/chart/ChartUtilities";
 import TabBar from "@/components/ui/TabBar";
-import { getUnitForStat, MEAL_COLORS, STAT_COLORS } from "@/utils/chartColors";
-import { formatMealType } from "@/utils/nutritionVisualizations";
+import { getUnitForStat, MEAL_COLORS } from "@/utils/chartColors";
 
 import {
   MacroEntry,
@@ -33,6 +23,41 @@ interface MealTimeBreakdownProps {
   startDate: string; // ISO string 'YYYY-MM-DD'
   endDate: string; // ISO string 'YYYY-MM-DD'
 }
+
+// Custom tooltip for Donut chart
+const CustomDonutTooltip = ({ active, payload, selectedStat }: any) => {
+  if (active && payload && payload.length > 0) {
+    const data = payload[0].payload;
+    const value = data.value;
+    const unit =
+      selectedStat === "count" ? " meals" : ` ${getUnitForStat(selectedStat)}`;
+    const color = payload[0].payload.fill || payload[0].color;
+
+    return (
+      <div className="rounded-lg border border-border/50 bg-surface-2 p-3 shadow-xl">
+        <div className="flex items-center gap-2">
+          <div
+            className="h-3 w-3 rounded-full"
+            style={{ backgroundColor: color }}
+          />
+          <p className="font-semibold text-foreground">{data.name}</p>
+        </div>
+        <div className="mt-2 flex flex-col gap-1">
+          <p className="text-sm text-muted">
+            <span className="font-medium text-foreground">
+              {Math.round(value)}
+            </span>
+            {unit}
+          </p>
+          <p className="text-xs text-muted/80">
+            {data.percentage}% of daily total
+          </p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
 
 function MealTimeBreakdown({
   history,
@@ -46,14 +71,23 @@ function MealTimeBreakdown({
     endDate,
     selectedStat,
   );
-  // Build TabBar items for stat selection (must be before any early return)
+
+  // Calculate total for center of donut
+  const totalValue = useMemo(() => {
+    return mealTypeDistribution.reduce(
+      (accumulator, current) => accumulator + current.value,
+      0,
+    );
+  }, [mealTypeDistribution]);
+
+  // Build TabBar items
   const tabItems = useMemo(
     () => [
-      { key: "calories", label: "Calories", activeBg: STAT_COLORS.calories },
-      { key: "protein", label: "Protein", activeBg: STAT_COLORS.protein },
-      { key: "carbs", label: "Carbs", activeBg: STAT_COLORS.carbs },
-      { key: "fats", label: "Fats", activeBg: STAT_COLORS.fats },
-      { key: "count", label: "Count", activeBg: STAT_COLORS.count },
+      { key: "calories", label: "Calories" },
+      { key: "protein", label: "Protein" },
+      { key: "carbs", label: "Carbs" },
+      { key: "fats", label: "Fats" },
+      { key: "count", label: "Count" },
     ],
     [],
   );
@@ -69,11 +103,9 @@ function MealTimeBreakdown({
             items={tabItems}
             activeKey={selectedStat}
             onChange={setSelectedStat}
-            rounded="rounded-lg"
+            size="sm"
             isMotion
-            layoutId="statHighlight"
-            size="xs"
-            className="p-0.5 [&_button]:px-2.5 [&_button]:py-0.5 [&_button]:text-xs"
+            layoutId="meal-distribution-tab-empty"
           />
         }
       >
@@ -82,130 +114,89 @@ function MealTimeBreakdown({
     );
   }
 
-  // Create gradient definitions
+  // Define MEAL_TYPES matching the hook logic for consistent colors
   const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
-  const gradientDefs = (
-    <defs>
-      {MEAL_TYPES.map((mealType) => {
-        const { gradient } = MEAL_COLORS[mealType];
-        return (
-          <linearGradient
-            key={`color-${mealType}`}
-            id={`color-${mealType}`}
-            x1="1"
-            y1="0"
-            x2="0"
-            y2="0"
-          >
-            <stop offset="0%" stopColor={gradient[0]} stopOpacity={0.8} />
-            <stop offset="100%" stopColor={gradient[1]} stopOpacity={0.8} />
-          </linearGradient>
-        );
-      })}
-    </defs>
-  );
 
   return (
     <ChartCard
       title="Meal Distribution"
-      className="h-100"
+      className="w-full"
       action={
         <TabBar
           items={tabItems}
           activeKey={selectedStat}
           onChange={setSelectedStat}
-          rounded="rounded-lg"
+          size="sm"
           isMotion
-          layoutId="statHighlight"
-          size="xs"
-          className="p-0.5 [&_button]:px-2.5 [&_button]:py-0.5 [&_button]:text-xs"
+          layoutId="meal-distribution-tab"
         />
       }
     >
-      {" "}
       <ResponsiveContainer width="100%" height="100%" minHeight={300}>
-        <BarChart
-          layout="vertical"
-          data={mealTypeDistribution}
-          margin={{ top: 10, right: 30, left: 0, bottom: 10 }}
-          barSize={25}
-        >
-          {gradientDefs}
-          <CartesianGrid
-            strokeDasharray="3 3"
-            opacity={0.1}
-            horizontal={false}
-          />
+        <PieChart margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+          <Pie
+            data={mealTypeDistribution}
+            cx="50%"
+            cy="50%"
+            innerRadius={85}
+            outerRadius={115}
+            paddingAngle={3}
+            dataKey="value"
+            stroke="none"
+            isAnimationActive={true}
+            animationDuration={500}
+            animationEasing="ease-out"
+          >
+            {mealTypeDistribution.map((entry, index) => {
+              // Ensure we map back to the key for colors
+              const typeKey =
+                entry.name.toLowerCase() as (typeof MEAL_TYPES)[number];
+              const color = MEAL_COLORS[typeKey]?.base || "#8884d8";
+              return <Cell key={`cell-${index}`} fill={color} />;
+            })}
+          </Pie>
 
-          <XAxis
-            type="number"
-            domain={[0, "dataMax"]}
-            tickFormatter={(value) =>
-              `${Math.round(value)}${
-                selectedStat === "count"
-                  ? ""
-                  : " " + getUnitForStat(selectedStat)
-              }`
-            }
-            tick={{ fill: "#9ca3af", fontSize: 10 }}
-          />
-
-          <YAxis
-            dataKey="name"
-            type="category"
-            tick={{ fill: "#d1d5db", fontSize: 12 }}
-            axisLine={true}
-            tickLine={true}
-            width={70}
-            interval={0}
-          />
+          {/* Center Text - account for Legend height at bottom */}
+          <foreignObject
+            x="0"
+            y="0"
+            width="100%"
+            height="calc(100% - 36px)"
+            className="pointer-events-none"
+          >
+            <div className="flex h-full items-center justify-center">
+              <div className="flex flex-col items-center gap-0.5">
+                <div className="text-3xl font-bold tracking-tight text-foreground">
+                  <AnimatedNumber value={totalValue} toFixedValue={0} duration={0.5} />
+                </div>
+                <div className="text-xs font-medium tracking-wider text-muted uppercase">
+                  {selectedStat === "count" ? "Total Meals" : "Avg / Day"}
+                </div>
+                {selectedStat !== "count" && (
+                  <div className="text-[10px] text-muted/60 uppercase">
+                    {getUnitForStat(selectedStat)}
+                  </div>
+                )}
+              </div>
+            </div>
+          </foreignObject>
 
           <RechartsTooltip
-            content={BarValueTooltip as any}
-            cursor={{ fill: "rgba(110,118,145,0.1)" }}
-            wrapperStyle={{ outline: "none" }}
+            content={<CustomDonutTooltip selectedStat={selectedStat} />}
+            cursor={{ fill: "transparent" }}
           />
 
           <Legend
-            {...standardLegendConfig}
-            payload={MEAL_TYPES.map((mealType) => ({
-              id: mealType,
-              value: formatMealType(mealType),
-              type: "circle",
-              color: MEAL_COLORS[mealType].base,
-            }))}
-            formatter={legendFormatter}
+            verticalAlign="bottom"
+            height={36}
+            iconType="circle"
+            formatter={(value) => (
+              <span className="ml-1 text-sm font-medium text-foreground">
+                {value}
+              </span>
+            )}
           />
-
-          <Bar
-            dataKey="value"
-            name="Meal Distribution"
-            fill="#8884d8"
-            radius={[0, 20, 20, 0]}
-            label={false}
-          >
-            {mealTypeDistribution.map((_, index) => (
-              <Cell
-                key={`cell-${index}`}
-                fill={`url(#color-${MEAL_TYPES[index]})`}
-              />
-            ))}
-            <LabelList
-              dataKey="percentage"
-              position="insideRight"
-              content={(properties) => (
-                // Recharts passes a large object; we map to the minimal props our component expects
-                <PercentageLabel
-                  x={(properties as any).x}
-                  y={(properties as any).y}
-                  width={(properties as any).width}
-                  height={(properties as any).height}
-                  value={(properties as any).value as number}
-                />
-              )}
-            />
-          </Bar>
-        </BarChart>
+        </PieChart>
       </ResponsiveContainer>
     </ChartCard>
   );

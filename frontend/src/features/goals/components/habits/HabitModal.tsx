@@ -41,7 +41,7 @@ function HabitModal({
   const [isFormValid, setIsFormValid] = useState(false);
 
   // Use new mutation error handling
-  const { handleMutationError, handleMutationSuccess } =
+  const { handleMutationError } =
     useMutationErrorHandler({
       onError: (message) => showNotification(message, "error"),
       onSuccess: (message) => showNotification(message, "success"),
@@ -105,10 +105,9 @@ function HabitModal({
     setIsSubmitting(true);
     try {
       await onSubmit(formValues, isEditMode ? habit?.id : undefined);
-      handleMutationSuccess(
-        `Habit ${isEditMode ? "updated" : "created"} successfully!`,
-      );
-      // onSubmit handles closing the modal, so we don't call onClose() here
+      // onSubmit handles closing the modal, success/error notifications are handled by the mutation
+      // Note: We don't reset isSubmitting on success because the modal will close
+      // and the component will unmount/reset when it reopens
     } catch (error) {
       handleMutationError(
         error,
@@ -117,8 +116,6 @@ function HabitModal({
       // Reset submitting state on error so user can try again
       setIsSubmitting(false);
     }
-    // Note: We don't reset isSubmitting on success because the modal will close
-    // and the component will unmount/reset when it reopens
   };
 
   // Determine the title and save button label based on the mode

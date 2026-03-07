@@ -62,7 +62,7 @@ const ConnectedAccountsForm = () => {
 
   // Wrap both operations with reverification
   const createExternalAccount = useReverification(
-    (parameters: { strategy: string; redirectUrl: string }) =>
+    (parameters: { strategy: any; redirectUrl: string }) =>
       user?.createExternalAccount(parameters),
   );
 
@@ -199,7 +199,7 @@ const ConnectedAccountsForm = () => {
     return (
       <div
         key={account.provider}
-        className="rounded-lg border border-border bg-surface-2 p-4"
+        className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -294,23 +294,23 @@ const ConnectedAccountsForm = () => {
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
             <div className="mr-4 rounded-xl bg-success/10 p-3">
-              <ShieldCheckIcon className="h-7 w-7 flex-shrink-0 text-success" />
+              <ShieldCheckIcon className="h-7 w-7 shrink-0 text-success" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-bold text-foreground">
+              <h3 className="truncate text-xl font-semibold text-foreground">
                 Connected Accounts
               </h3>
               <p className="mt-1 text-sm text-muted">
-                Manage how you sign in to your account
+                Manage your sign-in methods and connected services
               </p>
             </div>
           </div>
         </div>
 
         {/* Login summary */}
-        <div className="mb-6 rounded-lg border border-primary/20 bg-primary/5 p-4">
+        <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-start gap-3">
-            <EmailIcon className="mt-0.5 h-5 w-5 flex-shrink-0 text-primary" />
+            <EmailIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
               <p className="font-medium text-foreground">
                 Your account can be accessed with:
@@ -339,7 +339,7 @@ const ConnectedAccountsForm = () => {
             <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Email & Password
             </h4>
-            <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <div             className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-2">
@@ -407,7 +407,7 @@ const ConnectedAccountsForm = () => {
 
         {/* No accounts message */}
         {!hasPassword && externalAccounts.length === 0 && (
-          <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
+          <div className="rounded-2xl border border-warning/30 bg-warning/10 p-5">
             <p className="text-sm text-warning">
               You don&apos;t have any sign-in methods configured. Please add at
               least one method to secure your account.

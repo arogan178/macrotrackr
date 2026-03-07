@@ -11,10 +11,6 @@ import { describe, it, expect } from 'vitest'
 // This mirrors the logic in backend/src/middleware/clerkAuth.ts
 
 const AUTH_EXEMPT_PATHS = new Set([
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/validate-email",
-  "/api/auth/forgot-password",
   "/api/auth/reset-password",
   "/api/webhooks/clerk",
   "/api/webhooks/stripe",
@@ -46,22 +42,6 @@ function isExemptPath(path: string): boolean {
 
 describe('isExemptPath', () => {
   describe('exact matches', () => {
-    it('should exempt login path', () => {
-      expect(isExemptPath('/api/auth/login')).toBe(true)
-    })
-
-    it('should exempt register path', () => {
-      expect(isExemptPath('/api/auth/register')).toBe(true)
-    })
-
-    it('should exempt validate-email path', () => {
-      expect(isExemptPath('/api/auth/validate-email')).toBe(true)
-    })
-
-    it('should exempt forgot-password path', () => {
-      expect(isExemptPath('/api/auth/forgot-password')).toBe(true)
-    })
-
     it('should exempt reset-password path', () => {
       expect(isExemptPath('/api/auth/reset-password')).toBe(true)
     })
@@ -143,11 +123,11 @@ describe('isExemptPath', () => {
   describe('edge cases', () => {
     it('should handle paths with query parameters', () => {
       // Query params don't affect exemption
-      expect(isExemptPath('/api/auth/login?redirect=/dashboard')).toBe(false)
+      expect(isExemptPath('/api/auth/reset-password?token=abc')).toBe(false)
     })
 
     it('should be case-sensitive', () => {
-      expect(isExemptPath('/API/AUTH/LOGIN')).toBe(false)
+      expect(isExemptPath('/API/AUTH/RESET-PASSWORD')).toBe(false)
     })
 
     it('should handle empty path', () => {
@@ -163,10 +143,6 @@ describe('isExemptPath', () => {
 describe('AUTH_EXEMPT_PATHS set', () => {
   it('should contain all expected exempt paths', () => {
     const expectedPaths = [
-      "/api/auth/login",
-      "/api/auth/register",
-      "/api/auth/validate-email",
-      "/api/auth/forgot-password",
       "/api/auth/reset-password",
       "/api/webhooks/clerk",
       "/api/webhooks/stripe",
@@ -183,6 +159,6 @@ describe('AUTH_EXEMPT_PATHS set', () => {
   })
 
   it('should have correct size', () => {
-    expect(AUTH_EXEMPT_PATHS.size).toBe(12)
+    expect(AUTH_EXEMPT_PATHS.size).toBe(8)
   })
 })

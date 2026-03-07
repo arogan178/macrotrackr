@@ -451,7 +451,7 @@ export function ProfileCreationForm() {
         </p>
       </div>
 
-      <div className="space-y-3 rounded-lg border border-border bg-surface p-4">
+      <div className="space-y-3 rounded-lg border border-border bg-surface-2 p-4">
         <div className="flex justify-between">
           <span className="text-muted">Date of Birth</span>
           <span className="font-medium">{dateOfBirth}</span>

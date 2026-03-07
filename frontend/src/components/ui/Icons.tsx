@@ -68,8 +68,10 @@ import { memo } from "react";
 import { ICON_SIZES } from "../utils/Constants";
 
 // Base icon type with common props
-interface IconProps extends Omit<LucideProps, "size"> {
+export interface IconProps extends Omit<LucideProps, "size"> {
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+  className?: string;
+  "aria-hidden"?: boolean | "true" | "false";
 }
 
 // HOC to apply consistent styling to all icons

@@ -1,3 +1,4 @@
+import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useState } from "react";
 
 import {
@@ -6,11 +7,13 @@ import {
   Dropdown,
   NumberField,
   QuantityUnitField,
-  TextField,
   TimeField,
 } from "@/components/form";
-import { Button, CheckMarkIcon, TrashIcon } from "@/components/ui";
+import { formStyles } from "@/components/form/Styles";
+import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
+import { cn } from "@/lib/classnameUtilities";
+import type { Ingredient } from "@/types/macro";
 import { MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -26,6 +29,7 @@ interface AddEntryProps {
     mealName: string;
     entryDate: string;
     entryTime: string;
+    ingredients?: Ingredient[];
   }) => Promise<void>;
   isSaving: boolean;
 }
@@ -44,12 +48,11 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       }
     | undefined
   >();
+  const [baseIngredients, setBaseIngredients] = useState<Ingredient[] | undefined>();
 
   const [searchResult, setSearchResult] = useState<string | undefined>();
-  // Helper: get current hour in user's local time
   const currentHour = new Date().getHours();
 
-  // Define time ranges for each meal type
   const mealTypeTimeRanges = {
     breakfast: { start: 5, end: 10 }, // 5am–10am
     lunch: { start: 11, end: 15 }, // 11am–3pm
@@ -57,7 +60,6 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     snack: { start: 0, end: 23 }, // Snacks always available
   };
 
-  // Function to get default meal type based on current time
   const getDefaultMealType = () => {
     if (
       currentHour >= mealTypeTimeRanges.breakfast.start &&
@@ -94,35 +96,22 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     }),
   );
 
-  // Effect to recalculate macros when quantity, unit, or baseMacros change
   useEffect(() => {
     if (baseMacros && typeof quantity === "number" && quantity > 0) {
-      // Convert the quantity to grams for consistent macro calculations
-      // Base macros are always per 100g, so we need to calculate the factor accordingly
       let quantityInGrams: number;
 
       if (UnitConverter.isWeightUnit(unit)) {
-        // Convert weight units to grams
         quantityInGrams = UnitConverter.convert(quantity, unit, "g");
       } else if (UnitConverter.isVolumeUnit(unit)) {
-        // For volume units, we'll keep them as-is since macros are typically per volume for liquids
-        // But we still need to handle the conversion for display purposes
         quantityInGrams = UnitConverter.convert(quantity, unit, "ml");
       } else {
-        // For unit items (like pieces), treat as 100g equivalent
         quantityInGrams = quantity * 100;
       }
 
-      // Calculate macros based on the converted quantity
-      const factor = quantityInGrams / 100; // Macros are per 100g/ml
+      const factor = quantityInGrams / 100;
       setProtein(Number((baseMacros.protein * factor).toFixed(1)));
       setCarbs(Number((baseMacros.carbs * factor).toFixed(1)));
       setFats(Number((baseMacros.fats * factor).toFixed(1)));
-    } else if (!baseMacros) {
-      // Clear macros when no base macros are selected
-      setProtein(undefined);
-      setCarbs(undefined);
-      setFats(undefined);
     }
   }, [quantity, unit, baseMacros]);
 
@@ -158,13 +147,12 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         fats: Number.parseFloat(f),
       };
       setBaseMacros(per100g);
+      setBaseIngredients(undefined);
       setMealName(name);
       setQuantity(servingQuantity);
 
-      // Use the original unit for display
       let displayUnit = servingUnit as UnitType;
 
-      // Validate that the unit is actually valid
       const validUnits: UnitType[] = [
         "g",
         "kg",
@@ -182,23 +170,22 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         displayUnit = "g";
       }
 
-      // If it's lbs, convert to kg for better metric consistency
       if (displayUnit === "lb") {
         const metric = UnitConverter.toMetric(servingQuantity, displayUnit);
         setUnit(metric.unit);
         setQuantity(metric.quantity);
       } else {
-        // For other units, keep as-is but ensure they're valid UnitType
         setUnit(displayUnit);
         setQuantity(servingQuantity);
       }
-      setSearchResult(`Selected: ${name}`);
+      setSearchResult(name);
     },
     [],
   );
 
   const handleClearSearch = useCallback(() => {
     setBaseMacros(undefined);
+    setBaseIngredients(undefined);
     setMealName("");
     setSearchResult(undefined);
     setProtein(undefined);
@@ -208,18 +195,106 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     setUnit("g" as UnitType);
   }, []);
 
-  // When user manually edits a macro, break the link to the search result
   const handleManualMacroChange =
     (setter: (value: number | undefined) => void) =>
     (value: number | undefined) => {
       setter(value);
       setBaseMacros(undefined);
+      setBaseIngredients(undefined);
     };
+
+  const handleSelectSavedMeal = useCallback(
+    (meal: {
+      name: string;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: string;
+      ingredients?: Ingredient[];
+    }) => {
+      if (meal.ingredients && meal.ingredients.length > 0) {
+        setBaseMacros({
+          protein: meal.protein,
+          carbs: meal.carbs,
+          fats: meal.fats,
+        });
+        setBaseIngredients(meal.ingredients);
+        setMealName(meal.name);
+        setQuantity(1);
+        setUnit("unit");
+      } else {
+        setBaseMacros(undefined);
+        setBaseIngredients(undefined);
+        setMealName(meal.name);
+        setProtein(meal.protein);
+        setCarbs(meal.carbs);
+        setFats(meal.fats);
+        setQuantity(undefined);
+        setUnit("g"); // Default to g for saved meals or arbitrary since no base macros
+      }
+      
+      if (meal.mealType && MEAL_TYPE_OPTIONS.some((o) => o.value === meal.mealType)) {
+        setMealType(meal.mealType as MealType);
+      }
+      setSearchResult(undefined);
+    },
+    []
+  );
 
   const handleSubmit = useCallback(
     async (event: React.FormEvent) => {
       event.preventDefault();
       if (!isFormValid) return;
+
+      let finalIngredients = baseIngredients;
+      if (typeof quantity === "number" && quantity > 0) {
+        let factor = 1;
+        if (unit === "unit") {
+          factor = quantity;
+        } else {
+          let quantityInBaseUnit: number;
+          if (UnitConverter.isWeightUnit(unit)) {
+            quantityInBaseUnit = UnitConverter.convert(quantity, unit, "g");
+          } else if (UnitConverter.isVolumeUnit(unit)) {
+            quantityInBaseUnit = UnitConverter.convert(quantity, unit, "ml");
+          } else {
+            quantityInBaseUnit = quantity * 100;
+          }
+          factor = quantityInBaseUnit / 100;
+        }
+
+        if (baseIngredients) {
+          finalIngredients = baseIngredients.map((ing) => ({
+            ...ing,
+            protein: Number((ing.protein * factor).toFixed(1)),
+            carbs: Number((ing.carbs * factor).toFixed(1)),
+            fats: Number((ing.fats * factor).toFixed(1)),
+            quantity: ing.quantity ? Number((ing.quantity * factor).toFixed(1)) : undefined,
+          }));
+        } else if (baseMacros) {
+          finalIngredients = [
+            {
+              name: mealName,
+              protein: protein as number,
+              carbs: carbs as number,
+              fats: fats as number,
+              quantity,
+              unit,
+              baseProtein: baseMacros.protein,
+              baseCarbs: baseMacros.carbs,
+              baseFats: baseMacros.fats,
+              baseQuantity: unit === "unit" ? 1 : 100,
+              baseUnit: unit === "unit"
+                ? "unit"
+                : UnitConverter.isWeightUnit(unit)
+                  ? "g"
+                  : UnitConverter.isVolumeUnit(unit)
+                    ? "ml"
+                    : unit,
+            },
+          ];
+        }
+      }
 
       await onSubmit({
         protein: protein as number,
@@ -229,6 +304,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         mealName,
         entryDate,
         entryTime,
+        ingredients: finalIngredients,
       });
 
       handleClearSearch();
@@ -244,39 +320,34 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       onSubmit,
       isFormValid,
       handleClearSearch,
+      baseIngredients,
+      quantity,
+      unit,
     ],
   );
 
   return (
-    <CardContainer>
-      <div className="p-5">
-        <h2 className="mb-4 text-base font-semibold text-foreground">
-          Add Today's Macros
-        </h2>
+    <CardContainer
+      variant="interactive"
+      className="relative flex h-full flex-col justify-between overflow-hidden"
+    >
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50"></div>
+      <div className="relative z-10 p-5">
+        <div className="mb-5">
+          <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
+            Log a Meal
+          </h2>
+        </div>
 
-        <div className="mb-6">
-          <CalorieSearch onResult={handleSearchResult} />
-          {searchResult && (
-            <div className="mt-3 flex items-center justify-between text-sm text-success">
-              <div className="flex items-center">
-                <CheckMarkIcon className="mr-2 h-4 w-4" />
-                {searchResult}
-              </div>
-              <button
-                type="button"
-                onClick={handleClearSearch}
-                className="flex items-center text-xs text-muted transition-colors hover:text-foreground"
-                aria-label="Clear search"
-              >
-                <TrashIcon className="mr-1 h-4 w-4" />
-                Clear
-              </button>
-            </div>
-          )}
+        <div className="mb-5">
+          <CalorieSearch
+            onResult={handleSearchResult}
+            onSelectSavedMeal={handleSelectSavedMeal}
+          />
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3 sm:items-start">
+          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:items-start">
             <div className="sm:col-span-1">
               <QuantityUnitField
                 label="Quantity/Unit"
@@ -289,17 +360,44 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               />
             </div>
             <div className="sm:col-span-2">
-              <TextField
-                label="Meal Name"
-                value={mealName}
-                onChange={setMealName}
-                placeholder="e.g. Chicken Salad"
-                required
-              />
+              <div className="space-y-2">
+                <div className="relative flex items-center">
+                  <label htmlFor="meal-name-input" className={formStyles.label}>
+                    Meal Name
+                  </label>
+                  <AnimatePresence>
+                    {(searchResult || mealName.length > 0) && (
+                      <motion.button
+                        type="button"
+                        onClick={handleClearSearch}
+                        initial={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.8 }}
+                        transition={{ duration: 0.15 }}
+                        className="absolute right-0 flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
+                        aria-label="Clear search"
+                        title="Clear search result"
+                      >
+                        <TrashIcon className="h-3 w-3" />
+                        Clear
+                      </motion.button>
+                    )}
+                  </AnimatePresence>
+                </div>
+                <input
+                  id="meal-name-input"
+                  type="text"
+                  value={mealName}
+                  onChange={(event_) => setMealName(event_.target.value)}
+                  placeholder="e.g. Chicken Salad"
+                  required
+                  className={cn(formStyles.input.base, formStyles.input.normal)}
+                />
+              </div>
             </div>
           </div>
 
-          <div className="mb-4 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
             <DateField
               label="Date"
               value={entryDate}
@@ -325,7 +423,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <NumberField
               label="Protein"
               value={protein}
@@ -355,28 +453,42 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="mt-5 flex items-center justify-between">
-            <div className="text-sm text-muted">
-              Total Calories:{" "}
-              <span className="font-semibold text-foreground">{calories}</span>
+          <div className="mt-5 flex flex-col items-center justify-between gap-4 sm:flex-row">
+            <div className="flex flex-col gap-1">
+              <div className="text-sm font-medium tracking-wide text-muted uppercase">
+                Total Calories
+              </div>
+              <div className="text-2xl font-light tracking-tight text-foreground">
+                {calories}
+              </div>
             </div>
             {allFieldsAreZero && (
-              <div className="mr-4 text-sm text-warning">
+              <div className="mr-4 rounded-md bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning">
                 Macros must be greater than 0
               </div>
             )}
             {!mealName.trim() && !anyFieldIsUndefined && (
-              <div className="mr-4 text-sm text-warning">
+              <div className="mr-4 rounded-md bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning">
                 Please provide a meal name
               </div>
             )}
             <Button
               type="submit"
-              disabled={!isFormValid}
-              autoLoadingFeature="macros"
-              loadingText="Saving..."
-              text="Add Entry"
+              disabled={!isFormValid || _isSaving}
+              isLoading={_isSaving}
+              text={_isSaving ? "Saving..." : "Add Entry"}
+              icon={
+                <PlusIcon 
+                  className={cn(
+                    "mr-2 h-4 w-4 transition-transform duration-300",
+                    isFormValid && !_isSaving ? "group-hover:rotate-90" : ""
+                  )} 
+                />
+              }
+              iconPosition="left"
+              buttonSize="lg"
               variant="primary"
+              className="group min-w-40 font-medium transition-colors duration-200"
             />
           </div>
         </form>

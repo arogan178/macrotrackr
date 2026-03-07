@@ -26,6 +26,7 @@ import React, { memo } from "react";
 
 import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
+import { cn } from "../../lib/classnameUtilities";
 import Button from "./Button";
 import {
   CloseIcon,
@@ -70,47 +71,47 @@ const getActionConfigs = () =>
     "password-toggle": {
       icon: undefined, // Icon is always passed as prop for this variant
       className:
-        "text-foreground hover:text-foreground hover:bg-surface-2 focus:ring-gray-500",
+        "text-foreground bg-surface-2/40 hover:bg-surface-2/80 focus-visible:ring-gray-500 backdrop-blur-sm transition-colors duration-200",
     },
     delete: {
       icon: TrashIcon,
       className:
-        "text-error hover:text-error bg-error hover:bg-error focus:ring-red-500",
+        "text-error bg-error/10 border border-transparent hover:bg-error/20 hover:border-error/30 focus-visible:ring-red-500 transition-colors duration-200",
     },
     edit: {
       icon: EditIcon,
       className:
-        "text-foreground hover:text-foreground  hover:bg-surface-2 focus:ring-gray-500",
+        "text-foreground bg-surface-2/30 border border-transparent hover:bg-surface-2/80 hover:border-white/10 focus-visible:ring-gray-500 backdrop-blur-sm transition-colors duration-200",
     },
     close: {
       icon: CloseIcon,
       className:
-        "text-foreground hover:text-foreground  hover:bg-surface-2 focus:ring-gray-500 !rounded-full",
+        "text-foreground bg-surface-2/30 border border-transparent hover:bg-surface-2/80 hover:border-white/10 focus-visible:ring-gray-500 !rounded-full backdrop-blur-sm transition-colors duration-200",
     },
     add: {
       icon: PlusIcon,
       className:
-        "text-primary hover:text-primary hover:bg-primary/40 focus:ring-primary",
+        "text-primary bg-primary/10 border border-transparent hover:bg-primary/20 hover:border-primary/30 focus-visible:ring-primary backdrop-blur-sm transition-colors duration-200",
     },
     more: {
       icon: MoreVerticalIcon,
       className:
-        "text-foreground hover:text-foreground hover:bg-surface-3/70 focus:ring-gray-500",
+        "text-foreground bg-surface-3/40 border border-transparent hover:bg-surface-3/70 hover:border-white/10 focus-visible:ring-gray-500 backdrop-blur-sm transition-colors duration-200",
     },
     info: {
       icon: InfoIcon,
       className:
-        "text-primary hover:text-primary hover:bg-primary/40 focus:ring-primary",
+        "text-blue-400 bg-blue-400/10 border border-transparent hover:bg-blue-400/20 hover:border-blue-400/30 focus-visible:ring-blue-500 backdrop-blur-sm transition-colors duration-200",
     },
     warning: {
       icon: WarningIcon,
       className:
-        "text-warning hover:text-warning bg-warning/20 hover:bg-warning/35 focus:ring-yellow-500",
+        "text-warning bg-warning/10 border border-transparent hover:bg-warning/20 hover:border-warning/30 focus-visible:ring-yellow-500 transition-colors duration-200",
     },
     export: {
       icon: ExportIcon,
       className:
-        "text-foreground hover:text-success hover:bg-surface-2 focus:ring-emerald-500",
+        "text-foreground bg-success/10 border border-transparent hover:text-success hover:bg-success/20 hover:border-success/30 focus-visible:ring-emerald-500 backdrop-blur-sm transition-colors duration-200",
     },
     custom: {
       icon: undefined,
@@ -150,13 +151,12 @@ function IconButton({
   }
 
   // Compose className
-  const combinedClassName = [
+  const combinedClassName = cn(
     paddingClass,
-    "flex items-center justify-center transition-colors duration-200",
+    "flex items-center justify-center",
     variant === "custom" ? className : config.className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+    variant !== "custom" && className // apply any extra classes passed to built-in variants as well
+  );
 
   return (
     <Button

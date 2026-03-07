@@ -4,6 +4,7 @@ import { motion } from "motion/react";
 import { memo } from "react";
 
 import { AnimatedNumber } from "@/components/animation/";
+import { CardContainer } from "@/components/form";
 import {
   Button,
   CalendarIcon,
@@ -117,16 +118,16 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-xl border border-border/50 bg-surface p-4 shadow-primary transition-all duration-200 hover:border-border sm:p-6"
+      className="rounded-2xl border border-border/40 bg-surface p-6"
     >
       {/* Header */}
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+      <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div className="flex items-center">
-          <div className={`rounded-lg p-2.5 ${goalBgColorLight} mr-3`}>
-            <WeightIcon className={`h-6 w-6 ${goalTextColor}`} />
+          <div className={`rounded-xl p-3 ${goalBgColorLight} mr-4`}>
+            <WeightIcon className={`h-7 w-7 ${goalTextColor}`} />
           </div>
           <div>
-            <h2 className="text-xl font-semibold text-foreground">
+            <h2 className="text-xl font-bold tracking-tight text-foreground/90">
               {goalTypeLabel} Plan
             </h2>
             <p className="text-sm text-muted">
@@ -154,7 +155,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       </div>
 
       {/* Goal Progress Visual */}
-      <div className="mb-6">
+      <CardContainer className="mb-8 border-border/60 bg-surface-2 p-5">
         <div className="mb-3 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center">
           <div className="flex items-baseline space-x-2">
             <span className="text-2xl font-bold text-foreground">
@@ -228,58 +229,61 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             </div>
           </>
         )}
-      </div>
+      </CardContainer>
 
       {/* Stats Grid */}
-      <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <CardContainer
+          variant="transparent"
+          className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
-          <TrendingUpIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
+          <TrendingUpIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
-            <p className="text-sm text-muted">Weekly Rate</p>
-            <p className="text-base font-medium text-foreground">
+            <p className="text-sm font-medium text-muted">Weekly Rate</p>
+            <p className="text-lg font-bold tracking-tight text-foreground/90">
               {isMaintenance ? "Maintenance" : `${isWeightLoss ? "↓" : "↑"} `}
               {!isMaintenance && (
                 <AnimatedNumber
                   value={Math.abs(weeklyChange)}
                   toFixedValue={2}
-                  suffix=" kg/week"
+                  suffix=" kg/wk"
                 />
               )}
             </p>
           </div>
-        </div>
-        <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
+        </CardContainer>
+        <CardContainer
+          variant="transparent"
+          className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
-          <CalendarIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
+          <CalendarIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
-            <p className="text-sm text-muted">Est. Duration</p>
-            <p className="text-base font-medium text-foreground">
+            <p className="text-sm font-medium text-muted">Est. Duration</p>
+            <p className="text-lg font-bold tracking-tight text-foreground/90">
               {isMaintenance ? (
                 "Ongoing"
               ) : (
                 <>
-                  <AnimatedNumber value={calculatedWeeks} suffix=" weeks" />
+                  <AnimatedNumber value={calculatedWeeks} suffix=" wks" />
                 </>
               )}
             </p>
           </div>
-        </div>
-        <div
-          className={`flex items-start gap-3 ${goalBgColorLight} rounded-lg border p-3 ${goalBorderColor}`}
+        </CardContainer>
+        <CardContainer
+          variant="transparent"
+          className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
-          <TargetIcon className={` ${goalTextColor} mt-0.5 shrink-0`} />
+          <TargetIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
           <div>
-            <p className="text-sm text-muted">
+            <p className="text-sm font-medium text-muted">
               {isWeightLoss
                 ? "Daily Deficit"
                 : isWeightGain
                   ? "Daily Surplus"
                   : "Est. TDEE"}
             </p>
-            <p className="text-base font-medium text-foreground">
+            <p className="text-lg font-bold tracking-tight text-foreground/90">
               {isMaintenance ? (
                 <AnimatedNumber value={tdee} suffix=" kcal" />
               ) : (
@@ -287,12 +291,12 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               )}
             </p>
           </div>
-        </div>
+        </CardContainer>
       </div>
 
       {/* Nutrition section */}
-      <div>
-        <h3 className="mb-4 text-lg font-semibold text-foreground">
+      <CardContainer className="border-border/60 bg-surface-2 p-5">
+        <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
           Daily Nutrition Target
         </h3>
         <div className="mb-5">
@@ -349,7 +353,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             color="fats"
           />
         </div>
-      </div>
+      </CardContainer>
     </motion.div>
   );
 });
