@@ -42,6 +42,12 @@ function formatIngredient(ingredient: Ingredient) {
 export function buildHistoryCsv(entries: MacroEntry[]) {
   const rows = entries.map((entry) => {
     const ingredients = entry.ingredients || [];
+    const ingredientNames = ingredients
+      .map((ingredient) => ingredient.name)
+      .join(" | ");
+    const ingredientDetails = ingredients
+      .map((ingredient) => formatIngredient(ingredient))
+      .join(" | ");
 
     return [
       entry.entryDate || "",
@@ -53,11 +59,11 @@ export function buildHistoryCsv(entries: MacroEntry[]) {
       entry.fats,
       calculateCalories(entry),
       ingredients.length,
-      ingredients.map((ingredient) => ingredient.name).join(" | "),
-      ingredients.map(formatIngredient).join(" | "),
+      ingredientNames,
+      ingredientDetails,
       entry.createdAt,
     ]
-      .map(escapeCsvValue)
+      .map((value) => escapeCsvValue(value))
       .join(",");
   });
 

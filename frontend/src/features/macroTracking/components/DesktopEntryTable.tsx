@@ -170,8 +170,8 @@ const DesktopEntryTable = memo(
                       type="checkbox"
                       className="mr-2 h-4 w-4 rounded border-border text-primary focus:ring-primary/50"
                       checked={selectedEntryIds.has(entry.id)}
-                      onChange={(e) => {
-                        e.stopPropagation();
+                      onChange={(event_) => {
+                        event_.stopPropagation();
                         onToggleEntrySelection?.(entry.id);
                       }}
                     />

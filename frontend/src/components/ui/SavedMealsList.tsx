@@ -3,7 +3,7 @@ import { memo } from "react";
 
 import { Button, TrashIcon } from "@/components/ui";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
-import { useDeleteSavedMeal,useSavedMeals } from "@/hooks/queries/useSavedMeals";
+import { useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
 import { cn } from "@/lib/classnameUtilities";
 import type { Ingredient } from "@/types/macro";
 
@@ -76,6 +76,7 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
               whileTap={{ scale: 0.98 }}
             >
               <button
+                type="button"
                 onClick={() => onSelectMeal(meal)}
                 className="flex items-center gap-2 py-1 pr-1 outline-none"
               >
@@ -85,8 +86,9 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
                 <span className="text-xs text-muted">{calories} kcal</span>
               </button>
               <button
-                onClick={(e) => {
-                  e.stopPropagation();
+                type="button"
+                onClick={(event_) => {
+                  event_.stopPropagation();
                   deleteMeal.mutate(meal.id);
                 }}
                 disabled={deleteMeal.isPending}
