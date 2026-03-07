@@ -12,6 +12,7 @@ import {
   calculateWeeksToGoal,
 } from "@/features/goals/calculations";
 import type { WeightGoalFormValues } from "@/features/goals/types";
+import type { MacroEntry } from "@/types/macro";
 import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 import { getActivityLevelFromString } from "@/utils/userConstants";
 
@@ -29,6 +30,15 @@ export interface MacroDensitySummaryItem {
   fats: number;
   count: number;
 } // Adjust path as needed
+
+interface MacroHistoryResponse {
+  entries: MacroEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+  limits?: unknown;
+}
 
 // API Base URL and Response Types
 export const API_BASE_URL =
@@ -580,70 +590,9 @@ export const apiService = {
   },
 
   // Authentication endpoints
-  // Note: Login/Register/Forgot Password are now handled by Clerk
-  // The backend validates Clerk JWT tokens for authenticated requests
   auth: {
     /**
-     * @deprecated Use Clerk's SignIn component instead
-     * Kept for backward compatibility during migration
-     */
-    login: async (email: string, password: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        token: string;
-        user?: UserDetailsResponse;
-      };
-    },
-    /**
-     * @deprecated Clerk handles email validation automatically
-     */
-    validateEmail: async (email: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/validate-email`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ email }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as { valid: boolean };
-    },
-    /**
-     * @deprecated Use Clerk's SignUp component instead
-     * Kept for backward compatibility during migration
-     */
-    register: async (userData: Record<string, unknown>) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify(userData),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        token: string;
-        user?: UserDetailsResponse;
-      };
-    },
-    /**
-     * @deprecated Use Clerk's password reset flow instead
-     */
-    forgotPassword: async (email: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ email }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        success: boolean;
-        message?: string;
-      };
-    },
-    /**
-     * @deprecated Use Clerk's password reset flow instead
+     * Supports password reset links issued before the Clerk migration.
      */
     resetPassword: async (token: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
@@ -729,6 +678,40 @@ export const apiService = {
         credentials: "include",
       });
       return handleResponse(response);
+    },
+    getAllHistory: async (
+      options: { startDate?: string; endDate?: string } = {},
+    ): Promise<{ entries: MacroEntry[]; limits?: unknown }> => {
+      const pageSize = 100;
+      let offset = 0;
+      let hasMore = true;
+      const entries: MacroEntry[] = [];
+      let limits: unknown;
+
+      while (hasMore) {
+        const response = (await apiService.macros.getHistory(
+          pageSize,
+          offset,
+          options,
+        )) as MacroHistoryResponse;
+
+        if (Array.isArray(response.entries)) {
+          entries.push(...response.entries);
+        }
+
+        limits = response.limits ?? limits;
+        hasMore = response.hasMore === true;
+        offset += pageSize;
+
+        if (offset > 50_000) {
+          break;
+        }
+      }
+
+      return {
+        entries,
+        limits,
+      };
     },
     addEntry: async (entry: MacroEntryCreatePayload) => {
       const payload = {

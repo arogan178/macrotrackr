@@ -117,10 +117,11 @@ export default function SSOCallbackPage() {
           </h1>
           <p className="mb-6 text-muted">{error}</p>
           <button
+            type="button"
             onClick={() =>
               navigate({ to: "/login", search: { returnTo: undefined } })
             }
-            className="rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
             Try Again
           </button>

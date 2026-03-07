@@ -332,6 +332,8 @@ export const macroRoutes = (app: Elysia) =>
           // Parse pagination params
           const limit = Math.max(1, Math.min(Number(query?.limit) || 20, 100));
           const offset = Math.max(0, Number(query?.offset) || 0);
+          const startDate = query?.startDate;
+          const endDate = query?.endDate;
 
           // Check if user is Pro
           const isProUser = await checkProStatus(userId);
@@ -342,44 +344,57 @@ export const macroRoutes = (app: Elysia) =>
           cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
           const cutoffDateString = cutoffDate.toISOString().split('T')[0] as string;
 
+          const buildWhereClause = (includeRetentionCutoff: boolean) => {
+            const clauses = ["user_id = ?"];
+            const parameters: (number | string)[] = [userId];
+
+            if (startDate) {
+              clauses.push("entry_date >= ?");
+              parameters.push(startDate);
+            }
+
+            if (endDate) {
+              clauses.push("entry_date <= ?");
+              parameters.push(endDate);
+            }
+
+            if (includeRetentionCutoff) {
+              clauses.push("entry_date >= ?");
+              parameters.push(cutoffDateString);
+            }
+
+            return {
+              where: clauses.join(" AND "),
+              parameters,
+            };
+          };
+
+          const visibleWhere = buildWhereClause(!isProUser);
+          const totalWhere = buildWhereClause(false);
+
           // Get total count (all entries for Pro, filtered for Free)
-          let countQuery = `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`;
-          const countParams: (number | string)[] = [userId];
-
-          if (!isProUser) {
-            countQuery += ` AND entry_date >= ?`;
-            countParams.push(cutoffDateString);
-          }
-
           const countResult = safeQuery<{ count: number }>(
             db,
-            countQuery,
-            countParams
+            `SELECT COUNT(*) as count FROM macro_entries WHERE ${visibleWhere.where}`,
+            visibleWhere.parameters
           );
           const visibleTotal = countResult?.count || 0;
 
           // Get total available (for upgrade prompt)
           const totalAvailableResult = safeQuery<{ count: number }>(
             db,
-            `SELECT COUNT(*) as count FROM macro_entries WHERE user_id = ?`,
-            [userId]
+            `SELECT COUNT(*) as count FROM macro_entries WHERE ${totalWhere.where}`,
+            totalWhere.parameters
           );
           const totalAvailable = totalAvailableResult?.count || 0;
 
           // Get paginated results
-          let historyQuery = `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at 
+          const historyQuery = `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at 
              FROM macro_entries 
-             WHERE user_id = ?`;
-          const historyParams: (number | string)[] = [userId];
-
-          if (!isProUser) {
-            historyQuery += ` AND entry_date >= ?`;
-            historyParams.push(cutoffDateString);
-          }
-
-          historyQuery += ` ORDER BY entry_date DESC, entry_time DESC, created_at DESC
+             WHERE ${visibleWhere.where}
+             ORDER BY entry_date DESC, entry_time DESC, created_at DESC
              LIMIT ? OFFSET ?`;
-          historyParams.push(limit, offset);
+          const historyParams = [...visibleWhere.parameters, limit, offset];
 
           const historyResult = safeQueryAll<MacroEntryRow & { ingredients: string }>(
             db,
@@ -435,6 +450,8 @@ export const macroRoutes = (app: Elysia) =>
           query: t.Object({
             limit: t.Optional(t.Numeric()),
             offset: t.Optional(t.Numeric()),
+            startDate: t.Optional(t.String()),
+            endDate: t.Optional(t.String()),
           }),
           response: t.Object({
             entries: t.Array(MacroSchemas.macroEntryResponse),

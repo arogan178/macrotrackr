@@ -2,9 +2,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService } from "@/utils/apiServices";
-
 import { Ingredient } from "@/types/macro";
+import { apiService } from "@/utils/apiServices";
 
 export interface SavedMeal {
   id: number;

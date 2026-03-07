@@ -47,7 +47,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   <div
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`group relative flex h-full flex-col rounded-3xl border p-8 transition-all duration-200 ease-out sm:p-10 ${focusRingColor} ${cardClassName}`}
+    className={`group relative flex h-full flex-col rounded-3xl border p-8 transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out sm:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
       <div className="absolute -top-3 left-1/2 -translate-x-1/2">
@@ -60,7 +60,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
       <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
         {title}
       </h3>
-      <div className="mb-2 flex min-h-[3.5rem] items-center justify-center text-4xl font-bold tracking-tight text-foreground">
+      <div className="mb-2 flex min-h-14 items-center justify-center text-4xl font-bold tracking-tight text-foreground">
         {price}
         {suffix && (
           <span className="ml-1 text-lg font-normal tracking-normal text-muted">
@@ -68,7 +68,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
           </span>
         )}
       </div>
-      <div className="min-h-[1.5rem]">
+      <div className="min-h-6">
         {equivalent && (
           <p className="text-sm font-medium tracking-wide text-muted">
             {equivalent}

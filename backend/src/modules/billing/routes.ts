@@ -9,7 +9,7 @@ import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
 import type { AuthenticatedContext } from "../../types";
-import { adaptClerkToLegacy } from "../../lib/route-adapter";
+import { resolveAuthenticatedUser } from "../../lib/route-adapter";
 import type { Database } from "bun:sqlite";
 
 // Extended billing context type for route handlers
@@ -95,14 +95,14 @@ function handleRouteError(error: unknown, operation: string, userId?: number): n
 }
 
 function resolveBillingUser(context: BillingRouteContext) {
-  const legacyUser = adaptClerkToLegacy(context as any);
+  const authenticatedUser = resolveAuthenticatedUser(context as any);
   const clerkUser = context.user;
 
   return {
-    userId: legacyUser.userId,
-    email: legacyUser.email || "",
-    firstName: legacyUser.firstName || clerkUser?.firstName || "",
-    lastName: legacyUser.lastName || clerkUser?.lastName || "",
+    userId: authenticatedUser.userId,
+    email: authenticatedUser.email || "",
+    firstName: authenticatedUser.firstName || clerkUser?.firstName || "",
+    lastName: authenticatedUser.lastName || clerkUser?.lastName || "",
   };
 }
 

@@ -26,7 +26,7 @@ export function getButtonClasses(
 
   const buttonBase = cn(
     "inline-flex items-center justify-center gap-1.5 text-sm font-medium",
-    "transition-all duration-200",
+    "transition-[background-color,border-color,color,box-shadow,transform,filter] duration-200",
     "ease-out",
     "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
     "cursor-pointer rounded-full disabled:cursor-not-allowed disabled:opacity-50",

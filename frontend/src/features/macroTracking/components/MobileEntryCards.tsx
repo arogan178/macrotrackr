@@ -94,9 +94,11 @@ const EntryCard = memo(
               />
             )}
             {hasIngredients && (
-              <div 
-                className="cursor-pointer p-1 hover:bg-surface-3 rounded-md"
+              <button 
+                type="button"
+                className="cursor-pointer rounded-md p-1 hover:bg-surface-3"
                 onClick={() => setIsExpanded(!isExpanded)}
+                aria-label="Toggle ingredients"
               >
                 <motion.div
                   initial={false}
@@ -105,7 +107,7 @@ const EntryCard = memo(
                 >
                   <ChevronDownIcon className="h-4 w-4" />
                 </motion.div>
-              </div>
+              </button>
             )}
             <span className="text-sm font-medium tracking-tight text-foreground">
               {formatTimeFromEntry(entry)}
@@ -159,30 +161,32 @@ const EntryCard = memo(
         <AnimatePresence>
           {isExpanded && hasIngredients && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="mt-4 overflow-hidden border-t border-border/40 pt-4"
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: "auto" }}
+              exit={{ opacity: 0, height: 0 }}
+              transition={{ height: { duration: 0.3, ease: "easeInOut" }, opacity: { duration: 0.2 } }}
+              className="mt-4 overflow-hidden border-t border-border/40"
             >
-              <h4 className="text-xs font-semibold uppercase text-muted mb-3">Ingredients</h4>
-              <div className="space-y-3">
-                {entry.ingredients?.map((ing, idx) => (
-                  <div key={idx} className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-foreground">{ing.name}</span>
-                      <span className="text-xs font-medium text-foreground">{calculateCalories(ing.protein, ing.carbs, ing.fats)} kcal</span>
+              <div className="pt-4">
+                <h4 className="mb-3 text-xs font-semibold text-muted uppercase">Ingredients</h4>
+                <div className="space-y-3">
+                  {entry.ingredients?.map((ing, index) => (
+                    <div key={index} className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">{ing.name}</span>
+                        <span className="text-xs font-medium text-foreground">{calculateCalories(ing.protein, ing.carbs, ing.fats)} kcal</span>
+                      </div>
+                      {ing.quantity && (
+                        <span className="text-xs text-muted">{ing.quantity}{ing.unit || ''}</span>
+                      )}
+                      <div className="mt-1 flex gap-3 text-[10px] font-medium uppercase">
+                        <span className="text-protein">{ing.protein}g P</span>
+                        <span className="text-carbs">{ing.carbs}g C</span>
+                        <span className="text-fats">{ing.fats}g F</span>
+                      </div>
                     </div>
-                    {ing.quantity && (
-                      <span className="text-xs text-muted">{ing.quantity}{ing.unit || ''}</span>
-                    )}
-                    <div className="flex gap-3 text-[10px] uppercase font-medium mt-1">
-                      <span className="text-protein">{ing.protein}g P</span>
-                      <span className="text-carbs">{ing.carbs}g C</span>
-                      <span className="text-fats">{ing.fats}g F</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}
@@ -261,7 +265,7 @@ const MobileEntryCards = memo(
 
     const renderDateHeader = (group: GroupedEntry) => (
       <motion.div
-        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-4 transition-all duration-300 hover:bg-surface-2/60"
+        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-4 transition-colors duration-300 hover:bg-surface-2/60"
         onClick={() => toggleDateCollapse(group.date)}
         whileHover={{ backgroundColor: "var(--color-surface-2)" }}
         transition={{ duration: 0.2 }}
@@ -320,12 +324,13 @@ const MobileEntryCards = memo(
               return (
                 <div
                   key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={virtualizer.measureElement}
                   style={{
                     position: "absolute",
                     top: 0,
                     left: 0,
                     width: "100%",
-                    height: `${virtualRow.size}px`,
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >

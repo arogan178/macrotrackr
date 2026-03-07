@@ -161,7 +161,7 @@ function FloatingNotification({
   return (
     <div
       className={`relative mx-auto w-full max-w-md
-                 transform transition-all duration-300 ease-out
+                 transform transition-[opacity,transform] duration-300 ease-out
                  ${
                    isVisible && !isLeaving
                      ? "translate-y-0 scale-100 opacity-100"
@@ -210,7 +210,7 @@ function FloatingNotification({
           <div className="absolute right-0 bottom-0 left-0 h-1 overflow-hidden bg-black/30">
             <div
               ref={progressReference}
-              className={`h-full ${progress} transition-all ease-linear`}
+              className={`h-full ${progress} transition-[width] ease-linear`}
               style={{ width: "100%" }}
             />
           </div>

@@ -5,6 +5,7 @@ import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import usePageMetadata from "@/hooks/usePageMetadata";
 
+import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
@@ -155,6 +156,7 @@ const LandingPage: React.FC = () => {
       </main>
 
       <Footer />
+      <BackToTopButton label="Back to top" />
     </div>
   );
 };

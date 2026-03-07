@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { createPortal } from "react-dom";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
@@ -32,7 +33,13 @@ interface EntryHistoryProps {
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
   savedMealIds?: Set<number>;
-  onGroupMeals?: (name: string, mealType: string, selectedEntries: MacroEntry[]) => Promise<void>;
+  onGroupMeals?: (
+    name: string,
+    mealType: string,
+    selectedEntries: MacroEntry[],
+  ) => Promise<void>;
+  onExportCsv?: () => Promise<void> | void;
+  isExportingCsv?: boolean;
 }
 
 const formatEntryDate = (dateString: string): string =>
@@ -59,35 +66,6 @@ const calculateCalories = (
 const capitalizeFirstLetter = (string: string): string =>
   string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
 
-const exportCSV = (history: MacroEntry[]) => {
-  const csvContent = [
-    "Date, Time, Meal Type, Meal Name, Protein (g), Carbs (g), Fats (g), Calories (kcal)",
-    ...history.map(
-      (entry) =>
-        `${
-          entry.entryDate || new Date(entry.createdAt).toLocaleDateString()
-        },${new Date(entry.createdAt).toLocaleTimeString()},${
-          entry.mealType || ""
-        },${entry.foodName || entry.mealName || ""},${entry.protein},${
-          entry.carbs
-        },${entry.fats},${calculateCalories(
-          entry.protein,
-          entry.carbs,
-          entry.fats,
-        )}`,
-    ),
-  ].join("\n");
-
-  const blob = new Blob([csvContent], { type: "text/csv" });
-  const url = globalThis.URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  Object.assign(a, { href: url, download: "macro-entries.csv" });
-  document.body.append(a);
-  a.click();
-  a.remove();
-  globalThis.URL.revokeObjectURL(url);
-};
-
 const EntryHistoryComponent = function EntryHistory({
   history,
   deleteEntry,
@@ -101,15 +79,19 @@ const EntryHistoryComponent = function EntryHistory({
   onUnsaveMeal,
   savedMealIds,
   onGroupMeals,
+  onExportCsv,
+  isExportingCsv = false,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
   const [displayedDateCount, setDisplayedDateCount] = useState(5);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [dateToDelete, setDateToDelete] = useState<string | undefined>();
-  
+
   const [isSelectionMode, setIsSelectionMode] = useState(false);
-  const [selectedEntryIds, setSelectedEntryIds] = useState<Set<number>>(new Set());
+  const [selectedEntryIds, setSelectedEntryIds] = useState<Set<number>>(
+    new Set(),
+  );
   const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
   const [groupMealName, setGroupMealName] = useState("");
   const [groupMealType, setGroupMealType] = useState("snack");
@@ -140,10 +122,12 @@ const EntryHistoryComponent = function EntryHistory({
 
   const confirmGroupMeals = useCallback(async () => {
     if (!onGroupMeals || !groupMealName || selectedEntryIds.size < 2) return;
-    
-    const selectedEntries = history.filter(entry => selectedEntryIds.has(entry.id));
+
+    const selectedEntries = history.filter((entry) =>
+      selectedEntryIds.has(entry.id),
+    );
     await onGroupMeals(groupMealName, groupMealType, selectedEntries);
-    
+
     setIsGroupModalOpen(false);
     setIsSelectionMode(false);
     setSelectedEntryIds(new Set());
@@ -290,8 +274,6 @@ const EntryHistoryComponent = function EntryHistory({
     setDateToDelete(undefined);
   }, []);
 
-  const handleExportCSV = useCallback(() => exportCSV(history), [history]);
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -324,7 +306,8 @@ const EntryHistoryComponent = function EntryHistory({
               <IconButton
                 variant="export"
                 ariaLabel="Export data as CSV file"
-                onClick={handleExportCSV}
+                onClick={onExportCsv}
+                disabled={isExportingCsv}
                 className="mr-1"
               />
             </ProFeature>
@@ -362,9 +345,10 @@ const EntryHistoryComponent = function EntryHistory({
               <Button
                 icon={<ExportIcon />}
                 iconPosition="left"
-                onClick={handleExportCSV}
-                text="Export CSV"
+                onClick={onExportCsv}
+                text={isExportingCsv ? "Exporting..." : "Export CSV"}
                 buttonSize="sm"
+                isLoading={isExportingCsv}
               />
             </ProFeature>
           )}
@@ -491,48 +475,60 @@ const EntryHistoryComponent = function EntryHistory({
         </motion.div>
       )}
 
-      {/* Floating Action Bar for Meal Grouping */}
-      <AnimatePresence>
-        {isSelectionMode && (
-          <motion.div
-            initial={{ opacity: 0, y: 50, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 50, scale: 0.95 }}
-            transition={{ type: "spring", stiffness: 400, damping: 30 }}
-            className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border/50 bg-surface/90 px-4 py-3 shadow-2xl backdrop-blur-xl md:gap-4 md:px-6 md:py-3.5"
-          >
-            <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
-              <span className="text-sm font-medium whitespace-nowrap text-foreground">
-                {selectedEntryIds.size} selected
-              </span>
-              <span className="hidden h-4 w-[1px] bg-border md:block" />
-              <span className="text-xs whitespace-nowrap text-muted">
-                Select 2+ entries to group
-              </span>
-            </div>
-            
-            <div className="ml-2 flex items-center gap-2">
-              <Button
-                variant="primary"
-                onClick={handleCreateGroupMeal}
-                text="Save Group"
-                disabled={selectedEntryIds.size < 2}
-                buttonSize="sm"
-                className="whitespace-nowrap"
-              />
-              <button
-                onClick={toggleSelectionMode}
-                className="rounded-full p-2 text-muted transition-colors hover:bg-surface-2 hover:text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
-                aria-label="Cancel selection"
-              >
-                <svg className="h-4 w-4 md:h-5 md:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          </motion.div>
+      {/* Floating Action Bar for Meal Grouping - Portalled to body */}
+      {isSelectionMode &&
+        createPortal(
+          <AnimatePresence>
+            <motion.div
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 50, scale: 0.95 }}
+              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              className="fixed bottom-6 left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border/50 bg-surface/90 px-4 py-3 shadow-2xl backdrop-blur-xl md:gap-4 md:px-6 md:py-3.5"
+            >
+              <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
+                <span className="text-sm font-medium whitespace-nowrap text-foreground">
+                  {selectedEntryIds.size} selected
+                </span>
+                <span className="hidden h-4 w-px bg-border md:block" />
+                <span className="text-xs whitespace-nowrap text-muted">
+                  Select 2+ entries to group
+                </span>
+              </div>
+
+              <div className="ml-2 flex items-center gap-2">
+                <Button
+                  variant="primary"
+                  onClick={handleCreateGroupMeal}
+                  text="Save Group"
+                  disabled={selectedEntryIds.size < 2}
+                  buttonSize="sm"
+                  className="whitespace-nowrap"
+                />
+                <button
+                  onClick={toggleSelectionMode}
+                  className="rounded-full p-2 text-muted transition-colors hover:bg-surface-2 hover:text-foreground focus:ring-2 focus:ring-primary/50 focus:outline-none"
+                  aria-label="Cancel selection"
+                >
+                  <svg
+                    className="h-4 w-4 md:h-5 md:w-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </motion.div>
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
 
       <Modal
         isOpen={isDeleteModalOpen}
@@ -547,7 +543,7 @@ const EntryHistoryComponent = function EntryHistory({
         onConfirm={confirmDeleteDate}
         isDanger={true}
       />
-      
+
       <Modal
         isOpen={isGroupModalOpen}
         onClose={() => setIsGroupModalOpen(false)}
@@ -556,10 +552,14 @@ const EntryHistoryComponent = function EntryHistory({
       >
         <div className="space-y-4">
           <p className="text-sm text-muted">
-            Group {selectedEntryIds.size} selected entries into a single saved meal for easy logging later.
+            Group {selectedEntryIds.size} selected entries into a single saved
+            meal for easy logging later.
           </p>
           <div>
-            <label htmlFor="groupMealName" className="mb-2 block text-sm font-medium text-foreground">
+            <label
+              htmlFor="groupMealName"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
               Meal Name
             </label>
             <input
@@ -572,7 +572,10 @@ const EntryHistoryComponent = function EntryHistory({
             />
           </div>
           <div>
-            <label htmlFor="groupMealType" className="mb-2 block text-sm font-medium text-foreground">
+            <label
+              htmlFor="groupMealType"
+              className="mb-2 block text-sm font-medium text-foreground"
+            >
               Meal Type
             </label>
             <select

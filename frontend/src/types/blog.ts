@@ -7,6 +7,8 @@ export interface BlogPost {
   author: string;
   readingTime: string;
   image?: string;
+  tags: string[];
+  featured?: boolean;
   content?: string;
 }
 
@@ -15,9 +17,3 @@ export interface BlogCategory {
   slug: string;
   count: number;
 }
-
-export const blogCategories: BlogCategory[] = [
-  { name: "Releases", slug: "releases", count: 0 },
-  { name: "Tips", slug: "tips", count: 0 },
-  { name: "Nutrition Guides", slug: "nutrition-guides", count: 0 },
-];

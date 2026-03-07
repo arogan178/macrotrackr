@@ -13,13 +13,12 @@ import { formStyles } from "@/components/form/Styles";
 import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
+import type { Ingredient } from "@/types/macro";
 import { MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
 import { UnitConverter, type UnitType } from "../utils/units";
-
-import type { Ingredient } from "@/types/macro";
 
 interface AddEntryProps {
   onSubmit: (entry: {
@@ -248,29 +247,53 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       if (!isFormValid) return;
 
       let finalIngredients = baseIngredients;
-      if (baseIngredients && typeof quantity === "number" && quantity > 0) {
+      if (typeof quantity === "number" && quantity > 0) {
         let factor = 1;
         if (unit === "unit") {
           factor = quantity;
         } else {
-          let quantityInGrams: number;
+          let quantityInBaseUnit: number;
           if (UnitConverter.isWeightUnit(unit)) {
-            quantityInGrams = UnitConverter.convert(quantity, unit, "g");
+            quantityInBaseUnit = UnitConverter.convert(quantity, unit, "g");
           } else if (UnitConverter.isVolumeUnit(unit)) {
-            quantityInGrams = UnitConverter.convert(quantity, unit, "ml");
+            quantityInBaseUnit = UnitConverter.convert(quantity, unit, "ml");
           } else {
-            quantityInGrams = quantity * 100;
+            quantityInBaseUnit = quantity * 100;
           }
-          factor = quantityInGrams / 100;
+          factor = quantityInBaseUnit / 100;
         }
 
-        finalIngredients = baseIngredients.map((ing) => ({
-          ...ing,
-          protein: Number((ing.protein * factor).toFixed(1)),
-          carbs: Number((ing.carbs * factor).toFixed(1)),
-          fats: Number((ing.fats * factor).toFixed(1)),
-          quantity: ing.quantity ? Number((ing.quantity * factor).toFixed(1)) : undefined,
-        }));
+        if (baseIngredients) {
+          finalIngredients = baseIngredients.map((ing) => ({
+            ...ing,
+            protein: Number((ing.protein * factor).toFixed(1)),
+            carbs: Number((ing.carbs * factor).toFixed(1)),
+            fats: Number((ing.fats * factor).toFixed(1)),
+            quantity: ing.quantity ? Number((ing.quantity * factor).toFixed(1)) : undefined,
+          }));
+        } else if (baseMacros) {
+          finalIngredients = [
+            {
+              name: mealName,
+              protein: protein as number,
+              carbs: carbs as number,
+              fats: fats as number,
+              quantity,
+              unit,
+              baseProtein: baseMacros.protein,
+              baseCarbs: baseMacros.carbs,
+              baseFats: baseMacros.fats,
+              baseQuantity: unit === "unit" ? 1 : 100,
+              baseUnit: unit === "unit"
+                ? "unit"
+                : UnitConverter.isWeightUnit(unit)
+                  ? "g"
+                  : UnitConverter.isVolumeUnit(unit)
+                    ? "ml"
+                    : unit,
+            },
+          ];
+        }
       }
 
       await onSubmit({

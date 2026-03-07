@@ -225,8 +225,8 @@ function calculateStreaks(data: AggregatedDataPoint[]): {
 
   // Calculate current streak (consecutive days from the end)
   let currentStreak = 0;
-  for (let i = hasDataArray.length - 1; i >= 0; i--) {
-    if (hasDataArray[i]) {
+  for (let index = hasDataArray.length - 1; index >= 0; index--) {
+    if (hasDataArray[index]) {
       currentStreak++;
     } else {
       break;

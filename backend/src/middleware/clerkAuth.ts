@@ -6,11 +6,8 @@ import { logger } from "../lib/logger";
 import { getInternalUserId } from "../lib/clerk-utils";
 import type { Database } from "bun:sqlite";
 
-// Define paths exempt from authentication checks
-// Note: Login and register paths removed - now handled by Clerk
+// Define paths exempt from authentication checks.
 const AUTH_EXEMPT_PATHS = new Set([
-  "/api/auth/validate-email",
-  "/api/auth/forgot-password",
   "/api/auth/reset-password",
   // Note: /api/auth/clerk-sync is NOT exempt - it needs auth to know which user to sync
   "/api/webhooks/clerk",
@@ -324,17 +321,4 @@ export interface ClerkAuthContext {
   clerkUserId: string | null;
   internalUserId: number | null;
   clerkClient?: any;
-}
-
-/**
- * Legacy adapter type for backward compatibility
- * Maps Clerk auth to the old AuthenticatedContext structure
- */
-export interface LegacyAuthAdapter {
-  user: {
-    userId: number;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-  };
 }

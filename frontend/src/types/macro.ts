@@ -52,6 +52,14 @@ export interface Ingredient {
   fats: number;
   quantity?: number;
   unit?: string;
+  sourceEntryName?: string;
+  sourceEntryId?: number;
+  // Base macros per 100g/ml for scaling calculations
+  baseProtein?: number;
+  baseCarbs?: number;
+  baseFats?: number;
+  baseQuantity?: number;
+  baseUnit?: string;
 }
 
 export interface MacroEntry {

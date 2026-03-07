@@ -1,6 +1,7 @@
 import { useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
@@ -32,6 +33,9 @@ export function ClerkSignUpForm({
   const [isLoading, setIsLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
+  const [isEmailMode, setIsEmailMode] = useState(false);
+
+  const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
 
   // Handle social sign-up
   const handleSocialSignUp = async (
@@ -189,7 +193,7 @@ export function ClerkSignUpForm({
           <button
             type="button"
             onClick={() => setVerifying(false)}
-            className="text-sm text-primary hover:underline"
+            className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
             Back to sign up
           </button>
@@ -200,120 +204,167 @@ export function ClerkSignUpForm({
 
   return (
     <div className="w-full">
-      <div className="mb-8 flex flex-col items-center text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-          <CalorieIcon className="h-8 w-8 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold text-foreground">Create Account</h1>
-        <p className="mt-2 text-muted">Sign up to start tracking your macros</p>
-      </div>
+      <AnimatePresence mode="wait" initial={false}>
+        {isEmailMode ? (
+          <motion.div
+            key="email-sign-up"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <div className="mb-5 flex items-center justify-between">
+              <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+                Email sign up
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsEmailMode(false)}
+                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+              >
+                Back
+              </button>
+            </div>
 
-      <div className="mb-6 space-y-3">
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignUp("oauth_google")}
-          icon={<GoogleIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Google
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignUp("oauth_facebook")}
-          icon={<FacebookIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Facebook
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignUp("oauth_apple")}
-          icon={<AppleIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Apple
-        </Button>
-      </div>
+            <form onSubmit={handleEmailSignUp} className="space-y-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <TextField
+                  label="First Name"
+                  value={firstName}
+                  onChange={setFirstName}
+                  required
+                  placeholder="John"
+                  textOnly
+                  name="firstName"
+                  autoComplete="given-name"
+                />
+                <TextField
+                  label="Last Name"
+                  value={lastName}
+                  onChange={setLastName}
+                  required
+                  placeholder="Doe"
+                  textOnly
+                  name="lastName"
+                  autoComplete="family-name"
+                />
+              </div>
 
-      <div className="mb-6 flex items-center">
-        <div className="flex-1 border-t border-border" />
-        <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
-          or
-        </span>
-        <div className="flex-1 border-t border-border" />
-      </div>
+              <TextField
+                label="Email"
+                value={email}
+                onChange={setEmail}
+                type="email"
+                required
+                placeholder="your@email.com"
+                name="email"
+                autoComplete="email"
+              />
 
-      <form onSubmit={handleEmailSignUp} className="space-y-5">
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <TextField
-            label="First Name"
-            value={firstName}
-            onChange={setFirstName}
-            required
-            placeholder="John"
-            textOnly
-            name="firstName"
-            autoComplete="given-name"
-          />
-          <TextField
-            label="Last Name"
-            value={lastName}
-            onChange={setLastName}
-            required
-            placeholder="Doe"
-            textOnly
-            name="lastName"
-            autoComplete="family-name"
-          />
-        </div>
+              <AnimatePresence initial={false}>
+                {showPasswordField ? (
+                  <motion.div
+                    key="sign-up-password"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.24, ease: "easeOut" }}
+                    className="overflow-hidden"
+                  >
+                    <TextField
+                      label="Password"
+                      value={password}
+                      onChange={setPassword}
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      name="password"
+                      autoComplete="new-password"
+                    />
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
 
-        <TextField
-          label="Email"
-          value={email}
-          onChange={setEmail}
-          type="email"
-          required
-          placeholder="your@email.com"
-          name="email"
-          autoComplete="email"
-        />
+              {/* Clerk CAPTCHA element - required for bot protection */}
+              <div id="clerk-captcha" className="hidden" />
 
-        <TextField
-          label="Password"
-          value={password}
-          onChange={setPassword}
-          type="password"
-          required
-          placeholder="••••••••"
-          name="password"
-          autoComplete="new-password"
-        />
+              <Button
+                type="submit"
+                fullWidth
+                isLoading={isLoading}
+                loadingText="Creating account..."
+              >
+                Create Account
+              </Button>
+            </form>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="social-sign-up"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignUp("oauth_google")}
+                icon={<GoogleIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Google
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignUp("oauth_facebook")}
+                icon={<FacebookIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Facebook
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignUp("oauth_apple")}
+                icon={<AppleIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Apple
+              </Button>
+            </div>
 
-        {/* Clerk CAPTCHA element - required for bot protection */}
-        <div id="clerk-captcha" className="hidden" />
+            <div className="my-6 flex items-center">
+              <div className="flex-1 border-t border-border" />
+              <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
+                or
+              </span>
+              <div className="flex-1 border-t border-border" />
+            </div>
 
-        <Button
-          type="submit"
-          fullWidth
-          isLoading={isLoading}
-          loadingText="Creating account..."
-        >
-          Create Account
-        </Button>
-      </form>
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              onClick={() => setIsEmailMode(true)}
+            >
+              Continue with email
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="mt-6 border-t border-border pt-6 text-center text-sm">
         <span className="text-muted">Already have an account? </span>
         <button
           type="button"
           onClick={onSwitchToSignIn}
-          className="font-medium text-primary hover:underline"
+          className="inline-flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
         >
           Sign in
         </button>

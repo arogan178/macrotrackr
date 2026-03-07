@@ -1,51 +1,59 @@
-# MacroTrackr v2.0: A Complete Design Overhaul & Hybrid Meal Grouping
+# MacroTrackr v2.0: Faster Editing, Better Grouping, Cleaner Reporting
 
-Over the past few months, we took a step back and looked at how our users were actually interacting with MacroTrackr. The feedback was clear: you loved the speed and the data, but you wanted a more premium feel, better insights, and less friction when tracking complex meals.
+MacroTrackr v2.0 is the first release that feels less like a pile of useful tools and more like one product with a clear point of view.
 
-Today, we're thrilled to unveil MacroTrackr v2.0.
+The focus was not on inventing new screens for the sake of it. The focus was on removing the tiny pieces of friction that make tracking feel heavier than it should: editing a saved meal without breaking the math, understanding what actually lives inside a grouped entry, and checking progress without moving through a dashboard that feels stitched together.
 
-This is our biggest update yet, featuring a completely redesigned interface, our highly requested Hybrid Meal Grouping feature, and a massive upgrade to our analytics and reporting tools.
+That sounds subtle on paper. In daily use, it changes the tone of the app.
 
-## The Spotify-Inspired UI Redesign
+## What changed in practice
 
-We've completely overhauled the visual language of the app. Drawing inspiration from top-tier audio and fitness apps, we adopted a darker, more immersive theme with bold typography, subtle gradients, and high-contrast vibrant accents for your macros.
+The biggest shift is that grouped meals now keep enough ingredient context to stay editable.
 
-**What's new in the UI:**
-- **Sleek Dark Mode:** Deep surface colors with subtle frosted glass and neon accents make tracking at night or in the gym easy on the eyes.
-- **Fluid Animations:** Powered by Framer Motion, every interaction—from opening modals to expanding meals—feels natural and responsive.
-- **Simplified Navigation:** We reworked the landing page and the core dashboard to put your daily totals and tracking history front and center.
+If you save a shake made from 200ml milk, 30g whey, and a banana, the app now keeps the actual quantities and units attached to those ingredients. It no longer collapses the whole thing into a vague total that looks fine until you try to change one detail later.
 
-## Introducing: Hybrid Meal Grouping
+That difference matters because trust in a tracker is usually won or lost in the edit flow. If the app cannot explain where the numbers came from, every correction feels risky.
 
-One of the biggest pain points in macro tracking is logging the same complex meal day after day. You either have to log 10 different ingredients every time, or create a custom "food" that loses all the underlying data.
+## Edit flow improvements
 
-Not anymore. 
+The rebuilt edit modal follows three simple rules.
 
-With **Hybrid Meal Grouping**, you can now select multiple items directly from your entry history and group them into a single "Saved Meal." 
-- **Single Top-Level Entry:** When you log it, it shows up as one clean entry on your daily log.
-- **Preserved Ingredients:** Expand the entry with our new accordion UI to see exactly what’s inside.
-- **Dynamic Scaling:** Adjust the serving size of your saved meal, and all underlying ingredients will scale perfectly.
+### 1. Preserve the source data
 
-It’s the best of both worlds: a clean dashboard and perfectly accurate data.
+Ingredients keep their real quantity and unit whenever possible. Grouped meals also reveal their source ingredients more clearly, so opening a combined meal no longer feels like opening a black box.
 
-## Unified Insights & Bento Grid Reporting
+### 2. Scale macros from the real base amount
 
-Data is only useful if you can understand it at a glance. We’ve replaced our old reporting charts with a modern, unified "Bento Grid" UI. 
+When you change a quantity from 200ml to 300ml, the app recalculates protein, carbs, and fats from the stored base amount instead of guessing from whatever totals happened to be on screen a moment ago.
 
-- Your **Macro Density Breakdown**, **Meal Time Analytics**, and **Caloric Trends** are now beautifully arranged in a unified dashboard.
-- We removed the nested, heavy styles in favor of clean, readable charts that highlight your progress over 7, 30, or 90 days.
+### 3. Make the modal easier to use for longer meals
 
-## Performance & Accessibility
+Spacing, grouping, and scroll behavior were tightened so longer meals feel manageable instead of bloated. The screen should now hold more ingredients without turning into a stack of giant cards fighting for attention.
 
-A premium design means nothing if the app is slow. We went through the entire application to ensure that performance and accessibility were first-class:
-- Fixed invisible UI bugs and low-contrast text on authentication pages.
-- Standardized our color tokens to ensure proper depth hierarchy and WCAG compliance.
-- Continued leveraging **TanStack Query** and **React 19** for instant transitions and zero loading spinners between your views.
+## Reporting is lighter and more coherent
 
-## What's Next?
+The analytics side of the product also became calmer.
 
-This v2.0 release lays the groundwork for the rest of 2026. With our new UI system and flexible data structures (like nested ingredients), we're perfectly positioned to introduce advanced recipe building and barcode scanning soon.
+Instead of reading like a collection of unrelated widgets, reporting now behaves more like a single workspace. Range controls are easier to notice, empty states are clearer, and the chart panels feel more stable when moving between periods.
 
-Try out the new tracking flow today, and let us know what you think of the new look!
+Underneath that, the date utilities were consolidated so the app is not mixing local and UTC-style assumptions in different corners of the reporting layer. Most users will never see that change directly, which is exactly the point. It removes the kind of bug that only appears when range boundaries and labels quietly stop agreeing with each other.
 
-— The MacroTrackr Team
+## History and export improvements
+
+History browsing still loads progressively because that keeps the interface fast. Exporting, however, now behaves the way users expect. It fetches the full visible history before building the CSV, rather than exporting only the rows that happened to be loaded in the panel.
+
+Browsing can be incremental. Exporting should be complete. That contract is much clearer now.
+
+## Why this release matters
+
+v2.0 matters because it improves product trust, not because it introduces novelty for its own sake.
+
+A tracker only earns a place in someone’s routine if it helps them log quickly, edit confidently, and review progress without second-guessing the data. This release pushes all three of those things forward.
+
+## What comes next
+
+The next layer is less about correction and more about refinement: stronger saved-meal workflows, better educational surfaces, richer exports, and more cleanup of duplicated front-end logic that still slows iteration.
+
+That work is easier now because the foundation is less fragmented than it was a release ago.
+
+v2.0 is not the finish line. It is the point where MacroTrackr starts behaving like a tighter system rather than a collection of useful features.

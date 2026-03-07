@@ -1,12 +1,10 @@
 import { motion } from "motion/react";
 import { memo } from "react";
 
-import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
-import { useSavedMeals, useDeleteSavedMeal } from "@/hooks/queries/useSavedMeals";
-import { cn } from "@/lib/classnameUtilities";
-
 import { Button, TrashIcon } from "@/components/ui";
-
+import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
+import { useDeleteSavedMeal,useSavedMeals } from "@/hooks/queries/useSavedMeals";
+import { cn } from "@/lib/classnameUtilities";
 import type { Ingredient } from "@/types/macro";
 
 interface SavedMealsListProps {
@@ -34,9 +32,9 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
       <div className={cn("space-y-2", className)}>
         <div className="text-sm font-medium text-muted">Saved Meals</div>
         <div className="flex gap-2">
-          {[1, 2, 3].map((i) => (
+          {[1, 2, 3].map((index) => (
             <div
-              key={i}
+              key={index}
               className="h-10 w-24 animate-pulse rounded-lg bg-surface-2"
             />
           ))}
@@ -73,7 +71,7 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
           return (
             <motion.div
               key={meal.id}
-              className="group flex items-center gap-1 rounded-lg border border-border bg-surface pl-3 pr-1 py-1 transition-all hover:border-primary/30 hover:bg-surface-2"
+              className="group flex items-center gap-1 rounded-lg border border-border bg-surface py-1 pr-1 pl-3 transition-[background-color,border-color] duration-200 hover:border-primary/30 hover:bg-surface-2"
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
             >
@@ -92,7 +90,7 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
                   deleteMeal.mutate(meal.id);
                 }}
                 disabled={deleteMeal.isPending}
-                className="rounded-md p-1.5 text-muted opacity-0 transition-all hover:bg-error/10 hover:text-error group-hover:opacity-100 disabled:opacity-50"
+                className="rounded-md p-1.5 text-muted opacity-0 transition-[opacity,background-color,color] duration-200 group-hover:opacity-100 hover:bg-error/10 hover:text-error disabled:opacity-50"
                 title="Delete saved meal"
                 aria-label={`Delete ${meal.name}`}
               >

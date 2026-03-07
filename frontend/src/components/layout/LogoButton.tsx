@@ -6,18 +6,20 @@ interface LogoButtonProps {
   onClick?: () => void;
   className?: string;
   ariaLabel?: string;
+  compact?: boolean;
 }
 
 const LogoButton: React.FC<LogoButtonProps> = ({
   onClick,
   className = "",
   ariaLabel = "Go to home page",
+  compact = false,
 }) => (
   <button
     type="button"
     onClick={onClick}
     aria-label={ariaLabel}
-    className={`hover:bg-surface-hover mr-2 flex h-full cursor-pointer items-center rounded px-2 font-light tracking-wide text-primary transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background sm:mr-4 ${className}`}
+    className={`hover:bg-surface-hover flex cursor-pointer items-center rounded font-light tracking-wide text-primary transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${compact ? "mr-0 h-auto p-0 sm:mr-0" : "mr-2 h-full px-2 sm:mr-4"} ${className}`}
   >
     <span className="relative flex items-center">
       {/* Icon */}
