@@ -8,9 +8,10 @@ import {
   SearchIcon,
 } from "@/components/ui";
 import SavedMealsList from "@/components/ui/SavedMealsList";
+import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import type { Ingredient } from "@/types/macro";
-import { apiService } from "@/utils/apiServices";
+import type { FoodSearchResult } from "@/utils/apiServices";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
@@ -34,30 +35,25 @@ interface CalorieSearchProps {
   }) => void;
 }
 
-interface FoodResult {
-  name: string;
-  protein: number;
-  carbs: number;
-  fats: number;
-  energyKcal: number;
-  categories: string;
-  servingQuantity: number;
-  servingUnit: string;
-  rawQuantity?: string;
-}
+type ActivePanel = "results" | "savedMeals" | null;
 
 const CalorieSearch = memo(function CalorieSearch({
   onResult,
   onSelectSavedMeal,
 }: CalorieSearchProps) {
   const [query, setQuery] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [results, setResults] = useState<FoodResult[]>([]);
-  const [showResults, setShowResults] = useState(false);
+  const [submittedQuery, setSubmittedQuery] = useState("");
+  const [activePanel, setActivePanel] = useState<ActivePanel>(null);
   const [isAtBottom, setIsAtBottom] = useState(false);
-  const [isFocused, setIsFocused] = useState(false);
   const wrapperReference = useRef<HTMLDivElement>(null);
+  const {
+    data: results = [],
+    isFetching: isSearching,
+    isFetched,
+    error: searchError,
+  } = useFoodSearch(submittedQuery);
+
+  const trimmedQuery = query.trim();
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -65,43 +61,46 @@ const CalorieSearch = memo(function CalorieSearch({
         wrapperReference.current &&
         !wrapperReference.current.contains(event.target as Node)
       ) {
-        setIsFocused(false);
+        setActivePanel(null);
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!submittedQuery || isSearching) {
+      return;
+    }
+
+    if (results.length > 0) {
+      setActivePanel("results");
+      return;
+    }
+
+    setActivePanel(null);
+  }, [isSearching, results.length, submittedQuery]);
+
   const handleQueryChange = useCallback((value: string) => {
     setQuery(value);
-    setResults([]);
-    setShowResults(false);
-    setError("");
+    setSubmittedQuery("");
+
+    if (value.trim().length === 0) {
+      setActivePanel("savedMeals");
+      return;
+    }
+
+    setActivePanel(null);
   }, []);
 
   const handleSearch = useCallback(async () => {
-    if (!query.trim()) return;
-
-    setLoading(true);
-    setError("");
-    setShowResults(false);
-    setResults([]);
-
-    try {
-      const result = await apiService.macros.search(query.trim());
-      if (Array.isArray(result) && result.length > 0) {
-        setResults(result);
-        setShowResults(true);
-      } else {
-        setError("No results found for this food item");
-      }
-    } catch (error) {
-      console.error("Food search failed:", error);
-      setError("Failed to search for food item. Please try again.");
-    } finally {
-      setLoading(false);
+    if (trimmedQuery.length < 2) {
+      return;
     }
-  }, [query]);
+
+    setActivePanel(null);
+    setSubmittedQuery(trimmedQuery);
+  }, [trimmedQuery]);
 
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -120,7 +119,7 @@ const CalorieSearch = memo(function CalorieSearch({
     setIsAtBottom(atBottom);
   }, []);
 
-  const processFoodItemSelection = useCallback((item: FoodResult) => {
+  const processFoodItemSelection = useCallback((item: FoodSearchResult) => {
     let quantity = item.servingQuantity;
     let unit = item.servingUnit;
 
@@ -212,24 +211,24 @@ const CalorieSearch = memo(function CalorieSearch({
   }, []);
 
   const handleSelect = useCallback(
-    (item: FoodResult) => {
+    (item: FoodSearchResult) => {
       const result = processFoodItemSelection(item);
       onResult(result);
-      setShowResults(false);
-      setResults([]);
+      setActivePanel(null);
+      setSubmittedQuery("");
       setQuery("");
     },
     [onResult, processFoodItemSelection],
   );
 
-  const calculateDisplayCalories = useCallback((item: FoodResult): number => {
+  const calculateDisplayCalories = useCallback((item: FoodSearchResult): number => {
     if (item.energyKcal && item.energyKcal > 0) {
       return item.energyKcal;
     }
     return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
   }, []);
 
-  const getQuantityDisplay = useCallback((item: FoodResult): string => {
+  const getQuantityDisplay = useCallback((item: FoodSearchResult): string => {
     if (item.rawQuantity) {
       return item.rawQuantity;
     }
@@ -249,12 +248,12 @@ const CalorieSearch = memo(function CalorieSearch({
     return "";
   }, []);
 
-  const hasNutrients = useCallback((item: FoodResult): boolean => {
+  const hasNutrients = useCallback((item: FoodSearchResult): boolean => {
     return !(item.protein === 0 && item.carbs === 0 && item.fats === 0);
   }, []);
 
   const displayResults = useMemo(() => {
-    if (!showResults || results.length === 0) return [];
+    if (activePanel !== "results" || results.length === 0) return [];
 
     return results
       .filter((item) => hasNutrients(item))
@@ -266,12 +265,22 @@ const CalorieSearch = memo(function CalorieSearch({
         id: `${item.name}-${index}`,
       }));
   }, [
+    activePanel,
     results,
-    showResults,
     hasNutrients,
     getQuantityDisplay,
     calculateDisplayCalories,
   ]);
+
+  const searchErrorMessage =
+    searchError ? "Failed to search for food item. Please try again." : "";
+
+  const noResultsMessage =
+    submittedQuery && isFetched && !isSearching && !searchError && results.length === 0
+      ? "No results found for this food item"
+      : "";
+
+  const statusMessage = searchErrorMessage || noResultsMessage;
 
   return (
     <div className="relative flex flex-col gap-3" ref={wrapperReference}>
@@ -283,7 +292,13 @@ const CalorieSearch = memo(function CalorieSearch({
             value={query}
             onChange={handleQueryChange}
             onKeyDown={handleKeyDown}
-            onFocus={() => setIsFocused(true)}
+            onFocus={() => {
+              if (query.trim().length === 0) {
+                setActivePanel("savedMeals");
+              } else if (results.length > 0) {
+                setActivePanel("results");
+              }
+            }}
             placeholder="e.g. 1 apple, 100g chicken breast"
             icon={<SearchIcon className="text-foreground!" />}
             maxLength={50}
@@ -293,8 +308,8 @@ const CalorieSearch = memo(function CalorieSearch({
           <Button
             type="button"
             onClick={handleSearch}
-            isLoading={loading}
-            disabled={loading || !query}
+            isLoading={isSearching}
+            disabled={isSearching || trimmedQuery.length < 2}
             text="Search"
             icon={<ArrowRightIcon className="ml-1 h-4 w-4" />}
             iconPosition="right"
@@ -306,7 +321,7 @@ const CalorieSearch = memo(function CalorieSearch({
         </div>
       </div>
 
-      {showResults && displayResults.length > 0 && (
+      {activePanel === "results" && displayResults.length > 0 && (
         <div className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
             {displayResults.map((resultData) => {
@@ -345,20 +360,25 @@ const CalorieSearch = memo(function CalorieSearch({
         </div>
       )}
 
-      {isFocused && query.length === 0 && (
+      {activePanel === "savedMeals" && query.length === 0 && (
         <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl">
           <SavedMealsList
             onSelectMeal={(meal) => {
               onSelectSavedMeal(meal);
-              setIsFocused(false);
+              setSubmittedQuery("");
+              setQuery("");
+              setActivePanel(null);
             }}
           />
         </div>
       )}
 
-      {error && (
+      {statusMessage && (
         <div>
-          <StatusIndicator status="error" message={error} />
+          <StatusIndicator
+            status={searchError ? "error" : "warning"}
+            message={statusMessage}
+          />
         </div>
       )}
     </div>
