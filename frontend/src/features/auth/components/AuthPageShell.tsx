@@ -4,6 +4,8 @@ import type { ReactNode } from "react";
 import CardContainer from "@/components/form/CardContainer";
 import LogoButton from "@/components/layout/LogoButton";
 import PageBackground from "@/components/layout/PageBackground";
+import { BackIcon } from "@/components/ui";
+import { getButtonClasses } from "@/components/ui/Button";
 
 interface AuthPageShellProps {
   eyebrow: string;
@@ -26,14 +28,25 @@ export default function AuthPageShell({
     <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
       <PageBackground />
       <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-6xl">
-          <div className="flex min-h-14 items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
-            <LogoButton
-              compact
-              onClick={() => navigate({ to: "/" })}
-              ariaLabel="Home"
-            />
-          </div>
+        <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
+          <LogoButton
+            compact
+            onClick={() => navigate({ to: "/" })}
+            ariaLabel="Home"
+          />
+          <button
+            type="button"
+            onClick={() => navigate({ to: "/" })}
+            className={getButtonClasses(
+              "ghost",
+              "sm",
+              false,
+              "rounded-full font-medium text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+            )}
+          >
+            <BackIcon />
+            <span>Back to home</span>
+          </button>
         </div>
       </header>
 
