@@ -1,4 +1,4 @@
-import { useSignUp } from "@clerk/clerk-react";
+import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
@@ -30,6 +30,7 @@ export function ClerkSignUpForm({
 }: ClerkSignUpFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
+  const { isLoaded: isSignInLoaded, signIn, setActive: setSignInActive } = useSignIn();
   const { showNotification } = useStore();
 
   const [email, setEmail] = useState("");
@@ -113,8 +114,47 @@ export function ClerkSignUpForm({
       }
     } catch (error) {
       logger.error("Sign-up error:", error);
+
+      // Check if this is a "user already exists" error from Clerk
+      const clerkError = error as {
+        errors?: Array<{ code?: string; message?: string }>;
+        message?: string;
+      };
+      const firstErrorCode = clerkError?.errors?.[0]?.code;
+
+      if (
+        firstErrorCode === "form_identifier_exists" ||
+        firstErrorCode === "identifier_already_signed_up"
+      ) {
+        // Automatically attempt sign-in with the same credentials
+        if (isSignInLoaded && signIn && password) {
+          try {
+            const signInResult = await signIn.create({
+              identifier: email,
+              password,
+            });
+
+            if (signInResult.status === "complete" && signInResult.createdSessionId) {
+              await setSignInActive({ session: signInResult.createdSessionId });
+              navigate({
+                to: "/auth-ready",
+                search: { redirectTo: normalizeAuthRedirect(redirectTo) },
+              });
+              return;
+            }
+          } catch (signInError) {
+            logger.warn("Auto sign-in after duplicate sign-up failed:", signInError);
+            // Fall through to show a generic message
+          }
+        }
+
+        // If auto-sign-in failed (e.g. wrong password), switch to sign-in form silently
+        onSwitchToSignIn();
+        return;
+      }
+
       showNotification(
-        error instanceof Error ? error.message : "Sign-up failed",
+        clerkError?.errors?.[0]?.message || clerkError?.message || "Sign-up failed. Please try again.",
         "error",
       );
     } finally {
