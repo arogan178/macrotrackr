@@ -23,6 +23,7 @@ import { todayISO } from "@/utils/dateUtilities";
 
 import MainLayout from "./components/layout/MainLayout";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
+import type { WeightGoalsResponse } from "./features/goals/types";
 import { hasStatus, queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
@@ -174,23 +175,25 @@ export const homeRoute = createRoute({
             queryKey: queryKeys.goals.weight(),
             queryFn: () =>
               apiService.goals.getWeightGoals().then((r) => r ?? null),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
-        null,
+        null as WeightGoalsResponse | null,
       ),
       safeFetch(
         () =>
           context.queryClient.fetchQuery({
             queryKey: queryKeys.goals.weightLog(),
             queryFn: () => apiService.goals.getWeightLog(),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
-        [],
+        [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
       ),
     ]);
 
     const latestWeight =
-      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+      weightLog && weightLog.length > 0
+        ? weightLog[weightLog.length - 1]?.weight
+        : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
@@ -251,32 +254,34 @@ export const goalsRoute = createRoute({
             queryKey: queryKeys.goals.weight(),
             queryFn: () =>
               apiService.goals.getWeightGoals().then((r) => r ?? null),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
-        null,
+        null as WeightGoalsResponse | null,
       ),
       safeFetch(
         () =>
           context.queryClient.fetchQuery({
             queryKey: queryKeys.goals.weightLog(),
             queryFn: () => apiService.goals.getWeightLog(),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
-        [],
+        [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
       ),
       safeFetch(
         () =>
           context.queryClient.fetchQuery({
             queryKey: queryKeys.habits.list(),
             queryFn: () => apiService.habits.getHabit(),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
         [],
       ),
     ]);
 
     const latestWeight =
-      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+      weightLog && weightLog.length > 0
+        ? weightLog[weightLog.length - 1]?.weight
+        : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
@@ -352,6 +357,9 @@ const signUpRoute = createRoute({
 const profileSetupRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/profile-setup",
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: search.redirectTo as string | undefined,
+  }),
   component: ProfileSetupPage,
 });
 
@@ -371,6 +379,7 @@ const ssoCallbackRoute = createRoute({
   path: "/sso-callback",
   validateSearch: (search: Record<string, unknown>) => ({
     redirectTo: search.redirectTo as string | undefined,
+    flow: search.flow as string | undefined,
   }),
   component: SSOCallbackPage,
 });
@@ -400,7 +409,7 @@ export const reportingRoute = createRoute({
               startDate: deps.startDate,
               endDate: deps.endDate,
             }),
-          ...queryConfigs.history,
+          ...queryConfigs.macros,
         }),
       null,
     );

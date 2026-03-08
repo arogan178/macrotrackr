@@ -11,6 +11,12 @@ import {
   FacebookIcon,
   GoogleIcon,
 } from "@/components/ui/Icons";
+import {
+  encodeAuthRedirect,
+  normalizeAuthRedirect,
+  shouldBypassSyncForRedirect,
+} from "@/features/auth/utils/redirect";
+import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
 interface ClerkSignUpFormProps {
@@ -47,14 +53,14 @@ export function ClerkSignUpForm({
     }
 
     try {
-      const destination = redirectTo || "/home";
+      const destination = normalizeAuthRedirect(redirectTo);
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(destination)}`,
-        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(destination)}`,
+        redirectUrl: `/sso-callback?flow=signup&redirectTo=${encodeAuthRedirect(destination)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeAuthRedirect(destination)}`,
       });
     } catch (error) {
-      console.error("Social sign-up error:", error);
+      logger.error("Social sign-up error:", error);
       showNotification(
         error instanceof Error ? error.message : "Social sign-up failed",
         "error",
@@ -85,9 +91,14 @@ export function ClerkSignUpForm({
         // Sign-up complete, set session and redirect to auth-ready
         // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
+        const normalizedRedirect = normalizeAuthRedirect(redirectTo);
         navigate({
           to: "/auth-ready",
-          search: { redirectTo: redirectTo || "/home" },
+          search: {
+            redirectTo: shouldBypassSyncForRedirect(normalizedRedirect)
+              ? normalizedRedirect
+              : `/profile-setup?redirectTo=${encodeAuthRedirect(normalizedRedirect)}`,
+          },
         });
       } else if (result.status === "missing_requirements") {
         // Email verification required
@@ -101,7 +112,7 @@ export function ClerkSignUpForm({
         );
       }
     } catch (error) {
-      console.error("Sign-up error:", error);
+      logger.error("Sign-up error:", error);
       showNotification(
         error instanceof Error ? error.message : "Sign-up failed",
         "error",
@@ -129,9 +140,14 @@ export function ClerkSignUpForm({
         // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
         showNotification("Email verified successfully!", "success");
+        const normalizedRedirect = normalizeAuthRedirect(redirectTo);
         navigate({
           to: "/auth-ready",
-          search: { redirectTo: redirectTo || "/home" },
+          search: {
+            redirectTo: shouldBypassSyncForRedirect(normalizedRedirect)
+              ? normalizedRedirect
+              : `/profile-setup?redirectTo=${encodeAuthRedirect(normalizedRedirect)}`,
+          },
         });
       } else {
         showNotification(
@@ -140,7 +156,7 @@ export function ClerkSignUpForm({
         );
       }
     } catch (error) {
-      console.error("Verification error:", error);
+      logger.error("Verification error:", error);
       showNotification(
         error instanceof Error ? error.message : "Verification failed",
         "error",

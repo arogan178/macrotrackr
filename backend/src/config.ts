@@ -21,7 +21,7 @@ const EnvSchema = z.object({
     .string()
     .default("./macro_tracker.db")
     .transform((path) =>
-      isAbsolute(path) ? path : resolve(import.meta.dir, "..", path)
+      isAbsolute(path) ? path : resolve(process.cwd(), path)
     ),
 
   /**
@@ -101,6 +101,11 @@ const EnvSchema = z.object({
    * Clerk Webhook Secret for verifying webhooks
    */
   CLERK_WEBHOOK_SECRET: z.string().optional(),
+
+  /**
+   * Shared secret for protected diagnostics endpoints
+   */
+  METRICS_API_KEY: z.string().min(1).optional(),
 });
 
 // Validate environment variables on startup

@@ -43,6 +43,7 @@
     "@elysiajs/jwt": "^1.4.1",
     "@elysiajs/swagger": "latest",
     "@node-rs/bcrypt": "^1.10.7",
+    "svix": "^1.65.0",
     "@types/stripe": "^8.0.417",
     "compression": "^1.8.1",
     "elysia": "^1.4.27",

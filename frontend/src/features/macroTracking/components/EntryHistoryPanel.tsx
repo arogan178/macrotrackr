@@ -336,7 +336,7 @@ const EntryHistoryComponent = function EntryHistory({
             <Button
               variant={isSelectionMode ? "primary" : "secondary"}
               onClick={toggleSelectionMode}
-              text={isSelectionMode ? "Cancel Selection" : "Select Meals"}
+              text={isSelectionMode ? "Cancel Selection" : "Group Meals"}
               buttonSize="sm"
             />
           )}
