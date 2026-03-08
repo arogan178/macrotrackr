@@ -10,12 +10,16 @@ import {
   type MacroTargetRow,
   type MacroEntryRow,
 } from "../../lib/database";
-import { NotFoundError } from "../../lib/errors";
+import { BadRequestError, NotFoundError } from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
 import { toCamelCase } from "../../lib/responses";
 
-import { OpenFoodFactsApiClient } from "../../lib/openfoodfacts-api-client";
+import {
+  buildFoodSearchCacheKey,
+  normalizeFoodSearchQuery,
+  OpenFoodFactsApiClient,
+} from "../../lib/openfoodfacts-api-client";
 import { cacheService } from "../../lib/cache-service";
 import type { Database } from "bun:sqlite";
 import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
@@ -25,7 +29,7 @@ import type { FoodProductResult } from "../../lib/openfoodfacts-api-client";
 
 // Cache service interface
 interface CacheService {
-  get: <T>(key: string) => T | undefined;
+  get: <T>(key: string) => T | null | undefined;
   set: <T>(key: string, value: T) => void;
 }
 
@@ -54,12 +58,17 @@ export const macroRoutes = (app: Elysia) =>
         async (context: any) => {
           const { query, openFoodFactsApiClient, cacheService: cache } = context as MacrosRouteContext;
 
-          const searchQuery = query?.q;
-          if (!searchQuery) {
-            throw new Error("Search query is required");
+          const rawSearchQuery = query?.q;
+          if (!rawSearchQuery) {
+            throw new BadRequestError("Search query is required");
           }
 
-          const cacheKey = `food_search:${searchQuery}`;
+          const searchQuery = normalizeFoodSearchQuery(rawSearchQuery);
+          if (searchQuery.length < 2) {
+            throw new BadRequestError("Search query must be at least 2 characters long");
+          }
+
+          const cacheKey = buildFoodSearchCacheKey(searchQuery);
           
           if (cache) {
             const cachedResult = cache.get<FoodProductResult[]>(cacheKey);
@@ -69,7 +78,7 @@ export const macroRoutes = (app: Elysia) =>
           }
 
           if (!openFoodFactsApiClient) {
-            throw new Error("Food API client not available");
+            throw new BadRequestError("Food API client not available");
           }
 
           const results = await openFoodFactsApiClient.search(searchQuery);
