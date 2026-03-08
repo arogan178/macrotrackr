@@ -1,14 +1,14 @@
 [
   {
     "slug": "v2-launch-complete-ui-overhaul",
-    "title": "MacroTrackr v2.0: Faster Editing, Better Grouping, Cleaner Reporting",
-    "excerpt": "What changed in v2.0, why grouped meals are more trustworthy now, and where the reporting and edit flows got tighter.",
-    "date": "2026-03-01",
+    "title": "MacroTrackr v2.0: Faster Search, Better Editing, Cleaner Reporting",
+    "excerpt": "The 2.0 release tightens food search, quick-add saved meals, grouped meal editing, and reporting so tracking feels faster and more trustworthy.",
+    "date": "2026-03-08",
     "category": "Releases",
     "author": "MacroTrackr Team",
     "readingTime": "2 min",
     "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Product", "Release Notes", "Meal Grouping", "Reporting"],
+    "tags": ["Product", "Release Notes", "Search UX", "Meal Grouping", "Reporting"],
     "featured": true
   },
   {
