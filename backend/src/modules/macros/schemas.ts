@@ -121,7 +121,7 @@ export const MacroSchemas = {
     macroTarget: t.Nullable(MacroTargetPercentagesSchema),
   }),
   foodSearchQuery: t.Object({
-    q: t.String(),
+    q: t.String({ minLength: 2, maxLength: 80 }),
   }),
   foodSearchResponse: t.Array(
     t.Object({
