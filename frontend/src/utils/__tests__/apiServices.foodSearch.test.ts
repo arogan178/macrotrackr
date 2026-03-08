@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  normalizeFoodSearchResults,
   type FoodSearchResult,
+  normalizeFoodSearchResults,
 } from "../apiServices";
 
 describe("normalizeFoodSearchResults", () => {
