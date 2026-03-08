@@ -21,25 +21,22 @@ interface PageTransitionProps {
   className?: string;
 }
 
-// Animation variants for blur-to-clear transition
+// Animation variants for smooth fade transition
 const pageVariants = {
   initial: {
     opacity: 0,
-    filter: "blur(8px)",
   },
   animate: {
     opacity: 1,
-    filter: "blur(0px)",
   },
   exit: {
     opacity: 0,
-    filter: "blur(8px)",
   },
 };
 
 // Transition configuration using design system easing
 const pageTransition = {
-  duration: 0.3,
+  duration: 0.2,
   ease: [0.32, 0.72, 0, 1], // Matches --ease-modal CSS variable
 };
 
