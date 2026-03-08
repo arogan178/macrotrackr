@@ -1,91 +1,157 @@
-import { useClerk } from "@clerk/clerk-react";
+import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
+import { ApiError, apiService } from "@/utils/apiServices";
 
 /**
  * SSOCallbackPage - Handles the callback from Clerk OAuth providers
  *
  * This page is shown after the user authenticates with Google/Facebook/Apple.
  *
- * Important: The Clerk user account is already created at this point (OAuth flow).
- * However, we DON'T create the user in our database yet - that happens only
- * after they complete the profile setup form.
+ * Key edge case: If an existing user clicks "Sign up with Google", Clerk
+ * will still authenticate them. We detect this by syncing with our backend
+ * and checking profile completion. Existing users skip profile setup entirely.
  *
  * Flow:
- * 1. User clicks "Sign up with Google" → Clerk creates account, redirects here
- * 2. We extract profile data and store it temporarily
- * 3. Redirect to profile setup
- * 4. User completes profile → THEN we create the user in our DB
+ * 1. User clicks "Sign up/in with Google" → Clerk creates/finds account, redirects here
+ * 2. Clerk processes the OAuth callback via handleRedirectCallback
+ * 3. Once session is active, we get a token and sync with backend
+ * 4. If existing user with complete profile → /auth-ready (straight to app)
+ * 5. If new user or incomplete profile → /profile-setup
  */
 export default function SSOCallbackPage() {
-  const { user, session } = useClerk();
+  const { handleRedirectCallback } = useClerk();
+  const { isLoaded: authLoaded, isSignedIn } = useAuth();
+  const { user, isLoaded: userLoaded } = useUser();
   const navigate = useNavigate();
   const search = useSearch({ from: "/sso-callback" }) as {
     redirectTo?: string;
     flow?: string;
   };
   const [error, setError] = useState<string | null>(null);
-  const [_isProcessing, setIsProcessing] = useState(true);
+  const hasProcessedCallback = useRef(false);
+  const hasProcessedRouting = useRef(false);
 
   const redirectTo = search.redirectTo || "/home";
 
+  // Step 1: Let Clerk process the OAuth redirect callback
   useEffect(() => {
-    async function handleCallback() {
+    if (hasProcessedCallback.current) return;
+    hasProcessedCallback.current = true;
+
+    handleRedirectCallback({
+      // We handle routing ourselves, so tell Clerk to stay on this page
+      afterSignInUrl: window.location.href,
+      afterSignUpUrl: window.location.href,
+    }).catch((err) => {
+      // Clerk may throw if the callback was already handled (e.g. page refresh)
+      // This is safe to ignore if the user is already signed in
+      logger.warn("[SSOCallback] handleRedirectCallback error (may be safe to ignore):", err);
+    });
+  }, [handleRedirectCallback]);
+
+  // Step 2: Once Clerk is loaded and user is signed in, handle routing
+  useEffect(() => {
+    if (hasProcessedRouting.current) return;
+    if (!authLoaded || !userLoaded) return;
+    if (!isSignedIn || !user) return;
+
+    hasProcessedRouting.current = true;
+
+    async function routeUser() {
       try {
-        // Wait for session to be ready
-        if (!session || !user) {
-          return;
-        }
-
-        // NOTE: We DON'T sync the user to our backend here.
-        // The user in our DB will only be created after profile setup is complete.
-        // This allows users to back out without creating incomplete accounts.
-
-        // Extract social login data for pre-population
-        const socialData = {
-          firstName: user.firstName || "",
-          lastName: user.lastName || "",
-          email: user.primaryEmailAddress?.emailAddress || "",
-          // Some providers may include birthday in unsafeMetadata
-          dateOfBirth: (user.unsafeMetadata?.dateOfBirth as string) || "",
-        };
-
         const safeRedirectTo = normalizeAuthRedirect(redirectTo);
         const isSignUpFlow = search.flow === "signup";
 
-        if (isSignUpFlow) {
-          sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
+        // For sign-in flows, go straight to auth-ready
+        if (!isSignUpFlow) {
+          sessionStorage.removeItem("socialProfileData");
           navigate({
-            to: "/profile-setup",
+            to: "/auth-ready",
             search: { redirectTo: safeRedirectTo },
           });
           return;
         }
 
-        sessionStorage.removeItem("socialProfileData");
+        // ── Sign-up flow: check if the user already exists in our DB ──
+        // This handles existing users who clicked "Sign up with Google"
+        // instead of "Log in with Google".
 
+        // Check if user already exists in our backend via sync + profile check.
+        // apiService.auth.syncUser() uses getHeadersAsync() which automatically
+        // retrieves the Clerk token via the token getter set by useClerkAuth.
+        let existingUser = false;
+        let profileComplete = false;
+
+        try {
+          // syncUser uses getHeadersAsync which pulls from the Clerk token getter
+          await apiService.auth.syncUser();
+
+          // If sync succeeds, check profile completion
+          try {
+            const userDetails = await apiService.user.getUserDetails();
+            existingUser = true;
+
+            if (userDetails && typeof userDetails === "object") {
+              if (typeof userDetails.isProfileComplete === "boolean") {
+                profileComplete = userDetails.isProfileComplete;
+              } else if ("dateOfBirth" in userDetails) {
+                profileComplete = Boolean(userDetails.dateOfBirth);
+              }
+            }
+          } catch (userError) {
+            if (userError instanceof ApiError && userError.status === 404) {
+              existingUser = false;
+            } else {
+              logger.warn("[SSOCallback] Failed to fetch user details:", userError);
+            }
+          }
+        } catch (syncError) {
+          // Sync failed - expected for truly new users
+          logger.info("[SSOCallback] Sync error (expected for new users):", syncError);
+          existingUser = false;
+        }
+
+        // Route based on what we found
+        if (existingUser && profileComplete) {
+          logger.info("[SSOCallback] Existing user with complete profile - routing to auth-ready");
+          sessionStorage.removeItem("socialProfileData");
+          navigate({
+            to: "/auth-ready",
+            search: { redirectTo: safeRedirectTo },
+          });
+          return;
+        }
+
+        // New user or incomplete profile → go to profile setup
+        const socialData = {
+          firstName: user?.firstName || "",
+          lastName: user?.lastName || "",
+          email: user?.primaryEmailAddress?.emailAddress || "",
+          dateOfBirth: (user?.unsafeMetadata?.dateOfBirth as string) || "",
+        };
+        sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
         navigate({
-          to: "/auth-ready",
+          to: "/profile-setup",
           search: { redirectTo: safeRedirectTo },
         });
-      } catch (error_) {
-        logger.error("SSO callback error:", error_);
+      } catch (err) {
+        logger.error("SSO callback routing error:", err);
         setError(
-          error_ instanceof Error
-            ? error_.message
+          err instanceof Error
+            ? err.message
             : "Failed to complete sign-in. Please try again.",
         );
-        setIsProcessing(false);
       }
     }
 
-    handleCallback();
-  }, [session, user, navigate, redirectTo, search.flow]);
+    routeUser();
+  }, [authLoaded, userLoaded, isSignedIn, user, navigate, redirectTo, search.flow]);
 
   if (error) {
     return (
@@ -142,3 +208,4 @@ export default function SSOCallbackPage() {
     </div>
   );
 }
+
