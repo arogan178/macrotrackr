@@ -38,7 +38,7 @@ const Header: React.FC = () => {
 
   return (
     <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
-      <div className="mx-auto flex min-h-14 max-w-7xl items-center justify-between rounded-2xl border border-border/70 bg-background/85 px-4 shadow-lg shadow-black/5 backdrop-blur-md transition-colors duration-200 supports-backdrop-filter:bg-background/75 sm:px-6">
+      <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
         {/* Left: Brand */}
         <div className="flex w-1/3 items-center justify-start">
           <LogoButton compact onClick={() => navigate({ to: "/" })} />
