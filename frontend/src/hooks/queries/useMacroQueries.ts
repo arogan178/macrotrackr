@@ -183,7 +183,7 @@ export function useAddMacroEntry() {
       );
 
       // 3. Create a temporary ID for the optimistic entry
-      const temporaryId = `temp_${Date.now()}`;
+      const temporaryId = -Date.now();
       const optimisticEntry = {
         id: temporaryId,
         ...variables,
@@ -254,17 +254,23 @@ export function useAddMacroEntry() {
     },
     onError: (_error, variables, context) => {
       // If there's an error, roll back the optimistic updates
-      if (context?.previousHistoryData) {
+      if (context?.previousHistoryData !== undefined) {
         queryClient.setQueryData(
           queryKeys.macros.historyInfinite(),
           context.previousHistoryData,
         );
+      } else {
+        queryClient.removeQueries({ queryKey: queryKeys.macros.historyInfinite() });
       }
-      if (context?.previousDailyTotals) {
+      if (context?.previousDailyTotals !== undefined) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(variables.entryDate),
           context.previousDailyTotals,
         );
+      } else {
+        queryClient.removeQueries({
+          queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
+        });
       }
     },
     onSuccess: (newEntryFromServer: {
@@ -539,15 +545,19 @@ export function useDeleteMacroEntry() {
               ...oldData,
               calories: Math.max(
                 0,
-                oldData.calories - entryToDelete.calories,
+                oldData.calories -
+                  calculateCaloriesFromMacros(
+                    entryToDelete.protein,
+                    entryToDelete.carbs,
+                    entryToDelete.fats,
+                  ),
               ),
               protein: Math.max(
                 0,
                 oldData.protein - entryToDelete.protein,
               ),
               carbs: Math.max(0, oldData.carbs - entryToDelete.carbs),
-              fats: Math.max(0, oldData.fats - entryToDelete.fat),
-              entryCount: Math.max(0, oldData.entryCount - 1),
+              fats: Math.max(0, oldData.fats - entryToDelete.fats),
             };
           },
         );

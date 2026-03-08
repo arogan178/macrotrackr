@@ -12,6 +12,11 @@ import {
   ShieldCheckIcon,
 } from "@/components/ui/Icons";
 import Modal from "@/components/ui/Modal";
+import {
+  encodeAuthRedirect,
+  normalizeAuthRedirect,
+} from "@/features/auth/utils/redirect";
+import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
 // Provider configuration
@@ -100,7 +105,9 @@ const ConnectedAccountsForm = () => {
         strategy: provider.strategy,
         redirectUrl:
           globalThis.location.origin +
-          "/sso-callback?redirectTo=/settings?tab=accounts",
+          `/sso-callback?flow=signin&redirectTo=${encodeAuthRedirect(
+            normalizeAuthRedirect("/settings?tab=accounts"),
+          )}`,
       });
 
       // The result contains a verification URL that we need to redirect to
@@ -111,7 +118,7 @@ const ConnectedAccountsForm = () => {
           result.verification.externalVerificationRedirectURL.href;
       }
     } catch (error) {
-      console.error("Error connecting provider:", error);
+      logger.error("Error connecting provider:", error);
       const errorMessage =
         error instanceof Error ? error.message : "Failed to connect provider";
       if (
@@ -162,7 +169,7 @@ const ConnectedAccountsForm = () => {
       );
       closeModal();
     } catch (error) {
-      console.error("Error disconnecting provider:", error);
+      logger.error("Error disconnecting provider:", error);
       const errorMessage =
         error instanceof Error
           ? error.message

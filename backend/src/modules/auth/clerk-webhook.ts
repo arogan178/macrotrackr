@@ -1,16 +1,20 @@
 // src/modules/auth/clerk-webhook.ts
 import { Elysia } from "elysia";
+import { WebhookVerificationError, Webhook as SvixWebhook } from "svix";
 import { db } from "../../db";
 import { config } from "../../config";
 import { logger } from "../../lib/logger";
-import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
-import crypto from "crypto";
+import { safeQuery, safeExecute } from "../../lib/database";
 
 // Type for Clerk webhook events
 interface ClerkWebhookEvent {
   data: {
     id: string;
-    email_addresses?: Array<{ email_address: string }>;
+    email_addresses?: Array<{
+      id?: string;
+      email_address: string;
+    }>;
+    primary_email_address_id?: string;
     first_name?: string;
     last_name?: string;
     [key: string]: unknown;
@@ -19,26 +23,40 @@ interface ClerkWebhookEvent {
   type: string;
 }
 
-/**
- * Verify Clerk webhook signature
- * Clerk webhooks include a signature in the Svix-Signature header
- */
-function verifyWebhookSignature(
-  payload: string,
-  signature: string,
-  secret: string
-): boolean {
-  try {
-    const signedContent = `${payload}.${signature}`;
-    const expectedSignature = crypto
-      .createHmac("sha256", secret)
-      .update(signedContent)
-      .digest("hex");
-    return signature === expectedSignature;
-  } catch (error) {
-    logger.error({ error }, "Failed to verify webhook signature");
-    return false;
+function verifyWebhookSignature(request: Request, payload: string): ClerkWebhookEvent {
+  const secret = config.CLERK_WEBHOOK_SECRET;
+  const svixId = request.headers.get("svix-id");
+  const svixTimestamp = request.headers.get("svix-timestamp");
+  const svixSignature = request.headers.get("svix-signature");
+
+  if (!secret || !svixId || !svixTimestamp || !svixSignature) {
+    throw new WebhookVerificationError("Missing Clerk Svix headers or secret");
   }
+
+  const webhook = new SvixWebhook(secret);
+  return webhook.verify(payload, {
+    "svix-id": svixId,
+    "svix-timestamp": svixTimestamp,
+    "svix-signature": svixSignature,
+  }) as ClerkWebhookEvent;
+}
+
+function getPrimaryEmail(event: ClerkWebhookEvent): string | undefined {
+  const primaryEmailAddressId = event.data.primary_email_address_id;
+  if (!event.data.email_addresses || event.data.email_addresses.length === 0) {
+    return undefined;
+  }
+
+  if (primaryEmailAddressId) {
+    const primaryEmail = event.data.email_addresses.find(
+      (address) => address.id === primaryEmailAddressId,
+    );
+    if (primaryEmail?.email_address) {
+      return primaryEmail.email_address;
+    }
+  }
+
+  return event.data.email_addresses[0]?.email_address;
 }
 
 /**
@@ -46,7 +64,7 @@ function verifyWebhookSignature(
  */
 async function handleUserCreated(event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
-  const email = event.data.email_addresses?.[0]?.email_address;
+  const email = getPrimaryEmail(event);
   const firstName = event.data.first_name || "";
   const lastName = event.data.last_name || "";
 
@@ -57,55 +75,30 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
 
   logger.info({ clerkUserId, email }, "Processing Clerk user.created webhook");
 
-  // Check if user already exists
+  // Only update already-linked users. New users are created by /api/auth/clerk-sync.
   const existingUser = safeQuery<{ id: number }>(
     db,
-    "SELECT id FROM users WHERE LOWER(email) = LOWER(?) OR clerk_id = ?",
-    [email, clerkUserId]
+    "SELECT id FROM users WHERE clerk_id = ?",
+    [clerkUserId]
   );
 
   if (existingUser) {
-    // Update existing user with Clerk ID
     safeExecute(
       db,
-      "UPDATE users SET clerk_id = ?, first_name = ?, last_name = ? WHERE id = ?",
-      [clerkUserId, firstName, lastName, existingUser.id]
+      "UPDATE users SET first_name = ?, last_name = ? WHERE id = ?",
+      [firstName, lastName, existingUser.id]
     );
     logger.info(
       { userId: existingUser.id, clerkUserId },
-      "Updated existing user with Clerk ID"
+      "Updated existing linked user from Clerk webhook"
     );
     return;
   }
 
-  // Create new user
-  withTransaction(db, () => {
-    // Insert user
-    const userResult = safeExecute(
-      db,
-      "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)",
-      [email, firstName, lastName, clerkUserId, "clerk-auth"]
-    );
-    const userId = Number(userResult.lastInsertRowid);
-
-    // Insert default user details
-    safeExecute(
-      db,
-      `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
-       VALUES (?, NULL, NULL, NULL, NULL, NULL)`,
-      [userId]
-    );
-
-    // Insert default macro targets
-    safeExecute(
-      db,
-      `INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
-       VALUES (?, 30, 40, 30, '[]')`,
-      [userId]
-    );
-
-    logger.info({ userId, clerkUserId }, "Created new user from Clerk webhook");
-  });
+  logger.info(
+    { clerkUserId, email },
+    "Ignoring Clerk user.created webhook until the app explicitly syncs the account",
+  );
 }
 
 /**
@@ -113,13 +106,56 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
  */
 async function handleUserUpdated(event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
-  const email = event.data.email_addresses?.[0]?.email_address ?? "";
+  const email = getPrimaryEmail(event);
   const firstName = event.data.first_name || "";
   const lastName = event.data.last_name || "";
 
   logger.info({ clerkUserId }, "Processing Clerk user.updated webhook");
 
-  // Update user in our database
+  const existingUser = safeQuery<{ id: number }>(
+    db,
+    "SELECT id FROM users WHERE clerk_id = ?",
+    [clerkUserId]
+  );
+
+  if (!existingUser) {
+    logger.info(
+      { clerkUserId, email },
+      "Ignoring Clerk user.updated webhook for an unlinked account",
+    );
+    return;
+  }
+
+  if (email) {
+    const emailOwner = safeQuery<{ id: number }>(
+      db,
+      "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND (clerk_id IS NULL OR clerk_id != ?)",
+      [email, clerkUserId],
+    );
+
+    if (emailOwner) {
+      logger.warn(
+        { clerkUserId, existingUserId: emailOwner.id },
+        "Skipping Clerk email update because the email belongs to another user",
+      );
+      safeExecute(
+        db,
+        "UPDATE users SET first_name = ?, last_name = ? WHERE clerk_id = ?",
+        [firstName, lastName, clerkUserId],
+      );
+      return;
+    }
+  }
+
+  if (!email) {
+    safeExecute(
+      db,
+      "UPDATE users SET first_name = ?, last_name = ? WHERE clerk_id = ?",
+      [firstName, lastName, clerkUserId],
+    );
+    return;
+  }
+
   safeExecute(
     db,
     "UPDATE users SET email = ?, first_name = ?, last_name = ? WHERE clerk_id = ?",
@@ -156,31 +192,29 @@ export const clerkWebhookHandler = (app: Elysia) =>
   app.post(
     "/api/webhooks/clerk",
     async (context: any) => {
-      const { request, body } = context;
+      const { request } = context;
+      const payload = await request.text();
 
-      // Get the webhook signature from headers
-      const signature = request.headers.get("svix-signature");
-      const secret = config.CLERK_WEBHOOK_SECRET;
+      if (!config.CLERK_WEBHOOK_SECRET) {
+        logger.warn("Missing Clerk webhook secret");
+        context.set.status = 500;
+        return {
+          success: false,
+          message: "Clerk webhook secret is not configured",
+        };
+      }
 
-      if (!signature || !secret) {
-        logger.warn("Missing webhook signature or secret");
+      let event: ClerkWebhookEvent;
+      try {
+        event = verifyWebhookSignature(request, payload);
+      } catch (error) {
+        logger.warn({ error }, "Invalid Clerk webhook signature");
+        context.set.status = 400;
         return {
           success: false,
           message: "Unauthorized",
         };
       }
-
-      // Verify webhook signature
-      const payload = JSON.stringify(body);
-      if (!verifyWebhookSignature(payload, signature, secret)) {
-        logger.warn("Invalid webhook signature");
-        return {
-          success: false,
-          message: "Unauthorized",
-        };
-      }
-
-      const event = body as ClerkWebhookEvent;
 
       logger.info(
         { eventType: event.type, clerkUserId: event.data.id },
@@ -209,6 +243,7 @@ export const clerkWebhookHandler = (app: Elysia) =>
         };
       } catch (error) {
         logger.error({ error, eventType: event.type }, "Failed to process webhook");
+        context.set.status = 500;
         return {
           success: false,
           message: "Failed to process webhook",
@@ -216,6 +251,7 @@ export const clerkWebhookHandler = (app: Elysia) =>
       }
     },
     {
+      parse: "text",
       detail: {
         summary: "Handle Clerk webhooks",
         description: "Receives and processes webhook events from Clerk (user.created, user.updated, user.deleted)",

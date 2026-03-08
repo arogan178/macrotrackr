@@ -6,6 +6,7 @@ import type { AuthenticatedContext } from "../../types";
 import { generateId } from "../../utils/id-generator";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import {
+  AccountNotSyncedError,
   NotFoundError,
   ConflictError,
   AuthenticationError,
@@ -81,60 +82,7 @@ async function resolveOrCreateInternalUserId(
     return resolvedInternalUserId;
   }
 
-  const email = user.email;
-  if (!email) {
-    return null;
-  }
-
-  logger.warn(
-    { clerkUserId: user.clerkUserId, email: user.email },
-    "[/api/user/me] Clerk user not linked. Creating internal user record as fallback.",
-  );
-
-  const fallbackFirstName = user.firstName ?? "";
-  const fallbackLastName = user.lastName ?? "";
-
-  const createdUserId = withTransaction(db, () => {
-    const existingByEmail = safeQuery<{ id: number }>(
-      db,
-      "SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
-      [email],
-    );
-
-    if (existingByEmail) {
-      safeExecute(db, "UPDATE users SET clerk_id = ? WHERE id = ?", [
-        user.clerkUserId,
-        existingByEmail.id,
-      ]);
-      return existingByEmail.id;
-    }
-
-    const insertUserResult = safeExecute(
-      db,
-      "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)",
-      [email, fallbackFirstName, fallbackLastName, user.clerkUserId, "clerk-auth"],
-    );
-
-    const newUserId = Number(insertUserResult.lastInsertRowid);
-
-    safeExecute(
-      db,
-      `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
-       VALUES (?, NULL, NULL, NULL, NULL, NULL)`,
-      [newUserId],
-    );
-
-    safeExecute(
-      db,
-      `INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
-       VALUES (?, 30, 40, 30, '[]')`,
-      [newUserId],
-    );
-
-    return newUserId;
-  });
-
-  return createdUserId;
+  return null;
 }
 
 export const userRoutes = (app: Elysia) =>
@@ -155,7 +103,7 @@ export const userRoutes = (app: Elysia) =>
             }
 
             // Get internal user ID from Clerk ID
-            logger.info({ clerkUserId: user.clerkUserId, email: user.email }, "[/api/user/me] Looking up internal user ID");
+            logger.info({ clerkUserId: user.clerkUserId }, "[/api/user/me] Looking up internal user ID");
             
             const internalUserId = await resolveOrCreateInternalUserId(
               db,
@@ -164,14 +112,12 @@ export const userRoutes = (app: Elysia) =>
             );
 
             if (!internalUserId) {
-              // User doesn't exist in our DB yet - this shouldn't happen
-              // if they called /auth/clerk-sync first, but handle it gracefully
-              logger.error(
-                { clerkUserId: user.clerkUserId, email: user.email },
-                "[/api/user/me] User not found in database - sync may have failed"
+              logger.warn(
+                { clerkUserId: user.clerkUserId },
+                "[/api/user/me] Clerk user is authenticated but not linked to an internal account",
               );
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
+              throw new AccountNotSyncedError(
+                "Your account setup is not finished yet. Please complete your profile.",
               );
             }
             
