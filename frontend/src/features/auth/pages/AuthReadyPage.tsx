@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { normalizeAuthRedirect, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { queryKeys } from "@/lib/queryKeys";
 import { ApiError, apiService, setAuthToken } from "@/utils/apiServices";
@@ -51,7 +52,7 @@ export default function AuthReadyPage() {
   const [error, setError] = useState<string | null>(null);
   const hasInitializedReference = useRef(false);
 
-  const redirectTo = search.redirectTo || "/home";
+  const redirectTo = normalizeAuthRedirect(search.redirectTo);
 
   useEffect(() => {
     async function setupAuth() {
@@ -85,29 +86,33 @@ export default function AuthReadyPage() {
         // Give a small moment for the token to be set
         await new Promise((resolve) => setTimeout(resolve, 50));
 
-        // Sync the Clerk user with our backend.
-        let syncSuccess = false;
-        try {
-          await apiService.auth.syncUser(token || undefined);
-          syncSuccess = true;
-        } catch (syncError: unknown) {
-          // If it's a 401, the token might be invalid.
-          if (syncError instanceof Error && "status" in syncError) {
-            const errorWithStatus = syncError as { status: number };
-            if (errorWithStatus.status === 401) {
-              setError("Authentication failed. Please sign in again.");
-              return;
-            }
-          }
+        const shouldBypassSync = shouldBypassSyncForRedirect(redirectTo);
 
-          logger.error(
-            "[AuthReadyPage] Failed to sync Clerk user with backend",
-            syncError,
-          );
-          setError(
-            "We couldn't link your account yet. Please try signing in again.",
-          );
-          return;
+        // Sync the Clerk user with our backend when continuing to app routes.
+        let syncSuccess = false;
+        if (!shouldBypassSync) {
+          try {
+            await apiService.auth.syncUser(token || undefined);
+            syncSuccess = true;
+          } catch (syncError: unknown) {
+            // If it's a 401, the token might be invalid.
+            if (syncError instanceof Error && "status" in syncError) {
+              const errorWithStatus = syncError as { status: number };
+              if (errorWithStatus.status === 401) {
+                setError("Authentication failed. Please sign in again.");
+                return;
+              }
+            }
+
+            logger.error(
+              "[AuthReadyPage] Failed to sync Clerk user with backend",
+              syncError,
+            );
+            setError(
+              "We couldn't link your account yet. Please try signing in again.",
+            );
+            return;
+          }
         }
 
         // Small delay after successful sync to ensure DB is updated
@@ -116,19 +121,24 @@ export default function AuthReadyPage() {
           queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
         }
 
+        if (shouldBypassSync) {
+          navigate({
+            to: "/profile-setup",
+            search: { redirectTo },
+            replace: true,
+          });
+          return;
+        }
+
         // Resolve backend user details before leaving auth-ready.
         // This avoids bouncing to protected routes while /api/user/me still returns 401.
         let userDetails: Record<string, unknown> | null = null;
         for (let attempt = 0; attempt < 3; attempt += 1) {
           try {
-            console.log(
-              `[AuthReadyPage] Fetching user details, attempt ${attempt + 1}`,
-            );
             const response = await apiService.user.getUserDetails();
-            console.log(`[AuthReadyPage] Raw API response:`, response);
 
             if (!isLikelyUserDetailsPayload(response)) {
-              console.warn(
+              logger.warn(
                 `[AuthReadyPage] Malformed user details payload on attempt ${attempt + 1}`,
                 response,
               );
@@ -139,7 +149,7 @@ export default function AuthReadyPage() {
             userDetails = response;
             break;
           } catch (userError) {
-            console.error(
+            logger.warn(
               `[AuthReadyPage] Attempt ${attempt + 1} failed:`,
               userError,
             );
@@ -158,10 +168,13 @@ export default function AuthReadyPage() {
         // Route by profile completion only when we can confidently determine it.
         const isProfileComplete = resolveProfileCompletion(userDetails);
         if (isProfileComplete === false) {
-          console.warn(
+          logger.warn(
             "[AuthReadyPage] Profile incomplete - redirecting to /profile-setup",
           );
-          navigate({ to: "/profile-setup" });
+          navigate({
+            to: "/profile-setup",
+            search: { redirectTo },
+          });
           return;
         }
 
@@ -171,17 +184,7 @@ export default function AuthReadyPage() {
           );
         }
 
-        // Validate redirect URL to prevent open redirect attacks
-        // Must be a relative path starting with '/' but not '//' (protocol-relative)
-        const isValidRedirect = (url: string): boolean =>
-          url.startsWith("/") && !url.startsWith("//");
-
-        const normalizedRedirectTo =
-          !redirectTo ||
-          !isValidRedirect(redirectTo) ||
-          redirectTo.startsWith("/auth-ready")
-            ? "/home"
-            : redirectTo;
+        const normalizedRedirectTo = normalizeAuthRedirect(redirectTo);
 
         if (normalizedRedirectTo === "/home") {
           navigate({ to: "/home", search: { limit: 20, offset: 0 } });

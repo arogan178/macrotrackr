@@ -115,7 +115,7 @@ export const habitRoutes = (app: Elysia) =>
           const featureLimitResult = await checkFeatureLimit(
             internalUserId,
             "MAX_HABITS",
-            currentHabitCount + 1
+            currentHabitCount
           );
           if (!featureLimitResult.allowed) {
             throw new AuthorizationError(
