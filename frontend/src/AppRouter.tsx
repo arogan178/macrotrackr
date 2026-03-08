@@ -22,8 +22,8 @@ import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
 
 import MainLayout from "./components/layout/MainLayout";
-import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
 import type { WeightGoalsResponse } from "./features/goals/types";
+import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
 import { hasStatus, queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
@@ -192,7 +192,7 @@ export const homeRoute = createRoute({
 
     const latestWeight =
       weightLog && weightLog.length > 0
-        ? weightLog[weightLog.length - 1]?.weight
+        ? weightLog.at(-1)?.weight
         : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
@@ -280,7 +280,7 @@ export const goalsRoute = createRoute({
 
     const latestWeight =
       weightLog && weightLog.length > 0
-        ? weightLog[weightLog.length - 1]?.weight
+        ? weightLog.at(-1)?.weight
         : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
