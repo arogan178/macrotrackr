@@ -8,8 +8,8 @@ import {
   SearchIcon,
 } from "@/components/ui";
 import SavedMealsList from "@/components/ui/SavedMealsList";
-import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import StatusIndicator from "@/components/ui/StatusIndicator";
+import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import type { Ingredient } from "@/types/macro";
 import type { FoodSearchResult } from "@/utils/apiServices";
 
