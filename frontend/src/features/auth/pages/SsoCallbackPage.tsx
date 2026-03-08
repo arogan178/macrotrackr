@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { apiService } from "@/utils/apiServices";
+import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import { logger } from "@/lib/logger";
 
 /**
  * SSOCallbackPage - Handles the callback from Clerk OAuth providers
@@ -26,6 +27,7 @@ export default function SSOCallbackPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/sso-callback" }) as {
     redirectTo?: string;
+    flow?: string;
   };
   const [error, setError] = useState<string | null>(null);
   const [_isProcessing, setIsProcessing] = useState(true);
@@ -40,18 +42,6 @@ export default function SSOCallbackPage() {
           return;
         }
 
-        // Get the Clerk session token
-        const token = await session.getToken();
-
-        if (!token) {
-          setError("Failed to get authentication token");
-          setIsProcessing(false);
-          return;
-        }
-
-        // Set the token for API calls
-        apiService.setAuthToken(token);
-
         // NOTE: We DON'T sync the user to our backend here.
         // The user in our DB will only be created after profile setup is complete.
         // This allows users to back out without creating incomplete accounts.
@@ -65,21 +55,26 @@ export default function SSOCallbackPage() {
           dateOfBirth: (user.unsafeMetadata?.dateOfBirth as string) || "",
         };
 
-        // Store social data temporarily for profile setup
-        sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
+        const safeRedirectTo = normalizeAuthRedirect(redirectTo);
+        const isSignUpFlow = search.flow === "signup";
 
-        // Validate redirect URL to prevent open redirect attacks
-        // Must be a relative path starting with '/' but not '//' (protocol-relative)
-        const isValidRedirect = (url: string): boolean =>
-          url.startsWith("/") && !url.startsWith("//");
+        if (isSignUpFlow) {
+          sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
+          navigate({
+            to: "/profile-setup",
+            search: { redirectTo: safeRedirectTo },
+          });
+          return;
+        }
 
-        const safeRedirectTo =
-          redirectTo && isValidRedirect(redirectTo) ? redirectTo : "/home";
+        sessionStorage.removeItem("socialProfileData");
 
-        // Redirect to auth-ready - AuthReadyPage will set token and then redirect
-        navigate({ to: "/auth-ready", search: { redirectTo: safeRedirectTo } });
+        navigate({
+          to: "/auth-ready",
+          search: { redirectTo: safeRedirectTo },
+        });
       } catch (error_) {
-        console.error("SSO callback error:", error_);
+        logger.error("SSO callback error:", error_);
         setError(
           error_ instanceof Error
             ? error_.message
@@ -90,7 +85,7 @@ export default function SSOCallbackPage() {
     }
 
     handleCallback();
-  }, [session, user, navigate, redirectTo]);
+  }, [session, user, navigate, redirectTo, search.flow]);
 
   if (error) {
     return (

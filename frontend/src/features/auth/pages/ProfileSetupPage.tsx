@@ -1,9 +1,11 @@
 import { useAuth } from "@clerk/clerk-react";
-import { Navigate } from "@tanstack/react-router";
+import { Navigate, useSearch } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { ProfileCreationForm } from "@/features/auth/components/ProfileCreationForm";
+import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 
 function resolveProfileCompletion(user: unknown): boolean | undefined {
@@ -31,9 +33,17 @@ function resolveProfileCompletion(user: unknown): boolean | undefined {
  */
 export default function ProfileSetupPage() {
   const { isSignedIn, isLoaded } = useAuth();
+  const search = useSearch({ from: "/profile-setup" }) as {
+    redirectTo?: string;
+  };
   const { data: user, isLoading: isUserLoading } = useUser({
     enabled: isLoaded && isSignedIn,
   });
+  const normalizedRedirect = normalizeAuthRedirect(search.redirectTo);
+
+  useEffect(() => {
+    sessionStorage.setItem("postAuthRedirect", normalizedRedirect);
+  }, [normalizedRedirect]);
 
   // Show loading while Clerk loads
   if (!isLoaded) {

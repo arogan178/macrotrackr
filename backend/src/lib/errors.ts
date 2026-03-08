@@ -86,6 +86,17 @@ export class ConflictError extends AppError {
 }
 
 /**
+ * Account linkage errors
+ */
+export class AccountNotSyncedError extends AppError {
+  constructor(
+    message: string = "Your account is not linked yet. Please finish setup.",
+  ) {
+    super(message, 409, "ACCOUNT_NOT_SYNCED");
+  }
+}
+
+/**
  * Database operation errors
  */
 export class DatabaseError extends AppError {

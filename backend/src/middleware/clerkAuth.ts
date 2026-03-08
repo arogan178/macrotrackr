@@ -17,6 +17,8 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/",
   "/health",
   "/health/ready",
+  "/metrics",
+  "/metrics/queries",
 ]);
 
 // Paths that can be called before the Clerk account is linked to an internal DB user.
@@ -27,7 +29,7 @@ const UNLINKED_ALLOWED_PATHS = new Set([
 /**
  * Check if a path is exempt from authentication
  */
-function isExemptPath(path: string): boolean {
+export function isExemptPath(path: string): boolean {
   // Check exact matches
   if (AUTH_EXEMPT_PATHS.has(path)) {
     return true;
@@ -73,6 +75,48 @@ function getRequestPath(context: { request?: Request; path?: string }): string {
   return context.path ?? "";
 }
 
+function getSafeHeaderSummary(request?: Request): Record<string, string> | "no headers" {
+  if (!request?.headers) {
+    return "no headers";
+  }
+
+  const summary: Record<string, string> = {};
+  for (const [key, value] of request.headers.entries()) {
+    const normalizedKey = key.toLowerCase();
+    if (
+      normalizedKey === "authorization" ||
+      normalizedKey === "cookie" ||
+      normalizedKey === "set-cookie"
+    ) {
+      summary[normalizedKey] = "[redacted]";
+      continue;
+    }
+    summary[normalizedKey] = value;
+  }
+
+  return summary;
+}
+
+function getPrimaryClerkEmail(clerkUser: {
+  emailAddresses?: Array<{ id?: string; emailAddress?: string }>;
+  primaryEmailAddressId?: string | null;
+} | null): string | undefined {
+  if (!clerkUser?.emailAddresses || clerkUser.emailAddresses.length === 0) {
+    return undefined;
+  }
+
+  if (clerkUser.primaryEmailAddressId) {
+    const primary = clerkUser.emailAddresses.find(
+      (emailAddress) => emailAddress.id === clerkUser.primaryEmailAddressId,
+    );
+    if (primary?.emailAddress) {
+      return primary.emailAddress;
+    }
+  }
+
+  return clerkUser.emailAddresses[0]?.emailAddress;
+}
+
 /**
  * Clerk authentication middleware for Elysia
  * Validates Clerk JWT tokens and extracts user information
@@ -98,7 +142,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         hasAuth: !!auth, 
         authType: typeof auth,
         hasClerk: !!clerk,
-        headers: request?.headers ? Object.fromEntries(request.headers.entries()) : 'no headers'
+        headers: getSafeHeaderSummary(request)
       }, "Clerk auth middleware called");
     }
     
@@ -226,7 +270,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         logger.warn({ userId, error: err }, "Failed to fetch Clerk user details");
       }
 
-      const email = clerkUser?.emailAddresses?.[0]?.emailAddress;
+      const email = getPrimaryClerkEmail(clerkUser);
       
       // Debug logging - only in development
       if (config.NODE_ENV === 'development') {
