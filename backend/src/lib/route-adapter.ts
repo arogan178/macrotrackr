@@ -20,7 +20,7 @@ export function resolveAuthenticatedUser(
   // Use pre-resolved internal user ID or look it up
   const resolvedUserId =
     internalUserId ??
-    (db ? getInternalUserId(db, user.clerkUserId, user.email) : null);
+    (db ? getInternalUserId(db, user.clerkUserId) : null);
 
   if (!resolvedUserId) {
     throw new NotFoundError(

@@ -6,6 +6,7 @@ import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
 import { AUTH_ERROR_MESSAGES } from "@/features/auth/constants";
+import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -37,6 +38,9 @@ export function ProfileCreationForm() {
   const { user: clerkUser, isLoaded: _isUserLoaded } = useUser();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const { showNotification } = useStore();
+  const postSetupRedirect = normalizeAuthRedirect(
+    sessionStorage.getItem("postAuthRedirect") || undefined,
+  );
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -219,7 +223,9 @@ export function ProfileCreationForm() {
         if (
           syncError instanceof Error &&
           hasStatus(syncError) &&
-          syncError.status === 409
+          syncError.status === 409 &&
+          "code" in syncError &&
+          (syncError as { code?: string }).code !== "RESOURCE_CONFLICT"
         ) {
           // User already exists, safe to continue profile completion.
         } else {
@@ -238,6 +244,7 @@ export function ProfileCreationForm() {
 
       // Clear social data on success
       sessionStorage.removeItem("socialProfileData");
+      sessionStorage.removeItem("postAuthRedirect");
 
       // Refresh cached user state before navigation so guards see profile as complete.
       await Promise.all([
@@ -254,11 +261,15 @@ export function ProfileCreationForm() {
       showNotification("Profile created successfully!", "success");
 
       // Redirect to home with replace for a clean onboarding transition.
-      navigate({
-        to: "/home",
-        search: { limit: 20, offset: 0 },
-        replace: true,
-      });
+      if (postSetupRedirect === "/home") {
+        navigate({
+          to: "/home",
+          search: { limit: 20, offset: 0 },
+          replace: true,
+        });
+      } else {
+        globalThis.location.assign(postSetupRedirect);
+      }
     } catch (error) {
       logger.error("Profile creation error:", error);
       showNotification(
@@ -332,9 +343,9 @@ export function ProfileCreationForm() {
             <div>
               <NumberField
                 label={`Height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`}
-                value={height}
-                onChange={(value: number | null) => {
-                  setHeight(value);
+                value={height ?? undefined}
+                onChange={(value: number | undefined) => {
+                  setHeight(value ?? null);
                   if (errors.height) {
                     setErrors((previous) => ({ ...previous, height: "" }));
                   }
@@ -353,9 +364,9 @@ export function ProfileCreationForm() {
             <div>
               <NumberField
                 label={`Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
-                value={weight}
-                onChange={(value: number | null) => {
-                  setWeight(value);
+                value={weight ?? undefined}
+                onChange={(value: number | undefined) => {
+                  setWeight(value ?? null);
                   if (errors.weight) {
                     setErrors((previous) => ({ ...previous, weight: "" }));
                   }

@@ -19,6 +19,8 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/",
   "/health",
   "/health/ready",
+  "/metrics",
+  "/metrics/queries",
 ])
 
 function isExemptPath(path: string): boolean {
@@ -53,6 +55,11 @@ describe('isExemptPath', () => {
     it('should exempt health check paths', () => {
       expect(isExemptPath('/health')).toBe(true)
       expect(isExemptPath('/health/ready')).toBe(true)
+    })
+
+    it('should exempt metrics paths', () => {
+      expect(isExemptPath('/metrics')).toBe(true)
+      expect(isExemptPath('/metrics/queries')).toBe(true)
     })
 
     it('should exempt docs paths', () => {
@@ -151,6 +158,8 @@ describe('AUTH_EXEMPT_PATHS set', () => {
       "/",
       "/health",
       "/health/ready",
+      "/metrics",
+      "/metrics/queries",
     ]
 
     expectedPaths.forEach(path => {
@@ -159,6 +168,6 @@ describe('AUTH_EXEMPT_PATHS set', () => {
   })
 
   it('should have correct size', () => {
-    expect(AUTH_EXEMPT_PATHS.size).toBe(8)
+    expect(AUTH_EXEMPT_PATHS.size).toBe(10)
   })
 })

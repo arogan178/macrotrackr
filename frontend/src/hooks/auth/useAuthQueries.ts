@@ -36,6 +36,15 @@ export function useUser(options?: { enabled?: boolean }) {
         if (error instanceof Error && hasStatus(error) && error.status === 401) {
           return null;
         }
+        if (
+          error instanceof Error &&
+          hasStatus(error) &&
+          error.status === 409 &&
+          "code" in error &&
+          (error as { code?: string }).code === "ACCOUNT_NOT_SYNCED"
+        ) {
+          return null;
+        }
         throw error;
       }
     },
@@ -88,7 +97,7 @@ export function useResetPassword() {
     },
     onSuccess: () => {
       // Navigate to login with success message
-      navigate({ to: "/login" });
+      navigate({ to: "/login", search: { returnTo: undefined } });
     },
     onError: (error) => {
       console.error("Password reset failed:", error);

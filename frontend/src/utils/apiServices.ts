@@ -120,24 +120,11 @@ export interface UserDetailsResponse {
 
 function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
   if (!value || typeof value !== "object") {
-    console.log("[DEBUG] isUserDetailsResponse: value is not an object", value);
     return false;
   }
 
   const candidate = value as Record<string, unknown>;
-  
-  // DEBUG: Log the validation checks
-  console.log("[DEBUG] isUserDetailsResponse validation:", {
-    hasId: typeof candidate.id === "number",
-    idValue: candidate.id,
-    hasEmail: typeof candidate.email === "string",
-    emailValue: candidate.email,
-    hasFirstName: typeof candidate.firstName === "string",
-    firstNameValue: candidate.firstName,
-    hasLastName: typeof candidate.lastName === "string",
-    lastNameValue: candidate.lastName,
-  });
-  
+
   return (
     typeof candidate.id === "number" &&
     typeof candidate.email === "string" &&
@@ -147,9 +134,6 @@ function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
 }
 
 function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | null {
-  // DEBUG: Log the raw response
-  console.log("[DEBUG] normalizeUserDetailsResponse - raw value:", JSON.stringify(value, null, 2));
-  
   if (!value || typeof value !== "object") {
     return null;
   }
@@ -159,9 +143,6 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
     root && typeof root.data === "object" && root.data !== null
       ? (root.data as Record<string, unknown>)
       : root;
-
-  // DEBUG: Log the candidate extraction
-  console.log("[DEBUG] normalizeUserDetailsResponse - candidateRaw:", JSON.stringify(candidateRaw, null, 2));
 
   const candidate: Record<string, unknown> = {
     ...candidateRaw,
@@ -407,11 +388,14 @@ export function setAuthToken(token: string | null) {
  * Get the current auth token (Clerk or static)
  */
 export async function getAuthToken(): Promise<string | null> {
+  if (getClerkToken) {
+    const freshToken = await getClerkToken();
+    if (freshToken) {
+      return freshToken;
+    }
+  }
   if (staticAuthToken) {
     return staticAuthToken;
-  }
-  if (getClerkToken) {
-    return await getClerkToken();
   }
   return null;
 }
@@ -434,14 +418,7 @@ export async function getHeadersAsync(
 ): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
   const token = await getAuthToken();
-  
-  // DEBUG: Log token retrieval
-  console.log("[DEBUG] getHeadersAsync - Token retrieval:", {
-    hasToken: !!token,
-    tokenLength: token?.length,
-    tokenPreview: token ? `${token.slice(0, 20)}...` : null
-  });
-  
+
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -498,27 +475,11 @@ export const apiService = {
     getUserDetails: async (): Promise<UserDetailsResponse> => {
       const fetchUserDetails = async (): Promise<unknown> => {
         const url = `${API_BASE_URL}/api/user/me`;
-        console.log("[DEBUG] getUserDetails - Fetching from:", url);
-        
         const response = await fetch(url, {
           headers: await getHeadersAsync(false),
           credentials: "include",
         });
-        
-        console.log("[DEBUG] getUserDetails - Response status:", response.status);
-        console.log("[DEBUG] getUserDetails - Response OK:", response.ok);
-        
-        const responseText = await response.text();
-        console.log("[DEBUG] getUserDetails - Response text:", responseText);
-        
-        // Parse the text back to JSON for handleResponse
-        const parsedResponse = new Response(responseText, {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers,
-        });
-        
-        return handleResponse(parsedResponse);
+        return handleResponse(response);
       };
 
       const initialResult = await fetchUserDetails();
