@@ -221,12 +221,15 @@ const CalorieSearch = memo(function CalorieSearch({
     [onResult, processFoodItemSelection],
   );
 
-  const calculateDisplayCalories = useCallback((item: FoodSearchResult): number => {
-    if (item.energyKcal && item.energyKcal > 0) {
-      return item.energyKcal;
-    }
-    return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
-  }, []);
+  const calculateDisplayCalories = useCallback(
+    (item: FoodSearchResult): number => {
+      if (item.energyKcal && item.energyKcal > 0) {
+        return item.energyKcal;
+      }
+      return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
+    },
+    [],
+  );
 
   const getQuantityDisplay = useCallback((item: FoodSearchResult): string => {
     if (item.rawQuantity) {
@@ -272,11 +275,16 @@ const CalorieSearch = memo(function CalorieSearch({
     calculateDisplayCalories,
   ]);
 
-  const searchErrorMessage =
-    searchError ? "Failed to search for food item. Please try again." : "";
+  const searchErrorMessage = searchError
+    ? "Failed to search for food item. Please try again."
+    : "";
 
   const noResultsMessage =
-    submittedQuery && isFetched && !isSearching && !searchError && results.length === 0
+    submittedQuery &&
+    isFetched &&
+    !isSearching &&
+    !searchError &&
+    results.length === 0
       ? "No results found for this food item"
       : "";
 

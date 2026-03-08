@@ -8,7 +8,13 @@
     "author": "MacroTrackr Team",
     "readingTime": "2 min",
     "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Product", "Release Notes", "Search UX", "Meal Grouping", "Reporting"],
+    "tags": [
+      "Product",
+      "Release Notes",
+      "Search UX",
+      "Meal Grouping",
+      "Reporting"
+    ],
     "featured": true
   },
   {
