@@ -64,7 +64,7 @@ const Navbar: React.FC = () => {
     <>
       <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
         <nav
-          className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border/70 bg-background/85 px-4 shadow-lg shadow-black/5 backdrop-blur-md transition-colors duration-200 supports-backdrop-filter:bg-background/75 sm:px-6"
+          className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6"
           role="navigation"
           aria-label="Main navigation"
           style={{ touchAction: "manipulation" }}
@@ -158,7 +158,7 @@ const Navbar: React.FC = () => {
             />
 
             <motion.div
-              className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-border/70 bg-background/90 p-3 shadow-xl shadow-black/10 backdrop-blur-md supports-backdrop-filter:bg-background/80 lg:hidden"
+              className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-border bg-surface p-3 shadow-modal lg:hidden"
               initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
@@ -186,7 +186,7 @@ const Navbar: React.FC = () => {
                   );
                 })}
 
-                <div className="mt-2 border-t border-border/60 pt-2">
+                <div className="mt-2 border-t border-border pt-2">
                   <button
                     type="button"
                     onClick={handleLogout}
