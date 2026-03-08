@@ -26,6 +26,7 @@ export const queryKeys = {
   // Macro tracking queries
   macros: {
     all: () => ["macros"] as const,
+    search: (query: string) => ["macros", "search", query] as const,
     history: (page?: number, startDate?: string, endDate?: string) =>
       startDate || endDate
         ? (["macros", "history", page, startDate, endDate] as const)
