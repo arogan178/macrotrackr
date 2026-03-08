@@ -1,59 +1,66 @@
-# MacroTrackr v2.0: Faster Editing, Better Grouping, Cleaner Reporting
+# MacroTrackr v2.0: Faster Search, Better Editing, Cleaner Reporting
 
-MacroTrackr v2.0 is the first release that feels less like a pile of useful tools and more like one product with a clear point of view.
+MacroTrackr v2.0 is the release where the app starts feeling coherent from search to logging to review.
 
-The focus was not on inventing new screens for the sake of it. The focus was on removing the tiny pieces of friction that make tracking feel heavier than it should: editing a saved meal without breaking the math, understanding what actually lives inside a grouped entry, and checking progress without moving through a dashboard that feels stitched together.
+This version is less about one flashy feature and more about removing the small trust-breaking moments that make tracking feel clumsy: search results that feel noisy, quick-add flows that linger after you have already made a choice, grouped meals that are hard to edit confidently, and reporting screens that feel more assembled than designed.
 
-That sounds subtle on paper. In daily use, it changes the tone of the app.
+Put together, those fixes change the character of the product.
 
-## What changed in practice
+## What defines v2.0
 
-The biggest shift is that grouped meals now keep enough ingredient context to stay editable.
+The through-line for 2.0 is confidence.
 
-If you save a shake made from 200ml milk, 30g whey, and a banana, the app now keeps the actual quantities and units attached to those ingredients. It no longer collapses the whole thing into a vague total that looks fine until you try to change one detail later.
+You should be able to:
 
-That difference matters because trust in a tracker is usually won or lost in the edit flow. If the app cannot explain where the numbers came from, every correction feels risky.
+- find a food quickly,
+- add it without the interface fighting you,
+- come back later and still understand where the numbers came from,
+- review your progress without wondering whether the app quietly dropped context on the floor.
 
-## Edit flow improvements
+That is the standard this release was built around.
 
-The rebuilt edit modal follows three simple rules.
+## Search is faster and cleaner
 
-### 1. Preserve the source data
+Food search now behaves more like a product feature and less like a raw API passthrough.
 
-Ingredients keep their real quantity and unit whenever possible. Grouped meals also reveal their source ingredients more clearly, so opening a combined meal no longer feels like opening a black box.
+Results are normalized more consistently, duplicate-looking entries are filtered down, and ranking is better aligned with what people actually expect when they search for a common food. Exact and near-exact matches surface more reliably, while irrelevant or lower-signal matches are pushed down.
 
-### 2. Scale macros from the real base amount
+On the front end, the search flow was also tightened so result fetching, caching, and empty-state handling follow the same query patterns used elsewhere in the app. That means fewer ad hoc states, clearer loading behavior, and a search box that feels more predictable under repeated use.
 
-When you change a quantity from 200ml to 300ml, the app recalculates protein, carbs, and fats from the stored base amount instead of guessing from whatever totals happened to be on screen a moment ago.
+## Saved-meal quick add is smoother
 
-### 3. Make the modal easier to use for longer meals
+One of the most annoying bits of friction in the old flow was that the saved-meals panel could hang around after you had already selected an item. That kind of thing sounds tiny until you repeat it multiple times a day.
 
-Spacing, grouping, and scroll behavior were tightened so longer meals feel manageable instead of bloated. The screen should now hold more ingredients without turning into a stack of giant cards fighting for attention.
+In 2.0, the quick-add panel and the search-results panel behave like a single coordinated flow. When you choose a saved meal or a search result, the overlay closes cleanly and the form moves on with the selected data already applied.
 
-## Reporting is lighter and more coherent
+That matters because good tracking UX is mostly about not making the user dismiss extra UI they no longer need.
 
-The analytics side of the product also became calmer.
+## Grouped meals are easier to trust and edit
 
-Instead of reading like a collection of unrelated widgets, reporting now behaves more like a single workspace. Range controls are easier to notice, empty states are clearer, and the chart panels feel more stable when moving between periods.
+Grouped meals now preserve more of the ingredient context needed to stay editable.
 
-Underneath that, the date utilities were consolidated so the app is not mixing local and UTC-style assumptions in different corners of the reporting layer. Most users will never see that change directly, which is exactly the point. It removes the kind of bug that only appears when range boundaries and labels quietly stop agreeing with each other.
+If you save a shake made from milk, whey, and a banana, the app keeps the actual quantities and units attached to those ingredients instead of flattening everything into a mysterious total. That makes later edits feel legitimate rather than approximate.
 
-## History and export improvements
+When quantities change, macros are recalculated from a real base amount rather than whatever totals happened to be on screen a moment earlier. That sounds technical, but the user-facing effect is simple: edits feel safer.
 
-History browsing still loads progressively because that keeps the interface fast. Exporting, however, now behaves the way users expect. It fetches the full visible history before building the CSV, rather than exporting only the rows that happened to be loaded in the panel.
+## Reporting feels calmer
 
-Browsing can be incremental. Exporting should be complete. That contract is much clearer now.
+The reporting layer also got more coherent.
+
+Range controls are easier to read, history handling is clearer, and export behavior better matches user expectations by collecting the full visible history before generating a CSV. Browsing can stay progressive for speed; exports should feel complete.
+
+Date handling and supporting utilities were also cleaned up so labels, ranges, and totals are less likely to drift apart in edge cases.
 
 ## Why this release matters
 
-v2.0 matters because it improves product trust, not because it introduces novelty for its own sake.
+v2.0 is important because it improves trust, not because it adds novelty for novelty’s sake.
 
-A tracker only earns a place in someone’s routine if it helps them log quickly, edit confidently, and review progress without second-guessing the data. This release pushes all three of those things forward.
+A macro tracker only earns a place in someone’s routine if it helps them log quickly, edit confidently, and review progress without second-guessing the data. This release pushes all three of those forward.
 
 ## What comes next
 
-The next layer is less about correction and more about refinement: stronger saved-meal workflows, better educational surfaces, richer exports, and more cleanup of duplicated front-end logic that still slows iteration.
+The next layer of work is about refinement rather than rescue: stronger saved-meal workflows, smarter educational surfaces, richer exports, and continued cleanup of duplicated front-end logic so the product can move faster without getting messier.
 
-That work is easier now because the foundation is less fragmented than it was a release ago.
+That work is easier now because the foundations are tighter than they were before.
 
-v2.0 is not the finish line. It is the point where MacroTrackr starts behaving like a tighter system rather than a collection of useful features.
+v2.0 is not the finish line. It is the point where MacroTrackr starts behaving like a more reliable system instead of a set of useful but loosely connected features.

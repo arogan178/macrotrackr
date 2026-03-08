@@ -40,6 +40,18 @@ interface MacroHistoryResponse {
   limits?: unknown;
 }
 
+export interface FoodSearchResult {
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  energyKcal: number;
+  categories: string;
+  servingQuantity: number;
+  servingUnit: string;
+  rawQuantity?: string;
+}
+
 // API Base URL and Response Types
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:3000";
@@ -287,6 +299,34 @@ export class ApiError extends Error {
     this.code = code;
     this.details = details;
   }
+}
+
+function isFoodSearchResult(value: unknown): value is FoodSearchResult {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.protein === "number" &&
+    typeof candidate.carbs === "number" &&
+    typeof candidate.fats === "number" &&
+    typeof candidate.energyKcal === "number" &&
+    typeof candidate.categories === "string" &&
+    typeof candidate.servingQuantity === "number" &&
+    typeof candidate.servingUnit === "string" &&
+    (candidate.rawQuantity === undefined || typeof candidate.rawQuantity === "string")
+  );
+}
+
+export function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is FoodSearchResult => isFoodSearchResult(item));
 }
 
 // Habit Goal Payload
@@ -741,15 +781,20 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    search: async (query: string) => {
+    search: async (query: string): Promise<FoodSearchResult[]> => {
+      const normalizedQuery = query.trim();
+      if (normalizedQuery.length < 2) {
+        return [];
+      }
+
       const response = await fetch(
-        `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(query)}`,
+        `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`,
         {
           headers: await getHeadersAsync(false),
           credentials: "include",
         },
       );
-      return handleResponse(response);
+      return normalizeFoodSearchResults(await handleResponse(response));
     },
   },
 
