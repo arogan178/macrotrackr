@@ -6,6 +6,10 @@ import { useMemo, useState } from "react";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { AppleIcon, FacebookIcon, GoogleIcon } from "@/components/ui/Icons";
+import {
+  encodeAuthRedirect,
+  normalizeAuthRedirect,
+} from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
@@ -59,11 +63,11 @@ export function ClerkSignInForm({
     }
 
     try {
-      const destination = redirectTo || "/home";
+      const destination = normalizeAuthRedirect(redirectTo);
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(destination)}`,
-        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(destination)}`,
+        redirectUrl: `/sso-callback?flow=signin&redirectTo=${encodeAuthRedirect(destination)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeAuthRedirect(destination)}`,
       });
     } catch (error) {
       logger.error("Social sign-in error:", error);
@@ -109,7 +113,7 @@ export function ClerkSignInForm({
           showNotification("Signed in successfully!", "success");
           navigate({
             to: "/auth-ready",
-            search: { redirectTo: redirectTo || "/home" },
+            search: { redirectTo: normalizeAuthRedirect(redirectTo) },
           });
 
           break;

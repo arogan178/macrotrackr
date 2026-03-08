@@ -27,7 +27,17 @@ describe('Validation Utilities', () => {
     })
 
     it('should handle leap years correctly', () => {
-      expect(isOldEnough('2008-02-29')).toBe(false)
+      const today = new Date()
+      const leapYearBirthday = new Date(
+        today.getFullYear() - 18,
+        1,
+        29,
+      )
+      const expected = leapYearBirthday <= today
+
+      expect(
+        isOldEnough(leapYearBirthday.toISOString().split('T')[0]!),
+      ).toBe(expected)
     })
 
     it('should handle birthday today edge case', () => {

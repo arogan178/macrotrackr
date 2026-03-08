@@ -8,7 +8,7 @@ import {
   withTransaction,
 } from "../../lib/database";
 import { db } from "../../db";
-import { AuthenticationError } from "../../lib/errors";
+import { AuthenticationError, ConflictError } from "../../lib/errors";
 import { logger } from "../../lib/logger";
 import { hashPassword } from "../../lib/password";
 import type { RouteContext } from "../../types";
@@ -18,9 +18,27 @@ import { AuthSchemas } from "./schemas";
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
 interface ClerkUserRecord {
-  emailAddresses?: Array<{ emailAddress?: string }>;
+  emailAddresses?: Array<{ id?: string; emailAddress?: string }>;
+  primaryEmailAddressId?: string;
   firstName?: string;
   lastName?: string;
+}
+
+function getPrimaryClerkEmail(user: ClerkUserRecord | undefined): string | undefined {
+  if (!user?.emailAddresses || user.emailAddresses.length === 0) {
+    return undefined;
+  }
+
+  if (user.primaryEmailAddressId) {
+    const primary = user.emailAddresses.find(
+      (address) => address.id === user.primaryEmailAddressId,
+    );
+    if (primary?.emailAddress) {
+      return primary.emailAddress;
+    }
+  }
+
+  return user.emailAddresses[0]?.emailAddress;
 }
 
 interface ClerkApiClient {
@@ -117,7 +135,7 @@ export const authRoutes = (app: Elysia) =>
           if (!email || !firstName || !lastName) {
             try {
               const clerkUser = await clerkClient?.users?.getUser?.(clerkUserId);
-              email = email || clerkUser?.emailAddresses?.[0]?.emailAddress;
+              email = email || getPrimaryClerkEmail(clerkUser);
               firstName = firstName || clerkUser?.firstName || "";
               lastName = lastName || clerkUser?.lastName || "";
             } catch (error) {
@@ -134,7 +152,7 @@ export const authRoutes = (app: Elysia) =>
             );
           }
 
-          logger.info({ clerkUserId, email, firstName, lastName }, "[clerk-sync] Syncing Clerk user with database");
+          logger.info({ clerkUserId }, "[clerk-sync] Syncing Clerk user with database");
 
           // Check if user already exists (prefer clerk_id match).
           const existingByClerkId = safeQuery<UserRow & { email: string }>(
@@ -153,29 +171,25 @@ export const authRoutes = (app: Elysia) =>
             foundByClerkId: !!existingByClerkId, 
             foundByEmail: !!existingByEmail,
             clerkUserId,
-            email 
           }, "[clerk-sync] User lookup results");
           
-          const existingUser = existingByClerkId || existingByEmail;
-
-          if (existingUser) {
+          if (existingByClerkId) {
             // Update existing user with Clerk ID
             logger.info({ 
-              userId: existingUser.id, 
+              userId: existingByClerkId.id, 
               clerkUserId,
-              existingClerkId: existingByEmail?.clerk_id,
-              matchedBy: existingByClerkId ? "clerk_id" : "email"
+              matchedBy: "clerk_id"
             }, "[clerk-sync] Updating existing user");
             
             // Handle email updates carefully for multi-provider account linking and account merges
-            const currentEmail = existingUser.email;
+            const currentEmail = existingByClerkId.email;
             let emailToUpdate = email;
             
             // Check if incoming email belongs to a DIFFERENT existing user (account merge scenario)
             const emailOwner = safeQuery<{ id: number; clerk_id: string | null }>(
               db,
               "SELECT id, clerk_id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?",
-              [email, existingUser.id]
+              [email, existingByClerkId.id]
             );
             
             if (emailOwner) {
@@ -184,13 +198,13 @@ export const authRoutes = (app: Elysia) =>
               // We should NOT update email - it would violate unique constraint
               // Both accounts need manual merge or the other account should be deleted first
               logger.warn({
-                userId: existingUser.id,
+                userId: existingByClerkId.id,
                 currentEmail,
                 incomingEmail: email,
                 emailOwnerId: emailOwner.id,
                 emailOwnerClerkId: emailOwner.clerk_id,
                 clerkUserId,
-                matchedBy: existingByClerkId ? "clerk_id" : "email"
+                matchedBy: "clerk_id"
               }, "[clerk-sync] Account merge scenario detected: incoming email belongs to different user, keeping existing email");
               emailToUpdate = currentEmail;
             } else if (currentEmail && currentEmail.toLowerCase() !== email.toLowerCase()) {
@@ -201,17 +215,32 @@ export const authRoutes = (app: Elysia) =>
             safeExecute(
               db,
               "UPDATE users SET clerk_id = ?, email = ?, first_name = ?, last_name = ? WHERE id = ?",
-              [clerkUserId, emailToUpdate, firstName, lastName, existingUser.id]
+              [clerkUserId, emailToUpdate, firstName, lastName, existingByClerkId.id]
             );
 
             return {
-              id: existingUser.id,
+              id: existingByClerkId.id,
               clerkId: clerkUserId,
               email: emailToUpdate,
               firstName,
               lastName,
               message: "User synced successfully",
             };
+          }
+
+          if (existingByEmail) {
+            logger.warn(
+              {
+                clerkUserId,
+                email,
+                existingUserId: existingByEmail.id,
+                existingClerkId: existingByEmail.clerk_id,
+              },
+              "[clerk-sync] Refusing to auto-link account by email",
+            );
+            throw new ConflictError(
+              "A user with this email already exists. Please sign in with your existing method or contact support to link accounts.",
+            );
           }
 
           // Create new user
