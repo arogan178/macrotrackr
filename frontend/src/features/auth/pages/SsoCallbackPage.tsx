@@ -46,12 +46,12 @@ export default function SSOCallbackPage() {
 
     handleRedirectCallback({
       // We handle routing ourselves, so tell Clerk to stay on this page
-      afterSignInUrl: window.location.href,
-      afterSignUpUrl: window.location.href,
-    }).catch((err) => {
+      afterSignInUrl: globalThis.location.href,
+      afterSignUpUrl: globalThis.location.href,
+    }).catch((error_) => {
       // Clerk may throw if the callback was already handled (e.g. page refresh)
       // This is safe to ignore if the user is already signed in
-      logger.warn("[SSOCallback] handleRedirectCallback error (may be safe to ignore):", err);
+      logger.warn("[SSOCallback] handleRedirectCallback error (may be safe to ignore):", error_);
     });
   }, [handleRedirectCallback]);
 
@@ -140,11 +140,11 @@ export default function SSOCallbackPage() {
           to: "/profile-setup",
           search: { redirectTo: safeRedirectTo },
         });
-      } catch (err) {
-        logger.error("SSO callback routing error:", err);
+      } catch (error_) {
+        logger.error("SSO callback routing error:", error_);
         setError(
-          err instanceof Error
-            ? err.message
+          error_ instanceof Error
+            ? error_.message
             : "Failed to complete sign-in. Please try again.",
         );
       }

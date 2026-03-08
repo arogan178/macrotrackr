@@ -254,23 +254,23 @@ export function useAddMacroEntry() {
     },
     onError: (_error, variables, context) => {
       // If there's an error, roll back the optimistic updates
-      if (context?.previousHistoryData !== undefined) {
+      if (context?.previousHistoryData === undefined) {
+        queryClient.removeQueries({ queryKey: queryKeys.macros.historyInfinite() });
+      } else {
         queryClient.setQueryData(
           queryKeys.macros.historyInfinite(),
           context.previousHistoryData,
         );
-      } else {
-        queryClient.removeQueries({ queryKey: queryKeys.macros.historyInfinite() });
       }
-      if (context?.previousDailyTotals !== undefined) {
+      if (context?.previousDailyTotals === undefined) {
+        queryClient.removeQueries({
+          queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
+        });
+      } else {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(variables.entryDate),
           context.previousDailyTotals,
         );
-      } else {
-        queryClient.removeQueries({
-          queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
-        });
       }
     },
     onSuccess: (newEntryFromServer: {
