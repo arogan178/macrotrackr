@@ -7,6 +7,7 @@ import { Button, CheckMarkIcon, InfoIcon } from "@/components/ui";
 import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
+import { handleApiError } from "@/utils/errorHandling";
 
 interface MacroTargetFormProps {
   macroTarget: MacroTargetSettings | null;
@@ -87,8 +88,8 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
           // Clear success message after 3 seconds
           setTimeout(() => setSaveSuccess(false), 3000);
         })
-        .catch(() => {
-          // Error handling is done in the mutation
+        .catch((error) => {
+          handleApiError(error, "save macro target settings");
         });
     }
   }, [localTarget, hasChanges, mutateAsync]);

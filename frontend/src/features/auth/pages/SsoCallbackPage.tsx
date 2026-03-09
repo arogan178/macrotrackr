@@ -134,9 +134,13 @@ export default function SSOCallbackPage() {
             }
           }
         } catch (syncError) {
-          // Sync failed - expected for truly new users
-          logger.info("[SSOCallback] Sync error (expected for new users):", syncError);
-          existingUser = false;
+          if (syncError instanceof ApiError && syncError.status === 404) {
+            logger.info("[SSOCallback] Sync indicates new user profile:", syncError);
+            existingUser = false;
+          } else {
+            logger.error("[SSOCallback] Unexpected sync failure:", syncError);
+            throw syncError;
+          }
         }
 
         // Route based on what we found
@@ -291,4 +295,3 @@ export default function SSOCallbackPage() {
     </div>
   );
 }
-

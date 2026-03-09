@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
-import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
+import { MacroDistributionBar, MacroTargetLegend } from "@/components/macros";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
@@ -214,7 +214,7 @@ function DailySummaryInner({
             className="mb-4"
           />
 
-          <MacroTargetBar
+          <MacroDistributionBar
             macros={{
               protein: macroCalories.protein,
               carbs: macroCalories.carbs,

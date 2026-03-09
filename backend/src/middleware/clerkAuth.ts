@@ -11,7 +11,7 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/api/auth/reset-password",
   // Note: /api/auth/clerk-sync is NOT exempt - it needs auth to know which user to sync
   "/api/webhooks/clerk",
-  "/api/webhooks/stripe",
+  "/api/billing/webhook",
   "/api/docs",
   "/api/docs/json",
   "/",

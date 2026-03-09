@@ -8,7 +8,12 @@ import {
   safeExecute,
   safeQueryAll,
 } from "../../lib/database";
-import { NotFoundError, AuthorizationError } from "../../lib/errors";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  BadRequestError,
+  NotFoundError,
+} from "../../lib/errors";
 import {
   checkProStatus,
   checkFeatureLimit,
@@ -96,7 +101,7 @@ export const savedMealRoutes = (app: Elysia) =>
           const { db, internalUserId } = context as SavedMealsRouteContext;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
@@ -148,13 +153,13 @@ export const savedMealRoutes = (app: Elysia) =>
           const { db, internalUserId, body } = context as SavedMealsRouteContext;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           // Check feature limit for free users
@@ -196,7 +201,7 @@ export const savedMealRoutes = (app: Elysia) =>
           );
 
           if (!result) {
-            throw new Error("Failed to create saved meal");
+            throw new BadRequestError("Failed to create saved meal");
           }
 
           const camelResult = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
@@ -227,7 +232,7 @@ export const savedMealRoutes = (app: Elysia) =>
             context as SavedMealsRouteContext;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
@@ -238,7 +243,7 @@ export const savedMealRoutes = (app: Elysia) =>
           }
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           // Build update object
@@ -252,7 +257,7 @@ export const savedMealRoutes = (app: Elysia) =>
 
           const fieldsToUpdate = Object.keys(updates);
           if (fieldsToUpdate.length === 0) {
-            throw new Error("No valid fields provided for update.");
+            throw new BadRequestError("No valid fields provided for update.");
           }
 
           const setClause = fieldsToUpdate
@@ -307,7 +312,7 @@ export const savedMealRoutes = (app: Elysia) =>
             context as SavedMealsRouteContext;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
