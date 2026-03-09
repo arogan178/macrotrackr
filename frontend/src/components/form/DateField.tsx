@@ -1,8 +1,10 @@
 import { memo } from "react";
 
 import { formStyles } from "@/components/form/Styles";
-import type { DateFieldProps } from "@/components/form/types";
+import type { DateFieldProps } from "@/components/form/Types";
 import { todayISO } from "@/utils/dateUtilities";
+
+import { cn } from "../../lib/classnameUtilities";
 
 function DateField({
   label,
@@ -17,9 +19,11 @@ function DateField({
     onChange(event.target.value);
   };
 
-  const inputClasses = `${formStyles.input.base} ${
-    error ? formStyles.input.error : formStyles.input.normal
-  } cursor-pointer`;
+  const inputClasses = cn(
+    formStyles.input.base,
+    error ? formStyles.input.error : formStyles.input.normal,
+    "cursor-pointer"
+  );
 
   // Default max to today if not provided
   const maxDate = max || todayISO();

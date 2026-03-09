@@ -32,6 +32,7 @@ import {
   Home,
   Info,
   Lightbulb,
+  Link,
   Loader,
   Lock,
   LogOut,
@@ -67,8 +68,10 @@ import { memo } from "react";
 import { ICON_SIZES } from "../utils/Constants";
 
 // Base icon type with common props
-interface IconProps extends Omit<LucideProps, "size"> {
+export interface IconProps extends Omit<LucideProps, "size"> {
   size?: "sm" | "md" | "lg" | "xl" | "2xl" | "3xl" | "4xl" | "5xl";
+  className?: string;
+  "aria-hidden"?: boolean | "true" | "false";
 }
 
 // HOC to apply consistent styling to all icons
@@ -172,6 +175,7 @@ export const LightningIcon = createIcon(Zap);
 export const ClipboardIcon = createIcon(Clipboard);
 export const NutrientIcon = createIcon(Apple);
 export const ProteinIcon = createIcon(Beef);
+export const LinkIcon = createIcon(Link);
 export const ExternalLinkIcon = createIcon(ExternalLink);
 export const ShieldCheckIcon = createIcon(ShieldCheck);
 

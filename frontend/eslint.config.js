@@ -186,6 +186,18 @@ export default [
       "no-undefined": "off",
       // Permit intentional undefined usages without auto-fix noise
       "unicorn/no-useless-undefined": "off",
+
+      // Warn on explicit any usage to prevent type regression
+      "@typescript-eslint/no-explicit-any": "warn",
+
+      // Warn on type assertions that could be unsafe
+      "@typescript-eslint/consistent-type-assertions": [
+        "warn",
+        {
+          assertionStyle: "as",
+          objectLiteralTypeAssertions: "never",
+        },
+      ],
     },
     settings: {
       react: { version: "detect" },
@@ -216,6 +228,9 @@ export default [
     },
     rules: {
       "react/prop-types": "off",
+      // Allow any in test files for mocking purposes
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/consistent-type-assertions": "off",
     },
   },
 

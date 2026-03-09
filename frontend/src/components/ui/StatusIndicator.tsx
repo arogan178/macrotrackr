@@ -24,6 +24,7 @@
  */
 import React from "react";
 
+import { cn } from "../../lib/classnameUtilities";
 import { CheckMarkIcon, CloseIcon, InfoIcon, WarningIcon } from "./Icons";
 
 export type StatusType = "success" | "error" | "warning" | "info";
@@ -77,7 +78,7 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   const { color, Icon } = statusConfig[status];
   return (
     <div
-      className={`flex items-center gap-2 text-sm font-medium ${color} ${className}`}
+      className={cn("flex items-center gap-2 text-sm font-medium", color, className)}
       role="status"
       aria-live={ariaLive}
     >

@@ -1,6 +1,7 @@
 // src/modules/user/schemas.ts
 import { t } from "elysia";
-import { AuthSchemas } from "../auth/schemas";
+
+import { EmailSchema } from "../../lib/schemas";
 
 // Reusable optional types for updates
 const OptionalDateString = t.Optional(
@@ -19,7 +20,7 @@ const OptionalActivityLevel = t.Optional(
 export const UserSchemas = {
   userDetailsResponse: t.Object({
     id: t.Integer(),
-    email: AuthSchemas.login.properties.email,
+    email: EmailSchema,
     firstName: t.String(),
     lastName: t.String(),
     createdAt: t.String(),
@@ -45,7 +46,7 @@ export const UserSchemas = {
     // Basic user info (optional updates)
     firstName: t.Optional(t.String()),
     lastName: t.Optional(t.String()),
-    email: t.Optional(AuthSchemas.login.properties.email),
+    email: t.Optional(EmailSchema),
     // User details (optional updates, allow null to clear) - USE camelCase
     dateOfBirth: OptionalDateString,
     height: OptionalPositiveNumber,

@@ -8,8 +8,7 @@ import {
   useUpdateHabit,
 } from "@/hooks/queries/useHabits";
 import { useStore } from "@/store/store";
-import type { HabitGoalFormValues } from "@/types/habit";
-import type { Habit } from "@/utils/apiServices";
+import type { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 
 export function useGoalsMutations() {
   const { showNotification } = useStore();
@@ -54,12 +53,12 @@ export function useGoalsMutations() {
     }
   }
 
-  async function incrementHabit(originalHabit: Habit) {
+  async function incrementHabit(originalHabit: HabitGoal) {
     try {
       await incrementProgressMutation.mutateAsync(originalHabit);
       if (originalHabit.current + 1 >= originalHabit.target) {
         handleMutationSuccess(
-          `🎉 Congratulations! You've completed your ${originalHabit.title}!`,
+          `Congratulations! You've completed your ${originalHabit.title}!`,
         );
       }
     } catch (error) {
@@ -71,7 +70,7 @@ export function useGoalsMutations() {
   async function completeHabit(id: string) {
     try {
       await completeHabitMutation.mutateAsync(id);
-      handleMutationSuccess("🎉 Congratulations! You've completed your habit!");
+      handleMutationSuccess("Congratulations! You've completed your habit!");
     } catch (error) {
       handleMutationError(error, "completing habit");
       throw error;

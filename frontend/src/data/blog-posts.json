@@ -1,0 +1,86 @@
+[
+  {
+    "slug": "v2-launch-complete-ui-overhaul",
+    "title": "MacroTrackr v2.0: Faster Search, Better Editing, Cleaner Reporting",
+    "excerpt": "The 2.0 release tightens food search, quick-add saved meals, grouped meal editing, and reporting so tracking feels faster and more trustworthy.",
+    "date": "2026-03-08",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "2 min",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+    "tags": [
+      "Product",
+      "Release Notes",
+      "Search UX",
+      "Meal Grouping",
+      "Reporting"
+    ],
+    "featured": true
+  },
+  {
+    "slug": "how-to-estimate-restaurant-meals-without-guessing-blind",
+    "title": "How to Estimate Restaurant Meals Without Guessing Blind",
+    "excerpt": "A practical framework for logging restaurant meals when there is no nutrition label, no exact recipe, and no time for perfectionism.",
+    "date": "2026-02-24",
+    "category": "Tips",
+    "author": "MacroTrackr Team",
+    "readingTime": "3 min",
+    "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Eating Out", "Consistency", "Calories", "Protein"]
+  },
+  {
+    "slug": "why-weekly-averages-beat-perfect-days",
+    "title": "Why Weekly Averages Beat Perfect Days",
+    "excerpt": "If you keep swinging between over-control and all-or-nothing weekends, your weekly average is the metric that will calm everything down.",
+    "date": "2026-02-18",
+    "category": "Nutrition Guides",
+    "author": "MacroTrackr Team",
+    "readingTime": "3 min",
+    "image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Mindset", "Fat Loss", "Consistency", "Analytics"]
+  },
+  {
+    "slug": "macro-tracking-tips-for-beginners",
+    "title": "Macro Tracking Tips for Beginners",
+    "excerpt": "Starting your macro tracking journey? Here are 7 practical tips to help you stay consistent and achieve your nutrition goals.",
+    "date": "2026-02-15",
+    "category": "Tips",
+    "author": "MacroTrackr Team",
+    "readingTime": "4 min",
+    "image": "https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Beginners", "Habits", "Meal Prep", "Tracking Basics"]
+  },
+  {
+    "slug": "understanding-protein-intake",
+    "title": "Understanding Protein Intake: The Complete Guide",
+    "excerpt": "Everything you need to know about protein: how much you need, the best sources, and how to hit your targets consistently.",
+    "date": "2026-01-28",
+    "category": "Nutrition Guides",
+    "author": "MacroTrackr Team",
+    "readingTime": "6 min",
+    "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Protein", "Recovery", "Muscle Gain", "Nutrition Basics"]
+  },
+  {
+    "slug": "meal-prep-for-macro-tracking",
+    "title": "Meal Prep Strategies for Accurate Macro Tracking",
+    "excerpt": "Learn how to meal prep effectively to make macro tracking easier and more accurate throughout your week.",
+    "date": "2026-01-10",
+    "category": "Tips",
+    "author": "MacroTrackr Team",
+    "readingTime": "6 min",
+    "image": "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Meal Prep", "Batch Cooking", "Planning", "Food Scale"]
+  },
+  {
+    "slug": "carbs-fats-balance",
+    "title": "Finding Your Optimal Carb-to-Fat Ratio",
+    "excerpt": "How to determine the right balance of carbohydrates and fats for your goals, lifestyle, and preferences.",
+    "date": "2025-12-20",
+    "category": "Nutrition Guides",
+    "author": "MacroTrackr Team",
+    "readingTime": "6 min",
+    "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200",
+    "tags": ["Carbs", "Fats", "Performance", "Personalization"]
+  }
+]

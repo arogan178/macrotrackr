@@ -3,47 +3,66 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand palette */
-  --color-primary: #22c55e;
-  --color-secondary: #6ee7a0;
-  --color-vibrant-accent: #f59e0b;
+  /* Brand palette - Modern / Spotify Inspired */
+  --color-primary: #1ed760;
+  --color-secondary: #1db954;
+  --color-vibrant-accent: #1ed760;
 
-  /* Surfaces – tighter progression for depth without faux-glass */
-  --color-background: #09090b;
-  --color-surface: #121218;
-  --color-surface-2: #1a1a22;
-  --color-surface-3: #22222c;
-  --color-surface-4: #2a2a36;
+  /* Surfaces – Modern contrast hierarchy */
+  --color-background: #000000;
+  --color-surface: #121212;
+  --color-surface-2: #181818;
+  --color-surface-3: #282828;
+  --color-surface-4: #333333;
 
   /* Borders */
-  --color-border: #27272a;
-  --color-border-2: #3f3f46;
+  --color-border: #282828;
+  --color-border-2: #333333;
 
   /* Text */
-  --color-foreground: #fafafa;
-  --color-muted: #a1a1aa;
+  --color-foreground: #ffffff;
+  --color-muted: #b3b3b3;
+
+  /* Text opacity hierarchy */
+  --text-primary: rgba(255, 255, 255, 1);
+  --text-secondary: rgba(255, 255, 255, 0.85);
+  --text-body: rgba(255, 255, 255, 0.7);
+  --text-muted: #b3b3b3;
+  --text-hint: rgba(255, 255, 255, 0.35);
 
   /* Macro colors */
-  --color-protein: #22c55e;
+  --color-protein: #1ed760;
   --color-carbs: #3b82f6;
   --color-fats: #ef4444;
 
   /* Feedback */
-  --color-success: #22c55e;
+  --color-success: #1ed760;
   --color-warning: #f59e0b;
-  --color-error: #ef4444;
+  --color-error: #e91429;
 
-  /* Shadows – minimal, single-layer for modern flat feel */
-  --shadow-surface: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-primary:
-    0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
-  --shadow-modal: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  --shadow-warning: 0 4px 14px -3px rgba(245, 158, 11, 0.2);
-  --shadow-error: 0 4px 14px -3px rgba(239, 68, 68, 0.2);
-  --shadow-success: 0 4px 14px -3px rgba(34, 197, 94, 0.2);
-  --shadow-accent: 0 4px 14px -3px rgba(245, 158, 11, 0.2);
-  --shadow-glow: 0 0 16px rgba(34, 197, 94, 0.15);
-  --shadow-border: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  /* Shadows – Minimalist */
+  --shadow-surface: none;
+  --shadow-primary: none;
+  --shadow-modal: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
+  --shadow-card: none;
+  --shadow-card-hover: none;
+  --shadow-border: none;
+
+  /* Neutral opacity backgrounds for depth */
+  --color-neutral-950-80: rgba(0, 0, 0, 0.8);
+  --color-neutral-950-90: rgba(0, 0, 0, 0.9);
+  --color-neutral-900-50: rgba(18, 18, 18, 0.5);
+  --color-neutral-900-80: rgba(18, 18, 18, 0.8);
+
+  /* Design system easing curves */
+  --ease-modal: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Letter spacing tokens for labels */
+  --tracking-label: 0.025em;
+  --tracking-wide: 0.05em;
+  --tracking-wider: 0.1em;
 }
 
 /* Surface utility classes */
@@ -66,4 +85,26 @@ button:disabled,
 input:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+/* Marquee animation for stock ticker-style feature display */
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-100%, 0, 0);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 50s linear infinite;
+  will-change: transform;
+}
+
+/* Respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee {
+    animation: none;
+  }
 }

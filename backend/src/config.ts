@@ -1,5 +1,6 @@
 // src/config.ts
 import { z } from "zod";
+import { isAbsolute, resolve } from "node:path";
 
 // Define a schema for environment variables for validation and type safety
 const EnvSchema = z.object({
@@ -16,7 +17,12 @@ const EnvSchema = z.object({
   /**
    * Path to SQLite database file
    */
-  DATABASE_PATH: z.string().default("./macro_tracker.db"),
+  DATABASE_PATH: z
+    .string()
+    .default("./macro_tracker.db")
+    .transform((path) =>
+      isAbsolute(path) ? path : resolve(process.cwd(), path)
+    ),
 
   /**
    * JWT secret for signing tokens (must be at least 32 chars)
@@ -95,6 +101,11 @@ const EnvSchema = z.object({
    * Clerk Webhook Secret for verifying webhooks
    */
   CLERK_WEBHOOK_SECRET: z.string().optional(),
+
+  /**
+   * Shared secret for protected diagnostics endpoints
+   */
+  METRICS_API_KEY: z.string().min(1).optional(),
 });
 
 // Validate environment variables on startup
@@ -103,7 +114,7 @@ const parsedEnv = EnvSchema.safeParse(process.env);
 
 if (!parsedEnv.success) {
   console.error(
-    "❌ Invalid environment variables:",
+    "Invalid environment variables:",
     parsedEnv.error.flatten().fieldErrors
   );
   // Throwing an error prevents the application from starting with invalid config
@@ -127,5 +138,5 @@ const nodeEnv =
     ? config.NODE_ENV
     : "unknown");
 if (nodeEnv !== "test") {
-  console.log(`✅ Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
+  console.log(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
 }

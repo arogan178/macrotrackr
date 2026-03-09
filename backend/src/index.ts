@@ -24,14 +24,36 @@ import { goalRoutes } from "./modules/goals/routes";
 import { habitRoutes } from "./modules/habits/routes";
 import { billingRoutes } from "./modules/billing/routes";
 import { reportingRoutes } from "./modules/reporting/routes";
+import { savedMealRoutes } from "./modules/saved-meals/routes";
 import { webhookHandler } from "./modules/billing/webhook-handler";
 import { healthRoutes } from "./routes/health";
+import { metricsRoutes } from "./routes/metrics";
+import { recordRequest } from "./lib/metrics";
 
-logger.info("🚀 Starting Elysia server...");
+logger.info("Starting Elysia server...");
 
 const app = new Elysia()
   // Request size limits for security
   .use(requestLimitsMiddleware)
+
+  // Request timing middleware for metrics collection
+  .onRequest((context: any) => {
+    context.requestStartTime = Date.now();
+  })
+
+  .onAfterResponse((context: any) => {
+    const { request, set } = context;
+    const start =
+      typeof context.requestStartTime === "number"
+        ? context.requestStartTime
+        : Date.now();
+    const duration = Date.now() - start;
+    const path = new URL(request.url).pathname;
+    const statusCode =
+      typeof set?.status === "number" ? set.status : 200;
+
+    recordRequest(request.method, path, statusCode, duration);
+  })
 
   // Global middleware & plugins
   .use(
@@ -85,9 +107,7 @@ app.use(rateLimiters.api);
 // This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
 app.use(clerkAuthMiddleware);
 
-// Public auth routes (no authentication required)
-// Note: Legacy login/register are kept for backward compatibility
-// but are deprecated in favor of Clerk authentication
+// Public auth routes (password reset + Clerk sync)
 app.use(authRoutes);
 
 // All other routes
@@ -97,9 +117,13 @@ app.use(goalRoutes);
 app.use(habitRoutes);
 app.use(billingRoutes);
 app.use(reportingRoutes);
+app.use(savedMealRoutes);
 
 // Health check routes (public, no auth)
 app.use(healthRoutes);
+
+// Metrics endpoint (public, no auth) - Prometheus-compatible
+app.use(metricsRoutes);
 
 // Global error handling
 app.onError(({ code, error, set, path }: any) => {
@@ -177,7 +201,7 @@ logger.info(
     corsOrigin: config.CORS_ORIGIN,
     environment: config.NODE_ENV,
   },
-  `✅ Server listening on http://${app.server?.hostname}:${app.server?.port}`
+  `Server listening on http://${app.server?.hostname}:${app.server?.port}`
 );
 
 logger.info(`    CORS Origin: ${config.CORS_ORIGIN}`);

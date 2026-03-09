@@ -1,5 +1,7 @@
 // src/lib/errors.ts
 
+import { loggerHelpers } from "./logger";
+
 /**
  * Base application error class
  */
@@ -84,6 +86,17 @@ export class ConflictError extends AppError {
 }
 
 /**
+ * Account linkage errors
+ */
+export class AccountNotSyncedError extends AppError {
+  constructor(
+    message: string = "Your account is not linked yet. Please finish setup.",
+  ) {
+    super(message, 409, "ACCOUNT_NOT_SYNCED");
+  }
+}
+
+/**
  * Database operation errors
  */
 export class DatabaseError extends AppError {
@@ -121,8 +134,6 @@ export function formatErrorResponse(error: unknown) {
   }
 
   // Generic error fallback
-  // Import logger only when needed to avoid circular dependencies
-  const { loggerHelpers } = require("./logger");
   loggerHelpers.error(
     error instanceof Error ? error : new Error(String(error)),
     { type: "unexpected_error" }

@@ -1,10 +1,11 @@
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
 import { usePostHog } from "posthog-js/react";
 import React, { useState } from "react";
 
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import { useStore } from "@/store/store";
 
 import PlanToggle from "./PlanToggle";
 import PricingCard from "./PricingCard";
@@ -25,6 +26,8 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   const navigate = useNavigate();
   const { isSignedIn } = useAuth();
   const isAuthenticated = !!isSignedIn;
+  const subscriptionStatus = useStore((s) => s.subscriptionStatus);
+  const isProUser = subscriptionStatus === "pro" || subscriptionStatus === "canceled";
   const posthog = usePostHog();
 
   const handleGetPro = () => {
@@ -80,79 +83,72 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           price={PRICING_PLANS.free.price}
           suffix={PRICING_PLANS.free.suffix}
           features={features.free}
-          buttonText={PRICING_PLANS.free.buttonText}
-          buttonVariant={
-            PRICING_PLANS.free.buttonVariant as
-              | "ghost"
-              | "primary"
-              | "secondary"
-              | "danger"
-              | "success"
-              | undefined
+          buttonText={
+            isProUser ? "Free Plan" : isAuthenticated ? "Current Plan" : "Create Free Account"
           }
-          buttonSize={"lg"}
-          buttonClassName={PRICING_PLANS.free.buttonClassName}
-          focusRingColor="focus:ring-primary/40"
-          featureIconColor={PRICING_PLANS.free.featureIconColor}
-          featureTextClass={PRICING_PLANS.free.featureTextClass}
-          cardClassName={PRICING_PLANS.free.cardClassName}
-          onButtonClick={() => {
-            posthog?.capture?.("clicked_pricing_nav", {
-              location: "pricing_cards",
-              source: "pricing_card_free",
-            });
-            navigate({ to: "/register", search: { returnTo: undefined } });
-          }}
+          buttonVariant="ghost"
+          buttonSize="lg"
+          buttonClassName="w-full rounded-full border border-border bg-surface-2 transition-colors duration-200 hover:border-border-2 hover:bg-surface-3 hover:text-foreground"
+          featureIconColor="text-primary/70"
+          featureTextClass="text-muted"
+          cardClassName="border-border bg-surface hover:border-border-2"
+          buttonDisabled={isAuthenticated}
+          onButtonClick={
+            isAuthenticated
+              ? undefined
+              : () => {
+                  posthog?.capture?.("clicked_pricing_nav", {
+                    location: "pricing_cards",
+                    source: "pricing_card_free",
+                  });
+                  navigate({ to: "/register", search: { returnTo: undefined } });
+                }
+          }
         >
-          <p className="text-foreground">{PRICING_PLANS.free.description}</p>
+          <p className="mt-2 text-balance text-muted">
+            Everything you need to start tracking and build lasting healthy habits.
+          </p>
         </PricingCard>
 
         {/* Pro Plan */}
         <PricingCard
           title={PRICING_PLANS.pro.name}
           price={
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={selectedPlan}
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ duration: 0.3 }}
-              >
-                ${proPrice}
-              </motion.span>
-            </AnimatePresence>
+            <AnimatedNumber
+              value={proPrice}
+              toFixedValue={2}
+              prefix="$"
+              suffix={proSuffix}
+            />
           }
-          suffix={proSuffix}
+          suffix=""
           equivalent={proEquivalent}
           features={features.pro}
-          isPopular={PRICING_PLANS.pro.isPopular}
+          isPopular={true}
           buttonText={
-            showUpgradeButtons ? "Upgrade to Pro" : PRICING_PLANS.pro.buttonText
+            isProUser
+              ? "Current Plan"
+              : showUpgradeButtons
+                ? "Upgrade to Pro"
+                : "Unlock Pro"
           }
-          buttonVariant={
-            PRICING_PLANS.pro.buttonVariant as
-              | "ghost"
-              | "primary"
-              | "secondary"
-              | "danger"
-              | "success"
-              | undefined
-          }
-          buttonSize={"lg"}
-          buttonClassName={PRICING_PLANS.pro.buttonClassName}
-          focusRingColor="focus:ring-primary/40"
-          featureIconColor={PRICING_PLANS.pro.featureIconColor}
-          featureTextClass={PRICING_PLANS.pro.featureTextClass}
-          cardClassName={PRICING_PLANS.pro.cardClassName}
+          buttonVariant="primary"
+          buttonSize="lg"
+          buttonClassName="w-full rounded-full font-semibold transition-colors duration-200 hover:bg-primary/90"
+          featureIconColor="text-primary"
+          featureTextClass="text-foreground font-medium"
+          cardClassName="border-border-2 bg-surface-2 hover:border-primary/50"
+          buttonDisabled={isProUser}
           onButtonClick={
-            showUpgradeButtons
-              ? () => onUpgrade && onUpgrade(selectedPlan)
-              : handleGetPro
+            isProUser
+              ? undefined
+              : showUpgradeButtons
+                ? () => onUpgrade && onUpgrade(selectedPlan)
+                : handleGetPro
           }
         >
-          <p className="mt-2 text-foreground">
-            {PRICING_PLANS.pro.description}
+          <p className="mt-2 text-balance text-muted">
+            Unlock advanced analytics, custom insights, and tools to accelerate your results.
           </p>
         </PricingCard>
       </div>

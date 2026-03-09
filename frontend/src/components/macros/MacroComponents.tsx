@@ -22,15 +22,15 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
       className={`relative h-2 w-full overflow-hidden rounded-full bg-surface-3 ${className}`}
     >
       <div
-        className="absolute top-0 left-0 h-full bg-protein/80 transition-all duration-500"
+        className="absolute top-0 left-0 h-full bg-protein/80 transition-[width] duration-500"
         style={{ width: `${proteinPercent}%` }}
       />
       <div
-        className="absolute top-0 h-full bg-carbs/80 transition-all duration-500"
+        className="absolute top-0 h-full bg-carbs/80 transition-[left,width] duration-500"
         style={{ width: `${carbsPercent}%`, left: `${proteinPercent}%` }}
       />
       <div
-        className="absolute top-0 h-full bg-fats/80 transition-all duration-500"
+        className="absolute top-0 h-full bg-fats/80 transition-[left,width] duration-500"
         style={{
           width: `${fatsPercent}%`,
           left: `${proteinPercent + carbsPercent}%`,
@@ -108,9 +108,9 @@ export function MacroIndicator({
       bg: "bg-fats/80",
     },
     calories: {
-      dot: "bg-vibrant-accent",
-      text: "text-vibrant-accent",
-      bg: "bg-vibrant-accent/80",
+      dot: "bg-foreground",
+      text: "text-foreground",
+      bg: "bg-foreground/80",
     },
   };
 

@@ -1,4 +1,4 @@
-// src/features/macroTracking/components/DailySummaryPanel.tsx
+import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
@@ -13,148 +13,178 @@ import {
   calculateProteinCalories,
 } from "../calculations";
 
+const DEFAULT_TARGET = {
+  proteinPercentage: 30,
+  carbsPercentage: 40,
+  fatsPercentage: 30,
+} as const;
+
+const EMPTY_TOTALS: MacroDailyTotals = {
+  protein: 0,
+  carbs: 0,
+  fats: 0,
+  calories: 0,
+};
+
+function calculatePercent(actual: number, targetValue: number): number {
+  if (!targetValue) return 0;
+  const ratio = actual / targetValue;
+  const pct = Math.floor(ratio * 100);
+  return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
+}
+
 interface DailySummaryProps {
   macroDailyTotals?: MacroDailyTotals;
   macroTarget?: MacroTargetSettings;
   calorieTarget?: number;
 }
 
-export default function DailySummary({
+function DailySummaryInner({
   macroDailyTotals,
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
-  // --- Defaults ---
-  const DEFAULT_TARGET = {
-    proteinPercentage: 30,
-    carbsPercentage: 40,
-    fatsPercentage: 30,
-  };
-  const EMPTY_TOTALS: MacroDailyTotals = {
-    protein: 0,
-    carbs: 0,
-    fats: 0,
-    calories: 0,
-  };
-
-  // --- Safe values ---
   const safeTotal = macroDailyTotals || EMPTY_TOTALS;
   const target = macroTarget || DEFAULT_TARGET;
   const dailyCalorieTarget = calorieTarget || 0;
 
-  // --- Macro calorie calculations ---
-  const totalCalories = calculateCaloriesFromMacros(
-    safeTotal.protein,
-    safeTotal.carbs,
-    safeTotal.fats,
-  );
-  const proteinCalories = calculateProteinCalories(safeTotal.protein);
-  const carbsCalories = calculateCarbsCalories(safeTotal.carbs);
-  const fatsCalories = calculateFatsCalories(safeTotal.fats);
-
-  // --- Macro targets (grams) ---
-  const targetProteinGrams = Math.round(
-    (dailyCalorieTarget * target.proteinPercentage) / 100 / 4,
-  );
-  const targetCarbsGrams = Math.round(
-    (dailyCalorieTarget * target.carbsPercentage) / 100 / 4,
-  );
-  const targetFatsGrams = Math.round(
-    (dailyCalorieTarget * target.fatsPercentage) / 100 / 9,
+  const macroCalories = useMemo(
+    () => ({
+      total: calculateCaloriesFromMacros(
+        safeTotal.protein,
+        safeTotal.carbs,
+        safeTotal.fats,
+      ),
+      protein: calculateProteinCalories(safeTotal.protein),
+      carbs: calculateCarbsCalories(safeTotal.carbs),
+      fats: calculateFatsCalories(safeTotal.fats),
+    }),
+    [safeTotal.protein, safeTotal.carbs, safeTotal.fats],
   );
 
-  // --- Completion percentages ---
-  // Use floor for percentages so exact target reaches 100% and avoid 101% on floating drift
-  function percent(actual: number, targetValue: number) {
-    if (!targetValue) return 0;
-    const ratio = actual / targetValue;
-    const pct = Math.floor(ratio * 100);
-    // Clamp to [0, 100]
-    return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
-  }
-  const proteinCompletionPercent = percent(
-    safeTotal.protein,
-    targetProteinGrams,
+  const targetGrams = useMemo(
+    () => ({
+      protein: Math.round(
+        (dailyCalorieTarget * target.proteinPercentage) / 100 / 4,
+      ),
+      carbs: Math.round(
+        (dailyCalorieTarget * target.carbsPercentage) / 100 / 4,
+      ),
+      fats: Math.round((dailyCalorieTarget * target.fatsPercentage) / 100 / 9),
+    }),
+    [
+      dailyCalorieTarget,
+      target.proteinPercentage,
+      target.carbsPercentage,
+      target.fatsPercentage,
+    ],
   );
-  const carbsCompletionPercent = percent(safeTotal.carbs, targetCarbsGrams);
-  const fatsCompletionPercent = percent(safeTotal.fats, targetFatsGrams);
-  const calorieCompletionPercent = percent(totalCalories, dailyCalorieTarget);
 
-  // --- Macro calorie percentages ---
-  const totalMacroCalories = totalCalories;
-  const proteinPercent =
-    totalMacroCalories === 0
-      ? 0
-      : Math.round((proteinCalories / totalMacroCalories) * 100);
-  const carbsPercent =
-    totalMacroCalories === 0
-      ? 0
-      : Math.round((carbsCalories / totalMacroCalories) * 100);
-  const fatsPercent =
-    totalMacroCalories === 0 ? 0 : 100 - proteinPercent - carbsPercent;
+  const completionPercentages = useMemo(
+    () => ({
+      protein: calculatePercent(safeTotal.protein, targetGrams.protein),
+      carbs: calculatePercent(safeTotal.carbs, targetGrams.carbs),
+      fats: calculatePercent(safeTotal.fats, targetGrams.fats),
+      calories: calculatePercent(macroCalories.total, dailyCalorieTarget),
+    }),
+    [
+      safeTotal.protein,
+      safeTotal.carbs,
+      safeTotal.fats,
+      targetGrams,
+      macroCalories.total,
+      dailyCalorieTarget,
+    ],
+  );
 
-  // --- Macro data for rendering ---
-  const macroData = [
-    {
-      name: "Protein",
-      grams: Math.round(safeTotal.protein),
-      targetGrams: targetProteinGrams,
-      calories: proteinCalories,
-      targetPercent: target.proteinPercentage,
-      actualPercent: proteinPercent,
-      color: "bg-protein",
-      textColor: "text-protein",
-      borderColor: "border-protein/20",
-      gradientFrom: "from-protein/30",
-      completionPercent: proteinCompletionPercent,
-    },
-    {
-      name: "Carbs",
-      grams: Math.round(safeTotal.carbs),
-      targetGrams: targetCarbsGrams,
-      calories: carbsCalories,
-      targetPercent: target.carbsPercentage,
-      actualPercent: carbsPercent,
-      color: "bg-carbs",
-      textColor: "text-carbs",
-      borderColor: "border-carbs/20",
-      gradientFrom: "from-carbs/30",
-      completionPercent: carbsCompletionPercent,
-    },
-    {
-      name: "Fats",
-      grams: Math.round(safeTotal.fats),
-      targetGrams: targetFatsGrams,
-      calories: fatsCalories,
-      targetPercent: target.fatsPercentage,
-      actualPercent: fatsPercent,
-      color: "bg-fats",
-      textColor: "text-fats",
-      borderColor: "border-fats/20",
-      gradientFrom: "from-fats/30",
-      completionPercent: fatsCompletionPercent,
-    },
-  ];
+  const macroPercentages = useMemo(() => {
+    const totalMacroCalories = macroCalories.total;
+    if (totalMacroCalories === 0) {
+      return { protein: 0, carbs: 0, fats: 0 };
+    }
+    const protein = Math.round(
+      (macroCalories.protein / totalMacroCalories) * 100,
+    );
+    const carbs = Math.round((macroCalories.carbs / totalMacroCalories) * 100);
+    const fats = 100 - protein - carbs;
+    return { protein, carbs, fats };
+  }, [macroCalories]);
+
+  const macroData = useMemo(
+    () => [
+      {
+        name: "Protein",
+        grams: Math.round(safeTotal.protein),
+        targetGrams: targetGrams.protein,
+        calories: macroCalories.protein,
+        targetPercent: target.proteinPercentage,
+        actualPercent: macroPercentages.protein,
+        color: "bg-protein",
+        textColor: "text-protein",
+        borderColor: "border-protein/20",
+        gradientFrom: "from-protein/30",
+        completionPercent: completionPercentages.protein,
+      },
+      {
+        name: "Carbs",
+        grams: Math.round(safeTotal.carbs),
+        targetGrams: targetGrams.carbs,
+        calories: macroCalories.carbs,
+        targetPercent: target.carbsPercentage,
+        actualPercent: macroPercentages.carbs,
+        color: "bg-carbs",
+        textColor: "text-carbs",
+        borderColor: "border-carbs/20",
+        gradientFrom: "from-carbs/30",
+        completionPercent: completionPercentages.carbs,
+      },
+      {
+        name: "Fats",
+        grams: Math.round(safeTotal.fats),
+        targetGrams: targetGrams.fats,
+        calories: macroCalories.fats,
+        targetPercent: target.fatsPercentage,
+        actualPercent: macroPercentages.fats,
+        color: "bg-fats",
+        textColor: "text-fats",
+        borderColor: "border-fats/20",
+        gradientFrom: "from-fats/30",
+        completionPercent: completionPercentages.fats,
+      },
+    ],
+    [
+      safeTotal.protein,
+      safeTotal.carbs,
+      safeTotal.fats,
+      targetGrams,
+      macroCalories,
+      target.proteinPercentage,
+      target.carbsPercentage,
+      target.fatsPercentage,
+      macroPercentages,
+      completionPercentages,
+    ],
+  );
 
   return (
     <CardContainer className="h-full">
-      <div className="flex h-full flex-col p-6">
-        <div className="mb-6 rounded-xl bg-surface-2 p-4">
+      <div className="flex h-full flex-col gap-3 p-3">
+        <CardContainer className="border-border/60 bg-surface-2 p-4">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-base font-semibold text-foreground">
+            <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
               Today's Summary
             </h2>
             <div className="text-right">
-              <div className="text-2xl font-bold text-foreground">
+              <div className="text-3xl font-light tracking-tight text-foreground">
                 <AnimatedNumber
-                  value={totalCalories}
+                  value={macroCalories.total}
                   toFixedValue={0}
                   duration={0.8}
                 />
               </div>
-              <div className="text-xs text-muted">
+              <div className="mt-1 text-sm text-muted">
                 <span>of </span>
-                <span className="font-medium text-muted">
+                <span className="font-medium text-foreground/80">
                   <AnimatedNumber
                     value={dailyCalorieTarget}
                     toFixedValue={0}
@@ -163,10 +193,10 @@ export default function DailySummary({
                 </span>
                 <span> kcal</span>
 
-                <span className="ml-1 font-medium text-primary">
+                <span className="ml-1.5 font-medium text-primary">
                   (
                   <AnimatedNumber
-                    value={calorieCompletionPercent}
+                    value={completionPercentages.calories}
                     toFixedValue={0}
                     suffix="%"
                     duration={0.5}
@@ -178,7 +208,7 @@ export default function DailySummary({
           </div>
 
           <ProgressBar
-            progress={calorieCompletionPercent}
+            progress={completionPercentages.calories}
             color="accent"
             height="lg"
             className="mb-4"
@@ -186,9 +216,9 @@ export default function DailySummary({
 
           <MacroTargetBar
             macros={{
-              protein: proteinCalories,
-              carbs: carbsCalories,
-              fats: fatsCalories,
+              protein: macroCalories.protein,
+              carbs: macroCalories.carbs,
+              fats: macroCalories.fats,
             }}
           />
 
@@ -200,18 +230,23 @@ export default function DailySummary({
             }}
             className="mt-2"
           />
-        </div>
+        </CardContainer>
 
-        <div className="space-y-3">
+        <div className="flex flex-1 flex-col gap-3">
           {macroData.map((macro) => (
-            <div
+            <CardContainer
+              variant="interactive"
               key={macro.name}
-              className={`rounded-xl border bg-surface-2/50 p-4 ${macro.borderColor} transition-colors duration-200 hover:bg-surface-2`}
+              className="group flex flex-1 flex-col justify-center bg-surface-2 p-4"
             >
-              <div className="mb-2 flex items-center justify-between">
+              <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className={`h-2 w-2 rounded-full ${macro.color}`}></div>
-                  <h3 className={`${macro.textColor} text-sm font-medium`}>
+                  <div
+                    className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110`}
+                  ></div>
+                  <h3
+                    className={`${macro.textColor} text-sm font-medium tracking-wide`}
+                  >
                     {macro.name}
                   </h3>
                 </div>
@@ -263,10 +298,14 @@ export default function DailySummary({
                   </span>
                 </div>
               </div>
-            </div>
+            </CardContainer>
           ))}
         </div>
       </div>
     </CardContainer>
   );
 }
+
+const DailySummary = memo(DailySummaryInner);
+
+export default DailySummary;

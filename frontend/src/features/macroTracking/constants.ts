@@ -7,10 +7,10 @@ export { DEFAULT_MACRO_TOTALS } from "@/utils/constants/nutrition";
 
 // Meal type display options
 export const MEAL_TYPE_OPTIONS = [
-  { value: "breakfast" as MealType, display: "Breakfast 🍳" },
-  { value: "lunch" as MealType, display: "Lunch 🍗" },
-  { value: "dinner" as MealType, display: "Dinner 🍽️" },
-  { value: "snack" as MealType, display: "Snack 🧃" },
+  { value: "breakfast" as MealType, display: "Breakfast" },
+  { value: "lunch" as MealType, display: "Lunch" },
+  { value: "dinner" as MealType, display: "Dinner" },
+  { value: "snack" as MealType, display: "Snack" },
 ] as const;
 
 // Helper function to get meal type display name

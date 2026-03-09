@@ -1,5 +1,6 @@
 import { memo, ReactNode } from "react";
 
+import { cn } from "../../lib/classnameUtilities";
 import Button from "./Button";
 import { PlusIcon } from "./Icons";
 
@@ -58,27 +59,31 @@ function EmptyState({
   // Default icon if none provided
   const defaultIcon = (
     <PlusIcon
-      className={`${sizeStyles.iconSize} text-muted`}
+      className={cn(sizeStyles.iconSize, "text-muted")}
       strokeWidth={1.5}
     />
   );
 
   return (
     <div
-      className={`flex flex-col items-center justify-center text-center ${sizeStyles.padding} px-4 ${className}`}
+      className={cn(
+        "flex flex-col items-center justify-center px-4 text-center",
+        sizeStyles.padding,
+        className
+      )}
     >
       <div className="mb-4 text-muted">
         {icon || (
-          <div className="inline-block rounded-full bg-surface-2 p-4">
+          <div className="inline-flex items-center justify-center rounded-full border border-white/5 bg-surface-2/50 p-4 shadow-sm backdrop-blur-sm">
             {defaultIcon}
           </div>
         )}
       </div>
 
-      <h3 className={`${sizeStyles.title} mb-2 font-medium text-foreground`}>
+      <h3 className={cn(sizeStyles.title, "mb-2 font-medium text-foreground")}>
         {title}
       </h3>
-      <p className={`${sizeStyles.message} mb-6 text-muted`}>{message}</p>
+      <p className={cn(sizeStyles.message, "mb-6 text-muted")}>{message}</p>
 
       {/* Icon buttons */}
       {(action || secondaryAction) && (

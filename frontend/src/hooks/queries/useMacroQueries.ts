@@ -1,4 +1,5 @@
 import {
+  keepPreviousData,
   useInfiniteQuery,
   useMutation,
   useQuery,
@@ -19,6 +20,26 @@ import type {
   MacroEntryUpdatePayload,
 } from "@/utils/apiServices";
 import { apiService } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
+
+function normalizePaginatedHistory(
+  response: unknown,
+  limit: number,
+  offset: number,
+): PaginatedMacroHistory {
+  if (!response || typeof response !== "object") {
+    return { entries: [], total: 0, limit, offset, hasMore: false };
+  }
+
+  const result = response as Record<string, unknown>;
+  return {
+    entries: Array.isArray(result.entries) ? (result.entries as any[]) : [],
+    total: typeof result.total === "number" ? result.total : 0,
+    limit: typeof result.limit === "number" ? result.limit : limit,
+    offset: typeof result.offset === "number" ? result.offset : offset,
+    hasMore: typeof result.hasMore === "boolean" ? result.hasMore : false,
+  };
+}
 
 // Query hook for paginated macro history
 export function useMacroHistory(
@@ -40,7 +61,7 @@ export function useMacroHistory(
         offset,
         options,
       );
-      return response as PaginatedMacroHistory;
+      return normalizePaginatedHistory(response, limit, offset);
     },
     ...queryConfigs.macros, // 2 minutes stale time for macro data
   });
@@ -62,7 +83,7 @@ export function useMacroHistoryInfinite(
         pageParameter,
         options,
       );
-      return response as PaginatedMacroHistory;
+      return normalizePaginatedHistory(response, limit, pageParameter);
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return;
@@ -81,22 +102,22 @@ export function useMacroHistoryForDateRange(
   return useQuery({
     queryKey: queryKeys.macros.historyRange(startDate, endDate),
     queryFn: async () => {
-      // Get a large number of entries to ensure we get all data for the date range
-      const response = await apiService.macros.getHistory(10_000, 0, {
+      const response = await apiService.macros.getAllHistory({
         startDate,
         endDate,
       });
-      return (response as PaginatedMacroHistory).entries;
+      return response.entries;
     },
-    ...queryConfigs.longLived, // 5 minutes stale time for reporting data
-    gcTime: 15 * 60 * 1000, // 15 minutes for longer cache retention
-    enabled: !!(startDate && endDate), // Only run if both dates are provided
+    ...queryConfigs.longLived,
+    gcTime: 15 * 60 * 1000,
+    enabled: !!(startDate && endDate),
+    placeholderData: keepPreviousData,
   });
 }
 
 // Query hook for daily macro totals by date
 export function useMacroDailyTotals(date?: string) {
-  const today = new Date().toISOString().split("T")[0];
+  const today = todayISO();
   const queryDate = date || today;
 
   return useQuery({
@@ -118,7 +139,7 @@ export function useMacroTarget() {
     queryKey: queryKeys.macros.targets(),
     queryFn: async () => {
       const response = await apiService.macros.getMacroTarget();
-      return response?.macroTarget;
+      return response?.macroTarget ?? null;
     },
     ...queryConfigs.longLived, // 5 minutes stale time for targets (less frequently changed)
     gcTime: 30 * 60 * 1000, // Keep longer cache time for targets
@@ -162,7 +183,7 @@ export function useAddMacroEntry() {
       );
 
       // 3. Create a temporary ID for the optimistic entry
-      const temporaryId = `temp_${Date.now()}`;
+      const temporaryId = -Date.now();
       const optimisticEntry = {
         id: temporaryId,
         ...variables,
@@ -233,13 +254,19 @@ export function useAddMacroEntry() {
     },
     onError: (_error, variables, context) => {
       // If there's an error, roll back the optimistic updates
-      if (context?.previousHistoryData) {
+      if (context?.previousHistoryData === undefined) {
+        queryClient.removeQueries({ queryKey: queryKeys.macros.historyInfinite() });
+      } else {
         queryClient.setQueryData(
           queryKeys.macros.historyInfinite(),
           context.previousHistoryData,
         );
       }
-      if (context?.previousDailyTotals) {
+      if (context?.previousDailyTotals === undefined) {
+        queryClient.removeQueries({
+          queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
+        });
+      } else {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(variables.entryDate),
           context.previousDailyTotals,
@@ -407,10 +434,10 @@ export function useUpdateMacroEntry() {
 
               return {
                 ...oldData,
-                totalCalories: oldData.totalCalories + caloriesDiff,
-                totalProtein: oldData.totalProtein + proteinDiff,
-                totalCarbs: oldData.totalCarbs + carbsDiff,
-                totalFat: oldData.totalFat + fatsDiff,
+                calories: oldData.calories + caloriesDiff,
+                protein: oldData.protein + proteinDiff,
+                carbs: oldData.carbs + carbsDiff,
+                fats: oldData.fats + fatsDiff,
               };
             },
           );
@@ -516,17 +543,21 @@ export function useDeleteMacroEntry() {
 
             return {
               ...oldData,
-              totalCalories: Math.max(
+              calories: Math.max(
                 0,
-                oldData.totalCalories - entryToDelete.calories,
+                oldData.calories -
+                  calculateCaloriesFromMacros(
+                    entryToDelete.protein,
+                    entryToDelete.carbs,
+                    entryToDelete.fats,
+                  ),
               ),
-              totalProtein: Math.max(
+              protein: Math.max(
                 0,
-                oldData.totalProtein - entryToDelete.protein,
+                oldData.protein - entryToDelete.protein,
               ),
-              totalCarbs: Math.max(0, oldData.totalCarbs - entryToDelete.carbs),
-              totalFat: Math.max(0, oldData.totalFat - entryToDelete.fat),
-              entryCount: Math.max(0, oldData.entryCount - 1),
+              carbs: Math.max(0, oldData.carbs - entryToDelete.carbs),
+              fats: Math.max(0, oldData.fats - entryToDelete.fats),
             };
           },
         );
