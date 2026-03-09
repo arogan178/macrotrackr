@@ -8,4 +8,5 @@ export { default as NutritionInsights } from "./NutritionInsights";
 export { default as RecommendationsSection } from "./RecommendationsSection";
 export { default as ReportingPageSkeleton } from "./ReportingPageSkeleton";
 export { default as TrendDisplay } from "./TrendDisplay";
+export { default as TrendsChartSection } from "./TrendsChartSection";
 export { default as UnifiedInsights } from "./UnifiedInsights";
