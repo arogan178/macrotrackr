@@ -2,6 +2,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { buildRedirectFromLocation } from "@/features/auth/utils/redirect";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 
 /**
@@ -20,6 +21,24 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
  */
 interface RequireCompleteProfileProps {
   children: React.ReactNode;
+}
+
+function resolveProfileCompletion(user: unknown): boolean | undefined {
+  if (!user || typeof user !== "object") {
+    return undefined;
+  }
+
+  const userRecord = user as Record<string, unknown>;
+
+  if (typeof userRecord.isProfileComplete === "boolean") {
+    return userRecord.isProfileComplete;
+  }
+
+  if ("dateOfBirth" in userRecord) {
+    return Boolean(userRecord.dateOfBirth);
+  }
+
+  return undefined;
 }
 
 export function RequireCompleteProfile({
@@ -47,7 +66,7 @@ export function RequireCompleteProfile({
   // (usually token sync race). Route through auth-ready to establish session
   // and sync backend user before trying protected pages again.
   if (user === null) {
-    const redirectTo = location.pathname || "/home";
+    const redirectTo = buildRedirectFromLocation(location);
     return <Navigate to="/auth-ready" search={{ redirectTo }} />;
   }
 
@@ -60,9 +79,15 @@ export function RequireCompleteProfile({
     );
   }
 
-  // If user data is loaded but profile is incomplete, redirect to setup
-  if (!user.isProfileComplete) {
-    return <Navigate to="/profile-setup" />;
+  // Only redirect when we can explicitly determine the profile is incomplete.
+  const isProfileComplete = resolveProfileCompletion(user);
+  if (isProfileComplete === false) {
+    return (
+      <Navigate
+        to="/profile-setup"
+        search={{ redirectTo: buildRedirectFromLocation(location) }}
+      />
+    );
   }
 
   // Profile is complete, render the protected content

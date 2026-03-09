@@ -14,13 +14,13 @@ db.exec("PRAGMA journal_mode = WAL;");
 try {
   initializeSchema(db);
 } catch (error) {
-  console.error("❌ Fatal error during database initialization:", error);
+  console.error("Fatal error during database initialization:", error);
   process.exit(1); // Exit if critical DB setup fails
 }
 
 // Use basic console.log for startup message as logger may not be initialized yet
 if (config.NODE_ENV !== "test") {
-  console.log(`💾 Database connected at ${config.DATABASE_PATH}`);
+  console.log(`Database connected at ${config.DATABASE_PATH}`);
 }
 
 // Export the initialized database instance

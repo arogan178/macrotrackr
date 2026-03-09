@@ -11,19 +11,19 @@ interface UserMetricsPanelProps {
 
 const LoadingSkeleton = memo(function LoadingSkeleton() {
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       {[0, 1].map((index) => (
         <div
           key={index}
-          className="animate-pulse rounded-2xl border border-border/50 bg-surface p-5"
+          className="flex h-40 animate-pulse flex-col justify-between rounded-2xl border border-border/60 bg-surface p-5"
         >
           <div className="flex items-start gap-4">
-            <div className="rounded-xl border border-border/50 bg-surface-2 p-3">
+            <div className="rounded-2xl border border-border/40 bg-surface-2 p-3.5">
               <div className="h-6 w-6 rounded bg-surface-3" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="mb-2 h-4 w-3/4 rounded bg-surface-2" />
-              <div className="h-6 w-2/5 rounded bg-surface-2" />
+              <div className="h-8 w-2/5 rounded bg-surface-2" />
             </div>
           </div>
         </div>
@@ -44,7 +44,7 @@ function UserMetricsPanel({
   if (isLoading) return <LoadingSkeleton />;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
       <MetricCard
         icon={UserIcon}
         title="Basal Metabolic Rate"

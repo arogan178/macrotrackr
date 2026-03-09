@@ -1,5 +1,6 @@
 // src/lib/responses.ts
 import { isAppError } from "./errors";
+import { loggerHelpers } from "./logger";
 
 /**
  * Standard success response format
@@ -18,6 +19,19 @@ export interface ErrorResponse {
   code: string;
   message: string;
   details?: unknown;
+}
+
+interface ResponseContextSet {
+  status?: number;
+  headers?: Record<string, string>;
+}
+
+function getErrorDetails(error: unknown): unknown {
+  if (error && typeof error === "object" && "details" in error) {
+    return (error as { details?: unknown }).details;
+  }
+
+  return undefined;
 }
 
 /**
@@ -59,8 +73,10 @@ export function createErrorResponse(
 /**
  * Handles errors and sets appropriate status codes
  */
-export function handleError(error: unknown, set: any): ErrorResponse {
-  const { loggerHelpers } = require("./logger");
+export function handleError(
+  error: unknown,
+  set: ResponseContextSet,
+): ErrorResponse {
   loggerHelpers.error(
     error instanceof Error ? error : new Error(String(error)),
     { type: "response_error_handling" }
@@ -72,11 +88,7 @@ export function handleError(error: unknown, set: any): ErrorResponse {
 
   if (isAppError(error)) {
     set.status = error.statusCode;
-    return createErrorResponse(
-      error.code,
-      error.message,
-      (error as any).details
-    );
+    return createErrorResponse(error.code, error.message, getErrorDetails(error));
   }
 
   // Handle Elysia validation errors
@@ -97,8 +109,8 @@ export function handleError(error: unknown, set: any): ErrorResponse {
 /**
  * Wraps a route handler with standardized error handling
  */
-export function withErrorHandling<T extends any[], R>(
-  handler: (...args: T) => R | Promise<R>
+export function withErrorHandling<T extends unknown[], R>(
+  handler: (...args: T) => R | Promise<R>,
 ) {
   return async (...args: T): Promise<R> => {
     try {
@@ -106,8 +118,8 @@ export function withErrorHandling<T extends any[], R>(
       return result;
     } catch (error) {
       // Extract the 'set' parameter from args (typically the last context parameter)
-      const context = args[args.length - 1] as any;
-      if (context && context.set) {
+      const context = args[args.length - 1] as { set?: unknown } | undefined;
+      if (context?.set) {
         throw error; // Let the global error handler deal with it
       }
       throw error;
@@ -116,30 +128,16 @@ export function withErrorHandling<T extends any[], R>(
 }
 
 /**
- * Converts snake_case object keys to camelCase
+ * Centralized snake_case ↔ camelCase conversion utilities
+ * Re-exported from the dedicated mappers module for backward compatibility
  */
-export function toCamelCase<T extends Record<string, any>>(obj: T): any {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    const camelKey = key.replace(/_([a-z])/g, (_, letter) =>
-      letter.toUpperCase()
-    );
-    result[camelKey] = value;
-  }
-  return result;
-}
-
-/**
- * Converts camelCase object keys to snake_case
- */
-export function toSnakeCase<T extends Record<string, any>>(obj: T): any {
-  const result: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    const snakeKey = key.replace(
-      /[A-Z]/g,
-      (letter) => `_${letter.toLowerCase()}`
-    );
-    result[snakeKey] = value;
-  }
-  return result;
-}
+export {
+  toCamelCase,
+  toSnakeCase,
+  toCamelCaseString,
+  toSnakeCaseString,
+  transformKeysToCamel,
+  transformKeysToSnake,
+  transformArrayToCamel,
+  transformArrayToSnake,
+} from "./mappers";

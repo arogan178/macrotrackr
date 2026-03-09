@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 
-import { AuthUISlice, createAuthUISlice } from "@/store/ui/auth-ui-slice";
 import { createGoalsUISlice, GoalsUISlice } from "@/store/ui/goals-ui-slice";
 import { createMacroUISlice, MacroUISlice } from "@/store/ui/macro-ui-slice";
 import {
@@ -12,7 +11,6 @@ import { createUserUISlice, UserUISlice } from "@/store/ui/user-ui-slice";
 
 // Combine all slice types (removed HabitsSlice, GoalsSlice, and MacrosSlice - kept UI slices for UI state)
 export type StoreState = UserUISlice &
-  AuthUISlice &
   GoalsUISlice &
   MacroUISlice &
   NotificationSlice;
@@ -21,7 +19,6 @@ export type StoreState = UserUISlice &
 export const useStore = create<StoreState>()(
   devtools((...a) => ({
     ...createUserUISlice(...a),
-    ...createAuthUISlice(...a),
     ...createGoalsUISlice(...a),
     ...createMacroUISlice(...a),
     ...createNotificationSlice(...a),

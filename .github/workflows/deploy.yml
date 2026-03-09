@@ -11,7 +11,11 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  quality:
+    uses: ./.github/workflows/quality-gate.yml
+
   deploy-backend:
+    needs: quality
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: backend
@@ -111,10 +115,10 @@ jobs:
 
         # Write frontend .env for build
         printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
-        
+
         echo "📋 Frontend env file contents (API URL):"
         grep VITE_API_URL .env || echo "⚠️ VITE_API_URL not found in .env"
-        
+
         export NODE_OPTIONS="--max-old-space-size=4096"
         bun run build
         unset NODE_OPTIONS
@@ -236,3 +240,23 @@ jobs:
       if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ZONE_ID == '' }}
       run: |
         echo "ℹ️ Skipping Cloudflare cache purge. Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID to enable it."
+
+  smoke-test:
+    needs: deploy-frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    - name: Install bun
+      uses: oven-sh/setup-bun@v1
+    - name: Run smoke tests
+      run: |
+        cd backend
+        bun install
+        bun run scripts/smoke-test.ts
+      env:
+        SMOKE_TEST_URL: ${{ secrets.BACKEND_URL }}
+        FRONTEND_URL: ${{ secrets.FRONTEND_URL }}

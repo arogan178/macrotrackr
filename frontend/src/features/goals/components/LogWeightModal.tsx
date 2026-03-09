@@ -152,7 +152,7 @@ function LogWeightModal({
           disabled={addWeightLogMutation.isPending}
         />
         {formError && (
-          <p className="text-sm text-vibrant-accent">{formError}</p>
+          <p className="text-sm text-error">{formError}</p>
         )}
       </div>
     </Modal>

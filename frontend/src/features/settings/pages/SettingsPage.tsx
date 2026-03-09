@@ -1,3 +1,4 @@
+import { useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
@@ -5,6 +6,7 @@ import { DashboardPageContainer } from "@/components/layout/DashboardPageContain
 import FeaturePage from "@/components/layout/FeaturePage";
 import {
   AwardIcon,
+  LinkIcon,
   LockIcon,
   Modal,
   TabButton,
@@ -13,6 +15,7 @@ import {
 import {
   BillingForm,
   ChangePasswordForm,
+  ConnectedAccountsForm,
   ProfileForm,
   SettingsLoadingSkeleton,
 } from "@/features/settings/components";
@@ -21,7 +24,20 @@ import { useSaveSettings, useSettings } from "@/hooks/queries/useSettings";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 
+type TabType = "profile" | "billing" | "accounts" | "security";
+
+// Valid tab values for validation
+const VALID_TABS = new Set<TabType>([
+  "profile",
+  "billing",
+  "accounts",
+  "security",
+]);
+
 export default function SettingsPage() {
+  // Read tab from URL search params
+  const search = useSearch({ from: "/settings" }) as { tab?: string };
+
   // Use TanStack Query for settings data and mutations
   const {
     data: settingsData,
@@ -48,21 +64,38 @@ export default function SettingsPage() {
   // Use new loading state hooks
   const { handleMutationError, handleMutationSuccess } =
     useMutationErrorHandler({
-      onError: (message) =>
-        console.error("Settings operation failed:", message),
-      onSuccess: (message) =>
-        console.log("Settings operation succeeded:", message),
+      logError: false,
+      showSuccess: false,
     });
 
   // Centralize subscription status hydration
   usePageDataSync();
 
-  type TabType = "profile" | "billing" | "security";
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+  // Initialize active tab from URL param or default to "profile"
+  const getInitialTab = (): TabType => {
+    const tabParameter = search?.tab;
+    if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
+      return tabParameter as TabType;
+    }
+    return "profile";
+  };
+
+  const [activeTab, setActiveTab] = useState<TabType>(getInitialTab);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [pendingTabChange, setPendingTabChange] = useState<
     TabType | undefined
   >();
+
+  // Update tab when URL changes
+  useEffect(() => {
+    const tabParameter = search?.tab;
+    if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
+      const newTab = tabParameter as TabType;
+      if (newTab !== activeTab && !hasSettingsChanges) {
+        setActiveTab(newTab);
+      }
+    }
+  }, [search?.tab, hasSettingsChanges, activeTab]);
 
   // Initialize settings from query data on component mount
   useEffect(() => {
@@ -170,7 +203,7 @@ export default function SettingsPage() {
         subtitle={undefined}
         headerChildren={
           <div
-            className="relative flex space-x-1 rounded-lg bg-surface p-1"
+            className="relative flex space-x-1 rounded-xl bg-surface p-1"
             role="tablist"
             aria-label="Settings Tabs"
           >
@@ -197,6 +230,17 @@ export default function SettingsPage() {
               </span>
             </TabButton>
             <TabButton
+              active={activeTab === "accounts"}
+              onClick={() => handleTabChange("accounts")}
+              layoutId="settingsTabHighlight"
+              isMotion={true}
+            >
+              <span className="relative z-10 flex items-center">
+                <LinkIcon size="sm" className="mr-1.5" />
+                Accounts
+              </span>
+            </TabButton>
+            <TabButton
               active={activeTab === "security"}
               onClick={() => handleTabChange("security")}
               layoutId="settingsTabHighlight"
@@ -214,7 +258,7 @@ export default function SettingsPage() {
           <SettingsLoadingSkeleton />
         ) : settingsQueryError ? (
           <div className="p-6 text-center">
-            <p className="text-vibrant-accent">
+            <p className="text-error">
               Failed to load settings. Please try again.
             </p>
           </div>
@@ -226,7 +270,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <ProfileForm
                   settings={settings}
@@ -244,9 +288,20 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <BillingForm />
+              </motion.div>
+            )}
+            {activeTab === "accounts" && (
+              <motion.div
+                key="accounts"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              >
+                <ConnectedAccountsForm />
               </motion.div>
             )}
             {activeTab === "security" && (
@@ -255,7 +310,7 @@ export default function SettingsPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
               >
                 <ChangePasswordForm />
               </motion.div>

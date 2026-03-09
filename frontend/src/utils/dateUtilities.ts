@@ -7,19 +7,23 @@ import {
   parseISO,
 } from "date-fns";
 
-/**
- * Returns today's date as YYYY-MM-DD (local time)
- */
-export function todayISO(): string {
-  return format(new Date(), "yyyy-MM-dd");
+const PRESET_DATE_RANGE_DAYS = {
+  week: 7,
+  month: 30,
+  "3months": 90,
+} as const;
+
+export type PresetDateRange = keyof typeof PRESET_DATE_RANGE_DAYS;
+
+export function formatISODate(date: Date = new Date()): string {
+  return format(date, "yyyy-MM-dd");
 }
 
 /**
- * Returns today's date in ISO YYYY-MM-DD format (UTC-based)
- * @deprecated Use todayISO() for local time consistency
+ * Returns today's date as YYYY-MM-DD (local time)
  */
-export function getTodayISO(): string {
-  return new Date().toISOString().split("T")[0]!;
+export function todayISO(date: Date = new Date()): string {
+  return formatISODate(date);
 }
 
 /**
@@ -115,7 +119,7 @@ export function isWithinDateRange(
 export function addDaysISO(dateString: string, days: number): string {
   const date = parseISO(dateString);
   if (!isValid(date)) return dateString;
-  return format(addDays(date, days), "yyyy-MM-dd");
+  return formatISODate(addDays(date, days));
 }
 
 /**
@@ -125,5 +129,26 @@ export function eachDayISO(startDate: string, days: number): string[] {
   const start = parseISO(startDate);
   if (!isValid(start) || days <= 0) return [];
   const end = addDays(start, days - 1);
-  return eachDayOfInterval({ start, end }).map((d) => format(d, "yyyy-MM-dd"));
+  return eachDayOfInterval({ start, end }).map((date) => formatISODate(date));
+}
+
+export function mapDateRangeToDays(range: string): 7 | 30 | 90 {
+  return PRESET_DATE_RANGE_DAYS[
+    (range in PRESET_DATE_RANGE_DAYS
+      ? range
+      : "week") as PresetDateRange
+  ];
+}
+
+export function getDateRangeData(
+  range: string,
+  referenceDate: Date = new Date(),
+): { startDate: string; endDate: string; days: 7 | 30 | 90 } {
+  const days = mapDateRangeToDays(range);
+
+  return {
+    startDate: formatISODate(addDays(referenceDate, -(days - 1))),
+    endDate: formatISODate(referenceDate),
+    days,
+  };
 }

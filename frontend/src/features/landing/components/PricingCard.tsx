@@ -13,6 +13,7 @@ interface PricingCardProps {
   buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
   buttonSize?: "sm" | "md" | "lg";
   buttonClassName?: string;
+  buttonDisabled?: boolean;
   onButtonClick?: () => void;
   focusRingColor?: string;
   featureIconColor?: string;
@@ -35,6 +36,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   buttonVariant = "primary",
   buttonSize = "lg",
   buttonClassName = "",
+  buttonDisabled = false,
   onButtonClick,
   focusRingColor = "focus-visible:outline-primary/50",
   featureIconColor = "text-primary",
@@ -43,36 +45,54 @@ const PricingCard: React.FC<PricingCardProps> = ({
   children,
 }) => (
   <div
-    tabIndex={0}
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`relative flex h-full flex-col rounded-xl border border-border bg-surface p-8 outline-none lg:p-10 ${focusRingColor} ${cardClassName}`}
+    className={`group relative flex h-full flex-col rounded-3xl border p-8 transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out sm:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
-      <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-        <span className="rounded-full border border-primary/30 bg-primary px-4 py-1.5 text-xs font-semibold tracking-wide text-background uppercase">
+      <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+        <span className="rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-semibold tracking-wide text-foreground uppercase shadow-sm">
           Most Popular
         </span>
       </div>
     )}
     <div className="mt-4 mb-8 text-center">
-      <h3 className="mb-2 text-2xl font-bold text-foreground">{title}</h3>
-      <div className="mb-2 text-4xl font-bold text-foreground">
+      <h3 className="mb-2 text-2xl font-bold tracking-tight text-foreground">
+        {title}
+      </h3>
+      <div className="mb-2 flex min-h-14 items-center justify-center text-4xl font-bold tracking-tight text-foreground">
         {price}
         {suffix && (
-          <span className="text-lg font-normal text-muted">{suffix}</span>
+          <span className="ml-1 text-lg font-normal tracking-normal text-muted">
+            {suffix}
+          </span>
         )}
       </div>
-      {equivalent && (
-        <p className="text-sm font-medium text-success">{equivalent}</p>
-      )}
+      <div className="min-h-6">
+        {equivalent && (
+          <p className="text-sm font-medium tracking-wide text-muted">
+            {equivalent}
+          </p>
+        )}
+      </div>
       {children}
     </div>
-    <ul className="mb-8 space-y-4">
+    <ul className="mb-10 space-y-4">
       {features.map((feature, index) => (
-        <li key={index} className="flex items-center gap-3">
-          <CheckIcon className={`${featureIconColor} shrink-0`} />
-          <span className={featureTextClass}>{feature}</span>
+        <li key={index} className="flex items-center gap-4">
+          <div
+            className={`flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 ${isPopular ? "border border-border-2 bg-surface-3" : "border border-border"}`}
+          >
+            <CheckIcon
+              className={`h-3.5 w-3.5 ${featureIconColor} shrink-0`}
+              aria-hidden="true"
+            />
+          </div>
+          <span
+            className={`leading-relaxed tracking-tight ${featureTextClass}`}
+          >
+            {feature}
+          </span>
         </li>
       ))}
     </ul>
@@ -83,6 +103,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
         buttonSize={buttonSize}
         className={buttonClassName}
         onClick={onButtonClick}
+        disabled={buttonDisabled}
       />
     </div>
   </div>

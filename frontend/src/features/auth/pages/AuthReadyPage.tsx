@@ -3,9 +3,36 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 
+import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { normalizeAuthRedirect, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
+import { logger } from "@/lib/logger";
 import { queryKeys } from "@/lib/queryKeys";
 import { ApiError, apiService, setAuthToken } from "@/utils/apiServices";
+
+function isLikelyUserDetailsPayload(
+  value: unknown,
+): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && Object.keys(value).length > 0;
+}
+
+function resolveProfileCompletion(
+  userDetails: Record<string, unknown> | null,
+): boolean | undefined {
+  if (!userDetails) {
+    return undefined;
+  }
+
+  if (typeof userDetails.isProfileComplete === "boolean") {
+    return userDetails.isProfileComplete;
+  }
+
+  if ("dateOfBirth" in userDetails) {
+    return Boolean(userDetails.dateOfBirth);
+  }
+
+  return undefined;
+}
 
 /**
  * AuthReadyPage - Intermediate page that ensures auth token is set before redirecting
@@ -25,7 +52,7 @@ export default function AuthReadyPage() {
   const [error, setError] = useState<string | null>(null);
   const hasInitializedReference = useRef(false);
 
-  const redirectTo = search.redirectTo || "/home";
+  const redirectTo = normalizeAuthRedirect(search.redirectTo);
 
   useEffect(() => {
     async function setupAuth() {
@@ -59,15 +86,31 @@ export default function AuthReadyPage() {
         // Give a small moment for the token to be set
         await new Promise((resolve) => setTimeout(resolve, 50));
 
-        // Sync the Clerk user with our backend.
+        const shouldBypassSync = shouldBypassSyncForRedirect(redirectTo);
+
+        // Sync the Clerk user with our backend when continuing to app routes.
         let syncSuccess = false;
-        try {
-          await apiService.auth.syncUser(token || undefined);
-          syncSuccess = true;
-        } catch (syncError: any) {
-          // If it's a 401, the token might be invalid.
-          if (syncError?.status === 401) {
-            setError("Authentication failed. Please sign in again.");
+        if (!shouldBypassSync) {
+          try {
+            await apiService.auth.syncUser(token || undefined);
+            syncSuccess = true;
+          } catch (syncError: unknown) {
+            // If it's a 401, the token might be invalid.
+            if (syncError instanceof Error && "status" in syncError) {
+              const errorWithStatus = syncError as { status: number };
+              if (errorWithStatus.status === 401) {
+                setError("Authentication failed. Please sign in again.");
+                return;
+              }
+            }
+
+            logger.error(
+              "[AuthReadyPage] Failed to sync Clerk user with backend",
+              syncError,
+            );
+            setError(
+              "We couldn't link your account yet. Please try signing in again.",
+            );
             return;
           }
         }
@@ -78,14 +121,38 @@ export default function AuthReadyPage() {
           queryClient.invalidateQueries({ queryKey: queryKeys.auth.user() });
         }
 
+        if (shouldBypassSync) {
+          navigate({
+            to: "/profile-setup",
+            search: { redirectTo },
+            replace: true,
+          });
+          return;
+        }
+
         // Resolve backend user details before leaving auth-ready.
         // This avoids bouncing to protected routes while /api/user/me still returns 401.
-        let userDetails = null;
+        let userDetails: Record<string, unknown> | null = null;
         for (let attempt = 0; attempt < 3; attempt += 1) {
           try {
-            userDetails = await apiService.user.getUserDetails();
+            const response = await apiService.user.getUserDetails();
+
+            if (!isLikelyUserDetailsPayload(response)) {
+              logger.warn(
+                `[AuthReadyPage] Malformed user details payload on attempt ${attempt + 1}`,
+                response,
+              );
+              await new Promise((resolve) => setTimeout(resolve, 120));
+              continue;
+            }
+
+            userDetails = response;
             break;
           } catch (userError) {
+            logger.warn(
+              `[AuthReadyPage] Attempt ${attempt + 1} failed:`,
+              userError,
+            );
             if (userError instanceof ApiError && userError.status === 401) {
               await new Promise((resolve) => setTimeout(resolve, 120));
               continue;
@@ -94,35 +161,36 @@ export default function AuthReadyPage() {
           }
         }
 
-        if (!userDetails) {
-          setError("Authentication is not ready yet. Please sign in again.");
+        if (userDetails) {
+          queryClient.setQueryData(queryKeys.auth.user(), userDetails);
+        }
+
+        // Route by profile completion only when we can confidently determine it.
+        const isProfileComplete = resolveProfileCompletion(userDetails);
+        if (isProfileComplete === false) {
+          logger.warn(
+            "[AuthReadyPage] Profile incomplete - redirecting to /profile-setup",
+          );
+          navigate({
+            to: "/profile-setup",
+            search: { redirectTo },
+          });
           return;
         }
 
-        queryClient.setQueryData(queryKeys.auth.user(), userDetails);
-
-        // Route by profile completion first.
-        if (!userDetails.isProfileComplete) {
-          navigate({ to: "/profile-setup" });
-          return;
+        if (isProfileComplete === undefined) {
+          logger.warn(
+            "[AuthReadyPage] Could not determine profile completion from /api/user/me. Continuing to requested route.",
+          );
         }
 
-        // Validate redirect URL to prevent open redirect attacks
-        // Must be a relative path starting with '/' but not '//' (protocol-relative)
-        const isValidRedirect = (url: string): boolean =>
-          url.startsWith("/") && !url.startsWith("//");
-
-        const normalizedRedirectTo =
-          !redirectTo ||
-          !isValidRedirect(redirectTo) ||
-          redirectTo.startsWith("/auth-ready")
-            ? "/home"
-            : redirectTo;
+        const normalizedRedirectTo = normalizeAuthRedirect(redirectTo);
 
         if (normalizedRedirectTo === "/home") {
           navigate({ to: "/home", search: { limit: 20, offset: 0 } });
         } else {
-          navigate({ to: normalizedRedirectTo as any });
+          globalThis.location.assign(normalizedRedirectTo);
+          return;
         }
       } catch {
         setError("Failed to complete authentication. Please try again.");
@@ -134,8 +202,9 @@ export default function AuthReadyPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-surface p-4">
-        <div className="w-full max-w-md rounded-lg border border-border bg-surface-2 p-8 text-center shadow-lg">
+      <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
+        <PageBackground />
+        <div className="relative z-10 w-full max-w-md rounded-2xl border border-border bg-surface p-8 text-center shadow-sm">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
             <svg
               className="h-8 w-8 text-error"
@@ -155,10 +224,11 @@ export default function AuthReadyPage() {
           </h1>
           <p className="mb-6 text-muted">{error}</p>
           <button
+            type="button"
             onClick={() =>
               navigate({ to: "/login", search: { returnTo: undefined } })
             }
-            className="rounded-md bg-primary px-6 py-2 text-white transition-colors hover:bg-primary/90"
+            className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
             Back to Login
           </button>
@@ -168,9 +238,12 @@ export default function AuthReadyPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-surface">
-      <div className="text-center">
-        <LoadingSpinner size="lg" className="mx-auto mb-4" />
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background text-foreground">
+      <PageBackground />
+      <div className="relative z-10 text-center">
+        <div className="mx-auto mb-4">
+          <LoadingSpinner size="lg" />
+        </div>
         <h1 className="text-xl font-semibold text-foreground">
           Preparing your account...
         </h1>

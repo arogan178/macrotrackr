@@ -1,0 +1,39 @@
+[
+  {
+    "version": "1.0.0",
+    "date": "2026-03-01",
+    "title": "MacroTrackr Launch",
+    "type": "release",
+    "highlights": [
+      "Clean, distraction-free macro tracking",
+      "Free tier with unlimited daily tracking",
+      "Pro features: 60-day history, unlimited date ranges, saved meals",
+      "Dark mode support",
+      "Instant food search with 500K+ items"
+    ]
+  },
+  {
+    "version": "0.9.0",
+    "date": "2026-02-15",
+    "title": "Beta Release",
+    "type": "release",
+    "highlights": [
+      "Private beta with 50+ testers",
+      "Goal setting and progress tracking",
+      "7-day trend analytics",
+      "Meal history and editing"
+    ]
+  },
+  {
+    "version": "0.8.0",
+    "date": "2026-01-20",
+    "title": "Core Features Complete",
+    "type": "update",
+    "highlights": [
+      "Calorie and macro tracking",
+      "USDA food database integration",
+      "Responsive design for mobile",
+      "Export data functionality"
+    ]
+  }
+]

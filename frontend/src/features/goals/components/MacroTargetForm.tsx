@@ -118,74 +118,75 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
         <div className="flex h-full flex-col lg:col-span-4">
           <CardContainer className="h-full p-6">
             <div className="mb-6 flex items-center justify-between">
-              <h3 className="text-base font-semibold text-foreground">
-                Macro Target Settings
-              </h3>
-              <div className="rounded-full border border-primary/30 bg-primary/10 px-3 py-1">
+              <div>
+                <h3 className="text-lg font-semibold tracking-tight text-foreground/90">
+                  Macro Target Settings
+                </h3>
+                <p className="mt-1 text-sm text-muted">
+                  Adjust the sliders to set your preferred daily macronutrient percentages.
+                </p>
+              </div>
+              <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1">
                 <span className="text-xs font-medium text-primary">
                   Daily Target
                 </span>
               </div>
             </div>
 
-            <p className="mb-6 text-sm text-muted">
-              Adjust the sliders below to set your preferred macronutrient
-              target. These percentages will be used to calculate your daily
-              macro target based on your calorie needs.
-            </p>
-
             {/* Show skeleton loader when loading or when we don't have valid values yet */}
-            {hasValidValues ? (
-              <MacroTarget
-                initialValues={displayValues}
-                onTargetChange={handleMacroTargetChange}
-              />
-            ) : (
-              <div className="space-y-10">
-                {/* Skeleton for the stacked bar */}
-                <div className="relative mb-6 h-2 animate-pulse overflow-hidden rounded-full bg-surface" />
+            <div className="rounded-2xl border border-border/60 bg-surface-2 p-5">
+              {hasValidValues ? (
+                <MacroTarget
+                  initialValues={displayValues}
+                  onTargetChange={handleMacroTargetChange}
+                />
+              ) : (
+                <div className="space-y-10">
+                  {/* Skeleton for the stacked bar */}
+                  <div className="relative mb-6 h-2 animate-pulse overflow-hidden rounded-full bg-surface" />
 
-                {/* Skeleton for sliders */}
-                <div className="space-y-8">
-                  {/* Protein slider skeleton */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <div className="h-4 w-20 animate-pulse rounded bg-surface" />
-                      <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                  {/* Skeleton for sliders */}
+                  <div className="space-y-8">
+                    {/* Protein slider skeleton */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <div className="h-4 w-20 animate-pulse rounded bg-surface" />
+                        <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                      </div>
+                      <div className="h-2 animate-pulse rounded-full bg-surface" />
                     </div>
-                    <div className="h-2 animate-pulse rounded-full bg-surface" />
+
+                    {/* Carbs slider skeleton */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <div className="h-4 w-20 animate-pulse rounded bg-surface" />
+                        <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                      </div>
+                      <div className="h-2 animate-pulse rounded-full bg-surface" />
+                    </div>
+
+                    {/* Fats slider skeleton */}
+                    <div className="space-y-2">
+                      <div className="flex justify-between">
+                        <div className="h-4 w-20 animate-pulse rounded bg-surface" />
+                        <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                      </div>
+                      <div className="h-2 animate-pulse rounded-full bg-surface" />
+                    </div>
                   </div>
 
-                  {/* Carbs slider skeleton */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <div className="h-4 w-20 animate-pulse rounded bg-surface" />
-                      <div className="h-4 w-12 animate-pulse rounded bg-surface" />
-                    </div>
-                    <div className="h-2 animate-pulse rounded-full bg-surface" />
-                  </div>
-
-                  {/* Fats slider skeleton */}
-                  <div className="space-y-2">
-                    <div className="flex justify-between">
-                      <div className="h-4 w-20 animate-pulse rounded bg-surface" />
-                      <div className="h-4 w-12 animate-pulse rounded bg-surface" />
-                    </div>
-                    <div className="h-2 animate-pulse rounded-full bg-surface" />
+                  {/* Skeleton for badges */}
+                  <div className="grid grid-cols-3 gap-2 pt-5">
+                    <div className="h-10 animate-pulse rounded bg-surface" />
+                    <div className="h-10 animate-pulse rounded bg-surface" />
+                    <div className="h-10 animate-pulse rounded bg-surface" />
                   </div>
                 </div>
-
-                {/* Skeleton for badges */}
-                <div className="grid grid-cols-3 gap-2 pt-5">
-                  <div className="h-10 animate-pulse rounded bg-surface" />
-                  <div className="h-10 animate-pulse rounded bg-surface" />
-                  <div className="h-10 animate-pulse rounded bg-surface" />
-                </div>
-              </div>
-            )}
+              )}
+            </div>
 
             {/* Save/Reset Controls */}
-            <div className="mt-8 flex items-center justify-between">
+            <div className="mt-8 flex items-center justify-between border-t border-border pt-6">
               {isPending ? (
                 <div className="flex items-center text-sm text-foreground">
                   <LoadingSpinner size="sm" color="text-foreground" />
@@ -239,8 +240,8 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
 
         {/* Right side - Info panel (2 cols) */}
         <div className="flex h-full flex-col lg:col-span-2">
-          <CardContainer className="h-full p-6">
-            <h3 className="mb-4 text-base font-semibold text-foreground">
+          <CardContainer className="h-full bg-surface-2 p-6">
+            <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
               Understanding Macros
             </h3>
             <div className="flex-1 space-y-4">

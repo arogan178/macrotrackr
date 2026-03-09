@@ -20,9 +20,9 @@ export const BAR_BASE_CLASSES =
   "h-2 w-full rounded-full bg-surface overflow-hidden";
 
 export const CARD_BASE_CLASSES =
-  "rounded-xl border border-border/50 bg-surface p-6 shadow-modal backdrop-blur-sm";
+  "rounded-2xl border border-border/40 bg-surface p-6";
 
-export const SECTION_HEADING_CLASSES = "text-lg font-semibold text-foreground";
+export const SECTION_HEADING_CLASSES = "text-lg font-semibold tracking-tight text-foreground/90";
 
 export const SUBTEXT_MUTED_CLASSES = "text-xs text-foreground";
 
@@ -40,10 +40,17 @@ export function getColorByScore(
     if (score > 40) return "bg-warning";
     return "bg-error";
   }
-  // consistency: success >70, warning >40, else vibrant-accent
+  // consistency: success >70, warning >40, else error
   if (score > 70) return "bg-success";
   if (score > 40) return "bg-warning";
-  return "bg-vibrant-accent";
+  return "bg-error";
+}
+
+export function getTextColorByScore(
+  score: number,
+  variant: "consistency" | "density" = "consistency",
+): string {
+  return getColorByScore(score, variant).replace("bg-", "text-");
 }
 
 /**
