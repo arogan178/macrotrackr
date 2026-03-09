@@ -19,8 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: backend
-    outputs:
-      frontend_url: ${{ steps.publish-backend-outputs.outputs.frontend_url }}
 
     steps:
     - name: Checkout code
@@ -36,10 +34,17 @@ jobs:
         cd backend
         bun install
 
-    - name: Publish backend deployment metadata
-      id: publish-backend-outputs
+    - name: Write backend deployment metadata
       run: |
-        echo "frontend_url=${{ secrets.CORS_ORIGIN }}" >> "$GITHUB_OUTPUT"
+        mkdir -p .smoke
+        printf '%s' '${{ secrets.CORS_ORIGIN }}' > .smoke/frontend_url
+
+    - name: Upload backend deployment metadata
+      uses: actions/upload-artifact@v4
+      with:
+        name: backend-deployment-metadata
+        path: .smoke/frontend_url
+        if-no-files-found: error
 
     - name: Deploy backend to server
       uses: appleboy/ssh-action@v1.0.0
@@ -95,8 +100,6 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment: frontend
-    outputs:
-      backend_url: ${{ steps.publish-frontend-outputs.outputs.backend_url }}
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
@@ -115,10 +118,17 @@ jobs:
         cd frontend
         bun install
 
-    - name: Publish frontend deployment metadata
-      id: publish-frontend-outputs
+    - name: Write frontend deployment metadata
       run: |
-        echo "backend_url=${{ secrets.VITE_API_URL }}" >> "$GITHUB_OUTPUT"
+        mkdir -p .smoke
+        printf '%s' '${{ secrets.VITE_API_URL }}' > .smoke/backend_url
+
+    - name: Upload frontend deployment metadata
+      uses: actions/upload-artifact@v4
+      with:
+        name: frontend-deployment-metadata
+        path: .smoke/backend_url
+        if-no-files-found: error
 
     - name: Build frontend
       run: |
@@ -268,11 +278,20 @@ jobs:
         node-version: '20'
     - name: Install bun
       uses: oven-sh/setup-bun@v1
+    - name: Download backend deployment metadata
+      uses: actions/download-artifact@v4
+      with:
+        name: backend-deployment-metadata
+        path: .smoke/backend
+    - name: Download frontend deployment metadata
+      uses: actions/download-artifact@v4
+      with:
+        name: frontend-deployment-metadata
+        path: .smoke/frontend
     - name: Run smoke tests
       run: |
+        export SMOKE_TEST_URL="$(cat .smoke/frontend/backend_url)"
+        export FRONTEND_URL="$(cat .smoke/backend/frontend_url)"
         cd backend
         bun install
         bun run scripts/smoke-test.ts
-      env:
-        SMOKE_TEST_URL: ${{ needs.deploy-frontend.outputs.backend_url }}
-        FRONTEND_URL: ${{ needs.deploy-backend.outputs.frontend_url }}
