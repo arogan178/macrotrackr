@@ -3,8 +3,31 @@
  * Verifies health endpoints and frontend availability
  */
 
-const BASE_URL = process.env.SMOKE_TEST_URL || 'http://localhost:3000';
-const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+function normalizeUrl(
+  value: string | undefined,
+  fallback: string,
+  variableName: string,
+): string {
+  const normalized = value?.trim();
+
+  if (process.env.CI === 'true' && !normalized) {
+    throw new Error(`Missing required environment variable: ${variableName}`);
+  }
+
+  const resolved = normalized || fallback;
+  return resolved.replace(/\/+$/, '');
+}
+
+const BASE_URL = normalizeUrl(
+  process.env.SMOKE_TEST_URL,
+  'http://localhost:3000',
+  'SMOKE_TEST_URL',
+);
+const FRONTEND_URL = normalizeUrl(
+  process.env.FRONTEND_URL,
+  'http://localhost:5173',
+  'FRONTEND_URL',
+);
 
 interface SmokeTestResult {
   name: string;
@@ -46,6 +69,8 @@ async function fetchWithTimeout(url: string, timeout = 5000) {
 
 async function runSmokeTests(): Promise<void> {
   console.log('Running smoke tests...\n');
+  console.log(`Backend URL: ${BASE_URL}`);
+  console.log(`Frontend URL: ${FRONTEND_URL}\n`);
   
   const tests: SmokeTestResult[] = [];
 
@@ -63,7 +88,7 @@ async function runSmokeTests(): Promise<void> {
       const response = await fetchWithTimeout(`${BASE_URL}/health`);
       if (!response.ok) throw new Error(`Status ${response.status}`);
       const data = await response.json();
-      if (data.status !== 'ok') throw new Error('Invalid health status');
+      if (data.status !== 'healthy') throw new Error(`Invalid health status: ${String(data.status)}`);
     })
   );
 
