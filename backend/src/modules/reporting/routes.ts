@@ -1,6 +1,5 @@
 import { Elysia, t } from "elysia";
 import { getMacroDensitySummary } from "./service";
-import { toCamelCase } from "../../lib/responses";
 import { db } from "../../db";
 import { requireAuth } from "../../middleware/clerk-guards";
 
@@ -36,7 +35,7 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
         groupBy: groupByValue,
       });
       
-      return toCamelCase(summary);
+      return summary;
     },
     {
       query: t.Object({

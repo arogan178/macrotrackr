@@ -2,7 +2,7 @@
 import { Elysia } from "elysia";
 import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContext } from "../../types";
 import {
   safeQuery,
   safeQueryAll,
@@ -15,16 +15,8 @@ import {
   NotFoundError,
 } from "../../lib/errors";
 import { checkFeatureLimit } from "../../middleware/clerk-guards";
-import type { Database } from "bun:sqlite";
 
-// Extended habits context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface HabitsRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
-}
+type HabitsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
@@ -264,7 +256,31 @@ export const habitRoutes = (app: Elysia) =>
             internalUserId,
           ]);
 
-          return { success: true };
+          return {
+            id: habitId,
+            title,
+            iconName,
+            current,
+            target,
+            progress:
+              target > 0 ? Math.min(100, Math.round((current / target) * 100)) : 0,
+            accentColor: normalizedAccent as
+              | "indigo"
+              | "blue"
+              | "cyan"
+              | "teal"
+              | "green"
+              | "lime"
+              | "yellow"
+              | "orange"
+              | "red"
+              | "pink"
+              | "purple"
+              | undefined,
+            isComplete,
+            createdAt,
+            completedAt: completedAt || null,
+          };
         },
         {
           body: HabitSchemas.updateHabitBody,
@@ -307,7 +323,7 @@ export const habitRoutes = (app: Elysia) =>
 
           safeExecute(db, deleteQuery, [habitId, internalUserId]);
 
-          return { success: true };
+          return { success: true, id: habitId };
         },
         {
           response: HabitSchemas.deleteHabitResponse,
@@ -331,7 +347,7 @@ export const habitRoutes = (app: Elysia) =>
 
           safeExecute(db, query, [internalUserId]);
 
-          return { success: true };
+          return { success: true, count: 0 };
         },
         {
           response: HabitSchemas.resetHabitsResponse,

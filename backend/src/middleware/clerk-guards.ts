@@ -90,26 +90,7 @@ export const requirePro = new Elysia({ name: "requirePro" })
   .use(requireAuth)
   .derive({ as: "scoped" }, async (context: any) => {
     const { authenticatedUser } = context;
-    
-    let hasActivePro = false;
-    
-    try {
-      hasActivePro = await SubscriptionService.hasActiveProSubscription(
-        authenticatedUser.userId
-      );
-    } catch (error) {
-      logger.error(
-        {
-          error: error instanceof Error ? error : new Error(String(error)),
-          operation: "requirePro_check_failed",
-          userId: authenticatedUser.userId,
-        },
-        "Failed to verify Pro subscription status"
-      );
-      throw new AuthorizationError(
-        "Unable to verify subscription status. Please try again later."
-      );
-    }
+    const hasActivePro = await getRequiredProStatus(authenticatedUser.userId);
     
     if (!hasActivePro) {
       logger.warn(
@@ -151,6 +132,25 @@ export interface FeatureLimitResult {
   isProUser: boolean;
 }
 
+async function getRequiredProStatus(userId: number): Promise<boolean> {
+  try {
+    return await SubscriptionService.hasActiveProSubscription(userId);
+  } catch (error) {
+    logger.error(
+      {
+        error: error instanceof Error ? error : new Error(String(error)),
+        operation: "subscription_status_check_failed",
+        userId,
+      },
+      "Failed to verify Pro subscription status"
+    );
+
+    throw new AuthorizationError(
+      "Unable to verify subscription status. Please try again later."
+    );
+  }
+}
+
 /**
  * Check if a Free user has reached their limit for a specific feature.
  * Pro users always have unlimited access.
@@ -165,51 +165,33 @@ export const checkFeatureLimit = async (
   feature: FeatureLimitKey,
   currentCount: number
 ): Promise<FeatureLimitResult> => {
-  try {
-    const isProUser = await SubscriptionService.hasActiveProSubscription(userId);
+  const isProUser = await getRequiredProStatus(userId);
 
-    // Pro users have unlimited access
-    if (isProUser) {
-      return { allowed: true, isProUser: true };
-    }
-
-    // Check limits for Free users
-    const limit = FREE_TIER_LIMITS[feature];
-
-    if (currentCount >= limit) {
-      const featureMessages: Record<FeatureLimitKey, string> = {
-        MAX_GOALS: `You've reached the limit of ${limit} goals on the Free plan. Upgrade to Pro for unlimited goals.`,
-        MAX_HABITS: `You've reached the limit of ${limit} habits on the Free plan. Upgrade to Pro for unlimited habits.`,
-        MAX_MACRO_ENTRIES_PER_DAY: `You've reached the daily limit of ${limit} macro entries. Upgrade to Pro for unlimited entries.`,
-        MAX_WEIGHT_ENTRIES_PER_MONTH: `You've reached the monthly limit of ${limit} weight entries. Upgrade to Pro for unlimited tracking.`,
-        DATA_RETENTION_DAYS: `Data older than ${limit} days is not available on the Free plan. Upgrade to Pro for unlimited data retention.`,
-        MAX_SAVED_MEALS: `You've reached the limit of ${limit} saved meals on the Free plan. Upgrade to Pro for unlimited saved meals.`,
-      };
-
-      return {
-        allowed: false,
-        limit,
-        message: featureMessages[feature],
-        isProUser: false,
-      };
-    }
-
-    return { allowed: true, limit, isProUser: false };
-  } catch (error) {
-    logger.error(
-      {
-        error: error instanceof Error ? error : new Error(String(error)),
-        operation: "checkFeatureLimit",
-        userId,
-        feature,
-        currentCount,
-      },
-      "Failed to check feature limit"
-    );
-
-    // On error, allow the action but log it
-    return { allowed: true, isProUser: false };
+  if (isProUser) {
+    return { allowed: true, isProUser: true };
   }
+
+  const limit = FREE_TIER_LIMITS[feature];
+
+  if (currentCount >= limit) {
+    const featureMessages: Record<FeatureLimitKey, string> = {
+      MAX_GOALS: `You've reached the limit of ${limit} goals on the Free plan. Upgrade to Pro for unlimited goals.`,
+      MAX_HABITS: `You've reached the limit of ${limit} habits on the Free plan. Upgrade to Pro for unlimited habits.`,
+      MAX_MACRO_ENTRIES_PER_DAY: `You've reached the daily limit of ${limit} macro entries. Upgrade to Pro for unlimited entries.`,
+      MAX_WEIGHT_ENTRIES_PER_MONTH: `You've reached the monthly limit of ${limit} weight entries. Upgrade to Pro for unlimited tracking.`,
+      DATA_RETENTION_DAYS: `Data older than ${limit} days is not available on the Free plan. Upgrade to Pro for unlimited data retention.`,
+      MAX_SAVED_MEALS: `You've reached the limit of ${limit} saved meals on the Free plan. Upgrade to Pro for unlimited saved meals.`,
+    };
+
+    return {
+      allowed: false,
+      limit,
+      message: featureMessages[feature],
+      isProUser: false,
+    };
+  }
+
+  return { allowed: true, limit, isProUser: false };
 };
 
 /**
@@ -220,19 +202,7 @@ export const checkFeatureLimit = async (
  * @returns Whether the user has an active Pro subscription
  */
 export const checkProStatus = async (userId: number): Promise<boolean> => {
-  try {
-    return await SubscriptionService.hasActiveProSubscription(userId);
-  } catch (error) {
-    logger.error(
-      {
-        error: error instanceof Error ? error : new Error(String(error)),
-        operation: "checkProStatus",
-        userId,
-      },
-      "Failed to check Pro subscription status"
-    );
-    return false;
-  }
+  return getRequiredProStatus(userId);
 };
 
 /**

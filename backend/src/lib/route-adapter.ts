@@ -3,7 +3,7 @@ import type { Database } from "bun:sqlite";
 
 import type { ClerkAuthContext } from "../middleware/clerkAuth";
 import { getInternalUserId } from "./clerk-utils";
-import { NotFoundError } from "./errors";
+import { AuthenticationError, NotFoundError } from "./errors";
 
 /**
  * Resolve the internal application user identity from Clerk auth context.
@@ -14,7 +14,7 @@ export function resolveAuthenticatedUser(
   const { user, internalUserId, db } = context;
 
   if (!user?.clerkUserId) {
-    throw new Error("Unauthorized");
+    throw new AuthenticationError("Authentication required. Please sign in.");
   }
 
   // Use pre-resolved internal user ID or look it up

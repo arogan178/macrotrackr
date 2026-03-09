@@ -12,36 +12,18 @@ import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
-interface GroupedEntry {
-  date: string;
-  entries: MacroEntry[];
-  totals: {
-    protein: number;
-    carbs: number;
-    fats: number;
-    calories: number;
-  };
-}
+import type {
+  EntryHistoryActions,
+  EntryHistoryHelpers,
+  EntryHistoryState,
+  GroupedEntry,
+} from "./entryHistoryShared";
 
 interface DesktopEntryTableProps {
   groupedEntries: GroupedEntry[];
-  collapsedDates: Set<string>;
-  formatDate: (dateString: string) => string;
-  formatTimeFromEntry: (entry: MacroEntry) => string;
-  capitalizeFirstLetter: (string: string) => string;
-  calculateCalories: (protein: number, carbs: number, fats: number) => number;
-  toggleDateCollapse: (date: string) => void;
-  handleDeleteDate: (date: string, event: React.MouseEvent) => void;
-  onEdit: (entry: MacroEntry) => void;
-  deleteEntry: (id: number) => void;
-  isDeleting: boolean;
-  showAllDates?: boolean;
-  onSaveMeal?: (entry: MacroEntry) => void;
-  onUnsaveMeal?: (entry: MacroEntry) => void;
-  savedMealIds?: Set<number>;
-  isSelectionMode?: boolean;
-  selectedEntryIds?: Set<number>;
-  onToggleEntrySelection?: (id: number) => void;
+  helpers: EntryHistoryHelpers;
+  actions: EntryHistoryActions;
+  state: EntryHistoryState;
 }
 
 type TableRowData = GroupedEntry & {
@@ -54,24 +36,34 @@ const columnHelper = createColumnHelper<TableRowData>();
 const DesktopEntryTable = memo(
   ({
     groupedEntries,
-    collapsedDates,
-    formatDate,
-    formatTimeFromEntry,
-    capitalizeFirstLetter,
-    calculateCalories,
-    toggleDateCollapse,
-    handleDeleteDate,
-    onEdit,
-    deleteEntry,
-    isDeleting,
-    showAllDates = true,
-    onSaveMeal,
-    onUnsaveMeal,
-    savedMealIds = new Set(),
-    isSelectionMode = false,
-    selectedEntryIds = new Set(),
-    onToggleEntrySelection,
+    helpers,
+    actions,
+    state,
   }: DesktopEntryTableProps) => {
+    const {
+      formatDate,
+      formatTimeFromEntry,
+      capitalizeFirstLetter,
+      calculateCalories,
+    } = helpers;
+    const {
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+    } = actions;
+    const {
+      collapsedDates,
+      isDeleting,
+      showAllDates = true,
+      savedMealIds = new Set(),
+      isSelectionMode = false,
+      selectedEntryIds = new Set(),
+      onToggleEntrySelection,
+    } = state;
+
     const tableContainerReference = useRef<HTMLDivElement>(null);
     const [expandedEntries, setExpandedEntries] = useState<Set<number>>(
       new Set(),
