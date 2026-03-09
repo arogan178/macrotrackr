@@ -85,6 +85,13 @@ export class OpenFoodFactsRateLimitError extends OpenFoodFactsError {
   }
 }
 
+export class OpenFoodFactsUnavailableError extends OpenFoodFactsError {
+  constructor(message: string = "OpenFoodFacts service temporarily unavailable") {
+    super(message, 503);
+    this.name = "OpenFoodFactsUnavailableError";
+  }
+}
+
 // Utility functions for better code organization
 export function normalizeFoodSearchQuery(query: string): string {
   return query.trim().toLowerCase().replace(/\s+/g, " ");
@@ -486,6 +493,6 @@ export class OpenFoodFactsApiClient {
       }
     );
 
-    return []; // Return empty array instead of throwing to maintain backwards compatibility
+    throw new OpenFoodFactsUnavailableError(errorMessage);
   }
 }

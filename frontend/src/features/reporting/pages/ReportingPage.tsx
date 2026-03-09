@@ -23,9 +23,9 @@ import {
   MacroSummaryStats,
   MealTimeBreakdown,
   ReportingPageSkeleton,
+  TrendsChartSection,
   UnifiedInsights,
 } from "../components";
-import TrendsChartSection from "../components/TrendsChartSection";
 import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
 import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
