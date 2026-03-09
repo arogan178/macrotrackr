@@ -631,14 +631,14 @@ Design components to be easily testable by E2E frameworks (Playwright/Puppeteer)
 4. **Test IDs**: Use `data-testid` as a fallback for elements that lack semantic meaning or text (e.g., `data-testid="user-menu"`).
 
 ```tsx
-// ✅ Good: Testable via semantic text or ARIA
+// Good: Testable via semantic text or ARIA
 <button onClick={submit}>Save Entry</button>
 <button aria-label="Close modal" onClick={close}><Icon name="x" /></button>
 
-// ✅ Good: Testable via data-testid when necessary
+// Good: Testable via data-testid when necessary
 <div data-testid="macro-summary-chart">...</div>
 
-// ❌ Bad: Relying on CSS classes for tests
+// Bad: Relying on CSS classes for tests
 <div className="btn-primary submit-btn" onClick={submit}>Save</div>
 ```
 
