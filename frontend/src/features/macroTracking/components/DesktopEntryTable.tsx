@@ -17,7 +17,7 @@ import type {
   EntryHistoryHelpers,
   EntryHistoryState,
   GroupedEntry,
-} from "./entryHistoryShared";
+} from "./EntryHistoryShared";
 
 interface DesktopEntryTableProps {
   groupedEntries: GroupedEntry[];
@@ -34,12 +34,7 @@ type TableRowData = GroupedEntry & {
 const columnHelper = createColumnHelper<TableRowData>();
 
 const DesktopEntryTable = memo(
-  ({
-    groupedEntries,
-    helpers,
-    actions,
-    state,
-  }: DesktopEntryTableProps) => {
+  ({ groupedEntries, helpers, actions, state }: DesktopEntryTableProps) => {
     const {
       formatDate,
       formatTimeFromEntry,

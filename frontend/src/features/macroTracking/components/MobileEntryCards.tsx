@@ -11,7 +11,7 @@ import type {
   EntryHistoryHelpers,
   EntryHistoryState,
   GroupedEntry,
-} from "./entryHistoryShared";
+} from "./EntryHistoryShared";
 
 interface MobileEntryCardsProps {
   groupedEntries: GroupedEntry[];
@@ -76,7 +76,7 @@ const EntryCard = memo(
               />
             )}
             {hasIngredients && (
-              <button 
+              <button
                 type="button"
                 className="cursor-pointer rounded-md p-1 hover:bg-surface-3"
                 onClick={() => setIsExpanded(!isExpanded)}
@@ -118,20 +118,39 @@ const EntryCard = memo(
 
         <div className="mt-4 grid grid-cols-3 gap-3">
           {[
-            { label: "Protein", value: entry.protein, color: "text-protein", bg: "bg-surface-2" },
-            { label: "Carbs", value: entry.carbs, color: "text-carbs", bg: "bg-surface-2" },
-            { label: "Fats", value: entry.fats, color: "text-fats", bg: "bg-surface-2" },
+            {
+              label: "Protein",
+              value: entry.protein,
+              color: "text-protein",
+              bg: "bg-surface-2",
+            },
+            {
+              label: "Carbs",
+              value: entry.carbs,
+              color: "text-carbs",
+              bg: "bg-surface-2",
+            },
+            {
+              label: "Fats",
+              value: entry.fats,
+              color: "text-fats",
+              bg: "bg-surface-2",
+            },
           ].map((macro) => (
             <div
               key={macro.label}
               className={`flex flex-col items-center justify-center rounded-xl ${macro.bg} border border-border/40 p-3`}
             >
-              <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">{macro.label}</span>
+              <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">
+                {macro.label}
+              </span>
               <MacroCell value={macro.value} suffix="g" color={macro.color} />
             </div>
           ))}
           <div className="col-span-3 mt-1 flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-3.5">
-            <span className="text-xs font-medium tracking-wider text-muted uppercase">Calories</span>
+            <span className="text-xs font-medium tracking-wider text-muted uppercase">
+              Calories
+            </span>
             <MacroCell
               value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
               suffix=" kcal"
@@ -146,20 +165,36 @@ const EntryCard = memo(
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              transition={{ height: { duration: 0.3, ease: "easeInOut" }, opacity: { duration: 0.2 } }}
+              transition={{
+                height: { duration: 0.3, ease: "easeInOut" },
+                opacity: { duration: 0.2 },
+              }}
               className="mt-4 overflow-hidden border-t border-border/40"
             >
               <div className="pt-4">
-                <h4 className="mb-3 text-xs font-semibold text-muted uppercase">Ingredients</h4>
+                <h4 className="mb-3 text-xs font-semibold text-muted uppercase">
+                  Ingredients
+                </h4>
                 <div className="space-y-3">
                   {entry.ingredients?.map((ing, index) => (
-                    <div key={index} className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3">
+                    <div
+                      key={index}
+                      className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3"
+                    >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium text-foreground">{ing.name}</span>
-                        <span className="text-xs font-medium text-foreground">{calculateCalories(ing.protein, ing.carbs, ing.fats)} kcal</span>
+                        <span className="text-sm font-medium text-foreground">
+                          {ing.name}
+                        </span>
+                        <span className="text-xs font-medium text-foreground">
+                          {calculateCalories(ing.protein, ing.carbs, ing.fats)}{" "}
+                          kcal
+                        </span>
                       </div>
                       {ing.quantity && (
-                        <span className="text-xs text-muted">{ing.quantity}{ing.unit || ''}</span>
+                        <span className="text-xs text-muted">
+                          {ing.quantity}
+                          {ing.unit || ""}
+                        </span>
                       )}
                       <div className="mt-1 flex gap-3 text-[10px] font-medium uppercase">
                         <span className="text-protein">{ing.protein}g P</span>
@@ -175,18 +210,13 @@ const EntryCard = memo(
         </AnimatePresence>
       </motion.div>
     );
-  }
+  },
 );
 
 EntryCard.displayName = "EntryCard";
 
 const MobileEntryCards = memo(
-  ({
-    groupedEntries,
-    helpers,
-    actions,
-    state,
-  }: MobileEntryCardsProps) => {
+  ({ groupedEntries, helpers, actions, state }: MobileEntryCardsProps) => {
     const {
       formatDate,
       formatTimeFromEntry,
@@ -283,7 +313,9 @@ const MobileEntryCards = memo(
           <span className="font-medium tracking-tight text-carbs">
             {group.totals.carbs}g C
           </span>
-          <span className="font-medium tracking-tight text-fats">{group.totals.fats}g F</span>
+          <span className="font-medium tracking-tight text-fats">
+            {group.totals.fats}g F
+          </span>
           <span className="font-medium tracking-tight text-foreground">
             {group.totals.calories} kcal
           </span>
@@ -331,23 +363,23 @@ const MobileEntryCards = memo(
                       {renderDateHeader(item.group)}
                     </div>
                   ) : (
-                      <div className="p-4 pt-0">
-                        <EntryCard
-                          entry={item.entry}
-                          onEdit={onEdit}
-                          deleteEntry={deleteEntry}
-                          isDeleting={isDeleting}
-                          formatTimeFromEntry={formatTimeFromEntry}
-                          capitalizeFirstLetter={capitalizeFirstLetter}
-                          calculateCalories={calculateCalories}
-                          onSaveMeal={onSaveMeal}
-                          onUnsaveMeal={onUnsaveMeal}
-                          isMealSaved={savedMealIds?.has(item.entry.id)}
-                          isSelectionMode={isSelectionMode}
-                          isSelected={selectedEntryIds.has(item.entry.id)}
-                          onToggleSelection={onToggleEntrySelection}
-                        />
-                      </div>
+                    <div className="p-4 pt-0">
+                      <EntryCard
+                        entry={item.entry}
+                        onEdit={onEdit}
+                        deleteEntry={deleteEntry}
+                        isDeleting={isDeleting}
+                        formatTimeFromEntry={formatTimeFromEntry}
+                        capitalizeFirstLetter={capitalizeFirstLetter}
+                        calculateCalories={calculateCalories}
+                        onSaveMeal={onSaveMeal}
+                        onUnsaveMeal={onUnsaveMeal}
+                        isMealSaved={savedMealIds?.has(item.entry.id)}
+                        isSelectionMode={isSelectionMode}
+                        isSelected={selectedEntryIds.has(item.entry.id)}
+                        onToggleSelection={onToggleEntrySelection}
+                      />
+                    </div>
                   )}
                 </div>
               );
