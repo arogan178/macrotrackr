@@ -19,6 +19,32 @@ export function withTransaction<T>(db: Database, operation: () => T): T {
   }
 }
 
+export async function withTransactionAsync<T>(
+  db: Database,
+  operation: () => Promise<T>
+): Promise<T> {
+  safeExecute(db, "BEGIN");
+
+  try {
+    const result = await operation();
+    safeExecute(db, "COMMIT");
+    return result;
+  } catch (error) {
+    try {
+      safeExecute(db, "ROLLBACK");
+    } catch (rollbackError) {
+      loggerHelpers.error(rollbackError as Error, {
+        operation: "database_transaction_rollback",
+      });
+    }
+
+    loggerHelpers.error(error as Error, { operation: "database_transaction" });
+    throw new DatabaseError(
+      error instanceof Error ? error.message : "Transaction failed"
+    );
+  }
+}
+
 /**
  * Type for SQLite parameter values
  */

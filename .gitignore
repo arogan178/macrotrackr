@@ -46,3 +46,4 @@ frontend/.github/instructions/tanstack-react-router_routing.instructions.md
 frontend/.github/instructions/tanstack-react-router_setup-and-architecture.instructions.md
 .github/README_DEPLOY.md
 frontend/test-results/
+.desloppify/
