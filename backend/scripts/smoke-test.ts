@@ -29,6 +29,12 @@ const FRONTEND_URL = normalizeUrl(
   'FRONTEND_URL',
 );
 
+function getOrigin(url: string): string {
+  return new URL(url).origin;
+}
+
+const sharedPublicOrigin = getOrigin(BASE_URL) === getOrigin(FRONTEND_URL);
+
 interface SmokeTestResult {
   name: string;
   passed: boolean;
@@ -71,36 +77,41 @@ async function runSmokeTests(): Promise<void> {
   console.log('Running smoke tests...\n');
   console.log(`Backend URL: ${BASE_URL}`);
   console.log(`Frontend URL: ${FRONTEND_URL}\n`);
+
+  if (sharedPublicOrigin) {
+    console.log(
+      'Backend and frontend share the same public origin; public smoke tests will verify the site, while server-local backend health is checked in the workflow.\n',
+    );
+  }
   
   const tests: SmokeTestResult[] = [];
 
-  // Test 1: Backend root health
-  tests.push(
-    await smokeTest('Backend root endpoint', async () => {
-      const response = await fetchWithTimeout(`${BASE_URL}/`);
-      if (!response.ok) throw new Error(`Status ${response.status}`);
-    })
-  );
+  if (!sharedPublicOrigin) {
+    tests.push(
+      await smokeTest('Backend root endpoint', async () => {
+        const response = await fetchWithTimeout(`${BASE_URL}/`);
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+      })
+    );
 
-  // Test 2: Backend /health
-  tests.push(
-    await smokeTest('Backend /health endpoint', async () => {
-      const response = await fetchWithTimeout(`${BASE_URL}/health`);
-      if (!response.ok) throw new Error(`Status ${response.status}`);
-      const data = await response.json();
-      if (data.status !== 'healthy') throw new Error(`Invalid health status: ${String(data.status)}`);
-    })
-  );
+    tests.push(
+      await smokeTest('Backend /health endpoint', async () => {
+        const response = await fetchWithTimeout(`${BASE_URL}/health`);
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+        const data = await response.json();
+        if (data.status !== 'healthy') throw new Error(`Invalid health status: ${String(data.status)}`);
+      })
+    );
 
-  // Test 3: Backend /health/ready
-  tests.push(
-    await smokeTest('Backend /health/ready endpoint', async () => {
-      const response = await fetchWithTimeout(`${BASE_URL}/health/ready`);
-      if (!response.ok) throw new Error(`Status ${response.status}`);
-    })
-  );
+    tests.push(
+      await smokeTest('Backend /health/ready endpoint', async () => {
+        const response = await fetchWithTimeout(`${BASE_URL}/health/ready`);
+        if (!response.ok) throw new Error(`Status ${response.status}`);
+      })
+    );
+  }
 
-  // Test 4: Frontend availability
+  // Public site availability
   tests.push(
     await smokeTest('Frontend availability', async () => {
       const response = await fetchWithTimeout(FRONTEND_URL);
