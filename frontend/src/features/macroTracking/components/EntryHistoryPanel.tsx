@@ -18,12 +18,12 @@ import {
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
-import MobileEntryCards from "./MobileEntryCards";
 import type {
   EntryHistoryActions,
   EntryHistoryHelpers,
   EntryHistoryState,
-} from "./entryHistoryShared";
+} from "./EntryHistoryShared";
+import MobileEntryCards from "./MobileEntryCards";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
