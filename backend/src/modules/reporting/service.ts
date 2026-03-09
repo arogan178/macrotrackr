@@ -1,5 +1,8 @@
 // Service for nutrient density summary aggregation
-import { getMacroHistory } from "../macros/service";
+import {
+  getMacroHistory,
+  type MacroHistorySummaryItem,
+} from "../macros/service";
 // import { getGoalsForUser } from "../goals/services";
 
 interface MacroDensitySummaryParams {
@@ -14,7 +17,7 @@ export async function getMacroDensitySummary({
   startDate,
   endDate,
   groupBy = "week",
-}: MacroDensitySummaryParams) {
+}: MacroDensitySummaryParams): Promise<MacroHistorySummaryItem[]> {
   // Fetch macro history for the user in the date range, grouped by week or month
   return await getMacroHistory(userId, { startDate, endDate, groupBy });
 }

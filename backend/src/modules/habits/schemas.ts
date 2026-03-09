@@ -100,16 +100,27 @@ export const HabitSchemas = {
 
   // Schema for response after updating a habit
   updateHabitResponse: t.Object({
-    success: t.Boolean(),
+    id: StringRequired,
+    title: StringRequired,
+    iconName: StringRequired,
+    current: PositiveNumber,
+    target: PositiveNumber,
+    progress: PositiveNumber,
+    accentColor: t.Optional(AccentColor),
+    isComplete: t.Boolean(),
+    createdAt: DateString,
+    completedAt: t.Optional(DateStringOrNull),
   }),
 
   // Schema for response after deleting a habit
   deleteHabitResponse: t.Object({
     success: t.Boolean(),
+    id: StringRequired,
   }),
 
   // Schema for response after resetting all habits
   resetHabitsResponse: t.Object({
     success: t.Boolean(),
+    count: t.Number({ minimum: 0 }),
   }),
 };

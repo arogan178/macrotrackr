@@ -230,17 +230,17 @@ export interface BillingDetailsResponse {
     | {
         id: string;
         status: string;
-        currentPeriodEnd: string;
-        stripeSubscriptionId: string;
+        currentPeriodEnd: string | null;
+        stripeSubscriptionId: string | null;
       }
-    | undefined;
-  price: string | undefined;
+    | null;
+  price: string | null;
   paymentMethod:
     | {
         brand: string;
         last4: string;
       }
-    | undefined;
+    | null;
   stripeDetails:
     | {
         id: string;
@@ -248,12 +248,10 @@ export interface BillingDetailsResponse {
         status: string;
         current_period_end: number;
       }
-    | undefined;
+    | null;
 }
 
-// Payload for PUT /api/user/settings (User details ONLY)
-// macroTarget removed
-type UserSettingsPayload = Partial<{
+export type UserSettingsPayload = Partial<{
   firstName: string;
   lastName: string;
   email: string;
@@ -564,9 +562,10 @@ export const apiService = {
         body: JSON.stringify(payloadToSend), // Send payload with only user details
         credentials: "include",
       });
-      return (await handleResponse(response)) as
-        | SetWeightGoalPayload
-        | undefined;
+      return (await handleResponse(response)) as {
+        success: boolean;
+        message: string;
+      };
     },
     /** Completes user profile */
     completeProfile: async (
@@ -586,7 +585,10 @@ export const apiService = {
           credentials: "include",
         },
       );
-      return (await handleResponse(response)) as WeightLogEntry[];
+      return (await handleResponse(response)) as {
+        success: boolean;
+        message: string;
+      };
     },
   },
 
@@ -965,34 +967,34 @@ export const apiService = {
     updateHabit: async (
       id: string,
       habitGoal: HabitGoalPayload,
-    ): Promise<{ success: boolean }> => {
+    ): Promise<HabitGoalPayload> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "PUT",
         headers: await getHeadersAsync(),
         body: JSON.stringify(habitGoal),
         credentials: "include",
       });
-      return (await handleResponse(response)) as { success: boolean };
+      return (await handleResponse(response)) as HabitGoalPayload;
     },
 
     /** Deletes a habit goal */
-    deleteHabit: async (id: string): Promise<{ success: boolean }> => {
+    deleteHabit: async (id: string): Promise<{ success: boolean; id: string }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "DELETE",
         headers: await getHeadersAsync(),
         credentials: "include",
       });
-      return (await handleResponse(response)) as { success: boolean };
+      return (await handleResponse(response)) as { success: boolean; id: string };
     },
 
     /** Reset all habit goals */
-    resetHabit: async (): Promise<{ success: boolean }> => {
+    resetHabit: async (): Promise<{ success: boolean; count: number }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         method: "DELETE",
         headers: await getHeadersAsync(),
         credentials: "include",
       });
-      return (await handleResponse(response)) as { success: boolean };
+      return (await handleResponse(response)) as { success: boolean; count: number };
     },
   },
   
@@ -1079,13 +1081,13 @@ export const apiService = {
     },
 
     /** Delete a saved meal */
-    delete: async (id: number): Promise<{ success: boolean; message: string }> => {
+    delete: async (id: number): Promise<{ success: boolean; id: number }> => {
       const response = await fetch(`${API_BASE_URL}/api/saved-meals/${id}`, {
         method: "DELETE",
         headers: await getHeadersAsync(false),
         credentials: "include",
       });
-      return (await handleResponse(response)) as { success: boolean; message: string };
+      return (await handleResponse(response)) as { success: boolean; id: number };
     },
   },
 
