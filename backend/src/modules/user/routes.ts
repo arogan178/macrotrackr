@@ -2,9 +2,13 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { UserSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContext } from "../../types";
 import { generateId } from "../../utils/id-generator";
-import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
+import {
+  safeQuery,
+  safeExecute,
+  withTransactionAsync,
+} from "../../lib/database";
 import {
   AccountNotSyncedError,
   NotFoundError,
@@ -19,14 +23,7 @@ import type { Database } from "bun:sqlite";
 import { logger } from "../../lib/logger";
 import { getInternalUserId } from "../../lib/clerk-utils";
 
-// Extended user context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface UserRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
-}
+type UserRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
 const ErrorResponseSchema = t.Object({
   code: t.String(),
@@ -248,7 +245,7 @@ export const userRoutes = (app: Elysia) =>
               activityLevel?: number;
             };
 
-            return await withTransaction(db, async () => {
+            return await withTransactionAsync(db, async () => {
               // Check for current weight before updates
               let currentWeight: number | null = null;
               const currentDetails = safeQuery<{ weight: number | null }>(
@@ -415,7 +412,7 @@ export const userRoutes = (app: Elysia) =>
               activityLevel?: number;
             };
 
-            return await withTransaction(db, async () => {
+            return await withTransactionAsync(db, async () => {
               // Upsert user_details
               safeExecute(
                 db,
@@ -527,7 +524,7 @@ export const userRoutes = (app: Elysia) =>
               newPassword: string;
             };
 
-            return await withTransaction(db, async () => {
+            return await withTransactionAsync(db, async () => {
               const dbUser = safeQuery<{ password?: string }>(
                 db,
                 "SELECT password FROM users WHERE id = ?",

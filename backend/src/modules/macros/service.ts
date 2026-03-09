@@ -1,6 +1,6 @@
 // src/modules/macros/service.ts
 import { db } from "../../db";
-import { toCamelCase } from "../../lib/responses";
+import { transformKeysToCamel } from "../../lib/mappers";
 import { safeQueryAll } from "../../lib/database";
 
 interface MacroHistoryQuery {
@@ -9,10 +9,19 @@ interface MacroHistoryQuery {
   groupBy?: "week" | "month";
 }
 
+export interface MacroHistorySummaryItem {
+  period: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  calories: number;
+  count: number;
+}
+
 export async function getMacroHistory(
   userId: string,
   params: MacroHistoryQuery = {}
-) {
+): Promise<MacroHistorySummaryItem[]> {
   const { startDate, endDate, groupBy } = params;
   let groupExpr = "entry_date";
   let selectPeriod = "entry_date as period";
@@ -36,6 +45,9 @@ export async function getMacroHistory(
   }
   query += ` GROUP BY ${groupExpr} ORDER BY ${groupExpr} ASC`;
 
-  const rows = safeQueryAll<any>(db, query, sqlParams);
-  return rows.map(toCamelCase);
+  const rows = safeQueryAll<Record<string, unknown>>(db, query, sqlParams);
+  return rows.map(
+    (row) =>
+      transformKeysToCamel(row) as unknown as MacroHistorySummaryItem,
+  );
 }

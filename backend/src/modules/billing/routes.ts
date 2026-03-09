@@ -8,18 +8,10 @@ import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContext } from "../../types";
 import { resolveAuthenticatedUser } from "../../lib/route-adapter";
-import type { Database } from "bun:sqlite";
 
-// Extended billing context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface BillingRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
-}
+type BillingRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -95,7 +87,7 @@ function handleRouteError(error: unknown, operation: string, userId?: number): n
 }
 
 function resolveBillingUser(context: BillingRouteContext) {
-  const authenticatedUser = resolveAuthenticatedUser(context as any);
+  const authenticatedUser = resolveAuthenticatedUser(context);
   const clerkUser = context.user;
 
   return {

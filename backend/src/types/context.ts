@@ -78,16 +78,33 @@ export interface AuthenticatedContextWithDb extends AuthenticatedContext {
   db: import("bun:sqlite").Database;
 }
 
+export type RouteParams = Record<string, string>;
+
+export type RouteQuery = Record<string, string | undefined>;
+
 /**
  * Extended context with body/params/query
  * Use this for routes that handle request data
  */
-export interface RouteContext<TBody = unknown, TParams = unknown, TQuery = unknown>
-  extends AuthenticatedContext {
+export interface RouteContext<
+  TBody = unknown,
+  TParams = RouteParams,
+  TQuery = RouteQuery,
+> extends AuthenticatedContext {
   /** Request body */
   body?: TBody;
   /** Route parameters */
   params?: TParams;
   /** Query string parameters */
+  query: TQuery;
+}
+
+export interface AuthenticatedRouteContext<
+  TBody = unknown,
+  TParams = RouteParams,
+  TQuery = RouteQuery,
+> extends AuthenticatedContextWithDb {
+  body?: TBody;
+  params?: TParams;
   query: TQuery;
 }

@@ -1,41 +1,23 @@
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
-import React, { memo, useMemo, useRef, useState } from "react";
+import { memo, useMemo, useRef, useState } from "react";
 
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 import { MacroEntry } from "@/types/macro";
 
-interface GroupedEntry {
-  date: string;
-  entries: MacroEntry[];
-  totals: {
-    protein: number;
-    carbs: number;
-    fats: number;
-    calories: number;
-  };
-}
+import type {
+  EntryHistoryActions,
+  EntryHistoryHelpers,
+  EntryHistoryState,
+  GroupedEntry,
+} from "./entryHistoryShared";
 
 interface MobileEntryCardsProps {
   groupedEntries: GroupedEntry[];
-  collapsedDates: Set<string>;
-  formatDate: (dateString: string) => string;
-  formatTimeFromEntry: (entry: MacroEntry) => string;
-  capitalizeFirstLetter: (string: string) => string;
-  calculateCalories: (protein: number, carbs: number, fats: number) => number;
-  toggleDateCollapse: (date: string) => void;
-  handleDeleteDate: (date: string, event: React.MouseEvent) => void;
-  onEdit: (entry: MacroEntry) => void;
-  deleteEntry: (id: number) => void;
-  isDeleting: boolean;
-  showAllDates?: boolean;
-  onSaveMeal?: (entry: MacroEntry) => void;
-  onUnsaveMeal?: (entry: MacroEntry) => void;
-  savedMealIds?: Set<number>;
-  isSelectionMode?: boolean;
-  selectedEntryIds?: Set<number>;
-  onToggleEntrySelection?: (id: number) => void;
+  helpers: EntryHistoryHelpers;
+  actions: EntryHistoryActions;
+  state: EntryHistoryState;
 }
 
 const EntryCard = memo(
@@ -201,24 +183,34 @@ EntryCard.displayName = "EntryCard";
 const MobileEntryCards = memo(
   ({
     groupedEntries,
-    collapsedDates,
-    formatDate,
-    formatTimeFromEntry,
-    capitalizeFirstLetter,
-    calculateCalories,
-    toggleDateCollapse,
-    handleDeleteDate,
-    onEdit,
-    deleteEntry,
-    isDeleting,
-    showAllDates = true,
-    onSaveMeal,
-    onUnsaveMeal,
-    savedMealIds,
-    isSelectionMode = false,
-    selectedEntryIds = new Set(),
-    onToggleEntrySelection,
+    helpers,
+    actions,
+    state,
   }: MobileEntryCardsProps) => {
+    const {
+      formatDate,
+      formatTimeFromEntry,
+      capitalizeFirstLetter,
+      calculateCalories,
+    } = helpers;
+    const {
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+    } = actions;
+    const {
+      collapsedDates,
+      isDeleting,
+      showAllDates = true,
+      savedMealIds,
+      isSelectionMode = false,
+      selectedEntryIds = new Set(),
+      onToggleEntrySelection,
+    } = state;
+
     const containerReference = useRef<HTMLDivElement>(null);
 
     const totalEntries = useMemo(() => {
