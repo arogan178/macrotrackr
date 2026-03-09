@@ -1,10 +1,12 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { ProFeature } from "@/components/billing";
-import { DateRangeSelector, LineChartComponent } from "@/components/chart";
+import { DateRangeSelector } from "@/components/chart";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
+import { EmptyState } from "@/components/ui";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -12,6 +14,9 @@ import {
   useMacroTarget,
 } from "@/hooks/queries/useMacroQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { queryKeys } from "@/lib/queryKeys";
+import { useStore } from "@/store/store";
+import { apiService } from "@/utils/apiServices";
 
 import {
   MacroDensityBreakdown,
@@ -20,31 +25,67 @@ import {
   ReportingPageSkeleton,
   UnifiedInsights,
 } from "../components";
+import TrendsChartSection from "../components/TrendsChartSection";
 import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-
-// Moved to outer scope to satisfy unicorn/consistent-function-scoping
-function getDateRangeISOStrings(range: string) {
-  const today = new Date();
-  const endDateString = today.toISOString().split("T")[0];
-  let days = 7;
-  if (range === "month") days = 30;
-  if (range === "3months") days = 90;
-  const startDateObject = new Date(today);
-  startDateObject.setDate(today.getDate() - (days - 1));
-  const startDateString = startDateObject.toISOString().split("T")[0];
-  return { startDate: startDateString, endDate: endDateString };
-}
+import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
 
 export default function ReportingPage() {
+  const queryClient = useQueryClient();
+
+  // Get subscription status from store
+  const { subscriptionStatus } = useStore();
+  const isProUser = subscriptionStatus === "pro";
+
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");
+
+  // Redirect to week view if free user tries to access Pro ranges
+  const handleRangeChange = (range: string) => {
+    if (!isProUser && range !== "week") {
+      return; // Don't allow free users to select Pro ranges
+    }
+    setDateRange(range);
+  };
+
+  // Prefetch other date ranges on mount for faster tab switching
+  useEffect(() => {
+    const { startDate: monthStart, endDate: monthEnd } =
+      getDateRangeData("month");
+    const { startDate: threeMonthsStart, endDate: threeMonthsEnd } =
+      getDateRangeData("3months");
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.macros.historyRange(monthStart, monthEnd),
+      queryFn: async () => {
+        const response = await apiService.macros.getHistory(10_000, 0, {
+          startDate: monthStart,
+          endDate: monthEnd,
+        });
+        return (response as { entries: unknown[] }).entries;
+      },
+    });
+
+    queryClient.prefetchQuery({
+      queryKey: queryKeys.macros.historyRange(
+        threeMonthsStart,
+        threeMonthsEnd,
+      ),
+      queryFn: async () => {
+        const response = await apiService.macros.getHistory(10_000, 0, {
+          startDate: threeMonthsStart,
+          endDate: threeMonthsEnd,
+        });
+        return (response as { entries: unknown[] }).entries;
+      },
+    });
+  }, [queryClient]);
 
   // Get user data from useUser hook
   const { data: _user } = useUser();
 
   // Calculate date range for the selected period
-  const { startDate, endDate } = getDateRangeISOStrings(dateRange);
+  const { startDate, endDate } = getDateRangeData(dateRange);
 
   // Use TanStack Query hooks for data fetching
   const { data: weightGoals } = useWeightGoals();
@@ -62,7 +103,6 @@ export default function ReportingPage() {
     dataProcessed,
     averages,
     handleDownloadCSV,
-    mapDateRangeToNumeric,
   } = useReportingLogic(history, dateRange, isHistoryLoading);
 
   // Macro density breakdown chart data (percentages)
@@ -71,16 +111,16 @@ export default function ReportingPage() {
   // Define chart configurations for the new component (memoized for stable identity)
   const calorieChartLines = useMemo(
     () => [
-      { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)" }, // vibrant-accent approx
+      { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)", isArea: true }, // vibrant-accent approx
     ],
     [],
   );
 
   const macroChartLines = useMemo(
     () => [
-      { dataKey: "protein", name: "Protein (g)", color: "hsl(145, 63%, 49%)" }, // green-500 approx
-      { dataKey: "carbs", name: "Carbs (g)", color: "hsl(217, 91%, 60%)" }, // blue-500 approx
-      { dataKey: "fats", name: "Fats (g)", color: "hsl(0, 84%, 60%)" }, // red-500 approx
+      { dataKey: "protein", name: "Protein (g)", color: "hsl(145, 63%, 49%)", isArea: true }, // green-500 approx
+      { dataKey: "carbs", name: "Carbs (g)", color: "hsl(217, 91%, 60%)", isArea: true }, // blue-500 approx
+      { dataKey: "fats", name: "Fats (g)", color: "hsl(0, 84%, 60%)", isArea: true }, // red-500 approx
     ],
     [],
   );
@@ -88,12 +128,8 @@ export default function ReportingPage() {
   const showNoDataMessage =
     !isHistoryLoading && dataProcessed && aggregatedData.length === 0;
 
-  // For the line charts we now show daily data; compute a chart-specific empty state
-  const chartShowNoDataMessage =
-    !isHistoryLoading && dataProcessed && dailySeries.length === 0;
-
-  const headerTitle = "Nutrition Reports";
-  const headerSubtitle = "Track your nutrition trends and progress over time";
+  const headerTitle = "Analytics";
+  const headerSubtitle = "Deep dive into your nutrition patterns and progress";
 
   return (
     <DashboardPageContainer>
@@ -110,153 +146,105 @@ export default function ReportingPage() {
               {isHistoryLoading ? (
                 <ReportingPageSkeleton />
               ) : (
-                <>
-                  {/* Debug info for development - Adjusted condition */}
-                  {!isHistoryLoading &&
-                    history?.length === 0 &&
-                    dataProcessed && (
-                      <div className="mb-4 rounded-md border border-warning/30 bg-warning/10 px-3 py-2 text-sm text-warning">
-                        <div className="flex items-center gap-2">
-                          <svg
-                            className="h-4 w-4 shrink-0 text-warning"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth="2"
-                              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                            ></path>
-                          </svg>
-                          <span>
-                            No nutrition history found. Add some entries to see
-                            your reporting data.
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  {/* Date Range Selector */}
-                  <ProFeature>
-                    <DateRangeSelector
-                      currentRange={dateRange}
-                      onRangeChange={setDateRange}
-                      onExportClick={handleDownloadCSV}
-                      isExportDisabled={
-                        aggregatedData.length === 0 || isHistoryLoading
-                      }
-                    />
-                  </ProFeature>
-                  {/* Summary Stats */}
-                  {(() => {
-                    const calorieTarget =
-                      weightGoals?.calorieTarget ||
-                      /* tdee fallback removed: use available targets only */
-                      2000;
-                    return (
-                      <MacroSummaryStats
-                        data={aggregatedData}
-                        calorieTarget={calorieTarget}
-                        macroTarget={macroTarget}
+                <div className="flex flex-col gap-6">
+                  <DateRangeSelector
+                    currentRange={dateRange}
+                    onRangeChange={handleRangeChange}
+                    onExportClick={handleDownloadCSV}
+                    isExportDisabled={
+                      aggregatedData.length === 0 || isHistoryLoading
+                    }
+                    disabledRanges={isProUser ? [] : ["month", "3months"]}
+                    isPro={isProUser}
+                  />
+
+                  {showNoDataMessage ? (
+                    <div className="rounded-2xl border border-border/60 bg-surface/70 shadow-sm">
+                      <EmptyState
+                        title="No reporting data yet"
+                        message="Add a few meals to unlock analytics, macro trends, and meal timing insights for the selected range."
+                        size="md"
                       />
-                    );
-                  })()}
-                  {/* Mobile-optimized: MealTimeBreakdown and MacroDensityBreakdown */}
-                  <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <motion.div
-                      className="order-2 md:order-1"
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      layout
-                    >
-                      {/* MealTimeBreakdown expects raw history and ISO date strings for filtering */}
+                    </div>
+                  ) : (
+                    <>
                       {(() => {
-                        const { startDate, endDate } =
-                          getDateRangeISOStrings(dateRange);
+                        const calorieTarget = weightGoals?.calorieTarget || 2000;
                         return (
-                          <MealTimeBreakdown
-                            history={history}
-                            startDate={startDate}
-                            endDate={endDate}
+                          <MacroSummaryStats
+                            data={aggregatedData}
+                            calorieTarget={calorieTarget}
+                            macroTarget={macroTarget || undefined}
                           />
                         );
                       })()}
-                    </motion.div>
-                    <motion.div
-                      className="order-1 md:order-2"
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -12 }}
-                      transition={{ duration: 0.25, ease: "easeOut" }}
-                      layout
-                    >
-                      {/* MacroDensityBreakdown expects pre-aggregated macro density data and numeric range */}
-                      <MacroDensityBreakdown
-                        data={macroDensityData}
-                        selectedRange={mapDateRangeToNumeric(dateRange)}
-                        isLoading={isHistoryLoading}
-                        dataProcessed={dataProcessed}
-                      />
-                    </motion.div>
-                  </div>
-                  {/* Charts */}
-                  <div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-2">
-                    <ProFeature>
-                      <motion.div
-                        layout
-                        className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal"
-                      >
-                        <h2 className="mb-6 text-lg font-semibold text-foreground">
-                          Calorie Intake
-                        </h2>
-                        <div className="h-80 ">
-                          <LineChartComponent
-                            data={dailySeries}
-                            lines={calorieChartLines}
-                            isLoading={isHistoryLoading || !dataProcessed}
-                            showNoDataMessage={chartShowNoDataMessage}
-                          />
-                        </div>
-                      </motion.div>
-                    </ProFeature>
-                    <ProFeature>
-                      <motion.div
-                        layout
-                        className="rounded-xl border border-border/50 bg-surface p-4 shadow-modal"
-                      >
-                        <h2 className="mb-6 text-lg font-semibold text-foreground">
-                          Macronutrient Intake
-                        </h2>
-                        <div className="h-80">
-                          <LineChartComponent
-                            data={dailySeries}
-                            lines={macroChartLines}
-                            isLoading={isHistoryLoading || !dataProcessed}
-                            showNoDataMessage={chartShowNoDataMessage}
-                          />
-                        </div>
-                      </motion.div>
-                    </ProFeature>
-                  </div>
-                  {/* Unified Insights Dashboard */}
-                  <div className="mb-6">
-                    <ProFeature>
-                      <UnifiedInsights
-                        aggregatedData={aggregatedData}
-                        averages={averages}
-                        isLoading={isHistoryLoading}
-                        showNoDataMessage={showNoDataMessage}
-                        macroTarget={macroTarget}
-                        denominatorDays={mapDateRangeToNumeric(dateRange)}
-                        dailySeriesForRange={dailySeries}
-                      />
-                    </ProFeature>
-                  </div>
-                </>
+
+                      <ProFeature>
+                        <TrendsChartSection
+                          dailySeries={dailySeries}
+                          isHistoryLoading={isHistoryLoading}
+                          dataProcessed={dataProcessed}
+                          calorieChartLines={calorieChartLines}
+                          macroChartLines={macroChartLines}
+                        />
+                      </ProFeature>
+
+                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                        <motion.div
+                          className="flex w-full min-w-0"
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -12 }}
+                          transition={{ duration: 0.25, ease: "easeOut" }}
+                          layout
+                        >
+                          {(() => {
+                            const { startDate, endDate } =
+                              getDateRangeData(dateRange);
+                            return (
+                              <div className="w-full">
+                                <MealTimeBreakdown
+                                  history={history}
+                                  startDate={startDate}
+                                  endDate={endDate}
+                                />
+                              </div>
+                            );
+                          })()}
+                        </motion.div>
+                        <motion.div
+                          className="flex w-full min-w-0"
+                          initial={{ opacity: 0, y: 12 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: -12 }}
+                          transition={{ duration: 0.25, ease: "easeOut", delay: 0.05 }}
+                          layout
+                        >
+                          <div className="w-full">
+                            <MacroDensityBreakdown
+                              data={macroDensityData}
+                              selectedRange={mapDateRangeToNumeric(dateRange)}
+                              isLoading={isHistoryLoading}
+                              dataProcessed={dataProcessed}
+                            />
+                          </div>
+                        </motion.div>
+                      </div>
+
+                      <ProFeature>
+                        <UnifiedInsights
+                          aggregatedData={aggregatedData}
+                          averages={averages}
+                          isLoading={isHistoryLoading}
+                          showNoDataMessage={showNoDataMessage}
+                          macroTarget={macroTarget || undefined}
+                          denominatorDays={mapDateRangeToNumeric(dateRange)}
+                          dailySeriesForRange={dailySeries}
+                        />
+                      </ProFeature>
+                    </>
+                  )}
+                </div>
               )}
             </motion.div>
           }

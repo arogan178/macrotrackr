@@ -1,29 +1,19 @@
 import { motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect } from "react";
 
+import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import usePageMetadata from "@/hooks/usePageMetadata";
 
+import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
-import PageBackground from "../components/PageBackground";
 
 const FeaturesSection = React.lazy(
   () => import("../components/FeaturesSection"),
 );
 const PricingSection = React.lazy(() => import("../components/PricingSection"));
-const ProductPreviewSection = React.lazy(
-  () => import("../components/ProductPreviewSection"),
-);
-// const TestimonialsSection = React.lazy(
-//   () => import("../components/TestimonialsSection"),
-// );
-const FinalCtaSection = React.lazy(
-  () => import("../components/FinalCtaSection"),
-);
-
-// (Animations for header/hero were removed to improve FCP/LCP)
 
 const sectionRevealVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -57,35 +47,21 @@ function ThemedFallback() {
   );
 }
 
-function SectionDivider({ inverted = false }: { inverted?: boolean }) {
-  return (
-    <div className="relative w-full overflow-hidden">
-      <svg
-        viewBox="0 0 1440 80"
-        className="fill-surface"
-        style={inverted ? { transform: "scaleX(-1)" } : undefined}
-      >
-        <path d="M0,0 C480,80 960,0 1440,80 L1440,0 L0,0 Z"></path>
-      </svg>
-    </div>
-  );
-}
 const LandingPage: React.FC = () => {
   usePageMetadata({
-    title: "MacroTrackr — Nutrition & Macro Tracking",
+    title: "MacroTrackr — Macro Tracking That Fits Real Life",
     description:
-      "MacroTrackr helps you track macronutrients, set targets, and reach your health goals with a simple, powerful interface.",
+      "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
     canonical: "https://macrotrackr.com/",
     ogImage: "https://macrotrackr.com/icon.png",
   });
-  // Respect user's reduced motion preferences
   const shouldReduceMotion = useReducedMotion();
 
-  // Idle and saver-aware prefetch for lazy sections to improve perceived performance
   useEffect(() => {
-    const connection = (navigator as any).connection as
-      | { saveData?: boolean; effectiveType?: string }
-      | undefined;
+    const navigatorWithConnection = navigator as Navigator & {
+      connection?: { saveData?: boolean; effectiveType?: string };
+    };
+    const connection = navigatorWithConnection.connection;
     const isDataSaver = connection?.saveData === true;
     const isVerySlow = connection?.effectiveType === "2g";
 
@@ -95,17 +71,19 @@ const LandingPage: React.FC = () => {
     const doPrefetch = () => {
       void import("../components/FeaturesSection");
       void import("../components/PricingSection");
-      void import("../components/ProductPreviewSection");
-      void import("../components/FinalCtaSection");
     };
     const schedulePrefetch = () => {
       if ("requestIdleCallback" in globalThis) {
-        (globalThis as any).requestIdleCallback(doPrefetch, { timeout: 1500 });
+        (
+          globalThis.requestIdleCallback as (
+            callback: () => void,
+            options?: { timeout: number },
+          ) => number
+        )(doPrefetch, { timeout: 1500 });
       } else {
         setTimeout(doPrefetch, 500);
       }
     };
-    // Prefer scheduling after first paint
     requestAnimationFrame(() => schedulePrefetch());
   }, []);
 
@@ -119,12 +97,8 @@ const LandingPage: React.FC = () => {
 
   return (
     <div
-      className={`relative min-h-screen overflow-hidden text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
+      className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      {/* Shared background */}
-      <PageBackground />
-
-      {/* Structured data: SoftwareApplication + WebSite (helps search engines understand the product) */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -146,22 +120,15 @@ const LandingPage: React.FC = () => {
         }}
       />
 
-      {/* Header landmark - render immediately without entrance animation */}
-      <div aria-hidden={false}>
+      <PageBackground />
+
+      <div>
         <Header />
       </div>
 
-      {/* Main content landmark for accessibility */}
-      <main className="relative z-10 bg-background">
-        {/* Shared background */}
-        <PageBackground />
+      <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <HeroSection />
 
-        {/* Hero - render immediately without entrance animation */}
-        <div>
-          <HeroSection />
-        </div>
-        <SectionDivider />
-        {/* Features */}
         <motion.section
           {...inViewRevealProps}
           variants={sectionRevealVariants}
@@ -173,12 +140,12 @@ const LandingPage: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
         </motion.section>
-        <SectionDivider inverted />
-        {/* Pricing */}
+
         <motion.section
           {...inViewRevealProps}
           variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
+          className="pb-24"
         >
           <ErrorBoundary>
             <Suspense fallback={<ThemedFallback />}>
@@ -186,54 +153,10 @@ const LandingPage: React.FC = () => {
             </Suspense>
           </ErrorBoundary>
         </motion.section>
-        <SectionDivider />
-        {/* Product Preview */}
-        <motion.section
-          {...inViewRevealProps}
-          variants={sectionRevealVariants}
-          style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
-        >
-          <ErrorBoundary>
-            <Suspense fallback={<ThemedFallback />}>
-              <ProductPreviewSection
-                images={[
-                  {
-                    src: "/screens/dashboard.png",
-                    caption: "Track your daily macros at a glance",
-                  },
-                  {
-                    src: "/screens/food-entry.png",
-                    caption: "Quickly log your meals in seconds",
-                  },
-                  {
-                    src: "/screens/progress.png",
-                    caption: "Visualize your progress over time",
-                  },
-                  {
-                    src: "/screens/settings.png",
-                    caption: "Customizable goals and preferences",
-                  },
-                ]}
-              />
-            </Suspense>
-          </ErrorBoundary>
-        </motion.section>
-        <SectionDivider inverted />
-        {/* Final CTA */}
-        <motion.section
-          {...inViewRevealProps}
-          variants={sectionRevealVariants}
-          style={{ contentVisibility: "auto", containIntrinsicSize: "400px" }}
-        >
-          <ErrorBoundary>
-            <Suspense fallback={<ThemedFallback />}>
-              <FinalCtaSection />
-            </Suspense>
-          </ErrorBoundary>
-        </motion.section>
       </main>
 
       <Footer />
+      <BackToTopButton label="Back to top" />
     </div>
   );
 };

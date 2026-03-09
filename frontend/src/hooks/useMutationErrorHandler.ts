@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 
+import { logger } from "@/lib/logger";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 export interface MutationErrorHandlerOptions {
@@ -55,7 +56,7 @@ export function useMutationErrorHandler(
 
       if (logError) {
         const contextMessage = context ? ` (${context})` : "";
-        console.error(`Mutation error${contextMessage}:`, errorObject);
+        logger.error(`Mutation error${contextMessage}:`, errorObject);
       }
 
       if (onError) {
@@ -75,7 +76,7 @@ export function useMutationErrorHandler(
         if (onSuccess) {
           onSuccess(successMessage);
         } else {
-          console.log("Mutation success:", successMessage);
+          logger.debug("Mutation success:", successMessage);
         }
       }
     },
@@ -109,11 +110,11 @@ export function useOptimisticMutationHandler<
     useMutationErrorHandler(options);
 
   const createOptimisticHandlers = useCallback(
-    (rollbackFunction?: (context: any) => void, context?: string) => ({
+    (rollbackFunction?: (context: unknown) => void, context?: string) => ({
       onError: (
         error: unknown,
-        variables: TVariables,
-        rollbackContext: any,
+        _variables: TVariables,
+        rollbackContext: unknown,
       ) => {
         // Perform rollback if provided
         if (rollbackFunction && rollbackContext) {
@@ -122,7 +123,11 @@ export function useOptimisticMutationHandler<
 
         return handleMutationError(error, context);
       },
-      onSuccess: (_data: TData, _variables: TVariables, _rollbackContext: any) => {
+      onSuccess: (
+        _data: TData,
+        _variables: TVariables,
+        _rollbackContext: unknown,
+      ) => {
         handleMutationSuccess();
       },
     }),

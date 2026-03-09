@@ -26,9 +26,9 @@ function WeightProgressTabs() {
   // Removed unused handleBulkConfirm placeholder to satisfy no-unused-vars
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/50 bg-surface shadow-primary">
+    <div className="overflow-hidden rounded-2xl border border-border/40 bg-surface">
       {/* Tab Navigation + Delete All Button */}
-      <div className="flex items-center border-b border-border/50 pt-3 pr-8 pl-1">
+      <div className="flex items-center border-b border-border pt-3 pr-8 pl-1">
         <div className="flex">
           {tabs.map((tab) => (
             <button

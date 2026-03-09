@@ -5,7 +5,7 @@ import type { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants
 export type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 export type IconSize = keyof typeof ICON_SIZES;
 
-type ButtonVariant = "primary" | "secondary" | "danger" | "success" | "ghost";
+type ButtonVariant = "primary" | "secondary" | "neutral" | "danger" | "success" | "ghost" | "outline";
 type ButtonType = "button" | "submit" | "reset";
 type IconPosition = "left" | "right";
 
@@ -15,8 +15,14 @@ export interface ButtonProps {
   type?: ButtonType;
   variant?: ButtonVariant;
   buttonSize?: ButtonSize;
+  /** @deprecated Use leftIcon or rightIcon instead */
   icon?: ReactNode;
+  /** @deprecated Use leftIcon or rightIcon instead */
   iconPosition?: IconPosition;
+  /** Icon to display on the left side of the button text */
+  leftIcon?: ReactNode;
+  /** Icon to display on the right side of the button text */
+  rightIcon?: ReactNode;
   isLoading?: boolean;
   loadingText?: string;
   disabled?: boolean;
@@ -97,6 +103,8 @@ export type ModalProps = ConfirmationModalProps | FormModalProps;
 export interface CardContainerProps {
   children: ReactNode;
   className?: string;
+  /** Visual style variant for the card */
+  variant?: "default" | "transparent";
 }
 
 export interface InfoCardProps {

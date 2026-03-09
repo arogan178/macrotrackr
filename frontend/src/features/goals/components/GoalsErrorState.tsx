@@ -1,3 +1,4 @@
+import { CardContainer } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { WarningIcon } from "@/components/ui/Icons";
 
@@ -12,8 +13,8 @@ export default function GoalsErrorState({
 }: GoalsErrorStateProps) {
   return (
     <div className="flex min-h-[400px] items-center justify-center p-4">
-      <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-primary">
-        <div className="mb-4 text-vibrant-accent">
+      <CardContainer className="w-full max-w-md p-6">
+        <div className="mb-4 text-error">
           <WarningIcon className="mx-auto mb-3 h-12 w-12" />
           <h3 className="mb-2 text-center text-lg font-semibold text-foreground">
             Unable to Load Data
@@ -29,7 +30,6 @@ export default function GoalsErrorState({
               onClick={onRetry}
               ariaLabel="Try again"
               variant="primary"
-              className="rounded-lg bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
             >
               Try Again
             </Button>
@@ -38,12 +38,11 @@ export default function GoalsErrorState({
             onClick={() => globalThis.location.reload()}
             ariaLabel="Reload page"
             variant="secondary"
-            className="rounded-lg bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
           >
             Reload Page
           </Button>
         </div>
-      </div>
+      </CardContainer>
     </div>
   );
 }
