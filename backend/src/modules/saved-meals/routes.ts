@@ -1,15 +1,14 @@
 // src/modules/saved-meals/routes.ts
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContext } from "../../types";
+import { transformKeysToCamel } from "../../lib/mappers";
 import {
   safeQuery,
   safeExecute,
   safeQueryAll,
 } from "../../lib/database";
 import { NotFoundError, AuthorizationError } from "../../lib/errors";
-import { toCamelCase } from "../../lib/responses";
-import type { Database } from "bun:sqlite";
 import {
   checkProStatus,
   checkFeatureLimit,
@@ -31,11 +30,7 @@ interface SavedMealRow {
 }
 
 // Extended context type
-interface SavedMealsRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  db: Database;
-}
+type SavedMealsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
 // Schemas
 const SavedMealSchemas = {
@@ -117,7 +112,7 @@ export const savedMealRoutes = (app: Elysia) =>
 
           return {
             meals: meals.map((m) => {
-              const camel = toCamelCase(m) as any;
+              const camel = transformKeysToCamel(m as unknown as Record<string, unknown>) as any;
               if (camel.ingredients) {
                 try {
                   camel.ingredients = JSON.parse(camel.ingredients);
@@ -204,7 +199,7 @@ export const savedMealRoutes = (app: Elysia) =>
             throw new Error("Failed to create saved meal");
           }
 
-          const camelResult = toCamelCase(result) as any;
+          const camelResult = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
           if (camelResult.ingredients) {
             try {
               camelResult.ingredients = JSON.parse(camelResult.ingredients);
@@ -283,7 +278,7 @@ export const savedMealRoutes = (app: Elysia) =>
             );
           }
 
-          const camelResult = toCamelCase(result) as any;
+          const camelResult = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
           if (camelResult.ingredients) {
             try {
               camelResult.ingredients = JSON.parse(camelResult.ingredients);
@@ -336,14 +331,14 @@ export const savedMealRoutes = (app: Elysia) =>
 
           return {
             success: true,
-            message: `Saved meal ${mealId} deleted.`,
+            id: Number(mealId),
           };
         },
         {
           params: SavedMealSchemas.mealIdParam,
           response: t.Object({
             success: t.Boolean(),
-            message: t.String(),
+            id: t.Numeric(),
           }),
           detail: {
             summary: "Delete a saved meal",

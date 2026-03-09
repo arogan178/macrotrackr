@@ -2,19 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, UserDetailsResponse } from "@/utils/apiServices";
-
-// Types for settings mutations
-interface UserSettingsPayload {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  dateOfBirth?: string | undefined;
-  height?: number | undefined;
-  weight?: number | undefined;
-  gender?: "male" | "female" | undefined;
-  activityLevel?: number | undefined;
-}
+import {
+  apiService,
+  UserDetailsResponse,
+  type UserSettingsPayload,
+} from "@/utils/apiServices";
 
 /**
  * Query hook for fetching user settings
