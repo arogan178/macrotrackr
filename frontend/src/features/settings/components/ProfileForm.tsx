@@ -71,10 +71,10 @@ export default function ProfileForm({
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
             <div className="mr-4 rounded-xl bg-primary/10 p-3">
-              <UserIcon className="h-7 w-7 flex-shrink-0 text-primary" />
+              <UserIcon className="h-7 w-7 shrink-0 text-primary" />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-bold text-foreground">
+              <h3 className="truncate text-xl font-semibold text-foreground">
                 Profile Information
               </h3>
               <p className="mt-1 text-sm text-muted">

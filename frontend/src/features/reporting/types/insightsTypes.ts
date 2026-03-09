@@ -45,6 +45,9 @@ export interface DataQualityResult {
   totalDaysInPeriod: number;
   completionRate: number;
   message: string;
+  currentStreak: number;
+  longestStreak: number;
+  missedDays: number;
 }
 
 export interface MacroDensityResult {
@@ -70,13 +73,15 @@ export interface DailyAverageItem {
 
 export interface MetricCardProps {
   title: string;
-  value: string | number;
-  subtitle: string;
+  tooltipText?: string;
+  value?: string | number;
+  subtitle?: string;
   score: number;
-  bgGradient: string;
-  borderColor: string;
-  textColor: string;
+  bgGradient?: string;
+  borderColor?: string;
+  textColor?: string;
   delay?: number;
+  variant?: "default" | "custom";
   children?: React.ReactNode;
 }
 
@@ -90,4 +95,6 @@ export interface ActionCardProps {
 export interface TrendDisplayProps {
   label: string;
   trend: TrendResult;
+  data?: any[];
+  dataKey?: string;
 }

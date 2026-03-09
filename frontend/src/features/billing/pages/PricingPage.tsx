@@ -6,10 +6,12 @@ import React, { useEffect, useState } from "react";
 import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { CheckIcon, CircleQuestionMarkIcon, IconButton } from "@/components/ui";
-import { PRICING, PRICING_PLANS } from "@/config/pricing";
+import { CircleQuestionMarkIcon } from "@/components/ui";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
+import { useUser } from "@/hooks/auth/useAuthQueries";
+import { usePageDataSync } from "@/hooks/usePageDataSync";
 import usePageMetadata from "@/hooks/usePageMetadata";
+import { useStore } from "@/store/store";
 import { createCheckoutSession } from "@/utils/apiBilling";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
@@ -32,21 +34,6 @@ const faqs = [
   },
 ];
 
-// --- Handlers hoisted outside component (stable reference) ---
-
-const handleUpgrade = async (plan: "monthly" | "yearly") => {
-  try {
-    const { url } = await createCheckoutSession(
-      globalThis.location.origin + "/settings?upgraded=true",
-      globalThis.location.origin + "/pricing",
-      plan,
-    );
-    globalThis.location.href = url;
-  } catch {
-    alert("Failed to start checkout. Please try again.");
-  }
-};
-
 /**
  * /pricing page – Cards + FAQ.
  *
@@ -65,6 +52,11 @@ const PricingPage: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | undefined>(0);
   const { isLoaded, isSignedIn } = useAuth();
   const navigate = useNavigate();
+  const { showNotification } = useStore();
+
+  // Sync subscription status from user data
+  useUser();
+  usePageDataSync();
 
   useEffect(() => {
     if (!isLoaded) return;
@@ -79,6 +71,22 @@ const PricingPage: React.FC = () => {
 
   const toggleFaq = (index: number) => {
     setOpenFaq((previous) => (previous === index ? undefined : index));
+  };
+
+  const handleUpgrade = async (plan: "monthly" | "yearly") => {
+    try {
+      const { url } = await createCheckoutSession(
+        globalThis.location.origin + "/settings?upgraded=true",
+        globalThis.location.origin + "/pricing",
+        plan,
+      );
+      globalThis.location.href = url;
+    } catch {
+      showNotification(
+        "We couldn't start checkout right now. Please try again in a moment.",
+        "error",
+      );
+    }
   };
 
   return (
@@ -118,7 +126,7 @@ const PricingPage: React.FC = () => {
                   >
                     <button
                       type="button"
-                      className="flex w-full items-start justify-between gap-4 text-left"
+                      className="flex min-h-11 w-full items-start justify-between gap-4 rounded-xl text-left transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
                       aria-expanded={isOpen}
                       onClick={() => toggleFaq(index)}
                     >
@@ -126,27 +134,16 @@ const PricingPage: React.FC = () => {
                         <CircleQuestionMarkIcon className="mt-0.5 mr-2 h-5 w-5 shrink-0 text-primary" />
                         {faq.question}
                       </span>
-                      <IconButton
-                        variant="custom"
-                        ariaLabel={isOpen ? "Collapse FAQ" : "Expand FAQ"}
-                        onClick={(event_) => {
-                          event_.stopPropagation();
-                          toggleFaq(index);
-                        }}
-                        icon={
-                          <span
-                            className={`inline-flex h-5 w-5 items-center justify-center rounded-full border border-border text-[10px] font-bold transition-all ${
-                              isOpen
-                                ? "rotate-45 bg-primary/10 text-primary"
-                                : "group-hover:bg-primary/10 group-hover:text-primary"
-                            }`}
-                            aria-hidden="true"
-                          >
-                            +
-                          </span>
-                        }
-                        className="mt-0.5"
-                      />
+                      <span
+                        className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border text-[10px] font-bold transition-[background-color,color,transform] duration-200 ${
+                          isOpen
+                            ? "rotate-45 bg-primary/10 text-primary"
+                            : "group-hover:bg-primary/10 group-hover:text-primary"
+                        }`}
+                        aria-hidden="true"
+                      >
+                        +
+                      </span>
                     </button>
                     <AnimatePresence initial={false}>
                       {isOpen ? (

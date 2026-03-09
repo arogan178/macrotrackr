@@ -108,21 +108,21 @@ function WeightGoalDetails({
       </div>
 
       <div className="mb-5 grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="rounded-md bg-surface/30 p-3">
+        <div className="rounded-md bg-surface-2 p-3">
           <div className="mb-1 text-sm text-foreground">Starting Weight</div>
           <div className="text-xl font-medium text-foreground">
             {startingWeight === undefined ? "Not set" : `${startingWeight} kg`}
           </div>
         </div>
 
-        <div className="rounded-md bg-surface/30 p-3">
+        <div className="rounded-md bg-surface-2 p-3">
           <div className="mb-1 text-sm text-foreground">Target Weight</div>
           <div className="text-xl font-medium text-foreground">
             {targetWeight === undefined ? "Not set" : `${targetWeight} kg`}
           </div>
         </div>
 
-        <div className="rounded-md bg-surface/30 p-3">
+        <div className="rounded-md bg-surface-2 p-3">
           <div className="mb-1 text-sm text-foreground">Daily Calories</div>
           <div className="text-xl font-medium text-foreground">
             {calorieTarget === undefined ? "Not set" : `${calorieTarget} kcal`}
@@ -142,7 +142,7 @@ function WeightGoalDetails({
           ) : undefined}
         </div>
 
-        <div className="rounded-md bg-surface/30 p-3">
+        <div className="rounded-md bg-surface-2 p-3">
           <div className="mb-1 text-sm text-foreground">Timeline</div>
           <div className="text-xl font-medium text-foreground">
             {daysRemaining === undefined

@@ -1,42 +1,24 @@
-import { Link } from "@tanstack/react-router";
 import React from "react";
 
-import LogoButton from "@/components/layout/LogoButton";
-import { BackIcon, Button } from "@/components/ui";
-import PageBackground from "@/features/landing/components/PageBackground";
+import PageBackground from "@/components/layout/PageBackground";
+import BackToTopButton from "@/features/landing/components/BackToTopButton";
+import Footer from "@/features/landing/components/Footer";
+import LegalHeader from "@/features/landing/components/LegalHeader";
 
 const TermsAndConditionsPage: React.FC = () => {
   return (
-    <div className="relative min-h-screen overflow-hidden text-foreground">
+    <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
       <PageBackground />
-      <header className="sticky top-0 z-10 border-b border-border bg-surface/80 backdrop-blur-sm">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between py-6">
-            <Link to="/" className="flex items-center" aria-label="Home">
-              <LogoButton className="h-0" />
-            </Link>
-            <Link to="/" aria-label="Back to Home">
-              <Button
-                text="Back to Home"
-                variant="ghost"
-                buttonSize="sm"
-                ariaLabel="Back"
-                icon={<BackIcon />}
-                iconPosition="left"
-              />
-            </Link>
-          </div>
-        </div>
-      </header>
+      <LegalHeader />
 
-      <main className="relative z-10 px-4 py-12 sm:px-6 lg:px-8">
+      <main className="relative z-10 px-4 pt-24 pb-14 sm:px-6 sm:pt-28 lg:px-8">
         <div className="mx-auto max-w-4xl">
-          <div className="rounded-xl border border-border bg-surface p-8 lg:p-12">
+          <div className="rounded-3xl border border-border/70 bg-background/70 p-8 shadow-2xl shadow-black/10 backdrop-blur-sm lg:p-12">
             <h1 className="mb-8 text-4xl font-bold text-foreground">
               Terms and Conditions
             </h1>
 
-            <div className="prose prose-invert prose-slate max-w-none">
+            <div className="prose prose-slate prose-headings:text-foreground prose-p:text-foreground/85 prose-li:text-foreground/85 prose-strong:text-foreground prose-a:text-primary dark:prose-invert max-w-none">
               <p className="mb-8 text-lg text-foreground">
                 Last updated: {new Date().toLocaleDateString()}
               </p>
@@ -180,7 +162,7 @@ const TermsAndConditionsPage: React.FC = () => {
                 <h2 className="mb-3 text-2xl font-semibold text-foreground">
                   13. Contact Information
                 </h2>
-                <div className="rounded-lg border border-border/50 bg-surface/50 p-4 text-foreground">
+                <div className="rounded-2xl border border-border/70 bg-surface/70 p-4 text-foreground backdrop-blur-sm">
                   <p>Website: www.macrotrackr.com</p>
                   <p>Email: contact@macrotrackr.com</p>
                 </div>
@@ -189,6 +171,9 @@ const TermsAndConditionsPage: React.FC = () => {
           </div>
         </div>
       </main>
+
+      <Footer />
+      <BackToTopButton label="Back to top" className="bottom-32 sm:bottom-28" />
     </div>
   );
 };

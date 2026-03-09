@@ -2,15 +2,29 @@
 import { Elysia } from "elysia";
 import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../middleware/auth";
+import type { AuthenticatedContext } from "../../types";
 import {
   safeQuery,
   safeQueryAll,
   safeExecute,
   type HabitRow,
 } from "../../lib/database";
-import { NotFoundError } from "../../lib/errors";
-import { featureLimitGuard } from "../../middleware/pro-guard";
+import {
+  AuthorizationError,
+  AuthenticationError,
+  NotFoundError,
+} from "../../lib/errors";
+import { checkFeatureLimit } from "../../middleware/clerk-guards";
+import type { Database } from "bun:sqlite";
+
+// Extended habits context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface HabitsRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+}
 
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
@@ -21,7 +35,7 @@ export const habitRoutes = (app: Elysia) =>
       .get(
         "/",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database };
+          const { internalUserId, db } = context as HabitsRouteContext;
 
           const query = `
             SELECT id, user_id, title, icon_name, current, target, accent_color, 
@@ -31,7 +45,7 @@ export const habitRoutes = (app: Elysia) =>
             ORDER BY created_at DESC
           `;
 
-          const habitsResult = safeQueryAll(db, query, [user.userId]) as HabitRow[];
+          const habitsResult = safeQueryAll(db, query, [internalUserId]) as HabitRow[];
 
           const apiResponse = habitsResult.map((habit) => ({
             id: habit.id,
@@ -76,14 +90,17 @@ export const habitRoutes = (app: Elysia) =>
       )
 
       // --- Create New Habit ---
-      .use(featureLimitGuard("MAX_HABITS"))
       .post(
         "/",
         async (context: any) => {
-          const { body, user, db, checkLimit } = context as AuthenticatedContext & { db: import("bun:sqlite").Database; body?: Record<string, unknown>; checkLimit?: (count: number) => Promise<void> };
+          const { body, internalUserId, db } = context as HabitsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
+          }
+
+          if (!internalUserId) {
+            throw new AuthenticationError("Authentication required. Please sign in.");
           }
 
           // Check current habit count before creating new one
@@ -91,12 +108,19 @@ export const habitRoutes = (app: Elysia) =>
             safeQuery<{ count: number }>(
               db,
               "SELECT COUNT(*) as count FROM habits WHERE user_id = ?",
-              [user.userId]
+              [internalUserId]
             )?.count || 0;
 
-          // Check if user can create another habit
-          if (checkLimit) {
-            await checkLimit(currentHabitCount + 1);
+          // Check if user can create another habit based on Free/Pro limits
+          const featureLimitResult = await checkFeatureLimit(
+            internalUserId,
+            "MAX_HABITS",
+            currentHabitCount
+          );
+          if (!featureLimitResult.allowed) {
+            throw new AuthorizationError(
+              featureLimitResult.message || "Feature limit reached"
+            );
           }
 
           const {
@@ -133,7 +157,7 @@ export const habitRoutes = (app: Elysia) =>
 
           safeExecute(db, query, [
             id,
-            user.userId,
+            internalUserId,
             title,
             iconName,
             current,
@@ -147,7 +171,7 @@ export const habitRoutes = (app: Elysia) =>
           // Return properly typed response
           return {
             id,
-            userId: user.userId.toString(),
+            userId: internalUserId?.toString(),
             title,
             iconName,
             current,
@@ -173,7 +197,7 @@ export const habitRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { params, body, user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database; body?: Record<string, unknown>; params?: Record<string, string> };
+          const { params, body, internalUserId, db } = context as HabitsRouteContext;
 
           if (!body) {
             throw new Error("Request body is required");
@@ -213,7 +237,7 @@ export const habitRoutes = (app: Elysia) =>
           `;
           const existingHabit = safeQuery(db, checkQuery, [
             habitId,
-            user.userId,
+            internalUserId,
           ]);
 
           if (!existingHabit) {
@@ -237,7 +261,7 @@ export const habitRoutes = (app: Elysia) =>
             createdAt,
             completedAt || null,
             habitId,
-            user.userId,
+            internalUserId,
           ]);
 
           return { success: true };
@@ -256,7 +280,7 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { params, user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database; params?: Record<string, string> };
+          const { params, internalUserId, db } = context as HabitsRouteContext;
 
           const habitId = params?.id;
           if (!habitId) {
@@ -269,7 +293,7 @@ export const habitRoutes = (app: Elysia) =>
           `;
           const existingHabit = safeQuery(db, checkQuery, [
             habitId,
-            user.userId,
+            internalUserId,
           ]);
 
           if (!existingHabit) {
@@ -281,7 +305,7 @@ export const habitRoutes = (app: Elysia) =>
             WHERE id = ? AND user_id = ?
           `;
 
-          safeExecute(db, deleteQuery, [habitId, user.userId]);
+          safeExecute(db, deleteQuery, [habitId, internalUserId]);
 
           return { success: true };
         },
@@ -298,14 +322,14 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/",
         async (context: any) => {
-          const { user, db } = context as AuthenticatedContext & { db: import("bun:sqlite").Database };
+          const { internalUserId, db } = context as HabitsRouteContext;
 
           const query = `
             DELETE FROM habits
             WHERE user_id = ?
           `;
 
-          safeExecute(db, query, [user.userId]);
+          safeExecute(db, query, [internalUserId]);
 
           return { success: true };
         },

@@ -18,7 +18,7 @@ interface RecommendationsSectionProps {
 
 function getProteinRecommendation(proteinAverage: number): string {
   if (proteinAverage === 0) {
-    return "Ready to optimize your protein intake? Start tracking to get personalized muscle recovery recommendations!";
+    return "Ready to optimise your protein intake? Start tracking to get personalised muscle recovery recommendations!";
   }
   if (proteinAverage >= 120) {
     return "Excellent protein intake! You're supporting optimal muscle recovery and growth.";
@@ -44,44 +44,46 @@ export default function RecommendationsSection({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.5 }}
-      className="rounded-lg border border-green-500/20 bg-success/10 p-4"
+      className="flex flex-col gap-6"
     >
-      <div className="mb-3 flex items-center">
-        <LightningIcon className="mr-2  text-success" />
-        <h3 className="text-md font-medium text-success">
-          Personalized Action Plan
+      <div className="flex items-center text-foreground/90">
+        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+          <LightningIcon className="h-5 w-5 text-primary" />
+        </div>
+        <h3 className="text-xl font-bold tracking-tight">
+          Personalised Action Plan
         </h3>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
         <ActionCard
           title="Macro Balance"
-          bgColor="bg-purple-900/50"
+          bgColor="bg-purple-500/10 text-purple-400"
           message={macroBalance.recommendations}
-          icon={<BalanceIcon className="h-4 w-4 text-purple-400" />}
+          icon={<BalanceIcon className="h-5 w-5" />}
         />
 
         <ActionCard
           title="Food Quality"
-          bgColor="bg-emerald-900/50"
+          bgColor="bg-primary/10 text-primary"
           message={macroDensity.message}
-          icon={<NutrientIcon className="h-4 w-4 text-primary" />}
+          icon={<NutrientIcon className="h-5 w-5" />}
         />
 
         {averages.protein < 100 && (
           <ActionCard
             title="Protein Goals"
-            bgColor="bg-emerald-900/50"
+            bgColor="bg-blue-500/10 text-blue-400"
             message={getProteinRecommendation(averages.protein)}
-            icon={<ProteinIcon className="h-4 w-4 text-primary" />}
+            icon={<ProteinIcon className="h-5 w-5" />}
           />
         )}
 
         <ActionCard
           title="Next Steps"
-          bgColor="bg-emerald-900/50"
+          bgColor="bg-emerald-500/10 text-emerald-400"
           message={getNextStepsRecommendation(dataQuality.completionRate)}
-          icon={<ClipboardIcon className="h-4 w-4 text-primary" />}
+          icon={<ClipboardIcon className="h-5 w-5" />}
         />
       </div>
     </motion.div>

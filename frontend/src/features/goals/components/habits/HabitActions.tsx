@@ -27,7 +27,7 @@ function HabitActions({
 }: HabitActionsProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isActionInProgress, setIsActionInProgress] = useState(false);
-  const menuReference = useRef<HTMLDivElement>(undefined);
+  const menuReference = useRef<HTMLDivElement>(null);
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -79,7 +79,7 @@ function HabitActions({
   };
 
   return (
-    <div className="relative flex items-center" ref={menuReference}>
+    <div className="relative flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100" ref={menuReference}>
       {/* Progress increment button */}
       {!isComplete && (
         <button
@@ -117,7 +117,7 @@ function HabitActions({
       {!isComplete && (
         <button
           onClick={() => setIsMenuOpen(!isMenuOpen)}
-          className="rounded-full p-1.5 text-foreground hover:bg-surface/50 hover:text-foreground"
+          className="rounded-full p-1.5 text-foreground hover:bg-surface-2 hover:text-foreground"
           title="More actions"
         >
           <MoreVerticalIcon size="sm" />
@@ -125,11 +125,11 @@ function HabitActions({
       )}{" "}
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-lg border border-border bg-surface py-0.5 text-xs shadow-lg">
+        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-xl border border-border bg-surface py-0.5 text-xs">
           {onEdit && (
             <button
               onClick={handleEdit}
-              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface/50"
+              className="flex w-full items-center px-3 py-1.5 text-left text-foreground hover:bg-surface-2"
             >
               <EditIcon size="sm" className="mr-1.5" />
               Edit
@@ -141,7 +141,7 @@ function HabitActions({
             <button
               onClick={handleDelete}
               disabled={isActionInProgress}
-              className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface/50"
+              className="flex w-full items-center px-3 py-1.5 text-left text-error hover:bg-surface-2"
             >
               <TrashIcon size="sm" className="mr-1.5" />
               Delete

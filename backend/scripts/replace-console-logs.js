@@ -34,7 +34,7 @@ function analyzeFile(filePath) {
   const fullPath = path.join(__dirname, "..", filePath);
 
   if (!fs.existsSync(fullPath)) {
-    console.log(`❌ File not found: ${filePath}`);
+    console.log(`File not found: ${filePath}`);
     return;
   }
 
@@ -58,7 +58,7 @@ function analyzeFile(filePath) {
   });
 
   if (consoleStatements.length > 0) {
-    console.log(`\n📄 ${filePath}:`);
+    console.log(`\n${filePath}:`);
     consoleStatements.forEach((stmt) => {
       console.log(
         `   Line ${stmt.line}: ${stmt.type} - ${stmt.content.substring(
@@ -67,16 +67,16 @@ function analyzeFile(filePath) {
         )}...`
       );
     });
-    console.log(`   📊 Total console statements: ${consoleStatements.length}`);
+    console.log(`   Total console statements: ${consoleStatements.length}`);
   } else {
-    console.log(`✅ ${filePath}: Clean - no console statements found`);
+    console.log(`${filePath}: Clean - no console statements found`);
   }
 
   return consoleStatements.length;
 }
 
 function main() {
-  console.log("🔍 Analyzing remaining console statements...\n");
+  console.log("Analyzing remaining console statements...\n");
 
   let totalStatements = 0;
 
@@ -84,11 +84,11 @@ function main() {
     totalStatements += analyzeFile(file) || 0;
   });
 
-  console.log(`\n📈 Summary:`);
+  console.log(`\nSummary:`);
   console.log(`   Total console statements remaining: ${totalStatements}`);
 
   if (totalStatements > 0) {
-    console.log(`\n💡 Recommended actions:`);
+    console.log(`\nRecommended actions:`);
     console.log(
       `   1. Add 'import { loggerHelpers } from "../../lib/logger";' to each file`
     );
@@ -102,7 +102,7 @@ function main() {
       `   4. Consider removing debug console.log statements entirely`
     );
   } else {
-    console.log(`   🎉 All console statements have been replaced!`);
+    console.log(`   All console statements have been replaced!`);
   }
 }
 

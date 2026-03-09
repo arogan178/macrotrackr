@@ -1,0 +1,62 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [ develop, master ]
+  pull_request:
+    branches: [ develop, master ]
+  workflow_call:
+
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: bun install
+
+    - name: Typecheck
+      working-directory: ./backend
+      run: bun run typecheck
+
+    - name: Lint
+      working-directory: ./backend
+      run: bun run lint
+
+    - name: Test
+      working-directory: ./backend
+      run: bun run test
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+
+    - name: Install dependencies
+      working-directory: ./frontend
+      run: bun install
+
+    - name: Typecheck
+      working-directory: ./frontend
+      run: bun run typecheck
+
+    - name: Lint
+      working-directory: ./frontend
+      run: bun run lint
+
+    - name: Build
+      working-directory: ./frontend
+      run: bun run build

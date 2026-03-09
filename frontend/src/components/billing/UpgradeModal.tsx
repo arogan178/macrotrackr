@@ -46,7 +46,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
     >
       <div className="text-left">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warning">
-          <AwardIcon className="h-6 w-6 text-warning" />
+          <AwardIcon className="h-6 w-6 text-black" />
         </div>
         <p className="mb-4 text-foreground">{description}</p>
 

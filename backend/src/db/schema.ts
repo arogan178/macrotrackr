@@ -8,7 +8,7 @@ import { logger } from "../lib/logger";
  * @param db - The Bun SQLite database instance.
  */
 export function initializeSchema(db: Database) {
-  logger.info("🚀 Initializing database schema...");
+  logger.info("Initializing database schema...");
 
   // Enable Foreign Key support (important for relationships)
   db.exec("PRAGMA foreign_keys = ON;");
@@ -135,6 +135,20 @@ export function initializeSchema(db: Database) {
           id TEXT PRIMARY KEY,
           received_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
+
+        -- Saved Meals Table (Pro Feature) --
+        CREATE TABLE IF NOT EXISTS saved_meals (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          user_id INTEGER NOT NULL,
+          name TEXT NOT NULL,
+          protein REAL NOT NULL CHECK(protein >= 0.0),
+          carbs REAL NOT NULL CHECK(carbs >= 0.0),
+          fats REAL NOT NULL CHECK(fats >= 0.0),
+          meal_type TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack')),
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
     `);
 
   // --- Simple Migration Logic (Add columns if they don't exist) ---
@@ -152,7 +166,7 @@ export function initializeSchema(db: Database) {
 
     if (columnExists.count === 0) {
       logger.info(
-        `    ➕ Adding column '${columnName}' to table '${tableName}'...`
+        `    Adding column '${columnName}' to table '${tableName}'...`
       );
       try {
         db.exec(
@@ -160,7 +174,7 @@ export function initializeSchema(db: Database) {
         );
         if (updateLogic) {
           logger.info(
-            `       🔄 Running update logic for new column '${columnName}'...`
+            `       Running update logic for new column '${columnName}'...`
           );
           db.exec(updateLogic);
         }
@@ -216,10 +230,8 @@ export function initializeSchema(db: Database) {
     db.exec(`
       UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL;
     `);
-  } catch (error) {
-    logger.debug(
-      "Backfill for users.updated_at skipped (column may not exist yet)"
-    );
+  } catch {
+    // Intentionally ignored: column may not exist on older DB versions during idempotent migration.
   }
 
   // Apply data constraints for subscription_status (SQLite doesn't support CHECK in ALTER)
@@ -230,10 +242,8 @@ export function initializeSchema(db: Database) {
       SET subscription_status = 'free' 
       WHERE subscription_status NOT IN ('free', 'pro', 'canceled') OR subscription_status IS NULL
     `);
-  } catch (error) {
-    logger.debug(
-      "Subscription status normalization skipped (column may not exist yet)"
-    );
+  } catch {
+    // Intentionally ignored: column may not exist on older DB versions during idempotent migration.
   }
 
   // --- Conditional migration: rebuild habits table if old CHECK constraint exists ---
@@ -249,7 +259,7 @@ export function initializeSchema(db: Database) {
       ) ?? false;
 
     if (hasOldCheck) {
-      logger.info("    🔧 Migrating habits table to remove accent_color CHECK constraint...");
+      logger.info("    Migrating habits table to remove accent_color CHECK constraint...");
 
       db.exec("BEGIN IMMEDIATE TRANSACTION;");
 
@@ -286,25 +296,40 @@ export function initializeSchema(db: Database) {
 
       // Recreate indexes for habits (idempotent below will ensure existence)
       db.exec("COMMIT;");
-      logger.info("    ✅ habits table migrated successfully.");
+      logger.info("    habits table migrated successfully.");
     }
   } catch (error) {
-    logger.error({ error }, "    ❌ Failed migrating habits table; continuing with initialization");
-    try { db.exec("ROLLBACK;"); } catch {}
+    logger.error({ error }, "    Failed migrating habits table; continuing with initialization");
+    try { db.exec("ROLLBACK;"); } catch { /* ROLLBACK can fail if transaction not active */ }
   }
 
   // --- Indexes for Performance ---
-  logger.info("    ⚡ Creating indexes...");
+  logger.info("    Creating indexes...");
 
   // Basic single-column indexes
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
   );
+  // Additional performance indexes for macro_entries
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_id ON macro_entries(user_id)"
+  );
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_macro_entries_date ON macro_entries(entry_date)"
+  );
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits(user_id)");
+  // Additional performance index for habits active status
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, is_complete)"
+  );
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
+  );
+  // Additional performance index for goals (weight_goals) active status
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_goals_user_id ON weight_goals(user_id)"
   );
   db.exec(
     "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
@@ -319,7 +344,7 @@ export function initializeSchema(db: Database) {
   );
 
   // --- Advanced Compound Indexes for Performance Optimization ---
-  logger.info("    🚀 Creating compound performance indexes...");
+  logger.info("    Creating compound performance indexes...");
 
   // Macro entries optimized for common query patterns
   db.exec(
@@ -367,5 +392,14 @@ export function initializeSchema(db: Database) {
     "CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)"
   );
 
-  logger.info("✅ Database schema initialized successfully.");
+  // Saved meals indexes
+  db.exec(
+    "CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)"
+  );
+
+  // Apply ingredients column additions for hybrid meal support
+  checkAndAddColumn("macro_entries", "ingredients", "TEXT DEFAULT '[]'");
+  checkAndAddColumn("saved_meals", "ingredients", "TEXT DEFAULT '[]'");
+
+  logger.info("Database schema initialized successfully.");
 }

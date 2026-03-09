@@ -9,18 +9,22 @@ import {
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
+import { AnimatePresence } from "motion/react";
 import React, { Suspense } from "react";
 
+import { PageTransition } from "@/components/animation";
 import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import { apiService } from "@/utils/apiServices";
+import { todayISO } from "@/utils/dateUtilities";
 
 import MainLayout from "./components/layout/MainLayout";
+import type { WeightGoalsResponse } from "./features/goals/types";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
-import { queryClient, queryConfigs } from "./lib/queryClient";
+import { hasStatus, queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
 
 // Lazy loaded page components
@@ -44,7 +48,7 @@ const AuthReadyPage = React.lazy(
   () => import("@/features/auth/pages/AuthReadyPage"),
 );
 const SSOCallbackPage = React.lazy(
-  () => import("@/features/auth/pages/SSOCallbackPage"),
+  () => import("@/features/auth/pages/SsoCallbackPage"),
 );
 const ReportingPage = React.lazy(
   () => import("@/features/reporting/pages/ReportingPage"),
@@ -117,11 +121,7 @@ async function safeFetch<T>(
   try {
     return await fetchFunction();
   } catch (error) {
-    if (
-      error instanceof Error &&
-      "status" in error &&
-      (error as any).status === 401
-    ) {
+    if (error instanceof Error && hasStatus(error) && error.status === 401) {
       return defaultValue;
     }
     throw error;
@@ -137,7 +137,11 @@ export const rootRoute = createRootRoute({
         <GlobalLoadingOverlay />
         <MainLayout>
           <Suspense fallback={<LoadingFallback />}>
-            <Outlet />
+            <AnimatePresence mode="wait">
+              <PageTransition key={globalThis.location.pathname}>
+                <Outlet />
+              </PageTransition>
+            </AnimatePresence>
           </Suspense>
         </MainLayout>
       </div>
@@ -159,80 +163,42 @@ const landingRoute = createRoute({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
-  validateSearch: (search: Record<string, unknown>) => ({
-    limit: Number(search.limit) || 20,
-    offset: Number(search.offset) || 0,
-  }),
-  loaderDeps: ({ search: { offset, limit } }) => ({ offset, limit }),
   loader: async (context_) => {
-    const { deps, context } = context_ as typeof context_ & {
-      deps: { offset: number; limit: number };
+    const { context } = context_ as typeof context_ & {
       context: { queryClient: typeof queryClient };
     };
 
-    const limit = deps.limit || 20;
-    const offset = deps.offset || 0;
-    const page = Math.floor(offset / limit) + 1;
-
-    const [macroTarget, macroHistory, weightGoals, weightLog] =
-      await Promise.all([
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.macros.targets(),
-              queryFn: () =>
-                apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
-              ...queryConfigs.macros,
-            }),
-          undefined,
-        ),
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.macros.history(page),
-              queryFn: () => apiService.macros.getHistory(limit, offset),
-              ...queryConfigs.history,
-            }),
-          { entries: [], hasMore: false, total: 0 },
-        ),
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.goals.weight(),
-              queryFn: () =>
-                apiService.goals.getWeightGoals().then((r) => r ?? null),
-              ...queryConfigs.goals,
-            }),
-          null,
-        ),
-        safeFetch(
-          () =>
-            context.queryClient.fetchQuery({
-              queryKey: queryKeys.goals.weightLog(),
-              queryFn: () => apiService.goals.getWeightLog(),
-              ...queryConfigs.goals,
-            }),
-          [],
-        ),
-      ]);
+    const [weightGoals, weightLog] = await Promise.all([
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weight(),
+            queryFn: () =>
+              apiService.goals.getWeightGoals().then((r) => r ?? null),
+            ...queryConfigs.longLived,
+          }),
+        null as WeightGoalsResponse | null,
+      ),
+      safeFetch(
+        () =>
+          context.queryClient.fetchQuery({
+            queryKey: queryKeys.goals.weightLog(),
+            queryFn: () => apiService.goals.getWeightLog(),
+            ...queryConfigs.longLived,
+          }),
+        [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
+      ),
+    ]);
 
     const latestWeight =
-      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+      weightLog && weightLog.length > 0
+        ? weightLog.at(-1)?.weight
+        : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
 
-    const history = macroHistory as {
-      entries: unknown[];
-      hasMore: boolean;
-      total: number;
-    };
-
     return {
-      macroTarget,
-      history: history.entries,
-      historyHasMore: history.hasMore,
-      historyTotal: history.total,
       weightGoals: transformedWeightGoals,
       weightLog: Array.isArray(weightLog) ? weightLog : [],
     };
@@ -249,6 +215,9 @@ export const homeRoute = createRoute({
 const settingsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/settings",
+  validateSearch: (search: Record<string, unknown>) => ({
+    tab: search.tab as string | undefined,
+  }),
   component: () => (
     <RequireAuth>
       <RequireCompleteProfile>
@@ -272,10 +241,12 @@ export const goalsRoute = createRoute({
           context.queryClient.fetchQuery({
             queryKey: queryKeys.macros.targets(),
             queryFn: () =>
-              apiService.macros.getMacroTarget().then((r) => r?.macroTarget),
+              apiService.macros
+                .getMacroTarget()
+                .then((r) => r?.macroTarget ?? null),
             ...queryConfigs.macros,
           }),
-        undefined,
+        null,
       ),
       safeFetch(
         () =>
@@ -283,32 +254,34 @@ export const goalsRoute = createRoute({
             queryKey: queryKeys.goals.weight(),
             queryFn: () =>
               apiService.goals.getWeightGoals().then((r) => r ?? null),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
-        null,
+        null as WeightGoalsResponse | null,
       ),
       safeFetch(
         () =>
           context.queryClient.fetchQuery({
             queryKey: queryKeys.goals.weightLog(),
             queryFn: () => apiService.goals.getWeightLog(),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
-        [],
+        [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
       ),
       safeFetch(
         () =>
           context.queryClient.fetchQuery({
             queryKey: queryKeys.habits.list(),
             queryFn: () => apiService.habits.getHabit(),
-            ...queryConfigs.goals,
+            ...queryConfigs.longLived,
           }),
         [],
       ),
     ]);
 
     const latestWeight =
-      weightLog && weightLog.length > 0 ? weightLog.at(-1)?.weight : undefined;
+      weightLog && weightLog.length > 0
+        ? weightLog.at(-1)?.weight
+        : undefined;
     const transformedWeightGoals = weightGoals
       ? normalizeWeightGoals(weightGoals, latestWeight)
       : undefined;
@@ -326,6 +299,30 @@ export const goalsRoute = createRoute({
       </RequireCompleteProfile>
     </RequireAuth>
   ),
+});
+
+const BlogIndexPage = React.lazy(
+  () => import("./features/landing/pages/BlogIndexPage"),
+);
+const BlogArticlePage = React.lazy(
+  () => import("./features/landing/pages/BlogArticlePage"),
+);
+
+const blogIndexRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog",
+  validateSearch: (search: Record<string, unknown>) => ({
+    category: search.category as string | undefined,
+    tag: search.tag as string | undefined,
+    q: search.q as string | undefined,
+  }),
+  component: BlogIndexPage,
+});
+
+const blogArticleRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/blog/$slug",
+  component: BlogArticlePage,
 });
 
 // New Clerk sign-in route
@@ -360,6 +357,9 @@ const signUpRoute = createRoute({
 const profileSetupRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/profile-setup",
+  validateSearch: (search: Record<string, unknown>) => ({
+    redirectTo: search.redirectTo as string | undefined,
+  }),
   component: ProfileSetupPage,
 });
 
@@ -379,6 +379,7 @@ const ssoCallbackRoute = createRoute({
   path: "/sso-callback",
   validateSearch: (search: Record<string, unknown>) => ({
     redirectTo: search.redirectTo as string | undefined,
+    flow: search.flow as string | undefined,
   }),
   component: SSOCallbackPage,
 });
@@ -397,7 +398,7 @@ export const reportingRoute = createRoute({
       context: { queryClient: typeof queryClient };
     };
 
-    const queryDate = deps.startDate || new Date().toISOString().split("T")[0]!;
+    const queryDate = deps.startDate || todayISO();
 
     return safeFetch(
       () =>
@@ -408,7 +409,7 @@ export const reportingRoute = createRoute({
               startDate: deps.startDate,
               endDate: deps.endDate,
             }),
-          ...queryConfigs.history,
+          ...queryConfigs.macros,
         }),
       null,
     );
@@ -461,6 +462,8 @@ const routeTree = rootRoute.addChildren([
   resetPasswordRoute,
   termsRoute,
   privacyRoute,
+  blogIndexRoute,
+  blogArticleRoute,
 ]);
 
 const router = createRouter({
