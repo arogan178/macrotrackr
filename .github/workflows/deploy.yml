@@ -60,7 +60,7 @@ jobs:
           # Write backend .env from GitHub environment secrets
           echo "Writing backend environment variables..."
           printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env
-          echo "✅ Backend environment variables written"
+          echo "Backend environment variables written"
 
           # Install backend dependencies
           cd backend
@@ -81,9 +81,9 @@ jobs:
           # Check if backend started successfully
           sleep 3
           if pm2 describe macro-tracker-api > /dev/null; then
-            echo "✅ Backend API started successfully"
+            echo "Backend API started successfully"
           else
-            echo "❌ Backend API failed to start"
+            echo "Backend API failed to start"
             pm2 logs macro-tracker-api --lines 20 || true
             exit 1
           fi
@@ -130,8 +130,8 @@ jobs:
         # Write frontend .env for build
         printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
 
-        echo "📋 Frontend env file contents (API URL):"
-        grep VITE_API_URL .env || echo "⚠️ VITE_API_URL not found in .env"
+        echo "Frontend env file contents (API URL):"
+        grep VITE_API_URL .env || echo "VITE_API_URL not found in .env"
 
         export NODE_OPTIONS="--max-old-space-size=4096"
         bun run build
@@ -171,7 +171,7 @@ jobs:
           exit 1
         }
 
-        echo "✅ Frontend build preflight checks passed"
+        echo "Frontend build preflight checks passed"
 
     - name: Deploy frontend dist to server
       uses: appleboy/scp-action@v0.1.4
@@ -209,9 +209,9 @@ jobs:
           # Check if frontend process started successfully
           sleep 3
           if pm2 describe macro-frontend > /dev/null; then
-            echo "✅ Frontend server started successfully"
+            echo "Frontend server started successfully"
           else
-            echo "❌ Frontend server failed to start"
+            echo "Frontend server failed to start"
             pm2 logs macro-frontend --lines 20 || true
             exit 1
           fi
@@ -244,11 +244,11 @@ jobs:
         echo "Cloudflare response: ${RESPONSE}"
 
         echo "${RESPONSE}" | grep -q '"success":true' || {
-          echo "❌ Cloudflare cache purge failed"
+          echo "Cloudflare cache purge failed"
           exit 1
         }
 
-        echo "✅ Cloudflare cache purge completed"
+        echo "Cloudflare cache purge completed"
 
     - name: Skip Cloudflare cache purge (secrets not configured)
       if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ZONE_ID == '' }}

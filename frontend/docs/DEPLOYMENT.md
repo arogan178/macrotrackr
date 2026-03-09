@@ -123,7 +123,7 @@ pm2 restart macro-frontend || pm2 start ecosystem.config.js --only macro-fronten
 
 ### Environment Variables Error
 
-If you see "❌ Error: .env.production file not found!" during deployment:
+If you see "Error: .env.production file not found!" during deployment:
 
 1. **Create the missing file**: Environment files are gitignored for security, so you need to create `.env.production` manually on your server:
 

@@ -57,7 +57,7 @@ log "Setting up production environment variables..."
 if [ "$DRY_RUN" = false ]; then
     if [ -f backend/.env.production ]; then
         cp backend/.env.production backend/.env
-        log "✅ Production environment variables copied"
+        log "Production environment variables copied"
     else
         warn "backend/.env.production file not found!"
         warn "Environment variables will not be configured"
@@ -126,7 +126,7 @@ if [ "$DRY_RUN" = false ]; then
         error "Frontend dist folder not found after build!"
         exit 1
     else
-        log "✅ Frontend dist folder found"
+        log "Frontend dist folder found"
     fi
 else
     log "Would check if frontend dist folder exists"
@@ -170,7 +170,7 @@ sleep 3
 log "Checking backend API status..."
 if [ "$DRY_RUN" = false ]; then
     if pm2 describe macro-tracker-api > /dev/null; then
-        log "✅ Backend API started successfully"
+        log "Backend API started successfully"
     else
         error "Backend API failed to start"
         pm2 logs macro-tracker-api --lines 20 || true
@@ -184,7 +184,7 @@ fi
 log "Checking frontend server status..."
 if [ "$DRY_RUN" = false ]; then
     if pm2 describe macro-frontend > /dev/null; then
-        log "✅ Frontend server started successfully"
+        log "Frontend server started successfully"
     else
         error "Frontend server failed to start"
         pm2 logs macro-frontend --lines 20 || true
