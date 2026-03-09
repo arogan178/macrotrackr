@@ -75,24 +75,24 @@ macro_tracker/
 ### Common Anti-Patterns to Avoid
 
 ```typescript
-// ❌ Inline objects break memoization
+// Inline objects break memoization
 <Component style={{ padding: 16 }} />
 
-// ✅ Hoist static objects
+// Hoist static objects
 const style = { padding: 16 };
 <Component style={style} />
 
-// ❌ Sequential awaits for independent operations
+// Sequential awaits for independent operations
 const a = await fetchA();
 const b = await fetchB();
 
-// ✅ Parallel fetching
+// Parallel fetching
 const [a, b] = await Promise.all([fetchA(), fetchB()]);
 
-// ❌ && with numbers renders "0"
+// && with numbers renders "0"
 {count && <Badge>{count}</Badge>}
 
-// ✅ Explicit comparison
+// Explicit comparison
 {count > 0 && <Badge>{count}</Badge>}
 ```
 
