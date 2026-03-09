@@ -255,7 +255,7 @@ Use `React.memo` for components that:
 - Receive object/array props that are compared by reference
 
 ```typescript
-// ✅ Good: Memoized list item with expensive rendering
+// Good: Memoized list item with expensive rendering
 const MacroEntryCard = React.memo(function MacroEntryCard({
   entry,
   onUpdate
@@ -267,7 +267,7 @@ const MacroEntryCard = React.memo(function MacroEntryCard({
   return <ComplexCard {...} />;
 });
 
-// ❌ Bad: Memoizing simple components unnecessarily
+// Bad: Memoizing simple components unnecessarily
 const SimpleBadge = React.memo(function SimpleBadge({ text }: { text: string }) {
   return <span>{text}</span>; // Too simple to benefit from memoization
 });
@@ -283,10 +283,10 @@ Avoid `useMemo` for:
 - Cases where the overhead outweighs the benefit
 
 ```typescript
-// ❌ Bad: Over-memoization of simple expressions
+// Bad: Over-memoization of simple expressions
 const total = useMemo(() => a + b, [a, b]); // Just use: const total = a + b;
 
-// ✅ Good: Memoizing expensive calculations
+// Good: Memoizing expensive calculations
 const sortedEntries = useMemo(() => {
   return [...entries].sort(
     (a, b) => new Date(b.entryDate).getTime() - new Date(a.entryDate).getTime(),
@@ -299,20 +299,20 @@ const sortedEntries = useMemo(() => {
 Move static objects, arrays, and JSX outside components to prevent recreation on every render:
 
 ```typescript
-// ❌ Bad: Object recreated on every render
+// Bad: Object recreated on every render
 function UserCard({ user }) {
   const defaultOptions = { theme: 'dark', size: 'md' }; // Recreated every render!
   return <Card options={defaultOptions} user={user} />;
 }
 
-// ✅ Good: Hoisted outside component
+// Good: Hoisted outside component
 const DEFAULT_CARD_OPTIONS = { theme: 'dark', size: 'md' };
 
 function UserCard({ user }) {
   return <Card options={DEFAULT_CARD_OPTIONS} user={user} />;
 }
 
-// ✅ Good: Static JSX hoisted outside
+// Good: Static JSX hoisted outside
 const LoadingFallback = (
   <div className="flex min-h-screen items-center justify-center">
     <LoadingSpinner size="lg" />
@@ -333,13 +333,13 @@ function AppRouter() {
 Use functional updates when new state depends on previous state:
 
 ```typescript
-// ❌ Bad: Can lead to stale state in rapid updates
+// Bad: Can lead to stale state in rapid updates
 setCount(count + 1);
 
-// ✅ Good: Functional update always uses latest state
+// Good: Functional update always uses latest state
 setCount((prev) => prev + 1);
 
-// ✅ Good: Functional update with objects
+// Good: Functional update with objects
 setUser((prev) => ({ ...prev, name: newName }));
 ```
 
@@ -348,10 +348,10 @@ setUser((prev) => ({ ...prev, name: newName }));
 Use lazy initialization for expensive initial state:
 
 ```typescript
-// ❌ Bad: Expensive computation runs on every render
+// Bad: Expensive computation runs on every render
 const [data, setData] = useState(parseLargeJSON(initialData));
 
-// ✅ Good: Expensive computation runs only once
+// Good: Expensive computation runs only once
 const [data, setData] = useState(() => parseLargeJSON(initialData));
 ```
 
@@ -422,12 +422,12 @@ useEffect(() => {
 }, []);
 ```
 
-### ⚠️ CRITICAL: Barrel File Anti-Pattern
+### CRITICAL: Barrel File Anti-Pattern
 
 **Avoid barrel files (index.ts re-exporting many modules) for large component libraries.**
 
 ```typescript
-// ❌ BAD: Barrel file forces loading ALL components
+// BAD: Barrel file forces loading ALL components
 // components/ui/index.ts
 export { Button } from "./Button";
 export { Modal } from "./Modal";
@@ -438,7 +438,7 @@ export { DataGrid } from "./DataGrid";
 // This imports EVERYTHING even if you only need Button!
 import { Button } from "@/components/ui";
 
-// ✅ GOOD: Direct imports for tree-shaking
+// GOOD: Direct imports for tree-shaking
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 ```
@@ -691,7 +691,7 @@ function SearchComponent() {
 Strategic Suspense placement for optimal loading states:
 
 ```typescript
-// ✅ Good: Granular Suspense boundaries
+// Good: Granular Suspense boundaries
 function Dashboard() {
   return (
     <div>
@@ -708,7 +708,7 @@ function Dashboard() {
   );
 }
 
-// ❌ Bad: Single Suspense wrapping everything
+// Bad: Single Suspense wrapping everything
 <Suspense fallback={<FullPageLoader />}>
   <Header />
   <ChartData />
@@ -721,15 +721,15 @@ function Dashboard() {
 ### Inline Object Creation in Render
 
 ```typescript
-// ❌ Bad: New object on every render breaks memoization
+// Bad: New object on every render breaks memoization
 <MotionDiv animate={{ x: 0, y: 100 }} />
 <Card style={{ padding: 16 }} />
 
-// ✅ Good: Hoist static objects
+// Good: Hoist static objects
 const cardStyle = { padding: 16 };
 <Card style={cardStyle} />
 
-// ✅ Good: Use useMemo for dynamic objects
+// Good: Use useMemo for dynamic objects
 const animatedStyle = useMemo(() => ({
   transform: `translateX(${offset}px)`
 }), [offset]);
@@ -738,7 +738,7 @@ const animatedStyle = useMemo(() => ({
 ### Animation Variants Inside Components
 
 ```typescript
-// ❌ Bad: Variants recreated every render
+// Bad: Variants recreated every render
 function AnimatedCard() {
   const variants = {
     hidden: { opacity: 0 },
@@ -747,7 +747,7 @@ function AnimatedCard() {
   return <motion.div variants={variants} />;
 }
 
-// ✅ Good: Hoist variants outside component
+// Good: Hoist variants outside component
 const cardVariants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
@@ -761,11 +761,11 @@ function AnimatedCard() {
 ### Over-Memoization of Simple Expressions
 
 ```typescript
-// ❌ Bad: Unnecessary memoization overhead
+// Bad: Unnecessary memoization overhead
 const displayName = useMemo(() => `${user.firstName} ${user.lastName}`, [user]);
 const isActive = useMemo(() => status === "active", [status]);
 
-// ✅ Good: Let these compute on every render
+// Good: Let these compute on every render
 const displayName = `${user.firstName} ${user.lastName}`;
 const isActive = status === "active";
 ```
@@ -773,32 +773,32 @@ const isActive = status === "active";
 ### Conditional Rendering with && for Numbers
 
 ```typescript
-// ❌ Bad: 0 renders as "0" when count is zero
+// Bad: 0 renders as "0" when count is zero
 {count && <Badge>{count}</Badge>}
 
-// ✅ Good: Explicit boolean check
+// Good: Explicit boolean check
 {count > 0 && <Badge>{count}</Badge>}
 
-// ✅ Good: Ternary for explicit fallback
+// Good: Ternary for explicit fallback
 {count ? <Badge>{count}</Badge> : null}
 ```
 
 ### Sequential Awaits for Independent Operations
 
 ```typescript
-// ❌ Bad: Sequential awaits create waterfall
+// Bad: Sequential awaits create waterfall
 const user = await fetchUser();
 const posts = await fetchPosts();
 const comments = await fetchComments();
 
-// ✅ Good: Parallel fetching
+// Good: Parallel fetching
 const [user, posts, comments] = await Promise.all([
   fetchUser(),
   fetchPosts(),
   fetchComments(),
 ]);
 
-// ✅ Good: Promise.allSettled for fault tolerance
+// Good: Promise.allSettled for fault tolerance
 const results = await Promise.allSettled([
   fetchUser(),
   fetchPosts(),
