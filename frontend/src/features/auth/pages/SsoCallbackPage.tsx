@@ -5,6 +5,10 @@ import { useEffect, useRef, useState } from "react";
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import {
+  resolveSocialAuthError,
+  type SocialAuthResolution,
+} from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
 import { ApiError, apiService } from "@/utils/apiServices";
 
@@ -34,10 +38,13 @@ export default function SSOCallbackPage() {
     flow?: string;
   };
   const [error, setError] = useState<string | null>(null);
+  const [callbackResolution, setCallbackResolution] =
+    useState<SocialAuthResolution | null>(null);
   const hasProcessedCallback = useRef(false);
   const hasProcessedRouting = useRef(false);
 
-  const redirectTo = search.redirectTo || "/home";
+  const isSignUpFlow = search.flow === "signup";
+  const redirectTo = normalizeAuthRedirect(search.redirectTo || "/home");
 
   // Step 1: Let Clerk process the OAuth redirect callback
   useEffect(() => {
@@ -51,22 +58,37 @@ export default function SSOCallbackPage() {
     }).catch((error_) => {
       // Clerk may throw if the callback was already handled (e.g. page refresh)
       // This is safe to ignore if the user is already signed in
-      logger.warn("[SSOCallback] handleRedirectCallback error (may be safe to ignore):", error_);
+      const resolution = resolveSocialAuthError(
+        error_,
+        isSignUpFlow ? "signup" : "signin",
+      );
+
+      logger.warn(
+        "[SSOCallback] handleRedirectCallback error (may be safe to ignore):",
+        error_,
+      );
+      setCallbackResolution(resolution);
     });
-  }, [handleRedirectCallback]);
+  }, [handleRedirectCallback, isSignUpFlow]);
 
   // Step 2: Once Clerk is loaded and user is signed in, handle routing
   useEffect(() => {
     if (hasProcessedRouting.current) return;
     if (!authLoaded || !userLoaded) return;
-    if (!isSignedIn || !user) return;
+
+    if (!isSignedIn || !user) {
+      if (callbackResolution) {
+        hasProcessedRouting.current = true;
+        setError(callbackResolution.message);
+      }
+      return;
+    }
 
     hasProcessedRouting.current = true;
 
     async function routeUser() {
       try {
-        const safeRedirectTo = normalizeAuthRedirect(redirectTo);
-        const isSignUpFlow = search.flow === "signup";
+        const safeRedirectTo = redirectTo;
 
         // For sign-in flows, go straight to auth-ready
         if (!isSignUpFlow) {
@@ -151,7 +173,61 @@ export default function SSOCallbackPage() {
     }
 
     routeUser();
-  }, [authLoaded, userLoaded, isSignedIn, user, navigate, redirectTo, search.flow]);
+  }, [
+    authLoaded,
+    callbackResolution,
+    isSignUpFlow,
+    isSignedIn,
+    navigate,
+    redirectTo,
+    user,
+    userLoaded,
+  ]);
+
+  const primaryAction = callbackResolution?.action === "switch-to-signin"
+    ? {
+        label: "Go to sign in",
+        onClick: () =>
+          navigate({
+            to: "/login",
+            search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+          }),
+      }
+    : callbackResolution?.action === "switch-to-signup"
+      ? {
+          label: "Go to sign up",
+          onClick: () =>
+            navigate({
+              to: "/register",
+              search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+            }),
+        }
+      : {
+          label: isSignUpFlow ? "Continue with email" : "Back to sign in",
+          onClick: () =>
+            navigate({
+              to: isSignUpFlow ? "/register" : "/login",
+              search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+            }),
+        };
+
+  const secondaryAction = isSignUpFlow
+    ? {
+        label: "Already have an account? Sign in",
+        onClick: () =>
+          navigate({
+            to: "/login",
+            search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+          }),
+      }
+    : {
+        label: "Need an account? Sign up",
+        onClick: () =>
+          navigate({
+            to: "/register",
+            search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+          }),
+      };
 
   if (error) {
     return (
@@ -177,15 +253,22 @@ export default function SSOCallbackPage() {
             Sign-in Failed
           </h1>
           <p className="mb-6 text-muted">{error}</p>
-          <button
-            type="button"
-            onClick={() =>
-              navigate({ to: "/login", search: { returnTo: undefined } })
-            }
-            className="inline-flex min-h-11 items-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
-          >
-            Try Again
-          </button>
+          <div className="flex flex-col justify-center gap-3 sm:flex-row">
+            <button
+              type="button"
+              onClick={primaryAction.onClick}
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-primary px-6 py-2 font-bold text-black transition-colors duration-200 hover:bg-primary/90 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+            >
+              {primaryAction.label}
+            </button>
+            <button
+              type="button"
+              onClick={secondaryAction.onClick}
+              className="inline-flex min-h-11 items-center justify-center rounded-full border border-border px-6 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+            >
+              {secondaryAction.label}
+            </button>
+          </div>
         </div>
       </div>
     );
