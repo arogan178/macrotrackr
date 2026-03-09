@@ -19,6 +19,11 @@ import { HistoryLimits, MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
 import MobileEntryCards from "./MobileEntryCards";
+import type {
+  EntryHistoryActions,
+  EntryHistoryHelpers,
+  EntryHistoryState,
+} from "./entryHistoryShared";
 
 interface EntryHistoryProps {
   history: MacroEntry[];
@@ -259,6 +264,54 @@ const EntryHistoryComponent = function EntryHistory({
     [],
   );
 
+  const helpers = useMemo<EntryHistoryHelpers>(
+    () => ({
+      formatDate,
+      formatTimeFromEntry,
+      capitalizeFirstLetter,
+      calculateCalories,
+    }),
+    [formatDate, formatTimeFromEntry, capitalizeFirstLetter],
+  );
+
+  const actions = useMemo<EntryHistoryActions>(
+    () => ({
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+    }),
+    [
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+    ],
+  );
+
+  const state = useMemo<EntryHistoryState>(
+    () => ({
+      collapsedDates,
+      isDeleting,
+      savedMealIds,
+      isSelectionMode,
+      selectedEntryIds,
+      onToggleEntrySelection: toggleEntrySelection,
+    }),
+    [
+      collapsedDates,
+      isDeleting,
+      savedMealIds,
+      isSelectionMode,
+      selectedEntryIds,
+      toggleEntrySelection,
+    ],
+  );
+
   const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
     const group = totalEntries.find((g) => g.date === dateToDelete);
@@ -372,44 +425,18 @@ const EntryHistoryComponent = function EntryHistory({
           <div className="hidden lg:block">
             <DesktopEntryTable
               groupedEntries={displayedEntries}
-              collapsedDates={collapsedDates}
-              formatDate={formatDate}
-              formatTimeFromEntry={formatTimeFromEntry}
-              capitalizeFirstLetter={capitalizeFirstLetter}
-              calculateCalories={calculateCalories}
-              toggleDateCollapse={toggleDateCollapse}
-              handleDeleteDate={handleDeleteDate}
-              onEdit={onEdit}
-              deleteEntry={deleteEntry}
-              isDeleting={isDeleting}
-              onSaveMeal={onSaveMeal}
-              onUnsaveMeal={onUnsaveMeal}
-              savedMealIds={savedMealIds}
-              isSelectionMode={isSelectionMode}
-              selectedEntryIds={selectedEntryIds}
-              onToggleEntrySelection={toggleEntrySelection}
+              helpers={helpers}
+              actions={actions}
+              state={state}
             />
           </div>
 
           <div className="lg:hidden">
             <MobileEntryCards
               groupedEntries={displayedEntries}
-              collapsedDates={collapsedDates}
-              formatDate={formatDate}
-              formatTimeFromEntry={formatTimeFromEntry}
-              capitalizeFirstLetter={capitalizeFirstLetter}
-              calculateCalories={calculateCalories}
-              toggleDateCollapse={toggleDateCollapse}
-              handleDeleteDate={handleDeleteDate}
-              onEdit={onEdit}
-              deleteEntry={deleteEntry}
-              isDeleting={isDeleting}
-              onSaveMeal={onSaveMeal}
-              onUnsaveMeal={onUnsaveMeal}
-              savedMealIds={savedMealIds}
-              isSelectionMode={isSelectionMode}
-              selectedEntryIds={selectedEntryIds}
-              onToggleEntrySelection={toggleEntrySelection}
+              helpers={helpers}
+              actions={actions}
+              state={state}
             />
           </div>
 

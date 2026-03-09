@@ -3,7 +3,7 @@ import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContext } from "../../types";
 import {
   safeQuery,
   safeExecute,
@@ -16,14 +16,7 @@ import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
 
-// Extended goals context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface GoalsRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
-}
+type GoalsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
 /**
  * Helper function to get the current weight from the latest weight log entry
@@ -118,6 +111,8 @@ export const goalRoutes = (app: Elysia) =>
           if (!body) {
             throw new Error("Request body is required");
           }
+
+          context.set.status = 201;
 
           const savedGoal = withTransaction(db, () => {
             // Check if a goal already exists

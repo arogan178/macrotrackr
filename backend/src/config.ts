@@ -132,11 +132,7 @@ export type Config = z.infer<typeof EnvSchema>;
 export const config: Config = parsedEnv.data;
 
 // Use basic console.log for startup message as logger may not be initialized yet
-const nodeEnv =
-  process.env.NODE_ENV ||
-  (typeof config === "object" && "NODE_ENV" in config
-    ? config.NODE_ENV
-    : "unknown");
+const nodeEnv = process.env.NODE_ENV || config.NODE_ENV || "unknown";
 if (nodeEnv !== "test") {
   console.log(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
 }

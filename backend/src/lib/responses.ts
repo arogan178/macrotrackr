@@ -2,18 +2,12 @@
 import { isAppError } from "./errors";
 import { loggerHelpers } from "./logger";
 
-/**
- * Standard success response format
- */
 export interface SuccessResponse<T = unknown> {
   success: true;
   data: T;
   message?: string;
 }
 
-/**
- * Standard error response format
- */
 export interface ErrorResponse {
   success: false;
   code: string;
@@ -34,9 +28,6 @@ function getErrorDetails(error: unknown): unknown {
   return undefined;
 }
 
-/**
- * Creates a standardized success response
- */
 export function createSuccessResponse<T>(
   data: T,
   message?: string
@@ -51,9 +42,6 @@ export function createSuccessResponse<T>(
   return response;
 }
 
-/**
- * Creates a standardized error response
- */
 export function createErrorResponse(
   code: string,
   message: string,
@@ -70,9 +58,6 @@ export function createErrorResponse(
   return response;
 }
 
-/**
- * Handles errors and sets appropriate status codes
- */
 export function handleError(
   error: unknown,
   set: ResponseContextSet,
@@ -106,9 +91,6 @@ export function handleError(
   return createErrorResponse("INTERNAL_ERROR", "An unexpected error occurred");
 }
 
-/**
- * Wraps a route handler with standardized error handling
- */
 export function withErrorHandling<T extends unknown[], R>(
   handler: (...args: T) => R | Promise<R>,
 ) {
@@ -127,13 +109,7 @@ export function withErrorHandling<T extends unknown[], R>(
   };
 }
 
-/**
- * Centralized snake_case ↔ camelCase conversion utilities
- * Re-exported from the dedicated mappers module for backward compatibility
- */
 export {
-  toCamelCase,
-  toSnakeCase,
   toCamelCaseString,
   toSnakeCaseString,
   transformKeysToCamel,

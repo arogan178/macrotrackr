@@ -1,8 +1,9 @@
 // src/modules/macros/routes.ts
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
+import { transformKeysToCamel } from "../../lib/mappers";
 import { MacroSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContext } from "../../types";
 import {
   safeQuery,
   safeExecute,
@@ -13,7 +14,6 @@ import {
 import { BadRequestError, NotFoundError } from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
-import { toCamelCase } from "../../lib/responses";
 
 import {
   buildFoodSearchCacheKey,
@@ -21,7 +21,6 @@ import {
   OpenFoodFactsApiClient,
 } from "../../lib/openfoodfacts-api-client";
 import { cacheService } from "../../lib/cache-service";
-import type { Database } from "bun:sqlite";
 import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
 
 // Import types from API client
@@ -33,13 +32,7 @@ interface CacheService {
   set: <T>(key: string, value: T) => void;
 }
 
-// Extended macros context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface MacrosRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
+interface MacrosRouteContext extends AuthenticatedRouteContext<Record<string, unknown>> {
   openFoodFactsApiClient?: {
     search: (query: string) => Promise<FoodProductResult[]>;
   };
@@ -426,7 +419,7 @@ export const macroRoutes = (app: Elysia) =>
             };
           } = {
             entries: historyResult.map((m) => {
-              const camel = toCamelCase(m) as any;
+              const camel = transformKeysToCamel(m as unknown as Record<string, unknown>) as any;
               if (camel.ingredients) {
                 try {
                   camel.ingredients = JSON.parse(camel.ingredients);
@@ -538,7 +531,7 @@ export const macroRoutes = (app: Elysia) =>
             );
           }
 
-          const response = toCamelCase(result) as any;
+          const response = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
           if (response.ingredients) {
             try {
               response.ingredients = JSON.parse(response.ingredients);
@@ -664,7 +657,7 @@ export const macroRoutes = (app: Elysia) =>
             }
           }
 
-          const response = toCamelCase(result) as any;
+          const response = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
           if (response.ingredients) {
             try {
               response.ingredients = JSON.parse(response.ingredients);
