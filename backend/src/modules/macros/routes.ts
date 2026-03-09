@@ -11,7 +11,13 @@ import {
   type MacroTargetRow,
   type MacroEntryRow,
 } from "../../lib/database";
-import { BadRequestError, NotFoundError } from "../../lib/errors";
+import {
+  AuthenticationError,
+  BadRequestError,
+  DatabaseError,
+  NotFoundError,
+  ValidationError,
+} from "../../lib/errors";
 import { getLocalDate } from "../../lib/dates";
 import { loggerHelpers } from "../../lib/logger";
 
@@ -37,6 +43,29 @@ interface MacrosRouteContext extends AuthenticatedRouteContext<Record<string, un
     search: (query: string) => Promise<FoodProductResult[]>;
   };
   cacheService?: CacheService;
+}
+
+function parseJsonArrayField<T>(
+  rawValue: string | null | undefined,
+  fieldName: string,
+): T[] {
+  if (!rawValue) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (!Array.isArray(parsed)) {
+      throw new ValidationError(`${fieldName} must be a JSON array.`);
+    }
+    return parsed as T[];
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw error;
+    }
+
+    throw new ValidationError(`Invalid ${fieldName} data in storage.`);
+  }
 }
 
 export const macroRoutes = (app: Elysia) =>
@@ -125,17 +154,10 @@ export const macroRoutes = (app: Elysia) =>
             };
           }
 
-          let lockedMacros: string[] = [];
-          try {
-            lockedMacros = JSON.parse(macroTargetResult.locked_macros || "[]");
-          } catch (error) {
-            loggerHelpers.error(error as Error, {
-              operation: "parse_locked_macros",
-              path: "/macros/target",
-              userId: internalUserId ?? undefined,
-            });
-            lockedMacros = [];
-          }
+          const lockedMacros = parseJsonArrayField<string>(
+            macroTargetResult.locked_macros,
+            "locked macros",
+          );
 
           const macroTargetData = {
             proteinPercentage: macroTargetResult.protein_percentage,
@@ -168,7 +190,7 @@ export const macroRoutes = (app: Elysia) =>
           const { internalUserId, db, body, request } = context as MacrosRouteContext;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           // Get correlation ID from request headers if available
@@ -218,24 +240,13 @@ export const macroRoutes = (app: Elysia) =>
           );
 
           if (!savedResult) {
-            throw new Error("Failed to save macro targets");
+            throw new DatabaseError("Failed to save macro targets");
           }
 
-          // Parse locked_macros from saved result
-          let lockedMacros: string[] = [];
-          try {
-            lockedMacros = JSON.parse(savedResult.locked_macros || "[]");
-            if (!Array.isArray(lockedMacros)) {
-              lockedMacros = [];
-            }
-          } catch (error) {
-            loggerHelpers.error(error as Error, {
-              operation: "parse_saved_locked_macros",
-              path: "/macros/target",
-              userId: internalUserId ?? undefined,
-            });
-            lockedMacros = [];
-          }
+          const lockedMacros = parseJsonArrayField<string>(
+            savedResult.locked_macros,
+            "locked macros",
+          );
 
           const macroTargetResponse = {
             proteinPercentage: savedResult.protein_percentage,
@@ -280,7 +291,7 @@ export const macroRoutes = (app: Elysia) =>
           if (endDate && !startDate) startDate = endDate;
 
           if (!startDate || !endDate) {
-            throw new Error("Date range is required");
+            throw new BadRequestError("Date range is required");
           }
 
           const result = safeQuery<{
@@ -326,7 +337,7 @@ export const macroRoutes = (app: Elysia) =>
           const { db, internalUserId, query } = context as MacrosRouteContext;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
@@ -421,11 +432,10 @@ export const macroRoutes = (app: Elysia) =>
             entries: historyResult.map((m) => {
               const camel = transformKeysToCamel(m as unknown as Record<string, unknown>) as any;
               if (camel.ingredients) {
-                try {
-                  camel.ingredients = JSON.parse(camel.ingredients);
-                } catch {
-                  camel.ingredients = [];
-                }
+                camel.ingredients = parseJsonArrayField<Record<string, unknown>>(
+                  camel.ingredients,
+                  "ingredients",
+                );
               }
               return camel;
             }),
@@ -482,7 +492,7 @@ export const macroRoutes = (app: Elysia) =>
           const { db, internalUserId, body } = context as MacrosRouteContext;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           const {
@@ -526,18 +536,17 @@ export const macroRoutes = (app: Elysia) =>
           );
 
           if (!result) {
-            throw new Error(
+            throw new DatabaseError(
               "Failed to create macro entry or retrieve confirmation."
             );
           }
 
           const response = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
           if (response.ingredients) {
-            try {
-              response.ingredients = JSON.parse(response.ingredients);
-            } catch {
-              response.ingredients = [];
-            }
+            response.ingredients = parseJsonArrayField<Record<string, unknown>>(
+              response.ingredients,
+              "ingredients",
+            );
           }
           return response;
         },
@@ -599,7 +608,7 @@ export const macroRoutes = (app: Elysia) =>
           const { db, internalUserId, params, body } = context as MacrosRouteContext;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           const entryId = params?.id;
@@ -622,7 +631,7 @@ export const macroRoutes = (app: Elysia) =>
 
           const fieldsToUpdate = Object.keys(updates);
           if (fieldsToUpdate.length === 0) {
-            throw new Error("No valid fields provided for update.");
+            throw new BadRequestError("No valid fields provided for update.");
           }
 
           const setClause = fieldsToUpdate
@@ -651,7 +660,7 @@ export const macroRoutes = (app: Elysia) =>
                 `Macro entry with ID ${entryId} not found or access denied.`
               );
             } else {
-              throw new Error(
+              throw new DatabaseError(
                 "Failed to update macro entry (update returned no data)."
               );
             }
@@ -659,11 +668,10 @@ export const macroRoutes = (app: Elysia) =>
 
           const response = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
           if (response.ingredients) {
-            try {
-              response.ingredients = JSON.parse(response.ingredients);
-            } catch {
-              response.ingredients = [];
-            }
+            response.ingredients = parseJsonArrayField<Record<string, unknown>>(
+              response.ingredients,
+              "ingredients",
+            );
           }
           return response;
         },

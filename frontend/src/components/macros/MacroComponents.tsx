@@ -40,6 +40,10 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
   );
 }
 
+export function MacroDistributionBar(props: MacroBarProps) {
+  return <MacroTargetBar {...props} />;
+}
+
 interface MacroLegendProps {
   macros: MacroNutrients;
   className?: string;

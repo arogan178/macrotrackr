@@ -19,9 +19,5 @@
   "devDependencies": {
     "@types/react-syntax-highlighter": "^15.5.13",
     "typescript": "^5.9.3"
-  },
-  "dependencies": {
-    "react-markdown": "^10.1.0",
-    "remark-gfm": "^4.0.1"
   }
 }
