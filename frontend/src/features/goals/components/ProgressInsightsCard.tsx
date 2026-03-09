@@ -91,7 +91,7 @@ function ProgressInsightsCard({
       if (actualWeeklyChange > targetWeeklyChange + tolerance) {
         return {
           message: "Slightly behind schedule. Stay consistent!",
-          color: "text-vibrant-accent",
+          color: "text-warning",
         };
       }
       return {
@@ -110,7 +110,7 @@ function ProgressInsightsCard({
       if (actualWeeklyChange < targetWeeklyChange - tolerance) {
         return {
           message: "Slightly behind schedule. Stay consistent!",
-          color: "text-vibrant-accent",
+          color: "text-warning",
         };
       }
       return {

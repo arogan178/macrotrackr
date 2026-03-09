@@ -26,6 +26,7 @@ export const queryKeys = {
   // Macro tracking queries
   macros: {
     all: () => ["macros"] as const,
+    search: (query: string) => ["macros", "search", query] as const,
     history: (page?: number, startDate?: string, endDate?: string) =>
       startDate || endDate
         ? (["macros", "history", page, startDate, endDate] as const)
@@ -45,6 +46,12 @@ export const queryKeys = {
     all: () => ["settings"] as const,
     user: () => ["settings", "user"] as const,
     billing: () => ["settings", "billing"] as const,
+  },
+
+  // Saved meals queries
+  savedMeals: {
+    all: () => ["saved-meals"] as const,
+    list: () => ["saved-meals", "list"] as const,
   },
 } as const;
 

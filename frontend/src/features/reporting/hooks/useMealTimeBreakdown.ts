@@ -2,7 +2,7 @@ import { useMemo } from "react";
 
 import { formatMealType,MEAL_TYPES } from "@/utils/nutritionVisualizations";
 
-import { getDayString } from "./useReportingLogic";
+import { getDayString } from "../utils";
 
 // Re-export MealType from shared utilities
 type MealType = (typeof MEAL_TYPES)[number];

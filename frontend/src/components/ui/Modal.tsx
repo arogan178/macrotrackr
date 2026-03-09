@@ -1,71 +1,91 @@
-/**
- * Modal – Accessible, animated modal dialog for confirmation and form flows.
- *
- * Renders in a portal (#modal-root), supports keyboard and backdrop close, and provides two variants:
- * - Confirmation: For yes/no or destructive actions
- * - Form: For embedded forms with Save/Cancel
- *
- * Accessibility:
- * - Uses role="dialog", aria-modal, and aria-labelledby for screen readers.
- * - Focus is trapped within the modal while open.
- *
- * Props (Confirmation):
- * @prop {boolean} isOpen - Whether the modal is open
- * @prop {function} onClose - Close handler
- * @prop {string} title - Modal title
- * @prop {string} message - Confirmation message
- * @prop {function} onConfirm - Confirm handler
- * @prop {string} [confirmLabel] - Confirm button label
- * @prop {string} [cancelLabel] - Cancel button label
-  let message: string | undefined,
-    confirmLabel: string | undefined,
-    cancelLabel: string | undefined,
-    onConfirm: (() => void) | undefined,
-    isDanger: boolean | undefined,
-    hideCancelButton: boolean = false,
-    onSave: (() => void) | undefined,
-    saveDisabled: boolean | undefined,
-    saveLabel: string | undefined;
- * Common Props:
- * @prop {ReactNode} children - Modal content
- * @prop {"sm"|"md"|"lg"|"xl"|"2xl"} [size] - Modal size
- * @prop {boolean} [hideClose] - Hide close (X) button
- *
- * @example
- * <Modal
-      hideCancelButton,
- *   onClose={close}
- *   title="Delete item?"
- *   variant="confirmation"
- *   message="Are you sure you want to delete this?"
- *   onConfirm={handleDelete}
- * />
-  hideCancelButton = false, // Set default for hideCancelButton here
-      hideCancelButton,
- * @example
- * // Form modal
- * <Modal
- *   isOpen={open}
- *   onClose={close}
- *   title="Edit Profile"
- *   variant="form"
- *   onSave={handleSave}
- *   saveDisabled={isSaving}
- * >
- *   <ProfileForm />
- * </Modal>
- */
-import { motion } from "motion/react";
-import { memo, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { memo, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
 
-import type {
-  ConfirmationModalProps,
-  FormModalProps,
-  ModalProps,
-} from "../utils/Types";
+import { cn } from "../../lib/classnameUtilities";
 import Button from "./Button";
 import IconButton from "./IconButton";
+import ProgressiveBlur from "./ProgressiveBlur";
+import type { ButtonProps, ModalProps } from "./Types";
+
+const CONTAINER_CLASS =
+  "fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6";
+const CONTENT_CLASS =
+  "relative flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-surface/95 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:max-h-[calc(100dvh-3rem)]";
+const SURFACE_CLASS = "bg-surface/80 backdrop-blur-md";
+const SIZE_CLASS_MAP = {
+  sm: "max-w-sm w-full",
+  md: "max-w-md w-full",
+  lg: "max-w-lg w-full",
+  xl: "max-w-xl w-full",
+  "2xl": "max-w-2xl w-full",
+} as const;
+
+const modalVariants = {
+  hidden: { opacity: 0, scale: 0.96, y: 10 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: {
+      type: "spring" as const,
+      stiffness: 400,
+      damping: 30,
+      mass: 0.8,
+    },
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    y: -5,
+    transition: {
+      duration: 0.15,
+      ease: "easeOut" as const,
+    },
+  },
+};
+
+const backdropVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { duration: 0.3, ease: "easeOut" as const },
+  },
+  exit: {
+    opacity: 0,
+    transition: { duration: 0.2, ease: "easeIn" as const },
+  },
+};
+
+function getVariantConfig(properties: ModalProps) {
+  if (properties.variant === "confirmation") {
+    return {
+      message: properties.message,
+      cancelLabel: properties.cancelLabel ?? "Cancel",
+      confirmLabel: properties.confirmLabel ?? "Confirm",
+      confirmVariant: (properties.isDanger
+        ? "danger"
+        : "primary") as ButtonProps["variant"],
+      onConfirm: properties.onConfirm,
+      onSave: undefined,
+      saveDisabled: undefined,
+      saveLabel: undefined,
+      hideCancelButton: properties.hideCancelButton ?? false,
+    };
+  }
+
+  return {
+    message: undefined,
+    cancelLabel: properties.cancelLabel ?? "Cancel",
+    confirmLabel: undefined,
+    confirmVariant: "primary" as const,
+    onConfirm: undefined,
+    onSave: properties.onSave,
+    saveDisabled: properties.saveDisabled,
+    saveLabel: properties.saveLabel ?? "Save",
+    hideCancelButton: properties.hideCancelButton ?? false,
+  };
+}
 
 function Modal(properties: ModalProps) {
   const {
@@ -77,47 +97,26 @@ function Modal(properties: ModalProps) {
     children,
     hideClose = false,
   } = properties;
+  const [isMounted, setIsMounted] = useState(false);
 
-  // Discriminated union for variant-specific props
-  const variant: ConfirmationModalProps["variant"] | FormModalProps["variant"] =
-    (properties as ModalProps & { variant: "confirmation" | "form" }).variant;
-  let message: string | undefined,
-    confirmLabel: string | undefined,
-    cancelLabel: string | undefined,
-    onConfirm: (() => void) | undefined,
-    isDanger: boolean | undefined,
-    onSave: (() => void) | undefined,
-    saveDisabled: boolean | undefined,
-    saveLabel: string | undefined,
-    hideCancelButton = false;
-  if (variant === "confirmation") {
-    ({
-      message,
-      confirmLabel = "Confirm",
-      cancelLabel = "Cancel",
-      onConfirm,
-      isDanger = false,
-      hideCancelButton = false,
-    } = properties as ConfirmationModalProps);
-  } else if (variant === "form") {
-    ({
-      onSave,
-      saveDisabled,
-      saveLabel = "Save",
-      cancelLabel = "Cancel",
-      hideCancelButton = false,
-    } = properties as FormModalProps);
-  }
-  const modalReference = useRef<HTMLDivElement>(undefined);
-  const modalRoot = document.querySelector("#modal-root"); // Get the portal target
+  const {
+    message,
+    cancelLabel,
+    confirmLabel,
+    confirmVariant,
+    onConfirm,
+    onSave,
+    saveDisabled,
+    saveLabel,
+    hideCancelButton,
+  } = getVariantConfig(properties);
 
-  // Handle escape key press and body scroll lock
   useEffect(() => {
-    function handleKeyDown(event: KeyboardEvent) {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isOpen) {
         onClose();
       }
-    }
+    };
 
     if (isOpen) {
       document.body.classList.add("modal-open");
@@ -126,207 +125,142 @@ function Modal(properties: ModalProps) {
       document.body.classList.remove("modal-open");
     }
 
-    // Cleanup function
     return () => {
-      document.body.classList.remove("modal-open"); // Ensure class is removed on unmount
+      document.body.classList.remove("modal-open");
       globalThis.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen, onClose]);
-
-  // Get variant specific styles - Restore default header/footer backgrounds
-  const getVariantStyles = (variant: string) => {
-    const defaultStyles = {
-      header: "bg-surface",
-      footer: "bg-surface-2",
-      confirmButton: "",
-    };
-
-    switch (variant) {
-      case "confirmation": {
-        return {
-          // Use default header/footer for uniform look, override only confirm button
-          ...defaultStyles,
-          confirmButton: isDanger
-            ? "bg-error text-foreground hover:bg-error"
-            : "bg-primary text-foreground hover:bg-primary",
-        };
-      }
-      case "form": {
-        return {
-          ...defaultStyles, // Use default header/footer
-          confirmButton: "bg-primary text-foreground hover:bg-primary",
-        };
-      }
-      default: {
-        return defaultStyles;
-      }
-    }
-  };
-
-  // Base styles for the modal container
-  const baseContainerStyles =
-    "fixed inset-0 z-50 flex items-center justify-center p-4";
-
-  // Base styles for the modal content
-  const baseContentStyles =
-    "bg-surface rounded-xl shadow-modal border border-border flex flex-col overflow-hidden";
-
-  // Size styles
-  const sizeStyles = {
-    sm: "max-w-sm w-full",
-    md: "max-w-md w-full",
-    lg: "max-w-lg w-full",
-    xl: "max-w-xl w-full",
-    "2xl": "max-w-2xl w-full",
-  }[size];
-
-  const variantStyles = getVariantStyles(variant);
-
-  // Animation variants for motion.div
-  const modalVariants = {
-    hidden: {
-      opacity: 0,
-      scale: 0.95,
-      y: 20,
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: {
-        duration: 0.2,
-      },
-    },
-    exit: {
-      opacity: 0,
-      scale: 0.95,
-      y: 20,
-      transition: {
-        duration: 0.15,
-      },
-    },
-  };
-
-  const backdropVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.2 } },
-    exit: { opacity: 0, transition: { duration: 0.15 } },
-  };
-
-  // State to manage mounting for portal
-  const [isMounted, setIsMounted] = useState(false);
 
   useEffect(() => {
     setIsMounted(true);
     return () => setIsMounted(false);
   }, []);
 
-  // Prevent rendering if not open or not mounted or portal root not found
-  if (!isOpen || !isMounted || !modalRoot) return;
+  const modalRoot =
+    typeof document === "undefined"
+      ? null
+      : document.querySelector("#modal-root");
 
-  // Use ReactDOM.createPortal to render the modal into #modal-root
+  if (!isMounted || !modalRoot) return null;
+
   return ReactDOM.createPortal(
-    <div
-      className={`${baseContainerStyles}`}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="modal-title"
-    >
-      {/* Backdrop with animation */}
-      <motion.div
-        className="absolute inset-0 bg-black/70 backdrop-blur-[2px]"
-        variants={backdropVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        onClick={onClose} // Close on backdrop click
-      />
+    <AnimatePresence>
+      {isOpen && (
+        <div
+          className={CONTAINER_CLASS}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="modal-title"
+          style={{ perspective: "1000px" }}
+        >
+          <motion.div
+            className="absolute inset-0 bg-black/60 backdrop-blur-md"
+            variants={backdropVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            onClick={onClose}
+          />
 
-      {/* Modal Content with animation */}
-      <motion.div
-        ref={modalReference}
-        className={`${baseContentStyles} ${sizeStyles} relative`}
-        style={{ overflowX: "hidden" }}
-        variants={modalVariants}
-        initial="hidden"
-        animate="visible"
-        exit="exit"
-        role="document"
-        onClick={(event) => event.stopPropagation()}
-      >
-        {/* Header: Only render if close button is shown */}
-        {!hideClose && (
-          <div
-            className={`flex items-center justify-between border-b border-border p-4 ${variantStyles.header}`}
+          <motion.div
+            className={cn(CONTENT_CLASS, SIZE_CLASS_MAP[size])}
+            style={{ overflowX: "hidden" }}
+            variants={modalVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            role="document"
+            onClick={(event) => event.stopPropagation()}
           >
-            <h2
-              id="modal-title"
-              className="text-lg font-medium text-foreground"
-            >
-              {title}
-            </h2>
-            <IconButton
-              variant="close"
-              iconSize={buttonSize}
-              buttonSize={buttonSize}
-              onClick={onClose}
-              ariaLabel="Close modal"
-              className="hover:text-red text-foreground transition-colors"
-            />
-          </div>
-        )}
-
-        {/* Body */}
-        <div className="grow overflow-x-hidden overflow-y-auto p-5">
-          {message && <p className="mb-4 text-sm text-foreground">{message}</p>}
-          {children}
-        </div>
-
-        {/* Footer */}
-        {(onSave || onConfirm || variant === "confirmation") && (
-          <div
-            className={`flex ${
-              hideCancelButton ? "justify-center" : "justify-end"
-            } gap-3 border-t border-border px-4 py-3 ${variantStyles.footer}`}
-          >
-            {!hideCancelButton && (
-              <Button
-                onClick={onClose}
-                ariaLabel={cancelLabel}
-                variant="secondary"
-                buttonSize={buttonSize}
-                className="rounded-lg bg-surface/60 px-4 py-2 font-medium text-foreground transition-colors hover:bg-surface/90"
+            {!hideClose && (
+              <div
+                className={cn(
+                  "flex items-center justify-between border-b border-white/5 px-6 py-5",
+                  SURFACE_CLASS,
+                )}
               >
-                {cancelLabel}
-              </Button>
+                <h2
+                  id="modal-title"
+                  className="text-lg font-semibold tracking-tight text-foreground"
+                >
+                  {title}
+                </h2>
+                <IconButton
+                  variant="close"
+                  iconSize={buttonSize}
+                  buttonSize={buttonSize}
+                  onClick={onClose}
+                  ariaLabel="Close modal"
+                  className="text-muted transition-colors hover:bg-white/5 hover:text-foreground"
+                />
+              </div>
             )}
-            {variant === "form" && onSave && (
-              <Button
-                type="button"
-                onClick={onSave}
-                disabled={saveDisabled}
-                text={saveLabel}
-                buttonSize={buttonSize}
-                variant="primary"
-                className="px-8 py-3 text-lg"
+
+            <div className="relative grow overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5">
+              <div className="relative z-10">
+                {message && (
+                  <p className="mb-5 text-sm leading-relaxed text-muted">
+                    {message}
+                  </p>
+                )}
+                {children}
+              </div>
+              <ProgressiveBlur
+                direction="up"
+                intensity={0.3}
+                height="50px"
+                className="pointer-events-none z-0"
               />
-            )}
-            {variant === "confirmation" && onConfirm && (
-              <Button
-                onClick={onConfirm}
-                ariaLabel={confirmLabel}
-                variant={isDanger ? "danger" : "primary"}
-                buttonSize={buttonSize}
-                className={`rounded-lg px-4 py-2 font-medium transition-colors ${variantStyles.confirmButton}`}
+            </div>
+
+            {(properties.variant === "confirmation" || onSave) && (
+              <div
+                className={cn(
+                  "flex gap-3 border-t border-white/5 px-6 py-4",
+                  hideCancelButton ? "justify-center" : "justify-end",
+                  SURFACE_CLASS,
+                )}
               >
-                {confirmLabel}
-              </Button>
+                {!hideCancelButton && (
+                  <Button
+                    onClick={onClose}
+                    ariaLabel={cancelLabel}
+                    variant="secondary"
+                    buttonSize={buttonSize}
+                    className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
+                  >
+                    {cancelLabel}
+                  </Button>
+                )}
+                {properties.variant === "form" && onSave && (
+                  <Button
+                    type="button"
+                    onClick={onSave}
+                    disabled={saveDisabled}
+                    text={saveLabel}
+                    buttonSize={buttonSize}
+                    variant="primary"
+                    className="px-6 font-medium"
+                  />
+                )}
+                {properties.variant === "confirmation" && onConfirm && (
+                  <Button
+                    onClick={onConfirm}
+                    ariaLabel={confirmLabel}
+                    variant={confirmVariant}
+                    buttonSize={buttonSize}
+                    className="px-6 font-medium"
+                  >
+                    {confirmLabel}
+                  </Button>
+                )}
+              </div>
             )}
-          </div>
-        )}
-      </motion.div>
-    </div>,
-    modalRoot, // Target element for the portal
+          </motion.div>
+        </div>
+      )}
+    </AnimatePresence>,
+    modalRoot,
   );
 }
 

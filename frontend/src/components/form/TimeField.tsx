@@ -1,7 +1,9 @@
 import { memo } from "react";
 
 import { formStyles } from "@/components/form/Styles";
-import type { TimeFieldProps } from "@/components/form/types";
+import type { TimeFieldProps } from "@/components/form/Types";
+
+import { cn } from "../../lib/classnameUtilities";
 
 function TimeField({
   label,
@@ -15,9 +17,11 @@ function TimeField({
     onChange(event.target.value);
   };
 
-  const inputClasses = `${formStyles.input.base} ${
-    error ? formStyles.input.error : formStyles.input.normal
-  } cursor-pointer`;
+  const inputClasses = cn(
+    formStyles.input.base,
+    error ? formStyles.input.error : formStyles.input.normal,
+    "cursor-pointer"
+  );
 
   return (
     <div className={formStyles.container}>

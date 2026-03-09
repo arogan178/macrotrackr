@@ -1,11 +1,11 @@
 import { motion } from "motion/react";
+import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import CardContainer from "@/components/form/CardContainer";
 import { COLOR_MAP } from "@/components/utils";
+import { cn } from "@/lib/classnameUtilities";
 
-// Optional: import getScoreColor if needed for reporting
-// import { getScoreColor } from "@/features/reporting/utils/insightsCalculations";
+import { useCardGlare } from "./hooks";
 
 export interface MetricCardProps {
   icon?: React.FC<React.SVGProps<SVGSVGElement>>;
@@ -22,9 +22,11 @@ export interface MetricCardProps {
   children?: React.ReactNode;
   className?: string;
   showKcalSuffix?: boolean;
+  /** Enable 3D glare effect on hover */
+  enableGlare?: boolean;
 }
 
-export default function MetricCard(properties: MetricCardProps) {
+function MetricCardInner(properties: MetricCardProps) {
   const {
     icon: Icon,
     title,
@@ -40,36 +42,71 @@ export default function MetricCard(properties: MetricCardProps) {
     children,
     className = "",
     showKcalSuffix = false,
+    enableGlare = false,
   } = properties;
 
-  // Resolve color classes for icon with safe fallbacks for optional keys
-  const colorClasses = color
-    ? COLOR_MAP[color]
-    : ({} as Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>);
+  // Initialize glare effect hook
+  const { cardRef, cardStyle, glareStyle, handlers } = useCardGlare({
+    maxRotation: 8,
+    scale: 1.02,
+    glareIntensity: 0.12,
+    enableGlare,
+    enableRotation: enableGlare,
+  });
 
-  // Use motion.div for animation if delay or score is provided, else CardContainer
-  const Wrapper = score !== undefined || delay > 0 ? motion.div : CardContainer;
-  const wrapperProps =
-    score !== undefined || delay > 0
-      ? {
-          initial: { opacity: 0, y: 10 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.3, delay },
-          className: `bg-surface rounded-xl border border-border overflow-hidden ${bgGradient ?? ""} p-4 ${borderColor ?? ""} h-40 flex flex-col group ${className}`,
-        }
-      : {
-          className: `p-3.5 hover:bg-surface-2 transition-colors group ${className}`,
-        };
+  // Memoize color classes for icon with safe fallbacks for optional keys
+  const colorClasses = useMemo(
+    () =>
+      color
+        ? COLOR_MAP[color]
+        : ({} as Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>),
+    [color],
+  );
 
-  return (
-    <Wrapper {...wrapperProps}>
-      <div className="flex items-start gap-5">
+  // Memoize parsed numeric value for AnimatedNumber
+  const numericValue = useMemo(() => {
+    if (value === undefined) return undefined;
+    return typeof value === "number"
+      ? value
+      : Number.parseFloat(value.toString());
+  }, [value]);
+
+  const hasMotion = score !== undefined || delay > 0 || enableGlare;
+
+  const baseClasses = cn(
+    "group relative flex flex-col transition-colors duration-200 ease-in-out",
+    "overflow-hidden rounded-2xl border border-border/60 bg-surface",
+    "hover:border-white/20",
+    enableGlare ? "p-4" : "p-5",
+    bgGradient,
+    borderColor,
+    className
+  );
+
+  const innerContent = (
+    <>
+      {enableGlare && <div style={glareStyle} />}
+
+      <div
+        className={cn(
+          "relative z-10 flex items-start",
+          enableGlare ? "gap-5" : "gap-4"
+        )}
+      >
         {Icon && (
           <div
-            className={`rounded-xl bg-linear-to-br p-3 ${colorClasses?.gradient ?? ""} border ${colorClasses?.border ?? borderColor ?? ""}`}
+            className={cn(
+              "rounded-2xl border border-border/40 bg-surface-2 shadow-sm transition-transform duration-300 group-hover:scale-105",
+              enableGlare ? "p-3" : "p-3.5",
+              colorClasses?.gradient,
+              colorClasses?.border || borderColor
+            )}
           >
             <Icon
-              className={`h-7 w-7 ${colorClasses?.text ?? textColor ?? ""}`}
+              className={cn(
+                enableGlare ? "h-7 w-7" : "h-6 w-6",
+                colorClasses?.text || textColor || "text-foreground/80"
+              )}
               strokeWidth={1.5}
             />
           </div>
@@ -77,29 +114,32 @@ export default function MetricCard(properties: MetricCardProps) {
         <div className="min-w-0 flex-1">
           <div className="mb-1 flex items-baseline gap-2">
             <h3
-              className={`truncate text-sm font-medium text-foreground ${textColor ?? ""}`}
+              className={cn(
+                "truncate text-sm font-medium",
+                enableGlare ? "text-foreground/80" : "text-foreground",
+                textColor
+              )}
             >
               {title}
             </h3>
             {acronym && (
               <span
-                className={`text-xs whitespace-nowrap ${colorClasses?.acronym ?? textColor ?? ""}`}
+                className={cn(
+                  "text-xs whitespace-nowrap",
+                  colorClasses?.acronym || textColor
+                )}
               >
                 ({acronym})
               </span>
             )}
           </div>
-          <p className="text-2xl font-bold text-foreground">
-            {value === undefined ? (
+          <p className="text-3xl font-light tracking-tight text-foreground">
+            {numericValue === undefined ? (
               <span className="text-base text-muted">Complete profile</span>
             ) : (
               <span className="text-foreground">
                 <AnimatedNumber
-                  value={
-                    typeof value === "number"
-                      ? value
-                      : Number.parseFloat(value.toString())
-                  }
+                  value={numericValue}
                   toFixedValue={0}
                   suffix={showKcalSuffix ? " kcal" : ""}
                   duration={0.8}
@@ -107,23 +147,46 @@ export default function MetricCard(properties: MetricCardProps) {
               </span>
             )}
             {subtitle && (
-              <span className={`ml-2 text-xs ${textColor ?? ""}`}>
-                {subtitle}
-              </span>
+              <span className={cn("ml-2 text-xs", textColor)}>{subtitle}</span>
             )}
           </p>
         </div>
       </div>
-      {/* Score dot for reporting */}
+
       {score !== undefined && (
-        <div className="mb-2 flex items-center justify-between">
-          {/* <div className={`h-2 w-2 rounded-full ${getScoreColor(score)}`} /> */}
+        <div className="relative z-10 mb-2 flex items-center justify-between" />
+      )}
+
+      {children && (
+        <div className="relative z-10 flex flex-1 flex-col justify-between">
+          {children}
         </div>
       )}
-      {/* Children for extra content */}
-      {children && (
-        <div className="flex flex-1 flex-col justify-between">{children}</div>
-      )}
-    </Wrapper>
+    </>
+  );
+
+  if (hasMotion) {
+    return (
+      <motion.div
+        ref={cardRef}
+        style={cardStyle}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3, delay }}
+        className={baseClasses}
+        {...(enableGlare ? handlers : {})}
+      >
+        {innerContent}
+      </motion.div>
+    );
+  }
+
+  return (
+    <div ref={cardRef as any} className={baseClasses}>
+      {innerContent}
+    </div>
   );
 }
+
+const MetricCard = memo(MetricCardInner);
+export default MetricCard;

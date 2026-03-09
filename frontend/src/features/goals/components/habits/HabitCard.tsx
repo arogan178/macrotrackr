@@ -1,6 +1,8 @@
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import { CheckIcon, TargetIcon } from "@/components/ui";
 import ProgressBar from "@/components/ui/ProgressBar";
+import { cn } from "@/lib/classnameUtilities";
 import type { HabitGoal } from "@/types/habit";
 
 import { HABIT_ICONS } from "../../constants/habits";
@@ -155,25 +157,33 @@ export default function HabitCard({
 
   // Size styles
   const numberClass = variant === "sm" ? "text-lg" : "text-xl";
-  const paddingClass = "p-3";
-  const iconWrapperPadding = "p-1.5";
+  const paddingClass = variant === "sm" ? "p-3" : "p-4";
+  const iconWrapperPadding = variant === "sm" ? "p-1.5" : "p-2";
 
   return (
-    <div className="overflow-hidden rounded-lg bg-surface/30">
+    <CardContainer variant="interactive" className="overflow-hidden bg-surface-2/60 p-0">
       <div
-        className={`bg-gradient-to-r ${getGradientClass(accentColor)} ${paddingClass}`}
+        className={cn(
+          "bg-gradient-to-r",
+          getGradientClass(accentColor),
+          paddingClass
+        )}
       >
-        <div className="mb-2 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center">
             <div
-              className={`mr-2 rounded-lg ${iconWrapperPadding} ${getAccentClass(accentColor)}`}
+              className={cn(
+                "mr-3 rounded-xl",
+                iconWrapperPadding,
+                getAccentClass(accentColor)
+              )}
             >
               <IconComponent
-                className={variant === "sm" ? "h-4 w-4" : "h-4 w-4"}
+                className={variant === "sm" ? "h-4 w-4" : "h-5 w-5"}
               />
             </div>
             {resolvedShow.title && (
-              <h4 className="mr-2 font-medium text-foreground">{title}</h4>
+              <h4 className="mr-2 font-semibold tracking-tight text-foreground/90">{title}</h4>
             )}
           </div>
 
@@ -207,7 +217,7 @@ export default function HabitCard({
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-baseline gap-1">
               {resolvedShow.numbers && (
-                <span className={`${numberClass} font-bold text-foreground`}>
+                <span className={cn(numberClass, "font-bold text-foreground")}>
                   {variant === "sm" ? (
                     <span>{current}</span>
                   ) : (
@@ -248,6 +258,6 @@ export default function HabitCard({
           />
         )}
       </div>
-    </div>
+    </CardContainer>
   );
 }

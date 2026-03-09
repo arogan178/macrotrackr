@@ -1,24 +1,24 @@
 export const SCORE_COLORS = {
   excellent: "bg-success",
   good: "bg-warning",
-  poor: "bg-vibrant-accent",
+  poor: "bg-error",
 } as const;
 
 export const METRIC_CARD_CONFIGS = {
   consistency: {
-    bgGradient: "bg-gradient-to-br from-primary/60 to-primary/30",
-    borderColor: "border border-primary/30",
-    textColor: "text-primary",
+    bgGradient: "bg-surface-2",
+    borderColor: "border border-border/40",
+    textColor: "text-foreground/90",
   },
   macroBalance: {
-    bgGradient: "bg-gradient-to-br from-purple-900/60 to-purple-800/30",
-    borderColor: "border border-purple-700/30",
-    textColor: "text-purple-300",
+    bgGradient: "bg-surface-2",
+    borderColor: "border border-border/40",
+    textColor: "text-foreground/90",
   },
   macroDensity: {
-    bgGradient: "bg-gradient-to-br from-emerald-900/60 to-emerald-800/30",
-    borderColor: "border border-emerald-700/30",
-    textColor: "text-emerald-300",
+    bgGradient: "bg-surface-2",
+    borderColor: "border border-border/40",
+    textColor: "text-foreground/90",
   },
 } as const;
 
@@ -38,10 +38,9 @@ export const MACRO_COLORS = {
 } as const;
 
 export const SECTION_STYLES = {
-  atAGlance: "p-4 rounded-lg border border-purple-500/20 bg-purple-900/10",
-  trendAnalysis: "p-4 rounded-lg border border-primary/20 bg-primary/10",
-  trackingAnalysis: "p-4 rounded-lg border border-primary/20 bg-primary/10",
-  recommendations: "p-4 rounded-lg border border-green-500/20 bg-success/10",
+  trendAnalysis: "pt-4",
+  trackingAnalysis: "pt-4",
+  recommendations: "pt-4",
 } as const;
 
 export const DEFAULT_MACRO_TARGET = {
@@ -59,7 +58,7 @@ export const DAILY_AVERAGES_CONFIG = [
   {
     label: "Calories",
     unit: "cal",
-    color: "text-vibrant-accent",
+    color: "text-error",
     key: "calories" as const,
   },
   {

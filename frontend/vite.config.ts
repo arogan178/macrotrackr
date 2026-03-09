@@ -10,6 +10,7 @@ import viteCompression from "vite-plugin-compression";
 import { VitePWA } from "vite-plugin-pwa";
 import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
+import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig(() => {
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -109,6 +110,13 @@ export default defineConfig(() => {
         },
       }),
       tsconfigPaths(),
+      // Bundle analyzer - generates stats.html in dist folder
+      visualizer({
+        open: false,
+        gzipSize: true,
+        brotliSize: true,
+        filename: "dist/stats.html",
+      }),
     ],
     resolve: {
       alias: {
@@ -129,7 +137,18 @@ export default defineConfig(() => {
           chunkFileNames: `assets/[name].[hash].js`,
           assetFileNames: `assets/[name].[hash].[ext]`,
           manualChunks: {
-            vendor: ["react", "react-dom"],
+            // Vendor chunks - split by library for better caching
+            "vendor-react": ["react", "react-dom"],
+            "vendor-router": ["react-router-dom"],
+            "vendor-query": ["@tanstack/react-query"],
+            "vendor-charts": ["recharts"],
+            "vendor-motion": ["motion"],
+            "vendor-clerk": ["@clerk/clerk-react"],
+            "vendor-ui": [
+              "lucide-react",
+              "clsx",
+              "tailwind-merge",
+            ],
           },
         },
       },

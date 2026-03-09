@@ -6,12 +6,8 @@ import { logger } from "../lib/logger";
 import { getInternalUserId } from "../lib/clerk-utils";
 import type { Database } from "bun:sqlite";
 
-// Define paths exempt from authentication checks
+// Define paths exempt from authentication checks.
 const AUTH_EXEMPT_PATHS = new Set([
-  "/api/auth/login",
-  "/api/auth/register",
-  "/api/auth/validate-email",
-  "/api/auth/forgot-password",
   "/api/auth/reset-password",
   // Note: /api/auth/clerk-sync is NOT exempt - it needs auth to know which user to sync
   "/api/webhooks/clerk",
@@ -21,12 +17,19 @@ const AUTH_EXEMPT_PATHS = new Set([
   "/",
   "/health",
   "/health/ready",
+  "/metrics",
+  "/metrics/queries",
+]);
+
+// Paths that can be called before the Clerk account is linked to an internal DB user.
+const UNLINKED_ALLOWED_PATHS = new Set([
+  "/api/auth/clerk-sync",
 ]);
 
 /**
  * Check if a path is exempt from authentication
  */
-function isExemptPath(path: string): boolean {
+export function isExemptPath(path: string): boolean {
   // Check exact matches
   if (AUTH_EXEMPT_PATHS.has(path)) {
     return true;
@@ -45,6 +48,75 @@ function isExemptPath(path: string): boolean {
   return false;
 }
 
+function isAllowedForUnlinkedUser(path: string): boolean {
+  if (UNLINKED_ALLOWED_PATHS.has(path)) {
+    return true;
+  }
+
+  // Keep diagnostics path available while account linking is being established.
+  if (path === "/api/user/me") {
+    return true;
+  }
+
+  return false;
+}
+
+function getRequestPath(context: { request?: Request; path?: string }): string {
+  const requestUrl = context.request?.url;
+
+  if (typeof requestUrl === "string" && requestUrl.length > 0) {
+    try {
+      return new URL(requestUrl).pathname;
+    } catch {
+      // Fall through to context.path
+    }
+  }
+
+  return context.path ?? "";
+}
+
+function getSafeHeaderSummary(request?: Request): Record<string, string> | "no headers" {
+  if (!request?.headers) {
+    return "no headers";
+  }
+
+  const summary: Record<string, string> = {};
+  for (const [key, value] of request.headers.entries()) {
+    const normalizedKey = key.toLowerCase();
+    if (
+      normalizedKey === "authorization" ||
+      normalizedKey === "cookie" ||
+      normalizedKey === "set-cookie"
+    ) {
+      summary[normalizedKey] = "[redacted]";
+      continue;
+    }
+    summary[normalizedKey] = value;
+  }
+
+  return summary;
+}
+
+function getPrimaryClerkEmail(clerkUser: {
+  emailAddresses?: Array<{ id?: string; emailAddress?: string }>;
+  primaryEmailAddressId?: string | null;
+} | null): string | undefined {
+  if (!clerkUser?.emailAddresses || clerkUser.emailAddresses.length === 0) {
+    return undefined;
+  }
+
+  if (clerkUser.primaryEmailAddressId) {
+    const primary = clerkUser.emailAddresses.find(
+      (emailAddress) => emailAddress.id === clerkUser.primaryEmailAddressId,
+    );
+    if (primary?.emailAddress) {
+      return primary.emailAddress;
+    }
+  }
+
+  return clerkUser.emailAddresses[0]?.emailAddress;
+}
+
 /**
  * Clerk authentication middleware for Elysia
  * Validates Clerk JWT tokens and extracts user information
@@ -60,19 +132,25 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
   )
   .resolve({ as: "scoped" }, async (context: any) => {
     const { auth, clerk, path, db, request } = context;
+    const requestPath = getRequestPath(context);
     
-    // Debug logging
-    logger.debug({ 
-      path, 
-      hasAuth: !!auth, 
-      authType: typeof auth,
-      hasClerk: !!clerk,
-      headers: request?.headers ? Object.fromEntries(request.headers.entries()) : 'no headers'
-    }, "Clerk auth middleware called");
+    // Debug logging - only in development
+    if (config.NODE_ENV === 'development') {
+      logger.debug({ 
+        path, 
+        requestPath,
+        hasAuth: !!auth, 
+        authType: typeof auth,
+        hasClerk: !!clerk,
+        headers: getSafeHeaderSummary(request)
+      }, "Clerk auth middleware called");
+    }
     
     // Skip authentication for exempt paths
-    if (isExemptPath(path)) {
-      logger.debug({ path }, "Skipping auth for exempt path");
+    if (isExemptPath(requestPath)) {
+      if (config.NODE_ENV === 'development') {
+        logger.debug({ path, requestPath }, "Skipping auth for exempt path");
+      }
       return { user: null, clerkUserId: null, internalUserId: null };
     }
 
@@ -112,7 +190,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
           };
         } catch (error) {
           logger.warn(
-            { path, error },
+            { path, requestPath, error },
             "Bearer token verification fallback failed"
           );
           return null;
@@ -143,7 +221,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         }
 
         logger.warn(
-          { path },
+          { path, requestPath },
           "No compatible Clerk auth resolver found on context"
         );
         return null;
@@ -159,22 +237,26 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       }
 
       if (!authResult) {
-        logger.warn({ path }, "No auth function available in context");
+        logger.warn({ path, requestPath }, "No auth function available in context");
         return { user: null, clerkUserId: null, internalUserId: null };
       }
 
       const userId = authResult?.userId;
       
-      logger.debug({ 
-        path, 
-        userId, 
-        sessionId: authResult?.sessionId,
-        hasAuthResult: !!authResult 
-      }, "Auth function called");
+      // Debug logging - only in development
+      if (config.NODE_ENV === 'development') {
+        logger.debug({ 
+          path, 
+          requestPath,
+          userId, 
+          sessionId: authResult?.sessionId,
+          hasAuthResult: !!authResult 
+        }, "Auth function called");
+      }
       
       if (!userId) {
         logger.warn(
-          { path, authResult },
+          { path, requestPath, authResult },
           "No userId in auth result - no valid Clerk session token found"
         );
         return { user: null, clerkUserId: null, internalUserId: null };
@@ -188,19 +270,32 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         logger.warn({ userId, error: err }, "Failed to fetch Clerk user details");
       }
 
-      const email = clerkUser?.emailAddresses?.[0]?.emailAddress;
+      const email = getPrimaryClerkEmail(clerkUser);
       
-      logger.debug({ 
-        path, 
-        userId, 
-        email,
-        firstName: clerkUser?.firstName 
-      }, "User authenticated successfully");
+      // Debug logging - only in development
+      if (config.NODE_ENV === 'development') {
+        logger.debug({ 
+          path, 
+          requestPath,
+          userId, 
+          email,
+          firstName: clerkUser?.firstName 
+        }, "User authenticated successfully");
+      }
 
       // Look up internal user ID from database
       const internalUserId = db 
         ? getInternalUserId(db as Database, userId, email)
         : null;
+
+      logger.debug({
+        path,
+        requestPath,
+        clerkUserId: userId,
+        email,
+        internalUserId,
+        hasDb: !!db
+      }, "Clerk auth middleware - internal user ID lookup result");
 
       // Return user info for use in route handlers
       return {
@@ -218,26 +313,40 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         clerkClient: clerk,
       };
     } catch (err) {
-      logger.error({ error: err, path }, "Clerk authentication error");
+      logger.error({ error: err, path, requestPath }, "Clerk authentication error");
       return { user: null, clerkUserId: null, internalUserId: null };
     }
   })
   // Authentication guard - must be after the derive to check if user exists
   .onBeforeHandle({ as: "scoped" }, (context: any) => {
-    const { user, path, set } = context;
+    const { user, internalUserId, path, set } = context;
+    const requestPath = getRequestPath(context);
     
     // Skip authentication for exempt paths
-    if (isExemptPath(path)) {
+    if (isExemptPath(requestPath)) {
       return;
     }
 
     // Require authentication for all other paths
     if (!user) {
-      logger.warn({ path }, "Authentication required but no user found");
+      logger.warn({ path, requestPath }, "Authentication required but no user found");
       set.status = 401;
       return {
         code: "UNAUTHORIZED",
         message: "Authentication required. Please sign in.",
+      };
+    }
+
+    if (!internalUserId && !isAllowedForUnlinkedUser(requestPath)) {
+      logger.warn(
+        { path, requestPath, clerkUserId: user?.clerkUserId },
+        "Authenticated Clerk user is not linked to an internal account",
+      );
+      set.status = 409;
+      return {
+        code: "ACCOUNT_NOT_SYNCED",
+        message:
+          "Your account is not linked yet. Please retry sign-in so we can finish setup.",
       };
     }
   });
@@ -256,17 +365,4 @@ export interface ClerkAuthContext {
   clerkUserId: string | null;
   internalUserId: number | null;
   clerkClient?: any;
-}
-
-/**
- * Legacy adapter type for backward compatibility
- * Maps Clerk auth to the old AuthenticatedContext structure
- */
-export interface LegacyAuthAdapter {
-  user: {
-    userId: number;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-  };
 }

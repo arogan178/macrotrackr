@@ -1,5 +1,6 @@
 import { memo } from "react";
 
+import { CardContainer } from "@/components/form";
 import { EmptyState, TargetIcon } from "@/components/ui/";
 import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { useFeatureLoading } from "@/hooks";
@@ -68,12 +69,12 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Empty State
   if (!weightGoals) {
     return (
-      <div className={`rounded-2xl bg-surface ${className}`}>
+      <CardContainer className={className}>
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
           icon={
-            <TargetIcon className="h-14 w-14 text-primary" strokeWidth={1} />
+            <TargetIcon className="h-14 w-14 text-primary" />
           }
           action={{
             label: "Set Weight Goal",
@@ -83,32 +84,30 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
           size="md"
           className="py-10" // Adjust padding if needed
         />
-      </div>
+      </CardContainer>
     );
   }
 
   // Status View (when weightGoals exist)
   return (
-    <>
-      <div className={`rounded-2xl bg-surface ${className}`}>
-        <WeightGoalStatus
-          startingWeight={user.weight ?? 0}
-          targetWeight={weightGoals.targetWeight}
-          tdee={Number.isFinite(tdee) ? tdee : 0}
-          macroDailyTotals={macroDailyTotals}
-          weightGoals={weightGoals}
-          onEdit={onOpenModal}
-          onDelete={onDelete}
-          onLogWeight={handleOpenLogWeightModal}
-          targetCalories={
-            Number.isFinite(effectiveTargetCalories)
-              ? effectiveTargetCalories
-              : 0
-          }
-          macroTarget={macroTarget}
-        />
-      </div>
-    </>
+    <div className={className}>
+      <WeightGoalStatus
+        startingWeight={user.weight ?? 0}
+        targetWeight={weightGoals.targetWeight}
+        tdee={Number.isFinite(tdee) ? tdee : 0}
+        macroDailyTotals={macroDailyTotals}
+        weightGoals={weightGoals}
+        onEdit={onOpenModal}
+        onDelete={onDelete}
+        onLogWeight={handleOpenLogWeightModal}
+        targetCalories={
+          Number.isFinite(effectiveTargetCalories)
+            ? effectiveTargetCalories
+            : 0
+        }
+        macroTarget={macroTarget}
+      />
+    </div>
   );
 });
 

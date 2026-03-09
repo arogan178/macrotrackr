@@ -1,8 +1,10 @@
 import { memo } from "react";
 
 import { formStyles } from "@/components/form/Styles";
-import type { NumberFieldProps } from "@/components/form/types";
+import type { NumberFieldProps } from "@/components/form/Types";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
+
+import { cn } from "../../lib/classnameUtilities";
 
 // Update NumberFieldProps in ../form/types.ts if needed to include 'disabled'
 // interface NumberFieldProps {
@@ -85,11 +87,14 @@ function NumberField({
   };
 
   // Add disabled styles
-  const inputClasses = `${formStyles.input.base} ${
-    error ? formStyles.input.error : formStyles.input.normal
-  } ${formStyles.input.numberInput} ${unit ? formStyles.input.withUnit : ""} ${
-    disabled ? formStyles.input.disabled : ""
-  } placeholder:text-muted`;
+  const inputClasses = cn(
+    formStyles.input.base,
+    error ? formStyles.input.error : formStyles.input.normal,
+    formStyles.input.numberInput,
+    unit && formStyles.input.withUnit,
+    disabled && formStyles.input.disabled,
+    "placeholder:text-muted"
+  );
 
   return (
     <div className={formStyles.container}>

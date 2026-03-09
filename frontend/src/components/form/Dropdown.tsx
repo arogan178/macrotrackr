@@ -3,6 +3,8 @@ import { memo } from "react";
 import { formStyles } from "@/components/form/Styles";
 import type { DropdownProps } from "@/components/form/Types";
 
+import { cn } from "../../lib/classnameUtilities";
+
 function Dropdown({
   label,
   value,
@@ -12,9 +14,12 @@ function Dropdown({
   disabled = false,
   error,
 }: DropdownProps) {
-  const selectClasses = `${formStyles.input.base} ${
-    error ? formStyles.input.error : formStyles.input.normal
-  } ${formStyles.select.base} ${disabled ? formStyles.input.disabled : "cursor-pointer"}`;
+  const selectClasses = cn(
+    formStyles.input.base,
+    error ? formStyles.input.error : formStyles.input.normal,
+    formStyles.select.base,
+    disabled ? formStyles.input.disabled : "cursor-pointer"
+  );
 
   return (
     <div className={formStyles.container}>

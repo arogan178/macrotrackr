@@ -8,14 +8,81 @@ import {
 } from "@/components/utils/Constants";
 import { useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { cn } from "@/lib/classnameUtilities";
 
 import { LoadingSpinnerIcon } from "./Icons";
-// Fixed type import path: Types are defined in ./Types.ts, not "@/components/ui/types"
 import type { ButtonProps } from "./Types";
 
 type ButtonAllProps = ButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;
 
+export function getButtonClasses(
+  variant: string = BUTTON_VARIANTS.PRIMARY,
+  buttonSize: string = "md",
+  fullWidth: boolean = false,
+  className: string = "",
+): string {
+  const sizeStyles = BUTTON_SIZES;
+
+  const buttonBase = cn(
+    "inline-flex items-center justify-center gap-1.5 text-sm font-medium",
+    "transition-[background-color,border-color,color,box-shadow,transform,filter] duration-200",
+    "ease-out",
+    "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
+    "cursor-pointer rounded-full disabled:cursor-not-allowed disabled:opacity-50",
+    "hover:brightness-110 active:scale-[0.98]",
+  );
+
+  const buttonVariants: Record<string, string> = {
+    primary: cn(
+      "bg-primary font-semibold text-black shadow-sm",
+      "focus-visible:ring-primary active:bg-primary/90 disabled:hover:brightness-100",
+    ),
+    secondary: cn(
+      "border border-white/10 bg-surface-2 text-foreground shadow-sm",
+      "hover:border-white/20 hover:bg-surface-3",
+      "focus-visible:ring-primary active:bg-surface-2 disabled:hover:bg-surface-2",
+    ),
+    neutral: cn(
+      "border border-neutral-700/50 bg-neutral-800 text-white shadow-sm",
+      "hover:border-neutral-500 hover:bg-neutral-700",
+      "focus-visible:ring-neutral-500 active:bg-neutral-600",
+    ),
+    danger: cn(
+      "border border-error/20 bg-error/10 text-error",
+      "hover:border-error/30 hover:bg-error/20",
+      "focus-visible:ring-error active:bg-error/30 disabled:hover:bg-error/10",
+    ),
+    success: cn(
+      "border border-success/20 bg-success/10 text-success",
+      "hover:border-success/30 hover:bg-success/20",
+      "focus-visible:ring-success active:bg-success/30 disabled:hover:bg-success/10",
+    ),
+    ghost: cn(
+      "bg-transparent text-muted",
+      "hover:bg-white/5 hover:text-foreground",
+      "focus-visible:ring-primary active:bg-white/10 disabled:hover:bg-transparent",
+    ),
+    outline: cn(
+      "border border-white/10 bg-transparent text-foreground shadow-sm",
+      "hover:border-white/20 hover:bg-white/[0.02]",
+      "active:bg-white/10 disabled:hover:border-white/10 disabled:hover:bg-transparent",
+      "focus-visible:ring-primary",
+    ),
+  };
+
+  return cn(
+    buttonBase,
+    sizeStyles[buttonSize as keyof typeof sizeStyles],
+    buttonVariants[variant],
+    fullWidth && "w-full",
+    className,
+  );
+}
+
+/**
+ * Enhanced Button component with multiple variants, loading states, and icon support.
+ */
 function ButtonBase({
   children,
   text,
@@ -24,6 +91,8 @@ function ButtonBase({
   buttonSize = "md",
   icon,
   iconPosition = ICON_POSITIONS.RIGHT,
+  leftIcon,
+  rightIcon,
   isLoading = false,
   loadingText = DEFAULT_LOADING_TEXT,
   disabled = false,
@@ -37,42 +106,14 @@ function ButtonBase({
 
   // Memoize button class computation to avoid recalculation on every render
   const buttonClasses = useMemo(() => {
-    const sizeStyles = BUTTON_SIZES;
-
-    const buttonBase =
-      "inline-flex items-center justify-center font-medium text-sm gap-1.5 " +
-      "transition-colors duration-150 ease-out " +
-      "focus-visible:outline-2 focus-visible:outline-offset-2 " +
-      "rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed";
-
-    const buttonVariants: Record<string, string> = {
-      primary:
-        "bg-primary text-background hover:bg-primary/85 active:bg-primary/70 " +
-        "disabled:hover:bg-primary focus-visible:outline-primary",
-      secondary:
-        "bg-surface-3 text-foreground border border-border hover:bg-surface-4 active:bg-surface-2 " +
-        "disabled:hover:bg-surface-3 focus-visible:outline-primary",
-      danger:
-        "bg-error/15 text-error border border-error/25 hover:bg-error/25 active:bg-error/35 " +
-        "disabled:hover:bg-error/15 focus-visible:outline-error",
-      success:
-        "bg-success/15 text-success border border-success/25 hover:bg-success/25 active:bg-success/35 " +
-        "disabled:hover:bg-success/15 focus-visible:outline-success",
-      ghost:
-        "bg-transparent text-muted hover:bg-surface-2 hover:text-foreground active:bg-surface-3 " +
-        "disabled:hover:bg-transparent focus-visible:outline-primary",
-    };
-
-    const widthStyles = fullWidth ? "w-full" : "";
-
-    return [
-      buttonBase,
-      sizeStyles[buttonSize as keyof typeof sizeStyles],
-      buttonVariants[variant],
-      widthStyles,
-      className,
-    ].join(" ");
+    return getButtonClasses(variant, buttonSize, fullWidth, className);
   }, [buttonSize, variant, fullWidth, className]);
+
+  // Determine which icons to render (support both old and new API)
+  const effectiveLeftIcon =
+    leftIcon ?? (icon && iconPosition === ICON_POSITIONS.LEFT ? icon : null);
+  const effectiveRightIcon =
+    rightIcon ?? (icon && iconPosition === ICON_POSITIONS.RIGHT ? icon : null);
 
   const renderContent = () => {
     if (finalIsLoading) {
@@ -87,12 +128,16 @@ function ButtonBase({
     const content = children || text;
     return (
       <span className="flex items-center justify-center">
-        {icon && iconPosition === ICON_POSITIONS.LEFT && (
-          <span className="mr-2 flex items-center">{icon}</span>
+        {effectiveLeftIcon && (
+          <span className="mr-2 flex shrink-0 items-center">
+            {effectiveLeftIcon}
+          </span>
         )}
         {content && <span>{content}</span>}
-        {icon && iconPosition === ICON_POSITIONS.RIGHT && (
-          <span className="ml-2 flex items-center">{icon}</span>
+        {effectiveRightIcon && (
+          <span className="ml-2 flex shrink-0 items-center">
+            {effectiveRightIcon}
+          </span>
         )}
       </span>
     );

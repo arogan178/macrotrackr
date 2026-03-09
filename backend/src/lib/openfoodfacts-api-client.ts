@@ -10,6 +10,7 @@ const USER_AGENT = "MacroTracker/1.0 (contact@example.com)";
 const MAX_RESULTS = 10;
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 const MAX_RETRIES = 2;
+const MIN_QUERY_LENGTH = 2;
 
 // Enhanced types for better type safety
 export interface FoodProductNutriments {
@@ -85,7 +86,15 @@ export class OpenFoodFactsRateLimitError extends OpenFoodFactsError {
 }
 
 // Utility functions for better code organization
-function parseQuantity(quantityString: string): QuantityParseResult {
+export function normalizeFoodSearchQuery(query: string): string {
+  return query.trim().toLowerCase().replace(/\s+/g, " ");
+}
+
+export function buildFoodSearchCacheKey(query: string): string {
+  return `food_search:${normalizeFoodSearchQuery(query)}`;
+}
+
+export function parseQuantity(quantityString: string): QuantityParseResult {
   if (!quantityString || typeof quantityString !== "string") {
     return { quantity: 100, unit: "g" };
   }
@@ -94,26 +103,28 @@ function parseQuantity(quantityString: string): QuantityParseResult {
 
   // Handle various quantity formats
   const patterns = [
+    // "12 fl oz"
+    /([\d.,]+)\s*(fl\s*oz)/,
     // "90 g", "90g", "90 grams"
-    /([\d.,]+)\s*(?:g|gram|grams?)/,
+    /([\d.,]+)\s*(g|gram|grams?)/,
     // "1.5 kg", "1.5kg"
-    /([\d.,]+)\s*(?:kg|kilogram|kilograms?)/,
+    /([\d.,]+)\s*(kg|kilogram|kilograms?)/,
     // "16 oz", "16oz"
-    /([\d.,]+)\s*(?:oz|ounce|ounces?)/,
+    /([\d.,]+)\s*(oz|ounce|ounces?)/,
     // "2 lb", "2lbs", "2 pounds"
-    /([\d.,]+)\s*(?:lb|lbs|pound|pounds)/,
+    /([\d.,]+)\s*(lb|lbs|pound|pounds)/,
     // "500 ml", "500ml", "500 milliliters"
-    /([\d.,]+)\s*(?:ml|milliliter|milliliters)/,
+    /([\d.,]+)\s*(ml|milliliter|milliliters)/,
     // "1.5 L", "1.5L", "1.5 liter"
-    /([\d.,]+)\s*(?:l|liter|liters)/,
+    /([\d.,]+)\s*(l|liter|liters)/,
     // "1 cup", "1cup"
-    /([\d.,]+)\s*(?:cup|cups)/,
+    /([\d.,]+)\s*(cup|cups)/,
     // "2 tbsp", "2 tablespoons"
-    /([\d.,]+)\s*(?:tbsp|tablespoon|tablespoons)/,
+    /([\d.,]+)\s*(tbsp|tablespoon|tablespoons)/,
     // "1 tsp", "1 teaspoon"
-    /([\d.,]+)\s*(?:tsp|teaspoon|teaspoons)/,
+    /([\d.,]+)\s*(tsp|teaspoon|teaspoons)/,
     // "1 pt", "1 pint"
-    /([\d.,]+)\s*(?:pt|pint|pints)/,
+    /([\d.,]+)\s*(pt|pint|pints)/,
   ];
 
   for (const pattern of patterns) {
@@ -124,6 +135,7 @@ function parseQuantity(quantityString: string): QuantityParseResult {
       if (!isNaN(quantity) && quantity > 0) {
         // Map common units to standardized units
         const unitMap: Record<string, string> = {
+          "fl oz": "fl oz",
           g: "g",
           gram: "g",
           grams: "g",
@@ -200,6 +212,109 @@ function isValidFoodProduct(hit: FoodSearchHit): boolean {
   return hasNutrients;
 }
 
+function getFoodProductDisplayName(hit: FoodSearchHit): string {
+  return hit.product_name_en || hit.product_name || "Unknown Product";
+}
+
+function getFoodSearchTokens(normalizedQuery: string): string[] {
+  return normalizedQuery.split(" ").filter(Boolean);
+}
+
+function getFoodSearchScore(hit: FoodSearchHit, normalizedQuery: string): number {
+  const tokens = getFoodSearchTokens(normalizedQuery);
+  const name = normalizeFoodSearchQuery(getFoodProductDisplayName(hit));
+  const categories = normalizeFoodSearchQuery(hit.categories || "");
+  const rawQuantity = normalizeFoodSearchQuery(hit.quantity || "");
+
+  if (!name) {
+    return 0;
+  }
+
+  let score = 0;
+
+  if (name === normalizedQuery) {
+    score += 120;
+  } else if (name.startsWith(normalizedQuery)) {
+    score += 80;
+  } else if (name.includes(normalizedQuery)) {
+    score += 45;
+  }
+
+  const matchedNameTokens = tokens.filter((token) => name.includes(token)).length;
+  const matchedCategoryTokens = tokens.filter((token) => categories.includes(token)).length;
+
+  score += matchedNameTokens * 14;
+  score += matchedCategoryTokens * 4;
+
+  if (tokens.length > 0 && matchedNameTokens === tokens.length) {
+    score += 18;
+  }
+
+  if (rawQuantity) {
+    score += 2;
+  }
+
+  const nutriments = hit.nutriments;
+  if (nutriments) {
+    if (parseNutrientValue(nutriments["energy-kcal_100g"]) > 0) {
+      score += 2;
+    }
+    if (
+      parseNutrientValue(nutriments.proteins_100g) > 0 ||
+      parseNutrientValue(nutriments.carbohydrates_100g) > 0 ||
+      parseNutrientValue(nutriments.fat_100g) > 0
+    ) {
+      score += 3;
+    }
+  }
+
+  return score;
+}
+
+function getFoodProductDeduplicationKey(result: FoodProductResult): string {
+  return [
+    normalizeFoodSearchQuery(result.name),
+    result.rawQuantity || "",
+    result.protein.toFixed(1),
+    result.carbs.toFixed(1),
+    result.fats.toFixed(1),
+  ].join("|");
+}
+
+export function rankAndNormalizeFoodProducts(
+  hits: FoodSearchHit[],
+  query: string,
+): FoodProductResult[] {
+  const normalizedQuery = normalizeFoodSearchQuery(query);
+  const uniqueResults = new Map<string, FoodProductResult>();
+
+  const rankedHits = hits
+    .filter(isValidFoodProduct)
+    .map((hit) => ({
+      hit,
+      score: getFoodSearchScore(hit, normalizedQuery),
+    }))
+    .sort((left, right) => right.score - left.score);
+
+  for (const { hit } of rankedHits) {
+    const mapped = mapHitToFoodProduct(hit);
+    if (mapped.name === "Unknown Product") {
+      continue;
+    }
+
+    const dedupeKey = getFoodProductDeduplicationKey(mapped);
+    if (!uniqueResults.has(dedupeKey)) {
+      uniqueResults.set(dedupeKey, mapped);
+    }
+
+    if (uniqueResults.size >= MAX_RESULTS) {
+      break;
+    }
+  }
+
+  return [...uniqueResults.values()];
+}
+
 function mapHitToFoodProduct(hit: FoodSearchHit): FoodProductResult {
   const nutriments = hit.nutriments || {};
 
@@ -228,25 +343,32 @@ async function delay(ms: number): Promise<void> {
 }
 
 export class OpenFoodFactsApiClient {
-  private retryCount = 0;
-
   async search(query: string): Promise<FoodProductResult[]> {
-    if (!query || typeof query !== "string" || query.trim().length === 0) {
+    if (!query || typeof query !== "string") {
       logger.warn("Empty or invalid search query provided");
       return [];
     }
 
-    const trimmedQuery = query.trim();
+    const trimmedQuery = normalizeFoodSearchQuery(query);
+    if (trimmedQuery.length < MIN_QUERY_LENGTH) {
+      logger.warn({ query }, "Search query too short");
+      return [];
+    }
+
     const url = `${API_URL}?q=${encodeURIComponent(
       trimmedQuery
     )}&lc=en&search_simple=1&fields=product_name,product_name_en,nutriments,categories,quantity`;
 
     logger.debug({ url, query: trimmedQuery }, "Requesting URL from search-a-licious API");
 
-    return this.makeRequest(url);
+    return this.makeRequest(url, trimmedQuery);
   }
 
-  private async makeRequest(url: string): Promise<FoodProductResult[]> {
+  private async makeRequest(
+    url: string,
+    normalizedQuery: string,
+    retryCount = 0,
+  ): Promise<FoodProductResult[]> {
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT);
@@ -273,15 +395,11 @@ export class OpenFoodFactsApiClient {
         return [];
       }
 
-      const validHits = data.hits
-        .filter(isValidFoodProduct)
-        .map(mapHitToFoodProduct)
-        .filter(result => result.name !== "Unknown Product")
-        .slice(0, MAX_RESULTS);
+      const validHits = rankAndNormalizeFoodProducts(data.hits, normalizedQuery);
 
       logger.debug(
         {
-          query: url,
+          query: normalizedQuery,
           totalHits: data.hits.length,
           validResults: validHits.length,
           timedOut: data.timed_out
@@ -292,7 +410,7 @@ export class OpenFoodFactsApiClient {
       return validHits;
 
     } catch (error) {
-      return this.handleRequestError(error, url);
+      return this.handleRequestError(error, url, normalizedQuery, retryCount);
     }
   }
 
@@ -327,7 +445,12 @@ export class OpenFoodFactsApiClient {
     throw new OpenFoodFactsError(errorMessage, response.status);
   }
 
-  private async handleRequestError(error: unknown, url: string): Promise<FoodProductResult[]> {
+  private async handleRequestError(
+    error: unknown,
+    url: string,
+    normalizedQuery: string,
+    retryCount: number,
+  ): Promise<FoodProductResult[]> {
     if (error instanceof OpenFoodFactsError) {
       throw error;
     }
@@ -338,17 +461,17 @@ export class OpenFoodFactsApiClient {
     }
 
     // Retry logic for network errors
-    if (this.retryCount < MAX_RETRIES) {
-      this.retryCount++;
-      const delayMs = Math.pow(2, this.retryCount) * 1000; // Exponential backoff
+    if (retryCount < MAX_RETRIES) {
+      const nextRetryCount = retryCount + 1;
+      const delayMs = Math.pow(2, nextRetryCount) * 1000; // Exponential backoff
 
       logger.warn(
-        { error: error instanceof Error ? error.message : error, retryCount: this.retryCount },
+        { error: error instanceof Error ? error.message : error, retryCount: nextRetryCount },
         `Network error, retrying in ${delayMs}ms`
       );
 
       await delay(delayMs);
-      return this.makeRequest(url);
+      return this.makeRequest(url, normalizedQuery, nextRetryCount);
     }
 
     const errorMessage = "Failed to fetch from OpenFoodFacts API";
@@ -359,7 +482,7 @@ export class OpenFoodFactsApiClient {
           { message: error.message, stack: error.stack, name: error.name } :
           error,
         url,
-        retryCount: this.retryCount,
+        retryCount,
       }
     );
 
