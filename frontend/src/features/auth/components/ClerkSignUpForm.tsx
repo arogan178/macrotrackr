@@ -16,6 +16,7 @@ import {
   normalizeAuthRedirect,
   shouldBypassSyncForRedirect,
 } from "@/features/auth/utils/redirect";
+import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
@@ -62,10 +63,29 @@ export function ClerkSignUpForm({
       });
     } catch (error) {
       logger.error("Social sign-up error:", error);
-      showNotification(
-        error instanceof Error ? error.message : "Social sign-up failed",
-        "error",
-      );
+
+      const resolution = resolveSocialAuthError(error, "signup");
+
+      if (resolution.action === "auth-ready") {
+        showNotification(resolution.message, resolution.tone);
+        navigate({
+          to: "/auth-ready",
+          search: { redirectTo: normalizeAuthRedirect(redirectTo) },
+        });
+        return;
+      }
+
+      if (resolution.action === "switch-to-signin") {
+        showNotification(resolution.message, resolution.tone);
+        onSwitchToSignIn();
+        return;
+      }
+
+      if (resolution.action === "show-email") {
+        setIsEmailMode(true);
+      }
+
+      showNotification(resolution.message, resolution.tone);
     }
   };
 
@@ -149,6 +169,10 @@ export function ClerkSignUpForm({
         }
 
         // If auto-sign-in failed (e.g. wrong password), switch to sign-in form silently
+        showNotification(
+          "That email already has an account. Please sign in instead.",
+          "info",
+        );
         onSwitchToSignIn();
         return;
       }
