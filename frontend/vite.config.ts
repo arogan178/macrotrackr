@@ -139,7 +139,7 @@ export default defineConfig(() => {
           manualChunks: {
             // Vendor chunks - split by library for better caching
             "vendor-react": ["react", "react-dom"],
-            "vendor-router": ["react-router-dom"],
+            "vendor-router": ["@tanstack/react-router"],
             "vendor-query": ["@tanstack/react-query"],
             "vendor-charts": ["recharts"],
             "vendor-motion": ["motion"],
