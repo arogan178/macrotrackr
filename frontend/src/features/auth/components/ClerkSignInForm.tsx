@@ -1,4 +1,4 @@
-import { useSignIn } from "@clerk/clerk-react";
+import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 import { useMemo, useState } from "react";
@@ -10,6 +10,7 @@ import {
   encodeAuthRedirect,
   normalizeAuthRedirect,
 } from "@/features/auth/utils/redirect";
+import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
@@ -44,6 +45,7 @@ export function ClerkSignInForm({
 }: ClerkSignInFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signIn, setActive } = useSignIn();
+  const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
   const { showNotification } = useStore();
 
   const [email, setEmail] = useState("");
@@ -54,27 +56,45 @@ export function ClerkSignInForm({
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
 
   // Handle social sign-in
+  // We intentionally start OAuth via the sign-up resource because the callback
+  // flow already handles both cases safely:
+  // - existing social account => continue as sign-in
+  // - new social account => continue to onboarding/profile setup
+  // This keeps social auth consistent across the login and registration pages.
   const handleSocialSignIn = async (
     strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
   ) => {
-    if (!isLoaded || !signIn) {
+    if (!isSignUpLoaded || !signUp) {
       showNotification("Authentication not ready. Please try again.", "error");
       return;
     }
 
     try {
       const destination = normalizeAuthRedirect(redirectTo);
-      await signIn.authenticateWithRedirect({
+      await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: `/sso-callback?flow=signin&redirectTo=${encodeAuthRedirect(destination)}`,
+        redirectUrl: `/sso-callback?flow=signup&redirectTo=${encodeAuthRedirect(destination)}`,
         redirectUrlComplete: `/auth-ready?redirectTo=${encodeAuthRedirect(destination)}`,
       });
     } catch (error) {
       logger.error("Social sign-in error:", error);
-      showNotification(
-        error instanceof Error ? error.message : "Social sign-in failed",
-        "error",
-      );
+
+      const resolution = resolveSocialAuthError(error, "signin");
+
+      if (resolution.action === "auth-ready") {
+        showNotification(resolution.message, resolution.tone);
+        navigate({
+          to: "/auth-ready",
+          search: { redirectTo: normalizeAuthRedirect(redirectTo) },
+        });
+        return;
+      }
+
+      if (resolution.action === "show-email") {
+        setIsEmailMode(true);
+      }
+
+      showNotification(resolution.message, resolution.tone);
     }
   };
 
