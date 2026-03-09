@@ -1,21 +1,40 @@
 import { useSignIn } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
+import { AppleIcon, FacebookIcon, GoogleIcon } from "@/components/ui/Icons";
 import {
-  AppleIcon,
-  CalorieIcon,
-  FacebookIcon,
-  GoogleIcon,
-} from "@/components/ui/Icons";
+  encodeAuthRedirect,
+  normalizeAuthRedirect,
+} from "@/features/auth/utils/redirect";
+import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
 interface ClerkSignInFormProps {
   onSwitchToSignUp: () => void;
   onForgotPassword: () => void;
   redirectTo?: string;
+}
+
+function getStrategies(
+  factors: Array<unknown> | null | undefined,
+): string[] | undefined {
+  return factors
+    ?.map((factor) => {
+      if (
+        typeof factor === "object" &&
+        factor !== null &&
+        "strategy" in factor &&
+        typeof factor.strategy === "string"
+      ) {
+        return factor.strategy;
+      }
+      return undefined;
+    })
+    .filter((strategy): strategy is string => strategy !== undefined);
 }
 
 export function ClerkSignInForm({
@@ -30,6 +49,9 @@ export function ClerkSignInForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isEmailMode, setIsEmailMode] = useState(false);
+
+  const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
 
   // Handle social sign-in
   const handleSocialSignIn = async (
@@ -41,14 +63,14 @@ export function ClerkSignInForm({
     }
 
     try {
-      const destination = redirectTo || "/home";
+      const destination = normalizeAuthRedirect(redirectTo);
       await signIn.authenticateWithRedirect({
         strategy,
-        redirectUrl: `/sso-callback?redirectTo=${encodeURIComponent(destination)}`,
-        redirectUrlComplete: `/auth-ready?redirectTo=${encodeURIComponent(destination)}`,
+        redirectUrl: `/sso-callback?flow=signin&redirectTo=${encodeAuthRedirect(destination)}`,
+        redirectUrlComplete: `/auth-ready?redirectTo=${encodeAuthRedirect(destination)}`,
       });
     } catch (error) {
-      console.error("Social sign-in error:", error);
+      logger.error("Social sign-in error:", error);
       showNotification(
         error instanceof Error ? error.message : "Social sign-in failed",
         "error",
@@ -57,62 +79,29 @@ export function ClerkSignInForm({
   };
 
   // Handle email/password sign-in
-  const handleEmailSignIn = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailSignIn = async (event: React.FormEvent) => {
+    event.preventDefault();
 
     if (!isLoaded || !signIn) {
       showNotification("Authentication not ready. Please try again.", "error");
       return;
     }
 
-    // Check if there's an existing sign-in state that needs to be cleared
-    // This can happen when password was changed in Clerk
-    console.log("[ClerkSignInForm] Current sign-in status:", signIn.status);
-
-    // If there's a previous sign-in attempt in progress, we should handle it
-    if (signIn.status && signIn.status !== "needs_identifier") {
-      console.log(
-        "[ClerkSignInForm] Existing sign-in state detected, creating fresh attempt",
-      );
-    }
-
-    console.log("[ClerkSignInForm] Starting sign-in attempt");
-
     setIsLoading(true);
 
     try {
-      console.log("[ClerkSignInForm] Attempting sign-in with:", { email });
       const result = await signIn.create({
         identifier: email,
         password,
-      });
-
-      console.log("[ClerkSignInForm] Sign-in result:", {
-        status: result.status,
-        hasSessionId: !!result.createdSessionId,
-        sessionId: result.createdSessionId,
-        userData: result.userData,
-        identifier: result.identifier,
-        supportedFirstFactors: result.supportedFirstFactors?.map(
-          (f: any) => f.strategy,
-        ),
-        supportedSecondFactors: result.supportedSecondFactors?.map(
-          (f: any) => f.strategy,
-        ),
-        firstFactorVerification: result.firstFactorVerification,
-        secondFactorVerification: result.secondFactorVerification,
       });
 
       switch (result.status) {
         case "complete": {
           // Sign-in complete, set session and redirect to auth-ready
           // AuthReadyPage will set the token and then redirect to the intended destination
-          console.log(
-            "[ClerkSignInForm] Sign-in complete, setting active session",
-          );
           if (!result.createdSessionId) {
-            console.error(
-              "[ClerkSignInForm] No session ID available despite complete status",
+            logger.error(
+              "No session ID available despite complete sign-in status",
             );
             showNotification(
               "Sign-in completed but session could not be created. Please try again.",
@@ -122,21 +111,17 @@ export function ClerkSignInForm({
           }
           await setActive({ session: result.createdSessionId });
           showNotification("Signed in successfully!", "success");
-          navigate({ to: "/auth-ready", search: { redirectTo: redirectTo || "/home" } });
+          navigate({
+            to: "/auth-ready",
+            search: { redirectTo: normalizeAuthRedirect(redirectTo) },
+          });
 
           break;
         }
         case "needs_first_factor": {
           // Handle cases like email verification or password reset needed
-          console.log(
-            "[ClerkSignInForm] Needs first factor, checking requirements...",
-          );
-          const supportedStrategies = result.supportedFirstFactors?.map(
-            (f: any) => f.strategy,
-          );
-          console.log(
-            "[ClerkSignInForm] Supported strategies:",
-            supportedStrategies,
+          const supportedStrategies = getStrategies(
+            result.supportedFirstFactors,
           );
 
           if (supportedStrategies?.includes("reset_password_email_code")) {
@@ -161,7 +146,6 @@ export function ClerkSignInForm({
         }
         case "needs_new_password": {
           // Password was changed or expired
-          console.log("[ClerkSignInForm] Needs new password");
           showNotification(
             "Your password has been changed. Please check your email or reset your password.",
             "info",
@@ -173,17 +157,13 @@ export function ClerkSignInForm({
         }
         case "needs_second_factor": {
           // 2FA required
-          console.log("[ClerkSignInForm] Needs second factor (2FA)");
           showNotification("Two-factor authentication required.", "info");
 
           break;
         }
         default: {
           // Handle any other status
-          console.warn(
-            "[ClerkSignInForm] Unhandled sign-in status:",
-            result.status,
-          );
+          logger.warn("Unhandled sign-in status:", result.status);
           showNotification(
             `Sign-in status: ${result.status}. Please try again or contact support.`,
             "warning",
@@ -191,14 +171,18 @@ export function ClerkSignInForm({
         }
       }
     } catch (error) {
-      console.error("[ClerkSignInForm] Sign-in error:", error);
+      logger.error("Sign-in error:", error);
 
       // Handle Clerk-specific error structures
       let errorMessage = "Invalid email or password";
 
       if (error && typeof error === "object") {
-        const clerkError = error as any;
-        console.error("[ClerkSignInForm] Error details:", {
+        const clerkError = error as {
+          message?: string;
+          status?: number;
+          errors?: Array<{ code?: string; message?: string }>;
+        };
+        logger.error("Sign-in error details:", {
           message: clerkError.message,
           status: clerkError.status,
           errors: clerkError.errors,
@@ -245,106 +229,151 @@ export function ClerkSignInForm({
 
   return (
     <div className="w-full">
-      <div className="mb-8 flex flex-col items-center text-center">
-        <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-          <CalorieIcon className="h-8 w-8 text-primary" />
-        </div>
-        <h1 className="text-3xl font-bold text-foreground">Welcome Back</h1>
-        <p className="mt-2 text-muted">
-          Sign in to continue tracking your macros
-        </p>
-      </div>
-
-      <div className="mb-6 space-y-3">
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignIn("oauth_google")}
-          icon={<GoogleIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Google
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignIn("oauth_facebook")}
-          icon={<FacebookIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Facebook
-        </Button>
-        <Button
-          type="button"
-          variant="secondary"
-          fullWidth
-          onClick={() => handleSocialSignIn("oauth_apple")}
-          icon={<AppleIcon className="h-5 w-5" />}
-          iconPosition="left"
-        >
-          Continue with Apple
-        </Button>
-      </div>
-
-      <div className="mb-6 flex items-center">
-        <div className="flex-1 border-t border-border" />
-        <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
-          or
-        </span>
-        <div className="flex-1 border-t border-border" />
-      </div>
-
-      <form onSubmit={handleEmailSignIn} className="space-y-5">
-        <TextField
-          label="Email"
-          value={email}
-          onChange={setEmail}
-          type="email"
-          required
-          placeholder="your@email.com"
-          name="email"
-          autoComplete="username"
-        />
-
-        <TextField
-          label="Password"
-          value={password}
-          onChange={setPassword}
-          type="password"
-          required
-          placeholder="••••••••"
-          name="password"
-          autoComplete="current-password"
-        />
-
-        <div className="flex justify-end">
-          <button
-            type="button"
-            onClick={onForgotPassword}
-            className="text-sm text-primary transition-colors hover:text-primary"
+      <AnimatePresence mode="wait" initial={false}>
+        {isEmailMode ? (
+          <motion.div
+            key="email-sign-in"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            Forgot password?
-          </button>
-        </div>
+            <div className="mb-5 flex items-center justify-between">
+              <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
+                Email sign in
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsEmailMode(false)}
+                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+              >
+                Back
+              </button>
+            </div>
 
-        <Button
-          type="submit"
-          fullWidth
-          isLoading={isLoading}
-          loadingText="Signing in..."
-        >
-          Sign In
-        </Button>
-      </form>
+            <form onSubmit={handleEmailSignIn} className="space-y-4">
+              <TextField
+                label="Email"
+                value={email}
+                onChange={setEmail}
+                type="email"
+                required
+                placeholder="your@email.com"
+                name="email"
+                autoComplete="username"
+              />
+
+              <AnimatePresence initial={false}>
+                {showPasswordField ? (
+                  <motion.div
+                    key="password-field"
+                    initial={{ opacity: 0, height: 0, y: -6 }}
+                    animate={{ opacity: 1, height: "auto", y: 0 }}
+                    exit={{ opacity: 0, height: 0, y: -6 }}
+                    transition={{ duration: 0.24, ease: "easeOut" }}
+                    className="space-y-3 overflow-hidden"
+                  >
+                    <TextField
+                      label="Password"
+                      value={password}
+                      onChange={setPassword}
+                      type="password"
+                      required
+                      placeholder="••••••••"
+                      name="password"
+                      autoComplete="current-password"
+                    />
+
+                    <div className="flex justify-end">
+                      <button
+                        type="button"
+                        onClick={onForgotPassword}
+                        className="inline-flex min-h-11 items-center rounded-md px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  </motion.div>
+                ) : null}
+              </AnimatePresence>
+
+              <Button
+                type="submit"
+                fullWidth
+                isLoading={isLoading}
+                loadingText="Signing in..."
+              >
+                Sign In
+              </Button>
+            </form>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="social-sign-in"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <div className="space-y-3">
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignIn("oauth_google")}
+                icon={<GoogleIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Google
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignIn("oauth_facebook")}
+                icon={<FacebookIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Facebook
+              </Button>
+              <Button
+                type="button"
+                variant="secondary"
+                fullWidth
+                onClick={() => handleSocialSignIn("oauth_apple")}
+                icon={<AppleIcon className="h-5 w-5" />}
+                iconPosition="left"
+              >
+                Continue with Apple
+              </Button>
+            </div>
+
+            <div className="my-6 flex items-center">
+              <div className="flex-1 border-t border-border" />
+              <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
+                or
+              </span>
+              <div className="flex-1 border-t border-border" />
+            </div>
+
+            <Button
+              type="button"
+              variant="outline"
+              fullWidth
+              onClick={() => setIsEmailMode(true)}
+            >
+              Continue with email
+            </Button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <div className="mt-6 border-t border-border pt-6 text-center text-sm">
         <span className="text-muted">Don&apos;t have an account? </span>
         <button
           type="button"
           onClick={onSwitchToSignUp}
-          className="font-medium text-primary hover:underline"
+          className="inline-flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
         >
           Sign up
         </button>

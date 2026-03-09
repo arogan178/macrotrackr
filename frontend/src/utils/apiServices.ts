@@ -12,6 +12,7 @@ import {
   calculateWeeksToGoal,
 } from "@/features/goals/calculations";
 import type { WeightGoalFormValues } from "@/features/goals/types";
+import type { MacroEntry } from "@/types/macro";
 import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 import { getActivityLevelFromString } from "@/utils/userConstants";
 
@@ -29,6 +30,27 @@ export interface MacroDensitySummaryItem {
   fats: number;
   count: number;
 } // Adjust path as needed
+
+interface MacroHistoryResponse {
+  entries: MacroEntry[];
+  total: number;
+  limit: number;
+  offset: number;
+  hasMore: boolean;
+  limits?: unknown;
+}
+
+export interface FoodSearchResult {
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  energyKcal: number;
+  categories: string;
+  servingQuantity: number;
+  servingUnit: string;
+  rawQuantity?: string;
+}
 
 // API Base URL and Response Types
 export const API_BASE_URL =
@@ -108,6 +130,101 @@ export interface UserDetailsResponse {
   };
 }
 
+function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    typeof candidate.id === "number" &&
+    typeof candidate.email === "string" &&
+    typeof candidate.firstName === "string" &&
+    typeof candidate.lastName === "string"
+  );
+}
+
+function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | null {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  const root = value as Record<string, unknown>;
+  const candidateRaw =
+    root && typeof root.data === "object" && root.data !== null
+      ? (root.data as Record<string, unknown>)
+      : root;
+
+  const candidate: Record<string, unknown> = {
+    ...candidateRaw,
+    firstName: candidateRaw.firstName ?? candidateRaw.first_name,
+    lastName: candidateRaw.lastName ?? candidateRaw.last_name,
+    createdAt: candidateRaw.createdAt ?? candidateRaw.created_at,
+    dateOfBirth: candidateRaw.dateOfBirth ?? candidateRaw.date_of_birth,
+    activityLevel: candidateRaw.activityLevel ?? candidateRaw.activity_level,
+  };
+
+  if (!isUserDetailsResponse(candidate)) {
+    return null;
+  }
+
+  return {
+    id: candidate.id,
+    email: candidate.email,
+    firstName: candidate.firstName,
+    lastName: candidate.lastName,
+    createdAt:
+      typeof candidate.createdAt === "string"
+        ? candidate.createdAt
+        : new Date().toISOString(),
+    dateOfBirth:
+      typeof candidate.dateOfBirth === "string"
+        ? candidate.dateOfBirth
+        : undefined,
+    height: typeof candidate.height === "number" ? candidate.height : undefined,
+    weight: typeof candidate.weight === "number" ? candidate.weight : undefined,
+    gender:
+      typeof candidate.gender === "string" ? candidate.gender : undefined,
+    activityLevel:
+      typeof candidate.activityLevel === "number"
+        ? candidate.activityLevel
+        : undefined,
+    isProfileComplete:
+      typeof candidate.isProfileComplete === "boolean"
+        ? candidate.isProfileComplete
+        : Boolean(candidate.dateOfBirth),
+    subscription:
+      candidate.subscription && typeof candidate.subscription === "object"
+        ? {
+            status:
+              (candidate.subscription as Record<string, unknown>).status === "pro" ||
+              (candidate.subscription as Record<string, unknown>).status === "canceled"
+                ? ((candidate.subscription as Record<string, unknown>).status as
+                    | "pro"
+                    | "canceled")
+                : "free",
+            hasStripeCustomer:
+              typeof (candidate.subscription as Record<string, unknown>)
+                .hasStripeCustomer === "boolean"
+                ? ((candidate.subscription as Record<string, unknown>)
+                    .hasStripeCustomer as boolean)
+                : false,
+            currentPeriodEnd:
+              typeof (candidate.subscription as Record<string, unknown>)
+                .currentPeriodEnd === "string"
+                ? ((candidate.subscription as Record<string, unknown>)
+                    .currentPeriodEnd as string)
+                : undefined,
+          }
+        : {
+            status: "free",
+            hasStripeCustomer: false,
+            currentPeriodEnd: undefined,
+          },
+  };
+}
+
 export interface BillingDetailsResponse {
   subscription:
     | {
@@ -155,6 +272,7 @@ interface MacroEntryCreatePayload {
   mealName?: string; // camelCase
   entryDate: string; // Updated to camelCase
   entryTime: string; // Updated to camelCase
+  ingredients?: import("@/types/macro").Ingredient[];
 }
 export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
 
@@ -181,6 +299,34 @@ export class ApiError extends Error {
     this.code = code;
     this.details = details;
   }
+}
+
+function isFoodSearchResult(value: unknown): value is FoodSearchResult {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const candidate = value as Record<string, unknown>;
+
+  return (
+    typeof candidate.name === "string" &&
+    typeof candidate.protein === "number" &&
+    typeof candidate.carbs === "number" &&
+    typeof candidate.fats === "number" &&
+    typeof candidate.energyKcal === "number" &&
+    typeof candidate.categories === "string" &&
+    typeof candidate.servingQuantity === "number" &&
+    typeof candidate.servingUnit === "string" &&
+    (candidate.rawQuantity === undefined || typeof candidate.rawQuantity === "string")
+  );
+}
+
+export function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
+  if (!Array.isArray(value)) {
+    return [];
+  }
+
+  return value.filter((item): item is FoodSearchResult => isFoodSearchResult(item));
 }
 
 // Habit Goal Payload
@@ -282,11 +428,14 @@ export function setAuthToken(token: string | null) {
  * Get the current auth token (Clerk or static)
  */
 export async function getAuthToken(): Promise<string | null> {
+  if (getClerkToken) {
+    const freshToken = await getClerkToken();
+    if (freshToken) {
+      return freshToken;
+    }
+  }
   if (staticAuthToken) {
     return staticAuthToken;
-  }
-  if (getClerkToken) {
-    return await getClerkToken();
   }
   return null;
 }
@@ -309,6 +458,7 @@ export async function getHeadersAsync(
 ): Promise<Record<string, string>> {
   const headers: Record<string, string> = {};
   const token = await getAuthToken();
+
   if (token) {
     headers["Authorization"] = `Bearer ${token}`;
   }
@@ -363,11 +513,37 @@ export const apiService = {
   user: {
     /** Fetches the current authenticated user's profile */
     getUserDetails: async (): Promise<UserDetailsResponse> => {
-      const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-        headers: await getHeadersAsync(false),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as UserDetailsResponse;
+      const fetchUserDetails = async (): Promise<unknown> => {
+        const url = `${API_BASE_URL}/api/user/me`;
+        const response = await fetch(url, {
+          headers: await getHeadersAsync(false),
+          credentials: "include",
+        });
+        return handleResponse(response);
+      };
+
+      const initialResult = await fetchUserDetails();
+      const normalizedInitialResult = normalizeUserDetailsResponse(initialResult);
+      if (normalizedInitialResult) {
+        return normalizedInitialResult;
+      }
+
+      // If backend returned an unexpected payload (e.g. {}), try to re-sync Clerk linkage once.
+      const token = await getAuthToken();
+      await apiService.auth.syncUser(token || undefined);
+
+      const retryResult = await fetchUserDetails();
+      const normalizedRetryResult = normalizeUserDetailsResponse(retryResult);
+      if (normalizedRetryResult) {
+        return normalizedRetryResult;
+      }
+
+      throw new ApiError(
+        "Invalid user profile response from server",
+        500,
+        "INVALID_USER_RESPONSE",
+        retryResult,
+      );
     },
     /** Updates user settings (profile details only) */
     updateSettings: async (settings: UserSettingsPayload) => {
@@ -397,7 +573,7 @@ export const apiService = {
       profileData: Partial<
         Pick<
           UserSettingsPayload,
-          "dateOfBirth" | "height" | "weight" | "activityLevel"
+          "dateOfBirth" | "height" | "weight" | "gender" | "activityLevel"
         >
       >,
     ) => {
@@ -415,70 +591,9 @@ export const apiService = {
   },
 
   // Authentication endpoints
-  // Note: Login/Register/Forgot Password are now handled by Clerk
-  // The backend validates Clerk JWT tokens for authenticated requests
   auth: {
     /**
-     * @deprecated Use Clerk's SignIn component instead
-     * Kept for backward compatibility during migration
-     */
-    login: async (email: string, password: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ email, password }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        token: string;
-        user?: UserDetailsResponse;
-      };
-    },
-    /**
-     * @deprecated Clerk handles email validation automatically
-     */
-    validateEmail: async (email: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/validate-email`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ email }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as { valid: boolean };
-    },
-    /**
-     * @deprecated Use Clerk's SignUp component instead
-     * Kept for backward compatibility during migration
-     */
-    register: async (userData: Record<string, unknown>) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify(userData),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        token: string;
-        user?: UserDetailsResponse;
-      };
-    },
-    /**
-     * @deprecated Use Clerk's password reset flow instead
-     */
-    forgotPassword: async (email: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/auth/forgot-password`, {
-        method: "POST",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ email }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        success: boolean;
-        message?: string;
-      };
-    },
-    /**
-     * @deprecated Use Clerk's password reset flow instead
+     * Supports password reset links issued before the Clerk migration.
      */
     resetPassword: async (token: string, newPassword: string) => {
       const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
@@ -565,6 +680,40 @@ export const apiService = {
       });
       return handleResponse(response);
     },
+    getAllHistory: async (
+      options: { startDate?: string; endDate?: string } = {},
+    ): Promise<{ entries: MacroEntry[]; limits?: unknown }> => {
+      const pageSize = 100;
+      let offset = 0;
+      let hasMore = true;
+      const entries: MacroEntry[] = [];
+      let limits: unknown;
+
+      while (hasMore) {
+        const response = (await apiService.macros.getHistory(
+          pageSize,
+          offset,
+          options,
+        )) as MacroHistoryResponse;
+
+        if (Array.isArray(response.entries)) {
+          entries.push(...response.entries);
+        }
+
+        limits = response.limits ?? limits;
+        hasMore = response.hasMore === true;
+        offset += pageSize;
+
+        if (offset > 50_000) {
+          break;
+        }
+      }
+
+      return {
+        entries,
+        limits,
+      };
+    },
     addEntry: async (entry: MacroEntryCreatePayload) => {
       const payload = {
         protein: entry.protein,
@@ -574,6 +723,7 @@ export const apiService = {
         mealName: entry.mealName || "",
         entryDate: entry.entryDate,
         entryTime: entry.entryTime,
+        ingredients: entry.ingredients,
       };
       const response = await fetch(`${API_BASE_URL}/api/macros`, {
         method: "POST",
@@ -592,6 +742,7 @@ export const apiService = {
       if (entry.mealName !== undefined) payload.mealName = entry.mealName;
       if (entry.entryDate !== undefined) payload.entryDate = entry.entryDate;
       if (entry.entryTime !== undefined) payload.entryTime = entry.entryTime;
+      if (entry.ingredients !== undefined) payload.ingredients = entry.ingredients;
       const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
         method: "PUT",
         headers: await getHeadersAsync(),
@@ -630,15 +781,20 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    search: async (query: string) => {
+    search: async (query: string): Promise<FoodSearchResult[]> => {
+      const normalizedQuery = query.trim();
+      if (normalizedQuery.length < 2) {
+        return [];
+      }
+
       const response = await fetch(
-        `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(query)}`,
+        `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`,
         {
           headers: await getHeadersAsync(false),
           credentials: "include",
         },
       );
-      return handleResponse(response);
+      return normalizeFoodSearchResults(await handleResponse(response));
     },
   },
 
@@ -840,6 +996,99 @@ export const apiService = {
     },
   },
   
+  // Saved Meals API
+  savedMeals: {
+    /** Get all saved meals for the current user */
+    getAll: async (): Promise<{
+      meals: Array<{
+        id: number;
+        userId: number;
+        name: string;
+        protein: number;
+        carbs: number;
+        fats: number;
+        mealType: string;
+        createdAt: string;
+        updatedAt: string;
+        ingredients?: import("@/types/macro").Ingredient[];
+      }>;
+      count: number;
+      limit: number;
+      isPro: boolean;
+    }> => {
+      const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
+        headers: await getHeadersAsync(false),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as {
+        meals: Array<{
+          id: number;
+          userId: number;
+          name: string;
+          protein: number;
+          carbs: number;
+          fats: number;
+          mealType: string;
+          createdAt: string;
+          updatedAt: string;
+          ingredients?: import("@/types/macro").Ingredient[];
+        }>;
+        count: number;
+        limit: number;
+        isPro: boolean;
+      };
+    },
+
+    /** Create a new saved meal */
+    create: async (payload: {
+      name: string;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+      ingredients?: import("@/types/macro").Ingredient[];
+    }): Promise<{
+      id: number;
+      userId: number;
+      name: string;
+      protein: number;
+      carbs: number;
+      fats: number;
+      mealType: string;
+      createdAt: string;
+      updatedAt: string;
+      ingredients?: import("@/types/macro").Ingredient[];
+    }> => {
+      const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
+        method: "POST",
+        headers: await getHeadersAsync(),
+        body: JSON.stringify(payload),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as {
+        id: number;
+        userId: number;
+        name: string;
+        protein: number;
+        carbs: number;
+        fats: number;
+        mealType: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    },
+
+    /** Delete a saved meal */
+    delete: async (id: number): Promise<{ success: boolean; message: string }> => {
+      const response = await fetch(`${API_BASE_URL}/api/saved-meals/${id}`, {
+        method: "DELETE",
+        headers: await getHeadersAsync(false),
+        credentials: "include",
+      });
+      return (await handleResponse(response)) as { success: boolean; message: string };
+    },
+  },
+
   // Add methods for Clerk integration
   setGetToken,
   setAuthToken,

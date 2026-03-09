@@ -2,20 +2,37 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { UserSchemas } from "./schemas";
-import type { ClerkAuthContext } from "../../middleware/clerkAuth";
+import type { AuthenticatedContext } from "../../types";
 import { generateId } from "../../utils/id-generator";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import {
+  AccountNotSyncedError,
   NotFoundError,
   ConflictError,
   AuthenticationError,
 } from "../../lib/errors";
-import { toCamelCase, handleError } from "../../lib/responses";
+import { handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
 import { hashPassword, verifyPassword } from "../../lib/password";
 import { SubscriptionService } from "../billing/subscription-service";
 import type { Database } from "bun:sqlite";
 import { logger } from "../../lib/logger";
+import { getInternalUserId } from "../../lib/clerk-utils";
+
+// Extended user context type for route handlers
+// Extends AuthenticatedContext with module-specific properties
+interface UserRouteContext extends AuthenticatedContext {
+  body?: Record<string, unknown>;
+  params?: Record<string, string>;
+  query: Record<string, string | undefined>;
+  db: Database;
+}
+
+const ErrorResponseSchema = t.Object({
+  code: t.String(),
+  message: t.String(),
+  details: t.Optional(t.Unknown()),
+});
 
 // Helper function
 const nullify = <T>(value: T | undefined | null): T | null =>
@@ -25,9 +42,11 @@ const nullify = <T>(value: T | undefined | null): T | null =>
 interface UserDetailsResult {
   id: number;
   email: string;
-  first_name: string;
-  last_name: string;
+  first_name: string | null;
+  last_name: string | null;
   created_at: string;
+  subscription_status: "free" | "pro" | "canceled" | string | null;
+  stripe_customer_id: string | null;
   date_of_birth: string | null;
   height: number | null;
   weight: number | null;
@@ -35,40 +54,32 @@ interface UserDetailsResult {
   activity_level: number | null;
 }
 
-// Helper to get internal user ID from Clerk ID or email
-function getInternalUserId(
-  db: Database,
-  clerkUserId: string,
-  email?: string
-): number | null {
-  // First try to find by Clerk ID
-  const userByClerkId = safeQuery<{ id: number }>(
-    db,
-    "SELECT id FROM users WHERE clerk_id = ?",
-    [clerkUserId]
-  );
+function normalizeSubscriptionStatus(
+  status: string | null | undefined,
+): "free" | "pro" | "canceled" {
+  if (status === "pro" || status === "canceled") {
+    return status;
+  }
+  return "free";
+}
 
-  if (userByClerkId) {
-    return userByClerkId.id;
+async function resolveOrCreateInternalUserId(
+  db: Database,
+  user: NonNullable<UserRouteContext["user"]>,
+  internalUserIdFromContext: number | null | undefined,
+): Promise<number | null> {
+  if (internalUserIdFromContext) {
+    return internalUserIdFromContext;
   }
 
-  // Fall back to email lookup
-  if (email) {
-    const userByEmail = safeQuery<{ id: number }>(
-      db,
-      "SELECT id FROM users WHERE email = ?",
-      [email]
-    );
+  const resolvedInternalUserId = getInternalUserId(
+    db,
+    user.clerkUserId,
+    user.email,
+  );
 
-    if (userByEmail) {
-      // Update the user with the Clerk ID for future lookups
-      safeExecute(
-        db,
-        "UPDATE users SET clerk_id = ? WHERE id = ?",
-        [clerkUserId, userByEmail.id]
-      );
-      return userByEmail.id;
-    }
+  if (resolvedInternalUserId) {
+    return resolvedInternalUserId;
   }
 
   return null;
@@ -84,30 +95,29 @@ export const userRoutes = (app: Elysia) =>
         "/me",
         async (context: any) => {
           try {
-            const { db, user } = context as ClerkAuthContext & { db: Database };
+            const { db, user, internalUserId: internalUserIdFromContext } =
+              context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
             }
 
             // Get internal user ID from Clerk ID
-            logger.info({ clerkUserId: user.clerkUserId, email: user.email }, "[/api/user/me] Looking up internal user ID");
+            logger.info({ clerkUserId: user.clerkUserId }, "[/api/user/me] Looking up internal user ID");
             
-            const internalUserId = getInternalUserId(
+            const internalUserId = await resolveOrCreateInternalUserId(
               db,
-              user.clerkUserId,
-              user.email
+              user,
+              internalUserIdFromContext,
             );
 
             if (!internalUserId) {
-              // User doesn't exist in our DB yet - this shouldn't happen
-              // if they called /auth/clerk-sync first, but handle it gracefully
-              logger.error(
-                { clerkUserId: user.clerkUserId, email: user.email },
-                "[/api/user/me] User not found in database - sync may have failed"
+              logger.warn(
+                { clerkUserId: user.clerkUserId },
+                "[/api/user/me] Clerk user is authenticated but not linked to an internal account",
               );
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
+              throw new AccountNotSyncedError(
+                "Your account setup is not finished yet. Please complete your profile.",
               );
             }
             
@@ -116,7 +126,8 @@ export const userRoutes = (app: Elysia) =>
             // Fetch user details
             const dbResult = safeQuery<UserDetailsResult>(
               db,
-              `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
+                  `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
+                    u.subscription_status, u.stripe_customer_id,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
@@ -129,31 +140,51 @@ export const userRoutes = (app: Elysia) =>
               throw new NotFoundError("User data not found.");
             }
 
-            // Get only summary subscription info
-            const subscriptionInfo =
-              await SubscriptionService.getUserSubscription(internalUserId);
-            const result = toCamelCase(dbResult);
+            let currentPeriodEnd: string | null = null;
+            try {
+              const subscriptionInfo =
+                await SubscriptionService.getUserSubscription(internalUserId);
+              currentPeriodEnd =
+                subscriptionInfo.subscription?.current_period_end || null;
+            } catch (subscriptionError) {
+              logger.warn(
+                {
+                  internalUserId,
+                  subscriptionError,
+                },
+                "[/api/user/me] Failed to resolve subscription period end, using fallback values",
+              );
+            }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (result as Record<string, any>).subscription = {
-              status: subscriptionInfo.subscription_status,
-              hasStripeCustomer: !!subscriptionInfo.stripe_customer_id,
-              currentPeriodEnd:
-                subscriptionInfo.subscription?.current_period_end || null,
+            return {
+              id: dbResult.id,
+              email: dbResult.email,
+              firstName: dbResult.first_name ?? "",
+              lastName: dbResult.last_name ?? "",
+              createdAt: dbResult.created_at,
+              dateOfBirth: dbResult.date_of_birth,
+              height: dbResult.height,
+              weight: dbResult.weight,
+              gender: dbResult.gender,
+              activityLevel: dbResult.activity_level,
+              isProfileComplete: !!dbResult.date_of_birth,
+              subscription: {
+                status: normalizeSubscriptionStatus(dbResult.subscription_status),
+                hasStripeCustomer: !!dbResult.stripe_customer_id,
+                currentPeriodEnd,
+              },
             };
-
-            // Add profile completion flag based on date of birth
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            (result as Record<string, any>).isProfileComplete = !!dbResult.date_of_birth;
-
-            // Do NOT include any detailed billing or payment info here
-            return result;
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
-          response: UserSchemas.userDetailsResponse,
+          response: {
+            200: UserSchemas.userDetailsResponse,
+            401: ErrorResponseSchema,
+            404: ErrorResponseSchema,
+            500: ErrorResponseSchema,
+          },
           detail: {
             summary: "Get current authenticated user's profile and settings",
             tags: ["User"],
@@ -166,11 +197,7 @@ export const userRoutes = (app: Elysia) =>
         "/settings",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as ClerkAuthContext & {
-              db: Database;
-              body?: Record<string, unknown>;
-              request: Request;
-            };
+            const { db, user, body, request } = context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -323,7 +350,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
@@ -344,11 +371,7 @@ export const userRoutes = (app: Elysia) =>
         "/complete-profile",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as ClerkAuthContext & {
-              db: Database;
-              body?: Record<string, unknown>;
-              request: Request;
-            };
+            const { db, user, body, request } = context as UserRouteContext;
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -434,7 +457,7 @@ export const userRoutes = (app: Elysia) =>
               return { success: true, message: "Profile details updated." };
             });
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
@@ -450,15 +473,33 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      // PUT /password - Change user password
+      /**
+       * PUT /password - Change user password
+       * 
+       * @deprecated This endpoint is deprecated and will be removed in v2.0.0.
+       * Clerk-authenticated users should use Clerk's password management instead.
+       * This endpoint only works for legacy users who haven't migrated to Clerk auth.
+       * 
+       * @see https://clerk.com/docs/custom-flows/passwords for Clerk password management
+       */
       .put(
         "/password",
         async (context: any) => {
           try {
-            const { db, user, body } = context as ClerkAuthContext & {
-              db: Database;
-              body?: Record<string, unknown>;
+            const { db, user, body, set } = context as UserRouteContext & {
+              set: { headers: Record<string, string> };
             };
+
+            // Add deprecation headers
+            set.headers = set.headers || {};
+            set.headers["X-Deprecated"] = "true";
+            set.headers["X-Deprecation-Message"] = "Use Clerk password management. This endpoint will be removed in v2.0.0.";
+
+            // Log deprecation warning
+            logger.warn(
+              { operation: "deprecated_endpoint", endpoint: "/api/user/password" },
+              "DEPRECATED: /api/user/password endpoint called. This will be removed in v2.0.0."
+            );
 
             if (!user?.clerkUserId) {
               throw new AuthenticationError("Unauthorized");
@@ -522,7 +563,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            return handleError(error, context);
+            return handleError(error, context.set);
           }
         },
         {
@@ -531,10 +572,12 @@ export const userRoutes = (app: Elysia) =>
             200: t.Object({ success: t.Boolean(), message: t.String() }),
           },
           detail: {
-            summary: "[DEPRECATED] Change the current user's password",
+            summary: "[DEPRECATED] Change the current user's password - Will be removed in v2.0.0",
             description:
-              "This endpoint is deprecated for Clerk users. Use Clerk's password management instead.",
-            tags: ["User"],
+              "This endpoint is deprecated and will be removed in v2.0.0. " +
+              "Clerk-authenticated users should use Clerk's password management instead. " +
+              "This endpoint only works for legacy users who haven't migrated to Clerk auth.",
+            tags: ["User", "Deprecated"],
           },
         }
       )

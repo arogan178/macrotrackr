@@ -1,73 +1,75 @@
 /* src/styles/global.css */
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
-html {
-  color-scheme: dark;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-rendering: optimizeLegibility;
-  scroll-behavior: smooth;
-}
+@layer base {
+  html {
+    color-scheme: dark;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    scroll-behavior: smooth;
+  }
 
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+  html,
+  body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
-body {
-  @apply bg-background text-foreground;
-  font-family:
-    "Inter",
-    system-ui,
-    -apple-system,
-    sans-serif;
-  font-size: 16px;
-  line-height: 1.6;
-  min-height: 100vh;
-  font-variant-numeric: tabular-nums;
-}
+  body {
+    @apply bg-background text-foreground;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    min-height: 100vh;
+    font-variant-numeric: tabular-nums;
+  }
 
-*,
-*:before,
-*:after {
-  box-sizing: inherit;
-}
+  *,
+  *:before,
+  *:after {
+    box-sizing: inherit;
+  }
 
-a {
-  @apply text-foreground;
-  text-decoration: none;
-  transition: color 0.15s ease;
-}
+  a {
+    @apply text-foreground;
+    text-decoration: none;
+    transition: color 0.15s ease;
+  }
 
-a:hover,
-a:focus-visible {
-  @apply text-primary;
-}
+  a:not([class]):hover,
+  a:not([class]):focus-visible {
+    @apply text-primary;
+  }
 
-button,
-input,
-select,
-textarea {
-  font-family: inherit;
-  font-size: inherit;
-}
+  button,
+  input,
+  select,
+  textarea {
+    font-family: inherit;
+    font-size: inherit;
+  }
 
-:focus-visible {
-  @apply outline-2 outline-offset-2 outline-primary;
-}
+  :focus-visible {
+    @apply outline-2 outline-offset-2 outline-primary;
+  }
 
-/* Remove default focus ring — only show on keyboard navigation */
-:focus:not(:focus-visible) {
-  outline: none;
-}
+  /* Remove default focus ring — only show on keyboard navigation */
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
 
-[aria-disabled="true"],
-:disabled {
-  opacity: 0.5;
-  pointer-events: auto;
+  [aria-disabled="true"],
+  :disabled {
+    opacity: 0.5;
+    pointer-events: auto;
+  }
 }
 
 /* Respect reduced motion */

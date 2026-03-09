@@ -1,0 +1,28 @@
+name: Bundle Size Check
+
+on:
+  pull_request:
+    branches: [ develop, main ]
+    paths:
+    - 'frontend/**'
+
+jobs:
+  check-bundle:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Bun
+      uses: oven-sh/setup-bun@v1
+
+    - name: Install dependencies
+      working-directory: frontend
+      run: bun install
+
+    - name: Build with analysis
+      working-directory: frontend
+      run: bun run build
+
+    - name: Check bundle size
+      working-directory: frontend
+      run: bun run bundle:size

@@ -35,7 +35,7 @@ function HabitTracker({
       <div className="p-5">
         {/* Header with title and add button */}
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="flex items-center text-base font-semibold text-foreground">
+          <h3 className="flex items-center text-lg font-semibold tracking-tight text-foreground/90">
             <CheckCircleIcon size="md" className="mr-2 text-purple-400" />
             Habit Goals
           </h3>
@@ -60,18 +60,18 @@ function HabitTracker({
         </div>
 
         {isLoading ? (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {[1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="overflow-hidden rounded-lg bg-surface-2"
+                className="overflow-hidden rounded-2xl bg-surface-2"
               >
-                <div className="p-3">
-                  <div className="mb-2 flex items-center">
-                    <div className="mr-2 h-8 w-8 animate-pulse rounded-lg bg-surface-3"></div>
+                <div className="p-4">
+                  <div className="mb-4 flex items-center">
+                    <div className="mr-3 h-10 w-10 animate-pulse rounded-xl bg-surface-3"></div>
                     <div className="h-5 w-24 animate-pulse rounded bg-surface-3"></div>
                   </div>
-                  <div className="mb-1.5 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between">
                     <div className="h-6 w-16 animate-pulse rounded bg-surface-3"></div>
                     <div className="h-4 w-8 animate-pulse rounded bg-surface-3"></div>
                   </div>
@@ -86,7 +86,7 @@ function HabitTracker({
             title="Start Building Habits"
             message="Add your first habit goal to begin tracking your progress."
             icon={
-              <div className="inline-block rounded-full bg-surface p-4">
+              <div className="inline-block rounded-2xl bg-surface p-4">
                 <CheckCircleIcon className="h-10 w-10 text-foreground" />
               </div>
             }
@@ -101,10 +101,10 @@ function HabitTracker({
                 : undefined
             }
             size="md"
-            className="rounded-lg bg-surface-2"
+            className="rounded-2xl border border-border/60 bg-surface-2"
           />
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
             {habits.map((habit) => (
               <HabitCard
                 key={habit.id}

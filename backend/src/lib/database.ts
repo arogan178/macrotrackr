@@ -2,6 +2,7 @@
 import type { Database } from "bun:sqlite";
 import { DatabaseError } from "./errors";
 import { loggerHelpers } from "./logger";
+import { traceQuerySync } from "./query-tracer";
 
 /**
  * Executes a database operation within a transaction with proper error handling
@@ -31,20 +32,22 @@ export function safeQuery<T>(
   query: string,
   params: SQLParam[] = []
 ): T | undefined {
-  try {
-    const statement = db.prepare(query);
-    const result = statement.get(...params) as T | undefined;
-    loggerHelpers.dbQuery("SELECT", extractTableName(query));
-    return result;
-  } catch (error) {
-    loggerHelpers.error(error as Error, {
-      query: sanitizeQuery(query),
-      params: params.length,
-    });
-    throw new DatabaseError(
-      error instanceof Error ? error.message : "Query execution failed"
-    );
-  }
+  return traceQuerySync(query, params, () => {
+    try {
+      const statement = db.prepare(query);
+      const result = statement.get(...params) as T | undefined;
+      loggerHelpers.dbQuery("SELECT", extractTableName(query));
+      return result;
+    } catch (error) {
+      loggerHelpers.error(error as Error, {
+        query: sanitizeQuery(query),
+        params: params.length,
+      });
+      throw new DatabaseError(
+        error instanceof Error ? error.message : "Query execution failed"
+      );
+    }
+  });
 }
 
 /**
@@ -55,25 +58,27 @@ export function safeQueryAll<T>(
   query: string,
   params: SQLParam[] = []
 ): T[] {
-  try {
-    const statement = db.prepare(query);
-    const result = statement.all(...params) as T[];
-    loggerHelpers.dbQuery(
-      "SELECT_ALL",
-      extractTableName(query),
-      undefined,
-      result.length
-    );
-    return result;
-  } catch (error) {
-    loggerHelpers.error(error as Error, {
-      query: sanitizeQuery(query),
-      params: params.length,
-    });
-    throw new DatabaseError(
-      error instanceof Error ? error.message : "Query execution failed"
-    );
-  }
+  return traceQuerySync(query, params, () => {
+    try {
+      const statement = db.prepare(query);
+      const result = statement.all(...params) as T[];
+      loggerHelpers.dbQuery(
+        "SELECT_ALL",
+        extractTableName(query),
+        undefined,
+        result.length
+      );
+      return result;
+    } catch (error) {
+      loggerHelpers.error(error as Error, {
+        query: sanitizeQuery(query),
+        params: params.length,
+      });
+      throw new DatabaseError(
+        error instanceof Error ? error.message : "Query execution failed"
+      );
+    }
+  });
 }
 
 /**
@@ -84,25 +89,27 @@ export function safeExecute(
   query: string,
   params: SQLParam[] = []
 ): { changes: number; lastInsertRowid: number | bigint } {
-  try {
-    const statement = db.prepare(query);
-    const result = statement.run(...params);
-    loggerHelpers.dbQuery(
-      getQueryOperation(query),
-      extractTableName(query),
-      undefined,
-      result.changes
-    );
-    return result;
-  } catch (error) {
-    loggerHelpers.error(error as Error, {
-      query: sanitizeQuery(query),
-      params: params.length,
-    });
-    throw new DatabaseError(
-      error instanceof Error ? error.message : "Query execution failed"
-    );
-  }
+  return traceQuerySync(query, params, () => {
+    try {
+      const statement = db.prepare(query);
+      const result = statement.run(...params);
+      loggerHelpers.dbQuery(
+        getQueryOperation(query),
+        extractTableName(query),
+        undefined,
+        result.changes
+      );
+      return result;
+    } catch (error) {
+      loggerHelpers.error(error as Error, {
+        query: sanitizeQuery(query),
+        params: params.length,
+      });
+      throw new DatabaseError(
+        error instanceof Error ? error.message : "Query execution failed"
+      );
+    }
+  });
 }
 
 /**

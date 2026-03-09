@@ -22,6 +22,8 @@ export interface FeaturePageProps {
   subtitle?: string;
   headerChildren?: ReactNode;
   children: ReactNode;
+  /** Enable animated text reveal effect for the title */
+  animateTitle?: boolean;
 }
 
 function FeaturePageImpl({
@@ -29,10 +31,11 @@ function FeaturePageImpl({
   subtitle,
   headerChildren,
   children,
+  animateTitle = false,
 }: FeaturePageProps) {
   return (
     <div className="space-y-6">
-      <PageHeader title={title} subtitle={subtitle}>
+      <PageHeader title={title} subtitle={subtitle} animateTitle={animateTitle}>
         {headerChildren}
       </PageHeader>
       {children}

@@ -6,7 +6,9 @@ import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
 import { AUTH_ERROR_MESSAGES } from "@/features/auth/constants";
-import { queryClient } from "@/lib/queryClient";
+import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import { logger } from "@/lib/logger";
+import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
@@ -27,11 +29,18 @@ interface SocialProfileData {
   dateOfBirth?: string;
 }
 
+function getFirstErrorMessage(validationErrors: Record<string, string>) {
+  return Object.values(validationErrors)[0];
+}
+
 export function ProfileCreationForm() {
   const navigate = useNavigate();
-  const { user: clerkUser, isLoaded: isUserLoaded } = useUser();
+  const { user: clerkUser, isLoaded: _isUserLoaded } = useUser();
   const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const { showNotification } = useStore();
+  const postSetupRedirect = normalizeAuthRedirect(
+    sessionStorage.getItem("postAuthRedirect") || undefined,
+  );
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -54,7 +63,7 @@ export function ProfileCreationForm() {
       try {
         const parsed = JSON.parse(storedData) as SocialProfileData;
         setSocialData(parsed);
-        
+
         // Pre-populate date of birth if available from social login
         if (parsed.dateOfBirth) {
           setDateOfBirth(parsed.dateOfBirth);
@@ -72,7 +81,7 @@ export function ProfileCreationForm() {
     };
   }, []);
 
-  const validateStep1 = (): boolean => {
+  const validateStep1 = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     // Date of Birth validation
@@ -90,28 +99,22 @@ export function ProfileCreationForm() {
     // Height validation
     if (!height) {
       newErrors.height = AUTH_ERROR_MESSAGES.heightRequired;
-    } else if (
-      height < USER_MINIMUM_HEIGHT ||
-      height > USER_MAXIMUM_HEIGHT
-    ) {
+    } else if (height < USER_MINIMUM_HEIGHT || height > USER_MAXIMUM_HEIGHT) {
       newErrors.height = `Please enter a valid height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`;
     }
 
     // Weight validation
     if (!weight) {
       newErrors.weight = AUTH_ERROR_MESSAGES.weightRequired;
-    } else if (
-      weight < USER_MINIMUM_WEIGHT ||
-      weight > USER_MAXIMUM_WEIGHT
-    ) {
+    } else if (weight < USER_MINIMUM_WEIGHT || weight > USER_MAXIMUM_WEIGHT) {
       newErrors.weight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
-  const validateStep2 = (): boolean => {
+  const validateStep2 = (): Record<string, string> => {
     const newErrors: Record<string, string> = {};
 
     // Activity level validation
@@ -120,56 +123,65 @@ export function ProfileCreationForm() {
     }
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleNext = () => {
-    if (step === 1 && !validateStep1()) {
-        // Show first error as notification
-        const firstError = Object.values(errors)[0];
-        if (firstError) {
-          showNotification(firstError, "error");
-        }
+    if (step === 1) {
+      const stepErrors = validateStep1();
+      const firstError = getFirstErrorMessage(stepErrors);
+      if (firstError) {
+        showNotification(firstError, "error");
         return;
       }
-    if (step === 2 && !validateStep2()) {
-        const firstError = Object.values(errors)[0];
-        if (firstError) {
-          showNotification(firstError, "error");
-        }
+    }
+
+    if (step === 2) {
+      const stepErrors = validateStep2();
+      const firstError = getFirstErrorMessage(stepErrors);
+      if (firstError) {
+        showNotification(firstError, "error");
         return;
       }
+    }
+
     setErrors({});
-    setStep(step + 1);
+    setStep((previousStep) => previousStep + 1);
   };
 
   const handleBack = () => {
     setErrors({});
-    setStep(step - 1);
+    setStep((previousStep) => previousStep - 1);
   };
 
   const handleSubmit = async () => {
-    console.log("[ProfileCreationForm] handleSubmit called", { isAuthLoaded, isSignedIn, hasGetToken: !!getToken });
-    
-    if (!validateStep2()) {
-      const firstError = Object.values(errors)[0];
-      if (firstError) {
-        showNotification(firstError, "error");
-      }
+    const stepErrors = validateStep2();
+    const firstError = getFirstErrorMessage(stepErrors);
+    if (firstError) {
+      showNotification(firstError, "error");
       return;
     }
 
     // Wait for Clerk to be fully loaded
     if (!isAuthLoaded) {
-      showNotification("Authentication is still loading. Please wait...", "info");
+      showNotification(
+        "Authentication is still loading. Please wait...",
+        "info",
+      );
       return;
     }
 
     // Ensure user is authenticated
     if (!isSignedIn || !getToken) {
-      console.error("[ProfileCreationForm] Not authenticated:", { isSignedIn, hasGetToken: !!getToken });
-      showNotification("Authentication required. Please sign in again.", "error");
-      navigate({ to: "/login" });
+      logger.error("Profile creation attempted without authentication:", {
+        isSignedIn,
+        hasGetToken: !!getToken,
+      });
+      showNotification(
+        "Authentication required. Please sign in again.",
+        "error",
+      );
+      navigate({ to: "/login", search: { returnTo: undefined } });
       return;
     }
 
@@ -180,73 +192,86 @@ export function ProfileCreationForm() {
       // Retry a few times if token is not immediately available
       let token: string | null = null;
       let retries = 3;
-      
+
       while (retries > 0 && !token) {
         token = await getToken();
         if (!token && retries > 1) {
-          await new Promise(resolve => setTimeout(resolve, 100));
+          await new Promise((resolve) => setTimeout(resolve, 100));
           retries--;
         }
       }
-      
+
       if (!token) {
-        showNotification("Authentication failed. Please sign in again.", "error");
-        navigate({ to: "/login" });
+        showNotification(
+          "Authentication failed. Please sign in again.",
+          "error",
+        );
+        navigate({ to: "/login", search: { returnTo: undefined } });
         return;
       }
-      
+
       // Set the token for API calls
       setAuthToken(token);
-      console.log("[ProfileCreationForm] Token set successfully");
 
       // Step 1: Sync the Clerk user to our backend
       // This creates the user record in our database
       // Note: User may already be synced from AuthReadyPage, so we handle conflicts gracefully
-      console.log("[ProfileCreationForm] Syncing user with backend...");
       try {
         await apiService.auth.syncUser(token);
-        console.log("[ProfileCreationForm] User synced successfully");
-      } catch (syncError: any) {
+      } catch (syncError: unknown) {
         // If user already exists (409), that's fine - continue with profile completion
-        if (syncError?.status === 409) {
-          console.log("[ProfileCreationForm] User already exists, continuing...");
+        if (
+          syncError instanceof Error &&
+          hasStatus(syncError) &&
+          syncError.status === 409 &&
+          "code" in syncError &&
+          (syncError as { code?: string }).code !== "RESOURCE_CONFLICT"
+        ) {
+          // User already exists, safe to continue profile completion.
         } else {
           throw syncError;
         }
       }
 
       // Step 2: Complete the user profile with the provided data
-      console.log("[ProfileCreationForm] Completing profile...");
       await apiService.user.completeProfile({
         dateOfBirth,
         height: height || undefined,
         weight: weight || undefined,
         gender: gender || undefined,
-        activityLevel,
+        activityLevel: activityLevel || undefined,
       });
-      console.log("[ProfileCreationForm] Profile completed successfully");
 
       // Clear social data on success
       sessionStorage.removeItem("socialProfileData");
+      sessionStorage.removeItem("postAuthRedirect");
 
       // Refresh cached user state before navigation so guards see profile as complete.
-      await queryClient.fetchQuery({
-        queryKey: queryKeys.auth.user(),
-        queryFn: () => apiService.user.getUserDetails(),
-        staleTime: 0,
-      });
-      await queryClient.invalidateQueries({ queryKey: queryKeys.settings.user() });
+      await Promise.all([
+        queryClient.fetchQuery({
+          queryKey: queryKeys.auth.user(),
+          queryFn: () => apiService.user.getUserDetails(),
+          staleTime: 0,
+        }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.settings.user(),
+        }),
+      ]);
 
       showNotification("Profile created successfully!", "success");
 
       // Redirect to home with replace for a clean onboarding transition.
-      navigate({ to: "/home", search: { limit: 20, offset: 0 }, replace: true });
-    } catch (error) {
-      console.error("[ProfileCreationForm] Profile creation error:", error);
-      // Log additional context for debugging
-      if (error && typeof error === 'object' && 'status' in error) {
-        console.error(`[ProfileCreationForm] Error status: ${(error as any).status}`);
+      if (postSetupRedirect === "/home") {
+        navigate({
+          to: "/home",
+          search: { limit: 20, offset: 0 },
+          replace: true,
+        });
+      } else {
+        globalThis.location.assign(postSetupRedirect);
       }
+    } catch (error) {
+      logger.error("Profile creation error:", error);
       showNotification(
         error instanceof Error ? error.message : "Failed to create profile",
         "error",
@@ -282,7 +307,7 @@ export function ProfileCreationForm() {
             <DateField
               label="Date of Birth"
               value={dateOfBirth}
-              onChange={(value) => {
+              onChange={(value: string) => {
                 setDateOfBirth(value);
                 if (errors.dateOfBirth) {
                   setErrors((previous) => ({ ...previous, dateOfBirth: "" }));
@@ -300,8 +325,8 @@ export function ProfileCreationForm() {
             <Dropdown
               label="Gender"
               value={gender}
-              onChange={(value) => {
-                setGender(value as Gender);
+              onChange={(value: string | number) => {
+                setGender(String(value) as Gender);
                 if (errors.gender) {
                   setErrors((previous) => ({ ...previous, gender: "" }));
                 }
@@ -318,9 +343,9 @@ export function ProfileCreationForm() {
             <div>
               <NumberField
                 label={`Height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`}
-                value={height}
-                onChange={(value) => {
-                  setHeight(value);
+                value={height ?? undefined}
+                onChange={(value: number | undefined) => {
+                  setHeight(value ?? null);
                   if (errors.height) {
                     setErrors((previous) => ({ ...previous, height: "" }));
                   }
@@ -339,9 +364,9 @@ export function ProfileCreationForm() {
             <div>
               <NumberField
                 label={`Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
-                value={weight}
-                onChange={(value) => {
-                  setWeight(value);
+                value={weight ?? undefined}
+                onChange={(value: number | undefined) => {
+                  setWeight(value ?? null);
                   if (errors.weight) {
                     setErrors((previous) => ({ ...previous, weight: "" }));
                   }
@@ -382,8 +407,11 @@ export function ProfileCreationForm() {
             <Dropdown
               label="How active are you on a typical week?"
               value={activityLevel?.toString() || ""}
-              onChange={(value) => {
-                setActivityLevel(value ? Number(value) : null);
+              onChange={(value: string | number) => {
+                const normalizedValue = String(value);
+                setActivityLevel(
+                  normalizedValue ? Number(normalizedValue) : null,
+                );
                 if (errors.activityLevel) {
                   setErrors((previous) => ({ ...previous, activityLevel: "" }));
                 }
@@ -434,7 +462,7 @@ export function ProfileCreationForm() {
         </p>
       </div>
 
-      <div className="space-y-3 rounded-lg border border-border bg-surface p-4">
+      <div className="space-y-3 rounded-lg border border-border bg-surface-2 p-4">
         <div className="flex justify-between">
           <span className="text-muted">Date of Birth</span>
           <span className="font-medium">{dateOfBirth}</span>
