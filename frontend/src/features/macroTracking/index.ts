@@ -39,8 +39,6 @@ export {
   validateMacroInputs,
 } from "./utils";
 
-// Pages / Hooks / Components / Types barrels
 export * from "./components";
 export * from "./hooks";
-export * from "./pages";
 export * from "./types";
