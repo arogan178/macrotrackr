@@ -27,14 +27,14 @@ export const queryKeys = {
   macros: {
     all: () => ["macros"] as const,
     search: (query: string) => ["macros", "search", query] as const,
-    history: (page?: number, startDate?: string, endDate?: string) =>
+    history: (page?: number, limit?: number, startDate?: string, endDate?: string) =>
       startDate || endDate
-        ? (["macros", "history", page, startDate, endDate] as const)
-        : (["macros", "history", page] as const),
-    historyInfinite: (startDate?: string, endDate?: string) =>
+        ? (["macros", "history", page, limit, startDate, endDate] as const)
+        : (["macros", "history", page, limit] as const),
+    historyInfinite: (limit?: number, startDate?: string, endDate?: string) =>
       startDate || endDate
-        ? (["macros", "history-infinite", startDate, endDate] as const)
-        : (["macros", "history-infinite"] as const),
+        ? (["macros", "history-infinite", limit, startDate, endDate] as const)
+        : (["macros", "history-infinite", limit] as const),
     historyRange: (startDate?: string, endDate?: string) =>
       ["macros", "history-range", startDate, endDate] as const,
     dailyTotals: (date: string) => ["macros", "daily-totals", date] as const,

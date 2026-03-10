@@ -2,46 +2,17 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { Ingredient } from "@/types/macro";
-import { apiService } from "@/utils/apiServices";
+import {
+  apiService,
+  type CreateSavedMealPayload,
+  type SavedMeal,
+  type SavedMealsResponse,
+} from "@/utils/apiServices";
 
-export interface SavedMeal {
-  id: number;
-  userId: number;
-  name: string;
-  protein: number;
-  carbs: number;
-  fats: number;
-  mealType: string;
-  createdAt: string;
-  updatedAt: string;
-  ingredients?: Ingredient[];
-}
-
-export interface SavedMealsResponse {
-  meals: SavedMeal[];
-  count: number;
-  limit: number;
-  isPro: boolean;
-}
-
-export interface CreateSavedMealPayload {
-  name: string;
-  protein: number;
-  carbs: number;
-  fats: number;
-  mealType?: "breakfast" | "lunch" | "dinner" | "snack";
-  ingredients?: Ingredient[];
-}
-
-// Query hook for getting all saved meals
 export function useSavedMeals() {
   return useQuery({
     queryKey: queryKeys.savedMeals.list(),
-    queryFn: async () => {
-      const response = await apiService.savedMeals.getAll();
-      return response as SavedMealsResponse;
-    },
+    queryFn: (): Promise<SavedMealsResponse> => apiService.savedMeals.getAll(),
     ...queryConfigs.longLived,
   });
 }

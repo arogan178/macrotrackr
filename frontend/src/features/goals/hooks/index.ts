@@ -1,2 +1,1 @@
-// Export hooks related to goals
-export { useGoalData } from "./useGoalData";
+export { useMacroTarget } from "./useMacroTarget";

@@ -122,31 +122,29 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
           eventType: normalizedEvent.type,
           eventId,
         };
-      } catch (error) {
-        logger.error(
-          {
-            error: error instanceof Error ? error : new Error(String(error)),
-            operation: "stripe_webhook",
-          },
-          "Failed to process webhook"
-        );
-        ctx.set.status = 200;
-        return { received: false, error: "Webhook processing failed" };
-      }
-    },
-    {
-      // Custom parse function to handle Stripe webhook raw body
-      async parse(ctx) {
-        // Check for Stripe webhook content-type with charset
-        const contentType = ctx.request.headers.get("content-type");
-        if (contentType === "application/json; charset=utf-8") {
-          const reqText = await ctx.request.text();
-          return reqText;
-        } else {
-          // For other content types, let Elysia handle normally
-          return undefined;
+        } catch (error) {
+          logger.error(
+            {
+              error: error instanceof Error ? error : new Error(String(error)),
+              operation: "stripe_webhook",
+            },
+            "Failed to process webhook"
+          );
+          ctx.set.status = 500;
+          return { received: false, error: "Webhook processing failed" };
         }
       },
+      {
+        // Custom parse function to handle Stripe webhook raw body
+        async parse(ctx) {
+          const contentType = ctx.request.headers.get("content-type");
+          if (contentType?.startsWith("application/json")) {
+            const reqText = await ctx.request.text();
+            return reqText;
+          }
+
+          return undefined;
+        },
       headers: t.Object({
         "stripe-signature": t.String(),
       }),

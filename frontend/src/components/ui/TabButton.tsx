@@ -27,10 +27,6 @@ type ExtendedTabButtonProps = TabButtonProps & {
   fullWidth?: boolean;
 };
 
-/**
- * TabButton with smooth background transition for active state.
- * Uses background color change to indicate active tab.
- */
 function TabButton({
   active,
   onClick,
@@ -92,36 +88,6 @@ function TabButton({
         />
       )}
     </button>
-  );
-}
-
-/**
- * TabButtonGroup - Container for managing multiple TabButtons
- */
-export interface TabButtonGroupProps {
-  children: React.ReactNode;
-  className?: string;
-  /** Full width tabs */
-  fullWidth?: boolean;
-}
-
-export function TabButtonGroup({
-  children,
-  className = "",
-  fullWidth = false,
-}: TabButtonGroupProps) {
-  return (
-    <div
-      className={cn(
-        "relative inline-flex items-center gap-1 p-1",
-        "rounded-xl border border-white/5 bg-surface-2/80 backdrop-blur-md",
-        fullWidth ? "w-full" : "",
-        className
-      )}
-      role="tablist"
-    >
-      {children}
-    </div>
   );
 }
 

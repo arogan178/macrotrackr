@@ -185,7 +185,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       );
 
       onSave({
-        startingWeight: formValues.startingWeight!,
+        ...(isEditing ? {} : { startingWeight: formValues.startingWeight! }),
         targetWeight: formValues.targetWeight,
         calorieTarget: calorieIntake,
         startDate: formValues.startDate || todayString,
@@ -204,6 +204,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
       calculatedWeeks,
       onSave,
       todayString,
+      isEditing,
     ]);
 
     // Expose save method to parent via ref

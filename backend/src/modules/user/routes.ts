@@ -17,7 +17,6 @@ import {
 } from "../../lib/errors";
 import { handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
-import { hashPassword, verifyPassword } from "../../lib/password";
 import { SubscriptionService } from "../billing/subscription-service";
 import type { Database } from "bun:sqlite";
 import { logger } from "../../lib/logger";
@@ -60,7 +59,7 @@ function normalizeSubscriptionStatus(
   return "free";
 }
 
-async function resolveOrCreateInternalUserId(
+async function resolveInternalUserId(
   db: Database,
   user: NonNullable<UserRouteContext["user"]>,
   internalUserIdFromContext: number | null | undefined,
@@ -102,7 +101,7 @@ export const userRoutes = (app: Elysia) =>
             // Get internal user ID from Clerk ID
             logger.info({ clerkUserId: user.clerkUserId }, "[/api/user/me] Looking up internal user ID");
             
-            const internalUserId = await resolveOrCreateInternalUserId(
+            const internalUserId = await resolveInternalUserId(
               db,
               user,
               internalUserIdFromContext,
@@ -470,112 +469,4 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      /**
-       * PUT /password - Change user password
-       * 
-       * @deprecated This endpoint is deprecated and will be removed in v2.0.0.
-       * Clerk-authenticated users should use Clerk's password management instead.
-       * This endpoint only works for legacy users who haven't migrated to Clerk auth.
-       * 
-       * @see https://clerk.com/docs/custom-flows/passwords for Clerk password management
-       */
-      .put(
-        "/password",
-        async (context: any) => {
-          try {
-            const { db, user, body, set } = context as UserRouteContext & {
-              set: { headers: Record<string, string> };
-            };
-
-            // Add deprecation headers
-            set.headers = set.headers || {};
-            set.headers["X-Deprecated"] = "true";
-            set.headers["X-Deprecation-Message"] = "Use Clerk password management. This endpoint will be removed in v2.0.0.";
-
-            // Log deprecation warning
-            logger.warn(
-              { operation: "deprecated_endpoint", endpoint: "/api/user/password" },
-              "DEPRECATED: /api/user/password endpoint called. This will be removed in v2.0.0."
-            );
-
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
-            }
-
-            // Get internal user ID from Clerk ID
-            const internalUserId = getInternalUserId(
-              db,
-              user.clerkUserId,
-              user.email
-            );
-
-            if (!internalUserId) {
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
-              );
-            }
-
-            if (!body) {
-              throw new Error("Request body is required");
-            }
-
-            const { currentPassword, newPassword } = body as {
-              currentPassword: string;
-              newPassword: string;
-            };
-
-            return await withTransactionAsync(db, async () => {
-              const dbUser = safeQuery<{ password?: string }>(
-                db,
-                "SELECT password FROM users WHERE id = ?",
-                [internalUserId]
-              );
-
-              // Note: Clerk users may not have a password in our DB
-              if (!dbUser?.password || dbUser.password === "clerk-auth") {
-                throw new AuthenticationError(
-                  "Password change not available for Clerk-authenticated users. Please use Clerk's password management."
-                );
-              }
-
-              const isPasswordValid = await verifyPassword(
-                currentPassword,
-                dbUser.password
-              );
-
-              if (!isPasswordValid) {
-                throw new AuthenticationError("Invalid current password.");
-              }
-
-              const hashedNewPassword = await hashPassword(newPassword);
-
-              safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
-                hashedNewPassword,
-                internalUserId,
-              ]);
-
-              return {
-                success: true,
-                message: "Password updated successfully.",
-              };
-            });
-          } catch (error) {
-            return handleError(error, context.set);
-          }
-        },
-        {
-          body: UserSchemas.changePassword,
-          response: {
-            200: t.Object({ success: t.Boolean(), message: t.String() }),
-          },
-          detail: {
-            summary: "[DEPRECATED] Change the current user's password - Will be removed in v2.0.0",
-            description:
-              "This endpoint is deprecated and will be removed in v2.0.0. " +
-              "Clerk-authenticated users should use Clerk's password management instead. " +
-              "This endpoint only works for legacy users who haven't migrated to Clerk auth.",
-            tags: ["User", "Deprecated"],
-          },
-        }
-      )
   );
