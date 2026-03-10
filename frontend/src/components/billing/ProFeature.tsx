@@ -5,10 +5,6 @@ import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import ProBadge from "./ProBadge";
 import UpgradeModal from "./UpgradeModal";
 
-/**
- * ProFeature - Conditionally renders Pro features with gating
- * Usage: <ProFeature><AdvancedComponent /></ProFeature>
- */
 export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
@@ -47,5 +43,3 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
 };
 
 export default memo(ProFeature);
-// Usage example:
-// <ProFeature><AdvancedReporting /></ProFeature>

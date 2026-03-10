@@ -1,17 +1,10 @@
-// --- Reporting ---
-/**
- * API Service - Centralizes API calls and standardizes error handling
- * Updated for simplified calorie target model and refactored goal/macro endpoints.
- * Updated for Clerk SSO integration.
- */
-
-// Assuming these imports exist and work as intended in your frontend structure
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
   calculateWeeksToGoal,
 } from "@/features/goals/calculations";
 import type { WeightGoalFormValues } from "@/features/goals/types";
+import type { HabitAccentColor } from "@/types/habit";
 import type { MacroEntry } from "@/types/macro";
 import { ActivityLevel } from "@/types/user"; // Adjust path as needed
 import { getActivityLevelFromString } from "@/utils/userConstants";
@@ -53,15 +46,11 @@ export interface FoodSearchResult {
 }
 
 // API Base URL and Response Types
-export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:3000";
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
-// --- Interfaces for Payloads and Responses (camelCase) ---
-
-// Payload for PUT /api/goals/weight (CREATE/UPDATE response)
 type SetWeightGoalPayload = {
-  startingWeight: number; // Required for creation
-  currentWeight: number | undefined; // Latest weight from weight log
+  startingWeight: number;
+  currentWeight: number | undefined;
   targetWeight: number | undefined;
   weightGoal: "lose" | "maintain" | "gain" | undefined;
   startDate: string | undefined;
@@ -72,23 +61,17 @@ type SetWeightGoalPayload = {
   dailyChange: number | undefined;
 };
 
-// Payload for PUT /api/goals/weight (UPDATE)
-// Omits startingWeight
-
-// --- Weight Log Interfaces ---
 export interface WeightLogEntry {
   id: string;
-  timestamp: string; // ISO 8601 string
+  timestamp: string;
   weight: number;
 }
 
 export interface AddWeightLogPayload {
-  timestamp: string; // ISO 8601 string
+  timestamp: string;
   weight: number;
 }
-// --- END Weight Log Interfaces ---
 
-// Type for the macro target settings object
 type MacroTargetSettingsObject =
   | {
       proteinPercentage: number;
@@ -98,19 +81,16 @@ type MacroTargetSettingsObject =
     }
   | undefined;
 
-// Payload for PUT /api/macros/target (updating settings ONLY)
 type MacroTargetSettingsPayload = {
   macroTarget: MacroTargetSettingsObject;
 };
 
-// Type for response from GET /api/macros/target (settings ONLY)
 type MacroTargetGetResponse =
   | {
       macroTarget: MacroTargetSettingsObject;
     }
   | undefined;
 
-// --- User Details Response Type ---
 export interface UserDetailsResponse {
   id: number;
   email: string;
@@ -314,15 +294,14 @@ interface MacroEntryCreatePayload {
   protein: number;
   carbs: number;
   fats: number;
-  mealType: "breakfast" | "lunch" | "dinner" | "snack"; // camelCase
-  mealName?: string; // camelCase
-  entryDate: string; // Updated to camelCase
-  entryTime: string; // Updated to camelCase
+  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealName?: string;
+  entryDate: string;
+  entryTime: string;
   ingredients?: import("@/types/macro").Ingredient[];
 }
 export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
 
-// Export the create payload for consistency
 export type { MacroEntryCreatePayload };
 interface ApiErrorResponse {
   code: string;
@@ -375,7 +354,6 @@ export function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
   return value.filter((item): item is FoodSearchResult => isFoodSearchResult(item));
 }
 
-// Habit Goal Payload
 type HabitGoalPayload = {
   id: string;
   title: string;
@@ -400,25 +378,30 @@ type HabitGoalPayload = {
   completedAt?: string;
 };
 
-// --- Helper Functions ---
-/**
- * Handles API responses, parses JSON, and standardizes error handling.
- * Updated to handle valid undefined/empty responses for 200 OK status.
- */
+export type HabitGoalUpdatePayload = {
+  title: string;
+  iconName: string;
+  current: number;
+  target: number;
+  accentColor?: HabitAccentColor;
+  isComplete?: boolean;
+  createdAt: string;
+  completedAt?: string;
+};
+
 export async function handleResponse(response: Response): Promise<unknown> {
-  // Handle successful responses (2xx status codes)
   if (response.ok) {
-    // Handle specific 204 No Content responses
     if (response.status === 204) {
-      return { success: true }; // Return a simple success indicator
+      return { success: true };
     }
-    // Try to parse successful JSON response, but handle potential undefined/empty body for 200 OK
+
     try {
       const responseBodyText = await response.clone().text();
       if (!responseBodyText) {
         return undefined;
-      } // Return undefined if body is empty
-      return await response.json(); // Parse JSON if body exists
+      }
+
+      return await response.json();
     } catch (error) {
       console.warn("API Success Response (2xx) could not be parsed as JSON:", {
         status: response.status,
@@ -426,14 +409,14 @@ export async function handleResponse(response: Response): Promise<unknown> {
       });
       if (response.status === 200) {
         return undefined;
-      } // Assume valid undefined/empty for 200
+      }
+
       throw new Error(
         "Received an invalid or unparsable response from the server.",
       );
     }
   }
 
-  // Handle error responses (response.ok is false - 4xx, 5xx status codes)
   let errorPayload: ApiErrorResponse | undefined = undefined;
   let errorMessage = `API error (${response.status}): ${response.statusText}`;
   let errorCode = `HTTP_${response.status}`;
@@ -451,28 +434,17 @@ export async function handleResponse(response: Response): Promise<unknown> {
   throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
 }
 
-// Clerk token getter - will be set by useClerkAuth hook
 let getClerkToken: (() => Promise<string | null>) | null = null;
 
-/**
- * Set the Clerk token getter function
- * Called by useClerkAuth hook to provide fresh tokens
- */
 export function setGetToken(function_: () => Promise<string | null>) {
   getClerkToken = function_;
 }
 
-/**
- * Set a static auth token (for immediate use after sign in)
- */
 let staticAuthToken: string | null = null;
 export function setAuthToken(token: string | null) {
   staticAuthToken = token;
 }
 
-/**
- * Get the current auth token (Clerk or static)
- */
 export async function getAuthToken(): Promise<string | null> {
   if (getClerkToken) {
     const freshToken = await getClerkToken();
@@ -488,17 +460,12 @@ export async function getAuthToken(): Promise<string | null> {
 
 export function getHeaders(includeContentType = true): Record<string, string> {
   const headers: Record<string, string> = {};
-  // Note: This synchronous version is for backward compatibility
-  // Use getHeadersAsync for async token retrieval with Clerk
   if (includeContentType) {
     headers["Content-Type"] = "application/json";
   }
   return headers;
 }
 
-/**
- * Async version of getHeaders that properly retrieves Clerk tokens
- */
 export async function getHeadersAsync(
   includeContentType = true,
 ): Promise<Record<string, string>> {
@@ -514,9 +481,6 @@ export async function getHeadersAsync(
   return headers;
 }
 
-/**
- * Generic POST helper for API calls (used by billing helpers)
- */
 export async function post<T = unknown>(
   url: string,
   body?: unknown,
@@ -530,12 +494,8 @@ export async function post<T = unknown>(
   return handleResponse(response) as T;
 }
 
-/**
- * Centralized API service object with methods grouped by resource.
- */
 export const apiService = {
   reporting: {
-    /** Fetches nutrient density summary for a date range and grouping */
     getMacroDensitySummary: async (
       parameters: MacroDensitySummaryParameters = {},
     ): Promise<MacroDensitySummaryItem[]> => {
@@ -555,9 +515,7 @@ export const apiService = {
       return (await handleResponse(response)) as MacroDensitySummaryItem[];
     },
   },
-  // User endpoints
   user: {
-    /** Fetches the current authenticated user's profile */
     getUserDetails: async (): Promise<UserDetailsResponse> => {
       const fetchUserDetails = async (): Promise<unknown> => {
         const url = `${API_BASE_URL}/api/user/me`;
@@ -585,9 +543,7 @@ export const apiService = {
       await apiService.auth.syncUser(token);
       return apiService.user.getUserDetails();
     },
-    /** Updates user settings (profile details only) */
     updateSettings: async (settings: UserSettingsPayload) => {
-      // Basic normalization (e.g., ensure activityLevel is number if sent as string)
       const payloadToSend = { ...settings };
       if (
         payloadToSend.activityLevel !== undefined &&
@@ -598,10 +554,11 @@ export const apiService = {
           payloadToSend.activityLevel as ActivityLevel,
         );
       }
+
       const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
         method: "PUT",
         headers: await getHeadersAsync(),
-        body: JSON.stringify(payloadToSend), // Send payload with only user details
+        body: JSON.stringify(payloadToSend),
         credentials: "include",
       });
       return (await handleResponse(response)) as {
@@ -609,7 +566,6 @@ export const apiService = {
         message: string;
       };
     },
-    /** Completes user profile */
     completeProfile: async (
       profileData: Partial<
         Pick<
@@ -634,7 +590,6 @@ export const apiService = {
     },
   },
 
-  // Authentication endpoints
   auth: {
     /**
      * Supports password reset links issued before the Clerk migration.
@@ -651,10 +606,6 @@ export const apiService = {
         message?: string;
       };
     },
-    /**
-     * Sync Clerk user with backend database
-     * Called after successful Clerk authentication to ensure user exists in our DB
-     */
     syncUser: async (token?: string): Promise<AuthSyncResponse> => {
       const headers = token
         ? {
@@ -671,7 +622,6 @@ export const apiService = {
     },
   },
 
-  // Macro entry endpoints
   macros: {
     getDailyTotals: async ({
       startDate,
@@ -689,12 +639,6 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    /**
-     * Fetches paginated macro history
-     * @param {number} [limit=20] - Number of entries per page
-     * @param {number} [offset=0] - Offset for pagination
-     * @returns {Promise<{ entries: MacroEntry[]; total: number; limit: number; offset: number; hasMore: boolean; }>}
-     */
     getHistory: async (
       limit = 20,
       offset = 0,
@@ -789,7 +733,6 @@ export const apiService = {
       return handleResponse(response);
     },
 
-    /** Gets ONLY macro target percentages object */
     getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
         headers: await getHeadersAsync(false),
@@ -797,7 +740,6 @@ export const apiService = {
       });
       return (await handleResponse(response)) as MacroTargetGetResponse;
     },
-    /** Saves ONLY macro target settings */
     saveMacroTargetPercentages: async (payload: MacroTargetSettingsPayload) => {
       if (!payload || payload.macroTarget === undefined) {
         throw new Error("Invalid payload: macroTarget object is required.");
@@ -827,9 +769,7 @@ export const apiService = {
     },
   },
 
-  // Goals endpoints
   goals: {
-    /** Gets weight goals (including calorieTarget); returns undefined when not set */
     getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         headers: await getHeadersAsync(false),
@@ -839,12 +779,9 @@ export const apiService = {
         | SetWeightGoalPayload
         | undefined
         | null;
-      // Normalize null -> undefined (lint preference) so downstream always checks falsy
       return result === null ? undefined : result;
     },
-    /** Creates new weight goals */
     createWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
-      // Calculate the complete goal data including calorie targets
       const startingWeight = goals.startingWeight ?? 0;
       const targetWeight = goals.targetWeight ?? startingWeight;
       const payload = {
@@ -870,9 +807,7 @@ export const apiService = {
       return handleResponse(response);
     },
 
-    /** Updates existing weight goals */
     updateWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
-      // Calculate the complete goal data including calorie targets
       const startingWeight = goals.startingWeight ?? 0;
       const targetWeight = goals.targetWeight ?? startingWeight;
       const payload = {
@@ -900,7 +835,6 @@ export const apiService = {
       });
       return handleResponse(response);
     },
-    /** Resets all goals */
     deleteWeightGoals: async () => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
         method: "DELETE",
@@ -910,18 +844,14 @@ export const apiService = {
       return handleResponse(response);
     },
 
-    // --- NEW Weight Log Endpoints ---
-    /** Fetches the user's weight log history */
     getWeightLog: async (): Promise<WeightLogEntry[]> => {
       const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
         headers: await getHeadersAsync(false),
         credentials: "include",
       });
-      // The backend returns an array, potentially empty, matching WeightLogEntry[]
       return (await handleResponse(response)) as WeightLogEntry[];
     },
 
-    /** Adds a new weight log entry */
     addWeightLogEntry: async (
       payload: AddWeightLogPayload,
     ): Promise<WeightLogEntry> => {
@@ -931,7 +861,6 @@ export const apiService = {
         body: JSON.stringify(payload),
         credentials: "include",
       });
-      // Backend returns the created entry including id, timestamp, and weight
       const fullEntry = (await handleResponse(response)) as WeightLogEntry;
       return {
         id: fullEntry.id,
@@ -940,7 +869,6 @@ export const apiService = {
       };
     },
 
-    /** Deletes a specific weight log entry */
     deleteWeightLogEntry: async (
       id: string,
     ): Promise<{ success: boolean; id: string }> => {
@@ -952,16 +880,13 @@ export const apiService = {
           credentials: "include",
         },
       );
-      // Backend now returns { success: true, id: 'deleted_id' }
       return (await handleResponse(response)) as {
         success: boolean;
         id: string;
       };
     },
-    // --- END NEW Weight Log Endpoints ---
   },
   billing: {
-    /** Fetches detailed billing and subscription info for the current user */
     getBillingDetails: async (): Promise<BillingDetailsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/billing/details`, {
         headers: await getHeadersAsync(false),
@@ -990,7 +915,6 @@ export const apiService = {
     },
   },
   habits: {
-    /** Get all habit goals */
     getHabits: async (): Promise<HabitGoalPayload[]> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         headers: await getHeadersAsync(false),
@@ -999,7 +923,6 @@ export const apiService = {
       return (await handleResponse(response)) as HabitGoalPayload[];
     },
 
-    /** Saves a new habit goal */
     saveHabit: async (
       habitGoal: HabitGoalPayload,
     ): Promise<HabitGoalPayload> => {
@@ -1012,10 +935,9 @@ export const apiService = {
       return (await handleResponse(response)) as HabitGoalPayload;
     },
 
-    /** Updates an existing habit goal */
     updateHabit: async (
       id: string,
-      habitGoal: HabitGoalPayload,
+      habitGoal: HabitGoalUpdatePayload,
     ): Promise<HabitGoalPayload> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "PUT",
@@ -1026,7 +948,6 @@ export const apiService = {
       return (await handleResponse(response)) as HabitGoalPayload;
     },
 
-    /** Deletes a habit goal */
     deleteHabit: async (id: string): Promise<{ success: boolean; id: string }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
         method: "DELETE",
@@ -1036,7 +957,6 @@ export const apiService = {
       return (await handleResponse(response)) as { success: boolean; id: string };
     },
 
-    /** Reset all habit goals */
     resetHabit: async (): Promise<{ success: boolean; count: number }> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         method: "DELETE",
@@ -1046,10 +966,8 @@ export const apiService = {
       return (await handleResponse(response)) as { success: boolean; count: number };
     },
   },
-  
-  // Saved Meals API
+
   savedMeals: {
-    /** Get all saved meals for the current user */
     getAll: async (): Promise<SavedMealsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
         headers: await getHeadersAsync(false),
@@ -1058,7 +976,6 @@ export const apiService = {
       return (await handleResponse(response)) as SavedMealsResponse;
     },
 
-    /** Create a new saved meal */
     create: async (payload: CreateSavedMealPayload): Promise<SavedMeal> => {
       const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
         method: "POST",
@@ -1069,7 +986,6 @@ export const apiService = {
       return (await handleResponse(response)) as SavedMeal;
     },
 
-    /** Delete a saved meal */
     delete: async (id: number): Promise<{ success: boolean; id: number }> => {
       const response = await fetch(`${API_BASE_URL}/api/saved-meals/${id}`, {
         method: "DELETE",
@@ -1080,7 +996,6 @@ export const apiService = {
     },
   },
 
-  // Add methods for Clerk integration
   setGetToken,
   setAuthToken,
   getAuthToken,

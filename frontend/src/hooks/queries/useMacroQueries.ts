@@ -1,4 +1,5 @@
 import {
+  type InfiniteData,
   keepPreviousData,
   useInfiniteQuery,
   useMutation,
@@ -8,9 +9,11 @@ import {
 
 // Mutation hook for adding macro entry with optimistic updates
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
+import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import type {
+  MacroEntry,
   MacroDailyTotals,
   MacroTargetSettings,
   PaginatedMacroHistory,
@@ -21,6 +24,42 @@ import type {
 } from "@/utils/apiServices";
 import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
+
+type MacroHistoryInfiniteData = InfiniteData<PaginatedMacroHistory, number>;
+type MacroHistorySnapshot = Array<
+  readonly [ReadonlyArray<unknown>, MacroHistoryInfiniteData | undefined]
+>;
+type OptimisticMacroEntry = MacroEntry & { optimistic?: boolean };
+
+function getMacroHistorySnapshots(queryClient: ReturnType<typeof useQueryClient>) {
+  return queryClient.getQueriesData<MacroHistoryInfiniteData>({
+    queryKey: queryKeys.macros.historyInfinite(),
+  });
+}
+
+function restoreMacroHistorySnapshots(
+  queryClient: ReturnType<typeof useQueryClient>,
+  snapshots: MacroHistorySnapshot,
+) {
+  for (const [queryKey, data] of snapshots) {
+    if (data === undefined) {
+      queryClient.removeQueries({ queryKey, exact: true });
+      continue;
+    }
+
+    queryClient.setQueryData(queryKey, data);
+  }
+}
+
+function updateMacroHistoryCaches(
+  queryClient: ReturnType<typeof useQueryClient>,
+  updater: (oldData: MacroHistoryInfiniteData | undefined) => MacroHistoryInfiniteData | undefined,
+) {
+  queryClient.setQueriesData<MacroHistoryInfiniteData>(
+    { queryKey: queryKeys.macros.historyInfinite() },
+    updater,
+  );
+}
 
 function normalizePaginatedHistory(
   response: unknown,
@@ -159,17 +198,7 @@ export function useAddMacroEntry() {
   return useMutation({
     mutationKey: [...queryKeys.macros.historyInfinite(), "add"],
     mutationFn: async (entry: MacroEntryCreatePayload) => {
-      // This function now returns the newly created entry from the server
-      return (await apiService.macros.addEntry(entry)) as {
-        id: number;
-        protein: number;
-        carbs: number;
-        fats: number;
-        mealType: string;
-        mealName: string;
-        entryDate: string;
-        entryTime: string;
-      };
+      return (await apiService.macros.addEntry(entry)) as MacroEntry;
     },
     onMutate: async (variables: MacroEntryCreatePayload) => {
       // 1. Cancel ongoing queries to prevent them from overwriting the optimistic update
@@ -181,51 +210,40 @@ export function useAddMacroEntry() {
       });
 
       // 2. Snapshot the current state for potential rollback on error
-      const previousHistoryData = queryClient.getQueryData<any>(
-        queryKeys.macros.historyInfinite(),
-      );
+      const previousHistoryData = getMacroHistorySnapshots(queryClient);
       const previousDailyTotals = queryClient.getQueryData<MacroDailyTotals>(
         queryKeys.macros.dailyTotals(variables.entryDate),
       );
 
       // 3. Create a temporary ID for the optimistic entry
       const temporaryId = -Date.now();
-      const optimisticEntry = {
+      const optimisticEntry: OptimisticMacroEntry = {
         id: temporaryId,
+        createdAt: new Date().toISOString(),
         ...variables,
-        // mark as optimistic so UI can avoid transitions/skeletons
+        mealName: variables.mealName || "",
         optimistic: true,
       };
 
       // 4. Optimistically update the history list in the cache
-      queryClient.setQueryData(
-        queryKeys.macros.historyInfinite(),
-        (oldData: any) => {
-          // Ensure a stable shape to avoid list component remounts
-          if (!oldData || !oldData.pages || oldData.pages.length === 0) {
-            return {
-              pages: [
-                {
-                  entries: [optimisticEntry],
-                  hasMore: true,
-                  total: 1,
-                  limit: 20,
-                  offset: 0,
-                },
-              ],
-              pageParams: [0],
-            };
-          }
-          const newPages = oldData.pages.map((page: any, index: number) => {
-            if (index !== 0) return page;
-            return {
-              ...page,
-              entries: [optimisticEntry, ...(page.entries || [])],
-            };
-          });
-          return { ...oldData, pages: newPages, pageParams: oldData.pageParams ?? [0] };
-        },
-      );
+      updateMacroHistoryCaches(queryClient, (oldData) => {
+        if (!oldData || oldData.pages.length === 0) {
+          return oldData;
+        }
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page, index) =>
+            index === 0
+              ? {
+                  ...page,
+                  entries: [optimisticEntry, ...page.entries],
+                }
+              : page,
+          ),
+          pageParams: oldData.pageParams ?? [0],
+        };
+      });
 
       // 5. Optimistically update the daily totals in the cache
       queryClient.setQueryData(
@@ -260,14 +278,7 @@ export function useAddMacroEntry() {
     },
     onError: (_error, variables, context) => {
       // If there's an error, roll back the optimistic updates
-      if (context?.previousHistoryData === undefined) {
-        queryClient.removeQueries({ queryKey: queryKeys.macros.historyInfinite() });
-      } else {
-        queryClient.setQueryData(
-          queryKeys.macros.historyInfinite(),
-          context.previousHistoryData,
-        );
-      }
+      restoreMacroHistorySnapshots(queryClient, context?.previousHistoryData ?? []);
       if (context?.previousDailyTotals === undefined) {
         queryClient.removeQueries({
           queryKey: queryKeys.macros.dailyTotals(variables.entryDate),
@@ -279,30 +290,23 @@ export function useAddMacroEntry() {
         );
       }
     },
-    onSuccess: (newEntryFromServer: {
-      id: number;
-      protein: number;
-      carbs: number;
-      fats: number;
-      mealType: string;
-      mealName: string;
-      entryDate: string;
-      entryTime: string;
-    }, variables, context) => {
+    onSuccess: (newEntryFromServer: MacroEntry, variables, context) => {
       // 7. On success, replace the temporary entry with the real one from the server
-      queryClient.setQueryData(
-        queryKeys.macros.historyInfinite(),
-        (oldData: any) => {
-          if (!oldData) return oldData;
-          const newPages = oldData.pages.map((page: any) => ({
+      updateMacroHistoryCaches(queryClient, (oldData) => {
+        if (!oldData) {
+          return oldData;
+        }
+
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
             ...page,
-            entries: page.entries.map((entry: any) =>
+            entries: page.entries.map((entry) =>
               entry.id === context?.tempId ? newEntryFromServer : entry,
             ),
-          }));
-          return { ...oldData, pages: newPages };
-        },
-      );
+          })),
+        };
+      });
 
       // Ensure totals reflect server response in case of server-side adjustments
       const entryDate = variables.entryDate;
@@ -346,6 +350,9 @@ export function useAddMacroEntry() {
 // Mutation hook for updating macro entry with optimistic updates
 export function useUpdateMacroEntry() {
   const queryClient = useQueryClient();
+  const logUpdateMacroEntryError = createMutationErrorLogger(
+    "Error updating macro entry",
+  );
 
   return useMutation({
     mutationKey: [...queryKeys.macros.historyInfinite(), "update"],
@@ -364,13 +371,14 @@ export function useUpdateMacroEntry() {
 
       // Find the entry date for daily totals invalidation
       let entryDate: string | undefined;
-      const historyData = queryClient.getQueryData<any>(
-        queryKeys.macros.historyInfinite(),
-      );
+      const previousHistoryData = getMacroHistorySnapshots(queryClient);
+      const historyData = previousHistoryData.find(([, data]) => {
+        return data?.pages.some((page) => page.entries.some((entry) => entry.id === id));
+      })?.[1];
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries?.find((entry: any) => entry.id === id);
+          const foundEntry = page.entries.find((entry) => entry.id === id);
           if (foundEntry) {
             entryDate = foundEntry.entryDate;
             break;
@@ -379,43 +387,38 @@ export function useUpdateMacroEntry() {
       }
 
       // Snapshot previous data
-      const previousHistoryData = historyData;
       const previousDailyTotals = entryDate
         ? queryClient.getQueryData(queryKeys.macros.dailyTotals(entryDate))
         : undefined;
 
       // Optimistically update infinite query data
-      queryClient.setQueryData(
-        queryKeys.macros.historyInfinite(),
-        (oldData: any) => {
-          if (!oldData) return oldData;
+      updateMacroHistoryCaches(queryClient, (oldData) => {
+        if (!oldData) {
+          return oldData;
+        }
 
-          const newPages = oldData.pages.map((page: any) => ({
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
             ...page,
-            entries:
-              page.entries?.map((entryItem: any) =>
-                entryItem.id === id ? { ...entryItem, ...entry } : entryItem,
-              ) || [],
-          }));
-
-          return {
-            ...oldData,
-            pages: newPages,
-          };
-        },
-      );
+            entries: page.entries.map((entryItem) =>
+              entryItem.id === id ? { ...entryItem, ...entry } : entryItem,
+            ),
+          })),
+        };
+      });
 
       // Optimistically update daily totals if we found the entry date
       if (entryDate && previousDailyTotals) {
         // Find the original entry to calculate the difference
         const originalEntry = historyData?.pages
-          ?.flatMap((page: any) => page.entries || [])
-          ?.find((entry: any) => entry.id === id);
+          .flatMap((page) => page.entries)
+          .find((entryItem) => entryItem.id === id);
 
         if (originalEntry) {
           queryClient.setQueryData(
             queryKeys.macros.dailyTotals(entryDate),
-            (oldData: any) => {
+            (oldData: MacroDailyTotals | undefined) => {
               if (!oldData) return oldData;
 
               // Calculate calories diff using calculateCaloriesFromMacros
@@ -454,19 +457,14 @@ export function useUpdateMacroEntry() {
     },
     onError: (error, _variables, context) => {
       // Rollback optimistic updates
-      if (context?.previousHistoryData !== undefined) {
-        queryClient.setQueryData(
-          queryKeys.macros.historyInfinite(),
-          context.previousHistoryData,
-        );
-      }
+      restoreMacroHistorySnapshots(queryClient, context?.previousHistoryData ?? []);
       if (context?.entryDate && context?.previousDailyTotals !== undefined) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(context.entryDate),
           context.previousDailyTotals,
         );
       }
-      console.error("Error updating macro entry:", error);
+      logUpdateMacroEntryError(error);
     },
     onSettled: (_data, _error, _variables, context) => {
       // Only invalidate queries if the mutation affects the currently displayed data
@@ -483,6 +481,9 @@ export function useUpdateMacroEntry() {
 // Mutation hook for deleting macro entry with optimistic updates
 export function useDeleteMacroEntry() {
   const queryClient = useQueryClient();
+  const logDeleteMacroEntryError = createMutationErrorLogger(
+    "Error deleting macro entry",
+  );
 
   return useMutation({
     mutationKey: [...queryKeys.macros.historyInfinite(), "delete"],
@@ -494,18 +495,17 @@ export function useDeleteMacroEntry() {
       await queryClient.cancelQueries({ queryKey: queryKeys.macros.all() });
 
       // Find the entry to delete and its date
-      let entryToDelete: any;
+      let entryToDelete: PaginatedMacroHistory["entries"][number] | undefined;
       let entryDate: string | undefined;
 
-      const historyData = queryClient.getQueryData<any>(
-        queryKeys.macros.historyInfinite(),
-      );
+      const previousHistoryData = getMacroHistorySnapshots(queryClient);
+      const historyData = previousHistoryData.find(([, data]) => {
+        return data?.pages.some((page) => page.entries.some((entry) => entry.id === id));
+      })?.[1];
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries?.find(
-            (entryItem: any) => entryItem.id === id,
-          );
+          const foundEntry = page.entries.find((entryItem) => entryItem.id === id);
           if (foundEntry) {
             entryToDelete = foundEntry;
             entryDate = foundEntry.entryDate;
@@ -515,36 +515,30 @@ export function useDeleteMacroEntry() {
       }
 
       // Snapshot previous data
-      const previousHistoryData = historyData;
       const previousDailyTotals = entryDate
         ? queryClient.getQueryData(queryKeys.macros.dailyTotals(entryDate))
         : undefined;
 
       // Optimistically remove from infinite query data
-      queryClient.setQueryData(
-        queryKeys.macros.historyInfinite(),
-        (oldData: any) => {
-          if (!oldData) return oldData;
+      updateMacroHistoryCaches(queryClient, (oldData) => {
+        if (!oldData) {
+          return oldData;
+        }
 
-          const newPages = oldData.pages.map((page: any) => ({
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
             ...page,
-            entries:
-              page.entries?.filter((entryItem: any) => entryItem.id !== id) ||
-              [],
-          }));
-
-          return {
-            ...oldData,
-            pages: newPages,
-          };
-        },
-      );
+            entries: page.entries.filter((entryItem) => entryItem.id !== id),
+          })),
+        };
+      });
 
       // Optimistically update daily totals
       if (entryDate && entryToDelete && previousDailyTotals) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(entryDate),
-          (oldData: any) => {
+          (oldData: MacroDailyTotals | undefined) => {
             if (!oldData) return oldData;
 
             return {
@@ -573,19 +567,14 @@ export function useDeleteMacroEntry() {
     },
     onError: (error, _id, context) => {
       // Rollback optimistic updates
-      if (context?.previousHistoryData !== undefined) {
-        queryClient.setQueryData(
-          queryKeys.macros.historyInfinite(),
-          context.previousHistoryData,
-        );
-      }
+      restoreMacroHistorySnapshots(queryClient, context?.previousHistoryData ?? []);
       if (context?.entryDate && context?.previousDailyTotals !== undefined) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(context.entryDate),
           context.previousDailyTotals,
         );
       }
-      console.error("Error deleting macro entry:", error);
+      logDeleteMacroEntryError(error);
     },
     onSettled: (_data, _error, _id, context) => {
       // Only invalidate queries if the mutation affects the currently displayed data

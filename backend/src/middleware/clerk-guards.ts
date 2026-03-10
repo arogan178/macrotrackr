@@ -1,20 +1,9 @@
-// src/middleware/clerk-guards.ts
-/**
- * Clerk-compatible guard helpers for authentication and authorization.
- * These guards work with the global clerkAuthMiddleware context.
- * 
- * @see plans/roadmap-a-auth-consolidation.md for migration details
- */
-
 import { Elysia } from "elysia";
 import { SubscriptionService } from "../modules/billing/subscription-service";
 import { AuthorizationError, AuthenticationError } from "../lib/errors";
 import { logger } from "../lib/logger";
 import type { ClerkAuthContext } from "./clerkAuth";
 
-/**
- * Authenticated user shape for route handlers
- */
 export interface AuthenticatedUser {
   userId: number;
   clerkUserId: string;
@@ -24,25 +13,10 @@ export interface AuthenticatedUser {
   imageUrl?: string;
 }
 
-/**
- * Extended context with authenticated user
- */
 export interface AuthenticatedContext extends ClerkAuthContext {
   authenticatedUser: AuthenticatedUser;
 }
 
-/**
- * Guard that ensures user is authenticated via Clerk.
- * Must be used after clerkAuthMiddleware (applied globally in index.ts).
- * 
- * @example
- * ```typescript
- * app.use(requireAuth)
- *   .get("/protected", ({ authenticatedUser }) => {
- *     return { userId: authenticatedUser.userId };
- *   });
- * ```
- */
 export const requireAuth = new Elysia({ name: "requireAuth" })
   .derive({ as: "scoped" }, async (context: any): Promise<{ authenticatedUser: AuthenticatedUser }> => {
     const { user, internalUserId } = context as ClerkAuthContext;
@@ -74,18 +48,6 @@ export const requireAuth = new Elysia({ name: "requireAuth" })
     };
   });
 
-/**
- * Guard that ensures user has an active Pro subscription.
- * Must be used after clerkAuthMiddleware (applied globally in index.ts).
- * 
- * @example
- * ```typescript
- * app.use(requirePro)
- *   .get("/pro-feature", ({ authenticatedUser, isProUser }) => {
- *     return { message: "Pro feature accessed" };
- *   });
- * ```
- */
 export const requirePro = new Elysia({ name: "requirePro" })
   .use(requireAuth)
   .derive({ as: "scoped" }, async (context: any) => {
@@ -108,9 +70,6 @@ export const requirePro = new Elysia({ name: "requirePro" })
     return { isProUser: true };
   });
 
-/**
- * Pro feature limits for Free users
- */
 export const FREE_TIER_LIMITS = {
   MAX_GOALS: 3,
   MAX_HABITS: 5,
@@ -122,9 +81,6 @@ export const FREE_TIER_LIMITS = {
 
 export type FeatureLimitKey = keyof typeof FREE_TIER_LIMITS;
 
-/**
- * Result of checking a feature limit
- */
 export interface FeatureLimitResult {
   allowed: boolean;
   limit?: number;
@@ -151,15 +107,6 @@ async function getRequiredProStatus(userId: number): Promise<boolean> {
   }
 }
 
-/**
- * Check if a Free user has reached their limit for a specific feature.
- * Pro users always have unlimited access.
- * 
- * @param userId - Internal user ID
- * @param feature - The feature to check
- * @param currentCount - Current usage count
- * @returns Feature limit result with allowed status and message
- */
 export const checkFeatureLimit = async (
   userId: number,
   feature: FeatureLimitKey,
@@ -194,33 +141,10 @@ export const checkFeatureLimit = async (
   return { allowed: true, limit, isProUser: false };
 };
 
-/**
- * Utility function to check Pro status without throwing.
- * Useful for conditional feature display.
- * 
- * @param userId - Internal user ID
- * @returns Whether the user has an active Pro subscription
- */
 export const checkProStatus = async (userId: number): Promise<boolean> => {
   return getRequiredProStatus(userId);
 };
 
-/**
- * Middleware for enforcing feature limits on Free users.
- * More lenient than requirePro - allows action but may warn about limits.
- * 
- * @param feature - The feature to check limits for
- * 
- * @example
- * ```typescript
- * app.use(featureLimitGuard("MAX_GOALS"))
- *   .post("/goals", async ({ authenticatedUser, checkLimit }) => {
- *     const currentCount = await getGoalCount(authenticatedUser.userId);
- *     await checkLimit(currentCount); // Throws if limit reached
- *     // ... create goal
- *   });
- * ```
- */
 export const featureLimitGuard = (feature: FeatureLimitKey) =>
   new Elysia({ name: `featureLimitGuard_${feature}` })
     .use(requireAuth)
