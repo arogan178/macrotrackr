@@ -13,6 +13,10 @@ function Dropdown({
   required = false,
   disabled = false,
   error,
+  helperText,
+  placeholder,
+  id,
+  name,
 }: DropdownProps) {
   const selectClasses = cn(
     formStyles.input.base,
@@ -21,18 +25,32 @@ function Dropdown({
     disabled ? formStyles.input.disabled : "cursor-pointer"
   );
 
+  const resolvedId = id ?? name ?? label;
+  const normalizedValue = value ?? "";
+  const normalizedOptions =
+    placeholder && !options.some((option) => option.value === "")
+      ? [{ value: "", label: placeholder }, ...options]
+      : options;
+
   return (
     <div className={formStyles.container}>
-      <label className={formStyles.label}>{label}</label>
+      {label ? (
+        <label className={formStyles.label} htmlFor={resolvedId}>
+          {label}
+        </label>
+      ) : null}
       <div className={formStyles.select.container}>
         <select
-          value={value || ""}
+          id={resolvedId}
+          name={name}
+          value={normalizedValue}
           onChange={(event) => onChange(event.target.value)}
           className={selectClasses}
           required={required}
           disabled={disabled}
+          aria-describedby={helperText ? `${resolvedId}-helper` : undefined}
         >
-          {options.map((option) => (
+          {normalizedOptions.map((option) => (
             <option
               key={option.value}
               value={option.value}
@@ -46,6 +64,11 @@ function Dropdown({
         </select>
       </div>
 
+      {helperText && !error ? (
+        <p id={`${resolvedId}-helper`} className={formStyles.helper}>
+          {helperText}
+        </p>
+      ) : null}
       {error && <p className={formStyles.error}>{error}</p>}
     </div>
   );

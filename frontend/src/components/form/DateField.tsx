@@ -12,9 +12,13 @@ function DateField({
   onChange,
   required = false,
   error,
-  max,
-  ...rest
-}: DateFieldProps & { max?: string }) {
+  helperText,
+  minDate,
+  maxDate,
+  disabled = false,
+  id,
+  name,
+}: DateFieldProps) {
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     onChange(event.target.value);
   };
@@ -22,26 +26,40 @@ function DateField({
   const inputClasses = cn(
     formStyles.input.base,
     error ? formStyles.input.error : formStyles.input.normal,
+    disabled && formStyles.input.disabled,
     "cursor-pointer"
   );
 
-  // Default max to today if not provided
-  const maxDate = max || todayISO();
+  const resolvedId = id ?? name ?? label;
+  const resolvedMaxDate = maxDate ?? todayISO();
 
   return (
     <div className={formStyles.container}>
-      <label className={formStyles.label}>{label}</label>
+      {label ? (
+        <label className={formStyles.label} htmlFor={resolvedId}>
+          {label}
+        </label>
+      ) : null}
       <div className="relative">
         <input
+          id={resolvedId}
+          name={name}
           type="date"
           value={value}
           onChange={handleChange}
           className={inputClasses}
           required={required}
-          max={maxDate}
-          {...rest}
+          min={minDate}
+          max={resolvedMaxDate}
+          disabled={disabled}
+          aria-describedby={helperText ? `${resolvedId}-helper` : undefined}
         />
       </div>
+      {helperText && !error ? (
+        <p id={`${resolvedId}-helper`} className={formStyles.helper}>
+          {helperText}
+        </p>
+      ) : null}
       {error && <p className={formStyles.error}>{error}</p>}
     </div>
   );

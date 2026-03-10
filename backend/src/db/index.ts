@@ -1,27 +1,30 @@
-// src/db/index.ts
-
 import { Database } from "bun:sqlite";
+
+import { config } from "../config";
 import { initializeSchema } from "./schema";
-import { config } from "../config"; // Import validated config
 
-// Create or open the database file using path from config
-const db = new Database(config.DATABASE_PATH, { create: true });
-
-// Enable Write-Ahead Logging for better concurrency performance
-db.exec("PRAGMA journal_mode = WAL;");
-
-// Run schema initialization and migrations
-try {
-  initializeSchema(db);
-} catch (error) {
-  console.error("Fatal error during database initialization:", error);
-  process.exit(1); // Exit if critical DB setup fails
+function configureDatabase(db: Database) {
+  db.exec("PRAGMA journal_mode = WAL;");
 }
 
-// Use basic console.log for startup message as logger may not be initialized yet
-if (config.NODE_ENV !== "test") {
-  console.log(`Database connected at ${config.DATABASE_PATH}`);
+export function createDatabase(databasePath = config.DATABASE_PATH) {
+  const database = new Database(databasePath, { create: true });
+  configureDatabase(database);
+  return database;
 }
 
-// Export the initialized database instance
-export { db };
+export function initializeDatabase(database: Database) {
+  initializeSchema(database);
+
+  if (config.NODE_ENV !== "test") {
+    console.log(`Database connected at ${config.DATABASE_PATH}`);
+  }
+
+  return database;
+}
+
+export function createInitializedDatabase(databasePath = config.DATABASE_PATH) {
+  return initializeDatabase(createDatabase(databasePath));
+}
+
+export const db = createInitializedDatabase();

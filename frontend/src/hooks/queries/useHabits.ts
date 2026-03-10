@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   buildHabitUpdatePayload,
@@ -12,15 +12,15 @@ import { queryKeys } from "@/lib/queryKeys";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import { apiService } from "@/utils/apiServices";
 
-// Query hook for fetching habits
-export function useHabits() {
-  return useQuery({
+export const habitsQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.habits.list(),
-    queryFn: async (): Promise<HabitGoal[]> => {
-      return await apiService.habits.getHabit();
-    },
-    ...queryConfigs.longLived, // 5 minutes stale time for habits
+    queryFn: (): Promise<HabitGoal[]> => apiService.habits.getHabits(),
+    ...queryConfigs.longLived,
   });
+
+export function useHabits() {
+  return useQuery(habitsQueryOptions());
 }
 
 // Mutation hook for adding a new habit
@@ -55,7 +55,7 @@ export function useUpdateHabit() {
     }: {
       id: string;
       values: HabitGoalFormValues;
-    }): Promise<{ success: boolean }> => {
+    }): Promise<HabitGoal> => {
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
@@ -132,7 +132,7 @@ export function useIncrementHabitProgress() {
 
   return useMutation({
     mutationKey: [...queryKeys.habits.list(), "increment"],
-    mutationFn: async (habit: HabitGoal): Promise<{ success: boolean }> => {
+    mutationFn: async (habit: HabitGoal): Promise<HabitGoal> => {
       if (!habit) {
         throw new Error("Habit not found");
       }
@@ -178,7 +178,7 @@ export function useCompleteHabit() {
 
   return useMutation({
     mutationKey: [...queryKeys.habits.list(), "complete"],
-    mutationFn: async (id: string): Promise<{ success: boolean }> => {
+    mutationFn: async (id: string): Promise<HabitGoal> => {
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
@@ -236,7 +236,7 @@ export function useResetHabits() {
 
   return useMutation({
     mutationKey: [...queryKeys.habits.list(), "reset"],
-    mutationFn: async (): Promise<{ success: boolean }> => {
+    mutationFn: async (): Promise<{ success: boolean; count: number }> => {
       return await apiService.habits.resetHabit();
     },
     onSuccess: () => {

@@ -37,6 +37,8 @@ export interface MacroPercentages {
   fatsPercentage: number;
 }
 
+export type MacroKey = keyof MacroPercentages;
+
 export interface MacroTargetState extends MacroPercentages {
   lockedMacros: MacroType[];
 }

@@ -14,13 +14,10 @@ import {
 export function useSettings() {
   return useQuery({
     queryKey: queryKeys.settings.user(),
-    queryFn: async (): Promise<UserDetailsResponse> => {
-      return await apiService.user.getUserDetails();
-    },
-    ...queryConfigs.longLived, // 5 minutes stale time for settings
+    queryFn: (): Promise<UserDetailsResponse> => apiService.user.getUserDetails(),
+    ...queryConfigs.longLived,
     retry: (failureCount, error) => {
-      // Don't retry on auth errors
-      if (error instanceof Error && error.message.includes("401")) {
+      if (error instanceof Error && hasStatus(error) && error.status === 401) {
         return false;
       }
       return failureCount < 3;

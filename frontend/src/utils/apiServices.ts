@@ -130,6 +130,15 @@ export interface UserDetailsResponse {
   };
 }
 
+export interface AuthSyncResponse {
+  id: number;
+  clerkId: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  message: string;
+}
+
 function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
   if (!value || typeof value !== "object") {
     return false;
@@ -248,7 +257,17 @@ export interface BillingDetailsResponse {
         status: string;
         current_period_end: number;
       }
-    | null;
+     | null;
+}
+
+export interface BillingSessionResponse {
+  sessionId?: string;
+  url: string;
+}
+
+export interface BillingCancelResponse {
+  success: boolean;
+  message: string;
 }
 
 export type UserSettingsPayload = Partial<{
@@ -260,7 +279,36 @@ export type UserSettingsPayload = Partial<{
   weight: number | undefined;
   gender: "male" | "female" | undefined;
   activityLevel: number | undefined;
-}>;
+}>; 
+
+export interface SavedMeal {
+  id: number;
+  userId: number;
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  mealType: string;
+  createdAt: string;
+  updatedAt: string;
+  ingredients?: import("@/types/macro").Ingredient[];
+}
+
+export interface SavedMealsResponse {
+  meals: SavedMeal[];
+  count: number;
+  limit: number;
+  isPro: boolean;
+}
+
+export interface CreateSavedMealPayload {
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+  ingredients?: import("@/types/macro").Ingredient[];
+}
 
 interface MacroEntryCreatePayload {
   protein: number;
@@ -520,28 +568,22 @@ export const apiService = {
         return handleResponse(response);
       };
 
-      const initialResult = await fetchUserDetails();
-      const normalizedInitialResult = normalizeUserDetailsResponse(initialResult);
-      if (normalizedInitialResult) {
-        return normalizedInitialResult;
-      }
-
-      // If backend returned an unexpected payload (e.g. {}), try to re-sync Clerk linkage once.
-      const token = await getAuthToken();
-      await apiService.auth.syncUser(token || undefined);
-
-      const retryResult = await fetchUserDetails();
-      const normalizedRetryResult = normalizeUserDetailsResponse(retryResult);
-      if (normalizedRetryResult) {
-        return normalizedRetryResult;
+      const result = await fetchUserDetails();
+      const normalizedResult = normalizeUserDetailsResponse(result);
+      if (normalizedResult) {
+        return normalizedResult;
       }
 
       throw new ApiError(
         "Invalid user profile response from server",
         500,
         "INVALID_USER_RESPONSE",
-        retryResult,
+        result,
       );
+    },
+    syncAndGetUserDetails: async (token?: string): Promise<UserDetailsResponse> => {
+      await apiService.auth.syncUser(token);
+      return apiService.user.getUserDetails();
     },
     /** Updates user settings (profile details only) */
     updateSettings: async (settings: UserSettingsPayload) => {
@@ -610,25 +652,10 @@ export const apiService = {
       };
     },
     /**
-     * @deprecated Use Clerk's password management instead
-     */
-    changePassword: async (currentPassword: string, newPassword: string) => {
-      const response = await fetch(`${API_BASE_URL}/api/user/password`, {
-        method: "PUT",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify({ currentPassword, newPassword }),
-        credentials: "include",
-      });
-      return (await handleResponse(response)) as {
-        success: boolean;
-        message?: string;
-      };
-    },
-    /**
      * Sync Clerk user with backend database
      * Called after successful Clerk authentication to ensure user exists in our DB
      */
-    syncUser: async (token?: string): Promise<UserDetailsResponse> => {
+    syncUser: async (token?: string): Promise<AuthSyncResponse> => {
       const headers = token
         ? {
             Authorization: `Bearer ${token}`,
@@ -640,7 +667,7 @@ export const apiService = {
         headers,
         credentials: "include",
       });
-      return (await handleResponse(response)) as UserDetailsResponse;
+      return (await handleResponse(response)) as AuthSyncResponse;
     },
   },
 
@@ -849,7 +876,6 @@ export const apiService = {
       const startingWeight = goals.startingWeight ?? 0;
       const targetWeight = goals.targetWeight ?? startingWeight;
       const payload = {
-        ...goals,
         calorieTarget:
           goals.calorieTarget ??
           calculateCalorieTarget(tdee, startingWeight, targetWeight),
@@ -860,6 +886,10 @@ export const apiService = {
           goals.calculatedWeeks ??
           calculateWeeksToGoal(startingWeight, targetWeight),
         dailyChange: goals.dailyChange ?? undefined,
+        targetWeight: goals.targetWeight,
+        weightGoal: goals.weightGoal,
+        startDate: goals.startDate,
+        targetDate: goals.targetDate,
       };
 
       const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
@@ -939,10 +969,29 @@ export const apiService = {
       });
       return (await handleResponse(response)) as BillingDetailsResponse;
     },
+    cancelSubscription: async (): Promise<BillingCancelResponse> => {
+      return post<BillingCancelResponse>("/api/billing/cancel");
+    },
+    createCheckoutSession: async (
+      successUrl: string,
+      cancelUrl: string,
+      plan: "monthly" | "yearly" = "monthly",
+    ): Promise<BillingSessionResponse> => {
+      return post<BillingSessionResponse>("/api/billing/checkout", {
+        successUrl,
+        cancelUrl,
+        plan,
+      });
+    },
+    createPortalSession: async (
+      returnUrl: string,
+    ): Promise<BillingSessionResponse> => {
+      return post<BillingSessionResponse>("/api/billing/portal", { returnUrl });
+    },
   },
   habits: {
     /** Get all habit goals */
-    getHabit: async (): Promise<HabitGoalPayload[]> => {
+    getHabits: async (): Promise<HabitGoalPayload[]> => {
       const response = await fetch(`${API_BASE_URL}/api/habits`, {
         headers: await getHeadersAsync(false),
         credentials: "include",
@@ -1001,83 +1050,23 @@ export const apiService = {
   // Saved Meals API
   savedMeals: {
     /** Get all saved meals for the current user */
-    getAll: async (): Promise<{
-      meals: Array<{
-        id: number;
-        userId: number;
-        name: string;
-        protein: number;
-        carbs: number;
-        fats: number;
-        mealType: string;
-        createdAt: string;
-        updatedAt: string;
-        ingredients?: import("@/types/macro").Ingredient[];
-      }>;
-      count: number;
-      limit: number;
-      isPro: boolean;
-    }> => {
+    getAll: async (): Promise<SavedMealsResponse> => {
       const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
         headers: await getHeadersAsync(false),
         credentials: "include",
       });
-      return (await handleResponse(response)) as {
-        meals: Array<{
-          id: number;
-          userId: number;
-          name: string;
-          protein: number;
-          carbs: number;
-          fats: number;
-          mealType: string;
-          createdAt: string;
-          updatedAt: string;
-          ingredients?: import("@/types/macro").Ingredient[];
-        }>;
-        count: number;
-        limit: number;
-        isPro: boolean;
-      };
+      return (await handleResponse(response)) as SavedMealsResponse;
     },
 
     /** Create a new saved meal */
-    create: async (payload: {
-      name: string;
-      protein: number;
-      carbs: number;
-      fats: number;
-      mealType?: "breakfast" | "lunch" | "dinner" | "snack";
-      ingredients?: import("@/types/macro").Ingredient[];
-    }): Promise<{
-      id: number;
-      userId: number;
-      name: string;
-      protein: number;
-      carbs: number;
-      fats: number;
-      mealType: string;
-      createdAt: string;
-      updatedAt: string;
-      ingredients?: import("@/types/macro").Ingredient[];
-    }> => {
+    create: async (payload: CreateSavedMealPayload): Promise<SavedMeal> => {
       const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
         method: "POST",
         headers: await getHeadersAsync(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
-      return (await handleResponse(response)) as {
-        id: number;
-        userId: number;
-        name: string;
-        protein: number;
-        carbs: number;
-        fats: number;
-        mealType: string;
-        createdAt: string;
-        updatedAt: string;
-      };
+      return (await handleResponse(response)) as SavedMeal;
     },
 
     /** Delete a saved meal */

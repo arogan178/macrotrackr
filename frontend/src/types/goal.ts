@@ -10,7 +10,7 @@ export interface WeightGoalFormValues {
   calorieTarget?: number;
   weeklyChange?: number;
   calculatedWeeks?: number;
-  weightGoal?: string;
+  weightGoal?: WeightGoal;
   dailyChange?: number;
 }
 
