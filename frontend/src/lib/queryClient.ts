@@ -67,7 +67,13 @@ export const localStoragePersister = createAsyncStoragePersister({
   storage: globalThis.localStorage,
   key: "macro-tracker-query-cache",
   serialize: (data: PersistedClient) => JSON.stringify(data),
-  deserialize: (data: string) => JSON.parse(data) as PersistedClient,
+  deserialize: (data: string): PersistedClient => {
+    try {
+      return JSON.parse(data) as PersistedClient;
+    } catch {
+      throw new Error("Failed to deserialize query cache");
+    }
+  },
 });
 
 export const doNotPersistKeys = [

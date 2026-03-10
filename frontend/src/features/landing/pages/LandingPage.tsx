@@ -95,29 +95,32 @@ const LandingPage: React.FC = () => {
         viewport: { once: true, amount: 0.2 },
       } as const);
 
+  const schemaScript = `
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "MacroTrackr",
+      "alternateName": "MacroTracker",
+      "url": "https://macrotrackr.com",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "url": "https://macrotrackr.com/#pricing"
+      }
+    }
+  `;
+
   return (
     <div
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
+      {/* eslint-disable-next-line react/no-dangerously-set-inner-html */}
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            name: "MacroTrackr",
-            alternateName: "MacroTracker",
-            url: "https://macrotrackr.com",
-            applicationCategory: "HealthApplication",
-            operatingSystem: "Web",
-            offers: {
-              "@type": "Offer",
-              price: "0",
-              priceCurrency: "USD",
-              url: "https://macrotrackr.com/#pricing",
-            },
-          }),
-        }}
+        dangerouslySetInnerHTML={{ __html: schemaScript }}
       />
 
       <PageBackground />
