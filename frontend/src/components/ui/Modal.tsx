@@ -83,6 +83,7 @@ function getVariantConfig(properties: ModalProps) {
     onSave: properties.onSave,
     saveDisabled: properties.saveDisabled,
     saveLabel: properties.saveLabel ?? "Save",
+    hideDefaultButtons: properties.hideDefaultButtons ?? false,
     hideCancelButton: properties.hideCancelButton ?? false,
   };
 }
@@ -108,6 +109,7 @@ function Modal(properties: ModalProps) {
     onSave,
     saveDisabled,
     saveLabel,
+    hideDefaultButtons,
     hideCancelButton,
   } = getVariantConfig(properties);
 
@@ -213,7 +215,7 @@ function Modal(properties: ModalProps) {
               />
             </div>
 
-            {(properties.variant === "confirmation" || onSave) && (
+            {(properties.variant === "confirmation" || (onSave && !hideDefaultButtons)) && (
               <div
                 className={cn(
                   "flex gap-3 border-t border-white/5 px-6 py-4",

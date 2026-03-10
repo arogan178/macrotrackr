@@ -18,6 +18,11 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
+import { habitsQueryOptions } from "@/hooks/queries/useHabits";
+import {
+  weightGoalsQueryOptions,
+  weightLogQueryOptions,
+} from "@/hooks/queries/useGoals";
 import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
 
@@ -171,21 +176,12 @@ export const homeRoute = createRoute({
     const [weightGoals, weightLog] = await Promise.all([
       safeFetch(
         () =>
-          context.queryClient.fetchQuery({
-            queryKey: queryKeys.goals.weight(),
-            queryFn: () =>
-              apiService.goals.getWeightGoals().then((r) => r ?? null),
-            ...queryConfigs.longLived,
-          }),
+          context.queryClient.fetchQuery(weightGoalsQueryOptions()),
         null as WeightGoalsResponse | null,
       ),
       safeFetch(
         () =>
-          context.queryClient.fetchQuery({
-            queryKey: queryKeys.goals.weightLog(),
-            queryFn: () => apiService.goals.getWeightLog(),
-            ...queryConfigs.longLived,
-          }),
+          context.queryClient.fetchQuery(weightLogQueryOptions()),
         [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
       ),
     ]);
@@ -250,30 +246,17 @@ export const goalsRoute = createRoute({
       ),
       safeFetch(
         () =>
-          context.queryClient.fetchQuery({
-            queryKey: queryKeys.goals.weight(),
-            queryFn: () =>
-              apiService.goals.getWeightGoals().then((r) => r ?? null),
-            ...queryConfigs.longLived,
-          }),
+          context.queryClient.fetchQuery(weightGoalsQueryOptions()),
         null as WeightGoalsResponse | null,
       ),
       safeFetch(
         () =>
-          context.queryClient.fetchQuery({
-            queryKey: queryKeys.goals.weightLog(),
-            queryFn: () => apiService.goals.getWeightLog(),
-            ...queryConfigs.longLived,
-          }),
+          context.queryClient.fetchQuery(weightLogQueryOptions()),
         [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
       ),
       safeFetch(
         () =>
-          context.queryClient.fetchQuery({
-            queryKey: queryKeys.habits.list(),
-            queryFn: () => apiService.habits.getHabit(),
-            ...queryConfigs.longLived,
-          }),
+          context.queryClient.fetchQuery(habitsQueryOptions()),
         [],
       ),
     ]);

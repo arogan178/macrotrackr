@@ -11,9 +11,7 @@ export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
 // Type for Gender - derived from GENDER_OPTIONS
 export type Gender = "male" | "female" | "";
 
-// Minimal interface for createNutritionProfile to avoid circular imports
-// The full UserSettings type is in @/types/user
-interface UserSettingsForProfile {
+export interface NutritionProfileSource {
   id: number;
   weight: number | undefined;
   height: number | undefined;
@@ -111,7 +109,7 @@ export function calculateAge(birthDate: string): number {
  * This is a convenience function used across multiple features
  */
 export function createNutritionProfile(
-  settings: UserSettingsForProfile,
+  settings: NutritionProfileSource,
 ): UserNutritionalProfile {
   const age = calculateAge(settings.dateOfBirth || "");
   let bmr = 0;
