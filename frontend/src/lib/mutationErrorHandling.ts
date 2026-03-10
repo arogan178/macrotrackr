@@ -25,6 +25,16 @@ export interface MutationErrorHandlerOptions {
   showNotification?: boolean;
 }
 
+export function logMutationError(operation: string, error: unknown) {
+  console.error(`${operation}:`, error);
+}
+
+export function createMutationErrorLogger(operation: string) {
+  return (error: unknown) => {
+    logMutationError(operation, error);
+  };
+}
+
 /**
  * Default retry configurations for different types of operations
  */
