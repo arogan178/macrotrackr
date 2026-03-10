@@ -2,15 +2,11 @@
 // Usage example:
 // import { UserSettings, Gender, ActivityLevel } from '@/types/user';
 
-// Re-export from userConstants for backwards compatibility
-// Import Gender type for use in this file
-import type { Gender } from "@/utils/userConstants";
+import type { Gender } from "./activity";
 
-export type {
-  ActivityLevel,
-  Gender,
-  UserNutritionalProfile,
-} from "@/utils/userConstants";
+export type { ActivityLevel } from "./activity";
+export { Gender };
+export type { UserNutritionalProfile } from "@/utils/userConstants";
 
 export interface UserSettings {
   id: number;

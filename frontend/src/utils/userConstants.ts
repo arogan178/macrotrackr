@@ -4,12 +4,13 @@
  */
 
 import { calculateBMR, calculateTDEE } from "@/utils/nutritionCalculations";
+import type { ActivityLevel, Gender } from "@/types/activity";
+
+// Re-export for backwards compatibility
+export type { ActivityLevel, Gender };
 
 // Activity level type - used across the app
-export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
-
 // Type for Gender - derived from GENDER_OPTIONS
-export type Gender = "male" | "female" | "";
 
 export interface NutritionProfileSource {
   id: number;

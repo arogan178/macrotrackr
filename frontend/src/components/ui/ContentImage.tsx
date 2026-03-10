@@ -1,5 +1,5 @@
 import type { ImgHTMLAttributes } from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "@/lib/classnameUtilities";
 
@@ -20,11 +20,7 @@ export default function ContentImage({
   onLoad,
   ...properties
 }: ContentImageProps) {
-  const [isLoaded, setIsLoaded] = useState(!src);
-
-  useEffect(() => {
-    setIsLoaded(!src);
-  }, [src]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   if (!src) {
     return null;
@@ -36,6 +32,7 @@ export default function ContentImage({
         "relative overflow-hidden bg-surface-2",
         containerClassName,
       )}
+      key={src}
     >
       {!isLoaded && (
         <div className="absolute inset-0 animate-pulse bg-linear-to-br from-surface-2 via-surface-3 to-surface-2" />
