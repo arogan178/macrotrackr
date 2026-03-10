@@ -27,12 +27,13 @@
     /* Paths */
     "baseUrl": ".", // Allows importing relative to 'src'
     "paths": {
-      "@/*": ["src/*"] // Optional: Alias for src directory
+      "@/*": ["src/*"], // Optional: Alias for src directory
+      "@shared/*": ["../shared/*"]
     },
 
     /* Type Roots */
     "types": ["bun"] // Important: Include bun types
   },
-  "include": ["src/**/*.ts"], // Specify files to include
+  "include": ["src/**/*.ts", "../shared/**/*.ts"], // Specify files to include
   "exclude": ["node_modules"] // Specify files to exclude
 }

@@ -1,7 +1,7 @@
 import React from "react";
 
 import { cn } from "../../lib/classnameUtilities";
-import { CheckMarkIcon, CloseIcon, InfoIcon, WarningIcon } from "./Icons";
+import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "./Icons";
 
 export type StatusType = "success" | "error" | "warning" | "info";
 
@@ -16,7 +16,7 @@ interface StatusIndicatorProps {
 const statusConfig = {
   success: {
     color: "text-success",
-    Icon: CheckMarkIcon,
+    Icon: CheckIcon,
   },
   error: {
     color: "text-vibrant-accent",

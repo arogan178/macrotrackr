@@ -3,7 +3,7 @@ import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { config } from "./config";
-import { db } from "./db";
+import { createDatabase, initializeDatabase } from "./db";
 import { clerkAuthMiddleware } from "./middleware/clerkAuth";
 import { rateLimiters } from "./middleware/rate-limit";
 import { requestLimitsMiddleware } from "./middleware/request-limits";
@@ -31,6 +31,15 @@ import { metricsRoutes } from "./routes/metrics";
 import { recordRequest } from "./lib/metrics";
 
 logger.info("Starting Elysia server...");
+
+let db;
+
+try {
+  db = initializeDatabase(createDatabase());
+} catch (error) {
+  console.error("Fatal error during database initialization:", error);
+  process.exit(1);
+}
 
 const app = new Elysia()
   // Request size limits for security

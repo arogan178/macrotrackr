@@ -18,5 +18,5 @@ export { default as SavedMealsList } from "./SavedMealsList";
 export { default as StatusBadge } from "./StatusBadge";
 export { default as StatusIndicator } from "./StatusIndicator";
 export { default as TabBar } from "./TabBar";
-export { default as TabButton, TabButtonGroup, type TabButtonGroupProps, type TabButtonProps } from "./TabButton";
+export { default as TabButton, type TabButtonProps } from "./TabButton";
 export { VirtualList } from "./VirtualList";

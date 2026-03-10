@@ -6,7 +6,7 @@ import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
 import { cn } from "@/lib/classnameUtilities";
 import { useStore } from "@/store/store";
-import { createPortalSession } from "@/utils/apiBilling";
+import { apiService } from "@/utils/apiServices";
 
 import FreeBillingView from "./FreeBillingView";
 import ProBillingView from "./ProBillingView";
@@ -58,7 +58,7 @@ const BillingForm: React.FC = () => {
     setIsLoading(true);
     try {
       const returnUrl = globalThis.location.origin + "/settings";
-      const { url } = await createPortalSession(returnUrl);
+      const { url } = await apiService.billing.createPortalSession(returnUrl);
 
       // Validation for successful URL generation
       if (!url || !url.startsWith("https://")) {
