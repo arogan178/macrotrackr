@@ -46,14 +46,6 @@ export interface LoadingSpinnerProps {
   label?: string;
 }
 
-export interface TabButtonProps {
-  active: boolean;
-  onClick: () => void;
-  children: ReactNode;
-  layoutId?: string;
-  isMotion?: boolean;
-}
-
 export interface IconButtonGroupProps {
   onEdit: () => void;
   onDelete: () => void;
@@ -64,9 +56,6 @@ export interface IconButtonGroupProps {
   iconSize?: IconSize;
 }
 
-/**
- * Modal types shared across multiple modal implementations
- */
 export interface BaseModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -99,18 +88,3 @@ export interface ConfirmationModalProps extends BaseModalProps {
 }
 
 export type ModalProps = ConfirmationModalProps | FormModalProps;
-
-export interface CardContainerProps {
-  children: ReactNode;
-  className?: string;
-  /** Visual style variant for the card */
-  variant?: "default" | "transparent";
-}
-
-export interface InfoCardProps {
-  title: string;
-  description?: string;
-  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent";
-  icon?: ReactNode;
-  children?: ReactNode;
-}

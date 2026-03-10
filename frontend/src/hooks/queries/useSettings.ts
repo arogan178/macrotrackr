@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import {
@@ -8,9 +9,6 @@ import {
   type UserSettingsPayload,
 } from "@/utils/apiServices";
 
-/**
- * Query hook for fetching user settings
- */
 export function useSettings() {
   return useQuery({
     queryKey: queryKeys.settings.user(),
@@ -25,11 +23,9 @@ export function useSettings() {
   });
 }
 
-/**
- * Mutation hook for saving user settings with optimistic updates
- */
 export function useSaveSettings() {
   const queryClient = useQueryClient();
+  const logSaveSettingsError = createMutationErrorLogger("Error saving settings");
 
   return useMutation({
     mutationKey: [...queryKeys.settings.user(), "save"],
@@ -75,7 +71,7 @@ export function useSaveSettings() {
           context.previousAuthUser,
         );
       }
-      console.error("Error saving settings:", error);
+      logSaveSettingsError(error);
     },
     onSettled: () => {
       // Always refetch to ensure consistency

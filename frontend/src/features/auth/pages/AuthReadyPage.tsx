@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { normalizeAuthRedirect, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
+import { normalizeAuthRedirect, resolveProfileCompletion, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { queryKeys } from "@/lib/queryKeys";
 import { ApiError, apiService, setAuthToken } from "@/utils/apiServices";
@@ -14,24 +14,6 @@ function isLikelyUserDetailsPayload(
   value: unknown,
 ): value is Record<string, unknown> {
   return !!value && typeof value === "object" && Object.keys(value).length > 0;
-}
-
-function resolveProfileCompletion(
-  userDetails: Record<string, unknown> | null,
-): boolean | undefined {
-  if (!userDetails) {
-    return undefined;
-  }
-
-  if (typeof userDetails.isProfileComplete === "boolean") {
-    return userDetails.isProfileComplete;
-  }
-
-  if ("dateOfBirth" in userDetails) {
-    return Boolean(userDetails.dateOfBirth);
-  }
-
-  return undefined;
 }
 
 /**

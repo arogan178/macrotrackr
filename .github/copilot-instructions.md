@@ -104,8 +104,6 @@ See [Frontend Patterns](./frontend-patterns.md) for detailed documentation on:
 - React 19 Patterns (use() hook, transitions, Suspense)
 - Anti-patterns to avoid
 
-<!-- desloppify-begin -->
-<!-- desloppify-skill-version: 4 -->
 ---
 name: desloppify
 description: >
@@ -116,6 +114,9 @@ description: >
   create a cleanup plan. Supports 28 languages.
 allowed-tools: Bash(desloppify *)
 ---
+
+<!-- desloppify-begin -->
+<!-- desloppify-skill-version: 5 -->
 
 # Desloppify
 
@@ -376,3 +377,4 @@ Split dimensions across `desloppify-reviewer` calls (Copilot runs them concurren
 
 <!-- desloppify-overlay: copilot -->
 <!-- desloppify-end -->
+
