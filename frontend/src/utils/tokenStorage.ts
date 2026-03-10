@@ -6,59 +6,27 @@
  * on the environment's capabilities.
  */
 
-// Check if Web Crypto API is available
 const isWebCryptoSupported =
   globalThis.window !== undefined &&
   globalThis.crypto &&
   typeof globalThis.crypto.subtle === "object";
 
-/**
- * Securely stores the authentication token
- *
- * Uses Web Crypto API for encryption when available, otherwise falls back
- * to localStorage with some additional protection.
- */
-export function securelyStoreToken(token: string): void {
+export function securelyStoreToken(token: string, expiresAt?: number): void {
   if (isWebCryptoSupported) {
-    // In a real implementation, this would use the Web Crypto API
-    // to encrypt the token before storing it
-    // For now, we'll use localStorage with a note about encryption
     localStorage.setItem("token", token);
-    try {
-      const [, payloadBase64] = token.split(".");
-      const payloadJson = atob(payloadBase64.replaceAll('-', "+").replaceAll('_', "/"));
-      const payload = JSON.parse(payloadJson);
-      if (payload && typeof payload.exp === "number") {
-        localStorage.setItem("token_exp", String(payload.exp));
-      }
-    } catch {
-      // Ignore malformed or non-JWT tokens
-      void 0;
+    if (expiresAt) {
+      localStorage.setItem("token_exp", String(expiresAt));
     }
     localStorage.setItem("token_stored_at", Date.now().toString());
   } else {
-    // Fallback to localStorage
     localStorage.setItem("token", token);
-    try {
-      const [, payloadBase64] = token.split(".");
-      const payloadJson = atob(payloadBase64.replaceAll('-', "+").replaceAll('_', "/"));
-      const payload = JSON.parse(payloadJson);
-      if (payload && typeof payload.exp === "number") {
-        localStorage.setItem("token_exp", String(payload.exp));
-      }
-    } catch {
-      // Ignore malformed or non-JWT tokens
-      void 0;
+    if (expiresAt) {
+      localStorage.setItem("token_exp", String(expiresAt));
     }
     localStorage.setItem("token_stored_at", Date.now().toString());
   }
-
-  // For production, consider setting httpOnly cookies with a server-side API
 }
 
-/**
- * Retrieves the stored authentication token
- */
 export function getToken(): string | undefined {
   if (!isLocalStorageAvailable()) return undefined;
 
@@ -74,17 +42,10 @@ export function getToken(): string | undefined {
   return token;
 }
 
-/**
- * Sets/stores the authentication token
- * Alias for securelyStoreToken for consistency with existing code
- */
 export function setToken(token: string): void {
   securelyStoreToken(token);
 }
 
-/**
- * Removes the stored token
- */
 export function removeToken(): void {
   if (!isLocalStorageAvailable()) return;
 
@@ -93,9 +54,6 @@ export function removeToken(): void {
   localStorage.removeItem("token_exp");
 }
 
-/**
- * Checks if token has expired based on storage time
- */
 function isTokenExpired(storedAtString: string, expSecondsString: string | null): boolean {
   try {
     const storedAt = Number.parseInt(storedAtString, 10);
@@ -107,13 +65,10 @@ function isTokenExpired(storedAtString: string, expSecondsString: string | null)
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
     return now - storedAt > thirtyDaysMs;
   } catch {
-    return true; // If there's any error parsing, consider it expired
+    return true;
   }
 }
 
-/**
- * Checks if localStorage is available
- */
 function isLocalStorageAvailable(): boolean {
   try {
     const testKey = "__test__";

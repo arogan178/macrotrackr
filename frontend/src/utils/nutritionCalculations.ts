@@ -5,7 +5,7 @@ import {
   MIN_WEEKLY_WEIGHT_LOSS,
 } from "@/features/goals/constants";
 import type { MacroDailyTotals, MacroEntry } from "@/types/macro";
-import type { ActivityLevel, Gender } from "@/types/user";
+import type { ActivityLevel, Gender } from "@/utils/userConstants";
 import {
   CALORIES_PER_GRAM,
   DEFAULT_MACRO_TOTALS,

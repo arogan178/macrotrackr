@@ -13,8 +13,7 @@ export function ClerkTokenSync() {
     }
     try {
       return await getToken();
-    } catch (error) {
-      console.error("Failed to get Clerk token:", error);
+    } catch {
       return null;
     }
   }, [isSignedIn, getToken]);
@@ -31,8 +30,7 @@ export function ClerkTokenSync() {
         try {
           const token = await session.getToken();
           setAuthToken(token);
-        } catch (error) {
-          console.error("Failed to get session token:", error);
+        } catch {
           setAuthToken(null);
         }
       } else {
