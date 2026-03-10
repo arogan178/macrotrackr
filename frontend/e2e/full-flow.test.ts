@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
-import { navigateToSignUp, navigateToSignIn, loginWithTestUser, signUpViaUI } from './helpers/auth'
+import { navigateToSignIn, loginWithTestUser, signUpViaUI } from './helpers/auth'
 import { sleep } from './helpers/index'
 
 test.describe('Full Flow E2E Tests', () => {

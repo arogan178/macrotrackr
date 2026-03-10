@@ -102,7 +102,7 @@ export function buildFoodSearchCacheKey(query: string): string {
 }
 
 export function parseQuantity(quantityString: string): QuantityParseResult {
-  if (!quantityString || typeof quantityString !== "string") {
+  if (!quantityString) {
     return { quantity: 100, unit: "g" };
   }
 
@@ -232,10 +232,6 @@ function getFoodSearchScore(hit: FoodSearchHit, normalizedQuery: string): number
   const name = normalizeFoodSearchQuery(getFoodProductDisplayName(hit));
   const categories = normalizeFoodSearchQuery(hit.categories || "");
   const rawQuantity = normalizeFoodSearchQuery(hit.quantity || "");
-
-  if (!name) {
-    return 0;
-  }
 
   let score = 0;
 

@@ -4,7 +4,7 @@
  * These tests validate the error classes and utilities in src/lib/errors.ts
  */
 
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import {
   AppError,
   AuthenticationError,

@@ -1,12 +1,8 @@
-// src/lib/database.ts
 import type { Database } from "bun:sqlite";
 import { DatabaseError } from "./errors";
 import { loggerHelpers } from "./logger";
 import { traceQuerySync } from "./query-tracer";
 
-/**
- * Executes a database operation within a transaction with proper error handling
- */
 export function withTransaction<T>(db: Database, operation: () => T): T {
   const transaction = db.transaction(operation);
   try {
@@ -45,14 +41,8 @@ export async function withTransactionAsync<T>(
   }
 }
 
-/**
- * Type for SQLite parameter values
- */
 export type SQLParam = string | number | boolean | null | Uint8Array;
 
-/**
- * Safely executes a prepared statement with proper error handling and type safety
- */
 export function safeQuery<T>(
   db: Database,
   query: string,
@@ -76,9 +66,6 @@ export function safeQuery<T>(
   });
 }
 
-/**
- * Safely executes a prepared statement that returns multiple rows
- */
 export function safeQueryAll<T>(
   db: Database,
   query: string,
@@ -107,9 +94,6 @@ export function safeQueryAll<T>(
   });
 }
 
-/**
- * Safely executes a prepared statement for insert/update/delete operations
- */
 export function safeExecute(
   db: Database,
   query: string,
@@ -138,9 +122,6 @@ export function safeExecute(
   });
 }
 
-/**
- * Type-safe database result types
- */
 export interface UserRow {
   id: number;
   first_name: string;
