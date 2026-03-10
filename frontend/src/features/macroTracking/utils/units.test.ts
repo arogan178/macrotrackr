@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { UnitConverter, type UnitType } from "./units";
+import { UnitConverter } from "./units";
 
 describe("units", () => {
   describe("UnitConverter", () => {
