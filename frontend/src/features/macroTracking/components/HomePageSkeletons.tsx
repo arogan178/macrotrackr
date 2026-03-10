@@ -1,13 +1,4 @@
-// Loading skeleton components extracted from HomePage
-// File: [frontend/src/features/macroTracking/pages/HomePage.Skeletons.tsx](frontend/src/features/macroTracking/pages/HomePage.Skeletons.tsx:1)
-
 import { CardContainer } from "@/components/form";
-
-/**
- * Skeleton shown while AddEntryForm is loading.
- * Markup and classes identical to inline component previously in
- * [frontend/src/features/macroTracking/pages/HomePage.tsx](frontend/src/features/macroTracking/pages/HomePage.tsx:251).
- */
 export const AddEntryLoadingSkeleton = () => (
   <CardContainer className="flex h-full flex-col justify-between rounded-2xl border-border/60">
     <div className="animate-pulse p-5">

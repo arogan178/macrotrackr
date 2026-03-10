@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
@@ -12,28 +12,31 @@ import {
 } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
 
-// Query hook for fetching weight goals
-export function useWeightGoals() {
-  return useQuery({
+export const weightGoalsQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.goals.weight(),
     queryFn: async (): Promise<WeightGoals | null> => {
       const data = await apiService.goals.getWeightGoals();
       return normalizeWeightGoals(data, undefined) ?? null;
     },
     ...queryConfigs.longLived,
-    placeholderData: (previousData) => previousData,
+    placeholderData: (previousData: WeightGoals | null | undefined) =>
+      previousData,
   });
+
+export function useWeightGoals() {
+  return useQuery(weightGoalsQueryOptions());
 }
 
-// Query hook for fetching weight log entries
-export function useWeightLog() {
-  return useQuery({
+export const weightLogQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.goals.weightLog(),
-    queryFn: async (): Promise<WeightLogEntry[]> => {
-      return await apiService.goals.getWeightLog();
-    },
-    ...queryConfigs.longLived, // 5 minutes stale time for goals
+    queryFn: (): Promise<WeightLogEntry[]> => apiService.goals.getWeightLog(),
+    ...queryConfigs.longLived,
   });
+
+export function useWeightLog() {
+  return useQuery(weightLogQueryOptions());
 }
 
 // Mutation hook for creating weight goals

@@ -12,7 +12,7 @@ import {
   type WeightGoalRow,
   type WeightLogRow,
 } from "../../lib/database";
-import { NotFoundError } from "../../lib/errors";
+import { ConflictError, NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
 
@@ -123,7 +123,7 @@ export const goalRoutes = (app: Elysia) =>
             );
 
             if (existingGoal) {
-              throw new Error(
+              throw new ConflictError(
                 "Weight goal already exists for this user. Use PUT to update."
               );
             }

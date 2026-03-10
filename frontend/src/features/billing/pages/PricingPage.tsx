@@ -12,7 +12,7 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { useStore } from "@/store/store";
-import { createCheckoutSession } from "@/utils/apiBilling";
+import { apiService } from "@/utils/apiServices";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
 
@@ -75,7 +75,7 @@ const PricingPage: React.FC = () => {
 
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
-      const { url } = await createCheckoutSession(
+      const { url } = await apiService.billing.createCheckoutSession(
         globalThis.location.origin + "/settings?upgraded=true",
         globalThis.location.origin + "/pricing",
         plan,

@@ -1,17 +1,32 @@
-// Export component API
 export * from "./components";
-
-// Export hooks API
 export * from "./hooks";
-
-// Export calculation functions
 export * from "./calculations";
-
-// Export constants
-export * from "./constants";
-
-// Export habit constants (merged from habits feature)
-export * from "./constants/habits";
-
-// Export utility functions
+export type {
+  GoalsState,
+  SetWeightGoalPayload,
+  TimeToGoalCalculation,
+  UpdateWeightGoalPayload,
+  WeightGoalsResponse,
+  WeightGoalFormValues,
+} from "./types";
+export {
+  CALORIE_ADJUSTMENT_FACTORS,
+  CALORIE_RANGE_LABELS,
+  CALORIES_PER_KG_FAT,
+  CARBS_PERCENTAGE,
+  CHART_COLORS,
+  DAILY_PROTEIN_PER_KG,
+  DEFAULT_MACRO_TOTALS,
+  DEFAULT_TARGET_VALUES,
+  DEFAULT_TARGET_WEEKS,
+  ERROR_MESSAGES,
+  FATS_PERCENTAGE,
+  MAX_SAFE_DAILY_CHANGE,
+  MAX_WEEKLY_WEIGHT_LOSS,
+  MIN_SAFE_DAILY_CHANGE,
+  MIN_WEEKLY_WEIGHT_LOSS,
+  SUCCESS_MESSAGES,
+  WEIGHT_GOAL_OPTIONS,
+  WEIGHT_VALIDATION,
+} from "./constants";
 export * from "./utils";
