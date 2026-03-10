@@ -1,7 +1,8 @@
 import { motion } from "motion/react";
 import { memo } from "react";
 
-import { Button, TrashIcon } from "@/components/ui";
+import Button from "./Button";
+import { TrashIcon } from "./Icons";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
 import { cn } from "@/lib/classnameUtilities";
