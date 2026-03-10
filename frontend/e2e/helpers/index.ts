@@ -52,9 +52,11 @@ export function generateRandomEmail(): string {
 
 export function generateRandomPassword(): string {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
+  const randomValues = new Uint32Array(12)
+  crypto.getRandomValues(randomValues)
   let password = 'Test'
   for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length))
+    password += chars.charAt(randomValues[i] % chars.length)
   }
   return password
 }
