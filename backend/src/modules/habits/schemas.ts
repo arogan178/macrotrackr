@@ -86,12 +86,10 @@ export const HabitSchemas = {
 
   // Schema for PUT /api/habits/:id request body
   updateHabitBody: t.Object({
-    id: StringRequired,
     title: StringRequired,
     iconName: StringRequired,
     current: PositiveNumber,
     target: PositiveNumber,
-    progress: PositiveNumber,
     accentColor: t.Optional(AccentColor),
     isComplete: t.Optional(t.Boolean()),
     createdAt: DateString,

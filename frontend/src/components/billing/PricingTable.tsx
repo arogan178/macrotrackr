@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "motion/react";
 import React, { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { Button, CheckIcon, TabButton } from "@/components/ui";
+import { Button, CheckIcon, TabBar } from "@/components/ui";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
 
 // Memoize feature arrays outside the component to prevent re-computation on every render
@@ -32,7 +32,7 @@ interface FeatureRow {
 
 /**
  * PricingTable - Shows Free vs. Pro features
- * Usage: <PricingTable onUpgrade={...} />
+ * Usage: <PricingTable selectedPlan={plan} setSelectedPlan={setPlan} onUpgrade={...} />
  */
 
 const PricingTable: React.FC<PricingTableProps> = ({
@@ -151,36 +151,18 @@ const PricingTable: React.FC<PricingTableProps> = ({
     <div className="space-y-5">
       {/* Plan toggle (pill group) */}
       <div className="flex justify-center">
-        <div
-          className="inline-flex gap-1 overflow-hidden rounded-full border border-border bg-surface p-1 select-none"
-          role="tablist"
-          aria-label="Plan Toggle"
-        >
-          <TabButton
-            active={selectedPlan === "monthly"}
-            onClick={() => setSelectedPlan("monthly")}
-            layoutId="pricing-plan-toggle"
-            isMotion
-            rounded="rounded-full"
-            activeBg="bg-primary"
-            ariaLabel="Monthly plan"
-            className="overflow-hidden rounded-full px-5"
-          >
-            <span className="text-sm font-semibold">Monthly</span>
-          </TabButton>
-          <TabButton
-            active={selectedPlan === "yearly"}
-            onClick={() => setSelectedPlan("yearly")}
-            layoutId="pricing-plan-toggle"
-            isMotion
-            rounded="rounded-full"
-            activeBg="bg-primary"
-            ariaLabel="Yearly plan"
-            className="overflow-hidden rounded-full px-5"
-          >
-            <span className="text-sm font-semibold">Yearly</span>
-          </TabButton>
-        </div>
+        <TabBar
+          items={[
+            { key: "monthly", label: <span className="text-sm font-semibold">Monthly</span>, activeBg: "bg-primary" },
+            { key: "yearly", label: <span className="text-sm font-semibold">Yearly</span>, activeBg: "bg-primary" },
+          ]}
+          activeKey={selectedPlan}
+          onChange={(plan) => setSelectedPlan(plan as "monthly" | "yearly")}
+          layoutId="pricing-plan-toggle"
+          rounded="rounded-full"
+          className="overflow-hidden rounded-full border border-border bg-surface p-1 select-none"
+          size="sm"
+        />
       </div>
 
       <div className="relative w-full overflow-x-auto rounded-xl border border-border bg-surface-2">

@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useState } from "react";
 import { ProFeature } from "@/components/billing";
 import { CardContainer, InfoCard, LoadingSpinner } from "@/components/form";
 import MacroTarget from "@/components/macros/MacroTarget";
-import { Button, CheckMarkIcon, InfoIcon } from "@/components/ui";
+import { Button, CheckIcon, InfoIcon } from "@/components/ui";
 import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
@@ -197,7 +197,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                 <>
                   {saveSuccess && (
                     <div className="flex items-center text-sm text-success">
-                      <CheckMarkIcon className="mr-1 h-4 w-4" />
+                      <CheckIcon className="mr-1 h-4 w-4" />
                       Settings saved successfully
                     </div>
                   )}

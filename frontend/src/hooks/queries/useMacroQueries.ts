@@ -38,6 +38,10 @@ function normalizePaginatedHistory(
     limit: typeof result.limit === "number" ? result.limit : limit,
     offset: typeof result.offset === "number" ? result.offset : offset,
     hasMore: typeof result.hasMore === "boolean" ? result.hasMore : false,
+    limits:
+      result.limits && typeof result.limits === "object"
+        ? (result.limits as PaginatedMacroHistory["limits"])
+        : undefined,
   };
 }
 
@@ -52,6 +56,7 @@ export function useMacroHistory(
   return useQuery({
     queryKey: queryKeys.macros.history(
       page,
+      limit,
       options?.startDate,
       options?.endDate,
     ),
@@ -74,6 +79,7 @@ export function useMacroHistoryInfinite(
 ) {
   return useInfiniteQuery({
     queryKey: queryKeys.macros.historyInfinite(
+      limit,
       options?.startDate,
       options?.endDate,
     ),
