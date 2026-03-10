@@ -2,6 +2,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
+import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
@@ -164,6 +165,9 @@ function generateOptimisticId(): string {
 // Mutation hook for adding weight log entry with optimistic updates
 export function useAddWeightLogEntry() {
   const queryClient = useQueryClient();
+  const logAddWeightEntryError = createMutationErrorLogger(
+    "Failed to add weight log entry",
+  );
 
   return useMutation({
     mutationKey: [...queryKeys.goals.weightLog(), "add"],
@@ -237,7 +241,7 @@ export function useAddWeightLogEntry() {
       if (context?.previousUser) {
         queryClient.setQueryData(queryKeys.auth.user(), context.previousUser);
       }
-      console.error("Failed to add weight log entry:", error);
+      logAddWeightEntryError(error);
     },
     onSuccess: (newEntry, variables, context) => {
       // Replace optimistic entry with real data from server
@@ -295,6 +299,9 @@ export function useAddWeightLogEntry() {
 // Mutation hook for deleting weight log entry
 export function useDeleteWeightLogEntry() {
   const queryClient = useQueryClient();
+  const logDeleteWeightEntryError = createMutationErrorLogger(
+    "Error deleting weight log entry",
+  );
 
   return useMutation({
     mutationKey: [...queryKeys.goals.weightLog(), "delete"],
@@ -333,7 +340,7 @@ export function useDeleteWeightLogEntry() {
           context.previousWeightLog,
         );
       }
-      console.error("Error deleting weight log entry:", error);
+      logDeleteWeightEntryError(error);
     },
     onSettled: () => {
       // Always refetch after error or success

@@ -2,6 +2,7 @@ import { useAuth, useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
+import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { apiService, setAuthToken, UserDetailsResponse } from "@/utils/apiServices";
@@ -17,11 +18,6 @@ interface ChangePasswordData {
   newPassword: string;
 }
 
-/**
- * Query hook for current user data
- * Fetches user data from /api/auth/me (mapped to /api/user/me)
- * @param options - Optional configuration
- */
 export function useUser(options?: { enabled?: boolean }) {
   const { isLoaded, isSignedIn } = useAuth();
 
@@ -55,9 +51,6 @@ export function useUser(options?: { enabled?: boolean }) {
   });
 }
 
-/**
- * Mutation hook for user logout
- */
 export function useLogout() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -85,11 +78,9 @@ export function useLogout() {
   });
 }
 
-/**
- * Mutation hook for password reset
- */
 export function useResetPassword() {
   const navigate = useNavigate();
+  const logResetPasswordError = createMutationErrorLogger("Password reset failed");
 
   return useMutation({
     mutationFn: async (data: ResetPasswordData): Promise<void> => {
@@ -99,18 +90,13 @@ export function useResetPassword() {
       // Navigate to login with success message
       navigate({ to: "/login", search: { returnTo: undefined } });
     },
-    onError: (error) => {
-      console.error("Password reset failed:", error);
-    },
+    onError: logResetPasswordError,
   });
 }
 
-/**
- * Mutation hook for changing password (authenticated users)
- * Uses Clerk's API for password management
- */
 export function useChangePassword() {
   const { user } = useClerkUser();
+  const logChangePasswordError = createMutationErrorLogger("Change password failed");
 
   return useMutation({
     mutationFn: async (data: ChangePasswordData): Promise<void> => {
@@ -128,8 +114,6 @@ export function useChangePassword() {
     onSuccess: () => {
       // Success notification will be handled by the component
     },
-    onError: (error) => {
-      console.error("Change password failed:", error);
-    },
+    onError: logChangePasswordError,
   });
 }

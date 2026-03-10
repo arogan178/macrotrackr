@@ -6,7 +6,11 @@ import { cn } from "../../lib/classnameUtilities";
 import Button from "./Button";
 import IconButton from "./IconButton";
 import ProgressiveBlur from "./ProgressiveBlur";
-import type { ButtonProps, ModalProps } from "./Types";
+import type {
+  ConfirmationModalProps,
+  FormModalProps,
+  ModalProps,
+} from "./Types";
 
 const CONTAINER_CLASS =
   "fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6";
@@ -57,35 +61,91 @@ const backdropVariants = {
   },
 };
 
-function getVariantConfig(properties: ModalProps) {
-  if (properties.variant === "confirmation") {
-    return {
-      message: properties.message,
-      cancelLabel: properties.cancelLabel ?? "Cancel",
-      confirmLabel: properties.confirmLabel ?? "Confirm",
-      confirmVariant: (properties.isDanger
-        ? "danger"
-        : "primary") as ButtonProps["variant"],
-      onConfirm: properties.onConfirm,
-      onSave: undefined,
-      saveDisabled: undefined,
-      saveLabel: undefined,
-      hideCancelButton: properties.hideCancelButton ?? false,
-    };
+function renderConfirmationFooter(
+  properties: ConfirmationModalProps,
+  onClose: () => void,
+  buttonSize: NonNullable<ModalProps["buttonSize"]>,
+) {
+  const cancelLabel = properties.cancelLabel ?? "Cancel";
+  const confirmLabel = properties.confirmLabel ?? "Confirm";
+  const confirmVariant = properties.isDanger ? "danger" : "primary";
+  const hideCancelButton = properties.hideCancelButton ?? false;
+
+  return (
+    <div
+      className={cn(
+        "flex gap-3 border-t border-white/5 px-6 py-4",
+        hideCancelButton ? "justify-center" : "justify-end",
+        SURFACE_CLASS,
+      )}
+    >
+      {!hideCancelButton && (
+        <Button
+          onClick={onClose}
+          ariaLabel={cancelLabel}
+          variant="secondary"
+          buttonSize={buttonSize}
+          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
+        >
+          {cancelLabel}
+        </Button>
+      )}
+      <Button
+        onClick={properties.onConfirm}
+        ariaLabel={confirmLabel}
+        variant={confirmVariant}
+        buttonSize={buttonSize}
+        className="px-6 font-medium"
+      >
+        {confirmLabel}
+      </Button>
+    </div>
+  );
+}
+
+function renderFormFooter(
+  properties: FormModalProps,
+  onClose: () => void,
+  buttonSize: NonNullable<ModalProps["buttonSize"]>,
+) {
+  if (!properties.onSave || properties.hideDefaultButtons) {
+    return null;
   }
 
-  return {
-    message: undefined,
-    cancelLabel: properties.cancelLabel ?? "Cancel",
-    confirmLabel: undefined,
-    confirmVariant: "primary" as const,
-    onConfirm: undefined,
-    onSave: properties.onSave,
-    saveDisabled: properties.saveDisabled,
-    saveLabel: properties.saveLabel ?? "Save",
-    hideDefaultButtons: properties.hideDefaultButtons ?? false,
-    hideCancelButton: properties.hideCancelButton ?? false,
-  };
+  const cancelLabel = properties.cancelLabel ?? "Cancel";
+  const saveLabel = properties.saveLabel ?? "Save";
+  const hideCancelButton = properties.hideCancelButton ?? false;
+
+  return (
+    <div
+      className={cn(
+        "flex gap-3 border-t border-white/5 px-6 py-4",
+        hideCancelButton ? "justify-center" : "justify-end",
+        SURFACE_CLASS,
+      )}
+    >
+      {!hideCancelButton && (
+        <Button
+          onClick={onClose}
+          ariaLabel={cancelLabel}
+          variant="secondary"
+          buttonSize={buttonSize}
+          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
+        >
+          {cancelLabel}
+        </Button>
+      )}
+      <Button
+        type="button"
+        onClick={properties.onSave}
+        disabled={properties.saveDisabled}
+        text={saveLabel}
+        buttonSize={buttonSize}
+        variant="primary"
+        className="px-6 font-medium"
+      />
+    </div>
+  );
 }
 
 function Modal(properties: ModalProps) {
@@ -99,19 +159,6 @@ function Modal(properties: ModalProps) {
     hideClose = false,
   } = properties;
   const [isMounted, setIsMounted] = useState(false);
-
-  const {
-    message,
-    cancelLabel,
-    confirmLabel,
-    confirmVariant,
-    onConfirm,
-    onSave,
-    saveDisabled,
-    saveLabel,
-    hideDefaultButtons,
-    hideCancelButton,
-  } = getVariantConfig(properties);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -200,9 +247,9 @@ function Modal(properties: ModalProps) {
 
             <div className="relative grow overflow-x-hidden overflow-y-auto overscroll-contain px-6 py-5">
               <div className="relative z-10">
-                {message && (
+                {properties.variant === "confirmation" && (
                   <p className="mb-5 text-sm leading-relaxed text-muted">
-                    {message}
+                    {properties.message}
                   </p>
                 )}
                 {children}
@@ -215,49 +262,9 @@ function Modal(properties: ModalProps) {
               />
             </div>
 
-            {(properties.variant === "confirmation" || (onSave && !hideDefaultButtons)) && (
-              <div
-                className={cn(
-                  "flex gap-3 border-t border-white/5 px-6 py-4",
-                  hideCancelButton ? "justify-center" : "justify-end",
-                  SURFACE_CLASS,
-                )}
-              >
-                {!hideCancelButton && (
-                  <Button
-                    onClick={onClose}
-                    ariaLabel={cancelLabel}
-                    variant="secondary"
-                    buttonSize={buttonSize}
-                    className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
-                  >
-                    {cancelLabel}
-                  </Button>
-                )}
-                {properties.variant === "form" && onSave && (
-                  <Button
-                    type="button"
-                    onClick={onSave}
-                    disabled={saveDisabled}
-                    text={saveLabel}
-                    buttonSize={buttonSize}
-                    variant="primary"
-                    className="px-6 font-medium"
-                  />
-                )}
-                {properties.variant === "confirmation" && onConfirm && (
-                  <Button
-                    onClick={onConfirm}
-                    ariaLabel={confirmLabel}
-                    variant={confirmVariant}
-                    buttonSize={buttonSize}
-                    className="px-6 font-medium"
-                  >
-                    {confirmLabel}
-                  </Button>
-                )}
-              </div>
-            )}
+            {properties.variant === "confirmation"
+              ? renderConfirmationFooter(properties, onClose, buttonSize)
+              : renderFormFooter(properties, onClose, buttonSize)}
           </motion.div>
         </div>
       )}

@@ -77,3 +77,21 @@ export function shouldBypassSyncForRedirect(value: string | undefined): boolean 
 export function encodeAuthRedirect(value: string | undefined): string {
   return encodeURIComponent(normalizeAuthRedirect(value));
 }
+
+export function resolveProfileCompletion(user: unknown): boolean | undefined {
+  if (!user || typeof user !== "object") {
+    return undefined;
+  }
+
+  const userRecord = user as Record<string, unknown>;
+
+  if (typeof userRecord.isProfileComplete === "boolean") {
+    return userRecord.isProfileComplete;
+  }
+
+  if ("dateOfBirth" in userRecord) {
+    return Boolean(userRecord.dateOfBirth);
+  }
+
+  return undefined;
+}

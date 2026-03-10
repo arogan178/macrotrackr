@@ -10,11 +10,6 @@ interface UpgradeModalProps {
   description?: string;
 }
 
-/**
- * UpgradeModal - Prompts free users to upgrade to Pro
- * Usage: <UpgradeModal open={open} onClose={...} onUpgrade={...} />
- */
-
 const UpgradeModal: React.FC<UpgradeModalProps> = ({
   open,
   onClose,
@@ -62,8 +57,5 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
     </Modal>
   );
 };
-
-// Usage example:
-// <UpgradeModal open={modalOpen} onClose={closeModal} onUpgrade={goToPricing} />
 
 export default memo(UpgradeModal);
