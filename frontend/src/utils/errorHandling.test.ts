@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { getErrorMessage, handleApiError } from "./errorHandling";
 
 describe("errorHandling", () => {

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MACRO_PERCENTAGE_KEYS, DEFAULT_MACRO_TARGET } from "./macro";
+
+import { DEFAULT_MACRO_TARGET,MACRO_PERCENTAGE_KEYS } from "./macro";
 
 describe("macro constants", () => {
   describe("MACRO_PERCENTAGE_KEYS", () => {

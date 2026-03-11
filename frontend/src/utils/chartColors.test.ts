@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
+
 import {
+  getUnitForStat,
   MACRO_COLORS,
   MEAL_COLORS,
   STAT_COLORS,
-  getUnitForStat,
 } from "./chartColors";
 
 describe("chartColors", () => {
