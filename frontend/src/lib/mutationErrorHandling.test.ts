@@ -1,20 +1,20 @@
 import {
-  logMutationError,
+  calculateRetryDelay,
+  createMutationErrorHandler,
   createMutationErrorLogger,
+  createMutationRetryDelayFunction,
+  createMutationRetryFunction,
+  isAuthError,
+  isConflictError,
+  isNetworkError,
+  isRateLimitError,
+  isServerError,
+  isTimeoutError,
+  isValidationError,
+  logMutationError,
+  MutationErrorHandler,
   retryConfigs,
   shouldRetryError,
-  calculateRetryDelay,
-  createMutationRetryFunction,
-  createMutationRetryDelayFunction,
-  isNetworkError,
-  isTimeoutError,
-  isServerError,
-  isRateLimitError,
-  isAuthError,
-  isValidationError,
-  isConflictError,
-  MutationErrorHandler,
-  createMutationErrorHandler,
 } from "./mutationErrorHandling";
 
 describe("mutationErrorHandling", () => {
@@ -107,7 +107,7 @@ describe("mutationErrorHandling", () => {
     const config = {
       maxRetries: 3,
       baseDelay: 1000,
-      maxDelay: 10000,
+      maxDelay: 10_000,
       backoffMultiplier: 2,
       jitterFactor: 0,
     };
@@ -143,16 +143,16 @@ describe("mutationErrorHandling", () => {
 
   describe("createMutationRetryFunction", () => {
     it("should create retry function using config", () => {
-      const retryFn = createMutationRetryFunction(retryConfigs.standard);
+      const retryFunction = createMutationRetryFunction(retryConfigs.standard);
       const error = { message: "network error" } as MutationError;
-      expect(retryFn(0, error)).toBe(true);
+      expect(retryFunction(0, error)).toBe(true);
     });
   });
 
   describe("createMutationRetryDelayFunction", () => {
     it("should create delay function", () => {
-      const delayFn = createMutationRetryDelayFunction(retryConfigs.standard);
-      const delay = delayFn(0, undefined as unknown as MutationError);
+      const delayFunction = createMutationRetryDelayFunction(retryConfigs.standard);
+      const delay = delayFunction(0, undefined as unknown as MutationError);
       expect(typeof delay).toBe("number");
     });
   });

@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+
 import {
-  caloriesFromMacrosRaw,
-  caloriesFromMacrosRounded,
-  calculateProteinCalories,
   calculateCarbsCalories,
   calculateFatsCalories,
+  calculateProteinCalories,
+  caloriesFromMacrosRaw,
+  caloriesFromMacrosRounded,
 } from "./nutritionCalculations";
 
 describe("nutritionCalculations", () => {
