@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { MEAL_TYPE_OPTIONS, getMealTypeDisplay, getTodayDateString } from "./constants";
+
+import { getMealTypeDisplay, getTodayDateString,MEAL_TYPE_OPTIONS } from "./constants";
 
 type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 

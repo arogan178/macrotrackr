@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { getTodayEntries } from "./calculations";
 
 describe("macroTracking calculations", () => {

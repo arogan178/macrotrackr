@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { CALORIES_PER_GRAM, DEFAULT_MACRO_TOTALS } from "./nutrition";
 
 describe("nutrition constants", () => {
