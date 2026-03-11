@@ -13,8 +13,8 @@ import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import type {
-  MacroEntry,
   MacroDailyTotals,
+  MacroEntry,
   MacroTargetSettings,
   PaginatedMacroHistory,
 } from "@/types/macro";
