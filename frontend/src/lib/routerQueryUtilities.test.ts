@@ -1,5 +1,5 @@
-import { describe, expect, it, vi } from "vitest";
 import { QueryClient } from "@tanstack/react-query";
+import { describe, expect, it, vi } from "vitest";
 
 import { ensureQueryData, prefetchQuery } from "./routerQueryUtilities";
 
@@ -8,19 +8,19 @@ describe("routerQueryUtilities", () => {
     it("ensures query data is available", async () => {
       const queryClient = new QueryClient();
       const queryKey = ["test"];
-      const queryFn = vi.fn().mockResolvedValue({ data: "test" });
+      const queryFunction = vi.fn().mockResolvedValue({ data: "test" });
 
-      const result = await ensureQueryData(queryClient, queryKey, queryFn);
+      const result = await ensureQueryData(queryClient, queryKey, queryFunction);
       expect(result).toEqual({ data: "test" });
-      expect(queryFn).toHaveBeenCalled();
+      expect(queryFunction).toHaveBeenCalled();
     });
 
     it("passes options to ensureQueryData", async () => {
       const queryClient = new QueryClient();
       const queryKey = ["test"];
-      const queryFn = vi.fn().mockResolvedValue({ data: "test" });
+      const queryFunction = vi.fn().mockResolvedValue({ data: "test" });
 
-      await ensureQueryData(queryClient, queryKey, queryFn, {
+      await ensureQueryData(queryClient, queryKey, queryFunction, {
         staleTime: 1000,
       });
 
@@ -33,11 +33,11 @@ describe("routerQueryUtilities", () => {
     it("preetches query without waiting", async () => {
       const queryClient = new QueryClient();
       const queryKey = ["prefetch"];
-      const queryFn = vi.fn().mockResolvedValue({ prefetched: true });
+      const queryFunction = vi.fn().mockResolvedValue({ prefetched: true });
 
-      await prefetchQuery(queryClient, queryKey, queryFn);
+      await prefetchQuery(queryClient, queryKey, queryFunction);
 
-      expect(queryFn).toHaveBeenCalled();
+      expect(queryFunction).toHaveBeenCalled();
     });
   });
 });

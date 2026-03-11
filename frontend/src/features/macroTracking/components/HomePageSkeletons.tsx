@@ -1,4 +1,5 @@
 import { CardContainer } from "@/components/form";
+
 export const AddEntryLoadingSkeleton = () => (
   <CardContainer className="flex h-full flex-col justify-between rounded-2xl border-border/60">
     <div className="animate-pulse p-5">

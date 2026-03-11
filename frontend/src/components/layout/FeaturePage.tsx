@@ -1,6 +1,7 @@
 import { memo, ReactNode } from "react";
 
 import { PageHeader } from "./PageHeader";
+
 export interface FeaturePageProps {
   title: string;
   subtitle?: string;

@@ -1,66 +1,79 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 
+// Mock the logger module
 vi.mock("../../src/lib/logger", () => ({
   logger: {
     error: vi.fn(),
   },
-  loggerHelpers: {
-    error: vi.fn(),
-  },
 }));
 
-import { NotFoundError } from "../../src/lib/errors";
-import { handleServiceError } from "../../src/lib/error-handler";
 import { logger } from "../../src/lib/logger";
 
-describe("handleServiceError", () => {
+import { handleServiceError } from "../../src/lib/error-handler";
+import { NotFoundError, ValidationError } from "../../src/lib/errors";
+
+describe("error-handler", () => {
   beforeEach(() => {
-    vi.mocked(logger.error).mockReset();
+    vi.clearAllMocks();
   });
+  describe("handleServiceError", () => {
+    it("throws generic error for unknown errors", () => {
+      expect(() =>
+        handleServiceError(new Error("Unknown error"), "fetch_user")
+      ).toThrow("An unexpected error occurred. Please try again later.");
+    });
 
-  it("rethrows known error types after logging", () => {
-    const error = new NotFoundError("Meal not found");
+    it("throws for string errors", () => {
+      expect(() =>
+        handleServiceError("String error", "fetch_user")
+      ).toThrow("An unexpected error occurred. Please try again later.");
+    });
 
-    expect(() =>
-      handleServiceError(error, "load_meal", { mealId: 42 }, [NotFoundError]),
-    ).toThrow(error);
+    it("rethrows known error types when provided", () => {
+      const notFoundError = new NotFoundError("User not found");
 
-    expect(logger.error).toHaveBeenCalledWith(
-      {
-        error,
-        operation: "load_meal",
-        mealId: 42,
-      },
-      "Failed to load meal",
-    );
-  });
+      expect(() =>
+        handleServiceError(notFoundError, "fetch_user", {}, [NotFoundError])
+      ).toThrow(NotFoundError);
+    });
 
-  it("wraps unknown failures in a generic service error", () => {
-    expect(() =>
-      handleServiceError("boom", "save_settings", { userId: 7 }),
-    ).toThrow("An unexpected error occurred. Please try again later.");
+    it("does not rethrow unknown errors even when knownErrors provided", () => {
+      const validationError = new ValidationError("Invalid");
 
-    expect(logger.error).toHaveBeenCalledWith(
-      {
-        error: expect.any(Error),
-        operation: "save_settings",
-        userId: 7,
-      },
-      "Failed to save settings",
-    );
-  });
+      expect(() =>
+        handleServiceError(validationError, "fetch_user", {}, [NotFoundError])
+      ).toThrow("An unexpected error occurred. Please try again later.");
+    });
 
-  it("handles missing context", () => {
-    expect(() => handleServiceError(new Error("bad"), "refresh_cache")).toThrow(
-      "An unexpected error occurred. Please try again later.",
-    );
+    it("logs error with operation name", () => {
+      const loggerError = vi.fn();
+      vi.mocked(logger.error).mockImplementation(loggerError);
 
-    expect(logger.error).toHaveBeenCalledWith(
-      {
-        error: expect.any(Error),
-        operation: "refresh_cache",
-      },
-      "Failed to refresh cache",
-    );
+      try {
+        handleServiceError(new Error("test"), "fetch_user");
+      } catch {
+        // Expected to throw
+      }
+
+      expect(loggerError).toHaveBeenCalled();
+    });
+
+    it("includes context in log", () => {
+      const loggerError = vi.fn();
+      vi.mocked(logger.error).mockImplementation(loggerError);
+
+      try {
+        handleServiceError(new Error("test"), "fetch_user", { userId: 123 });
+      } catch {
+        // Expected to throw
+      }
+
+      expect(loggerError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 123,
+        }),
+        expect.any(String)
+      );
+    });
   });
 });

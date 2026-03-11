@@ -40,8 +40,8 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
   );
 }
 
-export function MacroDistributionBar(props: MacroBarProps) {
-  return <MacroTargetBar {...props} />;
+export function MacroDistributionBar(properties: MacroBarProps) {
+  return <MacroTargetBar {...properties} />;
 }
 
 interface MacroLegendProps {
