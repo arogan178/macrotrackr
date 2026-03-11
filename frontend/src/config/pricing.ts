@@ -4,7 +4,7 @@ import {
   PRO_PLAN_DEFINITION,
 } from "@shared/pricing";
 
-export { PRICING };
+
 
 export interface PricingPlan {
   name: string;
@@ -53,3 +53,5 @@ export const PRICING_PLANS = {
     description: PRO_PLAN_DEFINITION.description,
   },
 } satisfies Record<"free" | "pro", PricingPlan>;
+
+export {PRICING} from "@shared/pricing";

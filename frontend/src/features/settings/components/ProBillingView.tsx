@@ -10,8 +10,7 @@ import {
 } from "@/components/ui";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useStore } from "@/store/store";
-import { apiService } from "@/utils/apiServices";
-import { BillingDetailsResponse } from "@/utils/apiServices";
+import { apiService , BillingDetailsResponse } from "@/utils/apiServices";
 
 const ProBillingView: React.FC<{
   onManage: () => void;

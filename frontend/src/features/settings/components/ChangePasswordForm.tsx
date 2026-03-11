@@ -99,8 +99,8 @@ const ChangePasswordForm = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (err) {
-      const error = err;
+    } catch (error_) {
+      const error = error_;
       // Handle specific Clerk errors
       let errorMessage = "Failed to change password";
 

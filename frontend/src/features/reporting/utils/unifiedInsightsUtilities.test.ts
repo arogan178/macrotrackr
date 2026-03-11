@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 
 import {
   CARD_BASE_CLASSES,
-  STAGGER,
-  TRANSITIONS,
   getColorByScore,
   getTextColorByScore,
   parseMacroRatio,
+  STAGGER,
+  TRANSITIONS,
 } from "./unifiedInsightsUtilities";
 
 describe("unifiedInsightsUtilities", () => {

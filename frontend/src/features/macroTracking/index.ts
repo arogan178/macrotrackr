@@ -25,6 +25,9 @@ export {
 } from "./calculations";
 
 // Utilities (list ops, formatting, validation, state helpers)
+export * from "./components";
+export * from "./hooks";
+export * from "./types";
 export type {
   AddEntryPayload,
   OptimisticUpdateState,
@@ -38,7 +41,3 @@ export {
   updateEntryInList,
   validateMacroInputs,
 } from "./utils";
-
-export * from "./components";
-export * from "./hooks";
-export * from "./types";
