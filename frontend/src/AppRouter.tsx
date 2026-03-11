@@ -18,11 +18,11 @@ import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
-import { habitsQueryOptions } from "@/hooks/queries/useHabits";
 import {
   weightGoalsQueryOptions,
   weightLogQueryOptions,
 } from "@/hooks/queries/useGoals";
+import { habitsQueryOptions } from "@/hooks/queries/useHabits";
 import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
 

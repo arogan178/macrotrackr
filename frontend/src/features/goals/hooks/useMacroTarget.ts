@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 
-import type { MacroTargetState } from "@/types/macro";
 import {
   balanceMacroPercentages,
   useMacroTargetCore,
 } from "@/features/macroTracking/hooks/useMacroTargetCore";
+import type { MacroTargetState } from "@/types/macro";
 
 export function useMacroTarget(
   initialValues: MacroTargetState,

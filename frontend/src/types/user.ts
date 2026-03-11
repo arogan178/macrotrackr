@@ -4,8 +4,7 @@
 
 import type { Gender } from "./activity";
 
-export type { ActivityLevel } from "./activity";
-export { Gender };
+export type { ActivityLevel, Gender } from "./activity";
 export type { UserNutritionalProfile } from "@/utils/userConstants";
 
 export interface UserSettings {

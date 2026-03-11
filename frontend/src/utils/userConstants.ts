@@ -3,14 +3,8 @@
  * These are used across auth, settings, and types
  */
 
+import type { ActivityLevel,  } from "@/types/activity";
 import { calculateBMR, calculateTDEE } from "@/utils/nutritionCalculations";
-import type { ActivityLevel, Gender } from "@/types/activity";
-
-// Re-export for backwards compatibility
-export type { ActivityLevel, Gender };
-
-// Activity level type - used across the app
-// Type for Gender - derived from GENDER_OPTIONS
 
 export interface NutritionProfileSource {
   id: number;
@@ -137,3 +131,5 @@ export function createNutritionProfile(
     tdee,
   };
 }
+
+export {type ActivityLevel, type Gender} from "@/types/activity";
