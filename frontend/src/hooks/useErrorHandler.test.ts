@@ -1,4 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
+import { act,renderHook } from "@testing-library/react";
+
 import { useErrorHandler, useQueryErrorHandler } from "./useErrorHandler";
 
 describe("useErrorHandler", () => {
@@ -58,22 +59,22 @@ describe("useErrorHandler", () => {
   describe("handleAsyncError", () => {
     it("should handle async function success", async () => {
       const { result } = renderHook(() => useErrorHandler());
-      const mockFn = vi.fn().mockResolvedValue(undefined);
+      const mockFunction = vi.fn().mockResolvedValue(undefined);
 
       await act(async () => {
-        await result.current.handleAsyncError(mockFn);
+        await result.current.handleAsyncError(mockFunction);
       });
 
-      expect(mockFn).toHaveBeenCalled();
+      expect(mockFunction).toHaveBeenCalled();
     });
 
     it("should handle async function error", async () => {
       const { result } = renderHook(() => useErrorHandler());
-      const mockFn = vi.fn().mockRejectedValue(new Error("Async error"));
+      const mockFunction = vi.fn().mockRejectedValue(new Error("Async error"));
       const errorCallback = vi.fn();
 
       await act(async () => {
-        await result.current.handleAsyncError(mockFn, errorCallback);
+        await result.current.handleAsyncError(mockFunction, errorCallback);
       });
 
       expect(errorCallback).toHaveBeenCalledWith("Async error");

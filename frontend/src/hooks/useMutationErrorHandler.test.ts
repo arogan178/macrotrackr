@@ -1,4 +1,5 @@
 import { renderHook } from "@testing-library/react";
+
 import { useMutationErrorHandler, useOptimisticMutationHandler } from "./useMutationErrorHandler";
 
 describe("useMutationErrorHandler", () => {
@@ -89,13 +90,13 @@ describe("useMutationErrorHandler", () => {
 describe("useOptimisticMutationHandler", () => {
   describe("createOptimisticHandlers", () => {
     it("should create optimistic error handler with rollback", () => {
-      const rollbackFn = vi.fn();
+      const rollbackFunction = vi.fn();
       const { result } = renderHook(() => useOptimisticMutationHandler());
-      const handlers = result.current.createOptimisticHandlers(rollbackFn, "update");
+      const handlers = result.current.createOptimisticHandlers(rollbackFunction, "update");
 
       handlers.onError(new Error("Error"), {}, { previousValue: "test" });
 
-      expect(rollbackFn).toHaveBeenCalledWith({ previousValue: "test" });
+      expect(rollbackFunction).toHaveBeenCalledWith({ previousValue: "test" });
     });
 
     it("should create optimistic success handler", () => {

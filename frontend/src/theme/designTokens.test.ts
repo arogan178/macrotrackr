@@ -1,13 +1,14 @@
 import { describe, expect, it } from "vitest";
+
 import {
-  COLOR_MAP,
-  MACRO_COLORS,
-  ICON_SIZES,
-  BUTTON_VARIANTS,
-  ICON_POSITIONS,
-  ICON_BUTTON_SIZES,
   BUTTON_SIZES,
+  BUTTON_VARIANTS,
+  COLOR_MAP,
   DEFAULT_LOADING_TEXT,
+  ICON_BUTTON_SIZES,
+  ICON_POSITIONS,
+  ICON_SIZES,
+  MACRO_COLORS,
 } from "./designTokens";
 
 describe("designTokens", () => {
