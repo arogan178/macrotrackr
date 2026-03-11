@@ -1,14 +1,5 @@
-export * from "./components";
-export * from "./hooks";
 export * from "./calculations";
-export type {
-  GoalsState,
-  SetWeightGoalPayload,
-  TimeToGoalCalculation,
-  UpdateWeightGoalPayload,
-  WeightGoalsResponse,
-  WeightGoalFormValues,
-} from "./types";
+export * from "./components";
 export {
   CALORIE_ADJUSTMENT_FACTORS,
   CALORIE_RANGE_LABELS,
@@ -29,4 +20,13 @@ export {
   WEIGHT_GOAL_OPTIONS,
   WEIGHT_VALIDATION,
 } from "./constants";
+export * from "./hooks";
+export type {
+  GoalsState,
+  SetWeightGoalPayload,
+  TimeToGoalCalculation,
+  UpdateWeightGoalPayload,
+  WeightGoalFormValues,
+  WeightGoalsResponse,
+} from "./types";
 export * from "./utils";
