@@ -1,4 +1,4 @@
-import { lightTheme, darkTheme } from "./theme";
+import { darkTheme,lightTheme } from "./theme";
 
 describe("theme", () => {
   describe("lightTheme", () => {

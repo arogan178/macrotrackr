@@ -1,6 +1,8 @@
 import { render } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
+import ProFeature from "./ProFeature";
+
 // Mock the useSubscriptionStatus hook
 vi.mock("@/hooks/useSubscriptionStatus", () => ({
   useSubscriptionStatus: vi.fn(() => ({
@@ -8,8 +10,6 @@ vi.mock("@/hooks/useSubscriptionStatus", () => ({
     setSubscriptionStatus: vi.fn(),
   })),
 }));
-
-import ProFeature from "./ProFeature";
 
 describe("ProFeature", () => {
   it("renders children when not pro", () => {

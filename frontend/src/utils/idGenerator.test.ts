@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
+
 import { generateId } from "./idGenerator";
 
 describe("idGenerator", () => {
   describe("generateId", () => {
     it("generates an id with default prefix", () => {
       const id = generateId();
-      expect(id).toMatch(/^id_\d+_[a-z0-9]+$/);
+      expect(id).toMatch(/^id_\d+_[\da-z]+$/);
     });
 
     it("generates an id with custom prefix", () => {
       const id = generateId("user");
-      expect(id).toMatch(/^user_\d+_[a-z0-9]+$/);
+      expect(id).toMatch(/^user_\d+_[\da-z]+$/);
     });
 
     it("generates unique ids", () => {
