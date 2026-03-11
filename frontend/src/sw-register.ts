@@ -43,7 +43,7 @@ export async function registerServiceWorker() {
     setInterval(() => {
       registration.update();
     }, 60 * 60 * 1000); // Check every hour
-  } catch (error) {
+  } catch {
     // Service worker registration failed - silently fail in production
   }
 }

@@ -4,8 +4,8 @@ import {
   ACTIVITY_LEVELS,
   GENDER_OPTIONS,
   getActivityLevelLabel,
-  getActivityLevelValue,
   getActivityLevelMultiplier,
+  getActivityLevelValue,
 } from "./userConstants";
 
 describe("userConstants", () => {

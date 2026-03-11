@@ -18,7 +18,7 @@ describe("calorie", () => {
 
     it("returns 0 for non-finite tdee", () => {
       expect(computeEffectiveTargetCalories(Infinity)).toBe(0);
-      expect(computeEffectiveTargetCalories(NaN)).toBe(0);
+      expect(computeEffectiveTargetCalories(Number.NaN)).toBe(0);
     });
 
     it("uses tdee when calorieTarget is 0 (falsy check)", () => {

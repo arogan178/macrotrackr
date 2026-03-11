@@ -1,29 +1,29 @@
 import { describe, expect, it } from "vitest";
-
 import { generateId } from "./idGenerator";
 
 describe("idGenerator", () => {
   describe("generateId", () => {
-    it("generates unique IDs", () => {
+    it("generates an id with default prefix", () => {
+      const id = generateId();
+      expect(id).toMatch(/^id_\d+_[a-z0-9]+$/);
+    });
+
+    it("generates an id with custom prefix", () => {
+      const id = generateId("user");
+      expect(id).toMatch(/^user_\d+_[a-z0-9]+$/);
+    });
+
+    it("generates unique ids", () => {
       const id1 = generateId();
       const id2 = generateId();
       expect(id1).not.toBe(id2);
     });
 
-    it("generates ID with default prefix", () => {
-      const id = generateId();
-      expect(id.startsWith("id_")).toBe(true);
-    });
-
-    it("generates ID with custom prefix", () => {
-      const id = generateId("custom");
-      expect(id.startsWith("custom_")).toBe(true);
-    });
-
-    it("generates ID with correct format", () => {
-      const id = generateId();
-      const parts = id.split("_");
-      expect(parts).toHaveLength(3);
+    it("generates different ids when called rapidly", () => {
+      const ids = Array.from({ length: 10 }, () => generateId("test"));
+      const uniqueIds = new Set(ids);
+      // Due to timing, some may be same, but most should be unique
+      expect(uniqueIds.size).toBeGreaterThan(1);
     });
   });
 });

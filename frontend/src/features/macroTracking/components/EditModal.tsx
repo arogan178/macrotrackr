@@ -5,8 +5,8 @@ import IngredientsPanel from "@/features/macroTracking/components/edit-modal/Ing
 import MealDetailsSection from "@/features/macroTracking/components/edit-modal/MealDetailsSection";
 import { UnitConverter, type UnitType } from "@/features/macroTracking/utils/units";
 import { useBeforeUnload } from "@/hooks";
-import { handleApiError } from "@/utils/errorHandling";
 import { Ingredient, MacroEntry } from "@/types/macro";
+import { handleApiError } from "@/utils/errorHandling";
 
 interface EditModalProps {
   entry: MacroEntry | undefined;

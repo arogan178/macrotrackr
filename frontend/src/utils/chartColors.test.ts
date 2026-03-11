@@ -1,36 +1,54 @@
 import { describe, expect, it } from "vitest";
-
-import { MACRO_COLORS, MEAL_COLORS, getUnitForStat } from "./chartColors";
+import {
+  MACRO_COLORS,
+  MEAL_COLORS,
+  STAT_COLORS,
+  getUnitForStat,
+} from "./chartColors";
 
 describe("chartColors", () => {
   describe("MACRO_COLORS", () => {
-    it("contains protein color", () => {
+    it("should have protein color defined", () => {
       expect(MACRO_COLORS.protein).toBeDefined();
       expect(MACRO_COLORS.protein.base).toBe("#34d399");
     });
 
-    it("contains carbs color", () => {
+    it("should have carbs color defined", () => {
       expect(MACRO_COLORS.carbs).toBeDefined();
       expect(MACRO_COLORS.carbs.base).toBe("#60a5fa");
     });
 
-    it("contains fats color", () => {
+    it("should have fats color defined", () => {
       expect(MACRO_COLORS.fats).toBeDefined();
       expect(MACRO_COLORS.fats.base).toBe("#f87171");
     });
   });
 
   describe("MEAL_COLORS", () => {
-    it("contains breakfast color", () => {
+    it("should have breakfast color defined", () => {
       expect(MEAL_COLORS.breakfast).toBeDefined();
     });
 
-    it("contains lunch color", () => {
+    it("should have lunch color defined", () => {
       expect(MEAL_COLORS.lunch).toBeDefined();
     });
 
-    it("contains dinner color", () => {
+    it("should have dinner color defined", () => {
       expect(MEAL_COLORS.dinner).toBeDefined();
+    });
+
+    it("should have snack color defined", () => {
+      expect(MEAL_COLORS.snack).toBeDefined();
+    });
+  });
+
+  describe("STAT_COLORS", () => {
+    it("should have calories color defined", () => {
+      expect(STAT_COLORS.calories).toBe("bg-primary");
+    });
+
+    it("should have protein color defined", () => {
+      expect(STAT_COLORS.protein).toBe("bg-primary");
     });
   });
 
@@ -51,7 +69,7 @@ describe("chartColors", () => {
       expect(getUnitForStat("fats")).toBe("g");
     });
 
-    it("returns empty string for unknown stat", () => {
+    it("returns empty string for unknown stat type", () => {
       expect(getUnitForStat("unknown")).toBe("");
     });
   });
