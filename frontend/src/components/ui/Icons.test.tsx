@@ -2,13 +2,13 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import {
-  TrendIcon,
-  GoogleIcon,
-  GithubIcon,
-  FacebookIcon,
   AppleIcon,
-  UserIcon,
+  FacebookIcon,
+  GithubIcon,
+  GoogleIcon,
   PlusIcon,
+  TrendIcon,
+  UserIcon,
 } from "./Icons";
 
 describe("Icons", () => {

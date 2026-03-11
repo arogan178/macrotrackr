@@ -1,4 +1,5 @@
-import { renderHook, act } from "@testing-library/react";
+import { act,renderHook } from "@testing-library/react";
+
 import { useBeforeUnload } from "./useBeforeUnload";
 
 describe("useBeforeUnload", () => {
@@ -7,8 +8,8 @@ describe("useBeforeUnload", () => {
   });
 
   it("should not add event listener when hasUnsavedChanges is false", () => {
-    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
+    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
 
     renderHook(() => useBeforeUnload(false));
 
@@ -22,8 +23,8 @@ describe("useBeforeUnload", () => {
   });
 
   it("should add event listener when hasUnsavedChanges is true", () => {
-    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
+    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
 
     const { unmount } = renderHook(() => useBeforeUnload(true));
 
@@ -45,8 +46,8 @@ describe("useBeforeUnload", () => {
 
   it("should use custom message when provided", () => {
     const customMessage = "Custom unsaved changes message";
-    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
+    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
 
     renderHook(() => useBeforeUnload(true, customMessage));
 
@@ -61,8 +62,8 @@ describe("useBeforeUnload", () => {
   });
 
   it("should remove listener when hasUnsavedChanges changes to false", () => {
-    const addEventListenerSpy = vi.spyOn(window, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(window, "removeEventListener");
+    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
+    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
 
     const { rerender, unmount } = renderHook(
       ({ hasUnsavedChanges }) => useBeforeUnload(hasUnsavedChanges),
