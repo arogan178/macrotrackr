@@ -1,6 +1,7 @@
 import React from "react";
 
 import { cn } from "../../lib/classnameUtilities";
+
 import { CheckIcon, CloseIcon, InfoIcon, WarningIcon } from "./Icons";
 
 export type StatusType = "success" | "error" | "warning" | "info";

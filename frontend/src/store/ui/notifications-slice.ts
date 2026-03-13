@@ -81,8 +81,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
         // If the existing notification is still active and has the same message and type,
         // just return its ID instead of creating a new notification
         if (
-          existingNotification &&
-          existingNotification.message === message &&
+          existingNotification?.message === message &&
           existingNotification.type === type
         ) {
           return existingContextId;

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import {
   AlertCircle,
   Apple,
@@ -63,7 +64,6 @@ import {
   X,
   Zap,
 } from "lucide-react";
-import { memo } from "react";
 
 import { ICON_SIZES } from "../utils/Constants";
 

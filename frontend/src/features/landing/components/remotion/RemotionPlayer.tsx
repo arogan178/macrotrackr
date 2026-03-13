@@ -1,5 +1,5 @@
-import { Player } from "@remotion/player";
 import React from "react";
+import { Player } from "@remotion/player";
 
 import { DashboardAnimation } from "./DashboardAnimation";
 

@@ -1,7 +1,7 @@
+import { useMemo, useState } from "react";
 import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";

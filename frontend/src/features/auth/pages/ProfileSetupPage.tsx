@@ -1,6 +1,6 @@
+import { useEffect } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { Navigate, useSearch } from "@tanstack/react-router";
-import { useEffect } from "react";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";

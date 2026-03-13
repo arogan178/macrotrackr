@@ -4,12 +4,12 @@ import {
   MAX_WEEKLY_WEIGHT_LOSS,
   MIN_WEEKLY_WEIGHT_LOSS,
 } from "@/features/goals/constants";
+import type { ActivityLevel, Gender } from "@/types/activity";
 import type { MacroDailyTotals, MacroEntry } from "@/types/macro";
 import {
   CALORIES_PER_GRAM,
   DEFAULT_MACRO_TOTALS,
 } from "@/utils/constants/nutrition";
-import type { ActivityLevel, Gender } from "@/utils/userConstants";
 
 /**
  * Calorie helpers (raw math, no rounding by default)

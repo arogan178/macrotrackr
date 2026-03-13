@@ -1,6 +1,6 @@
-import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
@@ -315,7 +315,7 @@ const EntryHistoryComponent = function EntryHistory({
   const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
     const group = totalEntries.find((g) => g.date === dateToDelete);
-    if (group && group.entries) {
+    if (group?.entries) {
       for (const entry of group.entries) deleteEntry(entry.id);
     }
     setIsDeleteModalOpen(false);
