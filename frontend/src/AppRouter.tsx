@@ -1,5 +1,4 @@
-import "./style.css";
-
+import React, { Suspense } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import {
   createRootRoute,
@@ -10,7 +9,6 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
-import React, { Suspense } from "react";
 
 import { PageTransition } from "@/components/animation";
 import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
@@ -31,6 +29,8 @@ import type { WeightGoalsResponse } from "./features/goals/types";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
 import { hasStatus, queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
+
+import "./style.css";
 
 // Lazy loaded page components
 const NotFoundPage = React.lazy(() => import("@/components/ui/NotFoundPage"));

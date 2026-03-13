@@ -1,5 +1,5 @@
-import { CircleHelp, ShieldCheck, Sparkles } from "lucide-react";
 import React from "react";
+import { CircleHelp, ShieldCheck, Sparkles } from "lucide-react";
 
 const indicators = [
   {

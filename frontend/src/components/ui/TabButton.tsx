@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { memo } from "react";
+import { motion } from "motion/react";
 
 import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { cn } from "@/lib/classnameUtilities";

@@ -149,11 +149,34 @@ export default [
       "react/react-in-jsx-scope": "off",
 
       // Import hygiene and sorted groups
-      "simple-import-sort/imports": "error",
+      "simple-import-sort/imports": [
+        "error",
+        {
+          groups: [
+            // Side effect imports
+            ["^\\u0000"],
+            // Node.js builtins
+            ["^node:"],
+            // External packages
+            ["^react", "^@?\\w"],
+            // Internal aliases
+            ["^@/"],
+            // Parent imports
+            ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
+            // Same-folder imports
+            ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
+            // Style imports
+            ["^.+\\.s?css$"],
+          ],
+        },
+      ],
       "simple-import-sort/exports": "error",
       "import/first": "error",
       "import/newline-after-import": "error",
       "import/no-duplicates": "error",
+      "import/no-cycle": ["error", { maxDepth: 3 }],
+      "import/no-self-import": "error",
+      "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
 
       "unicorn/better-regex": "warn",
       "unicorn/no-null": "off",
@@ -198,6 +221,37 @@ export default [
           objectLiteralTypeAssertions: "never",
         },
       ],
+
+      // Best practices - prefer const and immutable patterns
+      "prefer-const": "error",
+      "no-var": "error",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      
+      // Prevent common mistakes
+      "no-shadow": "off",
+      "@typescript-eslint/no-shadow": "error",
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/prefer-optional-chain": "warn",
+      "@typescript-eslint/no-unnecessary-condition": "warn",
+      "@typescript-eslint/strict-boolean-expressions": "off",
+
+      // Naming conventions
+      "@typescript-eslint/naming-convention": [
+        "warn",
+        {
+          selector: "variable",
+          format: ["camelCase", "UPPER_CASE", "PascalCase"],
+          leadingUnderscore: "allow",
+        },
+        {
+          selector: "function",
+          format: ["camelCase", "PascalCase"],
+        },
+        {
+          selector: "typeLike",
+          format: ["PascalCase"],
+        },
+      ],
     },
     settings: {
       react: { version: "detect" },
@@ -231,6 +285,16 @@ export default [
       // Allow any in test files for mocking purposes
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/consistent-type-assertions": "off",
+      // Disable type-checked rules in tests
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/prefer-optional-chain": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-shadow": "off",
+      "no-shadow": "off",
     },
   },
 

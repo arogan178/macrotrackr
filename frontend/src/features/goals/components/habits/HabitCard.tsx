@@ -6,6 +6,7 @@ import { cn } from "@/lib/classnameUtilities";
 import type { HabitGoal } from "@/types/habit";
 
 import { HABIT_ICONS } from "../../constants/habits";
+
 import HabitActions from "./HabitActions";
 
 type Variant = "sm" | "md";

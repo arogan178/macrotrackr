@@ -1,6 +1,6 @@
+import { useEffect, useRef, useState } from "react";
 import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";

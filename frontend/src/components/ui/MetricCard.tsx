@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { memo, useMemo } from "react";
+import { motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { COLOR_MAP } from "@/components/utils";

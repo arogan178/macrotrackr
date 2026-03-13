@@ -1,5 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect } from "react";
+import { motion, useReducedMotion } from "motion/react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";

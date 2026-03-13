@@ -1,5 +1,5 @@
-import { useLoaderData } from "@tanstack/react-router";
 import React, { useCallback, useMemo } from "react";
+import { useLoaderData } from "@tanstack/react-router";
 
 import { homeRoute } from "@/AppRouter";
 import CardContainer from "@/components/form/CardContainer";
@@ -161,7 +161,7 @@ export default function HomePage() {
       const ingredients = selectedEntries.flatMap((entry) => {
         const ingredientName = entry.foodName || entry.mealName || "Ingredient";
         const singleIngredient =
-          entry.ingredients && entry.ingredients.length === 1
+          entry.ingredients?.length === 1
             ? entry.ingredients[0]
             : undefined;
 

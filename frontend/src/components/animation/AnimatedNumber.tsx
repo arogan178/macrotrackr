@@ -1,5 +1,5 @@
-import { animate } from "motion/react";
 import { useCallback, useEffect, useRef } from "react";
+import { animate } from "motion/react";
 
 interface AnimatedNumberProps {
   value: number;
