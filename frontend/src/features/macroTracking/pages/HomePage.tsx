@@ -33,7 +33,11 @@ import {
   useMacroTarget,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
-import { useCreateSavedMeal, useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
+import {
+  useCreateSavedMeal,
+  useDeleteSavedMeal,
+  useSavedMeals,
+} from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
@@ -77,12 +81,13 @@ export default function HomePage() {
     const ids = new Set<number>();
     for (const entry of history) {
       const entryName = entry.foodName || entry.mealName || "Saved Meal";
-      const isSaved = savedMeals.some((sm) => 
-        sm.name === entryName && 
-        sm.protein === entry.protein && 
-        sm.carbs === entry.carbs && 
-        sm.fats === entry.fats && 
-        sm.mealType === entry.mealType
+      const isSaved = savedMeals.some(
+        (sm) =>
+          sm.name === entryName &&
+          sm.protein === entry.protein &&
+          sm.carbs === entry.carbs &&
+          sm.fats === entry.fats &&
+          sm.mealType === entry.mealType,
       );
       if (isSaved) {
         ids.add(entry.id);
@@ -105,7 +110,7 @@ export default function HomePage() {
   const handleSaveMeal = useCallback(
     async (entry: MacroEntry) => {
       if (!entry.foodName && !entry.mealName) return;
-      
+
       try {
         await createSavedMealMutation.mutateAsync({
           name: entry.foodName || entry.mealName || "Saved Meal",
@@ -114,33 +119,34 @@ export default function HomePage() {
           fats: entry.fats,
           mealType: entry.mealType as any,
         });
-      } catch (error) {
-        console.error("Failed to save meal", error);
+      } catch {
+        // Failed to save meal - handled silently
       }
     },
-    [createSavedMealMutation]
+    [createSavedMealMutation],
   );
 
   const handleUnsaveMeal = useCallback(
     async (entry: MacroEntry) => {
       const entryName = entry.foodName || entry.mealName || "Saved Meal";
-      const savedMeal = savedMeals.find((sm) => 
-        sm.name === entryName && 
-        sm.protein === entry.protein && 
-        sm.carbs === entry.carbs && 
-        sm.fats === entry.fats && 
-        sm.mealType === entry.mealType
+      const savedMeal = savedMeals.find(
+        (sm) =>
+          sm.name === entryName &&
+          sm.protein === entry.protein &&
+          sm.carbs === entry.carbs &&
+          sm.fats === entry.fats &&
+          sm.mealType === entry.mealType,
       );
-      
+
       if (savedMeal) {
         try {
           await deleteSavedMealMutation.mutateAsync(savedMeal.id);
-        } catch (error) {
-          console.error("Failed to unsave meal", error);
+        } catch {
+          // Failed to unsave meal - handled silently
         }
       }
     },
-    [savedMeals, deleteSavedMealMutation]
+    [savedMeals, deleteSavedMealMutation],
   );
 
   const handleGroupMeals = useCallback(
@@ -161,9 +167,7 @@ export default function HomePage() {
       const ingredients = selectedEntries.flatMap((entry) => {
         const ingredientName = entry.foodName || entry.mealName || "Ingredient";
         const singleIngredient =
-          entry.ingredients?.length === 1
-            ? entry.ingredients[0]
-            : undefined;
+          entry.ingredients?.length === 1 ? entry.ingredients[0] : undefined;
 
         if (singleIngredient) {
           return {
@@ -171,10 +175,12 @@ export default function HomePage() {
             name: singleIngredient.name || ingredientName,
             sourceEntryName: ingredientName,
             sourceEntryId: entry.id,
-            baseProtein: singleIngredient.baseProtein ?? singleIngredient.protein,
+            baseProtein:
+              singleIngredient.baseProtein ?? singleIngredient.protein,
             baseCarbs: singleIngredient.baseCarbs ?? singleIngredient.carbs,
             baseFats: singleIngredient.baseFats ?? singleIngredient.fats,
-            baseQuantity: singleIngredient.baseQuantity ?? singleIngredient.quantity,
+            baseQuantity:
+              singleIngredient.baseQuantity ?? singleIngredient.quantity,
             baseUnit: singleIngredient.baseUnit ?? singleIngredient.unit,
           };
         }
@@ -222,7 +228,7 @@ export default function HomePage() {
         console.error("Failed to save grouped meal", error);
       }
     },
-    [createSavedMealMutation]
+    [createSavedMealMutation],
   );
 
   const handleEditEntry = useCallback(
