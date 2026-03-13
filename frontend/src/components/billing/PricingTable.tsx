@@ -1,3 +1,4 @@
+import React, { memo } from "react";
 import {
   CellContext,
   ColumnDef,
@@ -6,7 +7,6 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { AnimatePresence, motion } from "motion/react";
-import React, { memo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { Button, CheckIcon, TabBar } from "@/components/ui";
@@ -239,7 +239,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
         <div className="mt-5 flex flex-col items-center">
           <Button
             className="mb-2 w-full max-w-xs rounded-xl bg-warning px-10 py-4 text-lg font-semibold text-black hover:bg-warning/90"
-            onClick={() => onUpgrade && onUpgrade(selectedPlan)}
+            onClick={() => onUpgrade?.(selectedPlan)}
             ariaLabel="Upgrade to Pro"
           >
             Get Started with Pro

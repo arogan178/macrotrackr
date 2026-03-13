@@ -3,7 +3,7 @@
  * These are used across auth, settings, and types
  */
 
-import type { ActivityLevel,  } from "@/types/activity";
+import type { ActivityLevel } from "@/types/activity";
 import { calculateBMR, calculateTDEE } from "@/utils/nutritionCalculations";
 
 export interface NutritionProfileSource {
@@ -131,5 +131,3 @@ export function createNutritionProfile(
     tdee,
   };
 }
-
-export {type ActivityLevel, type Gender} from "@/types/activity";

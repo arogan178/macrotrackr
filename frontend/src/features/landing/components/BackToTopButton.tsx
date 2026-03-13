@@ -1,6 +1,6 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 const VISIBILITY_OFFSET = 480;
 const REMAINING_PAGE_THRESHOLD = 0.4;

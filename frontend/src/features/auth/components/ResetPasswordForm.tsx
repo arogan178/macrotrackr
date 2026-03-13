@@ -1,5 +1,5 @@
-import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
+import { useSearch } from "@tanstack/react-router";
 
 import { resetPasswordRoute } from "@/AppRouter";
 import { CardContainer, TextField } from "@/components/form";

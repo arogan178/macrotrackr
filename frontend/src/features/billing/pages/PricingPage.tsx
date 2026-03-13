@@ -1,7 +1,7 @@
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import React, { useEffect, useState } from "react";
 
 import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";

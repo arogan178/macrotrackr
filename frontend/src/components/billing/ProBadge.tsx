@@ -1,5 +1,5 @@
-import PropTypes from "prop-types";
 import React, { memo } from "react";
+import PropTypes from "prop-types";
 
 interface ProBadgeProps {
   className?: string;

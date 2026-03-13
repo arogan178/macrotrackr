@@ -1,3 +1,4 @@
+import React, { memo, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -6,7 +7,6 @@ import {
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
-import React, { memo, useMemo, useRef, useState } from "react";
 
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";

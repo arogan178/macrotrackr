@@ -1,6 +1,6 @@
+import { useMemo } from "react";
 import { Flame, Target, TrendingUp, XCircle } from "lucide-react";
 import { motion } from "motion/react";
-import { useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { CardContainer } from "@/components/form";
@@ -23,6 +23,7 @@ import {
   STAGGER,
   TRANSITIONS,
 } from "../utils/unifiedInsightsUtilities";
+
 import MetricCard from "./MetricCard";
 import RecommendationsSection from "./RecommendationsSection";
 import TrendDisplay from "./TrendDisplay";
