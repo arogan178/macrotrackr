@@ -1,15 +1,15 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { PostHogProvider } from "posthog-js/react";
-import React from "react";
-import ReactDOM from "react-dom/client";
 
-import AppRouter from "./AppRouter";
 import { ClerkTokenSync } from "./components/auth/ClerkTokenSync";
 import { clerkAppearance } from "./lib/clerkAppearance";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
+import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;

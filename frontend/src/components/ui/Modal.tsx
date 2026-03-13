@@ -1,8 +1,9 @@
-import { AnimatePresence, motion } from "motion/react";
 import { memo, useEffect, useState } from "react";
 import ReactDOM from "react-dom";
+import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "../../lib/classnameUtilities";
+
 import Button from "./Button";
 import IconButton from "./IconButton";
 import ProgressiveBlur from "./ProgressiveBlur";

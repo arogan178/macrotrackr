@@ -61,7 +61,7 @@ const BillingForm: React.FC = () => {
       const { url } = await apiService.billing.createPortalSession(returnUrl);
 
       // Validation for successful URL generation
-      if (!url || !url.startsWith("https://")) {
+      if (!url?.startsWith("https://")) {
         throw new Error("Invalid billing portal URL received from server");
       }
 

@@ -66,6 +66,19 @@ export default [
 
       // Allow explicit use of undefined
       "no-undefined": "off",
+
+      // Best practices
+      "prefer-const": "error",
+      "no-var": "error",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      
+      // Prevent common mistakes
+      "no-shadow": "off",
+      "@typescript-eslint/no-shadow": "error",
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/prefer-optional-chain": "warn",
+      "@typescript-eslint/no-unnecessary-condition": "warn",
+      "@typescript-eslint/return-await": ["error", "in-try-catch"],
     },
   },
 

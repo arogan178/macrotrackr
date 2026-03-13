@@ -99,7 +99,7 @@ function TextField({
           />
         )}
       </div>
-      {maxLength && value && value.length === maxLength && !error && (
+      {maxLength && value?.length === maxLength && !error && (
         <p className={formStyles.maxLength}>
           {`Maximum ${maxLength} characters reached`}
         </p>

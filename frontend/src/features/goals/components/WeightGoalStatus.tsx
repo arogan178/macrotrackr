@@ -1,7 +1,7 @@
 // src/features/goals/components/WeightGoalStatus.tsx
 
-import { motion } from "motion/react";
 import { memo } from "react";
+import { motion } from "motion/react";
 
 import { AnimatedNumber } from "@/components/animation/";
 import { CardContainer } from "@/components/form";
