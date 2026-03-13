@@ -1,7 +1,7 @@
+import React, { useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
-import React, { useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
@@ -143,7 +143,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
             isProUser
               ? undefined
               : showUpgradeButtons
-                ? () => onUpgrade && onUpgrade(selectedPlan)
+                ? () => onUpgrade?.(selectedPlan)
                 : handleGetPro
           }
         >

@@ -1,5 +1,5 @@
-import { motion, type Transition } from "motion/react";
 import React, { useEffect } from "react";
+import { motion, type Transition } from "motion/react";
 
 import { usePrefersReducedMotion } from "@/hooks";
 

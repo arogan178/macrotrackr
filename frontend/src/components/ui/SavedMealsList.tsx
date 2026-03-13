@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { memo } from "react";
+import { motion } from "motion/react";
 
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";

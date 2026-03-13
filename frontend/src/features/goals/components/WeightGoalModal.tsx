@@ -9,6 +9,7 @@ import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 
 import { WeightGoalFormValues } from "../types";
+
 import WeightGoalForm, { WeightGoalFormHandle } from "./WeightGoalForm";
 
 interface WeightGoalModalProps {
@@ -40,7 +41,7 @@ function WeightGoalModal({
 
     try {
       const hasExistingGoal =
-        weightGoals && weightGoals.startingWeight !== undefined;
+        weightGoals?.startingWeight !== undefined;
 
       await (hasExistingGoal
         ? updateWeightGoalMutation.mutateAsync({ goals: values, tdee })

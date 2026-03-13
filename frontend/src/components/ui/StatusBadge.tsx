@@ -1,8 +1,9 @@
 /* eslint-disable react/prop-types */
-import { motion } from "motion/react";
 import { memo, useMemo } from "react";
+import { motion } from "motion/react";
 
 import { cn } from "../../lib/classnameUtilities";
+
 import { CheckCircleIcon, InfoIcon, WarningIcon } from "./Icons";
 
 // Size variants for the badge

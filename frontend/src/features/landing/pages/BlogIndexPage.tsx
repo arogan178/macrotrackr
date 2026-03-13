@@ -1,6 +1,6 @@
+import React, { useCallback, useMemo } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import React, { useCallback, useMemo } from "react";
 
 import { ContentImage, EmptyState } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";

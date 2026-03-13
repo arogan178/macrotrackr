@@ -34,7 +34,7 @@ export async function registerServiceWorker() {
 
     // Listen for messages from service worker
     navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data && event.data.type === "SW_ACTIVATED") {
+      if (event.data?.type === "SW_ACTIVATED") {
         globalThis.location.reload();
       }
     });

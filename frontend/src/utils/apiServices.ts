@@ -741,7 +741,7 @@ export const apiService = {
       return (await handleResponse(response)) as MacroTargetGetResponse;
     },
     saveMacroTargetPercentages: async (payload: MacroTargetSettingsPayload) => {
-      if (!payload || payload.macroTarget === undefined) {
+      if (payload?.macroTarget === undefined) {
         throw new Error("Invalid payload: macroTarget object is required.");
       }
       const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
