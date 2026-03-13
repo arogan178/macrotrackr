@@ -40,17 +40,20 @@ const Navbar: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
 
   const logoutMutation = useLogout();
-  
+
   // Use useCallback for event handlers to prevent recreating on every render
   const handleLogout = useCallback(() => {
     logoutMutation.mutate();
     setIsMobileMenuOpen(false);
   }, [logoutMutation]);
 
-  const handleNavigation = useCallback((path: string) => {
-    navigate({ to: path });
-    setIsMobileMenuOpen(false);
-  }, [navigate]);
+  const handleNavigation = useCallback(
+    (path: string) => {
+      navigate({ to: path });
+      setIsMobileMenuOpen(false);
+    },
+    [navigate],
+  );
 
   // Memoize nav items to prevent recreating array on every render
   const navItems = useMemo(() => NAV_ITEMS_CONFIG, []);
@@ -162,7 +165,10 @@ const Navbar: React.FC = () => {
               initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.15, ease: "easeOut" }}
+              transition={{
+                duration: shouldReduceMotion ? 0 : 0.15,
+                ease: "easeOut",
+              }}
             >
               <div className="space-y-1">
                 {navItems.map(({ path, label, icon: Icon }) => {
