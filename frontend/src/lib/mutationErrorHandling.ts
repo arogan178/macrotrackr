@@ -7,7 +7,7 @@ import { QueryClient } from "@tanstack/react-query";
 export interface MutationError extends Error {
   status?: number;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 export interface RetryConfig {
@@ -25,8 +25,10 @@ export interface MutationErrorHandlerOptions {
   showNotification?: boolean;
 }
 
+import { logger } from "./logger";
+
 export function logMutationError(operation: string, error: unknown) {
-  console.error(`${operation}:`, error);
+  logger.error(`${operation}:`, error);
 }
 
 export function createMutationErrorLogger(operation: string) {
@@ -229,18 +231,12 @@ export class MutationErrorHandler {
    */
   handleError(
     error: MutationError,
-    context?: { operation: string; variables?: any },
+    context?: { operation: string; variables?: unknown },
   ): void {
-    // Log error details for debugging
-    console.error(
-      `Mutation error in ${context?.operation || "unknown operation"}:`,
-      {
-        error: error.message,
-        status: error.status,
-        variables: context?.variables,
-        stack: error.stack,
-      },
-    );
+    logger.error(`Mutation error in ${context?.operation || "unknown"}:`, {
+      message: error.message,
+      status: error.status,
+    });
 
     // Call custom error handler if provided
     if (this.options.onError) {

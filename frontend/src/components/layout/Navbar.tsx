@@ -16,7 +16,6 @@ import { useLogout } from "@/hooks/auth/useAuthQueries";
 
 import LogoButton from "./LogoButton";
 
-// Static nav items configuration - defined outside component
 const NAV_ITEMS_CONFIG = [
   { path: "/home", label: "Home", icon: HomeIcon },
   { path: "/goals", label: "Goals", icon: GoalsIcon },
@@ -33,15 +32,118 @@ const mobileMenuButtonClasses =
 const iconButtonClasses =
   "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-border/60 bg-background/60 text-foreground transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
+interface NavItemProps {
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  isActive: boolean;
+  onClick: () => void;
+  variant?: "desktop" | "mobile";
+}
+
+function NavItem({ label, icon: Icon, isActive, onClick, variant = "desktop" }: NavItemProps) {
+  const classes = variant === "desktop" ? navButtonClasses : mobileMenuButtonClasses;
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-current={isActive ? "page" : undefined}
+      className={`${classes} ${
+        isActive
+          ? "bg-surface text-foreground shadow-sm"
+          : "text-muted hover:bg-surface hover:text-foreground"
+      }`}
+    >
+      <Icon className={`h-4 w-4 ${variant === "mobile" ? "shrink-0" : ""}`} />
+      <span>{label}</span>
+    </button>
+  );
+}
+
+interface MobileMenuProps {
+  isOpen: boolean;
+  onClose: () => void;
+  navItems: readonly { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[];
+  isActiveRoute: (path: string) => boolean;
+  onNavigate: (path: string) => void;
+  onLogout: () => void;
+  isLoggingOut: boolean;
+  shouldReduceMotion: boolean;
+}
+
+function MobileMenu({
+  isOpen,
+  onClose,
+  navItems,
+  isActiveRoute,
+  onNavigate,
+  onLogout,
+  isLoggingOut,
+  shouldReduceMotion,
+}: MobileMenuProps) {
+  return (
+    <AnimatePresence initial={false}>
+      {isOpen && (
+        <>
+          <motion.div
+            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+            onClick={onClose}
+            aria-hidden="true"
+            initial={shouldReduceMotion ? false : { opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
+            style={{ touchAction: "none", overscrollBehavior: "contain" }}
+          />
+
+          <motion.div
+            className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-border bg-surface p-3 shadow-modal lg:hidden"
+            initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : 0.15,
+              ease: "easeOut",
+            }}
+          >
+            <div className="space-y-1">
+              {navItems.map(({ path, label, icon }) => (
+                <NavItem
+                  key={path}
+                  label={label}
+                  icon={icon}
+                  isActive={isActiveRoute(path)}
+                  onClick={() => onNavigate(path)}
+                  variant="mobile"
+                />
+              ))}
+
+              <div className="mt-2 border-t border-border pt-2">
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  disabled={isLoggingOut}
+                  className={`${mobileMenuButtonClasses} text-muted hover:bg-surface hover:text-foreground`}
+                >
+                  <LogoutIcon className="h-4 w-4 shrink-0" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+  );
+}
+
 const Navbar: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const shouldReduceMotion = useReducedMotion();
-
   const logoutMutation = useLogout();
 
-  // Use useCallback for event handlers to prevent recreating on every render
   const handleLogout = useCallback(() => {
     logoutMutation.mutate();
     setIsMobileMenuOpen(false);
@@ -55,7 +157,6 @@ const Navbar: React.FC = () => {
     [navigate],
   );
 
-  // Memoize nav items to prevent recreating array on every render
   const navItems = useMemo(() => NAV_ITEMS_CONFIG, []);
 
   const isActiveRoute = useCallback(
@@ -84,26 +185,15 @@ const Navbar: React.FC = () => {
             />
 
             <div className="hidden items-center gap-2 lg:flex">
-              {navItems.map(({ path, label, icon: Icon }) => {
-                const isActive = isActiveRoute(path);
-
-                return (
-                  <button
-                    key={path}
-                    type="button"
-                    onClick={() => handleNavigation(path)}
-                    aria-current={isActive ? "page" : undefined}
-                    className={`${navButtonClasses} ${
-                      isActive
-                        ? "bg-surface text-foreground shadow-sm"
-                        : "text-muted hover:bg-surface hover:text-foreground"
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" />
-                    <span>{label}</span>
-                  </button>
-                );
-              })}
+              {navItems.map(({ path, label, icon }) => (
+                <NavItem
+                  key={path}
+                  label={label}
+                  icon={icon}
+                  isActive={isActiveRoute(path)}
+                  onClick={() => handleNavigation(path)}
+                />
+              ))}
             </div>
           </div>
 
@@ -142,72 +232,18 @@ const Navbar: React.FC = () => {
         </nav>
       </header>
 
-      {/* Spacer to prevent content from hiding behind fixed navbar */}
       <div className="h-20" />
 
-      {/* Mobile menu overlay and menu */}
-      <AnimatePresence initial={false}>
-        {isMobileMenuOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/60 lg:hidden"
-              onClick={() => setIsMobileMenuOpen(false)}
-              aria-hidden="true"
-              initial={shouldReduceMotion ? false : { opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.15 }}
-              style={{ touchAction: "none", overscrollBehavior: "contain" }}
-            />
-
-            <motion.div
-              className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-border bg-surface p-3 shadow-modal lg:hidden"
-              initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -8 }}
-              transition={{
-                duration: shouldReduceMotion ? 0 : 0.15,
-                ease: "easeOut",
-              }}
-            >
-              <div className="space-y-1">
-                {navItems.map(({ path, label, icon: Icon }) => {
-                  const isActive = isActiveRoute(path);
-
-                  return (
-                    <button
-                      key={path}
-                      type="button"
-                      onClick={() => handleNavigation(path)}
-                      aria-current={isActive ? "page" : undefined}
-                      className={`${mobileMenuButtonClasses} ${
-                        isActive
-                          ? "bg-surface text-foreground shadow-sm"
-                          : "text-muted hover:bg-surface hover:text-foreground"
-                      }`}
-                    >
-                      <Icon className="h-4 w-4 shrink-0" />
-                      <span>{label}</span>
-                    </button>
-                  );
-                })}
-
-                <div className="mt-2 border-t border-border pt-2">
-                  <button
-                    type="button"
-                    onClick={handleLogout}
-                    disabled={logoutMutation.isPending}
-                    className={`${mobileMenuButtonClasses} text-muted hover:bg-surface hover:text-foreground`}
-                  >
-                    <LogoutIcon className="h-4 w-4 shrink-0" />
-                    <span>Logout</span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+      <MobileMenu
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        navItems={navItems}
+        isActiveRoute={isActiveRoute}
+        onNavigate={handleNavigation}
+        onLogout={handleLogout}
+        isLoggingOut={logoutMutation.isPending}
+        shouldReduceMotion={shouldReduceMotion ?? false}
+      />
     </>
   );
 };

@@ -60,7 +60,6 @@ function WeightGoalModal({
       const message =
         error?.message || "Failed to save weight goal. Please try again.";
       setErrorMessage(message);
-      console.error("Save failed in WeightGoalModal:", error);
     }
   };
 
