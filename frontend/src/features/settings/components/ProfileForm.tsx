@@ -7,15 +7,15 @@ import {
 } from "@/components/form";
 import { Button, UserIcon } from "@/components/ui";
 import {
-  ACTIVITY_LEVELS,
-  GENDER_OPTIONS,
-  getActivityLevelFromString,
-} from "@/features/settings/utils/constants";
-import {
   type ActivityLevel,
   type Gender,
   type UserSettings,
 } from "@/types/user";
+import {
+  ACTIVITY_LEVELS,
+  GENDER_OPTIONS,
+  getActivityLevelFromString,
+} from "@/utils/userConstants";
 
 type ProfileFormProps = {
   settings: UserSettings;

@@ -1,6 +1,6 @@
+import React from "react";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
-import React from "react";
 
 import LogoButton from "@/components/layout/LogoButton";
 import { getButtonClasses } from "@/components/ui/Button";

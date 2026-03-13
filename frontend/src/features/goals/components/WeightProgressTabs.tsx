@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { BarChartIcon, BookIcon, IconButton } from "@/components/ui";
 import { useWeightLog } from "@/hooks/queries/useGoals";

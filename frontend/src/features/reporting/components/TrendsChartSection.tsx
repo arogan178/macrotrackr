@@ -1,5 +1,5 @@
-import { Flame, PieChart } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Flame, PieChart } from "lucide-react";
 
 import { ChartCard, LineChartComponent } from "@/components/chart";
 import TabBar from "@/components/ui/TabBar";

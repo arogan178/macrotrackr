@@ -9,6 +9,7 @@ import {
 } from "@/components/ui";
 
 import type { InsightsData, NutritionAverage } from "../types/insightsTypes";
+
 import ActionCard from "./ActionCard";
 
 interface RecommendationsSectionProps {

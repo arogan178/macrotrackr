@@ -1,5 +1,5 @@
-import { motion, useReducedMotion } from "motion/react";
 import React, { useEffect, useState } from "react";
+import { motion, useReducedMotion } from "motion/react";
 
 interface FlowStep {
   title: string;

@@ -1,6 +1,6 @@
+import { useCallback, useEffect, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
 
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";

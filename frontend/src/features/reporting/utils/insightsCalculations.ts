@@ -12,6 +12,7 @@ import type {
   NutritionAverage,
   TrendResult,
 } from "../types/insightsTypes";
+
 import { calculateStandardDeviation } from "./macroCalculations";
 
 // --- Magic Number Constants ---
