@@ -72,8 +72,7 @@ function WeightLogList({
     try {
       await deleteWeightLogMutation.mutateAsync(itemToDelete.id);
       showNotification("Weight entry deleted successfully", "success");
-    } catch (error) {
-      console.error("Deletion failed from component:", error);
+    } catch {
       showNotification("Failed to delete weight entry", "error");
     } finally {
       setIsConfirmModalOpen(false);
@@ -90,8 +89,7 @@ function WeightLogList({
         await deleteWeightLogMutation.mutateAsync(entry.id);
       }
       showNotification("All weight entries deleted successfully", "success");
-    } catch (error) {
-      console.error("Bulk deletion failed:", error);
+    } catch {
       showNotification("Failed to delete weight entries", "error");
     } finally {
       onBulkCancel();

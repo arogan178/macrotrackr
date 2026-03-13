@@ -72,7 +72,7 @@ function normalizePaginatedHistory(
 
   const result = response as Record<string, unknown>;
   return {
-    entries: Array.isArray(result.entries) ? (result.entries as any[]) : [],
+    entries: Array.isArray(result.entries) ? (result.entries as MacroEntry[]) : [],
     total: typeof result.total === "number" ? result.total : 0,
     limit: typeof result.limit === "number" ? result.limit : limit,
     offset: typeof result.offset === "number" ? result.offset : offset,
