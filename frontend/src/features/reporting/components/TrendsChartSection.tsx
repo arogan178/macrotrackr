@@ -2,14 +2,16 @@ import { useMemo, useState } from "react";
 import { Flame, PieChart } from "lucide-react";
 
 import { ChartCard, LineChartComponent } from "@/components/chart";
+import type { ChartDataPoint } from "@/components/chart/Types";
 import TabBar from "@/components/ui/TabBar";
+import type { LineConfig } from "@/components/chart/Types";
 
 interface TrendsChartSectionProps {
-  dailySeries: any[];
+  dailySeries: ChartDataPoint[];
   isHistoryLoading: boolean;
   dataProcessed: boolean;
-  calorieChartLines: any[];
-  macroChartLines: any[];
+  calorieChartLines: LineConfig[];
+  macroChartLines: LineConfig[];
 }
 
 export default function TrendsChartSection({
