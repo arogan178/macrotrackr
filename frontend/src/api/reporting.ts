@@ -1,6 +1,5 @@
-import type { MacroEntry } from "@/types/macro";
-
 import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import type { MacroEntry } from "@/types/macro";
 
 export interface MacroDensitySummaryParameters {
   startDate?: string;

@@ -1,6 +1,5 @@
-import type { HabitAccentColor } from "@/types/habit";
-
 import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import type { HabitAccentColor } from "@/types/habit";
 
 export interface HabitGoalPayload {
   id: string;
