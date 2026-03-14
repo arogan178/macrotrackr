@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+import { logger } from "./logger";
+
 /**
  * Enhanced error handling utilities for mutations
  */
@@ -24,8 +26,6 @@ export interface MutationErrorHandlerOptions {
   onRetry?: (error: MutationError, attemptNumber: number) => void;
   showNotification?: boolean;
 }
-
-import { logger } from "./logger";
 
 export function logMutationError(operation: string, error: unknown) {
   logger.error(`${operation}:`, error);

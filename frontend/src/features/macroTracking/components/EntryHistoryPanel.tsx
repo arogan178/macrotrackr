@@ -18,17 +18,17 @@ import {
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
-import type {
-  EntryHistoryActions,
-  EntryHistoryHelpers,
-  EntryHistoryState,
-} from "./EntryHistoryShared";
 import {
   calculateCalories,
   capitalizeFirstLetter,
   formatEntryDate,
   formatTimeFromEntry,
 } from "./entryHistoryHelpers";
+import type {
+  EntryHistoryActions,
+  EntryHistoryHelpers,
+  EntryHistoryState,
+} from "./EntryHistoryShared";
 import MobileEntryCards from "./MobileEntryCards";
 
 interface EntryHistoryProps {

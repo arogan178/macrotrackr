@@ -6,6 +6,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
+import type {
+  MacroEntryCreatePayload,
+  MacroEntryUpdatePayload,
+} from "@/api/macros";
+import { macrosApi } from "@/api/macros";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
@@ -16,17 +21,12 @@ import type {
   MacroTargetSettings,
   PaginatedMacroHistory,
 } from "@/types/macro";
-import type {
-  MacroEntryCreatePayload,
-  MacroEntryUpdatePayload,
-} from "@/api/macros";
-import { macrosApi } from "@/api/macros";
 import { todayISO } from "@/utils/dateUtilities";
 
 import {
-  type OptimisticMacroEntry,
   getMacroHistorySnapshots,
   normalizePaginatedHistory,
+  type OptimisticMacroEntry,
   restoreMacroHistorySnapshots,
   updateMacroHistoryCaches,
 } from "./macro/helpers";

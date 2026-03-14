@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { getAllPosts, formatDate } from "./blog";
+import { formatDate,getAllPosts } from "./blog";
 
 describe("blog", () => {
   describe("getAllPosts", () => {
