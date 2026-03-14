@@ -23,7 +23,7 @@ import {
   capitalizeFirstLetter,
   formatEntryDate,
   formatTimeFromEntry,
-} from "./entryHistoryHelpers";
+} from "./EntryHistoryHelpers";
 import type {
   EntryHistoryActions,
   EntryHistoryHelpers,
