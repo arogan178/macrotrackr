@@ -6,18 +6,14 @@ import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
-import {
-  AddWeightLogPayload,
-  apiService,
-  WeightLogEntry,
-} from "@/utils/apiServices";
+import { goalsApi, type AddWeightLogPayload, type WeightLogEntry } from "@/api/goals";
 import { todayISO } from "@/utils/dateUtilities";
 
 export const weightGoalsQueryOptions = () =>
   queryOptions({
     queryKey: queryKeys.goals.weight(),
     queryFn: async (): Promise<WeightGoals | null> => {
-      const data = await apiService.goals.getWeightGoals();
+      const data = await goalsApi.getWeightGoals();
       return normalizeWeightGoals(data, undefined) ?? null;
     },
     ...queryConfigs.longLived,
@@ -32,7 +28,7 @@ export function useWeightGoals() {
 export const weightLogQueryOptions = () =>
   queryOptions({
     queryKey: queryKeys.goals.weightLog(),
-    queryFn: (): Promise<WeightLogEntry[]> => apiService.goals.getWeightLog(),
+    queryFn: (): Promise<WeightLogEntry[]> => goalsApi.getWeightLog(),
     ...queryConfigs.longLived,
   });
 
@@ -54,8 +50,8 @@ export function useCreateWeightGoal() {
       tdee: number;
     }) => {
       // Start both operations in parallel to avoid waterfall
-      const createPromise = apiService.goals.createWeightGoal(goals, tdee);
-      const weightLogPromise = apiService.goals.getWeightLog();
+      const createPromise = goalsApi.createWeightGoal(goals, tdee);
+      const weightLogPromise = goalsApi.getWeightLog();
 
       try {
         const [result, weightLog] = await Promise.all([
@@ -70,7 +66,7 @@ export function useCreateWeightGoal() {
 
         // If no entry for today, add the starting weight
         if (!hasEntryForToday && goals.startingWeight) {
-          await apiService.goals.addWeightLogEntry({
+          await goalsApi.addWeightLogEntry({
             weight: goals.startingWeight,
             timestamp: new Date().toISOString(),
           });
@@ -84,7 +80,7 @@ export function useCreateWeightGoal() {
           apiError?.status === 409 ||
           apiError?.message?.includes("already exists")
         ) {
-          return await apiService.goals.updateWeightGoal(goals, tdee);
+          return await goalsApi.updateWeightGoal(goals, tdee);
         }
         throw error;
       }
@@ -110,12 +106,12 @@ export function useUpdateWeightGoal() {
       tdee: number;
     }) => {
       try {
-        return await apiService.goals.updateWeightGoal(goals, tdee);
+        return await goalsApi.updateWeightGoal(goals, tdee);
       } catch (error) {
         // If update fails with 404 (goal not found), try to create instead
         const apiError = error as { status?: number };
         if (apiError?.status === 404) {
-          return await apiService.goals.createWeightGoal(goals, tdee);
+          return await goalsApi.createWeightGoal(goals, tdee);
         }
         throw error;
       }
@@ -139,7 +135,7 @@ export function useDeleteWeightGoal() {
   return useMutation({
     mutationKey: [...queryKeys.goals.weight(), "delete"],
     mutationFn: async () => {
-      return await apiService.goals.deleteWeightGoals();
+      return await goalsApi.deleteWeightGoals();
     },
     onSuccess: () => {
       // Remove from cache immediately for instant UI feedback
@@ -174,7 +170,7 @@ export function useAddWeightLogEntry() {
     mutationFn: async (
       payload: AddWeightLogPayload,
     ): Promise<WeightLogEntry> => {
-      return await apiService.goals.addWeightLogEntry(payload);
+      return await goalsApi.addWeightLogEntry(payload);
     },
     onMutate: async (variables: AddWeightLogPayload) => {
       // Cancel any outgoing refetches to prevent overwriting optimistic update
@@ -308,7 +304,7 @@ export function useDeleteWeightLogEntry() {
     mutationFn: async (
       id: string,
     ): Promise<{ success: boolean; id: string }> => {
-      return await apiService.goals.deleteWeightLogEntry(id);
+      return await goalsApi.deleteWeightLogEntry(id);
     },
     onMutate: async (id: string) => {
       // Cancel any outgoing refetches
