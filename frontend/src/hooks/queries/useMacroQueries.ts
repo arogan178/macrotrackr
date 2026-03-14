@@ -1,5 +1,4 @@
 import {
-  type InfiniteData,
   keepPreviousData,
   useInfiniteQuery,
   useMutation,
@@ -7,7 +6,6 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-// Mutation hook for adding macro entry with optimistic updates
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
@@ -21,68 +19,17 @@ import type {
 import type {
   MacroEntryCreatePayload,
   MacroEntryUpdatePayload,
-} from "@/utils/apiServices";
-import { apiService } from "@/utils/apiServices";
+} from "@/api/macros";
+import { macrosApi } from "@/api/macros";
 import { todayISO } from "@/utils/dateUtilities";
 
-type MacroHistoryInfiniteData = InfiniteData<PaginatedMacroHistory, number>;
-type MacroHistorySnapshot = Array<
-  readonly [ReadonlyArray<unknown>, MacroHistoryInfiniteData | undefined]
->;
-type OptimisticMacroEntry = MacroEntry & { optimistic?: boolean };
-
-function getMacroHistorySnapshots(queryClient: ReturnType<typeof useQueryClient>) {
-  return queryClient.getQueriesData<MacroHistoryInfiniteData>({
-    queryKey: queryKeys.macros.historyInfinite(),
-  });
-}
-
-function restoreMacroHistorySnapshots(
-  queryClient: ReturnType<typeof useQueryClient>,
-  snapshots: MacroHistorySnapshot,
-) {
-  for (const [queryKey, data] of snapshots) {
-    if (data === undefined) {
-      queryClient.removeQueries({ queryKey, exact: true });
-      continue;
-    }
-
-    queryClient.setQueryData(queryKey, data);
-  }
-}
-
-function updateMacroHistoryCaches(
-  queryClient: ReturnType<typeof useQueryClient>,
-  updater: (oldData: MacroHistoryInfiniteData | undefined) => MacroHistoryInfiniteData | undefined,
-) {
-  queryClient.setQueriesData<MacroHistoryInfiniteData>(
-    { queryKey: queryKeys.macros.historyInfinite() },
-    updater,
-  );
-}
-
-function normalizePaginatedHistory(
-  response: unknown,
-  limit: number,
-  offset: number,
-): PaginatedMacroHistory {
-  if (!response || typeof response !== "object") {
-    return { entries: [], total: 0, limit, offset, hasMore: false };
-  }
-
-  const result = response as Record<string, unknown>;
-  return {
-    entries: Array.isArray(result.entries) ? (result.entries as MacroEntry[]) : [],
-    total: typeof result.total === "number" ? result.total : 0,
-    limit: typeof result.limit === "number" ? result.limit : limit,
-    offset: typeof result.offset === "number" ? result.offset : offset,
-    hasMore: typeof result.hasMore === "boolean" ? result.hasMore : false,
-    limits:
-      result.limits && typeof result.limits === "object"
-        ? (result.limits as PaginatedMacroHistory["limits"])
-        : undefined,
-  };
-}
+import {
+  type OptimisticMacroEntry,
+  getMacroHistorySnapshots,
+  normalizePaginatedHistory,
+  restoreMacroHistorySnapshots,
+  updateMacroHistoryCaches,
+} from "./macro/helpers";
 
 // Query hook for paginated macro history
 export function useMacroHistory(
@@ -100,7 +47,7 @@ export function useMacroHistory(
       options?.endDate,
     ),
     queryFn: async () => {
-      const response = await apiService.macros.getHistory(
+      const response = await macrosApi.getHistory(
         limit,
         offset,
         options,
@@ -123,7 +70,7 @@ export function useMacroHistoryInfinite(
       options?.endDate,
     ),
     queryFn: async ({ pageParam: pageParameter = 0 }) => {
-      const response = await apiService.macros.getHistory(
+      const response = await macrosApi.getHistory(
         limit,
         pageParameter,
         options,
@@ -147,7 +94,7 @@ export function useMacroHistoryForDateRange(
   return useQuery({
     queryKey: queryKeys.macros.historyRange(startDate, endDate),
     queryFn: async () => {
-      const response = await apiService.macros.getAllHistory({
+      const response = await macrosApi.getAllHistory({
         startDate,
         endDate,
       });
@@ -168,7 +115,7 @@ export function useMacroDailyTotals(date?: string) {
   return useQuery({
     queryKey: queryKeys.macros.dailyTotals(queryDate),
     queryFn: async () => {
-      const response = await apiService.macros.getDailyTotals({
+      const response = await macrosApi.getDailyTotals({
         startDate: queryDate,
         endDate: queryDate,
       });
@@ -183,7 +130,7 @@ export function useMacroTarget() {
   return useQuery({
     queryKey: queryKeys.macros.targets(),
     queryFn: async () => {
-      const response = await apiService.macros.getMacroTarget();
+      const response = await macrosApi.getMacroTarget();
       return response?.macroTarget ?? null;
     },
     ...queryConfigs.longLived, // 5 minutes stale time for targets (less frequently changed)
@@ -198,7 +145,7 @@ export function useAddMacroEntry() {
   return useMutation({
     mutationKey: [...queryKeys.macros.historyInfinite(), "add"],
     mutationFn: async (entry: MacroEntryCreatePayload) => {
-      return (await apiService.macros.addEntry(entry)) as MacroEntry;
+      return (await macrosApi.addEntry(entry)) as MacroEntry;
     },
     onMutate: async (variables: MacroEntryCreatePayload) => {
       // 1. Cancel ongoing queries to prevent them from overwriting the optimistic update
@@ -363,7 +310,7 @@ export function useUpdateMacroEntry() {
       id: number;
       entry: MacroEntryUpdatePayload;
     }) => {
-      return await apiService.macros.updateEntry(id, entry);
+      return await macrosApi.updateEntry(id, entry);
     },
     onMutate: async ({ id, entry }) => {
       // Cancel any outgoing refetches
@@ -488,7 +435,7 @@ export function useDeleteMacroEntry() {
   return useMutation({
     mutationKey: [...queryKeys.macros.historyInfinite(), "delete"],
     mutationFn: async (id: number) => {
-      return await apiService.macros.deleteEntry(id);
+      return await macrosApi.deleteEntry(id);
     },
     onMutate: async (id: number) => {
       // Cancel any outgoing refetches
@@ -595,7 +542,7 @@ export function useUpdateMacroTarget() {
   return useMutation({
     mutationKey: [...queryKeys.macros.targets(), "update"],
     mutationFn: async (settings: MacroTargetSettings) => {
-      return await apiService.macros.saveMacroTargetPercentages({
+      return await macrosApi.saveMacroTargetPercentages({
         macroTarget: settings,
       });
     },

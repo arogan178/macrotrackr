@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 
+import { billingApi, type BillingDetailsResponse } from "@/api/billing";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, BillingDetailsResponse } from "@/utils/apiServices";
 
 /**
  * Query hook for fetching billing details
@@ -11,7 +11,7 @@ export function useBillingDetails() {
   return useQuery({
     queryKey: queryKeys.settings.billing(),
     queryFn: (): Promise<BillingDetailsResponse> =>
-      apiService.billing.getBillingDetails(),
+      billingApi.getBillingDetails(),
     ...queryConfigs.longLived,
     retry: (failureCount, error) => {
       if (error instanceof Error && hasStatus(error) && error.status === 401) {

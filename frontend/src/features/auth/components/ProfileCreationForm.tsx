@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 
+import { authApi } from "@/api/auth";
+import { setAuthToken } from "@/api/core";
+import { userApi } from "@/api/user";
 import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
@@ -12,7 +15,6 @@ import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
-import { apiService, setAuthToken } from "@/utils/apiServices";
 import {
   USER_MAXIMUM_HEIGHT,
   USER_MAXIMUM_WEIGHT,
@@ -217,7 +219,7 @@ export function ProfileCreationForm() {
       // This creates the user record in our database
       // Note: User may already be synced from AuthReadyPage, so we handle conflicts gracefully
       try {
-        await apiService.auth.syncUser(token);
+        await authApi.syncUser(token);
       } catch (syncError: unknown) {
         // If user already exists (409), that's fine - continue with profile completion
         if (
@@ -234,7 +236,7 @@ export function ProfileCreationForm() {
       }
 
       // Step 2: Complete the user profile with the provided data
-      await apiService.user.completeProfile({
+      await userApi.completeProfile({
         dateOfBirth,
         height: height || undefined,
         weight: weight || undefined,
@@ -250,7 +252,7 @@ export function ProfileCreationForm() {
       await Promise.all([
         queryClient.fetchQuery({
           queryKey: queryKeys.auth.user(),
-          queryFn: () => apiService.user.getUserDetails(),
+          queryFn: () => userApi.getUserDetails(),
           staleTime: 0,
         }),
         queryClient.invalidateQueries({
