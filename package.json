@@ -1,6 +1,7 @@
 {
   "name": "macro-tracker",
   "private": true,
+  "type": "module",
   "workspaces": [
     "frontend",
     "backend"
