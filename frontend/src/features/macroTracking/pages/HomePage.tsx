@@ -41,6 +41,7 @@ import {
 } from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
+import type { WeightGoals } from "@/types/goal";
 import type { MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
 
@@ -64,9 +65,10 @@ export default function HomePage() {
     limits,
   } = useHistoryPagination(20);
 
-  const { weightGoals } = useLoaderData({
+  const loaderData = useLoaderData({
     from: homeRoute.id,
-  }) as any;
+  });
+  const weightGoals = (loaderData as { weightGoals?: WeightGoals }).weightGoals;
 
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();

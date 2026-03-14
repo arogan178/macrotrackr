@@ -1,11 +1,10 @@
+import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
   calculateWeeksToGoal,
 } from "@/features/goals/calculations";
 import type { WeightGoalFormValues } from "@/features/goals/types";
-
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
 
 type SetWeightGoalPayload = {
   startingWeight: number;

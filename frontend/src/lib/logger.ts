@@ -5,45 +5,41 @@ const SENSITIVE_KEYS = [
   "session", "credential", "key", "bearer", "jwt",
 ];
 
-function redactSensitive(obj: unknown): unknown {
-  if (typeof obj === "string") {
-    return obj;
+function redactSensitive(object: unknown): unknown {
+  if (typeof object === "string") {
+    return object;
   }
-  if (obj === null || obj === undefined) {
-    return obj;
+  if (object === null || object === undefined) {
+    return object;
   }
-  if (Array.isArray(obj)) {
-    return obj.map(redactSensitive);
+  if (Array.isArray(object)) {
+    return object.map(redactSensitive);
   }
-  if (typeof obj === "object") {
+  if (typeof object === "object") {
     const result: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj)) {
-      if (SENSITIVE_KEYS.some(k => key.toLowerCase().includes(k))) {
-        result[key] = "[REDACTED]";
-      } else {
-        result[key] = redactSensitive(value);
-      }
+    for (const [key, value] of Object.entries(object)) {
+      result[key] = SENSITIVE_KEYS.some(k => key.toLowerCase().includes(k)) ? "[REDACTED]" : redactSensitive(value);
     }
     return result;
   }
-  return obj;
+  return object;
 }
 
 export const logger = {
-  debug: (...args: unknown[]) => {
+  debug: (...arguments_: unknown[]) => {
     if (isDevelopment) {
-      console.debug(...args.map(redactSensitive));
+      console.debug(...arguments_.map(redactSensitive));
     }
   },
-  info: (...args: unknown[]) => {
+  info: (...arguments_: unknown[]) => {
     if (isDevelopment) {
-      console.info(...args.map(redactSensitive));
+      console.info(...arguments_.map(redactSensitive));
     }
   },
-  warn: (...args: unknown[]) => {
-    console.warn(...args.map(redactSensitive));
+  warn: (...arguments_: unknown[]) => {
+    console.warn(...arguments_.map(redactSensitive));
   },
-  error: (...args: unknown[]) => {
-    console.error(...args.map(redactSensitive));
+  error: (...arguments_: unknown[]) => {
+    console.error(...arguments_.map(redactSensitive));
   },
 };

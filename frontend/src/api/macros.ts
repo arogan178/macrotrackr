@@ -1,6 +1,5 @@
-import type { Ingredient, MacroEntry } from "@/types/macro";
-
 import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import type { Ingredient, MacroEntry } from "@/types/macro";
 
 export interface FoodSearchResult {
   name: string;
