@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 
+import { billingApi, type BillingDetailsResponse } from "@/api/billing";
 import { CardContainer } from "@/components/form";
 import {
   Button,
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useStore } from "@/store/store";
-import { apiService , BillingDetailsResponse } from "@/utils/apiServices";
 
 const ProBillingView: React.FC<{
   onManage: () => void;
@@ -160,7 +160,7 @@ const ProBillingView: React.FC<{
             <Button
               onClick={async () => {
                 try {
-                  const response = await apiService.billing.cancelSubscription();
+                  const response = await billingApi.cancelSubscription();
                   setShowCancel(false);
                   showNotification(
                     response?.message || "Subscription cancelled.",

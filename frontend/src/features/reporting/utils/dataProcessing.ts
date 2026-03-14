@@ -159,7 +159,7 @@ export const calculateCompletionRate = (
 
 export const getUniqueLoggedDates = (entries: MacroEntry[]): string[] => {
   const uniqueDates = new Set(entries.map((entry) => entry.entryDate));
-  return [...uniqueDates].sort();
+  return [...uniqueDates].sort((a, b) => a.localeCompare(b));
 };
 
 export const getMissingDates = (
