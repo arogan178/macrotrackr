@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { MEAL_TYPES, MACRO_RATIOS } from "./constants";
+import { MACRO_RATIOS,MEAL_TYPES } from "./constants";
 
 describe("macroTracking constants", () => {
   it("has meal types", () => {

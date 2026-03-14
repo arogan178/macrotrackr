@@ -1,12 +1,12 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { type AddWeightLogPayload, goalsApi, type WeightLogEntry } from "@/api/goals";
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { WeightGoalFormValues, WeightGoals } from "@/types/goal";
-import { goalsApi, type AddWeightLogPayload, type WeightLogEntry } from "@/api/goals";
 import { todayISO } from "@/utils/dateUtilities";
 
 export const weightGoalsQueryOptions = () =>
