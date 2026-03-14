@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  calculateBMR,
+  calculateCaloriePercentages,
+  calculateCaloriesFromMacros,
   calculateCarbsCalories,
+  calculateDailyTotals,
   calculateFatsCalories,
+  calculateMacroTarget,
   calculateProteinCalories,
+  calculateTDEE,
   caloriesFromMacrosRaw,
   caloriesFromMacrosRounded,
-  calculateCaloriePercentages,
-  calculateMacroTarget,
-  calculateDailyTotals,
-  calculateBMR,
-  calculateTDEE,
-  calculateCaloriesFromMacros,
 } from "./nutritionCalculations";
 
 describe("nutritionCalculations", () => {

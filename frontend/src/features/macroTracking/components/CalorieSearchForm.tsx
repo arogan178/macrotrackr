@@ -133,7 +133,7 @@ const CalorieSearch = memo(function CalorieSearch({
 
       for (const pattern of patterns) {
         const match = raw.match(pattern);
-        if (match && match[1] && match[2]) {
+        if (match?.[1] && match[2]) {
           quantity = Number.parseFloat(match[1].replace(",", "."));
           const rawUnit = match[2];
 

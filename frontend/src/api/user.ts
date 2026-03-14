@@ -1,7 +1,6 @@
+import { API_BASE_URL, ApiError, getHeadersAsync, handleResponse } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import { getActivityLevelFromString } from "@/utils/userConstants";
-
-import { API_BASE_URL, ApiError, getHeadersAsync, handleResponse } from "@/api/core";
 
 export interface UserDetailsResponse {
   id: number;
