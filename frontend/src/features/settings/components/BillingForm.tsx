@@ -1,12 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 
+import { billingApi } from "@/api/billing";
 import { CardContainer } from "@/components/form";
 import { AwardIcon } from "@/components/ui";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
 import { cn } from "@/lib/classnameUtilities";
 import { useStore } from "@/store/store";
-import { apiService } from "@/utils/apiServices";
 
 import FreeBillingView from "./FreeBillingView";
 import ProBillingView from "./ProBillingView";
@@ -58,7 +58,7 @@ const BillingForm: React.FC = () => {
     setIsLoading(true);
     try {
       const returnUrl = globalThis.location.origin + "/settings";
-      const { url } = await apiService.billing.createPortalSession(returnUrl);
+      const { url } = await billingApi.createPortalSession(returnUrl);
 
       // Validation for successful URL generation
       if (!url?.startsWith("https://")) {

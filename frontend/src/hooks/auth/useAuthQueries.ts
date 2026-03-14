@@ -2,10 +2,12 @@ import { useAuth, useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
+import { authApi } from "@/api/auth";
+import { setAuthToken } from "@/api/core";
+import { userApi, type UserDetailsResponse } from "@/api/user";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, setAuthToken, UserDetailsResponse } from "@/utils/apiServices";
 import { removeToken } from "@/utils/tokenStorage";
 
 interface ResetPasswordData {
@@ -25,7 +27,7 @@ export function useUser(options?: { enabled?: boolean }) {
     queryKey: queryKeys.auth.user(),
     queryFn: async (): Promise<UserDetailsResponse | null> => {
       try {
-        return await apiService.user.getUserDetails();
+        return await userApi.getUserDetails();
       } catch (error) {
         // If user is not authenticated, return null instead of throwing.
         // TanStack Query does not allow undefined query data.
@@ -84,7 +86,7 @@ export function useResetPassword() {
 
   return useMutation({
     mutationFn: async (data: ResetPasswordData): Promise<void> => {
-      await apiService.auth.resetPassword(data.token, data.newPassword);
+      await authApi.resetPassword(data.token, data.newPassword);
     },
     onSuccess: () => {
       // Navigate to login with success message

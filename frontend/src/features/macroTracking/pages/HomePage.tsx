@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from "react";
 import { useLoaderData } from "@tanstack/react-router";
 
+import { macrosApi } from "@/api/macros";
 import { homeRoute } from "@/AppRouter";
 import CardContainer from "@/components/form/CardContainer";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
@@ -41,7 +42,6 @@ import {
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
-import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
 
 export default function HomePage() {
@@ -262,7 +262,7 @@ export default function HomePage() {
   const handleExportHistory = useCallback(async () => {
     setIsExportingHistory(true);
     try {
-      const response = await apiService.macros.getAllHistory();
+      const response = await macrosApi.getAllHistory();
       downloadHistoryCsv(response.entries as MacroEntry[]);
     } finally {
       setIsExportingHistory(false);
