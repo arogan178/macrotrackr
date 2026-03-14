@@ -1,137 +1,52 @@
 import React, { Suspense } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import {
   createRootRoute,
   createRoute,
   createRouter,
-  Navigate,
   Outlet,
   RouterProvider,
 } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 
+import { goalsApi } from "@/api/goals";
+import { macrosApi } from "@/api/macros";
 import { PageTransition } from "@/components/animation";
 import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
-import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
 import {
   weightGoalsQueryOptions,
   weightLogQueryOptions,
 } from "@/hooks/queries/useGoals";
 import { habitsQueryOptions } from "@/hooks/queries/useHabits";
-import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
 
 import MainLayout from "./components/layout/MainLayout";
 import type { WeightGoalsResponse } from "./features/goals/types";
 import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
-import { hasStatus, queryClient, queryConfigs } from "./lib/queryClient";
+import { queryClient, queryConfigs } from "./lib/queryClient";
 import { queryKeys } from "./lib/queryKeys";
+import { LoadingFallback, RequireAuth, RequireUnauth, safeFetch } from "./routes/authGuards";
+import {
+  AuthReadyPage,
+  GoalsPage,
+  HomePage,
+  LandingPage,
+  NotFoundPage,
+  PricingPage,
+  PrivacyPolicyPage,
+  ProfileSetupPage,
+  ReportingPage,
+  ResetPasswordPage,
+  SettingsPage,
+  SignInPage,
+  SignUpPage,
+  SSOCallbackPage,
+  TermsAndConditionsPage,
+} from "./routes/lazyPages";
 
 import "./style.css";
-
-// Lazy loaded page components
-const NotFoundPage = React.lazy(() => import("@/components/ui/NotFoundPage"));
-const LandingPage = React.lazy(
-  () => import("./features/landing/pages/LandingPage"),
-);
-const HomePage = React.lazy(
-  () => import("./features/macroTracking/pages/HomePage"),
-);
-const SettingsPage = React.lazy(
-  () => import("@/features/settings/pages/SettingsPage"),
-);
-const GoalsPage = React.lazy(() => import("@/features/goals/pages/GoalsPage"));
-const SignInPage = React.lazy(() => import("@/features/auth/pages/SignInPage"));
-const SignUpPage = React.lazy(() => import("@/features/auth/pages/SignUpPage"));
-const ProfileSetupPage = React.lazy(
-  () => import("@/features/auth/pages/ProfileSetupPage"),
-);
-const AuthReadyPage = React.lazy(
-  () => import("@/features/auth/pages/AuthReadyPage"),
-);
-const SSOCallbackPage = React.lazy(
-  () => import("@/features/auth/pages/SsoCallbackPage"),
-);
-const ReportingPage = React.lazy(
-  () => import("@/features/reporting/pages/ReportingPage"),
-);
-const PricingPage = React.lazy(
-  () => import("@/features/billing/pages/PricingPage"),
-);
-const ResetPasswordPage = React.lazy(
-  () => import("@/features/auth/pages/ResetPasswordPage"),
-);
-const TermsAndConditionsPage = React.lazy(
-  () => import("./features/landing/pages/TermsAndConditionsPage"),
-);
-const PrivacyPolicyPage = React.lazy(
-  () => import("./features/landing/pages/PrivacyPolicyPage"),
-);
-
-// Fallback component for suspense
-function LoadingFallback() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-surface">
-      <LoadingSpinner size="lg" />
-    </div>
-  );
-}
-
-// Auth guard component - using Clerk's useAuth
-function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isSignedIn, isLoaded } = useAuth();
-
-  if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  if (!isSignedIn) {
-    return <Navigate to="/login" search={{ returnTo: undefined }} />;
-  }
-
-  return <>{children}</>;
-}
-
-// Auth guard for unauthenticated routes
-function RequireUnauth({ children }: { children: React.ReactNode }) {
-  const { isSignedIn, isLoaded } = useAuth();
-
-  if (!isLoaded) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-surface">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
-  if (isSignedIn) {
-    return <Navigate to="/auth-ready" search={{ redirectTo: "/home" }} />;
-  }
-
-  return <>{children}</>;
-}
-
-// Helper function to safely fetch data with auth error handling
-async function safeFetch<T>(
-  fetchFunction: () => Promise<T>,
-  defaultValue: T,
-): Promise<T> {
-  try {
-    return await fetchFunction();
-  } catch (error) {
-    if (error instanceof Error && hasStatus(error) && error.status === 401) {
-      return defaultValue;
-    }
-    throw error;
-  }
-}
 
 // Root route
 export const rootRoute = createRootRoute({
@@ -182,7 +97,7 @@ export const homeRoute = createRoute({
       safeFetch(
         () =>
           context.queryClient.fetchQuery(weightLogQueryOptions()),
-        [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
+        [] as Awaited<ReturnType<typeof goalsApi.getWeightLog>>,
       ),
     ]);
 
@@ -237,7 +152,7 @@ export const goalsRoute = createRoute({
           context.queryClient.fetchQuery({
             queryKey: queryKeys.macros.targets(),
             queryFn: () =>
-              apiService.macros
+              macrosApi
                 .getMacroTarget()
                 .then((r) => r?.macroTarget ?? null),
             ...queryConfigs.macros,
@@ -252,7 +167,7 @@ export const goalsRoute = createRoute({
       safeFetch(
         () =>
           context.queryClient.fetchQuery(weightLogQueryOptions()),
-        [] as Awaited<ReturnType<typeof apiService.goals.getWeightLog>>,
+        [] as Awaited<ReturnType<typeof goalsApi.getWeightLog>>,
       ),
       safeFetch(
         () =>
@@ -388,7 +303,7 @@ export const reportingRoute = createRoute({
         context.queryClient.fetchQuery({
           queryKey: queryKeys.macros.dailyTotals(queryDate),
           queryFn: () =>
-            apiService.macros.getDailyTotals({
+            macrosApi.getDailyTotals({
               startDate: deps.startDate,
               endDate: deps.endDate,
             }),

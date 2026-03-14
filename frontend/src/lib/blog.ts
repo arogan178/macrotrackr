@@ -57,7 +57,7 @@ export function getBlogCategories(): BlogCategory[] {
 }
 
 export function getAllTags(): string[] {
-  return [...new Set(normalizedPosts.flatMap((post) => post.tags))].sort();
+  return [...new Set(normalizedPosts.flatMap((post) => post.tags))].sort((a, b) => a.localeCompare(b));
 }
 
 export function normalizeBlogFilter(value?: string) {

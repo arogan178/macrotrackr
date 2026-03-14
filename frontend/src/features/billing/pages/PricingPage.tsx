@@ -3,6 +3,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
+import { billingApi } from "@/api/billing";
 import { CardContainer } from "@/components/form";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
@@ -12,7 +13,6 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import usePageMetadata from "@/hooks/usePageMetadata";
 import { useStore } from "@/store/store";
-import { apiService } from "@/utils/apiServices";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
 
@@ -75,7 +75,7 @@ const PricingPage: React.FC = () => {
 
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
-      const { url } = await apiService.billing.createCheckoutSession(
+      const { url } = await billingApi.createCheckoutSession(
         globalThis.location.origin + "/settings?upgraded=true",
         globalThis.location.origin + "/pricing",
         plan,

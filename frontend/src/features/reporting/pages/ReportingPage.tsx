@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
 
+import { macrosApi } from "@/api/macros";
 import { ProFeature } from "@/components/billing";
 import { DateRangeSelector } from "@/components/chart";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
@@ -16,7 +17,6 @@ import {
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
-import { apiService } from "@/utils/apiServices";
 
 import {
   MacroDensityBreakdown,
@@ -58,7 +58,7 @@ export default function ReportingPage() {
     queryClient.prefetchQuery({
       queryKey: queryKeys.macros.historyRange(monthStart, monthEnd),
       queryFn: async () => {
-        const response = await apiService.macros.getHistory(10_000, 0, {
+        const response = await macrosApi.getHistory(10_000, 0, {
           startDate: monthStart,
           endDate: monthEnd,
         });
@@ -72,7 +72,7 @@ export default function ReportingPage() {
         threeMonthsEnd,
       ),
       queryFn: async () => {
-        const response = await apiService.macros.getHistory(10_000, 0, {
+        const response = await macrosApi.getHistory(10_000, 0, {
           startDate: threeMonthsStart,
           endDate: threeMonthsEnd,
         });
