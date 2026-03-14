@@ -5,7 +5,7 @@ const SENSITIVE_KEYS = [
   "session", "credential", "key", "bearer", "jwt",
 ];
 
-function redactSensitive(object: unknown): unknown {
+function redact(object: unknown): unknown {
   if (typeof object === "string") {
     return object;
   }
@@ -13,12 +13,12 @@ function redactSensitive(object: unknown): unknown {
     return object;
   }
   if (Array.isArray(object)) {
-    return object.map(redactSensitive);
+    return object.map((item) => redact(item));
   }
   if (typeof object === "object") {
     const result: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(object)) {
-      result[key] = SENSITIVE_KEYS.some(k => key.toLowerCase().includes(k)) ? "[REDACTED]" : redactSensitive(value);
+      result[key] = SENSITIVE_KEYS.some(k => key.toLowerCase().includes(k)) ? "[REDACTED]" : redact(value);
     }
     return result;
   }
@@ -28,18 +28,18 @@ function redactSensitive(object: unknown): unknown {
 export const logger = {
   debug: (...arguments_: unknown[]) => {
     if (isDevelopment) {
-      console.debug(...arguments_.map(redactSensitive));
+      console.debug(...arguments_.map((a) => redact(a)));
     }
   },
   info: (...arguments_: unknown[]) => {
     if (isDevelopment) {
-      console.info(...arguments_.map(redactSensitive));
+      console.info(...arguments_.map((a) => redact(a)));
     }
   },
   warn: (...arguments_: unknown[]) => {
-    console.warn(...arguments_.map(redactSensitive));
+    console.warn(...arguments_.map((a) => redact(a)));
   },
   error: (...arguments_: unknown[]) => {
-    console.error(...arguments_.map(redactSensitive));
+    console.error(...arguments_.map((a) => redact(a)));
   },
 };
