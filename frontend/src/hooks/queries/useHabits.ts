@@ -1,5 +1,6 @@
 import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { type HabitGoalUpdatePayload,habitsApi } from "@/api/habits";
 import {
   buildHabitUpdatePayload,
   completeHabit,
@@ -11,7 +12,6 @@ import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
-import { apiService, type HabitGoalUpdatePayload } from "@/utils/apiServices";
 
 type HabitMutationContext = {
   previousHabits?: HabitGoal[];
@@ -20,7 +20,7 @@ type HabitMutationContext = {
 export const habitsQueryOptions = () =>
   queryOptions({
     queryKey: queryKeys.habits.list(),
-    queryFn: (): Promise<HabitGoal[]> => apiService.habits.getHabits(),
+    queryFn: (): Promise<HabitGoal[]> => habitsApi.getHabits(),
     ...queryConfigs.longLived,
   });
 
@@ -37,7 +37,7 @@ export function useAddHabit() {
     mutationKey: [...queryKeys.habits.list(), "add"],
     mutationFn: async (values: HabitGoalFormValues): Promise<HabitGoal> => {
       const newHabit = createNewHabit(values);
-      return await apiService.habits.saveHabit(newHabit);
+      return await habitsApi.saveHabit(newHabit);
     },
     onSuccess: () => {
       // Invalidate and refetch habits list
@@ -85,7 +85,7 @@ export function useUpdateHabit() {
       const updatedHabit = updateHabitFromForm(existingHabit, values);
       const payload = buildHabitUpdatePayload(existingHabit, updatedHabit);
 
-      return await apiService.habits.updateHabit(id, payload);
+      return await habitsApi.updateHabit(id, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
@@ -106,7 +106,7 @@ export function useDeleteHabit() {
   >({
     mutationKey: [...queryKeys.habits.list(), "delete"],
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
-      return await apiService.habits.deleteHabit(id);
+      return await habitsApi.deleteHabit(id);
     },
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
@@ -163,7 +163,7 @@ export function useIncrementHabitProgress() {
         createdAt: updatedHabit.createdAt,
         completedAt: updatedHabit.completedAt,
       };
-      return await apiService.habits.updateHabit(habit.id, payload);
+      return await habitsApi.updateHabit(habit.id, payload);
     },
     onMutate: async (habit: HabitGoal) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
@@ -233,7 +233,7 @@ export function useCompleteHabit() {
         completedAt: completedHabit.completedAt,
       };
 
-      return await apiService.habits.updateHabit(id, payload);
+      return await habitsApi.updateHabit(id, payload);
     },
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
@@ -275,7 +275,7 @@ export function useResetHabits() {
   return useMutation({
     mutationKey: [...queryKeys.habits.list(), "reset"],
     mutationFn: async (): Promise<{ success: boolean; count: number }> => {
-      return await apiService.habits.resetHabit();
+      return await habitsApi.resetHabit();
     },
     onSuccess: () => {
       // Clear the habits cache and refetch

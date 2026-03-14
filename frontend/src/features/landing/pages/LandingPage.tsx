@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "motion/react";
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import usePageMetadata from "@/hooks/usePageMetadata";
+import { APP_ICON_URL, APP_URL, PRICING_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
 import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
@@ -52,8 +53,8 @@ const LandingPage: React.FC = () => {
     title: "MacroTrackr — Macro Tracking That Fits Real Life",
     description:
       "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
-    canonical: "https://macrotrackr.com/",
-    ogImage: "https://macrotrackr.com/icon.png",
+    canonical: `${APP_URL}/`,
+    ogImage: APP_ICON_URL,
   });
   const shouldReduceMotion = useReducedMotion();
 
@@ -97,18 +98,18 @@ const LandingPage: React.FC = () => {
 
   const schemaScript = `
     {
-      "@context": "https://schema.org",
+      "@context": "${SCHEMA_ORG_CONTEXT}",
       "@type": "SoftwareApplication",
       "name": "MacroTrackr",
       "alternateName": "MacroTracker",
-      "url": "https://macrotrackr.com",
+      "url": "${APP_URL}",
       "applicationCategory": "HealthApplication",
       "operatingSystem": "Web",
       "offers": {
         "@type": "Offer",
         "price": "0",
         "priceCurrency": "USD",
-        "url": "https://macrotrackr.com/#pricing"
+        "url": "${PRICING_URL}"
       }
     }
   `;

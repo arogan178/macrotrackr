@@ -1,12 +1,4 @@
-import { useEffect } from "react";
-import { useLocation } from "@tanstack/react-router";
-
 const NotFoundPage = () => {
-  const location = useLocation();
-
-  useEffect(() => {
-    // 404 - route not found, handled by rendering this page
-  }, [location.pathname]);
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface">

@@ -2,6 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
+import { authApi } from "@/api/auth";
+import { ApiError } from "@/api/core";
+import { userApi } from "@/api/user";
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
@@ -10,7 +13,6 @@ import {
   type SocialAuthResolution,
 } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
-import { ApiError, apiService } from "@/utils/apiServices";
 
 /**
  * SSOCallbackPage - Handles the callback from Clerk OAuth providers
@@ -112,11 +114,11 @@ export default function SSOCallbackPage() {
 
         try {
           // syncUser uses getHeadersAsync which pulls from the Clerk token getter
-          await apiService.auth.syncUser();
+          await authApi.syncUser();
 
           // If sync succeeds, check profile completion
           try {
-            const userDetails = await apiService.user.getUserDetails();
+            const userDetails = await userApi.getUserDetails();
             existingUser = true;
 
             if (userDetails && typeof userDetails === "object") {

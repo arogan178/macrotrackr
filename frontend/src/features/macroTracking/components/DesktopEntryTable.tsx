@@ -10,7 +10,6 @@ import { AnimatePresence, motion } from "motion/react";
 
 import { MacroCell } from "@/components/macros";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
-import { MacroEntry } from "@/types/macro";
 
 import type {
   EntryHistoryActions,
@@ -18,6 +17,7 @@ import type {
   EntryHistoryState,
   GroupedEntry,
 } from "./EntryHistoryShared";
+import { IngredientsList } from "./IngredientsList";
 
 interface DesktopEntryTableProps {
   groupedEntries: GroupedEntry[];
@@ -331,54 +331,6 @@ const DesktopEntryTable = memo(
       getCoreRowModel: getCoreRowModel(),
     });
 
-    const renderIngredients = (entry: MacroEntry) => {
-      if (!entry.ingredients || entry.ingredients.length === 0) return null;
-      return (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: "auto" }}
-          exit={{ opacity: 0, height: 0 }}
-          transition={{
-            height: { duration: 0.3, ease: "easeInOut" },
-            opacity: { duration: 0.2 },
-          }}
-          className="w-full overflow-hidden border-t border-border/40 bg-surface-2/40"
-        >
-          <div className="flex flex-col gap-2 px-[10%] py-3">
-            {entry.ingredients.map((ing, index) => (
-              <div key={index} className="flex items-center text-xs text-muted">
-                <div className="flex-1 font-medium text-foreground">
-                  {ing.name}{" "}
-                  {ing.quantity ? `(${ing.quantity}${ing.unit || ""})` : ""}
-                </div>
-                <div className="w-[14%] text-center">
-                  <MacroCell
-                    value={ing.protein}
-                    suffix="g"
-                    color="text-protein"
-                  />
-                </div>
-                <div className="w-[14%] text-center">
-                  <MacroCell value={ing.carbs} suffix="g" color="text-carbs" />
-                </div>
-                <div className="w-[14%] text-center">
-                  <MacroCell value={ing.fats} suffix="g" color="text-fats" />
-                </div>
-                <div className="w-[14%] text-center">
-                  <MacroCell
-                    value={calculateCalories(ing.protein, ing.carbs, ing.fats)}
-                    suffix=" kcal"
-                    color="text-foreground"
-                  />
-                </div>
-                <div className="w-[14%]"></div>
-              </div>
-            ))}
-          </div>
-        </motion.div>
-      );
-    };
-
     const renderVirtualizedBody = () => {
       const virtualItems = virtualizer.getVirtualItems();
 
@@ -447,7 +399,7 @@ const DesktopEntryTable = memo(
                   <AnimatePresence initial={false}>
                     {!data.isGroup &&
                       expandedEntries.has(data.entries[0].id) &&
-                      renderIngredients(data.entries[0])}
+                      <IngredientsList ingredients={data.entries[0].ingredients || []} calculateCalories={calculateCalories} />}
                   </AnimatePresence>
                 </motion.div>
               );
@@ -523,7 +475,7 @@ const DesktopEntryTable = memo(
                 <AnimatePresence initial={false}>
                   {!isGroup &&
                     expandedEntries.has(data.entries[0].id) &&
-                    renderIngredients(data.entries[0])}
+                    <IngredientsList ingredients={data.entries[0].ingredients || []} calculateCalories={calculateCalories} />}
                 </AnimatePresence>
               </motion.div>
             );

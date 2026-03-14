@@ -3,12 +3,14 @@ import { useAuth, useSession } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
+import { authApi } from "@/api/auth";
+import { ApiError, setAuthToken } from "@/api/core";
+import { userApi } from "@/api/user";
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { normalizeAuthRedirect, resolveProfileCompletion, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { queryKeys } from "@/lib/queryKeys";
-import { ApiError, apiService, setAuthToken } from "@/utils/apiServices";
 
 function isLikelyUserDetailsPayload(
   value: unknown,
@@ -74,7 +76,7 @@ export default function AuthReadyPage() {
         let syncSuccess = false;
         if (!shouldBypassSync) {
           try {
-            await apiService.auth.syncUser(token || undefined);
+            await authApi.syncUser(token || undefined);
             syncSuccess = true;
           } catch (syncError: unknown) {
             // If it's a 401, the token might be invalid.
@@ -117,7 +119,7 @@ export default function AuthReadyPage() {
         let userDetails: Record<string, unknown> | null = null;
         for (let attempt = 0; attempt < 3; attempt += 1) {
           try {
-            const response = await apiService.user.getUserDetails();
+            const response = await userApi.getUserDetails();
 
             if (!isLikelyUserDetailsPayload(response)) {
               logger.warn(

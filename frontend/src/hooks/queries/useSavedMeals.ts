@@ -1,18 +1,18 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { queryConfigs } from "@/lib/queryClient";
-import { queryKeys } from "@/lib/queryKeys";
 import {
-  apiService,
   type CreateSavedMealPayload,
   type SavedMeal,
+  savedMealsApi,
   type SavedMealsResponse,
-} from "@/utils/apiServices";
+} from "@/api/savedMeals";
+import { queryConfigs } from "@/lib/queryClient";
+import { queryKeys } from "@/lib/queryKeys";
 
 export function useSavedMeals() {
   return useQuery({
     queryKey: queryKeys.savedMeals.list(),
-    queryFn: (): Promise<SavedMealsResponse> => apiService.savedMeals.getAll(),
+    queryFn: (): Promise<SavedMealsResponse> => savedMealsApi.getAll(),
     ...queryConfigs.longLived,
   });
 }
@@ -24,7 +24,7 @@ export function useCreateSavedMeal() {
   return useMutation({
     mutationKey: [...queryKeys.savedMeals.all(), "create"],
     mutationFn: async (payload: CreateSavedMealPayload) => {
-      return (await apiService.savedMeals.create(payload)) as SavedMeal;
+      return (await savedMealsApi.create(payload)) as SavedMeal;
     },
     onSuccess: () => {
       // Invalidate saved meals list to refetch
@@ -42,7 +42,7 @@ export function useDeleteSavedMeal() {
   return useMutation({
     mutationKey: [...queryKeys.savedMeals.all(), "delete"],
     mutationFn: async (id: number) => {
-      return await apiService.savedMeals.delete(id);
+      return await savedMealsApi.delete(id);
     },
     onSuccess: () => {
       // Invalidate saved meals list to refetch

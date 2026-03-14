@@ -1,18 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { userApi, type UserDetailsResponse, type UserSettingsPayload } from "@/api/user";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import {
-  apiService,
-  UserDetailsResponse,
-  type UserSettingsPayload,
-} from "@/utils/apiServices";
 
 export function useSettings() {
   return useQuery({
     queryKey: queryKeys.settings.user(),
-    queryFn: (): Promise<UserDetailsResponse> => apiService.user.getUserDetails(),
+    queryFn: (): Promise<UserDetailsResponse> => userApi.getUserDetails(),
     ...queryConfigs.longLived,
     retry: (failureCount, error) => {
       if (error instanceof Error && hasStatus(error) && error.status === 401) {
@@ -30,7 +26,7 @@ export function useSaveSettings() {
   return useMutation({
     mutationKey: [...queryKeys.settings.user(), "save"],
     mutationFn: async (settings: UserSettingsPayload) => {
-      return await apiService.user.updateSettings(settings);
+      return await userApi.updateSettings(settings);
     },
     onMutate: async (variables: UserSettingsPayload) => {
       // Cancel any outgoing refetches
