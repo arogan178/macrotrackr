@@ -1,6 +1,6 @@
 // API Core utilities - authentication, headers, base URL, error handling
 
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
+export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 export class ApiError extends Error {
   status: number;
@@ -44,6 +44,7 @@ export async function getAuthToken(): Promise<string | null> {
   if (staticAuthToken) {
     return staticAuthToken;
   }
+
   return null;
 }
 
@@ -52,6 +53,7 @@ export function getHeaders(includeContentType = true): Record<string, string> {
   if (includeContentType) {
     headers["Content-Type"] = "application/json";
   }
+
   return headers;
 }
 
@@ -67,6 +69,7 @@ export async function getHeadersAsync(
   if (includeContentType) {
     headers["Content-Type"] = "application/json";
   }
+
   return headers;
 }
 
@@ -81,6 +84,7 @@ export async function handleResponse(response: Response): Promise<unknown> {
       if (!responseBodyText) {
         return undefined;
       }
+
       return await response.json();
     } catch {
       if (response.status === 200) {
@@ -96,8 +100,8 @@ export async function handleResponse(response: Response): Promise<unknown> {
   try {
     const errorPayload = await response.json() as ApiErrorResponse;
     if (errorPayload && typeof errorPayload === "object") {
-      errorMessage = errorPayload.message || errorMessage;
-      errorCode = errorPayload.code || errorCode;
+      errorMessage = errorPayload.message ?? errorMessage;
+      errorCode = errorPayload.code ?? errorCode;
       errorDetails = errorPayload.details;
     }
   } catch {
@@ -116,5 +120,6 @@ export async function post<T = unknown>(
     body: body ? JSON.stringify(body) : undefined,
     credentials: "include",
   });
+
   return handleResponse(response) as Promise<T>;
 }

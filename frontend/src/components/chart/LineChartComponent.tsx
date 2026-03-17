@@ -65,7 +65,7 @@ const CustomDot = (properties: CustomDotProps) => {
       cx={cx}
       cy={cy}
       r={dotSize}
-      fill={properties.fill || properties.stroke}
+      fill={properties.fill ?? properties.stroke}
       stroke={properties.stroke}
       strokeWidth="0"
     />
@@ -96,6 +96,7 @@ function getAdaptiveInterval(dataLength: number) {
   if (dataLength > 60) return Math.floor(dataLength / 8); // Show ~8 ticks for 90+ days
   if (dataLength > 30) return Math.floor(dataLength / 6); // Show ~6 ticks for 30-60 days
   if (dataLength > 15) return Math.floor(dataLength / 5); // Show ~5 ticks for 15-30 days
+
   return "preserveStartEnd"; // Show all ticks for shorter periods
 }
 
@@ -117,7 +118,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
 }) => {
   const hasData = data && data.length > 0;
   // Assign the component or element directly; default to richer ChartTooltip
-  const TooltipContent = tooltipContent || ChartTooltip;
+  const TooltipContent = tooltipContent ?? ChartTooltip;
 
   const defaultXAxisProps: Partial<XAxisProps> = {
     dataKey: "name",
@@ -244,7 +245,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   strokeLinejoin="round"
                   strokeWidth="1.5"
                   d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                ></path>
+                 />
               </svg>
               <p className="max-w-xs text-sm text-foreground">
                 No data available for the selected period.
@@ -279,7 +280,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             <Tooltip
               // Pass the component/element directly to the content prop
               // Cast to any to accommodate both element and function content types across Recharts generics
-              content={TooltipContent as any}
+              content={TooltipContent as React.ComponentType<Record<string, unknown>>}
               cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
             />
             {showLegend && (
@@ -299,7 +300,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                   ? 1.5
                   : dataLength > 30
                     ? 2
-                    : line.strokeWidth || 2;
+                    : line.strokeWidth ?? 2;
               const adaptiveActiveDot =
                 dataLength > 60
                   ? { r: 4 }
@@ -310,11 +311,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
               return line.isArea ? (
                 <Area
                   key={line.dataKey}
-                  type={line.type || "monotone"}
+                  type={line.type ?? "monotone"}
                   dataKey={line.dataKey}
                   name={line.name}
-                  stroke={line.color || "#8884d8"}
-                  fill={line.color || "#8884d8"}
+                  stroke={line.color ?? "#8884d8"}
+                  fill={line.color ?? "#8884d8"}
                   fillOpacity={0.15}
                   strokeWidth={adaptiveStrokeWidth}
                   activeDot={adaptiveActiveDot}
@@ -331,10 +332,10 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
               ) : (
                 <Line
                   key={line.dataKey}
-                  type={line.type || "monotone"}
+                  type={line.type ?? "monotone"}
                   dataKey={line.dataKey}
                   name={line.name}
-                  stroke={line.color || "#8884d8"} // Default color if not provided
+                  stroke={line.color ?? "#8884d8"}
                   strokeWidth={adaptiveStrokeWidth}
                   activeDot={adaptiveActiveDot}
                   dot={

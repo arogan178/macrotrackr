@@ -7,7 +7,7 @@ import { useEffect } from "react";
  */
 export function useBeforeUnload(
   hasUnsavedChanges: boolean,
-  message: string = "You have unsaved changes. Are you sure you want to leave?",
+  message = "You have unsaved changes. Are you sure you want to leave?",
 ) {
   useEffect(() => {
     const handleBeforeUnload = (event: BeforeUnloadEvent) => {

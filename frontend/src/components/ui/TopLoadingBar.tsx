@@ -21,6 +21,7 @@ function TopLoadingBar() {
   // Respect reduced motion preference (memoized)
   const prefersReducedMotion = useMemo(() => {
     if (typeof globalThis.matchMedia !== "function") return false;
+
     return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 

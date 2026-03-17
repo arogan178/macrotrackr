@@ -41,36 +41,40 @@ function buildReportingData(
   const dailyTotals: Record<string, MacroTotals> = {};
 
   for (const entry of history) {
-    const entryDateString =
-      entry.entryDate || entry.createdAt?.split("T")[0] || "";
-    if (!entryDateString) continue;
+    const entryDateString = entry.entryDate;
 
     const entryDate = new Date(`${entryDateString}T00:00:00`);
     if (entryDate < rangeStart || entryDate > rangeEnd) continue;
 
-    if (!dailyTotals[entryDateString]) {
-      dailyTotals[entryDateString] = {
+    let totals = dailyTotals[entryDateString];
+    if (!totals) {
+      totals = {
         protein: 0,
         carbs: 0,
         fats: 0,
         calories: 0,
       };
+      dailyTotals[entryDateString] = totals;
     }
 
-    dailyTotals[entryDateString].protein += entry.protein;
-    dailyTotals[entryDateString].carbs += entry.carbs;
-    dailyTotals[entryDateString].fats += entry.fats;
-    dailyTotals[entryDateString].calories +=
+    totals.protein += entry.protein;
+    totals.carbs += entry.carbs;
+    totals.fats += entry.fats;
+    totals.calories +=
       entry.protein * 4 + entry.carbs * 4 + entry.fats * 9;
   }
 
-  const dailySeries = getDatesBetween(startDate, endDate).map((date) => ({
-    name: formatDate(date),
-    calories: dailyTotals[date]?.calories || 0,
-    protein: dailyTotals[date]?.protein || 0,
-    carbs: dailyTotals[date]?.carbs || 0,
-    fats: dailyTotals[date]?.fats || 0,
-  }));
+  const dailySeries = getDatesBetween(startDate, endDate).map((date) => {
+    const totals = dailyTotals[date];
+
+    return {
+      name: formatDate(date),
+      calories: totals ? totals.calories : 0,
+      protein: totals ? totals.protein : 0,
+      carbs: totals ? totals.carbs : 0,
+      fats: totals ? totals.fats : 0,
+    };
+  });
 
   if (dateRange === "week") {
     return {
@@ -85,18 +89,20 @@ function buildReportingData(
 
     for (const [dateString, totals] of Object.entries(dailyTotals)) {
       const weekKey = getWeekString(new Date(`${dateString}T00:00:00`));
-      if (!weeklyTotals[weekKey]) {
+      const existing = weeklyTotals[weekKey];
+      if (!existing) {
         weeklyTotals[weekKey] = {
           totals: { protein: 0, carbs: 0, fats: 0, calories: 0 },
           count: 0,
         };
       }
 
-      weeklyTotals[weekKey].totals.protein += totals.protein;
-      weeklyTotals[weekKey].totals.carbs += totals.carbs;
-      weeklyTotals[weekKey].totals.fats += totals.fats;
-      weeklyTotals[weekKey].totals.calories += totals.calories;
-      weeklyTotals[weekKey].count += 1;
+      const week = weeklyTotals[weekKey];
+      week.totals.protein += totals.protein;
+      week.totals.carbs += totals.carbs;
+      week.totals.fats += totals.fats;
+      week.totals.calories += totals.calories;
+      week.count += 1;
     }
 
     return {
@@ -118,18 +124,20 @@ function buildReportingData(
 
   for (const [dateString, totals] of Object.entries(dailyTotals)) {
     const monthKey = getMonthString(new Date(`${dateString}T00:00:00`));
-    if (!monthlyTotals[monthKey]) {
+    const existing = monthlyTotals[monthKey];
+    if (!existing) {
       monthlyTotals[monthKey] = {
         totals: { protein: 0, carbs: 0, fats: 0, calories: 0 },
         count: 0,
       };
     }
 
-    monthlyTotals[monthKey].totals.protein += totals.protein;
-    monthlyTotals[monthKey].totals.carbs += totals.carbs;
-    monthlyTotals[monthKey].totals.fats += totals.fats;
-    monthlyTotals[monthKey].totals.calories += totals.calories;
-    monthlyTotals[monthKey].count += 1;
+    const month = monthlyTotals[monthKey];
+    month.totals.protein += totals.protein;
+    month.totals.carbs += totals.carbs;
+    month.totals.fats += totals.fats;
+    month.totals.calories += totals.calories;
+    month.count += 1;
   }
 
   const monthNames = [
@@ -152,6 +160,7 @@ function buildReportingData(
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([monthKey, { totals, count }]) => {
         const [year, month] = monthKey.split("-");
+
         return {
           name: `${monthNames[Number.parseInt(month, 10) - 1]} ${year}`,
           calories: count > 0 ? Math.round(totals.calories / count) : 0,

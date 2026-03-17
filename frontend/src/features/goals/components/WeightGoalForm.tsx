@@ -42,6 +42,7 @@ const getGoalType = (
   if (!startingWeight || !targetWeight) return "maintain";
   if (startingWeight > targetWeight) return "lose";
   if (startingWeight < targetWeight) return "gain";
+
   return "maintain";
 };
 
@@ -55,6 +56,7 @@ const getCalorieRange = (
     maintain: { min: tdee - 300, max: tdee + 300 },
     gain: { min: tdee, max: tdee + 1000 },
   };
+
   return ranges[goalType];
 };
 
@@ -70,6 +72,7 @@ const getCalorieAdjustmentInfo = (
     ? `Deficit: ${displayDiff} kcal`
     : `Surplus: ${displayDiff} kcal`;
   const isLargeAdjustment = diff > 800;
+
   return { label, isLargeAdjustment };
 };
 
@@ -91,15 +94,14 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
 
     const [formValues, setFormValues] = useState<WeightGoalFormValues>(() => ({
       startingWeight: weightGoals?.startingWeight ?? startingWeight,
-      targetWeight: weightGoals?.targetWeight ?? targetWeight ?? startingWeight,
+      targetWeight: weightGoals?.targetWeight ?? targetWeight,
       startDate: weightGoals?.startDate ?? todayString,
     }));
 
     useEffect(() => {
       setFormValues({
         startingWeight: weightGoals?.startingWeight ?? startingWeight,
-        targetWeight:
-          weightGoals?.targetWeight ?? targetWeight ?? startingWeight,
+        targetWeight: weightGoals?.targetWeight ?? targetWeight,
         startDate: weightGoals?.startDate ?? todayString,
       });
     }, [weightGoals, startingWeight, targetWeight, todayString]);
@@ -111,6 +113,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
     const calculations = useMemo(() => {
       if (!tdee || !formValues.startingWeight || !formValues.targetWeight)
         return undefined;
+
       return generateWeightGoalCalculations(
         tdee,
         formValues.startingWeight,
@@ -128,6 +131,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
     useEffect(() => {
       if (isEditing && weightGoals?.calorieTarget !== undefined) {
         setCalorieIntake(weightGoals.calorieTarget);
+
         return;
       }
 
@@ -142,7 +146,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           formValues.startingWeight,
           formValues.targetWeight,
           undefined,
-        )?.calorieTarget;
+        ).calorieTarget;
         setCalorieIntake(defaultCalories);
       }
     }, [
@@ -170,6 +174,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
         if (value == undefined) return `${fieldName} is required`;
         if (value < 30) return `${fieldName} must be at least 30 kg`;
         if (value > 300) return `${fieldName} must be at most 300 kg`;
+
         return undefined;
       },
       [],
@@ -188,7 +193,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
         ...(isEditing ? {} : { startingWeight: formValues.startingWeight! }),
         targetWeight: formValues.targetWeight,
         calorieTarget: calorieIntake,
-        startDate: formValues.startDate || todayString,
+        startDate: formValues.startDate ?? todayString,
         targetDate: calculatedTargetDate,
         weeklyChange: weeklyWeightChange,
         calculatedWeeks,
@@ -235,6 +240,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
 
     useEffect(() => {
       document.addEventListener("keydown", handleKeyDown);
+
       return () => document.removeEventListener("keydown", handleKeyDown);
     }, [handleKeyDown]);
 
@@ -308,7 +314,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               label="Starting Weight"
               value={formValues.startingWeight}
               onChange={(value: number | undefined) => {
-                setFormValues({ ...formValues, startingWeight: value || 0 });
+                setFormValues({ ...formValues, startingWeight: value ?? 0 });
                 const error = validateWeight(value, "Starting weight");
                 setFieldErrors((previous) => ({
                   ...previous,
@@ -375,7 +381,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               min={minCalorieIntake}
               max={maxCalorieIntake}
               step={50}
-              showFillTrack={true}
+              showFillTrack
               trackColorClass="bg-vibrant-accent"
               ariaLabelledBy="calorie-intake-range"
               unit="calories"

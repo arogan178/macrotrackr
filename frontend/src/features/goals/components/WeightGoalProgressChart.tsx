@@ -31,18 +31,18 @@ function WeightCustomTooltip({
         <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
-            : label || "Date Unavailable"}
+            : label ?? "Date Unavailable"}
         </div>
         <div className="mt-1 flex items-center gap-2">
           <div
             className={"h-3 w-3 rounded-full"}
-            style={{ backgroundColor: payload[0].color || payload[0].stroke }}
-          ></div>
+            style={{ backgroundColor: payload[0].color ?? payload[0].stroke }}
+           />
           <span className="text-sm text-foreground">
             Weight:{" "}
             <span
               className="font-semibold"
-              style={{ color: payload[0].color || payload[0].stroke }}
+              style={{ color: payload[0].color ?? payload[0].stroke }}
             >
               {typeof data.weight === "number" ? data.weight.toFixed(1) : "N/A"}{" "}
               kg
@@ -52,6 +52,7 @@ function WeightCustomTooltip({
       </div>
     );
   }
+
   return;
 }
 
@@ -86,6 +87,7 @@ function WeightGoalProgressChart() {
         const sortedTimestamps = [...timestamps].sort(
           (a, b) => parseISO(a).getTime() - parseISO(b).getTime(),
         );
+
         return {
           name: format(parseISO(dateKey), "MMM d"),
           weight: avgWeight,
@@ -98,6 +100,7 @@ function WeightGoalProgressChart() {
   // Calculate Y-axis domain using shared helper for identical behavior
   const { domainMin, domainMax } = React.useMemo(() => {
     const weights = chartData.map((d) => d.weight);
+
     return getChartDomain(weights, weightGoals?.targetWeight);
   }, [chartData, weightGoals?.targetWeight]);
 

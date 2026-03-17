@@ -29,7 +29,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
     proteinPercentage: settings.proteinPercentage,
     carbsPercentage: settings.carbsPercentage,
     fatsPercentage: settings.fatsPercentage,
-    lockedMacros: settings.lockedMacros || [],
+    lockedMacros: settings.lockedMacros ?? [],
   });
 
   // Initialize local target from prop value
@@ -46,15 +46,14 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
       setLocalTarget(target);
 
       if (macroTarget) {
-        const hasChanges =
+        const targetChanged =
           target.proteinPercentage !== macroTarget.proteinPercentage ||
           target.carbsPercentage !== macroTarget.carbsPercentage ||
           target.fatsPercentage !== macroTarget.fatsPercentage ||
           // Check for differences in lockedMacros arrays
-          JSON.stringify(target.lockedMacros || []) !==
-            JSON.stringify(macroTarget.lockedMacros || []);
-
-        setHasChanges(hasChanges);
+          JSON.stringify(target.lockedMacros ?? []) !==
+          JSON.stringify(macroTarget.lockedMacros ?? []);
+        setHasChanges(targetChanged);
       } else {
         setHasChanges(true);
       }
@@ -110,7 +109,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
   const hasValidValues = localTarget !== undefined;
 
   // Use local target values for rendering
-  const displayValues = localTarget || DEFAULT_MACRO_TARGET;
+  const displayValues = localTarget ?? DEFAULT_MACRO_TARGET;
 
   return (
     <ProFeature>

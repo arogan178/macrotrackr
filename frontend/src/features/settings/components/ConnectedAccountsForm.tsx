@@ -87,6 +87,7 @@ const ConnectedAccountsForm = () => {
   // Check if disconnecting would leave user with no auth method
   const wouldBeLastAuthMethod = (_provider: ProviderKey): boolean => {
     if (hasPassword) return false;
+
     return externalAccounts.length === 1;
   };
 
@@ -146,6 +147,7 @@ const ConnectedAccountsForm = () => {
   const handleDisconnectConfirm = async () => {
     if (!modal.provider || modal.type === "warning") {
       closeModal();
+
       return;
     }
 
@@ -156,6 +158,7 @@ const ConnectedAccountsForm = () => {
     if (!account) {
       showNotification("Account not found.", "error");
       closeModal();
+
       return;
     }
 
@@ -201,7 +204,7 @@ const ConnectedAccountsForm = () => {
     if (!provider) return null;
 
     const ProviderIcon = provider.icon;
-    const displayEmail = account.emailAddress || "Connected";
+    const displayEmail = account.emailAddress ?? "Connected";
 
     return (
       <div
@@ -222,7 +225,7 @@ const ConnectedAccountsForm = () => {
             variant="ghost"
             buttonSize="sm"
             onClick={() =>
-              handleDisconnectClick(providerKey, account.emailAddress || "")
+              handleDisconnectClick(providerKey, account.emailAddress ?? "")
             }
             className="text-muted hover:text-error"
             ariaLabel={`Disconnect ${provider.name}`}
@@ -357,7 +360,7 @@ const ConnectedAccountsForm = () => {
                       Email & Password
                     </p>
                     <p className="text-sm text-muted">
-                      {user?.primaryEmailAddress?.emailAddress ||
+                      {user?.primaryEmailAddress?.emailAddress ??
                         "Password enabled"}
                     </p>
                   </div>

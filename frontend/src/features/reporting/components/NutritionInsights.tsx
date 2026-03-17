@@ -40,6 +40,7 @@ export default function NutritionInsights({
         status: "moderate",
         message: "Good start! Consider aiming for 1.6g per kg of body weight.",
       };
+
     return {
       status: "low",
       message: "Increasing protein can support muscle growth and satiety.",
@@ -67,6 +68,7 @@ export default function NutritionInsights({
         message:
           "High day-to-day variation. Consider more consistency for stable energy.",
       };
+
     return {
       status: "stable",
       message: "Consistent intake helps maintain stable energy levels.",

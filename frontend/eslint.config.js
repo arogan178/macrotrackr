@@ -1,8 +1,10 @@
 import pluginJs from "@eslint/js";
+import stylisticPlugin from "@stylistic/eslint-plugin";
 import eslintPluginImport from "eslint-plugin-import";
 import pluginJsxA11y from "eslint-plugin-jsx-a11y";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
+import pluginReactRefresh from "eslint-plugin-react-refresh";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
@@ -26,64 +28,27 @@ function getTanStackRouterRules() {
 }
 
 export default [
-  // Global ignores
   {
     name: "global-ignores",
-    ignores: [
-      "dist",
-      "build",
-      "coverage",
-      ".vite",
-      "node_modules",
-      "src/routeTree.gen.ts",
-      "src/routeTree.gen.*",
-    ],
+    ignores: ["dist", "build", "coverage", ".vite", "node_modules", "src/routeTree.gen.ts", "src/routeTree.gen.*"],
   },
-
-  // PascalCase for components and pages
   {
-    files: [
-      "src/components/**/*.{js,jsx,ts,tsx}",
-      "src/pages/**/*.{js,jsx,ts,tsx}",
-      "src/AppRouter.tsx",
-      "src/features/**/components/**/*.{js,jsx,ts,tsx}",
-      "src/features/**/pages/**/*.{js,jsx,ts,tsx}",
-    ],
+    files: ["src/components/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}", "src/AppRouter.tsx", "src/features/**/components/**/*.{js,jsx,ts,tsx}", "src/features/**/pages/**/*.{js,jsx,ts,tsx}"],
     rules: {
       "unicorn/filename-case": ["error", { case: "pascalCase", multipleFileExtensions: false }],
     },
   },
-
-  // camelCase for utils, types, hooks, lib
   {
-    files: [
-      "src/utils/**/*.{js,ts,tsx}",
-      "src/types/**/*.{js,ts,tsx}",
-      "src/hooks/**/*.{js,ts,tsx}",
-      "src/loaders/**/*.{js,ts,tsx}",
-      "src/constants/**/*.{js,ts,tsx}",
-      "src/lib/**/*.{js,ts,tsx}",
-      "src/theme/**/*.{js,ts,tsx}",
-      "src/features/**/hooks/**/*.{js,ts,tsx}",
-      "src/features/**/types/**/*.{js,ts,tsx}",
-      "src/features/**/utils/**/*.{js,ts,tsx}",
-      "src/features/**/constants/**/*.{js,ts,tsx}",
-      "src/api/**/*.{js,ts,tsx}",
-      "src/routes/**/*.{js,ts,tsx}",
-    ],
+    files: ["src/utils/**/*.{js,ts,tsx}", "src/types/**/*.{js,ts,tsx}", "src/hooks/**/*.{js,ts,tsx}", "src/loaders/**/*.{js,ts,tsx}", "src/constants/**/*.{js,ts,tsx}", "src/lib/**/*.{js,ts,tsx}", "src/theme/**/*.{js,ts,tsx}", "src/features/**/hooks/**/*.{js,ts,tsx}", "src/features/**/types/**/*.{js,ts,tsx}", "src/features/**/utils/**/*.{js,ts,tsx}", "src/features/**/constants/**/*.{js,ts,tsx}", "src/api/**/*.{js,ts,tsx}", "src/routes/**/*.{js,ts,tsx}"],
     rules: {
       "unicorn/filename-case": ["error", { case: "camelCase", multipleFileExtensions: false }],
     },
   },
-
-  // TanStack Router rules
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     plugins: { "@tanstack/router": pluginRouter },
     rules: { ...getTanStackRouterRules() },
   },
-
-  // Main config
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
     ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*", "src/routes/__root.gen.*"],
@@ -97,13 +62,13 @@ export default [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
+    linterOptions: { reportUnusedDisableDirectives: true },
     plugins: {
+      "@stylistic": stylisticPlugin,
       "@typescript-eslint": tseslint.plugin,
       react: pluginReact,
       "react-hooks": pluginReactHooks,
+      "react-refresh": pluginReactRefresh,
       "jsx-a11y": pluginJsxA11y,
       unicorn: eslintPluginUnicorn,
       "simple-import-sort": simpleImportSort,
@@ -111,34 +76,25 @@ export default [
       tailwindcss: tailwindPlugin,
     },
     rules: {
-      // Base rules
       ...pluginJs.configs.recommended.rules,
       ...tseslint.configs.recommendedTypeChecked.rules,
       ...tseslint.configs.stylisticTypeChecked.rules,
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
       ...pluginJsxA11y.configs.recommended.rules,
-
-      // Tailwind
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "@stylistic/padding-line-between-statements": ["warn", { blankLine: "always", prev: "*", next: "return" }],
       "tailwindcss/classnames-order": "warn",
       "tailwindcss/no-custom-classname": "off",
       "tailwindcss/no-contradicting-classname": "error",
-
-      // React
       "react/react-in-jsx-scope": "off",
       "react/no-unescaped-entities": "off",
-
-      // Import organization
+      "react/self-closing-comp": "error",
+      "react/jsx-no-useless-fragment": "warn",
+      "react/jsx-boolean-value": ["error", "never"],
+      "react/no-array-index-key": "warn",
       "simple-import-sort/imports": ["error", {
-        groups: [
-          ["^\\u0000"],
-          ["^node:"],
-          ["^react", "^@?\\w"],
-          ["^@/"],
-          ["^\\.\\.(?!/?$)", "^\\.\\./?$"],
-          ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"],
-          ["^.+\\.s?css$"],
-        ],
+        groups: [["^\\u0000"], ["^node:"], ["^react", "^@?\\w"], ["^@/"], ["^\\.\\.(?!/?$)", "^\\.\\./?$"], ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"], ["^.+\\.s?css$"]],
       }],
       "simple-import-sort/exports": "error",
       "import/first": "error",
@@ -147,8 +103,7 @@ export default [
       "import/no-cycle": ["error", { maxDepth: 3 }],
       "import/no-self-import": "error",
       "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
-
-      // Unicorn - selective
+      "import/no-mutable-exports": "error",
       "unicorn/better-regex": "warn",
       "unicorn/no-null": "off",
       "unicorn/no-useless-undefined": "off",
@@ -159,17 +114,20 @@ export default [
           res: true, req: true, err: true, env: true, doc: true,
           el: true, btn: true, src: true, dest: true, str: true,
           num: true, len: true, max: true, min: true, arg: true,
+          db: true, api: true, url: true, uri: true, id: true,
         },
       }],
       "unicorn/no-array-reduce": "off",
       "unicorn/no-nested-ternary": "off",
-
-      // TypeScript
+      "unicorn/no-process-exit": "off",
+      "unicorn/prefer-module": "off",
+      "unicorn/prefer-node-protocol": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-unused-vars": ["warn", {
         argsIgnorePattern: "^_",
         varsIgnorePattern: "^_",
         ignoreRestSiblings: true,
+        caughtErrorsIgnorePattern: "^_",
       }],
       "no-undef": "off",
       "no-undefined": "off",
@@ -178,21 +136,24 @@ export default [
         assertionStyle: "as",
         objectLiteralTypeAssertions: "never",
       }],
-
-      // Best practices
+      "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+      "@typescript-eslint/no-inferrable-types": "warn",
       "prefer-const": "error",
       "no-var": "error",
       "no-console": ["warn", { allow: ["warn", "error"] }],
-      
-      // Type safety - warnings only
+      "no-debugger": "warn",
+      "no-alert": "warn",
+      "no-duplicate-imports": "error",
       "no-shadow": "off",
       "@typescript-eslint/no-shadow": "warn",
       "@typescript-eslint/prefer-nullish-coalescing": "warn",
       "@typescript-eslint/prefer-optional-chain": "warn",
       "@typescript-eslint/no-unnecessary-condition": "warn",
       "@typescript-eslint/strict-boolean-expressions": "off",
-
-      // Naming
+      // Not appropriate for React frontend - async event handlers are common
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-misused-promises": "off",
+      "@typescript-eslint/require-await": "off",
       "@typescript-eslint/naming-convention": [
         "warn",
         { selector: "variable", format: ["camelCase", "UPPER_CASE", "PascalCase"], leadingUnderscore: "allow" },
@@ -215,8 +176,6 @@ export default [
       },
     },
   },
-
-  // Tests override - relaxed rules
   {
     files: ["src/**/*.test.{ts,tsx}", "src/**/__tests__/**/*.{ts,tsx}"],
     languageOptions: {
@@ -235,12 +194,13 @@ export default [
       "@typescript-eslint/prefer-optional-chain": "off",
       "@typescript-eslint/no-unnecessary-condition": "off",
       "@typescript-eslint/no-shadow": "off",
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-misused-promises": "off",
+      "@typescript-eslint/require-await": "off",
       "no-shadow": "off",
       "unicorn/filename-case": "off",
       "no-constant-binary-expression": "off",
     },
   },
-
-  // Prettier - must be last
   prettierConfig,
 ];

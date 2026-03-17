@@ -33,6 +33,7 @@ function getStrategies(
       ) {
         return factor.strategy;
       }
+
       return undefined;
     })
     .filter((strategy): strategy is string => strategy !== undefined);
@@ -64,8 +65,9 @@ export function ClerkSignInForm({
   const handleSocialSignIn = async (
     strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
   ) => {
-    if (!isSignUpLoaded || !signUp) {
+    if (!isSignUpLoaded) {
       showNotification("Authentication not ready. Please try again.", "error");
+
       return;
     }
 
@@ -87,6 +89,7 @@ export function ClerkSignInForm({
           to: "/auth-ready",
           search: { redirectTo: normalizeAuthRedirect(redirectTo) },
         });
+
         return;
       }
 
@@ -102,8 +105,9 @@ export function ClerkSignInForm({
   const handleEmailSignIn = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isLoaded || !signIn) {
+    if (!isLoaded) {
       showNotification("Authentication not ready. Please try again.", "error");
+
       return;
     }
 
@@ -127,6 +131,7 @@ export function ClerkSignInForm({
               "Sign-in completed but session could not be created. Please try again.",
               "error",
             );
+
             return;
           }
           await setActive({ session: result.createdSessionId });
@@ -211,7 +216,7 @@ export function ClerkSignInForm({
         // Check for specific Clerk error codes
         if (clerkError.errors && Array.isArray(clerkError.errors)) {
           const firstError = clerkError.errors[0];
-          switch (firstError?.code) {
+          switch (firstError.code) {
             case "form_password_incorrect": {
               errorMessage =
                 "Incorrect password. If you recently changed your password, please use the new password.";
@@ -231,7 +236,7 @@ export function ClerkSignInForm({
               break;
             }
             default: {
-              if (firstError?.message) {
+              if (firstError.message) {
                 errorMessage = firstError.message;
               }
             }

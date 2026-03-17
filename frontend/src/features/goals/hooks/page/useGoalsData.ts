@@ -20,6 +20,7 @@ interface GoalsLoaderData {
 // Transform UserDetailsResponse to UserSettings with required fields
 const toUserSettings = (user: UserDetailsResponse | null | undefined): UserSettings | undefined => {
   if (!user) return undefined;
+
   return {
     ...user,
     dateOfBirth: user.dateOfBirth ?? "",

@@ -104,7 +104,8 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
       const existingNotification = get().notifications.find(
         (n) => n.message === message && n.type === type,
       );
-      return existingNotification?.id || `ignored_${now}`;
+
+      return existingNotification?.id ?? `ignored_${now}`;
     }
 
     // Generate a unique ID with timestamp and random component
@@ -231,6 +232,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
           notificationContexts,
         };
       }
+
       return state;
     });
   },
