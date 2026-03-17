@@ -108,11 +108,11 @@ function IconButton({
   ...rest
 }: IconButtonProps) {
   const config = getActionConfigs()[variant];
-  const resolvedIconSize: IconSize = iconSize || buttonSize;
+  const resolvedIconSize: IconSize = iconSize ?? buttonSize;
   const iconSizeKey = resolvedIconSize as keyof typeof ICON_SIZES;
   const buttonSizeKey = buttonSize as keyof typeof ICON_BUTTON_SIZES;
-  const iconSizeClass = ICON_SIZES[iconSizeKey] || ICON_SIZES.md;
-  const paddingClass = ICON_BUTTON_SIZES[buttonSizeKey] || ICON_BUTTON_SIZES.md;
+  const iconSizeClass = ICON_SIZES[iconSizeKey];
+  const paddingClass = ICON_BUTTON_SIZES[buttonSizeKey];
 
   let iconElement: React.ReactNode;
   if (variant === "custom" || variant === "password-toggle") {

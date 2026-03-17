@@ -1,8 +1,7 @@
 import { ReactNode, useMemo } from "react";
 
-import type { FeatureType } from "@/hooks/useFeatureLoading";
-import { useFeatureLoading } from "@/hooks/useFeatureLoading";
-import { useCriticalLoading , useGlobalLoading } from "@/hooks/useGlobalLoading";
+import { type FeatureType,useFeatureLoading } from "@/hooks/useFeatureLoading";
+import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 import { cn } from "../../lib/classnameUtilities";
 
@@ -48,7 +47,7 @@ export function GlobalLoadingIndicator({
 
   return (
     <div className={cn("flex items-center justify-center p-4", className)}>
-      {loadingComponent || <LoadingSpinner size={size} />}
+      {loadingComponent ?? <LoadingSpinner size={size} />}
     </div>
   );
 }
@@ -70,7 +69,7 @@ export function CriticalLoadingIndicator({
 
   return (
     <div className={cn("flex items-center justify-center p-4", className)}>
-      {loadingComponent || <LoadingSpinner size={size} />}
+      {loadingComponent ?? <LoadingSpinner size={size} />}
     </div>
   );
 }
@@ -111,6 +110,7 @@ export function FeatureLoadingIndicator({
   const shouldShowLoading = useMemo(() => {
     if (queriesOnly) return isQueryLoading;
     if (mutationsOnly) return isMutationLoading;
+
     return isLoading;
   }, [queriesOnly, mutationsOnly, isQueryLoading, isMutationLoading, isLoading]);
 
@@ -120,7 +120,7 @@ export function FeatureLoadingIndicator({
 
   return (
     <div className={cn("flex items-center justify-center p-4", className)}>
-      {loadingComponent || <LoadingSpinner size={size} />}
+      {loadingComponent ?? <LoadingSpinner size={size} />}
     </div>
   );
 }
@@ -184,7 +184,7 @@ export function QueryLoadingWrapper({
   if (isLoading) {
     return (
       <div className={cn("flex items-center justify-center p-4", className)}>
-        {loadingComponent || <LoadingSpinner size={size} />}
+        {loadingComponent ?? <LoadingSpinner size={size} />}
       </div>
     );
   }
@@ -192,7 +192,7 @@ export function QueryLoadingWrapper({
   if (isError) {
     return (
       <div className={cn("flex items-center justify-center p-4", className)}>
-        {errorComponent || (
+        {errorComponent ?? (
           <div className="text-center text-error">
             <p className="font-medium">Error loading data</p>
             {error?.message && (
@@ -226,7 +226,7 @@ interface MutationLoadingButtonProps {
   /**
    * Additional props to pass to the button
    */
-  [key: string]: any;
+  [key: string]: string | boolean | number | undefined | ReactNode;
 }
 
 /**

@@ -26,6 +26,7 @@ function isUserDetailsResponse(value: unknown): value is UserDetailsResponse {
     return false;
   }
   const candidate = value as Record<string, unknown>;
+
   return (
     typeof candidate.id === "number" &&
     typeof candidate.email === "string" &&
@@ -41,7 +42,7 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
 
   const root = value as Record<string, unknown>;
   const candidateRaw =
-    root && typeof root.data === "object" && root.data !== null
+    typeof root.data === "object" && root.data !== null
       ? (root.data as Record<string, unknown>)
       : root;
 
@@ -81,7 +82,7 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
         ? candidate.isProfileComplete
         : false,
     subscription:
-      typeof candidate.subscription === "object" && candidate.subscription !== null
+      typeof candidate.subscription === "object"
         ? (candidate.subscription as UserDetailsResponse["subscription"])
         : { status: "free" as const, hasStripeCustomer: false, currentPeriodEnd: undefined },
   };
@@ -107,6 +108,7 @@ export function createUserApi(auth: { syncUser: (token?: string) => Promise<unkn
           headers: await getHeadersAsync(false),
           credentials: "include",
         });
+
         return handleResponse(response);
       };
 
@@ -126,6 +128,7 @@ export function createUserApi(auth: { syncUser: (token?: string) => Promise<unkn
 
     syncAndGetUserDetails: async (token?: string): Promise<UserDetailsResponse> => {
       await auth.syncUser(token);
+
       return userApi.getUserDetails();
     },
 
@@ -146,6 +149,7 @@ export function createUserApi(auth: { syncUser: (token?: string) => Promise<unkn
         body: JSON.stringify(payloadToSend),
         credentials: "include",
       });
+
       return (await handleResponse(response)) as {
         success: boolean;
         message: string;
@@ -169,6 +173,7 @@ export function createUserApi(auth: { syncUser: (token?: string) => Promise<unkn
           credentials: "include",
         },
       );
+
       return (await handleResponse(response)) as {
         success: boolean;
         message: string;
@@ -178,11 +183,25 @@ export function createUserApi(auth: { syncUser: (token?: string) => Promise<unkn
 }
 
 // Create userApi with circular dependency resolved via lazy init
-let userApi: ReturnType<typeof createUserApi>;
+let _userApi: ReturnType<typeof createUserApi> | undefined;
 
 export function initUserApi(auth: { syncUser: (token?: string) => Promise<unknown> }) {
-  userApi = createUserApi(auth);
-  return userApi;
+  _userApi = createUserApi(auth);
+
+  return _userApi;
 }
 
-export { userApi };
+export function getUserApi(): ReturnType<typeof createUserApi> {
+  if (!_userApi) {
+    throw new Error("userApi not initialized. Call initUserApi first.");
+  }
+
+  return _userApi;
+}
+
+// Deprecated: use getUserApi() instead
+export const userApi = new Proxy({} as ReturnType<typeof createUserApi>, {
+  get(_target, property) {
+    return getUserApi()[property as keyof ReturnType<typeof createUserApi>];
+  },
+});

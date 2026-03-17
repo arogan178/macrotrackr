@@ -70,6 +70,7 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
             meal.carbs,
             meal.fats
           ));
+
           return (
             <motion.div
               key={meal.id}

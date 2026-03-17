@@ -4,7 +4,7 @@ import { motion } from "motion/react";
 import { BUTTON_SIZES } from "@/components/utils/Constants";
 import { cn } from "@/lib/classnameUtilities";
 
-export type TabButtonProps = {
+export interface TabButtonProps {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
@@ -15,7 +15,7 @@ export type TabButtonProps = {
   ariaLabel?: string;
   role?: string;
   "aria-selected"?: boolean;
-};
+}
 
 type ButtonSizeKey = keyof typeof BUTTON_SIZES;
 
@@ -44,12 +44,12 @@ function TabButton({
 }: ExtendedTabButtonProps) {
   const baseRounded = rounded ?? "rounded-lg";
   const motionBg = activeBg ?? "bg-surface-3"; // Darker, premium active state
-  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey] || BUTTON_SIZES.md;
+  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
 
   // Check for reduced motion preference
   const prefersReducedMotion =
     typeof globalThis !== "undefined" &&
-    globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
     <button

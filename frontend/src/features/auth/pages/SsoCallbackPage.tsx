@@ -46,7 +46,7 @@ export default function SSOCallbackPage() {
   const hasProcessedRouting = useRef(false);
 
   const isSignUpFlow = search.flow === "signup";
-  const redirectTo = normalizeAuthRedirect(search.redirectTo || "/home");
+  const redirectTo = normalizeAuthRedirect(search.redirectTo ?? "/home");
 
   // Step 1: Let Clerk process the OAuth redirect callback
   useEffect(() => {
@@ -83,6 +83,7 @@ export default function SSOCallbackPage() {
         hasProcessedRouting.current = true;
         setError(callbackResolution.message);
       }
+
       return;
     }
 
@@ -99,6 +100,7 @@ export default function SSOCallbackPage() {
             to: "/auth-ready",
             search: { redirectTo: safeRedirectTo },
           });
+
           return;
         }
 
@@ -121,7 +123,7 @@ export default function SSOCallbackPage() {
             const userDetails = await userApi.getUserDetails();
             existingUser = true;
 
-            if (userDetails && typeof userDetails === "object") {
+            if (typeof userDetails === "object") {
               if (typeof userDetails.isProfileComplete === "boolean") {
                 profileComplete = userDetails.isProfileComplete;
               } else if ("dateOfBirth" in userDetails) {
@@ -153,15 +155,16 @@ export default function SSOCallbackPage() {
             to: "/auth-ready",
             search: { redirectTo: safeRedirectTo },
           });
+
           return;
         }
 
         // New user or incomplete profile → go to profile setup
         const socialData = {
-          firstName: user?.firstName || "",
-          lastName: user?.lastName || "",
-          email: user?.primaryEmailAddress?.emailAddress || "",
-          dateOfBirth: (user?.unsafeMetadata?.dateOfBirth as string) || "",
+          firstName: user?.firstName ?? "",
+          lastName: user?.lastName ?? "",
+          email: user?.primaryEmailAddress?.emailAddress ?? "",
+          dateOfBirth: (user!.unsafeMetadata.dateOfBirth as string | undefined) ?? "",
         };
         sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
         navigate({

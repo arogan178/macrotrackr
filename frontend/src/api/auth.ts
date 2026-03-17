@@ -13,6 +13,7 @@ export const authApi = {
       body: JSON.stringify({ token, newPassword }),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as {
       success: boolean;
       message?: string;
@@ -31,6 +32,7 @@ export const authApi = {
       headers,
       credentials: "include",
     });
+
     return (await handleResponse(response)) as AuthSyncResponse;
   },
 };

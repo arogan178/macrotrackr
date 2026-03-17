@@ -2,7 +2,7 @@ import type { Ingredient } from "@/types/macro";
 
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
 
-export type MacroEntryInput = {
+export interface MacroEntryInput {
   protein: number;
   carbs: number;
   fats: number;
@@ -11,9 +11,9 @@ export type MacroEntryInput = {
   entryDate: string; // YYYY-MM-DD
   entryTime: string; // HH:mm
   ingredients?: Ingredient[];
-};
+}
 
-export type EditingEntry = {
+export interface EditingEntry {
   id: number;
   protein: number;
   carbs: number;
@@ -23,4 +23,4 @@ export type EditingEntry = {
   entryDate?: string; // optional
   entryTime?: string; // optional
   ingredients?: Ingredient[];
-};
+}

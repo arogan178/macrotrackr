@@ -67,21 +67,28 @@ export const ACTIVITY_LEVELS: Record<
 
 // Helper functions for activity level lookups
 export function getActivityLevelLabel(level: number): string {
-  return ACTIVITY_LEVELS[level]?.label || "Unknown";
+  const activity = ACTIVITY_LEVELS[level];
+
+  return activity ? activity.label : "Unknown";
 }
 
 export function getActivityLevelValue(level: number): ActivityLevel {
-  return ACTIVITY_LEVELS[level]?.value || "sedentary";
+  const activity = ACTIVITY_LEVELS[level];
+
+  return activity ? activity.value : "sedentary";
 }
 
 export function getActivityLevelMultiplier(level: number): number {
-  return ACTIVITY_LEVELS[level]?.multiplier || 1;
+  const activity = ACTIVITY_LEVELS[level];
+
+  return activity ? activity.multiplier : 1;
 }
 
 export function getActivityLevelFromString(value: ActivityLevel): number {
   for (const [key, data] of Object.entries(ACTIVITY_LEVELS)) {
     if (data.value === value) return Number(key);
   }
+
   return 1; // Default to sedentary if not found
 }
 
@@ -96,6 +103,7 @@ export function calculateAge(birthDate: string): number {
   if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
     age--;
   }
+
   return Math.max(0, Math.min(120, age));
 }
 
@@ -106,7 +114,7 @@ export function calculateAge(birthDate: string): number {
 export function createNutritionProfile(
   settings: NutritionProfileSource,
 ): UserNutritionalProfile {
-  const age = calculateAge(settings.dateOfBirth || "");
+  const age = calculateAge(settings.dateOfBirth ?? "");
   let bmr = 0;
   let tdee = 0;
 

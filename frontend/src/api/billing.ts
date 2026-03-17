@@ -28,6 +28,7 @@ export const billingApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as BillingDetailsResponse;
   },
 

@@ -6,11 +6,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import type {
-  MacroEntryCreatePayload,
-  MacroEntryUpdatePayload,
-} from "@/api/macros";
-import { macrosApi } from "@/api/macros";
+import { type MacroEntryCreatePayload, type MacroEntryUpdatePayload,macrosApi } from "@/api/macros";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
@@ -52,6 +48,7 @@ export function useMacroHistory(
         offset,
         options,
       );
+
       return normalizePaginatedHistory(response, limit, offset);
     },
     ...queryConfigs.macros, // 2 minutes stale time for macro data
@@ -75,10 +72,12 @@ export function useMacroHistoryInfinite(
         pageParameter,
         options,
       );
+
       return normalizePaginatedHistory(response, limit, pageParameter);
     },
     getNextPageParam: (lastPage, allPages) => {
       if (!lastPage.hasMore) return;
+
       return allPages.length * limit; // Calculate next offset
     },
     initialPageParam: 0,
@@ -98,6 +97,7 @@ export function useMacroHistoryForDateRange(
         startDate,
         endDate,
       });
+
       return response.entries;
     },
     ...queryConfigs.longLived,
@@ -110,7 +110,7 @@ export function useMacroHistoryForDateRange(
 // Query hook for daily macro totals by date
 export function useMacroDailyTotals(date?: string) {
   const today = todayISO();
-  const queryDate = date || today;
+  const queryDate = date ?? today;
 
   return useQuery({
     queryKey: queryKeys.macros.dailyTotals(queryDate),
@@ -119,6 +119,7 @@ export function useMacroDailyTotals(date?: string) {
         startDate: queryDate,
         endDate: queryDate,
       });
+
       return response as MacroDailyTotals;
     },
     ...queryConfigs.macros, // 2 minutes stale time for macro data
@@ -131,6 +132,7 @@ export function useMacroTarget() {
     queryKey: queryKeys.macros.targets(),
     queryFn: async () => {
       const response = await macrosApi.getMacroTarget();
+
       return response?.macroTarget ?? null;
     },
     ...queryConfigs.longLived, // 5 minutes stale time for targets (less frequently changed)
@@ -168,7 +170,7 @@ export function useAddMacroEntry() {
         id: temporaryId,
         createdAt: new Date().toISOString(),
         ...variables,
-        mealName: variables.mealName || "",
+        mealName: variables.mealName ?? "",
         optimistic: true,
       };
 
@@ -188,7 +190,7 @@ export function useAddMacroEntry() {
                 }
               : page,
           ),
-          pageParams: oldData.pageParams ?? [0],
+          pageParams: oldData.pageParams,
         };
       });
 
@@ -210,12 +212,13 @@ export function useAddMacroEntry() {
               calories: entryCalories,
             };
           }
+
           return {
             ...oldData,
-            protein: (oldData.protein ?? 0) + variables.protein,
-            carbs: (oldData.carbs ?? 0) + variables.carbs,
-            fats: (oldData.fats ?? 0) + variables.fats,
-            calories: (oldData.calories ?? 0) + entryCalories,
+            protein: oldData.protein + variables.protein,
+            carbs: oldData.carbs + variables.carbs,
+            fats: oldData.fats + variables.fats,
+            calories: oldData.calories + entryCalories,
           };
         },
       );
@@ -249,7 +252,7 @@ export function useAddMacroEntry() {
           pages: oldData.pages.map((page) => ({
             ...page,
             entries: page.entries.map((entry) =>
-              entry.id === context?.tempId ? newEntryFromServer : entry,
+              entry.id === context.tempId ? newEntryFromServer : entry,
             ),
           })),
         };
@@ -273,6 +276,7 @@ export function useAddMacroEntry() {
               newEntryFromServer.fats,
             );
             const caloriesDiff = newCalories - oldCalories;
+
             return {
               ...oldData,
               protein: oldData.protein - variables.protein + newEntryFromServer.protein,
@@ -320,12 +324,12 @@ export function useUpdateMacroEntry() {
       let entryDate: string | undefined;
       const previousHistoryData = getMacroHistorySnapshots(queryClient);
       const historyData = previousHistoryData.find(([, data]) => {
-        return data?.pages.some((page) => page.entries.some((entry) => entry.id === id));
+        return data?.pages.some((page) => page.entries.some((e) => e.id === id));
       })?.[1];
 
       if (historyData?.pages) {
         for (const page of historyData.pages) {
-          const foundEntry = page.entries.find((entry) => entry.id === id);
+          const foundEntry = page.entries.find((e) => e.id === id);
           if (foundEntry) {
             entryDate = foundEntry.entryDate;
             break;
@@ -405,7 +409,7 @@ export function useUpdateMacroEntry() {
     onError: (error, _variables, context) => {
       // Rollback optimistic updates
       restoreMacroHistorySnapshots(queryClient, context?.previousHistoryData ?? []);
-      if (context?.entryDate && context?.previousDailyTotals !== undefined) {
+      if (context?.entryDate && context.previousDailyTotals !== undefined) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(context.entryDate),
           context.previousDailyTotals,
@@ -515,7 +519,7 @@ export function useDeleteMacroEntry() {
     onError: (error, _id, context) => {
       // Rollback optimistic updates
       restoreMacroHistorySnapshots(queryClient, context?.previousHistoryData ?? []);
-      if (context?.entryDate && context?.previousDailyTotals !== undefined) {
+      if (context?.entryDate && context.previousDailyTotals !== undefined) {
         queryClient.setQueryData(
           queryKeys.macros.dailyTotals(context.entryDate),
           context.previousDailyTotals,

@@ -38,7 +38,7 @@ function ChartCard({
         className="flex h-full flex-col"
       >
         {/* Header */}
-        {(title || action) && (
+        {(title ?? action) && (
           <div className="mb-4 flex items-center justify-between">
             {title && (
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">

@@ -183,6 +183,7 @@ function Modal(properties: ModalProps) {
 
   useEffect(() => {
     setIsMounted(true);
+
     return () => setIsMounted(false);
   }, []);
 

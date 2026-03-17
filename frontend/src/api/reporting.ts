@@ -42,6 +42,7 @@ export const reportingApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as MacroDensitySummaryItem[];
   },
 
@@ -57,6 +58,7 @@ export const reportingApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 };

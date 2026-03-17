@@ -55,6 +55,7 @@ export default function AuthReadyPage() {
         // If not signed in, redirect to login
         if (!isSignedIn) {
           navigate({ to: "/login", search: { returnTo: undefined } });
+
           return;
         }
 
@@ -76,7 +77,7 @@ export default function AuthReadyPage() {
         let syncSuccess = false;
         if (!shouldBypassSync) {
           try {
-            await authApi.syncUser(token || undefined);
+            await authApi.syncUser(token ?? undefined);
             syncSuccess = true;
           } catch (syncError: unknown) {
             // If it's a 401, the token might be invalid.
@@ -84,6 +85,7 @@ export default function AuthReadyPage() {
               const errorWithStatus = syncError as { status: number };
               if (errorWithStatus.status === 401) {
                 setError("Authentication failed. Please sign in again.");
+
                 return;
               }
             }
@@ -95,6 +97,7 @@ export default function AuthReadyPage() {
             setError(
               "We couldn't link your account yet. Please try signing in again.",
             );
+
             return;
           }
         }
@@ -111,6 +114,7 @@ export default function AuthReadyPage() {
             search: { redirectTo },
             replace: true,
           });
+
           return;
         }
 
@@ -159,6 +163,7 @@ export default function AuthReadyPage() {
             to: "/profile-setup",
             search: { redirectTo },
           });
+
           return;
         }
 
@@ -174,6 +179,7 @@ export default function AuthReadyPage() {
           navigate({ to: "/home", search: { limit: 20, offset: 0 } });
         } else {
           globalThis.location.assign(normalizedRedirectTo);
+
           return;
         }
       } catch {

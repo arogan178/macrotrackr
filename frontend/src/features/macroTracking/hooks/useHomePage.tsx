@@ -14,6 +14,7 @@ function isMacroEntry(entry: unknown): entry is MacroEntry {
   }
 
   const candidate = entry as Record<string, unknown>;
+
   return (
     typeof candidate.id === "number" &&
     typeof candidate.protein === "number" &&
@@ -27,6 +28,7 @@ export function useNutritionProfile(user: NutritionProfileSource | undefined) {
     if (user && typeof user.id === "number") {
       return createNutritionProfile(user);
     }
+
     return undefined;
   }, [user]);
 }
@@ -36,10 +38,11 @@ export function useHomeHeader(
   isLoading: boolean,
 ) {
   const title = useMemo(() => {
-    return `Welcome back, ${isLoading ? "..." : user?.firstName || "User"}`;
+    return `Welcome back, ${isLoading ? "..." : user?.firstName ?? "User"}`;
   }, [isLoading, user?.firstName]);
 
   const subtitle = useMemo(() => getDisplayDate(new Date()), []);
+
   return { title, subtitle };
 }
 
@@ -59,14 +62,15 @@ export function useHistoryPagination(pageSize: number) {
     }
 
     return pages
-      .flatMap((page) => (Array.isArray(page?.entries) ? page.entries : []))
+      .flatMap((page) => (Array.isArray(page.entries) ? page.entries : []))
       .filter((entry) => isMacroEntry(entry));
   }, [macroHistoryData]);
 
   // Get limits from the first page (all pages have same limits data)
   const limits = useMemo(() => {
     const firstPage = macroHistoryData?.pages?.[0];
-    return firstPage?.limits;
+
+    return firstPage!.limits;
   }, [macroHistoryData]);
 
   const historyHasMore = hasNextPage;

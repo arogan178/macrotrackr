@@ -61,5 +61,6 @@ export function getMacroPercentages({
   if (checkSum !== 100) {
     fOut = 100 - pOut - cOut;
   }
+
   return { proteinPct: pOut, carbsPct: cOut, fatsPct: Math.max(0, fOut) };
 }

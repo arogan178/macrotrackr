@@ -95,10 +95,10 @@ export const EntryCard = memo(
           />
         </div>
 
-        {(entry.foodName || entry.mealName) && (
+        {(entry.foodName ?? entry.mealName) && (
           <div className="mb-3">
             <span className="text-sm text-muted">
-              {entry.foodName || entry.mealName}
+              {entry.foodName ?? entry.mealName}
             </span>
           </div>
         )}
@@ -160,7 +160,7 @@ export const EntryCard = memo(
                         {ing.quantity && (
                           <span className="text-xs text-muted">
                             {ing.quantity}
-                            {ing.unit || ""}
+                            {ing.unit ?? ""}
                           </span>
                         )}
                       </div>

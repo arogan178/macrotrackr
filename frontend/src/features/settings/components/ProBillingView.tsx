@@ -23,14 +23,14 @@ const ProBillingView: React.FC<{
   // If user is needed, get from loader: const { user } = useLoaderData({ from: '/' });
 
   // Extract details from billingDetails
-  const price = billingDetails?.price || "";
+  const price = billingDetails?.price ?? "";
   const paymentMethod = billingDetails?.paymentMethod;
   const renewalDate = billingDetails?.subscription?.currentPeriodEnd
     ? new Date(
         billingDetails.subscription.currentPeriodEnd,
       ).toLocaleDateString()
     : undefined;
-  const status = billingDetails?.subscription?.status || "unknown";
+  const status = billingDetails?.subscription?.status ?? "unknown";
   const isCanceled = status === "canceled";
   const isActionRequired = status === "past_due" || status === "unpaid";
 
@@ -59,7 +59,7 @@ const ProBillingView: React.FC<{
                 <span className="text-lg font-semibold text-success">
                   Pro Plan Member
                 </span>
-                <div className="mt-1 flex items-center"></div>
+                <div className="mt-1 flex items-center" />
               </div>
             </div>
             <StatusBadge status={status} />
@@ -79,7 +79,7 @@ const ProBillingView: React.FC<{
                   {isCanceled ? "Expires" : "Renews"}
                 </div>
                 <div className="font-semibold text-foreground">
-                  {renewalDate || "-"}
+                  {renewalDate ?? "-"}
                 </div>
               </div>
               <div className="text-center sm:text-left">
@@ -163,7 +163,7 @@ const ProBillingView: React.FC<{
                   const response = await billingApi.cancelSubscription();
                   setShowCancel(false);
                   showNotification(
-                    response?.message || "Subscription cancelled.",
+                    response.message,
                     "success",
                   );
                   // Refresh user details to update UI
@@ -171,8 +171,7 @@ const ProBillingView: React.FC<{
                 } catch (error) {
                   setShowCancel(false);
                   showNotification(
-                    (error as Error)?.message ||
-                      "Failed to cancel subscription.",
+                    (error as Error).message,
                     "error",
                   );
                 }
@@ -192,7 +191,7 @@ const ProBillingView: React.FC<{
         size="md"
         variant="form"
         hideDefaultButtons
-        hideClose={true}
+        hideClose
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
@@ -209,19 +208,19 @@ const ProBillingView: React.FC<{
               </p>
               <ul className="space-y-2 text-sm text-muted">
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Update your payment method
                 </li>
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Download invoices and receipts
                 </li>
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Change your billing address
                 </li>
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Cancel your subscription
                 </li>
               </ul>

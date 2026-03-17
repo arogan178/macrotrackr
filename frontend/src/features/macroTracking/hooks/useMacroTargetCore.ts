@@ -20,6 +20,7 @@ function getUnlockedMacroKeys(
     "fatsPercentage",
   ] as MacroKey[]).filter((key) => {
     const macroName = key.replace("Percentage", "") as MacroType;
+
     return macroName !== currentMacro && !target.lockedMacros.includes(macroName);
   });
 }
@@ -42,6 +43,7 @@ export function balanceMacroPercentages(
   if (unlockedKeys.length === 0) {
     adjusted.proteinPercentage =
       100 - (adjusted.carbsPercentage + adjusted.fatsPercentage);
+
     return adjusted;
   }
 
@@ -54,6 +56,7 @@ export function balanceMacroPercentages(
   }, unlockedKeys[0]);
 
   adjusted[keyToAdjust] += sum > 100 ? -(sum - 100) : 100 - sum;
+
   return adjusted;
 }
 
@@ -74,6 +77,7 @@ export function calculateMacroAdjustment(
     .filter((lockedMacro) => lockedMacro !== macro || !isCurrentMacroLocked)
     .reduce((sum, lockedMacro) => {
       const key = `${lockedMacro}Percentage` as MacroKey;
+
       return sum + targetCopy[key];
     }, 0);
 
@@ -113,6 +117,7 @@ export function calculateMacroAdjustment(
         const difference = remainingTotal - distributedTotal;
         const adjustableKey = unlockedKeys.find((key) => {
           const currentValue = targetCopy[key];
+
           return currentValue + difference >= 5 && currentValue + difference <= 70;
         });
 
@@ -146,6 +151,7 @@ export function calculateMacroAdjustment(
     ] as MacroKey[])
       .filter((key) => {
         const macroName = key.replace("Percentage", "") as MacroType;
+
         return !targetCopy.lockedMacros.includes(macroName) || macroName === macro;
       })
       .filter((key) => targetCopy[key] > 5 && targetCopy[key] < 70);

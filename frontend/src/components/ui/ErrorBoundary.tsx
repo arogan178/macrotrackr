@@ -37,9 +37,9 @@ export class ErrorBoundary extends Component<
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     // Check if this is a query-related error
     const isQueryError =
-      error.message?.includes("query") ||
-      error.message?.includes("fetch") ||
-      error.name?.includes("Query");
+      error.message.includes("query") ||
+      error.message.includes("fetch") ||
+      error.name.includes("Query");
 
     return { hasError: true, error, isQueryError };
   }
@@ -66,7 +66,7 @@ export class ErrorBoundary extends Component<
     if (this.state.hasError) {
       // You can render any custom fallback UI
       return (
-        this.props.fallback || (
+        this.props.fallback ?? (
           <div className="flex min-h-screen items-center justify-center bg-surface p-4">
             <div className="w-full max-w-lg rounded-xl border border-border bg-surface p-6 shadow-modal">
               <div className="mb-4 text-error">

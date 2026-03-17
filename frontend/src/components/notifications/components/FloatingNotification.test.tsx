@@ -23,6 +23,7 @@ describe("FloatingNotification", () => {
 
   const renderWithQueryClient = (ui: React.ReactElement) => {
     const queryClient = createQueryClient();
+
     return render(
       <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>,
     );
