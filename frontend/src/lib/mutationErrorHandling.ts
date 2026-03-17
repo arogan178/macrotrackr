@@ -233,7 +233,7 @@ export class MutationErrorHandler {
     error: MutationError,
     context?: { operation: string; variables?: unknown },
   ): void {
-    logger.error(`Mutation error in ${context?.operation || "unknown"}:`, {
+    logger.error(`Mutation error in ${context?.operation ?? "unknown"}:`, {
       message: error.message,
       status: error.status,
     });
@@ -317,7 +317,7 @@ export function createStandardMutationOptions<
   errorHandler?: MutationErrorHandler;
   operation: string;
 }) {
-  const retryConfig = config.retryConfig || retryConfigs.standard;
+  const retryConfig = config.retryConfig ?? retryConfigs.standard;
 
   return {
     retry: createMutationRetryFunction(retryConfig),

@@ -65,6 +65,7 @@ export default function useDeferredVisibility(
 
         if (remaining === 0) {
           doHide();
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         } else if (!hideTimerReference.current) {
           hideTimerReference.current = globalThis.setTimeout(doHide, remaining);
         }

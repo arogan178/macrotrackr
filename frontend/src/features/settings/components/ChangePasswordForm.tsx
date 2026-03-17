@@ -45,6 +45,7 @@ const ChangePasswordForm = () => {
     if (passwordStrength <= 1) return "bg-error";
     if (passwordStrength <= 2) return "bg-warning";
     if (passwordStrength <= 3) return "bg-primary";
+
     return "bg-success";
   };
 
@@ -52,6 +53,7 @@ const ChangePasswordForm = () => {
     if (passwordStrength <= 1) return "Weak";
     if (passwordStrength <= 2) return "Fair";
     if (passwordStrength <= 3) return "Good";
+
     return "Strong";
   };
 
@@ -63,6 +65,7 @@ const ChangePasswordForm = () => {
     if (newPassword !== confirmPassword) {
       setFormError("New passwords do not match.");
       showNotification("New passwords do not match.", "error");
+
       return;
     }
 
@@ -70,6 +73,7 @@ const ChangePasswordForm = () => {
     if (passwordStrength < 3) {
       setFormError("Please choose a stronger password.");
       showNotification("Please choose a stronger password.", "error");
+
       return;
     }
 
@@ -77,11 +81,13 @@ const ChangePasswordForm = () => {
     if (!currentPassword) {
       setFormError("Current password is required.");
       showNotification("Current password is required.", "error");
+
       return;
     }
 
     if (!user) {
       showNotification("User not authenticated.", "error");
+
       return;
     }
 
@@ -108,9 +114,9 @@ const ChangePasswordForm = () => {
         const clerkError = error as {
           errors: Array<{ code?: string; message?: string }>;
         };
-        const firstError = clerkError.errors?.[0];
+        const firstError = clerkError.errors[0];
 
-        switch (firstError?.code) {
+        switch (firstError.code) {
           case "form_password_incorrect": {
             errorMessage = "Current password is incorrect.";
 
@@ -128,7 +134,7 @@ const ChangePasswordForm = () => {
             break;
           }
           default: {
-            if (firstError?.message) {
+            if (firstError.message) {
               errorMessage = firstError.message;
             }
           }

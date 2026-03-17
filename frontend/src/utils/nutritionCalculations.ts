@@ -81,6 +81,7 @@ export function calculateCaloriePercentages(
   const fatsPercent = Math.round(
     ((fats * CALORIES_PER_GRAM.fats) / totalCalories) * 100,
   );
+
   return { proteinPercent, carbsPercent, fatsPercent };
 }
 
@@ -99,6 +100,7 @@ export function calculateMacroTarget(
   const fatsTarget = Math.round(
     (totalCalories * (fatsPercentage / 100)) / CALORIES_PER_GRAM.fats,
   );
+
   return { proteinTarget, carbsTarget, fatsTarget };
 }
 
@@ -106,7 +108,7 @@ export function calculateMacroTarget(
  * Daily totals
  */
 export function calculateDailyTotals(entries: MacroEntry[]): MacroDailyTotals {
-  if (!entries || entries.length === 0) {
+  if (entries.length === 0) {
     return { ...DEFAULT_MACRO_TOTALS };
   }
   const totals: MacroDailyTotals = { ...DEFAULT_MACRO_TOTALS };
@@ -116,6 +118,7 @@ export function calculateDailyTotals(entries: MacroEntry[]): MacroDailyTotals {
     totals.fats += entry.fats || 0;
     totals.calories += caloriesFromEntryRaw(entry);
   }
+
   return {
     protein: Math.round(totals.protein),
     carbs: Math.round(totals.carbs),
@@ -144,6 +147,7 @@ function calculateBMRValue(
   const safeAge = Math.min(120, Math.max(1, age));
   const baseCalculation = 10 * safeWeight + 6.25 * safeHeight - 5 * safeAge;
   const bmr = isMale ? baseCalculation + 5 : baseCalculation - 161;
+
   return Math.max(500, bmr);
 }
 
@@ -158,6 +162,7 @@ export function calculateBMR(
 
 function calculateTDEEValue(bmr: number, activityMultiplier: number): number {
   if (!bmr) return 0;
+
   return Math.round(bmr * activityMultiplier);
 }
 
@@ -173,13 +178,14 @@ export function calculateTDEEByActivityLevel(
     { value: ActivityLevel; multiplier: number }
   >,
 ): number {
-  let multiplier = activityLevelsMap[1]?.multiplier ?? 1;
+  let multiplier = activityLevelsMap[1].multiplier;
   for (const level of Object.values(activityLevelsMap)) {
     if (level.value === activityLevel) {
       multiplier = level.multiplier;
       break;
     }
   }
+
   return calculateTDEEValue(bmr, multiplier);
 }
 
@@ -242,6 +248,7 @@ export function calculateRecommendedDeficit(
     MAX_WEEKLY_WEIGHT_LOSS,
   );
   const dailyChange = (safeWeeklyLoss * CALORIES_PER_KG_FAT) / 7;
+
   return Math.round(isWeightLoss ? dailyChange : -dailyChange);
 }
 
@@ -250,6 +257,7 @@ export function calculateWeeklyChange(
   targetWeight: number,
 ): number {
   const timeCalc = calculateTimeToGoal(startingWeight, targetWeight, 500);
+
   return timeCalc.expectedWeightLossPerWeek;
 }
 
@@ -261,6 +269,7 @@ export function calculateCalorieTarget(
   if (startingWeight === targetWeight) {
     return tdee;
   }
+
   return startingWeight > targetWeight ? tdee - 500 : tdee + 300;
 }
 
@@ -269,6 +278,7 @@ export function calculateWeeksToGoal(
   targetWeight: number,
 ): number {
   const timeCalc = calculateTimeToGoal(startingWeight, targetWeight, 500);
+
   return timeCalc.weeksToGoal;
 }
 
@@ -302,6 +312,7 @@ export function generateWeightGoalCalculations(
   if (weightGoal === "maintain") {
     const targetDate = new Date();
     targetDate.setDate(targetDate.getDate() + 7);
+
     return {
       startingWeight,
       targetWeight,
@@ -320,6 +331,7 @@ export function generateWeightGoalCalculations(
   if (effectiveCalorieChange <= 0) {
     const fallbackDate = new Date();
     fallbackDate.setDate(fallbackDate.getDate() + 365);
+
     return {
       startingWeight,
       targetWeight,

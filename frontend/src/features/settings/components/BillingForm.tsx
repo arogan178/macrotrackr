@@ -52,6 +52,7 @@ const BillingForm: React.FC = () => {
         "Pro subscription required to access billing portal.",
         "info",
       );
+
       return;
     }
 
@@ -82,8 +83,7 @@ const BillingForm: React.FC = () => {
   const isPro = subscriptionStatus === "pro";
 
   return (
-    <>
-      <CardContainer className="p-6 sm:p-8">
+    <CardContainer className="p-6 sm:p-8">
         {/* Enhanced responsive header with improved mobile layout */}
         <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
           <div className="flex items-center">
@@ -129,7 +129,6 @@ const BillingForm: React.FC = () => {
           />
         )}
       </CardContainer>
-    </>
   );
 };
 

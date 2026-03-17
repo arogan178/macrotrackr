@@ -48,6 +48,7 @@ export function normalizePaginatedHistory(
   }
 
   const result = response as Record<string, unknown>;
+
   return {
     entries: Array.isArray(result.entries) ? (result.entries as MacroEntry[]) : [],
     total: typeof result.total === "number" ? result.total : 0,

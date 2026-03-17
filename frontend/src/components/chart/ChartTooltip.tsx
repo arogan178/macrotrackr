@@ -23,13 +23,6 @@ interface LineChartPayloadEntry {
 }
 
 /**
- * Bar chart payload entry from recharts
- */
-interface BarChartPayloadEntry {
-  payload: TooltipData;
-}
-
-/**
  * Generic recharts payload entry that could be either line or bar chart
  */
 interface RechartsPayloadEntry {
@@ -255,6 +248,7 @@ export function StackedBarPercentageTooltip({
         {macroKeys.map((key) => {
           const pct = Number(data[key]) * 100;
           const color = colors?.[key];
+
           return (
             <p key={key} className="text-foreground">
               <span

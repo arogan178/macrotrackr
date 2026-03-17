@@ -26,10 +26,12 @@ function ResetPasswordForm() {
     event.preventDefault();
     if (!token) {
       showNotification("No reset token found.", "error");
+
       return;
     }
     if (newPassword !== confirmPassword) {
       showNotification("Passwords do not match.", "error");
+
       return;
     }
     try {
@@ -37,9 +39,9 @@ function ResetPasswordForm() {
       showNotification("Password has been reset successfully.", "success");
     } catch (error) {
       if (error instanceof ApiError) {
-        showNotification(error.message || "Reset failed", "error");
+        showNotification(error.message ?? "Reset failed", "error");
       } else if (error instanceof Error) {
-        showNotification(error.message || "Reset failed", "error");
+        showNotification(error.message ?? "Reset failed", "error");
       } else {
         showNotification("An unexpected error occurred.", "error");
       }
@@ -65,7 +67,7 @@ function ResetPasswordForm() {
           value={newPassword}
           onChange={setNewPassword}
           type="password"
-          required={true}
+          required
           placeholder="••••••••"
         />
 
@@ -74,7 +76,7 @@ function ResetPasswordForm() {
           value={confirmPassword}
           onChange={setConfirmPassword}
           type="password"
-          required={true}
+          required
           placeholder="••••••••"
         />
 

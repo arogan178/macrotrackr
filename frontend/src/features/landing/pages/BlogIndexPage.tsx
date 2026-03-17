@@ -60,7 +60,7 @@ const BlogIndexPage: React.FC = () => {
     [navigate],
   );
 
-  const activeCategory = search.category || "all";
+  const activeCategory = search.category ?? "all";
 
   return (
     <div
@@ -133,7 +133,7 @@ const BlogIndexPage: React.FC = () => {
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {activeCategory === "all"
                   ? "All Articles"
-                  : categories.find((c) => c.slug === activeCategory)?.name ||
+                   : categories.find((c) => c.slug === activeCategory)?.name ??
                     activeCategory}
               </h2>
             </div>
@@ -147,7 +147,7 @@ const BlogIndexPage: React.FC = () => {
         <AnimatePresence mode="wait">
           {featuredPost ? (
             <motion.div
-              key={`articles-${activeCategory}-${search.tag || "all-tags"}-${search.q || "all-query"}`}
+              key={`articles-${activeCategory}-${search.tag ?? "all-tags"}-${search.q ?? "all-query"}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

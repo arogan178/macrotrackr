@@ -130,14 +130,15 @@ export const UnitConverter = {
             pints: "pt",
           };
 
-          unit = unitMap[unitMatch] || "g";
+          unit = unitMap[unitMatch];
         }
 
         // Handle ingredient-specific conversions for cups
-        const ingredient = match[3]?.toLowerCase();
+        const ingredient = match[3].toLowerCase();
         if (unit === "cup" && ingredient && US_CUP_WEIGHTS[ingredient]) {
           // Convert cup measurement to grams using specific weight
           const weightInGrams = quantity * US_CUP_WEIGHTS[ingredient];
+
           return {
             quantity: Math.round(weightInGrams * 100) / 100,
             unit: "g",
@@ -255,6 +256,7 @@ export const UnitConverter = {
     }
 
     const rounded = Math.round(quantity * 100) / 100;
+
     return `${rounded}${unit}`;
   },
 
@@ -284,5 +286,6 @@ export const UnitConverter = {
 export function getMetricServing(quantity: number, unit: string): { quantity: number; unit: string } {
   const parsed = UnitConverter.parseQuantity(`${quantity} ${unit}`);
   const metric = UnitConverter.toMetric(parsed.quantity, parsed.unit as UnitType);
+
   return { quantity: metric.quantity, unit: metric.unit };
 }

@@ -79,6 +79,7 @@ export const hasSettingsChanged = (
   original: UserSettings | undefined,
 ): boolean => {
   if (!current || !original) return current !== original;
+
   return JSON.stringify(current) !== JSON.stringify(original);
 };
 
@@ -88,5 +89,6 @@ export const hasMacroTargetsChanged = (
   original: MacroTargetSettings | undefined,
 ): boolean => {
   if (!current || !original) return current !== original;
+
   return JSON.stringify(current) !== JSON.stringify(original);
 };

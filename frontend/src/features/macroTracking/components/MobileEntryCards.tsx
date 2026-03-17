@@ -85,6 +85,7 @@ const MobileEntryCards = memo(
       estimateSize: (index) => {
         const item = virtualItems[index];
         if (item.type === "header") return 60;
+
         return 200;
       },
       overscan: 5,
@@ -150,6 +151,7 @@ const MobileEntryCards = memo(
           >
             {items.map((virtualRow) => {
               const item = virtualItems[virtualRow.index];
+
               return (
                 <div
                   key={virtualRow.key}

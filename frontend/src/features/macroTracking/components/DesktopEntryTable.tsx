@@ -73,6 +73,7 @@ const DesktopEntryTable = memo(
         } else {
           newSet.add(id);
         }
+
         return newSet;
       });
     };
@@ -103,7 +104,8 @@ const DesktopEntryTable = memo(
     const visibleRows = useMemo(() => {
       return tableData.filter((data) => {
         if (data.isGroup) return true;
-        const parentDate = data.parentDate || data.date;
+            const parentDate = data.parentDate ?? data.date;
+
         return !collapsedDates.has(parentDate);
       });
     }, [tableData, collapsedDates]);
@@ -150,6 +152,7 @@ const DesktopEntryTable = memo(
               const entry = data.entries[0];
               const hasIngredients =
                 entry.ingredients && entry.ingredients.length > 0;
+
               return (
                 <div className="flex items-center gap-2 pl-6 text-sm whitespace-nowrap text-foreground">
                   {isSelectionMode && (
@@ -194,14 +197,15 @@ const DesktopEntryTable = memo(
             if (data.isGroup) return;
 
             const entry = data.entries[0];
+
             return (
               <div className="flex flex-col items-center text-center text-sm text-foreground">
                 <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
                   {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
                 </span>
-                {(entry.foodName || entry.mealName) && (
+                {(entry.foodName ?? entry.mealName) && (
                   <span className="mt-1 block text-xs font-medium text-foreground">
-                    {entry.foodName || entry.mealName}
+                    {entry.foodName ?? entry.mealName}
                   </span>
                 )}
               </div>
@@ -211,7 +215,7 @@ const DesktopEntryTable = memo(
         columnHelper.accessor("totals.protein", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-protein"></div>
+              <div className="h-2 w-2 rounded-full bg-protein" />
               Protein
             </div>
           ),
@@ -220,13 +224,14 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.protein
               : data.entries[0].protein;
+
             return <MacroCell value={value} suffix="g" color="text-protein" />;
           },
         }),
         columnHelper.accessor("totals.carbs", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-carbs"></div>
+              <div className="h-2 w-2 rounded-full bg-carbs" />
               Carbs
             </div>
           ),
@@ -235,13 +240,14 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.carbs
               : data.entries[0].carbs;
+
             return <MacroCell value={value} suffix="g" color="text-carbs" />;
           },
         }),
         columnHelper.accessor("totals.fats", {
           header: () => (
             <div className="flex items-center justify-center gap-1">
-              <div className="h-2 w-2 rounded-full bg-fats"></div>
+              <div className="h-2 w-2 rounded-full bg-fats" />
               Fats
             </div>
           ),
@@ -250,6 +256,7 @@ const DesktopEntryTable = memo(
             const value = data.isGroup
               ? data.totals.fats
               : data.entries[0].fats;
+
             return <MacroCell value={value} suffix="g" color="text-fats" />;
           },
         }),
@@ -264,6 +271,7 @@ const DesktopEntryTable = memo(
                   data.entries[0].carbs,
                   data.entries[0].fats,
                 );
+
             return (
               <MacroCell value={value} suffix=" kcal" color="text-foreground" />
             );
@@ -289,6 +297,7 @@ const DesktopEntryTable = memo(
               );
             } else {
               const entry = data.entries[0];
+
               return (
                 <IconButtonGroup
                   onEdit={() => onEdit(entry)}
@@ -345,6 +354,7 @@ const DesktopEntryTable = memo(
           <AnimatePresence initial={false}>
             {virtualItems.map((virtualRow) => {
               const data = visibleRows[virtualRow.index];
+
               return (
                 <motion.div
                   key={`virtual-${virtualRow.key}`}
@@ -378,6 +388,7 @@ const DesktopEntryTable = memo(
                       .rows.find((row) => {
                         const rowData = row.original;
                         if (rowData.isGroup) return rowData.date === data.date;
+
                         return rowData.entries[0].id === data.entries[0].id;
                       })
                       ?.getVisibleCells()
@@ -399,7 +410,7 @@ const DesktopEntryTable = memo(
                   <AnimatePresence initial={false}>
                     {!data.isGroup &&
                       expandedEntries.has(data.entries[0].id) &&
-                      <IngredientsList ingredients={data.entries[0].ingredients || []} calculateCalories={calculateCalories} />}
+                      <IngredientsList ingredients={data.entries[0].ingredients ?? []} calculateCalories={calculateCalories} />}
                   </AnimatePresence>
                 </motion.div>
               );
@@ -415,7 +426,7 @@ const DesktopEntryTable = memo(
           {table.getRowModel().rows.map((row) => {
             const data = row.original;
             const isGroup = data.isGroup;
-            const parentDate = data.parentDate || data.date;
+        const parentDate = data.parentDate ?? data.date;
 
             const isEntryCollapsed = !isGroup && collapsedDates.has(parentDate);
 
@@ -475,7 +486,7 @@ const DesktopEntryTable = memo(
                 <AnimatePresence initial={false}>
                   {!isGroup &&
                     expandedEntries.has(data.entries[0].id) &&
-                    <IngredientsList ingredients={data.entries[0].ingredients || []} calculateCalories={calculateCalories} />}
+                    <IngredientsList ingredients={data.entries[0].ingredients ?? []} calculateCalories={calculateCalories} />}
                 </AnimatePresence>
               </motion.div>
             );

@@ -99,7 +99,7 @@ const PricingPage: React.FC = () => {
           {/* Card-based pricing — matches landing page */}
           <CustomPricingCards
             onUpgrade={handleUpgrade}
-            showUpgradeButtons={true}
+            showUpgradeButtons
           />
 
           {/* FAQ Section */}
@@ -115,6 +115,7 @@ const PricingPage: React.FC = () => {
             <div className="mx-auto max-w-3xl space-y-4">
               {faqs.map((faq, index) => {
                 const isOpen = openFaq === index;
+
                 return (
                   <div
                     key={index}

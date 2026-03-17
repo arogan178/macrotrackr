@@ -187,7 +187,7 @@ export default function IngredientCard({
                 id={`ingredient-qty-${index}`}
                 type="number"
                 inputMode="decimal"
-                value={ingredient.quantity || ""}
+                value={ingredient.quantity ?? ""}
                 onChange={(event_) =>
                   onUpdateIngredient(
                     index,
@@ -206,7 +206,7 @@ export default function IngredientCard({
             <input
               id={`ingredient-unit-${index}`}
               type="text"
-              value={ingredient.unit || ""}
+              value={ingredient.unit ?? ""}
               onChange={(event_) =>
                 onUpdateIngredient(index, "unit", event_.target.value)
               }

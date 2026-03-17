@@ -44,9 +44,9 @@ type MacroTargetSettingsObject =
     }
   | undefined;
 
-type MacroTargetSettingsPayload = {
+interface MacroTargetSettingsPayload {
   macroTarget: MacroTargetSettingsObject;
-};
+}
 
 type MacroTargetGetResponse =
   | {
@@ -59,6 +59,7 @@ function isFoodSearchResult(value: unknown): value is FoodSearchResult {
     return false;
   }
   const candidate = value as Record<string, unknown>;
+
   return (
     typeof candidate.name === "string" &&
     typeof candidate.protein === "number" &&
@@ -76,6 +77,7 @@ function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
   if (!Array.isArray(value)) {
     return [];
   }
+
   return value.filter((item): item is FoodSearchResult => isFoodSearchResult(item));
 }
 
@@ -93,6 +95,7 @@ export const macrosApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -108,6 +111,7 @@ export const macrosApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -149,7 +153,7 @@ export const macrosApi = {
       carbs: entry.carbs,
       fats: entry.fats,
       mealType: entry.mealType,
-      mealName: entry.mealName || "",
+      mealName: entry.mealName ?? "",
       entryDate: entry.entryDate,
       entryTime: entry.entryTime,
       ingredients: entry.ingredients,
@@ -160,6 +164,7 @@ export const macrosApi = {
       body: JSON.stringify(payload),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -179,6 +184,7 @@ export const macrosApi = {
       body: JSON.stringify(payload),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -188,6 +194,7 @@ export const macrosApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -196,6 +203,7 @@ export const macrosApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as MacroTargetGetResponse;
   },
 
@@ -209,6 +217,7 @@ export const macrosApi = {
       body: JSON.stringify({ macroTarget: payload.macroTarget }),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -224,6 +233,7 @@ export const macrosApi = {
         credentials: "include",
       },
     );
+
     return normalizeFoodSearchResults(await handleResponse(response));
   },
 };

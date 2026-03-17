@@ -6,7 +6,7 @@ import {
 } from "@/features/goals/calculations";
 import type { WeightGoalFormValues } from "@/features/goals/types";
 
-type SetWeightGoalPayload = {
+interface SetWeightGoalPayload {
   startingWeight: number;
   currentWeight: number | undefined;
   targetWeight: number | undefined;
@@ -17,7 +17,7 @@ type SetWeightGoalPayload = {
   calculatedWeeks: number | undefined;
   weeklyChange: number | undefined;
   dailyChange: number | undefined;
-};
+}
 
 export interface WeightLogEntry {
   id: string;
@@ -40,6 +40,7 @@ export const goalsApi = {
       | SetWeightGoalPayload
       | undefined
       | null;
+
     return result === null ? undefined : result;
   },
 
@@ -66,6 +67,7 @@ export const goalsApi = {
       body: JSON.stringify(payload),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -95,6 +97,7 @@ export const goalsApi = {
       body: JSON.stringify(payload),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -104,6 +107,7 @@ export const goalsApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return handleResponse(response);
   },
 
@@ -112,6 +116,7 @@ export const goalsApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as WeightLogEntry[];
   },
 
@@ -125,6 +130,7 @@ export const goalsApi = {
       credentials: "include",
     });
     const fullEntry = (await handleResponse(response)) as WeightLogEntry;
+
     return {
       id: fullEntry.id,
       timestamp: fullEntry.timestamp,
@@ -143,6 +149,7 @@ export const goalsApi = {
         credentials: "include",
       },
     );
+
     return (await handleResponse(response)) as {
       success: boolean;
       id: string;

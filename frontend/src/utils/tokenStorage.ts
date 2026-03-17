@@ -7,9 +7,7 @@
  */
 
 const isWebCryptoSupported =
-  globalThis.window !== undefined &&
-  globalThis.crypto &&
-  typeof globalThis.crypto.subtle === "object";
+  typeof globalThis.crypto?.subtle === "object";
 
 export function securelyStoreToken(token: string, expiresAt?: number): void {
   if (isWebCryptoSupported) {
@@ -37,8 +35,10 @@ export function getToken(): string | undefined {
   if (!token || !storedAt) return undefined;
   if (isTokenExpired(storedAt, expSec)) {
     removeToken();
+
     return undefined;
   }
+
   return token;
 }
 
@@ -60,9 +60,11 @@ function isTokenExpired(storedAtString: string, expSecondsString: string | null)
     const now = Date.now();
     if (expSecondsString) {
       const expMs = Number.parseInt(expSecondsString, 10) * 1000;
+
       return now >= expMs;
     }
     const thirtyDaysMs = 30 * 24 * 60 * 60 * 1000;
+
     return now - storedAt > thirtyDaysMs;
   } catch {
     return true;
@@ -74,6 +76,7 @@ function isLocalStorageAvailable(): boolean {
     const testKey = "__test__";
     localStorage.setItem(testKey, testKey);
     localStorage.removeItem(testKey);
+
     return true;
   } catch {
     return false;

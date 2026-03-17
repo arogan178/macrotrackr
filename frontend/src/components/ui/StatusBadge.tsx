@@ -209,9 +209,10 @@ const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
   // Get status configuration or use default for unknown status
   const statusConfig = useMemo(() => {
     const knownStatus = status as StatusType;
-    if (STATUS_CONFIG[knownStatus]) {
+    if (knownStatus in STATUS_CONFIG) {
       return STATUS_CONFIG[knownStatus];
     }
+
     // Default configuration for unknown status types
     return {
       text:
@@ -238,7 +239,7 @@ const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
   // Check for reduced motion preference
   const prefersReducedMotion =
     typeof globalThis !== "undefined" &&
-    globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
     <div

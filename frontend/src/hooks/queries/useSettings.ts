@@ -14,6 +14,7 @@ export function useSettings() {
       if (error instanceof Error && hasStatus(error) && error.status === 401) {
         return false;
       }
+
       return failureCount < 3;
     },
   });
@@ -42,12 +43,14 @@ export function useSaveSettings() {
       // Optimistically update settings
       queryClient.setQueryData(queryKeys.settings.user(), (oldData: UserDetailsResponse | undefined) => {
         if (!oldData) return oldData;
+
         return { ...oldData, ...variables };
       });
 
       // Optimistically update auth user data
       queryClient.setQueryData(queryKeys.auth.user(), (oldData: UserDetailsResponse | undefined) => {
         if (!oldData) return oldData;
+
         return { ...oldData, ...variables };
       });
 
@@ -92,6 +95,7 @@ export function useSaveSettings() {
           return false;
         }
       }
+
       // Retry network and server errors up to 3 times
       return failureCount < 3;
     },

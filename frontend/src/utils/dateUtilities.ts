@@ -44,6 +44,7 @@ export function formatDateShort(dateString: string): string {
   try {
     const date = parseISO(dateString);
     if (!isValid(date)) return "Invalid Date";
+
     return format(date, "MMM d");
   } catch {
     return "Invalid Date";
@@ -57,6 +58,7 @@ export function formatDateFull(dateString: string): string {
   try {
     const date = parseISO(dateString);
     if (!isValid(date)) return "Invalid Date";
+
     return format(date, "MMMM d, yyyy");
   } catch {
     return "Invalid Date";
@@ -70,6 +72,7 @@ export function getDaysInRange(startDate: string, endDate: string): number {
   const start = parseISO(startDate);
   const end = parseISO(endDate);
   if (!isValid(start) || !isValid(end)) return 0;
+
   return differenceInCalendarDays(end, start) + 1;
 }
 
@@ -80,6 +83,7 @@ export function getDatesBetween(startDate: string, endDate: string): string[] {
   const start = parseISO(startDate);
   const end = parseISO(endDate);
   if (!isValid(start) || !isValid(end)) return [];
+
   return eachDayOfInterval({ start, end }).map((d) => format(d, "yyyy-MM-dd"));
 }
 
@@ -89,6 +93,7 @@ export function getDatesBetween(startDate: string, endDate: string): string[] {
 export function isValidDateString(dateString: string): boolean {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(dateString)) return false;
   const date = parseISO(dateString);
+
   return isValid(date);
 }
 
@@ -110,6 +115,7 @@ export function isWithinDateRange(
   const target = parseISO(targetDate);
   const start = parseISO(startDate);
   const end = parseISO(endDate);
+
   return target >= start && target <= end;
 }
 
@@ -119,6 +125,7 @@ export function isWithinDateRange(
 export function addDaysISO(dateString: string, days: number): string {
   const date = parseISO(dateString);
   if (!isValid(date)) return dateString;
+
   return formatISODate(addDays(date, days));
 }
 
@@ -129,6 +136,7 @@ export function eachDayISO(startDate: string, days: number): string[] {
   const start = parseISO(startDate);
   if (!isValid(start) || days <= 0) return [];
   const end = addDays(start, days - 1);
+
   return eachDayOfInterval({ start, end }).map((date) => formatISODate(date));
 }
 

@@ -188,6 +188,7 @@ function HabitForm({
         >
           {Object.entries(HABIT_ICONS).map(([key, IconComponent]) => {
             const isSelected = values.iconName === key;
+
             return (
               <button
                 key={key}
@@ -273,12 +274,12 @@ function HabitForm({
             variant="sm"
             habit={{
               id: undefined,
-              title: values.title || "Habit Title",
-              iconName: values.iconName || "target",
+              title: values.title,
+              iconName: values.iconName,
               current: currentProgress,
               target: values.target,
               progress: undefined, // let component compute from current/target
-              accentColor: values.accentColor || "indigo",
+              accentColor: values.accentColor ?? "indigo",
               isComplete: false,
             }}
             show={{ completionBadge: false }}

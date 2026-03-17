@@ -68,14 +68,14 @@ function HabitTracker({
               >
                 <div className="p-4">
                   <div className="mb-4 flex items-center">
-                    <div className="mr-3 h-10 w-10 animate-pulse rounded-xl bg-surface-3"></div>
-                    <div className="h-5 w-24 animate-pulse rounded bg-surface-3"></div>
+                    <div className="mr-3 h-10 w-10 animate-pulse rounded-xl bg-surface-3" />
+                    <div className="h-5 w-24 animate-pulse rounded bg-surface-3" />
                   </div>
                   <div className="mb-2 flex items-center justify-between">
-                    <div className="h-6 w-16 animate-pulse rounded bg-surface-3"></div>
-                    <div className="h-4 w-8 animate-pulse rounded bg-surface-3"></div>
+                    <div className="h-6 w-16 animate-pulse rounded bg-surface-3" />
+                    <div className="h-4 w-8 animate-pulse rounded bg-surface-3" />
                   </div>
-                  <div className="h-2 animate-pulse rounded-full bg-surface-3"></div>
+                  <div className="h-2 animate-pulse rounded-full bg-surface-3" />
                 </div>
               </div>
             ))}

@@ -28,7 +28,7 @@ function LogWeightModal({
 
   const [date, setDate] = useState<string>(today);
   const [time, setTime] = useState<string>(nowTime);
-  const [weight, setWeight] = useState<number | string>(initialWeight || "");
+  const [weight, setWeight] = useState<number | string>(initialWeight ?? "");
   const [formError, setFormError] = useState<string | undefined>();
 
   // Clear form error when inputs change
@@ -43,7 +43,7 @@ function LogWeightModal({
   };
 
   const handleWeightChange = (value: number | undefined) => {
-    setWeight(value === undefined ? "" : value);
+    setWeight(value ?? "");
     if (formError) setFormError(undefined);
   };
 
@@ -52,7 +52,7 @@ function LogWeightModal({
       const currentDateTime = new Date();
       setDate(format(currentDateTime, "yyyy-MM-dd"));
       setTime(format(currentDateTime, "HH:mm"));
-      setWeight(initialWeight || "");
+      setWeight(initialWeight ?? "");
       setFormError(undefined);
     }
   }, [isOpen, initialWeight]);
@@ -68,25 +68,31 @@ function LogWeightModal({
     );
     if (!isValid(parsedDateTime)) {
       setFormError("Invalid date or time selected.");
+
       return false;
     }
     if (parsedDateTime > new Date()) {
       setFormError("Date and time cannot be in the future.");
+
       return false;
     }
     const weightNumber = Number(weight);
     if (Number.isNaN(weightNumber)) {
       setFormError("Please enter a valid weight.");
+
       return false;
     }
     if (weightNumber < USER_MINIMUM_WEIGHT) {
       setFormError(`Weight must be at least ${USER_MINIMUM_WEIGHT} kg.`);
+
       return false;
     }
     if (weightNumber > USER_MAXIMUM_WEIGHT) {
       setFormError(`Weight cannot exceed ${USER_MAXIMUM_WEIGHT} kg.`);
+
       return false;
     }
+
     return true;
   }
 

@@ -29,7 +29,7 @@ export function useErrorHandler(options: ErrorHandlerOptions = {}) {
 
   const handleError = useCallback(
     (error: unknown): string => {
-      const errorMessage = fallbackMessage || getErrorMessage(error);
+      const errorMessage = fallbackMessage ?? getErrorMessage(error);
       const errorObject =
         error instanceof Error ? error : new Error(errorMessage);
 
