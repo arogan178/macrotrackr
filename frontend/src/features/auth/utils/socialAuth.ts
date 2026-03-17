@@ -116,7 +116,7 @@ export function resolveSocialAuthError(
   }
 
   return {
-    message: message || fallbackMessage,
+    message: message ?? fallbackMessage,
     action: null,
     tone: "error",
   };

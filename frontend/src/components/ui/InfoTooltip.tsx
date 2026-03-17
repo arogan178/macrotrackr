@@ -52,8 +52,8 @@ export function InfoTooltip({ text, className }: { text: string; className?: str
                 className="pointer-events-none z-[9999] w-48 rounded-lg border border-border/50 bg-surface-3 p-2 text-center text-xs text-foreground shadow-xl"
               >
                 {text}
-                <div className="absolute top-full left-1/2 -mt-[1px] -translate-x-1/2 border-[5px] border-transparent border-t-border/50"></div>
-                <div className="absolute top-full left-1/2 -mt-[2px] -translate-x-1/2 border-[5px] border-transparent border-t-surface-3"></div>
+                <div className="absolute top-full left-1/2 -mt-[1px] -translate-x-1/2 border-[5px] border-transparent border-t-border/50" />
+                <div className="absolute top-full left-1/2 -mt-[2px] -translate-x-1/2 border-[5px] border-transparent border-t-surface-3" />
               </motion.div>
             )}
           </AnimatePresence>,

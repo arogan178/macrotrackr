@@ -49,8 +49,9 @@ export function ClerkSignUpForm({
   const handleSocialSignUp = async (
     strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
   ) => {
-    if (!isLoaded || !signUp) {
+    if (!isLoaded) {
       showNotification("Authentication not ready. Please try again.", "error");
+
       return;
     }
 
@@ -72,12 +73,14 @@ export function ClerkSignUpForm({
           to: "/auth-ready",
           search: { redirectTo: normalizeAuthRedirect(redirectTo) },
         });
+
         return;
       }
 
       if (resolution.action === "switch-to-signin") {
         showNotification(resolution.message, resolution.tone);
         onSwitchToSignIn();
+
         return;
       }
 
@@ -93,8 +96,9 @@ export function ClerkSignUpForm({
   const handleEmailSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isLoaded || !signUp) {
+    if (!isLoaded) {
       showNotification("Authentication not ready. Please try again.", "error");
+
       return;
     }
 
@@ -140,14 +144,14 @@ export function ClerkSignUpForm({
         errors?: Array<{ code?: string; message?: string }>;
         message?: string;
       };
-      const firstErrorCode = clerkError?.errors?.[0]?.code;
+      const firstErrorCode = clerkError.errors?.[0]?.code;
 
       if (
         firstErrorCode === "form_identifier_exists" ||
         firstErrorCode === "identifier_already_signed_up"
       ) {
         // Automatically attempt sign-in with the same credentials
-        if (isSignInLoaded && signIn && password) {
+        if (isSignInLoaded && password) {
           try {
             const signInResult = await signIn.create({
               identifier: email,
@@ -160,6 +164,7 @@ export function ClerkSignUpForm({
                 to: "/auth-ready",
                 search: { redirectTo: normalizeAuthRedirect(redirectTo) },
               });
+
               return;
             }
           } catch (signInError) {
@@ -174,11 +179,12 @@ export function ClerkSignUpForm({
           "info",
         );
         onSwitchToSignIn();
+
         return;
       }
 
       showNotification(
-        clerkError?.errors?.[0]?.message || clerkError?.message || "Sign-up failed. Please try again.",
+        clerkError.errors?.[0]?.message ?? clerkError.message ?? "Sign-up failed. Please try again.",
         "error",
       );
     } finally {
@@ -190,7 +196,7 @@ export function ClerkSignUpForm({
   const handleVerify = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isLoaded || !signUp) return;
+    if (!isLoaded) return;
 
     setIsLoading(true);
 

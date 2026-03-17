@@ -12,9 +12,9 @@ export default function TrendDisplay({ label, trend, data, dataKey }: TrendDispl
     down: "var(--color-error, #e91429)",
     stable: "var(--text-muted, #b3b3b3)",
   };
-  const color = colorMap[trend.direction] || colorMap.stable;
+  const color = colorMap[trend.direction] ?? colorMap.stable;
 
-  const gradientId = `sparkline-${dataKey || label.toLowerCase().replaceAll(/\s+/g, '-')}`;
+  const gradientId = `sparkline-${dataKey ?? label.toLowerCase().replaceAll(/\s+/g, '-')}`;
 
   return (
     <div className="flex flex-col border-b border-border/40 pb-5 last:border-0 last:pb-0">
@@ -64,7 +64,7 @@ export default function TrendDisplay({ label, trend, data, dataKey }: TrendDispl
                 stroke={color} 
                 strokeWidth={2}
                 fill={`url(#${gradientId})`} 
-                isAnimationActive={true}
+                isAnimationActive
               />
             </AreaChart>
           </ResponsiveContainer>

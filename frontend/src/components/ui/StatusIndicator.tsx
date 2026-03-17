@@ -41,13 +41,14 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({
   "aria-live": ariaLive = "polite",
 }) => {
   const { color, Icon } = statusConfig[status];
+
   return (
     <div
       className={cn("flex items-center gap-2 text-sm font-medium", color, className)}
       role="status"
       aria-live={ariaLive}
     >
-      {icon || <Icon className="h-4 w-4" />} {message}
+      {icon ?? <Icon className="h-4 w-4" />} {message}
     </div>
   );
 };

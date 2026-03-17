@@ -225,7 +225,7 @@ function WeightLogList({
           confirmLabel="Delete Entry"
           cancelLabel="Cancel"
           onConfirm={handleConfirmDelete}
-          isDanger={true}
+          isDanger
         />
       )}
 
@@ -242,7 +242,7 @@ function WeightLogList({
           confirmLabel="Delete All"
           cancelLabel="Cancel"
           onConfirm={handleConfirmBulkDelete}
-          isDanger={true}
+          isDanger
         />
       )}
     </>

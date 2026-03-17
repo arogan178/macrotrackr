@@ -24,6 +24,7 @@ function calculateAgeValue(birthDate: Date): number {
   if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) {
     age--;
   }
+
   return Math.max(0, Math.min(120, age));
 }
 function calculateBMRValue(
@@ -92,7 +93,7 @@ export function calculateBMR(
 export function calculateTDEE(bmr: number, activityLevel: number): number {
   // Get the multiplier for the numeric activity level
   const multiplier =
-    ACTIVITY_LEVELS[activityLevel]?.multiplier || ACTIVITY_LEVELS[1].multiplier; // Default to sedentary
+    ACTIVITY_LEVELS[activityLevel].multiplier;
 
   return calculateTDEEValue(bmr, multiplier);
 }
@@ -141,7 +142,7 @@ export function calculateMacros(
 export const createNutritionProfile = (
   settings: UserSettings,
 ): UserNutritionalProfile => {
-  const age = calculateAge(settings.dateOfBirth || "");
+  const age = calculateAge(settings.dateOfBirth ?? "");
   let bmr = 0;
   let tdee = 0;
 

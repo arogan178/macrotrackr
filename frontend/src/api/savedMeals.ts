@@ -35,6 +35,7 @@ export const savedMealsApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as SavedMealsResponse;
   },
 
@@ -45,6 +46,7 @@ export const savedMealsApi = {
       body: JSON.stringify(payload),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as SavedMeal;
   },
 
@@ -54,6 +56,7 @@ export const savedMealsApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as { success: boolean; id: number };
   },
 };

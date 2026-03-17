@@ -38,6 +38,7 @@ export function useMacroDensityBreakdown(
       groupKeyFunction = getDayString;
       labelFunction = (key) => {
         const d = new Date(key + "T00:00:00");
+
         return d.toLocaleString("en-US", { month: "short", day: "numeric" });
       };
     } else if (dateRange === "month") {
@@ -47,6 +48,7 @@ export function useMacroDensityBreakdown(
         const sorted = groupDates.sort((a, b) => a.getTime() - b.getTime());
         const start = sorted[0];
         const end = sorted.at(-1);
+
         return `${start.toLocaleString("en-US", { month: "short", day: "numeric" })} - ${end.toLocaleString("en-US", { month: "short", day: "numeric" })}`;
       };
     } else {
@@ -54,6 +56,7 @@ export function useMacroDensityBreakdown(
       labelFunction = (key) => {
         const [year, month] = key.split("-");
         const d = new Date(Number(year), Number(month) - 1, 1);
+
         return d.toLocaleString("en-US", { month: "short" });
       };
     }
@@ -114,6 +117,7 @@ export function useMacroDensityBreakdown(
       .sort(([a], [b]) => (a < b ? 1 : -1)) // Descending by group
       .map(([key, macros]) => {
         const total = macros.protein + macros.carbs + macros.fats;
+
         return {
           period: labelFunction(key, macros.dates),
           calories: macros.calories,

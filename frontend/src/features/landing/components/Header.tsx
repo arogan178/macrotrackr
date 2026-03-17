@@ -17,7 +17,7 @@ const Header: React.FC = () => {
     const element = document.querySelector("#pricing");
     if (element instanceof HTMLElement) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
-      posthog?.capture?.("clicked_pricing_nav", {
+      posthog.capture("clicked_pricing_nav", {
         location: "header",
         source: "landing_header",
       });
@@ -29,7 +29,7 @@ const Header: React.FC = () => {
     const element = document.querySelector("#features");
     if (element instanceof HTMLElement) {
       element.scrollIntoView({ behavior: "smooth", block: "start" });
-      posthog?.capture?.("clicked_features_nav", {
+      posthog.capture("clicked_features_nav", {
         location: "header",
         source: "landing_header",
       });

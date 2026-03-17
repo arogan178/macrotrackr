@@ -65,6 +65,7 @@ const CalorieSearch = memo(function CalorieSearch({
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
+
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
@@ -75,6 +76,7 @@ const CalorieSearch = memo(function CalorieSearch({
 
     if (results.length > 0) {
       setActivePanel("results");
+
       return;
     }
 
@@ -87,6 +89,7 @@ const CalorieSearch = memo(function CalorieSearch({
 
     if (value.trim().length === 0) {
       setActivePanel("savedMeals");
+
       return;
     }
 
@@ -226,6 +229,7 @@ const CalorieSearch = memo(function CalorieSearch({
       if (item.energyKcal && item.energyKcal > 0) {
         return item.energyKcal;
       }
+
       return calculateCaloriesFromMacros(item.protein, item.carbs, item.fats);
     },
     [],
@@ -241,6 +245,7 @@ const CalorieSearch = memo(function CalorieSearch({
         item.servingQuantity,
         item.servingUnit as UnitType,
       );
+
       return `${metric.quantity}${metric.unit}`;
     }
 
@@ -334,6 +339,7 @@ const CalorieSearch = memo(function CalorieSearch({
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
             {displayResults.map((resultData) => {
               const { item, displayQuantity, calories } = resultData;
+
               return (
                 <button
                   key={resultData.id}

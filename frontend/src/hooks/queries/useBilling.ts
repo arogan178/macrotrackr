@@ -17,6 +17,7 @@ export function useBillingDetails() {
       if (error instanceof Error && hasStatus(error) && error.status === 401) {
         return false;
       }
+
       return failureCount < 3;
     },
   });

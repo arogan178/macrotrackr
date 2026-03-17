@@ -62,15 +62,15 @@ export function MacroTargetLegend({
   return (
     <div className={`flex justify-between text-xs ${className}`}>
       <div className="flex items-center">
-        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-protein"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-protein" />
         <span className="text-foreground">{proteinPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-carbs"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-carbs" />
         <span className="text-foreground">{carbsPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-fats"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-fats" />
         <span className="text-foreground">{fatsPercent}%</span>
       </div>
     </div>
@@ -128,7 +128,7 @@ export function MacroIndicator({
       <div className="mb-1 flex items-center gap-2">
         <div
           className={`h-2 w-2 rounded-full ${colorClasses[color].dot}`}
-        ></div>
+         />
         <span className="text-sm text-foreground">{name}</span>
         {showPercentage && percentage !== undefined && (
           <span className="ml-auto text-xs text-foreground">{percentage}%</span>
