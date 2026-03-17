@@ -25,6 +25,7 @@ export default function AnimatedNumber({
         typeof inputValue === "number" && !Number.isNaN(inputValue)
           ? inputValue
           : 0;
+
       return `${prefix}${numericValue.toFixed(toFixedValue)}${suffix}`;
     },
     [prefix, suffix, toFixedValue],
@@ -47,6 +48,7 @@ export default function AnimatedNumber({
     if (fromValue === toValue || duration === 0) {
       node.textContent = safeFormat(toValue);
       previousValueReference.current = toValue;
+
       return;
     }
 
@@ -54,18 +56,15 @@ export default function AnimatedNumber({
       duration,
       ease: "easeOut",
       onUpdate: (latest) => {
-        if (node) {
-          node.textContent = safeFormat(latest);
-        }
+        node.textContent = safeFormat(latest);
       },
       onComplete: () => {
-        if (node) {
-          node.textContent = safeFormat(toValue);
-        }
+        node.textContent = safeFormat(toValue);
       },
     });
 
     previousValueReference.current = toValue;
+
     return () => controls.stop();
   }, [value, toFixedValue, duration, prefix, suffix, safeFormat]);
 

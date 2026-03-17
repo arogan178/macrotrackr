@@ -13,7 +13,7 @@ export function IngredientRow({ ingredient, calculateCalories }: IngredientRowPr
     <div className="flex items-center text-xs text-muted">
       <div className="flex-1 font-medium text-foreground">
         {ingredient.name}{" "}
-        {ingredient.quantity ? `(${ingredient.quantity}${ingredient.unit || ""})` : ""}
+        {ingredient.quantity ? `(${ingredient.quantity}${ingredient.unit ?? ""})` : ""}
       </div>
       <div className="w-[14%] text-center">
         <MacroCell value={ingredient.protein} suffix="g" color="text-protein" />
@@ -31,7 +31,7 @@ export function IngredientRow({ ingredient, calculateCalories }: IngredientRowPr
           color="text-foreground"
         />
       </div>
-      <div className="w-[14%]"></div>
+      <div className="w-[14%]" />
     </div>
   );
 }

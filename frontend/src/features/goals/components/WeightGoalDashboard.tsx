@@ -52,7 +52,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   // Calculate effective target calories via shared helper
   const effectiveTargetCalories = computeEffectiveTargetCalories(
     tdee,
-    weightGoals || undefined,
+    weightGoals ?? undefined,
   );
 
   // Loading State

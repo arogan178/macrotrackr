@@ -98,6 +98,7 @@ const EntryHistoryComponent = function EntryHistory({
       } else {
         newSet.add(id);
       }
+
       return newSet;
     });
   }, []);
@@ -137,14 +138,10 @@ const EntryHistoryComponent = function EntryHistory({
   );
 
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
-    const grouped: Record<string, MacroEntry[]> = {};
+    const grouped: Record<string, MacroEntry[]> = Object.create(null);
     for (const entry of history) {
-      if (!entry) {
-        continue;
-      }
-      const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
-      if (!grouped[dateKey]) grouped[dateKey] = [];
-      grouped[dateKey].push(entry);
+      const dateKey = formatEntryDate(entry.entryDate);
+      (grouped[dateKey] ??= []).push(entry);
     }
 
     const allEntries = Object.entries(grouped)
@@ -160,6 +157,7 @@ const EntryHistoryComponent = function EntryHistory({
             entry.fats,
           );
         }
+
         return {
           date,
           entries,
@@ -177,8 +175,8 @@ const EntryHistoryComponent = function EntryHistory({
       }))
       .sort(
         (a, b) =>
-          new Date(b.entries[0].entryDate || b.entries[0].createdAt).getTime() -
-          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime(),
+           new Date(b.entries[0].entryDate).getTime() -
+            new Date(a.entries[0].entryDate).getTime(),
       );
 
     const displayed = allEntries.slice(0, displayedDateCount);
@@ -206,6 +204,7 @@ const EntryHistoryComponent = function EntryHistory({
         const newSet = new Set(previous);
         for (const date of newDatesToAdd) newSet.add(date);
         for (const date of datesToRemove) newSet.delete(date);
+
         return newSet;
       }
 
@@ -217,6 +216,7 @@ const EntryHistoryComponent = function EntryHistory({
     setCollapsedDates((previous) => {
       const newSet = new Set(previous);
       newSet.has(date) ? newSet.delete(date) : newSet.add(date);
+
       return newSet;
     });
   }, []);
@@ -550,7 +550,7 @@ const EntryHistoryComponent = function EntryHistory({
         confirmLabel="Delete All"
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
-        isDanger={true}
+        isDanger
       />
 
       <Modal

@@ -13,7 +13,7 @@ describe("UpgradeModal", () => {
 
   it("renders without crashing when open", () => {
     const { container } = render(
-      <UpgradeModal open={true} onClose={vi.fn()} onUpgrade={vi.fn()} />,
+      <UpgradeModal open onClose={vi.fn()} onUpgrade={vi.fn()} />,
     );
     // Component renders (even if Modal doesn't show in test environment)
     expect(container).toBeTruthy();
@@ -22,7 +22,7 @@ describe("UpgradeModal", () => {
   it("accepts custom featureName prop", () => {
     const { container } = render(
       <UpgradeModal
-        open={true}
+        open
         onClose={vi.fn()}
         onUpgrade={vi.fn()}
         featureName="Premium"
@@ -34,7 +34,7 @@ describe("UpgradeModal", () => {
   it("accepts custom description prop", () => {
     const { container } = render(
       <UpgradeModal
-        open={true}
+        open
         onClose={vi.fn()}
         onUpgrade={vi.fn()}
         description="Custom description"

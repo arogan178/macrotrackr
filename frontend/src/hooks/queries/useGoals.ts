@@ -14,6 +14,7 @@ export const weightGoalsQueryOptions = () =>
     queryKey: queryKeys.goals.weight(),
     queryFn: async (): Promise<WeightGoals | null> => {
       const data = await goalsApi.getWeightGoals();
+
       return normalizeWeightGoals(data, undefined) ?? null;
     },
     ...queryConfigs.longLived,
@@ -77,8 +78,8 @@ export function useCreateWeightGoal() {
         // If create fails because goal already exists, try to update instead
         const apiError = error as { status?: number; message?: string };
         if (
-          apiError?.status === 409 ||
-          apiError?.message?.includes("already exists")
+          apiError.status === 409 ||
+          apiError.message?.includes("already exists")
         ) {
           return await goalsApi.updateWeightGoal(goals, tdee);
         }
@@ -110,7 +111,7 @@ export function useUpdateWeightGoal() {
       } catch (error) {
         // If update fails with 404 (goal not found), try to create instead
         const apiError = error as { status?: number };
-        if (apiError?.status === 404) {
+        if (apiError.status === 404) {
           return await goalsApi.createWeightGoal(goals, tdee);
         }
         throw error;
@@ -155,6 +156,7 @@ export function useDeleteWeightGoal() {
  */
 function generateOptimisticId(): string {
   const randomPart = Math.random().toString(36).slice(2, 9);
+
   return `optimistic-${Date.now()}-${randomPart}`;
 }
 
@@ -202,6 +204,7 @@ export function useAddWeightLogEntry() {
         queryKeys.goals.weightLog(),
         (oldData) => {
           if (!oldData) return [optimisticEntry];
+
           return [...oldData, optimisticEntry];
         },
       );
@@ -211,6 +214,7 @@ export function useAddWeightLogEntry() {
         queryKeys.goals.weight(),
         (oldData) => {
           if (!oldData) return oldData;
+
           return { ...oldData, currentWeight: variables.weight };
         },
       );
@@ -220,6 +224,7 @@ export function useAddWeightLogEntry() {
         queryKeys.auth.user(),
         (oldUser: { weight?: number } | null) => {
           if (!oldUser) return oldUser;
+
           return { ...oldUser, weight: variables.weight };
         },
       );
@@ -252,10 +257,12 @@ export function useAddWeightLogEntry() {
 
           const updatedData = oldData.map((entry) => {
             // First priority: match by optimistic ID
-            if (entry.id === context?.optimisticEntry?.id) {
+            if (entry.id === context.optimisticEntry.id) {
               replaced = true;
+
               return newEntry;
             }
+
             return entry;
           });
 

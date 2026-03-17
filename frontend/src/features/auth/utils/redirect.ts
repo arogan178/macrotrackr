@@ -17,7 +17,7 @@ export function buildRedirectFromLocation(location: {
   pathname?: string;
   search?: Record<string, unknown>;
 }): string {
-  const pathname = location.pathname || DEFAULT_AUTH_REDIRECT;
+  const pathname = location.pathname ?? DEFAULT_AUTH_REDIRECT;
   const search = location.search;
 
   if (!search || typeof search !== "object" || Array.isArray(search)) {
@@ -43,6 +43,7 @@ export function buildRedirectFromLocation(location: {
   }
 
   const query = searchParameters.toString();
+
   return query ? `${pathname}?${query}` : pathname;
 }
 

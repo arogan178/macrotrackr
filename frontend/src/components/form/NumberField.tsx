@@ -33,6 +33,7 @@ function NumberField({
 
     if (value_ === "") {
       onChange(undefined);
+
       return;
     }
 
@@ -49,6 +50,7 @@ function NumberField({
   const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
     if (disabled) {
       event.preventDefault();
+
       return;
     }
 
@@ -106,7 +108,7 @@ function NumberField({
           step={step}
           className={inputClasses}
           required={required}
-          placeholder={placeholder?.toString() ?? ""}
+          placeholder={placeholder.toString()}
           disabled={disabled}
           aria-describedby={helperText ? `${inputId}-helper` : undefined}
         />

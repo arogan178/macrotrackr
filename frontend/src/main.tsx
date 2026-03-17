@@ -51,6 +51,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
               return false;
             if (queryKey[0] === "settings" && queryKey[1] === "billing")
               return false;
+
             return true;
           },
         },
@@ -75,7 +76,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
               debug: import.meta.env.MODE === "development",
             }}
           >
-            <AppContent includePostHogSync={true} />
+            <AppContent includePostHogSync />
           </PostHogProvider>
         ) : (
           <AppContent includePostHogSync={false} />

@@ -33,7 +33,7 @@ export const createNewHabit = (values: HabitGoalFormValues): HabitGoal => {
     current,
     target: values.target,
     progress,
-    accentColor: values.accentColor || DEFAULT_HABIT_COLOR,
+    accentColor: values.accentColor ?? DEFAULT_HABIT_COLOR,
     isComplete: isHabitComplete(current, values.target),
     createdAt: new Date().toISOString(),
   };
@@ -52,7 +52,7 @@ export const updateHabitFromForm = (
     target: values.target,
     progress,
     accentColor:
-      values.accentColor || existingHabit.accentColor || DEFAULT_HABIT_COLOR,
+      values.accentColor ?? existingHabit.accentColor ?? DEFAULT_HABIT_COLOR,
     isComplete: isHabitComplete(existingHabit.current, values.target),
   };
 };
@@ -60,7 +60,7 @@ export const updateHabitFromForm = (
 // Habit progress utilities
 export const incrementHabitProgress = (
   habit: HabitGoal,
-  incrementBy: number = 1,
+  incrementBy = 1,
 ): HabitGoal => {
   const newCurrent = habit.current + incrementBy;
   const newProgress = calculateProgress(newCurrent, habit.target);
@@ -104,9 +104,10 @@ export const resetHabitProgress = (habit: HabitGoal): HabitGoal => {
 // Habit filtering and sorting utilities
 export const filterHabitsByCompletion = (
   habits: HabitGoal[],
-  showCompleted: boolean = true,
+  showCompleted = true,
 ): HabitGoal[] => {
   if (showCompleted) return habits;
+
   return habits.filter((habit) => !habit.isComplete);
 };
 
@@ -162,6 +163,7 @@ export const searchHabits = (
   if (!searchTerm.trim()) return habits;
 
   const term = searchTerm.toLowerCase();
+
   return habits.filter((habit) => habit.title.toLowerCase().includes(term));
 };
 

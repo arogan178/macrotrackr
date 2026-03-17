@@ -35,9 +35,7 @@ export function calculateWeeklyAverageChange(
 
   for (const entry of recentLogs) {
     const weekNumber = differenceInWeeks(startOfWeek(entry.date), firstWeekStart);
-    if (!weeklyData[weekNumber]) {
-      weeklyData[weekNumber] = { weights: [], count: 0 };
-    }
+    (weeklyData[weekNumber] ??= { weights: [], count: 0 });
     weeklyData[weekNumber].weights.push(entry.weight);
     weeklyData[weekNumber].count++;
   }
@@ -85,9 +83,7 @@ export function calculateMonthlyTrend(log: WeightLogEntry[]): number | undefined
 
   for (const entry of recentLogs) {
     const monthNumber = differenceInCalendarMonths(startOfMonth(entry.date), firstMonthStart);
-    if (!monthlyData[monthNumber]) {
-      monthlyData[monthNumber] = { weights: [], count: 0 };
-    }
+    (monthlyData[monthNumber] ??= { weights: [], count: 0 });
     monthlyData[monthNumber].weights.push(entry.weight);
     monthlyData[monthNumber].count++;
   }

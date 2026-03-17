@@ -60,9 +60,9 @@ function getGradientClass(color: string | undefined) {
     "vibrant-accent": "from-vibrant-accent/20 to-vibrant-accent/5",
     accent: "from-vibrant-accent/20 to-vibrant-accent/5",
   } as const;
-  return (
-    gradients[(color as keyof typeof gradients) || "indigo"] || gradients.indigo
-  );
+  const key = (color as keyof typeof gradients) ?? "indigo";
+
+  return gradients[key] ?? gradients.indigo;
 }
 
 function getAccentClass(color: string | undefined) {
@@ -81,7 +81,8 @@ function getAccentClass(color: string | undefined) {
     "vibrant-accent": "text-vibrant-accent bg-vibrant-accent/10",
     accent: "text-vibrant-accent bg-vibrant-accent/10",
   } as const;
-  return colors[(color as keyof typeof colors) || "indigo"] || colors.indigo;
+
+  return colors[(color as keyof typeof colors) ?? "indigo"] ?? colors.indigo;
 }
 
 /* Direct Tailwind color mapping for the ProgressBar fill, matching user-selected color */
@@ -101,11 +102,13 @@ function getBarFillClass(color: string | undefined): string {
     "vibrant-accent": "bg-vibrant-accent",
     accent: "bg-vibrant-accent",
   } as const;
-  return fills[(color as keyof typeof fills) || "indigo"] || fills.indigo;
+
+  return fills[(color as keyof typeof fills) ?? "indigo"] ?? fills.indigo;
 }
 
 function computeProgress(current: number, target: number): number {
   if (!target || target <= 0) return 0;
+
   return Math.min(100, Math.max(0, Math.round((current / target) * 100)));
 }
 
@@ -154,7 +157,7 @@ export default function HabitCard({
       : computeProgress(current, target);
 
   const IconComponent =
-    HABIT_ICONS[iconName as keyof typeof HABIT_ICONS] || TargetIcon;
+    HABIT_ICONS[iconName as keyof typeof HABIT_ICONS] ?? TargetIcon;
 
   // Size styles
   const numberClass = variant === "sm" ? "text-lg" : "text-xl";
@@ -197,24 +200,24 @@ export default function HabitCard({
 
           {actions &&
             id &&
-            (actions.onIncrement ||
-              actions.onComplete ||
-              actions.onEdit ||
+            (actions.onIncrement ??
+              actions.onComplete ??
+              actions.onEdit ??
               actions.onDelete) && (
               <div className="ml-auto">
                 <HabitActions
                   habitId={id}
                   isComplete={isComplete}
-                  onIncrement={actions.onIncrement || (async () => {})}
-                  onComplete={actions.onComplete || (async () => {})}
-                  onEdit={actions.onEdit}
-                  onDelete={actions.onDelete || (async () => {})}
+                    onIncrement={actions.onIncrement ?? (async () => {})}
+                    onComplete={actions.onComplete ?? (async () => {})}
+                    onEdit={actions.onEdit}
+                    onDelete={actions.onDelete ?? (async () => {})}
                 />
               </div>
             )}
         </div>
 
-        {(resolvedShow.numbers || resolvedShow.percentage) && (
+        {(resolvedShow.numbers ?? resolvedShow.percentage) && (
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-baseline gap-1">
               {resolvedShow.numbers && (

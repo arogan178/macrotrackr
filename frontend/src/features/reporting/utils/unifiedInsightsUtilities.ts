@@ -38,11 +38,13 @@ export function getColorByScore(
     // density: success >70, warning >40, else error
     if (score > 70) return "bg-success";
     if (score > 40) return "bg-warning";
+
     return "bg-error";
   }
   // consistency: success >70, warning >40, else error
   if (score > 70) return "bg-success";
   if (score > 40) return "bg-warning";
+
   return "bg-error";
 }
 

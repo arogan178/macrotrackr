@@ -24,6 +24,7 @@ function getProteinRecommendation(proteinAverage: number): string {
   if (proteinAverage >= 120) {
     return "Excellent protein intake! You're supporting optimal muscle recovery and growth.";
   }
+
   return "Great start! Consider boosting your protein to about 1.6g per kg of body weight for optimal muscle support.";
 }
 
@@ -31,6 +32,7 @@ function getNextStepsRecommendation(completionRate: number): string {
   if (completionRate < 70) {
     return "Keep building that tracking habit! More consistent logging will unlock deeper insights into your nutrition patterns.";
   }
+
   return "You're doing great with consistency! Continue tracking and fine-tune your macro balance for optimal results.";
 }
 

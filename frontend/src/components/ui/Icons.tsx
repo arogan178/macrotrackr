@@ -82,6 +82,7 @@ function createIcon(Icon: LucideIcon) {
     ...properties
   }: IconProps) {
     const sizeClass = ICON_SIZES[size] || ICON_SIZES.md;
+
     return <Icon className={`${sizeClass} ${className}`} {...properties} />;
   });
 }

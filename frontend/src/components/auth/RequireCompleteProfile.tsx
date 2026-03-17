@@ -49,6 +49,7 @@ export function RequireCompleteProfile({
   // and sync backend user before trying protected pages again.
   if (user === null) {
     const redirectTo = buildRedirectFromLocation(location);
+
     return <Navigate to="/auth-ready" search={{ redirectTo }} />;
   }
 

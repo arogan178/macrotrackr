@@ -50,11 +50,9 @@ export const groupEntriesByDate = (entries: MacroEntry[]): GroupedData => {
   const groups: GroupedData = {};
   for (const entry of entries) {
     const date = entry.entryDate;
-    if (!groups[date]) {
-      groups[date] = [];
-    }
-    groups[date].push(entry);
+    (groups[date] ??= []).push(entry);
   }
+
   return groups;
 };
 
@@ -62,15 +60,13 @@ export const groupEntriesByMealType = (entries: MacroEntry[]): MealTypeData => {
   const groups: MealTypeData = {};
   for (const entry of entries) {
     const mealType = entry.mealType;
-    if (!groups[mealType]) {
-      groups[mealType] = {
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fats: 0,
-        count: 0,
-      };
-    }
+    (groups[mealType] ??= {
+      calories: 0,
+      protein: 0,
+      carbs: 0,
+      fats: 0,
+      count: 0,
+    });
     const dailyTotals = calculateDailyTotals([entry]);
     groups[mealType].calories += dailyTotals.calories;
     groups[mealType].protein += dailyTotals.protein;
@@ -78,6 +74,7 @@ export const groupEntriesByMealType = (entries: MacroEntry[]): MealTypeData => {
     groups[mealType].fats += dailyTotals.fats;
     groups[mealType].count += 1;
   }
+
   return groups;
 };
 
@@ -88,6 +85,7 @@ export const aggregateEntriesByDate = (entries: MacroEntry[]): DailyData[] => {
   return Object.entries(grouped)
     .map(([date, dateEntries]) => {
       const totals = calculateDailyTotals(dateEntries);
+
       return {
         date,
         ...totals,
@@ -140,6 +138,7 @@ export const calculateDailyAverages = (dailyData: DailyData[]) => {
     totals.fats += day.fats;
   }
   const days = dailyData.length;
+
   return {
     calories: Math.round(totals.calories / days),
     protein: Math.round(totals.protein / days),
@@ -154,11 +153,13 @@ export const calculateCompletionRate = (
   expectedDays: number,
 ): number => {
   if (expectedDays === 0) return 0;
+
   return Math.round((actualDays / expectedDays) * 100);
 };
 
 export const getUniqueLoggedDates = (entries: MacroEntry[]): string[] => {
   const uniqueDates = new Set(entries.map((entry) => entry.entryDate));
+
   return [...uniqueDates].sort((a, b) => a.localeCompare(b));
 };
 
@@ -167,5 +168,6 @@ export const getMissingDates = (
   expectedDates: string[],
 ): string[] => {
   const loggedSet = new Set(loggedDates);
+
   return expectedDates.filter((date) => !loggedSet.has(date));
 };

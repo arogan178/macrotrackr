@@ -13,8 +13,7 @@ import { formStyles } from "@/components/form/Styles";
 import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
-import type { Ingredient } from "@/types/macro";
-import { MealType } from "@/types/macro";
+import { type Ingredient, MealType } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { MEAL_TYPE_OPTIONS } from "../constants";
@@ -79,6 +78,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     ) {
       return "dinner";
     }
+
     return "snack";
   };
 
@@ -116,7 +116,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   }, [quantity, unit, baseMacros]);
 
   const calories = Math.round(
-    calculateCaloriesFromMacros(protein || 0, carbs || 0, fats || 0),
+    calculateCaloriesFromMacros(protein ?? 0, carbs ?? 0, fats ?? 0),
   );
 
   const anyFieldIsUndefined =
@@ -331,7 +331,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       variant="interactive"
       className="relative flex h-full flex-col justify-between overflow-hidden"
     >
-      <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50"></div>
+      <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50" />
       <div className="relative z-10 p-5">
         <div className="mb-5">
           <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
@@ -366,7 +366,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                     Meal Name
                   </label>
                   <AnimatePresence>
-                    {(searchResult || mealName.length > 0) && (
+                    {(searchResult ?? (mealName.length > 0)) && (
                       <motion.button
                         type="button"
                         onClick={handleClearSearch}

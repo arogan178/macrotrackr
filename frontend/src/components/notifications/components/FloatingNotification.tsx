@@ -92,16 +92,12 @@ function FloatingNotification({
 
     // Start the progress animation
     requestAnimationFrame(() => {
-      if (progressElement && !isLeaving) {
-        progressElement.style.width = "0%";
+      progressElement.style.width = "0%";
 
-        // Set up the auto-close timer to match exactly with animation end
-        timerReference.current = globalThis.setTimeout(() => {
-          if (!isLeaving) {
-            handleClose();
-          }
-        }, duration);
-      }
+      // Set up the auto-close timer to match exactly with animation end
+      timerReference.current = globalThis.setTimeout(() => {
+        handleClose();
+      }, duration);
     });
 
     return () => {

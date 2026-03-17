@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 
-type Meta = {
+interface Meta {
   title?: string;
   description?: string;
   canonical?: string;
   ogImage?: string;
-};
+}
 
 // Small helper to set or create a meta tag
 function setMeta(name: string, content?: string, property = false) {

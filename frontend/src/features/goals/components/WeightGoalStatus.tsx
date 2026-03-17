@@ -57,14 +57,14 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
     ? calculateGoalProgress(weightGoals).progress
     : 0;
 
-  const weightGoal = weightGoals?.weightGoal || "maintain";
+  const weightGoal = weightGoals?.weightGoal ?? "maintain";
   const isWeightLoss = weightGoal === "lose";
   const isWeightGain = weightGoal === "gain";
   const isMaintenance = weightGoal === "maintain";
 
   const effectiveCalorieTarget =
-    targetCalories ||
-    computeEffectiveTargetCalories(tdee, weightGoals || undefined);
+    targetCalories ??
+    computeEffectiveTargetCalories(tdee, weightGoals ?? undefined);
 
   const goalTypeLabel = isWeightLoss
     ? "Weight Loss"
@@ -86,7 +86,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   const formattedStartDate = formatDateShort(weightGoals?.startDate ?? "");
   const formattedTargetDate = formatDateShort(weightGoals?.targetDate ?? "");
 
-  const targetPercentages = macroTarget || {
+  const targetPercentages = macroTarget ?? {
     proteinPercentage: 30,
     carbsPercentage: 40,
     fatsPercentage: 30,
@@ -102,13 +102,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
     (effectiveCalorieTarget * targetPercentages.fatsPercentage) / 100 / 9,
   );
 
-  const weeklyChange = weightGoals?.weeklyChange || 0;
-  const calculatedWeeks = weightGoals?.calculatedWeeks || 0;
+  const weeklyChange = weightGoals?.weeklyChange ?? 0;
+  const calculatedWeeks = weightGoals?.calculatedWeeks ?? 0;
 
   // Mirror existing display behavior via shared helper
   const dailyDifference = computeDailyDifferenceForDisplay(
     tdee,
-    weightGoals || undefined,
+    weightGoals ?? undefined,
     true,
     50,
   );
@@ -263,9 +263,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
               {isMaintenance ? (
                 "Ongoing"
               ) : (
-                <>
-                  <AnimatedNumber value={calculatedWeeks} suffix=" wks" />
-                </>
+                <AnimatedNumber value={calculatedWeeks} suffix=" wks" />
               )}
             </p>
           </div>

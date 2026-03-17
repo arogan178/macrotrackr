@@ -42,6 +42,7 @@ export const habitsApi = {
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as HabitGoalPayload[];
   },
 
@@ -52,6 +53,7 @@ export const habitsApi = {
       body: JSON.stringify(habitGoal),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as HabitGoalPayload;
   },
 
@@ -65,6 +67,7 @@ export const habitsApi = {
       body: JSON.stringify(habitGoal),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as HabitGoalPayload;
   },
 
@@ -74,6 +77,7 @@ export const habitsApi = {
       headers: await getHeadersAsync(),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as { success: boolean; id: string };
   },
 
@@ -83,6 +87,7 @@ export const habitsApi = {
       headers: await getHeadersAsync(),
       credentials: "include",
     });
+
     return (await handleResponse(response)) as { success: boolean; count: number };
   },
 };
