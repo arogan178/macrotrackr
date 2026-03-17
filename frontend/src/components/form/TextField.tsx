@@ -28,7 +28,7 @@ function TextField({
   autoComplete,
 }: TextFieldProps & { id?: string; ariaLabel?: string }) {
   const autoId = useId();
-  const inputId = id || `textfield-${autoId}`;
+  const inputId = id ?? `textfield-${autoId}`;
   const describedByIds = [];
   if (error) describedByIds.push(`${inputId}-error`);
   if (helperText && !error) describedByIds.push(`${inputId}-helper`);

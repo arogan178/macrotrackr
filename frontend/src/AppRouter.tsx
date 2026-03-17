@@ -102,7 +102,7 @@ export const homeRoute = createRoute({
     ]);
 
     const latestWeight =
-      weightLog && weightLog.length > 0
+      weightLog.length > 0
         ? weightLog.at(-1)?.weight
         : undefined;
     const transformedWeightGoals = weightGoals
@@ -111,7 +111,7 @@ export const homeRoute = createRoute({
 
     return {
       weightGoals: transformedWeightGoals,
-      weightLog: Array.isArray(weightLog) ? weightLog : [],
+      weightLog,
     };
   },
   component: () => (
@@ -177,7 +177,7 @@ export const goalsRoute = createRoute({
     ]);
 
     const latestWeight =
-      weightLog && weightLog.length > 0
+      weightLog.length > 0
         ? weightLog.at(-1)?.weight
         : undefined;
     const transformedWeightGoals = weightGoals
@@ -187,7 +187,7 @@ export const goalsRoute = createRoute({
     return {
       macroTarget,
       weightGoals: transformedWeightGoals,
-      weightLog: Array.isArray(weightLog) ? weightLog : [],
+      weightLog,
     };
   },
   component: () => (
@@ -296,7 +296,7 @@ export const reportingRoute = createRoute({
       context: { queryClient: typeof queryClient };
     };
 
-    const queryDate = deps.startDate || todayISO();
+    const queryDate = deps.startDate ?? todayISO();
 
     return safeFetch(
       () =>

@@ -7,7 +7,7 @@ export function createWeightLogEntry(
   weight: number,
   date?: string,
 ): AddWeightLogPayload {
-  const entryDate = date || new Date().toISOString().split("T")[0];
+  const entryDate = date ?? new Date().toISOString().split("T")[0];
 
   return {
     weight,
@@ -34,6 +34,7 @@ export function filterWeightLogByDateRange(
 
   return entries.filter((entry) => {
     const entryDate = new Date(entry.timestamp);
+
     return entryDate >= start && entryDate <= end;
   });
 }
@@ -43,13 +44,14 @@ export function getLastNEntries(
   count: number,
 ): WeightLogEntry[] {
   const sorted = sortWeightLogByDate(entries);
+
   return sorted.slice(0, count);
 }
 
 // Weight trend analysis utilities
 export function calculateWeightTrend(
   entries: WeightLogEntry[],
-  days: number = 7,
+  days = 7,
 ): {
   trend: "up" | "down" | "stable";
   change: number;
@@ -80,13 +82,14 @@ export function calculateWeightTrend(
 
 export function calculateWeightAverage(
   entries: WeightLogEntry[],
-  days: number = 7,
+  days = 7,
 ): number {
   const recent = getLastNEntries(entries, days);
 
   if (recent.length === 0) return 0;
 
   const sum = recent.reduce((total, entry) => total + entry.weight, 0);
+
   return Math.round((sum / recent.length) * 10) / 10;
 }
 

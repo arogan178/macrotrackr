@@ -18,9 +18,9 @@ type ButtonAllProps = ButtonProps &
 
 export function getButtonClasses(
   variant: string = BUTTON_VARIANTS.PRIMARY,
-  buttonSize: string = "md",
-  fullWidth: boolean = false,
-  className: string = "",
+  buttonSize = "md",
+  fullWidth = false,
+  className = "",
 ): string {
   const sizeStyles = BUTTON_SIZES;
 
@@ -125,7 +125,8 @@ function ButtonBase({
       );
     }
     // Always render icon if provided, even with children
-    const content = children || text;
+    const content = children ?? text;
+
     return (
       <span className="flex items-center justify-center">
         {effectiveLeftIcon && (
@@ -150,7 +151,7 @@ function ButtonBase({
       disabled={finalIsLoading || disabled}
       className={buttonClasses}
       aria-busy={finalIsLoading}
-      aria-label={ariaLabel || text}
+      aria-label={ariaLabel ?? text}
       data-variant={variant}
       {...rest}
     >

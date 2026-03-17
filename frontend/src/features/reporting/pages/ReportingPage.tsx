@@ -62,6 +62,7 @@ export default function ReportingPage() {
           startDate: monthStart,
           endDate: monthEnd,
         });
+
         return (response as { entries: unknown[] }).entries;
       },
     });
@@ -76,6 +77,7 @@ export default function ReportingPage() {
           startDate: threeMonthsStart,
           endDate: threeMonthsEnd,
         });
+
         return (response as { entries: unknown[] }).entries;
       },
     });
@@ -169,12 +171,13 @@ export default function ReportingPage() {
                   ) : (
                     <>
                       {(() => {
-                        const calorieTarget = weightGoals?.calorieTarget || 2000;
+                        const calorieTarget = weightGoals?.calorieTarget ?? 2000;
+
                         return (
                           <MacroSummaryStats
                             data={aggregatedData}
                             calorieTarget={calorieTarget}
-                            macroTarget={macroTarget || undefined}
+                             macroTarget={macroTarget ?? undefined}
                           />
                         );
                       })()}
@@ -199,14 +202,16 @@ export default function ReportingPage() {
                           layout
                         >
                           {(() => {
-                            const { startDate, endDate } =
+                            const { startDate: rangeStart, endDate: rangeEnd } =
                               getDateRangeData(dateRange);
+
                             return (
                               <div className="w-full">
                                 <MealTimeBreakdown
                                   history={history}
-                                  startDate={startDate}
-                                  endDate={endDate}
+                                  startDate={rangeStart}
+                                  endDate={rangeEnd}
+                                  showLegend={false}
                                 />
                               </div>
                             );
@@ -237,7 +242,7 @@ export default function ReportingPage() {
                           averages={averages}
                           isLoading={isHistoryLoading}
                           showNoDataMessage={showNoDataMessage}
-                          macroTarget={macroTarget || undefined}
+                          macroTarget={macroTarget ?? undefined}
                           denominatorDays={mapDateRangeToNumeric(dateRange)}
                           dailySeriesForRange={dailySeries}
                         />

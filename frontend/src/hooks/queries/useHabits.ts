@@ -13,9 +13,9 @@ import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 
-type HabitMutationContext = {
+interface HabitMutationContext {
   previousHabits?: HabitGoal[];
-};
+}
 
 export const habitsQueryOptions = () =>
   queryOptions({
@@ -37,6 +37,7 @@ export function useAddHabit() {
     mutationKey: [...queryKeys.habits.list(), "add"],
     mutationFn: async (values: HabitGoalFormValues): Promise<HabitGoal> => {
       const newHabit = createNewHabit(values);
+
       return await habitsApi.saveHabit(newHabit);
     },
     onSuccess: () => {
@@ -163,6 +164,7 @@ export function useIncrementHabitProgress() {
         createdAt: updatedHabit.createdAt,
         completedAt: updatedHabit.completedAt,
       };
+
       return await habitsApi.updateHabit(habit.id, payload);
     },
     onMutate: async (habit: HabitGoal) => {
@@ -179,6 +181,7 @@ export function useIncrementHabitProgress() {
           previousHabits.map((h) => (h.id === habit.id ? updatedHabit : h)),
         );
       }
+
       return { previousHabits };
     },
     onError: (error, _variables, context) => {

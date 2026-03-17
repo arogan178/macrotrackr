@@ -68,7 +68,7 @@ export default function GoalsPage() {
               active={ui.activeTab === "goals"}
               onClick={() => ui.setActiveTab("goals")}
               layoutId="goalsTabHighlight"
-              isMotion={true}
+              isMotion
             >
               <span className="relative z-10 flex items-center">
                 <GoalsIcon size="sm" className="mr-1.5" />
@@ -79,7 +79,7 @@ export default function GoalsPage() {
               active={ui.activeTab === "macro targets"}
               onClick={() => ui.setActiveTab("macro targets")}
               layoutId="goalsTabHighlight"
-              isMotion={true}
+              isMotion
             >
               <span className="relative z-10 flex items-center">
                 <TargetIcon size="sm" className="mr-1.5" />
@@ -98,7 +98,7 @@ export default function GoalsPage() {
           confirmLabel="Reset Goals"
           cancelLabel="Cancel"
           onConfirm={actions.resetGoals}
-          isDanger={true}
+          isDanger
           size="md"
         />
         <Modal
@@ -110,7 +110,7 @@ export default function GoalsPage() {
           confirmLabel="Delete Goal"
           cancelLabel="Cancel"
           onConfirm={actions.deleteWeightGoalConfirmed}
-          isDanger={true}
+          isDanger
           size="md"
         />
         <HabitModal

@@ -66,6 +66,7 @@ const TextGenerateEffect: React.FC<TextGenerateEffectProps> = ({
     if (onComplete) {
       const totalTime = (units.length - 1) * speed + duration;
       const timer = setTimeout(onComplete, totalTime * 1000);
+
       return () => clearTimeout(timer);
     }
   }, [onComplete, units.length, speed, duration]);

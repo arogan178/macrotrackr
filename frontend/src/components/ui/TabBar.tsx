@@ -5,12 +5,12 @@ import { cn } from "@/lib/classnameUtilities";
 
 import TabButton from "./TabButton";
 
-export type TabItem = {
+export interface TabItem {
   key: string;
   label: React.ReactNode;
   activeBg?: string;
   disabled?: boolean;
-};
+}
 
 type ButtonSizeKey = keyof typeof BUTTON_SIZES; // "xs" | "sm" | "md" | "lg"
 

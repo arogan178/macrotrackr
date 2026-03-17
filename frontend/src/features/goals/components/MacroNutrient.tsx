@@ -15,7 +15,7 @@ function MacroNutrient({ label, current, target, color }: MacroNutrientProps) {
         value={current}
         target={target}
         color={color}
-        showPercentage={true}
+        showPercentage
       />
     </div>
   );

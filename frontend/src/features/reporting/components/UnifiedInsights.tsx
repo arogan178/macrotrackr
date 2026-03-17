@@ -9,7 +9,7 @@ import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { RadialProgress } from "@/components/ui/RadialProgress";
 
 import { MACRO_COLORS } from "../constants";
-import type { UnifiedInsightsProps as UnifiedInsightsProps } from "../types/insightsTypes";
+import type { AggregatedDataPoint, UnifiedInsightsProps } from "../types/insightsTypes";
 import {
   calculateConsistencyScore,
   calculateDataQuality,
@@ -65,7 +65,7 @@ function UnifiedInsights({
         macroBalance: calculateMacroBalance(averages, macroTarget),
         caloriesTrend: calculateTrend(aggregatedData, "calories"),
         proteinTrend: calculateTrend(aggregatedData, "protein"),
-        dataQuality: calculateDataQuality(dataForQuality as any, denominator),
+        dataQuality: calculateDataQuality(dataForQuality, denominator),
         macroDensity: calculateMacroDensity(averages),
       };
     } catch {

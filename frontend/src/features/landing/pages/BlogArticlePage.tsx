@@ -54,7 +54,7 @@ const LazyCodeHighlighter = React.lazy(async () => {
     default: ({ code, language }: LazyCodeHighlighterProps) => (
       <Prism
         style={vscDarkPlus}
-        language={language || "text"}
+        language={language}
         PreTag="div"
         customStyle={codeBlockStyle}
       >
@@ -70,7 +70,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
   children,
 }) => {
   const [copied, setCopied] = useState(false);
-  const match = /language-(\w+)/.exec(className || "");
+  const match = /language-(\w+)/.exec(className ?? "");
   const language = match ? match[1] : "";
   const code = String(children).replace(/\n$/, "");
 
@@ -205,7 +205,7 @@ const markdownComponents = {
   img: ({ src, alt }: { src?: string; alt?: string }) => (
     <ContentImage
       src={src}
-      alt={alt || ""}
+      alt={alt ?? ""}
       containerClassName="my-10 overflow-hidden rounded-3xl shadow-xl ring-1 ring-border/50"
       className="w-full rounded-lg"
       loading="lazy"
@@ -255,14 +255,14 @@ const BlogArticlePage: React.FC = () => {
 
   usePageMetadata({
     title: post ? `${post.title} — MacroTrackr Blog` : "Blog — MacroTrackr",
-    description: post?.excerpt || "Read the latest from MacroTrackr.",
+    description: post?.excerpt ?? "Read the latest from MacroTrackr.",
     canonical: `https://macrotrackr.com/blog/${slug}`,
   });
 
   const relatedPosts = useMemo(() => getRelatedPosts(slug), [slug]);
 
   const handleCopyLink = useCallback(async () => {
-    if (!navigator.clipboard?.writeText) {
+    if (!navigator.clipboard) {
       return;
     }
 
@@ -411,7 +411,7 @@ const BlogArticlePage: React.FC = () => {
                 ]}
                 components={markdownComponents}
               >
-                {post.content || ""}
+                {post.content ?? ""}
               </ReactMarkdown>
             </div>
 

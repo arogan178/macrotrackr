@@ -13,7 +13,7 @@ declare global {
   var __WB_MANIFEST: Array<string | PrecacheEntry>;
 }
 
-type ServiceWorkerRuntime = {
+interface ServiceWorkerRuntime {
   addEventListener: {
     (
       type: "activate",
@@ -28,7 +28,7 @@ type ServiceWorkerRuntime = {
     matchAll: () => Promise<Array<{ postMessage: (message: { type: string }) => void }>>;
   };
   skipWaiting: () => void;
-};
+}
 
 // Immediately take control and skip waiting
 skipWaiting();

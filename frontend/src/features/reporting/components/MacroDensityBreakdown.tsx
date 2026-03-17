@@ -21,7 +21,7 @@ interface MacroDensityBreakdownProps {
   startDate?: string;
   endDate?: string;
   groupBy?: "week" | "month";
-  data?: any[];
+  data?: Record<string, unknown>[];
   selectedRange?: number;
   isLoading?: boolean;
   dataProcessed?: boolean;
@@ -53,6 +53,7 @@ const PercentageLabel = (properties: PercentageLabelProps) => {
         : 0;
   // Only show label if value is significant enough to fit
   if (value < 0.05 || height < 20) return;
+
   return (
     <foreignObject
       x={x}
@@ -138,7 +139,7 @@ const MacroDensityBreakdown = ({
             <Tooltip
               // Use standardized stacked bar tooltip with color mapping and macro dots
               content={
-                ((properties: any) => (
+                ((properties: Record<string, unknown>) => (
                   <StackedBarPercentageTooltip
                     {...properties}
                     colors={{
@@ -148,8 +149,7 @@ const MacroDensityBreakdown = ({
                     }}
                     labelKey="period"
                   />
-                )) as unknown as any
-              }
+                ))}
               cursor={{ fill: "rgba(110,118,145,0.1)" }}
               wrapperStyle={{ outline: "none" }}
             />

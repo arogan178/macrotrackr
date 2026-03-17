@@ -9,7 +9,7 @@ import { LoadingSpinnerIcon, StarIcon, TrashIcon } from "./Icons";
 type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 type IconSize = keyof typeof ICON_SIZES;
 
-export type IconButtonGroupProps = {
+export interface IconButtonGroupProps {
   onEdit: () => void;
   onDelete: (event?: React.MouseEvent) => void;
   onSaveMeal?: () => void;
@@ -22,7 +22,7 @@ export type IconButtonGroupProps = {
   unsaveMealLabel?: string;
   buttonSize?: ButtonSize;
   iconSize?: IconSize;
-};
+}
 
 /**
  * Reusable edit/delete/save icon button group

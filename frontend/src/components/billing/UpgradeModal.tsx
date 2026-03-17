@@ -37,7 +37,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
       confirmLabel="Upgrade to Pro"
       cancelLabel="Maybe Later"
       size="md"
-      hideCancelButton={true}
+      hideCancelButton
     >
       <div className="text-left">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warning">

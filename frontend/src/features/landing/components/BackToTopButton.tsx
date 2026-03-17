@@ -41,17 +41,10 @@ const BackToTopButton = memo(function BackToTopButton({
   const frameReference = useRef<number | null>(null);
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
-
     setPortalTarget(globalThis.document.body);
   }, []);
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
 
     const updateVisibility = () => {
       frameReference.current = null;
@@ -63,6 +56,7 @@ const BackToTopButton = memo(function BackToTopButton({
 
       if (maxScroll === 0) {
         setIsVisible(false);
+
         return;
       }
 

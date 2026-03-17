@@ -56,9 +56,9 @@ function WeightGoalModal({
       );
 
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error?.message || "Failed to save weight goal. Please try again.";
+        error instanceof Error ? error.message : "Failed to save weight goal. Please try again.";
       setErrorMessage(message);
     }
   };

@@ -9,6 +9,7 @@ export function getErrorMessage(error: unknown): string {
   if (typeof error === "object" && error !== null && "message" in error) {
     return String((error as Record<string, unknown>).message);
   }
+
   return "An unknown error occurred";
 }
 
@@ -58,6 +59,7 @@ export function setNotificationWithTimeout(
       if (state.notification === message) {
         return { notification: undefined };
       }
+
       return state;
     });
   }, duration);

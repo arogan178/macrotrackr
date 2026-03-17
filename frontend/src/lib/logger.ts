@@ -20,8 +20,10 @@ function redact(object: unknown): unknown {
     for (const [key, value] of Object.entries(object)) {
       result[key] = SENSITIVE_KEYS.some(k => key.toLowerCase().includes(k)) ? "[REDACTED]" : redact(value);
     }
+
     return result;
   }
+
   return object;
 }
 

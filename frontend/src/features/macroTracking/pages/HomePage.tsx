@@ -82,7 +82,7 @@ export default function HomePage() {
   const savedEntryIds = useMemo(() => {
     const ids = new Set<number>();
     for (const entry of history) {
-      const entryName = entry.foodName || entry.mealName || "Saved Meal";
+      const entryName = entry.foodName ?? entry.mealName;
       const isSaved = savedMeals.some(
         (sm) =>
           sm.name === entryName &&
@@ -95,6 +95,7 @@ export default function HomePage() {
         ids.add(entry.id);
       }
     }
+
     return ids;
   }, [history, savedMeals]);
 
@@ -115,11 +116,11 @@ export default function HomePage() {
 
       try {
         await createSavedMealMutation.mutateAsync({
-          name: entry.foodName || entry.mealName || "Saved Meal",
+          name: entry.foodName ?? entry.mealName,
           protein: entry.protein,
           carbs: entry.carbs,
           fats: entry.fats,
-          mealType: entry.mealType as any,
+          mealType: entry.mealType,
         });
       } catch {
         // Failed to save meal - handled silently
@@ -130,7 +131,7 @@ export default function HomePage() {
 
   const handleUnsaveMeal = useCallback(
     async (entry: MacroEntry) => {
-      const entryName = entry.foodName || entry.mealName || "Saved Meal";
+      const entryName = entry.foodName ?? entry.mealName;
       const savedMeal = savedMeals.find(
         (sm) =>
           sm.name === entryName &&
@@ -167,7 +168,7 @@ export default function HomePage() {
       );
 
       const ingredients = selectedEntries.flatMap((entry) => {
-        const ingredientName = entry.foodName || entry.mealName || "Ingredient";
+        const ingredientName = entry.foodName ?? entry.mealName;
         const singleIngredient =
           entry.ingredients?.length === 1 ? entry.ingredients[0] : undefined;
 
@@ -223,7 +224,7 @@ export default function HomePage() {
           protein: totalProtein,
           carbs: totalCarbs,
           fats: totalFats,
-          mealType: mealType as any,
+          mealType: mealType as "breakfast" | "lunch" | "dinner" | "snack",
           ingredients,
         });
       } catch (error) {
@@ -244,8 +245,8 @@ export default function HomePage() {
           fats: entry.fats,
           mealType: entry.mealType,
           mealName: entry.mealName,
-          entryDate: entry.entryDate || "",
-          entryTime: entry.entryTime || "",
+          entryDate: entry.entryDate ?? "",
+          entryTime: entry.entryTime ?? "",
           ingredients: entry.ingredients,
         },
       });
@@ -281,7 +282,7 @@ export default function HomePage() {
   const isDeleting = deleteMacroEntryMutation.isPending;
 
   const effectiveCalorieTarget =
-    weightGoals?.calorieTarget || nutritionProfile?.tdee;
+    weightGoals?.calorieTarget ?? nutritionProfile?.tdee;
 
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
     user ?? undefined,
