@@ -1,16 +1,14 @@
 import { Elysia } from "elysia";
-import { SubscriptionService } from "../modules/billing/subscription-service";
-import { AuthorizationError, AuthenticationError } from "../lib/errors";
+import type { ClerkAuthContext } from "../types";
+import { AuthenticationError, AuthorizationError } from "../lib/errors";
 import { logger } from "../lib/logger";
-import type { ClerkAuthContext } from "./clerk-auth";
+
+console.log("REAL CLERK GUARDS IMPORTED!");
 
 export interface AuthenticatedUser {
   userId: number;
   clerkUserId: string;
   email?: string;
-  firstName?: string;
-  lastName?: string;
-  imageUrl?: string;
 }
 
 export interface AuthenticatedContext extends ClerkAuthContext {
