@@ -1,6 +1,8 @@
 import { type QueryClient } from "@tanstack/react-query";
+
 import { queryKeys } from "@/lib/queryKeys";
 import type { MacroDailyTotals } from "@/types/macro";
+
 import { getMacroHistorySnapshots, restoreMacroHistorySnapshots } from "./helpers";
 
 export async function prepareOptimisticUpdate(

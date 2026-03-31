@@ -28,7 +28,6 @@ import {
   getMacroHistorySnapshots,
   normalizePaginatedHistory,
   type OptimisticMacroEntry,
-  restoreMacroHistorySnapshots,
   updateMacroHistoryCaches,
 } from "./macro/helpers";
 import { prepareOptimisticUpdate, rollbackOptimisticUpdate } from "./macro/optimistic";
