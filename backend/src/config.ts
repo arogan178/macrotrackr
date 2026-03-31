@@ -6,9 +6,9 @@ const EnvSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   DATABASE_PATH: z
     .string()
-    .default("./macro_tracker.db")
+    .default(process.env.NODE_ENV === "test" ? ":memory:" : "./macro_tracker.db")
     .transform((path) =>
-      isAbsolute(path) ? path : resolve(process.cwd(), path)
+      path === ":memory:" ? path : isAbsolute(path) ? path : resolve(process.cwd(), path)
     ),
 
   JWT_SECRET: z
