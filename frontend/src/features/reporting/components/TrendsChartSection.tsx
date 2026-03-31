@@ -2,13 +2,13 @@ import { useMemo, useState } from "react";
 import { Flame, PieChart } from "lucide-react";
 
 import { ChartCard, LineChartComponent } from "@/components/chart";
-import type { ChartDataPoint , LineConfig } from "@/components/chart/Types";
+import type { ChartDataPoint , LineConfig } from "@/components/chart/ChartTypes";
 import TabBar from "@/components/ui/TabBar";
 
 interface TrendsChartSectionProps {
   dailySeries: ChartDataPoint[];
   isHistoryLoading: boolean;
-  dataProcessed: boolean;
+  isHistoryReady: boolean;
   calorieChartLines: LineConfig[];
   macroChartLines: LineConfig[];
 }
@@ -16,13 +16,14 @@ interface TrendsChartSectionProps {
 export default function TrendsChartSection({
   dailySeries,
   isHistoryLoading,
-  dataProcessed,
+  isHistoryReady,
   calorieChartLines,
   macroChartLines,
 }: TrendsChartSectionProps) {
   const [activeTab, setActiveTab] = useState<"calories" | "macros">("calories");
   
-  const chartShowNoDataMessage = !isHistoryLoading && dataProcessed && dailySeries.length === 0;
+  const chartShowNoDataMessage =
+    !isHistoryLoading && isHistoryReady && dailySeries.length === 0;
 
   const tabItems = useMemo(
     () => [
@@ -67,7 +68,7 @@ export default function TrendsChartSection({
       <LineChartComponent
         data={dailySeries}
         lines={activeTab === "calories" ? calorieChartLines : macroChartLines}
-        isLoading={isHistoryLoading || !dataProcessed}
+        isLoading={isHistoryLoading || !isHistoryReady}
         showNoDataMessage={chartShowNoDataMessage}
         height={320}
       />

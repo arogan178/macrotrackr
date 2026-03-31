@@ -21,7 +21,12 @@ function setMeta(name: string, content?: string, property = false) {
   element.setAttribute("content", content);
 }
 
-export default function usePageMetadata({ title, description, canonical, ogImage }: Meta) {
+export function usePageMetadata({
+  title,
+  description,
+  canonical,
+  ogImage,
+}: Meta) {
   useEffect(() => {
     const previousTitle = document.title;
     if (title) document.title = title;
@@ -40,13 +45,12 @@ export default function usePageMetadata({ title, description, canonical, ogImage
       if (!link) {
         link = document.createElement("link");
         link.setAttribute("rel", "canonical");
-    document.head.append(link);
+        document.head.append(link);
       }
       link.setAttribute("href", canonical);
     }
 
     return () => {
-      // restore previous title on unmount
       document.title = previousTitle;
     };
   }, [title, description, canonical, ogImage]);

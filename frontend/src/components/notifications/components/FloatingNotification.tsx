@@ -8,7 +8,9 @@ import {
   WarningIcon,
 } from "@/components/ui";
 
-import type { NotificationType } from "../Types";
+import type { NotificationType } from "../NotificationTypes";
+
+type TimerHandle = ReturnType<typeof globalThis.setTimeout>;
 
 export interface FloatingNotificationProps {
   message: string;
@@ -35,7 +37,7 @@ function FloatingNotification({
   const [isVisible, setIsVisible] = useState(false);
   const [isLeaving, setIsLeaving] = useState(false);
   const progressReference = useRef<HTMLDivElement>(null);
-  const timerReference = useRef<number | undefined>(undefined);
+  const timerReference = useRef<TimerHandle | undefined>(undefined);
   const animationStartedReference = useRef(false);
 
   // Memoize handleClose to prevent unnecessary effect re-runs

@@ -22,7 +22,7 @@ import {
 import { LoadingSpinner } from "@/components/ui";
 
 import ChartTooltip from "./ChartTooltip";
-import type { ChartDataPoint, LineConfig } from "./Types";
+import type { ChartDataPoint, LineConfig } from "./ChartTypes";
 
 // Interface for CustomDot props to improve type safety
 interface CustomDotProps {

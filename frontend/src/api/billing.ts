@@ -22,6 +22,12 @@ export interface BillingSessionResponse {
   url: string;
 }
 
+export interface CheckoutSessionPayload {
+  successUrl: string;
+  cancelUrl: string;
+  plan?: "monthly" | "yearly";
+}
+
 export const billingApi = {
   getBillingDetails: async (): Promise<BillingDetailsResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/billing/details`, {
@@ -36,11 +42,11 @@ export const billingApi = {
     return post<BillingCancelResponse>("/api/billing/cancel");
   },
 
-  createCheckoutSession: async (
-    successUrl: string,
-    cancelUrl: string,
-    plan: "monthly" | "yearly" = "monthly",
-  ): Promise<BillingSessionResponse> => {
+  createCheckoutSession: async ({
+    successUrl,
+    cancelUrl,
+    plan = "monthly",
+  }: CheckoutSessionPayload): Promise<BillingSessionResponse> => {
     return post<BillingSessionResponse>("/api/billing/checkout", {
       successUrl,
       cancelUrl,

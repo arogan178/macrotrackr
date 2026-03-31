@@ -1,7 +1,7 @@
 import { memo } from "react";
 
-import { formStyles } from "@/components/form/Styles";
-import type { DropdownProps } from "@/components/form/Types";
+import { formStyles } from "@/components/form/FormStyles";
+import type { DropdownProps } from "@/components/form/FormTypes";
 
 import { cn } from "../../lib/classnameUtilities";
 

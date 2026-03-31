@@ -26,8 +26,8 @@ import {
   TrendsChartSection,
   UnifiedInsights,
 } from "../components";
-import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
+import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
 
 export default function ReportingPage() {
@@ -58,7 +58,9 @@ export default function ReportingPage() {
     queryClient.prefetchQuery({
       queryKey: queryKeys.macros.historyRange(monthStart, monthEnd),
       queryFn: async () => {
-        const response = await macrosApi.getHistory(10_000, 0, {
+        const response = await macrosApi.getHistory({
+          limit: 10_000,
+          offset: 0,
           startDate: monthStart,
           endDate: monthEnd,
         });
@@ -73,7 +75,9 @@ export default function ReportingPage() {
         threeMonthsEnd,
       ),
       queryFn: async () => {
-        const response = await macrosApi.getHistory(10_000, 0, {
+        const response = await macrosApi.getHistory({
+          limit: 10_000,
+          offset: 0,
           startDate: threeMonthsStart,
           endDate: threeMonthsEnd,
         });
@@ -102,13 +106,14 @@ export default function ReportingPage() {
   const {
     aggregatedData,
     dailySeries,
-    dataProcessed,
+    isHistoryReady,
     averages,
     handleDownloadCSV,
   } = useReportingLogic(history, dateRange, isHistoryLoading);
 
-  // Macro density breakdown chart data (percentages)
-  const macroDensityData = useMacroDensityBreakdown(history, dateRange);
+  // Macro density breakdown chart data (percentages) fetched from backend reporting API
+  const densityGroupBy = dateRange === "week" ? "day" : (dateRange === "month" ? "week" : "month");
+  const { data: macroDensityData = [] } = useMacroDensitySummary(startDate, endDate, densityGroupBy);
 
   // Define chart configurations for the new component (memoized for stable identity)
   const calorieChartLines = useMemo(
@@ -128,7 +133,7 @@ export default function ReportingPage() {
   );
 
   const showNoDataMessage =
-    !isHistoryLoading && dataProcessed && aggregatedData.length === 0;
+    !isHistoryLoading && isHistoryReady && aggregatedData.length === 0;
 
   const headerTitle = "Analytics";
   const headerSubtitle = "Deep dive into your nutrition patterns and progress";
@@ -177,7 +182,7 @@ export default function ReportingPage() {
                           <MacroSummaryStats
                             data={aggregatedData}
                             calorieTarget={calorieTarget}
-                             macroTarget={macroTarget ?? undefined}
+                            macroTarget={macroTarget ?? undefined}
                           />
                         );
                       })()}
@@ -186,7 +191,7 @@ export default function ReportingPage() {
                         <TrendsChartSection
                           dailySeries={dailySeries}
                           isHistoryLoading={isHistoryLoading}
-                          dataProcessed={dataProcessed}
+                          isHistoryReady={isHistoryReady}
                           calorieChartLines={calorieChartLines}
                           macroChartLines={macroChartLines}
                         />
@@ -211,7 +216,6 @@ export default function ReportingPage() {
                                   history={history}
                                   startDate={rangeStart}
                                   endDate={rangeEnd}
-                                  showLegend={false}
                                 />
                               </div>
                             );
@@ -230,7 +234,7 @@ export default function ReportingPage() {
                               data={macroDensityData}
                               selectedRange={mapDateRangeToNumeric(dateRange)}
                               isLoading={isHistoryLoading}
-                              dataProcessed={dataProcessed}
+                              isHistoryReady={isHistoryReady}
                             />
                           </div>
                         </motion.div>

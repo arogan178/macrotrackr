@@ -1,7 +1,7 @@
 import { memo, useId } from "react";
 
-import { formStyles } from "@/components/form/Styles";
-import type { NumberFieldProps } from "@/components/form/Types";
+import { formStyles } from "@/components/form/FormStyles";
+import type { NumberFieldProps } from "@/components/form/FormTypes";
 import { NUMBER_FIELD_ALLOWED_KEYS } from "@/utils/constants";
 
 import { cn } from "../../lib/classnameUtilities";

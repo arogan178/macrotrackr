@@ -13,14 +13,13 @@ import {
   AccountNotSyncedError,
   NotFoundError,
   ConflictError,
-  AuthenticationError,
+  BadRequestError,
 } from "../../lib/errors";
 import { handleError } from "../../lib/responses";
 import { loggerHelpers } from "../../lib/logger";
 import { SubscriptionService } from "../billing/subscription-service";
-import type { Database } from "bun:sqlite";
 import { logger } from "../../lib/logger";
-import { getInternalUserId } from "../../lib/clerk-utils";
+import { requireAuth } from "../../middleware/clerk-guards";
 
 type UserRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
@@ -59,65 +58,25 @@ function normalizeSubscriptionStatus(
   return "free";
 }
 
-async function resolveInternalUserId(
-  db: Database,
-  user: NonNullable<UserRouteContext["user"]>,
-  internalUserIdFromContext: number | null | undefined,
-): Promise<number | null> {
-  if (internalUserIdFromContext) {
-    return internalUserIdFromContext;
-  }
-
-  const resolvedInternalUserId = getInternalUserId(
-    db,
-    user.clerkUserId,
-    user.email,
-  );
-
-  if (resolvedInternalUserId) {
-    return resolvedInternalUserId;
-  }
-
-  return null;
-}
-
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
     group
       .decorate("db", db)
+      .use(requireAuth)
 
       // GET /me - Get current user details
       .get(
         "/me",
         async (context: any) => {
           try {
-            const { db, user, internalUserId: internalUserIdFromContext } =
-              context as UserRouteContext;
+            const { db } = context as UserRouteContext;
+            const { userId: internalUserId, clerkUserId } =
+              context.authenticatedUser;
 
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
-            }
-
-            // Get internal user ID from Clerk ID
-            logger.info({ clerkUserId: user.clerkUserId }, "[/api/user/me] Looking up internal user ID");
-            
-            const internalUserId = await resolveInternalUserId(
-              db,
-              user,
-              internalUserIdFromContext,
+            logger.info(
+              { internalUserId, clerkUserId },
+              "[/api/user/me] Found internal user",
             );
-
-            if (!internalUserId) {
-              logger.warn(
-                { clerkUserId: user.clerkUserId },
-                "[/api/user/me] Clerk user is authenticated but not linked to an internal account",
-              );
-              throw new AccountNotSyncedError(
-                "Your account setup is not finished yet. Please complete your profile.",
-              );
-            }
-            
-            logger.info({ internalUserId, clerkUserId: user.clerkUserId }, "[/api/user/me] Found internal user");
 
             // Fetch user details
             const dbResult = safeQuery<UserDetailsResult>(
@@ -171,6 +130,12 @@ export const userRoutes = (app: Elysia) =>
               },
             };
           } catch (error) {
+            if (error instanceof NotFoundError) {
+              throw new AccountNotSyncedError(
+                "Your account setup is not finished yet. Please complete your profile.",
+              );
+            }
+
             return handleError(error, context.set);
           }
         },
@@ -193,27 +158,11 @@ export const userRoutes = (app: Elysia) =>
         "/settings",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as UserRouteContext;
-
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
-            }
+            const { db, body, request } = context as UserRouteContext;
+            const { userId: internalUserId } = context.authenticatedUser;
 
             if (!body) {
-              throw new Error("Request body is required");
-            }
-
-            // Get internal user ID from Clerk ID
-            const internalUserId = getInternalUserId(
-              db,
-              user.clerkUserId,
-              user.email
-            );
-
-            if (!internalUserId) {
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
-              );
+              throw new BadRequestError("Request body is required");
             }
 
             // Get correlation ID from request headers if available
@@ -367,27 +316,11 @@ export const userRoutes = (app: Elysia) =>
         "/complete-profile",
         async (context: any) => {
           try {
-            const { db, user, body, request } = context as UserRouteContext;
-
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
-            }
+            const { db, body, request } = context as UserRouteContext;
+            const { userId: internalUserId } = context.authenticatedUser;
 
             if (!body) {
-              throw new Error("Request body is required");
-            }
-
-            // Get internal user ID from Clerk ID
-            const internalUserId = getInternalUserId(
-              db,
-              user.clerkUserId,
-              user.email
-            );
-
-            if (!internalUserId) {
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
-              );
+              throw new BadRequestError("Request body is required");
             }
 
             // Get correlation ID from request headers if available

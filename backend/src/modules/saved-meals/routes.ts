@@ -18,6 +18,7 @@ import {
   checkProStatus,
   checkFeatureLimit,
   FREE_TIER_LIMITS,
+  requireAuth,
 } from "../../middleware/clerk-guards";
 
 // Saved meal row type
@@ -93,12 +94,14 @@ export const savedMealRoutes = (app: Elysia) =>
   app.group("/api/saved-meals", (group) =>
     group
       .decorate("db", db)
+      .use(requireAuth)
 
       // GET / - List all saved meals for the user
       .get(
         "/",
         async (context: any) => {
-          const { db, internalUserId } = context as SavedMealsRouteContext;
+          const { db } = context as SavedMealsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
             throw new AuthenticationError("Authentication required.");
@@ -150,7 +153,8 @@ export const savedMealRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { db, internalUserId, body } = context as SavedMealsRouteContext;
+          const { db, body } = context as SavedMealsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
             throw new AuthenticationError("Authentication required.");
@@ -228,8 +232,9 @@ export const savedMealRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { db, internalUserId, params, body } =
+          const { db, params, body } =
             context as SavedMealsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
             throw new AuthenticationError("Authentication required.");
@@ -308,8 +313,9 @@ export const savedMealRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { db, internalUserId, params } =
+          const { db, params } =
             context as SavedMealsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
             throw new AuthenticationError("Authentication required.");
