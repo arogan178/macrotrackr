@@ -193,9 +193,28 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
             integrationError: null as Error | null,
           };
         } catch (error) {
+          const errorMessage = String(error).toLowerCase();
+          const isTokenError = errorMessage.includes("jwt") || 
+                               errorMessage.includes("token") || 
+                               errorMessage.includes("signature") || 
+                               errorMessage.includes("expired");
+
+          if (isTokenError) {
+            // Token verification failures (expired, invalid signature) should result in 401, not 500.
+            // We treat them as an invalid token by returning auth: null, integrationError: null.
+            logger.warn(
+              { path, requestPath, error: String(error) },
+              "Bearer token verification fallback failed (invalid or expired token)"
+            );
+            return {
+              auth: null as { userId: string; sessionId: string | null } | null,
+              integrationError: null as Error | null,
+            };
+          }
+
           logger.error(
             { path, requestPath, error },
-            "Bearer token verification fallback failed"
+            "Bearer token verification fallback failed with unexpected error"
           );
 
           return {
