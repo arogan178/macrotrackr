@@ -91,7 +91,6 @@ export class StripeService {
       handleServiceError(error, "stripe_get_subscription_with_details", {
         subscriptionId,
       });
-      throw error;
     }
   }
   /**

@@ -12,6 +12,7 @@ import { AuthenticationError, ConflictError } from "../../lib/errors";
 import { logger } from "../../lib/logger";
 import { hashPassword } from "../../lib/password";
 import type { RouteContext } from "../../types";
+import { resolveClerkIdentity } from "../../lib/route-adapter";
 
 import { AuthSchemas } from "./schemas";
 
@@ -120,16 +121,17 @@ export const authRoutes = (app: Elysia) =>
       .post(
         "/clerk-sync",
         async (context) => {
-          const { db, user, clerkClient } = context as unknown as AuthRouteContext;
-          
-          if (!user?.clerkUserId) {
-            throw new AuthenticationError("Unauthorized - No Clerk user ID found");
-          }
+          const { db, clerkClient } = context as unknown as AuthRouteContext;
+          const {
+            clerkUserId,
+            email: initialEmail,
+            firstName: initialFirstName,
+            lastName: initialLastName,
+          } = resolveClerkIdentity(context as unknown as AuthRouteContext);
 
-          const clerkUserId = user.clerkUserId;
-          let email = user.email as string | undefined;
-          let firstName = (user.firstName as string | undefined) || "";
-          let lastName = (user.lastName as string | undefined) || "";
+          let email = initialEmail;
+          let firstName = initialFirstName || "";
+          let lastName = initialLastName || "";
 
           // Defensive fallback: resolve missing Clerk profile fields from Clerk API.
           if (!email || !firstName || !lastName) {

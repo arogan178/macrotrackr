@@ -9,7 +9,7 @@ import {
   QuantityUnitField,
   TimeField,
 } from "@/components/form";
-import { formStyles } from "@/components/form/Styles";
+import { formStyles } from "@/components/form/FormStyles";
 import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";

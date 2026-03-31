@@ -6,7 +6,7 @@ import { safeQueryAll } from "../../lib/database";
 interface MacroHistoryQuery {
   startDate?: string;
   endDate?: string;
-  groupBy?: "week" | "month";
+  groupBy?: "day" | "week" | "month";
 }
 
 export interface MacroHistorySummaryItem {

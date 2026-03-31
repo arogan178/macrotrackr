@@ -1,6 +1,6 @@
 import { ReactNode, useMemo } from "react";
 
-import { type FeatureType,useFeatureLoading } from "@/hooks/useFeatureLoading";
+import { type FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
 
 import { cn } from "../../lib/classnameUtilities";
@@ -9,30 +9,12 @@ import LoadingSpinner from "./LoadingSpinner";
 /* eslint-disable react/prop-types */
 
 interface LoadingStateProps {
-  /**
-   * Content to show when loading
-   */
   children?: ReactNode;
-
-  /**
-   * Custom loading component
-   */
   loadingComponent?: ReactNode;
-
-  /**
-   * Size of the loading spinner
-   */
   size?: "sm" | "md" | "lg";
-
-  /**
-   * Additional CSS classes
-   */
   className?: string;
 }
 
-/**
- * Global loading indicator that shows when any query or mutation is active
- */
 export function GlobalLoadingIndicator({
   children,
   loadingComponent,
@@ -52,9 +34,6 @@ export function GlobalLoadingIndicator({
   );
 }
 
-/**
- * Critical loading indicator that only shows for first-time loads, not background refetches
- */
 export function CriticalLoadingIndicator({
   children,
   loadingComponent,
@@ -75,25 +54,11 @@ export function CriticalLoadingIndicator({
 }
 
 interface FeatureLoadingIndicatorProps extends LoadingStateProps {
-  /**
-   * The feature to check loading state for
-   */
   feature: FeatureType;
-
-  /**
-   * Whether to show loading for queries only (not mutations)
-   */
   queriesOnly?: boolean;
-
-  /**
-   * Whether to show loading for mutations only (not queries)
-   */
   mutationsOnly?: boolean;
 }
 
-/**
- * Feature-specific loading indicator
- */
 export function FeatureLoadingIndicator({
   feature,
   children,
@@ -106,7 +71,6 @@ export function FeatureLoadingIndicator({
   const { isQueryLoading, isMutationLoading, isLoading } =
     useFeatureLoading(feature);
 
-  // Memoize the loading check to avoid recalculating on every render
   const shouldShowLoading = useMemo(() => {
     if (queriesOnly) return isQueryLoading;
     if (mutationsOnly) return isMutationLoading;
@@ -126,54 +90,19 @@ export function FeatureLoadingIndicator({
 }
 
 interface QueryLoadingWrapperProps {
-  /**
-   * Whether the query is loading
-   */
   isLoading: boolean;
-
-  /**
-   * Whether the query has an error
-   */
   isError?: boolean;
-
-  /**
-   * The error object if there is one
-   */
   error?: Error | undefined;
-
-  /**
-   * Content to show when loaded successfully
-   */
   children: ReactNode;
-
-  /**
-   * Custom loading component
-   */
   loadingComponent?: ReactNode;
-
-  /**
-   * Custom error component
-   */
   errorComponent?: ReactNode;
-
-  /**
-   * Size of the loading spinner
-   */
   size?: "sm" | "md" | "lg";
-
-  /**
-   * Additional CSS classes
-   */
   className?: string;
 }
 
-/**
- * Wrapper component that handles loading, error, and success states for queries
- */
 export function QueryLoadingWrapper({
   isLoading,
   isError = false,
-  // Use optional chaining below; keep default to undefined without explicit assignment
   error,
   children,
   loadingComponent,
@@ -208,30 +137,12 @@ export function QueryLoadingWrapper({
 }
 
 interface MutationLoadingButtonProps {
-  /**
-   * Whether the mutation is loading
-   */
   isLoading: boolean;
-
-  /**
-   * Button content when not loading
-   */
   children: ReactNode;
-
-  /**
-   * Loading text to show
-   */
   loadingText?: string;
-
-  /**
-   * Additional props to pass to the button
-   */
   [key: string]: string | boolean | number | undefined | ReactNode;
 }
 
-/**
- * Button component that shows loading state during mutations
- */
 export function MutationLoadingButton({
   isLoading,
   children,

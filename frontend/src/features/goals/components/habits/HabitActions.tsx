@@ -7,6 +7,7 @@ import {
   PlusCircleIcon,
   TrashIcon,
 } from "@/components/ui";
+import { logger } from "@/lib/logger";
 
 interface HabitActionsProps {
   habitId: string;
@@ -57,7 +58,8 @@ function HabitActions({
     try {
       await action();
     } catch (error) {
-      console.error(`Error during ${actionName} action:`, error);
+      logger.error(`Error during ${actionName} action`, error);
+      throw error;
     } finally {
       setIsActionInProgress(false);
       setIsMenuOpen(false);

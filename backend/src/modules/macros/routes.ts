@@ -3,6 +3,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { transformKeysToCamel } from "../../lib/mappers";
 import { MacroSchemas } from "./schemas";
+import { requireAuth } from "../../middleware/clerk-guards";
 import type { AuthenticatedRouteContext } from "../../types";
 import {
   safeQuery,
@@ -71,6 +72,7 @@ function parseJsonArrayField<T>(
 export const macroRoutes = (app: Elysia) =>
   app.group("/api/macros", (group) =>
     group
+      .use(requireAuth)
       .decorate("openFoodFactsApiClient", new OpenFoodFactsApiClient())
       .decorate("cacheService", cacheService)
 
@@ -126,7 +128,8 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/target",
         async (context: any) => {
-          const { internalUserId, db, request } = context as MacrosRouteContext;
+          const { db, request } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
@@ -187,7 +190,8 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/target",
         async (context: any) => {
-          const { internalUserId, db, body, request } = context as MacrosRouteContext;
+          const { db, body, request } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
             throw new BadRequestError("Request body is required");
@@ -277,7 +281,8 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/totals",
         async (context: any) => {
-          const { db, internalUserId, query } = context as MacrosRouteContext;
+          const { db, query } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
           let startDate = query?.startDate;
           let endDate = query?.endDate;
 
@@ -334,7 +339,8 @@ export const macroRoutes = (app: Elysia) =>
       .get(
         "/history",
         async (context: any) => {
-          const { db, internalUserId, query } = context as MacrosRouteContext;
+          const { db, query } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
             throw new AuthenticationError("Authentication required.");
@@ -489,7 +495,8 @@ export const macroRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { db, internalUserId, body } = context as MacrosRouteContext;
+          const { db, body } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
             throw new BadRequestError("Request body is required");
@@ -565,7 +572,8 @@ export const macroRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { db, internalUserId, params } = context as MacrosRouteContext;
+          const { db, params } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           const entryId = params?.id;
           if (!entryId) {
@@ -605,7 +613,8 @@ export const macroRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { db, internalUserId, params, body } = context as MacrosRouteContext;
+          const { db, params, body } = context as MacrosRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
             throw new BadRequestError("Request body is required");

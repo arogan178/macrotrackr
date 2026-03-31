@@ -4,7 +4,7 @@ import { cors } from "@elysiajs/cors";
 import { swagger } from "@elysiajs/swagger";
 import { config } from "./config";
 import { createDatabase, initializeDatabase } from "./db";
-import { clerkAuthMiddleware } from "./middleware/clerkAuth";
+import { clerkAuthMiddleware } from "./middleware/clerk-auth";
 import { rateLimiters } from "./middleware/rate-limit";
 import { requestLimitsMiddleware } from "./middleware/request-limits";
 import {
