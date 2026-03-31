@@ -65,7 +65,7 @@ import {
   Zap,
 } from "lucide-react";
 
-import { ICON_SIZES } from "../utils/Constants";
+import { ICON_SIZES } from "../utils/UiConstants";
 
 // Base icon type with common props
 export interface IconProps extends Omit<LucideProps, "size"> {

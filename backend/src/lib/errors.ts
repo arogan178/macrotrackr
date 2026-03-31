@@ -27,6 +27,12 @@ export class AuthenticationError extends AppError {
   }
 }
 
+export class AuthIntegrationError extends AppError {
+  constructor(message: string = "Authentication service is temporarily unavailable") {
+    super(message, 500, "AUTH_INTEGRATION_ERROR");
+  }
+}
+
 export class AuthorizationError extends AppError {
   constructor(message: string = "Access denied") {
     super(message, 403, "AUTHORIZATION_ERROR");

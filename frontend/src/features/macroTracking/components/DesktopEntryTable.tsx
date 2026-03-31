@@ -340,6 +340,80 @@ const DesktopEntryTable = memo(
       getCoreRowModel: getCoreRowModel(),
     });
 
+    const renderRow = (
+      row: any,
+      data: TableRowData,
+      isVirtualized: boolean,
+      virtualRowProps?: { start: number; measureRef: any }
+    ) => {
+      const isGroup = data.isGroup;
+      const parentDate = data.parentDate ?? data.date;
+      const animationKey = isGroup
+        ? `group-${data.date}`
+        : `entry-${data.entries[0].id}-${parentDate}`;
+
+      const commonProps = {
+        className: `flex w-full flex-col overflow-hidden ${
+          isGroup
+            ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
+            : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
+        }`,
+        onClick: isGroup ? () => toggleDateCollapse(data.date) : undefined,
+      };
+
+      const motionProps = isVirtualized
+        ? {
+            initial: { opacity: 0 },
+            animate: { opacity: 1 },
+            exit: { opacity: 0 },
+            transition: { duration: 0.15 },
+            style: {
+              position: "absolute" as const,
+              top: 0,
+              left: 0,
+              width: "100%",
+              transform: `translateY(${virtualRowProps?.start}px)`,
+            },
+            ref: virtualRowProps?.measureRef,
+          }
+        : {
+            initial: { height: 0, opacity: 0 },
+            animate: { height: "auto", opacity: 1 },
+            exit: { height: 0, opacity: 0 },
+            transition: {
+              height: { duration: 0.3, ease: "easeInOut" },
+              opacity: { duration: 0.2 },
+            },
+            layout: true,
+          };
+
+      return (
+        <motion.div key={animationKey} {...commonProps} {...motionProps}>
+          <div className="flex w-full items-center">
+            {row?.getVisibleCells().map((cell: any) => (
+              <div
+                key={cell.id}
+                className="flex min-h-12 items-center justify-center px-4 py-2.5 text-center"
+                style={{ width: "14.285%" }}
+              >
+                <div className="w-full">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext()) as React.ReactNode}
+                </div>
+              </div>
+            ))}
+          </div>
+          <AnimatePresence initial={false}>
+            {!isGroup && expandedEntries.has(data.entries[0].id) && (
+              <IngredientsList
+                ingredients={data.entries[0].ingredients ?? []}
+                calculateCalories={calculateCalories}
+              />
+            )}
+          </AnimatePresence>
+        </motion.div>
+      );
+    };
+
     const renderVirtualizedBody = () => {
       const virtualItems = virtualizer.getVirtualItems();
 
@@ -354,66 +428,16 @@ const DesktopEntryTable = memo(
           <AnimatePresence initial={false}>
             {virtualItems.map((virtualRow) => {
               const data = visibleRows[virtualRow.index];
+              const row = table.getRowModel().rows.find((r) => {
+                const rowData = r.original;
+                if (rowData.isGroup) return rowData.date === data.date;
+                return rowData.entries[0].id === data.entries[0].id;
+              });
 
-              return (
-                <motion.div
-                  key={`virtual-${virtualRow.key}`}
-                  data-index={virtualRow.index}
-                  ref={virtualizer.measureElement}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                  className={`flex flex-col overflow-hidden ${
-                    data.isGroup
-                      ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
-                      : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
-                  }`}
-                  onClick={
-                    data.isGroup
-                      ? () => toggleDateCollapse(data.date)
-                      : undefined
-                  }
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.15 }}
-                >
-                  <div className="flex w-full items-center">
-                    {table
-                      .getRowModel()
-                      .rows.find((row) => {
-                        const rowData = row.original;
-                        if (rowData.isGroup) return rowData.date === data.date;
-
-                        return rowData.entries[0].id === data.entries[0].id;
-                      })
-                      ?.getVisibleCells()
-                      .map((cell) => (
-                        <div
-                          key={cell.id}
-                          className="flex min-h-12 items-center justify-center px-4 py-2.5 text-center"
-                          style={{ width: "14.285%" }}
-                        >
-                          <div className="w-full">
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </div>
-                        </div>
-                      ))}
-                  </div>
-                  <AnimatePresence initial={false}>
-                    {!data.isGroup &&
-                      expandedEntries.has(data.entries[0].id) &&
-                      <IngredientsList ingredients={data.entries[0].ingredients ?? []} calculateCalories={calculateCalories} />}
-                  </AnimatePresence>
-                </motion.div>
-              );
+              return renderRow(row, data, true, {
+                start: virtualRow.start,
+                measureRef: virtualizer.measureElement,
+              });
             })}
           </AnimatePresence>
         </div>
@@ -426,70 +450,14 @@ const DesktopEntryTable = memo(
           {table.getRowModel().rows.map((row) => {
             const data = row.original;
             const isGroup = data.isGroup;
-        const parentDate = data.parentDate ?? data.date;
-
+            const parentDate = data.parentDate ?? data.date;
             const isEntryCollapsed = !isGroup && collapsedDates.has(parentDate);
-
-            const animationKey = isGroup
-              ? `group-${data.date}`
-              : `entry-${data.entries[0].id}-${parentDate}`;
 
             if (isEntryCollapsed) {
               return null;
             }
 
-            return (
-              <motion.div
-                key={animationKey}
-                className={`flex w-full flex-col overflow-hidden ${
-                  isGroup
-                    ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
-                    : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
-                }`}
-                onClick={
-                  isGroup ? () => toggleDateCollapse(data.date) : undefined
-                }
-                initial={{
-                  height: 0,
-                  opacity: 0,
-                }}
-                animate={{
-                  height: "auto",
-                  opacity: 1,
-                }}
-                exit={{
-                  height: 0,
-                  opacity: 0,
-                }}
-                transition={{
-                  height: { duration: 0.3, ease: "easeInOut" },
-                  opacity: { duration: 0.2 },
-                }}
-                layout
-              >
-                <div className="flex w-full items-center">
-                  {row.getVisibleCells().map((cell) => (
-                    <div
-                      key={cell.id}
-                      className="flex h-full items-center justify-center px-4 py-2.5 text-center"
-                      style={{ width: "14.285%" }}
-                    >
-                      <div className="w-full">
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext(),
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <AnimatePresence initial={false}>
-                  {!isGroup &&
-                    expandedEntries.has(data.entries[0].id) &&
-                    <IngredientsList ingredients={data.entries[0].ingredients ?? []} calculateCalories={calculateCalories} />}
-                </AnimatePresence>
-              </motion.div>
-            );
+            return renderRow(row, data, false);
           })}
         </AnimatePresence>
       </div>
@@ -517,10 +485,10 @@ const DesktopEntryTable = memo(
                     >
                       {header.isPlaceholder
                         ? undefined
-                        : flexRender(
+                        : (flexRender(
                             header.column.columnDef.header,
                             header.getContext(),
-                          )}
+                          ) as React.ReactNode)}
                     </div>
                   ))}
                 </div>

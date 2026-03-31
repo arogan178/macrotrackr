@@ -1,5 +1,3 @@
-// src/features/goals/pages/GoalsPage.tsx
-
 import { useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
@@ -18,13 +16,13 @@ import MacroTargetForm from "@/features/goals/components/MacroTargetForm";
 import WeightGoalDashboard from "@/features/goals/components/WeightGoalDashboard";
 import WeightGoalModal from "@/features/goals/components/WeightGoalModal";
 import WeightProgressTabs from "@/features/goals/components/WeightProgressTabs";
-import { useGoalsPage } from "@/features/goals/hooks/page";
+import { useGoalsController } from "@/features/goals/hooks/page";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 
 export default function GoalsPage() {
-  const { ui, data, actions } = useGoalsPage();
+  const { ui, data, actions } = useGoalsController();
   const queryClient = useQueryClient();
 
   usePageDataSync();
@@ -44,7 +42,7 @@ export default function GoalsPage() {
     currentWeightGoals?.targetWeight ?? user?.weight ?? 0;
 
   const normalizedWeightGoals = useMemo(
-    () => normalizeWeightGoals(currentWeightGoals, user?.weight),
+    () => normalizeWeightGoals(currentWeightGoals ?? undefined, user?.weight),
     [currentWeightGoals, user?.weight],
   );
 
@@ -97,7 +95,7 @@ export default function GoalsPage() {
           message="This will reset all your current goals and progress. Are you sure you want to continue?"
           confirmLabel="Reset Goals"
           cancelLabel="Cancel"
-          onConfirm={actions.resetGoals}
+          onConfirm={actions.closeResetGoalsModal}
           isDanger
           size="md"
         />
@@ -183,7 +181,6 @@ export default function GoalsPage() {
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                 >
                   <div className="space-y-6">
-                    {/* Prop expects MacroTargetSettings | null */}
                     <MacroTargetForm macroTarget={macroTarget ?? null} />
                   </div>
                 </motion.div>

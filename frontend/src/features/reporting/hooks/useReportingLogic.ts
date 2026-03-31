@@ -19,6 +19,7 @@ interface MacroTotals {
 
 interface ReportingChartRow extends MacroTotals {
   name: string;
+  [key: string]: string | number;
 }
 
 function buildReportingData(
@@ -183,7 +184,7 @@ export function useReportingLogic(
     [dateRange, history],
   );
 
-  const dataProcessed = !isLoadingExternal;
+  const isHistoryReady = !isLoadingExternal;
 
   const averages = useMemo(() => {
     if (aggregatedData.length === 0) {
@@ -237,6 +238,6 @@ export function useReportingLogic(
     dailySeries,
     averages,
     handleDownloadCSV,
-    dataProcessed,
+    isHistoryReady,
   };
 }

@@ -6,7 +6,11 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import { type MacroEntryCreatePayload, type MacroEntryUpdatePayload,macrosApi } from "@/api/macros";
+import {
+  type MacroEntryCreatePayload,
+  type MacroEntryUpdatePayload,
+  macrosApi,
+} from "@/api/macros";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
@@ -44,9 +48,7 @@ export function useMacroHistory(
     ),
     queryFn: async () => {
       const response = await macrosApi.getHistory(
-        limit,
-        offset,
-        options,
+        { limit, offset, ...options },
       );
 
       return normalizePaginatedHistory(response, limit, offset);
@@ -68,9 +70,7 @@ export function useMacroHistoryInfinite(
     ),
     queryFn: async ({ pageParam: pageParameter = 0 }) => {
       const response = await macrosApi.getHistory(
-        limit,
-        pageParameter,
-        options,
+        { limit, offset: pageParameter, ...options },
       );
 
       return normalizePaginatedHistory(response, limit, pageParameter);

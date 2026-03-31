@@ -40,6 +40,7 @@ function useMetricCardColors(color: keyof typeof COLOR_MAP | undefined) {
 function useNumericValue(value: number | string | undefined) {
   return useMemo(() => {
     if (value === undefined) return undefined;
+
     return typeof value === "number"
       ? value
       : Number.parseFloat(value.toString());

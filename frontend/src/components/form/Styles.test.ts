@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { formStyles } from "./Styles";
+import { formStyles } from "./FormStyles";
 
 describe("formStyles", () => {
   describe("labels", () => {
