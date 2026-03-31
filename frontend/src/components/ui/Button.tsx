@@ -5,13 +5,13 @@ import {
   BUTTON_VARIANTS,
   DEFAULT_LOADING_TEXT,
   ICON_POSITIONS,
-} from "@/components/utils/Constants";
+} from "@/components/utils/UiConstants";
 import { useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { cn } from "@/lib/classnameUtilities";
 
 import { LoadingSpinnerIcon } from "./Icons";
-import type { ButtonProps } from "./Types";
+import type { ButtonProps } from "./UiTypes";
 
 type ButtonAllProps = ButtonProps &
   React.ButtonHTMLAttributes<HTMLButtonElement>;

@@ -3,7 +3,7 @@ import { motion, useReducedMotion } from "motion/react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
-import usePageMetadata from "@/hooks/usePageMetadata";
+import { usePageMetadata } from "@/hooks";
 import { APP_ICON_URL, APP_URL, PRICING_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
 import BackToTopButton from "../components/BackToTopButton";
@@ -25,10 +25,6 @@ const sectionRevealVariants = {
   },
 } as const;
 
-/**
- * Enhanced Suspense fallback:
- * visually matches card surfaces with subtle shimmer.
- */
 function ThemedFallback() {
   return (
     <div className="flex w-full items-center justify-center py-16">
@@ -118,7 +114,6 @@ const LandingPage: React.FC = () => {
     <div
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      {/* eslint-disable-next-line react/no-dangerously-set-inner-html */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: schemaScript }}

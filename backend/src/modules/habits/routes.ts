@@ -12,9 +12,10 @@ import {
 import {
   AuthorizationError,
   AuthenticationError,
+  BadRequestError,
   NotFoundError,
 } from "../../lib/errors";
-import { checkFeatureLimit } from "../../middleware/clerk-guards";
+import { checkFeatureLimit, requireAuth } from "../../middleware/clerk-guards";
 
 type HabitsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
 
@@ -22,12 +23,14 @@ export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
     group
       .decorate("db", db)
+      .use(requireAuth)
 
       // --- Get All Habits ---
       .get(
         "/",
         async (context: any) => {
-          const { internalUserId, db } = context as HabitsRouteContext;
+          const { db } = context as HabitsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           const query = `
             SELECT id, user_id, title, icon_name, current, target, accent_color, 
@@ -85,10 +88,11 @@ export const habitRoutes = (app: Elysia) =>
       .post(
         "/",
         async (context: any) => {
-          const { body, internalUserId, db } = context as HabitsRouteContext;
+          const { body, db } = context as HabitsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           if (!internalUserId) {
@@ -189,10 +193,11 @@ export const habitRoutes = (app: Elysia) =>
       .put(
         "/:id",
         async (context: any) => {
-          const { params, body, internalUserId, db } = context as HabitsRouteContext;
+          const { params, body, db } = context as HabitsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           const habitId = params?.id;
@@ -296,7 +301,8 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/:id",
         async (context: any) => {
-          const { params, internalUserId, db } = context as HabitsRouteContext;
+          const { params, db } = context as HabitsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           const habitId = params?.id;
           if (!habitId) {
@@ -338,7 +344,8 @@ export const habitRoutes = (app: Elysia) =>
       .delete(
         "/",
         async (context: any) => {
-          const { internalUserId, db } = context as HabitsRouteContext;
+          const { db } = context as HabitsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           const query = `
             DELETE FROM habits

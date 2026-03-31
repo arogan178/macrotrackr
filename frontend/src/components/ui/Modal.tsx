@@ -11,7 +11,7 @@ import type {
   ConfirmationModalProps,
   FormModalProps,
   ModalProps,
-} from "./Types";
+} from "./UiTypes";
 
 const CONTAINER_CLASS =
   "fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6";

@@ -3,6 +3,7 @@ import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
+import { requireAuth } from "../../middleware/clerk-guards";
 import type { AuthenticatedRouteContext } from "../../types";
 import {
   safeQuery,
@@ -12,7 +13,7 @@ import {
   type WeightGoalRow,
   type WeightLogRow,
 } from "../../lib/database";
-import { ConflictError, NotFoundError } from "../../lib/errors";
+import { BadRequestError, ConflictError, NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
 
@@ -45,11 +46,13 @@ export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
       .decorate("db", db)
+      .use(requireAuth)
       // --- Get Weight Goals ---
       .get(
         "/weight",
         async (context: any) => {
-          const { internalUserId, db, request } = context as GoalsRouteContext;
+          const { db, request } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           // Get correlation ID from request headers if available
           const correlationId = request.headers.get("x-correlation-id") || undefined;
@@ -106,10 +109,11 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight",
         async (context: any) => {
-          const { internalUserId, body, db, request } = context as GoalsRouteContext;
+          const { body, db, request } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           context.set.status = 201;
@@ -227,10 +231,11 @@ export const goalRoutes = (app: Elysia) =>
       .put(
         "/weight",
         async (context: any) => {
-          const { internalUserId, body, db, request } = context as GoalsRouteContext;
+          const { body, db, request } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           const savedGoal = withTransaction(db, () => {
@@ -355,7 +360,8 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight",
         async (context: any) => {
-          const { internalUserId, db } = context as GoalsRouteContext;
+          const { db } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           withTransaction(db, () => {
             safeExecute(db, "DELETE FROM weight_goals WHERE user_id = ?", [
@@ -378,7 +384,8 @@ export const goalRoutes = (app: Elysia) =>
       .get(
         "/weight-log",
         async (context: any) => {
-          const { internalUserId, db } = context as GoalsRouteContext;
+          const { db } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           const query =
             "SELECT id, timestamp, weight FROM weight_log WHERE user_id = ? ORDER BY timestamp DESC";
@@ -404,10 +411,11 @@ export const goalRoutes = (app: Elysia) =>
       .post(
         "/weight-log",
         async (context: any) => {
-          const { internalUserId, body, db } = context as GoalsRouteContext;
+          const { body, db } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           const { timestamp, weight } = body as {
@@ -456,7 +464,8 @@ export const goalRoutes = (app: Elysia) =>
       .delete(
         "/weight-log/:id",
         async (context: any) => {
-          const { internalUserId, params, db } = context as GoalsRouteContext;
+          const { params, db } = context as GoalsRouteContext;
+          const internalUserId = context.authenticatedUser.userId;
 
           const entryIdToDelete = params?.id;
           if (!entryIdToDelete) {

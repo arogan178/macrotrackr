@@ -1,4 +1,3 @@
-// The updated HabitForm.tsx, removing isSubmitting prop since it's not used
 import { NumberField, TextField } from "@/components/form";
 import { HabitGoalFormValues } from "@/types/habit";
 
@@ -6,9 +5,6 @@ import { HABIT_ICONS } from "../../constants/habits";
 
 import HabitCard from "./HabitCard";
 
-/**
- * Curated color options for the swatch buttons (visual preview only).
- */
 const COLOR_OPTIONS = [
   { value: "indigo", label: "Indigo", class: "bg-indigo-500" },
   { value: "blue", label: "Blue", class: "bg-blue-500" },
@@ -23,10 +19,6 @@ const COLOR_OPTIONS = [
   { value: "purple", label: "Purple", class: "bg-purple-500" },
 ] as const;
 
-/**
- * Static maps for Tailwind classes to avoid purging of dynamic class names.
- * NOTE: Defined once here.
- */
 const COLOR_TEXT_RING_MAP = {
   indigo: { text: "text-indigo-400", ring: "ring-indigo-400" },
   blue: { text: "text-blue-400", ring: "ring-blue-400" },
@@ -134,9 +126,6 @@ function HabitForm({
     }
   };
 
-  // Use HABIT_ICONS for preview icon resolution (selection UI updated below)
-
-  // Safely map accentColor to our static Tailwind maps to satisfy TS and avoid purge
   type AccentKey = keyof typeof COLOR_TEXT_RING_MAP;
   const accentKey = values.accentColor as AccentKey;
   const colorText = COLOR_TEXT_RING_MAP[accentKey].text;
@@ -240,7 +229,6 @@ function HabitForm({
               aria-label={`Select ${color.label} color`}
             />
           ))}
-          {/* Hidden inputs to ensure optional fields serialize predictably */}
           <input
             type="hidden"
             name="accentColor"
@@ -249,7 +237,6 @@ function HabitForm({
         </div>
       </div>
 
-      {/* Hidden inputs to include backend-required fields in payload shape (handled by submitter) */}
       <input type="hidden" name="iconName" value={values.iconName} />
       <input type="hidden" name="current" value={currentProgress} />
       <input
@@ -265,7 +252,6 @@ function HabitForm({
           ),
         )}
       />
-      {/* isComplete, createdAt, completedAt are managed by submitter/backend */}
 
       <div className="mt-4">
         <p className="mb-2 text-sm font-medium text-foreground">Preview</p>
@@ -278,7 +264,7 @@ function HabitForm({
               iconName: values.iconName,
               current: currentProgress,
               target: values.target,
-              progress: undefined, // let component compute from current/target
+              progress: undefined,
               accentColor: values.accentColor ?? "indigo",
               isComplete: false,
             }}

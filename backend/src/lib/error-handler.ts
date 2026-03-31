@@ -1,5 +1,17 @@
 // src/lib/error-handler.ts
 import { logger } from "./logger";
+import { AppError } from "./errors";
+
+export class ServiceError extends AppError {
+  public readonly operation: string;
+  public readonly cause?: unknown;
+
+  constructor(operation: string, message: string, cause?: unknown) {
+    super(message, 500, "SERVICE_ERROR");
+    this.operation = operation;
+    this.cause = cause;
+  }
+}
 
 /**
  * Shared error handler for service methods.
@@ -9,8 +21,8 @@ import { logger } from "./logger";
 export function handleServiceError(
   error: unknown,
   operation: string,
-  context?: Record<string, any>,
-  knownErrors: Array<Function> = []
+  context?: Record<string, unknown>,
+  knownErrors: Array<new (...arguments_: never[]) => unknown> = [],
 ): never {
   logger.error(
     {
@@ -23,5 +35,9 @@ export function handleServiceError(
   for (const KnownError of knownErrors) {
     if (error instanceof KnownError) throw error;
   }
-  throw new Error("An unexpected error occurred. Please try again later.");
+  throw new ServiceError(
+    operation,
+    "An unexpected error occurred. Please try again later.",
+    error,
+  );
 }

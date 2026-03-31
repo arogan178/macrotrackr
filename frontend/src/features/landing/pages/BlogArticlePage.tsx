@@ -1,7 +1,7 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Check, Link2 } from "lucide-react";
+import { ArrowLeft, Check, Copy, Link2 } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
@@ -9,11 +9,11 @@ import remarkGfm from "remark-gfm";
 
 import { ContentImage } from "@/components/ui";
 import { MealGroupingFlow } from "@/features/landing/components/AnimatedUserFlow";
-import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
+import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
 import Footer from "@/features/landing/components/Footer";
 import Header from "@/features/landing/components/Header";
-import usePageMetadata from "@/hooks/usePageMetadata";
+import { usePageMetadata } from "@/hooks";
 import {
   formatDate,
   getPostBySlug,

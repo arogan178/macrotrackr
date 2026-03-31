@@ -8,26 +8,15 @@ import {
 } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 
-import { goalsApi } from "@/api/goals";
-import { macrosApi } from "@/api/macros";
 import { PageTransition } from "@/components/animation";
 import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
-import {
-  weightGoalsQueryOptions,
-  weightLogQueryOptions,
-} from "@/hooks/queries/useGoals";
-import { habitsQueryOptions } from "@/hooks/queries/useHabits";
-import { todayISO } from "@/utils/dateUtilities";
 
 import MainLayout from "./components/layout/MainLayout";
-import type { WeightGoalsResponse } from "./features/goals/types";
-import { normalizeWeightGoals } from "./features/goals/utils/goalUtilities";
-import { queryClient, queryConfigs } from "./lib/queryClient";
-import { queryKeys } from "./lib/queryKeys";
-import { LoadingFallback, RequireAuth, RequireUnauth, safeFetch } from "./routes/authGuards";
+import { queryClient } from "./lib/queryClient";
+import { LoadingFallback, RequireAuth, RequireUnauth } from "./routes/authGuards";
 import {
   AuthReadyPage,
   GoalsPage,
@@ -83,37 +72,6 @@ const landingRoute = createRoute({
 export const homeRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/home",
-  loader: async (context_) => {
-    const { context } = context_ as typeof context_ & {
-      context: { queryClient: typeof queryClient };
-    };
-
-    const [weightGoals, weightLog] = await Promise.all([
-      safeFetch(
-        () =>
-          context.queryClient.fetchQuery(weightGoalsQueryOptions()),
-        null as WeightGoalsResponse | null,
-      ),
-      safeFetch(
-        () =>
-          context.queryClient.fetchQuery(weightLogQueryOptions()),
-        [] as Awaited<ReturnType<typeof goalsApi.getWeightLog>>,
-      ),
-    ]);
-
-    const latestWeight =
-      weightLog.length > 0
-        ? weightLog.at(-1)?.weight
-        : undefined;
-    const transformedWeightGoals = weightGoals
-      ? normalizeWeightGoals(weightGoals, latestWeight)
-      : undefined;
-
-    return {
-      weightGoals: transformedWeightGoals,
-      weightLog,
-    };
-  },
   component: () => (
     <RequireAuth>
       <RequireCompleteProfile>
@@ -141,55 +99,6 @@ const settingsRoute = createRoute({
 export const goalsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/goals",
-  loader: async (context_) => {
-    const { context } = context_ as typeof context_ & {
-      context: { queryClient: typeof queryClient };
-    };
-
-    const [macroTarget, weightGoals, weightLog] = await Promise.all([
-      safeFetch(
-        () =>
-          context.queryClient.fetchQuery({
-            queryKey: queryKeys.macros.targets(),
-            queryFn: () =>
-              macrosApi
-                .getMacroTarget()
-                .then((r) => r?.macroTarget ?? null),
-            ...queryConfigs.macros,
-          }),
-        null,
-      ),
-      safeFetch(
-        () =>
-          context.queryClient.fetchQuery(weightGoalsQueryOptions()),
-        null as WeightGoalsResponse | null,
-      ),
-      safeFetch(
-        () =>
-          context.queryClient.fetchQuery(weightLogQueryOptions()),
-        [] as Awaited<ReturnType<typeof goalsApi.getWeightLog>>,
-      ),
-      safeFetch(
-        () =>
-          context.queryClient.fetchQuery(habitsQueryOptions()),
-        [],
-      ),
-    ]);
-
-    const latestWeight =
-      weightLog.length > 0
-        ? weightLog.at(-1)?.weight
-        : undefined;
-    const transformedWeightGoals = weightGoals
-      ? normalizeWeightGoals(weightGoals, latestWeight)
-      : undefined;
-
-    return {
-      macroTarget,
-      weightGoals: transformedWeightGoals,
-      weightLog,
-    };
-  },
   component: () => (
     <RequireAuth>
       <RequireCompleteProfile>
@@ -289,29 +198,6 @@ export const reportingRoute = createRoute({
     startDate: search.startDate as string | undefined,
     endDate: search.endDate as string | undefined,
   }),
-  loaderDeps: ({ search: { startDate, endDate } }) => ({ startDate, endDate }),
-  loader: async (context_) => {
-    const { deps, context } = context_ as typeof context_ & {
-      deps: { startDate?: string; endDate?: string };
-      context: { queryClient: typeof queryClient };
-    };
-
-    const queryDate = deps.startDate ?? todayISO();
-
-    return safeFetch(
-      () =>
-        context.queryClient.fetchQuery({
-          queryKey: queryKeys.macros.dailyTotals(queryDate),
-          queryFn: () =>
-            macrosApi.getDailyTotals({
-              startDate: deps.startDate,
-              endDate: deps.endDate,
-            }),
-          ...queryConfigs.macros,
-        }),
-      null,
-    );
-  },
   component: () => (
     <RequireAuth>
       <RequireCompleteProfile>

@@ -1,28 +1,21 @@
 import { memo, useEffect } from "react";
 import { createPortal } from "react-dom";
 
-import useDeferredVisibility from "@/hooks/useDeferredVisibility";
+import { useDeferredVisibility } from "@/hooks";
 import { useCriticalLoading } from "@/hooks/useGlobalLoading";
 
 import LoadingSpinner from "./LoadingSpinner";
 
-/**
- * Full-screen overlay that blocks interaction during critical first-loads or any mutation.
- * Renders via portal to avoid layout shifts and stacking context issues.
- */
 function GlobalLoadingOverlay() {
   const { isLoading } = useCriticalLoading();
 
-  // Debounce show by 200ms; keep on screen for 400ms minimum once visible
   const visible = useDeferredVisibility(isLoading, {
     delayMs: 200,
     minVisibleMs: 400,
   });
 
-  // Ensure we have a portal target; default to document.body
   const target = typeof document === "undefined" ? undefined : document.body;
 
-  // Optionally set aria-busy on the main app container if present
   useEffect(() => {
     const main = document?.getElementById("app-root");
     if (!main) return;
@@ -33,15 +26,6 @@ function GlobalLoadingOverlay() {
     }
   }, [visible]);
 
-  // Respect reduced motion for spinner if desired (spinner already uses simple spin)
-  // Currently unused, keep logic for potential future use but comment to satisfy linter
-  // const prefersReducedMotion = useMemo(() => {
-  //   if (globalThis.window === undefined || !globalThis.matchMedia) return false;
-  //   return globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  // }, []);
-
-  // Returning null is the conventional React pattern; disable unicorn/no-null for this line.
-   
   if (!visible || !target) return null;
 
   const overlay = (

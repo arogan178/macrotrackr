@@ -1,3 +1,4 @@
+import { authApi } from "@/api/auth";
 import { API_BASE_URL, ApiError, getHeadersAsync, handleResponse } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import { getActivityLevelFromString } from "@/utils/userConstants";
@@ -40,11 +41,7 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
     return null;
   }
 
-  const root = value as Record<string, unknown>;
-  const candidateRaw =
-    typeof root.data === "object" && root.data !== null
-      ? (root.data as Record<string, unknown>)
-      : root;
+  const candidateRaw = value as Record<string, unknown>;
 
   const candidate: Record<string, unknown> = {
     ...candidateRaw,
@@ -99,109 +96,74 @@ export type UserSettingsPayload = Partial<{
   activityLevel: string | number;
 }>;
 
-export function createUserApi(auth: { syncUser: (token?: string) => Promise<unknown> }) {
-  return {
-    getUserDetails: async (): Promise<UserDetailsResponse> => {
-      const fetchUserDetails = async (): Promise<unknown> => {
-        const url = `${API_BASE_URL}/api/user/me`;
-        const response = await fetch(url, {
-          headers: await getHeadersAsync(false),
-          credentials: "include",
-        });
+export const userApi = {
+  getUserDetails: async (): Promise<UserDetailsResponse> => {
+    const response = await fetch(`${API_BASE_URL}/api/user/me`, {
+      headers: await getHeadersAsync(false),
+      credentials: "include",
+    });
+    const result = await handleResponse(response);
+    const normalizedResult = normalizeUserDetailsResponse(result);
+    if (normalizedResult) {
+      return normalizedResult;
+    }
 
-        return handleResponse(response);
-      };
-
-      const result = await fetchUserDetails();
-      const normalizedResult = normalizeUserDetailsResponse(result);
-      if (normalizedResult) {
-        return normalizedResult;
-      }
-
-      throw new ApiError(
-        "Invalid user profile response from server",
-        500,
-        "INVALID_USER_RESPONSE",
-        result,
-      );
-    },
-
-    syncAndGetUserDetails: async (token?: string): Promise<UserDetailsResponse> => {
-      await auth.syncUser(token);
-
-      return userApi.getUserDetails();
-    },
-
-    updateSettings: async (settings: UserSettingsPayload) => {
-      const payloadToSend = { ...settings };
-      if (
-        payloadToSend.activityLevel !== undefined &&
-        typeof payloadToSend.activityLevel === "string"
-      ) {
-        payloadToSend.activityLevel = getActivityLevelFromString(
-          payloadToSend.activityLevel as ActivityLevel,
-        );
-      }
-
-      const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
-        method: "PUT",
-        headers: await getHeadersAsync(),
-        body: JSON.stringify(payloadToSend),
-        credentials: "include",
-      });
-
-      return (await handleResponse(response)) as {
-        success: boolean;
-        message: string;
-      };
-    },
-
-    completeProfile: async (
-      profileData: Partial<
-        Pick<
-          UserSettingsPayload,
-          "dateOfBirth" | "height" | "weight" | "gender" | "activityLevel"
-        >
-      >,
-    ) => {
-      const response = await fetch(
-        `${API_BASE_URL}/api/user/complete-profile`,
-        {
-          method: "POST",
-          headers: await getHeadersAsync(),
-          body: JSON.stringify(profileData),
-          credentials: "include",
-        },
-      );
-
-      return (await handleResponse(response)) as {
-        success: boolean;
-        message: string;
-      };
-    },
-  };
-}
-
-// Create userApi with circular dependency resolved via lazy init
-let _userApi: ReturnType<typeof createUserApi> | undefined;
-
-export function initUserApi(auth: { syncUser: (token?: string) => Promise<unknown> }) {
-  _userApi = createUserApi(auth);
-
-  return _userApi;
-}
-
-export function getUserApi(): ReturnType<typeof createUserApi> {
-  if (!_userApi) {
-    throw new Error("userApi not initialized. Call initUserApi first.");
-  }
-
-  return _userApi;
-}
-
-// Deprecated: use getUserApi() instead
-export const userApi = new Proxy({} as ReturnType<typeof createUserApi>, {
-  get(_target, property) {
-    return getUserApi()[property as keyof ReturnType<typeof createUserApi>];
+    throw new ApiError(
+      "Invalid user profile response from server",
+      500,
+      "INVALID_USER_RESPONSE",
+      result,
+    );
   },
-});
+
+  syncAndGetUserDetails: async (token?: string): Promise<UserDetailsResponse> => {
+    await authApi.syncUser(token);
+
+    return userApi.getUserDetails();
+  },
+
+  updateSettings: async (settings: UserSettingsPayload) => {
+    const payloadToSend = { ...settings };
+    if (
+      payloadToSend.activityLevel !== undefined &&
+      typeof payloadToSend.activityLevel === "string"
+    ) {
+      payloadToSend.activityLevel = getActivityLevelFromString(
+        payloadToSend.activityLevel as ActivityLevel,
+      );
+    }
+
+    const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
+      method: "PUT",
+      headers: await getHeadersAsync(),
+      body: JSON.stringify(payloadToSend),
+      credentials: "include",
+    });
+
+    return (await handleResponse(response)) as {
+      success: boolean;
+      message: string;
+    };
+  },
+
+  completeProfile: async (
+    profileData: Partial<
+      Pick<
+        UserSettingsPayload,
+        "dateOfBirth" | "height" | "weight" | "gender" | "activityLevel"
+      >
+    >,
+  ) => {
+    const response = await fetch(`${API_BASE_URL}/api/user/complete-profile`, {
+      method: "POST",
+      headers: await getHeadersAsync(),
+      body: JSON.stringify(profileData),
+      credentials: "include",
+    });
+
+    return (await handleResponse(response)) as {
+      success: boolean;
+      message: string;
+    };
+  },
+};
