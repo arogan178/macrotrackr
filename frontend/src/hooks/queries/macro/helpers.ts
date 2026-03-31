@@ -1,6 +1,5 @@
 import { type InfiniteData, type QueryClient } from "@tanstack/react-query";
 
-import { queryKeys } from "@/lib/queryKeys";
 import type { MacroEntry, PaginatedMacroHistory } from "@/types/macro";
 
 export type MacroHistoryInfiniteData = InfiniteData<PaginatedMacroHistory, number>;
@@ -11,7 +10,7 @@ export type OptimisticMacroEntry = MacroEntry & { optimistic?: boolean };
 
 export function getMacroHistorySnapshots(queryClient: QueryClient) {
   return queryClient.getQueriesData<MacroHistoryInfiniteData>({
-    queryKey: queryKeys.macros.historyInfinite(),
+    queryKey: ["macros", "history-infinite"],
   });
 }
 
@@ -33,7 +32,7 @@ export function updateMacroHistoryCaches(
   updater: (oldData: MacroHistoryInfiniteData | undefined) => MacroHistoryInfiniteData | undefined,
 ) {
   queryClient.setQueriesData<MacroHistoryInfiniteData>(
-    { queryKey: queryKeys.macros.historyInfinite() },
+    { queryKey: ["macros", "history-infinite"] },
     updater,
   );
 }
