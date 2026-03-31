@@ -14,6 +14,7 @@ import {
   useMacroHistoryForDateRange,
   useMacroTarget,
 } from "@/hooks/queries/useMacroQueries";
+import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
@@ -27,7 +28,6 @@ import {
   UnifiedInsights,
 } from "../components";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
 
 export default function ReportingPage() {
