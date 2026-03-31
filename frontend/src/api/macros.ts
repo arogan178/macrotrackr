@@ -26,6 +26,13 @@ export interface MacroEntryCreatePayload {
 
 export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
 
+export interface MacroHistoryOptions {
+  limit?: number;
+  offset?: number;
+  startDate?: string;
+  endDate?: string;
+}
+
 interface MacroHistoryResponse {
   entries: MacroEntry[];
   total: number;
@@ -100,10 +107,9 @@ export const macrosApi = {
   },
 
   getHistory: async (
-    limit = 20,
-    offset = 0,
-    { startDate, endDate }: { startDate?: string; endDate?: string } = {},
+    options: MacroHistoryOptions = {},
   ) => {
+    const { limit = 20, offset = 0, startDate, endDate } = options;
     let url = `${API_BASE_URL}/api/macros/history?limit=${limit}&offset=${offset}`;
     if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
     if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
@@ -126,9 +132,7 @@ export const macrosApi = {
 
     while (hasMore) {
       const response = (await macrosApi.getHistory(
-        pageSize,
-        offset,
-        options,
+        { limit: pageSize, offset, ...options },
       )) as MacroHistoryResponse;
 
       if (Array.isArray(response.entries)) {

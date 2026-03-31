@@ -1,7 +1,7 @@
 // Change `space-x-2` to `space-x-1` to reduce the gap between the buttons
 import { memo } from "react";
 
-import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants";
+import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/UiConstants";
 
 import IconButton from "./IconButton";
 import { LoadingSpinnerIcon, StarIcon, TrashIcon } from "./Icons";

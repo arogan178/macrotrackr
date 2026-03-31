@@ -44,14 +44,12 @@ describe("useBeforeUnload", () => {
     removeEventListenerSpy.mockRestore();
   });
 
-  it("should use custom message when provided", () => {
-    const customMessage = "Custom unsaved changes message";
+  it("should add beforeunload listener", () => {
     const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
     const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
 
-    renderHook(() => useBeforeUnload(true, customMessage));
+    renderHook(() => useBeforeUnload(true));
 
-    // The hook should be called with the custom message
     expect(addEventListenerSpy).toHaveBeenCalledWith(
       "beforeunload",
       expect.any(Function),
@@ -70,10 +68,8 @@ describe("useBeforeUnload", () => {
       { initialProps: { hasUnsavedChanges: true } },
     );
 
-    // First render with true - should add listener
     expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
 
-    // Rerender with false - should remove listener
     rerender({ hasUnsavedChanges: false });
     expect(removeEventListenerSpy).toHaveBeenCalledTimes(1);
 

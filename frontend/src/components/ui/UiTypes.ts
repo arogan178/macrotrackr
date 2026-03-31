@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-import type { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants";
+import type { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/UiConstants";
 
 export type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 export type IconSize = keyof typeof ICON_SIZES;

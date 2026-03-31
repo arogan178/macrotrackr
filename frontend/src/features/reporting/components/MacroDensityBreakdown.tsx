@@ -24,7 +24,7 @@ interface MacroDensityBreakdownProps {
   data?: Record<string, unknown>[];
   selectedRange?: number;
   isLoading?: boolean;
-  dataProcessed?: boolean;
+  isHistoryReady?: boolean;
 }
 
 // --- Subcomponents ---
@@ -83,7 +83,7 @@ const MacroDensityBreakdown = ({
   data: propertyData,
   selectedRange: _selectedRange,
   isLoading: propertyIsLoading,
-  dataProcessed,
+  isHistoryReady,
 }: MacroDensityBreakdownProps) => {
   // Always call hook, then prefer provided data if present
   const hookData = useMacroDensityBreakdown(undefined, "week");
@@ -92,7 +92,7 @@ const MacroDensityBreakdown = ({
     typeof propertyIsLoading === "boolean" ? propertyIsLoading : false;
   // Show a message if there is no data after loading
   const showNoData =
-    !loading && Array.isArray(data) && data.length === 0 && dataProcessed;
+    !loading && Array.isArray(data) && data.length === 0 && isHistoryReady;
 
   return (
     <ChartCard title="Macro Distribution" className="w-full">

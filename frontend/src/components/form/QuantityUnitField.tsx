@@ -1,8 +1,8 @@
 import { memo } from "react";
 
 import Dropdown from "@/components/form/Dropdown";
+import { formStyles } from "@/components/form/FormStyles";
 import NumberField from "@/components/form/NumberField";
-import { formStyles } from "@/components/form/Styles";
 import {
   UnitConverter,
   type UnitType,

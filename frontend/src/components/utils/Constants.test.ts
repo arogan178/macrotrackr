@@ -12,7 +12,7 @@ import {
   MACRO_COLORS,
   PROGRESS_BAR_COLORS,
   PROGRESS_BAR_HEIGHTS,
-} from "./Constants";
+} from "./UiConstants";
 
 describe("Constants", () => {
   describe("COLOR_MAP", () => {

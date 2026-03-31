@@ -1,7 +1,7 @@
 import { memo, useId, useState } from "react";
 
-import { formStyles } from "@/components/form/Styles";
-import type { TextFieldProps } from "@/components/form/Types";
+import { formStyles } from "@/components/form/FormStyles";
+import type { TextFieldProps } from "@/components/form/FormTypes";
 import { EyeIcon, EyeSlashIcon, IconButton } from "@/components/ui";
 
 import { cn } from "../../lib/classnameUtilities";

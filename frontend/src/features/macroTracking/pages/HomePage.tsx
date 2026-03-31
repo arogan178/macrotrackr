@@ -1,8 +1,6 @@
 import React, { useCallback, useMemo } from "react";
-import { useLoaderData } from "@tanstack/react-router";
 
 import { macrosApi } from "@/api/macros";
-import { homeRoute } from "@/AppRouter";
 import CardContainer from "@/components/form/CardContainer";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
@@ -27,6 +25,7 @@ import type {
 } from "@/features/macroTracking/types/macro";
 import { downloadHistoryCsv } from "@/features/macroTracking/utils";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
   useAddMacroEntry,
   useDeleteMacroEntry,
@@ -40,10 +39,11 @@ import {
   useSavedMeals,
 } from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
-import type { WeightGoals } from "@/types/goal";
 import type { MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
+import type { NutritionProfileSource } from "@/utils/userConstants";
 
 export default function HomePage() {
   usePageDataSync();
@@ -55,6 +55,7 @@ export default function HomePage() {
     data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
   } = useMacroDailyTotals(today);
   const { data: macroTarget } = useMacroTarget();
+  const { data: weightGoals } = useWeightGoals();
 
   const {
     history,
@@ -64,11 +65,6 @@ export default function HomePage() {
     loadMoreHistory,
     limits,
   } = useHistoryPagination(20);
-
-  const loaderData = useLoaderData({
-    from: homeRoute.id,
-  });
-  const weightGoals = (loaderData as { weightGoals?: WeightGoals }).weightGoals;
 
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
@@ -101,7 +97,20 @@ export default function HomePage() {
 
   const { editingEntry, setEditingEntry } = useStore();
 
-  const nutritionProfile = useNutritionProfile(user ?? undefined);
+  const nutritionProfileSource: NutritionProfileSource | undefined =
+    user &&
+    (user.gender === "male" || user.gender === "female")
+      ? {
+          id: user.id,
+          weight: user.weight,
+          height: user.height,
+          dateOfBirth: user.dateOfBirth,
+          gender: user.gender,
+          activityLevel: user.activityLevel,
+        }
+      : undefined;
+
+  const nutritionProfile = useNutritionProfile(nutritionProfileSource);
 
   const handleAddEntry = useCallback(
     async (entry: MacroEntryInput) => {
@@ -114,17 +123,13 @@ export default function HomePage() {
     async (entry: MacroEntry) => {
       if (!entry.foodName && !entry.mealName) return;
 
-      try {
-        await createSavedMealMutation.mutateAsync({
-          name: entry.foodName ?? entry.mealName,
-          protein: entry.protein,
-          carbs: entry.carbs,
-          fats: entry.fats,
-          mealType: entry.mealType,
-        });
-      } catch {
-        // Failed to save meal - handled silently
-      }
+      await createSavedMealMutation.mutateAsync({
+        name: entry.foodName ?? entry.mealName,
+        protein: entry.protein,
+        carbs: entry.carbs,
+        fats: entry.fats,
+        mealType: entry.mealType,
+      });
     },
     [createSavedMealMutation],
   );
@@ -142,11 +147,7 @@ export default function HomePage() {
       );
 
       if (savedMeal) {
-        try {
-          await deleteSavedMealMutation.mutateAsync(savedMeal.id);
-        } catch {
-          // Failed to unsave meal - handled silently
-        }
+        await deleteSavedMealMutation.mutateAsync(savedMeal.id);
       }
     },
     [savedMeals, deleteSavedMealMutation],
@@ -228,7 +229,8 @@ export default function HomePage() {
           ingredients,
         });
       } catch (error) {
-        console.error("Failed to save grouped meal", error);
+        logger.error("Failed to save grouped meal", error);
+        throw error;
       }
     },
     [createSavedMealMutation],
