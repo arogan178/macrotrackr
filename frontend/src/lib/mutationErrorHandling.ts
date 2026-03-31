@@ -32,9 +32,7 @@ export function logMutationError(operation: string, error: unknown) {
 }
 
 export function createMutationErrorLogger(operation: string) {
-  return (error: unknown) => {
-    logMutationError(operation, error);
-  };
+  return (error: unknown) => logMutationError(operation, error);
 }
 
 /**
@@ -226,9 +224,6 @@ export function isConflictError(error: MutationError): boolean {
 export class MutationErrorHandler {
   constructor(private options: MutationErrorHandlerOptions) {}
 
-  /**
-   * Handles mutation errors with consistent logging and user feedback
-   */
   handleError(
     error: MutationError,
     context?: { operation: string; variables?: unknown },
@@ -238,26 +233,21 @@ export class MutationErrorHandler {
       status: error.status,
     });
 
-    // Call custom error handler if provided
     if (this.options.onError) {
       this.options.onError(error);
     }
 
-    // Show user-friendly notification if enabled
     if (this.options.showNotification) {
       this.showErrorNotification(error);
     }
   }
 
-  /**
-   * Handles retry attempts with logging
-   */
   handleRetry(
     error: MutationError,
     attemptNumber: number,
     operation: string,
   ): void {
-    console.warn(`Retrying ${operation} (attempt ${attemptNumber}):`, {
+    logger.warn(`Retrying ${operation} (attempt ${attemptNumber})`, {
       error: error.message,
       status: error.status,
     });
@@ -267,9 +257,6 @@ export class MutationErrorHandler {
     }
   }
 
-  /**
-   * Shows user-friendly error notifications
-   */
   private showErrorNotification(error: MutationError): void {
     let message = "An unexpected error occurred. Please try again.";
 
@@ -289,9 +276,7 @@ export class MutationErrorHandler {
       message = "Conflict detected. Please refresh and try again.";
     }
 
-    // In a real app, you would integrate with your notification system here
-    // For now, we'll just log the user-friendly message
-    console.info("User notification:", message);
+    logger.info("User notification", { message });
   }
 }
 

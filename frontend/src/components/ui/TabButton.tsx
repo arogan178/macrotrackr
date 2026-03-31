@@ -1,7 +1,7 @@
 import { memo } from "react";
 import { motion } from "motion/react";
 
-import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { BUTTON_SIZES } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
 
 export interface TabButtonProps {

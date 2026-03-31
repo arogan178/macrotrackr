@@ -1,6 +1,6 @@
 import React from "react";
 
-import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { BUTTON_SIZES } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
 
 import TabButton from "./TabButton";

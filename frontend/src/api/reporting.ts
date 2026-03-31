@@ -1,5 +1,4 @@
 import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
-import type { MacroEntry } from "@/types/macro";
 
 export interface MacroDensitySummaryParameters {
   startDate?: string;
@@ -14,15 +13,6 @@ export interface MacroDensitySummaryItem {
   carbs: number;
   fats: number;
   count: number;
-}
-
-export interface MacroHistoryResponse {
-  entries: MacroEntry[];
-  total: number;
-  limit: number;
-  offset: number;
-  hasMore: boolean;
-  limits?: unknown;
 }
 
 export const reportingApi = {
@@ -44,21 +34,5 @@ export const reportingApi = {
     });
 
     return (await handleResponse(response)) as MacroDensitySummaryItem[];
-  },
-
-  getMacroHistory: async (
-    limit = 20,
-    offset = 0,
-    { startDate, endDate }: { startDate?: string; endDate?: string } = {},
-  ) => {
-    let url = `${API_BASE_URL}/api/macros/history?limit=${limit}&offset=${offset}`;
-    if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
-    if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
-    const response = await fetch(url, {
-      headers: await getHeadersAsync(false),
-      credentials: "include",
-    });
-
-    return handleResponse(response);
   },
 };

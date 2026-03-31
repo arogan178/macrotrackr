@@ -9,14 +9,14 @@ interface MacroDensitySummaryParams {
   userId: string;
   startDate?: string;
   endDate?: string;
-  groupBy?: "week" | "month";
+  groupBy?: "day" | "week" | "month";
 }
 
 export async function getMacroDensitySummary({
   userId,
   startDate,
   endDate,
-  groupBy = "week",
+  groupBy = "day",
 }: MacroDensitySummaryParams): Promise<MacroHistorySummaryItem[]> {
   // Fetch macro history for the user in the date range, grouped by week or month
   return await getMacroHistory(userId, { startDate, endDate, groupBy });

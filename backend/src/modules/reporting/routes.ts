@@ -21,12 +21,12 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
   .get(
     "/nutrient-density-summary",
     async ({ authenticatedUser, query }: { authenticatedUser: { userId: number }; query?: Record<string, string | undefined> }) => {
-      // Accepts: startDate, endDate, groupBy (e.g., week, month)
+      // Accepts: startDate, endDate, groupBy (e.g., day, week, month)
       const { startDate, endDate, groupBy } = query ?? {};
       
-      // Only allow 'week' or 'month' for groupBy
+      // Only allow 'day', 'week' or 'month' for groupBy
       const groupByValue =
-        groupBy === "week" || groupBy === "month" ? groupBy : undefined;
+        groupBy === "day" || groupBy === "week" || groupBy === "month" ? groupBy : undefined;
       
       const summary = await getMacroDensitySummary({
         userId: authenticatedUser.userId.toString(),
@@ -41,7 +41,7 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
       query: t.Object({
         startDate: t.Optional(t.String()),
         endDate: t.Optional(t.String()),
-        groupBy: t.Optional(t.Union([t.Literal("week"), t.Literal("month")])),
+        groupBy: t.Optional(t.Union([t.Literal("day"), t.Literal("week"), t.Literal("month")])),
       }),
       response: NutrientDensitySummaryResponseSchema,
       detail: {

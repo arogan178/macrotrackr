@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import { SubscriptionService } from "../modules/billing/subscription-service";
 import { AuthorizationError, AuthenticationError } from "../lib/errors";
 import { logger } from "../lib/logger";
-import type { ClerkAuthContext } from "./clerkAuth";
+import type { ClerkAuthContext } from "./clerk-auth";
 
 export interface AuthenticatedUser {
   userId: number;

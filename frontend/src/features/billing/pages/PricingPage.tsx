@@ -9,9 +9,9 @@ import { DashboardPageContainer } from "@/components/layout/DashboardPageContain
 import FeaturePage from "@/components/layout/FeaturePage";
 import { CircleQuestionMarkIcon } from "@/components/ui";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
+import { usePageMetadata } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import usePageMetadata from "@/hooks/usePageMetadata";
 import { useStore } from "@/store/store";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
@@ -76,9 +76,11 @@ const PricingPage: React.FC = () => {
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
       const { url } = await billingApi.createCheckoutSession(
-        globalThis.location.origin + "/settings?upgraded=true",
-        globalThis.location.origin + "/pricing",
-        plan,
+        {
+          successUrl: globalThis.location.origin + "/settings?upgraded=true",
+          cancelUrl: globalThis.location.origin + "/pricing",
+          plan,
+        },
       );
       globalThis.location.href = url;
     } catch {

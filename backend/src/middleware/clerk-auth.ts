@@ -1,7 +1,8 @@
-// src/middleware/clerkAuth.ts
+// src/middleware/clerk-auth.ts
 import { clerkPlugin, verifyToken } from "elysia-clerk";
 import { Elysia } from "elysia";
 import { config } from "../config";
+import { AuthIntegrationError } from "../lib/errors";
 import { logger } from "../lib/logger";
 import { getInternalUserId } from "../lib/clerk-utils";
 import type { Database } from "bun:sqlite";
@@ -167,7 +168,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       const verifyBearerTokenFallback = async () => {
         const token = resolveBearerToken();
         if (!token) {
-          return null;
+          return { auth: null as { userId: string; sessionId: string | null } | null, integrationError: null as Error | null };
         }
 
         try {
@@ -178,22 +179,32 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
           const fallbackUserId =
             verified && typeof verified.sub === "string" ? verified.sub : null;
           if (!fallbackUserId) {
-            return null;
+            return { auth: null as { userId: string; sessionId: string | null } | null, integrationError: null as Error | null };
           }
 
           return {
-            userId: fallbackUserId,
-            sessionId:
-              verified && typeof verified.sid === "string"
-                ? verified.sid
-                : null,
+            auth: {
+              userId: fallbackUserId,
+              sessionId:
+                verified && typeof verified.sid === "string"
+                  ? verified.sid
+                  : null,
+            },
+            integrationError: null as Error | null,
           };
         } catch (error) {
-          logger.warn(
+          logger.error(
             { path, requestPath, error },
             "Bearer token verification fallback failed"
           );
-          return null;
+
+          return {
+            auth: null as { userId: string; sessionId: string | null } | null,
+            integrationError:
+              error instanceof Error
+                ? error
+                : new Error(String(error)),
+          };
         }
       };
 
@@ -231,8 +242,13 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
 
       if (!authResult?.userId) {
         const fallbackAuthResult = await verifyBearerTokenFallback();
-        if (fallbackAuthResult) {
-          authResult = fallbackAuthResult;
+        if (fallbackAuthResult.integrationError) {
+          throw new AuthIntegrationError(
+            "Failed to verify authentication token with Clerk",
+          );
+        }
+        if (fallbackAuthResult.auth) {
+          authResult = fallbackAuthResult.auth;
         }
       }
 
@@ -267,7 +283,10 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       try {
         clerkUser = await clerk.users.getUser(userId);
       } catch (err) {
-        logger.warn({ userId, error: err }, "Failed to fetch Clerk user details");
+        logger.error({ userId, error: err }, "Failed to fetch Clerk user details");
+        throw new AuthIntegrationError(
+          "Failed to load Clerk user details",
+        );
       }
 
       const email = getPrimaryClerkEmail(clerkUser);
@@ -313,8 +332,12 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
         clerkClient: clerk,
       };
     } catch (err) {
+      if (err instanceof AuthIntegrationError) {
+        throw err;
+      }
+
       logger.error({ error: err, path, requestPath }, "Clerk authentication error");
-      return { user: null, clerkUserId: null, internalUserId: null };
+      throw new AuthIntegrationError("Clerk authentication middleware failed");
     }
   })
   // Authentication guard - must be after the derive to check if user exists

@@ -7,10 +7,10 @@ import {
 } from "recharts/types/component/DefaultTooltipContent";
 
 import { LineChartComponent } from "@/components/chart";
-import type { ChartDataPoint } from "@/components/chart/Types";
+import type { ChartDataPoint } from "@/components/chart/ChartTypes";
 import { BarChartIcon, EmptyState } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
-import { groupWeightLogByDate, type ChartData } from "@/features/goals/utils/weightChartHelpers";
+import { type ChartData,groupWeightLogByDate } from "@/features/goals/utils/weightChartHelpers";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 
 // Custom Tooltip specific to Weight Goal Progress

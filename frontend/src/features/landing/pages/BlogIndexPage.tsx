@@ -6,7 +6,7 @@ import { ContentImage, EmptyState } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import Header from "@/features/landing/components/Header";
-import usePageMetadata from "@/hooks/usePageMetadata";
+import { usePageMetadata } from "@/hooks";
 import { filterPosts, getBlogCategories } from "@/lib/blog";
 
 interface BlogIndexSearch {

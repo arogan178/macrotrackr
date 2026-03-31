@@ -15,7 +15,7 @@ import {
   TrashIcon,
   WarningIcon,
 } from "./Icons";
-import type { ButtonSize, IconSize } from "./Types";
+import type { ButtonSize, IconSize } from "./UiTypes";
 
 type ActionVariant =
   | "delete"

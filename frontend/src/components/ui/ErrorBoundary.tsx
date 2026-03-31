@@ -1,5 +1,6 @@
 import { Component, ReactNode } from "react";
 
+import { logger } from "@/lib/logger";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 import Button from "./Button";
@@ -8,14 +9,7 @@ import { WarningIcon } from "./Icons";
 interface ErrorBoundaryProps {
   children: ReactNode;
   fallback?: ReactNode;
-  /**
-   * Whether this boundary should handle query errors specifically
-   * @default false
-   */
   handleQueryErrors?: boolean;
-  /**
-   * Callback when an error is caught
-   */
   onError?: (error: Error, errorInfo: { componentStack: string }) => void;
 }
 
@@ -35,7 +29,6 @@ export class ErrorBoundary extends Component<
   }
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    // Check if this is a query-related error
     const isQueryError =
       error.message.includes("query") ||
       error.message.includes("fetch") ||
@@ -45,16 +38,19 @@ export class ErrorBoundary extends Component<
   }
 
   componentDidCatch(error: Error, info: { componentStack: string }): void {
-    // Log the error to console and call custom error handler if provided
-    console.error("Error caught by boundary:", error, info);
+    logger.error("Error caught by boundary", {
+      message: error.message,
+      name: error.name,
+      stack: error.stack,
+      componentStack: info.componentStack,
+    });
 
     if (this.props.onError) {
       this.props.onError(error, info);
     }
 
-    // Additional logging for query errors
     if (this.state.isQueryError && this.props.handleQueryErrors) {
-      console.error("Query error details:", {
+      logger.error("Query error details", {
         message: error.message,
         stack: error.stack,
         componentStack: info.componentStack,
@@ -64,7 +60,6 @@ export class ErrorBoundary extends Component<
 
   render(): ReactNode {
     if (this.state.hasError) {
-      // You can render any custom fallback UI
       return (
         this.props.fallback ?? (
           <div className="flex min-h-screen items-center justify-center bg-surface p-4">
@@ -120,5 +115,4 @@ export class ErrorBoundary extends Component<
   }
 }
 
-// Also export as default for backward compatibility
 export default ErrorBoundary;
