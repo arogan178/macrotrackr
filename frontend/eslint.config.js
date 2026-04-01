@@ -11,13 +11,6 @@ import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import pluginRouter from "@tanstack/eslint-plugin-router";
-import tailwindPlugin from "eslint-plugin-tailwindcss";
-import { dirname, resolve } from "path";
-import { fileURLToPath } from "url";
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-const TAILWIND_ROOT_CSS = resolve(__dirname, "src/style.css");
 
 function getTanStackRouterRules() {
   const preset = pluginRouter.configs["flat/recommended"];
@@ -73,7 +66,6 @@ export default [
       unicorn: eslintPluginUnicorn,
       "simple-import-sort": simpleImportSort,
       import: eslintPluginImport,
-      tailwindcss: tailwindPlugin,
     },
     rules: {
       ...pluginJs.configs.recommended.rules,
@@ -84,9 +76,6 @@ export default [
       ...pluginJsxA11y.configs.recommended.rules,
       "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
       "@stylistic/padding-line-between-statements": ["warn", { blankLine: "always", prev: "*", next: "return" }],
-      "tailwindcss/classnames-order": "warn",
-      "tailwindcss/no-custom-classname": "off",
-      "tailwindcss/no-contradicting-classname": "error",
       "react/react-in-jsx-scope": "off",
       "react/no-unescaped-entities": "off",
       "react/self-closing-comp": "error",
@@ -168,11 +157,6 @@ export default [
           project: ["./tsconfig.app.json", "./tsconfig.node.json"],
           noWarnOnMultipleProjects: true,
         },
-      },
-      tailwindcss: {
-        config: TAILWIND_ROOT_CSS,
-        callees: ["cn", "clsx", "classnames"],
-        removeDuplicates: true,
       },
     },
   },
