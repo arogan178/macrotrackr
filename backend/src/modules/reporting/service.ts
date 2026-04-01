@@ -1,4 +1,5 @@
 // Service for nutrient density summary aggregation
+import type { Database } from "bun:sqlite";
 import {
   getMacroHistory,
   type MacroHistorySummaryItem,
@@ -12,12 +13,13 @@ interface MacroDensitySummaryParams {
   groupBy?: "day" | "week" | "month";
 }
 
-export async function getMacroDensitySummary({
+export function getMacroDensitySummary({
+  db,
   userId,
   startDate,
   endDate,
   groupBy = "day",
-}: MacroDensitySummaryParams): Promise<MacroHistorySummaryItem[]> {
+}: MacroDensitySummaryParams & { db: Database }): MacroHistorySummaryItem[] {
   // Fetch macro history for the user in the date range, grouped by week or month
-  return await getMacroHistory(userId, { startDate, endDate, groupBy });
+  return getMacroHistory(db, userId, { startDate, endDate, groupBy });
 }
