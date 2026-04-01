@@ -48,5 +48,5 @@ export interface ClerkUserContext {
     imageUrl?: string;
   } | null;
   clerkUserId: string | null;
-  clerkClient?: any;
+  clerkClient?: unknown;
 }
