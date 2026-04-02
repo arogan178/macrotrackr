@@ -5,7 +5,7 @@ export {
   ApiError,
   getAuthToken,
   getHeaders,
-  getHeadersAsync,
+  type GetHeadersOptions,
   handleResponse,
   post,
   setAuthToken,

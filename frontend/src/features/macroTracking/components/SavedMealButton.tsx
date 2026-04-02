@@ -5,6 +5,7 @@ import { StarIcon } from "@/components/ui/Icons";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
 import { useStore } from "@/store/store";
 import type { MealType } from "@/types/macro";
+import { handleApiError } from "@/utils/errorHandling";
 
 interface SavedMealButtonProps {
   mealName: string;
@@ -39,10 +40,7 @@ export default function SavedMealButton({
       setIsSaved(true);
       showNotification("Meal saved for quick re-entry", "success");
     } catch (error) {
-      showNotification(
-        error instanceof Error ? error.message : "Failed to save meal",
-        "error",
-      );
+      handleApiError(error, "save meal");
     }
   };
 
