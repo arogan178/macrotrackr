@@ -59,5 +59,14 @@ describe("Macros Module Integration", () => {
     expect(res.status).toBe(200);
     const body = JSON.parse(text);
     expect(isValidMacroTargetResponse(body)).toBe(true);
+
+    expect(body).toHaveProperty("macroTarget");
+    expect(body.macroTarget).toMatchObject({
+      proteinPercentage: 30,
+      carbsPercentage: 40,
+      fatsPercentage: 30,
+      lockedMacros: [],
+    });
+    expect(body.macroTarget).not.toHaveProperty("protein_percentage");
   });
 });

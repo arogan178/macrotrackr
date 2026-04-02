@@ -1,12 +1,12 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach,describe, expect, it } from "vitest";
 
 import {
   ApiError,
+  getAuthToken,
   getHeaders,
   getHeadersAsync,
   setAuthToken,
   setGetToken,
-  getAuthToken,
 } from "./core";
 
 describe("api/core", () => {

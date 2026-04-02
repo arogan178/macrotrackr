@@ -1,6 +1,6 @@
 import { formatISO } from "date-fns";
 
-import { AddWeightLogPayload, WeightLogEntry } from "@/utils/apiServices";
+import type { AddWeightLogPayload, WeightLogEntry } from "@/api/goals";
 
 // Weight log data utilities
 export function createWeightLogEntry(

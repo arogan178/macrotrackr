@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test'
 import type { Page } from '@playwright/test'
 import { navigateToSignIn, loginWithTestUser, signUpViaUI } from './helpers/auth'
-import { sleep } from './helpers/index'
+import { waitForAnyVisible, waitForPageReady } from './helpers/index'
 
 test.describe('Full Flow E2E Tests', () => {
   test.describe('Complete User Journey', () => {
@@ -14,8 +14,6 @@ test.describe('Full Flow E2E Tests', () => {
       console.log('Starting full signup test with email:', testUserEmail)
 
       await signUpViaUI(page, testUserEmail, password)
-
-      await sleep(2000)
 
       // Verify we're on an authenticated page or verification page
       const homeUrl = page.url()
@@ -43,15 +41,13 @@ test.describe('Full Flow E2E Tests', () => {
 
       // Access goals page
       await page.goto('/goals')
-      await page.waitForLoadState('networkidle')
-      await sleep(1000)
-      expect(page.url()).toContain('goals')
+      await waitForPageReady(page)
+      await expect(page).toHaveURL(/\/goals/)
 
       // Access settings page
       await page.goto('/settings')
-      await page.waitForLoadState('networkidle')
-      await sleep(1000)
-      expect(page.url()).toContain('settings')
+      await waitForPageReady(page)
+      await expect(page).toHaveURL(/\/settings/)
     })
   })
 
@@ -68,10 +64,12 @@ test.describe('Full Flow E2E Tests', () => {
       const submitButton = page.locator('button[type="submit"]').first()
       await submitButton.click()
 
-      await sleep(2000)
+      await Promise.race([
+        waitForAnyVisible(page, ['[role="alert"]', 'text=incorrect', 'text=invalid', 'text=wrong', 'text=Error'], 10000),
+        page.waitForURL(/\/login|\/sign-in/, { timeout: 10000 }),
+      ])
 
       // Should show error message or stay on login page
-      await sleep(2000)
       const url = page.url()
       const hasError = await page.locator('text=incorrect, text=invalid, text=wrong, text=Error, [role="alert"]').count() > 0
       const stillOnLogin = url.includes('login') || url.includes('sign-in')
@@ -82,7 +80,7 @@ test.describe('Full Flow E2E Tests', () => {
   test.describe('Landing Page', () => {
     test('should load landing page correctly', async ({ page }: { page: Page }) => {
       await page.goto('/')
-      await page.waitForLoadState('networkidle')
+      await waitForPageReady(page)
 
       const title = await page.title()
       expect(title).toBeTruthy()
@@ -93,7 +91,7 @@ test.describe('Full Flow E2E Tests', () => {
 
     test('should have working navigation links', async ({ page }: { page: Page }) => {
       await page.goto('/')
-      await page.waitForLoadState('networkidle')
+      await waitForPageReady(page)
 
       const links = await page.locator('a[href]').all()
       expect(links.length).toBeGreaterThan(0)

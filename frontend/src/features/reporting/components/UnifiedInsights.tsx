@@ -3,13 +3,16 @@ import { Flame, Target, TrendingUp, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import { LoadingSpinner } from "@/components/ui";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { RadialProgress } from "@/components/ui/RadialProgress";
 
 import { MACRO_COLORS } from "../constants";
-import type { AggregatedDataPoint, UnifiedInsightsProps } from "../types/insightsTypes";
+import type {
+  AggregatedDataPoint,
+  UnifiedInsightsProps,
+} from "../types/insightsTypes";
 import {
   calculateConsistencyScore,
   calculateDataQuality,
@@ -158,14 +161,23 @@ function UnifiedInsights({
                   progress={consistencyScore}
                   size={100}
                   strokeWidth={8}
-                  colorClass={getTextColorByScore(consistencyScore, "consistency")}
+                  colorClass={getTextColorByScore(
+                    consistencyScore,
+                    "consistency",
+                  )}
                   trackColorClass="text-surface border border-border/10 rounded-full"
                 >
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold tracking-tight text-foreground">
-                      <AnimatedNumber value={consistencyScore} toFixedValue={0} duration={0.8} />
+                      <AnimatedNumber
+                        value={consistencyScore}
+                        toFixedValue={0}
+                        duration={0.8}
+                      />
                     </span>
-                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">score</span>
+                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                      score
+                    </span>
                   </div>
                 </RadialProgress>
               </div>
@@ -184,8 +196,12 @@ function UnifiedInsights({
               <div className="flex h-full flex-col justify-center pt-2">
                 <div className="flex justify-around px-1 md:px-6">
                   {(() => {
-                    const currentParts = parseMacroRatio(macroBalance.currentRatio);
-                    const targetParts = parseMacroRatio(macroBalance.idealRatio);
+                    const currentParts = parseMacroRatio(
+                      macroBalance.currentRatio,
+                    );
+                    const targetParts = parseMacroRatio(
+                      macroBalance.idealRatio,
+                    );
                     const labels = ["Pro", "Carb", "Fat"];
                     const colors = [
                       MACRO_COLORS.protein.text,
@@ -202,7 +218,9 @@ function UnifiedInsights({
                           colorClass={colors[index]}
                           trackColorClass="text-surface border border-border/10 rounded-full"
                         >
-                          <span className="text-xl font-bold text-foreground">{pct}%</span>
+                          <span className="text-xl font-bold text-foreground">
+                            {pct}%
+                          </span>
                         </RadialProgress>
                         <span className="mt-2 text-xs font-medium tracking-wider text-muted uppercase">
                           {labels[index]}
@@ -232,14 +250,23 @@ function UnifiedInsights({
                   progress={macroDensity.score}
                   size={100}
                   strokeWidth={8}
-                  colorClass={getTextColorByScore(macroDensity.score, "density")}
+                  colorClass={getTextColorByScore(
+                    macroDensity.score,
+                    "density",
+                  )}
                   trackColorClass="text-surface border border-border/10 rounded-full"
                 >
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold tracking-tight text-foreground">
-                      <AnimatedNumber value={macroDensity.score} toFixedValue={0} duration={0.8} />
+                      <AnimatedNumber
+                        value={macroDensity.score}
+                        toFixedValue={0}
+                        duration={0.8}
+                      />
                     </span>
-                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">quality</span>
+                    <span className="text-[10px] font-medium tracking-wider text-muted uppercase">
+                      quality
+                    </span>
                   </div>
                 </RadialProgress>
               </div>
@@ -274,7 +301,11 @@ function UnifiedInsights({
               <div className="mb-4 flex items-baseline gap-1">
                 <span className="text-3xl font-bold text-foreground">
                   <AnimatedNumber
-                    value={typeof dataQuality.daysLogged === "number" ? dataQuality.daysLogged : 0}
+                    value={
+                      typeof dataQuality.daysLogged === "number"
+                        ? dataQuality.daysLogged
+                        : 0
+                    }
                     toFixedValue={0}
                     duration={0.5}
                   />
@@ -282,7 +313,11 @@ function UnifiedInsights({
                 <span className="text-lg text-muted/40">/</span>
                 <span className="text-lg text-muted">
                   <AnimatedNumber
-                    value={typeof dataQuality.totalDaysInPeriod === "number" ? dataQuality.totalDaysInPeriod : 0}
+                    value={
+                      typeof dataQuality.totalDaysInPeriod === "number"
+                        ? dataQuality.totalDaysInPeriod
+                        : 0
+                    }
                     toFixedValue={0}
                     duration={0.5}
                   />
@@ -350,7 +385,11 @@ function UnifiedInsights({
                   </div>
                   <p className="text-2xl font-bold text-foreground">
                     <AnimatedNumber
-                      value={typeof dataQuality.completionRate === "number" ? dataQuality.completionRate : 0}
+                      value={
+                        typeof dataQuality.completionRate === "number"
+                          ? dataQuality.completionRate
+                          : 0
+                      }
                       toFixedValue={0}
                       duration={0.6}
                     />

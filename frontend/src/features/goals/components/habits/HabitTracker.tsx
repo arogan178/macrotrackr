@@ -1,5 +1,5 @@
 import { ProFeature } from "@/components/billing/ProFeature";
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
@@ -48,11 +48,8 @@ function HabitTracker({
                   variant="ghost"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
-                  autoLoadingFeature="habits"
-                  loadingText="Adding..."
                   text="Add Habit"
-                  icon={<PlusIcon />}
-                  iconPosition="left"
+                  leftIcon={<PlusIcon />}
                 />
               </ProFeature>
             </div>

@@ -1,8 +1,7 @@
 // src/modules/habits/routes.ts
 import { Elysia } from "elysia";
-import { db } from "../../db";
 import { HabitSchemas } from "./schemas";
-import type { AuthenticatedRouteContext } from "../../types";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 import {
   safeQuery,
   safeQueryAll,
@@ -16,20 +15,22 @@ import {
   NotFoundError,
 } from "../../lib/errors";
 import { checkFeatureLimit, requireAuth } from "../../middleware/clerk-guards";
+import { mutationSuccessWithId } from "../../lib/mutation-contract";
 
-type HabitsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
+type HabitsRouteContext =
+  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
     group
-      .decorate("db", db)
       .use(requireAuth)
 
       // --- Get All Habits ---
       .get(
         "/",
-        async (context: any) => {
-          const { db } = context as HabitsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as HabitsRouteContext;
+          const { db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           const query = `
@@ -87,8 +88,9 @@ export const habitRoutes = (app: Elysia) =>
       // --- Create New Habit ---
       .post(
         "/",
-        async (context: any) => {
-          const { body, db } = context as HabitsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as HabitsRouteContext;
+          const { body, db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
@@ -192,8 +194,9 @@ export const habitRoutes = (app: Elysia) =>
       // --- Update Habit ---
       .put(
         "/:id",
-        async (context: any) => {
-          const { params, body, db } = context as HabitsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as HabitsRouteContext;
+          const { params, body, db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
@@ -300,8 +303,9 @@ export const habitRoutes = (app: Elysia) =>
       // --- Delete Habit ---
       .delete(
         "/:id",
-        async (context: any) => {
-          const { params, db } = context as HabitsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as HabitsRouteContext;
+          const { params, db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           const habitId = params?.id;
@@ -329,7 +333,7 @@ export const habitRoutes = (app: Elysia) =>
 
           safeExecute(db, deleteQuery, [habitId, internalUserId]);
 
-          return { success: true, id: habitId };
+          return mutationSuccessWithId(habitId);
         },
         {
           response: HabitSchemas.deleteHabitResponse,
@@ -343,8 +347,9 @@ export const habitRoutes = (app: Elysia) =>
       // --- Reset All Habits ---
       .delete(
         "/",
-        async (context: any) => {
-          const { db } = context as HabitsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as HabitsRouteContext;
+          const { db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           const query = `

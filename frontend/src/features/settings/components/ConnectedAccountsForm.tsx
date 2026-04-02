@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useReverification, useUser } from "@clerk/clerk-react";
 
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import Button from "@/components/ui/Button";
 import {
   AppleIcon,
@@ -261,8 +261,7 @@ const ConnectedAccountsForm = () => {
           onClick={() => handleConnect(providerKey)}
           isLoading={isCurrentlyConnecting}
           loadingText="Connecting..."
-          icon={<ProviderIcon className="h-5 w-5" />}
-          iconPosition="left"
+          leftIcon={<ProviderIcon className="h-5 w-5" />}
           className="justify-start"
         >
           Connect {provider.name}
@@ -349,7 +348,7 @@ const ConnectedAccountsForm = () => {
             <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Email & Password
             </h4>
-            <div             className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20">
+            <div className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-2">

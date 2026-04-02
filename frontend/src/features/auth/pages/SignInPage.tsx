@@ -1,6 +1,6 @@
 import { useSearch } from "@tanstack/react-router";
 
-import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
+import { QueryErrorBoundary } from "@/components/errors/QueryErrorBoundary";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { ClerkSignInForm } from "@/features/auth/components/ClerkSignInForm";
 

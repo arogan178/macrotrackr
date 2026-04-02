@@ -1,5 +1,5 @@
 import { createAsyncStoragePersister } from "@tanstack/query-async-storage-persister";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, type QueryClientConfig } from "@tanstack/react-query";
 import type { PersistedClient } from "@tanstack/react-query-persist-client";
 
 const SECOND = 1000;
@@ -13,7 +13,7 @@ export function hasStatus(error: Error): error is ErrorWithStatus {
   return "status" in error && typeof (error as ErrorWithStatus).status === "number";
 }
 
-export const queryClient = new QueryClient({
+const defaultQueryClientConfig: QueryClientConfig = {
   defaultOptions: {
     queries: {
       staleTime: 5 * MINUTE,
@@ -27,7 +27,28 @@ export const queryClient = new QueryClient({
       retry: 0,
     },
   },
-});
+};
+
+export function createAppQueryClient(overrides: QueryClientConfig = {}): QueryClient {
+  return new QueryClient({
+    ...defaultQueryClientConfig,
+    ...overrides,
+    defaultOptions: {
+      ...defaultQueryClientConfig.defaultOptions,
+      ...overrides.defaultOptions,
+      queries: {
+        ...defaultQueryClientConfig.defaultOptions?.queries,
+        ...overrides.defaultOptions?.queries,
+      },
+      mutations: {
+        ...defaultQueryClientConfig.defaultOptions?.mutations,
+        ...overrides.defaultOptions?.mutations,
+      },
+    },
+  });
+}
+
+export const queryClient = createAppQueryClient();
 
 export const queryConfigs = {
   auth: {

@@ -1,10 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { useAuth, useSession } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
-import { ApiError, setAuthToken } from "@/api/core";
+import { ApiError } from "@/api/core";
 import { userApi } from "@/api/user";
 import { normalizeAuthRedirect, resolveProfileCompletion, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
@@ -23,7 +23,6 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isLoaded, isSignedIn } = useAuth();
-  const { session } = useSession();
   const [error, setError] = useState<string | null>(null);
   const hasInitializedRef = useRef(false);
 
@@ -36,13 +35,8 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
 
       if (!isSignedIn) {
         navigate({ to: "/login", search: { returnTo: undefined } });
-        return;
-      }
 
-      let token: string | null = null;
-      if (session) {
-        token = await session.getToken();
-        if (token) setAuthToken(token);
+        return;
       }
 
       await new Promise((r) => setTimeout(r, 50));
@@ -51,17 +45,19 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
 
       if (!shouldBypassSync) {
         try {
-          await authApi.syncUser(token ?? undefined);
+          await authApi.syncUser();
         } catch (syncError: unknown) {
           if (syncError instanceof Error && "status" in syncError) {
             const errorWithStatus = syncError as { status: number };
             if (errorWithStatus.status === 401) {
               setError("Authentication failed. Please sign in again.");
+
               return;
             }
           }
           logger.error("[AuthReadyPage] Failed to sync user", syncError);
           setError("We couldn't link your account yet. Please try signing in again.");
+
           return;
         }
         await new Promise((r) => setTimeout(r, 100));
@@ -70,6 +66,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
 
       if (shouldBypassSync) {
         navigate({ to: "/profile-setup", search: { redirectTo }, replace: true });
+
         return;
       }
 
@@ -99,6 +96,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
       const isProfileComplete = resolveProfileCompletion(userDetails);
       if (isProfileComplete === false) {
         navigate({ to: "/profile-setup", search: { redirectTo } });
+
         return;
       }
 
@@ -107,12 +105,13 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
         navigate({ to: "/home", search: { limit: 20, offset: 0 } });
       } else {
         globalThis.location.assign(normalizedRedirectTo);
+
         return;
       }
     } catch {
       setError("Failed to complete authentication. Please try again.");
     }
-  }, [isLoaded, isSignedIn, session, navigate, redirectTo, queryClient]);
+  }, [isLoaded, isSignedIn, navigate, redirectTo, queryClient]);
 
   return { error, setupAuth };
 }

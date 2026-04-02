@@ -50,21 +50,60 @@ const EnvSchema = z.object({
   METRICS_API_KEY: z.string().min(1).optional(),
 });
 
-const parsedEnv = EnvSchema.safeParse(process.env);
-
-if (!parsedEnv.success) {
-  console.error(
-    "Invalid environment variables:",
-    parsedEnv.error.flatten().fieldErrors
-  );
-  throw new Error("Invalid environment variables");
-}
-
 export type Config = z.infer<typeof EnvSchema>;
 
-export const config: Config = parsedEnv.data;
+let cachedConfig: Config | null = null;
+let configOverrides: Partial<Config> | null = null;
 
-const nodeEnv = process.env.NODE_ENV || config.NODE_ENV || "unknown";
-if (nodeEnv !== "test") {
-  console.log(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
+function parseConfigFromEnvironment(): Config {
+  const parsedEnv = EnvSchema.safeParse(process.env);
+
+  if (!parsedEnv.success) {
+    console.error(
+      "Invalid environment variables:",
+      parsedEnv.error.flatten().fieldErrors
+    );
+    throw new Error("Invalid environment variables");
+  }
+
+  return parsedEnv.data;
 }
+
+export function getConfig(): Config {
+  if (cachedConfig) {
+    return cachedConfig;
+  }
+
+  const parsedConfig = parseConfigFromEnvironment();
+  cachedConfig = configOverrides
+    ? { ...parsedConfig, ...configOverrides }
+    : parsedConfig;
+
+  const nodeEnv = process.env.NODE_ENV || cachedConfig.NODE_ENV || "unknown";
+  if (nodeEnv !== "test") {
+    console.log(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
+  }
+
+  return cachedConfig;
+}
+
+export function setConfigOverrides(overrides: Partial<Config> | null) {
+  configOverrides = overrides;
+  cachedConfig = null;
+}
+
+export function resetConfigCache() {
+  cachedConfig = null;
+}
+
+export const config: Config = new Proxy({} as Config, {
+  get(_target, property: keyof Config) {
+    return getConfig()[property];
+  },
+  ownKeys() {
+    return Reflect.ownKeys(getConfig());
+  },
+  getOwnPropertyDescriptor(_target, property) {
+    return Object.getOwnPropertyDescriptor(getConfig(), property);
+  },
+});

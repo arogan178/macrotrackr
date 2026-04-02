@@ -3,79 +3,62 @@ import { renderHook } from "@testing-library/react";
 import { useBeforeUnload } from "./useBeforeUnload";
 
 describe("useBeforeUnload", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
+  function createBeforeUnloadEvent() {
+    const event = new Event("beforeunload", { cancelable: true });
+    Object.defineProperty(event, "returnValue", {
+      value: undefined,
+      writable: true,
+      configurable: true,
+    });
 
-  it("should not add event listener when hasUnsavedChanges is false", () => {
-    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
+    return event as BeforeUnloadEvent;
+  }
 
-    renderHook(() => useBeforeUnload(false));
-
-    expect(addEventListenerSpy).not.toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
-
-    addEventListenerSpy.mockRestore();
-    removeEventListenerSpy.mockRestore();
-  });
-
-  it("should add event listener when hasUnsavedChanges is true", () => {
-    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
-
-    const { unmount } = renderHook(() => useBeforeUnload(true));
-
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
-
-    unmount();
-
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
-
-    addEventListenerSpy.mockRestore();
-    removeEventListenerSpy.mockRestore();
-  });
-
-  it("should add beforeunload listener", () => {
-    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
-
+  it("prevents unload when hasUnsavedChanges is true", () => {
     renderHook(() => useBeforeUnload(true));
 
-    expect(addEventListenerSpy).toHaveBeenCalledWith(
-      "beforeunload",
-      expect.any(Function),
-    );
+    const event = createBeforeUnloadEvent();
+    window.dispatchEvent(event);
 
-    addEventListenerSpy.mockRestore();
-    removeEventListenerSpy.mockRestore();
+    expect(event.defaultPrevented).toBe(true);
+    expect(event.returnValue).toBe("");
   });
 
-  it("should remove listener when hasUnsavedChanges changes to false", () => {
-    const addEventListenerSpy = vi.spyOn(globalThis, "addEventListener");
-    const removeEventListenerSpy = vi.spyOn(globalThis, "removeEventListener");
+  it("does not prevent unload when hasUnsavedChanges is false", () => {
+    renderHook(() => useBeforeUnload(false));
 
-    const { rerender, unmount } = renderHook(
+    const event = createBeforeUnloadEvent();
+    window.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
+    expect(event.returnValue).toBeUndefined();
+  });
+
+  it("stops preventing unload after the flag changes to false", () => {
+    const { rerender } = renderHook(
       ({ hasUnsavedChanges }) => useBeforeUnload(hasUnsavedChanges),
       { initialProps: { hasUnsavedChanges: true } },
     );
 
-    expect(addEventListenerSpy).toHaveBeenCalledTimes(1);
+    const blockedEvent = createBeforeUnloadEvent();
+    window.dispatchEvent(blockedEvent);
+    expect(blockedEvent.defaultPrevented).toBe(true);
 
     rerender({ hasUnsavedChanges: false });
-    expect(removeEventListenerSpy).toHaveBeenCalledTimes(1);
+
+    const allowedEvent = createBeforeUnloadEvent();
+    window.dispatchEvent(allowedEvent);
+    expect(allowedEvent.defaultPrevented).toBe(false);
+  });
+
+  it("cleans up listener on unmount", () => {
+    const { unmount } = renderHook(() => useBeforeUnload(true));
 
     unmount();
 
-    addEventListenerSpy.mockRestore();
-    removeEventListenerSpy.mockRestore();
+    const event = createBeforeUnloadEvent();
+    window.dispatchEvent(event);
+
+    expect(event.defaultPrevented).toBe(false);
   });
 });

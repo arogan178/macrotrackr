@@ -11,6 +11,7 @@ import PostHogUserSync from "./lib/posthogIntegration";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
 import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
+import { initializeAuthTokenProvider } from "./api/core";
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
@@ -24,6 +25,9 @@ const shouldEnablePostHog =
 if (!clerkPublishableKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
 }
+
+// Explicitly initialize auth token provider state before any API call path can run.
+initializeAuthTokenProvider();
 
 function AppContent({ includePostHogSync }: { includePostHogSync: boolean }) {
   return (

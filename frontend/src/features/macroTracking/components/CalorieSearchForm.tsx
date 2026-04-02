@@ -1,20 +1,20 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import { TextField } from "@/components/form";
+import TextField from "@/components/form/TextField";
 import {
   ArrowRightIcon,
   Button,
   ProgressiveBlur,
   SearchIcon,
 } from "@/components/ui";
-import SavedMealsList from "@/components/ui/SavedMealsList";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import type { Ingredient } from "@/types/macro";
-import type { FoodSearchResult } from "@/utils/apiServices";
+import type { FoodSearchResult } from "@/api/macros";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
+import SavedMealsList from "./SavedMealsList";
 
 interface CalorieSearchProps {
   onResult: (macros: {
@@ -324,8 +324,7 @@ const CalorieSearch = memo(function CalorieSearch({
             isLoading={isSearching}
             disabled={isSearching || trimmedQuery.length < 2}
             text="Search"
-            icon={<ArrowRightIcon className="ml-1 h-4 w-4" />}
-            iconPosition="right"
+            rightIcon={<ArrowRightIcon className="ml-1 h-4 w-4" />}
             ariaLabel="Search for food"
             buttonSize="lg"
             variant="primary"

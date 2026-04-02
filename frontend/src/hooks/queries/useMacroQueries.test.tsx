@@ -1,10 +1,11 @@
-import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { act,renderHook, waitFor } from "@testing-library/react";
+import { beforeEach,describe, expect, it, vi } from "vitest";
 
-import { useAddMacroEntry, useUpdateMacroEntry, useDeleteMacroEntry } from "./useMacroQueries";
 import { macrosApi } from "@/api/macros";
 import { queryKeys } from "@/lib/queryKeys";
+
+import { useAddMacroEntry, useDeleteMacroEntry,useUpdateMacroEntry } from "./useMacroQueries";
 
 vi.mock("@/api/macros", () => ({
   macrosApi: {
@@ -23,6 +24,7 @@ function createWrapper() {
       mutations: { retry: false },
     },
   });
+
   return {
     queryClient,
     wrapper: ({ children }: { children: React.ReactNode }) => (

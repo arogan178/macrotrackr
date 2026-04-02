@@ -2,11 +2,12 @@ import { useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 
 import { resetPasswordRoute } from "@/AppRouter";
-import { CardContainer, TextField } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
+import TextField from "@/components/form/TextField";
 import { Button, LoadingSpinner, LockIcon } from "@/components/ui";
 import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/utils/apiServices";
+import { ApiError } from "@/api/core";
 
 interface ResetPasswordSearchParameters {
   token?: string;
