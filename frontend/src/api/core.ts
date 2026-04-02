@@ -78,24 +78,41 @@ export async function getAuthToken(): Promise<string | null> {
   return null;
 }
 
-export function getHeaders(includeContentType = true): Record<string, string> {
-  const headers: Record<string, string> = {};
-  if (includeContentType) {
-    headers["Content-Type"] = "application/json";
-  }
-
-  return headers;
+export interface GetHeadersOptions {
+  includeContentType?: boolean;
+  includeAuth?: boolean;
 }
 
-export async function getHeadersAsync(
-  includeContentType = true,
-): Promise<Record<string, string>> {
-  const headers: Record<string, string> = {};
-  const token = await getAuthToken();
-
-  if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+function resolveHeaderOptions(
+  options: GetHeadersOptions | boolean | undefined,
+): Required<GetHeadersOptions> {
+  if (typeof options === "boolean") {
+    return {
+      includeContentType: options,
+      includeAuth: true,
+    };
   }
+
+  return {
+    includeContentType: options?.includeContentType ?? true,
+    includeAuth: options?.includeAuth ?? true,
+  };
+}
+
+export async function getHeaders(
+  options: GetHeadersOptions | boolean = true,
+): Promise<Record<string, string>> {
+  const { includeContentType, includeAuth } = resolveHeaderOptions(options);
+  const headers: Record<string, string> = {};
+
+  if (includeAuth) {
+    const token = await getAuthToken();
+
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
   if (includeContentType) {
     headers["Content-Type"] = "application/json";
   }
@@ -146,7 +163,7 @@ export async function post<T = unknown>(
 ): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${url}`, {
     method: "POST",
-    headers: await getHeadersAsync(),
+    headers: await getHeaders(),
     body: body ? JSON.stringify(body) : undefined,
     credentials: "include",
   });

@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { authApi as authApiClient } from "../../api/auth";
 import {
   ApiError,
   getAuthToken,
-  getHeadersAsync,
+  getHeaders,
   handleResponse,
   setAuthToken,
   setGetToken,
 } from "../../api/core";
 import { userApi } from "../../api/user";
-import { authApi as authApiClient } from "../../api/auth";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -40,7 +40,7 @@ describe("apiServices contracts", () => {
     setGetToken(async () => "fresh-token");
 
     expect(await getAuthToken()).toBe("fresh-token");
-    await expect(getHeadersAsync()).resolves.toEqual({
+    await expect(getHeaders()).resolves.toEqual({
       Authorization: "Bearer fresh-token",
       "Content-Type": "application/json",
     });
@@ -49,7 +49,7 @@ describe("apiServices contracts", () => {
   it("falls back to the static token when Clerk cannot provide one", async () => {
     setAuthToken("static-token");
 
-    await expect(getHeadersAsync(false)).resolves.toEqual({
+    await expect(getHeaders(false)).resolves.toEqual({
       Authorization: "Bearer static-token",
     });
   });

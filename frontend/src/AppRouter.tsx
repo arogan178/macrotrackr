@@ -220,6 +220,10 @@ const pricingRoute = createRoute({
 export const resetPasswordRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/reset-password",
+  validateSearch: (search: Record<string, unknown>) => ({
+    token: search.token as string | undefined,
+    returnTo: search.returnTo as string | undefined,
+  }),
   component: ResetPasswordPage,
 });
 

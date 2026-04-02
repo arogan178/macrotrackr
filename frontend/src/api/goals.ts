@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
@@ -19,6 +19,11 @@ interface SetWeightGoalPayload {
   dailyChange: number | undefined;
 }
 
+interface WeightGoalUpsertPayload {
+  goals: WeightGoalFormValues;
+  tdee: number;
+}
+
 export interface WeightLogEntry {
   id: string;
   timestamp: string;
@@ -33,7 +38,7 @@ export interface AddWeightLogPayload {
 export const goalsApi = {
   getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
     const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
     const result = (await handleResponse(response)) as
@@ -44,7 +49,10 @@ export const goalsApi = {
     return result === null ? undefined : result;
   },
 
-  createWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
+  createWeightGoal: async ({
+    goals,
+    tdee,
+  }: WeightGoalUpsertPayload) => {
     const startingWeight = goals.startingWeight ?? 0;
     const targetWeight = goals.targetWeight ?? startingWeight;
     const payload = {
@@ -63,7 +71,7 @@ export const goalsApi = {
 
     const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payload),
       credentials: "include",
     });
@@ -71,7 +79,10 @@ export const goalsApi = {
     return handleResponse(response);
   },
 
-  updateWeightGoal: async (goals: WeightGoalFormValues, tdee: number) => {
+  updateWeightGoal: async ({
+    goals,
+    tdee,
+  }: WeightGoalUpsertPayload) => {
     const startingWeight = goals.startingWeight ?? 0;
     const targetWeight = goals.targetWeight ?? startingWeight;
     const payload = {
@@ -93,7 +104,7 @@ export const goalsApi = {
 
     const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
       method: "PUT",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payload),
       credentials: "include",
     });
@@ -104,7 +115,7 @@ export const goalsApi = {
   deleteWeightGoals: async () => {
     const response = await fetch(`${API_BASE_URL}/api/goals/weight`, {
       method: "DELETE",
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -113,7 +124,7 @@ export const goalsApi = {
 
   getWeightLog: async (): Promise<WeightLogEntry[]> => {
     const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -125,7 +136,7 @@ export const goalsApi = {
   ): Promise<WeightLogEntry> => {
     const response = await fetch(`${API_BASE_URL}/api/goals/weight-log`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payload),
       credentials: "include",
     });
@@ -145,7 +156,7 @@ export const goalsApi = {
       `${API_BASE_URL}/api/goals/weight-log/${id}`,
       {
         method: "DELETE",
-        headers: await getHeadersAsync(false),
+        headers: await getHeaders(false),
         credentials: "include",
       },
     );

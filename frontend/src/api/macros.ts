@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 export interface FoodSearchResult {
@@ -104,7 +104,7 @@ export const macrosApi = {
     if (endDate) parameters.push(`endDate=${encodeURIComponent(endDate)}`);
     if (parameters.length > 0) url += `?${parameters.join("&")}`;
     const response = await fetch(url, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -119,7 +119,7 @@ export const macrosApi = {
     if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
     if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
     const response = await fetch(url, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -169,7 +169,7 @@ export const macrosApi = {
     };
     const response = await fetch(`${API_BASE_URL}/api/macros`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payload),
       credentials: "include",
     });
@@ -189,7 +189,7 @@ export const macrosApi = {
     if (entry.ingredients !== undefined) payload.ingredients = entry.ingredients;
     const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
       method: "PUT",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payload),
       credentials: "include",
     });
@@ -200,7 +200,7 @@ export const macrosApi = {
   deleteEntry: async (id: number): Promise<MacroEntryDeleteResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
       method: "DELETE",
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -209,7 +209,7 @@ export const macrosApi = {
 
   getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -222,7 +222,7 @@ export const macrosApi = {
     }
     const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
       method: "PUT",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify({ macroTarget: payload.macroTarget }),
       credentials: "include",
     });
@@ -238,7 +238,7 @@ export const macrosApi = {
     const response = await fetch(
       `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`,
       {
-        headers: await getHeadersAsync(false),
+        headers: await getHeaders(false),
         credentials: "include",
       },
     );
