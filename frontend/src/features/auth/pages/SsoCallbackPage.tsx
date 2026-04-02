@@ -7,7 +7,10 @@ import { ApiError } from "@/api/core";
 import { userApi } from "@/api/user";
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import {
+  normalizeAuthRedirect,
+  resolveAuthReturnTo,
+} from "@/features/auth/utils/redirect";
 import {
   resolveSocialAuthError,
   type SocialAuthResolution,
@@ -47,6 +50,7 @@ export default function SSOCallbackPage() {
 
   const isSignUpFlow = search.flow === "signup";
   const redirectTo = normalizeAuthRedirect(search.redirectTo ?? "/home");
+  const returnToSearch = { returnTo: resolveAuthReturnTo(redirectTo) };
 
   // Step 1: Let Clerk process the OAuth redirect callback
   useEffect(() => {
@@ -109,13 +113,13 @@ export default function SSOCallbackPage() {
         // instead of "Log in with Google".
 
         // Check if user already exists in our backend via sync + profile check.
-        // apiService.auth.syncUser() uses getHeadersAsync() which automatically
+        // apiService.auth.syncUser() uses getHeaders() which automatically
         // retrieves the Clerk token via the token getter set by useClerkAuth.
         let existingUser = false;
         let profileComplete = false;
 
         try {
-          // syncUser uses getHeadersAsync which pulls from the Clerk token getter
+          // syncUser uses getHeaders which pulls from the Clerk token getter
           await authApi.syncUser();
 
           // If sync succeeds, check profile completion
@@ -134,12 +138,18 @@ export default function SSOCallbackPage() {
             if (userError instanceof ApiError && userError.status === 404) {
               existingUser = false;
             } else {
-              logger.warn("[SSOCallback] Failed to fetch user details:", userError);
+              logger.warn(
+                "[SSOCallback] Failed to fetch user details:",
+                userError,
+              );
             }
           }
         } catch (syncError) {
           if (syncError instanceof ApiError && syncError.status === 404) {
-            logger.info("[SSOCallback] Sync indicates new user profile:", syncError);
+            logger.info(
+              "[SSOCallback] Sync indicates new user profile:",
+              syncError,
+            );
             existingUser = false;
           } else {
             logger.error("[SSOCallback] Unexpected sync failure:", syncError);
@@ -149,7 +159,9 @@ export default function SSOCallbackPage() {
 
         // Route based on what we found
         if (existingUser && profileComplete) {
-          logger.info("[SSOCallback] Existing user with complete profile - routing to auth-ready");
+          logger.info(
+            "[SSOCallback] Existing user with complete profile - routing to auth-ready",
+          );
           sessionStorage.removeItem("socialProfileData");
           navigate({
             to: "/auth-ready",
@@ -164,7 +176,8 @@ export default function SSOCallbackPage() {
           firstName: user?.firstName ?? "",
           lastName: user?.lastName ?? "",
           email: user?.primaryEmailAddress?.emailAddress ?? "",
-          dateOfBirth: (user!.unsafeMetadata.dateOfBirth as string | undefined) ?? "",
+          dateOfBirth:
+            (user!.unsafeMetadata.dateOfBirth as string | undefined) ?? "",
         };
         sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
         navigate({
@@ -193,32 +206,33 @@ export default function SSOCallbackPage() {
     userLoaded,
   ]);
 
-  const primaryAction = callbackResolution?.action === "switch-to-signin"
-    ? {
-        label: "Go to sign in",
-        onClick: () =>
-          navigate({
-            to: "/login",
-            search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
-          }),
-      }
-    : callbackResolution?.action === "switch-to-signup"
+  const primaryAction =
+    callbackResolution?.action === "switch-to-signin"
       ? {
-          label: "Go to sign up",
+          label: "Go to sign in",
           onClick: () =>
             navigate({
-              to: "/register",
-              search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+              to: "/login",
+              search: returnToSearch,
             }),
         }
-      : {
-          label: isSignUpFlow ? "Continue with email" : "Back to sign in",
-          onClick: () =>
-            navigate({
-              to: isSignUpFlow ? "/register" : "/login",
-              search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
-            }),
-        };
+      : callbackResolution?.action === "switch-to-signup"
+        ? {
+            label: "Go to sign up",
+            onClick: () =>
+              navigate({
+                to: "/register",
+                search: returnToSearch,
+              }),
+          }
+        : {
+            label: isSignUpFlow ? "Continue with email" : "Back to sign in",
+            onClick: () =>
+              navigate({
+                to: isSignUpFlow ? "/register" : "/login",
+                search: returnToSearch,
+              }),
+          };
 
   const secondaryAction = isSignUpFlow
     ? {
@@ -226,7 +240,7 @@ export default function SSOCallbackPage() {
         onClick: () =>
           navigate({
             to: "/login",
-            search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+            search: returnToSearch,
           }),
       }
     : {
@@ -234,7 +248,7 @@ export default function SSOCallbackPage() {
         onClick: () =>
           navigate({
             to: "/register",
-            search: { returnTo: redirectTo === "/home" ? undefined : redirectTo },
+            search: returnToSearch,
           }),
       };
 

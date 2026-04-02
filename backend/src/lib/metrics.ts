@@ -3,6 +3,8 @@
  * Provides Prometheus-compatible metrics for monitoring
  */
 
+import { logger } from "./logger";
+
 interface MetricValue {
   value: number;
   timestamp: number;
@@ -110,13 +112,25 @@ export function createMetricsRegistry() {
 }
 
 let metricsRef: MetricsRegistry | null = null;
+let metricsConfiguredExplicitly = false;
 
 export function configureMetricsRegistry(metrics: MetricsRegistry) {
   metricsRef = metrics;
+  metricsConfiguredExplicitly = true;
 }
 
 export function getMetricsRegistry() {
   if (!metricsRef) {
+    if (!metricsConfiguredExplicitly) {
+      logger.warn(
+        {
+          type: "implicit_service_initialization",
+          service: "metrics",
+        },
+        "Metrics registry accessed before explicit runtime configuration; using default instance.",
+      );
+    }
+
     metricsRef = createMetricsRegistry();
   }
 
@@ -125,6 +139,7 @@ export function getMetricsRegistry() {
 
 export function resetMetricsRegistry() {
   metricsRef = null;
+  metricsConfiguredExplicitly = false;
 }
 
 // Helper functions

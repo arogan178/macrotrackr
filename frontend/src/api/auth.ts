@@ -1,15 +1,20 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
 
 export interface AuthSyncResponse {
   user: unknown;
   isNewUser: boolean;
 }
 
+export interface ResetPasswordPayload {
+  token: string;
+  newPassword: string;
+}
+
 export const authApi = {
-  resetPassword: async (token: string, newPassword: string) => {
+  resetPassword: async ({ token, newPassword }: ResetPasswordPayload) => {
     const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify({ token, newPassword }),
       credentials: "include",
     });
@@ -26,7 +31,7 @@ export const authApi = {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         }
-      : await getHeadersAsync();
+      : await getHeaders();
     const response = await fetch(`${API_BASE_URL}/api/auth/clerk-sync`, {
       method: "POST",
       headers,

@@ -1,5 +1,5 @@
 import { authApi } from "@/api/auth";
-import { API_BASE_URL, ApiError, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, ApiError, getHeaders, handleResponse } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import { getActivityLevelFromString } from "@/utils/userConstants";
 
@@ -99,7 +99,7 @@ export type UserSettingsPayload = Partial<{
 export const userApi = {
   getUserDetails: async (): Promise<UserDetailsResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
     const result = await handleResponse(response);
@@ -135,7 +135,7 @@ export const userApi = {
 
     const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
       method: "PUT",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payloadToSend),
       credentials: "include",
     });
@@ -156,7 +156,7 @@ export const userApi = {
   ) => {
     const response = await fetch(`${API_BASE_URL}/api/user/complete-profile`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(profileData),
       credentials: "include",
     });

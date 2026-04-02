@@ -361,6 +361,9 @@ export function useDeleteMacroEntry() {
 
 export function useUpdateMacroTarget() {
   const queryClient = useQueryClient();
+  const logUpdateMacroTargetError = createMutationErrorLogger(
+    "Error updating macro target",
+  );
 
   return useMutation({
     mutationKey: [...queryKeys.macros.targets(), "update"],
@@ -372,5 +375,6 @@ export function useUpdateMacroTarget() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.macros.targets() });
     },
+    onError: logUpdateMacroTargetError,
   });
 }

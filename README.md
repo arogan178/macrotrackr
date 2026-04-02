@@ -1,4 +1,4 @@
-# Macro Trackr
+# Macro Tracker
 
 A modern, full-stack nutrition and fitness tracking application.
 
@@ -17,13 +17,49 @@ A modern, full-stack nutrition and fitness tracking application.
 - **Runtime:** Bun
 - **Framework:** Elysia.js (fast, type-safe REST APIs)
 - **Database:** SQLite (local/embedded)
-- **Architecture:** Modular domain-driven design (`backend/src/modules/`)
+- **Architecture:** Modular domain-driven design (`backend/src/modules/`) with explicit bootstrap lifecycle in `backend/src/index.ts`
 
 **Shared Infrastructure:**
 
 - **Authentication:** Clerk (integrated on both frontend via SDK and backend via Elysia middleware)
 - **Payments:** Stripe (via webhooks in `billing` module)
 - **External APIs:** OpenFoodFacts for food search/barcode scanning
+
+## 🔁 Runtime Bootstrap Contracts
+
+### Backend bootstrap flow (`backend/src/index.ts`)
+
+The backend startup path is intentionally explicit and should be preserved when adding new runtime services:
+
+1. Resolve runtime config and database path (`resolveDatabasePath`).
+2. Create and initialize SQLite (`createDatabase` → `initializeDatabase`).
+3. Wire runtime services from the initialized DB (`createRuntimeServices(db)`).
+4. Build the Elysia app (`new Elysia().use(createApp(db))`).
+5. Start listening only from `startServer()`.
+
+If you add new singleton-style services, register them during runtime bootstrap (step 3) rather than relying on import-time side effects.
+
+### Frontend bootstrap flow (`frontend/src/main.tsx`)
+
+The frontend startup path establishes auth and provider ordering before routes mount:
+
+1. Validate required environment variables (for example, `VITE_CLERK_PUBLISHABLE_KEY`).
+2. Initialize auth token provider state early (`initializeAuthTokenProvider()`).
+3. Mount providers in this order:
+   - `PersistQueryClientProvider`
+   - `ClerkProvider` (+ `ClerkTokenSync`)
+   - optional `PostHogProvider`
+   - `AppRouter`
+4. Register service worker after root render (`registerServiceWorker()`).
+
+Provider order is part of app contract; keep it stable unless there is a strong reason to change it.
+
+### Frontend feature/public-surface conventions
+
+- Keep domain logic inside `frontend/src/features/<feature>/` and avoid cross-feature deep imports.
+- Prefer shared imports via `@/components`, `@/hooks`, `@/lib`, and `@/types`.
+- Expose feature-level entry points with `index.ts` where practical so route/pages import stable public surfaces instead of internal file paths.
+- Keep API callers on shared request contracts from `frontend/src/api/core.ts` (for example, common header-building and error-handling paths).
 
 ## 📂 Workspace Layout
 
@@ -87,4 +123,3 @@ bun run typecheck
 - **Frontend unit/integration:** `bun run test`
 - **Frontend e2e:** `bun run --cwd frontend test:e2e`
 - **Backend tests:** `bun run --cwd backend test`
-

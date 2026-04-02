@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
 import type { HabitAccentColor } from "@/types/habit";
 
 export interface HabitGoalPayload {
@@ -39,7 +39,7 @@ export interface HabitGoalUpdatePayload {
 export const habitsApi = {
   getHabits: async (): Promise<HabitGoalPayload[]> => {
     const response = await fetch(`${API_BASE_URL}/api/habits`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -49,7 +49,7 @@ export const habitsApi = {
   saveHabit: async (habitGoal: HabitGoalPayload): Promise<HabitGoalPayload> => {
     const response = await fetch(`${API_BASE_URL}/api/habits`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(habitGoal),
       credentials: "include",
     });
@@ -63,7 +63,7 @@ export const habitsApi = {
   ): Promise<HabitGoalPayload> => {
     const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
       method: "PUT",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(habitGoal),
       credentials: "include",
     });
@@ -74,7 +74,7 @@ export const habitsApi = {
   deleteHabit: async (id: string): Promise<{ success: boolean; id: string }> => {
     const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
       method: "DELETE",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       credentials: "include",
     });
 
@@ -84,7 +84,7 @@ export const habitsApi = {
   resetHabit: async (): Promise<{ success: boolean; count: number }> => {
     const response = await fetch(`${API_BASE_URL}/api/habits`, {
       method: "DELETE",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       credentials: "include",
     });
 
