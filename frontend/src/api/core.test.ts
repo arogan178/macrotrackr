@@ -4,7 +4,6 @@ import {
   ApiError,
   getAuthToken,
   getHeaders,
-  getHeadersAsync,
   setAuthToken,
   setGetToken,
 } from "./core";
@@ -31,36 +30,37 @@ describe("api/core", () => {
   });
 
   describe("getHeaders", () => {
-    it("returns Content-Type by default", () => {
-      const headers = getHeaders();
+    it("returns Content-Type by default", async () => {
+      const headers = await getHeaders({ includeAuth: false });
       expect(headers["Content-Type"]).toBe("application/json");
     });
 
-    it("skips Content-Type when disabled", () => {
-      const headers = getHeaders(false);
+    it("skips Content-Type when disabled", async () => {
+      const headers = await getHeaders({
+        includeContentType: false,
+        includeAuth: false,
+      });
       expect(headers["Content-Type"]).toBeUndefined();
     });
-  });
 
-  describe("getHeadersAsync", () => {
     beforeEach(() => {
       setAuthToken(null);
       setGetToken(async () => null);
     });
 
     it("returns Content-Type by default", async () => {
-      const headers = await getHeadersAsync();
+      const headers = await getHeaders();
       expect(headers["Content-Type"]).toBe("application/json");
     });
 
     it("includes auth token when available", async () => {
       setAuthToken("test-token");
-      const headers = await getHeadersAsync();
+      const headers = await getHeaders();
       expect(headers["Authorization"]).toBe("Bearer test-token");
     });
 
     it("skips Content-Type when disabled", async () => {
-      const headers = await getHeadersAsync(false);
+      const headers = await getHeaders({ includeContentType: false });
       expect(headers["Content-Type"]).toBeUndefined();
     });
   });

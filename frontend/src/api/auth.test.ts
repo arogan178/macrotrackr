@@ -33,7 +33,12 @@ describe("authApi", () => {
       createJsonResponse({ success: true, message: "Password reset" }),
     );
 
-    await expect(authApi.resetPassword("token-123", "new-password")).resolves.toEqual({
+    await expect(
+      authApi.resetPassword({
+        token: "token-123",
+        newPassword: "new-password",
+      }),
+    ).resolves.toEqual({
       success: true,
       message: "Password reset",
     });

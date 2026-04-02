@@ -40,6 +40,9 @@ export function useWeightLog() {
 // Mutation hook for creating weight goals
 export function useCreateWeightGoal() {
   const queryClient = useQueryClient();
+  const logCreateWeightGoalError = createMutationErrorLogger(
+    "Error creating weight goal",
+  );
 
   return useMutation({
     mutationKey: queryKeys.goals.weight(),
@@ -51,7 +54,7 @@ export function useCreateWeightGoal() {
       tdee: number;
     }) => {
       // Start both operations in parallel to avoid waterfall
-      const createPromise = goalsApi.createWeightGoal(goals, tdee);
+      const createPromise = goalsApi.createWeightGoal({ goals, tdee });
       const weightLogPromise = goalsApi.getWeightLog();
 
       try {
@@ -81,7 +84,7 @@ export function useCreateWeightGoal() {
           apiError.status === 409 ||
           apiError.message?.includes("already exists")
         ) {
-          return await goalsApi.updateWeightGoal(goals, tdee);
+          return await goalsApi.updateWeightGoal({ goals, tdee });
         }
         throw error;
       }
@@ -90,12 +93,16 @@ export function useCreateWeightGoal() {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
     },
+    onError: logCreateWeightGoalError,
   });
 }
 
 // Mutation hook for updating weight goals
 export function useUpdateWeightGoal() {
   const queryClient = useQueryClient();
+  const logUpdateWeightGoalError = createMutationErrorLogger(
+    "Error updating weight goal",
+  );
 
   return useMutation({
     mutationKey: queryKeys.goals.weight(),
@@ -107,12 +114,12 @@ export function useUpdateWeightGoal() {
       tdee: number;
     }) => {
       try {
-        return await goalsApi.updateWeightGoal(goals, tdee);
+        return await goalsApi.updateWeightGoal({ goals, tdee });
       } catch (error) {
         // If update fails with 404 (goal not found), try to create instead
         const apiError = error as { status?: number };
         if (apiError.status === 404) {
-          return await goalsApi.createWeightGoal(goals, tdee);
+          return await goalsApi.createWeightGoal({ goals, tdee });
         }
         throw error;
       }
@@ -126,12 +133,16 @@ export function useUpdateWeightGoal() {
         );
       }
     },
+    onError: logUpdateWeightGoalError,
   });
 }
 
 // Mutation hook for deleting weight goals
 export function useDeleteWeightGoal() {
   const queryClient = useQueryClient();
+  const logDeleteWeightGoalError = createMutationErrorLogger(
+    "Error deleting weight goal",
+  );
 
   return useMutation({
     mutationKey: [...queryKeys.goals.weight(), "delete"],
@@ -146,6 +157,7 @@ export function useDeleteWeightGoal() {
       // Always invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
     },
+    onError: logDeleteWeightGoalError,
   });
 }
 

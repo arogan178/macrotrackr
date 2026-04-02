@@ -1,17 +1,13 @@
 import { useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 
+import { ApiError } from "@/api/core";
 import { resetPasswordRoute } from "@/AppRouter";
 import CardContainer from "@/components/form/CardContainer";
 import TextField from "@/components/form/TextField";
 import { Button, LoadingSpinner, LockIcon } from "@/components/ui";
 import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/api/core";
-
-interface ResetPasswordSearchParameters {
-  token?: string;
-}
 
 function ResetPasswordForm() {
   const search = useSearch({ from: resetPasswordRoute.id });
@@ -21,7 +17,7 @@ function ResetPasswordForm() {
   const resetPasswordMutation = useResetPassword();
 
   // Extract token from search params with proper typing
-  const token = (search as ResetPasswordSearchParameters).token;
+  const token = search.token;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

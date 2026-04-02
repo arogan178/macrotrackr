@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
 import type { MealType } from "@/types/macro";
 
 export interface SavedMeal {
@@ -33,7 +33,7 @@ export interface CreateSavedMealPayload {
 export const savedMealsApi = {
   getAll: async (): Promise<SavedMealsResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
@@ -43,7 +43,7 @@ export const savedMealsApi = {
   create: async (payload: CreateSavedMealPayload): Promise<SavedMeal> => {
     const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
       method: "POST",
-      headers: await getHeadersAsync(),
+      headers: await getHeaders(),
       body: JSON.stringify(payload),
       credentials: "include",
     });
@@ -54,7 +54,7 @@ export const savedMealsApi = {
   delete: async (id: number): Promise<{ success: boolean; id: number }> => {
     const response = await fetch(`${API_BASE_URL}/api/saved-meals/${id}`, {
       method: "DELETE",
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
