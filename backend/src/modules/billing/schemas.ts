@@ -1,87 +1,132 @@
 // src/modules/billing/schemas.ts
-import { z } from "zod";
+import { t } from "elysia";
+
+const subscriptionStatusSchema = t.Union([
+  t.Literal("active"),
+  t.Literal("canceled"),
+  t.Literal("past_due"),
+  t.Literal("unpaid"),
+]);
+
+const subscriptionIntervalSchema = t.Union([
+  t.Literal("month"),
+  t.Literal("year"),
+]);
 
 export const BillingSchemas = {
   // Create checkout session request
-  createCheckoutSession: z.object({
-    successUrl: z.string().url("Success URL must be a valid URL"),
-    cancelUrl: z.string().url("Cancel URL must be a valid URL"),
-    metadata: z.record(z.string()).optional(),
+  createCheckoutSession: t.Object({
+    successUrl: t.String({ format: "uri" }),
+    cancelUrl: t.String({ format: "uri" }),
+    metadata: t.Optional(t.Record(t.String(), t.String())),
   }),
 
   // Create customer portal session request
-  createPortalSession: z.object({
-    returnUrl: z.string().url("Return URL must be a valid URL"),
+  createPortalSession: t.Object({
+    returnUrl: t.String({ format: "uri" }),
   }),
 
   // Webhook event (minimal validation for security)
-  webhookEvent: z.object({
-    type: z.string(),
-    data: z.object({
-      object: z.any(),
+  webhookEvent: t.Object({
+    type: t.String(),
+    data: t.Object({
+      object: t.Any(),
     }),
-    id: z.string(),
-    created: z.number(),
+    id: t.String(),
+    created: t.Number(),
   }),
 
   // Subscription status update
-  subscriptionStatus: z.object({
-    status: z.enum(["active", "canceled", "past_due", "unpaid"]),
-    currentPeriodEnd: z.string().datetime(),
+  subscriptionStatus: t.Object({
+    status: subscriptionStatusSchema,
+    currentPeriodEnd: t.String({ format: "date-time" }),
   }),
 
   // Get subscription response
-  subscriptionResponse: z.object({
-    id: z.string(),
-    status: z.enum(["active", "canceled", "past_due", "unpaid"]),
-    customerId: z.string(),
-    currentPeriodStart: z.string().datetime(),
-    currentPeriodEnd: z.string().datetime(),
-    cancelAtPeriodEnd: z.boolean(),
-    created: z.string().datetime(),
-    priceId: z.string(),
+  subscriptionResponse: t.Object({
+    id: t.String(),
+    status: subscriptionStatusSchema,
+    customerId: t.String(),
+    currentPeriodStart: t.String({ format: "date-time" }),
+    currentPeriodEnd: t.String({ format: "date-time" }),
+    cancelAtPeriodEnd: t.Boolean(),
+    created: t.String({ format: "date-time" }),
+    priceId: t.String(),
   }),
 
   // Checkout session response
-  checkoutSessionResponse: z.object({
-    sessionId: z.string(),
-    url: z.string().url(),
+  checkoutSessionResponse: t.Object({
+    sessionId: t.String(),
+    url: t.String({ format: "uri" }),
   }),
 
   // Customer portal session response
-  portalSessionResponse: z.object({
-    url: z.string().url(),
+  portalSessionResponse: t.Object({
+    url: t.String({ format: "uri" }),
   }),
 
   // Subscription plan information
-  subscriptionPlan: z.object({
-    id: z.string(),
-    name: z.string(),
-    description: z.string(),
-    price: z.number(),
-    currency: z.string(),
-    interval: z.enum(["month", "year"]),
-    features: z.array(z.string()),
+  subscriptionPlan: t.Object({
+    id: t.String(),
+    name: t.String(),
+    description: t.String(),
+    price: t.Number(),
+    currency: t.String(),
+    interval: subscriptionIntervalSchema,
+    features: t.Array(t.String()),
   }),
 } as const;
 
-export type CreateCheckoutSessionRequest = z.infer<
-  typeof BillingSchemas.createCheckoutSession
->;
-export type CreatePortalSessionRequest = z.infer<
-  typeof BillingSchemas.createPortalSession
->;
-export type WebhookEventRequest = z.infer<typeof BillingSchemas.webhookEvent>;
-export type SubscriptionStatusRequest = z.infer<
-  typeof BillingSchemas.subscriptionStatus
->;
-export type SubscriptionResponse = z.infer<
-  typeof BillingSchemas.subscriptionResponse
->;
-export type CheckoutSessionResponse = z.infer<
-  typeof BillingSchemas.checkoutSessionResponse
->;
-export type PortalSessionResponse = z.infer<
-  typeof BillingSchemas.portalSessionResponse
->;
-export type SubscriptionPlan = z.infer<typeof BillingSchemas.subscriptionPlan>;
+export interface CreateCheckoutSessionRequest {
+  successUrl: string;
+  cancelUrl: string;
+  metadata?: Record<string, string>;
+}
+
+export interface CreatePortalSessionRequest {
+  returnUrl: string;
+}
+
+export interface WebhookEventRequest {
+  type: string;
+  data: {
+    object: unknown;
+  };
+  id: string;
+  created: number;
+}
+
+export interface SubscriptionStatusRequest {
+  status: "active" | "canceled" | "past_due" | "unpaid";
+  currentPeriodEnd: string;
+}
+
+export interface SubscriptionResponse {
+  id: string;
+  status: "active" | "canceled" | "past_due" | "unpaid";
+  customerId: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  cancelAtPeriodEnd: boolean;
+  created: string;
+  priceId: string;
+}
+
+export interface CheckoutSessionResponse {
+  sessionId: string;
+  url: string;
+}
+
+export interface PortalSessionResponse {
+  url: string;
+}
+
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  currency: string;
+  interval: "month" | "year";
+  features: string[];
+}

@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import { EmptyState, TargetIcon } from "@/components/ui/";
 import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { useFeatureLoading } from "@/hooks";
@@ -73,9 +73,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
         <EmptyState
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
-          icon={
-            <TargetIcon className="h-14 w-14 text-primary" />
-          }
+          icon={<TargetIcon className="h-14 w-14 text-primary" />}
           action={{
             label: "Set Weight Goal",
             onClick: onOpenModal, // Trigger modal open
@@ -101,9 +99,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
         onDelete={onDelete}
         onLogWeight={handleOpenLogWeightModal}
         targetCalories={
-          Number.isFinite(effectiveTargetCalories)
-            ? effectiveTargetCalories
-            : 0
+          Number.isFinite(effectiveTargetCalories) ? effectiveTargetCalories : 0
         }
         macroTarget={macroTarget}
       />

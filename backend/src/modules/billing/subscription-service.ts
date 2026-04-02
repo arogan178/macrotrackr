@@ -1,12 +1,13 @@
 // src/modules/billing/subscription-service.ts
 
-import { db } from "../../db";
+import type { Database } from "bun:sqlite";
+import type Stripe from "stripe";
 import { logger } from "../../lib/logger";
 import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
 import { NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { handleServiceError } from "../../lib/error-handler";
-import { cacheService } from "../../lib/cache-service";
+import type { CacheService } from "../../lib/cache-service";
 
 export interface SubscriptionRecord {
   id: string;
@@ -24,7 +25,40 @@ export interface UserSubscriptionInfo {
   subscription?: SubscriptionRecord;
   price?: string;
   paymentMethod?: { brand: string; last4: string };
-  stripeDetails?: any;
+  stripeDetails?: Stripe.Subscription;
+}
+
+interface CachedStripeDetails {
+  price?: string;
+  paymentMethod?: { brand: string; last4: string };
+  stripeDetails?: Stripe.Subscription;
+}
+
+let dbRef: Database | null = null;
+let cacheServiceRef: CacheService | null = null;
+
+export function configureSubscriptionService(options: {
+  db: Database;
+  cacheService: CacheService;
+}) {
+  dbRef = options.db;
+  cacheServiceRef = options.cacheService;
+}
+
+function getDb(): Database {
+  if (!dbRef) {
+    throw new Error("SubscriptionService database is not configured");
+  }
+
+  return dbRef;
+}
+
+function getCacheService(): CacheService {
+  if (!cacheServiceRef) {
+    throw new Error("SubscriptionService cache service is not configured");
+  }
+
+  return cacheServiceRef;
 }
 
 export class SubscriptionService {
@@ -37,6 +71,7 @@ export class SubscriptionService {
     status: "active" | "canceled" | "past_due" | "unpaid",
     currentPeriodEnd: string
   ): Promise<SubscriptionRecord> {
+    const db = getDb();
     return withTransaction(db, () => {
       try {
         const existing = safeQuery<SubscriptionRecord>(
@@ -120,6 +155,8 @@ export class SubscriptionService {
   static async getUserSubscription(
     userId: number
   ): Promise<UserSubscriptionInfo> {
+    const db = getDb();
+    const cacheService = getCacheService();
     try {
       const user = safeQuery<{
         subscription_status: "free" | "pro" | "canceled";
@@ -143,13 +180,13 @@ export class SubscriptionService {
       let price: string | undefined = undefined;
       let paymentMethod: { brand: string; last4: string } | undefined =
         undefined;
-      let stripeDetails: any = undefined;
+      let stripeDetails: Stripe.Subscription | undefined = undefined;
 
       // Use cache for Stripe details if available
       let cacheKey: string | undefined = undefined;
       if (subscription && subscription.stripe_subscription_id) {
         cacheKey = `stripe-details:${subscription.stripe_subscription_id}`;
-        const cached = cacheService.get<any>(cacheKey);
+        const cached = cacheService.get<CachedStripeDetails>(cacheKey);
         if (cached) {
           price = cached.price;
           paymentMethod = cached.paymentMethod;
@@ -196,6 +233,7 @@ export class SubscriptionService {
     userId: number,
     customerId: string
   ): Promise<void> {
+    const db = getDb();
     try {
       const result = safeExecute(
         db,
@@ -230,6 +268,7 @@ export class SubscriptionService {
     userId: number,
     stripeSubscriptionId: string
   ): Promise<void> {
+    const db = getDb();
     return withTransaction(db, () => {
       try {
         const result = safeExecute(
@@ -272,6 +311,7 @@ export class SubscriptionService {
   static async getSubscriptionByStripeId(
     stripeSubscriptionId: string
   ): Promise<SubscriptionRecord> {
+    const db = getDb();
     try {
       const subscription = safeQuery<SubscriptionRecord>(
         db,
@@ -296,6 +336,7 @@ export class SubscriptionService {
    * Check if user has active Pro subscription
    */
   static async hasActiveProSubscription(userId: number): Promise<boolean> {
+    const db = getDb();
     try {
       // First, let's get the raw subscription data to debug
       const rawSubscription = safeQuery<{

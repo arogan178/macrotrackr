@@ -346,8 +346,7 @@ export function ClerkSignInForm({
                 variant="secondary"
                 fullWidth
                 onClick={() => handleSocialSignIn("oauth_google")}
-                icon={<GoogleIcon className="h-5 w-5" />}
-                iconPosition="left"
+                leftIcon={<GoogleIcon className="h-5 w-5" />}
               >
                 Continue with Google
               </Button>
@@ -356,8 +355,7 @@ export function ClerkSignInForm({
                 variant="secondary"
                 fullWidth
                 onClick={() => handleSocialSignIn("oauth_facebook")}
-                icon={<FacebookIcon className="h-5 w-5" />}
-                iconPosition="left"
+                leftIcon={<FacebookIcon className="h-5 w-5" />}
               >
                 Continue with Facebook
               </Button>
@@ -366,8 +364,7 @@ export function ClerkSignInForm({
                 variant="secondary"
                 fullWidth
                 onClick={() => handleSocialSignIn("oauth_apple")}
-                icon={<AppleIcon className="h-5 w-5" />}
-                iconPosition="left"
+                leftIcon={<AppleIcon className="h-5 w-5" />}
               >
                 Continue with Apple
               </Button>

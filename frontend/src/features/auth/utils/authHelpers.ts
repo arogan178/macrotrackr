@@ -31,11 +31,12 @@ export async function getAuthTokenWithRetry(
 
 export async function syncUserWithBackend(
   token: string,
-  setAuthTokenFn: (token: string) => void,
+  setAuthTokenFunction: (token: string) => void,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    setAuthTokenFn(token);
+    setAuthTokenFunction(token);
     await authApi.syncUser(token);
+
     return { success: true };
   } catch (syncError: unknown) {
     if (
@@ -46,6 +47,7 @@ export async function syncUserWithBackend(
       return { success: true }; // User already exists, continue
     }
     logger.error("Failed to sync user:", syncError);
+
     return { success: false, error: "We couldn't link your account. Please try again." };
   }
 }
@@ -56,6 +58,7 @@ export async function completeProfileAndNavigate(
 ): Promise<{ success: boolean; error?: string }> {
   try {
     await userApi.completeProfile(profileData);
+
     return { success: true };
   } catch (error: unknown) {
     logger.error("Profile completion failed:", error);
@@ -66,6 +69,7 @@ export async function completeProfileAndNavigate(
       (error as { status: number }).status === 409
     ) {
       navigate({ to: "/home" });
+
       return { success: true };
     }
 

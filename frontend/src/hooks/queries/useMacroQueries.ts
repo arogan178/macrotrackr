@@ -199,7 +199,7 @@ export function useMacroDailyTotals(date?: string) {
   });
 }
 
-export function useMacroTarget() {
+export function useMacroTargetQuery() {
   return useQuery({
     queryKey: queryKeys.macros.targets(),
     queryFn: async () => {

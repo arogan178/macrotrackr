@@ -4,29 +4,83 @@ import { config } from "../../config";
 import { logger } from "../../lib/logger";
 import { handleServiceError } from "../../lib/error-handler";
 
-// Initialize Stripe with secret key
-export const stripe = new Stripe(config.STRIPE_SECRET_KEY, {
-  apiVersion: "2025-08-27.basil",
-  typescript: true,
-});
+function createStripeClient() {
+  return new Stripe(config.STRIPE_SECRET_KEY, {
+    apiVersion: "2025-08-27.basil",
+    typescript: true,
+  });
+}
+
+let stripeClientRef: Stripe | null = null;
+
+export function getStripeClient() {
+  if (!stripeClientRef) {
+    stripeClientRef = createStripeClient();
+  }
+
+  return stripeClientRef;
+}
+
+export function resetStripeClient() {
+  stripeClientRef = null;
+}
 
 // Types for webhook event normalization
+export type ThinEventRelatedObjectType =
+  | "billing.subscription"
+  | "subscription"
+  | "billing.customer"
+  | "customer"
+  | "billing.invoice"
+  | "invoice"
+  | "billing.checkout.session"
+  | "checkout.session";
+
 export interface ThinEventRelatedObject {
   id: string;
-  type: string;
+  type: ThinEventRelatedObjectType | (string & {});
   url?: string;
 }
 
-export interface NormalizedWebhookEvent {
+export interface ThinWebhookEvent {
   id: string;
   type: string;
-  format: "snapshot" | "thin";
+  object: "v2.core.event";
   livemode: boolean;
   created: number | string;
-  related_object?: ThinEventRelatedObject | null;
-  data?: Stripe.Event.Data | null;
-  rawEvent: Stripe.Event | any;
+  related_object: ThinEventRelatedObject;
 }
+
+type StripeWebhookEvent = Stripe.Event | ThinWebhookEvent;
+
+export type NormalizedWebhookEvent =
+  | {
+      id: string;
+      type: string;
+      format: "thin";
+      livemode: boolean;
+      created: number | string;
+      related_object: ThinEventRelatedObject;
+      data: null;
+      rawEvent: ThinWebhookEvent;
+    }
+  | {
+      id: string;
+      type: string;
+      format: "snapshot";
+      livemode: boolean;
+      created: number | string;
+      related_object: null;
+      data: Stripe.Event.Data;
+      rawEvent: Stripe.Event;
+    };
+
+export type RelatedStripeObject =
+  | Stripe.Subscription
+  | Stripe.Customer
+  | Stripe.DeletedCustomer
+  | Stripe.Invoice
+  | Stripe.Checkout.Session;
 
 export interface CreateCheckoutSessionOptions {
   customerId?: string;
@@ -44,6 +98,17 @@ export interface CreateCustomerOptions {
 }
 
 export class StripeService {
+  private static isThinWebhookEvent(
+    event: StripeWebhookEvent
+  ): event is ThinWebhookEvent {
+    const candidate = event as Partial<ThinWebhookEvent>;
+    return (
+      candidate.object === "v2.core.event" &&
+      typeof candidate.related_object === "object" &&
+      candidate.related_object !== null
+    );
+  }
+
   /**
    * Get subscription with expanded details (price, payment method)
    */
@@ -53,6 +118,7 @@ export class StripeService {
     paymentMethod: { brand: string; last4: string } | null;
   }> {
     try {
+      const stripe = getStripeClient();
       // Expand default_payment_method and plan.product for full details
       const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
         expand: ["default_payment_method", "plan.product"],
@@ -100,6 +166,7 @@ export class StripeService {
     options: CreateCustomerOptions
   ): Promise<Stripe.Customer> {
     try {
+      const stripe = getStripeClient();
       const customer = await stripe.customers.create({
         email: options.email,
         name: options.name,
@@ -128,6 +195,7 @@ export class StripeService {
     options: CreateCheckoutSessionOptions
   ): Promise<Stripe.Checkout.Session> {
     try {
+      const stripe = getStripeClient();
       const sessionParams: Stripe.Checkout.SessionCreateParams = {
         mode: "subscription",
         payment_method_types: ["card"],
@@ -179,6 +247,7 @@ export class StripeService {
     returnUrl: string
   ): Promise<Stripe.BillingPortal.Session> {
     try {
+      const stripe = getStripeClient();
       const portalSession = await stripe.billingPortal.sessions.create({
         customer: customerId,
         return_url: returnUrl,
@@ -204,6 +273,7 @@ export class StripeService {
     subscriptionId: string
   ): Promise<Stripe.Subscription> {
     try {
+      const stripe = getStripeClient();
       const subscription = await stripe.subscriptions.retrieve(subscriptionId);
       return subscription;
     } catch (error) {
@@ -218,6 +288,7 @@ export class StripeService {
     subscriptionId: string
   ): Promise<Stripe.Subscription> {
     try {
+      const stripe = getStripeClient();
       const subscription = await stripe.subscriptions.cancel(subscriptionId);
       logger.info(
         {
@@ -243,12 +314,13 @@ export class StripeService {
     signature: string
   ): Promise<NormalizedWebhookEvent> {
     try {
+      const stripe = getStripeClient();
 
-      const event = await stripe.webhooks.constructEventAsync(
+      const event = (await stripe.webhooks.constructEventAsync(
         payload,
         signature,
         config.STRIPE_WEBHOOK_SECRET
-      );
+      )) as StripeWebhookEvent;
       const normalizedEvent = this.normalizeWebhookEvent(event);
       return normalizedEvent;
     } catch (error) {
@@ -269,21 +341,18 @@ export class StripeService {
    * Normalize webhook event to handle both Snapshot (v1) and Thin (v2) formats
    */
   private static normalizeWebhookEvent(
-    event: Stripe.Event | any
+    event: StripeWebhookEvent
   ): NormalizedWebhookEvent {
     // Check if this is a thin event (v2 format)
     // Thin events have object: "v2.core.event" and related_object property
-    if (
-      (event as any).object === "v2.core.event" &&
-      (event as any).related_object
-    ) {
+    if (this.isThinWebhookEvent(event)) {
       return {
         id: event.id,
         type: event.type,
         format: "thin",
         livemode: event.livemode,
         created: event.created,
-        related_object: (event as any).related_object,
+        related_object: event.related_object,
         data: null, // Thin events don't contain full object data
         rawEvent: event,
       };
@@ -297,7 +366,7 @@ export class StripeService {
       livemode: event.livemode,
       created: event.created,
       related_object: null,
-      data: (event as Stripe.Event).data,
+      data: event.data,
       rawEvent: event,
     };
   }
@@ -307,8 +376,9 @@ export class StripeService {
    */
   static async fetchRelatedObject(
     relatedObject: ThinEventRelatedObject
-  ): Promise<any> {
+  ): Promise<RelatedStripeObject | null> {
     try {
+      const stripe = getStripeClient();
       const { type, id } = relatedObject;
       switch (type) {
         case "billing.subscription":

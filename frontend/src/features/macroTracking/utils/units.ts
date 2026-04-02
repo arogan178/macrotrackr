@@ -115,7 +115,7 @@ export const UnitConverter = {
           unit = unitMap[unitMatch];
         }
 
-        const ingredient = match[3].toLowerCase();
+        const ingredient = match[3]?.toLowerCase().trim();
         if (unit === "cup" && ingredient && US_CUP_WEIGHTS[ingredient]) {
           const weightInGrams = quantity * US_CUP_WEIGHTS[ingredient];
 

@@ -1,4 +1,4 @@
-import { MacroIndicator } from "@/components/macros";
+import { MacroIndicator } from "@/components/macros/MacroComponents";
 
 interface MacroNutrientProps {
   label: string;

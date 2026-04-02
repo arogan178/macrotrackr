@@ -1,7 +1,19 @@
 import { Elysia, t } from "elysia";
 import { getMacroDensitySummary } from "./service";
-import { db } from "../../db";
 import { requireAuth } from "../../middleware/clerk-guards";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
+
+type ReportingQuery = {
+  startDate?: string;
+  endDate?: string;
+  groupBy?: "day" | "week" | "month";
+};
+
+type ReportingRouteContext = AuthenticatedRouteContextWithUser<
+  Record<string, never>,
+  Record<string, string>,
+  ReportingQuery
+>;
 
 // Response schema for nutrient density summary
 const NutrientDensityItemSchema = t.Object({
@@ -16,11 +28,18 @@ const NutrientDensityItemSchema = t.Object({
 const NutrientDensitySummaryResponseSchema = t.Array(NutrientDensityItemSchema);
 
 export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
-  .decorate("db", db)
   .use(requireAuth)
   .get(
     "/nutrient-density-summary",
-    async ({ authenticatedUser, query }: { authenticatedUser: { userId: number }; query?: Record<string, string | undefined> }) => {
+    async (rawContext: unknown) => {
+      const context = rawContext as ReportingRouteContext;
+      const { authenticatedUser, query, db } = context;
+      const internalUserId = authenticatedUser.userId;
+
+      if (internalUserId === null) {
+        throw new Error("Authenticated user ID is required");
+      }
+
       // Accepts: startDate, endDate, groupBy (e.g., day, week, month)
       const { startDate, endDate, groupBy } = query ?? {};
       
@@ -29,7 +48,8 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
         groupBy === "day" || groupBy === "week" || groupBy === "month" ? groupBy : undefined;
       
       const summary = await getMacroDensitySummary({
-        userId: authenticatedUser.userId.toString(),
+        db,
+        userId: internalUserId.toString(),
         startDate,
         endDate,
         groupBy: groupByValue,

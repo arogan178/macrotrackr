@@ -3,7 +3,10 @@ import type { WeightGoalsResponse } from "@/features/goals/types";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import { useHabits } from "@/hooks/queries/useHabits";
-import { useMacroDailyTotals, useMacroTarget } from "@/hooks/queries/useMacroQueries";
+import {
+  useMacroDailyTotals,
+  useMacroTargetQuery,
+} from "@/hooks/queries/useMacroQueries";
 import type { UserSettings } from "@/types/user";
 import { DEFAULT_MACRO_TOTALS } from "@/utils/constants/nutrition";
 import { createNutritionProfile } from "@/utils/userConstants";
@@ -34,7 +37,7 @@ export function useGoalsData() {
   const { data: user, isError: isUserError, error: userError } = useUser();
   const safeUserSettings = toUserSettings(user);
 
-  const { data: macroTarget } = useMacroTarget();
+  const { data: macroTarget } = useMacroTargetQuery();
   const { data: liveMacroDailyTotals } = useMacroDailyTotals();
 
   const macroDailyTotals = liveMacroDailyTotals ?? DEFAULT_MACRO_TOTALS;

@@ -17,7 +17,7 @@ export async function isServerAvailable(url: string): Promise<boolean> {
 }
 
 export async function waitForElement(page: Page, selector: string, timeout = 10000): Promise<void> {
-  await page.locator(selector).waitFor({ timeout })
+  await page.locator(selector).first().waitFor({ state: 'visible', timeout })
 }
 
 export async function clickButton(page: Page, text: string): Promise<void> {
@@ -43,6 +43,28 @@ export async function isVisible(page: Page, selector: string): Promise<boolean> 
 
 export async function waitForUrl(page: Page, pattern: string | RegExp): Promise<void> {
   await page.waitForURL(pattern, { timeout: 30000 })
+}
+
+export async function waitForPageReady(page: Page): Promise<void> {
+  await page.waitForLoadState('domcontentloaded')
+  await page.waitForLoadState('networkidle')
+}
+
+export async function waitForAnyVisible(
+  page: Page,
+  selectors: string[],
+  timeout = 10000,
+): Promise<string> {
+  for (const selector of selectors) {
+    try {
+      await page.locator(selector).first().waitFor({ state: 'visible', timeout })
+      return selector
+    } catch {
+      // try the next selector
+    }
+  }
+
+  throw new Error(`None of the expected selectors became visible: ${selectors.join(', ')}`)
 }
 
 export function generateRandomEmail(): string {
@@ -75,8 +97,4 @@ export async function getConsoleErrors(page: Page): Promise<string[]> {
 
 export async function takeScreenshot(page: Page, name: string): Promise<void> {
   await page.screenshot({ path: `e2e/screenshots/${name}-${Date.now()}.png` })
-}
-
-export async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
 }

@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 
-import { NumberField } from "@/components/form";
+import NumberField from "@/components/form/NumberField";
 import { RangeSlider } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";

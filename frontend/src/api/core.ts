@@ -23,18 +23,48 @@ export interface ApiErrorResponse {
 }
 
 let getClerkToken: (() => Promise<string | null>) | null = null;
+let authTokenProviderInitialized = false;
+
+export function initializeAuthTokenProvider(
+  provider: (() => Promise<string | null>) | null = null,
+  fallbackToken: string | null = null,
+) {
+  getClerkToken = provider;
+  staticAuthToken = fallbackToken;
+  authTokenProviderInitialized = true;
+}
+
+export function isAuthTokenProviderInitialized(): boolean {
+  return authTokenProviderInitialized;
+}
+
+export function resetAuthTokenProviderForTests() {
+  getClerkToken = null;
+  staticAuthToken = null;
+  authTokenProviderInitialized = false;
+}
 
 export function setGetToken(function_: () => Promise<string | null>) {
   getClerkToken = function_;
+  authTokenProviderInitialized = true;
 }
 
 let staticAuthToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
   staticAuthToken = token;
+  authTokenProviderInitialized = true;
 }
 
 export async function getAuthToken(): Promise<string | null> {
+  if (!authTokenProviderInitialized) {
+    throw new ApiError(
+      "Auth token provider has not been initialized",
+      500,
+      "AUTH_TOKEN_PROVIDER_UNINITIALIZED",
+    );
+  }
+
   if (getClerkToken) {
     const freshToken = await getClerkToken();
     if (freshToken) {

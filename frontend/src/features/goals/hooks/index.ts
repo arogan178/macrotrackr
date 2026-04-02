@@ -1,1 +1,1 @@
-export { useMacroTarget } from "./useMacroTarget";
+export { useEditableMacroTarget } from "./useMacroTarget";

@@ -1,6 +1,6 @@
-import type { Ingredient } from "@/types/macro";
+import type { Ingredient, MealType } from "@/types/macro";
 
-export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
+export type { MealType };
 
 export interface MacroEntryInput {
   protein: number;

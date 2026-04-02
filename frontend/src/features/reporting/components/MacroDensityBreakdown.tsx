@@ -10,12 +10,10 @@ import {
   YAxis,
 } from "recharts";
 
-import { AnimatedNumber } from "@/components/animation";
-import { ChartCard } from "@/components/chart";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import ChartCard from "@/components/chart/ChartCard";
 import { StackedBarPercentageTooltip } from "@/components/chart/ChartTooltip";
 import { MACRO_COLORS } from "@/utils/chartColors";
-
-import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 
 interface MacroDensityBreakdownProps {
   startDate?: string;
@@ -85,9 +83,7 @@ const MacroDensityBreakdown = ({
   isLoading: propertyIsLoading,
   isHistoryReady,
 }: MacroDensityBreakdownProps) => {
-  // Always call hook, then prefer provided data if present
-  const hookData = useMacroDensityBreakdown(undefined, "week");
-  const data = propertyData ?? hookData;
+  const data = propertyData ?? [];
   const loading =
     typeof propertyIsLoading === "boolean" ? propertyIsLoading : false;
   // Show a message if there is no data after loading
@@ -138,18 +134,17 @@ const MacroDensityBreakdown = ({
             />
             <Tooltip
               // Use standardized stacked bar tooltip with color mapping and macro dots
-              content={
-                ((properties: Record<string, unknown>) => (
-                  <StackedBarPercentageTooltip
-                    {...properties}
-                    colors={{
-                      protein: MACRO_COLORS.protein.base,
-                      carbs: MACRO_COLORS.carbs.base,
-                      fats: MACRO_COLORS.fats.base,
-                    }}
-                    labelKey="period"
-                  />
-                ))}
+              content={(properties: Record<string, unknown>) => (
+                <StackedBarPercentageTooltip
+                  {...properties}
+                  colors={{
+                    protein: MACRO_COLORS.protein.base,
+                    carbs: MACRO_COLORS.carbs.base,
+                    fats: MACRO_COLORS.fats.base,
+                  }}
+                  labelKey="period"
+                />
+              )}
               cursor={{ fill: "rgba(110,118,145,0.1)" }}
               wrapperStyle={{ outline: "none" }}
             />

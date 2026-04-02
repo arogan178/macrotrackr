@@ -1,4 +1,10 @@
-import { Button, ExportIcon, IconButton, LockIcon, TabBar } from "@/components/ui";
+import {
+  Button,
+  ExportIcon,
+  IconButton,
+  LockIcon,
+  TabBar,
+} from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 
 import AnalyticsToolbar from "./AnalyticsToolbar";
@@ -81,8 +87,7 @@ export default function DateRangeSelector({
             disabled={isExportDisabled}
             ariaLabel="Export data as CSV file"
             className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
-            icon={<ExportIcon />}
-            iconPosition="left"
+            leftIcon={<ExportIcon />}
           >
             Export CSV
           </Button>

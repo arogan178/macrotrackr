@@ -7,7 +7,6 @@ import {
   safeQuery,
   withTransaction,
 } from "../../lib/database";
-import { db } from "../../db";
 import { AuthenticationError, ConflictError } from "../../lib/errors";
 import { logger } from "../../lib/logger";
 import { hashPassword } from "../../lib/password";
@@ -66,7 +65,6 @@ export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
       // .use(rateLimiters.auth) // Temporarily disabled for testing
-      .decorate("db", db)
 
       /**
        * POST /reset-password - Reset password using a valid token
