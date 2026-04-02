@@ -79,6 +79,29 @@ export function encodeAuthRedirect(value: string | undefined): string {
   return encodeURIComponent(normalizeAuthRedirect(value));
 }
 
+export function resolveAuthReturnTo(value: string | undefined):
+  | string
+  | undefined {
+  const normalized = normalizeAuthRedirect(value);
+
+  return normalized === DEFAULT_AUTH_REDIRECT ? undefined : normalized;
+}
+
+export function buildSocialAuthRedirectUrls(
+  value: string | undefined,
+  flow: "signin" | "signup" = "signup",
+): {
+  redirectUrl: string;
+  redirectUrlComplete: string;
+} {
+  const encodedRedirect = encodeAuthRedirect(value);
+
+  return {
+    redirectUrl: `/sso-callback?flow=${flow}&redirectTo=${encodedRedirect}`,
+    redirectUrlComplete: `/auth-ready?redirectTo=${encodedRedirect}`,
+  };
+}
+
 export function resolveProfileCompletion(user: unknown): boolean | undefined {
   if (!user || typeof user !== "object") {
     return undefined;

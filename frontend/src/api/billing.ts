@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse, post } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse, post } from "@/api/core";
 
 export interface BillingSubscriptionDetails {
   id: string;
@@ -40,7 +40,7 @@ export interface CheckoutSessionPayload {
 export const billingApi = {
   getBillingDetails: async (): Promise<BillingDetailsResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/billing/details`, {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 

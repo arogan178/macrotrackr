@@ -73,9 +73,20 @@ function createEmailServiceClient() {
 }
 
 let emailServiceRef: EmailService | null = null;
+let emailServiceConfiguredExplicitly = false;
 
 export function getEmailService(): EmailService {
   if (!emailServiceRef) {
+    if (!emailServiceConfiguredExplicitly) {
+      logger.warn(
+        {
+          type: "implicit_service_initialization",
+          service: "email",
+        },
+        "Email service accessed before explicit runtime configuration; using default instance.",
+      );
+    }
+
     emailServiceRef = createEmailServiceClient();
   }
 
@@ -84,10 +95,12 @@ export function getEmailService(): EmailService {
 
 export function configureEmailService(service: EmailService): void {
   emailServiceRef = service;
+  emailServiceConfiguredExplicitly = true;
 }
 
 export function resetEmailService(): void {
   emailServiceRef = null;
+  emailServiceConfiguredExplicitly = false;
 }
 
 export function createEmailService(): EmailService {
