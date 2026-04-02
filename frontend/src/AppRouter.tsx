@@ -8,7 +8,7 @@ import {
 } from "@tanstack/react-router";
 import { AnimatePresence } from "motion/react";
 
-import { PageTransition } from "@/components/animation";
+import PageTransition from "@/components/animation/PageTransition";
 import { RequireCompleteProfile } from "@/components/auth/RequireCompleteProfile";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
@@ -16,7 +16,11 @@ import TopLoadingBar from "@/components/ui/TopLoadingBar";
 
 import MainLayout from "./components/layout/MainLayout";
 import { queryClient } from "./lib/queryClient";
-import { LoadingFallback, RequireAuth, RequireUnauth } from "./routes/authGuards";
+import {
+  LoadingFallback,
+  RequireAuth,
+  RequireUnauth,
+} from "./routes/authGuards";
 import {
   AuthReadyPage,
   GoalsPage,

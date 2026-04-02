@@ -36,6 +36,10 @@ async function loadDbModule(configOverrides?: {
       DATABASE_PATH: configOverrides?.DATABASE_PATH ?? "/tmp/macro-tracker.sqlite",
       NODE_ENV: configOverrides?.NODE_ENV ?? "test",
     },
+    getConfig: () => ({
+      DATABASE_PATH: configOverrides?.DATABASE_PATH ?? "/tmp/macro-tracker.sqlite",
+      NODE_ENV: configOverrides?.NODE_ENV ?? "test",
+    }),
   }));
 
   vi.doMock("../../src/db/schema", () => ({
@@ -64,7 +68,7 @@ describe("db/index", () => {
 
     const created = dbModule.createDatabase("/tmp/custom.sqlite");
 
-    expect(DatabaseMock).toHaveBeenNthCalledWith(2, "/tmp/custom.sqlite", {
+    expect(DatabaseMock).toHaveBeenCalledWith("/tmp/custom.sqlite", {
       create: true,
     });
     expect(created.exec).toHaveBeenCalledWith("PRAGMA journal_mode = WAL;");
@@ -101,15 +105,13 @@ describe("db/index", () => {
     expect(initializeSchema).toHaveBeenCalledWith(created);
   });
 
-  it("exports an initialized default database instance", async () => {
-    const dbModule = await loadDbModule({
+  it("does not initialize a database at import time", async () => {
+    await loadDbModule({
       DATABASE_PATH: "/tmp/default.sqlite",
       NODE_ENV: "test",
     });
 
-    expect(DatabaseMock).toHaveBeenCalledWith("/tmp/default.sqlite", {
-      create: true,
-    });
-    expect(initializeSchema).toHaveBeenCalledWith(dbModule.db);
+    expect(DatabaseMock).not.toHaveBeenCalled();
+    expect(initializeSchema).not.toHaveBeenCalled();
   });
 });

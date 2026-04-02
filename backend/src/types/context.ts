@@ -1,5 +1,5 @@
 export interface AuthenticatedUser {
-  userId?: number | null;
+  userId: number | null;
   id: string;
   clerkUserId: string;
   email?: string;
@@ -47,3 +47,11 @@ export interface AuthenticatedRouteContext<
   params?: TParams;
   query: TQuery;
 }
+
+export type AuthenticatedRouteContextWithUser<
+  TBody = unknown,
+  TParams = RouteParams,
+  TQuery = RouteQuery,
+> = AuthenticatedRouteContext<TBody, TParams, TQuery> & {
+  authenticatedUser: AuthenticatedUser;
+};

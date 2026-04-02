@@ -24,11 +24,7 @@ import {
   formatEntryDate,
   formatTimeFromEntry,
 } from "./EntryHistoryHelpers";
-import type {
-  EntryHistoryActions,
-  EntryHistoryHelpers,
-  EntryHistoryState,
-} from "./EntryHistoryShared";
+import type { EntryHistoryController } from "./EntryHistoryShared";
 import MobileEntryCards from "./MobileEntryCards";
 
 interface EntryHistoryProps {
@@ -175,8 +171,8 @@ const EntryHistoryComponent = function EntryHistory({
       }))
       .sort(
         (a, b) =>
-           new Date(b.entries[0].entryDate).getTime() -
-            new Date(a.entries[0].entryDate).getTime(),
+          new Date(b.entries[0].entryDate).getTime() -
+          new Date(a.entries[0].entryDate).getTime(),
       );
 
     const displayed = allEntries.slice(0, displayedDateCount);
@@ -246,50 +242,53 @@ const EntryHistoryComponent = function EntryHistory({
     [],
   );
 
-  const helpers = useMemo<EntryHistoryHelpers>(
+  const isDateCollapsed = useCallback(
+    (date: string) => collapsedDates.has(date),
+    [collapsedDates],
+  );
+
+  const isMealSaved = useCallback(
+    (entryId: number) => savedMealIds?.has(entryId) ?? false,
+    [savedMealIds],
+  );
+
+  const isEntrySelected = useCallback(
+    (entryId: number) => selectedEntryIds.has(entryId),
+    [selectedEntryIds],
+  );
+
+  const controller = useMemo<EntryHistoryController>(
     () => ({
       formatDate,
       formatTimeFromEntry,
       capitalizeFirstLetter,
       calculateCalories,
-    }),
-    [formatDate, formatTimeFromEntry, capitalizeFirstLetter],
-  );
-
-  const actions = useMemo<EntryHistoryActions>(
-    () => ({
+      isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
-    }),
-    [
-      toggleDateCollapse,
-      handleDeleteDate,
-      onEdit,
-      deleteEntry,
-      onSaveMeal,
-      onUnsaveMeal,
-    ],
-  );
-
-  const state = useMemo<EntryHistoryState>(
-    () => ({
-      collapsedDates,
+      isMealSaved,
       isDeleting,
-      savedMealIds,
       isSelectionMode,
-      selectedEntryIds,
+      isEntrySelected,
       onToggleEntrySelection: toggleEntrySelection,
     }),
     [
-      collapsedDates,
+      formatDate,
+      isDateCollapsed,
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+      isMealSaved,
       isDeleting,
-      savedMealIds,
       isSelectionMode,
-      selectedEntryIds,
+      isEntrySelected,
       toggleEntrySelection,
     ],
   );
@@ -378,8 +377,7 @@ const EntryHistoryComponent = function EntryHistory({
           {history.length > 0 && (
             <ProFeature>
               <Button
-                icon={<ExportIcon />}
-                iconPosition="left"
+                leftIcon={<ExportIcon />}
                 onClick={onExportCsv}
                 text={isExportingCsv ? "Exporting..." : "Export CSV"}
                 buttonSize="sm"
@@ -407,18 +405,14 @@ const EntryHistoryComponent = function EntryHistory({
           <div className="hidden lg:block">
             <DesktopEntryTable
               groupedEntries={displayedEntries}
-              helpers={helpers}
-              actions={actions}
-              state={state}
+              controller={controller}
             />
           </div>
 
           <div className="lg:hidden">
             <MobileEntryCards
               groupedEntries={displayedEntries}
-              helpers={helpers}
-              actions={actions}
-              state={state}
+              controller={controller}
             />
           </div>
 

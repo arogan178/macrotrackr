@@ -1,217 +1,117 @@
-import { describe, expect, it } from "vitest";
-import { z } from "zod";
+import { resolve } from "node:path";
 
-// Re-create the EnvSchema for testing (without the side effects)
-const TestEnvSchema = z.object({
-  PORT: z.coerce.number().int().positive().default(3000),
-  HOST: z.string().default("0.0.0.0"),
-  DATABASE_PATH: z
-    .string()
-    .default("./macro_tracker.db")
-    .transform((path) => {
-      const isAbsolute = (p: string) => p.startsWith("/");
-      return isAbsolute(path) ? path : path; // Simplified for test
-    }),
+import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 
-  JWT_SECRET: z
-    .string()
-    .min(32, "JWT_SECRET must be at least 32 characters long"),
+const originalEnv = { ...process.env };
 
-  CORS_ORIGIN: z
-    .string()
-    .default("http://localhost:5173")
-    .transform((val) =>
-      val.includes(",") ? val.split(",").map((v) => v.trim()) : val
-    ),
+const requiredEnv: Record<string, string> = {
+	JWT_SECRET: "test_jwt_secret_must_be_long_enough_32_chars",
+	STRIPE_SECRET_KEY: "sk_test_123",
+	STRIPE_WEBHOOK_SECRET: "whsec_test_123",
+	STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
+	STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
+	RESEND_API_KEY: "re_test_123",
+	CLERK_PUBLISHABLE_KEY: "pk_test_123",
+	CLERK_SECRET_KEY: "sk_test_123",
+	NODE_ENV: "test",
+};
 
-  NODE_ENV: z
-    .enum(["development", "production", "test"])
-    .default("development"),
+const managedKeys = [
+	"PORT",
+	"HOST",
+	"DATABASE_PATH",
+	"JWT_SECRET",
+	"CORS_ORIGIN",
+	"NODE_ENV",
+	"JWT_EXP",
+	"STRIPE_SECRET_KEY",
+	"STRIPE_WEBHOOK_SECRET",
+	"STRIPE_PRICE_ID_MONTHLY",
+	"STRIPE_PRICE_ID_YEARLY",
+	"RESEND_API_KEY",
+	"CLERK_PUBLISHABLE_KEY",
+	"CLERK_SECRET_KEY",
+	"CLERK_WEBHOOK_SECRET",
+	"METRICS_API_KEY",
+];
 
-  JWT_EXP: z.string().default("30d"),
-  STRIPE_SECRET_KEY: z.string().min(1, "STRIPE_SECRET_KEY is required"),
-  STRIPE_WEBHOOK_SECRET: z.string().min(1, "STRIPE_WEBHOOK_SECRET is required"),
-  STRIPE_PRICE_ID_MONTHLY: z
-    .string()
-    .min(
-      1,
-      "STRIPE_PRICE_ID_MONTHLY is required for Pro subscription (monthly)"
-    ),
+function applyTestEnv(overrides: Record<string, string | undefined> = {}) {
+	for (const key of managedKeys) {
+		delete process.env[key];
+	}
 
-  STRIPE_PRICE_ID_YEARLY: z
-    .string()
-    .min(1, "STRIPE_PRICE_ID_YEARLY is required for Pro subscription (yearly)"),
+	for (const [key, value] of Object.entries(requiredEnv)) {
+		process.env[key] = value;
+	}
 
-  RESEND_API_KEY: z.string().min(1, "RESEND_API_KEY is required"),
-  CLERK_PUBLISHABLE_KEY: z
-    .string()
-    .min(1, "CLERK_PUBLISHABLE_KEY is required"),
+	for (const [key, value] of Object.entries(overrides)) {
+		if (value === undefined) {
+			delete process.env[key];
+		} else {
+			process.env[key] = value;
+		}
+	}
+}
 
-  CLERK_SECRET_KEY: z.string().min(1, "CLERK_SECRET_KEY is required"),
-  CLERK_WEBHOOK_SECRET: z.string().optional(),
-  METRICS_API_KEY: z.string().min(1).optional(),
-});
+async function loadConfigModule(overrides: Record<string, string | undefined> = {}) {
+	applyTestEnv(overrides);
+	const cacheBuster = `${Date.now()}-${Math.random()}`;
+	return import(`../src/config?cachebust=${cacheBuster}`);
+}
 
 describe("config", () => {
-  describe("EnvSchema validation", () => {
-    it("parses valid environment variables", () => {
-      const validEnv = {
-        PORT: "3000",
-        HOST: "0.0.0.0",
-        DATABASE_PATH: "./test.db",
-        JWT_SECRET: "this-is-a-32-character-secret-key!!",
-        CORS_ORIGIN: "http://localhost:5173",
-        NODE_ENV: "development",
-        JWT_EXP: "30d",
-        STRIPE_SECRET_KEY: "sk_test_123",
-        STRIPE_WEBHOOK_SECRET: "whsec_123",
-        STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-        STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-        RESEND_API_KEY: "re_123",
-        CLERK_PUBLISHABLE_KEY: "pk_test_123",
-        CLERK_SECRET_KEY: "sk_test_123",
-      };
+	beforeEach(() => {
+		vi.restoreAllMocks();
+	});
 
-      const result = TestEnvSchema.safeParse(validEnv);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.PORT).toBe(3000);
-        expect(result.data.HOST).toBe("0.0.0.0");
-        expect(result.data.NODE_ENV).toBe("development");
-      }
-    });
+	afterAll(() => {
+		for (const key of Object.keys(process.env)) {
+			if (!(key in originalEnv)) {
+				delete process.env[key];
+			}
+		}
 
-    it("applies defaults for missing optional fields", () => {
-      const minimalEnv = {
-        JWT_SECRET: "this-is-a-32-character-secret-key!!",
-        STRIPE_SECRET_KEY: "sk_test_123",
-        STRIPE_WEBHOOK_SECRET: "whsec_123",
-        STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-        STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-        RESEND_API_KEY: "re_123",
-        CLERK_PUBLISHABLE_KEY: "pk_test_123",
-        CLERK_SECRET_KEY: "sk_test_123",
-      };
+		Object.assign(process.env, originalEnv);
+	});
 
-      const result = TestEnvSchema.safeParse(minimalEnv);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.PORT).toBe(3000); // default
-        expect(result.data.HOST).toBe("0.0.0.0"); // default
-        expect(result.data.NODE_ENV).toBe("development"); // default
-        expect(result.data.JWT_EXP).toBe("30d"); // default
-      }
-    });
+	it("loads expected defaults for test environment", async () => {
+		const { config } = await loadConfigModule();
 
-    it("rejects JWT_SECRET shorter than 32 characters", () => {
-      const invalidEnv = {
-        JWT_SECRET: "short",
-        STRIPE_SECRET_KEY: "sk_test_123",
-        STRIPE_WEBHOOK_SECRET: "whsec_123",
-        STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-        STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-        RESEND_API_KEY: "re_123",
-        CLERK_PUBLISHABLE_KEY: "pk_test_123",
-        CLERK_SECRET_KEY: "sk_test_123",
-      };
+		expect(config.PORT).toBe(3000);
+		expect(config.HOST).toBe("0.0.0.0");
+		expect(config.NODE_ENV).toBe("test");
+		expect(config.DATABASE_PATH).toBe(":memory:");
+		expect(config.JWT_EXP).toBe("30d");
+		expect(config.CORS_ORIGIN).toBe("http://localhost:5173");
+	});
 
-      const result = TestEnvSchema.safeParse(invalidEnv);
-      expect(result.success).toBe(false);
-    });
+	it("transforms CSV CORS origins and resolves relative database paths", async () => {
+		const { config } = await loadConfigModule({
+			DATABASE_PATH: "./tmp/dev.sqlite",
+			CORS_ORIGIN: "https://app.example.com, https://admin.example.com",
+		});
 
-    it("coerces PORT to number", () => {
-      const envWithStringPort = {
-        JWT_SECRET: "this-is-a-32-character-secret-key!!",
-        STRIPE_SECRET_KEY: "sk_test_123",
-        STRIPE_WEBHOOK_SECRET: "whsec_123",
-        STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-        STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-        RESEND_API_KEY: "re_123",
-        CLERK_PUBLISHABLE_KEY: "pk_test_123",
-        CLERK_SECRET_KEY: "sk_test_123",
-        PORT: "8080",
-      };
+		expect(config.DATABASE_PATH).toBe(resolve(process.cwd(), "./tmp/dev.sqlite"));
+		expect(config.CORS_ORIGIN).toEqual([
+			"https://app.example.com",
+			"https://admin.example.com",
+		]);
+	});
 
-      const result = TestEnvSchema.safeParse(envWithStringPort);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.PORT).toBe(8080);
-        expect(typeof result.data.PORT).toBe("number");
-      }
-    });
+	it("throws when required environment variables are invalid", async () => {
+		const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-    it("transforms CORS_ORIGIN to array when comma-separated", () => {
-      const envWithMultipleOrigins = {
-        JWT_SECRET: "this-is-a-32-character-secret-key!!",
-        STRIPE_SECRET_KEY: "sk_test_123",
-        STRIPE_WEBHOOK_SECRET: "whsec_123",
-        STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-        STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-        RESEND_API_KEY: "re_123",
-        CLERK_PUBLISHABLE_KEY: "pk_test_123",
-        CLERK_SECRET_KEY: "sk_test_123",
-        CORS_ORIGIN: "http://localhost:5173,http://localhost:3000",
-      };
+		await expect(
+			loadConfigModule({
+				JWT_SECRET: "too-short",
+			}),
+		).rejects.toThrow("Invalid environment variables");
 
-      const result = TestEnvSchema.safeParse(envWithMultipleOrigins);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.CORS_ORIGIN).toEqual([
-          "http://localhost:5173",
-          "http://localhost:3000",
-        ]);
-      }
-    });
-
-    it("validates NODE_ENV enum values", () => {
-      const validEnvs = [
-        { ...baseValidEnv(), NODE_ENV: "development" },
-        { ...baseValidEnv(), NODE_ENV: "production" },
-        { ...baseValidEnv(), NODE_ENV: "test" },
-      ];
-
-      for (const env of validEnvs) {
-        const result = TestEnvSchema.safeParse(env);
-        expect(result.success).toBe(true);
-      }
-    });
-
-    it("rejects invalid NODE_ENV values", () => {
-      const invalidEnv = {
-        ...baseValidEnv(),
-        NODE_ENV: "invalid",
-      };
-
-      const result = TestEnvSchema.safeParse(invalidEnv);
-      expect(result.success).toBe(false);
-    });
-
-    it("makes CLERK_WEBHOOK_SECRET optional", () => {
-      const envWithoutOptional = {
-        JWT_SECRET: "this-is-a-32-character-secret-key!!",
-        STRIPE_SECRET_KEY: "sk_test_123",
-        STRIPE_WEBHOOK_SECRET: "whsec_123",
-        STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-        STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-        RESEND_API_KEY: "re_123",
-        CLERK_PUBLISHABLE_KEY: "pk_test_123",
-        CLERK_SECRET_KEY: "sk_test_123",
-      };
-
-      const result = TestEnvSchema.safeParse(envWithoutOptional);
-      expect(result.success).toBe(true);
-    });
-  });
-});
-
-// Helper for base valid environment
-const baseValidEnv = () => ({
-  JWT_SECRET: "this-is-a-32-character-secret-key!!",
-  STRIPE_SECRET_KEY: "sk_test_123",
-  STRIPE_WEBHOOK_SECRET: "whsec_123",
-  STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
-  STRIPE_PRICE_ID_YEARLY: "price_yearly_123",
-  RESEND_API_KEY: "re_123",
-  CLERK_PUBLISHABLE_KEY: "pk_test_123",
-  CLERK_SECRET_KEY: "sk_test_123",
+		expect(consoleErrorSpy).toHaveBeenCalledWith(
+			"Invalid environment variables:",
+			expect.objectContaining({
+				JWT_SECRET: expect.any(Array),
+			}),
+		);
+	});
 });

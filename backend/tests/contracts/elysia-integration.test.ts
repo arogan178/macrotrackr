@@ -58,15 +58,19 @@ describe("Route Integration Test Patterns", () => {
       .use(macroRoutes);
       
     const res = await testApp.handle(new Request("http://localhost/api/macros/target"));
-    
-    console.log(res.status);
-    console.log(await res.clone().text());
 
     expect(res.status).toBe(200);
     const body = await res.json();
-    console.log("Response Body:", body);
-    
+
     expect(isValidMacroTargetResponse(body)).toBe(true);
+    expect(body).toHaveProperty("macroTarget");
+    expect(body.macroTarget).toMatchObject({
+      proteinPercentage: 35,
+      carbsPercentage: 45,
+      fatsPercentage: 20,
+      lockedMacros: ["protein"],
+    });
+    expect(body.macroTarget).not.toHaveProperty("protein_percentage");
     
     mockDb.close();
   });

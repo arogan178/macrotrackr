@@ -1,4 +1,4 @@
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 
 export const AddEntryLoadingSkeleton = () => (
   <CardContainer className="flex h-full flex-col justify-between rounded-2xl border-border/60">

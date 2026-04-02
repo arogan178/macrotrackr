@@ -2,13 +2,14 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   ApiError,
-  apiService,
   getAuthToken,
   getHeadersAsync,
   handleResponse,
   setAuthToken,
   setGetToken,
-} from "../apiServices";
+} from "../../api/core";
+import { userApi } from "../../api/user";
+import { authApi as authApiClient } from "../../api/auth";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -57,34 +58,35 @@ describe("apiServices contracts", () => {
     fetchMock
       .mockResolvedValueOnce(
         createJsonResponse({
-          id: 11,
-          clerkId: "user_123",
-          email: "hello@example.com",
-          firstName: "Taylor",
-          lastName: "Diaz",
-          message: "User synced successfully",
+          user: {
+            id: 11,
+            clerkId: "user_123",
+            email: "hello@example.com",
+            firstName: "Taylor",
+            lastName: "Diaz",
+          },
+          isNewUser: false,
         }),
       )
       .mockResolvedValueOnce(
         createJsonResponse({
-          data: {
-            id: 11,
-            email: "hello@example.com",
-            first_name: "Taylor",
-            last_name: "Diaz",
-            created_at: "2026-03-09T00:00:00.000Z",
-            date_of_birth: "1995-05-20",
-            activity_level: 3,
-            subscription: {
-              status: "pro",
-              hasStripeCustomer: true,
-              currentPeriodEnd: "2026-04-01T00:00:00.000Z",
-            },
+          id: 11,
+          email: "hello@example.com",
+          first_name: "Taylor",
+          last_name: "Diaz",
+          created_at: "2026-03-09T00:00:00.000Z",
+          date_of_birth: "1995-05-20",
+          activity_level: 3,
+          isProfileComplete: true,
+          subscription: {
+            status: "pro",
+            hasStripeCustomer: true,
+            currentPeriodEnd: "2026-04-01T00:00:00.000Z",
           },
         }),
       );
 
-    await expect(apiService.user.syncAndGetUserDetails()).resolves.toEqual({
+    await expect(userApi.syncAndGetUserDetails()).resolves.toEqual({
       id: 11,
       email: "hello@example.com",
       firstName: "Taylor",
@@ -113,22 +115,26 @@ describe("apiServices contracts", () => {
   it("keeps auth sync typed to its actual backend contract", async () => {
     fetchMock.mockResolvedValueOnce(
       createJsonResponse({
+        user: {
+          id: 12,
+          clerkId: "user_456",
+          email: "casey@example.com",
+          firstName: "Casey",
+          lastName: "Ng",
+        },
+        isNewUser: true,
+      }),
+    );
+
+    await expect(authApiClient.syncUser("token-123")).resolves.toEqual({
+      user: {
         id: 12,
         clerkId: "user_456",
         email: "casey@example.com",
         firstName: "Casey",
         lastName: "Ng",
-        message: "User created and synced successfully",
-      }),
-    );
-
-    await expect(apiService.auth.syncUser("token-123")).resolves.toEqual({
-      id: 12,
-      clerkId: "user_456",
-      email: "casey@example.com",
-      firstName: "Casey",
-      lastName: "Ng",
-      message: "User created and synced successfully",
+      },
+      isNewUser: true,
     });
 
     expect(fetchMock).toHaveBeenCalledWith(

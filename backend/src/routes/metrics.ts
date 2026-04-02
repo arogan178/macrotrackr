@@ -1,7 +1,7 @@
 import { timingSafeEqual } from "node:crypto";
 import { Elysia } from "elysia";
 import { config } from "../config";
-import { metrics } from "../lib/metrics";
+import { getMetricsRegistry } from "../lib/metrics";
 import { getSlowQueryStats, getRecentTraces } from "../lib/query-tracer";
 
 function secureCompare(left: string, right: string): boolean {
@@ -34,6 +34,7 @@ function isDiagnosticsAuthorized(request: Request): boolean {
 
 export const metricsRoutes = new Elysia()
   .get("/metrics", () => {
+    const metrics = getMetricsRegistry();
     const prometheusOutput = metrics.exportPrometheus();
     return new Response(prometheusOutput, {
       headers: { "Content-Type": "text/plain; charset=utf-8" },

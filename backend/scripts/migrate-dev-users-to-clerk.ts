@@ -1,6 +1,8 @@
 import { createClerkClient } from "elysia-clerk";
 import { Database } from "bun:sqlite";
 import crypto from "crypto";
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
 
 type LocalUser = {
   id: number;
@@ -26,12 +28,12 @@ type Options = {
   requireBcrypt: boolean;
 };
 
-function getClerkErrorMetadata(error: unknown): {
+export function getClerkErrorMetadata(error: unknown): {
   status?: number;
   code?: string;
   messages: string[];
 } {
-  const anyError = error as any;
+  const anyError = error as Record<string, unknown>;
   const messages: string[] = [];
   const errors = Array.isArray(anyError?.errors) ? anyError.errors : [];
   for (const item of errors) {
@@ -46,7 +48,7 @@ function getClerkErrorMetadata(error: unknown): {
   };
 }
 
-function parseOptions(argv: string[]): Options {
+export function parseOptions(argv: string[]): Options {
   return {
     dryRun: argv.includes("--dry-run"),
     createMissingClerk: !argv.includes("--no-create-clerk"),
@@ -56,13 +58,13 @@ function parseOptions(argv: string[]): Options {
   };
 }
 
-function normalizeEmail(value: string | null | undefined): string | null {
+export function normalizeEmail(value: string | null | undefined): string | null {
   if (!value) return null;
   const normalized = value.trim().toLowerCase();
   return normalized.length > 0 ? normalized : null;
 }
 
-function splitNameFromEmail(email: string): { first: string; last: string } {
+export function splitNameFromEmail(email: string): { first: string; last: string } {
   const localPart = email.split("@")[0] || "user";
   const cleaned = localPart.replace(/[._-]+/g, " ").trim();
   const [first = "User", ...rest] = cleaned.split(" ");
@@ -73,18 +75,18 @@ function splitNameFromEmail(email: string): { first: string; last: string } {
   };
 }
 
-function generateTempPassword(): string {
+export function generateTempPassword(): string {
   // Strong dev migration password to satisfy Clerk instance password policy.
   // Users can reset/change it in Clerk flows as needed.
   return `DevMigrate!${crypto.randomUUID()}aA1`;
 }
 
-function isBcryptHash(value: string | null | undefined): boolean {
+export function isBcryptHash(value: string | null | undefined): boolean {
   if (!value) return false;
   return /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/.test(value);
 }
 
-async function fetchAllClerkUsers(
+export async function fetchAllClerkUsers(
   clerk: ReturnType<typeof createClerkClient>
 ): Promise<ClerkUserSummary[]> {
   const all: ClerkUserSummary[] = [];
@@ -113,7 +115,7 @@ async function fetchAllClerkUsers(
   return all;
 }
 
-function createDefaultLocalUserData(clerkUser: ClerkUserSummary) {
+export function createDefaultLocalUserData(clerkUser: ClerkUserSummary) {
   const normalizedEmail = normalizeEmail(clerkUser.email);
   if (!normalizedEmail) return null;
 
@@ -125,7 +127,7 @@ function createDefaultLocalUserData(clerkUser: ClerkUserSummary) {
   };
 }
 
-async function main() {
+export async function main() {
   const options = parseOptions(process.argv.slice(2));
   const databasePath = process.env.DATABASE_PATH || "./macro_tracker.db";
   const secretKey = process.env.CLERK_SECRET_KEY;
@@ -445,7 +447,16 @@ async function main() {
   }
 }
 
-main().catch((error) => {
-  console.error("Migration failed:", error);
-  process.exit(1);
-});
+function isDirectExecution(): boolean {
+  const entryPoint = process.argv[1];
+  if (!entryPoint) return false;
+
+  return resolve(entryPoint) === fileURLToPath(import.meta.url);
+}
+
+if (isDirectExecution()) {
+  main().catch((error) => {
+    console.error("Migration failed:", error);
+    process.exit(1);
+  });
+}

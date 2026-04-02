@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   type FoodSearchResult,
   normalizeFoodSearchResults,
-} from "../apiServices";
+} from "../../api/macros";
 
 describe("normalizeFoodSearchResults", () => {
   it("returns valid search results unchanged", () => {

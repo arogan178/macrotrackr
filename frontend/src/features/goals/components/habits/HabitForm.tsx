@@ -1,4 +1,5 @@
-import { NumberField, TextField } from "@/components/form";
+import NumberField from "@/components/form/NumberField";
+import TextField from "@/components/form/TextField";
 import { HabitGoalFormValues } from "@/types/habit";
 
 import { HABIT_ICONS } from "../../constants/habits";

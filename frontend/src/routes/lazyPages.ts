@@ -21,4 +21,4 @@ export const TermsAndConditionsPage = React.lazy(() => import("@/features/landin
 export const PrivacyPolicyPage = React.lazy(() => import("@/features/landing/pages/PrivacyPolicyPage"));
 
 // UI pages
-export const NotFoundPage = React.lazy(() => import("@/components/ui/NotFoundPage"));
+export const NotFoundPage = React.lazy(() => import("@/routes/NotFoundPage"));

@@ -70,7 +70,7 @@ function EmptyState({
       className={cn(
         "flex flex-col items-center justify-center px-4 text-center",
         sizeStyles.padding,
-        className
+        className,
       )}
     >
       <div className="mb-4 text-muted">
@@ -101,8 +101,7 @@ function EmptyState({
                     : "primary"
               }
               className={getButtonStyles(action.variant)}
-              icon={action.icon}
-              iconPosition="left"
+              leftIcon={action.icon}
             >
               {action.label}
             </Button>
@@ -119,9 +118,8 @@ function EmptyState({
                     ? "ghost"
                     : "primary"
               }
-                className={getButtonStyles(secondaryAction.variant ?? "outline")}
-              icon={secondaryAction.icon}
-              iconPosition="left"
+              className={getButtonStyles(secondaryAction.variant ?? "outline")}
+              leftIcon={secondaryAction.icon}
             >
               {secondaryAction.label}
             </Button>

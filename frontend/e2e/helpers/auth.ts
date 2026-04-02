@@ -1,5 +1,5 @@
 import type { Page } from '@playwright/test'
-import { sleep } from './index'
+import { waitForAnyVisible, waitForPageReady } from './index'
 
 export interface TestUser {
   email: string
@@ -8,14 +8,14 @@ export interface TestUser {
 
 export async function navigateToSignUp(page: Page): Promise<void> {
   await page.goto('/register')
-  await page.waitForLoadState('networkidle')
-  await sleep(1000)
+  await waitForPageReady(page)
+  await waitForAnyVisible(page, ['input[type="email"]', 'input[name="email"]'])
 }
 
 export async function navigateToSignIn(page: Page): Promise<void> {
   await page.goto('/login')
-  await page.waitForLoadState('networkidle')
-  await sleep(1000)
+  await waitForPageReady(page)
+  await waitForAnyVisible(page, ['input[type="email"]', 'input[name="email"]'])
 }
 
 /**
@@ -24,10 +24,8 @@ export async function navigateToSignIn(page: Page): Promise<void> {
  */
 export async function signInWithUI(page: Page, email: string, password: string): Promise<void> {
   await navigateToSignIn(page)
-  
-  // Wait for the login form to be ready
-  await page.waitForLoadState('networkidle')
-  await sleep(1000)
+
+  await waitForAnyVisible(page, ['input[name="email"]', 'input[type="email"]'])
   
   // Check if we're on the right page (not redirected to Google)
   const url = page.url()
@@ -47,9 +45,10 @@ export async function signInWithUI(page: Page, email: string, password: string):
   // Based on debug output, "Sign In" is the button with exact text
   const submitButton = page.locator('button:has-text("Sign In")').first()
   await submitButton.click()
-  
+
   // Wait for redirect to authenticated page
   await page.waitForURL(/\/home|\/dashboard/, { timeout: 10000 })
+  await waitForPageReady(page)
 }
 
 /**
@@ -57,7 +56,9 @@ export async function signInWithUI(page: Page, email: string, password: string):
  */
 export async function signUpViaUI(page: Page, email: string, password: string): Promise<void> {
   await navigateToSignUp(page)
-  
+
+  await waitForAnyVisible(page, ['input[type="email"]', 'input[name="email"]'])
+
   // Fill in the registration form
   const firstNameInput = page.locator('input[name="firstName"], input[placeholder*="First"]').first()
   if (await firstNameInput.isVisible().catch(() => false)) {
@@ -78,9 +79,13 @@ export async function signUpViaUI(page: Page, email: string, password: string): 
   // Submit form
   const submitButton = page.locator('button[type="submit"], button:has-text("Create Account")').first()
   await submitButton.click()
-  
-  // Wait for navigation
-  await sleep(3000)
+
+  await Promise.race([
+    page.waitForURL(/\/home|\/dashboard|verify|register|confirm|auth/, { timeout: 15000 }),
+    waitForAnyVisible(page, ['[role="alert"]', 'text=verify', 'text=Check your email'], 15000),
+  ])
+
+  await waitForPageReady(page)
 }
 
 export async function isAuthenticated(page: Page): Promise<boolean> {

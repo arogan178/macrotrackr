@@ -1,10 +1,9 @@
 // src/modules/goals/routes.ts
 import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
 import { GoalSchemas } from "./schemas";
 import { requireAuth } from "../../middleware/clerk-guards";
-import type { AuthenticatedRouteContext } from "../../types";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 import {
   safeQuery,
   safeExecute,
@@ -16,8 +15,10 @@ import {
 import { BadRequestError, ConflictError, NotFoundError } from "../../lib/errors";
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/logger";
+import { mutationSuccess, mutationSuccessWithId } from "../../lib/mutation-contract";
 
-type GoalsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
+type GoalsRouteContext =
+  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
 /**
  * Helper function to get the current weight from the latest weight log entry
@@ -45,13 +46,13 @@ function getCurrentWeight(
 export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
-      .decorate("db", db)
       .use(requireAuth)
       // --- Get Weight Goals ---
       .get(
         "/weight",
-        async (context: any) => {
-          const { db, request } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { db, request } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           // Get correlation ID from request headers if available
@@ -108,8 +109,9 @@ export const goalRoutes = (app: Elysia) =>
       // --- CREATE Weight Goals ---
       .post(
         "/weight",
-        async (context: any) => {
-          const { body, db, request } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { body, db, request } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
@@ -230,8 +232,9 @@ export const goalRoutes = (app: Elysia) =>
       // --- UPDATE Weight Goals ---
       .put(
         "/weight",
-        async (context: any) => {
-          const { body, db, request } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { body, db, request } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
@@ -359,8 +362,9 @@ export const goalRoutes = (app: Elysia) =>
       // --- Reset Goals (DELETE /weight) ---
       .delete(
         "/weight",
-        async (context: any) => {
-          const { db } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           withTransaction(db, () => {
@@ -369,7 +373,7 @@ export const goalRoutes = (app: Elysia) =>
             ]);
           });
 
-          return { success: true };
+          return mutationSuccess();
         },
         {
           response: GoalSchemas.resetResponse,
@@ -383,8 +387,9 @@ export const goalRoutes = (app: Elysia) =>
       // --- Get Weight Log History ---
       .get(
         "/weight-log",
-        async (context: any) => {
-          const { db } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           const query =
@@ -410,8 +415,9 @@ export const goalRoutes = (app: Elysia) =>
       // --- Add Weight Log Entry ---
       .post(
         "/weight-log",
-        async (context: any) => {
-          const { body, db } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { body, db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!body) {
@@ -463,8 +469,9 @@ export const goalRoutes = (app: Elysia) =>
       // --- Delete Weight Log Entry ---
       .delete(
         "/weight-log/:id",
-        async (context: any) => {
-          const { params, db } = context as GoalsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as GoalsRouteContext;
+          const { params, db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           const entryIdToDelete = params?.id;
@@ -524,7 +531,7 @@ export const goalRoutes = (app: Elysia) =>
               ]);
             }
 
-            return { success: true, id: deletedEntry.id };
+            return mutationSuccessWithId(deletedEntry.id);
           });
         },
         {

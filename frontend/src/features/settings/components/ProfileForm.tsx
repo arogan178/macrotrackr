@@ -1,19 +1,11 @@
-import {
-  CardContainer,
-  DateField,
-  Dropdown,
-  NumberField,
-  TextField,
-} from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
+import DateField from "@/components/form/DateField";
+import Dropdown from "@/components/form/Dropdown";
+import NumberField from "@/components/form/NumberField";
+import TextField from "@/components/form/TextField";
 import { Button, UserIcon } from "@/components/ui";
-import {
-  type Gender,
-  type UserSettings,
-} from "@/types/user";
-import {
-  ACTIVITY_LEVELS,
-  GENDER_OPTIONS,
-} from "@/utils/userConstants";
+import { type Gender, type UserSettings } from "@/types/user";
+import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
 
 interface ProfileFormProps {
   settings: UserSettings;
