@@ -78,13 +78,25 @@ function createDefaultAlertingService() {
 }
 
 let alertingRef: AlertingService | null = null;
+let alertingConfiguredExplicitly = false;
 
 export function configureAlertingService(service: AlertingService): void {
   alertingRef = service;
+  alertingConfiguredExplicitly = true;
 }
 
 export function getAlertingService(): AlertingService {
   if (!alertingRef) {
+    if (!alertingConfiguredExplicitly) {
+      logger.warn(
+        {
+          type: "implicit_service_initialization",
+          service: "alerting",
+        },
+        "Alerting service accessed before explicit runtime configuration; using default instance.",
+      );
+    }
+
     alertingRef = createDefaultAlertingService();
   }
 
@@ -93,6 +105,7 @@ export function getAlertingService(): AlertingService {
 
 export function resetAlertingService(): void {
   alertingRef = null;
+  alertingConfiguredExplicitly = false;
 }
 
 export function createAlertingService(): AlertingService {

@@ -57,6 +57,7 @@ export function useLogout() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { signOut } = useClerk();
+  const logLogoutError = createMutationErrorLogger("Logout failed");
 
   return useMutation({
     mutationFn: async (): Promise<void> => {
@@ -77,6 +78,7 @@ export function useLogout() {
       // Navigate to landing page
       navigate({ to: "/" });
     },
+    onError: logLogoutError,
   });
 }
 
@@ -86,7 +88,7 @@ export function useResetPassword() {
 
   return useMutation({
     mutationFn: async (data: ResetPasswordData): Promise<void> => {
-      await authApi.resetPassword(data.token, data.newPassword);
+      await authApi.resetPassword(data);
     },
     onSuccess: () => {
       // Navigate to login with success message

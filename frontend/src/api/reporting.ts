@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
 
 export interface MacroDensitySummaryParameters {
   startDate?: string;
@@ -29,7 +29,7 @@ export const reportingApi = {
     if (parameters.groupBy)
       url.searchParams.append("groupBy", parameters.groupBy);
     const response = await fetch(url.toString(), {
-      headers: await getHeadersAsync(false),
+      headers: await getHeaders(false),
       credentials: "include",
     });
 
