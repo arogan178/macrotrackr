@@ -30,7 +30,7 @@ import {
   useAddMacroEntry,
   useDeleteMacroEntry,
   useMacroDailyTotals,
-  useMacroTarget,
+  useMacroTargetQuery,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
 import {
@@ -54,7 +54,7 @@ export default function HomePage() {
   const {
     data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
   } = useMacroDailyTotals(today);
-  const { data: macroTarget } = useMacroTarget();
+  const { data: macroTarget } = useMacroTargetQuery();
   const { data: weightGoals } = useWeightGoals();
 
   const {
@@ -98,8 +98,7 @@ export default function HomePage() {
   const { editingEntry, setEditingEntry } = useStore();
 
   const nutritionProfileSource: NutritionProfileSource | undefined =
-    user &&
-    (user.gender === "male" || user.gender === "female")
+    user && (user.gender === "male" || user.gender === "female")
       ? {
           id: user.id,
           weight: user.weight,

@@ -1,5 +1,5 @@
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
-import { QueryErrorBoundary } from "@/components/ui/QueryErrorBoundary";
+import { QueryErrorBoundary } from "@/components/errors/QueryErrorBoundary";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import ResetPasswordForm from "@/features/auth/components/ResetPasswordForm";
 

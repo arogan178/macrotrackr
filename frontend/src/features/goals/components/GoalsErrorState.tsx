@@ -1,4 +1,4 @@
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import Button from "@/components/ui/Button";
 import { WarningIcon } from "@/components/ui/Icons";
 
@@ -7,9 +7,9 @@ interface GoalsErrorStateProps {
   errorMessage?: string;
 }
 
-export default function GoalsErrorState({ 
-  onRetry, 
-  errorMessage = "Failed to load your goals data. Please try again." 
+export default function GoalsErrorState({
+  onRetry,
+  errorMessage = "Failed to load your goals data. Please try again.",
 }: GoalsErrorStateProps) {
   return (
     <div className="flex min-h-[400px] items-center justify-center p-4">
@@ -26,11 +26,7 @@ export default function GoalsErrorState({
 
         <div className="flex justify-center space-x-3">
           {onRetry && (
-            <Button
-              onClick={onRetry}
-              ariaLabel="Try again"
-              variant="primary"
-            >
+            <Button onClick={onRetry} ariaLabel="Try again" variant="primary">
               Try Again
             </Button>
           )}

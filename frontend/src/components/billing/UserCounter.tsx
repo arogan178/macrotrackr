@@ -1,6 +1,5 @@
 import React, { memo, useEffect, useState } from "react";
 import { motion } from "motion/react";
-import PropTypes from "prop-types";
 
 interface UserCounterProps {
   className?: string;
@@ -92,8 +91,5 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
   );
 });
 UserCounter.displayName = "UserCounter";
-UserCounter.propTypes = {
-  className: PropTypes.string,
-};
 
 export default UserCounter;

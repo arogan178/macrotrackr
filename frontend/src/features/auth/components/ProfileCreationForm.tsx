@@ -3,32 +3,38 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
-import { setAuthToken } from "@/api/core";
 import { userApi } from "@/api/user";
-import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
+import DateField from "@/components/form/DateField";
+import Dropdown from "@/components/form/Dropdown";
+import InfoCard from "@/components/form/InfoCard";
+import NumberField from "@/components/form/NumberField";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
-import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
-import { validateStep1 as checkStep1, validateStep2 as checkStep2, getFirstErrorMessage } from "@/features/auth/utils/profileValidation";
 import { useSocialProfileData } from "@/features/auth/hooks/useSocialProfileData";
+import {
+  getFirstErrorMessage,
+  validateStep1 as checkStep1,
+  validateStep2 as checkStep2,
+} from "@/features/auth/utils/profileValidation";
+import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
-import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
 import {
+  USER_MAXIMUM_HEIGHT,
+  USER_MAXIMUM_WEIGHT,
   USER_MINIMUM_AGE,
   USER_MINIMUM_HEIGHT,
-  USER_MAXIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
-  USER_MAXIMUM_WEIGHT,
 } from "@/utils/constants";
+import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
 
 export function ProfileCreationForm() {
   const navigate = useNavigate();
   const { user: clerkUser, isLoaded: _isUserLoaded } = useUser();
-  const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const { showNotification } = useStore();
   const postSetupRedirect = normalizeAuthRedirect(
     sessionStorage.getItem("postAuthRedirect") ?? undefined,
@@ -36,10 +42,10 @@ export function ProfileCreationForm() {
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Use extracted hook for social profile data
   const { socialData, dateOfBirth, setDateOfBirth } = useSocialProfileData();
-  
+
   // Profile data
   const [gender, setGender] = useState<Gender | "">("");
   const [height, setHeight] = useState<number | null>(null);
@@ -52,12 +58,14 @@ export function ProfileCreationForm() {
   const validateStep1 = (): Record<string, string> => {
     const newErrors = checkStep1(dateOfBirth, gender, height, weight);
     setErrors(newErrors);
+
     return newErrors;
   };
 
   const validateStep2 = (): Record<string, string> => {
     const newErrors = checkStep2(activityLevel);
     setErrors(newErrors);
+
     return newErrors;
   };
 
@@ -128,37 +136,11 @@ export function ProfileCreationForm() {
     setIsLoading(true);
 
     try {
-      // Get a fresh token before making API calls
-      // Retry a few times if token is not immediately available
-      let token: string | null = null;
-      let retries = 3;
-
-      while (retries > 0 && !token) {
-        token = await getToken();
-        if (!token && retries > 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          retries--;
-        }
-      }
-
-      if (!token) {
-        showNotification(
-          "Authentication failed. Please sign in again.",
-          "error",
-        );
-        navigate({ to: "/login", search: { returnTo: undefined } });
-
-        return;
-      }
-
-      // Set the token for API calls
-      setAuthToken(token);
-
       // Step 1: Sync the Clerk user to our backend
       // This creates the user record in our database
       // Note: User may already be synced from AuthReadyPage, so we handle conflicts gracefully
       try {
-        await authApi.syncUser(token);
+        await authApi.syncUser();
       } catch (syncError: unknown) {
         // If user already exists (409), that's fine - continue with profile completion
         if (
@@ -325,7 +307,7 @@ export function ProfileCreationForm() {
           </div>
         </div>
 
-        <Button onClick={handleNext} fullWidth iconPosition="right">
+        <Button onClick={handleNext} fullWidth>
           Continue
         </Button>
       </div>
@@ -437,7 +419,7 @@ export function ProfileCreationForm() {
           fullWidth
           isLoading={isLoading}
           loadingText="Creating profile..."
-          icon={<CheckIcon />}
+          leftIcon={<CheckIcon />}
           className="w-2/3"
         >
           Create Profile

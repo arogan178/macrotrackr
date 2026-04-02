@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { useUser } from "@clerk/clerk-react";
 
-import { CardContainer, TextField } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
+import TextField from "@/components/form/TextField";
 import { Button, LockIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
@@ -292,9 +293,7 @@ const ChangePasswordForm = () => {
             value={confirmPassword}
             onChange={setConfirmPassword}
             required
-            error={
-              formError?.includes("match") ? formError : undefined
-            }
+            error={formError?.includes("match") ? formError : undefined}
             name="confirmPassword"
             autoComplete="new-password"
             helperText="Re-enter your new password to confirm"

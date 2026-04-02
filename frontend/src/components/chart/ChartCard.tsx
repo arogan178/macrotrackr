@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { motion } from "motion/react";
 
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 
 interface ChartCardProps {
   title?: string;

@@ -388,14 +388,13 @@ export class OpenFoodFactsApiClient {
 
       if (!response.ok) {
         await this.handleHttpError(response);
-        return [];
       }
 
       const data: FoodSearchResponse = await response.json();
 
       if (!data || !Array.isArray(data.hits)) {
         logger.warn({ data }, "Invalid API response structure");
-        return [];
+        throw new OpenFoodFactsError("Invalid API response structure", response.status);
       }
 
       const validHits = rankAndNormalizeFoodProducts(data.hits, normalizedQuery);

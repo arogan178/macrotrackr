@@ -1,8 +1,7 @@
 // src/modules/user/routes.ts
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
 import { UserSchemas } from "./schemas";
-import type { AuthenticatedRouteContext } from "../../types";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 import { generateId } from "../../utils/id-generator";
 import {
   safeQuery,
@@ -21,7 +20,8 @@ import { SubscriptionService } from "../billing/subscription-service";
 import { logger } from "../../lib/logger";
 import { requireAuth } from "../../middleware/clerk-guards";
 
-type UserRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
+type UserRouteContext =
+  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
 const ErrorResponseSchema = t.Object({
   code: t.String(),
@@ -61,17 +61,21 @@ function normalizeSubscriptionStatus(
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
     group
-      .decorate("db", db)
       .use(requireAuth)
 
       // GET /me - Get current user details
       .get(
         "/me",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
           try {
-            const { db } = context as UserRouteContext;
+            const { db } = context;
             const { userId: internalUserId, clerkUserId } =
               context.authenticatedUser;
+
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
+            }
 
             logger.info(
               { internalUserId, clerkUserId },
@@ -156,10 +160,15 @@ export const userRoutes = (app: Elysia) =>
       // PUT /settings Handler - Update user settings
       .put(
         "/settings",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
           try {
-            const { db, body, request } = context as UserRouteContext;
+            const { db, body, request } = context;
             const { userId: internalUserId } = context.authenticatedUser;
+
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
+            }
 
             if (!body) {
               throw new BadRequestError("Request body is required");
@@ -314,10 +323,15 @@ export const userRoutes = (app: Elysia) =>
       // POST /complete-profile Handler - Complete user profile
       .post(
         "/complete-profile",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
           try {
-            const { db, body, request } = context as UserRouteContext;
+            const { db, body, request } = context;
             const { userId: internalUserId } = context.authenticatedUser;
+
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
+            }
 
             if (!body) {
               throw new BadRequestError("Request body is required");

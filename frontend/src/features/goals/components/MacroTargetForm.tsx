@@ -1,9 +1,11 @@
 import { memo, useCallback, useEffect, useState } from "react";
 
-import { ProFeature } from "@/components/billing";
-import { CardContainer, InfoCard, LoadingSpinner } from "@/components/form";
+import ProFeature from "@/components/billing/ProFeature";
+import CardContainer from "@/components/form/CardContainer";
+import InfoCard from "@/components/form/InfoCard";
 import MacroTarget from "@/components/macros/MacroTarget";
 import { Button, CheckIcon, InfoIcon } from "@/components/ui";
+import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import { useUpdateMacroTarget } from "@/hooks/queries";
 import type { MacroTargetSettings, MacroTargetState } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
@@ -52,7 +54,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
           target.fatsPercentage !== macroTarget.fatsPercentage ||
           // Check for differences in lockedMacros arrays
           JSON.stringify(target.lockedMacros ?? []) !==
-          JSON.stringify(macroTarget.lockedMacros ?? []);
+            JSON.stringify(macroTarget.lockedMacros ?? []);
         setHasChanges(targetChanged);
       } else {
         setHasChanges(true);
@@ -123,7 +125,8 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                   Macro Target Settings
                 </h3>
                 <p className="mt-1 text-sm text-muted">
-                  Adjust the sliders to set your preferred daily macronutrient percentages.
+                  Adjust the sliders to set your preferred daily macronutrient
+                  percentages.
                 </p>
               </div>
               <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1">
@@ -224,7 +227,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                 <Button
                   type="button"
                   onClick={handleSaveChanges}
-                  autoLoadingFeature="goals"
+                  isLoading={isPending}
                   loadingText="Saving..."
                   disabled={!hasChanges}
                   text="Save Targets"
