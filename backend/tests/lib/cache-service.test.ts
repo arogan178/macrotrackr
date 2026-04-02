@@ -8,10 +8,13 @@ vi.mock("../../src/lib/logger", () => ({
   },
 }));
 
-import { cacheService } from "../../src/lib/cache-service";
+import { createCacheService } from "../../src/lib/cache-service";
 
 describe("cacheService", () => {
+  let cacheService: ReturnType<typeof createCacheService>;
+
   beforeEach(() => {
+    cacheService = createCacheService();
     // Clear the cache before each test by accessing the private cache
     const cache = (cacheService as any).cache;
     cache.clear();

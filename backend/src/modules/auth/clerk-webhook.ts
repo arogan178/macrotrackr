@@ -1,7 +1,7 @@
 // src/modules/auth/clerk-webhook.ts
 import { Elysia } from "elysia";
 import { WebhookVerificationError, Webhook as SvixWebhook } from "svix";
-import { db } from "../../db";
+import type { Database } from "bun:sqlite";
 import { config } from "../../config";
 import { logger } from "../../lib/logger";
 import { safeQuery, safeExecute } from "../../lib/database";
@@ -62,7 +62,7 @@ function getPrimaryEmail(event: ClerkWebhookEvent): string | undefined {
 /**
  * Handle user.created event from Clerk
  */
-async function handleUserCreated(event: ClerkWebhookEvent) {
+function handleUserCreated(database: Database, event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
   const email = getPrimaryEmail(event);
   const firstName = event.data.first_name || "";
@@ -77,14 +77,14 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
 
   // Only update already-linked users. New users are created by /api/auth/clerk-sync.
   const existingUser = safeQuery<{ id: number }>(
-    db,
+    database,
     "SELECT id FROM users WHERE clerk_id = ?",
     [clerkUserId]
   );
 
   if (existingUser) {
     safeExecute(
-      db,
+      database,
       "UPDATE users SET first_name = ?, last_name = ? WHERE id = ?",
       [firstName, lastName, existingUser.id]
     );
@@ -104,7 +104,7 @@ async function handleUserCreated(event: ClerkWebhookEvent) {
 /**
  * Handle user.updated event from Clerk
  */
-async function handleUserUpdated(event: ClerkWebhookEvent) {
+function handleUserUpdated(database: Database, event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
   const email = getPrimaryEmail(event);
   const firstName = event.data.first_name || "";
@@ -113,7 +113,7 @@ async function handleUserUpdated(event: ClerkWebhookEvent) {
   logger.info({ clerkUserId }, "Processing Clerk user.updated webhook");
 
   const existingUser = safeQuery<{ id: number }>(
-    db,
+    database,
     "SELECT id FROM users WHERE clerk_id = ?",
     [clerkUserId]
   );
@@ -128,7 +128,7 @@ async function handleUserUpdated(event: ClerkWebhookEvent) {
 
   if (email) {
     const emailOwner = safeQuery<{ id: number }>(
-      db,
+      database,
       "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND (clerk_id IS NULL OR clerk_id != ?)",
       [email, clerkUserId],
     );
@@ -139,7 +139,7 @@ async function handleUserUpdated(event: ClerkWebhookEvent) {
         "Skipping Clerk email update because the email belongs to another user",
       );
       safeExecute(
-        db,
+        database,
         "UPDATE users SET first_name = ?, last_name = ? WHERE clerk_id = ?",
         [firstName, lastName, clerkUserId],
       );
@@ -149,7 +149,7 @@ async function handleUserUpdated(event: ClerkWebhookEvent) {
 
   if (!email) {
     safeExecute(
-      db,
+      database,
       "UPDATE users SET first_name = ?, last_name = ? WHERE clerk_id = ?",
       [firstName, lastName, clerkUserId],
     );
@@ -157,7 +157,7 @@ async function handleUserUpdated(event: ClerkWebhookEvent) {
   }
 
   safeExecute(
-    db,
+    database,
     "UPDATE users SET email = ?, first_name = ?, last_name = ? WHERE clerk_id = ?",
     [email, firstName, lastName, clerkUserId]
   );
@@ -166,20 +166,20 @@ async function handleUserUpdated(event: ClerkWebhookEvent) {
 /**
  * Handle user.deleted event from Clerk
  */
-async function handleUserDeleted(event: ClerkWebhookEvent) {
+function handleUserDeleted(database: Database, event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
 
   logger.info({ clerkUserId }, "Processing Clerk user.deleted webhook");
 
   // Find and delete user from our database
   const user = safeQuery<{ id: number }>(
-    db,
+    database,
     "SELECT id FROM users WHERE clerk_id = ?",
     [clerkUserId]
   );
 
   if (user) {
-    safeExecute(db, "DELETE FROM users WHERE id = ?", [user.id]);
+    safeExecute(database, "DELETE FROM users WHERE id = ?", [user.id]);
     logger.info({ userId: user.id, clerkUserId }, "Deleted user from database");
   }
 }
@@ -191,9 +191,21 @@ async function handleUserDeleted(event: ClerkWebhookEvent) {
 export const clerkWebhookHandler = (app: Elysia) =>
   app.post(
     "/api/webhooks/clerk",
-    async (context: any) => {
-      const { request } = context;
-      const payload = await request.text();
+    async (context) => {
+      const { request, db, body } = context as {
+        request: Request;
+        db?: Database;
+        body?: string;
+      };
+
+      if (!db) {
+        logger.error("Missing database in Clerk webhook context");
+        context.set.status = 500;
+        return {
+          success: false,
+          message: "Database not available",
+        };
+      }
 
       if (!config.CLERK_WEBHOOK_SECRET) {
         logger.warn("Missing Clerk webhook secret");
@@ -203,6 +215,9 @@ export const clerkWebhookHandler = (app: Elysia) =>
           message: "Clerk webhook secret is not configured",
         };
       }
+
+      const payload =
+        typeof body === "string" ? body : await request.text();
 
       let event: ClerkWebhookEvent;
       try {
@@ -225,13 +240,13 @@ export const clerkWebhookHandler = (app: Elysia) =>
         // Handle different event types
         switch (event.type) {
           case "user.created":
-            await handleUserCreated(event);
+            handleUserCreated(db, event);
             break;
           case "user.updated":
-            await handleUserUpdated(event);
+            handleUserUpdated(db, event);
             break;
           case "user.deleted":
-            await handleUserDeleted(event);
+            handleUserDeleted(db, event);
             break;
           default:
             logger.debug({ eventType: event.type }, "Unhandled webhook event");

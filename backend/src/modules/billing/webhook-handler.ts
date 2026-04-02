@@ -1,19 +1,70 @@
 // src/modules/billing/webhook-handler.ts
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
+import type { Database } from "bun:sqlite";
+import type Stripe from "stripe";
 import { logger } from "../../lib/logger";
-import { StripeService } from "./stripe-service";
+import {
+  StripeService,
+  type NormalizedWebhookEvent,
+  type RelatedStripeObject,
+} from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
+
+type WebhookRouteContext = {
+  body?: string;
+  headers: Record<string, string | undefined>;
+  db: Database;
+  set: {
+    status?: number;
+  };
+  request: Request;
+};
+
+type SupportedSubscriptionStatus =
+  | "active"
+  | "canceled"
+  | "past_due"
+  | "unpaid";
+
+function isStripeSubscription(
+  value: Stripe.Event.Data.Object | RelatedStripeObject | null | undefined
+): value is Stripe.Subscription {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "object" in value &&
+    value.object === "subscription"
+  );
+}
+
+function toSupportedSubscriptionStatus(
+  status: Stripe.Subscription.Status
+): SupportedSubscriptionStatus {
+  if (
+    status === "active" ||
+    status === "canceled" ||
+    status === "past_due" ||
+    status === "unpaid"
+  ) {
+    return status;
+  }
+
+  if (status === "trialing") {
+    return "active";
+  }
+
+  return "unpaid";
+}
 
 /**
  * Stripe webhook handler - must be mounted before auth middleware
  * to preserve raw body for signature verification
  */
 export const webhookHandler = new Elysia({ name: "webhookHandler" })
-  .decorate("db", db)
   .post(
     "/api/billing/webhook",
-    async (ctx: any) => {
+    async (rawContext: unknown) => {
+      const ctx = rawContext as WebhookRouteContext;
       try {
         // Get the raw body text from custom parse function
         const rawBodyText = ctx.body;
@@ -54,7 +105,7 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
         }
 
         // Verify webhook signature and normalize event format
-        let normalizedEvent;
+        let normalizedEvent: NormalizedWebhookEvent;
         try {
           normalizedEvent = await StripeService.verifyWebhookSignature(
             rawBodyText,
@@ -122,29 +173,29 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
           eventType: normalizedEvent.type,
           eventId,
         };
-        } catch (error) {
-          logger.error(
-            {
-              error: error instanceof Error ? error : new Error(String(error)),
-              operation: "stripe_webhook",
-            },
-            "Failed to process webhook"
-          );
-          ctx.set.status = 500;
-          return { received: false, error: "Webhook processing failed" };
+      } catch (error) {
+        logger.error(
+          {
+            error: error instanceof Error ? error : new Error(String(error)),
+            operation: "stripe_webhook",
+          },
+          "Failed to process webhook"
+        );
+        ctx.set.status = 500;
+        return { received: false, error: "Webhook processing failed" };
+      }
+    },
+    {
+      // Custom parse function to handle Stripe webhook raw body
+      async parse(ctx) {
+        const contentType = ctx.request.headers.get("content-type");
+        if (contentType?.startsWith("application/json")) {
+          const reqText = await ctx.request.text();
+          return reqText;
         }
-      },
-      {
-        // Custom parse function to handle Stripe webhook raw body
-        async parse(ctx) {
-          const contentType = ctx.request.headers.get("content-type");
-          if (contentType?.startsWith("application/json")) {
-            const reqText = await ctx.request.text();
-            return reqText;
-          }
 
-          return undefined;
-        },
+        return undefined;
+      },
       headers: t.Object({
         "stripe-signature": t.String(),
       }),
@@ -160,17 +211,24 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
  * Handle subscription-related webhook events
  */
 async function handleSubscriptionEvent(
-  db: any,
-  normalizedEvent: any,
+  db: Database,
+  normalizedEvent: NormalizedWebhookEvent,
   eventId: string
 ): Promise<void> {
-  let subscription;
+  let subscription: Stripe.Subscription | null = null;
   
   if (normalizedEvent.format === "thin" && normalizedEvent.related_object) {
-    subscription = await StripeService.fetchRelatedObject(
+    const relatedObject = await StripeService.fetchRelatedObject(
       normalizedEvent.related_object
     );
-  } else if (normalizedEvent.data?.object) {
+
+    if (isStripeSubscription(relatedObject)) {
+      subscription = relatedObject;
+    }
+  } else if (
+    normalizedEvent.format === "snapshot" &&
+    isStripeSubscription(normalizedEvent.data.object)
+  ) {
     subscription = normalizedEvent.data.object;
   }
 
@@ -182,9 +240,26 @@ async function handleSubscriptionEvent(
     return;
   }
 
-  const customerId = subscription.customer;
+  const customerId =
+    typeof subscription.customer === "string" ?
+      subscription.customer
+    : subscription.customer?.id;
+
+  if (!customerId) {
+    logger.warn(
+      {
+        operation: "stripe_webhook",
+        eventType: normalizedEvent.type,
+        subscriptionId: subscription.id,
+        eventId,
+      },
+      "Subscription event missing customer reference"
+    );
+    return;
+  }
+
   const subscriptionId = subscription.id;
-  const status = subscription.status;
+  const status = toSupportedSubscriptionStatus(subscription.status);
 
   // Find user by Stripe customer ID
   const user = db
@@ -222,6 +297,7 @@ async function handleSubscriptionEvent(
     if (!subscriptionItem) {
       throw new Error("Subscription has no items");
     }
+
     const currentPeriodEnd = new Date(
       subscriptionItem.current_period_end * 1000
     ).toISOString();

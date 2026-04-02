@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 
 import { billingApi, type BillingDetailsResponse } from "@/api/billing";
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import {
   Button,
   ExternalLinkIcon,
@@ -66,7 +66,10 @@ const ProBillingView: React.FC<{
           </div>
 
           {/* Subscription details in clean grid */}
-          <CardContainer variant="transparent" className="mb-4 bg-surface-2/40 p-5">
+          <CardContainer
+            variant="transparent"
+            className="mb-4 bg-surface-2/40 p-5"
+          >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
                 <div className="mb-1 text-xs text-muted">Plan & Price</div>
@@ -162,18 +165,12 @@ const ProBillingView: React.FC<{
                 try {
                   const response = await billingApi.cancelSubscription();
                   setShowCancel(false);
-                  showNotification(
-                    response.message,
-                    "success",
-                  );
+                  showNotification(response.message, "success");
                   // Refresh user details to update UI
                   // No need to refetch user details, loader will handle updates if needed
                 } catch (error) {
                   setShowCancel(false);
-                  showNotification(
-                    (error as Error).message,
-                    "error",
-                  );
+                  showNotification((error as Error).message, "error");
                 }
               }}
               variant="danger"

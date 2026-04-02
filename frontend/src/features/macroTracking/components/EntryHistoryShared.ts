@@ -1,3 +1,5 @@
+import type { MouseEvent } from "react";
+
 import type { MacroEntry } from "@/types/macro";
 
 export interface GroupedEntry {
@@ -11,28 +13,26 @@ export interface GroupedEntry {
   };
 }
 
-export interface EntryHistoryHelpers {
+export interface EntryHistoryController {
   formatDate: (dateString: string) => string;
   formatTimeFromEntry: (entry: MacroEntry) => string;
   capitalizeFirstLetter: (value: string) => string;
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
-}
 
-export interface EntryHistoryActions {
+  isDateCollapsed: (date: string) => boolean;
   toggleDateCollapse: (date: string) => void;
-  handleDeleteDate: (date: string, event: React.MouseEvent) => void;
+  handleDeleteDate: (date: string, event: MouseEvent) => void;
+
   onEdit: (entry: MacroEntry) => void;
   deleteEntry: (id: number) => void;
+
   onSaveMeal?: (entry: MacroEntry) => void;
   onUnsaveMeal?: (entry: MacroEntry) => void;
-}
 
-export interface EntryHistoryState {
-  collapsedDates: Set<string>;
+  isMealSaved: (entryId: number) => boolean;
+
   isDeleting: boolean;
-  showAllDates?: boolean;
-  savedMealIds?: Set<number>;
-  isSelectionMode?: boolean;
-  selectedEntryIds?: Set<number>;
+  isSelectionMode: boolean;
+  isEntrySelected: (id: number) => boolean;
   onToggleEntrySelection?: (id: number) => void;
 }

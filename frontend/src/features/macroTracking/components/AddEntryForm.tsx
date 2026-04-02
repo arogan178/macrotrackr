@@ -1,14 +1,12 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import {
-  CardContainer,
-  DateField,
-  Dropdown,
-  NumberField,
-  QuantityUnitField,
-  TimeField,
-} from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
+import DateField from "@/components/form/DateField";
+import Dropdown from "@/components/form/Dropdown";
+import NumberField from "@/components/form/NumberField";
+import QuantityUnitField from "@/components/form/QuantityUnitField";
+import TimeField from "@/components/form/TimeField";
 import { formStyles } from "@/components/form/FormStyles";
 import { Button, PlusIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
@@ -47,7 +45,9 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       }
     | undefined
   >();
-  const [baseIngredients, setBaseIngredients] = useState<Ingredient[] | undefined>();
+  const [baseIngredients, setBaseIngredients] = useState<
+    Ingredient[] | undefined
+  >();
 
   const [searchResult, setSearchResult] = useState<string | undefined>();
   const currentHour = new Date().getHours();
@@ -232,13 +232,16 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         setQuantity(undefined);
         setUnit("g"); // Default to g for saved meals or arbitrary since no base macros
       }
-      
-      if (meal.mealType && MEAL_TYPE_OPTIONS.some((o) => o.value === meal.mealType)) {
+
+      if (
+        meal.mealType &&
+        MEAL_TYPE_OPTIONS.some((o) => o.value === meal.mealType)
+      ) {
         setMealType(meal.mealType as MealType);
       }
       setSearchResult(undefined);
     },
-    []
+    [],
   );
 
   const handleSubmit = useCallback(
@@ -269,7 +272,9 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             protein: Number((ing.protein * factor).toFixed(1)),
             carbs: Number((ing.carbs * factor).toFixed(1)),
             fats: Number((ing.fats * factor).toFixed(1)),
-            quantity: ing.quantity ? Number((ing.quantity * factor).toFixed(1)) : undefined,
+            quantity: ing.quantity
+              ? Number((ing.quantity * factor).toFixed(1))
+              : undefined,
           }));
         } else if (baseMacros) {
           finalIngredients = [
@@ -284,13 +289,14 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               baseCarbs: baseMacros.carbs,
               baseFats: baseMacros.fats,
               baseQuantity: unit === "unit" ? 1 : 100,
-              baseUnit: unit === "unit"
-                ? "unit"
-                : UnitConverter.isWeightUnit(unit)
-                  ? "g"
-                  : UnitConverter.isVolumeUnit(unit)
-                    ? "ml"
-                    : unit,
+              baseUnit:
+                unit === "unit"
+                  ? "unit"
+                  : UnitConverter.isWeightUnit(unit)
+                    ? "g"
+                    : UnitConverter.isVolumeUnit(unit)
+                      ? "ml"
+                      : unit,
             },
           ];
         }
@@ -366,7 +372,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                     Meal Name
                   </label>
                   <AnimatePresence>
-                    {(searchResult ?? (mealName.length > 0)) && (
+                    {(searchResult ?? mealName.length > 0) && (
                       <motion.button
                         type="button"
                         onClick={handleClearSearch}
@@ -477,15 +483,14 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               disabled={!isFormValid || _isSaving}
               isLoading={_isSaving}
               text={_isSaving ? "Saving..." : "Add Entry"}
-              icon={
-                <PlusIcon 
+              leftIcon={
+                <PlusIcon
                   className={cn(
                     "mr-2 h-4 w-4 transition-transform duration-300",
-                    isFormValid && !_isSaving ? "group-hover:rotate-90" : ""
-                  )} 
+                    isFormValid && !_isSaving ? "group-hover:rotate-90" : "",
+                  )}
                 />
               }
-              iconPosition="left"
               buttonSize="lg"
               variant="primary"
               className="group min-w-40 font-medium transition-colors duration-200"

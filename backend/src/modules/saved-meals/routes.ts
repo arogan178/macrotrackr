@@ -1,7 +1,6 @@
 // src/modules/saved-meals/routes.ts
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import type { AuthenticatedRouteContext } from "../../types";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 import { transformKeysToCamel } from "../../lib/mappers";
 import {
   safeQuery,
@@ -20,6 +19,7 @@ import {
   FREE_TIER_LIMITS,
   requireAuth,
 } from "../../middleware/clerk-guards";
+import { mutationSuccessWithId } from "../../lib/mutation-contract";
 
 // Saved meal row type
 interface SavedMealRow {
@@ -36,7 +36,8 @@ interface SavedMealRow {
 }
 
 // Extended context type
-type SavedMealsRouteContext = AuthenticatedRouteContext<Record<string, unknown>>;
+type SavedMealsRouteContext =
+  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
 // Schemas
 const SavedMealSchemas = {
@@ -93,14 +94,14 @@ const SavedMealSchemas = {
 export const savedMealRoutes = (app: Elysia) =>
   app.group("/api/saved-meals", (group) =>
     group
-      .decorate("db", db)
       .use(requireAuth)
 
       // GET / - List all saved meals for the user
       .get(
         "/",
-        async (context: any) => {
-          const { db } = context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
@@ -152,8 +153,9 @@ export const savedMealRoutes = (app: Elysia) =>
       // POST / - Create a new saved meal
       .post(
         "/",
-        async (context: any) => {
-          const { db, body } = context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db, body } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
@@ -231,9 +233,9 @@ export const savedMealRoutes = (app: Elysia) =>
       // PUT /:id - Update a saved meal
       .put(
         "/:id",
-        async (context: any) => {
-          const { db, params, body } =
-            context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db, params, body } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
@@ -312,9 +314,9 @@ export const savedMealRoutes = (app: Elysia) =>
       // DELETE /:id - Delete a saved meal
       .delete(
         "/:id",
-        async (context: any) => {
-          const { db, params } =
-            context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db, params } = context;
           const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
@@ -340,10 +342,7 @@ export const savedMealRoutes = (app: Elysia) =>
             );
           }
 
-          return {
-            success: true,
-            id: Number(mealId),
-          };
+          return mutationSuccessWithId(Number(mealId));
         },
         {
           params: SavedMealSchemas.mealIdParam,

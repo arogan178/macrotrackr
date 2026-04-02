@@ -7,7 +7,6 @@ export type IconSize = keyof typeof ICON_SIZES;
 
 type ButtonVariant = "primary" | "secondary" | "neutral" | "danger" | "success" | "ghost" | "outline";
 type ButtonType = "button" | "submit" | "reset";
-type IconPosition = "left" | "right";
 
 export interface ButtonProps {
   children?: ReactNode;
@@ -15,10 +14,6 @@ export interface ButtonProps {
   type?: ButtonType;
   variant?: ButtonVariant;
   buttonSize?: ButtonSize;
-  /** @deprecated Use leftIcon or rightIcon instead */
-  icon?: ReactNode;
-  /** @deprecated Use leftIcon or rightIcon instead */
-  iconPosition?: IconPosition;
   /** Icon to display on the left side of the button text */
   leftIcon?: ReactNode;
   /** Icon to display on the right side of the button text */
@@ -30,14 +25,6 @@ export interface ButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   fullWidth?: boolean;
   ariaLabel?: string;
-  autoLoadingFeature?:
-    | "auth"
-    | "habits"
-    | "goals"
-    | "macros"
-    | "reports"
-    | "settings";
-  autoLoadingGlobal?: boolean;
 }
 
 export interface LoadingSpinnerProps {

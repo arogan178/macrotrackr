@@ -104,6 +104,10 @@ export const MacroSchemas = {
   macroIdParam: t.Object({
     id: t.Numeric({ minimum: 1, error: "Invalid ID parameter." }),
   }),
+  deleteMacroEntryResponse: t.Object({
+    success: t.Boolean(),
+    id: t.Numeric(),
+  }),
 
   // --- Macro Target Schemas (Moved from goals/schemas.ts) ---
   getMacroTargetResponse: t.Nullable(

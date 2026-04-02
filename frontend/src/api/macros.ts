@@ -26,6 +26,11 @@ export interface MacroEntryCreatePayload {
 
 export type MacroEntryUpdatePayload = Partial<MacroEntryCreatePayload>;
 
+export interface MacroEntryDeleteResponse {
+  success: boolean;
+  id: number;
+}
+
 export interface MacroHistoryOptions {
   limit?: number;
   offset?: number;
@@ -80,7 +85,7 @@ function isFoodSearchResult(value: unknown): value is FoodSearchResult {
   );
 }
 
-function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
+export function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
   if (!Array.isArray(value)) {
     return [];
   }
@@ -192,14 +197,14 @@ export const macrosApi = {
     return handleResponse(response);
   },
 
-  deleteEntry: async (id: number) => {
+  deleteEntry: async (id: number): Promise<MacroEntryDeleteResponse> => {
     const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
       method: "DELETE",
       headers: await getHeadersAsync(false),
       credentials: "include",
     });
 
-    return handleResponse(response);
+    return (await handleResponse(response)) as MacroEntryDeleteResponse;
   },
 
   getMacroTarget: async (): Promise<MacroTargetGetResponse> => {

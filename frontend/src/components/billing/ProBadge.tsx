@@ -1,5 +1,4 @@
 import React, { memo } from "react";
-import PropTypes from "prop-types";
 
 interface ProBadgeProps {
   className?: string;
@@ -18,8 +17,5 @@ const ProBadge: React.FC<ProBadgeProps> = memo(function ProBadge({
   );
 });
 ProBadge.displayName = "ProBadge";
-ProBadge.propTypes = {
-  className: PropTypes.string,
-};
 
 export default ProBadge;

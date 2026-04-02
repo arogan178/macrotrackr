@@ -7,44 +7,35 @@ import type { MacroEntry } from "@/types/macro";
 
 import { EntryCard } from "./EntryCard";
 import type {
-  EntryHistoryActions,
-  EntryHistoryHelpers,
-  EntryHistoryState,
+  EntryHistoryController,
   GroupedEntry,
 } from "./EntryHistoryShared";
 
 interface MobileEntryCardsProps {
   groupedEntries: GroupedEntry[];
-  helpers: EntryHistoryHelpers;
-  actions: EntryHistoryActions;
-  state: EntryHistoryState;
+  controller: EntryHistoryController;
 }
 
 const MobileEntryCards = memo(
-  ({ groupedEntries, helpers, actions, state }: MobileEntryCardsProps) => {
+  ({ groupedEntries, controller }: MobileEntryCardsProps) => {
     const {
       formatDate,
       formatTimeFromEntry,
       capitalizeFirstLetter,
       calculateCalories,
-    } = helpers;
-    const {
+      isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
-    } = actions;
-    const {
-      collapsedDates,
+      isMealSaved,
       isDeleting,
-      showAllDates = true,
-      savedMealIds,
-      isSelectionMode = false,
-      selectedEntryIds = new Set(),
+      isSelectionMode,
+      isEntrySelected,
       onToggleEntrySelection,
-    } = state;
+    } = controller;
 
     const containerReference = useRef<HTMLDivElement>(null);
 
@@ -60,24 +51,20 @@ const MobileEntryCards = memo(
     const virtualItems = useMemo(() => {
       const items: Array<
         | { type: "header"; group: GroupedEntry }
-        | { type: "entry"; entry: MacroEntry; groupDate: string }
+        | { type: "entry"; entry: MacroEntry }
       > = [];
 
-      const entriesToProcess = showAllDates
-        ? groupedEntries
-        : groupedEntries.slice(0, 5);
-
-      for (const group of entriesToProcess) {
+      for (const group of groupedEntries) {
         items.push({ type: "header", group });
-        if (!collapsedDates.has(group.date)) {
+        if (!isDateCollapsed(group.date)) {
           for (const entry of group.entries) {
-            items.push({ type: "entry", entry, groupDate: group.date });
+            items.push({ type: "entry", entry });
           }
         }
       }
 
       return items;
-    }, [groupedEntries, showAllDates, collapsedDates]);
+    }, [groupedEntries, isDateCollapsed]);
 
     const virtualizer = useVirtualizer({
       count: virtualItems.length,
@@ -101,7 +88,7 @@ const MobileEntryCards = memo(
         <div className="flex items-center gap-3">
           <motion.div
             animate={{
-              rotate: collapsedDates.has(group.date) ? -90 : 0,
+              rotate: isDateCollapsed(group.date) ? -90 : 0,
             }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
           >
@@ -133,6 +120,45 @@ const MobileEntryCards = memo(
         </div>
       </motion.div>
     );
+
+    const renderEntryCard = (entry: MacroEntry, index?: number) => {
+      const card = (
+        <EntryCard
+          entry={entry}
+          onEdit={onEdit}
+          deleteEntry={deleteEntry}
+          isDeleting={isDeleting}
+          formatTimeFromEntry={formatTimeFromEntry}
+          capitalizeFirstLetter={capitalizeFirstLetter}
+          calculateCalories={calculateCalories}
+          onSaveMeal={onSaveMeal}
+          onUnsaveMeal={onUnsaveMeal}
+          isMealSaved={isMealSaved(entry.id)}
+          isSelectionMode={isSelectionMode}
+          isSelected={isEntrySelected(entry.id)}
+          onToggleSelection={onToggleEntrySelection}
+        />
+      );
+
+      if (typeof index !== "number") {
+        return card;
+      }
+
+      return (
+        <motion.div
+          key={entry.id}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: index * 0.05,
+            duration: 0.3,
+            ease: "easeOut",
+          }}
+        >
+          {card}
+        </motion.div>
+      );
+    };
 
     if (shouldVirtualize) {
       const items = virtualizer.getVirtualItems();
@@ -171,21 +197,7 @@ const MobileEntryCards = memo(
                     </div>
                   ) : (
                     <div className="p-4 pt-0">
-                      <EntryCard
-                        entry={item.entry}
-                        onEdit={onEdit}
-                        deleteEntry={deleteEntry}
-                        isDeleting={isDeleting}
-                        formatTimeFromEntry={formatTimeFromEntry}
-                        capitalizeFirstLetter={capitalizeFirstLetter}
-                        calculateCalories={calculateCalories}
-                        onSaveMeal={onSaveMeal}
-                        onUnsaveMeal={onUnsaveMeal}
-                        isMealSaved={savedMealIds?.has(item.entry.id)}
-                        isSelectionMode={isSelectionMode}
-                        isSelected={selectedEntryIds.has(item.entry.id)}
-                        onToggleSelection={onToggleEntrySelection}
-                      />
+                      {renderEntryCard(item.entry)}
                     </div>
                   )}
                 </div>
@@ -196,163 +208,52 @@ const MobileEntryCards = memo(
       );
     }
 
-    const initialEntries = groupedEntries.slice(0, 5);
-    const additionalEntries = groupedEntries.slice(5);
-
     return (
       <div className="lg:hidden">
-        {initialEntries.map((group) => (
-          <motion.div
-            key={group.date}
-            className="border-b border-border/40 last:border-b-0"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            {renderDateHeader(group)}
-
-            <AnimatePresence>
-              {!collapsedDates.has(group.date) && (
-                <motion.div
-                  className="overflow-hidden"
-                  initial={{ height: 0, opacity: 0 }}
-                  animate={{
-                    height: "auto",
-                    opacity: 1,
-                    transition: {
-                      height: { duration: 0.4, ease: "easeInOut" },
-                      opacity: { duration: 0.2, delay: 0.1 },
-                    },
-                  }}
-                  exit={{
-                    height: 0,
-                    opacity: 0,
-                    transition: {
-                      height: { duration: 0.3, ease: "easeInOut" },
-                      opacity: { duration: 0.1 },
-                    },
-                  }}
-                >
-                  <div className="space-y-3 p-4">
-                    {group.entries.map((entry, index) => (
-                      <motion.div
-                        key={entry.id}
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{
-                          delay: index * 0.05,
-                          duration: 0.3,
-                          ease: "easeOut",
-                        }}
-                      >
-                        <EntryCard
-                          entry={entry}
-                          onEdit={onEdit}
-                          deleteEntry={deleteEntry}
-                          isDeleting={isDeleting}
-                          formatTimeFromEntry={formatTimeFromEntry}
-                          capitalizeFirstLetter={capitalizeFirstLetter}
-                          calculateCalories={calculateCalories}
-                          onSaveMeal={onSaveMeal}
-                          onUnsaveMeal={onUnsaveMeal}
-                          isMealSaved={savedMealIds?.has(entry.id)}
-                          isSelectionMode={isSelectionMode}
-                          isSelected={selectedEntryIds.has(entry.id)}
-                          onToggleSelection={onToggleEntrySelection}
-                        />
-                      </motion.div>
-                    ))}
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </motion.div>
-        ))}
-
         <AnimatePresence>
-          {showAllDates &&
-            additionalEntries.map((group) => (
-              <motion.div
-                key={group.date}
-                className="border-b border-border/40 last:border-b-0"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{
-                  opacity: 1,
-                  height: "auto",
-                  transition: {
-                    height: { duration: 0.4, ease: "easeInOut" },
-                    opacity: { duration: 0.3, delay: 0.1 },
-                  },
-                }}
-                exit={{
-                  opacity: 0,
-                  height: 0,
-                  transition: {
-                    height: { duration: 0.3, ease: "easeInOut" },
-                    opacity: { duration: 0.2 },
-                  },
-                }}
-                style={{ overflow: "hidden" }}
-              >
-                {renderDateHeader(group)}
+          {groupedEntries.map((group) => (
+            <motion.div
+              key={group.date}
+              className="border-b border-border/40 last:border-b-0"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              {renderDateHeader(group)}
 
-                <AnimatePresence>
-                  {!collapsedDates.has(group.date) && (
-                    <motion.div
-                      className="overflow-hidden"
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{
-                        height: "auto",
-                        opacity: 1,
-                        transition: {
-                          height: { duration: 0.4, ease: "easeInOut" },
-                          opacity: { duration: 0.2, delay: 0.1 },
-                        },
-                      }}
-                      exit={{
-                        height: 0,
-                        opacity: 0,
-                        transition: {
-                          height: { duration: 0.3, ease: "easeInOut" },
-                          opacity: { duration: 0.1 },
-                        },
-                      }}
-                    >
-                      <div className="space-y-3 p-4">
-                        {group.entries.map((entry, index) => (
-                          <motion.div
-                            key={entry.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{
-                              delay: index * 0.05,
-                              duration: 0.3,
-                              ease: "easeOut",
-                            }}
-                          >
-                            <EntryCard
-                              entry={entry}
-                              onEdit={onEdit}
-                              deleteEntry={deleteEntry}
-                              isDeleting={isDeleting}
-                              formatTimeFromEntry={formatTimeFromEntry}
-                              capitalizeFirstLetter={capitalizeFirstLetter}
-                              calculateCalories={calculateCalories}
-                              onSaveMeal={onSaveMeal}
-                              onUnsaveMeal={onUnsaveMeal}
-                              isMealSaved={savedMealIds?.has(entry.id)}
-                              isSelectionMode={isSelectionMode}
-                              isSelected={selectedEntryIds.has(entry.id)}
-                              onToggleSelection={onToggleEntrySelection}
-                            />
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-            ))}
+              <AnimatePresence>
+                {!isDateCollapsed(group.date) && (
+                  <motion.div
+                    className="overflow-hidden"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{
+                      height: "auto",
+                      opacity: 1,
+                      transition: {
+                        height: { duration: 0.4, ease: "easeInOut" },
+                        opacity: { duration: 0.2, delay: 0.1 },
+                      },
+                    }}
+                    exit={{
+                      height: 0,
+                      opacity: 0,
+                      transition: {
+                        height: { duration: 0.3, ease: "easeInOut" },
+                        opacity: { duration: 0.1 },
+                      },
+                    }}
+                  >
+                    <div className="space-y-3 p-4">
+                      {group.entries.map((entry, index) =>
+                        renderEntryCard(entry, index),
+                      )}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
         </AnimatePresence>
       </div>
     );

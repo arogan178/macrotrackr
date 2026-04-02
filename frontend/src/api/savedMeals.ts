@@ -1,9 +1,10 @@
 import { API_BASE_URL, getHeadersAsync, handleResponse } from "@/api/core";
+import type { MealType } from "@/types/macro";
 
 export interface SavedMeal {
   id: number;
   name: string;
-  mealType: string;
+  mealType: MealType;
   protein: number;
   carbs: number;
   fats: number;
@@ -25,7 +26,7 @@ export interface CreateSavedMealPayload {
   protein: number;
   carbs: number;
   fats: number;
-  mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+  mealType?: MealType;
   ingredients?: unknown[];
 }
 

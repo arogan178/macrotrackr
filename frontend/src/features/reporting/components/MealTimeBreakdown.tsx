@@ -8,8 +8,8 @@ import {
   Tooltip as RechartsTooltip,
 } from "recharts";
 
-import { AnimatedNumber } from "@/components/animation";
-import { ChartCard } from "@/components/chart";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import ChartCard from "@/components/chart/ChartCard";
 import TabBar from "@/components/ui/TabBar";
 import { getUnitForStat, MEAL_COLORS } from "@/utils/chartColors";
 
@@ -25,7 +25,11 @@ interface MealTimeBreakdownProps {
 }
 
 // Custom tooltip for Donut chart
-const CustomDonutTooltip = ({ active, payload, selectedStat }: {
+const CustomDonutTooltip = ({
+  active,
+  payload,
+  selectedStat,
+}: {
   active?: boolean;
   payload?: Array<{ payload: Record<string, unknown> }>;
   selectedStat?: string;
@@ -173,7 +177,11 @@ function MealTimeBreakdown({
             <div className="flex h-full items-center justify-center">
               <div className="flex flex-col items-center gap-0.5">
                 <div className="text-3xl font-bold tracking-tight text-foreground">
-                  <AnimatedNumber value={totalValue} toFixedValue={0} duration={0.5} />
+                  <AnimatedNumber
+                    value={totalValue}
+                    toFixedValue={0}
+                    duration={0.5}
+                  />
                 </div>
                 <div className="text-xs font-medium tracking-wider text-muted uppercase">
                   {selectedStat === "count" ? "Total Meals" : "Avg / Day"}

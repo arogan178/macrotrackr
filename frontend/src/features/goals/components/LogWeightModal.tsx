@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { format, isValid, parse } from "date-fns";
 
-import { DateField, NumberField, TimeField } from "@/components/form";
+import DateField from "@/components/form/DateField";
+import NumberField from "@/components/form/NumberField";
+import TimeField from "@/components/form/TimeField";
 import Modal from "@/components/ui/Modal";
 import { useAddWeightLogEntry } from "@/hooks/queries/useGoals";
-import { AddWeightLogPayload } from "@/utils/apiServices";
+import type { AddWeightLogPayload } from "@/api/goals";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
 
 interface LogWeightModalProps {
@@ -157,9 +159,7 @@ function LogWeightModal({
           placeholder={`e.g., 75.5 (between ${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
           disabled={addWeightLogMutation.isPending}
         />
-        {formError && (
-          <p className="text-sm text-error">{formError}</p>
-        )}
+        {formError && <p className="text-sm text-error">{formError}</p>}
       </div>
     </Modal>
   );

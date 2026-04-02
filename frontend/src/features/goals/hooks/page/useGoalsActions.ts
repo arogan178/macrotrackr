@@ -1,7 +1,7 @@
 import type { HabitGoalFormValues } from "@/types/habit";
 
-import { useGoalsMutations } from "./useGoalsMutations";
 import type { useGoalsData } from "./useGoalsData";
+import { useGoalsMutations } from "./useGoalsMutations";
 import type { useGoalsUiState } from "./useGoalsUiState";
 
 type GoalsUiState = ReturnType<typeof useGoalsUiState>;
