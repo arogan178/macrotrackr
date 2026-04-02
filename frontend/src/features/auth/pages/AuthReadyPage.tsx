@@ -3,8 +3,8 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { useAuthReady } from "@/features/auth/hooks/useAuthReady";
+import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 
 export default function AuthReadyPage() {
   const navigate = useNavigate();

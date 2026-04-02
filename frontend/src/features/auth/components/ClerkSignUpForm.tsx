@@ -31,7 +31,11 @@ export function ClerkSignUpForm({
 }: ClerkSignUpFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
-  const { isLoaded: isSignInLoaded, signIn, setActive: setSignInActive } = useSignIn();
+  const {
+    isLoaded: isSignInLoaded,
+    signIn,
+    setActive: setSignInActive,
+  } = useSignIn();
   const { showNotification } = useStore();
 
   const [email, setEmail] = useState("");
@@ -158,7 +162,10 @@ export function ClerkSignUpForm({
               password,
             });
 
-            if (signInResult.status === "complete" && signInResult.createdSessionId) {
+            if (
+              signInResult.status === "complete" &&
+              signInResult.createdSessionId
+            ) {
               await setSignInActive({ session: signInResult.createdSessionId });
               navigate({
                 to: "/auth-ready",
@@ -168,7 +175,10 @@ export function ClerkSignUpForm({
               return;
             }
           } catch (signInError) {
-            logger.warn("Auto sign-in after duplicate sign-up failed:", signInError);
+            logger.warn(
+              "Auto sign-in after duplicate sign-up failed:",
+              signInError,
+            );
             // Fall through to show a generic message
           }
         }
@@ -184,7 +194,9 @@ export function ClerkSignUpForm({
       }
 
       showNotification(
-        clerkError.errors?.[0]?.message ?? clerkError.message ?? "Sign-up failed. Please try again.",
+        clerkError.errors?.[0]?.message ??
+          clerkError.message ??
+          "Sign-up failed. Please try again.",
         "error",
       );
     } finally {
@@ -398,8 +410,7 @@ export function ClerkSignUpForm({
                 variant="secondary"
                 fullWidth
                 onClick={() => handleSocialSignUp("oauth_google")}
-                icon={<GoogleIcon className="h-5 w-5" />}
-                iconPosition="left"
+                leftIcon={<GoogleIcon className="h-5 w-5" />}
               >
                 Continue with Google
               </Button>
@@ -408,8 +419,7 @@ export function ClerkSignUpForm({
                 variant="secondary"
                 fullWidth
                 onClick={() => handleSocialSignUp("oauth_facebook")}
-                icon={<FacebookIcon className="h-5 w-5" />}
-                iconPosition="left"
+                leftIcon={<FacebookIcon className="h-5 w-5" />}
               >
                 Continue with Facebook
               </Button>
@@ -418,8 +428,7 @@ export function ClerkSignUpForm({
                 variant="secondary"
                 fullWidth
                 onClick={() => handleSocialSignUp("oauth_apple")}
-                icon={<AppleIcon className="h-5 w-5" />}
-                iconPosition="left"
+                leftIcon={<AppleIcon className="h-5 w-5" />}
               >
                 Continue with Apple
               </Button>

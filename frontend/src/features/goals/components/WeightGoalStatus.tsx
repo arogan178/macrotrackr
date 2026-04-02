@@ -3,8 +3,8 @@
 import { memo } from "react";
 import { motion } from "motion/react";
 
-import { AnimatedNumber } from "@/components/animation/";
-import { CardContainer } from "@/components/form";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import CardContainer from "@/components/form/CardContainer";
 import {
   Button,
   CalendarIcon,
@@ -140,8 +140,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
             variant="primary"
             onClick={onLogWeight}
             text="Log Weight"
-            icon={<WeightIcon />}
-            iconPosition="left"
+            leftIcon={<WeightIcon />}
             ariaLabel="Log current weight"
           />
           <IconButtonGroup
@@ -237,7 +236,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           variant="transparent"
           className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
-          <TrendingUpIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
+          <TrendingUpIcon
+            className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`}
+          />
           <div>
             <p className="text-sm font-medium text-muted">Weekly Rate</p>
             <p className="text-lg font-bold tracking-tight text-foreground/90">
@@ -256,7 +257,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
           variant="transparent"
           className={`flex items-start gap-4 p-5 transition-[filter,transform] duration-200 hover:brightness-110 ${goalBgColorLight} ${goalBorderColor}`}
         >
-          <CalendarIcon className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`} />
+          <CalendarIcon
+            className={` ${goalTextColor} mt-0.5 h-6 w-6 shrink-0`}
+          />
           <div>
             <p className="text-sm font-medium text-muted">Est. Duration</p>
             <p className="text-lg font-bold tracking-tight text-foreground/90">

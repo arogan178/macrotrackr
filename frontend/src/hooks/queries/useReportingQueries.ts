@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+
 import { reportingApi } from "@/api/reporting";
 import { queryConfigs } from "@/lib/queryClient";
 
@@ -17,6 +18,7 @@ export function useMacroDensitySummary(
     queryKey: reportingKeys.densitySummary(startDate, endDate, groupBy),
     queryFn: async () => {
       const data = await reportingApi.getMacroDensitySummary({ startDate, endDate, groupBy });
+
       return data.map(item => {
         const total = item.protein + item.carbs + item.fats;
         

@@ -1,10 +1,9 @@
 import { Component, ReactNode } from "react";
 import { QueryErrorResetBoundary } from "@tanstack/react-query";
 
+import Button from "@/components/ui/Button";
+import { WarningIcon } from "@/components/ui/Icons";
 import { getErrorMessage } from "@/utils/errorHandling";
-
-import Button from "./Button";
-import { WarningIcon } from "./Icons";
 
 interface QueryErrorBoundaryProps {
   children: ReactNode;

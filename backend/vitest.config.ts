@@ -32,7 +32,7 @@ export default defineConfig({
       NODE_ENV: "test"
     },
     setupFiles: ['./vitest.setup.ts'],
-    include: ['tests/**/*.test.ts'],
+    include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
     exclude: ['node_modules', 'dist', 'tests/contracts/*.integration.test.ts', 'tests/contracts/elysia-integration.test.ts'],
     coverage: {
       provider: 'v8',
@@ -41,6 +41,7 @@ export default defineConfig({
         'node_modules/**',
         'dist/**',
         'tests/**',
+        'src/**/*.test.ts',
         '*.config.ts',
       ],
     },

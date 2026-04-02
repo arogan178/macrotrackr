@@ -9,7 +9,7 @@ import {
   subWeeks,
 } from "date-fns";
 
-import type { WeightLogEntry } from "@/utils/apiServices";
+import type { WeightLogEntry } from "@/api/goals";
 
 /**
  * Calculate weekly average change over last ~4 weeks.
@@ -62,10 +62,10 @@ export function calculateWeeklyAverageChange(
 }
 
 /**
- * Calculate monthly trend over last ~3 months.
- * Logic copied from MonthlyTrendCard to preserve results exactly.
+ * Calculate three-month trend over last ~3 months.
+ * Logic copied from monthly trend UI behavior to preserve results exactly.
  */
-export function calculateMonthlyTrend(log: WeightLogEntry[]): number | undefined {
+export function calculateThreeMonthTrend(log: WeightLogEntry[]): number | undefined {
   if (log.length < 2) return undefined;
 
   const now = new Date();

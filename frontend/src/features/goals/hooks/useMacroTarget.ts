@@ -6,7 +6,7 @@ import {
 } from "@/features/macroTracking/hooks/useMacroTargetCore";
 import type { MacroTargetState } from "@/types/macro";
 
-export function useMacroTarget(
+export function useEditableMacroTarget(
   initialValues: MacroTargetState,
   onChange?: (target: MacroTargetState, shouldPersist?: boolean) => void,
 ) {

@@ -1,16 +1,20 @@
 import { API_BASE_URL, getHeadersAsync, handleResponse, post } from "@/api/core";
 
+export interface BillingSubscriptionDetails {
+  id: string;
+  status: string;
+  currentPeriodEnd: string | null;
+  stripeSubscriptionId: string | null;
+}
+
 export interface BillingDetailsResponse {
-  price: string;
-  paymentMethod?: {
+  price: string | null;
+  paymentMethod: {
     brand: string;
     last4: string;
-  };
-  subscription: {
-    status: string;
-    plan: string;
-    currentPeriodEnd: string;
   } | null;
+  subscription: BillingSubscriptionDetails | null;
+  stripeDetails: unknown | null;
 }
 
 export interface BillingCancelResponse {
@@ -18,7 +22,12 @@ export interface BillingCancelResponse {
   message: string;
 }
 
-export interface BillingSessionResponse {
+export interface BillingCheckoutSessionResponse {
+  sessionId: string;
+  url: string;
+}
+
+export interface BillingPortalSessionResponse {
   url: string;
 }
 
@@ -46,8 +55,8 @@ export const billingApi = {
     successUrl,
     cancelUrl,
     plan = "monthly",
-  }: CheckoutSessionPayload): Promise<BillingSessionResponse> => {
-    return post<BillingSessionResponse>("/api/billing/checkout", {
+  }: CheckoutSessionPayload): Promise<BillingCheckoutSessionResponse> => {
+    return post<BillingCheckoutSessionResponse>("/api/billing/checkout", {
       successUrl,
       cancelUrl,
       plan,
@@ -56,7 +65,7 @@ export const billingApi = {
 
   createPortalSession: async (
     returnUrl: string,
-  ): Promise<BillingSessionResponse> => {
-    return post<BillingSessionResponse>("/api/billing/portal", { returnUrl });
+  ): Promise<BillingPortalSessionResponse> => {
+    return post<BillingPortalSessionResponse>("/api/billing/portal", { returnUrl });
   },
 };

@@ -1,7 +1,6 @@
 // src/modules/billing/routes.ts
 
 import { Elysia } from "elysia";
-import { db } from "../../db";
 import { logger } from "../../lib/logger";
 import { BadRequestError, NotFoundError } from "../../lib/errors";
 import { StripeService } from "./stripe-service";
@@ -9,6 +8,8 @@ import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
 import { requireAuth } from "../../middleware/clerk-guards";
+import { mutationSuccessWithMessage } from "../../lib/mutation-contract";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -83,11 +84,30 @@ function handleRouteError(error: unknown, operation: string, userId?: number): n
   );
 }
 
-function resolveBillingUser(context: any) {
+type BillingRouteContext<TBody = Record<string, unknown>> =
+  AuthenticatedRouteContextWithUser<TBody>;
+
+type CheckoutRequestBody = {
+  plan?: "monthly" | "yearly";
+  successUrl: string;
+  cancelUrl: string;
+  metadata?: Record<string, string>;
+};
+
+type PortalRequestBody = {
+  returnUrl: string;
+};
+
+function resolveBillingUser(context: BillingRouteContext) {
   const authenticatedUser = context.authenticatedUser;
+  const userId = authenticatedUser.userId;
+
+  if (!userId) {
+    throw new BadRequestError("Authenticated user ID is required");
+  }
 
   return {
-    userId: authenticatedUser.userId,
+    userId,
     email: authenticatedUser.email || "",
     firstName: authenticatedUser.firstName || "",
     lastName: authenticatedUser.lastName || "",
@@ -97,13 +117,13 @@ function resolveBillingUser(context: any) {
 export const billingRoutes = (app: Elysia) =>
   app.group("/api/billing", (group) =>
     group
-      .decorate("db", db)
       .use(requireAuth)
 
       // Get detailed billing/subscription info
       .get(
         "/details",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
           const user = resolveBillingUser(context);
           try {
             const subscriptionInfo =
@@ -142,7 +162,8 @@ export const billingRoutes = (app: Elysia) =>
       // Cancel current subscription
       .post(
         "/cancel",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
           const user = resolveBillingUser(context);
           try {
             const userSubscription =
@@ -166,11 +187,9 @@ export const billingRoutes = (app: Elysia) =>
               },
               "Canceled user subscription via API"
             );
-            return {
-              success: true,
-              message:
-                "Subscription canceled. You will retain access until the end of your billing period.",
-            };
+            return mutationSuccessWithMessage(
+              "Subscription canceled. You will retain access until the end of your billing period.",
+            );
           } catch (error) {
             handleRouteError(error, "cancel_subscription", user?.userId);
           }
@@ -185,10 +204,15 @@ export const billingRoutes = (app: Elysia) =>
       )
       .post(
         "/checkout",
-        async (context: any) => {
-          const { body } = context as { body?: Record<string, unknown> };
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext<CheckoutRequestBody>;
+          const { body } = context;
           const user = resolveBillingUser(context);
           try {
+            if (!body) {
+              throw new BadRequestError("Request body is required");
+            }
+
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             if (userSubscription.subscription_status === "pro") {
@@ -210,11 +234,8 @@ export const billingRoutes = (app: Elysia) =>
               );
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const bodyData = body as any;
-
             // Determine price ID based on plan
-            const plan = bodyData?.plan === "yearly" ? "yearly" : "monthly";
+            const plan = body.plan === "yearly" ? "yearly" : "monthly";
             const priceId =
               plan === "yearly" ?
                 process.env.STRIPE_PRICE_ID_YEARLY || ""
@@ -225,13 +246,13 @@ export const billingRoutes = (app: Elysia) =>
               );
             const session = await StripeService.createCheckoutSession({
               customerId,
-              successUrl: bodyData?.successUrl,
-              cancelUrl: bodyData?.cancelUrl,
+                successUrl: body.successUrl,
+                cancelUrl: body.cancelUrl,
               priceId,
               metadata: {
                 userId: user.userId.toString(),
                 plan,
-                ...bodyData?.metadata,
+                  ...body.metadata,
               },
             });
             logger.info(
@@ -270,18 +291,22 @@ export const billingRoutes = (app: Elysia) =>
       // Create customer portal session
       .post(
         "/portal",
-        async (context: any) => {
-          const { body } = context as { body?: Record<string, unknown> };
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext<PortalRequestBody>;
+          const { body } = context;
           const user = resolveBillingUser(context);
           try {
+            if (!body) {
+              throw new BadRequestError("Request body is required");
+            }
+
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             if (!userSubscription.stripe_customer_id) {
               throw new BadRequestError("User has no Stripe customer ID");
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const returnUrl = (body as any)?.returnUrl;
+            const returnUrl = body.returnUrl;
             if (!returnUrl) {
               throw new BadRequestError("Return URL is required");
             }
@@ -319,7 +344,8 @@ export const billingRoutes = (app: Elysia) =>
       // Get current subscription status
       .get(
         "/subscription",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
           const user = resolveBillingUser(context);
           try {
             const subscriptionInfo =

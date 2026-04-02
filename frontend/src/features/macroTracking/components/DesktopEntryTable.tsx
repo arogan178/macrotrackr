@@ -8,22 +8,18 @@ import {
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros";
+import { MacroCell } from "@/components/macros/MacroComponents";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 
 import type {
-  EntryHistoryActions,
-  EntryHistoryHelpers,
-  EntryHistoryState,
+  EntryHistoryController,
   GroupedEntry,
 } from "./EntryHistoryShared";
 import { IngredientsList } from "./IngredientsList";
 
 interface DesktopEntryTableProps {
   groupedEntries: GroupedEntry[];
-  helpers: EntryHistoryHelpers;
-  actions: EntryHistoryActions;
-  state: EntryHistoryState;
+  controller: EntryHistoryController;
 }
 
 type TableRowData = GroupedEntry & {
@@ -34,30 +30,25 @@ type TableRowData = GroupedEntry & {
 const columnHelper = createColumnHelper<TableRowData>();
 
 const DesktopEntryTable = memo(
-  ({ groupedEntries, helpers, actions, state }: DesktopEntryTableProps) => {
+  ({ groupedEntries, controller }: DesktopEntryTableProps) => {
     const {
       formatDate,
       formatTimeFromEntry,
       capitalizeFirstLetter,
       calculateCalories,
-    } = helpers;
-    const {
+      isDateCollapsed,
       toggleDateCollapse,
       handleDeleteDate,
       onEdit,
       deleteEntry,
       onSaveMeal,
       onUnsaveMeal,
-    } = actions;
-    const {
-      collapsedDates,
+      isMealSaved,
       isDeleting,
-      showAllDates = true,
-      savedMealIds = new Set(),
-      isSelectionMode = false,
-      selectedEntryIds = new Set(),
+      isSelectionMode,
+      isEntrySelected,
       onToggleEntrySelection,
-    } = state;
+    } = controller;
 
     const tableContainerReference = useRef<HTMLDivElement>(null);
     const [expandedEntries, setExpandedEntries] = useState<Set<number>>(
@@ -80,14 +71,9 @@ const DesktopEntryTable = memo(
 
     // Transform data for TanStack Table
     const tableData = useMemo(() => {
-      // If showAllDates is true, use all entries, otherwise limit to first 5
-      const entriesToProcess = showAllDates
-        ? groupedEntries
-        : groupedEntries.slice(0, 5);
-
       // Always include all rows (both group headers and individual entries)
       // but mark them for conditional rendering based on collapsed state
-      const data: TableRowData[] = entriesToProcess.flatMap((group) => [
+      const data: TableRowData[] = groupedEntries.flatMap((group) => [
         { ...group, isGroup: true },
         // Always include individual entries - we'll handle visibility in the render
         ...group.entries.map((entry) => ({
@@ -99,16 +85,7 @@ const DesktopEntryTable = memo(
       ]);
 
       return data;
-    }, [groupedEntries, showAllDates]);
-
-    const visibleRows = useMemo(() => {
-      return tableData.filter((data) => {
-        if (data.isGroup) return true;
-            const parentDate = data.parentDate ?? data.date;
-
-        return !collapsedDates.has(parentDate);
-      });
-    }, [tableData, collapsedDates]);
+    }, [groupedEntries]);
 
     const totalEntries = useMemo(() => {
       return groupedEntries.reduce(
@@ -118,13 +95,6 @@ const DesktopEntryTable = memo(
     }, [groupedEntries]);
 
     const shouldVirtualize = totalEntries > 50;
-
-    const virtualizer = useVirtualizer({
-      count: visibleRows.length,
-      getScrollElement: () => tableContainerReference.current,
-      estimateSize: () => 48,
-      overscan: 10,
-    });
 
     const columns = useMemo(
       () => [
@@ -139,7 +109,7 @@ const DesktopEntryTable = memo(
                     key={`chevron-${data.date}`}
                     initial={false}
                     animate={{
-                      rotate: collapsedDates.has(data.date) ? -90 : 0,
+                      rotate: isDateCollapsed(data.date) ? -90 : 0,
                     }}
                     transition={{ duration: 0.25, ease: "easeInOut" }}
                   >
@@ -159,7 +129,7 @@ const DesktopEntryTable = memo(
                     <input
                       type="checkbox"
                       className="mr-2 h-4 w-4 rounded border-border text-primary focus:ring-primary/50"
-                      checked={selectedEntryIds.has(entry.id)}
+                      checked={isEntrySelected(entry.id)}
                       onChange={(event_) => {
                         event_.stopPropagation();
                         onToggleEntrySelection?.(entry.id);
@@ -307,7 +277,7 @@ const DesktopEntryTable = memo(
                   onUnsaveMeal={
                     onUnsaveMeal ? () => onUnsaveMeal(entry) : undefined
                   }
-                  isMealSaved={savedMealIds.has(entry.id)}
+                  isMealSaved={isMealSaved(entry.id)}
                 />
               );
             }
@@ -315,21 +285,21 @@ const DesktopEntryTable = memo(
         }),
       ],
       [
-        collapsedDates,
         expandedEntries,
         formatDate,
         formatTimeFromEntry,
         capitalizeFirstLetter,
         calculateCalories,
+        isDateCollapsed,
         handleDeleteDate,
         onEdit,
         deleteEntry,
         isDeleting,
         onSaveMeal,
         onUnsaveMeal,
-        savedMealIds,
+        isMealSaved,
         isSelectionMode,
-        selectedEntryIds,
+        isEntrySelected,
         onToggleEntrySelection,
       ],
     );
@@ -340,11 +310,30 @@ const DesktopEntryTable = memo(
       getCoreRowModel: getCoreRowModel(),
     });
 
+    const visibleTableRows = useMemo(() => {
+      return table.getRowModel().rows.filter((row) => {
+        const data = row.original;
+        if (data.isGroup) {
+          return true;
+        }
+
+        const parentDate = data.parentDate ?? data.date;
+        return !isDateCollapsed(parentDate);
+      });
+    }, [table, isDateCollapsed]);
+
+    const virtualizer = useVirtualizer({
+      count: visibleTableRows.length,
+      getScrollElement: () => tableContainerReference.current,
+      estimateSize: () => 48,
+      overscan: 10,
+    });
+
     const renderRow = (
       row: any,
       data: TableRowData,
       isVirtualized: boolean,
-      virtualRowProps?: { start: number; measureRef: any }
+      virtualRowProps?: { start: number; measureRef: any },
     ) => {
       const isGroup = data.isGroup;
       const parentDate = data.parentDate ?? data.date;
@@ -397,7 +386,12 @@ const DesktopEntryTable = memo(
                 style={{ width: "14.285%" }}
               >
                 <div className="w-full">
-                  {flexRender(cell.column.columnDef.cell, cell.getContext()) as React.ReactNode}
+                  {
+                    flexRender(
+                      cell.column.columnDef.cell,
+                      cell.getContext(),
+                    ) as React.ReactNode
+                  }
                 </div>
               </div>
             ))}
@@ -427,12 +421,12 @@ const DesktopEntryTable = memo(
         >
           <AnimatePresence initial={false}>
             {virtualItems.map((virtualRow) => {
-              const data = visibleRows[virtualRow.index];
-              const row = table.getRowModel().rows.find((r) => {
-                const rowData = r.original;
-                if (rowData.isGroup) return rowData.date === data.date;
-                return rowData.entries[0].id === data.entries[0].id;
-              });
+              const row = visibleTableRows[virtualRow.index];
+              if (!row) {
+                return null;
+              }
+
+              const data = row.original;
 
               return renderRow(row, data, true, {
                 start: virtualRow.start,
@@ -447,16 +441,8 @@ const DesktopEntryTable = memo(
     const renderNonVirtualizedBody = () => (
       <div className="flex w-full flex-col">
         <AnimatePresence initial={false}>
-          {table.getRowModel().rows.map((row) => {
+          {visibleTableRows.map((row) => {
             const data = row.original;
-            const isGroup = data.isGroup;
-            const parentDate = data.parentDate ?? data.date;
-            const isEntryCollapsed = !isGroup && collapsedDates.has(parentDate);
-
-            if (isEntryCollapsed) {
-              return null;
-            }
-
             return renderRow(row, data, false);
           })}
         </AnimatePresence>

@@ -6,11 +6,10 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import { LineChartComponent } from "@/components/chart";
-import type { ChartDataPoint } from "@/components/chart/ChartTypes";
+import LineChartComponent from "@/components/chart/LineChartComponent";
+import type { ChartDataPoint } from "@/components/chart/chartTypes";
 import { BarChartIcon, EmptyState } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
-import { type ChartData,groupWeightLogByDate } from "@/features/goals/utils/weightChartHelpers";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 
 // Custom Tooltip specific to Weight Goal Progress
@@ -32,13 +31,13 @@ function WeightCustomTooltip({
         <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")
-            : label ?? "Date Unavailable"}
+            : (label ?? "Date Unavailable")}
         </div>
         <div className="mt-1 flex items-center gap-2">
           <div
             className={"h-3 w-3 rounded-full"}
             style={{ backgroundColor: payload[0].color ?? payload[0].stroke }}
-           />
+          />
           <span className="text-sm text-foreground">
             Weight:{" "}
             <span
@@ -236,7 +235,9 @@ function WeightGoalProgressChart() {
             {format(parseISO(chartData[0].fullDate), "MMM d, yyyy")} -{" "}
             {format(
               parseISO(
-                chartData.length > 0 ? (chartData.at(-1)?.fullDate ?? "") : "",
+                chartData.length > 0
+                  ? (chartData[chartData.length - 1]?.fullDate ?? "")
+                  : "",
               ),
               "MMM d, yyyy",
             )}

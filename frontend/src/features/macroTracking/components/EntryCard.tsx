@@ -1,7 +1,7 @@
 import { memo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros";
+import { MacroCell } from "@/components/macros/MacroComponents";
 import { ChevronDownIcon, IconButtonGroup } from "@/components/ui";
 import type { MacroEntry } from "@/types/macro";
 
@@ -105,9 +105,24 @@ export const EntryCard = memo(
 
         <div className="mt-4 grid grid-cols-3 gap-3">
           {[
-            { label: "Protein", value: entry.protein, color: "text-protein", bg: "bg-surface-2" },
-            { label: "Carbs", value: entry.carbs, color: "text-carbs", bg: "bg-surface-2" },
-            { label: "Fats", value: entry.fats, color: "text-fats", bg: "bg-surface-2" },
+            {
+              label: "Protein",
+              value: entry.protein,
+              color: "text-protein",
+              bg: "bg-surface-2",
+            },
+            {
+              label: "Carbs",
+              value: entry.carbs,
+              color: "text-carbs",
+              bg: "bg-surface-2",
+            },
+            {
+              label: "Fats",
+              value: entry.fats,
+              color: "text-fats",
+              bg: "bg-surface-2",
+            },
           ].map((macro) => (
             <div
               key={macro.label}

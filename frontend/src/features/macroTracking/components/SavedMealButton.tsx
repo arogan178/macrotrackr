@@ -1,17 +1,17 @@
 import { useState } from "react";
 
+import IconButton from "@/components/ui/IconButton";
+import { StarIcon } from "@/components/ui/Icons";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
 import { useStore } from "@/store/store";
-
-import IconButton from "./IconButton";
-import { StarIcon } from "./Icons";
+import type { MealType } from "@/types/macro";
 
 interface SavedMealButtonProps {
   mealName: string;
   protein: number;
   carbs: number;
   fats: number;
-  mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+  mealType?: MealType;
   ariaLabel?: string;
 }
 

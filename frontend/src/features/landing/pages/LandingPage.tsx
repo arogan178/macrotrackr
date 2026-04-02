@@ -114,11 +114,7 @@ const LandingPage: React.FC = () => {
     <div
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: schemaScript }}
-      />
-
+      <script type="application/ld+json">{schemaScript}</script>
       <PageBackground />
 
       <div>

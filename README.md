@@ -5,19 +5,22 @@ A modern, full-stack nutrition and fitness tracking application.
 ## 🏗️ Architecture & Stack
 
 **Frontend:**
-- **Framework:** React 18, Vite, TypeScript
+
+- **Framework:** React 19, Vite, TypeScript
 - **Routing:** TanStack Router (file-based routing via `routeTree.gen.ts`)
 - **State & Data Fetching:** React Query, Zustand (for UI states like notifications)
 - **Styling:** Tailwind CSS, Framer Motion for animations
 - **Architecture:** Feature-sliced design (`frontend/src/features/`)
 
 **Backend:**
+
 - **Runtime:** Bun
 - **Framework:** Elysia.js (fast, type-safe REST APIs)
 - **Database:** SQLite (local/embedded)
 - **Architecture:** Modular domain-driven design (`backend/src/modules/`)
 
 **Shared Infrastructure:**
+
 - **Authentication:** Clerk (integrated on both frontend via SDK and backend via Elysia middleware)
 - **Payments:** Stripe (via webhooks in `billing` module)
 - **External APIs:** OpenFoodFacts for food search/barcode scanning
@@ -47,27 +50,41 @@ macro_tracker/
 
 ## 🚀 Development Guide
 
-**1. Installation**
+### 1. Installation
+
 ```bash
 bun install
 ```
 
-**2. Environment Variables**
+### 2. Environment Variables
+
 Ensure you have a `.env` file configured with your Clerk, Stripe, and base URL settings.
 
-**3. Running the App**
+### 3. Running the App
+
 ```bash
 # Run both frontend and backend concurrently
 bun run dev
 ```
 
-**4. Where to add new features?**
+Useful workspace scripts:
+
+```bash
+bun run dev:backend
+bun run dev:frontend
+bun run build
+bun run lint
+bun run typecheck
+```
+
+### 4. Where to add new features?
+
 - **Frontend:** Create a new folder inside `frontend/src/features/` if it's a distinct domain. Add API clients in `frontend/src/api/` and shared UI components to `frontend/src/components/ui/`.
 - **Backend:** Create a new module folder in `backend/src/modules/`. Expose its routes via a `routes.ts` file and register it in `backend/src/index.ts`. Use the `requireAuth` middleware for protected endpoints.
 
 ## 🧪 Testing
 
-- **Backend:** `bun run test:backend`
-- **Frontend:** `bun run test:frontend`
-- **E2E:** Playwright tests are run via GitHub actions or locally using `bun run e2e`
+- **Frontend unit/integration:** `bun run test`
+- **Frontend e2e:** `bun run --cwd frontend test:e2e`
+- **Backend tests:** `bun run --cwd backend test`
 

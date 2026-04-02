@@ -1,8 +1,10 @@
-import { app } from "../src/app";
-import { db } from "../src/db";
+import { createDatabase, initializeDatabase } from "../src/db";
+import { createRuntimeServices } from "../src/services/runtime";
+import { createApp } from "../src/app";
 
-// Force mock verifyToken in Elysia Clerk directly using a monkeypatch for tests
-const originalElysia = Object.getPrototypeOf(app).constructor;
+const db = initializeDatabase(createDatabase(":memory:"));
+createRuntimeServices(db);
+export const app = createApp(db);
 
 export async function setupTestUser() {
   const stmt = db.prepare("SELECT id FROM users WHERE clerk_id = ?");

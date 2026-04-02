@@ -2,7 +2,10 @@ import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
-import { MacroDistributionBar, MacroTargetLegend } from "@/components/macros";
+import {
+  MacroDistributionBar,
+  MacroTargetLegend,
+} from "@/components/macros/MacroComponents";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
@@ -245,7 +248,7 @@ function DailySummaryInner({
                 <div className="flex items-center gap-2">
                   <div
                     className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110`}
-                   />
+                  />
                   <h3
                     className={`${macro.textColor} text-sm font-medium tracking-wide`}
                   >

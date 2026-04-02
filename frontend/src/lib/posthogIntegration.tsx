@@ -35,6 +35,7 @@ export default function PostHogUserSync(): undefined {
         } catch (error) {
           // Don't throw in UI if analytics fails
           console.warn("PostHog identify failed:", error);
+          return;
         }
 
         lastDistinctIdReference.current = distinctId;
@@ -50,6 +51,7 @@ export default function PostHogUserSync(): undefined {
         posthog.reset(true);
       } catch (error) {
         console.warn("PostHog reset failed:", error);
+        return;
       }
       lastDistinctIdReference.current = undefined;
     }

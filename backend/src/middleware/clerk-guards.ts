@@ -1,23 +1,25 @@
 import { Elysia } from "elysia";
-import type { ClerkAuthContext } from "../types";
+import type { AuthenticatedContext } from "../types";
 import { AuthenticationError, AuthorizationError } from "../lib/errors";
 import { logger } from "../lib/logger";
-
-console.log("REAL CLERK GUARDS IMPORTED!");
+import { SubscriptionService } from "../modules/billing/subscription-service";
 
 export interface AuthenticatedUser {
   userId: number;
   clerkUserId: string;
   email?: string;
+  firstName?: string;
+  lastName?: string;
+  imageUrl?: string;
 }
 
-export interface AuthenticatedContext extends ClerkAuthContext {
+interface GuardsAuthenticatedContext extends AuthenticatedContext {
   authenticatedUser: AuthenticatedUser;
 }
 
 export const requireAuth = new Elysia({ name: "requireAuth" })
-  .derive({ as: "scoped" }, async (context: any): Promise<{ authenticatedUser: AuthenticatedUser }> => {
-    const { user, internalUserId } = context as ClerkAuthContext;
+  .derive({ as: "scoped" }, async (context): Promise<{ authenticatedUser: AuthenticatedUser }> => {
+    const { user, internalUserId } = context as unknown as GuardsAuthenticatedContext;
     
     if (!user) {
       logger.warn({ path: context.path }, "requireAuth: No user in context");
@@ -48,8 +50,12 @@ export const requireAuth = new Elysia({ name: "requireAuth" })
 
 export const requirePro = new Elysia({ name: "requirePro" })
   .use(requireAuth)
-  .derive({ as: "scoped" }, async (context: any) => {
+  .derive({ as: "scoped" }, async (context) => {
     const { authenticatedUser } = context;
+    if (!authenticatedUser) {
+      throw new AuthenticationError("Authentication required. Please sign in.");
+    }
+
     const hasActivePro = await getRequiredProStatus(authenticatedUser.userId);
     
     if (!hasActivePro) {
@@ -146,22 +152,23 @@ export const checkProStatus = async (userId: number): Promise<boolean> => {
 export const featureLimitGuard = (feature: FeatureLimitKey) =>
   new Elysia({ name: `featureLimitGuard_${feature}` })
     .use(requireAuth)
-    .derive({ as: "scoped" }, async (context: any) => {
+    .derive({ as: "scoped" }, async (context) => {
+      const ctx = context as unknown as GuardsAuthenticatedContext;
       const authenticatedUser = context.authenticatedUser as
         | AuthenticatedUser
         | undefined;
       const resolvedUserId =
         authenticatedUser?.userId ??
-        (typeof context.internalUserId === "number" ? context.internalUserId : null) ??
-        (typeof context.user?.userId === "number" ? context.user.userId : null);
+        (typeof ctx.internalUserId === "number" ? ctx.internalUserId : null) ??
+        (typeof ctx.user?.userId === "number" ? ctx.user.userId : null);
 
       if (!resolvedUserId) {
         logger.warn(
           {
             path: context.path,
             hasAuthenticatedUser: Boolean(authenticatedUser),
-            hasInternalUserId: typeof context.internalUserId === "number",
-            hasContextUserId: typeof context.user?.userId === "number",
+            hasInternalUserId: typeof ctx.internalUserId === "number",
+            hasContextUserId: typeof ctx.user?.userId === "number",
           },
           `featureLimitGuard_${feature}: Unable to resolve authenticated user ID`
         );

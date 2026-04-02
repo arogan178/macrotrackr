@@ -1,6 +1,6 @@
 import { motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros";
+import { MacroCell } from "@/components/macros/MacroComponents";
 import type { Ingredient } from "@/types/macro";
 
 interface IngredientRowProps {
@@ -8,12 +8,17 @@ interface IngredientRowProps {
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
 }
 
-export function IngredientRow({ ingredient, calculateCalories }: IngredientRowProps) {
+export function IngredientRow({
+  ingredient,
+  calculateCalories,
+}: IngredientRowProps) {
   return (
     <div className="flex items-center text-xs text-muted">
       <div className="flex-1 font-medium text-foreground">
         {ingredient.name}{" "}
-        {ingredient.quantity ? `(${ingredient.quantity}${ingredient.unit ?? ""})` : ""}
+        {ingredient.quantity
+          ? `(${ingredient.quantity}${ingredient.unit ?? ""})`
+          : ""}
       </div>
       <div className="w-[14%] text-center">
         <MacroCell value={ingredient.protein} suffix="g" color="text-protein" />
@@ -26,7 +31,11 @@ export function IngredientRow({ ingredient, calculateCalories }: IngredientRowPr
       </div>
       <div className="w-[14%] text-center">
         <MacroCell
-          value={calculateCalories(ingredient.protein, ingredient.carbs, ingredient.fats)}
+          value={calculateCalories(
+            ingredient.protein,
+            ingredient.carbs,
+            ingredient.fats,
+          )}
           suffix=" kcal"
           color="text-foreground"
         />
@@ -41,9 +50,12 @@ interface IngredientsListProps {
   calculateCalories: (protein: number, carbs: number, fats: number) => number;
 }
 
-export function IngredientsList({ ingredients, calculateCalories }: IngredientsListProps) {
+export function IngredientsList({
+  ingredients,
+  calculateCalories,
+}: IngredientsListProps) {
   if (!ingredients || ingredients.length === 0) return null;
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
