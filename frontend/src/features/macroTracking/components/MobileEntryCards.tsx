@@ -6,18 +6,18 @@ import { ChevronDownIcon, IconButton } from "@/components/ui";
 import type { MacroEntry } from "@/types/macro";
 
 import { EntryCard } from "./EntryCard";
+import { useEntryHistoryController } from "./EntryHistoryContext";
 import type {
-  EntryHistoryController,
   GroupedEntry,
 } from "./EntryHistoryShared";
 
 interface MobileEntryCardsProps {
   groupedEntries: GroupedEntry[];
-  controller: EntryHistoryController;
 }
 
 const MobileEntryCards = memo(
-  ({ groupedEntries, controller }: MobileEntryCardsProps) => {
+  ({ groupedEntries }: MobileEntryCardsProps) => {
+    const controller = useEntryHistoryController();
     const {
       formatDate,
       formatTimeFromEntry,

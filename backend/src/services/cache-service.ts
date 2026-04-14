@@ -1,4 +1,4 @@
-import { loggerHelpers } from "./logger";
+import { loggerHelpers } from "../lib/observability/logger";
 
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 

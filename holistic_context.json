@@ -1,0 +1,4004 @@
+{
+  "architecture": {
+    "god_modules": [
+      {
+        "file": "backend/src/lib/observability/logger.ts",
+        "importers": 29,
+        "excerpt": "// src/lib/logger.ts\nimport pino from \"pino\";\nimport { config } from \"../../config\";\n\n// Data sanitization for security - remove/mask sensitive fields\nconst sanitizeData = (data: unknown): unknown => {\n  if (!data || typeof data !== \"object\") return data;\n\n  if (Array.isArray(data)) {\n    return data.map((item) => sanitizeData(item));\n  }\n\n  // Create a copy to avoid mutating original data\n  const sanitized: Record<string, unknown> = {\n    ...(data as Record<string, unknown>),\n  };\n\n  // Remove/mask sensitive fields\n  const sensitiveFields = [\n    \"password\",\n    \"token\",\n    \"jwt\",\n    \"secret\",\n    \"key\",\n    \"authorization\",\n    \"email\",\n    \"phone\",\n    \"ssn\",\n    \"credit_card\",\n    \"creditCard\",\n\n... (228 more lines)"
+      },
+      {
+        "file": "backend/src/lib/http/errors.ts",
+        "importers": 19,
+        "excerpt": "import { loggerHelpers } from \"../observability/logger\";\n\nexport class AppError extends Error {\n  public readonly statusCode: number;\n  public readonly code: string;\n  public readonly isOperational: boolean;\n\n  constructor(\n    message: string,\n    statusCode: number = 500,\n    code: string = \"INTERNAL_ERROR\",\n    isOperational: boolean = true\n  ) {\n    super(message);\n    this.name = this.constructor.name;\n    this.statusCode = statusCode;\n    this.code = code;\n    this.isOperational = isOperational;\n\n    Error.captureStackTrace(this, this.constructor);\n  }\n}\n\nexport class AuthenticationError extends AppError {\n  constructor(message: string = \"Authentication required\") {\n    super(message, 401, \"AUTHENTICATION_ERROR\");\n  }\n}\n\nexport class AuthIntegrationError extends AppError {\n\n... (86 more lines)"
+      },
+      {
+        "file": "backend/src/config.ts",
+        "importers": 13,
+        "excerpt": "import { z } from \"zod\";\nimport { isAbsolute, resolve } from \"node:path\";\n\nconst EnvSchema = z.object({\n  PORT: z.coerce.number().int().positive().default(3000),\n  HOST: z.string().default(\"0.0.0.0\"),\n  DATABASE_PATH: z\n    .string()\n    .default(process.env.NODE_ENV === \"test\" ? \":memory:\" : \"./macro_tracker.db\")\n    .transform((path) =>\n      path === \":memory:\" ? path : isAbsolute(path) ? path : resolve(process.cwd(), path)\n    ),\n\n  JWT_SECRET: z\n    .string()\n    .min(32, \"JWT_SECRET must be at least 32 characters long\"),\n\n  CORS_ORIGIN: z\n    .string()\n    .default(\"http://localhost:5173\")\n    .transform((val) =>\n      val.includes(\",\") ? val.split(\",\").map((v) => v.trim()) : val\n    ),\n\n  NODE_ENV: z\n    .enum([\"development\", \"production\", \"test\"])\n    .default(\"development\"),\n\n  JWT_EXP: z.string().default(\"30d\"),\n  STRIPE_SECRET_KEY: z.string().min(1, \"STRIPE_SECRET_KEY is required\"),\n\n... (79 more lines)"
+      },
+      {
+        "file": "frontend/src/lib/classnameUtilities.ts",
+        "importers": 13,
+        "excerpt": "import { type ClassValue,clsx } from \"clsx\";\nimport { twMerge } from \"tailwind-merge\";\n\nexport function cn(...inputs: ClassValue[]): string {\n  return twMerge(clsx(inputs));\n}\n"
+      },
+      {
+        "file": "backend/src/lib/data/database.ts",
+        "importers": 12,
+        "excerpt": "import type { Database } from \"bun:sqlite\";\nimport { DatabaseError } from \"../http/errors\";\nimport { loggerHelpers } from \"../observability/logger\";\nimport { traceQuerySync } from \"../observability/query-tracer\";\n\nexport function withTransaction<T>(db: Database, operation: () => T): T {\n  const transaction = db.transaction(operation);\n  try {\n    return transaction();\n  } catch (error) {\n    loggerHelpers.error(error as Error, { operation: \"database_transaction\" });\n    throw new DatabaseError(\n      error instanceof Error ? error.message : \"Transaction failed\"\n    );\n  }\n}\n\nexport async function withTransactionAsync<T>(\n  db: Database,\n  operation: () => Promise<T>\n): Promise<T> {\n  safeExecute(db, \"BEGIN\");\n\n  try {\n    const result = await operation();\n    safeExecute(db, \"COMMIT\");\n    return result;\n  } catch (error) {\n    try {\n      safeExecute(db, \"ROLLBACK\");\n\n... (226 more lines)"
+      },
+      {
+        "file": "frontend/src/api/core.ts",
+        "importers": 11,
+        "excerpt": "// API Core utilities - authentication, headers, base URL, error handling\n\nexport const API_BASE_URL = import.meta.env.VITE_API_URL ?? \"http://localhost:3000\";\n\nexport class ApiError extends Error {\n  status: number;\n  code: string;\n  details: unknown;\n\n  constructor(message: string, status: number, code: string, details?: unknown) {\n    super(message);\n    this.name = \"ApiError\";\n    this.status = status;\n    this.code = code;\n    this.details = details;\n  }\n}\n\nexport interface ApiErrorResponse {\n  message?: string;\n  code?: string;\n  details?: unknown;\n}\n\nlet getClerkToken: (() => Promise<string | null>) | null = null;\nlet authTokenProviderInitialized = false;\n\nexport function initializeAuthTokenProvider(\n  provider: (() => Promise<string | null>) | null = null,\n  fallbackToken: string | null = null,\n\n... (142 more lines)"
+      },
+      {
+        "file": "frontend/src/components/ui/Icons.tsx",
+        "importers": 10,
+        "excerpt": "import { memo } from \"react\";\nimport {\n  AlertCircle,\n  Apple,\n  ArrowLeft,\n  ArrowRight,\n  Award,\n  BarChart,\n  BarChart2,\n  Beef,\n  Book,\n  Calendar,\n  CalendarHeart,\n  Check,\n  CheckCircle,\n  ChevronDown,\n  ChevronLeft,\n  ChevronRight,\n  ChevronUp,\n  CircleQuestionMark,\n  Clipboard,\n  Coffee,\n  Download,\n  Droplet,\n  Dumbbell,\n  Edit,\n  ExternalLink,\n  Eye,\n  EyeOff,\n  Flame,\n\n... (228 more lines)"
+      },
+      {
+        "file": "backend/src/types/index.ts",
+        "importers": 9,
+        "excerpt": "export * from \"./context\";\n"
+      },
+      {
+        "file": "frontend/src/features/reporting/types/insightsTypes.ts",
+        "importers": 8,
+        "excerpt": "import type { MacroTargetSettings } from \"@/types/macro\";\n\nexport interface AggregatedDataPoint {\n  name: string;\n  calories: number;\n  protein: number;\n  carbs: number;\n  fats: number;\n}\n\nexport interface NutritionAverage {\n  calories: number;\n  protein: number;\n  carbs: number;\n  fats: number;\n}\n\nexport interface UnifiedInsightsProps {\n  aggregatedData: AggregatedDataPoint[];\n  averages: NutritionAverage;\n  isLoading: boolean;\n  showNoDataMessage?: boolean;\n  macroTarget?: MacroTargetSettings | undefined;\n  // Explicit denominator for selected range (e.g., 7/30/90 or custom inclusive count)\n  denominatorDays?: number;\n  // Optional per-day series for the selected range to compute daily tracking accurately\n  dailySeriesForRange?: AggregatedDataPoint[];\n}\n\nexport interface MacroBalanceResult {\n\n... (70 more lines)"
+      },
+      {
+        "file": "frontend/src/features/macroTracking/calculations.ts",
+        "importers": 7,
+        "excerpt": "import type { MacroDailyTotals, MacroEntry } from \"@/types/macro\";\n// Import calculateDailyTotals for local use\nimport { calculateDailyTotals } from \"@/utils/nutritionCalculations\";\n\nimport { getTodayDateString } from \"./constants\";\n\n// Re-export consolidated nutrition calculations (match exact exported names)\nexport {\n  caloriesFromMacrosRaw as calculateCaloriesFromMacros,\n  caloriesFromEntryRaw as calculateEntryCalories,\n} from \"@/utils/nutritionCalculations\";\n\n// Import helpers directly for consumers that import from this module\nexport {\n  calculateCarbsCalories,\n  calculateFatsCalories,\n  calculateProteinCalories,\n} from \"@/utils/nutritionCalculations\";\n\n/**\n * Get entries for today (date-scoped selection helper for aggregation)\n */\nexport const getTodayEntries = (entries: MacroEntry[]): MacroEntry[] => {\n  const today = getTodayDateString();\n\n  return entries.filter((entry) => {\n    const entryDate = entry.entryDate || entry.createdAt?.split(\"T\")[0];\n\n    return entryDate === today;\n  });\n\n... (12 more lines)"
+      }
+    ],
+    "top_imported": {
+      "backend/src/lib/observability/logger.ts": 29,
+      "backend/src/lib/http/errors.ts": 19,
+      "backend/src/config.ts": 13,
+      "frontend/src/lib/classnameUtilities.ts": 13,
+      "backend/src/lib/data/database.ts": 12,
+      "frontend/src/api/core.ts": 11,
+      "frontend/src/components/ui/Icons.tsx": 10,
+      "backend/src/types/index.ts": 9,
+      "frontend/src/features/reporting/types/insightsTypes.ts": 8,
+      "frontend/src/features/macroTracking/calculations.ts": 7
+    }
+  },
+  "coupling": {
+    "module_level_io": [
+      {
+        "file": "backend/src/middleware/request-limits.ts",
+        "line": 12,
+        "code": "const contentLength = request.headers.get(\"content-length\");"
+      },
+      {
+        "file": "backend/src/modules/auth/clerk-webhook.ts",
+        "line": 28,
+        "code": "const svixId = request.headers.get(\"svix-id\");"
+      },
+      {
+        "file": "backend/src/modules/auth/clerk-webhook.ts",
+        "line": 29,
+        "code": "const svixTimestamp = request.headers.get(\"svix-timestamp\");"
+      },
+      {
+        "file": "backend/src/modules/auth/clerk-webhook.ts",
+        "line": 30,
+        "code": "const svixSignature = request.headers.get(\"svix-signature\");"
+      },
+      {
+        "file": "backend/src/modules/macros/target-routes.ts",
+        "line": 20,
+        "code": "const correlationId = request.headers.get(\"x-correlation-id\") || undefined;"
+      },
+      {
+        "file": "backend/src/routes/metrics.ts",
+        "line": 25,
+        "code": "const headerKey = request.headers.get(\"x-metrics-key\")?.trim();"
+      },
+      {
+        "file": "backend/src/routes/metrics.ts",
+        "line": 26,
+        "code": "const bearerToken = request.headers"
+      },
+      {
+        "file": "frontend/src/components/billing/ProFeature.tsx",
+        "line": 34,
+        "code": "open={modalOpen}"
+      },
+      {
+        "file": "frontend/src/components/billing/UpgradeModal.tsx",
+        "line": 6,
+        "code": "open: boolean;"
+      },
+      {
+        "file": "frontend/src/components/billing/UpgradeModal.tsx",
+        "line": 14,
+        "code": "open,"
+      },
+      {
+        "file": "frontend/src/components/billing/UpgradeModal.tsx",
+        "line": 31,
+        "code": "isOpen={open}"
+      },
+      {
+        "file": "frontend/src/store/ui/goals-ui-slice.ts",
+        "line": 29,
+        "code": "setResetModalOpen: (open: boolean) => void;"
+      },
+      {
+        "file": "frontend/src/store/ui/goals-ui-slice.ts",
+        "line": 30,
+        "code": "setHabitModalOpen: (open: boolean) => void;"
+      },
+      {
+        "file": "frontend/src/store/ui/goals-ui-slice.ts",
+        "line": 33,
+        "code": "setWeightGoalModalOpen: (open: boolean) => void;"
+      },
+      {
+        "file": "frontend/src/store/ui/goals-ui-slice.ts",
+        "line": 34,
+        "code": "setDeleteConfirmModalOpen: (open: boolean) => void;"
+      },
+      {
+        "file": "frontend/src/store/ui/goals-ui-slice.ts",
+        "line": 35,
+        "code": "setLogWeightModalOpen: (open: boolean) => void;"
+      }
+    ]
+  },
+  "conventions": {
+    "naming_by_directory": {
+      "scripts/": {
+        "camelCase": 17
+      },
+      "src/": {
+        "camelCase": 24,
+        "PascalCase": 3
+      },
+      "db/": {
+        "camelCase": 8
+      },
+      "auth/": {
+        "camelCase": 18,
+        "PascalCase": 2
+      },
+      "data/": {
+        "camelCase": 8
+      },
+      "http/": {
+        "camelCase": 12
+      },
+      "mappers/": {
+        "camelCase": 6
+      },
+      "observability/": {
+        "camelCase": 26
+      },
+      "utils/": {
+        "camelCase": 141
+      },
+      "middleware/": {
+        "camelCase": 11
+      },
+      "billing/": {
+        "camelCase": 11,
+        "PascalCase": 2
+      },
+      "habits/": {
+        "PascalCase": 5,
+        "camelCase": 5
+      },
+      "macros/": {
+        "PascalCase": 9,
+        "camelCase": 4
+      },
+      "routes/": {
+        "PascalCase": 4,
+        "camelCase": 3
+      },
+      "services/": {
+        "camelCase": 18
+      },
+      "api/": {
+        "camelCase": 13
+      },
+      "chart/": {
+        "PascalCase": 6,
+        "camelCase": 1
+      },
+      "form/": {
+        "PascalCase": 8
+      },
+      "layout/": {
+        "PascalCase": 4
+      },
+      "metrics/": {
+        "PascalCase": 2,
+        "camelCase": 1
+      },
+      "components/": {
+        "PascalCase": 31,
+        "camelCase": 9
+      },
+      "ui/": {
+        "PascalCase": 29,
+        "camelCase": 8
+      },
+      "hooks/": {
+        "camelCase": 34,
+        "PascalCase": 3
+      },
+      "pages/": {
+        "PascalCase": 10,
+        "camelCase": 1
+      },
+      "weight-goals/": {
+        "PascalCase": 6,
+        "camelCase": 1
+      },
+      "weight-logs/": {
+        "PascalCase": 3,
+        "camelCase": 2
+      },
+      "page/": {
+        "camelCase": 24
+      },
+      "edit-modal/": {
+        "PascalCase": 3
+      },
+      "queries/": {
+        "camelCase": 35
+      },
+      "macro/": {
+        "camelCase": 6
+      },
+      "lib/": {
+        "camelCase": 28,
+        "PascalCase": 1
+      }
+    },
+    "sibling_behavior": {
+      "backend/src/modules/reporting/": {
+        "shared_patterns": {
+          "type": {
+            "count": 2,
+            "total": 3
+          }
+        },
+        "outliers": [
+          {
+            "file": "backend/src/modules/reporting/index.ts",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/api/": {
+        "shared_patterns": {
+          "getHeaders": {
+            "count": 8,
+            "total": 10
+          },
+          "handleResponse": {
+            "count": 8,
+            "total": 10
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/api/core.ts",
+            "missing": [
+              "getHeaders",
+              "handleResponse"
+            ]
+          },
+          {
+            "file": "frontend/src/api/index.ts",
+            "missing": [
+              "getHeaders",
+              "handleResponse"
+            ]
+          }
+        ]
+      },
+      "frontend/src/components/animation/": {
+        "shared_patterns": {
+          "React": {
+            "count": 3,
+            "total": 4
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/components/animation/AnimatedNumber.tsx",
+            "missing": [
+              "React"
+            ]
+          }
+        ]
+      },
+      "frontend/src/components/form/": {
+        "shared_patterns": {
+          "type": {
+            "count": 8,
+            "total": 10
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/components/form/FormStyles.ts",
+            "missing": [
+              "type"
+            ]
+          },
+          {
+            "file": "frontend/src/components/form/QuantityUnitField.tsx",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/components/macros/": {
+        "shared_patterns": {
+          "type": {
+            "count": 3,
+            "total": 4
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/components/macros/MacroTargetBar.tsx",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/auth/components/": {
+        "shared_patterns": {
+          "Button": {
+            "count": 4,
+            "total": 5
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/auth/components/AuthPageShell.tsx",
+            "missing": [
+              "Button"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/auth/pages/": {
+        "shared_patterns": {
+          "useSearch": {
+            "count": 5,
+            "total": 5
+          },
+          "LoadingSpinner": {
+            "count": 3,
+            "total": 5
+          },
+          "AuthPageShell": {
+            "count": 3,
+            "total": 5
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/auth/pages/AuthReadyPage.tsx",
+            "missing": [
+              "AuthPageShell"
+            ]
+          },
+          {
+            "file": "frontend/src/features/auth/pages/SignInPage.tsx",
+            "missing": [
+              "LoadingSpinner"
+            ]
+          },
+          {
+            "file": "frontend/src/features/auth/pages/SignUpPage.tsx",
+            "missing": [
+              "LoadingSpinner"
+            ]
+          },
+          {
+            "file": "frontend/src/features/auth/pages/SsoCallbackPage.tsx",
+            "missing": [
+              "AuthPageShell"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/goals/components/weight-logs/": {
+        "shared_patterns": {
+          "isValid": {
+            "count": 2,
+            "total": 3
+          },
+          "useState": {
+            "count": 2,
+            "total": 3
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/goals/components/weight-logs/WeightProgressTabs.tsx",
+            "missing": [
+              "isValid",
+              "useState"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/goals/utils/": {
+        "shared_patterns": {
+          "type": {
+            "count": 4,
+            "total": 5
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/goals/utils/weightChartHelpers.ts",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/landing/components/": {
+        "shared_patterns": {
+          "React": {
+            "count": 12,
+            "total": 14
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/landing/components/BackToTopButton.tsx",
+            "missing": [
+              "React"
+            ]
+          },
+          {
+            "file": "frontend/src/features/landing/components/BlogNotFound.tsx",
+            "missing": [
+              "React"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/landing/pages/": {
+        "shared_patterns": {
+          "React": {
+            "count": 5,
+            "total": 5
+          },
+          "Footer": {
+            "count": 5,
+            "total": 5
+          },
+          "BackToTopButton": {
+            "count": 5,
+            "total": 5
+          },
+          "Header": {
+            "count": 3,
+            "total": 5
+          },
+          "useReducedMotion": {
+            "count": 3,
+            "total": 5
+          },
+          "PageBackground": {
+            "count": 3,
+            "total": 5
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/landing/pages/PrivacyPolicyPage.tsx",
+            "missing": [
+              "Header",
+              "useReducedMotion"
+            ]
+          },
+          {
+            "file": "frontend/src/features/landing/pages/TermsAndConditionsPage.tsx",
+            "missing": [
+              "Header",
+              "useReducedMotion"
+            ]
+          },
+          {
+            "file": "frontend/src/features/landing/pages/BlogArticlePage.tsx",
+            "missing": [
+              "PageBackground"
+            ]
+          },
+          {
+            "file": "frontend/src/features/landing/pages/BlogIndexPage.tsx",
+            "missing": [
+              "PageBackground"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/macroTracking/components/": {
+        "shared_patterns": {
+          "type": {
+            "count": 13,
+            "total": 16
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/macroTracking/components/DailySummaryPanel.tsx",
+            "missing": [
+              "type"
+            ]
+          },
+          {
+            "file": "frontend/src/features/macroTracking/components/HomePageSkeletons.tsx",
+            "missing": [
+              "type"
+            ]
+          },
+          {
+            "file": "frontend/src/features/macroTracking/components/index.ts",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/macroTracking/components/edit-modal/": {
+        "shared_patterns": {
+          "type": {
+            "count": 2,
+            "total": 3
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/macroTracking/components/edit-modal/MealDetailsSection.tsx",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/macroTracking/hooks/": {
+        "shared_patterns": {
+          "type": {
+            "count": 2,
+            "total": 3
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/macroTracking/hooks/index.ts",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/macroTracking/utils/": {
+        "shared_patterns": {
+          "MacroEntry": {
+            "count": 2,
+            "total": 3
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/macroTracking/utils/units.ts",
+            "missing": [
+              "MacroEntry"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/reporting/components/": {
+        "shared_patterns": {
+          "type": {
+            "count": 9,
+            "total": 13
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/reporting/components/MacroDensityBreakdown.tsx",
+            "missing": [
+              "type"
+            ]
+          },
+          {
+            "file": "frontend/src/features/reporting/components/MealTimeBreakdown.tsx",
+            "missing": [
+              "type"
+            ]
+          },
+          {
+            "file": "frontend/src/features/reporting/components/ReportingPageSkeleton.tsx",
+            "missing": [
+              "type"
+            ]
+          },
+          {
+            "file": "frontend/src/features/reporting/components/index.ts",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      },
+      "frontend/src/features/settings/components/": {
+        "shared_patterns": {
+          "CardContainer": {
+            "count": 6,
+            "total": 8
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/features/settings/components/SettingsLoadingSkeleton.tsx",
+            "missing": [
+              "CardContainer"
+            ]
+          },
+          {
+            "file": "frontend/src/features/settings/components/index.ts",
+            "missing": [
+              "CardContainer"
+            ]
+          }
+        ]
+      },
+      "frontend/src/store/ui/": {
+        "shared_patterns": {
+          "type": {
+            "count": 3,
+            "total": 4
+          }
+        },
+        "outliers": [
+          {
+            "file": "frontend/src/store/ui/user-ui-slice.ts",
+            "missing": [
+              "type"
+            ]
+          }
+        ]
+      }
+    },
+    "duplicate_clusters": [
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "backend/src/middleware/clerk-auth.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/reporting/pages/ReportingPage.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/components/form/DateField.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/components/utils/UiConstants.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/auth/components/ClerkSignInForm.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/utils/chartUtilities.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/utils/chartUtilities.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/landing/components/MarkdownComponents.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/landing/components/MarkdownComponents.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/settings/utils/calculations.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/components/form/DateField.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/auth/components/ClerkSignInForm.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/billing/pages/PricingPage.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/macroTracking/components/EntryCard.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/macroTracking/components/DesktopEntryTable.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/reporting/utils/dataProcessing.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "backend/src/modules/macros/routes.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/goals/constants.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/landing/components/MarkdownComponents.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/goals/pages/GoalsPage.tsx"
+        ]
+      }
+    ]
+  },
+  "errors": {
+    "strategy_by_directory": {
+      "scripts/": {
+        "throws": 10,
+        "try_catch": 6,
+        "returns_null": 2
+      },
+      "src/": {
+        "throws": 3,
+        "try_catch": 2
+      },
+      "db/": {
+        "try_catch": 5
+      },
+      "auth/": {
+        "returns_null": 10,
+        "try_catch": 8,
+        "throws": 6
+      },
+      "data/": {
+        "try_catch": 6,
+        "throws": 5
+      },
+      "http/": {
+        "throws": 1,
+        "try_catch": 1,
+        "returns_null": 1
+      },
+      "observability/": {
+        "try_catch": 2
+      },
+      "utils/": {
+        "returns_null": 16,
+        "try_catch": 7,
+        "throws": 1
+      },
+      "middleware/": {
+        "throws": 6,
+        "returns_null": 5,
+        "try_catch": 4
+      },
+      "billing/": {
+        "try_catch": 23,
+        "throws": 17,
+        "returns_null": 2
+      },
+      "goals/": {
+        "throws": 10,
+        "returns_null": 1
+      },
+      "habits/": {
+        "throws": 8,
+        "try_catch": 2
+      },
+      "macros/": {
+        "throws": 18,
+        "try_catch": 1
+      },
+      "saved-meals/": {
+        "throws": 13,
+        "try_catch": 1
+      },
+      "user/": {
+        "throws": 8,
+        "try_catch": 4
+      },
+      "routes/": {
+        "try_catch": 3
+      },
+      "services/": {
+        "throws": 5,
+        "returns_null": 2,
+        "try_catch": 2
+      },
+      "api/": {
+        "returns_null": 5,
+        "throws": 5,
+        "try_catch": 2
+      },
+      "components/": {
+        "try_catch": 16,
+        "returns_null": 6,
+        "throws": 2
+      },
+      "ui/": {
+        "returns_null": 6
+      },
+      "hooks/": {
+        "try_catch": 5,
+        "returns_null": 1
+      },
+      "pages/": {
+        "try_catch": 8
+      },
+      "weight-goals/": {
+        "returns_null": 2,
+        "try_catch": 1
+      },
+      "weight-logs/": {
+        "try_catch": 3
+      },
+      "page/": {
+        "try_catch": 5,
+        "throws": 1,
+        "returns_null": 1
+      },
+      "queries/": {
+        "throws": 5,
+        "try_catch": 2
+      },
+      "lib/": {
+        "try_catch": 3,
+        "returns_null": 2,
+        "throws": 1
+      }
+    }
+  },
+  "abstractions": {
+    "util_files": [
+      {
+        "file": "frontend/src/hooks/queries/macro/helpers.ts",
+        "loc": 62,
+        "excerpt": "import { type InfiniteData, type QueryClient } from \"@tanstack/react-query\";\n\nimport type { MacroEntry, PaginatedMacroHistory } from \"@/types/macro\";\n\nexport type MacroHistoryInfiniteData = InfiniteData<PaginatedMacroHistory, number>;\nexport type MacroHistorySnapshot = Array<\n  readonly [ReadonlyArray<unknown>, MacroHistoryInfiniteData | undefined]\n>;\nexport type OptimisticMacroEntry = MacroEntry & { optimistic?: boolean };\n\nexport function getMacroHistorySnapshots(queryClient: QueryClient) {\n  return queryClient.getQueriesData<MacroHistoryInfiniteData>({\n    queryKey: [\"macros\", \"history-infinite\"],\n  });\n}\n\nexport function restoreMacroHistorySnapshots(\n  queryClient: QueryClient,\n  snapshots: MacroHistorySnapshot,\n) {\n  for (const [queryKey, data] of snapshots) {\n    if (data === undefined) {\n      queryClient.removeQueries({ queryKey, exact: true });\n      continue;\n    }\n    queryClient.setQueryData(queryKey, data);\n  }\n}\n\nexport function updateMacroHistoryCaches(\n\n... (32 more lines)"
+      }
+    ],
+    "summary": {
+      "wrapper_rate": 0.079,
+      "total_wrappers": 15,
+      "total_function_signatures": 190,
+      "one_impl_interface_count": 0,
+      "indirection_hotspot_count": 44,
+      "wide_param_bag_count": 40,
+      "delegation_heavy_class_count": 0,
+      "facade_module_count": 0,
+      "typed_dict_violation_count": 0,
+      "dict_any_annotation_count": 0,
+      "enum_bypass_count": 0
+    },
+    "sub_axes": {
+      "abstraction_leverage": 89,
+      "indirection_cost": 0,
+      "interface_honesty": 100,
+      "delegation_density": 100,
+      "definition_directness": 100,
+      "type_discipline": 100
+    },
+    "pass_through_wrappers": [
+      {
+        "file": "frontend/src/hooks/queries/useMacroQueries.ts",
+        "count": 3,
+        "samples": [
+          "useMacroHistoryInfinite->useInfiniteQuery",
+          "useMacroHistoryForDateRange->useQuery",
+          "useMacroTargetQuery->useQuery"
+        ]
+      },
+      {
+        "file": "frontend/src/components/ui/MetricCard.tsx",
+        "count": 2,
+        "samples": [
+          "useMetricCardColors->useMemo",
+          "useNumericValue->useMemo"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useGoals.ts",
+        "count": 2,
+        "samples": [
+          "useWeightGoals->useQuery",
+          "useWeightLog->useQuery"
+        ]
+      },
+      {
+        "file": "backend/src/db/index.ts",
+        "count": 1,
+        "samples": [
+          "createInitializedDatabase->initializeDatabase"
+        ]
+      },
+      {
+        "file": "frontend/src/components/ui/Icons.tsx",
+        "count": 1,
+        "samples": [
+          "createIcon->memo"
+        ]
+      },
+      {
+        "file": "frontend/src/features/macroTracking/hooks/useHomePage.tsx",
+        "count": 1,
+        "samples": [
+          "useNutritionProfile->useMemo"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useBilling.ts",
+        "count": 1,
+        "samples": [
+          "useBillingDetails->useQuery"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useHabits.ts",
+        "count": 1,
+        "samples": [
+          "useHabits->useQuery"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useReportingQueries.ts",
+        "count": 1,
+        "samples": [
+          "useMacroDensitySummary->useQuery"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useSavedMeals.ts",
+        "count": 1,
+        "samples": [
+          "useSavedMeals->useQuery"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useSettings.ts",
+        "count": 1,
+        "samples": [
+          "useSettings->useQuery"
+        ]
+      }
+    ],
+    "indirection_hotspots": [
+      {
+        "file": "frontend/src/features/landing/components/remotion/DashboardAnimation.tsx",
+        "max_chain_depth": 5,
+        "chain_count": 21
+      },
+      {
+        "file": "frontend/src/components/ui/Icons.tsx",
+        "max_chain_depth": 4,
+        "chain_count": 57
+      },
+      {
+        "file": "backend/src/modules/billing/stripe-service.ts",
+        "max_chain_depth": 3,
+        "chain_count": 30
+      },
+      {
+        "file": "backend/src/modules/auth/clerk-webhook.ts",
+        "max_chain_depth": 3,
+        "chain_count": 20
+      },
+      {
+        "file": "backend/src/modules/billing/webhook-handler.ts",
+        "max_chain_depth": 3,
+        "chain_count": 15
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/DesktopEntryTable.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 10
+      },
+      {
+        "file": "frontend/src/components/billing/PricingTable.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 9
+      },
+      {
+        "file": "frontend/src/components/form/NumberField.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 9
+      },
+      {
+        "file": "frontend/src/main.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 7
+      },
+      {
+        "file": "backend/src/config.ts",
+        "max_chain_depth": 3,
+        "chain_count": 5
+      },
+      {
+        "file": "frontend/src/sw-register.ts",
+        "max_chain_depth": 3,
+        "chain_count": 5
+      },
+      {
+        "file": "frontend/src/components/chart/ChartTooltip.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 4
+      },
+      {
+        "file": "frontend/src/components/chart/LineChartComponent.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 4
+      },
+      {
+        "file": "frontend/src/components/ui/Modal.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 3
+      },
+      {
+        "file": "frontend/src/features/settings/components/ConnectedAccountsForm.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 3
+      },
+      {
+        "file": "frontend/src/features/landing/components/BackToTopButton.tsx",
+        "max_chain_depth": 3,
+        "chain_count": 2
+      },
+      {
+        "file": "frontend/src/api/core.ts",
+        "max_chain_depth": 3,
+        "chain_count": 1
+      },
+      {
+        "file": "frontend/src/lib/logger.ts",
+        "max_chain_depth": 3,
+        "chain_count": 1
+      },
+      {
+        "file": "frontend/src/hooks/queries/useGoals.ts",
+        "max_chain_depth": 2,
+        "chain_count": 35
+      },
+      {
+        "file": "frontend/src/hooks/queries/useHabits.ts",
+        "max_chain_depth": 2,
+        "chain_count": 26
+      }
+    ],
+    "wide_param_bags": [
+      {
+        "file": "frontend/src/components/form/Dropdown.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 4
+      },
+      {
+        "file": "frontend/src/components/ui/IconButton.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 4
+      },
+      {
+        "file": "frontend/src/components/chart/ChartCard.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/form/DateField.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/form/NumberField.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/form/TextField.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/form/TimeField.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/layout/Navbar.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/notifications/components/FloatingNotification.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/ui/Button.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/ui/EmptyState.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/ui/ProgressBar.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/ui/TabBar.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/components/ui/TabButton.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/habits/HabitActions.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/habits/HabitTracker.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-goals/WeightGoalForm.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-goals/WeightGoalModal.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/features/reporting/components/UnifiedInsights.tsx",
+        "wide_functions": 1,
+        "config_bag_mentions": 0
+      },
+      {
+        "file": "frontend/src/store/ui/notifications-slice.ts",
+        "wide_functions": 0,
+        "config_bag_mentions": 31
+      }
+    ],
+    "complexity_hotspots": [
+      {
+        "file": "backend/src/modules/macros/routes.ts",
+        "loc": 698.0,
+        "complexity_score": 15.0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/pages/HomePage.tsx",
+        "loc": 366.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 1,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/EntryHistoryPanel.tsx",
+        "loc": 612.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "backend/src/modules/goals/routes.ts",
+        "loc": 549.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/DesktopEntryTable.tsx",
+        "loc": 510.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/AddEntryForm.tsx",
+        "loc": 505.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "backend/src/middleware/clerk-auth.ts",
+        "loc": 503.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-goals/WeightGoalForm.tsx",
+        "loc": 469.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/CalorieSearchForm.tsx",
+        "loc": 401.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/EditModal.tsx",
+        "loc": 381.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-logs/WeightLogList.tsx",
+        "loc": 252.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      }
+    ]
+  },
+  "dependencies": {},
+  "testing": {
+    "total_files": 387,
+    "critical_untested": [
+      {
+        "file": "backend/src/modules/billing/subscription-service.ts",
+        "importers": 6
+      },
+      {
+        "file": "backend/src/db/schema.ts",
+        "importers": 5
+      },
+      {
+        "file": "backend/src/utils/id-generator.ts",
+        "importers": 4
+      },
+      {
+        "file": "backend/src/modules/macros/schemas.ts",
+        "importers": 4
+      },
+      {
+        "file": "backend/src/modules/billing/stripe-service.ts",
+        "importers": 4
+      },
+      {
+        "file": "backend/src/middleware/rate-limit.ts",
+        "importers": 4
+      },
+      {
+        "file": "frontend/src/features/macroTracking/utils/units.ts",
+        "importers": 4
+      },
+      {
+        "file": "backend/src/middleware/clerk-guards.ts",
+        "importers": 4
+      },
+      {
+        "file": "backend/src/lib/http/mutation-contract.ts",
+        "importers": 4
+      },
+      {
+        "file": "frontend/src/features/reporting/constants.ts",
+        "importers": 4
+      }
+    ]
+  },
+  "api_surface": {
+    "sync_async_mix": [
+      "backend/scripts/migrate-dev-users-to-clerk.ts",
+      "backend/scripts/smoke-test.ts",
+      "backend/src/lib/data/database.ts",
+      "frontend/src/api/core.ts",
+      "frontend/src/routes/authGuards.tsx"
+    ]
+  },
+  "structure": {
+    "directory_profiles": {
+      "backend/scripts/": {
+        "file_count": 2,
+        "files": [
+          "migrate-dev-users-to-clerk.ts",
+          "smoke-test.ts"
+        ],
+        "total_loc": 635,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "script": 2
+        },
+        "imported_by_dirs": {
+          "backend/scripts/__tests__/": 2
+        }
+      },
+      "backend/src/": {
+        "file_count": 3,
+        "files": [
+          "app.ts",
+          "config.ts",
+          "index.ts"
+        ],
+        "total_loc": 479,
+        "avg_fan_in": 5.0,
+        "avg_fan_out": 8.0,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "backend/src/middleware/": 4,
+          "backend/src/lib/observability/": 3,
+          "backend/src/lib/http/": 2,
+          "backend/src/routes/": 2,
+          "backend/src/modules/billing/": 1,
+          "backend/src/modules/reporting/": 1,
+          "backend/src/modules/habits/": 1,
+          "backend/src/modules/macros/": 1,
+          "backend/src/modules/auth/": 1,
+          "backend/src/modules/user/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/routes/": 2,
+          "backend/src/lib/observability/": 2,
+          "backend/tests/": 1,
+          "backend/src/db/": 1,
+          "backend/src/middleware/": 1,
+          "backend/src/modules/auth/": 1,
+          "backend/src/modules/billing/": 1,
+          "backend/src/services/": 1,
+          "backend/tests/modules/auth/": 1,
+          "backend/src/lib/auth/": 1
+        }
+      },
+      "backend/src/db/": {
+        "file_count": 2,
+        "files": [
+          "index.ts",
+          "schema.ts"
+        ],
+        "total_loc": 370,
+        "avg_fan_in": 3.5,
+        "avg_fan_out": 1.5,
+        "zones": {
+          "production": 2
+        },
+        "imports_from_dirs": {
+          "backend/src/": 1,
+          "backend/src/lib/observability/": 1
+        },
+        "imported_by_dirs": {
+          "backend/tests/contracts/": 4,
+          "backend/tests/": 1,
+          "backend/src/": 1
+        }
+      },
+      "backend/src/lib/auth/": {
+        "file_count": 4,
+        "files": [
+          "auth-utils.ts",
+          "clerk-utils.ts",
+          "password.ts",
+          "route-adapter.ts"
+        ],
+        "total_loc": 172,
+        "avg_fan_in": 0.5,
+        "avg_fan_out": 1.5,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 2,
+          "backend/src/": 1,
+          "backend/src/lib/data/": 1,
+          "backend/src/lib/http/": 1,
+          "backend/src/middleware/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/middleware/": 1,
+          "backend/src/modules/auth/": 1
+        }
+      },
+      "backend/src/lib/http/": {
+        "file_count": 5,
+        "files": [
+          "error-handler.ts",
+          "errors.ts",
+          "mutation-contract.ts",
+          "responses.ts",
+          "schemas.ts"
+        ],
+        "total_loc": 511,
+        "avg_fan_in": 5.8,
+        "avg_fan_out": 1.2,
+        "zones": {
+          "production": 5
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 3,
+          "backend/src/lib/mappers/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/modules/macros/": 5,
+          "backend/src/modules/billing/": 4,
+          "backend/src/modules/user/": 3,
+          "backend/src/": 2,
+          "backend/src/middleware/": 2,
+          "backend/src/modules/habits/": 2,
+          "backend/src/modules/saved-meals/": 2,
+          "backend/src/modules/auth/": 2,
+          "backend/src/modules/goals/": 2,
+          "backend/src/modules/reporting/": 1
+        }
+      },
+      "backend/src/lib/observability/": {
+        "file_count": 4,
+        "files": [
+          "alerting.ts",
+          "logger.ts",
+          "metrics.ts",
+          "query-tracer.ts"
+        ],
+        "total_loc": 753,
+        "avg_fan_in": 8.8,
+        "avg_fan_out": 1.2,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "backend/src/": 2
+        },
+        "imported_by_dirs": {
+          "backend/src/services/": 5,
+          "backend/src/middleware/": 4,
+          "backend/src/modules/billing/": 4,
+          "backend/src/": 3,
+          "backend/src/lib/http/": 3,
+          "backend/src/routes/": 3,
+          "backend/src/modules/auth/": 2,
+          "backend/src/lib/data/": 2,
+          "backend/src/lib/auth/": 2,
+          "backend/src/modules/user/": 1
+        }
+      },
+      "backend/src/middleware/": {
+        "file_count": 5,
+        "files": [
+          "clerk-auth.ts",
+          "clerk-guards.ts",
+          "correlation.ts",
+          "rate-limit.ts",
+          "request-limits.ts"
+        ],
+        "total_loc": 763,
+        "avg_fan_in": 2.8,
+        "avg_fan_out": 2.0,
+        "zones": {
+          "production": 5
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 4,
+          "backend/src/lib/http/": 2,
+          "backend/src/": 1,
+          "backend/src/lib/auth/": 1,
+          "backend/src/types/": 1,
+          "backend/src/modules/billing/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 4,
+          "backend/tests/middleware/": 4,
+          "backend/src/modules/auth/": 2,
+          "backend/src/lib/auth/": 1,
+          "backend/src/modules/saved-meals/": 1,
+          "backend/src/modules/habits/": 1,
+          "backend/src/modules/macros/": 1
+        }
+      },
+      "backend/src/modules/auth/": {
+        "file_count": 4,
+        "files": [
+          "clerk-webhook.ts",
+          "index.ts",
+          "routes.ts",
+          "schemas.ts"
+        ],
+        "total_loc": 535,
+        "avg_fan_in": 1.8,
+        "avg_fan_out": 3.5,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 2,
+          "backend/src/lib/data/": 2,
+          "backend/src/middleware/": 2,
+          "backend/src/lib/http/": 2,
+          "backend/src/": 1,
+          "backend/src/types/": 1,
+          "backend/src/lib/auth/": 1
+        },
+        "imported_by_dirs": {
+          "backend/tests/modules/auth/": 3,
+          "backend/src/": 1
+        }
+      },
+      "backend/src/modules/billing/": {
+        "file_count": 6,
+        "files": [
+          "index.ts",
+          "routes.ts",
+          "schemas.ts",
+          "stripe-service.ts",
+          "subscription-service.ts",
+          "webhook-handler.ts"
+        ],
+        "total_loc": 1670,
+        "avg_fan_in": 2.5,
+        "avg_fan_out": 3.8,
+        "zones": {
+          "production": 6
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 4,
+          "backend/src/lib/http/": 4,
+          "backend/src/types/": 1,
+          "backend/src/config/": 1,
+          "backend/src/": 1,
+          "backend/src/lib/data/": 1,
+          "backend/src/services/": 1,
+          "backend/src/utils/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/services/": 2,
+          "backend/src/": 1,
+          "backend/src/modules/user/": 1,
+          "backend/src/middleware/": 1
+        }
+      },
+      "backend/src/modules/goals/": {
+        "file_count": 3,
+        "files": [
+          "index.ts",
+          "routes.ts",
+          "schemas.ts"
+        ],
+        "total_loc": 659,
+        "avg_fan_in": 1.7,
+        "avg_fan_out": 3.0,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/http/": 2,
+          "backend/src/utils/": 1,
+          "backend/src/types/": 1,
+          "backend/src/lib/data/": 1,
+          "backend/src/lib/observability/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 1,
+          "backend/tests/contracts/": 1
+        }
+      },
+      "backend/src/modules/habits/": {
+        "file_count": 3,
+        "files": [
+          "index.ts",
+          "routes.ts",
+          "schemas.ts"
+        ],
+        "total_loc": 500,
+        "avg_fan_in": 1.3,
+        "avg_fan_out": 2.7,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/http/": 2,
+          "backend/src/middleware/": 1,
+          "backend/src/types/": 1,
+          "backend/src/lib/data/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 1
+        }
+      },
+      "backend/src/modules/macros/": {
+        "file_count": 7,
+        "files": [
+          "entry-routes.ts",
+          "index.ts",
+          "routes.ts",
+          "schemas.ts",
+          "search-routes.ts",
+          "service.ts",
+          "target-routes.ts"
+        ],
+        "total_loc": 919,
+        "avg_fan_in": 2.4,
+        "avg_fan_out": 4.4,
+        "zones": {
+          "production": 7
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/http/": 5,
+          "backend/src/lib/data/": 3,
+          "backend/src/services/": 3,
+          "backend/src/lib/utils/": 1,
+          "backend/src/middleware/": 1,
+          "backend/src/types/": 1,
+          "backend/src/lib/mappers/": 1,
+          "backend/src/lib/observability/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 1,
+          "backend/tests/contracts/": 1
+        }
+      },
+      "backend/src/modules/reporting/": {
+        "file_count": 3,
+        "files": [
+          "index.ts",
+          "routes.ts",
+          "service.ts"
+        ],
+        "total_loc": 133,
+        "avg_fan_in": 1.3,
+        "avg_fan_out": 2.3,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/http/": 1,
+          "backend/src/types/": 1,
+          "backend/src/lib/data/": 1,
+          "backend/src/lib/mappers/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 1
+        }
+      },
+      "backend/src/modules/saved-meals/": {
+        "file_count": 2,
+        "files": [
+          "index.ts",
+          "routes.ts"
+        ],
+        "total_loc": 368,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 3.5,
+        "zones": {
+          "production": 2
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/http/": 2,
+          "backend/src/middleware/": 1,
+          "backend/src/types/": 1,
+          "backend/src/lib/data/": 1,
+          "backend/src/lib/mappers/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 1
+        }
+      },
+      "backend/src/modules/user/": {
+        "file_count": 4,
+        "files": [
+          "index.ts",
+          "routes.ts",
+          "schemas.ts",
+          "services.ts"
+        ],
+        "total_loc": 497,
+        "avg_fan_in": 1.2,
+        "avg_fan_out": 2.8,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/http/": 3,
+          "backend/src/types/": 1,
+          "backend/src/lib/data/": 1,
+          "backend/src/modules/billing/": 1,
+          "backend/src/lib/observability/": 1,
+          "backend/src/utils/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/": 1,
+          "backend/tests/contracts/": 1
+        }
+      },
+      "backend/src/routes/": {
+        "file_count": 2,
+        "files": [
+          "health.ts",
+          "metrics.ts"
+        ],
+        "total_loc": 172,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 2.5,
+        "zones": {
+          "production": 2
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 3,
+          "backend/src/": 2
+        },
+        "imported_by_dirs": {
+          "backend/src/": 2
+        }
+      },
+      "backend/src/services/": {
+        "file_count": 4,
+        "files": [
+          "cache-service.ts",
+          "email-service.ts",
+          "openfoodfacts-api-client.ts",
+          "runtime.ts"
+        ],
+        "total_loc": 700,
+        "avg_fan_in": 2.2,
+        "avg_fan_out": 2.5,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "backend/src/lib/observability/": 5,
+          "backend/src/modules/billing/": 2,
+          "backend/src/": 1
+        },
+        "imported_by_dirs": {
+          "backend/src/modules/macros/": 3,
+          "backend/tests/lib/": 1,
+          "backend/src/modules/billing/": 1,
+          "backend/tests/": 1,
+          "backend/src/": 1
+        }
+      },
+      "backend/src/types/": {
+        "file_count": 2,
+        "files": [
+          "context.ts",
+          "index.ts"
+        ],
+        "total_loc": 58,
+        "avg_fan_in": 5.0,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "backend/src/modules/user/": 1,
+          "backend/src/modules/saved-meals/": 1,
+          "backend/src/middleware/": 1,
+          "backend/src/modules/auth/": 1,
+          "backend/src/modules/reporting/": 1,
+          "backend/src/modules/macros/": 1,
+          "backend/src/modules/billing/": 1,
+          "backend/src/modules/habits/": 1,
+          "backend/src/modules/goals/": 1
+        }
+      },
+      "frontend/": {
+        "file_count": 2,
+        "files": [
+          "run-test-debug.ts",
+          "test-rq-match.ts"
+        ],
+        "total_loc": 12,
+        "avg_fan_in": 0.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 1,
+          "script": 1
+        }
+      },
+      "frontend/src/": {
+        "file_count": 5,
+        "files": [
+          "AppRouter.tsx",
+          "app.tsx",
+          "main.tsx",
+          "service-worker.ts",
+          "sw-register.ts"
+        ],
+        "total_loc": 490,
+        "avg_fan_in": 0.6,
+        "avg_fan_out": 2.6,
+        "zones": {
+          "production": 5
+        },
+        "imports_from_dirs": {
+          "frontend/src/lib/": 4,
+          "frontend/src/routes/": 2,
+          "frontend/src/components/layout/": 1,
+          "frontend/src/api/": 1,
+          "frontend/src/components/auth/": 1
+        }
+      },
+      "frontend/src/api/": {
+        "file_count": 10,
+        "files": [
+          "auth.ts",
+          "billing.ts",
+          "core.ts",
+          "goals.ts",
+          "habits.ts",
+          "index.ts",
+          "macros.ts",
+          "reporting.ts",
+          "savedMeals.ts",
+          "user.ts"
+        ],
+        "total_loc": 1118,
+        "avg_fan_in": 2.3,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 10
+        },
+        "imported_by_dirs": {
+          "frontend/src/utils/__tests__/": 4,
+          "frontend/src/": 1
+        }
+      },
+      "frontend/src/components/animation/": {
+        "file_count": 4,
+        "files": [
+          "AnimatedNumber.tsx",
+          "PageTransition.tsx",
+          "ScrollTriggeredDiv.tsx",
+          "TextGenerateEffect.tsx"
+        ],
+        "total_loc": 339,
+        "avg_fan_in": 0.2,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 4
+        }
+      },
+      "frontend/src/components/auth/": {
+        "file_count": 2,
+        "files": [
+          "ClerkTokenSync.tsx",
+          "RequireCompleteProfile.tsx"
+        ],
+        "total_loc": 127,
+        "avg_fan_in": 0.5,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/": 1
+        }
+      },
+      "frontend/src/components/billing/": {
+        "file_count": 5,
+        "files": [
+          "PricingTable.tsx",
+          "ProBadge.tsx",
+          "ProFeature.tsx",
+          "UpgradeModal.tsx",
+          "UserCounter.tsx"
+        ],
+        "total_loc": 489,
+        "avg_fan_in": 1.4,
+        "avg_fan_out": 0.4,
+        "zones": {
+          "production": 5
+        }
+      },
+      "frontend/src/components/chart/": {
+        "file_count": 6,
+        "files": [
+          "AnalyticsToolbar.tsx",
+          "ChartCard.tsx",
+          "ChartTooltip.tsx",
+          "ChartTypes.ts",
+          "DateRangeSelector.tsx",
+          "LineChartComponent.tsx"
+        ],
+        "total_loc": 869,
+        "avg_fan_in": 0.5,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 6
+        }
+      },
+      "frontend/src/components/form/": {
+        "file_count": 10,
+        "files": [
+          "CardContainer.tsx",
+          "DateField.tsx",
+          "Dropdown.tsx",
+          "FormStyles.ts",
+          "FormTypes.ts",
+          "InfoCard.tsx",
+          "NumberField.tsx",
+          "QuantityUnitField.tsx",
+          "TextField.tsx",
+          "TimeField.tsx"
+        ],
+        "total_loc": 752,
+        "avg_fan_in": 0.1,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 10
+        },
+        "imports_from_dirs": {
+          "frontend/src/lib/": 5
+        }
+      },
+      "frontend/src/components/layout/": {
+        "file_count": 7,
+        "files": [
+          "DashboardPageContainer.tsx",
+          "FeaturePage.tsx",
+          "LogoButton.tsx",
+          "MainLayout.tsx",
+          "Navbar.tsx",
+          "PageBackground.tsx",
+          "PageHeader.tsx"
+        ],
+        "total_loc": 521,
+        "avg_fan_in": 0.6,
+        "avg_fan_out": 0.4,
+        "zones": {
+          "production": 7
+        },
+        "imported_by_dirs": {
+          "frontend/src/": 1
+        }
+      },
+      "frontend/src/components/macros/": {
+        "file_count": 4,
+        "files": [
+          "MacroComponents.tsx",
+          "MacroSlider.tsx",
+          "MacroTarget.tsx",
+          "MacroTargetBar.tsx"
+        ],
+        "total_loc": 530,
+        "avg_fan_in": 0.2,
+        "avg_fan_out": 0.8,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "frontend/src/components/utils/": 1,
+          "frontend/src/features/settings/types/": 1
+        }
+      },
+      "frontend/src/components/notifications/": {
+        "file_count": 2,
+        "files": [
+          "NotificationConstants.ts",
+          "NotificationTypes.ts"
+        ],
+        "total_loc": 6,
+        "avg_fan_in": 0.5,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/components/notifications/components/": 1
+        }
+      },
+      "frontend/src/components/notifications/components/": {
+        "file_count": 2,
+        "files": [
+          "FloatingNotification.tsx",
+          "NotificationManager.tsx"
+        ],
+        "total_loc": 274,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 1.0,
+        "zones": {
+          "production": 2
+        },
+        "imports_from_dirs": {
+          "frontend/src/components/notifications/": 1
+        }
+      },
+      "frontend/src/components/ui/": {
+        "file_count": 25,
+        "files": [
+          "Button.tsx",
+          "ContentImage.tsx",
+          "EmptyState.tsx",
+          "ErrorBoundary.tsx",
+          "GlobalLoadingOverlay.tsx",
+          "IconButton.tsx",
+          "IconButtonGroup.tsx",
+          "Icons.tsx",
+          "InfoTooltip.tsx",
+          "LoadingSpinner.tsx",
+          "LoadingStates.tsx",
+          "MetricCard.tsx",
+          "Modal.tsx",
+          "ProgressBar.tsx",
+          "ProgressiveBlur.tsx",
+          "RadialProgress.tsx",
+          "RangeSlider.tsx",
+          "StatusBadge.tsx",
+          "StatusIndicator.tsx",
+          "TabBar.tsx",
+          "TabButton.tsx",
+          "TopLoadingBar.tsx",
+          "UiTypes.ts",
+          "VirtualList.tsx",
+          "index.ts"
+        ],
+        "total_loc": 2731,
+        "avg_fan_in": 1.7,
+        "avg_fan_out": 2.0,
+        "zones": {
+          "production": 25
+        },
+        "imports_from_dirs": {
+          "frontend/src/lib/": 7,
+          "frontend/src/components/ui/hooks/": 2,
+          "frontend/src/components/utils/": 1
+        }
+      },
+      "frontend/src/components/ui/hooks/": {
+        "file_count": 2,
+        "files": [
+          "CardGlareHook.tsx",
+          "index.ts"
+        ],
+        "total_loc": 209,
+        "avg_fan_in": 1.5,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/components/ui/": 2
+        }
+      },
+      "frontend/src/components/utils/": {
+        "file_count": 2,
+        "files": [
+          "UiConstants.ts",
+          "index.ts"
+        ],
+        "total_loc": 189,
+        "avg_fan_in": 2.0,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/components/ui/": 1,
+          "frontend/src/components/macros/": 1
+        }
+      },
+      "frontend/src/features/auth/components/": {
+        "file_count": 5,
+        "files": [
+          "AuthPageShell.tsx",
+          "ClerkSignInForm.tsx",
+          "ClerkSignUpForm.tsx",
+          "ProfileCreationForm.tsx",
+          "SocialAuthOptions.tsx"
+        ],
+        "total_loc": 1369,
+        "avg_fan_in": 0.8,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 5
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/auth/": 4
+        }
+      },
+      "frontend/src/features/auth/": {
+        "file_count": 2,
+        "files": [
+          "constants.ts",
+          "index.ts"
+        ],
+        "total_loc": 38,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 8.0,
+        "zones": {
+          "production": 2
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/auth/pages/": 5,
+          "frontend/src/features/auth/utils/": 4,
+          "frontend/src/features/auth/components/": 4,
+          "frontend/src/features/auth/hooks/": 2
+        }
+      },
+      "frontend/src/features/auth/hooks/": {
+        "file_count": 2,
+        "files": [
+          "useAuthReady.ts",
+          "useSocialProfileData.ts"
+        ],
+        "total_loc": 152,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/auth/": 2
+        }
+      },
+      "frontend/src/features/auth/pages/": {
+        "file_count": 5,
+        "files": [
+          "AuthReadyPage.tsx",
+          "ProfileSetupPage.tsx",
+          "SignInPage.tsx",
+          "SignUpPage.tsx",
+          "SsoCallbackPage.tsx"
+        ],
+        "total_loc": 516,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 5
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/auth/": 5
+        }
+      },
+      "frontend/src/features/auth/utils/": {
+        "file_count": 4,
+        "files": [
+          "authHelpers.ts",
+          "profileValidation.ts",
+          "redirect.ts",
+          "socialAuth.ts"
+        ],
+        "total_loc": 393,
+        "avg_fan_in": 1.8,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 4
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/auth/": 4
+        }
+      },
+      "frontend/src/features/goals/": {
+        "file_count": 4,
+        "files": [
+          "calculations.ts",
+          "constants.ts",
+          "index.ts",
+          "types.ts"
+        ],
+        "total_loc": 268,
+        "avg_fan_in": 2.8,
+        "avg_fan_out": 2.5,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/goals/utils/": 4,
+          "frontend/src/features/goals/hooks/": 1,
+          "frontend/src/features/goals/utils/habits/": 1,
+          "frontend/src/features/goals/components/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/components/weight-goals/": 4,
+          "frontend/src/features/goals/utils/": 2
+        }
+      },
+      "frontend/src/features/goals/components/habits/": {
+        "file_count": 6,
+        "files": [
+          "HabitActions.tsx",
+          "HabitCard.tsx",
+          "HabitForm.tsx",
+          "HabitModal.tsx",
+          "HabitTracker.tsx",
+          "index.ts"
+        ],
+        "total_loc": 990,
+        "avg_fan_in": 2.2,
+        "avg_fan_out": 1.8,
+        "zones": {
+          "production": 6
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/goals/constants/": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/components/": 1
+        }
+      },
+      "frontend/src/features/goals/components/macros/": {
+        "file_count": 2,
+        "files": [
+          "MacroNutrient.tsx",
+          "MacroTargetForm.tsx"
+        ],
+        "total_loc": 312,
+        "avg_fan_in": 1.5,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/components/": 2,
+          "frontend/src/features/goals/components/weight-goals/": 1
+        }
+      },
+      "frontend/src/features/goals/components/ui-states/": {
+        "file_count": 2,
+        "files": [
+          "GoalsErrorState.tsx",
+          "GoalsLoadingSkeleton.tsx"
+        ],
+        "total_loc": 82,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/components/": 2
+        }
+      },
+      "frontend/src/features/goals/components/weight-goals/": {
+        "file_count": 5,
+        "files": [
+          "WeightGoalDashboard.tsx",
+          "WeightGoalForm.tsx",
+          "WeightGoalModal.tsx",
+          "WeightGoalProgressChart.tsx",
+          "WeightGoalStatus.tsx"
+        ],
+        "total_loc": 1321,
+        "avg_fan_in": 1.8,
+        "avg_fan_out": 1.4,
+        "zones": {
+          "production": 5
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/goals/": 4,
+          "frontend/src/features/goals/components/macros/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/components/": 5,
+          "frontend/src/features/goals/components/weight-logs/": 1
+        }
+      },
+      "frontend/src/features/goals/components/weight-logs/": {
+        "file_count": 3,
+        "files": [
+          "LogWeightModal.tsx",
+          "WeightLogList.tsx",
+          "WeightProgressTabs.tsx"
+        ],
+        "total_loc": 514,
+        "avg_fan_in": 1.3,
+        "avg_fan_out": 0.7,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/goals/components/weight-goals/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/components/": 3
+        }
+      },
+      "frontend/src/features/goals/hooks/": {
+        "file_count": 2,
+        "files": [
+          "index.ts",
+          "useMacroTarget.ts"
+        ],
+        "total_loc": 43,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/": 1
+        }
+      },
+      "frontend/src/features/goals/hooks/page/": {
+        "file_count": 6,
+        "files": [
+          "index.ts",
+          "useGoalsActions.ts",
+          "useGoalsData.ts",
+          "useGoalsMutations.ts",
+          "useGoalsPage.ts",
+          "useGoalsUiState.ts"
+        ],
+        "total_loc": 337,
+        "avg_fan_in": 1.8,
+        "avg_fan_out": 1.8,
+        "zones": {
+          "production": 6
+        }
+      },
+      "frontend/src/features/goals/utils/": {
+        "file_count": 5,
+        "files": [
+          "calorie.ts",
+          "goalUtilities.ts",
+          "progressAnalytics.ts",
+          "weightChartHelpers.ts",
+          "weightLogUtilities.ts"
+        ],
+        "total_loc": 724,
+        "avg_fan_in": 1.6,
+        "avg_fan_out": 0.4,
+        "zones": {
+          "production": 5
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/goals/": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/": 4
+        }
+      },
+      "frontend/src/features/goals/utils/habits/": {
+        "file_count": 3,
+        "files": [
+          "calculations.ts",
+          "habitUtilities.ts",
+          "index.ts"
+        ],
+        "total_loc": 268,
+        "avg_fan_in": 2.0,
+        "avg_fan_out": 1.3,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/goals/constants/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/goals/": 1
+        }
+      },
+      "frontend/src/features/landing/components/": {
+        "file_count": 14,
+        "files": [
+          "AnimatedUserFlow.tsx",
+          "BackToTopButton.tsx",
+          "BlogNotFound.tsx",
+          "CustomPricingCards.tsx",
+          "FeaturesSection.tsx",
+          "Footer.tsx",
+          "Header.tsx",
+          "HeroSection.tsx",
+          "LegalHeader.tsx",
+          "MarkdownComponents.tsx",
+          "PlanToggle.tsx",
+          "PricingCard.tsx",
+          "PricingSection.tsx",
+          "TrustIndicators.tsx"
+        ],
+        "total_loc": 1384,
+        "avg_fan_in": 1.6,
+        "avg_fan_out": 0.4,
+        "zones": {
+          "production": 14
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/landing/utils/": 1,
+          "frontend/src/features/landing/components/remotion/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/landing/": 14,
+          "frontend/src/features/landing/pages/": 4
+        }
+      },
+      "frontend/src/features/landing/components/remotion/": {
+        "file_count": 2,
+        "files": [
+          "DashboardAnimation.tsx",
+          "RemotionPlayer.tsx"
+        ],
+        "total_loc": 417,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/landing/components/": 1
+        }
+      },
+      "frontend/src/features/landing/pages/": {
+        "file_count": 5,
+        "files": [
+          "BlogArticlePage.tsx",
+          "BlogIndexPage.tsx",
+          "LandingPage.tsx",
+          "PrivacyPolicyPage.tsx",
+          "TermsAndConditionsPage.tsx"
+        ],
+        "total_loc": 1228,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.8,
+        "zones": {
+          "production": 5
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/landing/components/": 4
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/landing/": 5
+        }
+      },
+      "frontend/src/features/macroTracking/": {
+        "file_count": 3,
+        "files": [
+          "calculations.ts",
+          "constants.ts",
+          "index.ts"
+        ],
+        "total_loc": 118,
+        "avg_fan_in": 3.7,
+        "avg_fan_out": 2.3,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/macroTracking/hooks/": 1,
+          "frontend/src/features/macroTracking/components/": 1,
+          "frontend/src/features/macroTracking/types/": 1,
+          "frontend/src/features/macroTracking/utils/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/macroTracking/components/": 5,
+          "frontend/src/features/macroTracking/utils/": 1
+        }
+      },
+      "frontend/src/features/macroTracking/components/": {
+        "file_count": 16,
+        "files": [
+          "AddEntryForm.tsx",
+          "CalorieSearchForm.tsx",
+          "DailySummaryPanel.tsx",
+          "DesktopEntryTable.tsx",
+          "EditModal.tsx",
+          "EntryCard.tsx",
+          "EntryHistoryContext.tsx",
+          "EntryHistoryHelpers.ts",
+          "EntryHistoryPanel.tsx",
+          "EntryHistoryShared.ts",
+          "HomePageSkeletons.tsx",
+          "IngredientsList.tsx",
+          "MobileEntryCards.tsx",
+          "SavedMealButton.tsx",
+          "SavedMealsList.tsx",
+          "index.ts"
+        ],
+        "total_loc": 3599,
+        "avg_fan_in": 1.4,
+        "avg_fan_out": 1.6,
+        "zones": {
+          "production": 16
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/macroTracking/": 5,
+          "frontend/src/features/macroTracking/utils/": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/macroTracking/": 1
+        }
+      },
+      "frontend/src/features/macroTracking/components/edit-modal/": {
+        "file_count": 3,
+        "files": [
+          "IngredientCard.tsx",
+          "IngredientsPanel.tsx",
+          "MealDetailsSection.tsx"
+        ],
+        "total_loc": 572,
+        "avg_fan_in": 0.3,
+        "avg_fan_out": 0.3,
+        "zones": {
+          "production": 3
+        }
+      },
+      "frontend/src/features/macroTracking/hooks/": {
+        "file_count": 3,
+        "files": [
+          "index.ts",
+          "useHomePage.tsx",
+          "useMacroTargetCore.ts"
+        ],
+        "total_loc": 311,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.3,
+        "zones": {
+          "production": 3
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/macroTracking/": 1
+        }
+      },
+      "frontend/src/features/macroTracking/types/": {
+        "file_count": 2,
+        "files": [
+          "index.ts",
+          "macro.ts"
+        ],
+        "total_loc": 31,
+        "avg_fan_in": 0.5,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/macroTracking/": 1
+        }
+      },
+      "frontend/src/features/macroTracking/utils/": {
+        "file_count": 3,
+        "files": [
+          "historyExport.ts",
+          "index.ts",
+          "units.ts"
+        ],
+        "total_loc": 441,
+        "avg_fan_in": 2.3,
+        "avg_fan_out": 0.7,
+        "zones": {
+          "production": 3
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/macroTracking/components/": 2,
+          "frontend/src/features/macroTracking/": 1
+        }
+      },
+      "frontend/src/features/reporting/components/": {
+        "file_count": 13,
+        "files": [
+          "ActionCard.tsx",
+          "AtAGlanceSection.tsx",
+          "MacroDensityBreakdown.tsx",
+          "MacroSummaryStat.tsx",
+          "MealTimeBreakdown.tsx",
+          "MetricCard.tsx",
+          "NutritionInsights.tsx",
+          "RecommendationsSection.tsx",
+          "ReportingPageSkeleton.tsx",
+          "TrendDisplay.tsx",
+          "TrendsChartSection.tsx",
+          "UnifiedInsights.tsx",
+          "index.ts"
+        ],
+        "total_loc": 1798,
+        "avg_fan_in": 1.4,
+        "avg_fan_out": 2.2,
+        "zones": {
+          "production": 13
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/reporting/types/": 6,
+          "frontend/src/features/reporting/": 3,
+          "frontend/src/features/reporting/utils/": 3,
+          "frontend/src/features/reporting/hooks/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/reporting/pages/": 1,
+          "frontend/src/features/reporting/": 1
+        }
+      },
+      "frontend/src/features/reporting/": {
+        "file_count": 3,
+        "files": [
+          "constants.ts",
+          "index.ts",
+          "types.ts"
+        ],
+        "total_loc": 96,
+        "avg_fan_in": 2.3,
+        "avg_fan_out": 3.0,
+        "zones": {
+          "production": 3
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/reporting/hooks/": 2,
+          "frontend/src/features/reporting/constants/": 1,
+          "frontend/src/features/reporting/utils/": 1,
+          "frontend/src/features/reporting/components/": 1,
+          "frontend/src/features/reporting/pages/": 1,
+          "frontend/src/features/reporting/types/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/reporting/components/": 3,
+          "frontend/src/features/reporting/utils/": 2
+        }
+      },
+      "frontend/src/features/reporting/hooks/": {
+        "file_count": 2,
+        "files": [
+          "useMealTimeBreakdown.ts",
+          "useReportingLogic.ts"
+        ],
+        "total_loc": 378,
+        "avg_fan_in": 2.0,
+        "avg_fan_out": 1.0,
+        "zones": {
+          "production": 2
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/reporting/utils/": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/reporting/": 2,
+          "frontend/src/features/reporting/components/": 1,
+          "frontend/src/features/reporting/pages/": 1
+        }
+      },
+      "frontend/src/features/reporting/utils/": {
+        "file_count": 6,
+        "files": [
+          "dataProcessing.ts",
+          "dateUtilities.ts",
+          "index.ts",
+          "insightsCalculations.ts",
+          "macroCalculations.ts",
+          "unifiedInsightsUtilities.ts"
+        ],
+        "total_loc": 813,
+        "avg_fan_in": 3.2,
+        "avg_fan_out": 1.8,
+        "zones": {
+          "production": 6
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/reporting/": 2,
+          "frontend/src/features/reporting/constants/": 1,
+          "frontend/src/features/reporting/types/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/reporting/components/": 3,
+          "frontend/src/features/reporting/hooks/": 2,
+          "frontend/src/features/reporting/pages/": 1,
+          "frontend/src/features/reporting/": 1
+        }
+      },
+      "frontend/src/features/settings/components/": {
+        "file_count": 8,
+        "files": [
+          "BillingForm.tsx",
+          "ChangePasswordForm.tsx",
+          "ConnectedAccountsForm.tsx",
+          "FreeBillingView.tsx",
+          "ProBillingView.tsx",
+          "ProfileForm.tsx",
+          "SettingsLoadingSkeleton.tsx",
+          "index.ts"
+        ],
+        "total_loc": 1443,
+        "avg_fan_in": 1.5,
+        "avg_fan_out": 0.9,
+        "zones": {
+          "production": 8
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/settings/": 3
+        }
+      },
+      "frontend/src/features/settings/utils/": {
+        "file_count": 4,
+        "files": [
+          "calculations.ts",
+          "constants.ts",
+          "parseBillingError.ts",
+          "validation.ts"
+        ],
+        "total_loc": 314,
+        "avg_fan_in": 2.0,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 4
+        },
+        "imports_from_dirs": {
+          "frontend/src/features/settings/types/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/features/settings/": 4
+        }
+      },
+      "frontend/src/hooks/": {
+        "file_count": 11,
+        "files": [
+          "index.ts",
+          "useBeforeUnload.ts",
+          "useDeferredVisibility.ts",
+          "useErrorHandler.ts",
+          "useFeatureLoading.ts",
+          "useGlobalLoading.ts",
+          "useMutationErrorHandler.ts",
+          "usePageDataSync.ts",
+          "usePageMetadata.ts",
+          "usePrefersReducedMotion.ts",
+          "useSubscriptionStatus.ts"
+        ],
+        "total_loc": 723,
+        "avg_fan_in": 1.3,
+        "avg_fan_out": 0.8,
+        "zones": {
+          "production": 11
+        }
+      },
+      "frontend/src/hooks/queries/": {
+        "file_count": 9,
+        "files": [
+          "index.ts",
+          "useBilling.ts",
+          "useFoodSearch.ts",
+          "useGoals.ts",
+          "useHabits.ts",
+          "useMacroQueries.ts",
+          "useReportingQueries.ts",
+          "useSavedMeals.ts",
+          "useSettings.ts"
+        ],
+        "total_loc": 1304,
+        "avg_fan_in": 0.7,
+        "avg_fan_out": 0.8,
+        "zones": {
+          "production": 9
+        },
+        "imports_from_dirs": {
+          "frontend/src/hooks/queries/macro/": 2
+        }
+      },
+      "frontend/src/hooks/queries/macro/": {
+        "file_count": 2,
+        "files": [
+          "helpers.ts",
+          "optimistic.ts"
+        ],
+        "total_loc": 112,
+        "avg_fan_in": 1.5,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 2
+        },
+        "imported_by_dirs": {
+          "frontend/src/hooks/queries/": 2
+        }
+      },
+      "frontend/src/lib/": {
+        "file_count": 10,
+        "files": [
+          "blog.ts",
+          "classnameUtilities.ts",
+          "clerkAppearance.ts",
+          "index.ts",
+          "logger.ts",
+          "mutationErrorHandling.ts",
+          "posthogIntegration.tsx",
+          "queryClient.ts",
+          "queryKeys.ts",
+          "routerQueryUtilities.ts"
+        ],
+        "total_loc": 909,
+        "avg_fan_in": 2.8,
+        "avg_fan_out": 0.5,
+        "zones": {
+          "production": 10
+        },
+        "imports_from_dirs": {
+          "frontend/src/data/": 1
+        },
+        "imported_by_dirs": {
+          "frontend/src/components/ui/": 7,
+          "frontend/src/components/form/": 5,
+          "frontend/src/": 4
+        }
+      },
+      "frontend/src/routes/": {
+        "file_count": 4,
+        "files": [
+          "NotFoundPage.tsx",
+          "__root.tsx",
+          "authGuards.tsx",
+          "lazyPages.ts"
+        ],
+        "total_loc": 117,
+        "avg_fan_in": 0.8,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 4
+        },
+        "imported_by_dirs": {
+          "frontend/src/": 3
+        }
+      },
+      "frontend/src/store/ui/": {
+        "file_count": 4,
+        "files": [
+          "goals-ui-slice.ts",
+          "macro-ui-slice.ts",
+          "notifications-slice.ts",
+          "user-ui-slice.ts"
+        ],
+        "total_loc": 525,
+        "avg_fan_in": 0.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 4
+        }
+      },
+      "frontend/src/theme/": {
+        "file_count": 2,
+        "files": [
+          "designTokens.ts",
+          "theme.ts"
+        ],
+        "total_loc": 221,
+        "avg_fan_in": 1.0,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 2
+        }
+      },
+      "frontend/src/types/": {
+        "file_count": 6,
+        "files": [
+          "activity.ts",
+          "blog.ts",
+          "goal.ts",
+          "habit.ts",
+          "macro.ts",
+          "user.ts"
+        ],
+        "total_loc": 225,
+        "avg_fan_in": 0.3,
+        "avg_fan_out": 0.2,
+        "zones": {
+          "production": 6
+        }
+      },
+      "frontend/src/utils/": {
+        "file_count": 13,
+        "files": [
+          "appConstants.ts",
+          "chartColors.ts",
+          "chartUtilities.ts",
+          "constants.ts",
+          "dateUtilities.ts",
+          "errorHandling.ts",
+          "idGenerator.ts",
+          "nutritionCalculations.ts",
+          "nutritionTypes.ts",
+          "nutritionVisualizations.ts",
+          "tokenStorage.ts",
+          "userConstants.ts",
+          "validation.ts"
+        ],
+        "total_loc": 1230,
+        "avg_fan_in": 1.2,
+        "avg_fan_out": 0.2,
+        "zones": {
+          "production": 13
+        },
+        "imported_by_dirs": {
+          "frontend/src/utils/__tests__/": 3
+        }
+      },
+      "frontend/src/utils/constants/": {
+        "file_count": 3,
+        "files": [
+          "goal.ts",
+          "macro.ts",
+          "nutrition.ts"
+        ],
+        "total_loc": 50,
+        "avg_fan_in": 0.7,
+        "avg_fan_out": 0.0,
+        "zones": {
+          "production": 3
+        }
+      }
+    },
+    "root_files": [
+      {
+        "file": "rewrite.ts",
+        "loc": 5,
+        "fan_in": 0,
+        "fan_out": 0,
+        "role": "peripheral"
+      }
+    ],
+    "coupling_matrix": {
+      "frontend/src/components/ui/ → frontend/src/lib/": 7,
+      "frontend/src/features/reporting/components/ → frontend/src/features/reporting/types/": 6,
+      "backend/src/modules/macros/ → backend/src/lib/http/": 5,
+      "backend/src/services/ → backend/src/lib/observability/": 5,
+      "frontend/src/components/form/ → frontend/src/lib/": 5,
+      "frontend/src/features/auth/ → frontend/src/features/auth/pages/": 5,
+      "frontend/src/features/macroTracking/components/ → frontend/src/features/macroTracking/": 5,
+      "backend/src/ → backend/src/middleware/": 4,
+      "backend/src/middleware/ → backend/src/lib/observability/": 4,
+      "backend/src/modules/billing/ → backend/src/lib/observability/": 4,
+      "backend/src/modules/billing/ → backend/src/lib/http/": 4,
+      "frontend/src/ → frontend/src/lib/": 4,
+      "frontend/src/features/auth/ → frontend/src/features/auth/utils/": 4,
+      "frontend/src/features/auth/ → frontend/src/features/auth/components/": 4,
+      "frontend/src/features/goals/ → frontend/src/features/goals/utils/": 4,
+      "frontend/src/features/goals/components/weight-goals/ → frontend/src/features/goals/": 4,
+      "frontend/src/features/landing/pages/ → frontend/src/features/landing/components/": 4,
+      "backend/src/ → backend/src/lib/observability/": 3,
+      "backend/src/lib/http/ → backend/src/lib/observability/": 3,
+      "backend/src/modules/macros/ → backend/src/lib/data/": 3
+    }
+  },
+  "codebase_stats": {
+    "total_files": 387,
+    "total_loc": 47022
+  },
+  "authorization": {
+    "route_auth_coverage": {
+      "backend/src/app.ts": {
+        "handlers": 1,
+        "with_auth": 0,
+        "without_auth": 1,
+        "public_routes": 0
+      },
+      "backend/src/modules/auth/clerk-webhook.ts": {
+        "handlers": 1,
+        "with_auth": 0,
+        "without_auth": 1,
+        "public_routes": 0
+      }
+    },
+    "rls_coverage": {
+      "with_rls": [],
+      "without_rls": [
+        "habits",
+        "habits_new",
+        "macro_entries",
+        "macro_targets",
+        "saved_meals",
+        "stripe_events",
+        "subscriptions",
+        "user_details",
+        "users",
+        "weight_goals",
+        "weight_log"
+      ],
+      "files": {
+        "habits": [
+          "backend/src/db/schema.ts"
+        ],
+        "habits_new": [
+          "backend/src/db/schema.ts"
+        ],
+        "macro_entries": [
+          "backend/src/db/schema.ts"
+        ],
+        "macro_targets": [
+          "backend/src/db/schema.ts"
+        ],
+        "saved_meals": [
+          "backend/src/db/schema.ts"
+        ],
+        "stripe_events": [
+          "backend/src/db/schema.ts"
+        ],
+        "subscriptions": [
+          "backend/src/db/schema.ts"
+        ],
+        "user_details": [
+          "backend/src/db/schema.ts"
+        ],
+        "users": [
+          "backend/src/db/schema.ts"
+        ],
+        "weight_goals": [
+          "backend/src/db/schema.ts"
+        ],
+        "weight_log": [
+          "backend/src/db/schema.ts"
+        ]
+      }
+    },
+    "auth_patterns": {
+      "backend/src/middleware/clerk-auth.ts": 3,
+      "backend/src/middleware/clerk-guards.ts": 4,
+      "backend/src/modules/auth/routes.ts": 2,
+      "frontend/src/AppRouter.tsx": 9,
+      "frontend/src/components/auth/ClerkTokenSync.tsx": 2,
+      "frontend/src/components/auth/RequireCompleteProfile.tsx": 3,
+      "frontend/src/components/layout/MainLayout.tsx": 2,
+      "frontend/src/features/auth/components/ProfileCreationForm.tsx": 2,
+      "frontend/src/features/auth/hooks/useAuthReady.ts": 2,
+      "frontend/src/features/auth/pages/ProfileSetupPage.tsx": 2,
+      "frontend/src/features/auth/pages/SsoCallbackPage.tsx": 2,
+      "frontend/src/features/billing/pages/PricingPage.tsx": 2,
+      "frontend/src/features/landing/components/CustomPricingCards.tsx": 2,
+      "frontend/src/hooks/auth/useAuthQueries.ts": 2,
+      "frontend/src/routes/authGuards.tsx": 4
+    },
+    "auth_guard_patterns": {
+      "backend/src/middleware/clerk-guards.ts": 4,
+      "frontend/src/AppRouter.tsx": 9,
+      "frontend/src/components/auth/RequireCompleteProfile.tsx": 1,
+      "frontend/src/routes/authGuards.tsx": 1
+    },
+    "auth_usage_patterns": {
+      "backend/src/middleware/clerk-auth.ts": 3,
+      "backend/src/modules/auth/routes.ts": 2,
+      "frontend/src/components/auth/ClerkTokenSync.tsx": 2,
+      "frontend/src/components/auth/RequireCompleteProfile.tsx": 2,
+      "frontend/src/components/layout/MainLayout.tsx": 2,
+      "frontend/src/features/auth/components/ProfileCreationForm.tsx": 2,
+      "frontend/src/features/auth/hooks/useAuthReady.ts": 2,
+      "frontend/src/features/auth/pages/ProfileSetupPage.tsx": 2,
+      "frontend/src/features/auth/pages/SsoCallbackPage.tsx": 2,
+      "frontend/src/features/billing/pages/PricingPage.tsx": 2,
+      "frontend/src/features/landing/components/CustomPricingCards.tsx": 2,
+      "frontend/src/hooks/auth/useAuthQueries.ts": 2,
+      "frontend/src/routes/authGuards.tsx": 3
+    }
+  },
+  "ai_debt_signals": {
+    "file_signals": {
+      "backend/src/modules/auth/index.ts": {
+        "comment_ratio": 0.43
+      },
+      "backend/src/modules/goals/index.ts": {
+        "comment_ratio": 0.5
+      },
+      "backend/src/modules/habits/index.ts": {
+        "comment_ratio": 0.5
+      },
+      "backend/src/modules/reporting/index.ts": {
+        "comment_ratio": 0.5
+      },
+      "backend/src/modules/saved-meals/index.ts": {
+        "comment_ratio": 0.6
+      },
+      "backend/src/modules/user/index.ts": {
+        "comment_ratio": 0.5
+      },
+      "frontend/run-test-debug.ts": {
+        "comment_ratio": 1.0
+      },
+      "frontend/src/features/billing/index.ts": {
+        "comment_ratio": 0.6
+      },
+      "frontend/src/features/goals/utils/habits/index.ts": {
+        "comment_ratio": 0.33
+      },
+      "frontend/src/features/settings/utils/constants.ts": {
+        "comment_ratio": 0.67
+      }
+    },
+    "codebase_avg_comment_ratio": 0.065
+  },
+  "migration_signals": {
+    "pattern_pairs": [
+      {
+        "name": "class→functional components",
+        "old_count": 2,
+        "new_count": 105
+      },
+      {
+        "name": "var→let/const",
+        "old_count": 2,
+        "new_count": 299
+      }
+    ],
+    "mixed_extensions": [
+      "app"
+    ]
+  },
+  "scan_evidence": {
+    "complexity_hotspots": [
+      {
+        "file": "backend/src/modules/macros/routes.ts",
+        "loc": 698.0,
+        "complexity_score": 15.0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/pages/HomePage.tsx",
+        "loc": 366.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 1,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/EntryHistoryPanel.tsx",
+        "loc": 612.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "backend/src/modules/goals/routes.ts",
+        "loc": 549.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/DesktopEntryTable.tsx",
+        "loc": 510.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/AddEntryForm.tsx",
+        "loc": 505.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "backend/src/middleware/clerk-auth.ts",
+        "loc": 503.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-goals/WeightGoalForm.tsx",
+        "loc": 469.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/CalorieSearchForm.tsx",
+        "loc": 401.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/EditModal.tsx",
+        "loc": 381.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-logs/WeightLogList.tsx",
+        "loc": 252.0,
+        "complexity_score": 0,
+        "signals": [],
+        "component_count": 0,
+        "function_count": 0,
+        "monster_functions": 0,
+        "cyclomatic_hotspots": 0
+      }
+    ],
+    "dead_code": [
+      {
+        "file": "frontend/src/store/ui/notifications-slice.ts",
+        "kind": "orphaned",
+        "loc": 256
+      },
+      {
+        "file": "frontend/src/store/ui/user-ui-slice.ts",
+        "kind": "orphaned",
+        "loc": 148
+      },
+      {
+        "file": "frontend/src/store/ui/goals-ui-slice.ts",
+        "kind": "orphaned",
+        "loc": 96
+      },
+      {
+        "file": "frontend/src/service-worker.ts",
+        "kind": "orphaned",
+        "loc": 74
+      },
+      {
+        "file": "frontend/src/store/ui/macro-ui-slice.ts",
+        "kind": "orphaned",
+        "loc": 25
+      },
+      {
+        "file": "backend/src/middleware/clerk-guards.ts",
+        "kind": "orphaned",
+        "loc": 189
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/edit-modal/IngredientsPanel.tsx",
+        "kind": "orphaned",
+        "loc": 225
+      },
+      {
+        "file": "frontend/src/components/ui/MetricCard.tsx",
+        "kind": "orphaned",
+        "loc": 197
+      },
+      {
+        "file": "frontend/src/components/macros/MacroTarget.tsx",
+        "kind": "orphaned",
+        "loc": 136
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/edit-modal/MealDetailsSection.tsx",
+        "kind": "orphaned",
+        "loc": 105
+      },
+      {
+        "file": "backend/src/modules/billing/schemas.ts",
+        "kind": "orphaned",
+        "loc": 87
+      },
+      {
+        "file": "frontend/src/components/auth/RequireCompleteProfile.tsx",
+        "kind": "orphaned",
+        "loc": 80
+      },
+      {
+        "file": "frontend/src/components/form/FormTypes.ts",
+        "kind": "orphaned",
+        "loc": 78
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/HomePageSkeletons.tsx",
+        "kind": "orphaned",
+        "loc": 69
+      },
+      {
+        "file": "frontend/src/components/metrics/UserMetricsPanel.tsx",
+        "kind": "orphaned",
+        "loc": 68
+      },
+      {
+        "file": "frontend/src/components/ui/InfoTooltip.tsx",
+        "kind": "orphaned",
+        "loc": 64
+      },
+      {
+        "file": "frontend/src/components/ui/RadialProgress.tsx",
+        "kind": "orphaned",
+        "loc": 63
+      },
+      {
+        "file": "frontend/src/components/ui/TopLoadingBar.tsx",
+        "kind": "orphaned",
+        "loc": 54
+      },
+      {
+        "file": "frontend/src/hooks/queries/useSavedMeals.ts",
+        "kind": "orphaned",
+        "loc": 63
+      },
+      {
+        "file": "frontend/src/components/notifications/components/NotificationManager.tsx",
+        "kind": "orphaned",
+        "loc": 53
+      },
+      {
+        "file": "frontend/src/components/ui/GlobalLoadingOverlay.tsx",
+        "kind": "orphaned",
+        "loc": 52
+      },
+      {
+        "file": "frontend/src/features/goals/utils/weightChartHelpers.ts",
+        "kind": "orphaned",
+        "loc": 50
+      },
+      {
+        "file": "frontend/src/hooks/queries/useReportingQueries.ts",
+        "kind": "orphaned",
+        "loc": 49
+      },
+      {
+        "file": "frontend/src/components/layout/PageBackground.tsx",
+        "kind": "orphaned",
+        "loc": 46
+      },
+      {
+        "file": "frontend/src/components/layout/FeaturePage.tsx",
+        "kind": "orphaned",
+        "loc": 31
+      },
+      {
+        "file": "frontend/src/features/macroTracking/types/macro.ts",
+        "kind": "orphaned",
+        "loc": 26
+      },
+      {
+        "file": "frontend/src/components/layout/DashboardPageContainer.tsx",
+        "kind": "orphaned",
+        "loc": 25
+      },
+      {
+        "file": "frontend/src/hooks/usePageDataSync.ts",
+        "kind": "orphaned",
+        "loc": 25
+      },
+      {
+        "file": "frontend/src/types/user.ts",
+        "kind": "orphaned",
+        "loc": 25
+      },
+      {
+        "file": "frontend/src/hooks/queries/useFoodSearch.ts",
+        "kind": "orphaned",
+        "loc": 19
+      }
+    ],
+    "duplicate_clusters": [
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "backend/src/middleware/clerk-auth.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/reporting/pages/ReportingPage.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/components/form/DateField.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/components/utils/UiConstants.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/auth/components/ClerkSignInForm.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/utils/chartUtilities.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/utils/chartUtilities.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/landing/components/MarkdownComponents.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/landing/components/MarkdownComponents.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/settings/utils/calculations.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/components/form/DateField.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/auth/components/ClerkSignInForm.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/billing/pages/PricingPage.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/macroTracking/components/EntryCard.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/macroTracking/components/DesktopEntryTable.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/reporting/utils/dataProcessing.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "backend/src/modules/macros/routes.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/goals/constants.ts"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/landing/components/MarkdownComponents.tsx"
+        ]
+      },
+      {
+        "kind": "boilerplate_duplication",
+        "cluster_size": 1,
+        "name": "",
+        "files": [
+          "frontend/src/features/goals/pages/GoalsPage.tsx"
+        ]
+      }
+    ],
+    "large_file_distribution": {
+      "count": 11,
+      "median_loc": 503,
+      "p90_loc": 612,
+      "p99_loc": 698
+    },
+    "signal_density": [
+      {
+        "file": "backend/src/middleware/clerk-auth.ts",
+        "detector_count": 4,
+        "issue_count": 6,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "structural",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/DesktopEntryTable.tsx",
+        "detector_count": 4,
+        "issue_count": 5,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "structural",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/components/chart/LineChartComponent.tsx",
+        "detector_count": 4,
+        "issue_count": 4,
+        "detectors": [
+          "orphaned",
+          "props",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/components/ui/MetricCard.tsx",
+        "detector_count": 4,
+        "issue_count": 4,
+        "detectors": [
+          "orphaned",
+          "props",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "backend/scripts/migrate-dev-users-to-clerk.ts",
+        "detector_count": 3,
+        "issue_count": 6,
+        "detectors": [
+          "boilerplate_duplication",
+          "stale_wontfix",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/auth/components/ClerkSignInForm.tsx",
+        "detector_count": 3,
+        "issue_count": 6,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "backend/src/modules/macros/routes.ts",
+        "detector_count": 3,
+        "issue_count": 5,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "structural"
+        ]
+      },
+      {
+        "file": "frontend/src/features/macroTracking/pages/HomePage.tsx",
+        "detector_count": 3,
+        "issue_count": 5,
+        "detectors": [
+          "smells",
+          "structural",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/reporting/pages/ReportingPage.tsx",
+        "detector_count": 3,
+        "issue_count": 5,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/goals/pages/GoalsPage.tsx",
+        "detector_count": 3,
+        "issue_count": 5,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/billing/pages/PricingPage.tsx",
+        "detector_count": 3,
+        "issue_count": 4,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/components/form/DateField.tsx",
+        "detector_count": 3,
+        "issue_count": 4,
+        "detectors": [
+          "boilerplate_duplication",
+          "orphaned",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "backend/src/modules/billing/routes.ts",
+        "detector_count": 3,
+        "issue_count": 4,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "backend/src/modules/macros/service.ts",
+        "detector_count": 3,
+        "issue_count": 4,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "backend/src/modules/macros/entry-routes.ts",
+        "detector_count": 3,
+        "issue_count": 4,
+        "detectors": [
+          "boilerplate_duplication",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "backend/src/middleware/clerk-guards.ts",
+        "detector_count": 3,
+        "issue_count": 3,
+        "detectors": [
+          "orphaned",
+          "stale_wontfix",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/macroTracking/components/EntryHistoryPanel.tsx",
+        "detector_count": 3,
+        "issue_count": 3,
+        "detectors": [
+          "props",
+          "react",
+          "structural"
+        ]
+      },
+      {
+        "file": "frontend/src/hooks/queries/useFoodSearch.ts",
+        "detector_count": 3,
+        "issue_count": 3,
+        "detectors": [
+          "orphaned",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/components/animation/TextGenerateEffect.tsx",
+        "detector_count": 3,
+        "issue_count": 3,
+        "detectors": [
+          "orphaned",
+          "smells",
+          "test_coverage"
+        ]
+      },
+      {
+        "file": "frontend/src/features/goals/components/weight-goals/WeightGoalForm.tsx",
+        "detector_count": 3,
+        "issue_count": 3,
+        "detectors": [
+          "smells",
+          "structural",
+          "test_coverage"
+        ]
+      }
+    ],
+    "systemic_patterns": [
+      {
+        "pattern": "high_cyclomatic_complexity",
+        "file_count": 27,
+        "hotspots": [
+          "frontend/src/api/user.ts (1)",
+          "backend/src/modules/auth/clerk-webhook.ts (1)",
+          "frontend/src/components/ui/MetricCard.tsx (1)",
+          "frontend/src/features/auth/components/ClerkSignInForm.tsx (1)",
+          "frontend/src/features/auth/components/ClerkSignUpForm.tsx (1)"
+        ]
+      },
+      {
+        "pattern": "nested_closure",
+        "file_count": 22,
+        "hotspots": [
+          "frontend/src/components/auth/ClerkTokenSync.tsx (1)",
+          "frontend/src/components/ui/Modal.tsx (1)",
+          "frontend/src/features/auth/components/ProfileCreationForm.tsx (1)",
+          "frontend/src/features/auth/hooks/useSocialProfileData.ts (1)",
+          "frontend/src/features/auth/pages/SsoCallbackPage.tsx (1)"
+        ]
+      },
+      {
+        "pattern": "magic_number",
+        "file_count": 20,
+        "hotspots": [
+          "backend/src/middleware/correlation.ts (1)",
+          "backend/src/middleware/rate-limit.ts (1)",
+          "backend/src/middleware/request-limits.ts (1)",
+          "backend/src/utils/id-generator.ts (1)",
+          "backend/src/modules/billing/webhook-handler.ts (1)"
+        ]
+      },
+      {
+        "pattern": "monster_function",
+        "file_count": 14,
+        "hotspots": [
+          "frontend/src/features/auth/components/ProfileCreationForm.tsx (1)",
+          "frontend/src/features/auth/pages/SsoCallbackPage.tsx (1)",
+          "frontend/src/features/goals/pages/GoalsPage.tsx (1)",
+          "frontend/src/features/landing/components/AnimatedUserFlow.tsx (1)",
+          "frontend/src/features/landing/components/remotion/DashboardAnimation.tsx (1)"
+        ]
+      },
+      {
+        "pattern": "any_type",
+        "file_count": 14,
+        "hotspots": [
+          "backend/src/modules/auth/clerk-webhook.ts (1)",
+          "backend/src/modules/billing/routes.ts (1)",
+          "backend/src/modules/billing/stripe-service.ts (1)",
+          "backend/src/modules/billing/subscription-service.ts (1)",
+          "backend/src/modules/billing/webhook-handler.ts (1)"
+        ]
+      },
+      {
+        "pattern": "stub_function",
+        "file_count": 6,
+        "hotspots": [
+          "backend/src/modules/macros/service.ts (1)",
+          "frontend/src/components/ui/hooks/CardGlareHook.tsx (1)",
+          "frontend/src/hooks/useErrorHandler.ts (1)",
+          "frontend/src/hooks/useMutationErrorHandler.ts (1)",
+          "backend/src/index.ts (1)"
+        ]
+      },
+      {
+        "pattern": "async_no_await",
+        "file_count": 5,
+        "hotspots": [
+          "backend/src/middleware/clerk-auth.ts (1)",
+          "backend/src/modules/auth/clerk-webhook.ts (1)",
+          "frontend/src/features/auth/utils/authHelpers.ts (1)",
+          "frontend/src/features/settings/components/ChangePasswordForm.tsx (1)",
+          "backend/src/services/openfoodfacts-api-client.ts (1)"
+        ]
+      }
+    ],
+    "package_size_census": [
+      {
+        "package": "frontend",
+        "loc": 3724,
+        "pct_of_total": 67.5,
+        "disproportionate": true
+      },
+      {
+        "package": "backend",
+        "loc": 1793,
+        "pct_of_total": 32.5,
+        "disproportionate": true
+      },
+      {
+        "package": "shared",
+        "loc": 1,
+        "pct_of_total": 0.0,
+        "disproportionate": false
+      },
+      {
+        "package": "scripts",
+        "loc": 1,
+        "pct_of_total": 0.0,
+        "disproportionate": false
+      },
+      {
+        "package": "rewrite.ts",
+        "loc": 1,
+        "pct_of_total": 0.0,
+        "disproportionate": false
+      }
+    ]
+  }
+}

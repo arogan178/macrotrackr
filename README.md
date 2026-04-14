@@ -54,6 +54,12 @@ The frontend startup path establishes auth and provider ordering before routes m
 
 Provider order is part of app contract; keep it stable unless there is a strong reason to change it.
 
+## 📦 Dependency Governance
+
+Dependency/tooling policy for the workspace is documented in
+[`docs/DEPENDENCY_GOVERNANCE.md`](./docs/DEPENDENCY_GOVERNANCE.md).
+Use it when adding or updating dependencies to avoid cross-workspace drift.
+
 ### Frontend feature/public-surface conventions
 
 - Keep domain logic inside `frontend/src/features/<feature>/` and avoid cross-feature deep imports.
@@ -81,6 +87,7 @@ macro_tracker/
 │   │   ├── middleware/   # Elysia plugins (Clerk auth, rate limiting)
 │   │   └── modules/      # Feature modules (auth, macros, goals, reporting, billing, user)
 │   └── tests/            # API integration and contract tests
+├── scripts/              # One-off maintenance/refactor helpers
 └── package.json          # Root monorepo scripts
 ```
 
@@ -109,9 +116,17 @@ Useful workspace scripts:
 bun run dev:backend
 bun run dev:frontend
 bun run build
+bun run build:backend
+bun run start
+bun run --cwd backend test
 bun run lint
 bun run typecheck
 ```
+
+### 5. Maintenance scripts
+
+One-time helper scripts now live under `scripts/` at repository root.
+They are intentionally kept out of runtime paths and exist for targeted migration/refactor workflows.
 
 ### 4. Where to add new features?
 

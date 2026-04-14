@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { savedMealsApi } from "./savedMeals";
-import { setAuthToken, setGetToken } from "./core";
+import { apiClient } from "./core";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -16,16 +16,16 @@ describe("savedMealsApi", () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    vi.stubGlobal("fetch", fetchMock);
-    setAuthToken(null);
-    setGetToken(async () => null);
+    global.fetch = fetchMock as unknown as typeof fetch;
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    global.fetch = undefined as unknown as typeof fetch;
     vi.restoreAllMocks();
-    setAuthToken(null);
-    setGetToken(async () => null);
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   it("fetches saved meals without forcing a JSON content-type header", async () => {
@@ -84,7 +84,7 @@ describe("savedMealsApi", () => {
   it("deletes a saved meal by id", async () => {
     fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, id: 77 }));
 
-    await expect(savedMealsApi.delete(77)).resolves.toEqual({ success: true, id: 77 });
+    await expect(savedMealsApi.delete({ id: 77 })).resolves.toEqual({ success: true, id: 77 });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/saved-meals/77",

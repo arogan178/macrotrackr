@@ -2,7 +2,7 @@
 import { Elysia, t } from "elysia";
 import type { Database } from "bun:sqlite";
 import type Stripe from "stripe";
-import { logger } from "../../lib/logger";
+import { logger } from "../../lib/observability/logger";
 import {
   StripeService,
   type NormalizedWebhookEvent,

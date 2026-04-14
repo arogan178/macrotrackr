@@ -9,7 +9,7 @@ import {
   HomeIcon,
   LogoutIcon,
   MenuIcon,
-  ReportingIcon2,
+  ReportingIcon,
   SettingsIcon,
 } from "@/components/ui/Icons";
 import { useLogout } from "@/hooks/auth/useAuthQueries";
@@ -19,7 +19,7 @@ import LogoButton from "./LogoButton";
 const NAV_ITEMS_CONFIG = [
   { path: "/home", label: "Home", icon: HomeIcon },
   { path: "/goals", label: "Goals", icon: GoalsIcon },
-  { path: "/reporting", label: "Analytics", icon: ReportingIcon2 },
+  { path: "/reporting", label: "Analytics", icon: ReportingIcon },
   { path: "/settings", label: "Settings", icon: SettingsIcon },
 ] as const;
 

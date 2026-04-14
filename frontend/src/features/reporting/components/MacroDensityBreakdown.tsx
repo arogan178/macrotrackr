@@ -119,7 +119,7 @@ const MacroDensityBreakdown = ({
             />
             <XAxis
               dataKey="period"
-              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              tick={{ fill: "var(--text-muted)", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               dy={10}
@@ -128,7 +128,7 @@ const MacroDensityBreakdown = ({
               type="number"
               tickFormatter={(value) => `${Math.round(value * 100)}%`}
               domain={[0, 1]}
-              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              tick={{ fill: "var(--text-muted)", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
             />

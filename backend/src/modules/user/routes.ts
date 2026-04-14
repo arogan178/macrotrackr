@@ -7,18 +7,17 @@ import {
   safeQuery,
   safeExecute,
   withTransactionAsync,
-} from "../../lib/database";
+} from "../../lib/data/database";
 import {
   AccountNotSyncedError,
   NotFoundError,
   ConflictError,
   BadRequestError,
-} from "../../lib/errors";
-import { handleError } from "../../lib/responses";
-import { loggerHelpers } from "../../lib/logger";
+} from "../../lib/http/errors";
+import { handleError } from "../../lib/http/responses";
+import { loggerHelpers } from "../../lib/observability/logger";
 import { SubscriptionService } from "../billing/subscription-service";
-import { logger } from "../../lib/logger";
-import { requireAuth } from "../../middleware/clerk-guards";
+import { logger } from "../../lib/observability/logger";
 
 type UserRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
@@ -61,8 +60,6 @@ function normalizeSubscriptionStatus(
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
     group
-      .use(requireAuth)
-
       // GET /me - Get current user details
       .get(
         "/me",
@@ -304,7 +301,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            return handleError(error, context.set);
+            throw error;
           }
         },
         {
@@ -397,10 +394,13 @@ export const userRoutes = (app: Elysia) =>
                 loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
               }
 
-              return { success: true, message: "Profile details updated." };
+              return {
+                success: true,
+                message: "Profile details updated.",
+              };
             });
           } catch (error) {
-            return handleError(error, context.set);
+            throw error;
           }
         },
         {

@@ -29,7 +29,7 @@ describe("rate-limit middleware", () => {
       const middleware = rateLimit({
         windowMs: 60000,
         maxRequests: 100,
-        keyGenerator: (request) => "custom-key",
+        keyGenerator: () => "custom-key",
       });
       expect(middleware).toBeDefined();
     });

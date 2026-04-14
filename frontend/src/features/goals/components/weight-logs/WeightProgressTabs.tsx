@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { BarChartIcon, BookIcon, IconButton } from "@/components/ui";
 import { useWeightLog } from "@/hooks/queries/useGoals";
 
-import WeightGoalProgressChart from "./WeightGoalProgressChart";
+import WeightGoalProgressChart from "../weight-goals/WeightGoalProgressChart";
 import WeightLogList from "./WeightLogList";
 
 type TabId = "chart" | "list";

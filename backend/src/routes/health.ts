@@ -2,11 +2,7 @@
 import { Elysia } from "elysia";
 import type { Database } from "bun:sqlite";
 import { config } from "../config";
-import { logger } from "../lib/logger";
-
-interface HealthRouteContext {
-  db: Database;
-}
+import { logger } from "../lib/observability/logger";
 
 /**
  * Health check routes for monitoring and container orchestration.
@@ -32,10 +28,10 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
   // Health check endpoint for monitoring
   .get(
     "/health",
-    (context: HealthRouteContext) => {
+    (context) => {
       try {
         // Test database connectivity
-        const { db } = context;
+        const { db } = context as unknown as { db: Database };
         const dbCheck = db.prepare("SELECT 1 as health").get() as
           | { health: number }
           | undefined;
@@ -72,10 +68,10 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
   // Readiness probe for Kubernetes
   .get(
     "/health/ready",
-    (context: HealthRouteContext) => {
+    (context) => {
       try {
         // Check if all dependencies are ready
-        const { db } = context;
+        const { db } = context as unknown as { db: Database };
         const dbCheck = db.prepare("SELECT 1 as ready").get() as
           | { ready: number }
           | undefined;

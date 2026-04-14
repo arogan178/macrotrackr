@@ -1,5 +1,5 @@
 // src/lib/auth-utils.ts
-import { config } from "../config";
+import { config } from "../../config";
 
 /**
  * Parse JWT expiration string (e.g., "30d", "1h", "60m") to seconds
