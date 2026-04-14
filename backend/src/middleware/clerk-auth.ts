@@ -1,11 +1,32 @@
 // src/middleware/clerk-auth.ts
-import { clerkPlugin, verifyToken } from "elysia-clerk";
+import { clerkPlugin } from "elysia-clerk";
 import { Elysia } from "elysia";
 import { config } from "../config";
-import { AuthIntegrationError } from "../lib/errors";
-import { logger } from "../lib/logger";
-import { getInternalUserId } from "../lib/clerk-utils";
+import { AuthIntegrationError } from "../lib/http/errors";
+import { logger } from "../lib/observability/logger";
+import { getInternalUserId } from "../lib/auth/clerk-utils";
 import type { Database } from "bun:sqlite";
+
+type ClerkAuthResult = {
+  userId?: string;
+  sessionId?: string | null;
+};
+
+type ClerkUserObject = {
+  firstName?: string;
+  lastName?: string;
+  imageUrl?: string;
+  emailAddresses?: Array<{ id?: string; emailAddress?: string }>;
+  primaryEmailAddressId?: string | null;
+};
+
+type ClerkContextObject = {
+  getAuth?: (request?: Request) => unknown | Promise<unknown>;
+  auth?: (request?: Request) => unknown | Promise<unknown>;
+  users?: {
+    getUser?: (userId: string) => Promise<ClerkUserObject>;
+  };
+};
 
 // Define paths exempt from authentication checks.
 const AUTH_EXEMPT_PATHS = new Set([
@@ -131,7 +152,15 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       // authorizedParties: [config.CORS_ORIGIN as string],
     })
   )
-  .resolve({ as: "scoped" }, async (context: any) => {
+  .resolve(
+    { as: "scoped" },
+    async (context: {
+      auth?: unknown;
+      clerk?: unknown;
+      path?: string;
+      db?: Database;
+      request?: Request;
+    }) => {
     const { auth, clerk, path, db, request } = context;
     const requestPath = getRequestPath(context);
     
@@ -152,155 +181,38 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       if (config.NODE_ENV === 'development') {
         logger.debug({ path, requestPath }, "Skipping auth for exempt path");
       }
-      return { user: null, clerkUserId: null, internalUserId: null };
+      return {
+        user: null,
+        authenticatedUser: null,
+        clerkUserId: null,
+        internalUserId: null,
+      };
     }
 
     try {
-      const resolveBearerToken = () => {
-        const authHeader = request?.headers?.get("authorization");
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
-          return null;
-        }
-        const token = authHeader.slice(7).trim();
-        return token.length > 0 ? token : null;
-      };
-
-      const verifyBearerTokenFallback = async () => {
-        const token = resolveBearerToken();
-        if (!token) {
-          return { auth: null as { userId: string; sessionId: string | null } | null, integrationError: null as Error | null };
-        }
-
-        try {
-          const verified = await verifyToken(token, {
-            secretKey: config.CLERK_SECRET_KEY,
-          });
-
-          const fallbackUserId =
-            verified && typeof verified.sub === "string" ? verified.sub : null;
-          if (!fallbackUserId) {
-            return { auth: null as { userId: string; sessionId: string | null } | null, integrationError: null as Error | null };
-          }
-
-          return {
-            auth: {
-              userId: fallbackUserId,
-              sessionId:
-                verified && typeof verified.sid === "string"
-                  ? verified.sid
-                  : null,
-            },
-            integrationError: null as Error | null,
-          };
-        } catch (error) {
-          const errorMessage = String(error).toLowerCase();
-          const isTokenError = errorMessage.includes("jwt") || 
-                               errorMessage.includes("token") || 
-                               errorMessage.includes("signature") || 
-                               errorMessage.includes("expired");
-
-          if (isTokenError) {
-            // Token verification failures (expired, invalid signature) should result in 401, not 500.
-            // We treat them as an invalid token by returning auth: null, integrationError: null.
-            logger.warn(
-              { path, requestPath, error: String(error) },
-              "Bearer token verification fallback failed (invalid or expired token)"
-            );
-            return {
-              auth: null as { userId: string; sessionId: string | null } | null,
-              integrationError: null as Error | null,
-            };
-          }
-
-          logger.error(
-            { path, requestPath, error },
-            "Bearer token verification fallback failed with unexpected error"
-          );
-
-          return {
-            auth: null as { userId: string; sessionId: string | null } | null,
-            integrationError:
-              error instanceof Error
-                ? error
-                : new Error(String(error)),
-          };
-        }
-      };
-
-      const resolveAuth = async () => {
-        if (typeof auth === "function") {
-          return auth();
-        }
-
-        // In some Elysia lifecycles, auth can already be the resolved auth object.
-        if (auth && typeof auth === "object") {
-          return auth;
-        }
-
-        const clerkClient = clerk as Record<string, any> | null;
-        if (!clerkClient) {
-          return null;
-        }
-
-        if (typeof clerkClient.getAuth === "function") {
-          return clerkClient.getAuth(request);
-        }
-
-        if (typeof clerkClient.auth === "function") {
-          return clerkClient.auth(request);
-        }
-
-        logger.warn(
-          { path, requestPath },
-          "No compatible Clerk auth resolver found on context"
-        );
-        return null;
-      };
-
-      let authResult = await resolveAuth();
+      const authResult = auth as ClerkAuthResult | undefined;
 
       if (!authResult?.userId) {
-        const fallbackAuthResult = await verifyBearerTokenFallback();
-        if (fallbackAuthResult.integrationError) {
-          throw new AuthIntegrationError(
-            "Failed to verify authentication token with Clerk",
-          );
-        }
-        if (fallbackAuthResult.auth) {
-          authResult = fallbackAuthResult.auth;
-        }
+        logger.warn({ path, requestPath }, "No valid Clerk session token found in context");
+        return {
+          user: null,
+          authenticatedUser: null,
+          clerkUserId: null,
+          internalUserId: null,
+        };
       }
 
-      if (!authResult) {
-        logger.warn({ path, requestPath }, "No auth function available in context");
-        return { user: null, clerkUserId: null, internalUserId: null };
-      }
-
-      const userId = authResult?.userId;
-      
-      // Debug logging - only in development
-      if (config.NODE_ENV === 'development') {
-        logger.debug({ 
-          path, 
-          requestPath,
-          userId, 
-          sessionId: authResult?.sessionId,
-          hasAuthResult: !!authResult 
-        }, "Auth function called");
-      }
-      
-      if (!userId) {
-        logger.warn(
-          { path, requestPath, authResult },
-          "No userId in auth result - no valid Clerk session token found"
-        );
-        return { user: null, clerkUserId: null, internalUserId: null };
-      }
+      const userId = authResult.userId;
 
       // Fetch the full user object from Clerk if needed
-      let clerkUser = null;
+      let clerkUser: ClerkUserObject | null = null;
       try {
-        clerkUser = await clerk.users.getUser(userId);
+        const clerkClient = clerk as ClerkContextObject | null;
+        if (!clerkClient?.users?.getUser) {
+          throw new AuthIntegrationError("Clerk users client is unavailable");
+        }
+
+        clerkUser = await clerkClient.users.getUser(userId);
       } catch (err) {
         logger.error({ userId, error: err }, "Failed to fetch Clerk user details");
         throw new AuthIntegrationError(
@@ -336,8 +248,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       }, "Clerk auth middleware - internal user ID lookup result");
 
       // Return user info for use in route handlers
-      return {
-        user: {
+      const authenticatedUser = {
           userId: internalUserId ?? undefined,
           id: userId,
           clerkUserId: userId,
@@ -345,7 +256,11 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
           firstName: clerkUser?.firstName,
           lastName: clerkUser?.lastName,
           imageUrl: clerkUser?.imageUrl,
-        },
+        };
+
+      return {
+        user: authenticatedUser,
+        authenticatedUser,
         clerkUserId: userId,
         internalUserId,
         clerkClient: clerk,
@@ -358,10 +273,21 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
       logger.error({ error: err, path, requestPath }, "Clerk authentication error");
       throw new AuthIntegrationError("Clerk authentication middleware failed");
     }
-  })
+    },
+  )
   // Authentication guard - must be after the derive to check if user exists
-  .onBeforeHandle({ as: "scoped" }, (context: any) => {
-    const { user, internalUserId, path, set } = context;
+  .onBeforeHandle({ as: "scoped" }, (context) => {
+    const typedContext = context as {
+      user: ClerkAuthContext["user"];
+      internalUserId: number | null;
+      path?: string;
+      set: {
+        status?: number | string;
+      };
+      request?: Request;
+    };
+
+    const { user, internalUserId, path, set } = typedContext;
     const requestPath = getRequestPath(context);
     
     // Skip authentication for exempt paths
@@ -404,7 +330,16 @@ export interface ClerkAuthContext {
     lastName?: string;
     imageUrl?: string;
   } | null;
+  authenticatedUser: {
+    userId?: number | null;
+    id: string;
+    clerkUserId: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+    imageUrl?: string;
+  } | null;
   clerkUserId: string | null;
   internalUserId: number | null;
-  clerkClient?: any;
+  clerkClient?: unknown;
 }

@@ -65,9 +65,14 @@ const ConnectedAccountsForm = () => {
   const [isConnecting, setIsConnecting] = useState<ProviderKey | null>(null);
   const [_isDisconnecting, setIsDisconnecting] = useState(false);
 
+  type ExternalAccountCreateParams = {
+    strategy: (typeof PROVIDERS)[ProviderKey]["strategy"];
+    redirectUrl: string;
+  };
+
   // Wrap both operations with reverification
   const createExternalAccount = useReverification(
-    (parameters: { strategy: any; redirectUrl: string }) =>
+    (parameters: ExternalAccountCreateParams) =>
       user?.createExternalAccount(parameters),
   );
 

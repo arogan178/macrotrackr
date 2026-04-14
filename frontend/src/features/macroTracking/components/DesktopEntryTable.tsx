@@ -4,6 +4,7 @@ import {
   flexRender,
   getCoreRowModel,
   useReactTable,
+  type Row,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
@@ -11,15 +12,14 @@ import { AnimatePresence, motion } from "motion/react";
 import { MacroCell } from "@/components/macros/MacroComponents";
 import { ChevronDownIcon, IconButton, IconButtonGroup } from "@/components/ui";
 
+import { useEntryHistoryController } from "./EntryHistoryContext";
 import type {
-  EntryHistoryController,
   GroupedEntry,
 } from "./EntryHistoryShared";
 import { IngredientsList } from "./IngredientsList";
 
 interface DesktopEntryTableProps {
   groupedEntries: GroupedEntry[];
-  controller: EntryHistoryController;
 }
 
 type TableRowData = GroupedEntry & {
@@ -30,7 +30,8 @@ type TableRowData = GroupedEntry & {
 const columnHelper = createColumnHelper<TableRowData>();
 
 const DesktopEntryTable = memo(
-  ({ groupedEntries, controller }: DesktopEntryTableProps) => {
+  ({ groupedEntries }: DesktopEntryTableProps) => {
+    const controller = useEntryHistoryController();
     const {
       formatDate,
       formatTimeFromEntry,
@@ -330,10 +331,10 @@ const DesktopEntryTable = memo(
     });
 
     const renderRow = (
-      row: any,
+      row: Row<TableRowData>,
       data: TableRowData,
       isVirtualized: boolean,
-      virtualRowProps?: { start: number; measureRef: any },
+      virtualRowProps?: { start: number; measureRef: (el: HTMLDivElement | null) => void },
     ) => {
       const isGroup = data.isGroup;
       const parentDate = data.parentDate ?? data.date;
@@ -379,7 +380,7 @@ const DesktopEntryTable = memo(
       return (
         <motion.div key={animationKey} {...commonProps} {...motionProps}>
           <div className="flex w-full items-center">
-            {row?.getVisibleCells().map((cell: any) => (
+            {row?.getVisibleCells().map((cell) => (
               <div
                 key={cell.id}
                 className="flex min-h-12 items-center justify-center px-4 py-2.5 text-center"

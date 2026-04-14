@@ -1,6 +1,6 @@
 // src/middleware/rate-limit.ts
 import { Elysia } from "elysia";
-import { loggerHelpers } from "../lib/logger";
+import { loggerHelpers } from "../lib/observability/logger";
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds

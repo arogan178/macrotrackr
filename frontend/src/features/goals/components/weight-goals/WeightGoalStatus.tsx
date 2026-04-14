@@ -25,7 +25,7 @@ import type { WeightGoals } from "@/types/goal";
 import type { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 import { formatDateShort } from "@/utils/dateUtilities";
 
-import MacroNutrient from "./MacroNutrient";
+import MacroNutrient from "../macros/MacroNutrient";
 
 interface WeightGoalStatusProps {
   startingWeight: number;

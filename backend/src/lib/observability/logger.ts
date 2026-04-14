@@ -1,13 +1,19 @@
 // src/lib/logger.ts
 import pino from "pino";
-import { config } from "../config";
+import { config } from "../../config";
 
 // Data sanitization for security - remove/mask sensitive fields
-const sanitizeData = (data: any): any => {
+const sanitizeData = (data: unknown): unknown => {
   if (!data || typeof data !== "object") return data;
 
+  if (Array.isArray(data)) {
+    return data.map((item) => sanitizeData(item));
+  }
+
   // Create a copy to avoid mutating original data
-  const sanitized = { ...data };
+  const sanitized: Record<string, unknown> = {
+    ...(data as Record<string, unknown>),
+  };
 
   // Remove/mask sensitive fields
   const sensitiveFields = [
@@ -88,16 +94,32 @@ const createLogger = () => {
     // Custom serializers for error objects
     serializers: {
       error: pino.stdSerializers.err,
-      req: (req: any) => ({
-        method: req.method,
-        url: req.url,
-        userAgent: req.headers?.["user-agent"],
-        correlationId: req.correlationId,
-      }),
-      res: (res: any) => ({
-        statusCode: res.statusCode,
-        duration: res.duration,
-      }),
+      req: (req: unknown) => {
+        const request = req as {
+          method?: string;
+          url?: string;
+          headers?: Record<string, string | undefined>;
+          correlationId?: string;
+        };
+
+        return {
+          method: request.method,
+          url: request.url,
+          userAgent: request.headers?.["user-agent"],
+          correlationId: request.correlationId,
+        };
+      },
+      res: (res: unknown) => {
+        const response = res as {
+          statusCode?: number;
+          duration?: number;
+        };
+
+        return {
+          statusCode: response.statusCode,
+          duration: response.duration,
+        };
+      },
     },
   });
 };
@@ -107,7 +129,7 @@ export const logger = createLogger();
 // Helper functions for common logging patterns
 export const loggerHelpers = {
   // API request logging
-  apiRequest: (method: string, path: string, userId?: number, data?: any) => {
+  apiRequest: (method: string, path: string, userId?: number, data?: unknown) => {
     logger.info(
       {
         type: "api_request",
@@ -169,12 +191,16 @@ export const loggerHelpers = {
     success: boolean = true
   ) => {
     const level = success ? "info" : "warn";
+    const sanitizedEmail = email
+      ? (sanitizeData({ email }) as { email?: string }).email
+      : undefined;
+
     logger[level](
       {
         type: "auth_event",
         event,
         userId,
-        email: email ? sanitizeData({ email }).email : undefined,
+        email: sanitizedEmail,
         success,
       },
       `Auth: ${event} ${success ? "successful" : "failed"}`
@@ -184,7 +210,7 @@ export const loggerHelpers = {
   // Security event logging
   security: (
     event: string,
-    details: any,
+    details: unknown,
     severity: "low" | "medium" | "high" = "medium"
   ) => {
     const level =
@@ -201,7 +227,7 @@ export const loggerHelpers = {
   },
 
   // Performance logging
-  performance: (operation: string, duration: number, details?: any) => {
+  performance: (operation: string, duration: number, details?: unknown) => {
     const level = duration > 1000 ? "warn" : "debug";
     logger[level](
       {
@@ -215,7 +241,7 @@ export const loggerHelpers = {
   },
 
   // Error logging with context
-  error: (error: Error, context?: any, userId?: number) => {
+  error: (error: Error, context?: unknown, userId?: number) => {
     logger.error(
       {
         type: "error",

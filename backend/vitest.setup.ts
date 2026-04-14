@@ -1,5 +1,3 @@
-import { vi } from "vitest";
-
 process.env.JWT_SECRET = "test_jwt_secret_must_be_long_enough_32_chars";
 process.env.STRIPE_SECRET_KEY = "test_stripe_key";
 process.env.STRIPE_WEBHOOK_SECRET = "test_stripe_webhook_secret";

@@ -1,5 +1,5 @@
 import { authApi } from "@/api/auth";
-import { API_BASE_URL, ApiError, getHeaders, handleResponse } from "@/api/core";
+import { ApiError, apiClient } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import { getActivityLevelFromString } from "@/utils/userConstants";
 
@@ -97,12 +97,11 @@ export type UserSettingsPayload = Partial<{
 }>;
 
 export const userApi = {
+  /**
+   * @throws {ApiError}
+   */
   getUserDetails: async (): Promise<UserDetailsResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/user/me`, {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-    const result = await handleResponse(response);
+    const result = await apiClient.get<unknown>("/api/user/me");
     const normalizedResult = normalizeUserDetailsResponse(result);
     if (normalizedResult) {
       return normalizedResult;
@@ -116,13 +115,21 @@ export const userApi = {
     );
   },
 
-  syncAndGetUserDetails: async (token?: string): Promise<UserDetailsResponse> => {
-    await authApi.syncUser(token);
+  /**
+   * @throws {ApiError}
+   */
+  syncAndGetUserDetails: async ({ token }: { token?: string } = {}): Promise<UserDetailsResponse> => {
+    await authApi.syncUser({ token });
 
     return userApi.getUserDetails();
   },
 
-  updateSettings: async (settings: UserSettingsPayload) => {
+  /**
+   * @throws {ApiError}
+   */
+  updateSettings: async (
+    settings: UserSettingsPayload,
+  ): Promise<{ success: boolean; message: string }> => {
     const payloadToSend = { ...settings };
     if (
       payloadToSend.activityLevel !== undefined &&
@@ -133,19 +140,21 @@ export const userApi = {
       );
     }
 
-    const response = await fetch(`${API_BASE_URL}/api/user/settings`, {
-      method: "PUT",
-      headers: await getHeaders(),
-      body: JSON.stringify(payloadToSend),
-      credentials: "include",
-    });
+    const result = await apiClient.put<{
+      success?: boolean;
+      message?: string;
+      data?: { success?: boolean; message?: string };
+    }>("/api/user/settings", payloadToSend);
 
-    return (await handleResponse(response)) as {
-      success: boolean;
-      message: string;
+    return {
+      success: result.data?.success ?? result.success ?? false,
+      message: result.data?.message ?? result.message ?? "Settings updated.",
     };
   },
 
+  /**
+   * @throws {ApiError}
+   */
   completeProfile: async (
     profileData: Partial<
       Pick<
@@ -153,17 +162,17 @@ export const userApi = {
         "dateOfBirth" | "height" | "weight" | "gender" | "activityLevel"
       >
     >,
-  ) => {
-    const response = await fetch(`${API_BASE_URL}/api/user/complete-profile`, {
-      method: "POST",
-      headers: await getHeaders(),
-      body: JSON.stringify(profileData),
-      credentials: "include",
-    });
+  ): Promise<{ success: boolean; message: string }> => {
+    const result = await apiClient.post<{
+      success?: boolean;
+      message?: string;
+      data?: { success?: boolean; message?: string };
+    }>("/api/user/complete-profile", profileData);
 
-    return (await handleResponse(response)) as {
-      success: boolean;
-      message: string;
+    return {
+      success: result.data?.success ?? result.success ?? false,
+      message:
+        result.data?.message ?? result.message ?? "Profile updated successfully.",
     };
   },
 };

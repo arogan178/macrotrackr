@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
+import { apiClient, type ApiError } from "@/api/core";
 
 export interface MacroDensitySummaryParameters {
   startDate?: string;
@@ -16,23 +16,20 @@ export interface MacroDensitySummaryItem {
 }
 
 export const reportingApi = {
+  /**
+   * @throws {ApiError}
+   */
   getMacroDensitySummary: async (
     parameters: MacroDensitySummaryParameters = {},
   ): Promise<MacroDensitySummaryItem[]> => {
-    const url = new URL(
-      `${API_BASE_URL}/api/reporting/nutrient-density-summary`,
-    );
-    if (parameters.startDate)
-      url.searchParams.append("startDate", parameters.startDate);
-    if (parameters.endDate)
-      url.searchParams.append("endDate", parameters.endDate);
-    if (parameters.groupBy)
-      url.searchParams.append("groupBy", parameters.groupBy);
-    const response = await fetch(url.toString(), {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as MacroDensitySummaryItem[];
+    const searchParams = new URLSearchParams();
+    if (parameters.startDate) searchParams.append("startDate", parameters.startDate);
+    if (parameters.endDate) searchParams.append("endDate", parameters.endDate);
+    if (parameters.groupBy) searchParams.append("groupBy", parameters.groupBy);
+    
+    const queryString = searchParams.toString();
+    const url = `/api/reporting/nutrient-density-summary${queryString ? `?${queryString}` : ""}`;
+    
+    return apiClient.get<MacroDensitySummaryItem[]>(url);
   },
 };

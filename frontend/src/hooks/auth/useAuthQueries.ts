@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
-import { setAuthToken } from "@/api/core";
+import { apiClient } from "@/api/core";
 import { userApi, type UserDetailsResponse } from "@/api/user";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
@@ -63,7 +63,7 @@ export function useLogout() {
     mutationFn: async (): Promise<void> => {
       // Remove token from storage
       removeToken();
-      setAuthToken(null);
+      apiClient.setAuthToken(null);
 
       // Sign out from Clerk to clear session cookies
       await signOut();

@@ -24,6 +24,7 @@ import {
   formatEntryDate,
   formatTimeFromEntry,
 } from "./EntryHistoryHelpers";
+import { EntryHistoryContext } from "./EntryHistoryContext";
 import type { EntryHistoryController } from "./EntryHistoryShared";
 import MobileEntryCards from "./MobileEntryCards";
 
@@ -402,19 +403,15 @@ const EntryHistoryComponent = function EntryHistory({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          <div className="hidden lg:block">
-            <DesktopEntryTable
-              groupedEntries={displayedEntries}
-              controller={controller}
-            />
-          </div>
+          <EntryHistoryContext.Provider value={controller}>
+            <div className="hidden lg:block">
+              <DesktopEntryTable groupedEntries={displayedEntries} />
+            </div>
 
-          <div className="lg:hidden">
-            <MobileEntryCards
-              groupedEntries={displayedEntries}
-              controller={controller}
-            />
-          </div>
+            <div className="lg:hidden">
+              <MobileEntryCards groupedEntries={displayedEntries} />
+            </div>
+          </EntryHistoryContext.Provider>
 
           {(hasMoreDates || hasMore || displayedDateCount > 5) && (
             <motion.div
