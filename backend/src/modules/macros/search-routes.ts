@@ -1,18 +1,17 @@
-import { BadRequestError } from "../../lib/errors";
+import { BadRequestError } from "../../lib/http/errors";
 import {
   buildFoodSearchCacheKey,
   normalizeFoodSearchQuery,
-} from "../../lib/openfoodfacts-api-client";
-import type { FoodProductResult } from "../../lib/openfoodfacts-api-client";
+} from "../../services/openfoodfacts-api-client";
+import type { FoodProductResult } from "../../services/openfoodfacts-api-client";
 import { MacroSchemas } from "./schemas";
 import type { MacrosRouteContext } from "./service";
 
 export const registerMacroSearchRoutes = (group: any) =>
   group.get(
     "/search",
-    async (context: any) => {
-      const { query, openFoodFactsApiClient, cacheService: cache } =
-        context as MacrosRouteContext;
+    async (context: MacrosRouteContext) => {
+      const { query, openFoodFactsApiClient, cacheService: cache } = context;
 
       const rawSearchQuery = query?.q;
       if (!rawSearchQuery) {

@@ -3,8 +3,8 @@ import { Elysia } from "elysia";
 import { WebhookVerificationError, Webhook as SvixWebhook } from "svix";
 import type { Database } from "bun:sqlite";
 import { config } from "../../config";
-import { logger } from "../../lib/logger";
-import { safeQuery, safeExecute } from "../../lib/database";
+import { logger } from "../../lib/observability/logger";
+import { safeQuery, safeExecute } from "../../lib/data/database";
 
 // Type for Clerk webhook events
 interface ClerkWebhookEvent {

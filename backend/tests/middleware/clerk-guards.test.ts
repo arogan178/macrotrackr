@@ -1,12 +1,10 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   requireAuth,
-  requirePro,
   FREE_TIER_LIMITS,
   checkFeatureLimit,
   checkProStatus,
   type FeatureLimitKey,
-  type FeatureLimitResult,
 } from "../../src/middleware/clerk-guards";
 
 describe("clerk-guards", () => {
@@ -44,17 +42,6 @@ describe("clerk-guards", () => {
     it("should be an Elysia instance", () => {
       expect(requireAuth).toBeDefined();
       expect(typeof requireAuth).toBe("object");
-    });
-  });
-
-  describe("requirePro", () => {
-    it("should be defined", () => {
-      expect(requirePro).toBeDefined();
-    });
-
-    it("should be an Elysia instance", () => {
-      expect(requirePro).toBeDefined();
-      expect(typeof requirePro).toBe("object");
     });
   });
 

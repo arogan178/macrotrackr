@@ -1,6 +1,6 @@
 // src/lib/responses.ts
 import { isAppError } from "./errors";
-import { loggerHelpers } from "./logger";
+import { loggerHelpers } from "../observability/logger";
 
 export interface SuccessResponse<T = unknown> {
   success: true;
@@ -116,4 +116,4 @@ export {
   transformKeysToSnake,
   transformArrayToCamel,
   transformArrayToSnake,
-} from "./mappers";
+} from "../mappers";

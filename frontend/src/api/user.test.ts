@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authApi } from "./auth";
-import { setAuthToken, setGetToken } from "./core";
+import { apiClient } from "./core";
 import { userApi } from "./user";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
@@ -17,16 +17,16 @@ describe("userApi", () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    vi.stubGlobal("fetch", fetchMock);
-    setAuthToken(null);
-    setGetToken(async () => null);
+    global.fetch = fetchMock as unknown as typeof fetch;
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    global.fetch = undefined as unknown as typeof fetch;
     vi.restoreAllMocks();
-    setAuthToken(null);
-    setGetToken(async () => null);
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   it("normalizes snake_case user payloads into the frontend contract", async () => {
@@ -115,9 +115,9 @@ describe("userApi", () => {
       }),
     );
 
-    await userApi.syncAndGetUserDetails("token-abc");
+    await userApi.syncAndGetUserDetails({ token: "token-abc" });
 
-    expect(syncSpy).toHaveBeenCalledWith("token-abc");
+    expect(syncSpy).toHaveBeenCalledWith({ token: "token-abc" });
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

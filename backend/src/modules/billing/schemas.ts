@@ -30,7 +30,7 @@ export const BillingSchemas = {
   webhookEvent: t.Object({
     type: t.String(),
     data: t.Object({
-      object: t.Any(),
+      object: t.Record(t.String(), t.Unknown()),
     }),
     id: t.String(),
     created: t.Number(),

@@ -2,7 +2,6 @@
 import type { Database } from "bun:sqlite";
 import { Elysia, t } from "elysia";
 import { GoalSchemas } from "./schemas";
-import { requireAuth } from "../../middleware/clerk-guards";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
 import {
   safeQuery,
@@ -11,11 +10,11 @@ import {
   withTransaction,
   type WeightGoalRow,
   type WeightLogRow,
-} from "../../lib/database";
-import { BadRequestError, ConflictError, NotFoundError } from "../../lib/errors";
+} from "../../lib/data/database";
+import { BadRequestError, ConflictError, NotFoundError } from "../../lib/http/errors";
 import { generateId } from "../../utils/id-generator";
-import { loggerHelpers } from "../../lib/logger";
-import { mutationSuccess, mutationSuccessWithId } from "../../lib/mutation-contract";
+import { loggerHelpers } from "../../lib/observability/logger";
+import { mutationSuccess, mutationSuccessWithId } from "../../lib/http/mutation-contract";
 
 type GoalsRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
@@ -46,7 +45,6 @@ function getCurrentWeight(
 export const goalRoutes = (app: Elysia) =>
   app.group("/api/goals", (group) =>
     group
-      .use(requireAuth)
       // --- Get Weight Goals ---
       .get(
         "/weight",

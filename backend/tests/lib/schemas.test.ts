@@ -51,7 +51,6 @@ describe("schemas", () => {
     });
 
     it("should have snack as default", () => {
-      const anyOf = (MealTypeSchema as any).anyOf;
       const defaultValue = (MealTypeSchema as any).default;
       expect(defaultValue).toBe("snack");
     });

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authApi } from "./auth";
-import { setAuthToken, setGetToken } from "./core";
+import { apiClient } from "./core";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
@@ -16,16 +16,16 @@ describe("authApi", () => {
 
   beforeEach(() => {
     fetchMock.mockReset();
-    vi.stubGlobal("fetch", fetchMock);
-    setAuthToken(null);
-    setGetToken(async () => null);
+    global.fetch = fetchMock as unknown as typeof fetch;
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   afterEach(() => {
-    vi.unstubAllGlobals();
+    global.fetch = undefined as unknown as typeof fetch;
     vi.restoreAllMocks();
-    setAuthToken(null);
-    setGetToken(async () => null);
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   it("submits reset-password payload and returns the API response", async () => {
@@ -64,7 +64,7 @@ describe("authApi", () => {
       }),
     );
 
-    await authApi.syncUser("direct-token");
+    await authApi.syncUser({ token: "direct-token" });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/auth/clerk-sync",
@@ -80,7 +80,7 @@ describe("authApi", () => {
   });
 
   it("falls back to async auth headers when no explicit token is provided", async () => {
-    setGetToken(async () => "fresh-clerk-token");
+    apiClient.setGetToken(async () => "fresh-clerk-token");
     fetchMock.mockResolvedValueOnce(
       createJsonResponse({
         user: { id: 2, email: "casey@example.com" },

@@ -1,11 +1,13 @@
-import { hash as bcryptHash, verify as bcryptVerify } from "@node-rs/bcrypt";
-import { loggerHelpers } from "./logger";
+import { loggerHelpers } from "../observability/logger";
 
 const SALT_ROUNDS = 10; // Standard number of salt rounds for bcrypt
 
 export async function hashPassword(plaintextPassword: string): Promise<string> {
   try {
-    const hashed = await bcryptHash(plaintextPassword, SALT_ROUNDS);
+    const hashed = await Bun.password.hash(plaintextPassword, {
+      algorithm: "bcrypt",
+      cost: SALT_ROUNDS,
+    });
     return hashed;
   } catch (error) {
     loggerHelpers.security(
@@ -24,7 +26,7 @@ export async function verifyPassword(
   hashedPassword: string
 ): Promise<boolean> {
   try {
-    const isValid = await bcryptVerify(plaintextPassword, hashedPassword);
+    const isValid = await Bun.password.verify(plaintextPassword, hashedPassword, "bcrypt");
     return isValid;
   } catch (error) {
     // Log verification errors but typically return false for security

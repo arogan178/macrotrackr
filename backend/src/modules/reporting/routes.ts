@@ -1,6 +1,6 @@
 import { Elysia, t } from "elysia";
 import { getMacroDensitySummary } from "./service";
-import { requireAuth } from "../../middleware/clerk-guards";
+import { AuthenticationError } from "../../lib/http/errors";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
 
 type ReportingQuery = {
@@ -28,7 +28,6 @@ const NutrientDensityItemSchema = t.Object({
 const NutrientDensitySummaryResponseSchema = t.Array(NutrientDensityItemSchema);
 
 export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
-  .use(requireAuth)
   .get(
     "/nutrient-density-summary",
     async (rawContext: unknown) => {
@@ -37,7 +36,7 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
       const internalUserId = authenticatedUser.userId;
 
       if (internalUserId === null) {
-        throw new Error("Authenticated user ID is required");
+        throw new AuthenticationError("Authentication required. Please sign in.");
       }
 
       // Accepts: startDate, endDate, groupBy (e.g., day, week, month)

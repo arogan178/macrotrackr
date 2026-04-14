@@ -40,7 +40,7 @@ const macroEntryBase = t.Object({
   mealName: t.Optional(t.String({ default: "" })), // Use camelCase for API
   entryDate: DateSchema, // Changed to camelCase to match frontend
   entryTime: TimeSchema, // Changed to camelCase to match frontend
-  ingredients: t.Optional(t.Any()), // Store parsed JSON ingredients
+  ingredients: t.Optional(t.Array(t.Unknown())), // Store parsed JSON ingredients
 });
 
 // --- Macro Target Percentages Schema (Moved from goals/schemas.ts) ---
@@ -92,7 +92,7 @@ export const MacroSchemas = {
     mealName: t.Optional(t.String()), // camelCase
     entryDate: DateSchema,
     entryTime: TimeSchema,
-    ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
     createdAt: t.String(), // Accept any string format for timestamp
   }),
   macroTotals: t.Object({

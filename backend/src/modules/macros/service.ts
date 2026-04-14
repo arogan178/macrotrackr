@@ -3,11 +3,11 @@ import type { Database } from "bun:sqlite";
 import {
   safeQueryAll,
   type MacroEntryRow,
-} from "../../lib/database";
-import { ValidationError } from "../../lib/errors";
+} from "../../lib/data/database";
+import { ValidationError } from "../../lib/http/errors";
 import { transformKeysToCamel } from "../../lib/mappers";
-import type { FoodProductResult } from "../../lib/openfoodfacts-api-client";
-import type { AuthenticatedRouteContext } from "../../types";
+import type { FoodProductResult } from "../../services/openfoodfacts-api-client";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 
 interface MacroHistoryQuery {
   startDate?: string;
@@ -21,7 +21,7 @@ export interface CacheService {
 }
 
 export interface MacrosRouteContext
-  extends AuthenticatedRouteContext<Record<string, unknown>> {
+  extends AuthenticatedRouteContextWithUser<Record<string, unknown>> {
   openFoodFactsApiClient?: {
     search: (query: string) => Promise<FoodProductResult[]>;
   };

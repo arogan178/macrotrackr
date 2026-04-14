@@ -6,14 +6,15 @@ import {
   safeExecute,
   safeQuery,
   withTransaction,
-} from "../../lib/database";
-import { AuthenticationError, ConflictError } from "../../lib/errors";
-import { logger } from "../../lib/logger";
-import { hashPassword } from "../../lib/password";
-import type { RouteContext } from "../../types";
-import { resolveClerkIdentity } from "../../lib/route-adapter";
+} from "../../lib/data/database";
+import { AuthenticationError, ConflictError } from "../../lib/http/errors";
+import { logger } from "../../lib/observability/logger";
+import type { ClerkAuthContext } from "../../middleware/clerk-auth";
 
-import { AuthSchemas } from "./schemas";
+import type { RouteContext } from "../../types";
+import { resolveClerkIdentity } from "../../lib/auth/route-adapter";
+
+
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
@@ -56,64 +57,12 @@ type AuthRouteContext<TBody = Record<string, unknown>> = RouteContext<
   clerkClient?: ClerkApiClient;
 };
 
-interface ResetPasswordBody {
-  token: string;
-  newPassword: string;
-}
+
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
       // .use(rateLimiters.auth) // Temporarily disabled for testing
-
-      /**
-       * POST /reset-password - Reset password using a valid token
-       */
-      .post(
-        "/reset-password",
-        async (context) => {
-          const { body, db } = context as unknown as AuthRouteContext<ResetPasswordBody>;
-
-          const { token, newPassword } = body as ResetPasswordBody;
-
-          const user = safeQuery<UserRow>(
-            db,
-            "SELECT id, password_reset_expires FROM users WHERE password_reset_token = ?",
-            [token]
-          );
-
-          if (!user || !user.password_reset_expires) {
-            throw new AuthenticationError(
-              "Invalid or expired password reset token."
-            );
-          }
-
-          const expires = new Date(user.password_reset_expires);
-          if (expires < new Date()) {
-            throw new AuthenticationError(
-              "Invalid or expired password reset token."
-            );
-          }
-
-          const hashedPassword = await hashPassword(newPassword);
-
-          safeExecute(
-            db,
-            "UPDATE users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?",
-            [hashedPassword, user.id]
-          );
-
-          return { message: "Password has been reset successfully." };
-        },
-        {
-          body: AuthSchemas.resetPassword,
-          detail: {
-            summary: "Reset password using a valid token",
-            description: "Used for password reset links created before the Clerk migration.",
-            tags: ["Auth"],
-          },
-        }
-      )
 
       // Clerk User Sync - Sync Clerk user with our database
       .post(
@@ -125,7 +74,7 @@ export const authRoutes = (app: Elysia) =>
             email: initialEmail,
             firstName: initialFirstName,
             lastName: initialLastName,
-          } = resolveClerkIdentity(context as unknown as AuthRouteContext);
+          } = resolveClerkIdentity(context as unknown as ClerkAuthContext);
 
           let email = initialEmail;
           let firstName = initialFirstName || "";

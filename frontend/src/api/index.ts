@@ -3,13 +3,8 @@ export { billingApi } from "@/api/billing";
 export {
   API_BASE_URL,
   ApiError,
-  getAuthToken,
-  getHeaders,
+  apiClient,
   type GetHeadersOptions,
-  handleResponse,
-  post,
-  setAuthToken,
-  setGetToken,
 } from "@/api/core";
 export { type AddWeightLogPayload, goalsApi, type WeightLogEntry } from "@/api/goals";
 export {

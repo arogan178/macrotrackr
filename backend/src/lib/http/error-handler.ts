@@ -1,5 +1,5 @@
 // src/lib/error-handler.ts
-import { logger } from "./logger";
+import { logger } from "../observability/logger";
 import { AppError } from "./errors";
 
 export class ServiceError extends AppError {

@@ -1,9 +1,9 @@
 import {
   safeQuery,
   type MacroTargetRow,
-} from "../../lib/database";
-import { BadRequestError, DatabaseError } from "../../lib/errors";
-import { loggerHelpers } from "../../lib/logger";
+} from "../../lib/data/database";
+import { BadRequestError, DatabaseError } from "../../lib/http/errors";
+import { loggerHelpers } from "../../lib/observability/logger";
 import { MacroSchemas } from "./schemas";
 import {
   parseJsonArrayField,
@@ -14,8 +14,8 @@ export const registerMacroTargetRoutes = (group: any) =>
   group
     .get(
       "/target",
-      async (context: any) => {
-        const { db, request } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, request } = context;
         const internalUserId = context.authenticatedUser.userId;
         const correlationId = request.headers.get("x-correlation-id") || undefined;
 
@@ -68,8 +68,8 @@ export const registerMacroTargetRoutes = (group: any) =>
     )
     .put(
       "/target",
-      async (context: any) => {
-        const { db, body, request } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, body, request } = context;
         const internalUserId = context.authenticatedUser.userId;
 
         if (!body) {
@@ -81,11 +81,30 @@ export const registerMacroTargetRoutes = (group: any) =>
           correlationId,
         });
 
-        const macroTarget = (body as { macroTarget?: Record<string, unknown> }).macroTarget;
-        const proteinPercentage = macroTarget?.proteinPercentage ?? 30;
-        const carbsPercentage = macroTarget?.carbsPercentage ?? 40;
-        const fatsPercentage = macroTarget?.fatsPercentage ?? 30;
-        const lockedMacrosJson = JSON.stringify(macroTarget?.lockedMacros || []);
+        const macroTarget = (body as {
+          macroTarget?: {
+            proteinPercentage?: number;
+            carbsPercentage?: number;
+            fatsPercentage?: number;
+            lockedMacros?: unknown[];
+          };
+        }).macroTarget;
+
+        const proteinPercentage =
+          typeof macroTarget?.proteinPercentage === "number"
+            ? macroTarget.proteinPercentage
+            : 30;
+        const carbsPercentage =
+          typeof macroTarget?.carbsPercentage === "number"
+            ? macroTarget.carbsPercentage
+            : 40;
+        const fatsPercentage =
+          typeof macroTarget?.fatsPercentage === "number"
+            ? macroTarget.fatsPercentage
+            : 30;
+        const lockedMacrosJson = JSON.stringify(
+          Array.isArray(macroTarget?.lockedMacros) ? macroTarget.lockedMacros : [],
+        );
 
         const savedResult = safeQuery<{
           protein_percentage: number;

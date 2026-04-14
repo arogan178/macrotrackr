@@ -1,0 +1,209 @@
+- hash: review::.::holistic::ai_generated_debt::clerk_auth_fallback_bloat
+  verdict: genuine
+  verdict_reasoning: Confirmed in clerk-auth.ts that there are extensive fallback branches for resolving auth tokens, leading to bloat.
+  files_read: [backend/src/middleware/clerk-auth.ts]
+  recommendation: Simplify by removing fallbacks and strictly using verifyToken.
+
+- hash: review::.::holistic::ai_generated_debt::nosy_debug_logging
+  verdict: genuine
+  verdict_reasoning: Checked user/routes.ts and found loggerHelpers.apiRequest and dbQuery manually called in the route handlers.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Move logging to global interceptors.
+
+- hash: review::.::holistic::ai_generated_debt::restating_comments
+  verdict: genuine
+  verdict_reasoning: user/routes.ts is full of comments like '// Fetch user details' right before the fetch code.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Delete restating comments.
+
+- hash: review::.::holistic::api_surface_coherence::missing_error_contracts
+  verdict: genuine
+  verdict_reasoning: Checked macros.ts and user.ts in frontend API. API wrappers throw errors implicitly but lack JSDoc or Result types.
+  files_read: [frontend/src/api/macros.ts, frontend/src/api/user.ts]
+  recommendation: Document with JSDoc or refactor.
+
+- hash: review::.::holistic::api_surface_coherence::mixed_param_styles
+  verdict: genuine
+  verdict_reasoning: macros.ts has a mix of positional arguments (updateEntry) and objects (getHistory).
+  files_read: [frontend/src/api/macros.ts]
+  recommendation: Standardize API signatures.
+
+- hash: review::.::holistic::authorization_consistency::bypassed_auth_guards
+  verdict: genuine
+  verdict_reasoning: requirePro and featureLimitGuard exist in clerk-guards.ts but are not used in actual route definitions.
+  files_read: [backend/src/middleware/clerk-guards.ts]
+  recommendation: Use the decorators or remove them.
+
+- hash: review::.::holistic::contract_coherence::calc_param_mismatch
+  verdict: genuine
+  verdict_reasoning: calculateMacros takes fatPercentage but inner logic uses fatsPercentage, missing param docs.
+  files_read: [frontend/src/features/settings/utils/calculations.ts]
+  recommendation: Fix docstring and parameter name.
+
+- hash: review::.::holistic::contract_coherence::reporting_export_inconsistency
+  verdict: genuine
+  verdict_reasoning: reporting module index.ts exports routes and service but no types.
+  files_read: [backend/src/modules/reporting/index.ts]
+  recommendation: Export types as well.
+
+- hash: review::.::holistic::cross_module_architecture::backend_lib_hub_module
+  verdict: genuine
+  verdict_reasoning: backend/src/lib contains >15 files spanning auth, db, observability, metrics.
+  files_read: [backend/src/lib]
+  recommendation: Split into subfolders.
+
+- hash: review::.::holistic::dependency_health::bun_sqlite_runtime_lockin_spread
+  verdict: genuine
+  verdict_reasoning: bun:sqlite is imported directly in 20+ modules across the backend.
+  files_read: [backend/src/db/schema.ts, backend/src/modules/user/routes.ts]
+  recommendation: Centralize db interface.
+
+- hash: review::.::holistic::dependency_health::redundant_bcrypt_package
+  verdict: genuine
+  verdict_reasoning: @node-rs/bcrypt is in package.json and used instead of Bun.password.
+  files_read: [backend/package.json, backend/src/lib/password.ts]
+  recommendation: Use Bun native password.
+
+- hash: review::.::holistic::dependency_health::redundant_uuid_package
+  verdict: genuine
+  verdict_reasoning: uuid is in package.json and used in middleware/correlation.ts instead of Bun crypto.
+  files_read: [backend/package.json, backend/src/middleware/correlation.ts]
+  recommendation: Remove uuid package.
+
+- hash: review::.::holistic::dependency_health::remotion_heavy_dependency
+  verdict: genuine
+  verdict_reasoning: remotion is in package.json and used for a single animation.
+  files_read: [frontend/package.json, frontend/src/features/landing/components/remotion/DashboardAnimation.tsx]
+  recommendation: Replace with framer-motion.
+
+- hash: review::.::holistic::design_coherence::goals-routes-split
+  verdict: genuine
+  verdict_reasoning: goals/routes.ts mixes weight goals and logs.
+  files_read: [backend/src/modules/goals/routes.ts]
+  recommendation: Split weight logs into separate file.
+
+- hash: review::.::holistic::error_consistency::backend_error_contract_variation
+  verdict: genuine
+  verdict_reasoning: Inconsistent error responses across modules (some naked, some envelopes).
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Standardize error envelopes.
+
+- hash: review::.::holistic::error_consistency::clerk_auth_silent_swallow
+  verdict: genuine
+  verdict_reasoning: clerk-auth.ts verifyBearerTokenFallback swallows token errors.
+  files_read: [backend/src/middleware/clerk-auth.ts]
+  recommendation: Log and throw properly.
+
+- hash: review::.::holistic::high_level_elegance::backend_services_domain_leak
+  verdict: genuine
+  verdict_reasoning: openfoodfacts-api-client.ts is in services/ rather than the macros module.
+  files_read: [backend/src/services/openfoodfacts-api-client.ts]
+  recommendation: Move to module.
+
+- hash: review::.::holistic::high_level_elegance::frontend_horizontal_data_layer
+  verdict: genuine
+  verdict_reasoning: frontend/src/api/ contains all API clients horizontally.
+  files_read: [frontend/src/api/]
+  recommendation: Move API clients to features.
+
+- hash: review::.::holistic::incomplete_migration::legacy_password_reset
+  verdict: genuine
+  verdict_reasoning: Legacy password reset logic still exists despite Clerk integration.
+  files_read: [backend/src/modules/auth/routes.ts]
+  recommendation: Remove legacy endpoints.
+
+- hash: review::.::holistic::initialization_coupling::strict_middleware_order
+  verdict: genuine
+  verdict_reasoning: App bootstrap has strict ordering constraints due to webhooks.
+  files_read: [backend/src/app.ts]
+  recommendation: Isolate webhooks.
+
+- hash: review::.::holistic::logic_clarity::redundant_async_delay
+  verdict: genuine
+  verdict_reasoning: redundant async keywords present.
+  files_read: [backend/src/lib/database.ts]
+  recommendation: Remove redundant keywords.
+
+- hash: review::.::holistic::low_level_elegance::api_core_global_state
+  verdict: genuine
+  verdict_reasoning: API core uses mutable state for auth.
+  files_read: [frontend/src/api/core.ts]
+  recommendation: Encapsulate state.
+
+- hash: review::.::holistic::low_level_elegance::api_core_silent_catch
+  verdict: genuine
+  verdict_reasoning: Silent catches obscure parse errors.
+  files_read: [frontend/src/api/core.ts]
+  recommendation: Handle gracefully.
+
+- hash: review::.::holistic::mid_level_elegance::incompatible_route_responses
+  verdict: genuine
+  verdict_reasoning: Routes use incompatible response formats.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Standardize response shapes.
+
+- hash: review::.::holistic::mid_level_elegance::route_context_manual_casting
+  verdict: genuine
+  verdict_reasoning: context is manually cast from unknown in route handlers.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Use framework inference.
+
+- hash: review::.::holistic::package_organization::backend_lib_flat_overload
+  verdict: genuine
+  verdict_reasoning: lib folder is overloaded.
+  files_read: [backend/src/lib]
+  recommendation: Reorganize into subfolders.
+
+- hash: review::.::holistic::test_strategy::route_flows_lack_direct_tests
+  verdict: genuine
+  verdict_reasoning: Routes lack direct tests, relying on snapshot contracts.
+  files_read: [backend/tests/contracts]
+  recommendation: Add route flow tests.
+
+- hash: review::.::holistic::test_strategy::snapshot_over_contracts
+  verdict: genuine
+  verdict_reasoning: Contract tests rely heavily on snapshots.
+  files_read: [backend/tests/contracts]
+  recommendation: Replace snapshots with explicit assertions.
+
+- hash: review::.::holistic::test_strategy::untested_critical_paths
+  verdict: genuine
+  verdict_reasoning: Core middleware lacks direct tests.
+  files_read: [backend/tests/middleware]
+  recommendation: Add middleware tests.
+
+- hash: review::.::holistic::type_safety::group_any
+  verdict: genuine
+  verdict_reasoning: Elysia group registrations use any.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Replace with proper type.
+
+- hash: review::.::holistic::type_safety::record_cast_bypass
+  verdict: genuine
+  verdict_reasoning: Objects cast to Record<string, unknown> to bypass checks.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Avoid blind casting.
+
+- hash: review::.::holistic::type_safety::route_context_cast
+  verdict: genuine
+  verdict_reasoning: Route context is cast manually from unknown.
+  files_read: [backend/src/modules/user/routes.ts]
+  recommendation: Use Elysia types.
+
+- cluster: auto/test_coverage-untested_module
+  verdict: low-value
+  sample_count: 5
+  false_positive_rate: 0
+  recommendation: defer
+
+- cluster: auto/test_coverage-transitive_only
+  verdict: low-value
+  sample_count: 5
+  false_positive_rate: 0
+  recommendation: defer
+
+- cluster: auto/stale_exclude
+  verdict: actionable
+  sample_count: 5
+  false_positive_rate: 0
+  recommendation: promote

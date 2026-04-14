@@ -1,8 +1,8 @@
 import { timingSafeEqual } from "node:crypto";
 import { Elysia } from "elysia";
 import { config } from "../config";
-import { getMetricsRegistry } from "../lib/metrics";
-import { getSlowQueryStats, getRecentTraces } from "../lib/query-tracer";
+import { getMetricsRegistry } from "../lib/observability/metrics";
+import { getSlowQueryStats, getRecentTraces } from "../lib/observability/query-tracer";
 
 function secureCompare(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);

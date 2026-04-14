@@ -1,7 +1,7 @@
 // src/db/schema.ts
 
 import { Database } from "bun:sqlite";
-import { logger } from "../lib/logger";
+import { logger } from "../lib/observability/logger";
 
 const SCHEMA_SQL = `
         -- Users Table --
