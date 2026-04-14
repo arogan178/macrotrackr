@@ -122,7 +122,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
 
   const defaultXAxisProps: Partial<XAxisProps> = {
     dataKey: "name",
-    tick: { fill: "#9ca3af", fontSize: 11 },
+    tick: { fill: "var(--text-muted)", fontSize: 11 },
     axisLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     tickLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     padding: { left: 10, right: 10 },
@@ -132,7 +132,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
   };
 
   const defaultYAxisProps: Partial<YAxisProps> = {
-    tick: { fill: "#9ca3af", fontSize: 11 },
+    tick: { fill: "var(--text-muted)", fontSize: 11 },
     axisLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     tickLine: { stroke: "rgba(75, 85, 99, 0.3)" },
     tickFormatter: (value) =>

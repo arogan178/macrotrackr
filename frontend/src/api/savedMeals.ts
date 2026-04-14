@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
+import { apiClient, type ApiError } from "@/api/core";
 import type { MealType } from "@/types/macro";
 
 export interface SavedMeal {
@@ -31,33 +31,24 @@ export interface CreateSavedMealPayload {
 }
 
 export const savedMealsApi = {
+  /**
+   * @throws {ApiError}
+   */
   getAll: async (): Promise<SavedMealsResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as SavedMealsResponse;
+    return apiClient.get<SavedMealsResponse>("/api/saved-meals");
   },
 
+  /**
+   * @throws {ApiError}
+   */
   create: async (payload: CreateSavedMealPayload): Promise<SavedMeal> => {
-    const response = await fetch(`${API_BASE_URL}/api/saved-meals`, {
-      method: "POST",
-      headers: await getHeaders(),
-      body: JSON.stringify(payload),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as SavedMeal;
+    return apiClient.post<SavedMeal>("/api/saved-meals", payload);
   },
 
-  delete: async (id: number): Promise<{ success: boolean; id: number }> => {
-    const response = await fetch(`${API_BASE_URL}/api/saved-meals/${id}`, {
-      method: "DELETE",
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as { success: boolean; id: number };
+  /**
+   * @throws {ApiError}
+   */
+  delete: async ({ id }: { id: number }): Promise<{ success: boolean; id: number }> => {
+    return apiClient.del<{ success: boolean; id: number }>(`/api/saved-meals/${id}`);
   },
 };

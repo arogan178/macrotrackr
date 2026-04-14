@@ -9,6 +9,12 @@ const POSITIONS = {
   addEntryButton: { x: 780, y: 443 },
 };
 
+const MACRO_COLORS = {
+  protein: "#10b981",
+  carbs: "#3b82f6",
+  fats: "#f59e0b",
+} as const;
+
 const CURSOR_EASE = Easing.out(Easing.quad);
 
 const createCursorPath = (frame: number) => {
@@ -288,9 +294,9 @@ export const DashboardAnimation: React.FC = () => {
 
               <div className="space-y-2">
                 {[
-                  { color: "#1ed760", progress: proteinProgress, percent: 78 },
-                  { color: "#3b82f6", progress: carbsProgress, percent: 62 },
-                  { color: "#ef4444", progress: fatsProgress, percent: 45 },
+                  { color: MACRO_COLORS.protein, progress: proteinProgress, percent: 78 },
+                  { color: MACRO_COLORS.carbs, progress: carbsProgress, percent: 62 },
+                  { color: MACRO_COLORS.fats, progress: fatsProgress, percent: 45 },
                 ].map((macro, index) => (
                   <div key={index} className="rounded-lg border border-white/5 bg-surface-2/50 p-2.5">
                     <div className="mb-1.5 flex items-center justify-between">

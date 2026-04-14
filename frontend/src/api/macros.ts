@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
+import { apiClient, type ApiError } from "@/api/core";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 export interface FoodSearchResult {
@@ -94,38 +94,43 @@ export function normalizeFoodSearchResults(value: unknown): FoodSearchResult[] {
 }
 
 export const macrosApi = {
+  /**
+   * @throws {ApiError}
+   */
   getDailyTotals: async ({
     startDate,
     endDate,
   }: { startDate?: string; endDate?: string } = {}) => {
-    let url = `${API_BASE_URL}/api/macros/totals`;
-    const parameters = [];
-    if (startDate) parameters.push(`startDate=${encodeURIComponent(startDate)}`);
-    if (endDate) parameters.push(`endDate=${encodeURIComponent(endDate)}`);
-    if (parameters.length > 0) url += `?${parameters.join("&")}`;
-    const response = await fetch(url, {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return handleResponse(response);
+    const searchParams = new URLSearchParams();
+    if (startDate) searchParams.append("startDate", startDate);
+    if (endDate) searchParams.append("endDate", endDate);
+    
+    const queryString = searchParams.toString();
+    const url = `/api/macros/totals${queryString ? `?${queryString}` : ""}`;
+    
+    return apiClient.get<unknown>(url);
   },
 
+  /**
+   * @throws {ApiError}
+   */
   getHistory: async (
     options: MacroHistoryOptions = {},
   ) => {
     const { limit = 20, offset = 0, startDate, endDate } = options;
-    let url = `${API_BASE_URL}/api/macros/history?limit=${limit}&offset=${offset}`;
-    if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
-    if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
-    const response = await fetch(url, {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return handleResponse(response);
+    const searchParams = new URLSearchParams();
+    searchParams.append("limit", limit.toString());
+    searchParams.append("offset", offset.toString());
+    if (startDate) searchParams.append("startDate", startDate);
+    if (endDate) searchParams.append("endDate", endDate);
+    
+    const url = `/api/macros/history?${searchParams.toString()}`;
+    return apiClient.get<unknown>(url);
   },
 
+  /**
+   * @throws {ApiError}
+   */
   getAllHistory: async (
     options: { startDate?: string; endDate?: string } = {},
   ): Promise<{ entries: MacroEntry[]; limits?: unknown }> => {
@@ -156,6 +161,9 @@ export const macrosApi = {
     return { entries, limits };
   },
 
+  /**
+   * @throws {ApiError}
+   */
   addEntry: async (entry: MacroEntryCreatePayload) => {
     const payload = {
       protein: entry.protein,
@@ -167,18 +175,16 @@ export const macrosApi = {
       entryTime: entry.entryTime,
       ingredients: entry.ingredients,
     };
-    const response = await fetch(`${API_BASE_URL}/api/macros`, {
-      method: "POST",
-      headers: await getHeaders(),
-      body: JSON.stringify(payload),
-      credentials: "include",
-    });
-
-    return handleResponse(response);
+    
+    return apiClient.post<unknown>("/api/macros", payload);
   },
 
-  updateEntry: async (id: number, entry: MacroEntryUpdatePayload) => {
+  /**
+   * @throws {ApiError}
+   */
+  updateEntry: async ({ id, data }: { id: number; data: MacroEntryUpdatePayload }) => {
     const payload: MacroEntryUpdatePayload = {};
+    const entry = data;
     if (entry.protein !== undefined) payload.protein = entry.protein;
     if (entry.carbs !== undefined) payload.carbs = entry.carbs;
     if (entry.fats !== undefined) payload.fats = entry.fats;
@@ -187,62 +193,44 @@ export const macrosApi = {
     if (entry.entryDate !== undefined) payload.entryDate = entry.entryDate;
     if (entry.entryTime !== undefined) payload.entryTime = entry.entryTime;
     if (entry.ingredients !== undefined) payload.ingredients = entry.ingredients;
-    const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
-      method: "PUT",
-      headers: await getHeaders(),
-      body: JSON.stringify(payload),
-      credentials: "include",
-    });
-
-    return handleResponse(response);
+    
+    return apiClient.put<unknown>(`/api/macros/${id}`, payload);
   },
 
-  deleteEntry: async (id: number): Promise<MacroEntryDeleteResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/macros/${id}`, {
-      method: "DELETE",
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as MacroEntryDeleteResponse;
+  /**
+   * @throws {ApiError}
+   */
+  deleteEntry: async ({ id }: { id: number }): Promise<MacroEntryDeleteResponse> => {
+    return apiClient.del<MacroEntryDeleteResponse>(`/api/macros/${id}`);
   },
 
+  /**
+   * @throws {ApiError}
+   */
   getMacroTarget: async (): Promise<MacroTargetGetResponse> => {
-    const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as MacroTargetGetResponse;
+    return apiClient.get<MacroTargetGetResponse>("/api/macros/target");
   },
 
+  /**
+   * @throws {ApiError}
+   */
   saveMacroTargetPercentages: async (payload: MacroTargetSettingsPayload) => {
     if (payload?.macroTarget === undefined) {
       throw new Error("Invalid payload: macroTarget object is required.");
     }
-    const response = await fetch(`${API_BASE_URL}/api/macros/target`, {
-      method: "PUT",
-      headers: await getHeaders(),
-      body: JSON.stringify({ macroTarget: payload.macroTarget }),
-      credentials: "include",
-    });
-
-    return handleResponse(response);
+    return apiClient.put<unknown>("/api/macros/target", { macroTarget: payload.macroTarget });
   },
 
-  search: async (query: string): Promise<FoodSearchResult[]> => {
+  /**
+   * @throws {ApiError}
+   */
+  search: async ({ query }: { query: string }): Promise<FoodSearchResult[]> => {
     const normalizedQuery = query.trim();
     if (normalizedQuery.length < 2) {
       return [];
     }
-    const response = await fetch(
-      `${API_BASE_URL}/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`,
-      {
-        headers: await getHeaders(false),
-        credentials: "include",
-      },
-    );
-
-    return normalizeFoodSearchResults(await handleResponse(response));
+    
+    const response = await apiClient.get<unknown>(`/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`);
+    return normalizeFoodSearchResults(response);
   },
 };

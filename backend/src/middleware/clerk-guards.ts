@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import type { AuthenticatedContext } from "../types";
-import { AuthenticationError, AuthorizationError } from "../lib/errors";
-import { logger } from "../lib/logger";
+import { AuthenticationError, AuthorizationError } from "../lib/http/errors";
+import { logger } from "../lib/observability/logger";
 import { SubscriptionService } from "../modules/billing/subscription-service";
 
 export interface AuthenticatedUser {
@@ -46,32 +46,6 @@ export const requireAuth = new Elysia({ name: "requireAuth" })
         imageUrl: user.imageUrl,
       },
     };
-  });
-
-export const requirePro = new Elysia({ name: "requirePro" })
-  .use(requireAuth)
-  .derive({ as: "scoped" }, async (context) => {
-    const { authenticatedUser } = context;
-    if (!authenticatedUser) {
-      throw new AuthenticationError("Authentication required. Please sign in.");
-    }
-
-    const hasActivePro = await getRequiredProStatus(authenticatedUser.userId);
-    
-    if (!hasActivePro) {
-      logger.warn(
-        {
-          operation: "requirePro_access_denied",
-          userId: authenticatedUser.userId,
-        },
-        "User attempted to access Pro feature without active subscription"
-      );
-      throw new AuthorizationError(
-        "Pro subscription required. Please upgrade your account to access this feature."
-      );
-    }
-    
-    return { isProUser: true };
   });
 
 export const FREE_TIER_LIMITS = {
@@ -149,48 +123,3 @@ export const checkProStatus = async (userId: number): Promise<boolean> => {
   return getRequiredProStatus(userId);
 };
 
-export const featureLimitGuard = (feature: FeatureLimitKey) =>
-  new Elysia({ name: `featureLimitGuard_${feature}` })
-    .use(requireAuth)
-    .derive({ as: "scoped" }, async (context) => {
-      const ctx = context as unknown as GuardsAuthenticatedContext;
-      const authenticatedUser = context.authenticatedUser as
-        | AuthenticatedUser
-        | undefined;
-      const resolvedUserId =
-        authenticatedUser?.userId ??
-        (typeof ctx.internalUserId === "number" ? ctx.internalUserId : null) ??
-        (typeof ctx.user?.userId === "number" ? ctx.user.userId : null);
-
-      if (!resolvedUserId) {
-        logger.warn(
-          {
-            path: context.path,
-            hasAuthenticatedUser: Boolean(authenticatedUser),
-            hasInternalUserId: typeof ctx.internalUserId === "number",
-            hasContextUserId: typeof ctx.user?.userId === "number",
-          },
-          `featureLimitGuard_${feature}: Unable to resolve authenticated user ID`
-        );
-        throw new AuthenticationError("Authentication required. Please sign in.");
-      }
-      
-      return {
-        async checkLimit(currentCount: number): Promise<FeatureLimitResult> {
-          const result = await checkFeatureLimit(
-            resolvedUserId,
-            feature,
-            currentCount
-          );
-
-          if (!result.allowed) {
-            throw new AuthorizationError(
-              result.message || "Feature limit reached"
-            );
-          }
-
-          return result;
-        },
-        isProUser: await checkProStatus(resolvedUserId),
-      };
-    });

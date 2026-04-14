@@ -16,13 +16,8 @@ mock.module("../../src/middleware/clerk-guards", () => {
 
   return {
     requireAuth,
-    requirePro: new Elysia({ name: "requirePro" }).derive({ as: "scoped" }, () => ({ isProUser: true })),
     checkProStatus: async () => true,
-    FREE_TIER_LIMITS: { DATA_RETENTION_DAYS: 60 },
-    featureLimitGuard: () => new Elysia({ name: "featureLimitGuard_mock" }).derive({ as: "scoped" }, () => ({
-      checkLimit: async () => ({ allowed: true }),
-      isProUser: true
-    }))
+    FREE_TIER_LIMITS: { DATA_RETENTION_DAYS: 60 }
   };
 });
 
