@@ -1,7 +1,7 @@
 import type { Database } from "bun:sqlite";
-import { DatabaseError } from "./errors";
-import { loggerHelpers } from "./logger";
-import { traceQuerySync } from "./query-tracer";
+import { DatabaseError } from "../http/errors";
+import { loggerHelpers } from "../observability/logger";
+import { traceQuerySync } from "../observability/query-tracer";
 
 export function withTransaction<T>(db: Database, operation: () => T): T {
   const transaction = db.transaction(operation);

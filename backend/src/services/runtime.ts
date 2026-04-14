@@ -1,15 +1,15 @@
 import type { Database } from "bun:sqlite";
-import { type CacheService, createCacheService } from "../lib/cache-service";
+import { type CacheService, createCacheService } from "./cache-service";
 import {
   configureMetricsRegistry,
   createMetricsRegistry,
   type MetricsRegistry,
-} from "../lib/metrics";
+} from "../lib/observability/metrics";
 import {
   configureAlertingService,
   createAlertingService,
   type AlertingService,
-} from "../lib/alerting";
+} from "../lib/observability/alerting";
 import { configureSubscriptionService } from "../modules/billing/subscription-service";
 import {
   getStripeClient,
@@ -17,7 +17,7 @@ import {
 import {
   configureEmailService,
   createEmailService,
-} from "../lib/email-service";
+} from "./email-service";
 
 export interface RuntimeServices {
   db: Database;

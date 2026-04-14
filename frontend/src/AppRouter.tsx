@@ -31,7 +31,6 @@ import {
   PrivacyPolicyPage,
   ProfileSetupPage,
   ReportingPage,
-  ResetPasswordPage,
   SettingsPage,
   SignInPage,
   SignUpPage,
@@ -217,16 +216,6 @@ const pricingRoute = createRoute({
   component: PricingPage,
 });
 
-export const resetPasswordRoute = createRoute({
-  getParentRoute: () => rootRoute,
-  path: "/reset-password",
-  validateSearch: (search: Record<string, unknown>) => ({
-    token: search.token as string | undefined,
-    returnTo: search.returnTo as string | undefined,
-  }),
-  component: ResetPasswordPage,
-});
-
 const termsRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/terms",
@@ -251,7 +240,6 @@ const routeTree = rootRoute.addChildren([
   ssoCallbackRoute,
   reportingRoute,
   pricingRoute,
-  resetPasswordRoute,
   termsRoute,
   privacyRoute,
   blogIndexRoute,

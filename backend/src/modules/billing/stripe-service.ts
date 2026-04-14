@@ -1,8 +1,8 @@
 // src/modules/billing/stripe-service.ts
 import Stripe from "stripe";
 import { config } from "../../config";
-import { logger } from "../../lib/logger";
-import { handleServiceError } from "../../lib/error-handler";
+import { logger } from "../../lib/observability/logger";
+import { handleServiceError } from "../../lib/http/error-handler";
 
 function createStripeClient() {
   return new Stripe(config.STRIPE_SECRET_KEY, {

@@ -1,7 +1,7 @@
 // src/lib/clerk-utils.ts
 import type { Database } from "bun:sqlite";
-import { safeQuery } from "./database";
-import { logger } from "./logger";
+import { safeQuery } from "../data/database";
+import { logger } from "../observability/logger";
 
 /**
  * Get internal user ID from Clerk ID

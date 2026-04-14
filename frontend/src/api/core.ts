@@ -7,8 +7,8 @@ export class ApiError extends Error {
   code: string;
   details: unknown;
 
-  constructor(message: string, status: number, code: string, details?: unknown) {
-    super(message);
+  constructor(message: string, status: number, code: string, details?: unknown, options?: ErrorOptions) {
+    super(message, options);
     this.name = "ApiError";
     this.status = status;
     this.code = code;
@@ -20,62 +20,6 @@ export interface ApiErrorResponse {
   message?: string;
   code?: string;
   details?: unknown;
-}
-
-let getClerkToken: (() => Promise<string | null>) | null = null;
-let authTokenProviderInitialized = false;
-
-export function initializeAuthTokenProvider(
-  provider: (() => Promise<string | null>) | null = null,
-  fallbackToken: string | null = null,
-) {
-  getClerkToken = provider;
-  staticAuthToken = fallbackToken;
-  authTokenProviderInitialized = true;
-}
-
-export function isAuthTokenProviderInitialized(): boolean {
-  return authTokenProviderInitialized;
-}
-
-export function resetAuthTokenProviderForTests() {
-  getClerkToken = null;
-  staticAuthToken = null;
-  authTokenProviderInitialized = false;
-}
-
-export function setGetToken(function_: () => Promise<string | null>) {
-  getClerkToken = function_;
-  authTokenProviderInitialized = true;
-}
-
-let staticAuthToken: string | null = null;
-
-export function setAuthToken(token: string | null) {
-  staticAuthToken = token;
-  authTokenProviderInitialized = true;
-}
-
-export async function getAuthToken(): Promise<string | null> {
-  if (!authTokenProviderInitialized) {
-    throw new ApiError(
-      "Auth token provider has not been initialized",
-      500,
-      "AUTH_TOKEN_PROVIDER_UNINITIALIZED",
-    );
-  }
-
-  if (getClerkToken) {
-    const freshToken = await getClerkToken();
-    if (freshToken) {
-      return freshToken;
-    }
-  }
-  if (staticAuthToken) {
-    return staticAuthToken;
-  }
-
-  return null;
 }
 
 export interface GetHeadersOptions {
@@ -99,74 +43,182 @@ function resolveHeaderOptions(
   };
 }
 
-export async function getHeaders(
-  options: GetHeadersOptions | boolean = true,
-): Promise<Record<string, string>> {
-  const { includeContentType, includeAuth } = resolveHeaderOptions(options);
-  const headers: Record<string, string> = {};
+export class ApiClient {
+  private getClerkToken: (() => Promise<string | null>) | null = null;
+  private staticAuthToken: string | null = null;
+  private authTokenProviderInitialized = false;
 
-  if (includeAuth) {
-    const token = await getAuthToken();
-
-    if (token) {
-      headers["Authorization"] = `Bearer ${token}`;
-    }
+  initializeAuthTokenProvider(
+    provider: (() => Promise<string | null>) | null = null,
+    fallbackToken: string | null = null,
+  ) {
+    this.getClerkToken = provider;
+    this.staticAuthToken = fallbackToken;
+    this.authTokenProviderInitialized = true;
   }
 
-  if (includeContentType) {
-    headers["Content-Type"] = "application/json";
+  isAuthTokenProviderInitialized(): boolean {
+    return this.authTokenProviderInitialized;
   }
 
-  return headers;
-}
+  resetAuthTokenProviderForTests() {
+    this.getClerkToken = null;
+    this.staticAuthToken = null;
+    this.authTokenProviderInitialized = false;
+  }
 
-export async function handleResponse(response: Response): Promise<unknown> {
-  if (response.ok) {
-    if (response.status === 204) {
-      return { success: true };
+  setGetToken(function_: () => Promise<string | null>) {
+    this.getClerkToken = function_;
+    this.authTokenProviderInitialized = true;
+  }
+
+  setAuthToken(token: string | null) {
+    this.staticAuthToken = token;
+    this.authTokenProviderInitialized = true;
+  }
+
+  async getAuthToken(): Promise<string | null> {
+    if (!this.authTokenProviderInitialized) {
+      throw new ApiError(
+        "Auth token provider has not been initialized",
+        500,
+        "AUTH_TOKEN_PROVIDER_UNINITIALIZED",
+      );
     }
 
+    if (this.getClerkToken) {
+      const freshToken = await this.getClerkToken();
+      if (freshToken) {
+        return freshToken;
+      }
+    }
+    if (this.staticAuthToken) {
+      return this.staticAuthToken;
+    }
+
+    return null;
+  }
+
+  async getHeaders(
+    options: GetHeadersOptions | boolean = true,
+  ): Promise<Record<string, string>> {
+    const { includeContentType, includeAuth } = resolveHeaderOptions(options);
+    const headers: Record<string, string> = {};
+
+    if (includeAuth) {
+      const token = await this.getAuthToken();
+
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+    }
+
+    if (includeContentType) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    return headers;
+  }
+
+  async handleResponse(response: Response): Promise<unknown> {
+    if (response.ok) {
+      if (response.status === 204) {
+        return { success: true };
+      }
+
+      try {
+        const responseBodyText = await response.clone().text();
+        if (!responseBodyText) {
+          return undefined;
+        }
+
+        return await response.json();
+      } catch (error) {
+        if (response.status === 200) {
+          console.error("Failed to parse 200 OK response as JSON", error);
+          return undefined;
+        }
+        throw new Error("Received an invalid or unparsable response from the server.", { cause: error });
+      }
+    }
+
+    let errorMessage = `API error (${response.status}): ${response.statusText}`;
+    let errorCode = `HTTP_${response.status}`;
+    let errorDetails: unknown = undefined;
     try {
-      const responseBodyText = await response.clone().text();
-      if (!responseBodyText) {
-        return undefined;
+      const errorPayload = await response.json() as ApiErrorResponse;
+      if (errorPayload && typeof errorPayload === "object") {
+        errorMessage = errorPayload.message ?? errorMessage;
+        errorCode = errorPayload.code ?? errorCode;
+        errorDetails = errorPayload.details;
       }
-
-      return await response.json();
-    } catch {
-      if (response.status === 200) {
-        return undefined;
-      }
-      throw new Error("Received an invalid or unparsable response from the server.");
+    } catch (error) {
+      // Failed to parse error response JSON
+      console.error("Failed to parse error response JSON", error);
+      throw new ApiError(errorMessage, response.status, errorCode, errorDetails, { cause: error });
     }
+    throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
   }
 
-  let errorMessage = `API error (${response.status}): ${response.statusText}`;
-  let errorCode = `HTTP_${response.status}`;
-  let errorDetails: unknown = undefined;
-  try {
-    const errorPayload = await response.json() as ApiErrorResponse;
-    if (errorPayload && typeof errorPayload === "object") {
-      errorMessage = errorPayload.message ?? errorMessage;
-      errorCode = errorPayload.code ?? errorCode;
-      errorDetails = errorPayload.details;
-    }
-  } catch {
-    // Response body is not valid JSON
+  async get<T = unknown>(
+    url: string,
+    options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
+  ): Promise<T> {
+    const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? false);
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: "GET",
+      headers,
+      credentials: "include",
+    });
+
+    return this.handleResponse(response) as Promise<T>;
   }
-  throw new ApiError(errorMessage, response.status, errorCode, errorDetails);
+
+  async post<T = unknown>(
+    url: string,
+    body?: unknown,
+    options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
+  ): Promise<T> {
+    const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? true);
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: "POST",
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      credentials: "include",
+    });
+
+    return this.handleResponse(response) as Promise<T>;
+  }
+
+  async put<T = unknown>(
+    url: string,
+    body?: unknown,
+    options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
+  ): Promise<T> {
+    const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? true);
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: "PUT",
+      headers,
+      body: body !== undefined ? JSON.stringify(body) : undefined,
+      credentials: "include",
+    });
+
+    return this.handleResponse(response) as Promise<T>;
+  }
+
+  async del<T = unknown>(
+    url: string,
+    options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
+  ): Promise<T> {
+    const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? false);
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      method: "DELETE",
+      headers,
+      credentials: "include",
+    });
+
+    return this.handleResponse(response) as Promise<T>;
+  }
 }
 
-export async function post<T = unknown>(
-  url: string,
-  body?: unknown,
-): Promise<T> {
-  const response = await fetch(`${API_BASE_URL}${url}`, {
-    method: "POST",
-    headers: await getHeaders(),
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: "include",
-  });
-
-  return handleResponse(response) as Promise<T>;
-}
+export const apiClient = new ApiClient();

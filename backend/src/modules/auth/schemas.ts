@@ -1,6 +1,6 @@
 // src/modules/auth/schemas.ts
 import { t } from "elysia";
-import { PasswordSchema } from "../../lib/schemas";
+import { PasswordSchema } from "../../lib/http/schemas";
 
 export const AuthSchemas = {
   // Schema for resetting a password with a token

@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { config } from "../config";
-import { logger } from "./logger";
+import { logger } from "../lib/observability/logger";
 
 interface EmailService {
   sendPasswordResetEmail: (to: string, token: string) => Promise<void>;
@@ -47,14 +47,14 @@ function createEmailServiceClient() {
           </div>
         `,
       });
-      if (result && result.error) {
+      if (result.error) {
         logger.error(
           { type: "email_error", operation: "password_reset", error: result.error },
           "Resend API error sending password reset email"
         );
       } else {
         logger.info(
-          { type: "email_sent", operation: "password_reset", messageId: result?.data?.id },
+          { type: "email_sent", operation: "password_reset", messageId: result.data.id },
           "Password reset email sent successfully"
         );
       }

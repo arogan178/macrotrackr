@@ -1,6 +1,6 @@
 // src/lib/route-adapter.ts
-import type { ClerkAuthContext } from "../middleware/clerk-auth";
-import { AuthenticationError } from "./errors";
+import type { ClerkAuthContext } from "../../middleware/clerk-auth";
+import { AuthenticationError } from "../http/errors";
 
 export function resolveClerkIdentity(
   context: ClerkAuthContext,

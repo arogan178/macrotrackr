@@ -1,14 +1,12 @@
 // src/modules/billing/routes.ts
 
 import { Elysia } from "elysia";
-import { logger } from "../../lib/logger";
-import { BadRequestError, NotFoundError } from "../../lib/errors";
+import { logger } from "../../lib/observability/logger";
+import { BadRequestError, NotFoundError } from "../../lib/http/errors";
 import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
-import { requireAuth } from "../../middleware/clerk-guards";
-import { mutationSuccessWithMessage } from "../../lib/mutation-contract";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
 
 // Response schemas for type safety and API documentation
@@ -28,7 +26,7 @@ const BillingDetailsResponseSchema = t.Object({
       last4: t.String(),
     })
   ),
-  stripeDetails: t.Nullable(t.Any()),
+  stripeDetails: t.Nullable(t.Unknown()),
 });
 
 const CancelResponseSchema = t.Object({
@@ -117,8 +115,6 @@ function resolveBillingUser(context: BillingRouteContext) {
 export const billingRoutes = (app: Elysia) =>
   app.group("/api/billing", (group) =>
     group
-      .use(requireAuth)
-
       // Get detailed billing/subscription info
       .get(
         "/details",
@@ -187,9 +183,11 @@ export const billingRoutes = (app: Elysia) =>
               },
               "Canceled user subscription via API"
             );
-            return mutationSuccessWithMessage(
-              "Subscription canceled. You will retain access until the end of your billing period.",
-            );
+            return {
+              success: true,
+              message:
+                "Subscription canceled. You will retain access until the end of your billing period.",
+            };
           } catch (error) {
             handleRouteError(error, "cancel_subscription", user?.userId);
           }
