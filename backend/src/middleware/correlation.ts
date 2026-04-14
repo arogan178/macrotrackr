@@ -1,7 +1,6 @@
 // src/middleware/correlation.ts
 import { Elysia } from "elysia";
-import { v4 as uuidv4 } from "uuid";
-import { loggerHelpers } from "../lib/logger";
+import { loggerHelpers } from "../lib/observability/logger";
 
 function getOptionalStringProperty(
   source: unknown,
@@ -54,7 +53,7 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
     const correlationId =
       request.headers.get("x-correlation-id") ||
       request.headers.get("x-request-id") ||
-      uuidv4();
+      crypto.randomUUID();
 
     return { correlationId };
   })

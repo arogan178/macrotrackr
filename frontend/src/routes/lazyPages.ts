@@ -6,7 +6,6 @@ export const SignUpPage = React.lazy(() => import("@/features/auth/pages/SignUpP
 export const ProfileSetupPage = React.lazy(() => import("@/features/auth/pages/ProfileSetupPage"));
 export const AuthReadyPage = React.lazy(() => import("@/features/auth/pages/AuthReadyPage"));
 export const SSOCallbackPage = React.lazy(() => import("@/features/auth/pages/SsoCallbackPage"));
-export const ResetPasswordPage = React.lazy(() => import("@/features/auth/pages/ResetPasswordPage"));
 
 // Feature pages
 export const LandingPage = React.lazy(() => import("@/features/landing/pages/LandingPage"));

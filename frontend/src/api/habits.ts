@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
+import { apiClient, type ApiError } from "@/api/core";
 import type { HabitAccentColor } from "@/types/habit";
 
 export interface HabitGoalPayload {
@@ -37,57 +37,38 @@ export interface HabitGoalUpdatePayload {
 }
 
 export const habitsApi = {
+  /**
+   * @throws {ApiError}
+   */
   getHabits: async (): Promise<HabitGoalPayload[]> => {
-    const response = await fetch(`${API_BASE_URL}/api/habits`, {
-      headers: await getHeaders(false),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as HabitGoalPayload[];
+    return apiClient.get<HabitGoalPayload[]>("/api/habits");
   },
 
+  /**
+   * @throws {ApiError}
+   */
   saveHabit: async (habitGoal: HabitGoalPayload): Promise<HabitGoalPayload> => {
-    const response = await fetch(`${API_BASE_URL}/api/habits`, {
-      method: "POST",
-      headers: await getHeaders(),
-      body: JSON.stringify(habitGoal),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as HabitGoalPayload;
+    return apiClient.post<HabitGoalPayload>("/api/habits", habitGoal);
   },
 
-  updateHabit: async (
-    id: string,
-    habitGoal: HabitGoalUpdatePayload,
-  ): Promise<HabitGoalPayload> => {
-    const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
-      method: "PUT",
-      headers: await getHeaders(),
-      body: JSON.stringify(habitGoal),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as HabitGoalPayload;
+  /**
+   * @throws {ApiError}
+   */
+  updateHabit: async ({ id, data }: { id: string; data: HabitGoalUpdatePayload }): Promise<HabitGoalPayload> => {
+    return apiClient.put<HabitGoalPayload>(`/api/habits/${id}`, data);
   },
 
-  deleteHabit: async (id: string): Promise<{ success: boolean; id: string }> => {
-    const response = await fetch(`${API_BASE_URL}/api/habits/${id}`, {
-      method: "DELETE",
-      headers: await getHeaders(),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as { success: boolean; id: string };
+  /**
+   * @throws {ApiError}
+   */
+  deleteHabit: async ({ id }: { id: string }): Promise<{ success: boolean; id: string }> => {
+    return apiClient.del<{ success: boolean; id: string }>(`/api/habits/${id}`);
   },
 
+  /**
+   * @throws {ApiError}
+   */
   resetHabit: async (): Promise<{ success: boolean; count: number }> => {
-    const response = await fetch(`${API_BASE_URL}/api/habits`, {
-      method: "DELETE",
-      headers: await getHeaders(),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as { success: boolean; count: number };
+    return apiClient.del<{ success: boolean; count: number }>("/api/habits", { headers: true });
   },
 };

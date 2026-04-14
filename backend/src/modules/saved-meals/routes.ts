@@ -6,20 +6,19 @@ import {
   safeQuery,
   safeExecute,
   safeQueryAll,
-} from "../../lib/database";
+} from "../../lib/data/database";
 import {
   AuthenticationError,
   AuthorizationError,
   BadRequestError,
   NotFoundError,
-} from "../../lib/errors";
+} from "../../lib/http/errors";
 import {
   checkProStatus,
   checkFeatureLimit,
   FREE_TIER_LIMITS,
-  requireAuth,
 } from "../../middleware/clerk-guards";
-import { mutationSuccessWithId } from "../../lib/mutation-contract";
+import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
 
 // Saved meal row type
 interface SavedMealRow {
@@ -39,6 +38,38 @@ interface SavedMealRow {
 type SavedMealsRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
+interface SavedMealResponse {
+  id: number;
+  userId: number;
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  mealType: string;
+  ingredients?: unknown[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+const normalizeSavedMealRow = (row: SavedMealRow): SavedMealResponse => {
+  const camel = transformKeysToCamel(
+    row as unknown as Record<string, unknown>,
+  ) as unknown as SavedMealResponse;
+
+  if (typeof camel.ingredients === "string") {
+    try {
+      const parsed = JSON.parse(camel.ingredients) as unknown;
+      camel.ingredients = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      camel.ingredients = [];
+    }
+  } else if (!Array.isArray(camel.ingredients)) {
+    camel.ingredients = [];
+  }
+
+  return camel;
+};
+
 // Schemas
 const SavedMealSchemas = {
   savedMealResponse: t.Object({
@@ -51,7 +82,7 @@ const SavedMealSchemas = {
     mealType: t.String(),
     createdAt: t.String(),
     updatedAt: t.String(),
-  ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
   }),
 
   createSavedMealBody: t.Object({
@@ -67,7 +98,7 @@ const SavedMealSchemas = {
         t.Literal("snack"),
       ])
     ),
-    ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
   }),
 
   updateSavedMealBody: t.Object({
@@ -83,7 +114,7 @@ const SavedMealSchemas = {
         t.Literal("snack"),
       ])
     ),
-    ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
   }),
 
   mealIdParam: t.Object({
@@ -94,7 +125,6 @@ const SavedMealSchemas = {
 export const savedMealRoutes = (app: Elysia) =>
   app.group("/api/saved-meals", (group) =>
     group
-      .use(requireAuth)
 
       // GET / - List all saved meals for the user
       .get(
@@ -120,17 +150,7 @@ export const savedMealRoutes = (app: Elysia) =>
           );
 
           return {
-            meals: meals.map((m) => {
-              const camel = transformKeysToCamel(m as unknown as Record<string, unknown>) as any;
-              if (camel.ingredients) {
-                try {
-                  camel.ingredients = JSON.parse(camel.ingredients);
-                } catch {
-                  camel.ingredients = [];
-                }
-              }
-              return camel;
-            }),
+            meals: meals.map((m) => normalizeSavedMealRow(m)),
             count: meals.length,
             limit: FREE_TIER_LIMITS.MAX_SAVED_MEALS,
             isPro: await checkProStatus(userId),
@@ -193,7 +213,7 @@ export const savedMealRoutes = (app: Elysia) =>
             carbs: number;
             fats: number;
             mealType?: string;
-            ingredients?: any[];
+            ingredients?: unknown[];
           };
 
           const ingredientsStr = ingredients ? JSON.stringify(ingredients) : '[]';
@@ -210,15 +230,7 @@ export const savedMealRoutes = (app: Elysia) =>
             throw new BadRequestError("Failed to create saved meal");
           }
 
-          const camelResult = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
-          if (camelResult.ingredients) {
-            try {
-              camelResult.ingredients = JSON.parse(camelResult.ingredients);
-            } catch {
-              camelResult.ingredients = [];
-            }
-          }
-          return camelResult;
+          return normalizeSavedMealRow(result);
         },
         {
           body: SavedMealSchemas.createSavedMealBody,
@@ -290,15 +302,7 @@ export const savedMealRoutes = (app: Elysia) =>
             );
           }
 
-          const camelResult = transformKeysToCamel(result as unknown as Record<string, unknown>) as any;
-          if (camelResult.ingredients) {
-            try {
-              camelResult.ingredients = JSON.parse(camelResult.ingredients);
-            } catch {
-              camelResult.ingredients = [];
-            }
-          }
-          return camelResult;
+          return normalizeSavedMealRow(result);
         },
         {
           params: SavedMealSchemas.mealIdParam,

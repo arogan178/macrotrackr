@@ -2,7 +2,7 @@
  * Alerting utilities for SLO violations
  */
 
-import { config } from "../config";
+import { config } from "../../config";
 import { logger } from "./logger";
 
 export type AlertSeverity = "critical" | "warning" | "info";

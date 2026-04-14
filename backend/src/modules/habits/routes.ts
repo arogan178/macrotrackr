@@ -7,15 +7,15 @@ import {
   safeQueryAll,
   safeExecute,
   type HabitRow,
-} from "../../lib/database";
+} from "../../lib/data/database";
 import {
   AuthorizationError,
   AuthenticationError,
   BadRequestError,
   NotFoundError,
-} from "../../lib/errors";
-import { checkFeatureLimit, requireAuth } from "../../middleware/clerk-guards";
-import { mutationSuccessWithId } from "../../lib/mutation-contract";
+} from "../../lib/http/errors";
+import { checkFeatureLimit } from "../../middleware/clerk-guards";
+import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
 
 type HabitsRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
@@ -23,8 +23,6 @@ type HabitsRouteContext =
 export const habitRoutes = (app: Elysia) =>
   app.group("/api/habits", (group) =>
     group
-      .use(requireAuth)
-
       // --- Get All Habits ---
       .get(
         "/",

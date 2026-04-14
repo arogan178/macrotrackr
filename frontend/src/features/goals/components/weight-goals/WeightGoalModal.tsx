@@ -8,7 +8,7 @@ import {
 import { useStore } from "@/store/store";
 import type { WeightGoals } from "@/types/goal";
 
-import { WeightGoalFormValues } from "../types";
+import { WeightGoalFormValues } from "../../types";
 
 import WeightGoalForm, { WeightGoalFormHandle } from "./WeightGoalForm";
 

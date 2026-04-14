@@ -2,12 +2,12 @@
 
 import type { Database } from "bun:sqlite";
 import type Stripe from "stripe";
-import { logger } from "../../lib/logger";
-import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
-import { NotFoundError } from "../../lib/errors";
+import { logger } from "../../lib/observability/logger";
+import { safeQuery, safeExecute, withTransaction } from "../../lib/data/database";
+import { NotFoundError } from "../../lib/http/errors";
 import { generateId } from "../../utils/id-generator";
-import { handleServiceError } from "../../lib/error-handler";
-import type { CacheService } from "../../lib/cache-service";
+import { handleServiceError } from "../../lib/http/error-handler";
+import type { CacheService } from "../../services/cache-service";
 
 export interface SubscriptionRecord {
   id: string;

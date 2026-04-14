@@ -8,7 +8,7 @@ vi.mock("../../src/lib/logger", () => ({
   },
 }));
 
-import { createCacheService } from "../../src/lib/cache-service";
+import { createCacheService } from "../../src/services/cache-service";
 
 describe("cacheService", () => {
   let cacheService: ReturnType<typeof createCacheService>;

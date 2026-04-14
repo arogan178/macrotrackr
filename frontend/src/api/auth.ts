@@ -1,4 +1,4 @@
-import { API_BASE_URL, getHeaders, handleResponse } from "@/api/core";
+import { apiClient, type ApiError } from "@/api/core";
 
 export interface AuthSyncResponse {
   user: unknown;
@@ -11,33 +11,29 @@ export interface ResetPasswordPayload {
 }
 
 export const authApi = {
+  /**
+   * @throws {ApiError}
+   */
   resetPassword: async ({ token, newPassword }: ResetPasswordPayload) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
-      method: "POST",
-      headers: await getHeaders(),
-      body: JSON.stringify({ token, newPassword }),
-      credentials: "include",
-    });
-
-    return (await handleResponse(response)) as {
-      success: boolean;
-      message?: string;
-    };
+    return apiClient.post<{ success: boolean; message?: string }>(
+      "/api/auth/reset-password",
+      { token, newPassword }
+    );
   },
 
-  syncUser: async (token?: string): Promise<AuthSyncResponse> => {
-    const headers = token
-      ? {
+  /**
+   * @throws {ApiError}
+   */
+  syncUser: async ({ token }: { token?: string } = {}): Promise<AuthSyncResponse> => {
+    if (token) {
+      return apiClient.post<AuthSyncResponse>("/api/auth/clerk-sync", undefined, {
+        customHeaders: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
-        }
-      : await getHeaders();
-    const response = await fetch(`${API_BASE_URL}/api/auth/clerk-sync`, {
-      method: "POST",
-      headers,
-      credentials: "include",
-    });
+        },
+      });
+    }
 
-    return (await handleResponse(response)) as AuthSyncResponse;
+    return apiClient.post<AuthSyncResponse>("/api/auth/clerk-sync");
   },
 };

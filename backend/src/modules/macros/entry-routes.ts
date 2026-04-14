@@ -4,17 +4,17 @@ import {
   safeQuery,
   safeQueryAll,
   type MacroEntryRow,
-} from "../../lib/database";
-import { getLocalDate } from "../../lib/dates";
+} from "../../lib/data/database";
+import { getLocalDate } from "../../lib/utils/dates";
 import {
   AuthenticationError,
   BadRequestError,
   DatabaseError,
   NotFoundError,
-} from "../../lib/errors";
+} from "../../lib/http/errors";
 import {
   mutationSuccessWithId,
-} from "../../lib/mutation-contract";
+} from "../../lib/http/mutation-contract";
 import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
 import { MacroSchemas } from "./schemas";
 import {
@@ -27,8 +27,8 @@ export const registerMacroEntryRoutes = (group: any) =>
   group
     .get(
       "/totals",
-      async (context: any) => {
-        const { db, query } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, query } = context;
         const internalUserId = context.authenticatedUser.userId;
         let startDate = query?.startDate;
         let endDate = query?.endDate;
@@ -80,8 +80,8 @@ export const registerMacroEntryRoutes = (group: any) =>
     )
     .get(
       "/history",
-      async (context: any) => {
-        const { db, query } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, query } = context;
         const internalUserId = context.authenticatedUser.userId;
 
         if (!internalUserId) {
@@ -217,8 +217,8 @@ export const registerMacroEntryRoutes = (group: any) =>
     )
     .post(
       "/",
-      async (context: any) => {
-        const { db, body } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
         if (!body) {
@@ -282,8 +282,8 @@ export const registerMacroEntryRoutes = (group: any) =>
     )
     .delete(
       "/:id",
-      async (context: any) => {
-        const { db, params } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, params } = context;
         const internalUserId = context.authenticatedUser.userId;
 
         const entryId = params?.id;
@@ -318,8 +318,8 @@ export const registerMacroEntryRoutes = (group: any) =>
     )
     .put(
       "/:id",
-      async (context: any) => {
-        const { db, params, body } = context as MacrosRouteContext;
+      async (context: MacrosRouteContext) => {
+        const { db, params, body } = context;
         const internalUserId = context.authenticatedUser.userId;
 
         if (!body) {
@@ -349,7 +349,8 @@ export const registerMacroEntryRoutes = (group: any) =>
         }
 
         const setClause = fieldsToUpdate.map((field) => `${field} = ?`).join(", ");
-        const queryParams = [...Object.values(updates), entryId, internalUserId];
+        const updateValues = Object.values(updates) as Array<string | number | null>;
+        const queryParams = [...updateValues, Number(entryId), internalUserId];
 
         const result = safeQuery<MacroEntryRow>(
           db,

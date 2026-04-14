@@ -24,32 +24,32 @@ describe("apiServices contracts", () => {
 
   beforeEach(() => {
     vi.stubGlobal("fetch", fetchMock);
-    setAuthToken(null);
-    setGetToken(async () => null);
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   afterEach(() => {
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
-    setAuthToken(null);
-    setGetToken(async () => null);
+    apiClient.setAuthToken(null);
+    apiClient.setGetToken(async () => null);
   });
 
   it("prefers the fresh Clerk token over a stale static token", async () => {
-    setAuthToken("stale-token");
-    setGetToken(async () => "fresh-token");
+    apiClient.setAuthToken("stale-token");
+    apiClient.setGetToken(async () => "fresh-token");
 
-    expect(await getAuthToken()).toBe("fresh-token");
-    await expect(getHeaders()).resolves.toEqual({
+    expect(await apiClient.getAuthToken()).toBe("fresh-token");
+    await expect(apiClient.getHeaders()).resolves.toEqual({
       Authorization: "Bearer fresh-token",
       "Content-Type": "application/json",
     });
   });
 
   it("falls back to the static token when Clerk cannot provide one", async () => {
-    setAuthToken("static-token");
+    apiClient.setAuthToken("static-token");
 
-    await expect(getHeaders(false)).resolves.toEqual({
+    await expect(apiClient.getHeaders(false)).resolves.toEqual({
       Authorization: "Bearer static-token",
     });
   });
@@ -152,7 +152,7 @@ describe("apiServices contracts", () => {
 
   it("surfaces structured API failures through ApiError", async () => {
     await expect(
-      handleResponse(
+      apiClient.handleResponse(
         createJsonResponse(
           {
             code: "ACCOUNT_NOT_SYNCED",

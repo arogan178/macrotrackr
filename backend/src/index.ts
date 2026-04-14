@@ -1,7 +1,7 @@
 import { Elysia } from "elysia";
 import { createApp } from "./app";
 import { getConfig } from "./config";
-import { logger } from "./lib/logger";
+import { logger } from "./lib/observability/logger";
 import { createDatabase, initializeDatabase } from "./db";
 import { createRuntimeServices } from "./services/runtime";
 
