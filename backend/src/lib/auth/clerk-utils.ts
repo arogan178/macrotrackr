@@ -1,4 +1,3 @@
-// src/lib/clerk-utils.ts
 import type { Database } from "bun:sqlite";
 import { safeQuery } from "../data/database";
 import { logger } from "../observability/logger";
