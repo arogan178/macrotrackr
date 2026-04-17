@@ -17,7 +17,11 @@ vi.mock("elysia", () => ({
 }));
 
 vi.mock("elysia-clerk", () => ({
-  clerkPlugin: vi.fn(() => ({ name: "clerkPlugin" })),
+  clerkPlugin: vi.fn(() => ({
+    resolve: vi.fn(() => ({
+      onBeforeHandle: vi.fn(() => ({ name: "clerkPlugin" })),
+    })),
+  })),
   verifyToken: vi.fn(),
 }));
 
@@ -29,7 +33,7 @@ vi.mock("../../src/config", () => ({
   },
 }));
 
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   logger: {
     debug: vi.fn(),
     warn: vi.fn(),
@@ -37,11 +41,11 @@ vi.mock("../../src/lib/logger", () => ({
   },
 }));
 
-vi.mock("../../src/lib/clerk-utils", () => ({
+vi.mock("../../src/lib/auth/clerk-utils", () => ({
   getInternalUserId: vi.fn(),
 }));
 
-import { isExemptPath } from "../../src/middleware/clerkAuth";
+import { isExemptPath } from "../../src/middleware/clerk-auth";
 
 describe("isExemptPath", () => {
   it("allows exact public endpoints", () => {

@@ -55,8 +55,11 @@ function applyTestEnv(overrides: Record<string, string | undefined> = {}) {
 
 async function loadConfigModule(overrides: Record<string, string | undefined> = {}) {
 	applyTestEnv(overrides);
-	const cacheBuster = `${Date.now()}-${Math.random()}`;
-	return import(`../src/config?cachebust=${cacheBuster}`);
+	const configModule = await import("../src/config");
+	configModule.setConfigOverrides(null);
+	configModule.resetConfigCache();
+	configModule.getConfig();
+	return configModule;
 }
 
 describe("config", () => {

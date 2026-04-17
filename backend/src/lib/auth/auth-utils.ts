@@ -1,4 +1,3 @@
-// src/lib/auth-utils.ts
 import { config } from "../../config";
 
 /**

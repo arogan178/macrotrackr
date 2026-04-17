@@ -1,5 +1,3 @@
-// src/lib/dates.ts
-
 export function getLocalDate(): string {
   const date = new Date();
   const offset = date.getTimezoneOffset();
