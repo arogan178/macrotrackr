@@ -1,4 +1,3 @@
-// src/lib/error-handler.ts
 import { logger } from "../observability/logger";
 import { AppError } from "./errors";
 
