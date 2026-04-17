@@ -1,4 +1,3 @@
-// src/lib/route-adapter.ts
 import type { ClerkAuthContext } from "../../middleware/clerk-auth";
 import { AuthenticationError } from "../http/errors";
 

@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the logger before importing metrics
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   loggerHelpers: {
     performance: vi.fn(),
   },

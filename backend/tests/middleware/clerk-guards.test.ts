@@ -1,4 +1,14 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const hasActiveProSubscriptionMock = vi.fn();
+
+vi.mock("../../src/modules/billing/subscription-service", () => ({
+  SubscriptionService: {
+    hasActiveProSubscription: (...arguments_: unknown[]) =>
+      hasActiveProSubscriptionMock(...arguments_),
+  },
+}));
+
 import {
   requireAuth,
   FREE_TIER_LIMITS,
@@ -8,6 +18,10 @@ import {
 } from "../../src/middleware/clerk-guards";
 
 describe("clerk-guards", () => {
+  beforeEach(() => {
+    hasActiveProSubscriptionMock.mockReset();
+  });
+
   describe("FREE_TIER_LIMITS", () => {
     it("should have MAX_GOALS defined as 3", () => {
       expect(FREE_TIER_LIMITS.MAX_GOALS).toBe(3);
@@ -51,11 +65,7 @@ describe("clerk-guards", () => {
     });
 
     it("should return a promise", () => {
-      vi.mock("../../src/modules/billing/subscription-service", () => ({
-        SubscriptionService: {
-          hasActiveProSubscription: vi.fn().mockResolvedValue(true),
-        },
-      }));
+      hasActiveProSubscriptionMock.mockResolvedValue(true);
 
       const result = checkProStatus(1);
       expect(result).toBeInstanceOf(Promise);
@@ -63,14 +73,6 @@ describe("clerk-guards", () => {
   });
 
   describe("checkFeatureLimit", () => {
-    beforeEach(() => {
-      vi.mock("../../src/modules/billing/subscription-service", () => ({
-        SubscriptionService: {
-          hasActiveProSubscription: vi.fn(),
-        },
-      }));
-    });
-
     it("should be a function", () => {
       expect(typeof checkFeatureLimit).toBe("function");
     });
@@ -81,8 +83,7 @@ describe("clerk-guards", () => {
     });
 
     it("should return allowed true when under limit", async () => {
-      const mockSubscriptionService = require("../../src/modules/billing/subscription-service");
-      mockSubscriptionService.SubscriptionService.hasActiveProSubscription = vi.fn().mockResolvedValue(false);
+      hasActiveProSubscriptionMock.mockResolvedValue(false);
 
       const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 2);
       expect(result.allowed).toBe(true);
@@ -91,8 +92,7 @@ describe("clerk-guards", () => {
     });
 
     it("should return allowed false when at limit", async () => {
-      const mockSubscriptionService = require("../../src/modules/billing/subscription-service");
-      mockSubscriptionService.SubscriptionService.hasActiveProSubscription = vi.fn().mockResolvedValue(false);
+      hasActiveProSubscriptionMock.mockResolvedValue(false);
 
       const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 3);
       expect(result.allowed).toBe(false);
@@ -102,8 +102,7 @@ describe("clerk-guards", () => {
     });
 
     it("should return allowed true for Pro users regardless of count", async () => {
-      const mockSubscriptionService = require("../../src/modules/billing/subscription-service");
-      mockSubscriptionService.SubscriptionService.hasActiveProSubscription = vi.fn().mockResolvedValue(true);
+      hasActiveProSubscriptionMock.mockResolvedValue(true);
 
       const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 100);
       expect(result.allowed).toBe(true);
