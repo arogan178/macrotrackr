@@ -1,4 +1,3 @@
-// src/lib/schemas.ts
 import { t } from "elysia";
 
 /**

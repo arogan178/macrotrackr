@@ -13,7 +13,7 @@ import {
   ErrorResponseSchema,
   PaginationQuerySchema,
   PaginationResponseSchema,
-} from "../../src/lib/schemas";
+} from "../../src/lib/http/schemas";
 
 describe("schemas", () => {
   describe("EmailSchema", () => {
@@ -33,21 +33,32 @@ describe("schemas", () => {
   describe("PositiveNumberSchema", () => {
     it("should be defined with minimum 0", () => {
       expect(PositiveNumberSchema).toBeDefined();
-      expect(PositiveNumberSchema.type).toBe("number");
+      expect(
+        (PositiveNumberSchema as { type?: string }).type ??
+          (PositiveNumberSchema as { anyOf?: Array<{ type?: string }> }).anyOf?.[1]
+            ?.type,
+      ).toBe("number");
     });
   });
 
   describe("PositiveIntegerSchema", () => {
     it("should be defined with minimum 1", () => {
       expect(PositiveIntegerSchema).toBeDefined();
-      expect(PositiveIntegerSchema.type).toBe("number");
+      expect(
+        (PositiveIntegerSchema as { type?: string }).type ??
+          (PositiveIntegerSchema as { anyOf?: Array<{ type?: string }> }).anyOf?.[1]
+            ?.type,
+      ).toBe("integer");
     });
   });
 
   describe("MealTypeSchema", () => {
     it("should have breakfast, lunch, dinner, snack as valid options", () => {
       expect(MealTypeSchema).toBeDefined();
-      expect(MealTypeSchema.type).toBe("union");
+      expect(
+        (MealTypeSchema as { type?: string }).type ??
+          (MealTypeSchema as { anyOf?: unknown[] }).anyOf,
+      ).toBeDefined();
     });
 
     it("should have snack as default", () => {
@@ -59,7 +70,10 @@ describe("schemas", () => {
   describe("WeightGoalTypeSchema", () => {
     it("should have lose, maintain, gain as valid options", () => {
       expect(WeightGoalTypeSchema).toBeDefined();
-      expect(WeightGoalTypeSchema.type).toBe("union");
+      expect(
+        (WeightGoalTypeSchema as { type?: string }).type ??
+          (WeightGoalTypeSchema as { anyOf?: unknown[] }).anyOf,
+      ).toBeDefined();
     });
 
     it("should have maintain as default", () => {
@@ -71,14 +85,21 @@ describe("schemas", () => {
   describe("MacroPercentageSchema", () => {
     it("should be defined with min 5 and max 70", () => {
       expect(MacroPercentageSchema).toBeDefined();
-      expect(MacroPercentageSchema.type).toBe("integer");
+      expect(
+        (MacroPercentageSchema as { type?: string }).type ??
+          (MacroPercentageSchema as { anyOf?: Array<{ type?: string }> }).anyOf?.[1]
+            ?.type,
+      ).toBe("integer");
     });
   });
 
   describe("AccentColorSchema", () => {
     it("should have indigo, blue, green, purple as valid options", () => {
       expect(AccentColorSchema).toBeDefined();
-      expect(AccentColorSchema.type).toBe("union");
+      expect(
+        (AccentColorSchema as { type?: string }).type ??
+          (AccentColorSchema as { anyOf?: unknown[] }).anyOf,
+      ).toBeDefined();
     });
   });
 

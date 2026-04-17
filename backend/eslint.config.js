@@ -130,10 +130,11 @@ export default [
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: null,
+        ...tseslint.configs.disableTypeChecked.languageOptions.parserOptions,
       },
     },
     rules: {
+      ...tseslint.configs.disableTypeChecked.rules,
       // Allow any in test files for mocking purposes
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/consistent-type-assertions": "off",
