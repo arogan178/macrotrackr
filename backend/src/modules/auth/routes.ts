@@ -10,9 +10,11 @@ import {
 import { AuthenticationError, ConflictError } from "../../lib/http/errors";
 import { logger } from "../../lib/observability/logger";
 import type { ClerkAuthContext } from "../../middleware/clerk-auth";
+import { hashPassword } from "../../lib/auth/password";
 
 import type { RouteContext } from "../../types";
 import { resolveClerkIdentity } from "../../lib/auth/route-adapter";
+import { AuthSchemas } from "./schemas";
 
 
 
@@ -57,12 +59,65 @@ type AuthRouteContext<TBody = Record<string, unknown>> = RouteContext<
   clerkClient?: ClerkApiClient;
 };
 
+type ResetPasswordRequestBody = {
+  token: string;
+  newPassword: string;
+};
+
 
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
       // .use(rateLimiters.auth) // Temporarily disabled for testing
+
+      .post(
+        "/reset-password",
+        async (context) => {
+          const { db, body } =
+            context as unknown as AuthRouteContext<ResetPasswordRequestBody> & {
+              body: ResetPasswordRequestBody;
+            };
+          const { token, newPassword } = body;
+
+          const userWithResetToken = safeQuery<
+            Pick<UserRow, "id" | "password_reset_expires">
+          >(
+            db,
+            "SELECT id, password_reset_expires FROM users WHERE password_reset_token = ?",
+            [token],
+          );
+
+          if (!userWithResetToken?.password_reset_expires) {
+            throw new AuthenticationError("Invalid or expired password reset token.");
+          }
+
+          const resetExpiresAt = new Date(userWithResetToken.password_reset_expires);
+          if (Number.isNaN(resetExpiresAt.getTime()) || resetExpiresAt <= new Date()) {
+            throw new AuthenticationError("Invalid or expired password reset token.");
+          }
+
+          const hashedPassword = await hashPassword(newPassword);
+
+          safeExecute(
+            db,
+            "UPDATE users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?",
+            [hashedPassword, userWithResetToken.id],
+          );
+
+          return {
+            message: "Password has been reset successfully.",
+          };
+        },
+        {
+          body: AuthSchemas.resetPassword,
+          detail: {
+            summary: "Reset password with token",
+            description: "Resets a password using a valid password reset token",
+            tags: ["Auth"],
+          },
+        },
+      )
 
       // Clerk User Sync - Sync Clerk user with our database
       .post(

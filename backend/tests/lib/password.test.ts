@@ -1,5 +1,45 @@
 import { describe, expect, it, vi } from "vitest";
 
+const bunPasswordMock = {
+  hash: vi.fn(async (plaintextPassword: string) => {
+    const salt = Math.random().toString(36).slice(2, 10);
+    const encodedPassword = Buffer.from(plaintextPassword, "utf8").toString(
+      "base64url",
+    );
+    return `$2mock$${salt}$${encodedPassword}`;
+  }),
+  verify: vi.fn(
+    async (
+      plaintextPassword: string,
+      hashedPassword: string,
+      _algorithm?: string,
+    ) => {
+      if (typeof hashedPassword !== "string") {
+        return false;
+      }
+
+      const segments = hashedPassword.split("$");
+      const encodedPassword = segments[segments.length - 1];
+      if (!encodedPassword) {
+        return false;
+      }
+
+      try {
+        const decodedPassword = Buffer.from(encodedPassword, "base64url").toString(
+          "utf8",
+        );
+        return decodedPassword === plaintextPassword;
+      } catch {
+        return false;
+      }
+    },
+  ),
+};
+
+vi.stubGlobal("Bun", {
+  password: bunPasswordMock,
+});
+
 // Set required environment variables before importing password module
 const mockEnv = {
   JWT_SECRET: "this-is-a-32-character-secret-key!!",
@@ -24,7 +64,7 @@ vi.stubEnv("CLERK_SECRET_KEY", mockEnv.CLERK_SECRET_KEY);
 describe("password", () => {
   describe("hashPassword", () => {
     it("returns a hashed password", async () => {
-      const { hashPassword } = await import("../../src/lib/password");
+      const { hashPassword } = await import("../../src/lib/auth/password");
       const hashed = await hashPassword("testpassword123");
       
       expect(hashed).toBeDefined();
@@ -35,7 +75,7 @@ describe("password", () => {
     });
 
     it("produces different hashes for the same password", async () => {
-      const { hashPassword } = await import("../../src/lib/password");
+      const { hashPassword } = await import("../../src/lib/auth/password");
       const hash1 = await hashPassword("samepassword");
       const hash2 = await hashPassword("samepassword");
       
@@ -46,7 +86,7 @@ describe("password", () => {
 
   describe("verifyPassword", () => {
     it("returns true for correct password", async () => {
-      const { hashPassword, verifyPassword } = await import("../../src/lib/password");
+      const { hashPassword, verifyPassword } = await import("../../src/lib/auth/password");
       const password = "testpassword123";
       const hashed = await hashPassword(password);
       
@@ -55,7 +95,7 @@ describe("password", () => {
     });
 
     it("returns false for incorrect password", async () => {
-      const { hashPassword, verifyPassword } = await import("../../src/lib/password");
+      const { hashPassword, verifyPassword } = await import("../../src/lib/auth/password");
       const hashed = await hashPassword("correctpassword");
       
       const result = await verifyPassword("wrongpassword", hashed);
@@ -63,7 +103,7 @@ describe("password", () => {
     });
 
     it("returns false for invalid hash", async () => {
-      const { verifyPassword } = await import("../../src/lib/password");
+      const { verifyPassword } = await import("../../src/lib/auth/password");
       const result = await verifyPassword("anypassword", "invalidhash");
       expect(result).toBe(false);
     });

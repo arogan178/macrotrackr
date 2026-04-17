@@ -1,9 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the logger
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   logger: {
     error: vi.fn(),
+    warn: vi.fn(),
   },
 }));
 
@@ -13,7 +14,7 @@ describe("alerting", () => {
   });
 
   it("creates an alert with correct structure", async () => {
-    const { triggerAlert, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { triggerAlert, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -30,7 +31,7 @@ describe("alerting", () => {
   });
 
   it("triggers alertAvailabilityViolation", async () => {
-    const { alertAvailabilityViolation, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { alertAvailabilityViolation, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -45,7 +46,7 @@ describe("alerting", () => {
   });
 
   it("triggers alertAvailabilityViolation with warning", async () => {
-    const { alertAvailabilityViolation, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { alertAvailabilityViolation, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -59,7 +60,7 @@ describe("alerting", () => {
   });
 
   it("triggers alertLatencyViolation", async () => {
-    const { alertLatencyViolation, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { alertLatencyViolation, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -74,7 +75,7 @@ describe("alerting", () => {
   });
 
   it("triggers alertLatencyViolation with warning", async () => {
-    const { alertLatencyViolation, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { alertLatencyViolation, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -88,7 +89,7 @@ describe("alerting", () => {
   });
 
   it("triggers alertErrorRateViolation", async () => {
-    const { alertErrorRateViolation, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { alertErrorRateViolation, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -103,7 +104,7 @@ describe("alerting", () => {
   });
 
   it("triggers alertErrorRateViolation with warning", async () => {
-    const { alertErrorRateViolation, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { alertErrorRateViolation, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler = vi.fn();
     registerAlertHandler(handler);
@@ -117,7 +118,7 @@ describe("alerting", () => {
   });
 
   it("handles multiple handlers", async () => {
-    const { triggerAlert, registerAlertHandler } = await import("../../src/lib/alerting");
+    const { triggerAlert, registerAlertHandler } = await import("../../src/lib/observability/alerting");
     
     const handler1 = vi.fn();
     const handler2 = vi.fn();

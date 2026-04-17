@@ -1,4 +1,3 @@
-// src/lib/responses.ts
 import { isAppError } from "./errors";
 import { loggerHelpers } from "../observability/logger";
 

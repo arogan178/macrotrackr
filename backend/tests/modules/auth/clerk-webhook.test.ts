@@ -23,7 +23,7 @@ vi.mock("svix", () => {
   };
 });
 
-vi.mock("../../../src/lib/database", () => ({
+vi.mock("../../../src/lib/data/database", () => ({
   safeQuery: (...arguments_: unknown[]) => safeQueryMock(...arguments_),
   safeExecute: (...arguments_: unknown[]) => safeExecuteMock(...arguments_),
 }));
@@ -50,7 +50,7 @@ function createWebhookApp(db?: Record<string, unknown>) {
 }
 
 async function postWebhookEvent(
-  app: Elysia,
+  app: ReturnType<typeof createWebhookApp>,
   event: ClerkWebhookEvent,
   headers: Record<string, string> = {},
 ) {

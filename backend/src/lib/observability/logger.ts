@@ -1,4 +1,3 @@
-// src/lib/logger.ts
 import pino from "pino";
 import { config } from "../../config";
 
