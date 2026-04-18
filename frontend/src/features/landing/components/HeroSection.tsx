@@ -17,7 +17,7 @@ const HeroSection: React.FC = () => (
       >
         <span className="mb-6 flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-surface-3">
           <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          MacroTrackr 2.1 is now LIVE!
+          MacroTrackr 2.0.1 is now LIVE!
         </span>
         <h1 className="mb-6 max-w-4xl text-5xl font-bold tracking-tighter text-balance text-foreground sm:text-6xl lg:text-[5rem] lg:leading-[1.1]">
           Master your macros.
@@ -25,9 +25,9 @@ const HeroSection: React.FC = () => (
         </h1>
 
         <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-balance text-muted sm:text-xl">
-          MacroTrackr is a web app for tracking calories and macronutrients.
-          Log meals in seconds, visualize your progress instantly, and build
-          lasting habits with less friction and more clarity.
+          MacroTrackr is a web app for tracking calories and macronutrients. Log
+          meals in seconds, visualize your progress instantly, and build lasting
+          habits with less friction and more clarity.
         </p>
 
         <div className="mb-14 flex flex-col items-center justify-center gap-4 sm:flex-row">
