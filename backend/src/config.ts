@@ -79,9 +79,9 @@ export function getConfig(): Config {
     ? { ...parsedConfig, ...configOverrides }
     : parsedConfig;
 
-  const nodeEnv = process.env.NODE_ENV || cachedConfig.NODE_ENV || "unknown";
+  const nodeEnv = process.env.NODE_ENV ?? cachedConfig.NODE_ENV;
   if (nodeEnv !== "test") {
-    console.log(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
+    console.warn(`Configuration loaded successfully (NODE_ENV: ${nodeEnv})`);
   }
 
   return cachedConfig;
@@ -96,7 +96,24 @@ export function resetConfigCache() {
   cachedConfig = null;
 }
 
-export const config: Config = new Proxy({} as Config, {
+const configProxyTarget: Config = {
+  PORT: 0,
+  HOST: "",
+  DATABASE_PATH: "",
+  JWT_SECRET: "",
+  CORS_ORIGIN: "",
+  NODE_ENV: "development",
+  JWT_EXP: "",
+  STRIPE_SECRET_KEY: "",
+  STRIPE_WEBHOOK_SECRET: "",
+  STRIPE_PRICE_ID_MONTHLY: "",
+  STRIPE_PRICE_ID_YEARLY: "",
+  RESEND_API_KEY: "",
+  CLERK_PUBLISHABLE_KEY: "",
+  CLERK_SECRET_KEY: "",
+};
+
+export const config: Config = new Proxy(configProxyTarget, {
   get(_target, property: keyof Config) {
     return getConfig()[property];
   },

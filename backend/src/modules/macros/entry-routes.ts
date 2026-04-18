@@ -23,15 +23,21 @@ import {
   type MacrosRouteContext,
 } from "./service";
 
-export const registerMacroEntryRoutes = (group: any) =>
+type MacroRouteGroup = {
+  get: (path: string, ...args: unknown[]) => MacroRouteGroup;
+  post: (path: string, ...args: unknown[]) => MacroRouteGroup;
+  delete: (path: string, ...args: unknown[]) => MacroRouteGroup;
+  put: (path: string, ...args: unknown[]) => MacroRouteGroup;
+};
+
+export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
   group
     .get(
       "/totals",
       async (context: MacrosRouteContext) => {
         const { db, query } = context;
         const internalUserId = context.authenticatedUser.userId;
-        let startDate = query?.startDate;
-        let endDate = query?.endDate;
+        let { startDate, endDate } = query;
 
         if (!startDate && !endDate) {
           startDate = endDate = getLocalDate();
@@ -88,11 +94,11 @@ export const registerMacroEntryRoutes = (group: any) =>
           throw new AuthenticationError("Authentication required.");
         }
 
-        const userId = internalUserId as number;
-        const limit = Math.max(1, Math.min(Number(query?.limit) || 20, 100));
-        const offset = Math.max(0, Number(query?.offset) || 0);
-        const startDate = query?.startDate;
-        const endDate = query?.endDate;
+        const userId = internalUserId;
+        const limit = Math.max(1, Math.min(Number(query.limit ?? 20), 100));
+        const offset = Math.max(0, Number(query.offset ?? 0));
+        const startDate = query.startDate;
+        const endDate = query.endDate;
 
         const isProUser = await checkProStatus(userId);
         const retentionDays = FREE_TIER_LIMITS.DATA_RETENTION_DAYS;
@@ -133,14 +139,14 @@ export const registerMacroEntryRoutes = (group: any) =>
           `SELECT COUNT(*) as count FROM macro_entries WHERE ${visibleWhere.where}`,
           visibleWhere.parameters,
         );
-        const visibleTotal = countResult?.count || 0;
+        const visibleTotal = countResult?.count ?? 0;
 
         const totalAvailableResult = safeQuery<{ count: number }>(
           db,
           `SELECT COUNT(*) as count FROM macro_entries WHERE ${totalWhere.where}`,
           totalWhere.parameters,
         );
-        const totalAvailable = totalAvailableResult?.count || 0;
+        const totalAvailable = totalAvailableResult?.count ?? 0;
 
         const historyQuery = `SELECT id, protein, carbs, fats, meal_type, meal_name, entry_date, entry_time, ingredients, created_at
            FROM macro_entries

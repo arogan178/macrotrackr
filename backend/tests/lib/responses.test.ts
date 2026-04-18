@@ -15,7 +15,7 @@ describe("responses", () => {
 
   describe("createSuccessResponse", () => {
     it("creates a success response with data", async () => {
-      const { createSuccessResponse } = await import("../../src/lib/responses");
+      const { createSuccessResponse } = await import("../../src/lib/http/responses");
       
       const response = createSuccessResponse({ id: 1, name: "test" });
       
@@ -24,7 +24,7 @@ describe("responses", () => {
     });
 
     it("creates a success response with message", async () => {
-      const { createSuccessResponse } = await import("../../src/lib/responses");
+      const { createSuccessResponse } = await import("../../src/lib/http/responses");
       
       const response = createSuccessResponse({ id: 1 }, "Operation successful");
       
@@ -35,7 +35,7 @@ describe("responses", () => {
 
   describe("createErrorResponse", () => {
     it("creates an error response", async () => {
-      const { createErrorResponse } = await import("../../src/lib/responses");
+      const { createErrorResponse } = await import("../../src/lib/http/responses");
       
       const response = createErrorResponse("NOT_FOUND", "Resource not found");
       
@@ -45,7 +45,7 @@ describe("responses", () => {
     });
 
     it("creates an error response with details", async () => {
-      const { createErrorResponse } = await import("../../src/lib/responses");
+      const { createErrorResponse } = await import("../../src/lib/http/responses");
       
       const response = createErrorResponse(
         "VALIDATION_ERROR",
@@ -59,8 +59,8 @@ describe("responses", () => {
 
   describe("handleError", () => {
     it("handles AppError with status code", async () => {
-      const { handleError } = await import("../../src/lib/responses");
-      const { AppError } = await import("../../src/lib/errors");
+      const { handleError } = await import("../../src/lib/http/responses");
+      const { AppError } = await import("../../src/lib/http/errors");
       
       // Create an actual AppError instance
       const error = new AppError("Resource not found", 404, "NOT_FOUND");
@@ -73,7 +73,7 @@ describe("responses", () => {
     });
 
     it("handles generic error", async () => {
-      const { handleError } = await import("../../src/lib/responses");
+      const { handleError } = await import("../../src/lib/http/responses");
       
       const error = new Error("Something went wrong");
       const set = {} as any;
@@ -85,7 +85,7 @@ describe("responses", () => {
     });
 
     it("handles validation errors", async () => {
-      const { handleError } = await import("../../src/lib/responses");
+      const { handleError } = await import("../../src/lib/http/responses");
       
       const error = new Error("validation failed: invalid email");
       const set = {} as any;
@@ -97,7 +97,7 @@ describe("responses", () => {
     });
 
     it("sets Content-Type header", async () => {
-      const { handleError } = await import("../../src/lib/responses");
+      const { handleError } = await import("../../src/lib/http/responses");
       
       const error = new Error("test");
       const set = {} as any;

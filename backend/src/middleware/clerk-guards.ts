@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-import type { AuthenticatedContext } from "../types";
 import { AuthenticationError, AuthorizationError } from "../lib/http/errors";
 import { logger } from "../lib/observability/logger";
 import { SubscriptionService } from "../modules/billing/subscription-service";
@@ -13,8 +12,10 @@ export interface AuthenticatedUser {
   imageUrl?: string;
 }
 
-interface GuardsAuthenticatedContext extends AuthenticatedContext {
-  authenticatedUser: AuthenticatedUser;
+interface GuardsAuthenticatedContext {
+  user: AuthenticatedUser | null;
+  internalUserId: number | null;
+  path?: string;
 }
 
 export const requireAuth = new Elysia({ name: "requireAuth" })
@@ -122,4 +123,3 @@ export const checkFeatureLimit = async (
 export const checkProStatus = async (userId: number): Promise<boolean> => {
   return getRequiredProStatus(userId);
 };
-

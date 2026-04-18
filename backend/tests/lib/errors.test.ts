@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
 // Mock the logger module
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   loggerHelpers: {
     error: vi.fn(),
   },
@@ -19,7 +19,7 @@ import {
   DatabaseError,
   isAppError,
   formatErrorResponse,
-} from "../../src/lib/errors";
+} from "../../src/lib/http/errors";
 
 describe("errors", () => {
   describe("AppError", () => {

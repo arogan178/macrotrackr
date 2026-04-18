@@ -105,7 +105,7 @@ export const habitRoutes = (app: Elysia) =>
               db,
               "SELECT COUNT(*) as count FROM habits WHERE user_id = ?",
               [internalUserId]
-            )?.count || 0;
+            )?.count ?? 0;
 
           // Check if user can create another habit based on Free/Pro limits
           const featureLimitResult = await checkFeatureLimit(
@@ -115,7 +115,7 @@ export const habitRoutes = (app: Elysia) =>
           );
           if (!featureLimitResult.allowed) {
             throw new AuthorizationError(
-              featureLimitResult.message || "Feature limit reached"
+              featureLimitResult.message ?? "Feature limit reached"
             );
           }
 
@@ -161,13 +161,13 @@ export const habitRoutes = (app: Elysia) =>
             normalizedAccent,
             isComplete ? 1 : 0,
             createdAt,
-            completedAt || null,
+            completedAt ?? null,
           ]);
 
           // Return properly typed response
           return {
             id,
-            userId: internalUserId?.toString(),
+            userId: internalUserId.toString(),
             title,
             iconName,
             current,
@@ -257,7 +257,7 @@ export const habitRoutes = (app: Elysia) =>
             normalizedAccent,
             isComplete ? 1 : 0,
             createdAt,
-            completedAt || null,
+            completedAt ?? null,
             habitId,
             internalUserId,
           ]);
@@ -285,7 +285,7 @@ export const habitRoutes = (app: Elysia) =>
               | undefined,
             isComplete,
             createdAt,
-            completedAt: completedAt || null,
+            completedAt: completedAt ?? null,
           };
         },
         {

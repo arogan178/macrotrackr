@@ -2,7 +2,7 @@
 // Snapshot tests for API response shapes to catch regressions
 
 import { describe, it, expect } from 'vitest';
-import { transformKeysToCamel } from '../../src/lib/mappers';
+import { transformKeysToCamel } from '../../src/lib/mappers/index';
 import {
   // Macro entry fixtures
   mockMacroEntry,

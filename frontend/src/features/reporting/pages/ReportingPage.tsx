@@ -10,7 +10,10 @@ import FeaturePage from "@/components/layout/FeaturePage";
 import { EmptyState } from "@/components/ui";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
-import { useMacroTargetQuery } from "@/hooks/queries/useMacroQueries";
+import {
+  useMacroHistoryForDateRange,
+  useMacroTargetQuery,
+} from "@/hooks/queries/useMacroQueries";
 import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
