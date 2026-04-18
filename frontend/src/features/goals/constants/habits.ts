@@ -1,5 +1,4 @@
 import type { ComponentType } from "react";
-import type { IconProps } from "@/components/ui/Icons";
 
 import {
   AwardIcon,
@@ -14,6 +13,7 @@ import {
   SunIcon,
   TargetIcon,
 } from "@/components/ui";
+import type { IconProps } from "@/components/ui/Icons";
 
 type IconComponent = ComponentType<IconProps>;
 

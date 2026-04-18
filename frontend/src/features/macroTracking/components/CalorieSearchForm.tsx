@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 
+import type { FoodSearchResult } from "@/api/macros";
 import TextField from "@/components/form/TextField";
 import {
   ArrowRightIcon,
@@ -10,10 +11,10 @@ import {
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import type { Ingredient } from "@/types/macro";
-import type { FoodSearchResult } from "@/api/macros";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
+
 import SavedMealsList from "./SavedMealsList";
 
 interface CalorieSearchProps {

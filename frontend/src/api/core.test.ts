@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { ApiError, apiClient } from "./core";
+import { apiClient,ApiError } from "./core";
 
 describe("api/core", () => {
   describe("ApiError", () => {

@@ -1,4 +1,4 @@
-import { apiClient, type ApiError } from "@/api/core";
+import { apiClient } from "@/api/core";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
@@ -40,12 +40,9 @@ export const goalsApi = {
    * @throws {ApiError}
    */
   getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
-    try {
-      const result = await apiClient.get<SetWeightGoalPayload | null>("/api/goals/weight");
-      return result === null ? undefined : result;
-    } catch (e) {
-      throw e;
-    }
+    const result = await apiClient.get<SetWeightGoalPayload | null>("/api/goals/weight");
+
+    return result === null ? undefined : result;
   },
 
   /**

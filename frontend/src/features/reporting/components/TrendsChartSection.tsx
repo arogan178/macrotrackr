@@ -2,8 +2,8 @@ import { useMemo, useState } from "react";
 import { Flame, PieChart } from "lucide-react";
 
 import ChartCard from "@/components/chart/ChartCard";
-import LineChartComponent from "@/components/chart/LineChartComponent";
 import type { ChartDataPoint, LineConfig } from "@/components/chart/ChartTypes";
+import LineChartComponent from "@/components/chart/LineChartComponent";
 import TabBar from "@/components/ui/TabBar";
 
 interface TrendsChartSectionProps {
