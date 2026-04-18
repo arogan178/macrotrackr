@@ -75,9 +75,9 @@ jobs:
           cd ..
           mkdir -p logs
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
-          pm2 reload ecosystem.config.js || {
+          pm2 reload ecosystem.config.cjs || {
             echo "PM2 reload failed, attempting restart..."
-            pm2 restart ecosystem.config.js || {
+            pm2 restart ecosystem.config.cjs || {
               echo "PM2 restart also failed"
               exit 1
             }
@@ -208,9 +208,9 @@ jobs:
           cd /var/www/macro-tracker
 
           # Restart frontend
-          pm2 reload ecosystem.config.js || {
+          pm2 reload ecosystem.config.cjs || {
             echo "PM2 reload failed, attempting restart..."
-            pm2 restart ecosystem.config.js || {
+            pm2 restart ecosystem.config.cjs || {
               echo "PM2 restart also failed"
               exit 1
             }
