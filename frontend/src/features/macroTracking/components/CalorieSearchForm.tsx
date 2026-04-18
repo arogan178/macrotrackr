@@ -25,6 +25,7 @@ interface CalorieSearchProps {
     name: string;
     servingQuantity: number;
     servingUnit: string;
+    rawQuantity?: string;
   }) => void;
   onSelectSavedMeal: (meal: {
     name: string;
@@ -124,85 +125,37 @@ const CalorieSearch = memo(function CalorieSearch({
   }, []);
 
   const processFoodItemSelection = useCallback((item: FoodSearchResult) => {
-    let quantity = item.servingQuantity;
-    let unit = item.servingUnit;
+    const defaultUnit = item.servingUnit as UnitType;
+    const parsedQuantity = item.rawQuantity
+      ? UnitConverter.parseQuantity(item.rawQuantity)
+      : {
+          quantity: item.servingQuantity,
+          unit: defaultUnit,
+          original: "",
+        };
 
-    if (item.rawQuantity) {
-      const raw = item.rawQuantity.toLowerCase().trim();
+    const parsedUnit = parsedQuantity.unit as UnitType;
+    const hasSupportedUnit = [
+      "g",
+      "kg",
+      "oz",
+      "lb",
+      "ml",
+      "L",
+      "cup",
+      "tbsp",
+      "tsp",
+      "pt",
+      "unit",
+    ].includes(parsedUnit);
 
-      const patterns = [
-        /([\d,.]+)\s*(ml|milliliter|milliliters|l|liter|liters|fl\s*oz|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)/,
-        /([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds)/,
-      ];
+    const quantity = parsedQuantity.quantity;
+    const unit = hasSupportedUnit ? parsedUnit : defaultUnit;
 
-      for (const pattern of patterns) {
-        const match = raw.match(pattern);
-        if (match?.[1] && match[2]) {
-          quantity = Number.parseFloat(match[1].replace(",", "."));
-          const rawUnit = match[2];
-
-          const unitMap: Record<string, UnitType> = {
-            ml: "ml",
-            milliliter: "ml",
-            milliliters: "ml",
-            l: "L",
-            liter: "L",
-            liters: "L",
-            fl: "ml", // fl oz will be handled separately
-            oz: "ml", // fl oz will be handled separately
-            cup: "cup",
-            cups: "cup",
-            tbsp: "tbsp",
-            tablespoon: "tbsp",
-            tablespoons: "tbsp",
-            tsp: "tsp",
-            teaspoon: "tsp",
-            teaspoons: "tsp",
-            pt: "pt",
-            pint: "pt",
-            pints: "pt",
-            g: "g",
-            gram: "g",
-            grams: "g",
-            kg: "kg",
-            kilogram: "kg",
-            kilograms: "kg",
-            lb: "lb",
-            lbs: "lb",
-            pound: "lb",
-            pounds: "lb",
-          };
-
-          if (raw.includes("fl") && raw.includes("oz")) {
-            unit = "ml";
-            quantity = quantity * 29.5735;
-          } else {
-            unit = unitMap[rawUnit] || "g";
-          }
-
-          break;
-        }
-      }
-    }
-
-    if (unit === "g" && item.rawQuantity) {
-      const raw = item.rawQuantity.toLowerCase();
-      if (raw.includes("ml") || raw.includes("milliliter")) {
-        unit = "ml";
-      } else if (raw.includes("l") || raw.includes("liter")) {
-        unit = "L";
-      } else if (raw.includes("cup")) {
-        unit = "cup";
-      } else if (raw.includes("tbsp") || raw.includes("tablespoon")) {
-        unit = "tbsp";
-      } else if (raw.includes("tsp") || raw.includes("teaspoon")) {
-        unit = "tsp";
-      } else if (raw.includes("pt") || raw.includes("pint")) {
-        unit = "pt";
-      }
-    }
-
-    const metric = UnitConverter.toMetric(quantity, unit as UnitType);
+    const metric =
+      unit === "unit"
+        ? { quantity, unit }
+        : UnitConverter.toMetric(quantity, unit);
 
     return {
       protein: item.protein.toFixed(1),
@@ -211,6 +164,7 @@ const CalorieSearch = memo(function CalorieSearch({
       name: item.name,
       servingQuantity: metric.quantity,
       servingUnit: unit,
+      rawQuantity: item.rawQuantity,
     };
   }, []);
 
