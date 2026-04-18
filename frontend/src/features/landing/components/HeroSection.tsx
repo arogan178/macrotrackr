@@ -25,8 +25,9 @@ const HeroSection: React.FC = () => (
         </h1>
 
         <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-balance text-muted sm:text-xl">
+          MacroTrackr is a web app for tracking calories and macronutrients.
           Log meals in seconds, visualize your progress instantly, and build
-          lasting habits. No complexity, no friction—just clarity and results.
+          lasting habits with less friction and more clarity.
         </p>
 
         <div className="mb-14 flex flex-col items-center justify-center gap-4 sm:flex-row">
@@ -54,6 +55,24 @@ const HeroSection: React.FC = () => (
             Explore Features
           </a>
         </div>
+
+        <p className="text-sm text-muted">
+          Review our{" "}
+          <Link
+            to="/privacy"
+            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary"
+          >
+            Privacy Policy
+          </Link>{" "}
+          and{" "}
+          <Link
+            to="/terms"
+            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary"
+          >
+            Terms of Service
+          </Link>
+          .
+        </p>
       </motion.div>
 
       <motion.div
