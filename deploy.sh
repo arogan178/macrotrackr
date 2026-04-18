@@ -153,10 +153,10 @@ fi
 # Restart applications using PM2 ecosystem file
 log "Restarting applications with PM2..."
 if [ "$DRY_RUN" = false ]; then
-    pm2 reload ecosystem.config.js || {
+    pm2 reload ecosystem.config.cjs || {
         error "PM2 reload failed"
         log "Attempting PM2 restart instead..."
-        pm2 restart ecosystem.config.js || {
+        pm2 restart ecosystem.config.cjs || {
             error "PM2 restart also failed"
             exit 1
         }
