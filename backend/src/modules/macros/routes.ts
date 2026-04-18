@@ -12,8 +12,15 @@ export const macroRoutes = (app: Elysia) =>
     const macroGroup = group
       .decorate("openFoodFactsApiClient", new OpenFoodFactsApiClient());
 
-    registerMacroSearchRoutes(macroGroup);
-    registerMacroTargetRoutes(macroGroup);
+    registerMacroSearchRoutes(
+      macroGroup as unknown as Parameters<typeof registerMacroSearchRoutes>[0],
+    );
+    registerMacroTargetRoutes(
+      macroGroup as unknown as Parameters<typeof registerMacroTargetRoutes>[0],
+    );
+    registerMacroEntryRoutes(
+      macroGroup as unknown as Parameters<typeof registerMacroEntryRoutes>[0],
+    );
 
-    return registerMacroEntryRoutes(macroGroup);
+    return macroGroup;
   });

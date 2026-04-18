@@ -14,10 +14,7 @@ function createStripeClient() {
 let stripeClientRef: Stripe | null = null;
 
 export function getStripeClient() {
-  if (!stripeClientRef) {
-    stripeClientRef = createStripeClient();
-  }
-
+  stripeClientRef ??= createStripeClient();
   return stripeClientRef;
 }
 
@@ -102,10 +99,9 @@ export class StripeService {
     event: StripeWebhookEvent
   ): event is ThinWebhookEvent {
     const candidate = event as Partial<ThinWebhookEvent>;
-    return (
+      return (
       candidate.object === "v2.core.event" &&
-      typeof candidate.related_object === "object" &&
-      candidate.related_object !== null
+      typeof candidate.related_object === "object"
     );
   }
 
@@ -127,14 +123,12 @@ export class StripeService {
       // Get price string
       let price = "";
       if (subscription.items.data.length > 0) {
-        const item = subscription.items.data[0];
+        const item = subscription.items.data[0]!;
         if (
-          item &&
-          item.price &&
           item.price.unit_amount &&
           item.price.currency
         ) {
-          price = `$${(item.price.unit_amount / 100).toFixed(2)}/${item.price.recurring?.interval || "month"}`;
+          price = `$${(item.price.unit_amount / 100).toFixed(2)}/${item.price.recurring?.interval ?? "month"}`;
         }
       }
 
@@ -170,7 +164,7 @@ export class StripeService {
       const customer = await stripe.customers.create({
         email: options.email,
         name: options.name,
-        metadata: options.metadata || {},
+        metadata: options.metadata ?? {},
       });
       logger.info(
         {
@@ -208,9 +202,9 @@ export class StripeService {
         ],
         success_url: options.successUrl,
         cancel_url: options.cancelUrl,
-        metadata: options.metadata || {},
+        metadata: options.metadata ?? {},
         subscription_data: {
-          metadata: options.metadata || {},
+          metadata: options.metadata ?? {},
         },
       };
       if (options.customerId) {

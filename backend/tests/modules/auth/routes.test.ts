@@ -1,21 +1,21 @@
 import { Elysia } from "elysia";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { handleError } from "../../../src/lib/responses";
+import { handleError } from "../../../src/lib/http/responses";
 
 const safeQueryMock = vi.fn();
 const safeExecuteMock = vi.fn();
 const withTransactionMock = vi.fn();
 const hashPasswordMock = vi.fn();
 
-vi.mock("../../../src/lib/database", () => ({
+vi.mock("../../../src/lib/data/database", () => ({
   safeQuery: (...arguments_: unknown[]) => safeQueryMock(...arguments_),
   safeExecute: (...arguments_: unknown[]) => safeExecuteMock(...arguments_),
   withTransaction: (...arguments_: unknown[]) =>
     withTransactionMock(...arguments_),
 }));
 
-vi.mock("../../../src/lib/password", () => ({
+vi.mock("../../../src/lib/auth/password", () => ({
   hashPassword: (...arguments_: unknown[]) => hashPasswordMock(...arguments_),
 }));
 
@@ -64,7 +64,7 @@ function createAuthTestApp(
       baseApp.decorate("clerkClient", options.clerkClient)
     : baseApp;
 
-  return appWithClerkClient
+  return (appWithClerkClient as Elysia)
     .derive({ as: "scoped" }, () => ({
       user,
       clerkUserId: user.clerkUserId,

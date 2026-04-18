@@ -3,7 +3,7 @@ export function getLocalDate(): string {
   const offset = date.getTimezoneOffset();
   const adjustedDate = new Date(date.getTime() - offset * 60 * 1000);
   const parts = adjustedDate.toISOString().split("T");
-  return parts[0] || adjustedDate.toISOString().substring(0, 10);
+  return parts[0] ?? adjustedDate.toISOString().substring(0, 10);
 }
 
 export function getCurrentTimestamp(): string {
@@ -27,12 +27,12 @@ export function isValidTime(timeString: string): boolean {
 
 export function formatDate(date: Date): string {
   const parts = date.toISOString().split("T");
-  return parts[0] || date.toISOString().substring(0, 10);
+  return parts[0] ?? date.toISOString().substring(0, 10);
 }
 
 export function formatTime(date: Date): string {
   const parts = date.toTimeString().split(" ");
-  return parts[0] || "00:00:00";
+  return parts[0] ?? "00:00:00";
 }
 
 export function parseDate(dateString: string): Date {

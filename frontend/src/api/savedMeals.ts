@@ -1,4 +1,4 @@
-import { apiClient, type ApiError } from "@/api/core";
+import { apiClient } from "@/api/core";
 import type { MealType } from "@/types/macro";
 
 export interface SavedMeal {
@@ -48,7 +48,7 @@ export const savedMealsApi = {
   /**
    * @throws {ApiError}
    */
-  delete: async ({ id }: { id: number }): Promise<{ success: boolean; id: number }> => {
+  delete: async (id: number): Promise<{ success: boolean; id: number }> => {
     return apiClient.del<{ success: boolean; id: number }>(`/api/saved-meals/${id}`);
   },
 };

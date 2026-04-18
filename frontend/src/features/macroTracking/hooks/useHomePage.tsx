@@ -68,9 +68,7 @@ export function useHistoryPagination(pageSize: number) {
 
   // Get limits from the first page (all pages have same limits data)
   const limits = useMemo(() => {
-    const firstPage = macroHistoryData?.pages?.[0];
-
-    return firstPage!.limits;
+    return macroHistoryData?.pages?.[0]?.limits;
   }, [macroHistoryData]);
 
   const historyHasMore = hasNextPage;

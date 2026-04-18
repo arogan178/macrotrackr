@@ -7,13 +7,17 @@ import type { FoodProductResult } from "../../services/openfoodfacts-api-client"
 import { MacroSchemas } from "./schemas";
 import type { MacrosRouteContext } from "./service";
 
-export const registerMacroSearchRoutes = (group: any) =>
+type MacroRouteGroup = {
+  get: (path: string, ...args: unknown[]) => MacroRouteGroup;
+};
+
+export const registerMacroSearchRoutes = (group: MacroRouteGroup) =>
   group.get(
     "/search",
     async (context: MacrosRouteContext) => {
       const { query, openFoodFactsApiClient, cacheService: cache } = context;
 
-      const rawSearchQuery = query?.q;
+      const rawSearchQuery = query.q;
       if (!rawSearchQuery) {
         throw new BadRequestError("Search query is required");
       }

@@ -10,14 +10,19 @@ import {
   type MacrosRouteContext,
 } from "./service";
 
-export const registerMacroTargetRoutes = (group: any) =>
+type MacroRouteGroup = {
+  get: (path: string, ...args: unknown[]) => MacroRouteGroup;
+  put: (path: string, ...args: unknown[]) => MacroRouteGroup;
+};
+
+export const registerMacroTargetRoutes = (group: MacroRouteGroup) =>
   group
     .get(
       "/target",
       async (context: MacrosRouteContext) => {
         const { db, request } = context;
         const internalUserId = context.authenticatedUser.userId;
-        const correlationId = request.headers.get("x-correlation-id") || undefined;
+        const correlationId = request.headers.get("x-correlation-id") ?? undefined;
 
         loggerHelpers.apiRequest("GET", "/macros/target", internalUserId ?? undefined, {
           correlationId,
@@ -76,7 +81,7 @@ export const registerMacroTargetRoutes = (group: any) =>
           throw new BadRequestError("Request body is required");
         }
 
-        const correlationId = request.headers.get("x-correlation-id") || undefined;
+        const correlationId = request.headers.get("x-correlation-id") ?? undefined;
         loggerHelpers.apiRequest("PUT", "/macros/target", internalUserId ?? undefined, {
           correlationId,
         });
