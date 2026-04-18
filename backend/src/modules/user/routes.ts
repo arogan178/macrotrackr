@@ -29,8 +29,7 @@ const ErrorResponseSchema = t.Object({
 });
 
 // Helper function
-const nullify = <T>(value: T | undefined | null): T | null =>
-  value === undefined || value === null ? null : value;
+const nullify = <T>(value: T | undefined | null): T | null => value ?? null;
 
 // Type for user details query result
 interface UserDetailsResult {
@@ -101,7 +100,7 @@ export const userRoutes = (app: Elysia) =>
               const subscriptionInfo =
                 await SubscriptionService.getUserSubscription(internalUserId);
               currentPeriodEnd =
-                subscriptionInfo.subscription?.current_period_end || null;
+                subscriptionInfo.subscription?.current_period_end ?? null;
             } catch (subscriptionError) {
               logger.warn(
                 {
@@ -173,7 +172,7 @@ export const userRoutes = (app: Elysia) =>
 
             // Get correlation ID from request headers if available
             const correlationId =
-              request.headers.get("x-correlation-id") || undefined;
+              request.headers.get("x-correlation-id") ?? undefined;
 
             loggerHelpers.apiRequest("PUT", "/user/settings", internalUserId, {
               correlationId,
@@ -278,7 +277,7 @@ export const userRoutes = (app: Elysia) =>
               );
 
               // Log weight change if weight is provided and different
-              const newWeightProvided = weight !== undefined && weight !== null;
+              const newWeightProvided = weight != null;
               const weightHasChanged =
                 newWeightProvided && weight !== currentWeight;
 
@@ -301,7 +300,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            throw error;
+            return handleError(error, context.set);
           }
         },
         {
@@ -336,7 +335,7 @@ export const userRoutes = (app: Elysia) =>
 
             // Get correlation ID from request headers if available
             const correlationId =
-              request.headers.get("x-correlation-id") || undefined;
+              request.headers.get("x-correlation-id") ?? undefined;
 
             loggerHelpers.apiRequest(
               "POST",
@@ -381,7 +380,7 @@ export const userRoutes = (app: Elysia) =>
               );
 
               // Always insert weight log if weight is provided
-              if (weight !== undefined && weight !== null) {
+              if (weight != null) {
                 const logTimestamp = new Date().toISOString(); // Use full timestamp
                 const logId = generateId();
 
@@ -400,7 +399,7 @@ export const userRoutes = (app: Elysia) =>
               };
             });
           } catch (error) {
-            throw error;
+            return handleError(error, context.set);
           }
         },
         {

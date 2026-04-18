@@ -54,8 +54,8 @@ export const rateLimit = (config: RateLimitConfig) => {
       // Default: use IP address
       const headers = request.headers;
       return (
-        headers.get("x-forwarded-for") ||
-        headers.get("x-real-ip") ||
+        headers.get("x-forwarded-for") ??
+        headers.get("x-real-ip") ??
         "unknown"
       );
     },

@@ -2,7 +2,7 @@ import type { Database } from "bun:sqlite";
 import { describe, expect, it, vi } from "vitest";
 
 // Mock the logger module
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   loggerHelpers: {
     error: vi.fn(),
     dbQuery: vi.fn(),
@@ -10,17 +10,17 @@ vi.mock("../../src/lib/logger", () => ({
 }));
 
 // Mock the query-tracer
-vi.mock("../../src/lib/query-tracer", () => ({
+vi.mock("../../src/lib/observability/query-tracer", () => ({
   traceQuerySync: vi.fn((_query: string, _params: unknown[], fn: () => unknown) => fn()),
 }));
 
-import { DatabaseError } from "../../src/lib/errors";
+import { DatabaseError } from "../../src/lib/http/errors";
 import {
   safeExecute,
   safeQuery,
   safeQueryAll,
   withTransaction,
-} from "../../src/lib/database";
+} from "../../src/lib/data/database";
 
 describe("database utilities", () => {
   // Create mock database with proper typing

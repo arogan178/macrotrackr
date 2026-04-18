@@ -54,7 +54,7 @@ export const goalRoutes = (app: Elysia) =>
           const internalUserId = context.authenticatedUser.userId;
 
           // Get correlation ID from request headers if available
-          const correlationId = request.headers.get("x-correlation-id") || undefined;
+          const correlationId = request.headers.get("x-correlation-id") ?? undefined;
 
           loggerHelpers.apiRequest("GET", "/goals/weight", internalUserId ?? undefined, {
             correlationId,
@@ -156,11 +156,16 @@ export const goalRoutes = (app: Elysia) =>
             };
 
             // Get correlation ID from request headers if available
-            const correlationId = request.headers.get("x-correlation-id") || undefined;
+            const correlationId = request.headers.get("x-correlation-id") ?? undefined;
 
-            loggerHelpers.apiRequest("POST", "/goals/weight", internalUserId ?? undefined, {
-              correlationId,
-            });
+            loggerHelpers.apiRequest(
+              "POST",
+              "/goals/weight",
+              internalUserId ?? undefined,
+              {
+                correlationId,
+              }
+            );
 
             const savedGoalResult = safeQuery<WeightGoalRow>(
               db,
@@ -280,11 +285,16 @@ export const goalRoutes = (app: Elysia) =>
             const effectiveStartingWeight = existingGoal.starting_weight;
 
             // Get correlation ID from request headers if available
-            const correlationId = request.headers.get("x-correlation-id") || undefined;
+            const correlationId = request.headers.get("x-correlation-id") ?? undefined;
 
-            loggerHelpers.apiRequest("PUT", "/goals/weight", internalUserId ?? undefined, {
-              correlationId,
-            });
+            loggerHelpers.apiRequest(
+              "PUT",
+              "/goals/weight",
+              internalUserId ?? undefined,
+              {
+                correlationId,
+              }
+            );
 
             // IMPORTANT: Do NOT update starting_weight
             const savedGoalResult = safeQuery<WeightGoalRow>(

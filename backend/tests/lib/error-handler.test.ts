@@ -1,16 +1,16 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
 // Mock the logger module
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   logger: {
     error: vi.fn(),
   },
 }));
 
-import { logger } from "../../src/lib/logger";
+import { logger } from "../../src/lib/observability/logger";
 
-import { handleServiceError } from "../../src/lib/error-handler";
-import { NotFoundError, ValidationError } from "../../src/lib/errors";
+import { handleServiceError } from "../../src/lib/http/error-handler";
+import { NotFoundError, ValidationError } from "../../src/lib/http/errors";
 
 describe("error-handler", () => {
   beforeEach(() => {

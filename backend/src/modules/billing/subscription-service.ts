@@ -184,7 +184,7 @@ export class SubscriptionService {
 
       // Use cache for Stripe details if available
       let cacheKey: string | undefined = undefined;
-      if (subscription && subscription.stripe_subscription_id) {
+      if (subscription?.stripe_subscription_id) {
         cacheKey = `stripe-details:${subscription.stripe_subscription_id}`;
         const cached = cacheService.get<CachedStripeDetails>(cacheKey);
         if (cached) {
@@ -199,7 +199,7 @@ export class SubscriptionService {
               subscription.stripe_subscription_id
             );
             price = details.price;
-            paymentMethod = details.paymentMethod || undefined;
+            paymentMethod = details.paymentMethod ?? undefined;
             stripeDetails = details.subscription;
             cacheService.set(cacheKey, { price, paymentMethod, stripeDetails });
           } catch (err) {
@@ -214,7 +214,7 @@ export class SubscriptionService {
       return {
         subscription_status: user.subscription_status,
         stripe_customer_id: user.stripe_customer_id,
-        subscription: subscription || undefined,
+        subscription: subscription ?? undefined,
         price,
         paymentMethod,
         stripeDetails,

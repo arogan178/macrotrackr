@@ -28,7 +28,7 @@ function isDiagnosticsAuthorized(request: Request): boolean {
     ?.replace(/^Bearer\s+/u, "")
     .trim();
 
-  const providedKey = headerKey || bearerToken;
+  const providedKey = headerKey ?? bearerToken;
   return providedKey ? secureCompare(providedKey, configuredKey) : false;
 }
 
@@ -59,7 +59,7 @@ export const metricsRoutes = new Elysia()
       }),
     );
 
-    set.headers = set.headers || {};
+    set.headers = {};
     set.headers["Cache-Control"] = "no-store";
 
     return {

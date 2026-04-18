@@ -280,7 +280,11 @@ function applyMigrations(db: Database) {
     }
   } catch (error) {
     logger.error({ error }, "    Failed migrating habits table; continuing with initialization");
-    try { db.exec("ROLLBACK;"); } catch { }
+    try {
+      db.exec("ROLLBACK;");
+    } catch {
+      // no-op: rollback can fail if no transaction is active
+    }
   }
 
   // Apply ingredients column additions for hybrid meal support

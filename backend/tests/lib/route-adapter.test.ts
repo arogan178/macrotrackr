@@ -13,9 +13,9 @@ describe("route-adapter", () => {
     vi.stubEnv("CLERK_SECRET_KEY", "sk_test");
   });
 
-  describe("resolveAuthenticatedUser", () => {
+  describe("resolveClerkIdentity", () => {
     it("resolves user with valid clerk user ID", async () => {
-      const { resolveAuthenticatedUser } = await import("../../src/lib/route-adapter");
+      const { resolveClerkIdentity } = await import("../../src/lib/auth/route-adapter");
       
       const context = {
         user: {
@@ -24,35 +24,37 @@ describe("route-adapter", () => {
           firstName: "John",
           lastName: "Doe"
         },
-        internalUserId: 42
+        internalUserId: 42,
+        clerkUserId: "user_123",
       };
       
-      const result = resolveAuthenticatedUser(context as any);
+      const result = resolveClerkIdentity(context as any);
       
-      expect(result.userId).toBe(42);
+      expect(result.clerkUserId).toBe("user_123");
       expect(result.email).toBe("test@example.com");
       expect(result.firstName).toBe("John");
     });
 
     it("throws AuthenticationError when clerkUserId is missing", async () => {
-      const { resolveAuthenticatedUser } = await import("../../src/lib/route-adapter");
+      const { resolveClerkIdentity } = await import("../../src/lib/auth/route-adapter");
       
       const context = {
         user: {},
         internalUserId: 42
       };
       
-      expect(() => resolveAuthenticatedUser(context as any)).toThrow();
+      expect(() => resolveClerkIdentity(context as any)).toThrow();
     });
 
-    it("throws NotFoundError when internalUserId is missing and no db", async () => {
-      const { resolveAuthenticatedUser } = await import("../../src/lib/route-adapter");
+    it("accepts missing internalUserId because identity is Clerk-based", async () => {
+      const { resolveClerkIdentity } = await import("../../src/lib/auth/route-adapter");
       
       const context = {
         user: { clerkUserId: "user_123" }
       };
       
-      expect(() => resolveAuthenticatedUser(context as any)).toThrow();
+      const result = resolveClerkIdentity(context as any);
+      expect(result.clerkUserId).toBe("user_123");
     });
   });
 });

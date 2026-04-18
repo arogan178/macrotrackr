@@ -53,6 +53,7 @@ export default [
 
       // Core rule disabled in favor of TS rule
       "no-unused-vars": "off",
+      "no-undef": "off",
 
       // TypeScript unused vars with underscore exception
       "@typescript-eslint/no-unused-vars": [
@@ -111,6 +112,7 @@ export default [
 
       // Core rule disabled in favor of TS rule
       "no-unused-vars": "off",
+      "no-undef": "off",
 
       // TypeScript unused vars with underscore exception
       "@typescript-eslint/no-unused-vars": [

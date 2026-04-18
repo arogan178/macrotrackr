@@ -29,10 +29,7 @@ export function createServerApp(options: AppBootstrapOptions = {}) {
 let appInstance: Elysia | null = null;
 
 export function getApp(options: AppBootstrapOptions = {}) {
-  if (!appInstance) {
-    appInstance = createServerApp(options);
-  }
-
+  appInstance ??= createServerApp(options);
   return appInstance;
 }
 

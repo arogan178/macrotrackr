@@ -10,6 +10,23 @@ export interface MacroOptimisticContext {
   entryDate?: string;
 }
 
+export async function prepareOptimisticUpdate(
+  queryClient: QueryClient,
+  entryDate?: string,
+): Promise<MacroOptimisticContext> {
+  await queryClient.cancelQueries({ queryKey: ["macros", "history-infinite"] });
+
+  if (!entryDate) {
+    return {
+      previousHistoryData: getMacroHistorySnapshots(queryClient),
+    };
+  }
+
+  await queryClient.cancelQueries({ queryKey: queryKeys.macros.dailyTotals(entryDate) });
+
+  return captureMacroHistorySnapshot(queryClient, entryDate);
+}
+
 export function captureMacroHistorySnapshot(
   queryClient: QueryClient,
   entryDate: string
