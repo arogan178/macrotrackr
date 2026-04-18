@@ -22,8 +22,10 @@ export {
  */
 export const getTodayEntries = (entries: MacroEntry[]): MacroEntry[] => {
   const today = getTodayDateString();
+
   return entries.filter((entry) => {
     const entryDate = entry.entryDate || entry.createdAt?.split("T")[0];
+
     return entryDate === today;
   });
 };
@@ -35,5 +37,6 @@ export const calculateTodayTotals = (
   allEntries: MacroEntry[],
 ): MacroDailyTotals => {
   const todayEntries = getTodayEntries(allEntries);
+
   return calculateDailyTotals(todayEntries);
 };

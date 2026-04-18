@@ -1,12 +1,13 @@
 import type { HabitGoalFormValues } from "@/types/habit";
 
-import { useGoalsData } from "./useGoalsData";
+import type { useGoalsData } from "./useGoalsData";
 import { useGoalsMutations } from "./useGoalsMutations";
-import { useGoalsUiState } from "./useGoalsUiState";
+import type { useGoalsUiState } from "./useGoalsUiState";
 
-export function useGoalsActions() {
-  const ui = useGoalsUiState();
-  const data = useGoalsData();
+type GoalsUiState = ReturnType<typeof useGoalsUiState>;
+type GoalsData = ReturnType<typeof useGoalsData>;
+
+export function useGoalsActions(ui: GoalsUiState, data: GoalsData) {
   const mutations = useGoalsMutations();
 
   function openWeightGoalModal() {
@@ -21,7 +22,7 @@ export function useGoalsActions() {
     ui.setLogWeightModalOpen(false);
   }
 
-  function resetGoals() {
+  function closeResetGoalsModal() {
     ui.setResetModalOpen(false);
   }
 
@@ -76,7 +77,7 @@ export function useGoalsActions() {
     openWeightGoalModal,
     closeWeightGoalModal,
     closeLogWeightModal,
-    resetGoals,
+    closeResetGoalsModal,
     addHabit,
     editHabit,
     closeHabitModal,

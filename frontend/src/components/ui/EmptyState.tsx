@@ -1,6 +1,7 @@
 import { memo, ReactNode } from "react";
 
 import { cn } from "../../lib/classnameUtilities";
+
 import Button from "./Button";
 import { PlusIcon } from "./Icons";
 
@@ -69,11 +70,11 @@ function EmptyState({
       className={cn(
         "flex flex-col items-center justify-center px-4 text-center",
         sizeStyles.padding,
-        className
+        className,
       )}
     >
       <div className="mb-4 text-muted">
-        {icon || (
+        {icon ?? (
           <div className="inline-flex items-center justify-center rounded-full border border-white/5 bg-surface-2/50 p-4 shadow-sm backdrop-blur-sm">
             {defaultIcon}
           </div>
@@ -86,7 +87,7 @@ function EmptyState({
       <p className={cn(sizeStyles.message, "mb-6 text-muted")}>{message}</p>
 
       {/* Icon buttons */}
-      {(action || secondaryAction) && (
+      {(action ?? secondaryAction) && (
         <div className="flex flex-wrap justify-center gap-3">
           {action && (
             <Button
@@ -100,8 +101,7 @@ function EmptyState({
                     : "primary"
               }
               className={getButtonStyles(action.variant)}
-              icon={action.icon}
-              iconPosition="left"
+              leftIcon={action.icon}
             >
               {action.label}
             </Button>
@@ -118,9 +118,8 @@ function EmptyState({
                     ? "ghost"
                     : "primary"
               }
-              className={getButtonStyles(secondaryAction.variant || "outline")}
-              icon={secondaryAction.icon}
-              iconPosition="left"
+              className={getButtonStyles(secondaryAction.variant ?? "outline")}
+              leftIcon={secondaryAction.icon}
             >
               {secondaryAction.label}
             </Button>

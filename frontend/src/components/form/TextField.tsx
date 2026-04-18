@@ -1,45 +1,7 @@
-/**
- * TextField – Standardized, accessible input for text, email, or password fields.
- *
- * Handles error, helper text, icons, password visibility, and accessibility.
- *
- * Accessibility:
- * - Uses label, aria-describedby, and aria-label for screen readers.
- * - Error and helper text are properly linked.
- *
- * Props:
- * @prop {string} label - Field label
- * @prop {string} value - Input value
- * @prop {function} onChange - Change handler (string)
- * @prop {boolean} [required] - Mark as required
- * @prop {"text"|"email"|"password"} [type] - Input type
- * @prop {string} [error] - Error message
- * @prop {string} [helperText] - Helper text
- * @prop {string} [placeholder] - Placeholder text
- * @prop {number} [minLength] - Minimum length
- * @prop {number} [maxLength] - Maximum length
- * @prop {boolean} [textOnly] - Restrict to letters/spaces
- * @prop {React.ReactNode} [icon] - Optional icon (left)
- * @prop {function} [onKeyDown] - Keydown handler
- * @prop {string} [id] - Custom id
- * @prop {string} [ariaLabel] - Accessibility label
- *
- * @example
- * // Basic usage
- * <TextField label="Name" value={name} onChange={setName} />
- *
- * @example
- * // Password field with visibility toggle
- * <TextField label="Password" type="password" value={pw} onChange={setPw} />
- *
- * @example
- * // With icon and helper text
- * <TextField label="Email" value={email} onChange={setEmail} icon={<MailIcon />} helperText="We'll never share your email." />
- */
 import { memo, useId, useState } from "react";
 
-import { formStyles } from "@/components/form/Styles";
-import type { TextFieldProps } from "@/components/form/Types";
+import { formStyles } from "@/components/form/FormStyles";
+import type { TextFieldProps } from "@/components/form/FormTypes";
 import { EyeIcon, EyeSlashIcon, IconButton } from "@/components/ui";
 
 import { cn } from "../../lib/classnameUtilities";
@@ -66,7 +28,7 @@ function TextField({
   autoComplete,
 }: TextFieldProps & { id?: string; ariaLabel?: string }) {
   const autoId = useId();
-  const inputId = id || `textfield-${autoId}`;
+  const inputId = id ?? `textfield-${autoId}`;
   const describedByIds = [];
   if (error) describedByIds.push(`${inputId}-error`);
   if (helperText && !error) describedByIds.push(`${inputId}-helper`);
@@ -137,7 +99,7 @@ function TextField({
           />
         )}
       </div>
-      {maxLength && value && value.length === maxLength && !error && (
+      {maxLength && value?.length === maxLength && !error && (
         <p className={formStyles.maxLength}>
           {`Maximum ${maxLength} characters reached`}
         </p>

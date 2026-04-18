@@ -71,7 +71,7 @@ export function useMutationErrorHandler(
   const handleMutationSuccess = useCallback(
     (message?: string): void => {
       if (showSuccess) {
-        const successMessage = message || defaultSuccessMessage;
+        const successMessage = message ?? defaultSuccessMessage;
 
         if (onSuccess) {
           onSuccess(successMessage);

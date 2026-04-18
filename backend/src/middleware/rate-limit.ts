@@ -1,12 +1,12 @@
 // src/middleware/rate-limit.ts
 import { Elysia } from "elysia";
-import { loggerHelpers } from "../lib/logger";
+import { loggerHelpers } from "../lib/observability/logger";
 
 interface RateLimitConfig {
   windowMs: number; // Time window in milliseconds
   maxRequests: number; // Maximum requests per window
   message?: string;
-  keyGenerator?: (request: any) => string;
+  keyGenerator?: (request: Request) => string;
 }
 
 interface RateLimitEntry {
@@ -17,27 +17,45 @@ interface RateLimitEntry {
 // In-memory store for rate limiting (use Redis in production for distributed systems)
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Clean up expired entries periodically
-setInterval(() => {
-  const now = Date.now();
-  for (const [key, entry] of rateLimitStore.entries()) {
-    if (now > entry.resetTime) {
-      rateLimitStore.delete(key);
-    }
+let cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
+
+function startCleanupInterval() {
+  if (cleanupIntervalId) {
+    return;
   }
-}, 60000); // Clean up every minute
+
+  cleanupIntervalId = setInterval(() => {
+    const now = Date.now();
+    for (const [key, entry] of rateLimitStore.entries()) {
+      if (now > entry.resetTime) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }, 60000); // Clean up every minute
+}
+
+export function stopRateLimitCleanupForTests() {
+  if (!cleanupIntervalId) {
+    return;
+  }
+
+  clearInterval(cleanupIntervalId);
+  cleanupIntervalId = null;
+}
 
 export const rateLimit = (config: RateLimitConfig) => {
+  startCleanupInterval();
+
   const {
     windowMs,
     maxRequests,
     message = "Too many requests, please try again later",
-    keyGenerator = (request: any) => {
+    keyGenerator = (request: Request) => {
       // Default: use IP address
+      const headers = request.headers;
       return (
-        request.headers["x-forwarded-for"] ||
-        request.headers["x-real-ip"] ||
-        request.ip ||
+        headers.get("x-forwarded-for") ??
+        headers.get("x-real-ip") ??
         "unknown"
       );
     },

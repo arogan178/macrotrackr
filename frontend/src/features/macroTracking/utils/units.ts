@@ -1,6 +1,3 @@
-// Unit conversion utilities for macro tracking
-// Provides comprehensive unit conversion with proper type safety
-
 export type UnitType = "g" | "kg" | "oz" | "lb" | "ml" | "L" | "cup" | "tbsp" | "tsp" | "pt" | "unit";
 
 export interface UnitConversion {
@@ -16,27 +13,22 @@ export interface ParsedQuantity {
   original: string;
 }
 
-// Common unit conversions to grams or milliliters (base units)
 const UNIT_CONVERSIONS: Record<UnitType, number> = {
-  // Weight conversions (to grams)
   g: 1,
   kg: 1000,
   oz: 28.3495,
   lb: 453.592,
 
-  // Volume conversions (to milliliters)
   ml: 1,
   L: 1000,
-  cup: 236.588, // US cup
-  tbsp: 14.7868, // US tablespoon
-  tsp: 4.928_92, // US teaspoon
-  pt: 500, // EU pint (500ml)
+  cup: 236.588,
+  tbsp: 14.7868,
+  tsp: 4.928_92,
+  pt: 500,
 
-  // Special case for items counted by unit (e.g., "1 apple")
-  unit: 1, // Will be handled specially based on context
+  unit: 1,
 };
 
-// Standard US cup measurements for common foods (in grams)
 const US_CUP_WEIGHTS: Record<string, number> = {
   flour: 125,
   sugar: 200,
@@ -53,11 +45,7 @@ const US_CUP_WEIGHTS: Record<string, number> = {
   fruits: 160,
 };
 
-// Unit converter as object with methods (not class)
 export const UnitConverter = {
-  /**
-   * Parse a quantity string like "100g", "1.5 kg", "2 cups flour", etc.
-   */
   parseQuantity(input: string): ParsedQuantity {
     if (!input || typeof input !== "string") {
       return { quantity: 100, unit: "g", original: input || "" };
@@ -68,16 +56,12 @@ export const UnitConverter = {
       return { quantity: 100, unit: "g", original: input };
     }
 
-    // Handle special cases first
     if (trimmed === "1" || trimmed === "one" || trimmed === "a" || trimmed === "an") {
       return { quantity: 1, unit: "unit", original: input };
     }
 
-    // Match patterns like "100g", "1.5 kg", "2 cups", etc.
     const patterns = [
-      // "100 g", "100g", "100 grams"
       /^([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds|ml|milliliter|milliliters|l|liter|liters|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)?(?:\s+(.+))?$/,
-      // Handle "1 cup flour", "2 tbsp sugar", etc.
       /^([\d,.]+)\s*(cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)(?:\s+(.+))?$/,
     ];
 
@@ -91,12 +75,10 @@ export const UnitConverter = {
           continue;
         }
 
-        // Determine unit
         let unit: UnitType = "g";
         const unitMatch = match[2];
 
         if (unitMatch) {
-          // Normalize unit names
           const unitMap: Record<string, UnitType> = {
             g: "g",
             gram: "g",
@@ -130,14 +112,13 @@ export const UnitConverter = {
             pints: "pt",
           };
 
-          unit = unitMap[unitMatch] || "g";
+          unit = unitMap[unitMatch];
         }
 
-        // Handle ingredient-specific conversions for cups
-        const ingredient = match[3]?.toLowerCase();
+        const ingredient = match[3]?.toLowerCase().trim();
         if (unit === "cup" && ingredient && US_CUP_WEIGHTS[ingredient]) {
-          // Convert cup measurement to grams using specific weight
           const weightInGrams = quantity * US_CUP_WEIGHTS[ingredient];
+
           return {
             quantity: Math.round(weightInGrams * 100) / 100,
             unit: "g",
@@ -149,24 +130,18 @@ export const UnitConverter = {
       }
     }
 
-    // Fallback for unrecognized formats
     return { quantity: 100, unit: "g", original: input };
   },
 
-  /**
-   * Convert a quantity from one unit to another
-   */
   convert(quantity: number, from: UnitType, to: UnitType): number {
     if (from === to) {
       return quantity;
     }
 
-    // Handle special unit conversions
     if (from === "unit" || to === "unit") {
-      return quantity; // Units are handled specially based on context
+      return quantity;
     }
 
-    // Convert to base unit first, then to target unit
     let baseQuantity: number;
 
     if (this.isWeightUnit(from)) {
@@ -174,11 +149,9 @@ export const UnitConverter = {
     } else if (this.isVolumeUnit(from)) {
       baseQuantity = quantity * UNIT_CONVERSIONS[from];
     } else {
-      // Unknown unit type, return as-is
       return quantity;
     }
 
-    // Convert from base unit to target unit
     if (this.isWeightUnit(to)) {
       return baseQuantity / UNIT_CONVERSIONS[to];
     } else if (this.isVolumeUnit(to)) {
@@ -188,9 +161,6 @@ export const UnitConverter = {
     return quantity;
   },
 
-  /**
-   * Convert quantity to metric units for consistency
-   */
   toMetric(quantity: number, unit: UnitType): { quantity: number; unit: UnitType } {
     if (this.isMetricUnit(unit)) {
       return { quantity, unit };
@@ -200,7 +170,6 @@ export const UnitConverter = {
     let metricUnit: UnitType;
 
     if (unit === "oz" || unit === "lb") {
-      // Weight conversions
       metricQuantity = unit === "oz" ? quantity * 28.3495 : quantity * 453.592;
 
       metricUnit = metricQuantity >= 1000 ? "kg" : "g";
@@ -208,14 +177,12 @@ export const UnitConverter = {
         metricQuantity /= 1000;
       }
     } else if (unit === "cup" || unit === "tbsp" || unit === "tsp") {
-      // Volume conversions
       metricQuantity = quantity * UNIT_CONVERSIONS[unit];
       metricUnit = metricQuantity >= 1000 ? "L" : "ml";
       if (metricUnit === "L") {
         metricQuantity /= 1000;
       }
     } else {
-      // Unknown or already metric
       return { quantity, unit };
     }
 
@@ -225,42 +192,28 @@ export const UnitConverter = {
     };
   },
 
-  /**
-   * Check if unit is a weight unit
-   */
   isWeightUnit(unit: UnitType): boolean {
     return ["g", "kg", "oz", "lb"].includes(unit);
   },
 
-  /**
-   * Check if unit is a volume unit
-   */
   isVolumeUnit(unit: UnitType): boolean {
     return ["ml", "L", "cup", "tbsp", "tsp", "pt"].includes(unit);
   },
 
-  /**
-   * Check if unit is already metric
-   */
   isMetricUnit(unit: UnitType): boolean {
     return ["g", "kg", "ml", "L"].includes(unit);
   },
 
-  /**
-   * Format quantity for display
-   */
   formatQuantity(quantity: number, unit: UnitType): string {
     if (unit === "unit") {
       return quantity === 1 ? "1 piece" : `${quantity} pieces`;
     }
 
     const rounded = Math.round(quantity * 100) / 100;
+
     return `${rounded}${unit}`;
   },
 
-  /**
-   * Get display name for unit
-   */
   getUnitDisplayName(unit: UnitType): string {
     const displayNames: Record<UnitType, string> = {
       g: "grams",
@@ -280,9 +233,9 @@ export const UnitConverter = {
   },
 };
 
-// Backwards compatibility functions
 export function getMetricServing(quantity: number, unit: string): { quantity: number; unit: string } {
   const parsed = UnitConverter.parseQuantity(`${quantity} ${unit}`);
   const metric = UnitConverter.toMetric(parsed.quantity, parsed.unit as UnitType);
+
   return { quantity: metric.quantity, unit: metric.unit };
 }

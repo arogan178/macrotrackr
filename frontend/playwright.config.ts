@@ -13,9 +13,6 @@ dotenv.config({ path: resolve(__dirname, '.env.test') })
 if (!process.env.CLERK_PUBLISHABLE_KEY) {
   console.warn('Warning: CLERK_PUBLISHABLE_KEY is not set')
 }
-if (!process.env.CLERK_SECRET_KEY) {
-  console.warn('Warning: CLERK_SECRET_KEY is not set')
-}
 
 const PORT = process.env.PORT || 5173
 const baseURL = process.env.FRONTEND_URL || `http://localhost:${PORT}`

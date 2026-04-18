@@ -1,32 +1,26 @@
 // src/modules/user/routes.ts
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
 import { UserSchemas } from "./schemas";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 import { generateId } from "../../utils/id-generator";
-import { safeQuery, safeExecute, withTransaction } from "../../lib/database";
+import {
+  safeQuery,
+  safeExecute,
+  withTransactionAsync,
+} from "../../lib/data/database";
 import {
   AccountNotSyncedError,
   NotFoundError,
   ConflictError,
-  AuthenticationError,
-} from "../../lib/errors";
-import { handleError } from "../../lib/responses";
-import { loggerHelpers } from "../../lib/logger";
-import { hashPassword, verifyPassword } from "../../lib/password";
+  BadRequestError,
+} from "../../lib/http/errors";
+import { handleError } from "../../lib/http/responses";
+import { loggerHelpers } from "../../lib/observability/logger";
 import { SubscriptionService } from "../billing/subscription-service";
-import type { Database } from "bun:sqlite";
-import { logger } from "../../lib/logger";
-import { getInternalUserId } from "../../lib/clerk-utils";
+import { logger } from "../../lib/observability/logger";
 
-// Extended user context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface UserRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
-}
+type UserRouteContext =
+  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
 
 const ErrorResponseSchema = t.Object({
   code: t.String(),
@@ -35,8 +29,7 @@ const ErrorResponseSchema = t.Object({
 });
 
 // Helper function
-const nullify = <T>(value: T | undefined | null): T | null =>
-  value === undefined || value === null ? null : value;
+const nullify = <T>(value: T | undefined | null): T | null => value ?? null;
 
 // Type for user details query result
 interface UserDetailsResult {
@@ -63,65 +56,27 @@ function normalizeSubscriptionStatus(
   return "free";
 }
 
-async function resolveOrCreateInternalUserId(
-  db: Database,
-  user: NonNullable<UserRouteContext["user"]>,
-  internalUserIdFromContext: number | null | undefined,
-): Promise<number | null> {
-  if (internalUserIdFromContext) {
-    return internalUserIdFromContext;
-  }
-
-  const resolvedInternalUserId = getInternalUserId(
-    db,
-    user.clerkUserId,
-    user.email,
-  );
-
-  if (resolvedInternalUserId) {
-    return resolvedInternalUserId;
-  }
-
-  return null;
-}
-
 export const userRoutes = (app: Elysia) =>
   app.group("/api/user", (group) =>
     group
-      .decorate("db", db)
-
       // GET /me - Get current user details
       .get(
         "/me",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
           try {
-            const { db, user, internalUserId: internalUserIdFromContext } =
-              context as UserRouteContext;
+            const { db } = context;
+            const { userId: internalUserId, clerkUserId } =
+              context.authenticatedUser;
 
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
             }
 
-            // Get internal user ID from Clerk ID
-            logger.info({ clerkUserId: user.clerkUserId }, "[/api/user/me] Looking up internal user ID");
-            
-            const internalUserId = await resolveOrCreateInternalUserId(
-              db,
-              user,
-              internalUserIdFromContext,
+            logger.info(
+              { internalUserId, clerkUserId },
+              "[/api/user/me] Found internal user",
             );
-
-            if (!internalUserId) {
-              logger.warn(
-                { clerkUserId: user.clerkUserId },
-                "[/api/user/me] Clerk user is authenticated but not linked to an internal account",
-              );
-              throw new AccountNotSyncedError(
-                "Your account setup is not finished yet. Please complete your profile.",
-              );
-            }
-            
-            logger.info({ internalUserId, clerkUserId: user.clerkUserId }, "[/api/user/me] Found internal user");
 
             // Fetch user details
             const dbResult = safeQuery<UserDetailsResult>(
@@ -145,7 +100,7 @@ export const userRoutes = (app: Elysia) =>
               const subscriptionInfo =
                 await SubscriptionService.getUserSubscription(internalUserId);
               currentPeriodEnd =
-                subscriptionInfo.subscription?.current_period_end || null;
+                subscriptionInfo.subscription?.current_period_end ?? null;
             } catch (subscriptionError) {
               logger.warn(
                 {
@@ -175,6 +130,12 @@ export const userRoutes = (app: Elysia) =>
               },
             };
           } catch (error) {
+            if (error instanceof NotFoundError) {
+              throw new AccountNotSyncedError(
+                "Your account setup is not finished yet. Please complete your profile.",
+              );
+            }
+
             return handleError(error, context.set);
           }
         },
@@ -195,34 +156,23 @@ export const userRoutes = (app: Elysia) =>
       // PUT /settings Handler - Update user settings
       .put(
         "/settings",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
           try {
-            const { db, user, body, request } = context as UserRouteContext;
+            const { db, body, request } = context;
+            const { userId: internalUserId } = context.authenticatedUser;
 
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
             }
 
             if (!body) {
-              throw new Error("Request body is required");
-            }
-
-            // Get internal user ID from Clerk ID
-            const internalUserId = getInternalUserId(
-              db,
-              user.clerkUserId,
-              user.email
-            );
-
-            if (!internalUserId) {
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
-              );
+              throw new BadRequestError("Request body is required");
             }
 
             // Get correlation ID from request headers if available
             const correlationId =
-              request.headers.get("x-correlation-id") || undefined;
+              request.headers.get("x-correlation-id") ?? undefined;
 
             loggerHelpers.apiRequest("PUT", "/user/settings", internalUserId, {
               correlationId,
@@ -248,7 +198,7 @@ export const userRoutes = (app: Elysia) =>
               activityLevel?: number;
             };
 
-            return await withTransaction(db, async () => {
+            return await withTransactionAsync(db, async () => {
               // Check for current weight before updates
               let currentWeight: number | null = null;
               const currentDetails = safeQuery<{ weight: number | null }>(
@@ -327,7 +277,7 @@ export const userRoutes = (app: Elysia) =>
               );
 
               // Log weight change if weight is provided and different
-              const newWeightProvided = weight !== undefined && weight !== null;
+              const newWeightProvided = weight != null;
               const weightHasChanged =
                 newWeightProvided && weight !== currentWeight;
 
@@ -369,34 +319,23 @@ export const userRoutes = (app: Elysia) =>
       // POST /complete-profile Handler - Complete user profile
       .post(
         "/complete-profile",
-        async (context: any) => {
+        async (rawContext: unknown) => {
+          const context = rawContext as UserRouteContext;
           try {
-            const { db, user, body, request } = context as UserRouteContext;
+            const { db, body, request } = context;
+            const { userId: internalUserId } = context.authenticatedUser;
 
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
+            if (internalUserId === null) {
+              throw new AccountNotSyncedError("Unable to resolve internal user ID.");
             }
 
             if (!body) {
-              throw new Error("Request body is required");
-            }
-
-            // Get internal user ID from Clerk ID
-            const internalUserId = getInternalUserId(
-              db,
-              user.clerkUserId,
-              user.email
-            );
-
-            if (!internalUserId) {
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
-              );
+              throw new BadRequestError("Request body is required");
             }
 
             // Get correlation ID from request headers if available
             const correlationId =
-              request.headers.get("x-correlation-id") || undefined;
+              request.headers.get("x-correlation-id") ?? undefined;
 
             loggerHelpers.apiRequest(
               "POST",
@@ -415,7 +354,7 @@ export const userRoutes = (app: Elysia) =>
               activityLevel?: number;
             };
 
-            return await withTransaction(db, async () => {
+            return await withTransactionAsync(db, async () => {
               // Upsert user_details
               safeExecute(
                 db,
@@ -441,7 +380,7 @@ export const userRoutes = (app: Elysia) =>
               );
 
               // Always insert weight log if weight is provided
-              if (weight !== undefined && weight !== null) {
+              if (weight != null) {
                 const logTimestamp = new Date().toISOString(); // Use full timestamp
                 const logId = generateId();
 
@@ -454,7 +393,10 @@ export const userRoutes = (app: Elysia) =>
                 loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
               }
 
-              return { success: true, message: "Profile details updated." };
+              return {
+                success: true,
+                message: "Profile details updated.",
+              };
             });
           } catch (error) {
             return handleError(error, context.set);
@@ -473,112 +415,4 @@ export const userRoutes = (app: Elysia) =>
         }
       )
 
-      /**
-       * PUT /password - Change user password
-       * 
-       * @deprecated This endpoint is deprecated and will be removed in v2.0.0.
-       * Clerk-authenticated users should use Clerk's password management instead.
-       * This endpoint only works for legacy users who haven't migrated to Clerk auth.
-       * 
-       * @see https://clerk.com/docs/custom-flows/passwords for Clerk password management
-       */
-      .put(
-        "/password",
-        async (context: any) => {
-          try {
-            const { db, user, body, set } = context as UserRouteContext & {
-              set: { headers: Record<string, string> };
-            };
-
-            // Add deprecation headers
-            set.headers = set.headers || {};
-            set.headers["X-Deprecated"] = "true";
-            set.headers["X-Deprecation-Message"] = "Use Clerk password management. This endpoint will be removed in v2.0.0.";
-
-            // Log deprecation warning
-            logger.warn(
-              { operation: "deprecated_endpoint", endpoint: "/api/user/password" },
-              "DEPRECATED: /api/user/password endpoint called. This will be removed in v2.0.0."
-            );
-
-            if (!user?.clerkUserId) {
-              throw new AuthenticationError("Unauthorized");
-            }
-
-            // Get internal user ID from Clerk ID
-            const internalUserId = getInternalUserId(
-              db,
-              user.clerkUserId,
-              user.email
-            );
-
-            if (!internalUserId) {
-              throw new NotFoundError(
-                "User not found. Please sign out and sign in again."
-              );
-            }
-
-            if (!body) {
-              throw new Error("Request body is required");
-            }
-
-            const { currentPassword, newPassword } = body as {
-              currentPassword: string;
-              newPassword: string;
-            };
-
-            return await withTransaction(db, async () => {
-              const dbUser = safeQuery<{ password?: string }>(
-                db,
-                "SELECT password FROM users WHERE id = ?",
-                [internalUserId]
-              );
-
-              // Note: Clerk users may not have a password in our DB
-              if (!dbUser?.password || dbUser.password === "clerk-auth") {
-                throw new AuthenticationError(
-                  "Password change not available for Clerk-authenticated users. Please use Clerk's password management."
-                );
-              }
-
-              const isPasswordValid = await verifyPassword(
-                currentPassword,
-                dbUser.password
-              );
-
-              if (!isPasswordValid) {
-                throw new AuthenticationError("Invalid current password.");
-              }
-
-              const hashedNewPassword = await hashPassword(newPassword);
-
-              safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [
-                hashedNewPassword,
-                internalUserId,
-              ]);
-
-              return {
-                success: true,
-                message: "Password updated successfully.",
-              };
-            });
-          } catch (error) {
-            return handleError(error, context.set);
-          }
-        },
-        {
-          body: UserSchemas.changePassword,
-          response: {
-            200: t.Object({ success: t.Boolean(), message: t.String() }),
-          },
-          detail: {
-            summary: "[DEPRECATED] Change the current user's password - Will be removed in v2.0.0",
-            description:
-              "This endpoint is deprecated and will be removed in v2.0.0. " +
-              "Clerk-authenticated users should use Clerk's password management instead. " +
-              "This endpoint only works for legacy users who haven't migrated to Clerk auth.",
-            tags: ["User", "Deprecated"],
-          },
-        }
-      )
   );

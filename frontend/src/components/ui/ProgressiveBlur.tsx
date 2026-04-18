@@ -1,75 +1,12 @@
-/**
- * ProgressiveBlur – Applies increasing blur gradient for fading content edges.
- *
- * Creates a blur-to-transparent overlay that fades out content at container edges.
- * Uses backdrop-filter for actual blur effect with mask-image for progressive fading.
- * Required for all scrollable containers per Memoria Design System.
- *
- * @example
- * // Basic usage at bottom of scroll container
- * <div className="relative flex-1 min-h-0">
- *   <div className="absolute inset-0 overflow-y-auto pb-16">
- *     <ContentList />
- *   </div>
- *   <ProgressiveBlur direction="up" />
- * </div>
- *
- * @example
- * // With custom intensity and height
- * <div className="relative">
- *   <ScrollableContent />
- *   <ProgressiveBlur
- *     direction="up"
- *     intensity={0.8}
- *     height="80px"
- *   />
- * </div>
- *
- * @example
- * // Top blur for reverse scrolling
- * <div className="relative">
- *   <ContentList />
- *   <ProgressiveBlur direction="down" position="top" />
- * </div>
- */
-import { AnimatePresence, motion } from "motion/react";
 import React from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 interface ProgressiveBlurProps {
-  /**
-   * Direction of the blur gradient.
-   * - "up": Blur increases upward (fades bottom edge)
-   * - "down": Blur increases downward (fades top edge)
-   * @default "up"
-   */
   direction?: "up" | "down";
-  /**
-   * Intensity of the blur effect (0-1).
-   * Higher values create stronger blur.
-   * @default 0.6
-   */
   intensity?: number;
-  /**
-   * Height of the blur gradient area.
-   * Should be 60-80px per design system guidelines.
-   * @default "60px"
-   */
   height?: string;
-  /**
-   * Position of the blur overlay.
-   * @default "bottom"
-   */
   position?: "top" | "bottom";
-  /**
-   * Whether to show the blur effect.
-   * When false, renders nothing (useful for scroll-based visibility).
-   * @default true
-   */
   show?: boolean;
-  /**
-   * Additional CSS classes.
-   * Common: "pointer-events-none absolute left-0 w-full"
-   */
   className?: string;
 }
 

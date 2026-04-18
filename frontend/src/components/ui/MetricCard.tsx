@@ -1,5 +1,5 @@
-import { motion } from "motion/react";
 import { memo, useMemo } from "react";
+import { motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { COLOR_MAP } from "@/components/utils";
@@ -22,8 +22,29 @@ export interface MetricCardProps {
   children?: React.ReactNode;
   className?: string;
   showKcalSuffix?: boolean;
-  /** Enable 3D glare effect on hover */
   enableGlare?: boolean;
+}
+
+type ColorClasses = Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>;
+
+function useMetricCardColors(color: keyof typeof COLOR_MAP | undefined) {
+  return useMemo(
+    () =>
+      color
+        ? COLOR_MAP[color]
+        : ({} as ColorClasses),
+    [color],
+  );
+}
+
+function useNumericValue(value: number | string | undefined) {
+  return useMemo(() => {
+    if (value === undefined) return undefined;
+
+    return typeof value === "number"
+      ? value
+      : Number.parseFloat(value.toString());
+  }, [value]);
 }
 
 function MetricCardInner(properties: MetricCardProps) {
@@ -45,7 +66,6 @@ function MetricCardInner(properties: MetricCardProps) {
     enableGlare = false,
   } = properties;
 
-  // Initialize glare effect hook
   const { cardRef, cardStyle, glareStyle, handlers } = useCardGlare({
     maxRotation: 8,
     scale: 1.02,
@@ -54,23 +74,8 @@ function MetricCardInner(properties: MetricCardProps) {
     enableRotation: enableGlare,
   });
 
-  // Memoize color classes for icon with safe fallbacks for optional keys
-  const colorClasses = useMemo(
-    () =>
-      color
-        ? COLOR_MAP[color]
-        : ({} as Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>),
-    [color],
-  );
-
-  // Memoize parsed numeric value for AnimatedNumber
-  const numericValue = useMemo(() => {
-    if (value === undefined) return undefined;
-    return typeof value === "number"
-      ? value
-      : Number.parseFloat(value.toString());
-  }, [value]);
-
+  const colorClasses = useMetricCardColors(color);
+  const numericValue = useNumericValue(value);
   const hasMotion = score !== undefined || delay > 0 || enableGlare;
 
   const baseClasses = cn(
@@ -95,17 +100,17 @@ function MetricCardInner(properties: MetricCardProps) {
       >
         {Icon && (
           <div
-            className={cn(
-              "rounded-2xl border border-border/40 bg-surface-2 shadow-sm transition-transform duration-300 group-hover:scale-105",
-              enableGlare ? "p-3" : "p-3.5",
-              colorClasses?.gradient,
-              colorClasses?.border || borderColor
-            )}
+              className={cn(
+                "rounded-2xl border border-border/40 bg-surface-2 shadow-sm transition-transform duration-300 group-hover:scale-105",
+                enableGlare ? "p-3" : "p-3.5",
+                colorClasses.gradient,
+                colorClasses.border ?? borderColor
+              )}
           >
             <Icon
               className={cn(
                 enableGlare ? "h-7 w-7" : "h-6 w-6",
-                colorClasses?.text || textColor || "text-foreground/80"
+                colorClasses.text ?? textColor ?? "text-foreground/80"
               )}
               strokeWidth={1.5}
             />
@@ -126,7 +131,7 @@ function MetricCardInner(properties: MetricCardProps) {
               <span
                 className={cn(
                   "text-xs whitespace-nowrap",
-                  colorClasses?.acronym || textColor
+                  colorClasses.acronym ?? textColor
                 )}
               >
                 ({acronym})
@@ -182,7 +187,7 @@ function MetricCardInner(properties: MetricCardProps) {
   }
 
   return (
-    <div ref={cardRef as any} className={baseClasses}>
+    <div ref={cardRef} className={baseClasses}>
       {innerContent}
     </div>
   );

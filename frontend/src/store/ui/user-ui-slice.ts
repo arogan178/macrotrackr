@@ -50,6 +50,7 @@ export const createUserUISlice: StateCreator<
     if (typeof state.showNotification === "function") {
       return state.showNotification(message, type, options);
     }
+
     return "";
   },
 
@@ -81,6 +82,7 @@ export const createUserUISlice: StateCreator<
     set((state: UserUISlice & Record<string, unknown>) => {
       if (!state.settings || !(key in state.settings)) {
         console.warn(`Attempted to update unknown setting key: ${String(key)}`);
+
         return state;
       }
 
@@ -115,6 +117,7 @@ export const createUserUISlice: StateCreator<
     };
     const errors = validateSettings(settingsForValidation);
     set({ formErrors: errors });
+
     return Object.keys(errors).length === 0;
   },
 

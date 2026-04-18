@@ -1,6 +1,6 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { memo, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 const VISIBILITY_OFFSET = 480;
 const REMAINING_PAGE_THRESHOLD = 0.4;
@@ -41,17 +41,10 @@ const BackToTopButton = memo(function BackToTopButton({
   const frameReference = useRef<number | null>(null);
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
-
     setPortalTarget(globalThis.document.body);
   }, []);
 
   useEffect(() => {
-    if (globalThis.window === undefined) {
-      return;
-    }
 
     const updateVisibility = () => {
       frameReference.current = null;
@@ -63,6 +56,7 @@ const BackToTopButton = memo(function BackToTopButton({
 
       if (maxScroll === 0) {
         setIsVisible(false);
+
         return;
       }
 

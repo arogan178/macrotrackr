@@ -46,3 +46,14 @@ frontend/.github/instructions/tanstack-react-router_routing.instructions.md
 frontend/.github/instructions/tanstack-react-router_setup-and-architecture.instructions.md
 .github/README_DEPLOY.md
 frontend/test-results/
+.desloppify/
+.codex
+.opencode/
+holistic_context.json
+prompt.txt
+reflect_report.md
+report.json
+report.txt
+output.json
+rewrite.ts
+scorecard.png

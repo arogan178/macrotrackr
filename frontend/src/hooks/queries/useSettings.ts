@@ -1,51 +1,33 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { userApi, type UserDetailsResponse, type UserSettingsPayload } from "@/api/user";
+import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
-import { apiService, UserDetailsResponse } from "@/utils/apiServices";
 
-// Types for settings mutations
-interface UserSettingsPayload {
-  firstName?: string;
-  lastName?: string;
-  email?: string;
-  dateOfBirth?: string | undefined;
-  height?: number | undefined;
-  weight?: number | undefined;
-  gender?: "male" | "female" | undefined;
-  activityLevel?: number | undefined;
-}
-
-/**
- * Query hook for fetching user settings
- */
 export function useSettings() {
   return useQuery({
     queryKey: queryKeys.settings.user(),
-    queryFn: async (): Promise<UserDetailsResponse> => {
-      return await apiService.user.getUserDetails();
-    },
-    ...queryConfigs.longLived, // 5 minutes stale time for settings
+    queryFn: (): Promise<UserDetailsResponse> => userApi.getUserDetails(),
+    ...queryConfigs.longLived,
     retry: (failureCount, error) => {
-      // Don't retry on auth errors
-      if (error instanceof Error && error.message.includes("401")) {
+      if (error instanceof Error && hasStatus(error) && error.status === 401) {
         return false;
       }
+
       return failureCount < 3;
     },
   });
 }
 
-/**
- * Mutation hook for saving user settings with optimistic updates
- */
 export function useSaveSettings() {
   const queryClient = useQueryClient();
+  const logSaveSettingsError = createMutationErrorLogger("Error saving settings");
 
   return useMutation({
     mutationKey: [...queryKeys.settings.user(), "save"],
     mutationFn: async (settings: UserSettingsPayload) => {
-      return await apiService.user.updateSettings(settings);
+      return await userApi.updateSettings(settings);
     },
     onMutate: async (variables: UserSettingsPayload) => {
       // Cancel any outgoing refetches
@@ -61,12 +43,14 @@ export function useSaveSettings() {
       // Optimistically update settings
       queryClient.setQueryData(queryKeys.settings.user(), (oldData: UserDetailsResponse | undefined) => {
         if (!oldData) return oldData;
+
         return { ...oldData, ...variables };
       });
 
       // Optimistically update auth user data
       queryClient.setQueryData(queryKeys.auth.user(), (oldData: UserDetailsResponse | undefined) => {
         if (!oldData) return oldData;
+
         return { ...oldData, ...variables };
       });
 
@@ -86,7 +70,7 @@ export function useSaveSettings() {
           context.previousAuthUser,
         );
       }
-      console.error("Error saving settings:", error);
+      logSaveSettingsError(error);
     },
     onSettled: () => {
       // Always refetch to ensure consistency
@@ -111,6 +95,7 @@ export function useSaveSettings() {
           return false;
         }
       }
+
       // Retry network and server errors up to 3 times
       return failureCount < 3;
     },

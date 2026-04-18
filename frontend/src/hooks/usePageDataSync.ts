@@ -16,8 +16,7 @@ export function usePageDataSync() {
 
   useEffect(() => {
     if (
-      user &&
-      user.subscription &&
+      user?.subscription &&
       typeof user.subscription.status === "string"
     ) {
       setSubscriptionStatus(user.subscription.status);

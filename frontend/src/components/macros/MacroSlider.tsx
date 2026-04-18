@@ -54,6 +54,7 @@ export default function MacroSlider({
         `MacroSlider: Unknown color '${color}', using 'protein' as fallback.`,
       );
     }
+
     return properties;
   }, [color]);
 
@@ -104,8 +105,8 @@ export default function MacroSlider({
         max={max}
         step={1}
         disabled={isEffectivelyDisabled}
-        showFillTrack={true}
-        trackColorClass={PROGRESS_BAR_COLORS[color] ?? PROGRESS_BAR_COLORS.protein}
+        showFillTrack
+        trackColorClass={PROGRESS_BAR_COLORS[color]}
       />
 
       <div className="flex items-center justify-between">
@@ -123,16 +124,19 @@ function getRecommendation(macro: MacroType, value: number): string {
   if (macro === "protein") {
     if (value < 15) return "Consider increasing for muscle maintenance";
     if (value > 35) return "High protein intake";
+
     return "Ideal range for most people";
   }
   if (macro === "carbs") {
     if (value < 40) return "Low carb approach";
     if (value > 65) return "High carb approach";
+
     return "Balanced carb intake";
   }
   // fats
   if (value < 20) return "Consider increasing for hormone health";
   if (value > 40) return "Higher fat approach";
+
   return "Healthy fat intake";
 }
 
@@ -153,7 +157,7 @@ export function MacroBadge({
     border,
     iconColor,
     dot: badgeDot,
-  } = useMemo(() => COLOR_MAP[color] ?? COLOR_MAP.protein, [color]);
+  } = useMemo(() => COLOR_MAP[color], [color]);
 
   return (
     <div className={`rounded-lg border bg-surface-2 p-3 ${border}`}>

@@ -1,6 +1,6 @@
+import { useCallback, useEffect, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
 
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
@@ -73,10 +73,11 @@ export default function SettingsPage() {
 
   // Initialize active tab from URL param or default to "profile"
   const getInitialTab = (): TabType => {
-    const tabParameter = search?.tab;
+    const tabParameter = search.tab;
     if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
       return tabParameter as TabType;
     }
+
     return "profile";
   };
 
@@ -88,14 +89,14 @@ export default function SettingsPage() {
 
   // Update tab when URL changes
   useEffect(() => {
-    const tabParameter = search?.tab;
+    const tabParameter = search.tab;
     if (tabParameter && VALID_TABS.has(tabParameter as TabType)) {
       const newTab = tabParameter as TabType;
       if (newTab !== activeTab && !hasSettingsChanges) {
         setActiveTab(newTab);
       }
     }
-  }, [search?.tab, hasSettingsChanges, activeTab]);
+  }, [search.tab, hasSettingsChanges, activeTab]);
 
   // Initialize settings from query data on component mount
   useEffect(() => {
@@ -211,7 +212,7 @@ export default function SettingsPage() {
               active={activeTab === "profile"}
               onClick={() => handleTabChange("profile")}
               layoutId="settingsTabHighlight"
-              isMotion={true}
+              isMotion
             >
               <span className="relative z-10 flex items-center">
                 <UserIcon size="sm" className="mr-1.5" />
@@ -222,7 +223,7 @@ export default function SettingsPage() {
               active={activeTab === "billing"}
               onClick={() => handleTabChange("billing")}
               layoutId="settingsTabHighlight"
-              isMotion={true}
+              isMotion
             >
               <span className="relative z-10 flex items-center">
                 <AwardIcon size="sm" className="mr-1.5" />
@@ -233,7 +234,7 @@ export default function SettingsPage() {
               active={activeTab === "accounts"}
               onClick={() => handleTabChange("accounts")}
               layoutId="settingsTabHighlight"
-              isMotion={true}
+              isMotion
             >
               <span className="relative z-10 flex items-center">
                 <LinkIcon size="sm" className="mr-1.5" />
@@ -244,7 +245,7 @@ export default function SettingsPage() {
               active={activeTab === "security"}
               onClick={() => handleTabChange("security")}
               layoutId="settingsTabHighlight"
-              isMotion={true}
+              isMotion
             >
               <span className="relative z-10 flex items-center">
                 <LockIcon size="sm" className="mr-1.5" />
@@ -328,7 +329,7 @@ export default function SettingsPage() {
           confirmLabel="Discard Changes"
           cancelLabel="Keep Editing"
           onConfirm={confirmTabChange}
-          isDanger={true}
+          isDanger
         />
       </FeaturePage>
     </DashboardPageContainer>

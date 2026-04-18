@@ -1,7 +1,7 @@
 // Change `space-x-2` to `space-x-1` to reduce the gap between the buttons
 import { memo } from "react";
 
-import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/Constants";
+import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils/UiConstants";
 
 import IconButton from "./IconButton";
 import { LoadingSpinnerIcon, StarIcon, TrashIcon } from "./Icons";
@@ -9,7 +9,7 @@ import { LoadingSpinnerIcon, StarIcon, TrashIcon } from "./Icons";
 type ButtonSize = keyof typeof ICON_BUTTON_SIZES;
 type IconSize = keyof typeof ICON_SIZES;
 
-export type IconButtonGroupProps = {
+export interface IconButtonGroupProps {
   onEdit: () => void;
   onDelete: (event?: React.MouseEvent) => void;
   onSaveMeal?: () => void;
@@ -22,7 +22,7 @@ export type IconButtonGroupProps = {
   unsaveMealLabel?: string;
   buttonSize?: ButtonSize;
   iconSize?: IconSize;
-};
+}
 
 /**
  * Reusable edit/delete/save icon button group
