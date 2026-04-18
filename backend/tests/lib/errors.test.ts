@@ -15,6 +15,7 @@ import {
   ValidationError,
   BadRequestError,
   ConflictError,
+  AccountLinkRequiredError,
   AccountNotSyncedError,
   DatabaseError,
   isAppError,
@@ -106,6 +107,15 @@ describe("errors", () => {
       expect(error.message).toBe("Resource conflict");
       expect(error.statusCode).toBe(409);
       expect(error.code).toBe("RESOURCE_CONFLICT");
+    });
+  });
+
+  describe("AccountLinkRequiredError", () => {
+    it("creates account link required error with correct defaults", () => {
+      const error = new AccountLinkRequiredError();
+      expect(error.message).toBe("Account link required");
+      expect(error.statusCode).toBe(409);
+      expect(error.code).toBe("ACCOUNT_LINK_REQUIRED");
     });
   });
 
