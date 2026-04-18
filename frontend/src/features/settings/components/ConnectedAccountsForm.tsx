@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useReverification, useUser } from "@clerk/clerk-react";
 
 import CardContainer from "@/components/form/CardContainer";
@@ -12,6 +12,10 @@ import {
   ShieldCheckIcon,
 } from "@/components/ui/Icons";
 import Modal from "@/components/ui/Modal";
+import {
+  clearAuthLinkIntent,
+  getAuthLinkIntent,
+} from "@/features/auth/utils/linkIntent";
 import {
   encodeAuthRedirect,
   normalizeAuthRedirect,
@@ -64,6 +68,13 @@ const ConnectedAccountsForm = () => {
   });
   const [isConnecting, setIsConnecting] = useState<ProviderKey | null>(null);
   const [_isDisconnecting, setIsDisconnecting] = useState(false);
+  const [showLinkIntentHint, setShowLinkIntentHint] = useState(false);
+
+  useEffect(() => {
+    const linkIntent = getAuthLinkIntent();
+    setShowLinkIntentHint(linkIntent !== null);
+    clearAuthLinkIntent();
+  }, []);
 
   interface ExternalAccountCreateParameters {
     strategy: (typeof PROVIDERS)[ProviderKey]["strategy"];
@@ -411,6 +422,12 @@ const ConnectedAccountsForm = () => {
             <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Connect More Accounts
             </h4>
+            {showLinkIntentHint && (
+              <div className="mb-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
+                Sign in completed. Connect your social account below to finish
+                linking.
+              </div>
+            )}
             <div className="space-y-4">
               {availableProviders.map((providerKey) =>
                 renderAvailableProvider(providerKey),

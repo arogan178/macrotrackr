@@ -16,6 +16,8 @@ export { default as SignInPage } from "./pages/SignInPage";
 export { default as SignUpPage } from "./pages/SignUpPage";
 export { default as SSOCallbackPage } from "./pages/SsoCallbackPage";
 export * from "./utils/authHelpers";
+export * from "./utils/handleAuthCollision";
+export * from "./utils/linkIntent";
 export * from "./utils/profileValidation";
 export * from "./utils/redirect";
 export * from "./utils/socialAuth";
