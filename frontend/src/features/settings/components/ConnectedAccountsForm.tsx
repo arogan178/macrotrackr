@@ -70,6 +70,13 @@ const ConnectedAccountsForm = () => {
   const [_isDisconnecting, setIsDisconnecting] = useState(false);
   const [showLinkIntentHint, setShowLinkIntentHint] = useState(false);
 
+  const notifyUnavailableProvider = (providerName: string) => {
+    showNotification(
+      `${providerName} sign-in is temporarily unavailable. Please use email/password and try again later.`,
+      "error",
+    );
+  };
+
   useEffect(() => {
     const linkIntent = getAuthLinkIntent();
     setShowLinkIntentHint(linkIntent !== null);
@@ -127,13 +134,38 @@ const ConnectedAccountsForm = () => {
           )}`,
       });
 
-      // The result contains a verification URL that we need to redirect to
-      // This is the OAuth provider's authorization URL
-      if (result?.verification?.externalVerificationRedirectURL) {
-        // Redirect to the OAuth provider
-        globalThis.location.href =
-          result.verification.externalVerificationRedirectURL.href;
+      const redirectUrl =
+        result?.verification?.externalVerificationRedirectURL?.href;
+
+      if (!redirectUrl) {
+        notifyUnavailableProvider(provider.name);
+        setIsConnecting(null);
+
+        return;
       }
+
+      let hasClientId = false;
+
+      try {
+        hasClientId = Boolean(new URL(redirectUrl).searchParams.get("client_id"));
+      } catch (error) {
+        logger.error("Invalid social auth redirect URL", {
+          provider: providerKey,
+          error,
+        });
+      }
+
+      if (!hasClientId) {
+        logger.error("Missing OAuth client_id in social auth redirect URL", {
+          provider: providerKey,
+        });
+        notifyUnavailableProvider(provider.name);
+        setIsConnecting(null);
+
+        return;
+      }
+
+      globalThis.location.href = redirectUrl;
     } catch (error) {
       logger.error("Error connecting provider:", error);
       const errorMessage =
