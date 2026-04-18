@@ -1,10 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { apiClient } from "./core";
 import {
   macrosApi,
   normalizeFoodSearchResults,
 } from "./macros";
-import { apiClient } from "./core";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {

@@ -2,7 +2,12 @@ import { type QueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/lib/queryKeys";
 import type { MacroDailyTotals } from "@/types/macro";
-import { getMacroHistorySnapshots, restoreMacroHistorySnapshots, type MacroHistorySnapshot } from "./helpers";
+
+import {
+  getMacroHistorySnapshots,
+  type MacroHistorySnapshot,
+  restoreMacroHistorySnapshots,
+} from "./helpers";
 
 export interface MacroOptimisticContext {
   previousHistoryData?: MacroHistorySnapshot;
@@ -29,29 +34,27 @@ export async function prepareOptimisticUpdate(
 
 export function captureMacroHistorySnapshot(
   queryClient: QueryClient,
-  entryDate: string
+  entryDate: string,
 ): MacroOptimisticContext {
   const previousHistoryData = getMacroHistorySnapshots(queryClient);
 
-  let previousDailyTotals: MacroDailyTotals | undefined;
-  try {
-    previousDailyTotals = queryClient.getQueryData<MacroDailyTotals>(
-      queryKeys.macros.dailyTotals(entryDate)
-    );
-  } catch {
-  }
+  const previousDailyTotals = queryClient.getQueryData<MacroDailyTotals>(
+    queryKeys.macros.dailyTotals(entryDate),
+  );
 
   return { previousHistoryData, previousDailyTotals, entryDate };
 }
 
 export function rollbackOptimisticUpdate(
   queryClient: QueryClient,
-  context: MacroOptimisticContext | undefined
+  context: MacroOptimisticContext | undefined,
 ) {
-  if (!context) return;
-  
+  if (!context) {
+    return;
+  }
+
   restoreMacroHistorySnapshots(queryClient, context.previousHistoryData ?? []);
-  
+
   if (context.entryDate) {
     if (context.previousDailyTotals === undefined) {
       queryClient.removeQueries({

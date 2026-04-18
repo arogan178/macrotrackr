@@ -101,11 +101,11 @@ export const macrosApi = {
     startDate,
     endDate,
   }: { startDate?: string; endDate?: string } = {}) => {
-    const searchParams = new URLSearchParams();
-    if (startDate) searchParams.append("startDate", startDate);
-    if (endDate) searchParams.append("endDate", endDate);
+    const searchParameters = new URLSearchParams();
+    if (startDate) searchParameters.append("startDate", startDate);
+    if (endDate) searchParameters.append("endDate", endDate);
     
-    const queryString = searchParams.toString();
+    const queryString = searchParameters.toString();
     const url = `/api/macros/totals${queryString ? `?${queryString}` : ""}`;
     
     return apiClient.get<unknown>(url);
@@ -118,13 +118,14 @@ export const macrosApi = {
     options: MacroHistoryOptions = {},
   ) => {
     const { limit = 20, offset = 0, startDate, endDate } = options;
-    const searchParams = new URLSearchParams();
-    searchParams.append("limit", limit.toString());
-    searchParams.append("offset", offset.toString());
-    if (startDate) searchParams.append("startDate", startDate);
-    if (endDate) searchParams.append("endDate", endDate);
+    const searchParameters = new URLSearchParams();
+    searchParameters.append("limit", limit.toString());
+    searchParameters.append("offset", offset.toString());
+    if (startDate) searchParameters.append("startDate", startDate);
+    if (endDate) searchParameters.append("endDate", endDate);
     
-    const url = `/api/macros/history?${searchParams.toString()}`;
+    const url = `/api/macros/history?${searchParameters.toString()}`;
+
     return apiClient.get<unknown>(url);
   },
 
@@ -218,6 +219,7 @@ export const macrosApi = {
     if (payload?.macroTarget === undefined) {
       throw new Error("Invalid payload: macroTarget object is required.");
     }
+
     return apiClient.put<unknown>("/api/macros/target", { macroTarget: payload.macroTarget });
   },
 
@@ -231,6 +233,7 @@ export const macrosApi = {
     }
     
     const response = await apiClient.get<unknown>(`/api/macros/search?q=${encodeURIComponent(normalizedQuery)}`);
+
     return normalizeFoodSearchResults(response);
   },
 };
