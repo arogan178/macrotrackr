@@ -1,40 +1,28 @@
 import { useCallback } from "react";
 
+import { logger } from "@/lib/logger";
 import { getErrorMessage } from "@/utils/errorHandling";
 
 export interface ErrorHandlerOptions {
-  /**
-   * Whether to log errors to console
-   * @default true
-   */
   logError?: boolean;
-
-  /**
-   * Custom error message to display instead of the actual error
-   */
   fallbackMessage?: string;
-
-  /**
-   * Callback function to execute when an error occurs
-   */
   onError?: (error: Error, errorMessage: string) => void;
 }
 
-/**
- * Hook for consistent error handling across the application
- * Provides a standardized way to handle and display errors
- */
 export function useErrorHandler(options: ErrorHandlerOptions = {}) {
   const { logError = true, fallbackMessage, onError } = options;
 
   const handleError = useCallback(
     (error: unknown): string => {
-      const errorMessage = fallbackMessage || getErrorMessage(error);
+      const errorMessage = fallbackMessage ?? getErrorMessage(error);
       const errorObject =
         error instanceof Error ? error : new Error(errorMessage);
 
       if (logError) {
-        console.error("Error handled:", errorObject);
+        logger.error("Error handled", {
+          message: errorObject.message,
+          name: errorObject.name,
+        });
       }
 
       if (onError) {
@@ -69,10 +57,6 @@ export function useErrorHandler(options: ErrorHandlerOptions = {}) {
   };
 }
 
-/**
- * Hook for handling query-specific errors
- * Provides additional context for query failures
- */
 export function useQueryErrorHandler(options: ErrorHandlerOptions = {}) {
   const { handleError } = useErrorHandler(options);
 
@@ -81,7 +65,10 @@ export function useQueryErrorHandler(options: ErrorHandlerOptions = {}) {
       const errorMessage = handleError(error);
 
       if (queryKey && options.logError !== false) {
-        console.error(`Query error for key [${queryKey.join(", ")}]:`, error);
+        logger.error("Query error", {
+          queryKey: queryKey.map(String),
+          error,
+        });
       }
 
       return errorMessage;

@@ -11,7 +11,6 @@ dotenv.config({ path: resolve(__dirname, '..', '.env.test') })
 
 // Debug: Log env var status
 console.log('Global Setup - CLERK_PUBLISHABLE_KEY:', process.env.CLERK_PUBLISHABLE_KEY ? 'Set' : 'Not set')
-console.log('Global Setup - CLERK_SECRET_KEY:', process.env.CLERK_SECRET_KEY ? 'Set' : 'Not set')
 
 async function globalSetup() {
   // This sets up the Clerk testing token

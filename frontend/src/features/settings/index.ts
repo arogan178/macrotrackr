@@ -1,12 +1,26 @@
 /**
- * Settings Feature Public API
+ * Settings feature public API.
  */
 
-// Pages
-export { default as SettingsPage } from "./pages/SettingsPage";
-
-// Components
 export * from "./components";
-
-// Types
-export * from "./types";
+export { default as FreeBillingView } from "./components/FreeBillingView";
+export { default as ProBillingView } from "./components/ProBillingView";
+export { default as SettingsPage } from "./pages/SettingsPage";
+export type {
+  ActivityLevel,
+  Gender,
+  UserNutritionalProfile,
+  UserSettings,
+} from "./types/types";
+export {
+  calculateAge,
+  calculateBMR,
+  calculateMacros,
+  calculateTDEE,
+  calculateTDEEByActivityLevel,
+  createNutritionProfile,
+  createUserSettings,
+} from "./utils/calculations";
+export * from "./utils/constants";
+export { default as parseBillingError } from "./utils/parseBillingError";
+export * from "./utils/validation";

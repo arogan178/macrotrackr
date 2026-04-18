@@ -17,7 +17,7 @@ export function buildRedirectFromLocation(location: {
   pathname?: string;
   search?: Record<string, unknown>;
 }): string {
-  const pathname = location.pathname || DEFAULT_AUTH_REDIRECT;
+  const pathname = location.pathname ?? DEFAULT_AUTH_REDIRECT;
   const search = location.search;
 
   if (!search || typeof search !== "object" || Array.isArray(search)) {
@@ -43,6 +43,7 @@ export function buildRedirectFromLocation(location: {
   }
 
   const query = searchParameters.toString();
+
   return query ? `${pathname}?${query}` : pathname;
 }
 
@@ -76,4 +77,45 @@ export function shouldBypassSyncForRedirect(value: string | undefined): boolean 
 
 export function encodeAuthRedirect(value: string | undefined): string {
   return encodeURIComponent(normalizeAuthRedirect(value));
+}
+
+export function resolveAuthReturnTo(value: string | undefined):
+  | string
+  | undefined {
+  const normalized = normalizeAuthRedirect(value);
+
+  return normalized === DEFAULT_AUTH_REDIRECT ? undefined : normalized;
+}
+
+export function buildSocialAuthRedirectUrls(
+  value: string | undefined,
+  flow: "signin" | "signup" = "signup",
+): {
+  redirectUrl: string;
+  redirectUrlComplete: string;
+} {
+  const encodedRedirect = encodeAuthRedirect(value);
+
+  return {
+    redirectUrl: `/sso-callback?flow=${flow}&redirectTo=${encodedRedirect}`,
+    redirectUrlComplete: `/auth-ready?redirectTo=${encodedRedirect}`,
+  };
+}
+
+export function resolveProfileCompletion(user: unknown): boolean | undefined {
+  if (!user || typeof user !== "object") {
+    return undefined;
+  }
+
+  const userRecord = user as Record<string, unknown>;
+
+  if (typeof userRecord.isProfileComplete === "boolean") {
+    return userRecord.isProfileComplete;
+  }
+
+  if ("dateOfBirth" in userRecord) {
+    return Boolean(userRecord.dateOfBirth);
+  }
+
+  return undefined;
 }

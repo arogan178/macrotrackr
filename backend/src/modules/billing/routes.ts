@@ -1,25 +1,13 @@
 // src/modules/billing/routes.ts
 
 import { Elysia } from "elysia";
-import { db } from "../../db";
-import { logger } from "../../lib/logger";
-import { BadRequestError, NotFoundError } from "../../lib/errors";
+import { logger } from "../../lib/observability/logger";
+import { BadRequestError, NotFoundError } from "../../lib/http/errors";
 import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
 import { getPlans } from "../../config/pricing";
 import { t } from "elysia";
-import type { AuthenticatedContext } from "../../types";
-import { resolveAuthenticatedUser } from "../../lib/route-adapter";
-import type { Database } from "bun:sqlite";
-
-// Extended billing context type for route handlers
-// Extends AuthenticatedContext with module-specific properties
-interface BillingRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  query: Record<string, string | undefined>;
-  db: Database;
-}
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 
 // Response schemas for type safety and API documentation
 const SubscriptionInfoSchema = t.Object({
@@ -38,7 +26,7 @@ const BillingDetailsResponseSchema = t.Object({
       last4: t.String(),
     })
   ),
-  stripeDetails: t.Nullable(t.Any()),
+  stripeDetails: t.Nullable(t.Unknown()),
 });
 
 const CancelResponseSchema = t.Object({
@@ -94,28 +82,45 @@ function handleRouteError(error: unknown, operation: string, userId?: number): n
   );
 }
 
+type BillingRouteContext<TBody = Record<string, unknown>> =
+  AuthenticatedRouteContextWithUser<TBody>;
+
+type CheckoutRequestBody = {
+  plan?: "monthly" | "yearly";
+  successUrl: string;
+  cancelUrl: string;
+  metadata?: Record<string, string>;
+};
+
+type PortalRequestBody = {
+  returnUrl: string;
+};
+
 function resolveBillingUser(context: BillingRouteContext) {
-  const authenticatedUser = resolveAuthenticatedUser(context as any);
-  const clerkUser = context.user;
+  const authenticatedUser = context.authenticatedUser;
+  const userId = authenticatedUser.userId;
+
+  if (!userId) {
+    throw new BadRequestError("Authenticated user ID is required");
+  }
 
   return {
-    userId: authenticatedUser.userId,
-    email: authenticatedUser.email || "",
-    firstName: authenticatedUser.firstName || clerkUser?.firstName || "",
-    lastName: authenticatedUser.lastName || clerkUser?.lastName || "",
+    userId,
+    email: authenticatedUser.email ?? "",
+    firstName: authenticatedUser.firstName ?? "",
+    lastName: authenticatedUser.lastName ?? "",
   };
 }
 
 export const billingRoutes = (app: Elysia) =>
   app.group("/api/billing", (group) =>
     group
-      .decorate("db", db)
-
       // Get detailed billing/subscription info
       .get(
         "/details",
-        async (context: any) => {
-          const user = resolveBillingUser(context as BillingRouteContext);
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
+          const user = resolveBillingUser(context);
           try {
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -132,12 +137,12 @@ export const billingRoutes = (app: Elysia) =>
                       subscriptionInfo.subscription.stripe_subscription_id,
                   }
                 : null,
-              price: subscriptionInfo.price || null,
-              paymentMethod: subscriptionInfo.paymentMethod || null,
-              stripeDetails: subscriptionInfo.stripeDetails || null,
+              price: subscriptionInfo.price ?? null,
+              paymentMethod: subscriptionInfo.paymentMethod ?? null,
+              stripeDetails: subscriptionInfo.stripeDetails ?? null,
             };
           } catch (error) {
-            handleRouteError(error, "get_billing_details", user?.userId);
+            handleRouteError(error, "get_billing_details", user.userId);
           }
         },
         {
@@ -153,13 +158,14 @@ export const billingRoutes = (app: Elysia) =>
       // Cancel current subscription
       .post(
         "/cancel",
-        async (context: any) => {
-          const user = resolveBillingUser(context as BillingRouteContext);
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
+          const user = resolveBillingUser(context);
           try {
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             const sub = userSubscription.subscription;
-            if (!sub || !sub.stripe_subscription_id) {
+            if (!sub?.stripe_subscription_id) {
               throw new BadRequestError("No active subscription to cancel");
             }
             // Cancel in Stripe
@@ -183,7 +189,7 @@ export const billingRoutes = (app: Elysia) =>
                 "Subscription canceled. You will retain access until the end of your billing period.",
             };
           } catch (error) {
-            handleRouteError(error, "cancel_subscription", user?.userId);
+            handleRouteError(error, "cancel_subscription", user.userId);
           }
         },
         {
@@ -196,10 +202,15 @@ export const billingRoutes = (app: Elysia) =>
       )
       .post(
         "/checkout",
-        async (context: any) => {
-          const { body } = context as { body?: Record<string, unknown> };
-          const user = resolveBillingUser(context as BillingRouteContext);
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext<CheckoutRequestBody>;
+          const { body } = context;
+          const user = resolveBillingUser(context);
           try {
+            if (!body) {
+              throw new BadRequestError("Request body is required");
+            }
+
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             if (userSubscription.subscription_status === "pro") {
@@ -221,28 +232,25 @@ export const billingRoutes = (app: Elysia) =>
               );
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const bodyData = body as any;
-
             // Determine price ID based on plan
-            const plan = bodyData?.plan === "yearly" ? "yearly" : "monthly";
+            const plan = body.plan === "yearly" ? "yearly" : "monthly";
             const priceId =
               plan === "yearly" ?
-                process.env.STRIPE_PRICE_ID_YEARLY || ""
-              : process.env.STRIPE_PRICE_ID_MONTHLY || "";
+                process.env.STRIPE_PRICE_ID_YEARLY ?? ""
+              : process.env.STRIPE_PRICE_ID_MONTHLY ?? "";
             if (!priceId)
               throw new BadRequestError(
                 "Stripe price ID not configured for selected plan"
               );
             const session = await StripeService.createCheckoutSession({
               customerId,
-              successUrl: bodyData?.successUrl,
-              cancelUrl: bodyData?.cancelUrl,
+                successUrl: body.successUrl,
+                cancelUrl: body.cancelUrl,
               priceId,
               metadata: {
                 userId: user.userId.toString(),
                 plan,
-                ...bodyData?.metadata,
+                  ...body.metadata,
               },
             });
             logger.info(
@@ -257,7 +265,7 @@ export const billingRoutes = (app: Elysia) =>
             );
             return { sessionId: session.id, url: session.url! };
           } catch (error) {
-            handleRouteError(error, "create_checkout_session", user?.userId);
+            handleRouteError(error, "create_checkout_session", user.userId);
           }
         },
         {
@@ -281,18 +289,22 @@ export const billingRoutes = (app: Elysia) =>
       // Create customer portal session
       .post(
         "/portal",
-        async (context: any) => {
-          const { body } = context as { body?: Record<string, unknown> };
-          const user = resolveBillingUser(context as BillingRouteContext);
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext<PortalRequestBody>;
+          const { body } = context;
+          const user = resolveBillingUser(context);
           try {
+            if (!body) {
+              throw new BadRequestError("Request body is required");
+            }
+
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             if (!userSubscription.stripe_customer_id) {
               throw new BadRequestError("User has no Stripe customer ID");
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const returnUrl = (body as any)?.returnUrl;
+            const returnUrl = body.returnUrl;
             if (!returnUrl) {
               throw new BadRequestError("Return URL is required");
             }
@@ -312,7 +324,7 @@ export const billingRoutes = (app: Elysia) =>
             );
             return { url: portalSession.url };
           } catch (error) {
-            handleRouteError(error, "create_portal_session", user?.userId);
+            handleRouteError(error, "create_portal_session", user.userId);
           }
         },
         {
@@ -330,8 +342,9 @@ export const billingRoutes = (app: Elysia) =>
       // Get current subscription status
       .get(
         "/subscription",
-        async (context: any) => {
-          const user = resolveBillingUser(context as BillingRouteContext);
+        async (rawContext: unknown) => {
+          const context = rawContext as BillingRouteContext;
+          const user = resolveBillingUser(context);
           try {
             const subscriptionInfo =
               await SubscriptionService.getUserSubscription(user.userId);
@@ -346,7 +359,7 @@ export const billingRoutes = (app: Elysia) =>
               } : null,
             };
           } catch (error) {
-            handleRouteError(error, "get_subscription_status", user?.userId);
+            handleRouteError(error, "get_subscription_status", user.userId);
           }
         },
         {

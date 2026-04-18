@@ -1,8 +1,8 @@
 // src/routes/health.ts
 import { Elysia } from "elysia";
-import { db } from "../db";
+import type { Database } from "bun:sqlite";
 import { config } from "../config";
-import { logger } from "../lib/logger";
+import { logger } from "../lib/observability/logger";
 
 /**
  * Health check routes for monitoring and container orchestration.
@@ -11,13 +11,14 @@ import { logger } from "../lib/logger";
  * - GET /health/ready - Readiness probe for Kubernetes
  */
 export const healthRoutes = new Elysia({ name: "health-routes" })
+  .state("startedAt", new Date().toISOString())
   // Root endpoint
   .get(
     "/",
-    () => ({
+    ({ store }) => ({
       status: "ok",
       message: "Macro Trackr API is running!",
-      timestamp: new Date().toISOString(),
+      timestamp: store.startedAt,
     }),
     {
       detail: { summary: "API Root / Health Check", tags: ["System"] },
@@ -27,9 +28,10 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
   // Health check endpoint for monitoring
   .get(
     "/health",
-    () => {
+    (context) => {
       try {
         // Test database connectivity
+        const { db } = context as unknown as { db: Database };
         const dbCheck = db.prepare("SELECT 1 as health").get() as
           | { health: number }
           | undefined;
@@ -66,9 +68,10 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
   // Readiness probe for Kubernetes
   .get(
     "/health/ready",
-    () => {
+    (context) => {
       try {
         // Check if all dependencies are ready
+        const { db } = context as unknown as { db: Database };
         const dbCheck = db.prepare("SELECT 1 as ready").get() as
           | { ready: number }
           | undefined;

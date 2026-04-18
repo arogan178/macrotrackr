@@ -1,50 +1,53 @@
-import { Flame, PieChart } from "lucide-react";
 import { useMemo, useState } from "react";
+import { Flame, PieChart } from "lucide-react";
 
-import { ChartCard, LineChartComponent } from "@/components/chart";
+import ChartCard from "@/components/chart/ChartCard";
+import type { ChartDataPoint, LineConfig } from "@/components/chart/ChartTypes";
+import LineChartComponent from "@/components/chart/LineChartComponent";
 import TabBar from "@/components/ui/TabBar";
 
 interface TrendsChartSectionProps {
-  dailySeries: any[];
+  dailySeries: ChartDataPoint[];
   isHistoryLoading: boolean;
-  dataProcessed: boolean;
-  calorieChartLines: any[];
-  macroChartLines: any[];
+  isHistoryReady: boolean;
+  calorieChartLines: LineConfig[];
+  macroChartLines: LineConfig[];
 }
 
 export default function TrendsChartSection({
   dailySeries,
   isHistoryLoading,
-  dataProcessed,
+  isHistoryReady,
   calorieChartLines,
   macroChartLines,
 }: TrendsChartSectionProps) {
   const [activeTab, setActiveTab] = useState<"calories" | "macros">("calories");
-  
-  const chartShowNoDataMessage = !isHistoryLoading && dataProcessed && dailySeries.length === 0;
+
+  const chartShowNoDataMessage =
+    !isHistoryLoading && isHistoryReady && dailySeries.length === 0;
 
   const tabItems = useMemo(
     () => [
-      { 
-        key: "calories", 
+      {
+        key: "calories",
         label: (
           <div className="flex items-center gap-1.5 px-1">
             <Flame className="h-3.5 w-3.5 text-amber-500" />
             <span>Calories</span>
           </div>
-        )
+        ),
       },
-      { 
-        key: "macros", 
+      {
+        key: "macros",
         label: (
           <div className="flex items-center gap-1.5 px-1">
             <PieChart className="h-3.5 w-3.5 text-blue-500" />
             <span>Macros</span>
           </div>
-        )
+        ),
       },
     ],
-    []
+    [],
   );
 
   return (
@@ -66,7 +69,7 @@ export default function TrendsChartSection({
       <LineChartComponent
         data={dailySeries}
         lines={activeTab === "calories" ? calorieChartLines : macroChartLines}
-        isLoading={isHistoryLoading || !dataProcessed}
+        isLoading={isHistoryLoading || !isHistoryReady}
         showNoDataMessage={chartShowNoDataMessage}
         height={320}
       />

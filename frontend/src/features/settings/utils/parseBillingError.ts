@@ -20,6 +20,7 @@ const parseBillingError = (error: unknown) => {
       message: "Authentication required. Please refresh and try again.",
       retryable: false,
     };
+
   return {
     type: "unknown",
     message:

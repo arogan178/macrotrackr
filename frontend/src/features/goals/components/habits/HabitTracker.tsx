@@ -1,5 +1,5 @@
 import { ProFeature } from "@/components/billing/ProFeature";
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
@@ -48,11 +48,8 @@ function HabitTracker({
                   variant="ghost"
                   onClick={onAddHabit}
                   disabled={!canAddHabit}
-                  autoLoadingFeature="habits"
-                  loadingText="Adding..."
                   text="Add Habit"
-                  icon={<PlusIcon />}
-                  iconPosition="left"
+                  leftIcon={<PlusIcon />}
                 />
               </ProFeature>
             </div>
@@ -68,14 +65,14 @@ function HabitTracker({
               >
                 <div className="p-4">
                   <div className="mb-4 flex items-center">
-                    <div className="mr-3 h-10 w-10 animate-pulse rounded-xl bg-surface-3"></div>
-                    <div className="h-5 w-24 animate-pulse rounded bg-surface-3"></div>
+                    <div className="mr-3 h-10 w-10 animate-pulse rounded-xl bg-surface-3" />
+                    <div className="h-5 w-24 animate-pulse rounded bg-surface-3" />
                   </div>
                   <div className="mb-2 flex items-center justify-between">
-                    <div className="h-6 w-16 animate-pulse rounded bg-surface-3"></div>
-                    <div className="h-4 w-8 animate-pulse rounded bg-surface-3"></div>
+                    <div className="h-6 w-16 animate-pulse rounded bg-surface-3" />
+                    <div className="h-4 w-8 animate-pulse rounded bg-surface-3" />
                   </div>
-                  <div className="h-2 animate-pulse rounded-full bg-surface-3"></div>
+                  <div className="h-2 animate-pulse rounded-full bg-surface-3" />
                 </div>
               </div>
             ))}

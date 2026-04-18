@@ -1,7 +1,7 @@
-import { motion } from "motion/react";
 import { ReactNode } from "react";
+import { motion } from "motion/react";
 
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 
 interface ChartCardProps {
   title?: string;
@@ -38,7 +38,7 @@ function ChartCard({
         className="flex h-full flex-col"
       >
         {/* Header */}
-        {(title || action) && (
+        {(title ?? action) && (
           <div className="mb-4 flex items-center justify-between">
             {title && (
               <h3 className="text-lg font-semibold tracking-tight text-foreground/90">

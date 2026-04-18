@@ -9,7 +9,7 @@ import type { AggregatedDataPoint, NutritionAverage } from "../types";
 
 interface NutritionInsightsProps {
   isLoading: boolean;
-  dataProcessed: boolean;
+  isHistoryReady: boolean;
   showNoDataMessage: boolean;
   aggregatedData: AggregatedDataPoint[];
   averages: NutritionAverage;
@@ -17,7 +17,7 @@ interface NutritionInsightsProps {
 
 export default function NutritionInsights({
   isLoading,
-  dataProcessed,
+  isHistoryReady,
   showNoDataMessage,
   aggregatedData,
   averages,
@@ -40,6 +40,7 @@ export default function NutritionInsights({
         status: "moderate",
         message: "Good start! Consider aiming for 1.6g per kg of body weight.",
       };
+
     return {
       status: "low",
       message: "Increasing protein can support muscle growth and satiety.",
@@ -67,6 +68,7 @@ export default function NutritionInsights({
         message:
           "High day-to-day variation. Consider more consistency for stable energy.",
       };
+
     return {
       status: "stable",
       message: "Consistent intake helps maintain stable energy levels.",
@@ -82,7 +84,7 @@ export default function NutritionInsights({
         Nutrition Insights
       </h2>
 
-      {isLoading || !dataProcessed ? (
+      {isLoading || !isHistoryReady ? (
         <div className="flex h-40 items-center justify-center">
           <div className="flex flex-col items-center gap-3">
             <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />

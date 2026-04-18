@@ -16,7 +16,8 @@ export const MEAL_TYPE_OPTIONS = [
 // Helper function to get meal type display name
 export const getMealTypeDisplay = (mealType: MealType): string => {
   const option = MEAL_TYPE_OPTIONS.find((opt) => opt.value === mealType);
-  return option?.display || mealType;
+
+  return option?.display ?? mealType;
 };
 
 // Helper function to get today's date string

@@ -22,6 +22,7 @@ function calculateCalories(entry: MacroEntry) {
 function escapeCsvValue(value: string | number | undefined) {
   const normalized = value === undefined ? "" : String(value);
   const escaped = normalized.replaceAll('"', '""');
+
   return /[\n",]/.test(escaped) ? `"${escaped}"` : escaped;
 }
 
@@ -32,16 +33,17 @@ function formatIngredient(ingredient: Ingredient) {
     quantity !== undefined && ingredient.unit
       ? `${quantity}${ingredient.unit}`
       : quantity === undefined
-        ? ingredient.unit || ""
+        ? ingredient.unit ?? ""
         : String(quantity);
 
   const macros = `${ingredient.protein}P/${ingredient.carbs}C/${ingredient.fats}F`;
+
   return [ingredient.name, amount, macros].filter(Boolean).join(" ");
 }
 
 export function buildHistoryCsv(entries: MacroEntry[]) {
   const rows = entries.map((entry) => {
-    const ingredients = entry.ingredients || [];
+    const ingredients = entry.ingredients ?? [];
     const ingredientNames = ingredients
       .map((ingredient) => ingredient.name)
       .join(" | ");
@@ -50,10 +52,10 @@ export function buildHistoryCsv(entries: MacroEntry[]) {
       .join(" | ");
 
     return [
-      entry.entryDate || "",
-      entry.entryTime || "",
-      entry.mealType || "",
-      entry.foodName || entry.mealName || "",
+      entry.entryDate,
+      entry.entryTime,
+      entry.mealType,
+      entry.foodName ?? entry.mealName,
       entry.protein,
       entry.carbs,
       entry.fats,

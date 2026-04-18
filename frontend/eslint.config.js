@@ -1,25 +1,17 @@
 import pluginJs from "@eslint/js";
+import stylisticPlugin from "@stylistic/eslint-plugin";
 import eslintPluginImport from "eslint-plugin-import";
 import pluginJsxA11y from "eslint-plugin-jsx-a11y";
 import pluginReact from "eslint-plugin-react";
 import pluginReactHooks from "eslint-plugin-react-hooks";
+import pluginReactRefresh from "eslint-plugin-react-refresh";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import eslintPluginUnicorn from "eslint-plugin-unicorn";
-// Removed eslint-plugin-prettier; we use eslint-config-prettier only
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
 import pluginRouter from "@tanstack/eslint-plugin-router";
-import tailwindPlugin from "eslint-plugin-tailwindcss";
-import { dirname, resolve } from "path";
-import { fileURLToPath } from "url";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-// Tailwind v4 root CSS detected at frontend/src/style.css
-const TAILWIND_ROOT_CSS = resolve(__dirname, "src/style.css");
-
-// Helper to safely extract rules from TanStack Router flat config that may be an array or object
 function getTanStackRouterRules() {
   const preset = pluginRouter.configs["flat/recommended"];
   if (Array.isArray(preset)) {
@@ -29,86 +21,36 @@ function getTanStackRouterRules() {
 }
 
 export default [
-  // Global ignores for auto-generated artifacts
   {
     name: "global-ignores",
-    ignores: [
-      "dist",
-      "build",
-      "coverage",
-      ".vite",
-      "node_modules",
-      "src/routeTree.gen.ts",
-      "src/routeTree.gen.*",
-    ],
+    ignores: ["dist", "build", "coverage", ".vite", "node_modules", "src/routeTree.gen.ts", "src/routeTree.gen.*"],
   },
-
-  // PascalCase for components (include top-level AppRouter)
   {
-    files: [
-      "src/components/**/*.{js,jsx,ts,tsx}",
-      "src/pages/**/*.{js,jsx,ts,tsx}",
-      "src/AppRouter.tsx",
-      "src/features/**/components/**/*.{js,jsx,ts,tsx}",
-      "src/features/**/pages/**/*.{js,jsx,ts,tsx}",
-    ],
+    files: ["src/components/**/*.{js,jsx,ts,tsx}", "src/pages/**/*.{js,jsx,ts,tsx}", "src/AppRouter.tsx", "src/features/**/components/**/*.{js,jsx,ts,tsx}", "src/features/**/pages/**/*.{js,jsx,ts,tsx}"],
     rules: {
-      "unicorn/filename-case": [
-        "error",
-        {
-          case: "pascalCase",
-          multipleFileExtensions: false,
-        },
-      ],
+      "unicorn/filename-case": ["error", { case: "pascalCase", multipleFileExtensions: false }],
     },
   },
-
-  // camelCase for utils, types, store, hooks, and lib
   {
-    files: [
-      "src/utils/**/*.{js,ts,tsx}",
-      "src/types/**/*.{js,ts,tsx}",
-      "src/hooks/**/*.{js,ts,tsx}",
-      "src/loaders/**/*.{js,ts,tsx}",
-      "src/constants/**/*.{js,ts,tsx}",
-      "src/lib/**/*.{js,ts,tsx}",
-      "src/theme/**/*.{js,ts,tsx}",
-      "src/features/**/hooks/**/*.{js,ts,tsx}",
-      "src/features/**/types/**/*.{js,ts,tsx}",
-      "src/features/**/utils/**/*.{js,ts,tsx}",
-      "src/features/**/constants/**/*.{js,ts,tsx}",
-    ],
+    files: ["src/utils/**/*.{js,ts,tsx}", "src/types/**/*.{js,ts,tsx}", "src/hooks/**/*.{js,ts,tsx}", "src/loaders/**/*.{js,ts,tsx}", "src/constants/**/*.{js,ts,tsx}", "src/lib/**/*.{js,ts,tsx}", "src/theme/**/*.{js,ts,tsx}", "src/features/**/hooks/**/*.{js,ts,tsx}", "src/features/**/types/**/*.{js,ts,tsx}", "src/features/**/utils/**/*.{js,ts,tsx}", "src/features/**/constants/**/*.{js,ts,tsx}", "src/api/**/*.{js,ts,tsx}"],
     rules: {
-      "unicorn/filename-case": [
-        "error",
-        {
-          case: "camelCase",
-          multipleFileExtensions: false,
-        },
-      ],
+      "unicorn/filename-case": ["error", { case: "camelCase", multipleFileExtensions: false }],
     },
   },
-
-  // TanStack Router rules applied explicitly to avoid numeric-key flat config issues
+  {
+    files: ["src/routes/**/*.{js,ts,tsx}"],
+    rules: {
+      "unicorn/filename-case": "off",
+    },
+  },
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    plugins: {
-      "@tanstack/router": pluginRouter,
-    },
-    rules: {
-      ...getTanStackRouterRules(),
-    },
+    plugins: { "@tanstack/router": pluginRouter },
+    rules: { ...getTanStackRouterRules() },
   },
-
-  // Main config for all files
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    // Ensure we ignore TanStack Router's auto-generated file(s)
-    ignores: [
-      "src/routeTree.gen.ts",
-      "src/routeTree.gen.*",
-      "src/routes/__root.gen.*",
-    ],
+    ignores: ["src/routeTree.gen.ts", "src/routeTree.gen.*", "src/routes/__root.gen.*"],
     languageOptions: {
       globals: globals.browser,
       parser: tseslint.parser,
@@ -119,18 +61,17 @@ export default [
         tsconfigRootDir: import.meta.dirname,
       },
     },
-    linterOptions: {
-      reportUnusedDisableDirectives: true,
-    },
+    linterOptions: { reportUnusedDisableDirectives: true },
     plugins: {
+      "@stylistic": stylisticPlugin,
       "@typescript-eslint": tseslint.plugin,
       react: pluginReact,
       "react-hooks": pluginReactHooks,
+      "react-refresh": pluginReactRefresh,
       "jsx-a11y": pluginJsxA11y,
       unicorn: eslintPluginUnicorn,
       "simple-import-sort": simpleImportSort,
       import: eslintPluginImport,
-      tailwindcss: tailwindPlugin,
     },
     rules: {
       ...pluginJs.configs.recommended.rules,
@@ -139,64 +80,81 @@ export default [
       ...pluginReact.configs.recommended.rules,
       ...pluginReactHooks.configs.recommended.rules,
       ...pluginJsxA11y.configs.recommended.rules,
-      ...eslintPluginUnicorn.configs.recommended.rules,
-
-      // Tailwind CSS plugin: key best practices
-      "tailwindcss/classnames-order": "warn",
-      "tailwindcss/no-custom-classname": "off", // Allow design-system classnames
-      "tailwindcss/no-contradicting-classname": "error",
-
+      "react-refresh/only-export-components": ["warn", { allowConstantExport: true }],
+      "@stylistic/padding-line-between-statements": ["warn", { blankLine: "always", prev: "*", next: "return" }],
       "react/react-in-jsx-scope": "off",
-
-      // Import hygiene and sorted groups
-      "simple-import-sort/imports": "error",
+      "react/no-unescaped-entities": "off",
+      "react/self-closing-comp": "error",
+      "react/prop-types": "off",
+      "react/jsx-no-useless-fragment": "warn",
+      "react/jsx-boolean-value": ["error", "never"],
+      "react/no-array-index-key": "warn",
+      "simple-import-sort/imports": ["error", {
+        groups: [["^\\u0000"], ["^node:"], ["^react", "^@?\\w"], ["^@/"], ["^\\.\\.(?!/?$)", "^\\.\\./?$"], ["^\\./(?=.*/)(?!/?$)", "^\\.(?!/?$)", "^\\./?$"], ["^.+\\.s?css$"]],
+      }],
       "simple-import-sort/exports": "error",
       "import/first": "error",
       "import/newline-after-import": "error",
       "import/no-duplicates": "error",
-
+      "import/no-cycle": ["error", { maxDepth: 3 }],
+      "import/no-self-import": "error",
+      "import/no-useless-path-segments": ["error", { noUselessIndex: true }],
+      "import/no-mutable-exports": "error",
       "unicorn/better-regex": "warn",
       "unicorn/no-null": "off",
-      "react/no-unescaped-entities": "off",
-
-      // Remove unicorn/filename-case here, handled by overrides above
-      "unicorn/prevent-abbreviations": [
-        "error",
-        {
-          allowList: { Props: true },
-        },
-      ],
-
-      // Core rule disabled in favor of TS rule
-      "no-unused-vars": "off",
-
-      // Enabled per user preference with tuned config (warn)
-      "@typescript-eslint/no-unused-vars": [
-        "warn",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          ignoreRestSiblings: true,
-        },
-      ],
-
-      // Disable no-undef globally (React/TSX compatibility)
-      "no-undef": "off",
-      // Allow explicit use of undefined (sometimes needed for TS overloads / API semantics)
-      "no-undefined": "off",
-      // Permit intentional undefined usages without auto-fix noise
       "unicorn/no-useless-undefined": "off",
-
-      // Warn on explicit any usage to prevent type regression
-      "@typescript-eslint/no-explicit-any": "warn",
-
-      // Warn on type assertions that could be unsafe
-      "@typescript-eslint/consistent-type-assertions": [
-        "warn",
-        {
-          assertionStyle: "as",
-          objectLiteralTypeAssertions: "never",
+      "unicorn/prevent-abbreviations": ["warn", {
+        allowList: {
+          Props: true, Ref: true, params: true, args: true, fn: true,
+          acc: true, val: true, prev: true, curr: true, idx: true,
+          res: true, req: true, err: true, env: true, doc: true,
+          el: true, btn: true, src: true, dest: true, str: true,
+          num: true, len: true, max: true, min: true, arg: true,
+          db: true, api: true, url: true, uri: true, id: true,
         },
+      }],
+      "unicorn/no-array-reduce": "off",
+      "unicorn/no-nested-ternary": "off",
+      "unicorn/no-process-exit": "off",
+      "unicorn/prefer-module": "off",
+      "unicorn/prefer-node-protocol": "off",
+      "no-unused-vars": "off",
+      "@typescript-eslint/no-unused-vars": ["warn", {
+        argsIgnorePattern: "^_",
+        varsIgnorePattern: "^_",
+        ignoreRestSiblings: true,
+        caughtErrorsIgnorePattern: "^_",
+      }],
+      "no-undef": "off",
+      "no-undefined": "off",
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/consistent-type-assertions": ["warn", {
+        assertionStyle: "as",
+        objectLiteralTypeAssertions: "never",
+      }],
+      "@typescript-eslint/consistent-type-definitions": ["warn", "interface"],
+      "@typescript-eslint/no-inferrable-types": "warn",
+      "prefer-const": "error",
+      "no-var": "error",
+      "no-console": ["warn", { allow: ["warn", "error"] }],
+      "no-debugger": "warn",
+      "no-alert": "warn",
+      "no-duplicate-imports": "error",
+      "no-shadow": "off",
+      "@typescript-eslint/no-shadow": "warn",
+      "@typescript-eslint/prefer-nullish-coalescing": "warn",
+      "@typescript-eslint/prefer-optional-chain": "warn",
+      "@typescript-eslint/no-unnecessary-condition": "warn",
+      "@typescript-eslint/strict-boolean-expressions": "off",
+      // Not appropriate for React frontend - async event handlers are common
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-misused-promises": "off",
+      "@typescript-eslint/require-await": "off",
+      "@typescript-eslint/naming-convention": [
+        "warn",
+        { selector: "variable", format: ["camelCase", "UPPER_CASE", "PascalCase"], leadingUnderscore: "allow" },
+        { selector: "function", format: ["camelCase", "PascalCase"] },
+        { selector: "typeLike", format: ["PascalCase"] },
       ],
     },
     settings: {
@@ -207,33 +165,33 @@ export default [
           noWarnOnMultipleProjects: true,
         },
       },
-      // Tailwind v4 workaround for eslint-plugin-tailwindcss 4.0.0-beta.0:
-      // point to the absolute path of the root Tailwind CSS file.
-      tailwindcss: {
-        config: TAILWIND_ROOT_CSS,
-        callees: ["cn", "clsx", "classnames"],
-        removeDuplicates: true,
-      },
     },
   },
-
-  // Tests override: disable typed linting and prop-types in TS tests
   {
     files: ["src/**/*.test.{ts,tsx}", "src/**/__tests__/**/*.{ts,tsx}"],
     languageOptions: {
       parser: tseslint.parser,
-      parserOptions: {
-        project: null,
-      },
+      parserOptions: { project: null },
     },
     rules: {
       "react/prop-types": "off",
-      // Allow any in test files for mocking purposes
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/consistent-type-assertions": "off",
+      "@typescript-eslint/no-unsafe-assignment": "off",
+      "@typescript-eslint/no-unsafe-member-access": "off",
+      "@typescript-eslint/no-unsafe-call": "off",
+      "@typescript-eslint/no-unsafe-return": "off",
+      "@typescript-eslint/prefer-nullish-coalescing": "off",
+      "@typescript-eslint/prefer-optional-chain": "off",
+      "@typescript-eslint/no-unnecessary-condition": "off",
+      "@typescript-eslint/no-shadow": "off",
+      "@typescript-eslint/no-floating-promises": "off",
+      "@typescript-eslint/no-misused-promises": "off",
+      "@typescript-eslint/require-await": "off",
+      "no-shadow": "off",
+      "unicorn/filename-case": "off",
+      "no-constant-binary-expression": "off",
     },
   },
-
-  // Prettier config disables conflicting rules (must be last in array)
   prettierConfig,
 ];

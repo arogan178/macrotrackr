@@ -1,4 +1,4 @@
-import type { ComponentType, SVGProps } from "react";
+import type { ComponentType } from "react";
 
 import {
   AwardIcon,
@@ -7,14 +7,15 @@ import {
   CheckCircleIcon,
   CoffeeIcon,
   DropletIcon,
-  DumbBellIcon,
+  DumbbellIcon,
   HeartIcon,
   MoonIcon,
   SunIcon,
   TargetIcon,
 } from "@/components/ui";
+import type { IconProps } from "@/components/ui/Icons";
 
-type IconComponent = ComponentType<SVGProps<SVGSVGElement>>;
+type IconComponent = ComponentType<IconProps>;
 
 // Habit icon mapping
 export const HABIT_ICONS: Record<string, IconComponent> = {
@@ -26,7 +27,7 @@ export const HABIT_ICONS: Record<string, IconComponent> = {
   book: BookIcon,
   coffee: CoffeeIcon,
   droplet: DropletIcon,
-  dumbbell: DumbBellIcon,
+  dumbbell: DumbbellIcon,
   moon: MoonIcon,
   sun: SunIcon,
 } as const;
@@ -95,7 +96,7 @@ export const HABIT_ICON_OPTIONS: Array<{
   { value: "book" as const, label: "Book", icon: BookIcon },
   { value: "coffee" as const, label: "Coffee", icon: CoffeeIcon },
   { value: "droplet" as const, label: "Water", icon: DropletIcon },
-  { value: "dumbbell" as const, label: "Exercise", icon: DumbBellIcon },
+  { value: "dumbbell" as const, label: "Exercise", icon: DumbbellIcon },
   { value: "moon" as const, label: "Sleep", icon: MoonIcon },
   { value: "sun" as const, label: "Morning", icon: SunIcon },
 ] as const;

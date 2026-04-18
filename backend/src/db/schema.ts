@@ -1,20 +1,9 @@
 // src/db/schema.ts
 
 import { Database } from "bun:sqlite";
-import { logger } from "../lib/logger";
+import { logger } from "../lib/observability/logger";
 
-/**
- * Initializes the database schema, creating tables and applying migrations.
- * @param db - The Bun SQLite database instance.
- */
-export function initializeSchema(db: Database) {
-  logger.info("Initializing database schema...");
-
-  // Enable Foreign Key support (important for relationships)
-  db.exec("PRAGMA foreign_keys = ON;");
-
-  // Initialize database tables
-  db.exec(`
+const SCHEMA_SQL = `
         -- Users Table --
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -149,66 +138,70 @@ export function initializeSchema(db: Database) {
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
-    `);
+`;
 
-  // --- Simple Migration Logic (Add columns if they don't exist) ---
-  const checkAndAddColumn = (
-    tableName: string,
-    columnName: string,
-    columnDefinition: string,
-    updateLogic?: string
-  ) => {
-    const columnExists = db
-      .prepare(
-        `SELECT COUNT(*) as count FROM pragma_table_info(?) WHERE name = ?`
-      )
-      .get(tableName, columnName) as { count: number };
+function checkAndAddColumn(
+  db: Database,
+  tableName: string,
+  columnName: string,
+  columnDefinition: string,
+  updateLogic?: string
+) {
+  const columnExists = db
+    .prepare(
+      `SELECT COUNT(*) as count FROM pragma_table_info(?) WHERE name = ?`
+    )
+    .get(tableName, columnName) as { count: number };
 
-    if (columnExists.count === 0) {
-      logger.info(
-        `    Adding column '${columnName}' to table '${tableName}'...`
+  if (columnExists.count === 0) {
+    logger.info(
+      `    Adding column '${columnName}' to table '${tableName}'...`
+    );
+    try {
+      db.exec(
+        `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`
       );
-      try {
-        db.exec(
-          `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${columnDefinition}`
+      if (updateLogic) {
+        logger.info(
+          `       Running update logic for new column '${columnName}'...`
         );
-        if (updateLogic) {
-          logger.info(
-            `       Running update logic for new column '${columnName}'...`
-          );
-          db.exec(updateLogic);
-        }
-      } catch (error) {
-        logger.error(
-          {
-            error: error instanceof Error ? error : new Error(String(error)),
-            operation: "add_column",
-            tableName,
-            columnName,
-          },
-          `Failed to add column '${columnName}' to '${tableName}'`
-        );
+        db.exec(updateLogic);
       }
+    } catch (error) {
+      logger.error(
+        {
+          error: error instanceof Error ? error : new Error(String(error)),
+          operation: "add_column",
+          tableName,
+          columnName,
+        },
+        `Failed to add column '${columnName}' to '${tableName}'`
+      );
     }
-  };
+  }
+}
 
+function applyMigrations(db: Database) {
   // Apply necessary column additions for existing tables (idempotent)
-  checkAndAddColumn("users", "password_reset_token", "TEXT");
-  checkAndAddColumn("users", "password_reset_expires", "DATETIME");
-  checkAndAddColumn("users", "clerk_id", "TEXT");
+  checkAndAddColumn(db, "users", "password_reset_token", "TEXT");
+  checkAndAddColumn(db, "users", "password_reset_expires", "DATETIME");
+  checkAndAddColumn(db, "users", "clerk_id", "TEXT");
   checkAndAddColumn(
+    db,
     "macro_entries",
     "meal_type",
     "TEXT DEFAULT 'snack' CHECK(meal_type IN ('breakfast', 'lunch', 'dinner', 'snack'))"
   );
-  checkAndAddColumn("macro_entries", "meal_name", "TEXT DEFAULT ''");
+  checkAndAddColumn(db, "macro_entries", "meal_name", "TEXT DEFAULT ''");
   checkAndAddColumn(
+    db,
     "macro_entries",
     "entry_date",
     "TEXT",
     "UPDATE macro_entries SET entry_date = DATE(created_at) WHERE entry_date IS NULL"
   );
   checkAndAddColumn(
+    db,
     "macro_entries",
     "entry_time",
     "TEXT",
@@ -217,25 +210,22 @@ export function initializeSchema(db: Database) {
 
   // Apply subscription-related column additions to users table
   checkAndAddColumn(
+    db,
     "users",
     "subscription_status",
     "subscription_status TEXT DEFAULT 'free'"
   );
-  checkAndAddColumn("users", "stripe_customer_id", "stripe_customer_id TEXT");
-  // SQLite does not allow adding a column with non-constant default (e.g., CURRENT_TIMESTAMP)
-  // So: 1) Add column without default, 2) Backfill, 3) Enforce default in app layer for new inserts
-  checkAndAddColumn("users", "updated_at", "updated_at DATETIME");
-  // Backfill updated_at for existing rows if column was just added (safe to run every time)
+  checkAndAddColumn(db, "users", "stripe_customer_id", "stripe_customer_id TEXT");
+  checkAndAddColumn(db, "users", "updated_at", "updated_at DATETIME");
+  // Backfill updated_at for existing rows
   try {
     db.exec(`
       UPDATE users SET updated_at = CURRENT_TIMESTAMP WHERE updated_at IS NULL;
     `);
   } catch {
-    // Intentionally ignored: column may not exist on older DB versions during idempotent migration.
+    // Intentionally ignored
   }
 
-  // Apply data constraints for subscription_status (SQLite doesn't support CHECK in ALTER)
-  // We'll handle validation in the application layer instead
   try {
     db.exec(`
       UPDATE users 
@@ -243,12 +233,11 @@ export function initializeSchema(db: Database) {
       WHERE subscription_status NOT IN ('free', 'pro', 'canceled') OR subscription_status IS NULL
     `);
   } catch {
-    // Intentionally ignored: column may not exist on older DB versions during idempotent migration.
+    // Intentionally ignored
   }
 
-  // --- Conditional migration: rebuild habits table if old CHECK constraint exists ---
+  // Habits migration
   try {
-    // Inspect current CREATE TABLE statement for habits
     const habitsCreate = db
       .prepare("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'habits'")
       .get() as { sql?: string } | undefined;
@@ -260,10 +249,7 @@ export function initializeSchema(db: Database) {
 
     if (hasOldCheck) {
       logger.info("    Migrating habits table to remove accent_color CHECK constraint...");
-
       db.exec("BEGIN IMMEDIATE TRANSACTION;");
-
-      // Create new table without CHECK constraint
       db.exec(`
         CREATE TABLE IF NOT EXISTS habits_new (
           id TEXT PRIMARY KEY NOT NULL,
@@ -279,8 +265,6 @@ export function initializeSchema(db: Database) {
           FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         );
       `);
-
-      // Copy all existing data
       db.exec(`
         INSERT INTO habits_new (
           id, user_id, title, icon_name, current, target, accent_color, is_complete, created_at, completed_at
@@ -289,117 +273,71 @@ export function initializeSchema(db: Database) {
           id, user_id, title, icon_name, current, target, accent_color, is_complete, created_at, completed_at
         FROM habits;
       `);
-
-      // Replace old table
       db.exec("DROP TABLE habits;");
       db.exec("ALTER TABLE habits_new RENAME TO habits;");
-
-      // Recreate indexes for habits (idempotent below will ensure existence)
       db.exec("COMMIT;");
       logger.info("    habits table migrated successfully.");
     }
   } catch (error) {
     logger.error({ error }, "    Failed migrating habits table; continuing with initialization");
-    try { db.exec("ROLLBACK;"); } catch { /* ROLLBACK can fail if transaction not active */ }
+    try {
+      db.exec("ROLLBACK;");
+    } catch {
+      // no-op: rollback can fail if no transaction is active
+    }
   }
 
-  // --- Indexes for Performance ---
-  logger.info("    Creating indexes...");
+  // Apply ingredients column additions for hybrid meal support
+  checkAndAddColumn(db, "macro_entries", "ingredients", "TEXT DEFAULT '[]'");
+  checkAndAddColumn(db, "saved_meals", "ingredients", "TEXT DEFAULT '[]'");
+}
 
-  // Basic single-column indexes
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)"
-  );
-  // Additional performance indexes for macro_entries
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_id ON macro_entries(user_id)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_entries_date ON macro_entries(entry_date)"
-  );
+function createIndexes(db: Database) {
+  logger.info("    Creating indexes...");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date ON macro_entries(user_id, entry_date)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_id ON macro_entries(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_date ON macro_entries(entry_date)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)");
   db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_clerk_id ON users(clerk_id)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_id ON habits(user_id)");
-  // Additional performance index for habits active status
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, is_complete)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)"
-  );
-  // Additional performance index for goals (weight_goals) active status
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_goals_user_id ON weight_goals(user_id)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)"
-  );
+  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_active ON habits(user_id, is_complete)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_goals_user ON weight_goals(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_goals_user_id ON weight_goals(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_targets_user ON macro_targets(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp ON weight_log(user_id, timestamp)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)");
 
-  // Weight log indexes
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp ON weight_log(user_id, timestamp)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_created_at ON weight_log(user_id, created_at)"
-  );
-
-  // --- Advanced Compound Indexes for Performance Optimization ---
   logger.info("    Creating compound performance indexes...");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_meal ON macro_entries(user_id, entry_date, meal_type)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_desc ON macro_entries(user_id, entry_date DESC, created_at DESC)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp_desc ON weight_log(user_id, timestamp DESC)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_complete ON habits(user_id, is_complete)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_habits_user_created ON habits(user_id, created_at DESC)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_user_details_user ON user_details(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)");
+}
 
-  // Macro entries optimized for common query patterns
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_meal ON macro_entries(user_id, entry_date, meal_type)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_macro_entries_user_date_desc ON macro_entries(user_id, entry_date DESC, created_at DESC)"
-  );
+/**
+ * Initializes the database schema, creating tables and applying migrations.
+ * @param db - The Bun SQLite database instance.
+ */
+export function initializeSchema(db: Database) {
+  logger.info("Initializing database schema...");
 
-  // Weight log optimized for chronological queries
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_weight_log_user_timestamp_desc ON weight_log(user_id, timestamp DESC)"
-  );
+  // Enable Foreign Key support (important for relationships)
+  db.exec("PRAGMA foreign_keys = ON;");
 
-  // Habits optimized for completion status queries
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_habits_user_complete ON habits(user_id, is_complete)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_habits_user_created ON habits(user_id, created_at DESC)"
-  );
+  // Initialize database tables
+  db.exec(SCHEMA_SQL);
 
-  // User details lookup optimization
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_user_details_user ON user_details(user_id)"
-  );
-
-  // Subscription system indexes
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_users_subscription_status ON users(subscription_status)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_users_stripe_customer_id ON users(stripe_customer_id)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_subscriptions_user_id ON subscriptions(user_id)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_subscriptions_stripe_subscription_id ON subscriptions(stripe_subscription_id)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)"
-  );
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)"
-  );
-
-  // Saved meals indexes
-  db.exec(
-    "CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)"
-  );
-
-  // Apply ingredients column additions for hybrid meal support
-  checkAndAddColumn("macro_entries", "ingredients", "TEXT DEFAULT '[]'");
-  checkAndAddColumn("saved_meals", "ingredients", "TEXT DEFAULT '[]'");
+  applyMigrations(db);
+  createIndexes(db);
 
   logger.info("Database schema initialized successfully.");
 }
