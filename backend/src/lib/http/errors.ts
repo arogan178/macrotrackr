@@ -68,6 +68,12 @@ export class ConflictError extends AppError {
   }
 }
 
+export class AccountLinkRequiredError extends AppError {
+  constructor(message: string = "Account link required") {
+    super(message, 409, "ACCOUNT_LINK_REQUIRED");
+  }
+}
+
 export class AccountNotSyncedError extends AppError {
   constructor(
     message: string = "Your account is not linked yet. Please finish setup.",
