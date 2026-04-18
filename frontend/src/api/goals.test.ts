@@ -7,8 +7,8 @@ import {
 } from "@/features/goals/calculations";
 import type { WeightGoalFormValues } from "@/types/goal";
 
-import { goalsApi } from "./goals";
 import { apiClient } from "./core";
+import { goalsApi } from "./goals";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {

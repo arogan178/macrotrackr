@@ -6,8 +6,8 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import LineChartComponent from "@/components/chart/LineChartComponent";
 import type { ChartDataPoint } from "@/components/chart/chartTypes";
+import LineChartComponent from "@/components/chart/LineChartComponent";
 import { BarChartIcon, EmptyState } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";

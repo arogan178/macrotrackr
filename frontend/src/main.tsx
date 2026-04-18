@@ -5,13 +5,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { PostHogProvider } from "posthog-js/react";
 
+import { initializeAuthTokenProvider } from "./api/core";
 import { ClerkTokenSync } from "./components/auth/ClerkTokenSync";
 import { clerkAppearance } from "./lib/clerkAppearance";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
 import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
-import { initializeAuthTokenProvider } from "./api/core";
 
 import "./style.css";
 

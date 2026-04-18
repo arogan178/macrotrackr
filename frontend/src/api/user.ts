@@ -1,5 +1,5 @@
 import { authApi } from "@/api/auth";
-import { ApiError, apiClient } from "@/api/core";
+import { apiClient,ApiError } from "@/api/core";
 import type { ActivityLevel } from "@/types/activity";
 import { getActivityLevelFromString } from "@/utils/userConstants";
 

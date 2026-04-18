@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { habitsApi } from "./habits";
 import { apiClient } from "./core";
+import { habitsApi } from "./habits";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {

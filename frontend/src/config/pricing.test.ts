@@ -1,9 +1,10 @@
+import { describe, expect, it } from "vitest";
+
 import {
   FREE_PLAN_DEFINITION,
   PRICING as SHARED_PRICING,
   PRO_PLAN_DEFINITION,
 } from "../../../shared/pricing";
-import { describe, expect, it } from "vitest";
 
 import { PRICING, PRICING_PLANS } from "./pricing";
 
