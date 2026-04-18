@@ -63,8 +63,20 @@ jobs:
           git pull origin master
 
           # Write backend .env from GitHub environment secrets
+          BACKEND_CLERK_PUBLISHABLE_KEY="${{ secrets.CLERK_PUBLISHABLE_KEY }}"
+          if [ -z "${BACKEND_CLERK_PUBLISHABLE_KEY}" ]; then
+            BACKEND_CLERK_PUBLISHABLE_KEY="${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}"
+          fi
+
+          if [ -z "${BACKEND_CLERK_PUBLISHABLE_KEY}" ]; then
+            echo "ERROR: Missing Clerk publishable key in backend environment secrets"
+            echo "Set CLERK_PUBLISHABLE_KEY (recommended) or VITE_CLERK_PUBLISHABLE_KEY"
+            exit 1
+          fi
+
           echo "Writing backend environment variables..."
-          printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${{ secrets.CLERK_PUBLISHABLE_KEY }}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env
+          printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${BACKEND_CLERK_PUBLISHABLE_KEY}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env.production
+          cp backend/.env.production backend/.env
           echo "Backend environment variables written"
 
           # Install backend dependencies
@@ -75,13 +87,7 @@ jobs:
           cd ..
           mkdir -p logs
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
-          pm2 reload ecosystem.config.cjs || {
-            echo "PM2 reload failed, attempting restart..."
-            pm2 restart ecosystem.config.cjs || {
-              echo "PM2 restart also failed"
-              exit 1
-            }
-          }
+          pm2 startOrReload ecosystem.config.cjs --only macro-tracker-api --update-env
 
           # Check if backend started successfully
           sleep 3
@@ -208,13 +214,7 @@ jobs:
           cd /var/www/macro-tracker
 
           # Restart frontend
-          pm2 reload ecosystem.config.cjs || {
-            echo "PM2 reload failed, attempting restart..."
-            pm2 restart ecosystem.config.cjs || {
-              echo "PM2 restart also failed"
-              exit 1
-            }
-          }
+          pm2 startOrReload ecosystem.config.cjs --only macro-frontend --update-env
 
           # Check if frontend process started successfully
           sleep 3
