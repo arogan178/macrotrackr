@@ -25,6 +25,16 @@ export {
 } from "./calculations";
 
 // Utilities (list ops, formatting, validation, state helpers)
+export {
+  AddEntryForm,
+  DailySummaryPanel,
+  EditModal,
+  EntryHistoryPanel,
+  SavedMealButton,
+  SavedMealsList,
+} from "./components";
+export { useHomePage } from "./hooks";
+export type { MacroDailyTotals, MacroEntry, MealType } from "./types";
 export type {
   AddEntryPayload,
   OptimisticUpdateState,
@@ -38,9 +48,3 @@ export {
   updateEntryInList,
   validateMacroInputs,
 } from "./utils";
-
-// Pages / Hooks / Components / Types barrels
-export * from "./components";
-export * from "./hooks";
-export * from "./pages";
-export * from "./types";

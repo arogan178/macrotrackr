@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { buildRedirectFromLocation } from "@/features/auth/utils/redirect";
+import { buildRedirectFromLocation, resolveProfileCompletion } from "@/features/auth/utils/redirect";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 
 /**
@@ -21,24 +21,6 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
  */
 interface RequireCompleteProfileProps {
   children: React.ReactNode;
-}
-
-function resolveProfileCompletion(user: unknown): boolean | undefined {
-  if (!user || typeof user !== "object") {
-    return undefined;
-  }
-
-  const userRecord = user as Record<string, unknown>;
-
-  if (typeof userRecord.isProfileComplete === "boolean") {
-    return userRecord.isProfileComplete;
-  }
-
-  if ("dateOfBirth" in userRecord) {
-    return Boolean(userRecord.dateOfBirth);
-  }
-
-  return undefined;
 }
 
 export function RequireCompleteProfile({
@@ -67,6 +49,7 @@ export function RequireCompleteProfile({
   // and sync backend user before trying protected pages again.
   if (user === null) {
     const redirectTo = buildRedirectFromLocation(location);
+
     return <Navigate to="/auth-ready" search={{ redirectTo }} />;
   }
 

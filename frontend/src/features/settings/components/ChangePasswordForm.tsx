@@ -1,7 +1,8 @@
-import { useUser } from "@clerk/clerk-react";
 import { useState } from "react";
+import { useUser } from "@clerk/clerk-react";
 
-import { CardContainer, TextField } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
+import TextField from "@/components/form/TextField";
 import { Button, LockIcon } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useStore } from "@/store/store";
@@ -45,6 +46,7 @@ const ChangePasswordForm = () => {
     if (passwordStrength <= 1) return "bg-error";
     if (passwordStrength <= 2) return "bg-warning";
     if (passwordStrength <= 3) return "bg-primary";
+
     return "bg-success";
   };
 
@@ -52,6 +54,7 @@ const ChangePasswordForm = () => {
     if (passwordStrength <= 1) return "Weak";
     if (passwordStrength <= 2) return "Fair";
     if (passwordStrength <= 3) return "Good";
+
     return "Strong";
   };
 
@@ -63,6 +66,7 @@ const ChangePasswordForm = () => {
     if (newPassword !== confirmPassword) {
       setFormError("New passwords do not match.");
       showNotification("New passwords do not match.", "error");
+
       return;
     }
 
@@ -70,6 +74,7 @@ const ChangePasswordForm = () => {
     if (passwordStrength < 3) {
       setFormError("Please choose a stronger password.");
       showNotification("Please choose a stronger password.", "error");
+
       return;
     }
 
@@ -77,11 +82,13 @@ const ChangePasswordForm = () => {
     if (!currentPassword) {
       setFormError("Current password is required.");
       showNotification("Current password is required.", "error");
+
       return;
     }
 
     if (!user) {
       showNotification("User not authenticated.", "error");
+
       return;
     }
 
@@ -99,9 +106,8 @@ const ChangePasswordForm = () => {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error) {
-      console.error("Password change error:", error);
-
+    } catch (error_) {
+      const error = error_;
       // Handle specific Clerk errors
       let errorMessage = "Failed to change password";
 
@@ -109,9 +115,9 @@ const ChangePasswordForm = () => {
         const clerkError = error as {
           errors: Array<{ code?: string; message?: string }>;
         };
-        const firstError = clerkError.errors?.[0];
+        const firstError = clerkError.errors[0];
 
-        switch (firstError?.code) {
+        switch (firstError.code) {
           case "form_password_incorrect": {
             errorMessage = "Current password is incorrect.";
 
@@ -129,7 +135,7 @@ const ChangePasswordForm = () => {
             break;
           }
           default: {
-            if (firstError?.message) {
+            if (firstError.message) {
               errorMessage = firstError.message;
             }
           }
@@ -287,9 +293,7 @@ const ChangePasswordForm = () => {
             value={confirmPassword}
             onChange={setConfirmPassword}
             required
-            error={
-              formError && formError.includes("match") ? formError : undefined
-            }
+            error={formError?.includes("match") ? formError : undefined}
             name="confirmPassword"
             autoComplete="new-password"
             helperText="Re-enter your new password to confirm"

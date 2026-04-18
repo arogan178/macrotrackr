@@ -1,6 +1,4 @@
-// src/lib/cache-service.ts
-
-import { loggerHelpers } from "./logger";
+import { loggerHelpers } from "./observability/logger";
 
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
@@ -9,11 +7,11 @@ type CacheEntry<T> = {
   timestamp: number;
 };
 
-class CacheService {
-  private cache = new Map<string, CacheEntry<any>>();
+export class CacheService {
+  private cache = new Map<string, CacheEntry<unknown>>();
 
   get<T>(key: string): T | null {
-    const entry = this.cache.get(key);
+    const entry = this.cache.get(key) as CacheEntry<T> | undefined;
     if (!entry) {
       return null;
     }
@@ -35,6 +33,12 @@ class CacheService {
     this.cache.set(key, entry);
     loggerHelpers.performance("Cache SET", 0, { key });
   }
+
+  clear() {
+    this.cache.clear();
+  }
 }
 
-export const cacheService = new CacheService();
+export function createCacheService() {
+  return new CacheService();
+}

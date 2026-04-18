@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { AnimatedNumber } from "@/components/animation";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { calculateCaloriePercentages } from "@/utils/nutritionCalculations";
 import type { MacroNutrients } from "@/utils/nutritionTypes";
@@ -13,7 +13,10 @@ interface MacroBarProps {
 /**
  * Renders a stacked bar representing macro distribution
  */
-export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
+export function MacroDistributionStrip({
+  macros,
+  className = "",
+}: MacroBarProps) {
   const { proteinPercent, carbsPercent, fatsPercent } =
     calculateCaloriePercentages(macros.protein, macros.carbs, macros.fats);
 
@@ -40,6 +43,10 @@ export function MacroTargetBar({ macros, className = "" }: MacroBarProps) {
   );
 }
 
+export function MacroDistributionBar(properties: MacroBarProps) {
+  return <MacroDistributionStrip {...properties} />;
+}
+
 interface MacroLegendProps {
   macros: MacroNutrients;
   className?: string;
@@ -58,15 +65,15 @@ export function MacroTargetLegend({
   return (
     <div className={`flex justify-between text-xs ${className}`}>
       <div className="flex items-center">
-        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-protein"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-protein" />
         <span className="text-foreground">{proteinPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-carbs"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-carbs" />
         <span className="text-foreground">{carbsPercent}%</span>
       </div>
       <div className="flex items-center">
-        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-fats"></span>
+        <span className="mr-1 inline-block h-2 w-2 rounded-full bg-fats" />
         <span className="text-foreground">{fatsPercent}%</span>
       </div>
     </div>
@@ -122,9 +129,7 @@ export function MacroIndicator({
   return (
     <div className="flex flex-col">
       <div className="mb-1 flex items-center gap-2">
-        <div
-          className={`h-2 w-2 rounded-full ${colorClasses[color].dot}`}
-        ></div>
+        <div className={`h-2 w-2 rounded-full ${colorClasses[color].dot}`} />
         <span className="text-sm text-foreground">{name}</span>
         {showPercentage && percentage !== undefined && (
           <span className="ml-auto text-xs text-foreground">{percentage}%</span>

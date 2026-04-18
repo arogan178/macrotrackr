@@ -1,6 +1,6 @@
+import React, { useMemo } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useLocation } from "@tanstack/react-router";
-import React, { useMemo } from "react";
 
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import { useUser } from "@/hooks/auth/useAuthQueries";

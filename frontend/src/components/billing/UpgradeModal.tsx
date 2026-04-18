@@ -10,11 +10,6 @@ interface UpgradeModalProps {
   description?: string;
 }
 
-/**
- * UpgradeModal - Prompts free users to upgrade to Pro
- * Usage: <UpgradeModal open={open} onClose={...} onUpgrade={...} />
- */
-
 const UpgradeModal: React.FC<UpgradeModalProps> = ({
   open,
   onClose,
@@ -42,7 +37,7 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
       confirmLabel="Upgrade to Pro"
       cancelLabel="Maybe Later"
       size="md"
-      hideCancelButton={true}
+      hideCancelButton
     >
       <div className="text-left">
         <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-warning">
@@ -62,8 +57,5 @@ const UpgradeModal: React.FC<UpgradeModalProps> = ({
     </Modal>
   );
 };
-
-// Usage example:
-// <UpgradeModal open={modalOpen} onClose={closeModal} onUpgrade={goToPricing} />
 
 export default memo(UpgradeModal);

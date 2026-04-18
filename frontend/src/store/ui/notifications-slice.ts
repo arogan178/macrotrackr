@@ -5,8 +5,8 @@ import {
   DEFAULT_NOTIFICATION_DURATION,
   DEFAULT_NOTIFICATION_TYPE,
   MAX_NOTIFICATIONS,
-} from "@/components/notifications/Constants";
-import type { NotificationType } from "@/components/notifications/Types";
+} from "@/components/notifications/NotificationConstants";
+import type { NotificationType } from "@/components/notifications/NotificationTypes";
 
 export interface Notification {
   id: string;
@@ -81,8 +81,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
         // If the existing notification is still active and has the same message and type,
         // just return its ID instead of creating a new notification
         if (
-          existingNotification &&
-          existingNotification.message === message &&
+          existingNotification?.message === message &&
           existingNotification.type === type
         ) {
           return existingContextId;
@@ -105,7 +104,8 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
       const existingNotification = get().notifications.find(
         (n) => n.message === message && n.type === type,
       );
-      return existingNotification?.id || `ignored_${now}`;
+
+      return existingNotification?.id ?? `ignored_${now}`;
     }
 
     // Generate a unique ID with timestamp and random component
@@ -232,6 +232,7 @@ export const createNotificationSlice: StateCreator<NotificationSlice> = (
           notificationContexts,
         };
       }
+
       return state;
     });
   },

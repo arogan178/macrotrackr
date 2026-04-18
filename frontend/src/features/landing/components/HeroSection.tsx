@@ -1,6 +1,6 @@
+import React from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import React from "react";
 
 import { getButtonClasses } from "@/components/ui/Button";
 

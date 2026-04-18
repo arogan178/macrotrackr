@@ -1,5 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 
+import { logger } from "./logger";
+
 /**
  * Enhanced error handling utilities for mutations
  */
@@ -7,7 +9,7 @@ import { QueryClient } from "@tanstack/react-query";
 export interface MutationError extends Error {
   status?: number;
   code?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 export interface RetryConfig {
@@ -23,6 +25,14 @@ export interface MutationErrorHandlerOptions {
   onError?: (error: MutationError) => void;
   onRetry?: (error: MutationError, attemptNumber: number) => void;
   showNotification?: boolean;
+}
+
+export function logMutationError(operation: string, error: unknown) {
+  logger.error(`${operation}:`, error);
+}
+
+export function createMutationErrorLogger(operation: string) {
+  return (error: unknown) => logMutationError(operation, error);
 }
 
 /**
@@ -214,44 +224,30 @@ export function isConflictError(error: MutationError): boolean {
 export class MutationErrorHandler {
   constructor(private options: MutationErrorHandlerOptions) {}
 
-  /**
-   * Handles mutation errors with consistent logging and user feedback
-   */
   handleError(
     error: MutationError,
-    context?: { operation: string; variables?: any },
+    context?: { operation: string; variables?: unknown },
   ): void {
-    // Log error details for debugging
-    console.error(
-      `Mutation error in ${context?.operation || "unknown operation"}:`,
-      {
-        error: error.message,
-        status: error.status,
-        variables: context?.variables,
-        stack: error.stack,
-      },
-    );
+    logger.error(`Mutation error in ${context?.operation ?? "unknown"}:`, {
+      message: error.message,
+      status: error.status,
+    });
 
-    // Call custom error handler if provided
     if (this.options.onError) {
       this.options.onError(error);
     }
 
-    // Show user-friendly notification if enabled
     if (this.options.showNotification) {
       this.showErrorNotification(error);
     }
   }
 
-  /**
-   * Handles retry attempts with logging
-   */
   handleRetry(
     error: MutationError,
     attemptNumber: number,
     operation: string,
   ): void {
-    console.warn(`Retrying ${operation} (attempt ${attemptNumber}):`, {
+    logger.warn(`Retrying ${operation} (attempt ${attemptNumber})`, {
       error: error.message,
       status: error.status,
     });
@@ -261,9 +257,6 @@ export class MutationErrorHandler {
     }
   }
 
-  /**
-   * Shows user-friendly error notifications
-   */
   private showErrorNotification(error: MutationError): void {
     let message = "An unexpected error occurred. Please try again.";
 
@@ -283,9 +276,7 @@ export class MutationErrorHandler {
       message = "Conflict detected. Please refresh and try again.";
     }
 
-    // In a real app, you would integrate with your notification system here
-    // For now, we'll just log the user-friendly message
-    console.info("User notification:", message);
+    logger.info("User notification", { message });
   }
 }
 
@@ -311,7 +302,7 @@ export function createStandardMutationOptions<
   errorHandler?: MutationErrorHandler;
   operation: string;
 }) {
-  const retryConfig = config.retryConfig || retryConfigs.standard;
+  const retryConfig = config.retryConfig ?? retryConfigs.standard;
 
   return {
     retry: createMutationRetryFunction(retryConfig),

@@ -1,21 +1,23 @@
+import { useMemo, useState } from "react";
 import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import { useMemo, useState } from "react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
+import { CalorieIcon } from "@/components/ui/Icons";
 import {
-  AppleIcon,
-  CalorieIcon,
-  FacebookIcon,
-  GoogleIcon,
-} from "@/components/ui/Icons";
+  SocialAuthOptions,
+  type SocialAuthStrategy,
+} from "@/features/auth/components/SocialAuthOptions";
+import { AUTH_NOT_READY_MESSAGE } from "@/features/auth/constants";
 import {
+  buildSocialAuthRedirectUrls,
   encodeAuthRedirect,
   normalizeAuthRedirect,
   shouldBypassSyncForRedirect,
 } from "@/features/auth/utils/redirect";
+import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 
@@ -30,7 +32,11 @@ export function ClerkSignUpForm({
 }: ClerkSignUpFormProps) {
   const navigate = useNavigate();
   const { isLoaded, signUp, setActive } = useSignUp();
-  const { isLoaded: isSignInLoaded, signIn, setActive: setSignInActive } = useSignIn();
+  const {
+    isLoaded: isSignInLoaded,
+    signIn,
+    setActive: setSignInActive,
+  } = useSignIn();
   const { showNotification } = useStore();
 
   const [email, setEmail] = useState("");
@@ -43,29 +49,53 @@ export function ClerkSignUpForm({
   const [isEmailMode, setIsEmailMode] = useState(false);
 
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
+  const normalizedRedirect = normalizeAuthRedirect(redirectTo);
 
   // Handle social sign-up
-  const handleSocialSignUp = async (
-    strategy: "oauth_google" | "oauth_facebook" | "oauth_apple",
-  ) => {
-    if (!isLoaded || !signUp) {
-      showNotification("Authentication not ready. Please try again.", "error");
+  const handleSocialSignUp = async (strategy: SocialAuthStrategy) => {
+    if (!isLoaded) {
+      showNotification(AUTH_NOT_READY_MESSAGE, "error");
+
       return;
     }
 
     try {
-      const destination = normalizeAuthRedirect(redirectTo);
+      const { redirectUrl, redirectUrlComplete } = buildSocialAuthRedirectUrls(
+        normalizedRedirect,
+        "signup",
+      );
       await signUp.authenticateWithRedirect({
         strategy,
-        redirectUrl: `/sso-callback?flow=signup&redirectTo=${encodeAuthRedirect(destination)}`,
-        redirectUrlComplete: `/auth-ready?redirectTo=${encodeAuthRedirect(destination)}`,
+        redirectUrl,
+        redirectUrlComplete,
       });
     } catch (error) {
       logger.error("Social sign-up error:", error);
-      showNotification(
-        error instanceof Error ? error.message : "Social sign-up failed",
-        "error",
-      );
+
+      const resolution = resolveSocialAuthError(error, "signup");
+
+      if (resolution.action === "auth-ready") {
+        showNotification(resolution.message, resolution.tone);
+        navigate({
+          to: "/auth-ready",
+          search: { redirectTo: normalizedRedirect },
+        });
+
+        return;
+      }
+
+      if (resolution.action === "switch-to-signin") {
+        showNotification(resolution.message, resolution.tone);
+        onSwitchToSignIn();
+
+        return;
+      }
+
+      if (resolution.action === "show-email") {
+        setIsEmailMode(true);
+      }
+
+      showNotification(resolution.message, resolution.tone);
     }
   };
 
@@ -73,8 +103,9 @@ export function ClerkSignUpForm({
   const handleEmailSignUp = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isLoaded || !signUp) {
-      showNotification("Authentication not ready. Please try again.", "error");
+    if (!isLoaded) {
+      showNotification(AUTH_NOT_READY_MESSAGE, "error");
+
       return;
     }
 
@@ -92,7 +123,6 @@ export function ClerkSignUpForm({
         // Sign-up complete, set session and redirect to auth-ready
         // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
-        const normalizedRedirect = normalizeAuthRedirect(redirectTo);
         navigate({
           to: "/auth-ready",
           search: {
@@ -120,41 +150,55 @@ export function ClerkSignUpForm({
         errors?: Array<{ code?: string; message?: string }>;
         message?: string;
       };
-      const firstErrorCode = clerkError?.errors?.[0]?.code;
+      const firstErrorCode = clerkError.errors?.[0]?.code;
 
       if (
         firstErrorCode === "form_identifier_exists" ||
         firstErrorCode === "identifier_already_signed_up"
       ) {
         // Automatically attempt sign-in with the same credentials
-        if (isSignInLoaded && signIn && password) {
+        if (isSignInLoaded && password) {
           try {
             const signInResult = await signIn.create({
               identifier: email,
               password,
             });
 
-            if (signInResult.status === "complete" && signInResult.createdSessionId) {
+            if (
+              signInResult.status === "complete" &&
+              signInResult.createdSessionId
+            ) {
               await setSignInActive({ session: signInResult.createdSessionId });
               navigate({
                 to: "/auth-ready",
-                search: { redirectTo: normalizeAuthRedirect(redirectTo) },
+                search: { redirectTo: normalizedRedirect },
               });
+
               return;
             }
           } catch (signInError) {
-            logger.warn("Auto sign-in after duplicate sign-up failed:", signInError);
+            logger.warn(
+              "Auto sign-in after duplicate sign-up failed:",
+              signInError,
+            );
             // Fall through to show a generic message
           }
         }
 
         // If auto-sign-in failed (e.g. wrong password), switch to sign-in form silently
+        showNotification(
+          "That email already has an account. Please sign in instead.",
+          "info",
+        );
         onSwitchToSignIn();
+
         return;
       }
 
       showNotification(
-        clerkError?.errors?.[0]?.message || clerkError?.message || "Sign-up failed. Please try again.",
+        clerkError.errors?.[0]?.message ??
+          clerkError.message ??
+          "Sign-up failed. Please try again.",
         "error",
       );
     } finally {
@@ -166,7 +210,7 @@ export function ClerkSignUpForm({
   const handleVerify = async (event: React.FormEvent) => {
     event.preventDefault();
 
-    if (!isLoaded || !signUp) return;
+    if (!isLoaded) return;
 
     setIsLoading(true);
 
@@ -180,7 +224,6 @@ export function ClerkSignUpForm({
         // AuthReadyPage will set the token and then redirect to the intended destination
         await setActive({ session: result.createdSessionId });
         showNotification("Email verified successfully!", "success");
-        const normalizedRedirect = normalizeAuthRedirect(redirectTo);
         navigate({
           to: "/auth-ready",
           search: {
@@ -362,55 +405,10 @@ export function ClerkSignUpForm({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
-            <div className="space-y-3">
-              <Button
-                type="button"
-                variant="secondary"
-                fullWidth
-                onClick={() => handleSocialSignUp("oauth_google")}
-                icon={<GoogleIcon className="h-5 w-5" />}
-                iconPosition="left"
-              >
-                Continue with Google
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                fullWidth
-                onClick={() => handleSocialSignUp("oauth_facebook")}
-                icon={<FacebookIcon className="h-5 w-5" />}
-                iconPosition="left"
-              >
-                Continue with Facebook
-              </Button>
-              <Button
-                type="button"
-                variant="secondary"
-                fullWidth
-                onClick={() => handleSocialSignUp("oauth_apple")}
-                icon={<AppleIcon className="h-5 w-5" />}
-                iconPosition="left"
-              >
-                Continue with Apple
-              </Button>
-            </div>
-
-            <div className="my-6 flex items-center">
-              <div className="flex-1 border-t border-border" />
-              <span className="mx-4 text-xs font-semibold tracking-wide text-muted uppercase">
-                or
-              </span>
-              <div className="flex-1 border-t border-border" />
-            </div>
-
-            <Button
-              type="button"
-              variant="outline"
-              fullWidth
-              onClick={() => setIsEmailMode(true)}
-            >
-              Continue with email
-            </Button>
+            <SocialAuthOptions
+              onProviderSelect={handleSocialSignUp}
+              onContinueWithEmail={() => setIsEmailMode(true)}
+            />
           </motion.div>
         )}
       </AnimatePresence>

@@ -187,7 +187,7 @@ export default function MacroSummaryStats({
 
   const TARGET_MACROS = useMemo(
     () =>
-      macroTarget || {
+      macroTarget ?? {
         proteinPercentage: 30,
         carbsPercentage: 40,
         fatsPercentage: 30,
@@ -204,6 +204,7 @@ export default function MacroSummaryStats({
       (effectiveCalorieTarget * (TARGET_MACROS.carbsPercentage / 100)) / 4;
     const fatsG =
       (effectiveCalorieTarget * (TARGET_MACROS.fatsPercentage / 100)) / 9;
+
     return {
       protein: proteinG,
       carbs: carbsG,
@@ -216,6 +217,7 @@ export default function MacroSummaryStats({
   const avgCalories = useMemo(() => {
     if (data.length === 0) return 0;
     const total = data.reduce((accumulator, d) => accumulator + d.calories, 0);
+
     return Math.round(total / data.length);
   }, [data]);
 

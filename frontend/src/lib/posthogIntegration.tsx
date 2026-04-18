@@ -1,5 +1,5 @@
-import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef } from "react";
+import { usePostHog } from "posthog-js/react";
 
 import { useUser } from "@/hooks/auth/useAuthQueries";
 
@@ -18,8 +18,6 @@ export default function PostHogUserSync(): undefined {
   const lastDistinctIdReference = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!posthog) return;
-
     // If we have a user, identify them and set person properties
     if (user) {
       const distinctId = String(user.id);
@@ -31,26 +29,31 @@ export default function PostHogUserSync(): undefined {
             email: user.email,
             first_name: user.firstName,
             last_name: user.lastName,
-            subscription_status: user.subscription?.status,
+            subscription_status: user.subscription.status,
             created_at: user.createdAt,
           });
         } catch (error) {
           // Don't throw in UI if analytics fails
           console.warn("PostHog identify failed:", error);
+
+          return;
         }
 
         lastDistinctIdReference.current = distinctId;
       }
+
       return;
     }
 
     // If user is undefined (logged out), reset PostHog to unlink device from user
-    if (!user && lastDistinctIdReference.current) {
+    if (lastDistinctIdReference.current) {
       try {
         // reset(true) also resets the device id so future events are treated as new device
         posthog.reset(true);
       } catch (error) {
         console.warn("PostHog reset failed:", error);
+
+        return;
       }
       lastDistinctIdReference.current = undefined;
     }

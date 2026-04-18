@@ -11,8 +11,8 @@
  *   </PageTransition>
  * </AnimatePresence>
  */
-import { motion } from "motion/react";
 import React from "react";
+import { motion } from "motion/react";
 
 import { usePrefersReducedMotion } from "@/hooks";
 

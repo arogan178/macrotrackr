@@ -14,6 +14,7 @@ export function computeEffectiveTargetCalories(
     effective = goals.calorieTarget;
   }
   if (!Number.isFinite(effective)) return 0;
+
   return effective;
 }
 
@@ -27,10 +28,11 @@ export function computeDailyAdjustment(
   tdee: number,
   goals?: WeightGoals,
 ): number {
-  let daily = goals?.dailyChange || 0;
+  let daily = goals?.dailyChange ?? 0;
   if (daily === 0 && goals?.calorieTarget && tdee > 0) {
     daily = tdee - goals.calorieTarget;
   }
+
   return daily;
 }
 
@@ -41,17 +43,18 @@ export function computeDailyAdjustment(
 export function computeDailyDifferenceForDisplay(
   tdee: number,
   goals?: WeightGoals,
-  enforceMinForNonMaintenance: boolean = true,
-  minKcal: number = 50,
+  enforceMinForNonMaintenance = true,
+  minKcal = 50,
 ): number {
-  const weightGoal = goals?.weightGoal || "maintain";
+  const weightGoal = goals?.weightGoal ?? "maintain";
   const isMaintenance = weightGoal === "maintain";
-  let dailyDiff = Math.abs(goals?.dailyChange || 0);
+  let dailyDiff = Math.abs(goals?.dailyChange ?? 0);
   if (dailyDiff === 0 && goals?.calorieTarget && tdee > 0) {
     dailyDiff = Math.abs(tdee - goals.calorieTarget);
   }
   if (!isMaintenance && enforceMinForNonMaintenance && dailyDiff < minKcal) {
     dailyDiff = minKcal;
   }
+
   return dailyDiff;
 }

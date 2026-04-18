@@ -16,8 +16,8 @@ export type FeatureType =
  */
 export function useFeatureLoading(feature: FeatureType) {
   // Get the appropriate query key pattern for the feature
-  const getFeatureQueryKey = (feature: FeatureType): unknown[] => {
-    switch (feature) {
+  const getFeatureQueryKey = (feat: FeatureType): unknown[] => {
+    switch (feat) {
       case "auth": {
         return [...queryKeys.auth.all()];
       }

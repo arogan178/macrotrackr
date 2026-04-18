@@ -1,7 +1,7 @@
+import React, { useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
-import React, { useState } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { PRICING, PRICING_PLANS } from "@/config/pricing";
@@ -33,7 +33,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
   const handleGetPro = () => {
     if (isAuthenticated) {
       // If user is logged in, go to pricing page
-      posthog?.capture?.("clicked_pricing_nav", {
+      posthog.capture("clicked_pricing_nav", {
         location: "pricing_cards",
         source: "pricing_card_pro",
       });
@@ -41,7 +41,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
     } else {
       // If user is not logged in, go to register and include a returnTo so
       // after signup/login the user can be redirected back to /pricing.
-      posthog?.capture?.("clicked_pricing_nav", {
+      posthog.capture("clicked_pricing_nav", {
         location: "pricing_cards",
         source: "pricing_card_pro_unauth",
       });
@@ -97,7 +97,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
             isAuthenticated
               ? undefined
               : () => {
-                  posthog?.capture?.("clicked_pricing_nav", {
+                  posthog.capture("clicked_pricing_nav", {
                     location: "pricing_cards",
                     source: "pricing_card_free",
                   });
@@ -124,7 +124,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
           suffix=""
           equivalent={proEquivalent}
           features={features.pro}
-          isPopular={true}
+          isPopular
           buttonText={
             isProUser
               ? "Current Plan"
@@ -143,7 +143,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
             isProUser
               ? undefined
               : showUpgradeButtons
-                ? () => onUpgrade && onUpgrade(selectedPlan)
+                ? () => onUpgrade?.(selectedPlan)
                 : handleGetPro
           }
         >

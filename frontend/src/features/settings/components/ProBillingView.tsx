@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 
-import { CardContainer } from "@/components/form";
+import { billingApi, type BillingDetailsResponse } from "@/api/billing";
+import CardContainer from "@/components/form/CardContainer";
 import {
   Button,
   ExternalLinkIcon,
@@ -10,8 +11,6 @@ import {
 } from "@/components/ui";
 import StatusBadge from "@/components/ui/StatusBadge";
 import { useStore } from "@/store/store";
-import { cancelSubscription } from "@/utils/apiBilling";
-import { BillingDetailsResponse } from "@/utils/apiServices";
 
 const ProBillingView: React.FC<{
   onManage: () => void;
@@ -24,14 +23,14 @@ const ProBillingView: React.FC<{
   // If user is needed, get from loader: const { user } = useLoaderData({ from: '/' });
 
   // Extract details from billingDetails
-  const price = billingDetails?.price || "";
+  const price = billingDetails?.price ?? "";
   const paymentMethod = billingDetails?.paymentMethod;
   const renewalDate = billingDetails?.subscription?.currentPeriodEnd
     ? new Date(
         billingDetails.subscription.currentPeriodEnd,
       ).toLocaleDateString()
     : undefined;
-  const status = billingDetails?.subscription?.status || "unknown";
+  const status = billingDetails?.subscription?.status ?? "unknown";
   const isCanceled = status === "canceled";
   const isActionRequired = status === "past_due" || status === "unpaid";
 
@@ -60,14 +59,17 @@ const ProBillingView: React.FC<{
                 <span className="text-lg font-semibold text-success">
                   Pro Plan Member
                 </span>
-                <div className="mt-1 flex items-center"></div>
+                <div className="mt-1 flex items-center" />
               </div>
             </div>
             <StatusBadge status={status} />
           </div>
 
           {/* Subscription details in clean grid */}
-          <CardContainer variant="transparent" className="mb-4 bg-surface-2/40 p-5">
+          <CardContainer
+            variant="transparent"
+            className="mb-4 bg-surface-2/40 p-5"
+          >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
                 <div className="mb-1 text-xs text-muted">Plan & Price</div>
@@ -80,7 +82,7 @@ const ProBillingView: React.FC<{
                   {isCanceled ? "Expires" : "Renews"}
                 </div>
                 <div className="font-semibold text-foreground">
-                  {renewalDate || "-"}
+                  {renewalDate ?? "-"}
                 </div>
               </div>
               <div className="text-center sm:text-left">
@@ -161,21 +163,14 @@ const ProBillingView: React.FC<{
             <Button
               onClick={async () => {
                 try {
-                  const response = await cancelSubscription();
+                  const response = await billingApi.cancelSubscription();
                   setShowCancel(false);
-                  showNotification(
-                    response?.message || "Subscription cancelled.",
-                    "success",
-                  );
+                  showNotification(response.message, "success");
                   // Refresh user details to update UI
                   // No need to refetch user details, loader will handle updates if needed
                 } catch (error) {
                   setShowCancel(false);
-                  showNotification(
-                    (error as Error)?.message ||
-                      "Failed to cancel subscription.",
-                    "error",
-                  );
+                  showNotification((error as Error).message, "error");
                 }
               }}
               variant="danger"
@@ -193,7 +188,7 @@ const ProBillingView: React.FC<{
         size="md"
         variant="form"
         hideDefaultButtons
-        hideClose={true}
+        hideClose
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
@@ -210,19 +205,19 @@ const ProBillingView: React.FC<{
               </p>
               <ul className="space-y-2 text-sm text-muted">
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Update your payment method
                 </li>
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Download invoices and receipts
                 </li>
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Change your billing address
                 </li>
                 <li className="flex items-center">
-                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary"></span>
+                  <span className="mr-3 inline-block h-1.5 w-1.5 rounded-full bg-primary" />
                   Cancel your subscription
                 </li>
               </ul>

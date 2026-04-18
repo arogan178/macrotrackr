@@ -18,7 +18,8 @@
     "jsx": "react-jsx",
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@shared/*": ["../shared/*"]
     },
 
     /* Linting */
@@ -31,6 +32,6 @@
     /* Types */
     "types": ["vite/client"]
   },
-  "include": ["src"],
+  "include": ["src", "../shared/**/*.ts"],
   "exclude": ["node_modules", "**/*.spec.ts", "**/*.test.ts"]
 }

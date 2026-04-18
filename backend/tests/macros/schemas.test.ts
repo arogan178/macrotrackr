@@ -5,44 +5,9 @@
  */
 
 import { describe, it, expect } from 'vitest'
-import { t } from 'elysia'
 
 // Recreate the schema logic for unit testing
 // This mirrors the logic in backend/src/modules/macros/schemas.ts
-
-// --- Reusable Primitives ---
-const MacroPercentage = t.Integer({ minimum: 5, maximum: 70 })
-
-// --- Macro Entry Schemas ---
-
-const MacroValueSchema = t.Number({
-  minimum: 0,
-  error: "Macro value cannot be negative.",
-})
-
-const MealTypeSchema = t.Union(
-  [
-    t.Literal("breakfast"),
-    t.Literal("lunch"),
-    t.Literal("dinner"),
-    t.Literal("snack"),
-  ],
-  {
-    default: "snack",
-    error:
-      "Invalid meal type. Must be 'breakfast', 'lunch', 'dinner', or 'snack'.",
-  }
-)
-
-const DateSchema = t.String({
-  format: "date",
-  error: "Invalid date format. Please use YYYY-MM-DD.",
-})
-
-const TimeSchema = t.String({
-  pattern: "^([01]\\d|2[0-3]):([0-5]\\d)(?::([0-5]\\d))?$",
-  error: "Invalid time format. Please use HH:MM or HH:MM:SS.",
-})
 
 // Macro target percentages validation
 function validateMacroPercentages(data: {

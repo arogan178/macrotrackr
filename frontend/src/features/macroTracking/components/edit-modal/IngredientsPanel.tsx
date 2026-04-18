@@ -1,5 +1,5 @@
-import { AnimatePresence, motion } from "motion/react";
 import { Fragment } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 import type { Ingredient } from "@/types/macro";
 
