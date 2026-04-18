@@ -19,11 +19,11 @@ interface SocialAuthProviderConfig {
 }
 
 function parseFeatureFlag(value: string | undefined): boolean {
-  if (value === undefined) {
+  if (value === undefined || value.trim() === "") {
     return true;
   }
 
-  return value === "true";
+  return value.toLowerCase() === "true";
 }
 
 const SOCIAL_AUTH_PROVIDERS: SocialAuthProviderConfig[] = [
