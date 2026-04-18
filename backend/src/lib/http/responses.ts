@@ -67,7 +67,7 @@ export function handleError(
   );
 
   // Always ensure JSON content type for error responses
-  set.headers = set.headers || {};
+  set.headers = set.headers ?? {};
   set.headers["Content-Type"] = "application/json";
 
   if (isAppError(error)) {

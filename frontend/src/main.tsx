@@ -13,6 +13,8 @@ import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
 import { initializeAuthTokenProvider } from "./api/core";
 
+import "./style.css";
+
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
 const posthogHost = import.meta.env.VITE_PUBLIC_POSTHOG_HOST;

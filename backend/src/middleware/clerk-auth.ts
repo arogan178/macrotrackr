@@ -1,6 +1,5 @@
 // src/middleware/clerk-auth.ts
 import { clerkPlugin } from "elysia-clerk";
-import { Elysia } from "elysia";
 import { config } from "../config";
 import { AuthIntegrationError } from "../lib/http/errors";
 import { logger } from "../lib/observability/logger";
@@ -11,6 +10,8 @@ type ClerkAuthResult = {
   userId?: string;
   sessionId?: string | null;
 };
+
+type ClerkAuthResolver = (options?: unknown) => unknown;
 
 type ClerkUserObject = {
   firstName?: string;
@@ -83,6 +84,39 @@ function isAllowedForUnlinkedUser(path: string): boolean {
   return false;
 }
 
+function normalizeAuthResult(authResult: unknown): ClerkAuthResult | null {
+  if (!authResult || typeof authResult !== "object") {
+    return null;
+  }
+
+  const candidate = authResult as { userId?: unknown; sessionId?: unknown };
+
+  return {
+    userId:
+      typeof candidate.userId === "string" && candidate.userId.length > 0
+        ? candidate.userId
+        : undefined,
+    sessionId:
+      typeof candidate.sessionId === "string" || candidate.sessionId === null
+        ? candidate.sessionId
+        : null,
+  };
+}
+
+function resolveAuthResult(auth: unknown): ClerkAuthResult | null {
+  if (typeof auth === "function") {
+    try {
+      const resolved = (auth as ClerkAuthResolver)();
+      return normalizeAuthResult(resolved);
+    } catch (error) {
+      logger.warn({ error }, "Failed to resolve Clerk auth state");
+      return null;
+    }
+  }
+
+  return normalizeAuthResult(auth);
+}
+
 function getRequestPath(context: { request?: Request; path?: string }): string {
   const requestUrl = context.request?.url;
 
@@ -143,15 +177,12 @@ function getPrimaryClerkEmail(clerkUser: {
  * Clerk authentication middleware for Elysia
  * Validates Clerk JWT tokens and extracts user information
  */
-export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
-  .use(
-    clerkPlugin({
-      publishableKey: config.CLERK_PUBLISHABLE_KEY,
-      secretKey: config.CLERK_SECRET_KEY,
-      // Optional: restrict authorized parties
-      // authorizedParties: [config.CORS_ORIGIN as string],
-    })
-  )
+export const clerkAuthMiddleware = clerkPlugin({
+  publishableKey: config.CLERK_PUBLISHABLE_KEY,
+  secretKey: config.CLERK_SECRET_KEY,
+  // Optional: restrict authorized parties
+  // authorizedParties: [config.CORS_ORIGIN as string],
+})
   .resolve(
     { as: "scoped" },
     async (context: {
@@ -190,7 +221,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
     }
 
     try {
-      const authResult = auth as ClerkAuthResult | undefined;
+      const authResult = resolveAuthResult(auth);
 
       if (!authResult?.userId) {
         logger.warn({ path, requestPath }, "No valid Clerk session token found in context");
@@ -229,7 +260,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
           requestPath,
           userId, 
           email,
-          firstName: clerkUser?.firstName 
+          firstName: clerkUser.firstName 
         }, "User authenticated successfully");
       }
 
@@ -249,13 +280,13 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
 
       // Return user info for use in route handlers
       const authenticatedUser = {
-          userId: internalUserId ?? undefined,
+          userId: internalUserId,
           id: userId,
           clerkUserId: userId,
           email,
-          firstName: clerkUser?.firstName,
-          lastName: clerkUser?.lastName,
-          imageUrl: clerkUser?.imageUrl,
+          firstName: clerkUser.firstName,
+          lastName: clerkUser.lastName,
+          imageUrl: clerkUser.imageUrl,
         };
 
       return {
@@ -307,7 +338,7 @@ export const clerkAuthMiddleware = new Elysia({ name: "clerkAuthMiddleware" })
 
     if (!internalUserId && !isAllowedForUnlinkedUser(requestPath)) {
       logger.warn(
-        { path, requestPath, clerkUserId: user?.clerkUserId },
+        { path, requestPath, clerkUserId: user.clerkUserId },
         "Authenticated Clerk user is not linked to an internal account",
       );
       set.status = 409;

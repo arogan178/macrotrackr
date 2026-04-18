@@ -9,7 +9,7 @@ import {
   parseDate,
   daysDifference,
   weeksDifference,
-} from "../../src/lib/dates";
+} from "../../src/lib/utils/dates";
 
 describe("dates", () => {
   describe("getLocalDate", () => {

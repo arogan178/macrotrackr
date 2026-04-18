@@ -24,7 +24,7 @@ const NAV_ITEMS_CONFIG = [
 ] as const;
 
 const navButtonClasses =
-  "inline-flex min-h-11 cursor-pointer items-center rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const mobileMenuButtonClasses =
   "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
@@ -40,8 +40,15 @@ interface NavItemProps {
   variant?: "desktop" | "mobile";
 }
 
-function NavItem({ label, icon: Icon, isActive, onClick, variant = "desktop" }: NavItemProps) {
-  const classes = variant === "desktop" ? navButtonClasses : mobileMenuButtonClasses;
+function NavItem({
+  label,
+  icon: Icon,
+  isActive,
+  onClick,
+  variant = "desktop",
+}: NavItemProps) {
+  const classes =
+    variant === "desktop" ? navButtonClasses : mobileMenuButtonClasses;
 
   return (
     <button
@@ -63,7 +70,11 @@ function NavItem({ label, icon: Icon, isActive, onClick, variant = "desktop" }: 
 interface MobileMenuProps {
   isOpen: boolean;
   onClose: () => void;
-  navItems: readonly { path: string; label: string; icon: React.ComponentType<{ className?: string }> }[];
+  navItems: readonly {
+    path: string;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+  }[];
   isActiveRoute: (path: string) => boolean;
   onNavigate: (path: string) => void;
   onLogout: () => void;
@@ -207,7 +218,7 @@ const Navbar: React.FC = () => {
                   "ghost",
                   "sm",
                   false,
-                  "min-h-11 rounded-full font-medium",
+                  "min-h-11 gap-2.5 rounded-full font-medium",
                 )}
               >
                 <LogoutIcon className="h-4 w-4" />

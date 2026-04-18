@@ -51,15 +51,15 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
   .derive({ as: "scoped" }, ({ request }) => {
     // Extract existing correlation ID from headers or generate new one
     const correlationId =
-      request.headers.get("x-correlation-id") ||
-      request.headers.get("x-request-id") ||
+      request.headers.get("x-correlation-id") ??
+      request.headers.get("x-request-id") ??
       crypto.randomUUID();
 
     return { correlationId };
   })
   .onRequest((context) => {
     const { request } = context;
-    const correlationId = getOptionalStringProperty(context, "correlationId") || "unknown";
+    const correlationId = getOptionalStringProperty(context, "correlationId") ?? "unknown";
 
     // Log the start of request processing
     loggerHelpers.apiRequest(
@@ -97,7 +97,7 @@ export const enhancedApiLogging = new Elysia({ name: "apiLogging" })
   })
   .onAfterHandle({ as: "scoped" }, (context) => {
     const { set, request } = context;
-    const correlationId = getOptionalStringProperty(context, "correlationId") || "unknown";
+    const correlationId = getOptionalStringProperty(context, "correlationId") ?? "unknown";
     const startTime = getOptionalNumberProperty(context, "startTime") ?? Date.now();
     const userId = getOptionalUserId(context);
 

@@ -35,7 +35,7 @@ export class MetricsRegistry {
 
   incrementCounter(name: string, labels?: Record<string, string>): void {
     const metric = this.metrics.get(name);
-    if (metric && metric.type === "counter") {
+    if (metric?.type === "counter") {
       const existing = metric.values.find((v) =>
         JSON.stringify(v.labels) === JSON.stringify(labels)
       );
@@ -50,7 +50,7 @@ export class MetricsRegistry {
 
   setGauge(name: string, value: number, labels?: Record<string, string>): void {
     const metric = this.metrics.get(name);
-    if (metric && metric.type === "gauge") {
+    if (metric?.type === "gauge") {
       const existing = metric.values.find((v) =>
         JSON.stringify(v.labels) === JSON.stringify(labels)
       );
@@ -65,7 +65,7 @@ export class MetricsRegistry {
 
   observeHistogram(name: string, value: number, labels?: Record<string, string>): void {
     const metric = this.metrics.get(name);
-    if (metric && metric.type === "histogram") {
+    if (metric?.type === "histogram") {
       metric.values.push({ value, timestamp: Date.now(), labels });
     }
   }

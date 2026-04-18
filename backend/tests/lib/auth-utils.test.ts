@@ -16,35 +16,35 @@ describe("auth-utils", () => {
 
   describe("parseJwtExpToSeconds", () => {
     it("parses seconds", async () => {
-      const { parseJwtExpToSeconds } = await import("../../src/lib/auth-utils");
+      const { parseJwtExpToSeconds } = await import("../../src/lib/auth/auth-utils");
       
       expect(parseJwtExpToSeconds("60s")).toBe(60);
       expect(parseJwtExpToSeconds("30s")).toBe(30);
     });
 
     it("parses minutes", async () => {
-      const { parseJwtExpToSeconds } = await import("../../src/lib/auth-utils");
+      const { parseJwtExpToSeconds } = await import("../../src/lib/auth/auth-utils");
       
       expect(parseJwtExpToSeconds("30m")).toBe(1800);
       expect(parseJwtExpToSeconds("1m")).toBe(60);
     });
 
     it("parses hours", async () => {
-      const { parseJwtExpToSeconds } = await import("../../src/lib/auth-utils");
+      const { parseJwtExpToSeconds } = await import("../../src/lib/auth/auth-utils");
       
       expect(parseJwtExpToSeconds("2h")).toBe(7200);
       expect(parseJwtExpToSeconds("1h")).toBe(3600);
     });
 
     it("parses days", async () => {
-      const { parseJwtExpToSeconds } = await import("../../src/lib/auth-utils");
+      const { parseJwtExpToSeconds } = await import("../../src/lib/auth/auth-utils");
       
       expect(parseJwtExpToSeconds("7d")).toBe(604800);
       expect(parseJwtExpToSeconds("30d")).toBe(2592000);
     });
 
     it("returns default for invalid format", async () => {
-      const { parseJwtExpToSeconds } = await import("../../src/lib/auth-utils");
+      const { parseJwtExpToSeconds } = await import("../../src/lib/auth/auth-utils");
       
       expect(parseJwtExpToSeconds("invalid")).toBe(2592000); // default 30 days
     });
@@ -52,7 +52,7 @@ describe("auth-utils", () => {
 
   describe("getJwtCookieConfig", () => {
     it("returns cookie config with max age", async () => {
-      const { getJwtCookieConfig } = await import("../../src/lib/auth-utils");
+      const { getJwtCookieConfig } = await import("../../src/lib/auth/auth-utils");
       
       const config = getJwtCookieConfig();
       
@@ -64,7 +64,7 @@ describe("auth-utils", () => {
     it("excludes Secure flag in non-production", async () => {
       vi.stubEnv("NODE_ENV", "development");
       
-      const { getJwtCookieConfig } = await import("../../src/lib/auth-utils");
+      const { getJwtCookieConfig } = await import("../../src/lib/auth/auth-utils");
       
       const config = getJwtCookieConfig();
       
@@ -74,7 +74,7 @@ describe("auth-utils", () => {
 
   describe("createJwtCookie", () => {
     it("creates cookie string with token", async () => {
-      const { createJwtCookie } = await import("../../src/lib/auth-utils");
+      const { createJwtCookie } = await import("../../src/lib/auth/auth-utils");
       
       const cookie = createJwtCookie("my-token");
       

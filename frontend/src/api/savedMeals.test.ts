@@ -84,7 +84,7 @@ describe("savedMealsApi", () => {
   it("deletes a saved meal by id", async () => {
     fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, id: 77 }));
 
-    await expect(savedMealsApi.delete({ id: 77 })).resolves.toEqual({ success: true, id: 77 });
+    await expect(savedMealsApi.delete(77)).resolves.toEqual({ success: true, id: 77 });
 
     expect(fetchMock).toHaveBeenCalledWith(
       "http://localhost:3000/api/saved-meals/77",
