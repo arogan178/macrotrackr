@@ -132,16 +132,16 @@ export const authRoutes = (app: Elysia) =>
           } = resolveClerkIdentity(context as unknown as ClerkAuthContext);
 
           let email = initialEmail;
-          let firstName = initialFirstName || "";
-          let lastName = initialLastName || "";
+          let firstName = initialFirstName ?? "";
+          let lastName = initialLastName ?? "";
 
           // Defensive fallback: resolve missing Clerk profile fields from Clerk API.
           if (!email || !firstName || !lastName) {
             try {
               const clerkUser = await clerkClient?.users?.getUser?.(clerkUserId);
-              email = email || getPrimaryClerkEmail(clerkUser);
-              firstName = firstName || clerkUser?.firstName || "";
-              lastName = lastName || clerkUser?.lastName || "";
+              email = email ?? getPrimaryClerkEmail(clerkUser);
+              firstName = firstName || (clerkUser?.firstName ?? "");
+              lastName = lastName || (clerkUser?.lastName ?? "");
             } catch (error) {
               logger.warn(
                 { clerkUserId, error },

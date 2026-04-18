@@ -20,7 +20,7 @@ export function initializeDatabase(database: Database, databasePath?: string) {
   const resolvedPath = databasePath ?? runtimeConfig.DATABASE_PATH;
 
   if (runtimeConfig.NODE_ENV !== "test") {
-    console.log(`Database connected at ${resolvedPath}`);
+    console.warn(`Database connected at ${resolvedPath}`);
   }
 
   return database;

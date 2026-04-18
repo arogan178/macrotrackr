@@ -74,7 +74,7 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
           {
             operation: "stripe_webhook",
             hasRawBody: !!rawBodyText,
-            rawBodyLength: rawBodyText?.length || 0,
+            rawBodyLength: rawBodyText?.length ?? 0,
             hasSignature: !!signature,
             signature: signature ? signature.substring(0, 20) + "..." : "none",
             rawBodyPreview:
@@ -147,7 +147,6 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
 
         // Handle only supported event types
         if (
-          normalizedEvent.type &&
           normalizedEvent.type.includes("subscription")
         ) {
           await handleSubscriptionEvent(ctx.db, normalizedEvent, eventId);
@@ -156,10 +155,10 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
           logger.info(
             {
               operation: "stripe_webhook",
-              eventType: normalizedEvent?.type,
-              eventId,
-            },
-            `Received unsupported or unhandled event type: ${normalizedEvent?.type}`
+            eventType: normalizedEvent.type,
+            eventId,
+          },
+            `Received unsupported or unhandled event type: ${normalizedEvent.type}`
           );
         }
 
@@ -217,7 +216,7 @@ async function handleSubscriptionEvent(
 ): Promise<void> {
   let subscription: Stripe.Subscription | null = null;
   
-  if (normalizedEvent.format === "thin" && normalizedEvent.related_object) {
+  if (normalizedEvent.format === "thin") {
     const relatedObject = await StripeService.fetchRelatedObject(
       normalizedEvent.related_object
     );
@@ -225,10 +224,7 @@ async function handleSubscriptionEvent(
     if (isStripeSubscription(relatedObject)) {
       subscription = relatedObject;
     }
-  } else if (
-    normalizedEvent.format === "snapshot" &&
-    isStripeSubscription(normalizedEvent.data.object)
-  ) {
+  } else if (isStripeSubscription(normalizedEvent.data.object)) {
     subscription = normalizedEvent.data.object;
   }
 
@@ -243,7 +239,7 @@ async function handleSubscriptionEvent(
   const customerId =
     typeof subscription.customer === "string" ?
       subscription.customer
-    : subscription.customer?.id;
+    : subscription.customer.id;
 
   if (!customerId) {
     logger.warn(
@@ -280,7 +276,7 @@ async function handleSubscriptionEvent(
     return;
   }
 
-  if (status === "canceled" || normalizedEvent.type.includes("deleted")) {
+  if (status === "canceled" || normalizedEvent.type === "customer.subscription.deleted") {
     await SubscriptionService.cancelSubscription(user.id, subscriptionId);
     logger.info(
       {
@@ -293,7 +289,7 @@ async function handleSubscriptionEvent(
       "Canceled subscription from webhook"
     );
   } else {
-    const subscriptionItem = subscription.items?.data?.[0];
+    const subscriptionItem = subscription.items.data[0];
     if (!subscriptionItem) {
       throw new Error("Subscription has no items");
     }

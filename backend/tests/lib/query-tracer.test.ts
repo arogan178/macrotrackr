@@ -1,7 +1,7 @@
 import { describe, expect, it, beforeEach, vi } from "vitest";
 
 // Mock the logger module before importing the module under test
-vi.mock("../../src/lib/logger", () => ({
+vi.mock("../../src/lib/observability/logger", () => ({
   logger: {
     debug: vi.fn(),
     warn: vi.fn(),
@@ -15,7 +15,7 @@ import {
   getRecentTraces,
   getSlowQueryStats,
   clearTraces,
-} from "../../src/lib/query-tracer";
+} from "../../src/lib/observability/query-tracer";
 
 describe("query-tracer", () => {
   beforeEach(() => {

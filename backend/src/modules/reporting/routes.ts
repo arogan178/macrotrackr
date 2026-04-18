@@ -40,7 +40,7 @@ export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
       }
 
       // Accepts: startDate, endDate, groupBy (e.g., day, week, month)
-      const { startDate, endDate, groupBy } = query ?? {};
+      const { startDate, endDate, groupBy } = query;
       
       // Only allow 'day', 'week' or 'month' for groupBy
       const groupByValue =
