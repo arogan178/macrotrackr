@@ -45,6 +45,16 @@ const US_CUP_WEIGHTS: Record<string, number> = {
   fruits: 160,
 };
 
+const COUNT_BASED_QUANTITY_PATTERN =
+  /^([\d,.]+)\s*(egg|eggs|piece|pieces|pc|pcs|serving|servings|item|items)\b/;
+const COUNT_ONLY_WORD_PATTERN =
+  /\b(egg|eggs|piece|pieces|pc|pcs|serving|servings|item|items)\b/;
+
+const MEASUREMENT_PATTERN =
+  /([\d,.]+)\s*(fl\s*oz|g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds|ml|milliliter|milliliters|l|liter|liters|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)\b/;
+const CUP_WITH_INGREDIENT_PATTERN =
+  /([\d,.]+)\s*(cup|cups)\s+([a-z]+)/;
+
 export const UnitConverter = {
   parseQuantity(input: string): ParsedQuantity {
     if (!input || typeof input !== "string") {
@@ -60,71 +70,82 @@ export const UnitConverter = {
       return { quantity: 1, unit: "unit", original: input };
     }
 
-    const patterns = [
-      /^([\d,.]+)\s*(g|gram|grams|kg|kilogram|kilograms|oz|ounce|ounces|lb|lbs|pound|pounds|ml|milliliter|milliliters|l|liter|liters|cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)?(?:\s+(.+))?$/,
-      /^([\d,.]+)\s*(cup|cups|tbsp|tablespoon|tablespoons|tsp|teaspoon|teaspoons|pt|pint|pints)(?:\s+(.+))?$/,
-    ];
+    const countBasedMatch = trimmed.match(COUNT_BASED_QUANTITY_PATTERN);
+    if (countBasedMatch?.[1]) {
+      const count = Number.parseFloat(countBasedMatch[1].replace(",", "."));
+      if (!Number.isNaN(count) && count > 0) {
+        return { quantity: count, unit: "unit", original: input };
+      }
+    }
 
-    for (const pattern of patterns) {
-      const match = trimmed.match(pattern);
-      if (match && match[1]) {
-        const quantityString = match[1].replace(",", ".");
-        const quantity = Number.parseFloat(quantityString);
+    if (COUNT_ONLY_WORD_PATTERN.test(trimmed)) {
+      return { quantity: 1, unit: "unit", original: input };
+    }
 
-        if (Number.isNaN(quantity) || quantity <= 0) {
-          continue;
-        }
+    const cupIngredientMatch = trimmed.match(CUP_WITH_INGREDIENT_PATTERN);
+    if (cupIngredientMatch?.[1] && cupIngredientMatch[3]) {
+      const quantity = Number.parseFloat(cupIngredientMatch[1].replace(",", "."));
+      const ingredient = cupIngredientMatch[3].toLowerCase().trim();
 
-        let unit: UnitType = "g";
-        const unitMatch = match[2];
+      if (!Number.isNaN(quantity) && quantity > 0 && US_CUP_WEIGHTS[ingredient]) {
+        const weightInGrams = quantity * US_CUP_WEIGHTS[ingredient];
 
-        if (unitMatch) {
-          const unitMap: Record<string, UnitType> = {
-            g: "g",
-            gram: "g",
-            grams: "g",
-            kg: "kg",
-            kilogram: "kg",
-            kilograms: "kg",
-            oz: "oz",
-            ounce: "oz",
-            ounces: "oz",
-            lb: "lb",
-            lbs: "lb",
-            pound: "lb",
-            pounds: "lb",
-            ml: "ml",
-            milliliter: "ml",
-            milliliters: "ml",
-            l: "L",
-            liter: "L",
-            liters: "L",
-            cup: "cup",
-            cups: "cup",
-            tbsp: "tbsp",
-            tablespoon: "tbsp",
-            tablespoons: "tbsp",
-            tsp: "tsp",
-            teaspoon: "tsp",
-            teaspoons: "tsp",
-            pt: "pt",
-            pint: "pt",
-            pints: "pt",
-          };
+        return {
+          quantity: Math.round(weightInGrams * 100) / 100,
+          unit: "g",
+          original: input,
+        };
+      }
+    }
 
-          unit = unitMap[unitMatch];
-        }
+    const measurementMatch = trimmed.match(MEASUREMENT_PATTERN);
+    if (measurementMatch?.[1] && measurementMatch[2]) {
+      const quantity = Number.parseFloat(measurementMatch[1].replace(",", "."));
+      if (!Number.isNaN(quantity) && quantity > 0) {
+        const rawUnit = measurementMatch[2].replaceAll(/\s+/g, " ").trim();
+        const unitMap: Record<string, UnitType> = {
+          g: "g",
+          gram: "g",
+          grams: "g",
+          kg: "kg",
+          kilogram: "kg",
+          kilograms: "kg",
+          oz: "oz",
+          ounce: "oz",
+          ounces: "oz",
+          lb: "lb",
+          lbs: "lb",
+          pound: "lb",
+          pounds: "lb",
+          ml: "ml",
+          milliliter: "ml",
+          milliliters: "ml",
+          l: "L",
+          liter: "L",
+          liters: "L",
+          cup: "cup",
+          cups: "cup",
+          tbsp: "tbsp",
+          tablespoon: "tbsp",
+          tablespoons: "tbsp",
+          tsp: "tsp",
+          teaspoon: "tsp",
+          teaspoons: "tsp",
+          pt: "pt",
+          pint: "pt",
+          pints: "pt",
+          "fl oz": "ml",
+        };
 
-        const ingredient = match[3]?.toLowerCase().trim();
-        if (unit === "cup" && ingredient && US_CUP_WEIGHTS[ingredient]) {
-          const weightInGrams = quantity * US_CUP_WEIGHTS[ingredient];
-
+        if (rawUnit === "fl oz") {
           return {
-            quantity: Math.round(weightInGrams * 100) / 100,
-            unit: "g",
+            quantity: Math.round(quantity * 29.5735 * 100) / 100,
+            unit: "ml",
             original: input,
           };
         }
+
+        const unit = unitMap[rawUnit] ?? "g";
 
         return { quantity, unit, original: input };
       }
