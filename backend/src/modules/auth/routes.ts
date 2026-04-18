@@ -7,7 +7,10 @@ import {
   safeQuery,
   withTransaction,
 } from "../../lib/data/database";
-import { AuthenticationError, ConflictError } from "../../lib/http/errors";
+import {
+  AccountLinkRequiredError,
+  AuthenticationError,
+} from "../../lib/http/errors";
 import { logger } from "../../lib/observability/logger";
 import type { ClerkAuthContext } from "../../middleware/clerk-auth";
 import { hashPassword } from "../../lib/auth/password";
@@ -47,7 +50,35 @@ function getPrimaryClerkEmail(user: ClerkUserRecord | undefined): string | undef
 interface ClerkApiClient {
   users?: {
     getUser?: (userId: string) => Promise<ClerkUserRecord | undefined>;
+    deleteUser?: (userId: string) => Promise<void>;
   };
+}
+
+async function cleanupTransientClerkUser(
+  clerkClient: ClerkApiClient | undefined,
+  currentClerkUserId: string,
+  existingClerkUserId: string | null,
+): Promise<void> {
+  if (
+    !currentClerkUserId ||
+    currentClerkUserId === existingClerkUserId ||
+    !clerkClient?.users?.deleteUser
+  ) {
+    return;
+  }
+
+  try {
+    await clerkClient.users.deleteUser(currentClerkUserId);
+    logger.info(
+      { currentClerkUserId },
+      "[clerk-sync] Deleted transient Clerk user",
+    );
+  } catch (error) {
+    logger.error(
+      { currentClerkUserId, error },
+      "[clerk-sync] Failed to delete transient Clerk user (continuing)",
+    );
+  }
 }
 
 type AuthRouteContext<TBody = Record<string, unknown>> = RouteContext<
@@ -242,8 +273,13 @@ export const authRoutes = (app: Elysia) =>
               },
               "[clerk-sync] Refusing to auto-link account by email",
             );
-            throw new ConflictError(
-              "A user with this email already exists. Please sign in with your existing method or contact support to link accounts.",
+            await cleanupTransientClerkUser(
+              clerkClient,
+              clerkUserId,
+              existingByEmail.clerk_id,
+            );
+            throw new AccountLinkRequiredError(
+              "A user with this email already exists. Please sign in with your existing method to link accounts.",
             );
           }
 

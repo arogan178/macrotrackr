@@ -7,6 +7,7 @@ import { ApiError } from "@/api/core";
 import { userApi } from "@/api/user";
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { handleAccountCollision } from "@/features/auth/utils/handleAuthCollision";
 import {
   normalizeAuthRedirect,
   resolveAuthReturnTo,
@@ -34,7 +35,7 @@ import { logger } from "@/lib/logger";
  * 5. If new user or incomplete profile → /profile-setup
  */
 export default function SSOCallbackPage() {
-  const { handleRedirectCallback } = useClerk();
+  const { handleRedirectCallback, signOut } = useClerk();
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const navigate = useNavigate();
@@ -145,6 +146,16 @@ export default function SSOCallbackPage() {
             }
           }
         } catch (syncError) {
+          if (
+            syncError instanceof ApiError &&
+            syncError.status === 409 &&
+            syncError.code === "ACCOUNT_LINK_REQUIRED"
+          ) {
+            await handleAccountCollision({ signOut, navigate });
+
+            return;
+          }
+
           if (syncError instanceof ApiError && syncError.status === 404) {
             logger.info(
               "[SSOCallback] Sync indicates new user profile:",
@@ -204,6 +215,7 @@ export default function SSOCallbackPage() {
     redirectTo,
     user,
     userLoaded,
+    signOut,
   ]);
 
   const primaryAction =
