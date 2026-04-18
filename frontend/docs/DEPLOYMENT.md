@@ -97,7 +97,7 @@ If you need to deploy manually:
 cd backend
 bun install --frozen-lockfile
 cp .env.production .env
-pm2 restart macro-tracker-api || pm2 start ecosystem.config.js --only macro-tracker-api
+pm2 restart macro-tracker-api || pm2 start ecosystem.config.cjs --only macro-tracker-api
 ```
 
 ### Frontend
@@ -107,7 +107,7 @@ The frontend should already be built and committed to the repository:
 ```bash
 cd frontend
 # Dist folder should already exist from local build
-pm2 restart macro-frontend || pm2 start ecosystem.config.js --only macro-frontend
+pm2 restart macro-frontend || pm2 start ecosystem.config.cjs --only macro-frontend
 ```
 
 If you need to build manually on the server:
@@ -116,7 +116,7 @@ If you need to build manually on the server:
 cd frontend
 bun install --frozen-lockfile
 bun run build
-pm2 restart macro-frontend || pm2 start ecosystem.config.js --only macro-frontend
+pm2 restart macro-frontend || pm2 start ecosystem.config.cjs --only macro-frontend
 ```
 
 ## Troubleshooting
