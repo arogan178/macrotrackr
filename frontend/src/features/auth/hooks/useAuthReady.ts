@@ -1,11 +1,12 @@
 import { useCallback, useRef, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useClerk } from "@clerk/clerk-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
 import { ApiError } from "@/api/core";
 import { userApi } from "@/api/user";
+import { handleAccountCollision } from "@/features/auth/utils/handleAuthCollision";
 import { normalizeAuthRedirect, resolveProfileCompletion, shouldBypassSyncForRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { queryKeys } from "@/lib/queryKeys";
@@ -23,6 +24,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { isLoaded, isSignedIn } = useAuth();
+  const { signOut } = useClerk();
   const [error, setError] = useState<string | null>(null);
   const hasInitializedRef = useRef(false);
 
@@ -47,6 +49,16 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
         try {
           await authApi.syncUser();
         } catch (syncError: unknown) {
+          if (
+            syncError instanceof ApiError &&
+            syncError.status === 409 &&
+            syncError.code === "ACCOUNT_LINK_REQUIRED"
+          ) {
+            await handleAccountCollision({ signOut, navigate });
+
+            return;
+          }
+
           if (syncError instanceof Error && "status" in syncError) {
             const errorWithStatus = syncError as { status: number };
             if (errorWithStatus.status === 401) {
@@ -111,7 +123,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
     } catch {
       setError("Failed to complete authentication. Please try again.");
     }
-  }, [isLoaded, isSignedIn, navigate, redirectTo, queryClient]);
+  }, [isLoaded, isSignedIn, navigate, redirectTo, queryClient, signOut]);
 
   return { error, setupAuth };
 }

@@ -22,10 +22,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Bun
-      uses: oven-sh/setup-bun@v1
+      uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
 
@@ -75,9 +75,9 @@ jobs:
           cd ..
           mkdir -p logs
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
-          pm2 reload ecosystem.config.js || {
+          pm2 reload ecosystem.config.cjs || {
             echo "PM2 reload failed, attempting restart..."
-            pm2 restart ecosystem.config.js || {
+            pm2 restart ecosystem.config.cjs || {
               echo "PM2 restart also failed"
               exit 1
             }
@@ -106,10 +106,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Setup Bun
-      uses: oven-sh/setup-bun@v1
+      uses: oven-sh/setup-bun@v2
       with:
         bun-version: latest
 
@@ -208,9 +208,9 @@ jobs:
           cd /var/www/macro-tracker
 
           # Restart frontend
-          pm2 reload ecosystem.config.js || {
+          pm2 reload ecosystem.config.cjs || {
             echo "PM2 reload failed, attempting restart..."
-            pm2 restart ecosystem.config.js || {
+            pm2 restart ecosystem.config.cjs || {
               echo "PM2 restart also failed"
               exit 1
             }
@@ -273,12 +273,12 @@ jobs:
     timeout-minutes: 5
     environment: backend
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v6
     - uses: actions/setup-node@v4
       with:
         node-version: '20'
     - name: Install bun
-      uses: oven-sh/setup-bun@v1
+      uses: oven-sh/setup-bun@v2
     - name: Download backend deployment metadata
       uses: actions/download-artifact@v4
       with:
