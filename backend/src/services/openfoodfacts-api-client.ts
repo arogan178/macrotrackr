@@ -8,6 +8,7 @@ const USER_AGENT = "MacroTracker/1.0 (contact@example.com)";
 
 // Configuration constants
 const MAX_RESULTS = 10;
+const MAX_CANDIDATE_RESULTS = 50;
 const REQUEST_TIMEOUT = 10000; // 10 seconds
 const MAX_RETRIES = 2;
 const MIN_QUERY_LENGTH = 2;
@@ -58,6 +59,9 @@ export interface QuantityParseResult {
   quantity: number;
   unit: string;
 }
+
+const COUNT_BASED_QUANTITY_PATTERN =
+  /([\d.,]+)\s*(egg|eggs|piece|pieces|pc|pcs|serving|servings|item|items)\b/;
 
 // Custom error classes for better error handling
 export class OpenFoodFactsError extends Error {
@@ -177,12 +181,33 @@ export function parseQuantity(quantityString: string): QuantityParseResult {
 
         const rawUnit = match[2] ?? "";
         const normalizedUnit = unitMap[rawUnit] ?? rawUnit;
+
+        if (normalizedUnit === "fl oz") {
+          return {
+            quantity: Math.round(quantity * 29.5735 * 100) / 100,
+            unit: "ml",
+          };
+        }
+
         return {
           quantity,
           unit: normalizedUnit === "" ? "g" : normalizedUnit,
         };
       }
     }
+  }
+
+  const countBasedMatch = cleanedString.match(COUNT_BASED_QUANTITY_PATTERN);
+  if (countBasedMatch?.[1]) {
+    const quantityStr = countBasedMatch[1].replace(",", ".");
+    const quantity = parseFloat(quantityStr);
+    if (!isNaN(quantity) && quantity > 0) {
+      return { quantity, unit: "unit" };
+    }
+  }
+
+  if (/\b(egg|eggs|piece|pieces|pc|pcs|serving|servings|item|items)\b/.test(cleanedString)) {
+    return { quantity: 1, unit: "unit" };
   }
 
   // Fallback for unrecognized formats
@@ -226,30 +251,180 @@ function getFoodSearchTokens(normalizedQuery: string): string[] {
   return normalizedQuery.split(" ").filter(Boolean);
 }
 
+function isSingleTokenExactFoodNameMatch(
+  normalizedName: string,
+  normalizedQuery: string,
+): boolean {
+  const queryTokens = getFoodSearchTokens(normalizedQuery);
+  if (queryTokens.length !== 1) {
+    return false;
+  }
+
+  const queryToken = queryTokens[0] ?? "";
+  if (!queryToken) {
+    return false;
+  }
+
+  const nameWords = getNormalizedFoodWords(normalizedName);
+  if (nameWords.length !== 1) {
+    return false;
+  }
+
+  const nameWord = nameWords[0] ?? "";
+  return isFoodSearchTokenMatch(queryToken, nameWord);
+}
+
+function getNormalizedFoodWords(value: string): string[] {
+  return normalizeFoodSearchQuery(value).split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+function getFoodSearchTokenStem(token: string): string {
+  if (token.length > 3 && token.endsWith("es")) {
+    return token.slice(0, -2);
+  }
+
+  if (token.length > 3 && token.endsWith("s")) {
+    return token.slice(0, -1);
+  }
+
+  return token;
+}
+
+function getFoodWordStem(word: string): string {
+  if (word.length > 3 && word.endsWith("es")) {
+    return word.slice(0, -2);
+  }
+
+  if (word.length > 3 && word.endsWith("s")) {
+    return word.slice(0, -1);
+  }
+
+  return word;
+}
+
+function isFoodSearchTokenMatch(token: string, word: string): boolean {
+  if (!token || !word) {
+    return false;
+  }
+
+  if (word === token) {
+    return true;
+  }
+
+  const tokenStem = getFoodSearchTokenStem(token);
+  const wordStem = getFoodWordStem(word);
+  if (tokenStem === wordStem) {
+    return true;
+  }
+
+  if (token.length <= 3 && word.startsWith(token)) {
+    return true;
+  }
+
+  if (tokenStem.length <= 3 && word.startsWith(tokenStem)) {
+    return true;
+  }
+
+  return false;
+}
+
+function getNameTokenMatchCount(name: string, tokens: string[]): number {
+  if (tokens.length === 0) {
+    return 0;
+  }
+
+  const normalizedWords = getNormalizedFoodWords(name);
+  return tokens.filter((token) =>
+    normalizedWords.some((word) => isFoodSearchTokenMatch(token, word)),
+  ).length;
+}
+
+function hasStrongFoodNameMatch(
+  hit: FoodSearchHit,
+  normalizedQuery: string,
+): boolean {
+  const tokens = getFoodSearchTokens(normalizedQuery);
+  if (tokens.length === 0) {
+    return false;
+  }
+
+  const normalizedName = normalizeFoodSearchQuery(getFoodProductDisplayName(hit));
+  if (!normalizedName) {
+    return false;
+  }
+
+  if (normalizedName.includes(normalizedQuery)) {
+    return true;
+  }
+
+  const normalizedWords = getNormalizedFoodWords(normalizedName);
+  if (
+    tokens.length === 1 &&
+    normalizedWords.some((word) =>
+      isFoodSearchTokenMatch(tokens[0] ?? "", word),
+    )
+  ) {
+    return true;
+  }
+
+  const matchedTokens = getNameTokenMatchCount(normalizedName, tokens);
+  if (tokens.length === 1) {
+    return matchedTokens === 1;
+  }
+
+  return matchedTokens >= Math.max(1, tokens.length - 1);
+}
+
 function getFoodSearchScore(hit: FoodSearchHit, normalizedQuery: string): number {
   const tokens = getFoodSearchTokens(normalizedQuery);
   const name = normalizeFoodSearchQuery(getFoodProductDisplayName(hit));
+  const nameWords = getNormalizedFoodWords(name);
   const categories = normalizeFoodSearchQuery(hit.categories ?? "");
   const rawQuantity = normalizeFoodSearchQuery(hit.quantity ?? "");
+  const tokenStems = new Set(tokens.map((token) => getFoodSearchTokenStem(token)));
+  const categoryWords = getNormalizedFoodWords(categories);
+  const hasCategorySameAsQuery = categoryWords.some((word) =>
+    tokenStems.has(getFoodWordStem(word)),
+  );
 
   let score = 0;
 
   if (name === normalizedQuery) {
+    score += 180;
+  } else if (name.startsWith(`${normalizedQuery} `) || name.startsWith(normalizedQuery)) {
     score += 120;
-  } else if (name.startsWith(normalizedQuery)) {
-    score += 80;
   } else if (name.includes(normalizedQuery)) {
-    score += 45;
+    score += 80;
   }
 
-  const matchedNameTokens = tokens.filter((token) => name.includes(token)).length;
+  const matchedNameTokens = getNameTokenMatchCount(name, tokens);
   const matchedCategoryTokens = tokens.filter((token) => categories.includes(token)).length;
 
-  score += matchedNameTokens * 14;
-  score += matchedCategoryTokens * 4;
+  score += matchedNameTokens * 28;
+  score += matchedCategoryTokens;
 
   if (tokens.length > 0 && matchedNameTokens === tokens.length) {
-    score += 18;
+    score += 24;
+  }
+
+  if (tokens.length === 1) {
+    if (nameWords.length <= 3) {
+      score += 12;
+    } else if (nameWords.length <= 5) {
+      score += 6;
+    }
+
+    if (nameWords.length > 1) {
+      score -= 8;
+    }
+
+    if (hasCategorySameAsQuery) {
+      score += 12;
+    }
+  }
+
+  if (name.length > 70) {
+    score -= 8;
   }
 
   if (rawQuantity) {
@@ -273,13 +448,26 @@ function getFoodSearchScore(hit: FoodSearchHit, normalizedQuery: string): number
   return score;
 }
 
-function getFoodProductDeduplicationKey(result: FoodProductResult): string {
+function getFoodProductDeduplicationKey(
+  result: FoodProductResult,
+  normalizedQuery: string,
+): string {
+  const normalizedName = normalizeFoodSearchQuery(result.name);
+
+  if (isSingleTokenExactFoodNameMatch(normalizedName, normalizedQuery)) {
+    const normalizedWord = getNormalizedFoodWords(normalizedName)[0] ?? normalizedName;
+    const stemmedWord = getFoodWordStem(normalizedWord);
+
+    return `exact:${stemmedWord}`;
+  }
+
   return [
-    normalizeFoodSearchQuery(result.name),
-    result.rawQuantity ?? "",
+    "detailed",
+    normalizedName,
     result.protein.toFixed(1),
     result.carbs.toFixed(1),
     result.fats.toFixed(1),
+    result.energyKcal.toFixed(1),
   ].join("|");
 }
 
@@ -290,8 +478,13 @@ export function rankAndNormalizeFoodProducts(
   const normalizedQuery = normalizeFoodSearchQuery(query);
   const uniqueResults = new Map<string, FoodProductResult>();
 
-  const rankedHits = hits
-    .filter(isValidFoodProduct)
+  const validHits = hits.filter(isValidFoodProduct);
+  const stronglyMatchedHits = validHits.filter((hit) =>
+    hasStrongFoodNameMatch(hit, normalizedQuery),
+  );
+  const hitsToRank = stronglyMatchedHits.length > 0 ? stronglyMatchedHits : validHits;
+
+  const rankedHits = hitsToRank
     .map((hit) => ({
       hit,
       score: getFoodSearchScore(hit, normalizedQuery),
@@ -304,7 +497,7 @@ export function rankAndNormalizeFoodProducts(
       continue;
     }
 
-    const dedupeKey = getFoodProductDeduplicationKey(mapped);
+    const dedupeKey = getFoodProductDeduplicationKey(mapped, normalizedQuery);
     if (!uniqueResults.has(dedupeKey)) {
       uniqueResults.set(dedupeKey, mapped);
     }
@@ -359,7 +552,7 @@ export class OpenFoodFactsApiClient {
 
     const url = `${API_URL}?q=${encodeURIComponent(
       trimmedQuery
-    )}&lc=en&search_simple=1&fields=product_name,product_name_en,nutriments,categories,quantity`;
+    )}&lc=en&search_simple=1&page_size=${MAX_CANDIDATE_RESULTS}&fields=product_name,product_name_en,nutriments,categories,quantity`;
 
     logger.debug({ url, query: trimmedQuery }, "Requesting URL from search-a-licious API");
 
