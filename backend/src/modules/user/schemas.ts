@@ -1,7 +1,7 @@
 // src/modules/user/schemas.ts
 import { t } from "elysia";
 
-import { EmailSchema } from "../../lib/schemas";
+import { EmailSchema } from "../../lib/http/schemas";
 
 // Reusable optional types for updates
 const OptionalDateString = t.Optional(

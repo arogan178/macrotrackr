@@ -1,11 +1,6 @@
-// Error handling hooks
+export { useBeforeUnload } from "./useBeforeUnload";
+export { useDeferredVisibility } from "./useDeferredVisibility";
 export { useErrorHandler, useQueryErrorHandler } from "./useErrorHandler";
-export {
-  useMutationErrorHandler,
-  useOptimisticMutationHandler,
-} from "./useMutationErrorHandler";
-
-// Loading state hooks
 export {
   type FeatureType,
   useFeatureLoading,
@@ -14,15 +9,10 @@ export {
   useSpecificQueryLoading,
 } from "./useFeatureLoading";
 export { useCriticalLoading, useGlobalLoading } from "./useGlobalLoading";
-
-// Subscription hooks
-export { useSubscriptionStatus } from "./useSubscriptionStatus";
-
-// Animation hooks
+export {
+  useMutationErrorHandler,
+  useOptimisticMutationHandler,
+} from "./useMutationErrorHandler";
+export { usePageMetadata } from "./usePageMetadata";
 export { usePrefersReducedMotion } from "./usePrefersReducedMotion";
-
-// Performance monitoring hooks
-export { useRenderCount } from "./useRenderCount";
-
-// Other hooks
-export { default as useBeforeUnload } from "./useBeforeUnload";
+export { useSubscriptionStatus } from "./useSubscriptionStatus";

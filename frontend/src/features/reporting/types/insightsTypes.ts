@@ -95,6 +95,6 @@ export interface ActionCardProps {
 export interface TrendDisplayProps {
   label: string;
   trend: TrendResult;
-  data?: any[];
+  data?: Record<string, unknown>[];
   dataKey?: string;
 }

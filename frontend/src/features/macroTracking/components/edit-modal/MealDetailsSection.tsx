@@ -1,4 +1,5 @@
-import { NumberField, TextField } from "@/components/form";
+import NumberField from "@/components/form/NumberField";
+import TextField from "@/components/form/TextField";
 
 interface MealDetailsSectionProps {
   mealName: string;
@@ -6,7 +7,10 @@ interface MealDetailsSectionProps {
   carbs: number;
   fats: number;
   onMealNameChange: (value: string) => void;
-  onMacroChange: (field: "protein" | "carbs" | "fats", value: number | undefined) => void;
+  onMacroChange: (
+    field: "protein" | "carbs" | "fats",
+    value: number | undefined,
+  ) => void;
 }
 
 export default function MealDetailsSection({
@@ -25,7 +29,9 @@ export default function MealDetailsSection({
         <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
           Meal Details
         </p>
-        <p className="text-xs text-muted">Totals update from ingredients below.</p>
+        <p className="text-xs text-muted">
+          Totals update from ingredients below.
+        </p>
       </div>
 
       <TextField
@@ -65,25 +71,33 @@ export default function MealDetailsSection({
           <p className="text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
             Calories
           </p>
-          <p className="mt-2 text-2xl font-semibold text-foreground">{calories}</p>
+          <p className="mt-2 text-2xl font-semibold text-foreground">
+            {calories}
+          </p>
         </div>
         <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-protein uppercase">
             Protein
           </p>
-          <p className="mt-2 text-xl font-semibold text-foreground">{protein.toFixed(1)}g</p>
+          <p className="mt-2 text-xl font-semibold text-foreground">
+            {protein.toFixed(1)}g
+          </p>
         </div>
         <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-carbs uppercase">
             Carbs
           </p>
-          <p className="mt-2 text-xl font-semibold text-foreground">{carbs.toFixed(1)}g</p>
+          <p className="mt-2 text-xl font-semibold text-foreground">
+            {carbs.toFixed(1)}g
+          </p>
         </div>
         <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-fats uppercase">
             Fats
           </p>
-          <p className="mt-2 text-xl font-semibold text-foreground">{fats.toFixed(1)}g</p>
+          <p className="mt-2 text-xl font-semibold text-foreground">
+            {fats.toFixed(1)}g
+          </p>
         </div>
       </div>
     </section>

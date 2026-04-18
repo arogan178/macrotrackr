@@ -1,9 +1,10 @@
-import { motion, useReducedMotion } from "motion/react";
 import React, { Suspense, useEffect } from "react";
+import { motion, useReducedMotion } from "motion/react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
-import usePageMetadata from "@/hooks/usePageMetadata";
+import { usePageMetadata } from "@/hooks";
+import { APP_ICON_URL, APP_URL, PRICING_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
 
 import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
@@ -24,10 +25,6 @@ const sectionRevealVariants = {
   },
 } as const;
 
-/**
- * Enhanced Suspense fallback:
- * visually matches card surfaces with subtle shimmer.
- */
 function ThemedFallback() {
   return (
     <div className="flex w-full items-center justify-center py-16">
@@ -52,8 +49,8 @@ const LandingPage: React.FC = () => {
     title: "MacroTrackr — Macro Tracking That Fits Real Life",
     description:
       "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
-    canonical: "https://macrotrackr.com/",
-    ogImage: "https://macrotrackr.com/icon.png",
+    canonical: `${APP_URL}/`,
+    ogImage: APP_ICON_URL,
   });
   const shouldReduceMotion = useReducedMotion();
 
@@ -95,31 +92,29 @@ const LandingPage: React.FC = () => {
         viewport: { once: true, amount: 0.2 },
       } as const);
 
+  const schemaScript = `
+    {
+      "@context": "${SCHEMA_ORG_CONTEXT}",
+      "@type": "SoftwareApplication",
+      "name": "MacroTrackr",
+      "alternateName": "MacroTracker",
+      "url": "${APP_URL}",
+      "applicationCategory": "HealthApplication",
+      "operatingSystem": "Web",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD",
+        "url": "${PRICING_URL}"
+      }
+    }
+  `;
+
   return (
     <div
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            name: "MacroTrackr",
-            alternateName: "MacroTracker",
-            url: "https://macrotrackr.com",
-            applicationCategory: "HealthApplication",
-            operatingSystem: "Web",
-            offers: {
-              "@type": "Offer",
-              price: "0",
-              priceCurrency: "USD",
-              url: "https://macrotrackr.com/#pricing",
-            },
-          }),
-        }}
-      />
-
+      <script type="application/ld+json">{schemaScript}</script>
       <PageBackground />
 
       <div>

@@ -1,35 +1,33 @@
-import { useSearch } from "@tanstack/react-router";
 import { useState } from "react";
+import { useSearch } from "@tanstack/react-router";
 
-import { resetPasswordRoute } from "@/AppRouter";
-import { CardContainer, TextField } from "@/components/form";
+import { ApiError } from "@/api/core";
+import CardContainer from "@/components/form/CardContainer";
+import TextField from "@/components/form/TextField";
 import { Button, LoadingSpinner, LockIcon } from "@/components/ui";
 import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
-import { ApiError } from "@/utils/apiServices";
-
-interface ResetPasswordSearchParameters {
-  token?: string;
-}
 
 function ResetPasswordForm() {
-  const search = useSearch({ from: resetPasswordRoute.id });
+  const search = useSearch({ from: "/reset-password" });
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { showNotification } = useStore();
   const resetPasswordMutation = useResetPassword();
 
   // Extract token from search params with proper typing
-  const token = (search as ResetPasswordSearchParameters).token;
+  const token = search.token;
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!token) {
       showNotification("No reset token found.", "error");
+
       return;
     }
     if (newPassword !== confirmPassword) {
       showNotification("Passwords do not match.", "error");
+
       return;
     }
     try {
@@ -37,9 +35,9 @@ function ResetPasswordForm() {
       showNotification("Password has been reset successfully.", "success");
     } catch (error) {
       if (error instanceof ApiError) {
-        showNotification(error.message || "Reset failed", "error");
+        showNotification(error.message ?? "Reset failed", "error");
       } else if (error instanceof Error) {
-        showNotification(error.message || "Reset failed", "error");
+        showNotification(error.message ?? "Reset failed", "error");
       } else {
         showNotification("An unexpected error occurred.", "error");
       }
@@ -65,7 +63,7 @@ function ResetPasswordForm() {
           value={newPassword}
           onChange={setNewPassword}
           type="password"
-          required={true}
+          required
           placeholder="••••••••"
         />
 
@@ -74,7 +72,7 @@ function ResetPasswordForm() {
           value={confirmPassword}
           onChange={setConfirmPassword}
           type="password"
-          required={true}
+          required
           placeholder="••••••••"
         />
 

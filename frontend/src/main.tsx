@@ -1,16 +1,19 @@
+import React from "react";
+import ReactDOM from "react-dom/client";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { PostHogProvider } from "posthog-js/react";
-import React from "react";
-import ReactDOM from "react-dom/client";
 
-import AppRouter from "./AppRouter";
+import { initializeAuthTokenProvider } from "./api/core";
 import { ClerkTokenSync } from "./components/auth/ClerkTokenSync";
 import { clerkAppearance } from "./lib/clerkAppearance";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
+import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
+
+import "./style.css";
 
 const clerkPublishableKey = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
 const posthogApiKey = import.meta.env.VITE_PUBLIC_POSTHOG_KEY;
@@ -24,6 +27,9 @@ const shouldEnablePostHog =
 if (!clerkPublishableKey) {
   throw new Error("Missing VITE_CLERK_PUBLISHABLE_KEY environment variable");
 }
+
+// Explicitly initialize auth token provider state before any API call path can run.
+initializeAuthTokenProvider();
 
 function AppContent({ includePostHogSync }: { includePostHogSync: boolean }) {
   return (
@@ -51,6 +57,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
               return false;
             if (queryKey[0] === "settings" && queryKey[1] === "billing")
               return false;
+
             return true;
           },
         },
@@ -75,7 +82,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
               debug: import.meta.env.MODE === "development",
             }}
           >
-            <AppContent includePostHogSync={true} />
+            <AppContent includePostHogSync />
           </PostHogProvider>
         ) : (
           <AppContent includePostHogSync={false} />

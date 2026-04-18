@@ -1,20 +1,24 @@
 // src/modules/saved-meals/routes.ts
 import { Elysia, t } from "elysia";
-import { db } from "../../db";
-import type { AuthenticatedContext } from "../../types";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
+import { transformKeysToCamel } from "../../lib/mappers";
 import {
   safeQuery,
   safeExecute,
   safeQueryAll,
-} from "../../lib/database";
-import { NotFoundError, AuthorizationError } from "../../lib/errors";
-import { toCamelCase } from "../../lib/responses";
-import type { Database } from "bun:sqlite";
+} from "../../lib/data/database";
+import {
+  AuthenticationError,
+  AuthorizationError,
+  BadRequestError,
+  NotFoundError,
+} from "../../lib/http/errors";
 import {
   checkProStatus,
   checkFeatureLimit,
   FREE_TIER_LIMITS,
 } from "../../middleware/clerk-guards";
+import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
 
 // Saved meal row type
 interface SavedMealRow {
@@ -31,11 +35,40 @@ interface SavedMealRow {
 }
 
 // Extended context type
-interface SavedMealsRouteContext extends AuthenticatedContext {
-  body?: Record<string, unknown>;
-  params?: Record<string, string>;
-  db: Database;
+type SavedMealsRouteContext =
+  AuthenticatedRouteContextWithUser<Record<string, unknown>>;
+
+interface SavedMealResponse {
+  id: number;
+  userId: number;
+  name: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  mealType: string;
+  ingredients?: unknown[];
+  createdAt: string;
+  updatedAt: string;
 }
+
+const normalizeSavedMealRow = (row: SavedMealRow): SavedMealResponse => {
+  const camel = transformKeysToCamel(
+    row as unknown as Record<string, unknown>,
+  ) as unknown as SavedMealResponse;
+
+  if (typeof camel.ingredients === "string") {
+    try {
+      const parsed = JSON.parse(camel.ingredients) as unknown;
+      camel.ingredients = Array.isArray(parsed) ? parsed : [];
+    } catch {
+      camel.ingredients = [];
+    }
+  } else if (!Array.isArray(camel.ingredients)) {
+    camel.ingredients = [];
+  }
+
+  return camel;
+};
 
 // Schemas
 const SavedMealSchemas = {
@@ -49,7 +82,7 @@ const SavedMealSchemas = {
     mealType: t.String(),
     createdAt: t.String(),
     updatedAt: t.String(),
-  ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
   }),
 
   createSavedMealBody: t.Object({
@@ -65,7 +98,7 @@ const SavedMealSchemas = {
         t.Literal("snack"),
       ])
     ),
-    ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
   }),
 
   updateSavedMealBody: t.Object({
@@ -81,7 +114,7 @@ const SavedMealSchemas = {
         t.Literal("snack"),
       ])
     ),
-    ingredients: t.Optional(t.Any()),
+    ingredients: t.Optional(t.Array(t.Unknown())),
   }),
 
   mealIdParam: t.Object({
@@ -92,16 +125,17 @@ const SavedMealSchemas = {
 export const savedMealRoutes = (app: Elysia) =>
   app.group("/api/saved-meals", (group) =>
     group
-      .decorate("db", db)
 
       // GET / - List all saved meals for the user
       .get(
         "/",
-        async (context: any) => {
-          const { db, internalUserId } = context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db } = context;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
@@ -116,17 +150,7 @@ export const savedMealRoutes = (app: Elysia) =>
           );
 
           return {
-            meals: meals.map((m) => {
-              const camel = toCamelCase(m) as any;
-              if (camel.ingredients) {
-                try {
-                  camel.ingredients = JSON.parse(camel.ingredients);
-                } catch {
-                  camel.ingredients = [];
-                }
-              }
-              return camel;
-            }),
+            meals: meals.map((m) => normalizeSavedMealRow(m)),
             count: meals.length,
             limit: FREE_TIER_LIMITS.MAX_SAVED_MEALS,
             isPro: await checkProStatus(userId),
@@ -149,17 +173,19 @@ export const savedMealRoutes = (app: Elysia) =>
       // POST / - Create a new saved meal
       .post(
         "/",
-        async (context: any) => {
-          const { db, internalUserId, body } = context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db, body } = context;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           // Check feature limit for free users
@@ -177,7 +203,7 @@ export const savedMealRoutes = (app: Elysia) =>
 
           if (!limitCheck.allowed) {
             throw new AuthorizationError(
-              limitCheck.message || "Saved meals limit reached"
+              limitCheck.message ?? "Saved meals limit reached"
             );
           }
 
@@ -187,7 +213,7 @@ export const savedMealRoutes = (app: Elysia) =>
             carbs: number;
             fats: number;
             mealType?: string;
-            ingredients?: any[];
+            ingredients?: unknown[];
           };
 
           const ingredientsStr = ingredients ? JSON.stringify(ingredients) : '[]';
@@ -201,18 +227,10 @@ export const savedMealRoutes = (app: Elysia) =>
           );
 
           if (!result) {
-            throw new Error("Failed to create saved meal");
+            throw new BadRequestError("Failed to create saved meal");
           }
 
-          const camelResult = toCamelCase(result) as any;
-          if (camelResult.ingredients) {
-            try {
-              camelResult.ingredients = JSON.parse(camelResult.ingredients);
-            } catch {
-              camelResult.ingredients = [];
-            }
-          }
-          return camelResult;
+          return normalizeSavedMealRow(result);
         },
         {
           body: SavedMealSchemas.createSavedMealBody,
@@ -227,12 +245,13 @@ export const savedMealRoutes = (app: Elysia) =>
       // PUT /:id - Update a saved meal
       .put(
         "/:id",
-        async (context: any) => {
-          const { db, internalUserId, params, body } =
-            context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db, params, body } = context;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
@@ -243,7 +262,7 @@ export const savedMealRoutes = (app: Elysia) =>
           }
 
           if (!body) {
-            throw new Error("Request body is required");
+            throw new BadRequestError("Request body is required");
           }
 
           // Build update object
@@ -257,7 +276,7 @@ export const savedMealRoutes = (app: Elysia) =>
 
           const fieldsToUpdate = Object.keys(updates);
           if (fieldsToUpdate.length === 0) {
-            throw new Error("No valid fields provided for update.");
+            throw new BadRequestError("No valid fields provided for update.");
           }
 
           const setClause = fieldsToUpdate
@@ -283,15 +302,7 @@ export const savedMealRoutes = (app: Elysia) =>
             );
           }
 
-          const camelResult = toCamelCase(result) as any;
-          if (camelResult.ingredients) {
-            try {
-              camelResult.ingredients = JSON.parse(camelResult.ingredients);
-            } catch {
-              camelResult.ingredients = [];
-            }
-          }
-          return camelResult;
+          return normalizeSavedMealRow(result);
         },
         {
           params: SavedMealSchemas.mealIdParam,
@@ -307,12 +318,13 @@ export const savedMealRoutes = (app: Elysia) =>
       // DELETE /:id - Delete a saved meal
       .delete(
         "/:id",
-        async (context: any) => {
-          const { db, internalUserId, params } =
-            context as SavedMealsRouteContext;
+        async (rawContext: unknown) => {
+          const context = rawContext as SavedMealsRouteContext;
+          const { db, params } = context;
+          const internalUserId = context.authenticatedUser.userId;
 
           if (!internalUserId) {
-            throw new Error("User ID is required");
+            throw new AuthenticationError("Authentication required.");
           }
 
           const userId = internalUserId as number;
@@ -334,16 +346,13 @@ export const savedMealRoutes = (app: Elysia) =>
             );
           }
 
-          return {
-            success: true,
-            message: `Saved meal ${mealId} deleted.`,
-          };
+          return mutationSuccessWithId(Number(mealId));
         },
         {
           params: SavedMealSchemas.mealIdParam,
           response: t.Object({
             success: t.Boolean(),
-            message: t.String(),
+            id: t.Numeric(),
           }),
           detail: {
             summary: "Delete a saved meal",

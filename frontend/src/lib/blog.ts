@@ -57,7 +57,7 @@ export function getBlogCategories(): BlogCategory[] {
 }
 
 export function getAllTags(): string[] {
-  return [...new Set(normalizedPosts.flatMap((post) => post.tags))].sort();
+  return [...new Set(normalizedPosts.flatMap((post) => post.tags))].sort((a, b) => a.localeCompare(b));
 }
 
 export function normalizeBlogFilter(value?: string) {
@@ -123,6 +123,7 @@ export function getRelatedPosts(slug: string, limit = 3) {
 
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
+
   return date.toLocaleDateString("en-US", {
     year: "numeric",
     month: "long",

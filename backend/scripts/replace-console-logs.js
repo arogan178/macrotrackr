@@ -16,7 +16,7 @@ const filesToProcess = [
   "src/modules/user/routes.ts",
   "src/modules/macros/routes.ts",
   "src/modules/goals/routes.ts",
-  "src/lib/password.ts",
+  "src/lib/auth/password.ts",
 ];
 
 // Replacement patterns
@@ -90,7 +90,7 @@ function main() {
   if (totalStatements > 0) {
     console.log(`\nRecommended actions:`);
     console.log(
-      `   1. Add 'import { loggerHelpers } from "../../lib/logger";' to each file`
+      `   1. Add 'import { loggerHelpers } from "../../lib/observability/logger";' to each file`
     );
     console.log(
       `   2. Replace console.log with loggerHelpers.apiRequest for API operations`

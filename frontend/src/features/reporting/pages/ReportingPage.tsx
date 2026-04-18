@@ -1,9 +1,10 @@
+import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "motion/react";
-import { useEffect, useMemo, useState } from "react";
 
-import { ProFeature } from "@/components/billing";
-import { DateRangeSelector } from "@/components/chart";
+import { macrosApi } from "@/api/macros";
+import ProFeature from "@/components/billing/ProFeature";
+import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { EmptyState } from "@/components/ui";
@@ -11,22 +12,21 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
   useMacroHistoryForDateRange,
-  useMacroTarget,
+  useMacroTargetQuery,
 } from "@/hooks/queries/useMacroQueries";
+import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
-import { apiService } from "@/utils/apiServices";
 
 import {
   MacroDensityBreakdown,
   MacroSummaryStats,
   MealTimeBreakdown,
   ReportingPageSkeleton,
+  TrendsChartSection,
   UnifiedInsights,
 } from "../components";
-import TrendsChartSection from "../components/TrendsChartSection";
-import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 import { useReportingLogic } from "../hooks/useReportingLogic";
 import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
 
@@ -58,24 +58,27 @@ export default function ReportingPage() {
     queryClient.prefetchQuery({
       queryKey: queryKeys.macros.historyRange(monthStart, monthEnd),
       queryFn: async () => {
-        const response = await apiService.macros.getHistory(10_000, 0, {
+        const response = await macrosApi.getHistory({
+          limit: 10_000,
+          offset: 0,
           startDate: monthStart,
           endDate: monthEnd,
         });
+
         return (response as { entries: unknown[] }).entries;
       },
     });
 
     queryClient.prefetchQuery({
-      queryKey: queryKeys.macros.historyRange(
-        threeMonthsStart,
-        threeMonthsEnd,
-      ),
+      queryKey: queryKeys.macros.historyRange(threeMonthsStart, threeMonthsEnd),
       queryFn: async () => {
-        const response = await apiService.macros.getHistory(10_000, 0, {
+        const response = await macrosApi.getHistory({
+          limit: 10_000,
+          offset: 0,
           startDate: threeMonthsStart,
           endDate: threeMonthsEnd,
         });
+
         return (response as { entries: unknown[] }).entries;
       },
     });
@@ -89,7 +92,7 @@ export default function ReportingPage() {
 
   // Use TanStack Query hooks for data fetching
   const { data: weightGoals } = useWeightGoals();
-  const { data: macroTarget } = useMacroTarget();
+  const { data: macroTarget } = useMacroTargetQuery();
   const { data: history = [], isLoading: isHistoryLoading } =
     useMacroHistoryForDateRange(startDate, endDate);
 
@@ -100,33 +103,59 @@ export default function ReportingPage() {
   const {
     aggregatedData,
     dailySeries,
-    dataProcessed,
+    isHistoryReady,
     averages,
     handleDownloadCSV,
   } = useReportingLogic(history, dateRange, isHistoryLoading);
 
-  // Macro density breakdown chart data (percentages)
-  const macroDensityData = useMacroDensityBreakdown(history, dateRange);
+  // Macro density breakdown chart data (percentages) fetched from backend reporting API
+  const densityGroupBy =
+    dateRange === "week" ? "day" : dateRange === "month" ? "week" : "month";
+  const { data: macroDensityData = [] } = useMacroDensitySummary(
+    startDate,
+    endDate,
+    densityGroupBy,
+  );
 
   // Define chart configurations for the new component (memoized for stable identity)
   const calorieChartLines = useMemo(
     () => [
-      { dataKey: "calories", name: "Calories", color: "hsl(231, 77%, 66%)", isArea: true }, // vibrant-accent approx
+      {
+        dataKey: "calories",
+        name: "Calories",
+        color: "hsl(231, 77%, 66%)",
+        isArea: true,
+      }, // vibrant-accent approx
     ],
     [],
   );
 
   const macroChartLines = useMemo(
     () => [
-      { dataKey: "protein", name: "Protein (g)", color: "hsl(145, 63%, 49%)", isArea: true }, // green-500 approx
-      { dataKey: "carbs", name: "Carbs (g)", color: "hsl(217, 91%, 60%)", isArea: true }, // blue-500 approx
-      { dataKey: "fats", name: "Fats (g)", color: "hsl(0, 84%, 60%)", isArea: true }, // red-500 approx
+      {
+        dataKey: "protein",
+        name: "Protein (g)",
+        color: "hsl(145, 63%, 49%)",
+        isArea: true,
+      }, // green-500 approx
+      {
+        dataKey: "carbs",
+        name: "Carbs (g)",
+        color: "hsl(217, 91%, 60%)",
+        isArea: true,
+      }, // blue-500 approx
+      {
+        dataKey: "fats",
+        name: "Fats (g)",
+        color: "hsl(0, 84%, 60%)",
+        isArea: true,
+      }, // red-500 approx
     ],
     [],
   );
 
   const showNoDataMessage =
-    !isHistoryLoading && dataProcessed && aggregatedData.length === 0;
+    !isHistoryLoading && isHistoryReady && aggregatedData.length === 0;
 
   const headerTitle = "Analytics";
   const headerSubtitle = "Deep dive into your nutrition patterns and progress";
@@ -169,12 +198,14 @@ export default function ReportingPage() {
                   ) : (
                     <>
                       {(() => {
-                        const calorieTarget = weightGoals?.calorieTarget || 2000;
+                        const calorieTarget =
+                          weightGoals?.calorieTarget ?? 2000;
+
                         return (
                           <MacroSummaryStats
                             data={aggregatedData}
                             calorieTarget={calorieTarget}
-                            macroTarget={macroTarget || undefined}
+                            macroTarget={macroTarget ?? undefined}
                           />
                         );
                       })()}
@@ -183,7 +214,7 @@ export default function ReportingPage() {
                         <TrendsChartSection
                           dailySeries={dailySeries}
                           isHistoryLoading={isHistoryLoading}
-                          dataProcessed={dataProcessed}
+                          isHistoryReady={isHistoryReady}
                           calorieChartLines={calorieChartLines}
                           macroChartLines={macroChartLines}
                         />
@@ -199,14 +230,15 @@ export default function ReportingPage() {
                           layout
                         >
                           {(() => {
-                            const { startDate, endDate } =
+                            const { startDate: rangeStart, endDate: rangeEnd } =
                               getDateRangeData(dateRange);
+
                             return (
                               <div className="w-full">
                                 <MealTimeBreakdown
                                   history={history}
-                                  startDate={startDate}
-                                  endDate={endDate}
+                                  startDate={rangeStart}
+                                  endDate={rangeEnd}
                                 />
                               </div>
                             );
@@ -217,7 +249,11 @@ export default function ReportingPage() {
                           initial={{ opacity: 0, y: 12 }}
                           animate={{ opacity: 1, y: 0 }}
                           exit={{ opacity: 0, y: -12 }}
-                          transition={{ duration: 0.25, ease: "easeOut", delay: 0.05 }}
+                          transition={{
+                            duration: 0.25,
+                            ease: "easeOut",
+                            delay: 0.05,
+                          }}
                           layout
                         >
                           <div className="w-full">
@@ -225,7 +261,7 @@ export default function ReportingPage() {
                               data={macroDensityData}
                               selectedRange={mapDateRangeToNumeric(dateRange)}
                               isLoading={isHistoryLoading}
-                              dataProcessed={dataProcessed}
+                              isHistoryReady={isHistoryReady}
                             />
                           </div>
                         </motion.div>
@@ -237,7 +273,7 @@ export default function ReportingPage() {
                           averages={averages}
                           isLoading={isHistoryLoading}
                           showNoDataMessage={showNoDataMessage}
-                          macroTarget={macroTarget || undefined}
+                          macroTarget={macroTarget ?? undefined}
                           denominatorDays={mapDateRangeToNumeric(dateRange)}
                           dailySeriesForRange={dailySeries}
                         />

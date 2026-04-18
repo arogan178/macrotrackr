@@ -1,6 +1,7 @@
 // Habit progress calculation utilities
 export const calculateProgress = (current: number, target: number): number => {
   if (target <= 0) return 0;
+
   return Math.min(Math.round((current / target) * 100), 100);
 };
 
@@ -23,6 +24,7 @@ export const calculateCompletionRate = (
   const completedHabits = habits.filter((habit) =>
     isHabitComplete(habit.current, habit.target),
   );
+
   return Math.round((completedHabits.length / habits.length) * 100);
 };
 
@@ -60,6 +62,7 @@ export const getHabitProgressColor = (progress: number): string => {
   if (progress >= 100) return "text-success";
   if (progress >= 75) return "text-primary";
   if (progress >= 50) return "text-warning";
+
   return "text-foreground";
 };
 
@@ -69,5 +72,6 @@ export const getProgressBarColor = (
   if (progress >= 100) return "green";
   if (progress >= 75) return "blue";
   if (progress >= 50) return "yellow";
+
   return "gray";
 };

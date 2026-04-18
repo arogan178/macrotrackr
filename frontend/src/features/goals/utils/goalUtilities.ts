@@ -17,23 +17,23 @@ export function normalizeWeightGoals(
 
   if (isWeightGoals(goals)) {
     return {
-      startingWeight: goals.startingWeight ?? 0,
-      currentWeight: goals.currentWeight ?? userWeight ?? 0,
-      targetWeight: goals.targetWeight ?? 0,
-      weightGoal: goals.weightGoal ?? "maintain",
-      startDate: goals.startDate ?? "",
-      targetDate: goals.targetDate ?? "",
-      calorieTarget: goals.calorieTarget ?? 0,
-      calculatedWeeks: goals.calculatedWeeks ?? 0,
-      weeklyChange: goals.weeklyChange ?? 0,
-      dailyChange: goals.dailyChange ?? 0,
+      startingWeight: goals.startingWeight,
+      currentWeight: goals.currentWeight,
+      targetWeight: goals.targetWeight,
+      weightGoal: goals.weightGoal,
+      startDate: goals.startDate,
+      targetDate: goals.targetDate,
+      calorieTarget: goals.calorieTarget,
+      calculatedWeeks: goals.calculatedWeeks,
+      weeklyChange: goals.weeklyChange,
+      dailyChange: goals.dailyChange,
     };
   }
 
   if (goals.targetWeight === undefined) return undefined;
 
   const starting = goals.startingWeight;
-  const target = goals.targetWeight ?? 0;
+  const target = goals.targetWeight;
   const tentativeCurrent = userWeight ?? starting;
 
   // Prevent premature 100% progress when starting a new goal
@@ -85,7 +85,7 @@ export function calculateGoalDetails(
     weightGoal: customWeightGoal,
   } = formValues;
 
-  let weightGoal = customWeightGoal || "maintain";
+  let weightGoal = customWeightGoal ?? "maintain";
   if (!customWeightGoal && startingWeight && targetWeight) {
     if (targetWeight < startingWeight) weightGoal = "lose";
     else if (targetWeight > startingWeight) weightGoal = "gain";
@@ -131,7 +131,7 @@ export function calculateGoalDetails(
 
   return {
     targetWeight,
-    startDate: startDate || formattedToday,
+    startDate: startDate ?? formattedToday,
     targetDate,
     weightGoal,
     calorieTarget,
@@ -274,6 +274,7 @@ export function getGoalStatus(
 
   if (progressDiff > 10) return "ahead";
   if (progressDiff < -10) return "behind";
+
   return "on-track";
 }
 

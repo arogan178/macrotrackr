@@ -6,14 +6,15 @@ import { TrendIcon } from "@/components/ui";
 import type { TrendDisplayProps as TrendDisplayProps } from "../types/insightsTypes";
 
 export default function TrendDisplay({ label, trend, data, dataKey }: TrendDisplayProps) {
-  const isPositive = trend.direction === "up";
-  
-  // Choose color based on trend direction
-  let color = "#8b5cf6"; // Default/Stable
-  if (isPositive) color = "#10b981"; // Success/Up
-  if (trend.direction === "down") color = "#ef4444"; // Error/Down
+  // Chart colors - use CSS variables from design system (recharts renders in DOM so var() works)
+  const colorMap: Record<string, string> = {
+    up: "var(--color-success, #1ed760)",
+    down: "var(--color-error, #e91429)",
+    stable: "var(--text-muted, #b3b3b3)",
+  };
+  const color = colorMap[trend.direction] ?? colorMap.stable;
 
-  const gradientId = `sparkline-${dataKey || label.toLowerCase().replaceAll(/\s+/g, '-')}`;
+  const gradientId = `sparkline-${dataKey ?? label.toLowerCase().replaceAll(/\s+/g, '-')}`;
 
   return (
     <div className="flex flex-col border-b border-border/40 pb-5 last:border-0 last:pb-0">
@@ -63,7 +64,7 @@ export default function TrendDisplay({ label, trend, data, dataKey }: TrendDispl
                 stroke={color} 
                 strokeWidth={2}
                 fill={`url(#${gradientId})`} 
-                isAnimationActive={true}
+                isAnimationActive
               />
             </AreaChart>
           </ResponsiveContainer>

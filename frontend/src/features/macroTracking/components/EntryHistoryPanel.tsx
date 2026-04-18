@@ -1,6 +1,6 @@
-import { AnimatePresence, motion } from "motion/react";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
+import { AnimatePresence, motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { ProFeature } from "@/components/billing/ProFeature";
@@ -18,6 +18,14 @@ import {
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
+import { EntryHistoryContext } from "./EntryHistoryContext";
+import {
+  calculateCalories,
+  capitalizeFirstLetter,
+  formatEntryDate,
+  formatTimeFromEntry,
+} from "./EntryHistoryHelpers";
+import type { EntryHistoryController } from "./EntryHistoryShared";
 import MobileEntryCards from "./MobileEntryCards";
 
 interface EntryHistoryProps {
@@ -41,30 +49,6 @@ interface EntryHistoryProps {
   onExportCsv?: () => Promise<void> | void;
   isExportingCsv?: boolean;
 }
-
-const formatEntryDate = (dateString: string): string =>
-  new Date(dateString).toLocaleDateString("en-UK", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-
-const formatTimeFromEntry = (entry: MacroEntry): string =>
-  entry.entryTime ||
-  new Date(entry.createdAt).toLocaleTimeString([], {
-    hour: "2-digit",
-    minute: "2-digit",
-    hour12: false,
-  });
-
-const calculateCalories = (
-  protein: number,
-  carbs: number,
-  fats: number,
-): number => Math.round(protein * 4 + carbs * 4 + fats * 9);
-
-const capitalizeFirstLetter = (string: string): string =>
-  string ? string.charAt(0).toUpperCase() + string.slice(1) : "";
 
 const EntryHistoryComponent = function EntryHistory({
   history,
@@ -111,6 +95,7 @@ const EntryHistoryComponent = function EntryHistory({
       } else {
         newSet.add(id);
       }
+
       return newSet;
     });
   }, []);
@@ -150,14 +135,10 @@ const EntryHistoryComponent = function EntryHistory({
   );
 
   const { displayedEntries, totalEntries, hasMoreDates } = useMemo(() => {
-    const grouped: Record<string, MacroEntry[]> = {};
+    const grouped: Record<string, MacroEntry[]> = Object.create(null);
     for (const entry of history) {
-      if (!entry) {
-        continue;
-      }
-      const dateKey = formatEntryDate(entry.entryDate || entry.createdAt);
-      if (!grouped[dateKey]) grouped[dateKey] = [];
-      grouped[dateKey].push(entry);
+      const dateKey = formatEntryDate(entry.entryDate);
+      (grouped[dateKey] ??= []).push(entry);
     }
 
     const allEntries = Object.entries(grouped)
@@ -173,6 +154,7 @@ const EntryHistoryComponent = function EntryHistory({
             entry.fats,
           );
         }
+
         return {
           date,
           entries,
@@ -190,8 +172,8 @@ const EntryHistoryComponent = function EntryHistory({
       }))
       .sort(
         (a, b) =>
-          new Date(b.entries[0].entryDate || b.entries[0].createdAt).getTime() -
-          new Date(a.entries[0].entryDate || a.entries[0].createdAt).getTime(),
+          new Date(b.entries[0].entryDate).getTime() -
+          new Date(a.entries[0].entryDate).getTime(),
       );
 
     const displayed = allEntries.slice(0, displayedDateCount);
@@ -219,6 +201,7 @@ const EntryHistoryComponent = function EntryHistory({
         const newSet = new Set(previous);
         for (const date of newDatesToAdd) newSet.add(date);
         for (const date of datesToRemove) newSet.delete(date);
+
         return newSet;
       }
 
@@ -230,6 +213,7 @@ const EntryHistoryComponent = function EntryHistory({
     setCollapsedDates((previous) => {
       const newSet = new Set(previous);
       newSet.has(date) ? newSet.delete(date) : newSet.add(date);
+
       return newSet;
     });
   }, []);
@@ -259,10 +243,61 @@ const EntryHistoryComponent = function EntryHistory({
     [],
   );
 
+  const isDateCollapsed = useCallback(
+    (date: string) => collapsedDates.has(date),
+    [collapsedDates],
+  );
+
+  const isMealSaved = useCallback(
+    (entryId: number) => savedMealIds?.has(entryId) ?? false,
+    [savedMealIds],
+  );
+
+  const isEntrySelected = useCallback(
+    (entryId: number) => selectedEntryIds.has(entryId),
+    [selectedEntryIds],
+  );
+
+  const controller = useMemo<EntryHistoryController>(
+    () => ({
+      formatDate,
+      formatTimeFromEntry,
+      capitalizeFirstLetter,
+      calculateCalories,
+      isDateCollapsed,
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+      isMealSaved,
+      isDeleting,
+      isSelectionMode,
+      isEntrySelected,
+      onToggleEntrySelection: toggleEntrySelection,
+    }),
+    [
+      formatDate,
+      isDateCollapsed,
+      toggleDateCollapse,
+      handleDeleteDate,
+      onEdit,
+      deleteEntry,
+      onSaveMeal,
+      onUnsaveMeal,
+      isMealSaved,
+      isDeleting,
+      isSelectionMode,
+      isEntrySelected,
+      toggleEntrySelection,
+    ],
+  );
+
   const confirmDeleteDate = useCallback(() => {
     if (!dateToDelete) return;
     const group = totalEntries.find((g) => g.date === dateToDelete);
-    if (group && group.entries) {
+    if (group?.entries) {
       for (const entry of group.entries) deleteEntry(entry.id);
     }
     setIsDeleteModalOpen(false);
@@ -343,8 +378,7 @@ const EntryHistoryComponent = function EntryHistory({
           {history.length > 0 && (
             <ProFeature>
               <Button
-                icon={<ExportIcon />}
-                iconPosition="left"
+                leftIcon={<ExportIcon />}
                 onClick={onExportCsv}
                 text={isExportingCsv ? "Exporting..." : "Export CSV"}
                 buttonSize="sm"
@@ -369,49 +403,15 @@ const EntryHistoryComponent = function EntryHistory({
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
-          <div className="hidden lg:block">
-            <DesktopEntryTable
-              groupedEntries={displayedEntries}
-              collapsedDates={collapsedDates}
-              formatDate={formatDate}
-              formatTimeFromEntry={formatTimeFromEntry}
-              capitalizeFirstLetter={capitalizeFirstLetter}
-              calculateCalories={calculateCalories}
-              toggleDateCollapse={toggleDateCollapse}
-              handleDeleteDate={handleDeleteDate}
-              onEdit={onEdit}
-              deleteEntry={deleteEntry}
-              isDeleting={isDeleting}
-              onSaveMeal={onSaveMeal}
-              onUnsaveMeal={onUnsaveMeal}
-              savedMealIds={savedMealIds}
-              isSelectionMode={isSelectionMode}
-              selectedEntryIds={selectedEntryIds}
-              onToggleEntrySelection={toggleEntrySelection}
-            />
-          </div>
+          <EntryHistoryContext.Provider value={controller}>
+            <div className="hidden lg:block">
+              <DesktopEntryTable groupedEntries={displayedEntries} />
+            </div>
 
-          <div className="lg:hidden">
-            <MobileEntryCards
-              groupedEntries={displayedEntries}
-              collapsedDates={collapsedDates}
-              formatDate={formatDate}
-              formatTimeFromEntry={formatTimeFromEntry}
-              capitalizeFirstLetter={capitalizeFirstLetter}
-              calculateCalories={calculateCalories}
-              toggleDateCollapse={toggleDateCollapse}
-              handleDeleteDate={handleDeleteDate}
-              onEdit={onEdit}
-              deleteEntry={deleteEntry}
-              isDeleting={isDeleting}
-              onSaveMeal={onSaveMeal}
-              onUnsaveMeal={onUnsaveMeal}
-              savedMealIds={savedMealIds}
-              isSelectionMode={isSelectionMode}
-              selectedEntryIds={selectedEntryIds}
-              onToggleEntrySelection={toggleEntrySelection}
-            />
-          </div>
+            <div className="lg:hidden">
+              <MobileEntryCards groupedEntries={displayedEntries} />
+            </div>
+          </EntryHistoryContext.Provider>
 
           {(hasMoreDates || hasMore || displayedDateCount > 5) && (
             <motion.div
@@ -541,7 +541,7 @@ const EntryHistoryComponent = function EntryHistory({
         confirmLabel="Delete All"
         cancelLabel="Cancel"
         onConfirm={confirmDeleteDate}
-        isDanger={true}
+        isDanger
       />
 
       <Modal

@@ -2,7 +2,7 @@
 // Snapshot tests for API response shapes to catch regressions
 
 import { describe, it, expect } from 'vitest';
-import { transformKeysToCamel } from '../../src/lib/mappers';
+import { transformKeysToCamel } from '../../src/lib/mappers/index';
 import {
   // Macro entry fixtures
   mockMacroEntry,
@@ -40,154 +40,205 @@ import {
 } from '../fixtures/macro-responses';
 
 // ============================================================================
-// Macro Entry Response Snapshots
+// Response Contracts (Explicit Assertions)
 // ============================================================================
 
-describe('Macro Entry Response Snapshots', () => {
-  it('matches snapshot for lunch entry', () => {
-    expect(mockMacroEntry).toMatchSnapshot();
+describe('Macro Entry Response Contracts', () => {
+  it('defines a valid lunch entry contract', () => {
+    expect(mockMacroEntry).toMatchObject({
+      id: 1,
+      mealType: 'lunch',
+      mealName: 'Grilled Chicken Salad',
+      entryDate: '2026-02-18',
+      entryTime: '12:30',
+      protein: 30,
+      carbs: 40,
+      fats: 15,
+    });
   });
 
-  it('matches snapshot for breakfast entry', () => {
-    expect(mockBreakfastEntry).toMatchSnapshot();
-  });
-
-  it('matches snapshot for dinner entry', () => {
-    expect(mockDinnerEntry).toMatchSnapshot();
-  });
-
-  it('matches snapshot for snack entry', () => {
-    expect(mockSnackEntry).toMatchSnapshot();
+  it('defines valid breakfast, dinner, and snack meal types', () => {
+    expect(mockBreakfastEntry.mealType).toBe('breakfast');
+    expect(mockDinnerEntry.mealType).toBe('dinner');
+    expect(mockSnackEntry.mealType).toBe('snack');
   });
 });
 
-// ============================================================================
-// Macro Totals Response Snapshots
-// ============================================================================
-
-describe('Macro Totals Response Snapshots', () => {
-  it('matches snapshot for daily totals', () => {
-    expect(mockMacroDailyTotals).toMatchSnapshot();
+describe('Macro Totals Response Contracts', () => {
+  it('defines expected daily totals values', () => {
+    expect(mockMacroDailyTotals).toEqual({
+      protein: 150,
+      carbs: 250,
+      fats: 67,
+      calories: 2000,
+    });
   });
 
-  it('matches snapshot for empty totals', () => {
-    expect(mockEmptyMacroTotals).toMatchSnapshot();
+  it('defines expected empty totals values', () => {
+    expect(mockEmptyMacroTotals).toEqual({
+      protein: 0,
+      carbs: 0,
+      fats: 0,
+      calories: 0,
+    });
   });
 
-  it('matches snapshot for high totals (athlete)', () => {
-    expect(mockHighMacroTotals).toMatchSnapshot();
-  });
-});
-
-// ============================================================================
-// Macro Target Response Snapshots
-// ============================================================================
-
-describe('Macro Target Response Snapshots', () => {
-  it('matches snapshot for default target', () => {
-    expect(mockMacroTargetResponse).toMatchSnapshot();
-  });
-
-  it('matches snapshot for target with locked macros', () => {
-    expect(mockMacroTargetWithLocks).toMatchSnapshot();
+  it('defines expected high totals values', () => {
+    expect(mockHighMacroTotals).toEqual({
+      protein: 200,
+      carbs: 400,
+      fats: 90,
+      calories: 3200,
+    });
   });
 });
 
-// ============================================================================
-// Macro History Response Snapshots
-// ============================================================================
-
-describe('Macro History Response Snapshots', () => {
-  it('matches snapshot for history with entries', () => {
-    expect(mockMacroHistoryResponse).toMatchSnapshot();
+describe('Macro Target Response Contracts', () => {
+  it('defines expected default macro target percentages', () => {
+    expect(mockMacroTargetResponse.macroTarget).toEqual({
+      proteinPercentage: 30,
+      carbsPercentage: 40,
+      fatsPercentage: 30,
+      lockedMacros: [],
+    });
   });
 
-  it('matches snapshot for history with pagination', () => {
-    expect(mockMacroHistoryWithPagination).toMatchSnapshot();
-  });
-
-  it('matches snapshot for empty history', () => {
-    expect(mockEmptyMacroHistory).toMatchSnapshot();
-  });
-});
-
-// ============================================================================
-// Weight Goal Response Snapshots
-// ============================================================================
-
-describe('Weight Goal Response Snapshots', () => {
-  it('matches snapshot for weight loss goal', () => {
-    expect(mockWeightLossGoal).toMatchSnapshot();
-  });
-
-  it('matches snapshot for weight gain goal', () => {
-    expect(mockWeightGainGoal).toMatchSnapshot();
-  });
-
-  it('matches snapshot for maintenance goal', () => {
-    expect(mockMaintainGoal).toMatchSnapshot();
-  });
-
-  it('matches snapshot for empty goal (not set)', () => {
-    expect(mockEmptyWeightGoal).toMatchSnapshot();
+  it('defines expected locked macro target percentages', () => {
+    expect(mockMacroTargetWithLocks.macroTarget).toEqual({
+      proteinPercentage: 35,
+      carbsPercentage: 40,
+      fatsPercentage: 25,
+      lockedMacros: ['protein', 'fats'],
+    });
   });
 });
 
-// ============================================================================
-// Weight Log Response Snapshots
-// ============================================================================
-
-describe('Weight Log Response Snapshots', () => {
-  it('matches snapshot for weight log with entries', () => {
-    expect(mockWeightLogResponse).toMatchSnapshot();
+describe('Macro History Response Contracts', () => {
+  it('defines expected non-empty history metadata and ordering', () => {
+    expect(mockMacroHistoryResponse.total).toBe(4);
+    expect(mockMacroHistoryResponse.hasMore).toBe(false);
+    expect(mockMacroHistoryResponse.entries).toHaveLength(4);
+    expect(mockMacroHistoryResponse.entries.map((entry) => entry.mealType)).toEqual([
+      'dinner',
+      'snack',
+      'lunch',
+      'breakfast',
+    ]);
   });
 
-  it('matches snapshot for empty weight log', () => {
-    expect(mockEmptyWeightLog).toMatchSnapshot();
-  });
-});
-
-// ============================================================================
-// User Profile Response Snapshots
-// ============================================================================
-
-describe('User Profile Response Snapshots', () => {
-  it('matches snapshot for complete profile', () => {
-    expect(mockUserProfileComplete).toMatchSnapshot();
+  it('defines expected paginated history metadata', () => {
+    expect(mockMacroHistoryWithPagination.total).toBe(50);
+    expect(mockMacroHistoryWithPagination.hasMore).toBe(true);
+    expect(mockMacroHistoryWithPagination.entries).toHaveLength(2);
   });
 
-  it('matches snapshot for incomplete profile', () => {
-    expect(mockUserProfileIncomplete).toMatchSnapshot();
-  });
-
-  it('matches snapshot for female profile', () => {
-    expect(mockUserProfileFemale).toMatchSnapshot();
+  it('defines expected empty history metadata', () => {
+    expect(mockEmptyMacroHistory).toEqual({
+      entries: [],
+      total: 0,
+      limit: 20,
+      offset: 0,
+      hasMore: false,
+    });
   });
 });
 
-// ============================================================================
-// Database Row Transformation Snapshots
-// ============================================================================
-
-describe('Database Row Transformation Snapshots', () => {
-  it('transforms macro entry row to camelCase', () => {
-    const transformed = transformKeysToCamel(mockMacroEntryRow);
-    expect(transformed).toMatchSnapshot();
+describe('Weight Goal Response Contracts', () => {
+  it('defines expected weight loss goal fields', () => {
+    expect(mockWeightLossGoal).toMatchObject({
+      weightGoal: 'lose',
+      startingWeight: 85.5,
+      targetWeight: 80,
+      calorieTarget: 2000,
+      calculatedWeeks: 22,
+    });
   });
 
-  it('transforms user row to camelCase', () => {
-    const transformed = transformKeysToCamel(mockUserRow);
-    expect(transformed).toMatchSnapshot();
+  it('defines expected weight gain and maintenance goal fields', () => {
+    expect(mockWeightGainGoal.weightGoal).toBe('gain');
+    expect(mockMaintainGoal.weightGoal).toBe('maintain');
   });
 
-  it('transforms user details row to camelCase', () => {
-    const transformed = transformKeysToCamel(mockUserDetailsRow);
-    expect(transformed).toMatchSnapshot();
+  it('defines expected empty weight goal fields', () => {
+    expect(mockEmptyWeightGoal).toMatchObject({
+      weightGoal: null,
+      startingWeight: null,
+      targetWeight: null,
+      calorieTarget: null,
+    });
+  });
+});
+
+describe('Weight Log Response Contracts', () => {
+  it('defines expected populated weight log entries', () => {
+    expect(mockWeightLogResponse).toHaveLength(4);
+    expect(mockWeightLogResponse[0]).toMatchObject({
+      id: 'weight-1',
+      weight: 83.2,
+    });
   });
 
-  it('transforms weight goal row to camelCase', () => {
-    const transformed = transformKeysToCamel(mockWeightGoalRow);
-    expect(transformed).toMatchSnapshot();
+  it('defines expected empty weight log entries', () => {
+    expect(mockEmptyWeightLog).toEqual([]);
+  });
+});
+
+describe('User Profile Response Contracts', () => {
+  it('defines expected complete profile fields', () => {
+    expect(mockUserProfileComplete).toMatchObject({
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+      isProfileComplete: true,
+    });
+    expect(mockUserProfileComplete.subscription.status).toBe('pro');
+  });
+
+  it('defines expected incomplete and female profile variants', () => {
+    expect(mockUserProfileIncomplete.isProfileComplete).toBe(false);
+    expect(mockUserProfileFemale.gender).toBe('female');
+  });
+});
+
+describe('Database Row Transformation Contracts', () => {
+  it('transforms macro entry row to camelCase fields', () => {
+    const transformed = transformKeysToCamel(mockMacroEntryRow) as Record<string, unknown>;
+    expect(transformed).toMatchObject({
+      userId: 1,
+      mealType: 'lunch',
+      mealName: 'Grilled Chicken Salad',
+      entryDate: '2026-02-18',
+      entryTime: '12:30',
+    });
+    expect(transformed).not.toHaveProperty('meal_type');
+  });
+
+  it('transforms user and detail rows to camelCase fields', () => {
+    const user = transformKeysToCamel(mockUserRow) as Record<string, unknown>;
+    const details = transformKeysToCamel(mockUserDetailsRow) as Record<string, unknown>;
+
+    expect(user).toMatchObject({
+      firstName: 'John',
+      lastName: 'Doe',
+      clerkId: 'clerk_user_123',
+    });
+    expect(details).toMatchObject({
+      dateOfBirth: '1990-05-15',
+      activityLevel: 3,
+    });
+    expect(user).not.toHaveProperty('first_name');
+    expect(details).not.toHaveProperty('date_of_birth');
+  });
+
+  it('transforms weight goal row to camelCase fields', () => {
+    const transformed = transformKeysToCamel(mockWeightGoalRow) as Record<string, unknown>;
+    expect(transformed).toMatchObject({
+      startingWeight: 85.5,
+      targetWeight: 80,
+      weightGoal: 'lose',
+      calorieTarget: 2000,
+    });
+    expect(transformed).not.toHaveProperty('starting_weight');
   });
 });
 

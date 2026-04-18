@@ -1,27 +1,28 @@
-import { useLocation } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { Link } from "@tanstack/react-router";
+import { MoveLeft } from "lucide-react";
 
-const NotFoundPage = () => {
-  const location = useLocation();
+import Button from "@/components/ui/Button";
 
-  useEffect(() => {
-    console.error(
-      "404 Error: User attempted to access non-existent route:",
-      location.pathname,
-    );
-  }, [location.pathname]);
-
+export function NotFoundPage() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-semibold">404</h1>
-        <p className="mb-4 text-xl text-foreground">Oops! Page not found</p>
-        <a href="/" className="text-primary underline hover:text-primary">
-          Return to Home
-        </a>
-      </div>
+    <div className="flex min-h-[70vh] flex-col items-center justify-center text-center px-4">
+      <h1 className="text-6xl font-bold tracking-tighter text-foreground mb-4">
+        404
+      </h1>
+      <h2 className="text-2xl font-medium text-foreground mb-6">
+        Page not found
+      </h2>
+      <p className="text-muted-foreground mb-8 max-w-md">
+        Sorry, we couldn't find the page you're looking for. The page might have been removed, had its name changed, or is temporarily unavailable.
+      </p>
+      <Link to="/">
+        <Button size="lg" className="flex items-center gap-2">
+          <MoveLeft className="h-4 w-4" />
+          Back to Home
+        </Button>
+      </Link>
     </div>
   );
-};
+}
 
 export default NotFoundPage;
