@@ -46,6 +46,7 @@ export const calculateDailyTotals = (entries: MacroEntry[]): MacroData => {
     totals.carbs += entry.carbs || 0;
     totals.fats += entry.fats || 0;
   }
+
   return totals;
 };
 
@@ -84,6 +85,7 @@ export const calculateAverageMacros = (
     totals.fats += day.fats;
   }
   const days = dailyEntries.length;
+
   return {
     calories: Math.round(totals.calories / days),
     protein: Math.round(totals.protein / days),
@@ -105,7 +107,7 @@ export const calculateTrendData = (
 
 export const calculateMovingAverage = (
   data: TrendDataPoint[],
-  windowSize: number = 3,
+  windowSize = 3,
 ): TrendDataPoint[] => {
   if (data.length < windowSize) return data;
 

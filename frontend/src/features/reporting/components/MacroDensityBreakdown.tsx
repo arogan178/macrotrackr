@@ -10,21 +10,19 @@ import {
   YAxis,
 } from "recharts";
 
-import { AnimatedNumber } from "@/components/animation";
-import { ChartCard } from "@/components/chart";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import ChartCard from "@/components/chart/ChartCard";
 import { StackedBarPercentageTooltip } from "@/components/chart/ChartTooltip";
 import { MACRO_COLORS } from "@/utils/chartColors";
-
-import { useMacroDensityBreakdown } from "../hooks/useMacroDensityBreakdown";
 
 interface MacroDensityBreakdownProps {
   startDate?: string;
   endDate?: string;
   groupBy?: "week" | "month";
-  data?: any[];
+  data?: Record<string, unknown>[];
   selectedRange?: number;
   isLoading?: boolean;
-  dataProcessed?: boolean;
+  isHistoryReady?: boolean;
 }
 
 // --- Subcomponents ---
@@ -53,6 +51,7 @@ const PercentageLabel = (properties: PercentageLabelProps) => {
         : 0;
   // Only show label if value is significant enough to fit
   if (value < 0.05 || height < 20) return;
+
   return (
     <foreignObject
       x={x}
@@ -82,16 +81,14 @@ const MacroDensityBreakdown = ({
   data: propertyData,
   selectedRange: _selectedRange,
   isLoading: propertyIsLoading,
-  dataProcessed,
+  isHistoryReady,
 }: MacroDensityBreakdownProps) => {
-  // Always call hook, then prefer provided data if present
-  const hookData = useMacroDensityBreakdown(undefined, "week");
-  const data = propertyData ?? hookData;
+  const data = propertyData ?? [];
   const loading =
     typeof propertyIsLoading === "boolean" ? propertyIsLoading : false;
   // Show a message if there is no data after loading
   const showNoData =
-    !loading && Array.isArray(data) && data.length === 0 && dataProcessed;
+    !loading && Array.isArray(data) && data.length === 0 && isHistoryReady;
 
   return (
     <ChartCard title="Macro Distribution" className="w-full">
@@ -122,7 +119,7 @@ const MacroDensityBreakdown = ({
             />
             <XAxis
               dataKey="period"
-              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              tick={{ fill: "var(--text-muted)", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
               dy={10}
@@ -131,25 +128,23 @@ const MacroDensityBreakdown = ({
               type="number"
               tickFormatter={(value) => `${Math.round(value * 100)}%`}
               domain={[0, 1]}
-              tick={{ fill: "#9ca3af", fontSize: 10 }}
+              tick={{ fill: "var(--text-muted)", fontSize: 10 }}
               axisLine={false}
               tickLine={false}
             />
             <Tooltip
               // Use standardized stacked bar tooltip with color mapping and macro dots
-              content={
-                ((properties: any) => (
-                  <StackedBarPercentageTooltip
-                    {...properties}
-                    colors={{
-                      protein: MACRO_COLORS.protein.base,
-                      carbs: MACRO_COLORS.carbs.base,
-                      fats: MACRO_COLORS.fats.base,
-                    }}
-                    labelKey="period"
-                  />
-                )) as unknown as any
-              }
+              content={(properties: Record<string, unknown>) => (
+                <StackedBarPercentageTooltip
+                  {...properties}
+                  colors={{
+                    protein: MACRO_COLORS.protein.base,
+                    carbs: MACRO_COLORS.carbs.base,
+                    fats: MACRO_COLORS.fats.base,
+                  }}
+                  labelKey="period"
+                />
+              )}
               cursor={{ fill: "rgba(110,118,145,0.1)" }}
               wrapperStyle={{ outline: "none" }}
             />

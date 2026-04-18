@@ -1,6 +1,5 @@
-import { motion } from "motion/react";
-import PropTypes from "prop-types";
 import React, { memo, useEffect, useState } from "react";
+import { motion } from "motion/react";
 
 interface UserCounterProps {
   className?: string;
@@ -84,7 +83,7 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
 
         {/* Live indicator */}
         <div className="flex items-center space-x-1">
-          <div className="h-2 w-2 animate-pulse rounded-full bg-success"></div>
+          <div className="h-2 w-2 animate-pulse rounded-full bg-success" />
           <span className="text-xs font-medium text-success">Live</span>
         </div>
       </div>
@@ -92,8 +91,5 @@ const UserCounter: React.FC<UserCounterProps> = memo(function UserCounter({
   );
 });
 UserCounter.displayName = "UserCounter";
-UserCounter.propTypes = {
-  className: PropTypes.string,
-};
 
 export default UserCounter;

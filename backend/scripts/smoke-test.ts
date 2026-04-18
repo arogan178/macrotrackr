@@ -3,7 +3,10 @@
  * Verifies health endpoints and frontend availability
  */
 
-function normalizeUrl(
+import { resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+
+export function normalizeUrl(
   value: string | undefined,
   fallback: string,
   variableName: string,
@@ -18,31 +21,45 @@ function normalizeUrl(
   return resolved.replace(/\/+$/, '');
 }
 
-const BASE_URL = normalizeUrl(
-  process.env.SMOKE_TEST_URL,
-  'http://localhost:3000',
-  'SMOKE_TEST_URL',
-);
-const FRONTEND_URL = normalizeUrl(
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',
-  'FRONTEND_URL',
-);
-
-function getOrigin(url: string): string {
+export function getOrigin(url: string): string {
   return new URL(url).origin;
 }
 
-const sharedPublicOrigin = getOrigin(BASE_URL) === getOrigin(FRONTEND_URL);
+export interface SmokeTestConfig {
+  baseUrl: string;
+  frontendUrl: string;
+  sharedPublicOrigin: boolean;
+}
 
-interface SmokeTestResult {
+export function resolveSmokeTestConfig(
+  env: NodeJS.ProcessEnv = process.env,
+): SmokeTestConfig {
+  const baseUrl = normalizeUrl(
+    env.SMOKE_TEST_URL,
+    "http://localhost:3000",
+    "SMOKE_TEST_URL",
+  );
+  const frontendUrl = normalizeUrl(
+    env.FRONTEND_URL,
+    "http://localhost:5173",
+    "FRONTEND_URL",
+  );
+
+  return {
+    baseUrl,
+    frontendUrl,
+    sharedPublicOrigin: getOrigin(baseUrl) === getOrigin(frontendUrl),
+  };
+}
+
+export interface SmokeTestResult {
   name: string;
   passed: boolean;
   duration: number;
   error?: string;
 }
 
-async function smokeTest(
+export async function smokeTest(
   name: string,
   test: () => Promise<void>
 ): Promise<SmokeTestResult> {
@@ -60,7 +77,7 @@ async function smokeTest(
   }
 }
 
-async function fetchWithTimeout(url: string, timeout = 5000) {
+export async function fetchWithTimeout(url: string, timeout = 5000) {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), timeout);
   try {
@@ -73,10 +90,12 @@ async function fetchWithTimeout(url: string, timeout = 5000) {
   }
 }
 
-async function runSmokeTests(): Promise<void> {
+export async function runSmokeTests(): Promise<void> {
+  const { baseUrl, frontendUrl, sharedPublicOrigin } = resolveSmokeTestConfig();
+
   console.log('Running smoke tests...\n');
-  console.log(`Backend URL: ${BASE_URL}`);
-  console.log(`Frontend URL: ${FRONTEND_URL}\n`);
+  console.log(`Backend URL: ${baseUrl}`);
+  console.log(`Frontend URL: ${frontendUrl}\n`);
 
   if (sharedPublicOrigin) {
     console.log(
@@ -89,14 +108,14 @@ async function runSmokeTests(): Promise<void> {
   if (!sharedPublicOrigin) {
     tests.push(
       await smokeTest('Backend root endpoint', async () => {
-        const response = await fetchWithTimeout(`${BASE_URL}/`);
+        const response = await fetchWithTimeout(`${baseUrl}/`);
         if (!response.ok) throw new Error(`Status ${response.status}`);
       })
     );
 
     tests.push(
       await smokeTest('Backend /health endpoint', async () => {
-        const response = await fetchWithTimeout(`${BASE_URL}/health`);
+        const response = await fetchWithTimeout(`${baseUrl}/health`);
         if (!response.ok) throw new Error(`Status ${response.status}`);
         const data = await response.json();
         if (data.status !== 'healthy') throw new Error(`Invalid health status: ${String(data.status)}`);
@@ -105,7 +124,7 @@ async function runSmokeTests(): Promise<void> {
 
     tests.push(
       await smokeTest('Backend /health/ready endpoint', async () => {
-        const response = await fetchWithTimeout(`${BASE_URL}/health/ready`);
+        const response = await fetchWithTimeout(`${baseUrl}/health/ready`);
         if (!response.ok) throw new Error(`Status ${response.status}`);
       })
     );
@@ -114,7 +133,7 @@ async function runSmokeTests(): Promise<void> {
   // Public site availability
   tests.push(
     await smokeTest('Frontend availability', async () => {
-      const response = await fetchWithTimeout(FRONTEND_URL);
+      const response = await fetchWithTimeout(frontendUrl);
       if (!response.ok) throw new Error(`Status ${response.status}`);
     })
   );
@@ -139,4 +158,16 @@ async function runSmokeTests(): Promise<void> {
   }
 }
 
-runSmokeTests();
+function isDirectExecution(): boolean {
+  const entryPoint = process.argv[1];
+  if (!entryPoint) return false;
+
+  return resolve(entryPoint) === fileURLToPath(import.meta.url);
+}
+
+if (isDirectExecution()) {
+  runSmokeTests().catch((error) => {
+    console.error("Smoke test script failed:", error);
+    process.exit(1);
+  });
+}

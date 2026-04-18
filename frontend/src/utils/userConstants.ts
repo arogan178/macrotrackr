@@ -3,17 +3,10 @@
  * These are used across auth, settings, and types
  */
 
+import type { ActivityLevel } from "@/types/activity";
 import { calculateBMR, calculateTDEE } from "@/utils/nutritionCalculations";
 
-// Activity level type - used across the app
-export type ActivityLevel = "sedentary" | "low" | "medium" | "high" | "athlete";
-
-// Type for Gender - derived from GENDER_OPTIONS
-export type Gender = "male" | "female" | "";
-
-// Minimal interface for createNutritionProfile to avoid circular imports
-// The full UserSettings type is in @/types/user
-interface UserSettingsForProfile {
+export interface NutritionProfileSource {
   id: number;
   weight: number | undefined;
   height: number | undefined;
@@ -74,21 +67,28 @@ export const ACTIVITY_LEVELS: Record<
 
 // Helper functions for activity level lookups
 export function getActivityLevelLabel(level: number): string {
-  return ACTIVITY_LEVELS[level]?.label || "Unknown";
+  const activity = ACTIVITY_LEVELS[level];
+
+  return activity ? activity.label : "Unknown";
 }
 
 export function getActivityLevelValue(level: number): ActivityLevel {
-  return ACTIVITY_LEVELS[level]?.value || "sedentary";
+  const activity = ACTIVITY_LEVELS[level];
+
+  return activity ? activity.value : "sedentary";
 }
 
 export function getActivityLevelMultiplier(level: number): number {
-  return ACTIVITY_LEVELS[level]?.multiplier || 1;
+  const activity = ACTIVITY_LEVELS[level];
+
+  return activity ? activity.multiplier : 1;
 }
 
 export function getActivityLevelFromString(value: ActivityLevel): number {
   for (const [key, data] of Object.entries(ACTIVITY_LEVELS)) {
     if (data.value === value) return Number(key);
   }
+
   return 1; // Default to sedentary if not found
 }
 
@@ -103,6 +103,7 @@ export function calculateAge(birthDate: string): number {
   if (m < 0 || (m === 0 && now.getDate() < birth.getDate())) {
     age--;
   }
+
   return Math.max(0, Math.min(120, age));
 }
 
@@ -111,9 +112,9 @@ export function calculateAge(birthDate: string): number {
  * This is a convenience function used across multiple features
  */
 export function createNutritionProfile(
-  settings: UserSettingsForProfile,
+  settings: NutritionProfileSource,
 ): UserNutritionalProfile {
-  const age = calculateAge(settings.dateOfBirth || "");
+  const age = calculateAge(settings.dateOfBirth ?? "");
   let bmr = 0;
   let tdee = 0;
 

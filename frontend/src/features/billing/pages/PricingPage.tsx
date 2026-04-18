@@ -1,18 +1,18 @@
+import React, { useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
-import React, { useEffect, useState } from "react";
 
-import { CardContainer } from "@/components/form";
+import { billingApi } from "@/api/billing";
+import CardContainer from "@/components/form/CardContainer";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { CircleQuestionMarkIcon } from "@/components/ui";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
+import { usePageMetadata } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
-import usePageMetadata from "@/hooks/usePageMetadata";
 import { useStore } from "@/store/store";
-import { createCheckoutSession } from "@/utils/apiBilling";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
 
@@ -75,11 +75,11 @@ const PricingPage: React.FC = () => {
 
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
-      const { url } = await createCheckoutSession(
-        globalThis.location.origin + "/settings?upgraded=true",
-        globalThis.location.origin + "/pricing",
+      const { url } = await billingApi.createCheckoutSession({
+        successUrl: globalThis.location.origin + "/settings?upgraded=true",
+        cancelUrl: globalThis.location.origin + "/pricing",
         plan,
-      );
+      });
       globalThis.location.href = url;
     } catch {
       showNotification(
@@ -97,10 +97,7 @@ const PricingPage: React.FC = () => {
       >
         <div className="space-y-12">
           {/* Card-based pricing — matches landing page */}
-          <CustomPricingCards
-            onUpgrade={handleUpgrade}
-            showUpgradeButtons={true}
-          />
+          <CustomPricingCards onUpgrade={handleUpgrade} showUpgradeButtons />
 
           {/* FAQ Section */}
           <CardContainer className="p-6 sm:p-8">
@@ -115,6 +112,7 @@ const PricingPage: React.FC = () => {
             <div className="mx-auto max-w-3xl space-y-4">
               {faqs.map((faq, index) => {
                 const isOpen = openFaq === index;
+
                 return (
                   <div
                     key={index}

@@ -1,17 +1,110 @@
-// Export component API
-export * from "./components";
-
-// Export hooks API
-export * from "./hooks";
-
-// Export calculation functions
-export * from "./calculations";
-
-// Export constants
-export * from "./constants";
-
-// Export habit constants (merged from habits feature)
-export * from "./constants/habits";
-
-// Export utility functions
-export * from "./utils";
+export {
+  calculateCalorieTarget,
+  calculateRecommendedDeficit,
+  calculateTimeToGoal,
+  calculateWeeklyChange,
+  calculateWeeksToGoal,
+  generateWeightGoalCalculations,
+} from "./calculations";
+export {
+  GoalsLoadingSkeleton,
+  HabitActions,
+  HabitCard,
+  HabitForm,
+  HabitModal,
+  HabitTracker,
+  LogWeightModal,
+  MacroNutrient,
+  MacroTargetForm,
+  WeightGoalDashboard,
+  WeightGoalForm,
+  WeightGoalModal,
+  WeightGoalProgressChart,
+  WeightGoalStatus,
+  WeightLogList,
+  WeightProgressTabs,
+} from "./components";
+export {
+  CALORIE_ADJUSTMENT_FACTORS,
+  CALORIE_RANGE_LABELS,
+  CALORIES_PER_KG_FAT,
+  CARBS_PERCENTAGE,
+  CHART_COLORS,
+  DAILY_PROTEIN_PER_KG,
+  DEFAULT_MACRO_TOTALS,
+  DEFAULT_TARGET_VALUES,
+  DEFAULT_TARGET_WEEKS,
+  ERROR_MESSAGES,
+  FATS_PERCENTAGE,
+  MAX_SAFE_DAILY_CHANGE,
+  MAX_WEEKLY_WEIGHT_LOSS,
+  MIN_SAFE_DAILY_CHANGE,
+  MIN_WEEKLY_WEIGHT_LOSS,
+  SUCCESS_MESSAGES,
+  WEIGHT_GOAL_OPTIONS,
+  WEIGHT_VALIDATION,
+} from "./constants";
+export { useEditableMacroTarget } from "./hooks";
+export type {
+  GoalsState,
+  SetWeightGoalPayload,
+  TimeToGoalCalculation,
+  UpdateWeightGoalPayload,
+  WeightGoalFormValues,
+  WeightGoalsResponse,
+} from "./types";
+export {
+  computeDailyAdjustment,
+  computeDailyDifferenceForDisplay,
+  computeEffectiveTargetCalories,
+} from "./utils/calorie";
+export {
+  calculateGoalDetails,
+  calculateGoalProgress,
+  getDaysRemaining,
+  getGoalStatus,
+  getMotivationalMessage,
+  getWeeksElapsed,
+  isValidGoalForm,
+  normalizeWeightGoals,
+  validateGoalForm,
+} from "./utils/goalUtilities";
+export {
+  buildHabitUpdatePayload,
+  calculateCompletionRate,
+  calculateProgress,
+  calculateRemainingToTarget,
+  calculateStreakDays,
+  completeHabit,
+  createNewHabit,
+  filterHabitsByCompletion,
+  getHabitProgressColor,
+  getHabitsStats,
+  getProgressBarColor,
+  incrementHabitProgress,
+  isHabitComplete,
+  isValidHabitForm,
+  resetHabitProgress,
+  searchHabits,
+  sortHabitsByCreatedDate,
+  sortHabitsByProgress,
+  updateHabitFromForm,
+  validateHabitForm,
+} from "./utils/habits";
+export {
+  calculateThreeMonthTrend,
+  calculateWeeklyAverageChange,
+  getChartDomain,
+} from "./utils/progressAnalytics";
+export {
+  calculateWeightAverage,
+  calculateWeightTrend,
+  createWeightLogEntry,
+  filterWeightLogByDateRange,
+  getLastNEntries,
+  getWeightChangeFromStart,
+  getWeightLogStats,
+  isValidWeightEntry,
+  sortWeightLogByDate,
+  validateWeightEntry,
+} from "./utils/weightLogUtilities";

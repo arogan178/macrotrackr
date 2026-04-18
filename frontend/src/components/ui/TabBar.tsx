@@ -1,16 +1,16 @@
 import React from "react";
 
-import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { BUTTON_SIZES } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
 
 import TabButton from "./TabButton";
 
-export type TabItem = {
+export interface TabItem {
   key: string;
   label: React.ReactNode;
   activeBg?: string;
   disabled?: boolean;
-};
+}
 
 type ButtonSizeKey = keyof typeof BUTTON_SIZES; // "xs" | "sm" | "md" | "lg"
 

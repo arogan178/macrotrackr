@@ -18,11 +18,11 @@ export interface PaginatedMacroHistory {
 // Utility type for macro percentage keys
 export type MacroType = "protein" | "carbs" | "fats";
 export type MealType = "breakfast" | "lunch" | "dinner" | "snack";
-export type MacroTargetGrams = {
+export interface MacroTargetGrams {
   protein: number;
   carbs: number;
   fats: number;
-};
+}
 
 export interface MacroTargetSettings {
   proteinPercentage: number;
@@ -36,6 +36,8 @@ export interface MacroPercentages {
   carbsPercentage: number;
   fatsPercentage: number;
 }
+
+export type MacroKey = keyof MacroPercentages;
 
 export interface MacroTargetState extends MacroPercentages {
   lockedMacros: MacroType[];

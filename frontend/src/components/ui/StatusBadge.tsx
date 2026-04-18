@@ -1,17 +1,15 @@
 /* eslint-disable react/prop-types */
-import { motion } from "motion/react";
 import { memo, useMemo } from "react";
+import { motion } from "motion/react";
 
 import { cn } from "../../lib/classnameUtilities";
+
 import { CheckCircleIcon, InfoIcon, WarningIcon } from "./Icons";
 
-// Size variants for the badge
 type BadgeSize = "sm" | "md" | "lg";
 
-// Visual style variants
 type BadgeVariant = "solid" | "outline" | "subtle" | "glass";
 
-// Status types with their visual configurations
 type StatusType =
   | "active"
   | "past_due"
@@ -24,25 +22,16 @@ type StatusType =
   | "info";
 
 export interface StatusBadgeProps {
-  /** Status type to display - determines color and icon */
   status: StatusType | string;
-  /** Size of the badge */
   size?: BadgeSize;
-  /** Visual style variant */
   variant?: BadgeVariant;
-  /** Whether to show a pulsing animation */
   pulse?: boolean;
-  /** Optional custom icon to override default */
   icon?: React.ReactNode;
-  /** Optional custom text to override default status text */
   text?: string;
-  /** Additional CSS classes */
   className?: string;
-  /** Whether to show the icon */
   showIcon?: boolean;
 }
 
-// Size configurations
 const SIZE_CONFIG: Record<
   BadgeSize,
   { container: string; text: string; icon: string }
@@ -64,7 +53,6 @@ const SIZE_CONFIG: Record<
   },
 };
 
-// Status configurations with color mappings
 const STATUS_CONFIG: Record<
   StatusType,
   { text: string; colorClass: string; icon: React.ReactNode }
@@ -116,7 +104,6 @@ const STATUS_CONFIG: Record<
   },
 };
 
-// Color class generators for each variant
 const getVariantClasses = (
   colorClass: string,
   variant: BadgeVariant,
@@ -176,25 +163,6 @@ const getVariantClasses = (
   }
 };
 
-/**
- * Enhanced StatusBadge component with multiple sizes, variants, and animation support.
- *
- * @example
- * // Basic usage
- * <StatusBadge status="active" />
- *
- * @example
- * // With custom size and variant
- * <StatusBadge status="warning" size="lg" variant="outline" />
- *
- * @example
- * // With pulse animation
- * <StatusBadge status="error" pulse />
- *
- * @example
- * // Custom text and icon
- * <StatusBadge status="neutral" text="Custom Label" icon={<CustomIcon />} />
- */
 const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
   status,
   size = "md",
@@ -205,13 +173,12 @@ const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
   className = "",
   showIcon = true,
 }) {
-  // Get status configuration or use default for unknown status
   const statusConfig = useMemo(() => {
     const knownStatus = status as StatusType;
-    if (STATUS_CONFIG[knownStatus]) {
+    if (knownStatus in STATUS_CONFIG) {
       return STATUS_CONFIG[knownStatus];
     }
-    // Default configuration for unknown status types
+
     return {
       text:
         status.charAt(0).toUpperCase() + status.slice(1).replaceAll("_", " "),
@@ -220,24 +187,20 @@ const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
     };
   }, [status]);
 
-  // Get size classes
   const sizeClasses = SIZE_CONFIG[size];
 
-  // Get variant classes based on color
   const variantClasses = useMemo(
     () => getVariantClasses(statusConfig.colorClass, variant),
     [statusConfig.colorClass, variant],
   );
 
-  // Determine if we should show pulse animation
   const shouldPulse =
     pulse &&
     (status === "active" || status === "error" || status === "warning");
 
-  // Check for reduced motion preference
   const prefersReducedMotion =
     typeof globalThis !== "undefined" &&
-    globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
     <div

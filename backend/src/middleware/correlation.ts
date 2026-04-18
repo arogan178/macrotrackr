@@ -1,7 +1,47 @@
 // src/middleware/correlation.ts
 import { Elysia } from "elysia";
-import { v4 as uuidv4 } from "uuid";
-import { loggerHelpers } from "../lib/logger";
+import { loggerHelpers } from "../lib/observability/logger";
+
+function getOptionalStringProperty(
+  source: unknown,
+  key: string,
+): string | undefined {
+  if (!source || typeof source !== "object") {
+    return undefined;
+  }
+
+  const candidate = source as Record<string, unknown>;
+  const value = candidate[key];
+  return typeof value === "string" ? value : undefined;
+}
+
+function getOptionalNumberProperty(
+  source: unknown,
+  key: string,
+): number | undefined {
+  if (!source || typeof source !== "object") {
+    return undefined;
+  }
+
+  const candidate = source as Record<string, unknown>;
+  const value = candidate[key];
+  return typeof value === "number" ? value : undefined;
+}
+
+function getOptionalUserId(source: unknown): number | undefined {
+  if (!source || typeof source !== "object") {
+    return undefined;
+  }
+
+  const candidate = source as Record<string, unknown>;
+  const user = candidate.user;
+  if (!user || typeof user !== "object") {
+    return undefined;
+  }
+
+  const userRecord = user as Record<string, unknown>;
+  return typeof userRecord.userId === "number" ? userRecord.userId : undefined;
+}
 
 /**
  * Middleware to add correlation IDs to requests for distributed tracing
@@ -11,17 +51,15 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
   .derive({ as: "scoped" }, ({ request }) => {
     // Extract existing correlation ID from headers or generate new one
     const correlationId =
-      request.headers.get("x-correlation-id") ||
-      request.headers.get("x-request-id") ||
-      uuidv4();
+      request.headers.get("x-correlation-id") ??
+      request.headers.get("x-request-id") ??
+      crypto.randomUUID();
 
     return { correlationId };
   })
-  .onRequest((context: any) => {
-    const { correlationId, request } = context;
-
-    // Add correlation ID to request for downstream processing
-    (request as any).correlationId = correlationId;
+  .onRequest((context) => {
+    const { request } = context;
+    const correlationId = getOptionalStringProperty(context, "correlationId") ?? "unknown";
 
     // Log the start of request processing
     loggerHelpers.apiRequest(
@@ -31,16 +69,12 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
       { correlationId }
     );
   })
-  .onAfterHandle({ as: "scoped" }, (context: any) => {
-    const { correlationId, set } = context;
-
+  .onAfterHandle({ as: "scoped" }, ({ correlationId, set }) => {
     // Add correlation ID to response headers for client tracking
     set.headers["x-correlation-id"] = correlationId;
     set.headers["x-request-id"] = correlationId;
   })
-  .onError({ as: "scoped" }, (context: any) => {
-    const { correlationId, error, code, request } = context;
-
+  .onError({ as: "scoped" }, ({ correlationId, error, code, request }) => {
     // Log errors with correlation ID for easier debugging
     loggerHelpers.error(
       error instanceof Error ? error : new Error(String(error)),
@@ -57,11 +91,16 @@ export const correlationMiddleware = new Elysia({ name: "correlation" })
  * Enhanced API response logging with correlation ID and timing
  */
 export const enhancedApiLogging = new Elysia({ name: "apiLogging" })
+  .use(correlationMiddleware)
   .derive({ as: "scoped" }, () => {
     return { startTime: Date.now() };
   })
-  .onAfterHandle({ as: "scoped" }, (context: any) => {
-    const { correlationId, startTime, set, request, user } = context;
+  .onAfterHandle({ as: "scoped" }, (context) => {
+    const { set, request } = context;
+    const correlationId = getOptionalStringProperty(context, "correlationId") ?? "unknown";
+    const startTime = getOptionalNumberProperty(context, "startTime") ?? Date.now();
+    const userId = getOptionalUserId(context);
+
     const duration = Date.now() - (startTime || Date.now());
     const statusCode = typeof set.status === "number" ? set.status : 200;
     const path = new URL(request.url).pathname;
@@ -72,15 +111,16 @@ export const enhancedApiLogging = new Elysia({ name: "apiLogging" })
       path,
       statusCode,
       duration,
-      user?.userId
+      userId
     );
 
     // Log performance warnings for slow requests
-    if (duration > 1000) {
+    const SLOW_REQUEST_THRESHOLD_MS = 1000;
+    if (duration > SLOW_REQUEST_THRESHOLD_MS) {
       loggerHelpers.performance(
         `Slow API request: ${request.method} ${path}`,
         duration,
-        { correlationId, userId: user?.userId }
+        { correlationId, userId }
       );
     }
 

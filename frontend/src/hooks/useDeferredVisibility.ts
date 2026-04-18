@@ -1,12 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 
-/**
- * Debounce showing a boolean and keep it visible for a minimum duration once shown.
- * Useful to prevent flicker in loading indicators.
- *
- * Optimized with useRef for transient timer values to avoid re-render subscriptions.
- */
-export default function useDeferredVisibility(
+export function useDeferredVisibility(
   active: boolean,
   options?: { delayMs?: number; minVisibleMs?: number },
 ) {
@@ -14,10 +8,11 @@ export default function useDeferredVisibility(
   const minVisibleMs = options?.minVisibleMs ?? 400;
 
   const [visible, setVisible] = useState(false);
+  type TimerHandle = ReturnType<typeof globalThis.setTimeout>;
 
   // Use refs for all transient values to avoid subscribing to them in effects
-  const showTimerReference = useRef<number | undefined>(undefined);
-  const hideTimerReference = useRef<number | undefined>(undefined);
+  const showTimerReference = useRef<TimerHandle | undefined>(undefined);
+  const hideTimerReference = useRef<TimerHandle | undefined>(undefined);
   const lastShownAtReference = useRef<number | undefined>(undefined);
   const activeReference = useRef(active);
 
@@ -65,6 +60,7 @@ export default function useDeferredVisibility(
 
         if (remaining === 0) {
           doHide();
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing
         } else if (!hideTimerReference.current) {
           hideTimerReference.current = globalThis.setTimeout(doHide, remaining);
         }

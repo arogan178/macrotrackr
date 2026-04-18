@@ -13,7 +13,7 @@ declare global {
   var __WB_MANIFEST: Array<string | PrecacheEntry>;
 }
 
-type ServiceWorkerRuntime = {
+interface ServiceWorkerRuntime {
   addEventListener: {
     (
       type: "activate",
@@ -28,7 +28,7 @@ type ServiceWorkerRuntime = {
     matchAll: () => Promise<Array<{ postMessage: (message: { type: string }) => void }>>;
   };
   skipWaiting: () => void;
-};
+}
 
 // Immediately take control and skip waiting
 skipWaiting();
@@ -43,33 +43,20 @@ const sw = globalThis as unknown as ServiceWorkerRuntime;
 const injectedManifest = globalThis.__WB_MANIFEST;
 precacheAndRoute(injectedManifest);
 
-// Log activation for debugging
 sw.addEventListener("activate", (event) => {
-  if (import.meta.env.DEV) {
-    console.log("[SW] Service Worker activated - clearing old caches");
-  }
-
   event.waitUntil(
     caches
       .keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames.map((cacheName) => {
-            // Delete caches that aren't part of our current precache
             if (!cacheName.includes("workbox-precache")) {
-              if (import.meta.env.DEV) {
-                console.log(`[SW] Deleting old cache: ${cacheName}`);
-              }
               return caches.delete(cacheName);
             }
           }),
         );
       })
       .then(() => {
-        if (import.meta.env.DEV) {
-          console.log("[SW] Old caches cleared successfully");
-        }
-        // Tell all clients to reload
         return sw.clients.matchAll().then((clients) => {
           for (const client of clients) {
             client.postMessage({ type: "SW_ACTIVATED" });
@@ -81,8 +68,7 @@ sw.addEventListener("activate", (event) => {
 
 // Handle messages from the main thread
 sw.addEventListener("message", (event) => {
-  if (event.data && event.data.type === "SKIP_WAITING") {
+  if (event.data?.type === "SKIP_WAITING") {
     sw.skipWaiting();
   }
 });
-

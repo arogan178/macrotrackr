@@ -1,6 +1,4 @@
-// src/lib/openfoodfacts-api-client.ts
-
-import { logger, loggerHelpers } from "./logger";
+import { logger, loggerHelpers } from "./observability/logger";
 
 // Use the search-a-licious API for full-text search
 const API_URL = "https://search.openfoodfacts.org/search";
@@ -85,6 +83,13 @@ export class OpenFoodFactsRateLimitError extends OpenFoodFactsError {
   }
 }
 
+export class OpenFoodFactsUnavailableError extends OpenFoodFactsError {
+  constructor(message: string = "OpenFoodFacts service temporarily unavailable") {
+    super(message, 503);
+    this.name = "OpenFoodFactsUnavailableError";
+  }
+}
+
 // Utility functions for better code organization
 export function normalizeFoodSearchQuery(query: string): string {
   return query.trim().toLowerCase().replace(/\s+/g, " ");
@@ -95,7 +100,7 @@ export function buildFoodSearchCacheKey(query: string): string {
 }
 
 export function parseQuantity(quantityString: string): QuantityParseResult {
-  if (!quantityString || typeof quantityString !== "string") {
+  if (!quantityString) {
     return { quantity: 100, unit: "g" };
   }
 
@@ -129,7 +134,7 @@ export function parseQuantity(quantityString: string): QuantityParseResult {
 
   for (const pattern of patterns) {
     const match = cleanedString.match(pattern);
-    if (match && match[1]) {
+    if (match?.[1]) {
       const quantityStr = match[1].replace(",", ".");
       const quantity = parseFloat(quantityStr);
       if (!isNaN(quantity) && quantity > 0) {
@@ -168,10 +173,11 @@ export function parseQuantity(quantityString: string): QuantityParseResult {
           pints: "pt",
         };
 
-        const rawUnit = match[2] || "";
+        const rawUnit = match[2] ?? "";
+        const mappedUnit = unitMap[rawUnit] ?? rawUnit;
         return {
           quantity,
-          unit: unitMap[rawUnit] || rawUnit || "g",
+          unit: mappedUnit === "" ? "g" : mappedUnit,
         };
       }
     }
@@ -182,7 +188,7 @@ export function parseQuantity(quantityString: string): QuantityParseResult {
 }
 
 function parseNutrientValue(value: number | string | undefined): number {
-  if (value === undefined || value === null) return 0;
+  if (value == null) return 0;
 
   const stringValue = value.toString().trim();
   if (!stringValue) return 0;
@@ -192,10 +198,10 @@ function parseNutrientValue(value: number | string | undefined): number {
 }
 
 function isValidFoodProduct(hit: FoodSearchHit): boolean {
-  if (!hit || typeof hit !== "object") return false;
+  if (typeof hit !== "object") return false;
 
   // Must have a product name
-  const hasName = Boolean(hit.product_name || hit.product_name_en);
+  const hasName = Boolean(hit.product_name ?? hit.product_name_en);
   if (!hasName) return false;
 
   // Must have some nutritional data
@@ -213,7 +219,7 @@ function isValidFoodProduct(hit: FoodSearchHit): boolean {
 }
 
 function getFoodProductDisplayName(hit: FoodSearchHit): string {
-  return hit.product_name_en || hit.product_name || "Unknown Product";
+  return hit.product_name_en ?? hit.product_name ?? "Unknown Product";
 }
 
 function getFoodSearchTokens(normalizedQuery: string): string[] {
@@ -223,12 +229,8 @@ function getFoodSearchTokens(normalizedQuery: string): string[] {
 function getFoodSearchScore(hit: FoodSearchHit, normalizedQuery: string): number {
   const tokens = getFoodSearchTokens(normalizedQuery);
   const name = normalizeFoodSearchQuery(getFoodProductDisplayName(hit));
-  const categories = normalizeFoodSearchQuery(hit.categories || "");
-  const rawQuantity = normalizeFoodSearchQuery(hit.quantity || "");
-
-  if (!name) {
-    return 0;
-  }
+  const categories = normalizeFoodSearchQuery(hit.categories ?? "");
+  const rawQuantity = normalizeFoodSearchQuery(hit.quantity ?? "");
 
   let score = 0;
 
@@ -274,7 +276,7 @@ function getFoodSearchScore(hit: FoodSearchHit, normalizedQuery: string): number
 function getFoodProductDeduplicationKey(result: FoodProductResult): string {
   return [
     normalizeFoodSearchQuery(result.name),
-    result.rawQuantity || "",
+    result.rawQuantity ?? "",
     result.protein.toFixed(1),
     result.carbs.toFixed(1),
     result.fats.toFixed(1),
@@ -316,22 +318,22 @@ export function rankAndNormalizeFoodProducts(
 }
 
 function mapHitToFoodProduct(hit: FoodSearchHit): FoodProductResult {
-  const nutriments = hit.nutriments || {};
+  const nutriments = hit.nutriments ?? {};
 
   // Parse quantity information
   const { quantity: servingQuantity, unit: servingUnit } = parseQuantity(
-    hit.quantity || ""
+    hit.quantity ?? ""
   );
 
   const rawQuantity = hit.quantity;
 
   return {
-    name: hit.product_name_en || hit.product_name || "Unknown Product",
+    name: hit.product_name_en ?? hit.product_name ?? "Unknown Product",
     protein: parseNutrientValue(nutriments.proteins_100g),
     carbs: parseNutrientValue(nutriments.carbohydrates_100g),
     fats: parseNutrientValue(nutriments.fat_100g),
     energyKcal: parseNutrientValue(nutriments["energy-kcal_100g"]),
-    categories: hit.categories || "",
+    categories: hit.categories ?? "",
     servingQuantity,
     servingUnit,
     rawQuantity,
@@ -385,14 +387,13 @@ export class OpenFoodFactsApiClient {
 
       if (!response.ok) {
         await this.handleHttpError(response);
-        return [];
       }
 
       const data: FoodSearchResponse = await response.json();
 
-      if (!data || !Array.isArray(data.hits)) {
+      if (!Array.isArray(data.hits)) {
         logger.warn({ data }, "Invalid API response structure");
-        return [];
+        throw new OpenFoodFactsError("Invalid API response structure", response.status);
       }
 
       const validHits = rankAndNormalizeFoodProducts(data.hits, normalizedQuery);
@@ -486,6 +487,6 @@ export class OpenFoodFactsApiClient {
       }
     );
 
-    return []; // Return empty array instead of throwing to maintain backwards compatibility
+    throw new OpenFoodFactsUnavailableError(errorMessage);
   }
 }

@@ -1,28 +1,8 @@
-// src/config/pricing.ts
-// Centralized pricing configuration - keep in sync with frontend/src/config/pricing.ts
-
-export const PRICING = {
-  monthly: 3.99,
-  yearly: 29.99,
-} as const;
-
-export const FREE_FEATURES = [
-  "Macro Tracking",
-  "Meal Types",
-  "Weight Logging",
-  "Goal Setting",
-  "Basic Reporting",
-] as const;
-
-export const PRO_FEATURES = [
-  ...FREE_FEATURES,
-  "Unlimited Habit Tracking",
-  "Recipe & Meal Saver",
-  "Advanced Analytics",
-  "Ad-Free Experience",
-  "Priority Support",
-  "Export Data",
-] as const;
+import {
+  FREE_PLAN_DEFINITION,
+  PRICING,
+  PRO_PLAN_DEFINITION,
+} from "@shared/pricing";
 
 export interface Plan {
   id: "free" | "pro";
@@ -37,21 +17,21 @@ export interface Plan {
 export const PLANS: Plan[] = [
   {
     id: "free",
-    name: "Free",
-    description: "Perfect for getting started with macro tracking",
+    name: FREE_PLAN_DEFINITION.name,
+    description: FREE_PLAN_DEFINITION.description,
     price: 0,
     currency: "usd",
     interval: "month",
-    features: FREE_FEATURES,
+    features: FREE_PLAN_DEFINITION.features,
   },
   {
     id: "pro",
-    name: "Pro",
-    description: "Unlock your full potential with advanced features",
+    name: PRO_PLAN_DEFINITION.name,
+    description: PRO_PLAN_DEFINITION.description,
     price: PRICING.monthly,
     currency: "usd",
     interval: "month",
-    features: PRO_FEATURES,
+    features: PRO_PLAN_DEFINITION.features,
   },
 ] as const;
 

@@ -6,14 +6,17 @@ import {
   safeExecute,
   safeQuery,
   withTransaction,
-} from "../../lib/database";
-import { db } from "../../db";
-import { AuthenticationError, ConflictError } from "../../lib/errors";
-import { logger } from "../../lib/logger";
-import { hashPassword } from "../../lib/password";
-import type { RouteContext } from "../../types";
+} from "../../lib/data/database";
+import { AuthenticationError, ConflictError } from "../../lib/http/errors";
+import { logger } from "../../lib/observability/logger";
+import type { ClerkAuthContext } from "../../middleware/clerk-auth";
+import { hashPassword } from "../../lib/auth/password";
 
+import type { RouteContext } from "../../types";
+import { resolveClerkIdentity } from "../../lib/auth/route-adapter";
 import { AuthSchemas } from "./schemas";
+
+
 
 // import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
@@ -56,44 +59,42 @@ type AuthRouteContext<TBody = Record<string, unknown>> = RouteContext<
   clerkClient?: ClerkApiClient;
 };
 
-interface ResetPasswordBody {
+type ResetPasswordRequestBody = {
   token: string;
   newPassword: string;
-}
+};
+
+
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
       // .use(rateLimiters.auth) // Temporarily disabled for testing
-      .decorate("db", db)
 
-      /**
-       * POST /reset-password - Reset password using a valid token
-       */
       .post(
         "/reset-password",
         async (context) => {
-          const { body, db } = context as unknown as AuthRouteContext<ResetPasswordBody>;
+          const { db, body } =
+            context as unknown as AuthRouteContext<ResetPasswordRequestBody> & {
+              body: ResetPasswordRequestBody;
+            };
+          const { token, newPassword } = body;
 
-          const { token, newPassword } = body as ResetPasswordBody;
-
-          const user = safeQuery<UserRow>(
+          const userWithResetToken = safeQuery<
+            Pick<UserRow, "id" | "password_reset_expires">
+          >(
             db,
             "SELECT id, password_reset_expires FROM users WHERE password_reset_token = ?",
-            [token]
+            [token],
           );
 
-          if (!user || !user.password_reset_expires) {
-            throw new AuthenticationError(
-              "Invalid or expired password reset token."
-            );
+          if (!userWithResetToken?.password_reset_expires) {
+            throw new AuthenticationError("Invalid or expired password reset token.");
           }
 
-          const expires = new Date(user.password_reset_expires);
-          if (expires < new Date()) {
-            throw new AuthenticationError(
-              "Invalid or expired password reset token."
-            );
+          const resetExpiresAt = new Date(userWithResetToken.password_reset_expires);
+          if (Number.isNaN(resetExpiresAt.getTime()) || resetExpiresAt <= new Date()) {
+            throw new AuthenticationError("Invalid or expired password reset token.");
           }
 
           const hashedPassword = await hashPassword(newPassword);
@@ -101,43 +102,46 @@ export const authRoutes = (app: Elysia) =>
           safeExecute(
             db,
             "UPDATE users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?",
-            [hashedPassword, user.id]
+            [hashedPassword, userWithResetToken.id],
           );
 
-          return { message: "Password has been reset successfully." };
+          return {
+            message: "Password has been reset successfully.",
+          };
         },
         {
           body: AuthSchemas.resetPassword,
           detail: {
-            summary: "Reset password using a valid token",
-            description: "Used for password reset links created before the Clerk migration.",
+            summary: "Reset password with token",
+            description: "Resets a password using a valid password reset token",
             tags: ["Auth"],
           },
-        }
+        },
       )
 
       // Clerk User Sync - Sync Clerk user with our database
       .post(
         "/clerk-sync",
         async (context) => {
-          const { db, user, clerkClient } = context as unknown as AuthRouteContext;
-          
-          if (!user?.clerkUserId) {
-            throw new AuthenticationError("Unauthorized - No Clerk user ID found");
-          }
+          const { db, clerkClient } = context as unknown as AuthRouteContext;
+          const {
+            clerkUserId,
+            email: initialEmail,
+            firstName: initialFirstName,
+            lastName: initialLastName,
+          } = resolveClerkIdentity(context as unknown as ClerkAuthContext);
 
-          const clerkUserId = user.clerkUserId;
-          let email = user.email as string | undefined;
-          let firstName = (user.firstName as string | undefined) || "";
-          let lastName = (user.lastName as string | undefined) || "";
+          let email = initialEmail;
+          let firstName = initialFirstName ?? "";
+          let lastName = initialLastName ?? "";
 
           // Defensive fallback: resolve missing Clerk profile fields from Clerk API.
           if (!email || !firstName || !lastName) {
             try {
               const clerkUser = await clerkClient?.users?.getUser?.(clerkUserId);
-              email = email || getPrimaryClerkEmail(clerkUser);
-              firstName = firstName || clerkUser?.firstName || "";
-              lastName = lastName || clerkUser?.lastName || "";
+              email = email ?? getPrimaryClerkEmail(clerkUser);
+              firstName = firstName || (clerkUser?.firstName ?? "");
+              lastName = lastName || (clerkUser?.lastName ?? "");
             } catch (error) {
               logger.warn(
                 { clerkUserId, error },

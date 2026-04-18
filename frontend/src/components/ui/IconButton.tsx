@@ -1,32 +1,9 @@
-/**
- * IconButton – Standardized circular icon buttons for common actions.
- *
- * Provides predefined styling for common action types (delete, edit, close, etc.)
- * while maintaining consistency with the Button system.
- *
- * @example
- * // Delete button
- * <IconButton variant="delete" onClick={handleDelete} ariaLabel="Delete item" />
- *
- * @example
- * // Edit button
- * <IconButton variant="edit" onClick={handleEdit} ariaLabel="Edit item" />
- *
- * @example
- * // Custom action with custom icon
- * <IconButton
- *   variant="custom"
- *   icon={<CustomIcon />}
- *   onClick={handleCustomAction}
- *   ariaLabel="Custom action"
- *   className="text-purple-400 hover:text-purple-300 bg-purple-900/30 hover:bg-purple-900/50"
- * />
- */
 import React, { memo } from "react";
 
 import { ICON_BUTTON_SIZES, ICON_SIZES } from "@/components/utils";
 
 import { cn } from "../../lib/classnameUtilities";
+
 import Button from "./Button";
 import {
   CloseIcon,
@@ -38,7 +15,7 @@ import {
   TrashIcon,
   WarningIcon,
 } from "./Icons";
-import type { ButtonSize, IconSize } from "./Types";
+import type { ButtonSize, IconSize } from "./UiTypes";
 
 type ActionVariant =
   | "delete"
@@ -65,7 +42,6 @@ interface IconButtonProps {
   buttonVariant?: "primary" | "secondary" | "danger" | "success" | "ghost";
 }
 
-// Function to get action configs to avoid temporal dead zone issues
 const getActionConfigs = () =>
   ({
     "password-toggle": {
@@ -132,14 +108,12 @@ function IconButton({
   ...rest
 }: IconButtonProps) {
   const config = getActionConfigs()[variant];
-  // Prefer iconSize, fallback to buttonSize (both are strongly typed)
-  const resolvedIconSize: IconSize = iconSize || buttonSize;
+  const resolvedIconSize: IconSize = iconSize ?? buttonSize;
   const iconSizeKey = resolvedIconSize as keyof typeof ICON_SIZES;
   const buttonSizeKey = buttonSize as keyof typeof ICON_BUTTON_SIZES;
-  const iconSizeClass = ICON_SIZES[iconSizeKey] || ICON_SIZES.md;
-  const paddingClass = ICON_BUTTON_SIZES[buttonSizeKey] || ICON_BUTTON_SIZES.md;
+  const iconSizeClass = ICON_SIZES[iconSizeKey];
+  const paddingClass = ICON_BUTTON_SIZES[buttonSizeKey];
 
-  // Icon logic: use custom icon for 'custom' and 'password-toggle', otherwise use config.icon
   let iconElement: React.ReactNode;
   if (variant === "custom" || variant === "password-toggle") {
     iconElement = customIcon;
@@ -150,7 +124,6 @@ function IconButton({
     );
   }
 
-  // Compose className
   const combinedClassName = cn(
     paddingClass,
     "flex items-center justify-center",

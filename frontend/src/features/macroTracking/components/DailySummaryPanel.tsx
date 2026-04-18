@@ -2,7 +2,10 @@ import { memo, useMemo } from "react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
-import { MacroTargetBar, MacroTargetLegend } from "@/components/macros";
+import {
+  MacroDistributionBar,
+  MacroTargetLegend,
+} from "@/components/macros/MacroComponents";
 import ProgressBar from "@/components/ui/ProgressBar";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
@@ -30,6 +33,7 @@ function calculatePercent(actual: number, targetValue: number): number {
   if (!targetValue) return 0;
   const ratio = actual / targetValue;
   const pct = Math.floor(ratio * 100);
+
   return Math.max(0, Math.min(100, Number.isFinite(pct) ? pct : 0));
 }
 
@@ -44,9 +48,9 @@ function DailySummaryInner({
   macroTarget,
   calorieTarget,
 }: DailySummaryProps) {
-  const safeTotal = macroDailyTotals || EMPTY_TOTALS;
-  const target = macroTarget || DEFAULT_TARGET;
-  const dailyCalorieTarget = calorieTarget || 0;
+  const safeTotal = macroDailyTotals ?? EMPTY_TOTALS;
+  const target = macroTarget ?? DEFAULT_TARGET;
+  const dailyCalorieTarget = calorieTarget ?? 0;
 
   const macroCalories = useMemo(
     () => ({
@@ -107,6 +111,7 @@ function DailySummaryInner({
     );
     const carbs = Math.round((macroCalories.carbs / totalMacroCalories) * 100);
     const fats = 100 - protein - carbs;
+
     return { protein, carbs, fats };
   }, [macroCalories]);
 
@@ -214,7 +219,7 @@ function DailySummaryInner({
             className="mb-4"
           />
 
-          <MacroTargetBar
+          <MacroDistributionBar
             macros={{
               protein: macroCalories.protein,
               carbs: macroCalories.carbs,
@@ -243,7 +248,7 @@ function DailySummaryInner({
                 <div className="flex items-center gap-2">
                   <div
                     className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110`}
-                  ></div>
+                  />
                   <h3
                     className={`${macro.textColor} text-sm font-medium tracking-wide`}
                   >

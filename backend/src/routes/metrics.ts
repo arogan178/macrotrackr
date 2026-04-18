@@ -1,8 +1,8 @@
 import { timingSafeEqual } from "node:crypto";
 import { Elysia } from "elysia";
 import { config } from "../config";
-import { metrics } from "../lib/metrics";
-import { getSlowQueryStats, getRecentTraces } from "../lib/query-tracer";
+import { getMetricsRegistry } from "../lib/observability/metrics";
+import { getSlowQueryStats, getRecentTraces } from "../lib/observability/query-tracer";
 
 function secureCompare(left: string, right: string): boolean {
   const leftBuffer = Buffer.from(left);
@@ -28,12 +28,13 @@ function isDiagnosticsAuthorized(request: Request): boolean {
     ?.replace(/^Bearer\s+/u, "")
     .trim();
 
-  const providedKey = headerKey || bearerToken;
+  const providedKey = headerKey ?? bearerToken;
   return providedKey ? secureCompare(providedKey, configuredKey) : false;
 }
 
 export const metricsRoutes = new Elysia()
   .get("/metrics", () => {
+    const metrics = getMetricsRegistry();
     const prometheusOutput = metrics.exportPrometheus();
     return new Response(prometheusOutput, {
       headers: { "Content-Type": "text/plain; charset=utf-8" },
@@ -58,7 +59,7 @@ export const metricsRoutes = new Elysia()
       }),
     );
 
-    set.headers = set.headers || {};
+    set.headers = {};
     set.headers["Cache-Control"] = "no-store";
 
     return {

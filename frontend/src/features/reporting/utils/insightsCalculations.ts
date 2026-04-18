@@ -12,6 +12,7 @@ import type {
   NutritionAverage,
   TrendResult,
 } from "../types/insightsTypes";
+
 import { calculateStandardDeviation } from "./macroCalculations";
 
 // --- Magic Number Constants ---
@@ -36,7 +37,7 @@ export function calculateConsistencyScore(
   data: AggregatedDataPoint[],
   denominatorDays?: number,
 ): number {
-  if (!data?.length) return 0;
+  if (!data.length) return 0;
 
   // Frequency: proportion of days with data over the selected window
   const daysWithData = data.filter((d) => d.calories > 0).length;
@@ -72,11 +73,11 @@ export function calculateMacroBalance(
   macroTarget?: MacroTargetSettings | undefined,
 ): MacroBalanceResult {
   const total = averages.protein + averages.carbs + averages.fats;
-  const target = macroTarget || DEFAULT_MACRO_TARGET;
+  const target = macroTarget ?? DEFAULT_MACRO_TARGET;
 
   const idealRatioString = `${target.proteinPercentage}/${target.carbsPercentage}/${target.fatsPercentage}`;
 
-  if (!averages || total === 0) {
+  if (total === 0) {
     return {
       score: 0,
       idealRatio: idealRatioString,
@@ -154,7 +155,7 @@ export function calculateTrend(
   data: AggregatedDataPoint[],
   metric: keyof AggregatedDataPoint,
 ): TrendResult {
-  if (!data?.length || data.length < TREND_DAYS_REQUIRED) {
+  if (!data.length || data.length < TREND_DAYS_REQUIRED) {
     return {
       direction: "insufficient" as const,
       percentage: 0,
@@ -218,7 +219,7 @@ function calculateStreaks(data: AggregatedDataPoint[]): {
   currentStreak: number;
   longestStreak: number;
 } {
-  if (!data?.length) return { currentStreak: 0, longestStreak: 0 };
+  if (!data.length) return { currentStreak: 0, longestStreak: 0 };
 
   // Create array of booleans indicating if day has data (calories > 0)
   const hasDataArray = data.map((d) => d.calories > 0);
@@ -253,8 +254,9 @@ export function calculateDataQuality(
   totalDaysOverride?: number,
 ): DataQualityResult {
   // If no data at all, still respect a provided override for denominator
-  if (!data?.length) {
+  if (!data.length) {
     const totalDaysInPeriod = totalDaysOverride ?? 0;
+
     return {
       daysLogged: 0,
       totalDaysInPeriod,
@@ -305,7 +307,7 @@ export function calculateDataQuality(
 export function calculateMacroDensity(
   averages: NutritionAverage,
 ): MacroDensityResult {
-  if (!averages?.calories) {
+  if (!averages.calories) {
     return {
       score: 0,
       message:
