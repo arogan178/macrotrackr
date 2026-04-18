@@ -136,6 +136,7 @@ export class ApiClient {
       } catch (error) {
         if (response.status === 200) {
           console.error("Failed to parse 200 OK response as JSON", error);
+
           return undefined;
         }
         throw new Error("Received an invalid or unparsable response from the server.", { cause: error });

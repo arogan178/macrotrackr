@@ -5,16 +5,13 @@
 export * from "./components";
 export { default as FreeBillingView } from "./components/FreeBillingView";
 export { default as ProBillingView } from "./components/ProBillingView";
-
 export { default as SettingsPage } from "./pages/SettingsPage";
-
 export type {
   ActivityLevel,
   Gender,
   UserNutritionalProfile,
   UserSettings,
 } from "./types/types";
-
 export {
   calculateAge,
   calculateBMR,
@@ -24,6 +21,6 @@ export {
   createNutritionProfile,
   createUserSettings,
 } from "./utils/calculations";
+export * from "./utils/constants";
 export { default as parseBillingError } from "./utils/parseBillingError";
 export * from "./utils/validation";
-export * from "./utils/constants";
