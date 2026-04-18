@@ -133,6 +133,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       name,
       servingQuantity,
       servingUnit,
+      rawQuantity,
     }: {
       protein: string;
       carbs: string;
@@ -140,6 +141,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       name: string;
       servingQuantity: number;
       servingUnit: string;
+      rawQuantity?: string;
     }) => {
       const per100g = {
         protein: Number.parseFloat(p),
@@ -150,6 +152,15 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       setBaseIngredients(undefined);
       setMealName(name);
       setQuantity(servingQuantity);
+
+      if (rawQuantity) {
+        const parsed = UnitConverter.parseQuantity(rawQuantity);
+        setUnit(parsed.unit);
+        setQuantity(parsed.quantity);
+        setSearchResult(name);
+
+        return;
+      }
 
       let displayUnit = servingUnit as UnitType;
 
@@ -326,6 +337,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       onSubmit,
       isFormValid,
       handleClearSearch,
+      baseMacros,
       baseIngredients,
       quantity,
       unit,
