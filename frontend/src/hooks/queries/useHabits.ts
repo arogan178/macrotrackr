@@ -1,5 +1,6 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
+import { type HabitGoalUpdatePayload,habitsApi } from "@/api/habits";
 import {
   buildHabitUpdatePayload,
   completeHabit,
@@ -7,47 +8,56 @@ import {
   incrementHabitProgress,
   updateHabitFromForm,
 } from "@/features/goals/utils/habits";
+import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
-import { apiService } from "@/utils/apiServices";
 
-// Query hook for fetching habits
-export function useHabits() {
-  return useQuery({
+interface HabitMutationContext {
+  previousHabits?: HabitGoal[];
+}
+
+export const habitsQueryOptions = () =>
+  queryOptions({
     queryKey: queryKeys.habits.list(),
-    queryFn: async (): Promise<HabitGoal[]> => {
-      return await apiService.habits.getHabit();
-    },
-    ...queryConfigs.longLived, // 5 minutes stale time for habits
+    queryFn: (): Promise<HabitGoal[]> => habitsApi.getHabits(),
+    ...queryConfigs.longLived,
   });
+
+export function useHabits() {
+  return useQuery(habitsQueryOptions());
 }
 
 // Mutation hook for adding a new habit
 export function useAddHabit() {
   const queryClient = useQueryClient();
+  const logAddHabitError = createMutationErrorLogger("Error adding habit");
 
   return useMutation({
     mutationKey: [...queryKeys.habits.list(), "add"],
     mutationFn: async (values: HabitGoalFormValues): Promise<HabitGoal> => {
       const newHabit = createNewHabit(values);
-      return await apiService.habits.saveHabit(newHabit);
+
+      return await habitsApi.saveHabit(newHabit);
     },
     onSuccess: () => {
       // Invalidate and refetch habits list
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
     },
-    onError: (error) => {
-      console.error("Error adding habit:", error);
-    },
+    onError: logAddHabitError,
   });
 }
 
 // Mutation hook for updating a habit
 export function useUpdateHabit() {
   const queryClient = useQueryClient();
+  const logUpdateHabitError = createMutationErrorLogger("Error updating habit");
 
-  return useMutation({
+  return useMutation<
+    HabitGoal,
+    Error,
+    { id: string; values: HabitGoalFormValues }
+  >({
     mutationKey: [...queryKeys.habits.list(), "update"],
     mutationFn: async ({
       id,
@@ -55,7 +65,7 @@ export function useUpdateHabit() {
     }: {
       id: string;
       values: HabitGoalFormValues;
-    }): Promise<{ success: boolean }> => {
+    }): Promise<HabitGoal> => {
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
@@ -76,24 +86,28 @@ export function useUpdateHabit() {
       const updatedHabit = updateHabitFromForm(existingHabit, values);
       const payload = buildHabitUpdatePayload(existingHabit, updatedHabit);
 
-      return await apiService.habits.updateHabit(id, payload);
+      return await habitsApi.updateHabit(id, payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
     },
-    onError: (error) => {
-      console.error("Error updating habit:", error);
-    },
+    onError: logUpdateHabitError,
   });
 }
 // Mutation hook for deleting a habit with optimistic updates
 export function useDeleteHabit() {
   const queryClient = useQueryClient();
+  const logDeleteHabitError = createMutationErrorLogger("Error deleting habit");
 
-  return useMutation({
+  return useMutation<
+    { success: boolean },
+    Error,
+    string,
+    HabitMutationContext
+  >({
     mutationKey: [...queryKeys.habits.list(), "delete"],
     mutationFn: async (id: string): Promise<{ success: boolean }> => {
-      return await apiService.habits.deleteHabit(id);
+      return await habitsApi.deleteHabit(id);
     },
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
@@ -118,7 +132,7 @@ export function useDeleteHabit() {
           context.previousHabits,
         );
       }
-      console.error("Error deleting habit:", error);
+      logDeleteHabitError(error);
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
@@ -129,18 +143,29 @@ export function useDeleteHabit() {
 // Mutation hook for incrementing habit progress with optimistic updates
 export function useIncrementHabitProgress() {
   const queryClient = useQueryClient();
+  const logIncrementHabitError = createMutationErrorLogger(
+    "Error incrementing habit progress",
+  );
 
-  return useMutation({
+  return useMutation<HabitGoal, Error, HabitGoal, HabitMutationContext>({
     mutationKey: [...queryKeys.habits.list(), "increment"],
-    mutationFn: async (habit: HabitGoal): Promise<{ success: boolean }> => {
-      if (!habit) {
-        throw new Error("Habit not found");
-      }
+    mutationFn: async (habit: HabitGoal): Promise<HabitGoal> => {
       if (habit.isComplete) {
         throw new Error("Habit is already complete");
       }
       const updatedHabit = incrementHabitProgress(habit);
-      return await apiService.habits.updateHabit(habit.id, updatedHabit);
+      const payload: HabitGoalUpdatePayload = {
+        title: updatedHabit.title,
+        iconName: updatedHabit.iconName,
+        current: updatedHabit.current,
+        target: updatedHabit.target,
+        accentColor: updatedHabit.accentColor,
+        isComplete: updatedHabit.isComplete,
+        createdAt: updatedHabit.createdAt,
+        completedAt: updatedHabit.completedAt,
+      };
+
+      return await habitsApi.updateHabit(habit.id, payload);
     },
     onMutate: async (habit: HabitGoal) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
@@ -156,6 +181,7 @@ export function useIncrementHabitProgress() {
           previousHabits.map((h) => (h.id === habit.id ? updatedHabit : h)),
         );
       }
+
       return { previousHabits };
     },
     onError: (error, _variables, context) => {
@@ -165,7 +191,7 @@ export function useIncrementHabitProgress() {
           context.previousHabits,
         );
       }
-      console.error("Error incrementing habit progress:", error);
+      logIncrementHabitError(error);
     },
     // Don't invalidate queries - optimistic update already reflects the change in UI
     // The server will eventually sync in the background
@@ -175,10 +201,13 @@ export function useIncrementHabitProgress() {
 // Mutation hook for completing a habit with optimistic updates
 export function useCompleteHabit() {
   const queryClient = useQueryClient();
+  const logCompleteHabitError = createMutationErrorLogger(
+    "Error completing habit",
+  );
 
-  return useMutation({
+  return useMutation<HabitGoal, Error, string, HabitMutationContext>({
     mutationKey: [...queryKeys.habits.list(), "complete"],
-    mutationFn: async (id: string): Promise<{ success: boolean }> => {
+    mutationFn: async (id: string): Promise<HabitGoal> => {
       const currentHabits = queryClient.getQueryData<HabitGoal[]>(
         queryKeys.habits.list(),
       );
@@ -196,7 +225,18 @@ export function useCompleteHabit() {
         completedAt: new Date().toISOString(),
       };
 
-      return await apiService.habits.updateHabit(id, completedHabit);
+      const payload: HabitGoalUpdatePayload = {
+        title: completedHabit.title,
+        iconName: completedHabit.iconName,
+        current: completedHabit.current,
+        target: completedHabit.target,
+        accentColor: completedHabit.accentColor,
+        isComplete: completedHabit.isComplete,
+        createdAt: completedHabit.createdAt,
+        completedAt: completedHabit.completedAt,
+      };
+
+      return await habitsApi.updateHabit(id, payload);
     },
     onMutate: async (id: string) => {
       await queryClient.cancelQueries({ queryKey: queryKeys.habits.list() });
@@ -223,7 +263,7 @@ export function useCompleteHabit() {
           context.previousHabits,
         );
       }
-      console.error("Error completing habit:", error);
+      logCompleteHabitError(error);
     },
     // Don't invalidate queries - optimistic update already reflects the change in UI
     // The server will eventually sync in the background
@@ -233,19 +273,18 @@ export function useCompleteHabit() {
 // Mutation hook for resetting all habits
 export function useResetHabits() {
   const queryClient = useQueryClient();
+  const logResetHabitsError = createMutationErrorLogger("Error resetting habits");
 
   return useMutation({
     mutationKey: [...queryKeys.habits.list(), "reset"],
-    mutationFn: async (): Promise<{ success: boolean }> => {
-      return await apiService.habits.resetHabit();
+    mutationFn: async (): Promise<{ success: boolean; count: number }> => {
+      return await habitsApi.resetHabit();
     },
     onSuccess: () => {
       // Clear the habits cache and refetch
       queryClient.setQueryData<HabitGoal[]>(queryKeys.habits.list(), []);
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
     },
-    onError: (error) => {
-      console.error("Error resetting habits:", error);
-    },
+    onError: logResetHabitsError,
   });
 }

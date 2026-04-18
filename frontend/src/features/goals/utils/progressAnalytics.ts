@@ -9,7 +9,7 @@ import {
   subWeeks,
 } from "date-fns";
 
-import type { WeightLogEntry } from "@/utils/apiServices";
+import type { WeightLogEntry } from "@/api/goals";
 
 /**
  * Calculate weekly average change over last ~4 weeks.
@@ -35,9 +35,7 @@ export function calculateWeeklyAverageChange(
 
   for (const entry of recentLogs) {
     const weekNumber = differenceInWeeks(startOfWeek(entry.date), firstWeekStart);
-    if (!weeklyData[weekNumber]) {
-      weeklyData[weekNumber] = { weights: [], count: 0 };
-    }
+    (weeklyData[weekNumber] ??= { weights: [], count: 0 });
     weeklyData[weekNumber].weights.push(entry.weight);
     weeklyData[weekNumber].count++;
   }
@@ -64,10 +62,10 @@ export function calculateWeeklyAverageChange(
 }
 
 /**
- * Calculate monthly trend over last ~3 months.
- * Logic copied from MonthlyTrendCard to preserve results exactly.
+ * Calculate three-month trend over last ~3 months.
+ * Logic copied from monthly trend UI behavior to preserve results exactly.
  */
-export function calculateMonthlyTrend(log: WeightLogEntry[]): number | undefined {
+export function calculateThreeMonthTrend(log: WeightLogEntry[]): number | undefined {
   if (log.length < 2) return undefined;
 
   const now = new Date();
@@ -85,9 +83,7 @@ export function calculateMonthlyTrend(log: WeightLogEntry[]): number | undefined
 
   for (const entry of recentLogs) {
     const monthNumber = differenceInCalendarMonths(startOfMonth(entry.date), firstMonthStart);
-    if (!monthlyData[monthNumber]) {
-      monthlyData[monthNumber] = { weights: [], count: 0 };
-    }
+    (monthlyData[monthNumber] ??= { weights: [], count: 0 });
     monthlyData[monthNumber].weights.push(entry.weight);
     monthlyData[monthNumber].count++;
   }

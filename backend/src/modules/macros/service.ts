@@ -1,18 +1,101 @@
 // src/modules/macros/service.ts
-import { db } from "../../db";
-import { toCamelCase } from "../../lib/responses";
-import { safeQueryAll } from "../../lib/database";
+import type { Database } from "bun:sqlite";
+import {
+  safeQueryAll,
+  type MacroEntryRow,
+} from "../../lib/data/database";
+import { ValidationError } from "../../lib/http/errors";
+import { transformKeysToCamel } from "../../lib/mappers";
+import type { FoodProductResult } from "../../services/openfoodfacts-api-client";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
 
 interface MacroHistoryQuery {
   startDate?: string;
   endDate?: string;
-  groupBy?: "week" | "month";
+  groupBy?: "day" | "week" | "month";
 }
 
-export async function getMacroHistory(
+export interface CacheService {
+  get: <T>(key: string) => T | null | undefined;
+  set: <T>(key: string, value: T) => void;
+}
+
+export interface MacrosRouteContext
+  extends AuthenticatedRouteContextWithUser<Record<string, unknown>> {
+  openFoodFactsApiClient?: {
+    search: (query: string) => Promise<FoodProductResult[]>;
+  };
+  cacheService?: CacheService;
+}
+
+export interface MacroHistorySummaryItem {
+  period: string;
+  protein: number;
+  carbs: number;
+  fats: number;
+  calories: number;
+  count: number;
+}
+
+export interface MacroEntryResponse {
+  id: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+  mealType: "breakfast" | "lunch" | "dinner" | "snack";
+  mealName?: string;
+  entryDate: string;
+  entryTime: string;
+  ingredients?: unknown;
+  createdAt: string;
+}
+
+export function parseJsonArrayField<T>(
+  rawValue: string | null | undefined,
+  fieldName: string,
+): T[] {
+  if (!rawValue) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(rawValue);
+    if (!Array.isArray(parsed)) {
+      throw new ValidationError(`${fieldName} must be a JSON array.`);
+    }
+
+    return parsed as T[];
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw error;
+    }
+
+    throw new ValidationError(`Invalid ${fieldName} data in storage.`);
+  }
+}
+
+export function normalizeMacroEntryRow(
+  row: MacroEntryRow & { ingredients?: string | null },
+): MacroEntryResponse {
+  const normalized = transformKeysToCamel(
+    row as unknown as Record<string, unknown>,
+  ) as Record<string, unknown>;
+
+  if (typeof normalized.ingredients === "string") {
+    normalized.ingredients = parseJsonArrayField<Record<string, unknown>>(
+      normalized.ingredients,
+      "ingredients",
+    );
+  }
+
+  return normalized as unknown as MacroEntryResponse;
+}
+
+export function getMacroHistory(
+  db: Database,
   userId: string,
   params: MacroHistoryQuery = {}
-) {
+): MacroHistorySummaryItem[] {
   const { startDate, endDate, groupBy } = params;
   let groupExpr = "entry_date";
   let selectPeriod = "entry_date as period";
@@ -25,7 +108,7 @@ export async function getMacroHistory(
   }
 
   let query = `SELECT ${selectPeriod}, SUM(protein) as protein, SUM(carbs) as carbs, SUM(fats) as fats, SUM(protein*4 + carbs*4 + fats*9) as calories, COUNT(*) as count FROM macro_entries WHERE user_id = ?`;
-  const sqlParams: any[] = [userId];
+  const sqlParams: string[] = [userId];
   if (startDate) {
     query += " AND entry_date >= ?";
     sqlParams.push(startDate);
@@ -36,6 +119,9 @@ export async function getMacroHistory(
   }
   query += ` GROUP BY ${groupExpr} ORDER BY ${groupExpr} ASC`;
 
-  const rows = safeQueryAll<any>(db, query, sqlParams);
-  return rows.map(toCamelCase);
+  const rows = safeQueryAll<Record<string, unknown>>(db, query, sqlParams);
+  return rows.map(
+    (row) =>
+      transformKeysToCamel(row) as unknown as MacroHistorySummaryItem,
+  );
 }

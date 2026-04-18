@@ -1,1 +1,1 @@
-export { type CardGlareConfig, type CardGlareReturn,CardGlareWrapper, useCardGlare } from "./UseCardGlare";
+export { type CardGlareConfig, type CardGlareReturn,CardGlareWrapper, useCardGlare } from "./CardGlareHook";

@@ -1,6 +1,6 @@
 import React from "react";
 
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import { Button, StarIcon } from "@/components/ui";
 
 const FreeBillingView: React.FC<{

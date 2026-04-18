@@ -1,18 +1,27 @@
+import { useState } from "react";
 import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
 
-import { DateField, Dropdown, InfoCard, NumberField } from "@/components/form";
+import { authApi } from "@/api/auth";
+import { userApi } from "@/api/user";
+import DateField from "@/components/form/DateField";
+import Dropdown from "@/components/form/Dropdown";
+import InfoCard from "@/components/form/InfoCard";
+import NumberField from "@/components/form/NumberField";
 import Button from "@/components/ui/Button";
 import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
-import { AUTH_ERROR_MESSAGES } from "@/features/auth/constants";
+import { useSocialProfileData } from "@/features/auth/hooks/useSocialProfileData";
+import {
+  getFirstErrorMessage,
+  validateStep1 as checkStep1,
+  validateStep2 as checkStep2,
+} from "@/features/auth/utils/profileValidation";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
 import { logger } from "@/lib/logger";
 import { hasStatus, queryClient } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 import { Gender } from "@/types/user";
-import { apiService, setAuthToken } from "@/utils/apiServices";
 import {
   USER_MAXIMUM_HEIGHT,
   USER_MAXIMUM_WEIGHT,
@@ -21,33 +30,23 @@ import {
   USER_MINIMUM_WEIGHT,
 } from "@/utils/constants";
 import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
-import { isOldEnough } from "@/utils/validation";
-
-interface SocialProfileData {
-  firstName: string;
-  lastName: string;
-  dateOfBirth?: string;
-}
-
-function getFirstErrorMessage(validationErrors: Record<string, string>) {
-  return Object.values(validationErrors)[0];
-}
 
 export function ProfileCreationForm() {
   const navigate = useNavigate();
   const { user: clerkUser, isLoaded: _isUserLoaded } = useUser();
-  const { getToken, isSignedIn, isLoaded: isAuthLoaded } = useAuth();
+  const { isSignedIn, isLoaded: isAuthLoaded } = useAuth();
   const { showNotification } = useStore();
   const postSetupRedirect = normalizeAuthRedirect(
-    sessionStorage.getItem("postAuthRedirect") || undefined,
+    sessionStorage.getItem("postAuthRedirect") ?? undefined,
   );
 
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [socialData, setSocialData] = useState<SocialProfileData | null>(null);
+
+  // Use extracted hook for social profile data
+  const { socialData, dateOfBirth, setDateOfBirth } = useSocialProfileData();
 
   // Profile data
-  const [dateOfBirth, setDateOfBirth] = useState("");
   const [gender, setGender] = useState<Gender | "">("");
   const [height, setHeight] = useState<number | null>(null);
   const [weight, setWeight] = useState<number | null>(null);
@@ -56,73 +55,17 @@ export function ProfileCreationForm() {
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Load social data from session storage on mount
-  useEffect(() => {
-    const storedData = sessionStorage.getItem("socialProfileData");
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData) as SocialProfileData;
-        setSocialData(parsed);
-
-        // Pre-populate date of birth if available from social login
-        if (parsed.dateOfBirth) {
-          setDateOfBirth(parsed.dateOfBirth);
-        }
-      } catch {
-        // Invalid JSON, ignore
-      }
-    }
-  }, []);
-
-  // Clear social data from session storage after loading
-  useEffect(() => {
-    return () => {
-      sessionStorage.removeItem("socialProfileData");
-    };
-  }, []);
-
   const validateStep1 = (): Record<string, string> => {
-    const newErrors: Record<string, string> = {};
-
-    // Date of Birth validation
-    if (!dateOfBirth) {
-      newErrors.dateOfBirth = AUTH_ERROR_MESSAGES.dateOfBirthRequired;
-    } else if (!isOldEnough(dateOfBirth)) {
-      newErrors.dateOfBirth = `You must be at least ${USER_MINIMUM_AGE} years old`;
-    }
-
-    // Gender validation
-    if (!gender) {
-      newErrors.gender = "Gender is required";
-    }
-
-    // Height validation
-    if (!height) {
-      newErrors.height = AUTH_ERROR_MESSAGES.heightRequired;
-    } else if (height < USER_MINIMUM_HEIGHT || height > USER_MAXIMUM_HEIGHT) {
-      newErrors.height = `Please enter a valid height (${USER_MINIMUM_HEIGHT}-${USER_MAXIMUM_HEIGHT} cm)`;
-    }
-
-    // Weight validation
-    if (!weight) {
-      newErrors.weight = AUTH_ERROR_MESSAGES.weightRequired;
-    } else if (weight < USER_MINIMUM_WEIGHT || weight > USER_MAXIMUM_WEIGHT) {
-      newErrors.weight = `Please enter a valid weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`;
-    }
-
+    const newErrors = checkStep1(dateOfBirth, gender, height, weight);
     setErrors(newErrors);
+
     return newErrors;
   };
 
   const validateStep2 = (): Record<string, string> => {
-    const newErrors: Record<string, string> = {};
-
-    // Activity level validation
-    if (!activityLevel) {
-      newErrors.activityLevel = AUTH_ERROR_MESSAGES.activityLevelRequired;
-    }
-
+    const newErrors = checkStep2(activityLevel);
     setErrors(newErrors);
+
     return newErrors;
   };
 
@@ -132,6 +75,7 @@ export function ProfileCreationForm() {
       const firstError = getFirstErrorMessage(stepErrors);
       if (firstError) {
         showNotification(firstError, "error");
+
         return;
       }
     }
@@ -141,6 +85,7 @@ export function ProfileCreationForm() {
       const firstError = getFirstErrorMessage(stepErrors);
       if (firstError) {
         showNotification(firstError, "error");
+
         return;
       }
     }
@@ -159,6 +104,7 @@ export function ProfileCreationForm() {
     const firstError = getFirstErrorMessage(stepErrors);
     if (firstError) {
       showNotification(firstError, "error");
+
       return;
     }
 
@@ -168,11 +114,12 @@ export function ProfileCreationForm() {
         "Authentication is still loading. Please wait...",
         "info",
       );
+
       return;
     }
 
     // Ensure user is authenticated
-    if (!isSignedIn || !getToken) {
+    if (!isSignedIn) {
       logger.error("Profile creation attempted without authentication:", {
         isSignedIn,
         hasGetToken: !!getToken,
@@ -182,42 +129,18 @@ export function ProfileCreationForm() {
         "error",
       );
       navigate({ to: "/login", search: { returnTo: undefined } });
+
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Get a fresh token before making API calls
-      // Retry a few times if token is not immediately available
-      let token: string | null = null;
-      let retries = 3;
-
-      while (retries > 0 && !token) {
-        token = await getToken();
-        if (!token && retries > 1) {
-          await new Promise((resolve) => setTimeout(resolve, 100));
-          retries--;
-        }
-      }
-
-      if (!token) {
-        showNotification(
-          "Authentication failed. Please sign in again.",
-          "error",
-        );
-        navigate({ to: "/login", search: { returnTo: undefined } });
-        return;
-      }
-
-      // Set the token for API calls
-      setAuthToken(token);
-
       // Step 1: Sync the Clerk user to our backend
       // This creates the user record in our database
       // Note: User may already be synced from AuthReadyPage, so we handle conflicts gracefully
       try {
-        await apiService.auth.syncUser(token);
+        await authApi.syncUser();
       } catch (syncError: unknown) {
         // If user already exists (409), that's fine - continue with profile completion
         if (
@@ -234,12 +157,12 @@ export function ProfileCreationForm() {
       }
 
       // Step 2: Complete the user profile with the provided data
-      await apiService.user.completeProfile({
+      await userApi.completeProfile({
         dateOfBirth,
-        height: height || undefined,
-        weight: weight || undefined,
-        gender: gender || undefined,
-        activityLevel: activityLevel || undefined,
+        height: height ?? undefined,
+        weight: weight ?? undefined,
+        gender,
+        activityLevel: activityLevel ?? undefined,
       });
 
       // Clear social data on success
@@ -250,7 +173,7 @@ export function ProfileCreationForm() {
       await Promise.all([
         queryClient.fetchQuery({
           queryKey: queryKeys.auth.user(),
-          queryFn: () => apiService.user.getUserDetails(),
+          queryFn: () => userApi.getUserDetails(),
           staleTime: 0,
         }),
         queryClient.invalidateQueries({
@@ -282,7 +205,7 @@ export function ProfileCreationForm() {
   };
 
   // Get display name from social data or clerk user
-  const displayName = socialData?.firstName || clerkUser?.firstName || "there";
+  const displayName = socialData?.firstName ?? clerkUser?.firstName ?? "there";
 
   // Step 1: Basic Info
   if (step === 1) {
@@ -384,7 +307,7 @@ export function ProfileCreationForm() {
           </div>
         </div>
 
-        <Button onClick={handleNext} fullWidth iconPosition="right">
+        <Button onClick={handleNext} fullWidth>
           Continue
         </Button>
       </div>
@@ -406,7 +329,7 @@ export function ProfileCreationForm() {
           <div>
             <Dropdown
               label="How active are you on a typical week?"
-              value={activityLevel?.toString() || ""}
+              value={activityLevel?.toString() ?? ""}
               onChange={(value: string | number) => {
                 const normalizedValue = String(value);
                 setActivityLevel(
@@ -482,7 +405,7 @@ export function ProfileCreationForm() {
         <div className="flex justify-between">
           <span className="text-muted">Activity Level</span>
           <span className="text-right font-medium">
-            {activityLevel ? ACTIVITY_LEVELS[activityLevel]?.label : "-"}
+            {activityLevel ? ACTIVITY_LEVELS[activityLevel].label : "-"}
           </span>
         </div>
       </div>
@@ -496,7 +419,7 @@ export function ProfileCreationForm() {
           fullWidth
           isLoading={isLoading}
           loadingText="Creating profile..."
-          icon={<CheckIcon />}
+          leftIcon={<CheckIcon />}
           className="w-2/3"
         >
           Create Profile

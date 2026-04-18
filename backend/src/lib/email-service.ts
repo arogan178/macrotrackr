@@ -1,21 +1,25 @@
 import { Resend } from "resend";
 import { config } from "../config";
-import { logger } from "./logger";
+import { logger } from "./observability/logger";
 
-const resend = new Resend(config.RESEND_API_KEY);
+interface EmailService {
+  sendPasswordResetEmail: (to: string, token: string) => Promise<void>;
+}
 
-// Log config at startup
-logger.info(
-  {
-    type: "email_service_init",
-    hasApiKey: !!config.RESEND_API_KEY,
-    corsOrigin: config.CORS_ORIGIN,
-  },
-  "Email service initialized"
-);
+function createEmailServiceClient() {
+  const resend = new Resend(config.RESEND_API_KEY);
 
-export const emailService = {
-  sendPasswordResetEmail: async (to: string, token: string) => {
+  logger.info(
+    {
+      type: "email_service_init",
+      hasApiKey: !!config.RESEND_API_KEY,
+      corsOrigin: config.CORS_ORIGIN,
+    },
+    "Email service initialized"
+  );
+
+  return {
+    sendPasswordResetEmail: async (to: string, token: string) => {
     logger.info(
       { type: "email_send", operation: "password_reset", to: to.replace(/(.{2}).*@/, "$1***@") },
       "Sending password reset email"
@@ -43,14 +47,14 @@ export const emailService = {
           </div>
         `,
       });
-      if (result && result.error) {
+      if (result.error) {
         logger.error(
           { type: "email_error", operation: "password_reset", error: result.error },
           "Resend API error sending password reset email"
         );
       } else {
         logger.info(
-          { type: "email_sent", operation: "password_reset", messageId: result?.data?.id },
+          { type: "email_sent", operation: "password_reset", messageId: result.data.id },
           "Password reset email sent successfully"
         );
       }
@@ -64,5 +68,46 @@ export const emailService = {
         "Failed to send password reset email"
       );
     }
-  },
+    },
+  } satisfies EmailService;
+}
+
+let emailServiceRef: EmailService | null = null;
+let emailServiceConfiguredExplicitly = false;
+
+export function getEmailService(): EmailService {
+  if (!emailServiceRef) {
+    if (!emailServiceConfiguredExplicitly) {
+      logger.warn(
+        {
+          type: "implicit_service_initialization",
+          service: "email",
+        },
+        "Email service accessed before explicit runtime configuration; using default instance.",
+      );
+    }
+
+    emailServiceRef = createEmailServiceClient();
+  }
+
+  return emailServiceRef;
+}
+
+export function configureEmailService(service: EmailService): void {
+  emailServiceRef = service;
+  emailServiceConfiguredExplicitly = true;
+}
+
+export function resetEmailService(): void {
+  emailServiceRef = null;
+  emailServiceConfiguredExplicitly = false;
+}
+
+export function createEmailService(): EmailService {
+  return createEmailServiceClient();
+}
+
+export const emailService = {
+  sendPasswordResetEmail: async (to: string, token: string) =>
+    getEmailService().sendPasswordResetEmail(to, token),
 };

@@ -1,77 +1,18 @@
-/**
- * TextGenerateEffect – Animates text with a staggered reveal effect.
- *
- * Creates a blur-to-clear reveal animation for text, either character by character
- * or word by word. Uses Framer Motion for smooth animations.
- * Respects `prefers-reduced-motion` for accessibility.
- *
- * @example
- * // Word-by-word reveal (default)
- * <TextGenerateEffect text="Welcome to Macro Tracker" />
- *
- * @example
- * // Character-by-character reveal with custom speed
- * <TextGenerateEffect
- *   text="Loading..."
- *   mode="character"
- *   speed={0.05}
- * />
- *
- * @example
- * // Dramatic reveal for hero text
- * <TextGenerateEffect
- *   text="Track your nutrition journey"
- *   mode="word"
- *   speed={0.2}
- *   className="text-4xl font-light text-white"
- * />
- */
-import { motion, type Transition } from "motion/react";
 import React, { useEffect } from "react";
+import { motion, type Transition } from "motion/react";
 
 import { usePrefersReducedMotion } from "@/hooks";
 
 interface TextGenerateEffectProps {
-  /**
-   * The text to animate.
-   */
   text: string;
-  /**
-   * Animation mode.
-   * - "word": Reveal word by word (default, better for headings)
-   * - "character": Reveal character by character (better for short text)
-   * @default "word"
-   */
   mode?: "word" | "character";
-  /**
-   * Stagger delay between each unit (word or character) in seconds.
-   * - Fast: 0.08 (default)
-   * - Dramatic: 0.2
-   * @default 0.08
-   */
   speed?: number;
-  /**
-   * Duration of each unit's reveal animation in seconds.
-   * @default 0.4
-   */
   duration?: number;
-  /**
-   * Additional CSS classes for the container.
-   */
   className?: string;
-  /**
-   * Additional CSS classes for each text unit.
-   */
   textClassName?: string;
-  /**
-   * Callback when animation completes.
-   */
   onComplete?: () => void;
 }
 
-/**
- * Animation variants for blur-to-clear reveal
- */
 const unitVariants = {
   hidden: {
     opacity: 0,
@@ -85,9 +26,6 @@ const unitVariants = {
   },
 };
 
-/**
- * Reduced motion variants (simple fade only)
- */
 const reducedMotionVariants = {
   hidden: {
     opacity: 0,
@@ -128,6 +66,7 @@ const TextGenerateEffect: React.FC<TextGenerateEffectProps> = ({
     if (onComplete) {
       const totalTime = (units.length - 1) * speed + duration;
       const timer = setTimeout(onComplete, totalTime * 1000);
+
       return () => clearTimeout(timer);
     }
   }, [onComplete, units.length, speed, duration]);

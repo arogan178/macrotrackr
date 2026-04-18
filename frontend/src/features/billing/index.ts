@@ -1,9 +1,5 @@
 /**
- * Billing Feature Public API
+ * Billing feature public API.
  */
 
-// Pages
 export { default as PricingPage } from "./pages/PricingPage";
-
-// Hooks
-export { useSubscriptionStatus } from "./hooks/useSubscriptionStatus";

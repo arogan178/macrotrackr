@@ -1,7 +1,7 @@
-import { useReverification, useUser } from "@clerk/clerk-react";
 import { useState } from "react";
+import { useReverification, useUser } from "@clerk/clerk-react";
 
-import { CardContainer } from "@/components/form";
+import CardContainer from "@/components/form/CardContainer";
 import Button from "@/components/ui/Button";
 import {
   AppleIcon,
@@ -65,9 +65,14 @@ const ConnectedAccountsForm = () => {
   const [isConnecting, setIsConnecting] = useState<ProviderKey | null>(null);
   const [_isDisconnecting, setIsDisconnecting] = useState(false);
 
+  interface ExternalAccountCreateParameters {
+    strategy: (typeof PROVIDERS)[ProviderKey]["strategy"];
+    redirectUrl: string;
+  }
+
   // Wrap both operations with reverification
   const createExternalAccount = useReverification(
-    (parameters: { strategy: any; redirectUrl: string }) =>
+    (parameters: ExternalAccountCreateParameters) =>
       user?.createExternalAccount(parameters),
   );
 
@@ -87,6 +92,7 @@ const ConnectedAccountsForm = () => {
   // Check if disconnecting would leave user with no auth method
   const wouldBeLastAuthMethod = (_provider: ProviderKey): boolean => {
     if (hasPassword) return false;
+
     return externalAccounts.length === 1;
   };
 
@@ -146,6 +152,7 @@ const ConnectedAccountsForm = () => {
   const handleDisconnectConfirm = async () => {
     if (!modal.provider || modal.type === "warning") {
       closeModal();
+
       return;
     }
 
@@ -156,6 +163,7 @@ const ConnectedAccountsForm = () => {
     if (!account) {
       showNotification("Account not found.", "error");
       closeModal();
+
       return;
     }
 
@@ -201,7 +209,7 @@ const ConnectedAccountsForm = () => {
     if (!provider) return null;
 
     const ProviderIcon = provider.icon;
-    const displayEmail = account.emailAddress || "Connected";
+    const displayEmail = account.emailAddress ?? "Connected";
 
     return (
       <div
@@ -222,7 +230,7 @@ const ConnectedAccountsForm = () => {
             variant="ghost"
             buttonSize="sm"
             onClick={() =>
-              handleDisconnectClick(providerKey, account.emailAddress || "")
+              handleDisconnectClick(providerKey, account.emailAddress ?? "")
             }
             className="text-muted hover:text-error"
             ariaLabel={`Disconnect ${provider.name}`}
@@ -258,8 +266,7 @@ const ConnectedAccountsForm = () => {
           onClick={() => handleConnect(providerKey)}
           isLoading={isCurrentlyConnecting}
           loadingText="Connecting..."
-          icon={<ProviderIcon className="h-5 w-5" />}
-          iconPosition="left"
+          leftIcon={<ProviderIcon className="h-5 w-5" />}
           className="justify-start"
         >
           Connect {provider.name}
@@ -346,7 +353,7 @@ const ConnectedAccountsForm = () => {
             <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Email & Password
             </h4>
-            <div             className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20">
+            <div className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <div className="rounded-lg bg-primary/10 p-2">
@@ -357,7 +364,7 @@ const ConnectedAccountsForm = () => {
                       Email & Password
                     </p>
                     <p className="text-sm text-muted">
-                      {user?.primaryEmailAddress?.emailAddress ||
+                      {user?.primaryEmailAddress?.emailAddress ??
                         "Password enabled"}
                     </p>
                   </div>

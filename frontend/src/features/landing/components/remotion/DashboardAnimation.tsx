@@ -9,11 +9,18 @@ const POSITIONS = {
   addEntryButton: { x: 780, y: 443 },
 };
 
+const MACRO_COLORS = {
+  protein: "#10b981",
+  carbs: "#3b82f6",
+  fats: "#f59e0b",
+} as const;
+
 const CURSOR_EASE = Easing.out(Easing.quad);
 
 const createCursorPath = (frame: number) => {
   if (frame < 42) {
     const progress = interpolate(frame, [0, 42], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
     return {
       x: interpolate(progress, [0, 1], [POSITIONS.center.x, POSITIONS.searchBox.x], { easing: CURSOR_EASE }),
       y: interpolate(progress, [0, 1], [POSITIONS.center.y, POSITIONS.searchBox.y], { easing: CURSOR_EASE }),
@@ -23,6 +30,7 @@ const createCursorPath = (frame: number) => {
   
   if (frame < 102) {
     const progress = interpolate(frame, [95, 102], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
     return {
       x: interpolate(progress, [0, 1], [POSITIONS.searchBox.x, POSITIONS.searchButton.x], { easing: CURSOR_EASE }),
       y: interpolate(progress, [0, 1], [POSITIONS.searchBox.y, POSITIONS.searchButton.y], { easing: CURSOR_EASE }),
@@ -32,6 +40,7 @@ const createCursorPath = (frame: number) => {
   
   if (frame < 125) {
     const progress = interpolate(frame, [110, 125], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
     return {
       x: interpolate(progress, [0, 1], [POSITIONS.searchButton.x, POSITIONS.searchResult.x], { easing: CURSOR_EASE }),
       y: interpolate(progress, [0, 1], [POSITIONS.searchButton.y, POSITIONS.searchResult.y], { easing: CURSOR_EASE }),
@@ -41,6 +50,7 @@ const createCursorPath = (frame: number) => {
   
   if (frame < 202) {
     const progress = interpolate(frame, [195, 202], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+
     return {
       x: interpolate(progress, [0, 1], [POSITIONS.searchResult.x, POSITIONS.addEntryButton.x], { easing: CURSOR_EASE }),
       y: interpolate(progress, [0, 1], [POSITIONS.searchResult.y, POSITIONS.addEntryButton.y], { easing: CURSOR_EASE }),
@@ -107,6 +117,7 @@ export const DashboardAnimation: React.FC = () => {
     if (frame >= 100 && frame < 106) return interpolate(cursorClickSearchButton, [0, 0.5, 1], [1, 0.8, 1]);
     if (frame >= 135 && frame < 141) return interpolate(cursorClickSearchResult, [0, 0.5, 1], [1, 0.8, 1]);
     if (frame >= 200 && frame < 206) return interpolate(cursorClickAddButton, [0, 0.5, 1], [1, 0.8, 1]);
+
     return 1;
   };
 
@@ -283,9 +294,9 @@ export const DashboardAnimation: React.FC = () => {
 
               <div className="space-y-2">
                 {[
-                  { color: "#1ed760", progress: proteinProgress, percent: 78 },
-                  { color: "#3b82f6", progress: carbsProgress, percent: 62 },
-                  { color: "#ef4444", progress: fatsProgress, percent: 45 },
+                  { color: MACRO_COLORS.protein, progress: proteinProgress, percent: 78 },
+                  { color: MACRO_COLORS.carbs, progress: carbsProgress, percent: 62 },
+                  { color: MACRO_COLORS.fats, progress: fatsProgress, percent: 45 },
                 ].map((macro, index) => (
                   <div key={index} className="rounded-lg border border-white/5 bg-surface-2/50 p-2.5">
                     <div className="mb-1.5 flex items-center justify-between">
@@ -324,6 +335,7 @@ export const DashboardAnimation: React.FC = () => {
           <div className="space-y-2">
             {[0, 1, 2].map((index) => {
               const itemSpring = spring({ frame, fps, delay: 225 + index * 12, config: { damping: 200 } });
+
               return (
                 <div
                   key={index}

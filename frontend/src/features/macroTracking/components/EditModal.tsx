@@ -6,6 +6,7 @@ import MealDetailsSection from "@/features/macroTracking/components/edit-modal/M
 import { UnitConverter, type UnitType } from "@/features/macroTracking/utils/units";
 import { useBeforeUnload } from "@/hooks";
 import { Ingredient, MacroEntry } from "@/types/macro";
+import { handleApiError } from "@/utils/errorHandling";
 
 interface EditModalProps {
   entry: MacroEntry | undefined;
@@ -43,6 +44,7 @@ const normalizeQuantity = (quantity: number, unit: string): { value: number; typ
   if (UnitConverter.isVolumeUnit(unitType)) {
     return { value: UnitConverter.convert(quantity, unitType, "ml"), type: 'volume' };
   }
+
   return { value: quantity, type: 'unit' };
 };
 
@@ -75,7 +77,7 @@ export default function EditModal({
         baseFats: ing.baseFats ?? ing.fats,
         baseQuantity: ing.baseQuantity ?? ing.quantity,
         baseUnit: ing.baseUnit ?? ing.unit,
-      })) || [];
+      })) ?? [];
       
       const roundedEntry = {
         ...entry,
@@ -94,6 +96,7 @@ export default function EditModal({
 
   const hasUnsavedChanges = useMemo(() => {
     if (!originalEntry || !editedEntry) return false;
+
     return JSON.stringify(originalEntry) !== JSON.stringify(editedEntry);
   }, [editedEntry, originalEntry]);
 
@@ -166,7 +169,9 @@ export default function EditModal({
       .then(() => {
         setOriginalEntry({ ...editedEntry });
       })
-      .catch(() => {});
+      .catch((error) => {
+        handleApiError(error, "save edited macro entry");
+      });
   };
 
   // Ingredient management functions
@@ -179,7 +184,7 @@ export default function EditModal({
       fats: 0,
     };
     const updatedIngredients = [
-      ...(editedEntry.ingredients || []),
+      ...(editedEntry.ingredients ?? []),
       newIngredient,
     ];
     const totals = calculateTotalsFromIngredients(updatedIngredients);
@@ -196,7 +201,7 @@ export default function EditModal({
 
   const removeIngredient = (index: number) => {
     if (!editedEntry) return;
-    const updatedIngredients = editedEntry.ingredients?.filter((_, index_) => index_ !== index) || [];
+    const updatedIngredients = editedEntry.ingredients?.filter((_, index_) => index_ !== index) ?? [];
     const totals = calculateTotalsFromIngredients(updatedIngredients);
     setBaseIngredientsForScaling(updatedIngredients);
     setScaleFactor(1);
@@ -239,9 +244,9 @@ export default function EditModal({
         const baseNormalized = normalizeQuantity(baseQty, baseU);
         const newNormalized = normalizeQuantity(newQuantity ?? 100, newUnit ?? 'g');
 
-        let scaleFactor = 1;
+        let localScaleFactor = 1;
         if (baseNormalized.type === newNormalized.type && baseNormalized.value > 0) {
-          scaleFactor = newNormalized.value / baseNormalized.value;
+          localScaleFactor = newNormalized.value / baseNormalized.value;
         }
 
         // Update the ingredient with recalculated macros
@@ -249,9 +254,9 @@ export default function EditModal({
           ...updatedIng,
           quantity: newQuantity,
           unit: newUnit,
-          protein: roundValue(baseP * scaleFactor),
-          carbs: roundValue(baseC * scaleFactor),
-          fats: roundValue(baseF * scaleFactor),
+          protein: roundValue(baseP * localScaleFactor),
+          carbs: roundValue(baseC * localScaleFactor),
+          fats: roundValue(baseF * localScaleFactor),
         };
       } else {
         // Regular field update (name, protein, carbs, fats)
@@ -279,7 +284,7 @@ export default function EditModal({
       }
 
       return updatedIng;
-    }) || [];
+    }) ?? [];
 
     const totals = calculateTotalsFromIngredients(updatedIngredients);
     setBaseIngredientsForScaling(updatedIngredients);
@@ -359,7 +364,7 @@ export default function EditModal({
             onMacroChange={handleNumberChange}
           />
           <IngredientsPanel
-            ingredients={editedEntry.ingredients || []}
+            ingredients={editedEntry.ingredients ?? []}
             hasIngredients={Boolean(hasIngredients)}
             showIngredients={showIngredients}
             scaleFactor={scaleFactor}

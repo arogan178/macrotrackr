@@ -1,7 +1,6 @@
-import { useLoaderData } from "@tanstack/react-router";
 import React, { useCallback, useMemo } from "react";
 
-import { homeRoute } from "@/AppRouter";
+import { macrosApi } from "@/api/macros";
 import CardContainer from "@/components/form/CardContainer";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
@@ -26,19 +25,25 @@ import type {
 } from "@/features/macroTracking/types/macro";
 import { downloadHistoryCsv } from "@/features/macroTracking/utils";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
   useAddMacroEntry,
   useDeleteMacroEntry,
   useMacroDailyTotals,
-  useMacroTarget,
+  useMacroTargetQuery,
   useUpdateMacroEntry,
 } from "@/hooks/queries/useMacroQueries";
-import { useCreateSavedMeal, useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
+import {
+  useCreateSavedMeal,
+  useDeleteSavedMeal,
+  useSavedMeals,
+} from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
+import { logger } from "@/lib/logger";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
-import { apiService } from "@/utils/apiServices";
 import { todayISO } from "@/utils/dateUtilities";
+import type { NutritionProfileSource } from "@/utils/userConstants";
 
 export default function HomePage() {
   usePageDataSync();
@@ -49,7 +54,8 @@ export default function HomePage() {
   const {
     data: macroDailyTotals = { protein: 0, carbs: 0, fats: 0, calories: 0 },
   } = useMacroDailyTotals(today);
-  const { data: macroTarget } = useMacroTarget();
+  const { data: macroTarget } = useMacroTargetQuery();
+  const { data: weightGoals } = useWeightGoals();
 
   const {
     history,
@@ -59,10 +65,6 @@ export default function HomePage() {
     loadMoreHistory,
     limits,
   } = useHistoryPagination(20);
-
-  const { weightGoals } = useLoaderData({
-    from: homeRoute.id,
-  }) as any;
 
   const addMacroEntryMutation = useAddMacroEntry();
   const updateMacroEntryMutation = useUpdateMacroEntry();
@@ -76,24 +78,38 @@ export default function HomePage() {
   const savedEntryIds = useMemo(() => {
     const ids = new Set<number>();
     for (const entry of history) {
-      const entryName = entry.foodName || entry.mealName || "Saved Meal";
-      const isSaved = savedMeals.some((sm) => 
-        sm.name === entryName && 
-        sm.protein === entry.protein && 
-        sm.carbs === entry.carbs && 
-        sm.fats === entry.fats && 
-        sm.mealType === entry.mealType
+      const entryName = entry.foodName ?? entry.mealName;
+      const isSaved = savedMeals.some(
+        (sm) =>
+          sm.name === entryName &&
+          sm.protein === entry.protein &&
+          sm.carbs === entry.carbs &&
+          sm.fats === entry.fats &&
+          sm.mealType === entry.mealType,
       );
       if (isSaved) {
         ids.add(entry.id);
       }
     }
+
     return ids;
   }, [history, savedMeals]);
 
   const { editingEntry, setEditingEntry } = useStore();
 
-  const nutritionProfile = useNutritionProfile(user ?? undefined);
+  const nutritionProfileSource: NutritionProfileSource | undefined =
+    user && (user.gender === "male" || user.gender === "female")
+      ? {
+          id: user.id,
+          weight: user.weight,
+          height: user.height,
+          dateOfBirth: user.dateOfBirth,
+          gender: user.gender,
+          activityLevel: user.activityLevel,
+        }
+      : undefined;
+
+  const nutritionProfile = useNutritionProfile(nutritionProfileSource);
 
   const handleAddEntry = useCallback(
     async (entry: MacroEntryInput) => {
@@ -105,42 +121,35 @@ export default function HomePage() {
   const handleSaveMeal = useCallback(
     async (entry: MacroEntry) => {
       if (!entry.foodName && !entry.mealName) return;
-      
-      try {
-        await createSavedMealMutation.mutateAsync({
-          name: entry.foodName || entry.mealName || "Saved Meal",
-          protein: entry.protein,
-          carbs: entry.carbs,
-          fats: entry.fats,
-          mealType: entry.mealType as any,
-        });
-      } catch (error) {
-        console.error("Failed to save meal", error);
-      }
+
+      await createSavedMealMutation.mutateAsync({
+        name: entry.foodName ?? entry.mealName,
+        protein: entry.protein,
+        carbs: entry.carbs,
+        fats: entry.fats,
+        mealType: entry.mealType,
+      });
     },
-    [createSavedMealMutation]
+    [createSavedMealMutation],
   );
 
   const handleUnsaveMeal = useCallback(
     async (entry: MacroEntry) => {
-      const entryName = entry.foodName || entry.mealName || "Saved Meal";
-      const savedMeal = savedMeals.find((sm) => 
-        sm.name === entryName && 
-        sm.protein === entry.protein && 
-        sm.carbs === entry.carbs && 
-        sm.fats === entry.fats && 
-        sm.mealType === entry.mealType
+      const entryName = entry.foodName ?? entry.mealName;
+      const savedMeal = savedMeals.find(
+        (sm) =>
+          sm.name === entryName &&
+          sm.protein === entry.protein &&
+          sm.carbs === entry.carbs &&
+          sm.fats === entry.fats &&
+          sm.mealType === entry.mealType,
       );
-      
+
       if (savedMeal) {
-        try {
-          await deleteSavedMealMutation.mutateAsync(savedMeal.id);
-        } catch (error) {
-          console.error("Failed to unsave meal", error);
-        }
+        await deleteSavedMealMutation.mutateAsync(savedMeal.id);
       }
     },
-    [savedMeals, deleteSavedMealMutation]
+    [savedMeals, deleteSavedMealMutation],
   );
 
   const handleGroupMeals = useCallback(
@@ -159,11 +168,9 @@ export default function HomePage() {
       );
 
       const ingredients = selectedEntries.flatMap((entry) => {
-        const ingredientName = entry.foodName || entry.mealName || "Ingredient";
+        const ingredientName = entry.foodName ?? entry.mealName;
         const singleIngredient =
-          entry.ingredients && entry.ingredients.length === 1
-            ? entry.ingredients[0]
-            : undefined;
+          entry.ingredients?.length === 1 ? entry.ingredients[0] : undefined;
 
         if (singleIngredient) {
           return {
@@ -171,10 +178,12 @@ export default function HomePage() {
             name: singleIngredient.name || ingredientName,
             sourceEntryName: ingredientName,
             sourceEntryId: entry.id,
-            baseProtein: singleIngredient.baseProtein ?? singleIngredient.protein,
+            baseProtein:
+              singleIngredient.baseProtein ?? singleIngredient.protein,
             baseCarbs: singleIngredient.baseCarbs ?? singleIngredient.carbs,
             baseFats: singleIngredient.baseFats ?? singleIngredient.fats,
-            baseQuantity: singleIngredient.baseQuantity ?? singleIngredient.quantity,
+            baseQuantity:
+              singleIngredient.baseQuantity ?? singleIngredient.quantity,
             baseUnit: singleIngredient.baseUnit ?? singleIngredient.unit,
           };
         }
@@ -215,14 +224,15 @@ export default function HomePage() {
           protein: totalProtein,
           carbs: totalCarbs,
           fats: totalFats,
-          mealType: mealType as any,
+          mealType: mealType as "breakfast" | "lunch" | "dinner" | "snack",
           ingredients,
         });
       } catch (error) {
-        console.error("Failed to save grouped meal", error);
+        logger.error("Failed to save grouped meal", error);
+        throw error;
       }
     },
-    [createSavedMealMutation]
+    [createSavedMealMutation],
   );
 
   const handleEditEntry = useCallback(
@@ -236,8 +246,8 @@ export default function HomePage() {
           fats: entry.fats,
           mealType: entry.mealType,
           mealName: entry.mealName,
-          entryDate: entry.entryDate || "",
-          entryTime: entry.entryTime || "",
+          entryDate: entry.entryDate ?? "",
+          entryTime: entry.entryTime ?? "",
           ingredients: entry.ingredients,
         },
       });
@@ -256,7 +266,7 @@ export default function HomePage() {
   const handleExportHistory = useCallback(async () => {
     setIsExportingHistory(true);
     try {
-      const response = await apiService.macros.getAllHistory();
+      const response = await macrosApi.getAllHistory();
       downloadHistoryCsv(response.entries as MacroEntry[]);
     } finally {
       setIsExportingHistory(false);
@@ -273,7 +283,7 @@ export default function HomePage() {
   const isDeleting = deleteMacroEntryMutation.isPending;
 
   const effectiveCalorieTarget =
-    weightGoals?.calorieTarget || nutritionProfile?.tdee;
+    weightGoals?.calorieTarget ?? nutritionProfile?.tdee;
 
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
     user ?? undefined,

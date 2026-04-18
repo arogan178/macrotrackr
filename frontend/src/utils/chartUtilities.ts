@@ -36,7 +36,7 @@ export function formatDateName(
 
     // Create a date object for this entry
     const currentYear = new Date().getFullYear();
-    const monthNumber = monthMap[month] === undefined ? 0 : monthMap[month];
+    const monthNumber = monthMap[month] ?? 0;
     const entryDate = new Date(currentYear, monthNumber, day);
 
     // Calculate the week number within the month
@@ -55,6 +55,7 @@ export function formatDateName(
     const parts = entry.name.split(" ");
     const month = parts[0];
     const day = parts.length > 1 ? parts[1] : "";
+
     return `${month} ${day}`; // e.g., "Apr 18"
   }
 }
@@ -62,7 +63,7 @@ export function formatDateName(
 /**
  * Get descriptive text for the selected date range
  */
-export function getRangeDescription(selectedRange: number = 7): string {
+export function getRangeDescription(selectedRange = 7): string {
   return `Last ${selectedRange} Days`;
 }
 
@@ -76,7 +77,7 @@ export function getMacroPercentages(entry: {
   calories?: number;
 }) {
   const { protein, carbs, fats } = entry;
-  const calories = entry.calories || protein * 4 + carbs * 4 + fats * 9;
+  const calories = entry.calories ?? (protein * 4 + carbs * 4 + fats * 9);
 
   // If total calories from entry is 0, all percentages are 0
   if (calories === 0) {

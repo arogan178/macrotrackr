@@ -1,10 +1,10 @@
-import { motion } from "motion/react";
 import { memo } from "react";
+import { motion } from "motion/react";
 
-import { BUTTON_SIZES } from "@/components/utils/Constants";
+import { BUTTON_SIZES } from "@/components/utils/UiConstants";
 import { cn } from "@/lib/classnameUtilities";
 
-export type TabButtonProps = {
+export interface TabButtonProps {
   active: boolean;
   onClick: () => void;
   children: React.ReactNode;
@@ -15,7 +15,7 @@ export type TabButtonProps = {
   ariaLabel?: string;
   role?: string;
   "aria-selected"?: boolean;
-};
+}
 
 type ButtonSizeKey = keyof typeof BUTTON_SIZES;
 
@@ -27,10 +27,6 @@ type ExtendedTabButtonProps = TabButtonProps & {
   fullWidth?: boolean;
 };
 
-/**
- * TabButton with smooth background transition for active state.
- * Uses background color change to indicate active tab.
- */
 function TabButton({
   active,
   onClick,
@@ -48,12 +44,12 @@ function TabButton({
 }: ExtendedTabButtonProps) {
   const baseRounded = rounded ?? "rounded-lg";
   const motionBg = activeBg ?? "bg-surface-3"; // Darker, premium active state
-  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey] || BUTTON_SIZES.md;
+  const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
 
   // Check for reduced motion preference
   const prefersReducedMotion =
     typeof globalThis !== "undefined" &&
-    globalThis.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (
     <button
@@ -92,36 +88,6 @@ function TabButton({
         />
       )}
     </button>
-  );
-}
-
-/**
- * TabButtonGroup - Container for managing multiple TabButtons
- */
-export interface TabButtonGroupProps {
-  children: React.ReactNode;
-  className?: string;
-  /** Full width tabs */
-  fullWidth?: boolean;
-}
-
-export function TabButtonGroup({
-  children,
-  className = "",
-  fullWidth = false,
-}: TabButtonGroupProps) {
-  return (
-    <div
-      className={cn(
-        "relative inline-flex items-center gap-1 p-1",
-        "rounded-xl border border-white/5 bg-surface-2/80 backdrop-blur-md",
-        fullWidth ? "w-full" : "",
-        className
-      )}
-      role="tablist"
-    >
-      {children}
-    </div>
   );
 }
 

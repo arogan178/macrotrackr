@@ -38,11 +38,9 @@ function ProgressBar({
   const isComplete = safeProgress >= 99.5;
 
   const barHeight =
-    PROGRESS_BAR_HEIGHTS[height as keyof typeof PROGRESS_BAR_HEIGHTS] ||
-    PROGRESS_BAR_HEIGHTS.md;
+    PROGRESS_BAR_HEIGHTS[height as keyof typeof PROGRESS_BAR_HEIGHTS];
   const barColor =
-    PROGRESS_BAR_COLORS[color as keyof typeof PROGRESS_BAR_COLORS] ||
-    PROGRESS_BAR_COLORS.blue;
+    PROGRESS_BAR_COLORS[color as keyof typeof PROGRESS_BAR_COLORS];
 
   const fillRoundedClass = isComplete ? "rounded-full" : "rounded-l-full";
 
@@ -58,7 +56,7 @@ function ProgressBar({
         )}
 
         <div
-          className={`absolute top-0 left-0 h-full ${fillClass || barColor} ${fillRoundedClass} transition-[width] duration-500 ease-out`}
+          className={`absolute top-0 left-0 h-full ${fillClass ?? barColor} ${fillRoundedClass} transition-[width] duration-500 ease-out`}
           style={{ width: `${safeProgress}%` }}
         />
       </div>

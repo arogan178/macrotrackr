@@ -59,6 +59,7 @@ function HabitModal({
       newErrors.target = "Target must be greater than 0";
     }
     setErrors(newErrors);
+
     return Object.keys(newErrors).length === 0;
   }, []);
 
@@ -71,7 +72,7 @@ function HabitModal({
           title: habit.title,
           iconName: habit.iconName,
           target: habit.target,
-          accentColor: habit.accentColor || "indigo",
+          accentColor: habit.accentColor ?? "indigo",
         };
       }
       setFormValues(initialValues);
@@ -94,6 +95,7 @@ function HabitModal({
     setFormValues((previousValues) => {
       const newValues = { ...previousValues, [field]: value };
       setIsFormValid(validateForm(newValues)); // Re-validate on change
+
       return newValues;
     });
   };

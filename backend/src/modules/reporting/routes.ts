@@ -1,8 +1,19 @@
 import { Elysia, t } from "elysia";
 import { getMacroDensitySummary } from "./service";
-import { toCamelCase } from "../../lib/responses";
-import { db } from "../../db";
-import { requireAuth } from "../../middleware/clerk-guards";
+import { AuthenticationError } from "../../lib/http/errors";
+import type { AuthenticatedRouteContextWithUser } from "../../types";
+
+type ReportingQuery = {
+  startDate?: string;
+  endDate?: string;
+  groupBy?: "day" | "week" | "month";
+};
+
+type ReportingRouteContext = AuthenticatedRouteContextWithUser<
+  Record<string, never>,
+  Record<string, string>,
+  ReportingQuery
+>;
 
 // Response schema for nutrient density summary
 const NutrientDensityItemSchema = t.Object({
@@ -17,32 +28,39 @@ const NutrientDensityItemSchema = t.Object({
 const NutrientDensitySummaryResponseSchema = t.Array(NutrientDensityItemSchema);
 
 export const reportingRoutes = new Elysia({ prefix: "/api/reporting" })
-  .decorate("db", db)
-  .use(requireAuth)
   .get(
     "/nutrient-density-summary",
-    async ({ authenticatedUser, query }: { authenticatedUser: { userId: number }; query?: Record<string, string | undefined> }) => {
-      // Accepts: startDate, endDate, groupBy (e.g., week, month)
-      const { startDate, endDate, groupBy } = query ?? {};
+    async (rawContext: unknown) => {
+      const context = rawContext as ReportingRouteContext;
+      const { authenticatedUser, query, db } = context;
+      const internalUserId = authenticatedUser.userId;
+
+      if (internalUserId === null) {
+        throw new AuthenticationError("Authentication required. Please sign in.");
+      }
+
+      // Accepts: startDate, endDate, groupBy (e.g., day, week, month)
+      const { startDate, endDate, groupBy } = query;
       
-      // Only allow 'week' or 'month' for groupBy
+      // Only allow 'day', 'week' or 'month' for groupBy
       const groupByValue =
-        groupBy === "week" || groupBy === "month" ? groupBy : undefined;
+        groupBy === "day" || groupBy === "week" || groupBy === "month" ? groupBy : undefined;
       
       const summary = await getMacroDensitySummary({
-        userId: authenticatedUser.userId.toString(),
+        db,
+        userId: internalUserId.toString(),
         startDate,
         endDate,
         groupBy: groupByValue,
       });
       
-      return toCamelCase(summary);
+      return summary;
     },
     {
       query: t.Object({
         startDate: t.Optional(t.String()),
         endDate: t.Optional(t.String()),
-        groupBy: t.Optional(t.Union([t.Literal("week"), t.Literal("month")])),
+        groupBy: t.Optional(t.Union([t.Literal("day"), t.Literal("week"), t.Literal("month")])),
       }),
       response: NutrientDensitySummaryResponseSchema,
       detail: {

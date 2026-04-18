@@ -1,5 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { useNavigate } from "@tanstack/react-router";
 
 import CardContainer from "@/components/form/CardContainer";
 import LogoButton from "@/components/layout/LogoButton";

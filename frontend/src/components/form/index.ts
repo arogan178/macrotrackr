@@ -1,6 +1,4 @@
 export { default as LoadingSpinner } from "../ui/LoadingSpinner";
-export { default as Modal } from "../ui/Modal";
-export { default as ProgressBar } from "../ui/ProgressBar";
 export { default as CardContainer } from "./CardContainer";
 export { default as DateField } from "./DateField";
 export { default as Dropdown } from "./Dropdown";

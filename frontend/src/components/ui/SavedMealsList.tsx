@@ -1,11 +1,13 @@
-import { motion } from "motion/react";
 import { memo } from "react";
+import { motion } from "motion/react";
 
-import { Button, TrashIcon } from "@/components/ui";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
 import { cn } from "@/lib/classnameUtilities";
 import type { Ingredient } from "@/types/macro";
+
+import Button from "./Button";
+import { TrashIcon } from "./Icons";
 
 interface SavedMealsListProps {
   onSelectMeal: (meal: {
@@ -68,6 +70,7 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
             meal.carbs,
             meal.fats
           ));
+
           return (
             <motion.div
               key={meal.id}

@@ -1,12 +1,12 @@
+import React, { useCallback, useMemo } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import React, { useCallback, useMemo } from "react";
 
 import { ContentImage, EmptyState } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import Header from "@/features/landing/components/Header";
-import usePageMetadata from "@/hooks/usePageMetadata";
+import { usePageMetadata } from "@/hooks";
 import { filterPosts, getBlogCategories } from "@/lib/blog";
 
 interface BlogIndexSearch {
@@ -60,7 +60,7 @@ const BlogIndexPage: React.FC = () => {
     [navigate],
   );
 
-  const activeCategory = search.category || "all";
+  const activeCategory = search.category ?? "all";
 
   return (
     <div
@@ -133,7 +133,7 @@ const BlogIndexPage: React.FC = () => {
               <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
                 {activeCategory === "all"
                   ? "All Articles"
-                  : categories.find((c) => c.slug === activeCategory)?.name ||
+                   : categories.find((c) => c.slug === activeCategory)?.name ??
                     activeCategory}
               </h2>
             </div>
@@ -147,7 +147,7 @@ const BlogIndexPage: React.FC = () => {
         <AnimatePresence mode="wait">
           {featuredPost ? (
             <motion.div
-              key={`articles-${activeCategory}-${search.tag || "all-tags"}-${search.q || "all-query"}`}
+              key={`articles-${activeCategory}-${search.tag ?? "all-tags"}-${search.q ?? "all-query"}`}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}

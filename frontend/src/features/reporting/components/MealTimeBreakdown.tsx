@@ -8,8 +8,8 @@ import {
   Tooltip as RechartsTooltip,
 } from "recharts";
 
-import { AnimatedNumber } from "@/components/animation";
-import { ChartCard } from "@/components/chart";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import ChartCard from "@/components/chart/ChartCard";
 import TabBar from "@/components/ui/TabBar";
 import { getUnitForStat, MEAL_COLORS } from "@/utils/chartColors";
 
@@ -25,13 +25,21 @@ interface MealTimeBreakdownProps {
 }
 
 // Custom tooltip for Donut chart
-const CustomDonutTooltip = ({ active, payload, selectedStat }: any) => {
+const CustomDonutTooltip = ({
+  active,
+  payload,
+  selectedStat,
+}: {
+  active?: boolean;
+  payload?: Array<{ payload: Record<string, unknown> }>;
+  selectedStat?: string;
+}) => {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
     const value = data.value;
     const unit =
       selectedStat === "count" ? " meals" : ` ${getUnitForStat(selectedStat)}`;
-    const color = payload[0].payload.fill || payload[0].color;
+    const color = payload[0].payload.fill ?? payload[0].color;
 
     return (
       <div className="rounded-lg border border-border/50 bg-surface-2 p-3 shadow-xl">
@@ -56,6 +64,7 @@ const CustomDonutTooltip = ({ active, payload, selectedStat }: any) => {
       </div>
     );
   }
+
   return null;
 };
 
@@ -96,7 +105,7 @@ function MealTimeBreakdown({
     return (
       <ChartCard
         title="Meal Distribution"
-        isEmpty={true}
+        isEmpty
         emptyMessage="No meal data available for selected period."
         action={
           <TabBar
@@ -114,7 +123,7 @@ function MealTimeBreakdown({
     );
   }
 
-  // Define MEAL_TYPES matching the hook logic for consistent colors
+  // Meal types for type-safe mapping to colors
   const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
 
   return (
@@ -143,7 +152,7 @@ function MealTimeBreakdown({
             paddingAngle={3}
             dataKey="value"
             stroke="none"
-            isAnimationActive={true}
+            isAnimationActive
             animationDuration={500}
             animationEasing="ease-out"
           >
@@ -152,6 +161,7 @@ function MealTimeBreakdown({
               const typeKey =
                 entry.name.toLowerCase() as (typeof MEAL_TYPES)[number];
               const color = MEAL_COLORS[typeKey]?.base || "#8884d8";
+
               return <Cell key={`cell-${index}`} fill={color} />;
             })}
           </Pie>
@@ -167,7 +177,11 @@ function MealTimeBreakdown({
             <div className="flex h-full items-center justify-center">
               <div className="flex flex-col items-center gap-0.5">
                 <div className="text-3xl font-bold tracking-tight text-foreground">
-                  <AnimatedNumber value={totalValue} toFixedValue={0} duration={0.5} />
+                  <AnimatedNumber
+                    value={totalValue}
+                    toFixedValue={0}
+                    duration={0.5}
+                  />
                 </div>
                 <div className="text-xs font-medium tracking-wider text-muted uppercase">
                   {selectedStat === "count" ? "Total Meals" : "Avg / Day"}

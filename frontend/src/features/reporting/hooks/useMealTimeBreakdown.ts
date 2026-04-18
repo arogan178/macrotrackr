@@ -47,7 +47,7 @@ function calculateMealTypeDistribution(
 
   // Aggregate data by meal type
   for (const entry of entries) {
-    const mealType = entry.mealType || "snack";
+    const mealType = entry.mealType;
     const group = groups[mealType];
 
     group.protein += entry.protein || 0;
@@ -107,17 +107,19 @@ export function useMealTimeBreakdown(
 ): MealTypeDistributionData[] {
   // Filter history by date range
   const filteredHistory = useMemo(() => {
-    if (!history?.length) return [];
+    if (!history.length) return [];
     // Use shared getDayString for normalization, but direct start/end for filtering
     const start = new Date(startDate + "T00:00:00");
     const end = new Date(endDate + "T23:59:59");
+
     return history.filter((entry) => {
-      const dateString = entry.entryDate || entry.createdAt?.split("T")[0];
+      const dateString = entry.entryDate ?? entry.createdAt.split("T")[0];
       if (!dateString) return false;
       // Use shared getDayString for normalization
       const entryDate = new Date(
         getDayString(new Date(dateString)) + "T12:00:00",
       );
+
       return entryDate >= start && entryDate <= end;
     });
   }, [history, startDate, endDate]);
