@@ -50,11 +50,11 @@ async function loadDbModule(configOverrides?: {
 }
 
 describe("db/index", () => {
-  const consoleLogSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+  const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
 
   beforeEach(() => {
     DatabaseMock.mockClear();
-    consoleLogSpy.mockClear();
+    consoleWarnSpy.mockClear();
   });
 
   afterEach(() => {
@@ -80,14 +80,14 @@ describe("db/index", () => {
       NODE_ENV: "development",
     });
     initializeSchema.mockClear();
-    consoleLogSpy.mockClear();
+    consoleWarnSpy.mockClear();
 
     const database = { exec: vi.fn() };
     const result = dbModule.initializeDatabase(database as never);
 
     expect(result).toBe(database);
     expect(initializeSchema).toHaveBeenCalledWith(database);
-    expect(consoleLogSpy).toHaveBeenCalledWith(
+    expect(consoleWarnSpy).toHaveBeenCalledWith(
       "Database connected at /tmp/production.sqlite",
     );
   });

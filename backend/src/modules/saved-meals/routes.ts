@@ -203,7 +203,7 @@ export const savedMealRoutes = (app: Elysia) =>
 
           if (!limitCheck.allowed) {
             throw new AuthorizationError(
-              limitCheck.message || "Saved meals limit reached"
+              limitCheck.message ?? "Saved meals limit reached"
             );
           }
 

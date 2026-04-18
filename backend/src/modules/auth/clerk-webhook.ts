@@ -65,8 +65,8 @@ function getPrimaryEmail(event: ClerkWebhookEvent): string | undefined {
 function handleUserCreated(database: Database, event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
   const email = getPrimaryEmail(event);
-  const firstName = event.data.first_name || "";
-  const lastName = event.data.last_name || "";
+  const firstName = event.data.first_name ?? "";
+  const lastName = event.data.last_name ?? "";
 
   if (!email) {
     logger.error({ clerkUserId }, "No email found in Clerk user.created event");
@@ -107,8 +107,8 @@ function handleUserCreated(database: Database, event: ClerkWebhookEvent) {
 function handleUserUpdated(database: Database, event: ClerkWebhookEvent) {
   const clerkUserId = event.data.id;
   const email = getPrimaryEmail(event);
-  const firstName = event.data.first_name || "";
-  const lastName = event.data.last_name || "";
+  const firstName = event.data.first_name ?? "";
+  const lastName = event.data.last_name ?? "";
 
   logger.info({ clerkUserId }, "Processing Clerk user.updated webhook");
 

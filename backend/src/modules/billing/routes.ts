@@ -106,9 +106,9 @@ function resolveBillingUser(context: BillingRouteContext) {
 
   return {
     userId,
-    email: authenticatedUser.email || "",
-    firstName: authenticatedUser.firstName || "",
-    lastName: authenticatedUser.lastName || "",
+    email: authenticatedUser.email ?? "",
+    firstName: authenticatedUser.firstName ?? "",
+    lastName: authenticatedUser.lastName ?? "",
   };
 }
 
@@ -137,12 +137,12 @@ export const billingRoutes = (app: Elysia) =>
                       subscriptionInfo.subscription.stripe_subscription_id,
                   }
                 : null,
-              price: subscriptionInfo.price || null,
-              paymentMethod: subscriptionInfo.paymentMethod || null,
-              stripeDetails: subscriptionInfo.stripeDetails || null,
+              price: subscriptionInfo.price ?? null,
+              paymentMethod: subscriptionInfo.paymentMethod ?? null,
+              stripeDetails: subscriptionInfo.stripeDetails ?? null,
             };
           } catch (error) {
-            handleRouteError(error, "get_billing_details", user?.userId);
+            handleRouteError(error, "get_billing_details", user.userId);
           }
         },
         {
@@ -165,7 +165,7 @@ export const billingRoutes = (app: Elysia) =>
             const userSubscription =
               await SubscriptionService.getUserSubscription(user.userId);
             const sub = userSubscription.subscription;
-            if (!sub || !sub.stripe_subscription_id) {
+            if (!sub?.stripe_subscription_id) {
               throw new BadRequestError("No active subscription to cancel");
             }
             // Cancel in Stripe
@@ -189,7 +189,7 @@ export const billingRoutes = (app: Elysia) =>
                 "Subscription canceled. You will retain access until the end of your billing period.",
             };
           } catch (error) {
-            handleRouteError(error, "cancel_subscription", user?.userId);
+            handleRouteError(error, "cancel_subscription", user.userId);
           }
         },
         {
@@ -236,8 +236,8 @@ export const billingRoutes = (app: Elysia) =>
             const plan = body.plan === "yearly" ? "yearly" : "monthly";
             const priceId =
               plan === "yearly" ?
-                process.env.STRIPE_PRICE_ID_YEARLY || ""
-              : process.env.STRIPE_PRICE_ID_MONTHLY || "";
+                process.env.STRIPE_PRICE_ID_YEARLY ?? ""
+              : process.env.STRIPE_PRICE_ID_MONTHLY ?? "";
             if (!priceId)
               throw new BadRequestError(
                 "Stripe price ID not configured for selected plan"
@@ -265,7 +265,7 @@ export const billingRoutes = (app: Elysia) =>
             );
             return { sessionId: session.id, url: session.url! };
           } catch (error) {
-            handleRouteError(error, "create_checkout_session", user?.userId);
+            handleRouteError(error, "create_checkout_session", user.userId);
           }
         },
         {
@@ -324,7 +324,7 @@ export const billingRoutes = (app: Elysia) =>
             );
             return { url: portalSession.url };
           } catch (error) {
-            handleRouteError(error, "create_portal_session", user?.userId);
+            handleRouteError(error, "create_portal_session", user.userId);
           }
         },
         {
@@ -359,7 +359,7 @@ export const billingRoutes = (app: Elysia) =>
               } : null,
             };
           } catch (error) {
-            handleRouteError(error, "get_subscription_status", user?.userId);
+            handleRouteError(error, "get_subscription_status", user.userId);
           }
         },
         {

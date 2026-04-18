@@ -109,7 +109,7 @@ function configureSwaggerDocs(app: Elysia): void {
   // Alias for Swagger UI bug: serve /api/api/docs/json as /api/docs/json
   app.get("/api/api/docs/json", ({ set }) => {
     set.status = 302;
-    set.headers = set.headers ?? {};
+    set.headers = {};
     set.headers["Location"] = "/api/docs/json";
     return;
   });
@@ -147,7 +147,7 @@ function normalizeErrorCode(code: unknown): string {
 }
 
 function mapElysiaCodeToStatus(code: string): number {
-  return ELYSIA_STATUS_MAP[code] || 500;
+  return ELYSIA_STATUS_MAP[code] ?? 500;
 }
 
 function buildValidationErrorPayload(error: unknown): ErrorResponsePayload {
@@ -195,7 +195,7 @@ function handleGlobalError({ code, error, set, path }: ErrorHandlerContext) {
       code: errorCode,
       error: error instanceof Error ? error : new Error(String(error)),
     },
-    `[${errorCode}] ${error?.toString() || "Unknown error"}`
+    `[${errorCode}] ${error?.toString() ?? "Unknown error"}`
   );
 
   ensureApiJsonContentType(path, set);
