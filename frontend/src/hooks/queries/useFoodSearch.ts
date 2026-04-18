@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { type FoodSearchResult,macrosApi } from "@/api/macros";
+import { type FoodSearchResult, macrosApi } from "@/api/macros";
 import { queryKeys } from "@/lib/queryKeys";
 
 export function useFoodSearch(query?: string) {
@@ -9,7 +9,7 @@ export function useFoodSearch(query?: string) {
   return useQuery({
     queryKey: queryKeys.macros.search(normalizedQuery),
     queryFn: async (): Promise<FoodSearchResult[]> => {
-      return macrosApi.search(normalizedQuery);
+      return macrosApi.search({ query: normalizedQuery });
     },
     enabled: normalizedQuery.length >= 2,
     staleTime: 5 * 60 * 1000,

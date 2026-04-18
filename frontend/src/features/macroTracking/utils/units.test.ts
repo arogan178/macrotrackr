@@ -114,6 +114,34 @@ describe("units", () => {
           original: "totally unknown input",
         });
       });
+
+      it("parses food counts as unit servings", () => {
+        expect(UnitConverter.parseQuantity("6 eggs")).toEqual({
+          quantity: 6,
+          unit: "unit",
+          original: "6 eggs",
+        });
+
+        expect(UnitConverter.parseQuantity("Eggs")).toEqual({
+          quantity: 1,
+          unit: "unit",
+          original: "Eggs",
+        });
+
+        expect(UnitConverter.parseQuantity("3 pieces")).toEqual({
+          quantity: 3,
+          unit: "unit",
+          original: "3 pieces",
+        });
+      });
+
+      it("parses fl oz volumes into metric milliliters", () => {
+        expect(UnitConverter.parseQuantity("12 fl oz")).toEqual({
+          quantity: 354.88,
+          unit: "ml",
+          original: "12 fl oz",
+        });
+      });
     });
 
     describe("convert", () => {
