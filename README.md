@@ -103,6 +103,14 @@ bun install
 
 Ensure you have a `.env` file configured with your Clerk, Stripe, and base URL settings.
 
+Optional social-provider toggles for the login/register UI:
+
+- `VITE_SOCIAL_GOOGLE_ENABLED`
+- `VITE_SOCIAL_FACEBOOK_ENABLED`
+- `VITE_SOCIAL_APPLE_ENABLED`
+
+Set each to `true` or `false`. If omitted, the provider stays enabled by default.
+
 ### 3. Running the App
 
 ```bash

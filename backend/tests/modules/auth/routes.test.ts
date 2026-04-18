@@ -327,6 +327,8 @@ describe("auth routes", () => {
     });
 
     it("returns 409 when email already belongs to a different user", async () => {
+      const deleteUserMock = vi.fn(async () => undefined);
+
       safeQueryMock.mockImplementation((_db: unknown, query: string) => {
         if (query.includes("SELECT id, email FROM users WHERE clerk_id = ?")) {
           return null;
@@ -356,6 +358,11 @@ describe("auth routes", () => {
           firstName: "New",
           lastName: "Conflict",
         },
+        clerkClient: {
+          users: {
+            deleteUser: deleteUserMock,
+          },
+        },
       });
 
       const response = await postJson(app, "/api/auth/clerk-sync", {});
@@ -363,8 +370,61 @@ describe("auth routes", () => {
       expect(response.status).toBe(409);
       await expect(response.json()).resolves.toMatchObject({
         success: false,
-        code: "RESOURCE_CONFLICT",
+        code: "ACCOUNT_LINK_REQUIRED",
       });
+      expect(deleteUserMock).toHaveBeenCalledWith("clerk_new_conflict");
+      expect(safeExecuteMock).not.toHaveBeenCalled();
+    });
+
+    it("still returns account link required when transient cleanup fails", async () => {
+      const deleteUserMock = vi.fn(async () => {
+        throw new Error("cleanup failed");
+      });
+
+      safeQueryMock.mockImplementation((_db: unknown, query: string) => {
+        if (query.includes("SELECT id, email FROM users WHERE clerk_id = ?")) {
+          return null;
+        }
+
+        if (
+          query.includes(
+            "SELECT id, clerk_id, email FROM users WHERE LOWER(email) = LOWER(?)",
+          )
+        ) {
+          return {
+            id: 99,
+            clerk_id: "clerk_existing_owner",
+            email: "existing@example.com",
+          };
+        }
+
+        return null;
+      });
+
+      const app = createAuthTestApp(fakeDb, {
+        user: {
+          userId: null,
+          id: "clerk_conflict_cleanup_error",
+          clerkUserId: "clerk_conflict_cleanup_error",
+          email: "existing@example.com",
+          firstName: "Cleanup",
+          lastName: "Failure",
+        },
+        clerkClient: {
+          users: {
+            deleteUser: deleteUserMock,
+          },
+        },
+      });
+
+      const response = await postJson(app, "/api/auth/clerk-sync", {});
+
+      expect(response.status).toBe(409);
+      await expect(response.json()).resolves.toMatchObject({
+        success: false,
+        code: "ACCOUNT_LINK_REQUIRED",
+      });
+      expect(deleteUserMock).toHaveBeenCalledWith("clerk_conflict_cleanup_error");
       expect(safeExecuteMock).not.toHaveBeenCalled();
     });
 

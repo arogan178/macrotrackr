@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
@@ -10,6 +10,7 @@ import {
   type SocialAuthStrategy,
 } from "@/features/auth/components/SocialAuthOptions";
 import { AUTH_NOT_READY_MESSAGE } from "@/features/auth/constants";
+import { getAuthLinkIntent } from "@/features/auth/utils/linkIntent";
 import {
   buildSocialAuthRedirectUrls,
   normalizeAuthRedirect,
@@ -57,9 +58,14 @@ export function ClerkSignInForm({
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isEmailMode, setIsEmailMode] = useState(false);
+  const [showLinkIntentBanner, setShowLinkIntentBanner] = useState(false);
 
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
   const normalizedRedirect = normalizeAuthRedirect(redirectTo);
+
+  useEffect(() => {
+    setShowLinkIntentBanner(getAuthLinkIntent() !== null);
+  }, []);
 
   // Handle social sign-in
   // We intentionally start OAuth via the sign-up resource because the callback
@@ -260,6 +266,13 @@ export function ClerkSignInForm({
 
   return (
     <div className="w-full">
+      {showLinkIntentBanner && (
+        <div className="mb-4 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">
+          This email already has an account. Sign in to link your social
+          account.
+        </div>
+      )}
+
       <AnimatePresence mode="wait" initial={false}>
         {isEmailMode ? (
           <motion.div
