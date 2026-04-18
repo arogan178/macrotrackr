@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import { format, isValid, parse } from "date-fns";
 
+import type { AddWeightLogPayload } from "@/api/goals";
 import DateField from "@/components/form/DateField";
 import NumberField from "@/components/form/NumberField";
 import TimeField from "@/components/form/TimeField";
 import Modal from "@/components/ui/Modal";
 import { useAddWeightLogEntry } from "@/hooks/queries/useGoals";
-import type { AddWeightLogPayload } from "@/api/goals";
 import { USER_MAXIMUM_WEIGHT, USER_MINIMUM_WEIGHT } from "@/utils/constants";
 
 interface LogWeightModalProps {

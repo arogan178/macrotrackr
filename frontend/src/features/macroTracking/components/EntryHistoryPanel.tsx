@@ -18,13 +18,13 @@ import {
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 
 import DesktopEntryTable from "./DesktopEntryTable";
+import { EntryHistoryContext } from "./EntryHistoryContext";
 import {
   calculateCalories,
   capitalizeFirstLetter,
   formatEntryDate,
   formatTimeFromEntry,
 } from "./EntryHistoryHelpers";
-import { EntryHistoryContext } from "./EntryHistoryContext";
 import type { EntryHistoryController } from "./EntryHistoryShared";
 import MobileEntryCards from "./MobileEntryCards";
 

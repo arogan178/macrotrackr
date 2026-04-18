@@ -32,9 +32,15 @@ export default [
     },
   },
   {
-    files: ["src/utils/**/*.{js,ts,tsx}", "src/types/**/*.{js,ts,tsx}", "src/hooks/**/*.{js,ts,tsx}", "src/loaders/**/*.{js,ts,tsx}", "src/constants/**/*.{js,ts,tsx}", "src/lib/**/*.{js,ts,tsx}", "src/theme/**/*.{js,ts,tsx}", "src/features/**/hooks/**/*.{js,ts,tsx}", "src/features/**/types/**/*.{js,ts,tsx}", "src/features/**/utils/**/*.{js,ts,tsx}", "src/features/**/constants/**/*.{js,ts,tsx}", "src/api/**/*.{js,ts,tsx}", "src/routes/**/*.{js,ts,tsx}"],
+    files: ["src/utils/**/*.{js,ts,tsx}", "src/types/**/*.{js,ts,tsx}", "src/hooks/**/*.{js,ts,tsx}", "src/loaders/**/*.{js,ts,tsx}", "src/constants/**/*.{js,ts,tsx}", "src/lib/**/*.{js,ts,tsx}", "src/theme/**/*.{js,ts,tsx}", "src/features/**/hooks/**/*.{js,ts,tsx}", "src/features/**/types/**/*.{js,ts,tsx}", "src/features/**/utils/**/*.{js,ts,tsx}", "src/features/**/constants/**/*.{js,ts,tsx}", "src/api/**/*.{js,ts,tsx}"],
     rules: {
       "unicorn/filename-case": ["error", { case: "camelCase", multipleFileExtensions: false }],
+    },
+  },
+  {
+    files: ["src/routes/**/*.{js,ts,tsx}"],
+    rules: {
+      "unicorn/filename-case": "off",
     },
   },
   {
@@ -79,6 +85,7 @@ export default [
       "react/react-in-jsx-scope": "off",
       "react/no-unescaped-entities": "off",
       "react/self-closing-comp": "error",
+      "react/prop-types": "off",
       "react/jsx-no-useless-fragment": "warn",
       "react/jsx-boolean-value": ["error", "never"],
       "react/no-array-index-key": "warn",

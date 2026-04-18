@@ -22,12 +22,12 @@ export const reportingApi = {
   getMacroDensitySummary: async (
     parameters: MacroDensitySummaryParameters = {},
   ): Promise<MacroDensitySummaryItem[]> => {
-    const searchParams = new URLSearchParams();
-    if (parameters.startDate) searchParams.append("startDate", parameters.startDate);
-    if (parameters.endDate) searchParams.append("endDate", parameters.endDate);
-    if (parameters.groupBy) searchParams.append("groupBy", parameters.groupBy);
+    const searchParameters = new URLSearchParams();
+    if (parameters.startDate) searchParameters.append("startDate", parameters.startDate);
+    if (parameters.endDate) searchParameters.append("endDate", parameters.endDate);
+    if (parameters.groupBy) searchParameters.append("groupBy", parameters.groupBy);
     
-    const queryString = searchParams.toString();
+    const queryString = searchParameters.toString();
     const url = `/api/reporting/nutrient-density-summary${queryString ? `?${queryString}` : ""}`;
     
     return apiClient.get<MacroDensitySummaryItem[]>(url);

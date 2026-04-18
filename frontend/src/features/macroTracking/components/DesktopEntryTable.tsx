@@ -3,8 +3,8 @@ import {
   createColumnHelper,
   flexRender,
   getCoreRowModel,
-  useReactTable,
   type Row,
+  useReactTable,
 } from "@tanstack/react-table";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import { AnimatePresence, motion } from "motion/react";
@@ -319,6 +319,7 @@ const DesktopEntryTable = memo(
         }
 
         const parentDate = data.parentDate ?? data.date;
+
         return !isDateCollapsed(parentDate);
       });
     }, [table, isDateCollapsed]);
@@ -444,6 +445,7 @@ const DesktopEntryTable = memo(
         <AnimatePresence initial={false}>
           {visibleTableRows.map((row) => {
             const data = row.original;
+
             return renderRow(row, data, false);
           })}
         </AnimatePresence>

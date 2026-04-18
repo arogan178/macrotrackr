@@ -1,5 +1,5 @@
-import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import type { HabitGoalUpdatePayload } from "@/api/habits";
+import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
 import { generateId } from "@/utils/idGenerator";
 
 import { DEFAULT_HABIT_COLOR } from "../../constants/habits";
