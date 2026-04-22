@@ -7,7 +7,7 @@ on:
 
 
 concurrency:
-  group: macro-tracker-production-deploy
+  group: macrotrackr-production-deploy
   cancel-in-progress: false
 
 jobs:
@@ -54,7 +54,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: 22
         script: |
-          cd /var/www/macro-tracker
+          cd /var/www/macrotrackr
 
           # Add bun and pm2 to PATH
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
@@ -75,7 +75,7 @@ jobs:
           fi
 
           echo "Writing backend environment variables..."
-          printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "APP_MODE=managed" "AUTH_MODE=clerk" "BILLING_MODE=managed" "ANALYTICS_MODE=disabled" "EMAIL_MODE=resend" "APP_URL=${{ secrets.CORS_ORIGIN }}" "PUBLIC_APP_NAME=Macro Tracker" "SUPPORT_EMAIL=support@local.invalid" "ENABLE_METRICS=false" "CLERK_PUBLISHABLE_KEY=${BACKEND_CLERK_PUBLISHABLE_KEY}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env.production
+          printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macrotrackr.db" "APP_MODE=managed" "AUTH_MODE=clerk" "BILLING_MODE=managed" "ANALYTICS_MODE=disabled" "EMAIL_MODE=resend" "APP_URL=${{ secrets.CORS_ORIGIN }}" "PUBLIC_APP_NAME=Macro Tracker" "SUPPORT_EMAIL=support@local.invalid" "ENABLE_METRICS=false" "CLERK_PUBLISHABLE_KEY=${BACKEND_CLERK_PUBLISHABLE_KEY}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env.production
           cp backend/.env.production backend/.env
           echo "Backend environment variables written"
 
@@ -87,15 +87,15 @@ jobs:
           cd ..
           mkdir -p logs
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
-          pm2 startOrReload ecosystem.config.cjs --only macro-tracker-api --update-env
+          pm2 startOrReload ecosystem.config.cjs --only macrotrackr-api --update-env
 
           # Check if backend started successfully
           sleep 3
-          if pm2 describe macro-tracker-api > /dev/null; then
+          if pm2 describe macrotrackr-api > /dev/null; then
             echo "Backend API started successfully"
           else
             echo "Backend API failed to start"
-            pm2 logs macro-tracker-api --lines 20 || true
+            pm2 logs macrotrackr-api --lines 20 || true
             exit 1
           fi
 
@@ -198,7 +198,7 @@ jobs:
         key: ${{ secrets.SERVER_SSH_KEY }}
         port: 22
         source: "frontend/dist/"
-        target: "/var/www/macro-tracker/frontend/"
+        target: "/var/www/macrotrackr/frontend/"
         strip_components: 1
         rm: true
 
@@ -212,7 +212,7 @@ jobs:
         script: |
           export PATH=$PATH:/root/.bun/bin:/usr/local/bin
 
-          cd /var/www/macro-tracker
+          cd /var/www/macrotrackr
 
           # Restart frontend
           pm2 startOrReload ecosystem.config.cjs --only macro-frontend --update-env

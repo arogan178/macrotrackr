@@ -71,7 +71,7 @@
   - `docs/analysis/*`
   - `.github/IMPROVEMENTS_REQUIRED.md`
   - `.github/dev-commands.md`
-  - `.kilocode/skills/macro-tracker-design/SKILL.md`
+  - `.kilocode/skills/macrotrackr-design/SKILL.md`
   - `backend/src/db/schema.ts.bak`
   - `test-results/.last-run.json`
   - tracked local DB artifacts (including history cleanup before publication if needed)

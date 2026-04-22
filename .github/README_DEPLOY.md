@@ -47,7 +47,7 @@ Frontend build environment written by workflow includes:
 
 Use Docker Compose from the repository root for self-hosted deployments. By default, `docker-compose.yml` pulls prebuilt GHCR images:
 
-- `ghcr.io/arogan178/macro-tracker-backend:latest`
-- `ghcr.io/arogan178/macro-tracker-frontend:latest`
+- `ghcr.io/arogan178/macrotrackr-backend:latest`
+- `ghcr.io/arogan178/macrotrackr-frontend:latest`
 
 Use `docker-compose.build.yml` as an override when you want to build from source locally. See top-level `README.md` for commands and bootstrap flow.

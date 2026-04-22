@@ -35,12 +35,12 @@ log "Starting deployment"
 
 # Navigate to the app directory
 if [ "$DRY_RUN" = false ]; then
-    cd /var/www/macro-tracker/ || {
-        error "Failed to navigate to /var/www/macro-tracker/"
+    cd /var/www/macrotrackr/ || {
+        error "Failed to navigate to /var/www/macrotrackr/"
         exit 1
     }
 else
-    log "Would navigate to /var/www/macro-tracker/"
+    log "Would navigate to /var/www/macrotrackr/"
 fi
 
 # Pull the latest changes from the main branch
@@ -61,7 +61,7 @@ if [ "$DRY_RUN" = false ]; then
     else
         warn "backend/.env.production file not found!"
         warn "Environment variables will not be configured"
-        warn "Please create /var/www/macro-tracker/backend/.env.production with your production environment variables"
+        warn "Please create /var/www/macrotrackr/backend/.env.production with your production environment variables"
     fi
 else
     log "Would copy production environment variables if they exist"
@@ -169,11 +169,11 @@ fi
 sleep 3
 log "Checking backend API status..."
 if [ "$DRY_RUN" = false ]; then
-    if pm2 describe macro-tracker-api > /dev/null; then
+    if pm2 describe macrotrackr-api > /dev/null; then
         log "Backend API started successfully"
     else
         error "Backend API failed to start"
-        pm2 logs macro-tracker-api --lines 20 || true
+        pm2 logs macrotrackr-api --lines 20 || true
         exit 1
     fi
 else
