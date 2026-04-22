@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: "macro-tracker-api",
+      name: "macrotrackr-api",
       cwd: "./backend",
       script: "bun",
       args: "run start",

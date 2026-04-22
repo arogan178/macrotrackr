@@ -6,7 +6,7 @@ const BaseEnvSchema = z.object({
   HOST: z.string().default("0.0.0.0"),
   DATABASE_PATH: z
     .string()
-    .default(process.env.NODE_ENV === "test" ? ":memory:" : "./macro_tracker.db")
+    .default(process.env.NODE_ENV === "test" ? ":memory:" : "./macrotrackr.db")
     .transform((path) =>
       path === ":memory:" ? path : isAbsolute(path) ? path : resolve(process.cwd(), path)
     ),

@@ -27,7 +27,7 @@ bun run test         # Run frontend tests
 ## Architecture
 
 ```
-macro_tracker/
+macrotrackr/
 ├── frontend/     # React 19 + Vite + TanStack
 ├── backend/      # Elysia.js + Bun + SQLite
 └── .github/      # Documentation and AI instructions
