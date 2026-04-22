@@ -199,8 +199,8 @@ You don't need to wait for Monday. You don't need to finish reading every nutrit
 
 That's it. Start simple. Stay consistent. The results will come.
 
-[Start your free MacroTrackr account](https://macrotrackr.com/register) and make today Day 1.
+[Start your free MacroTrackr account](/register) and make today Day 1.
 
 — The MacroTrackr Team
 
-*Questions about getting started? Email us at support@macrotrackr.com—we read every message.*
+*Questions about getting started? Email us at support@local.invalid—we read every message.*

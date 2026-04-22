@@ -18,11 +18,9 @@ function NotificationManager() {
   return (
     <div
       className="pointer-events-none fixed left-1/2 z-50 -translate-x-1/2"
-      style={
-        {
-          top: "var(--floating-notification-top, 80px)",
-        } as React.CSSProperties
-      }
+      style={{
+        top: "var(--floating-notification-top, 80px)",
+      }}
     >
       <div className="flex w-screen max-w-md flex-col gap-3 px-4">
         {notifications.map((notification, index) => (

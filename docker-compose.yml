@@ -1,0 +1,38 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    env_file:
+      - backend/.env.example
+    volumes:
+      - ./data:/data
+    environment:
+      DATABASE_PATH: /data/macro_tracker.db
+      APP_MODE: self-hosted
+      AUTH_MODE: local
+      BILLING_MODE: disabled
+      ANALYTICS_MODE: disabled
+      EMAIL_MODE: disabled
+      APP_URL: http://localhost:5173
+      CORS_ORIGIN: http://localhost:5173
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ""
+        VITE_APP_URL: http://localhost:5173
+        VITE_PUBLIC_APP_NAME: Macro Tracker
+        VITE_SUPPORT_EMAIL: support@local.invalid
+        VITE_AUTH_MODE: local
+        VITE_BILLING_MODE: disabled
+        VITE_ANALYTICS_MODE: disabled
+        VITE_ENABLE_POSTHOG: "false"
+    depends_on:
+      - backend
+    ports:
+      - "5173:80"

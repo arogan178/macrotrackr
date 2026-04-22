@@ -35,7 +35,10 @@ function writeSitemap(outputPath, content) {
 }
 
 function main() {
-  const hostname = process.env.SITEMAP_HOSTNAME || "https://macrotrackr.com";
+  const hostname =
+    process.env.SITEMAP_HOSTNAME ||
+    process.env.VITE_APP_URL ||
+    "http://localhost:5173";
 
   const xml = buildSitemap(hostname);
 

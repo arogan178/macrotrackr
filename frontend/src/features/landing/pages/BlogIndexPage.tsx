@@ -8,6 +8,7 @@ import Footer from "@/features/landing/components/Footer";
 import Header from "@/features/landing/components/Header";
 import { usePageMetadata } from "@/hooks";
 import { filterPosts, getBlogCategories } from "@/lib/blog";
+import { buildCanonicalUrl } from "@/utils/appConstants";
 
 interface BlogIndexSearch {
   category?: string;
@@ -17,14 +18,14 @@ interface BlogIndexSearch {
 
 const BlogIndexPage: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
-  const navigate = useNavigate({ from: "/blog" });
-  const search = useSearch({ from: "/blog" }) as BlogIndexSearch;
+  const navigate = useNavigate({ from: "/blog/" });
+  const search = useSearch({ from: "/blog/" }) as BlogIndexSearch;
 
   usePageMetadata({
     title: "Blog — MacroTrackr",
     description:
       "Clearer nutrition writing, product releases, and practical tracking advice from the MacroTrackr team.",
-    canonical: "https://macrotrackr.com/blog",
+    canonical: buildCanonicalUrl("/blog"),
   });
 
   const categories = useMemo(

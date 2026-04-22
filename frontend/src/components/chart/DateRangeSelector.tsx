@@ -6,6 +6,7 @@ import {
   TabBar,
 } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
+import { isLocalAuthMode } from "@/config/runtime";
 
 import AnalyticsToolbar from "./AnalyticsToolbar";
 
@@ -26,6 +27,8 @@ export default function DateRangeSelector({
   disabledRanges = [],
   isPro = false,
 }: DateRangeSelectorProps) {
+  const hasProAccess = isLocalAuthMode || isPro;
+
   // Handle range change with free tier restrictions
   const handleRangeChange = (range: string) => {
     if (disabledRanges.includes(range)) {
@@ -63,7 +66,7 @@ export default function DateRangeSelector({
             size="sm"
             className="border border-border bg-surface-2"
           />
-          {!isPro && (
+          {!hasProAccess && (
             <span className="ml-2 text-xs text-muted">
               Pro: Unlock 30 & 90 day views
             </span>

@@ -1,8 +1,10 @@
 import { useNavigate, useSearch } from "@tanstack/react-router";
 
 import { QueryErrorBoundary } from "@/components/errors/QueryErrorBoundary";
+import { isClerkAuthMode, isLocalAuthMode } from "@/config/runtime";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { ClerkSignInForm } from "@/features/auth/components/ClerkSignInForm";
+import { LocalSignInForm } from "@/features/auth/components/LocalSignInForm";
 import { resolveAuthReturnTo } from "@/features/auth/utils/redirect";
 
 /**
@@ -21,16 +23,26 @@ export default function SignInPage() {
         eyebrow="Account Access"
         title="Welcome back"
         description="Sign in to pick up your tracking, saved meals, and goals right where you left them."
+        showBackToHome={!isLocalAuthMode}
       >
-        <ClerkSignInForm
-          onSwitchToSignUp={() =>
-            navigate({ to: "/register", search: returnToSearch })
-          }
-          onForgotPassword={() =>
-            navigate({ to: "/reset-password", search: returnToSearch })
-          }
-          redirectTo={returnTo}
-        />
+        {isClerkAuthMode ? (
+          <ClerkSignInForm
+            onSwitchToSignUp={() =>
+              navigate({ to: "/register", search: returnToSearch })
+            }
+            onForgotPassword={() =>
+              navigate({ to: "/reset-password", search: returnToSearch })
+            }
+            redirectTo={returnTo}
+          />
+        ) : (
+          <LocalSignInForm
+            onSwitchToSignUp={() =>
+              navigate({ to: "/register", search: returnToSearch })
+            }
+            redirectTo={returnTo}
+          />
+        )}
       </AuthPageShell>
     </QueryErrorBoundary>
   );

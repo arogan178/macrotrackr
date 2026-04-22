@@ -1,4 +1,4 @@
-import { apiClient, type ApiError } from "@/api/core";
+import { apiClient } from "@/api/core";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 export interface FoodSearchResult {
@@ -216,7 +216,7 @@ export const macrosApi = {
    * @throws {ApiError}
    */
   saveMacroTargetPercentages: async (payload: MacroTargetSettingsPayload) => {
-    if (payload?.macroTarget === undefined) {
+    if (payload.macroTarget === undefined) {
       throw new Error("Invalid payload: macroTarget object is required.");
     }
 

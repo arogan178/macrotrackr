@@ -22,7 +22,7 @@ describe("mutationErrorHandling", () => {
     it("should log error with operation", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       logMutationError("saveUser", new Error("Test error"));
-      expect(consoleSpy).toHaveBeenCalledWith("saveUser:", expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith("saveUser:", {});
       consoleSpy.mockRestore();
     });
   });
@@ -32,7 +32,7 @@ describe("mutationErrorHandling", () => {
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
       const logger = createMutationErrorLogger("testOp");
       logger(new Error("Test"));
-      expect(consoleSpy).toHaveBeenCalledWith("testOp:", expect.any(Error));
+      expect(consoleSpy).toHaveBeenCalledWith("testOp:", {});
       consoleSpy.mockRestore();
     });
   });

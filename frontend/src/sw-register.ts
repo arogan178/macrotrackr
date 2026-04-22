@@ -1,7 +1,23 @@
+import { isLocalAuthMode } from "./config/runtime";
+
 // Register the service worker in production builds with automatic updates
 export async function registerServiceWorker() {
   if (import.meta.env.MODE !== "production") return;
   if (!("serviceWorker" in navigator)) return;
+
+  if (isLocalAuthMode) {
+    try {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(registrations.map((registration) => registration.unregister()));
+
+      const cacheNames = await caches.keys();
+      await Promise.all(cacheNames.map((cacheName) => caches.delete(cacheName)));
+    } catch {
+      // Cache cleanup is best effort only.
+    }
+
+    return;
+  }
 
   try {
     let registration: ServiceWorkerRegistration | null = null;

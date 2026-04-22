@@ -1,6 +1,6 @@
 import type { Database } from "bun:sqlite";
 import { Elysia } from "elysia";
-
+import { randomBytes, createHash } from "node:crypto";
 import {
   type UserRow,
   safeExecute,
@@ -10,18 +10,27 @@ import {
 import {
   AccountLinkRequiredError,
   AuthenticationError,
+  ConflictError,
+  BadRequestError,
+  NotFoundError,
 } from "../../lib/http/errors";
 import { logger } from "../../lib/observability/logger";
-import type { ClerkAuthContext } from "../../middleware/clerk-auth";
-import { hashPassword } from "../../lib/auth/password";
-
+import { hashPassword, verifyPassword } from "../../lib/auth/password";
 import type { RouteContext } from "../../types";
 import { resolveClerkIdentity } from "../../lib/auth/route-adapter";
+import {
+  createExpiredSessionCookieValue,
+  createSession,
+  createSessionCookieValue,
+  deleteAllSessionsExcept,
+  deleteAllUserSessions,
+  deleteSession,
+  readSessionTokenFromRequest,
+} from "../../lib/auth/session";
+import { emailService } from "../../services/email-service";
+import { generateId } from "../../utils/id-generator";
+import { getConfig } from "../../config";
 import { AuthSchemas } from "./schemas";
-
-
-
-// import { rateLimiters } from "../../middleware/rate-limit"; // Temporarily disabled
 
 interface ClerkUserRecord {
   emailAddresses?: Array<{ id?: string; emailAddress?: string }>;
@@ -88,6 +97,32 @@ type AuthRouteContext<TBody = Record<string, unknown>> = RouteContext<
 > & {
   db: Database;
   clerkClient?: ClerkApiClient;
+  authenticatedUser?: {
+    userId: number | null;
+    providerUserId: string;
+    authProvider: "clerk" | "local";
+    sessionId?: string;
+    clerkUserId?: string;
+    email?: string;
+    firstName?: string;
+    lastName?: string;
+  } | null;
+};
+
+type RegisterRequestBody = {
+  email: string;
+  password: string;
+  firstName: string;
+  lastName: string;
+};
+
+type LoginRequestBody = {
+  email: string;
+  password: string;
+};
+
+type ForgotPasswordRequestBody = {
+  email: string;
 };
 
 type ResetPasswordRequestBody = {
@@ -95,13 +130,390 @@ type ResetPasswordRequestBody = {
   newPassword: string;
 };
 
+type ChangePasswordRequestBody = {
+  currentPassword: string;
+  newPassword: string;
+};
 
+const SESSION_SLIDING_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+function setSessionCookie(context: { set: { headers?: unknown } }, token: string): void {
+  const headers = (context.set.headers ?? {}) as Record<string, string>;
+  headers["Set-Cookie"] = createSessionCookieValue(token);
+  context.set.headers = headers;
+}
+
+function clearSessionCookie(context: { set: { headers?: unknown } }): void {
+  const headers = (context.set.headers ?? {}) as Record<string, string>;
+  headers["Set-Cookie"] = createExpiredSessionCookieValue();
+  context.set.headers = headers;
+}
+
+function getClientIp(request: Request): string | null {
+  const forwarded = request.headers.get("x-forwarded-for");
+  if (forwarded) {
+    return forwarded.split(",")[0]?.trim() ?? null;
+  }
+  return request.headers.get("x-real-ip");
+}
+
+function hashResetToken(token: string): string {
+  return createHash("sha256").update(token).digest("hex");
+}
+
+function createPasswordResetTokenPair(): { rawToken: string; tokenHash: string } {
+  const rawToken = randomBytes(32).toString("base64url");
+  return {
+    rawToken,
+    tokenHash: hashResetToken(rawToken),
+  };
+}
+
+function buildResetTokenExpiry(): string {
+  return new Date(Date.now() + 60 * 60 * 1000).toISOString();
+}
+
+function userHasLocalCredential(user: Pick<UserRow, "password">): boolean {
+  return user.password !== "clerk-auth";
+}
+
+function getHeaderValue(headers: unknown, key: string): string | null {
+  if (!headers || typeof headers !== "object") {
+    return null;
+  }
+
+  const record = headers as Record<string, unknown>;
+  const value = record[key];
+  return typeof value === "string" ? value : null;
+}
+
+function assertLocalRouteAccess(context: {
+  authenticatedUser?: AuthRouteContext["authenticatedUser"];
+  set: { status?: number };
+}): NonNullable<AuthRouteContext["authenticatedUser"]> {
+  const auth = context.authenticatedUser;
+
+  if (!auth) {
+    context.set.status = 401;
+    throw new AuthenticationError("Authentication required. Please sign in.");
+  }
+
+  if (auth.authProvider !== "local") {
+    context.set.status = 404;
+    throw new NotFoundError("Not found");
+  }
+
+  return auth;
+}
 
 export const authRoutes = (app: Elysia) =>
   app.group("/api/auth", (group) =>
     group
-      // .use(rateLimiters.auth) // Temporarily disabled for testing
+      .post(
+        "/register",
+        async (context) => {
+          const { db, body, request } =
+            context as unknown as AuthRouteContext<RegisterRequestBody> & {
+              body: RegisterRequestBody;
+            };
 
+          const authHeader = getHeaderValue(context.headers, "authorization");
+          if (authHeader) {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          if (getConfig().AUTH_MODE !== "local") {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          const email = body.email.trim().toLowerCase();
+          const existing = safeQuery<{ id: number }>(
+            db,
+            "SELECT id FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
+            [email],
+          );
+          if (existing) {
+            throw new ConflictError("An account with this email already exists.");
+          }
+
+          const passwordHash = await hashPassword(body.password);
+
+          const userId = withTransaction(db, () => {
+            const result = safeExecute(
+              db,
+              "INSERT INTO users (email, first_name, last_name, password) VALUES (?, ?, ?, ?)",
+              [email, body.firstName.trim(), body.lastName.trim(), passwordHash],
+            );
+            const insertedId = Number(result.lastInsertRowid);
+
+            safeExecute(
+              db,
+              `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
+               VALUES (?, NULL, NULL, NULL, NULL, NULL)`,
+              [insertedId],
+            );
+
+            safeExecute(
+              db,
+              `INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
+               VALUES (?, 30, 40, 30, '[]')`,
+              [insertedId],
+            );
+
+            return insertedId;
+          });
+
+          const { token } = createSession(db, userId, {
+            ip: getClientIp(request),
+            userAgent: request.headers.get("user-agent"),
+          });
+          setSessionCookie(context, token);
+
+          return {
+            success: true,
+            message: "Account created successfully",
+          };
+        },
+        {
+          body: AuthSchemas.register,
+          response: AuthSchemas.successResponse,
+          detail: {
+            summary: "Register local account",
+            tags: ["Auth"],
+          },
+        },
+      )
+      .post(
+        "/login",
+        async (context) => {
+          const { db, body, request } =
+            context as unknown as AuthRouteContext<LoginRequestBody> & {
+              body: LoginRequestBody;
+            };
+
+          const authHeader = getHeaderValue(context.headers, "authorization");
+          if (authHeader) {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          if (getConfig().AUTH_MODE !== "local") {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          const email = body.email.trim().toLowerCase();
+          const user = safeQuery<UserRow>(
+            db,
+            "SELECT id, email, password FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
+            [email],
+          );
+
+          if (!user || !userHasLocalCredential(user)) {
+            throw new AuthenticationError("Invalid email or password.");
+          }
+
+          const validPassword = await verifyPassword(body.password, user.password);
+          if (!validPassword) {
+            throw new AuthenticationError("Invalid email or password.");
+          }
+
+          deleteAllUserSessions(db, user.id);
+
+          const { token } = createSession(db, user.id, {
+            ip: getClientIp(request),
+            userAgent: request.headers.get("user-agent"),
+          });
+          setSessionCookie(context, token);
+
+          return {
+            success: true,
+            message: "Signed in successfully",
+          };
+        },
+        {
+          body: AuthSchemas.login,
+          response: AuthSchemas.successResponse,
+          detail: {
+            summary: "Login local account",
+            tags: ["Auth"],
+          },
+        },
+      )
+      .post(
+        "/logout",
+        async (context) => {
+          const { db } = context as unknown as AuthRouteContext;
+          const auth = assertLocalRouteAccess(context as unknown as AuthRouteContext);
+          if (!auth.sessionId || !auth.userId) {
+            context.set.status = 401;
+            throw new AuthenticationError("Authentication required. Please sign in.");
+          }
+
+          deleteSession(db, auth.sessionId);
+          clearSessionCookie(context);
+
+          return {
+            success: true,
+            message: "Signed out successfully",
+          };
+        },
+        {
+          response: AuthSchemas.successResponse,
+          detail: {
+            summary: "Logout current session",
+            tags: ["Auth"],
+          },
+        },
+      )
+      .post(
+        "/logout-all",
+        async (context) => {
+          const { db } = context as unknown as AuthRouteContext;
+          const auth = assertLocalRouteAccess(context as unknown as AuthRouteContext);
+          if (!auth.userId || !auth.sessionId) {
+            context.set.status = 401;
+            throw new AuthenticationError("Authentication required. Please sign in.");
+          }
+
+          deleteAllUserSessions(db, auth.userId);
+          clearSessionCookie(context);
+
+          return {
+            success: true,
+            message: "Signed out from all sessions",
+          };
+        },
+        {
+          response: AuthSchemas.successResponse,
+          detail: {
+            summary: "Logout all sessions",
+            tags: ["Auth"],
+          },
+        },
+      )
+      .get(
+        "/session",
+        async (context) => {
+          const { db } = context as unknown as AuthRouteContext;
+          const auth = context as unknown as AuthRouteContext;
+          if (getConfig().AUTH_MODE !== "local") {
+            return {
+              authenticated: false,
+              user: null,
+            };
+          }
+
+          if (!auth.authenticatedUser?.userId) {
+            return {
+              authenticated: false,
+              user: null,
+            };
+          }
+
+          const user = safeQuery<{
+            id: number;
+            email: string;
+            first_name: string;
+            last_name: string;
+          }>(
+            db,
+            "SELECT id, email, first_name, last_name FROM users WHERE id = ? LIMIT 1",
+            [auth.authenticatedUser.userId],
+          );
+
+          if (!user) {
+            return {
+              authenticated: false,
+              user: null,
+            };
+          }
+
+          return {
+            authenticated: true,
+            user: {
+              id: user.id,
+              email: user.email,
+              firstName: user.first_name,
+              lastName: user.last_name,
+            },
+          };
+        },
+        {
+          response: AuthSchemas.sessionResponse,
+          detail: {
+            summary: "Get local session status",
+            tags: ["Auth"],
+          },
+        },
+      )
+      .post(
+        "/forgot-password",
+        async (context) => {
+          const { db, body } =
+            context as unknown as AuthRouteContext<ForgotPasswordRequestBody> & {
+              body: ForgotPasswordRequestBody;
+            };
+
+          const authHeader = getHeaderValue(context.headers, "authorization");
+          if (authHeader) {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          if (getConfig().AUTH_MODE !== "local") {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
+          const email = body.email.trim().toLowerCase();
+          const user = safeQuery<{ id: number; email: string }>(
+            db,
+            "SELECT id, email FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
+            [email],
+          );
+
+          if (!user) {
+            return {
+              success: true,
+              message: "If this email exists, a reset link has been sent.",
+            };
+          }
+
+          const { rawToken, tokenHash } = createPasswordResetTokenPair();
+          const expiresAt = buildResetTokenExpiry();
+
+          safeExecute(
+            db,
+            "UPDATE password_reset_tokens SET used_at = CURRENT_TIMESTAMP WHERE user_id = ? AND used_at IS NULL",
+            [user.id],
+          );
+
+          safeExecute(
+            db,
+            `INSERT INTO password_reset_tokens (id, user_id, token_hash, expires_at)
+             VALUES (?, ?, ?, ?)`,
+            [generateId(), user.id, tokenHash, expiresAt],
+          );
+
+          await emailService.sendPasswordResetEmail(user.email, rawToken);
+
+          return {
+            success: true,
+            message: "If this email exists, a reset link has been sent.",
+          };
+        },
+        {
+          body: AuthSchemas.forgotPassword,
+          response: AuthSchemas.successResponse,
+          detail: {
+            summary: "Request password reset",
+            tags: ["Auth"],
+          },
+        },
+      )
       .post(
         "/reset-password",
         async (context) => {
@@ -109,39 +521,56 @@ export const authRoutes = (app: Elysia) =>
             context as unknown as AuthRouteContext<ResetPasswordRequestBody> & {
               body: ResetPasswordRequestBody;
             };
-          const { token, newPassword } = body;
 
-          const userWithResetToken = safeQuery<
-            Pick<UserRow, "id" | "password_reset_expires">
-          >(
+          const tokenHash = hashResetToken(body.token);
+
+          const tokenRecord = safeQuery<{
+            id: string;
+            user_id: number;
+            expires_at: string;
+            used_at: string | null;
+          }>(
             db,
-            "SELECT id, password_reset_expires FROM users WHERE password_reset_token = ?",
-            [token],
+            `SELECT id, user_id, expires_at, used_at
+             FROM password_reset_tokens
+             WHERE token_hash = ?
+             LIMIT 1`,
+            [tokenHash],
           );
 
-          if (!userWithResetToken?.password_reset_expires) {
+          if (!tokenRecord || tokenRecord.used_at) {
             throw new AuthenticationError("Invalid or expired password reset token.");
           }
 
-          const resetExpiresAt = new Date(userWithResetToken.password_reset_expires);
-          if (Number.isNaN(resetExpiresAt.getTime()) || resetExpiresAt <= new Date()) {
+          const expiresAt = new Date(tokenRecord.expires_at);
+          if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
             throw new AuthenticationError("Invalid or expired password reset token.");
           }
 
-          const hashedPassword = await hashPassword(newPassword);
+          const newPasswordHash = await hashPassword(body.newPassword);
 
-          safeExecute(
-            db,
-            "UPDATE users SET password = ?, password_reset_token = NULL, password_reset_expires = NULL WHERE id = ?",
-            [hashedPassword, userWithResetToken.id],
-          );
+          withTransaction(db, () => {
+            safeExecute(
+              db,
+              "UPDATE users SET password = ? WHERE id = ?",
+              [newPasswordHash, tokenRecord.user_id],
+            );
+            safeExecute(
+              db,
+              "UPDATE password_reset_tokens SET used_at = CURRENT_TIMESTAMP WHERE id = ?",
+              [tokenRecord.id],
+            );
+            deleteAllUserSessions(db, tokenRecord.user_id);
+          });
 
           return {
+            success: true,
             message: "Password has been reset successfully.",
           };
         },
         {
           body: AuthSchemas.resetPassword,
+          response: AuthSchemas.successResponse,
           detail: {
             summary: "Reset password with token",
             description: "Resets a password using a valid password reset token",
@@ -149,24 +578,93 @@ export const authRoutes = (app: Elysia) =>
           },
         },
       )
+      .post(
+        "/change-password",
+        async (context) => {
+          const { db, body, request } =
+            context as unknown as AuthRouteContext<ChangePasswordRequestBody> & {
+              body: ChangePasswordRequestBody;
+            };
 
-      // Clerk User Sync - Sync Clerk user with our database
+          const auth = assertLocalRouteAccess(context as unknown as AuthRouteContext);
+          if (!auth.userId || !auth.sessionId) {
+            context.set.status = 401;
+            throw new AuthenticationError("Authentication required. Please sign in.");
+          }
+
+          const userId = auth.userId;
+          const sessionId = auth.sessionId;
+
+          const currentUser = safeQuery<Pick<UserRow, "password">>(
+            db,
+            "SELECT password FROM users WHERE id = ? LIMIT 1",
+            [userId],
+          );
+          if (!currentUser || !userHasLocalCredential(currentUser)) {
+            throw new AuthenticationError("Current password is incorrect.");
+          }
+
+          const validPassword = await verifyPassword(body.currentPassword, currentUser.password);
+          if (!validPassword) {
+            throw new AuthenticationError("Current password is incorrect.");
+          }
+
+          const nextPasswordHash = await hashPassword(body.newPassword);
+
+          withTransaction(db, () => {
+            safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [nextPasswordHash, userId]);
+            deleteAllUserSessions(db, userId);
+          });
+
+          const { token } = createSession(db, userId, {
+            ip: getClientIp(request),
+            userAgent: request.headers.get("user-agent"),
+          });
+          setSessionCookie(context, token);
+
+          const newSessionId = token.split(".")[0];
+          if (!newSessionId) {
+            throw new BadRequestError("Unable to rotate session");
+          }
+
+          deleteAllSessionsExcept(db, userId, newSessionId);
+          deleteSession(db, sessionId);
+
+          return {
+            success: true,
+            message: "Password updated successfully.",
+          };
+        },
+        {
+          body: AuthSchemas.changePassword,
+          response: AuthSchemas.successResponse,
+          detail: {
+            summary: "Change local account password",
+            tags: ["Auth"],
+          },
+        },
+      )
       .post(
         "/clerk-sync",
         async (context) => {
+          const config = getConfig();
+          if (config.AUTH_MODE !== "clerk") {
+            context.set.status = 404;
+            throw new NotFoundError("Not found");
+          }
+
           const { db, clerkClient } = context as unknown as AuthRouteContext;
           const {
             clerkUserId,
             email: initialEmail,
             firstName: initialFirstName,
             lastName: initialLastName,
-          } = resolveClerkIdentity(context as unknown as ClerkAuthContext);
+          } = resolveClerkIdentity(context as unknown as RouteContext);
 
           let email = initialEmail;
           let firstName = initialFirstName ?? "";
           let lastName = initialLastName ?? "";
 
-          // Defensive fallback: resolve missing Clerk profile fields from Clerk API.
           if (!email || !firstName || !lastName) {
             try {
               const clerkUser = await clerkClient?.users?.getUser?.(clerkUserId);
@@ -176,81 +674,47 @@ export const authRoutes = (app: Elysia) =>
             } catch (error) {
               logger.warn(
                 { clerkUserId, error },
-                "Failed to resolve Clerk user details during sync"
+                "Failed to resolve Clerk user details during sync",
               );
             }
           }
 
           if (!email) {
             throw new AuthenticationError(
-              "Unable to resolve Clerk account email. Please verify your email and try again."
+              "Unable to resolve Clerk account email. Please verify your email and try again.",
             );
           }
 
-          logger.info({ clerkUserId }, "[clerk-sync] Syncing Clerk user with database");
-
-          // Check if user already exists (prefer clerk_id match).
           const existingByClerkId = safeQuery<UserRow & { email: string }>(
             db,
             "SELECT id, email FROM users WHERE clerk_id = ?",
-            [clerkUserId]
+            [clerkUserId],
           );
-          
+
           const existingByEmail = safeQuery<UserRow & { clerk_id: string | null; email: string }>(
             db,
             "SELECT id, clerk_id, email FROM users WHERE LOWER(email) = LOWER(?)",
-            [email]
+            [email],
           );
-          
-          logger.info({ 
-            foundByClerkId: !!existingByClerkId, 
-            foundByEmail: !!existingByEmail,
-            clerkUserId,
-          }, "[clerk-sync] User lookup results");
-          
+
           if (existingByClerkId) {
-            // Update existing user with Clerk ID
-            logger.info({ 
-              userId: existingByClerkId.id, 
-              clerkUserId,
-              matchedBy: "clerk_id"
-            }, "[clerk-sync] Updating existing user");
-            
-            // Handle email updates carefully for multi-provider account linking and account merges
             const currentEmail = existingByClerkId.email;
             let emailToUpdate = email;
-            
-            // Check if incoming email belongs to a DIFFERENT existing user (account merge scenario)
+
             const emailOwner = safeQuery<{ id: number; clerk_id: string | null }>(
               db,
               "SELECT id, clerk_id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?",
-              [email, existingByClerkId.id]
+              [email, existingByClerkId.id],
             );
-            
+
             if (emailOwner) {
-              // Account merge scenario: incoming email exists on another database record
-              // This happens when Clerk merges two accounts (e.g., Google link to existing account)
-              // We should NOT update email - it would violate unique constraint
-              // Both accounts need manual merge or the other account should be deleted first
-              logger.warn({
-                userId: existingByClerkId.id,
-                currentEmail,
-                incomingEmail: email,
-                emailOwnerId: emailOwner.id,
-                emailOwnerClerkId: emailOwner.clerk_id,
-                clerkUserId,
-                matchedBy: "clerk_id"
-              }, "[clerk-sync] Account merge scenario detected: incoming email belongs to different user, keeping existing email");
               emailToUpdate = currentEmail;
-            } else if (currentEmail && currentEmail.toLowerCase() !== email.toLowerCase()) {
-              // Email is different and NOT owned by another user - safe to update
-              emailToUpdate = email;
             }
-            
+
             safeExecute(
               db,
               "UPDATE users SET clerk_id = ?, email = ?, first_name = ?, last_name = ? WHERE id = ?",
-              [clerkUserId, emailToUpdate, firstName, lastName, existingByClerkId.id]
+              [clerkUserId, emailToUpdate, firstName, lastName, existingByClerkId.id],
             );
 
             return {
@@ -264,15 +728,6 @@ export const authRoutes = (app: Elysia) =>
           }
 
           if (existingByEmail) {
-            logger.warn(
-              {
-                clerkUserId,
-                email,
-                existingUserId: existingByEmail.id,
-                existingClerkId: existingByEmail.clerk_id,
-              },
-              "[clerk-sync] Refusing to auto-link account by email",
-            );
             await cleanupTransientClerkUser(
               clerkClient,
               clerkUserId,
@@ -283,30 +738,26 @@ export const authRoutes = (app: Elysia) =>
             );
           }
 
-          // Create new user
           const userData = withTransaction(db, () => {
-            // Insert user
             const userResult = safeExecute(
               db,
               "INSERT INTO users (email, first_name, last_name, clerk_id, password) VALUES (?, ?, ?, ?, ?)",
-              [email, firstName, lastName, clerkUserId, "clerk-auth"] // No password for Clerk users
+              [email, firstName, lastName, clerkUserId, "clerk-auth"],
             );
             const userId = Number(userResult.lastInsertRowid);
 
-            // Insert default user details (empty, can be filled later)
             safeExecute(
               db,
               `INSERT INTO user_details (user_id, date_of_birth, height, weight, gender, activity_level)
                VALUES (?, NULL, NULL, NULL, NULL, NULL)`,
-              [userId]
+              [userId],
             );
 
-            // Insert default macro targets
             safeExecute(
               db,
               `INSERT INTO macro_targets (user_id, protein_percentage, carbs_percentage, fats_percentage, locked_macros)
                VALUES (?, 30, 40, 30, '[]')`,
-              [userId]
+              [userId],
             );
 
             return { userId };
@@ -327,6 +778,29 @@ export const authRoutes = (app: Elysia) =>
             description: "Creates or updates a user in our database based on Clerk authentication",
             tags: ["Auth"],
           },
-        }
-      )
+        },
+      ),
   );
+
+export function isSessionFresh(lastUsedAt: string): boolean {
+  const last = new Date(lastUsedAt).getTime();
+  if (!Number.isFinite(last)) {
+    return false;
+  }
+
+  return Date.now() - last <= SESSION_SLIDING_TTL_MS;
+}
+
+export function clearCurrentSession(db: Database, request: Request): void {
+  const token = readSessionTokenFromRequest(request);
+  if (!token) {
+    return;
+  }
+
+  const sessionId = token.split(".")[0];
+  if (!sessionId) {
+    return;
+  }
+
+  deleteSession(db, sessionId);
+}

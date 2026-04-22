@@ -37,12 +37,12 @@ import { prepareOptimisticUpdate, rollbackOptimisticUpdate } from "./macro/optim
 function findEntryInHistory(queryClient: QueryClient, id: number) {
   const previousHistoryData = getMacroHistorySnapshots(queryClient);
   const historyData = previousHistoryData.find(([, data]) => {
-    return data?.pages.some((page) => page.entries.some((e) => e.id === id));
+    return data?.pages.some((page) => page.entries.some((entry) => entry.id === id));
   })?.[1];
 
   if (historyData?.pages) {
     for (const page of historyData.pages) {
-      const foundEntry = page.entries.find((e) => e.id === id);
+      const foundEntry = page.entries.find((entry) => entry.id === id);
       if (foundEntry) {
         return { entry: foundEntry, entryDate: foundEntry.entryDate };
       }
