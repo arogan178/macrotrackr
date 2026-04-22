@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
-    image: macro-tracker-backend:local
+    image: macrotrackr-backend:local
 
   frontend:
     build:
@@ -18,4 +18,4 @@ services:
         VITE_BILLING_MODE: disabled
         VITE_ANALYTICS_MODE: disabled
         VITE_ENABLE_POSTHOG: "false"
-    image: macro-tracker-frontend:local
+    image: macrotrackr-frontend:local

@@ -107,7 +107,7 @@ Services:
 - frontend: `http://localhost:5173` (Mapped to internal container port 80)
 - backend API: `http://localhost:3000` (Direct access usually not needed since frontend proxies `/api`)
 
-The SQLite database is persisted at `./data/macro_tracker.db`.
+The SQLite database is persisted at `./data/macrotrackr.db`.
 
 ### Build from source instead of pulling images
 
@@ -128,13 +128,13 @@ This mode is useful for contributors and local image customization.
 ### Backup
 
 ```bash
-cp data/macro_tracker.db data/macro_tracker.db.backup
+cp data/macrotrackr.db data/macrotrackr.db.backup
 ```
 
 ### Restore
 
 ```bash
-cp data/macro_tracker.db.backup data/macro_tracker.db
+cp data/macrotrackr.db.backup data/macrotrackr.db
 ```
 
 ### Upgrade
