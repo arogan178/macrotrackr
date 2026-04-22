@@ -1,0 +1,21 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: macro-tracker-backend:local
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        VITE_API_URL: ""
+        VITE_APP_URL: http://localhost:5173
+        VITE_PUBLIC_APP_NAME: Macro Tracker
+        VITE_SUPPORT_EMAIL: support@local.invalid
+        VITE_AUTH_MODE: local
+        VITE_BILLING_MODE: disabled
+        VITE_ANALYTICS_MODE: disabled
+        VITE_ENABLE_POSTHOG: "false"
+    image: macro-tracker-frontend:local

@@ -1,8 +1,6 @@
 services:
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    image: ${BACKEND_IMAGE:-ghcr.io/arogan178/macro-tracker-backend:latest}
     env_file:
       - backend/.env.example
     volumes:
@@ -20,18 +18,7 @@ services:
       - "3000:3000"
 
   frontend:
-    build:
-      context: .
-      dockerfile: frontend/Dockerfile
-      args:
-        VITE_API_URL: ""
-        VITE_APP_URL: http://localhost:5173
-        VITE_PUBLIC_APP_NAME: Macro Tracker
-        VITE_SUPPORT_EMAIL: support@local.invalid
-        VITE_AUTH_MODE: local
-        VITE_BILLING_MODE: disabled
-        VITE_ANALYTICS_MODE: disabled
-        VITE_ENABLE_POSTHOG: "false"
+    image: ${FRONTEND_IMAGE:-ghcr.io/arogan178/macro-tracker-frontend:latest}
     depends_on:
       - backend
     ports:

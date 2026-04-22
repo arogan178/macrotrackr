@@ -93,10 +93,11 @@ This repository includes a self-host starter compose stack.
 
 ```bash
 mkdir -p data
-docker compose up --build
+docker compose pull
+docker compose up -d
 ```
 
-The compose file bakes the frontend in local-auth mode (`VITE_AUTH_MODE=local`) by default,
+The default compose file uses prebuilt GHCR images in local-auth mode (`VITE_AUTH_MODE=local`),
 so no Clerk publishable key is required for self-hosted deployments.
 It also uses same-origin API requests (`/api`) through nginx proxying, so clients do not
 need to reach backend on `localhost`.
@@ -107,6 +108,14 @@ Services:
 - backend API: `http://localhost:3000` (Direct access usually not needed since frontend proxies `/api`)
 
 The SQLite database is persisted at `./data/macro_tracker.db`.
+
+### Build from source instead of pulling images
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+```
+
+This mode is useful for contributors and local image customization.
 
 ### First-run bootstrap
 
@@ -132,7 +141,7 @@ cp data/macro_tracker.db.backup data/macro_tracker.db
 
 ```bash
 git pull
-docker compose build --no-cache
+docker compose pull
 docker compose up -d
 ```
 
