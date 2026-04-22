@@ -2,6 +2,7 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import CardContainer from "@/components/form/CardContainer";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
 import EmptyState from "@/components/ui/EmptyState";
+import { isLocalAuthMode } from "@/config/runtime";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { HabitGoal } from "@/types/habit";
 
@@ -27,7 +28,7 @@ function HabitTracker({
   onDeleteHabit,
 }: HabitTrackerProps) {
   const { subscriptionStatus } = useSubscriptionStatus();
-  const isPro = subscriptionStatus === "pro";
+  const isPro = isLocalAuthMode || subscriptionStatus === "pro";
   const canAddHabit = isPro || habits.length < 2;
 
   return (

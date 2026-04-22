@@ -64,7 +64,14 @@ export function normalizeAuthRedirect(value: string | undefined): string {
     return DEFAULT_AUTH_REDIRECT;
   }
 
-  if (candidate.startsWith("/auth-ready") || candidate.startsWith("/sso-callback")) {
+  if (
+    candidate.startsWith("/auth-ready") ||
+    candidate.startsWith("/sso-callback")
+  ) {
+    return DEFAULT_AUTH_REDIRECT;
+  }
+
+  if (candidate.startsWith("/profile-setup")) {
     return DEFAULT_AUTH_REDIRECT;
   }
 
@@ -72,7 +79,39 @@ export function normalizeAuthRedirect(value: string | undefined): string {
 }
 
 export function shouldBypassSyncForRedirect(value: string | undefined): boolean {
-  return normalizeAuthRedirect(value) === "/profile-setup";
+  const candidate = normalizeCandidate(value);
+
+  if (!candidate || !isSafeAppRedirect(candidate)) {
+    return false;
+  }
+
+  return candidate.startsWith("/profile-setup");
+}
+
+function readProfileSetupRedirect(value: string): string | undefined {
+  const queryStart = value.indexOf("?");
+  if (queryStart === -1) {
+    return undefined;
+  }
+
+  const params = new URLSearchParams(value.slice(queryStart + 1));
+  const redirectTo = params.get("redirectTo");
+
+  return redirectTo ?? undefined;
+}
+
+export function resolveProfileSetupRedirect(value: string | undefined): string {
+  const candidate = normalizeCandidate(value);
+
+  if (!candidate || !isSafeAppRedirect(candidate)) {
+    return DEFAULT_AUTH_REDIRECT;
+  }
+
+  if (!candidate.startsWith("/profile-setup")) {
+    return normalizeAuthRedirect(candidate);
+  }
+
+  return normalizeAuthRedirect(readProfileSetupRedirect(candidate));
 }
 
 export function encodeAuthRedirect(value: string | undefined): string {

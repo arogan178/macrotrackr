@@ -2,10 +2,12 @@ import { Elysia } from "elysia";
 import { AuthenticationError, AuthorizationError } from "../lib/http/errors";
 import { logger } from "../lib/observability/logger";
 import { SubscriptionService } from "../modules/billing/subscription-service";
+import { getConfig } from "../config";
 
 export interface AuthenticatedUser {
   userId: number;
-  clerkUserId: string;
+  providerUserId: string;
+  authProvider: "clerk";
   email?: string;
   firstName?: string;
   lastName?: string;
@@ -29,7 +31,7 @@ export const requireAuth = new Elysia({ name: "requireAuth" })
     
     if (!internalUserId) {
       logger.warn(
-        { path: context.path, clerkUserId: user.clerkUserId }, 
+        { path: context.path, clerkUserId: user.providerUserId }, 
         "requireAuth: No internalUserId - user may not be synced"
       );
       throw new AuthenticationError(
@@ -40,7 +42,8 @@ export const requireAuth = new Elysia({ name: "requireAuth" })
     return {
       authenticatedUser: {
         userId: internalUserId,
-        clerkUserId: user.clerkUserId,
+        providerUserId: user.providerUserId,
+        authProvider: "clerk",
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -68,6 +71,10 @@ export interface FeatureLimitResult {
 }
 
 async function getRequiredProStatus(userId: number): Promise<boolean> {
+  if (getConfig().APP_MODE === "self-hosted") {
+    return true;
+  }
+
   try {
     return await SubscriptionService.hasActiveProSubscription(userId);
   } catch (error) {

@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { isLocalAuthMode } from "@/config/runtime";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import ResetPasswordForm from "@/features/auth/components/ResetPasswordForm";
 
@@ -17,6 +18,7 @@ function ResetPasswordRoute() {
       eyebrow="Password Recovery"
       title="Reset your password"
       description="Choose a new password to secure your account and continue where you left off."
+      showBackToHome={!isLocalAuthMode}
     >
       <ResetPasswordForm />
     </AuthPageShell>

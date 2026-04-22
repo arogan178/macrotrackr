@@ -12,7 +12,8 @@ import tsconfigPaths from "vite-tsconfig-paths";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import { visualizer } from "rollup-plugin-visualizer";
 
-export default defineConfig(() => {
+export default defineConfig(({ command }) => {
+  const isDevServer = command === "serve";
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   return {
     server: {
@@ -44,7 +45,7 @@ export default defineConfig(() => {
       }),
       react(),
       tailwindcss(),
-      checker({ typescript: true }),
+      ...(isDevServer ? [checker({ typescript: true })] : []),
       viteCompression(),
       VitePWA({
         injectRegister: null,

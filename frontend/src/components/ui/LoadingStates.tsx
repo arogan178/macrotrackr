@@ -1,4 +1,4 @@
-import { ReactNode, useMemo } from "react";
+import { type ReactNode, useMemo } from "react";
 
 import { type FeatureType, useFeatureLoading } from "@/hooks/useFeatureLoading";
 import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
@@ -6,7 +6,6 @@ import { useCriticalLoading, useGlobalLoading } from "@/hooks/useGlobalLoading";
 import { cn } from "../../lib/classnameUtilities";
 
 import LoadingSpinner from "./LoadingSpinner";
-/* eslint-disable react/prop-types */
 
 interface LoadingStateProps {
   children?: ReactNode;
@@ -24,7 +23,7 @@ export function GlobalLoadingIndicator({
   const { isLoading } = useGlobalLoading();
 
   if (!isLoading) {
-    return <>{children}</>;
+    return children;
   }
 
   return (
@@ -43,7 +42,7 @@ export function CriticalLoadingIndicator({
   const { isLoading } = useCriticalLoading();
 
   if (!isLoading) {
-    return <>{children}</>;
+    return children;
   }
 
   return (
@@ -79,7 +78,7 @@ export function FeatureLoadingIndicator({
   }, [queriesOnly, mutationsOnly, isQueryLoading, isMutationLoading, isLoading]);
 
   if (!shouldShowLoading) {
-    return <>{children}</>;
+    return children;
   }
 
   return (
@@ -133,7 +132,7 @@ export function QueryLoadingWrapper({
     );
   }
 
-  return <>{children}</>;
+  return children;
 }
 
 interface MutationLoadingButtonProps {

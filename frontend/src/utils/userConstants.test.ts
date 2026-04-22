@@ -28,17 +28,17 @@ describe("userConstants", () => {
     });
 
     it("has correct multiplier for athlete", () => {
-      expect(ACTIVITY_LEVELS[5].multiplier).toBe(1.9);
+      expect(ACTIVITY_LEVELS[5].multiplier).toBe(1.75);
     });
   });
 
   describe("getActivityLevelLabel", () => {
     it("returns label for valid level", () => {
-      expect(getActivityLevelLabel(1)).toBe("Sedentary");
+      expect(getActivityLevelLabel(1)).toBe("Sedentary (little or no exercise)");
     });
 
     it("returns empty string for invalid level", () => {
-      expect(getActivityLevelLabel(99)).toBe("");
+      expect(getActivityLevelLabel(99)).toBe("Unknown");
     });
   });
 

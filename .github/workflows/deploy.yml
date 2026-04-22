@@ -75,7 +75,7 @@ jobs:
           fi
 
           echo "Writing backend environment variables..."
-          printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "JWT_SECRET=${{ secrets.JWT_SECRET }}" "CLERK_PUBLISHABLE_KEY=${BACKEND_CLERK_PUBLISHABLE_KEY}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env.production
+          printf '%s\n' "NODE_ENV=production" "PORT=3000" "HOST=0.0.0.0" "DATABASE_PATH=./macro_tracker.db" "APP_MODE=managed" "AUTH_MODE=clerk" "BILLING_MODE=managed" "ANALYTICS_MODE=disabled" "EMAIL_MODE=resend" "APP_URL=${{ secrets.CORS_ORIGIN }}" "PUBLIC_APP_NAME=Macro Tracker" "SUPPORT_EMAIL=support@local.invalid" "ENABLE_METRICS=false" "CLERK_PUBLISHABLE_KEY=${BACKEND_CLERK_PUBLISHABLE_KEY}" "CLERK_SECRET_KEY=${{ secrets.CLERK_SECRET_KEY }}" "CLERK_WEBHOOK_SECRET=${{ secrets.CLERK_WEBHOOK_SECRET }}" "CORS_ORIGIN=${{ secrets.CORS_ORIGIN }}" "STRIPE_SECRET_KEY=${{ secrets.STRIPE_SECRET_KEY }}" "STRIPE_WEBHOOK_SECRET=${{ secrets.STRIPE_WEBHOOK_SECRET }}" "STRIPE_PRICE_ID_MONTHLY=${{ secrets.STRIPE_PRICE_ID_MONTHLY }}" "STRIPE_PRICE_ID_YEARLY=${{ secrets.STRIPE_PRICE_ID_YEARLY }}" "RESEND_API_KEY=${{ secrets.RESEND_API_KEY }}" > backend/.env.production
           cp backend/.env.production backend/.env
           echo "Backend environment variables written"
 
@@ -109,6 +109,7 @@ jobs:
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ZONE_ID: ${{ secrets.CLOUDFLARE_ZONE_ID }}
+      FRONTEND_APP_URL: ${{ secrets.FRONTEND_APP_URL }}
 
     steps:
     - name: Checkout code
@@ -144,7 +145,7 @@ jobs:
         rm -rf .tanstack/
 
         # Write frontend .env for build
-        printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
+        printf '%s\n' "VITE_API_URL=${{ secrets.VITE_API_URL }}" "VITE_APP_URL=${{ env.FRONTEND_APP_URL }}" "VITE_PUBLIC_APP_NAME=Macro Tracker" "VITE_SUPPORT_EMAIL=support@local.invalid" "VITE_AUTH_MODE=clerk" "VITE_BILLING_MODE=managed" "VITE_ANALYTICS_MODE=disabled" "VITE_PUBLIC_POSTHOG_KEY=${{ secrets.VITE_PUBLIC_POSTHOG_KEY }}" "VITE_PUBLIC_POSTHOG_HOST=${{ secrets.VITE_PUBLIC_POSTHOG_HOST }}" "VITE_CLERK_PUBLISHABLE_KEY=${{ secrets.VITE_CLERK_PUBLISHABLE_KEY }}" > .env
 
         echo "Frontend env file contents (API URL):"
         grep VITE_API_URL .env || echo "VITE_API_URL not found in .env"
@@ -229,22 +230,26 @@ jobs:
           echo "Frontend deployment finished successfully at $(date)"
 
     - name: Purge Cloudflare cache (optional)
-      if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ZONE_ID != '' }}
+      if: ${{ env.CLOUDFLARE_API_TOKEN != '' && env.CLOUDFLARE_ZONE_ID != '' && env.FRONTEND_APP_URL != '' }}
       run: |
         set -euo pipefail
+
+        BASE_URL="${FRONTEND_APP_URL%/}"
 
         PURGE_PAYLOAD=$(cat <<'JSON'
         {
           "files": [
-            "https://macrotrackr.com/",
-            "https://macrotrackr.com/index.html",
-            "https://macrotrackr.com/sw.js",
-            "https://macrotrackr.com/manifest.webmanifest",
-            "https://macrotrackr.com/sitemap.xml"
+            "__BASE_URL__/",
+            "__BASE_URL__/index.html",
+            "__BASE_URL__/sw.js",
+            "__BASE_URL__/manifest.webmanifest",
+            "__BASE_URL__/sitemap.xml"
           ]
         }
         JSON
         )
+
+        PURGE_PAYLOAD="${PURGE_PAYLOAD//__BASE_URL__/${BASE_URL}}"
 
         RESPONSE=$(curl -sS -X POST "https://api.cloudflare.com/client/v4/zones/${CLOUDFLARE_ZONE_ID}/purge_cache" \
           -H "Authorization: Bearer ${CLOUDFLARE_API_TOKEN}" \
@@ -261,9 +266,9 @@ jobs:
         echo "Cloudflare cache purge completed"
 
     - name: Skip Cloudflare cache purge (secrets not configured)
-      if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ZONE_ID == '' }}
+      if: ${{ env.CLOUDFLARE_API_TOKEN == '' || env.CLOUDFLARE_ZONE_ID == '' || env.FRONTEND_APP_URL == '' }}
       run: |
-        echo "ℹ️ Skipping Cloudflare cache purge. Configure CLOUDFLARE_API_TOKEN and CLOUDFLARE_ZONE_ID to enable it."
+        echo "ℹ️ Skipping Cloudflare cache purge. Configure CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID, and FRONTEND_APP_URL to enable it."
 
   smoke-test:
     needs:

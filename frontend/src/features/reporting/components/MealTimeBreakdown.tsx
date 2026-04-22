@@ -123,9 +123,6 @@ function MealTimeBreakdown({
     );
   }
 
-  // Meal types for type-safe mapping to colors
-  const MEAL_TYPES = ["breakfast", "lunch", "dinner", "snack"] as const;
-
   return (
     <ChartCard
       title="Meal Distribution"
@@ -158,8 +155,7 @@ function MealTimeBreakdown({
           >
             {mealTypeDistribution.map((entry, index) => {
               // Ensure we map back to the key for colors
-              const typeKey =
-                entry.name.toLowerCase() as (typeof MEAL_TYPES)[number];
+              const typeKey = entry.name.toLowerCase() as keyof typeof MEAL_COLORS;
               const color = MEAL_COLORS[typeKey]?.base || "#8884d8";
 
               return <Cell key={`cell-${index}`} fill={color} />;
