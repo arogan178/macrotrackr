@@ -312,6 +312,8 @@ export const authRoutes = (app: Elysia) =>
           );
 
           if (!user || !userHasLocalCredential(user)) {
+            // Mitigate timing attack by always executing a hash comparison
+            await verifyPassword(body.password, "$2b$10$w8.1tL.aW1jX2KkG5XoFmOUB41yM8s0d7dK6A9dK6A9dK6A9dK6A9");
             throw new AuthenticationError("Invalid email or password.");
           }
 
