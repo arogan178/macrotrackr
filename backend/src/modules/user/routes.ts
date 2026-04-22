@@ -15,9 +15,8 @@ import {
   BadRequestError,
 } from "../../lib/http/errors";
 import { handleError } from "../../lib/http/responses";
-import { loggerHelpers } from "../../lib/observability/logger";
-import { SubscriptionService } from "../billing/subscription-service";
-import { logger } from "../../lib/observability/logger";
+import { loggerHelpers, logger } from "../../lib/observability/logger";
+import { getConfig } from "../../config";
 
 type UserRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
@@ -39,7 +38,6 @@ interface UserDetailsResult {
   last_name: string | null;
   created_at: string;
   subscription_status: "free" | "pro" | "canceled" | string | null;
-  stripe_customer_id: string | null;
   date_of_birth: string | null;
   height: number | null;
   weight: number | null;
@@ -50,6 +48,10 @@ interface UserDetailsResult {
 function normalizeSubscriptionStatus(
   status: string | null | undefined,
 ): "free" | "pro" | "canceled" {
+  if (getConfig().APP_MODE === "self-hosted") {
+    return "pro";
+  }
+
   if (status === "pro" || status === "canceled") {
     return status;
   }
@@ -66,7 +68,7 @@ export const userRoutes = (app: Elysia) =>
           const context = rawContext as UserRouteContext;
           try {
             const { db } = context;
-            const { userId: internalUserId, clerkUserId } =
+            const { userId: internalUserId, authProvider, providerUserId } =
               context.authenticatedUser;
 
             if (internalUserId === null) {
@@ -74,7 +76,7 @@ export const userRoutes = (app: Elysia) =>
             }
 
             logger.info(
-              { internalUserId, clerkUserId },
+              { internalUserId, authProvider, providerUserId },
               "[/api/user/me] Found internal user",
             );
 
@@ -82,7 +84,7 @@ export const userRoutes = (app: Elysia) =>
             const dbResult = safeQuery<UserDetailsResult>(
               db,
                   `SELECT u.id, u.email, u.first_name, u.last_name, u.created_at,
-                    u.subscription_status, u.stripe_customer_id,
+                    u.subscription_status,
                       ud.date_of_birth, ud.height, ud.weight, ud.gender, ud.activity_level
                FROM users u
                LEFT JOIN user_details ud ON u.id = ud.user_id
@@ -93,22 +95,6 @@ export const userRoutes = (app: Elysia) =>
 
             if (!dbResult) {
               throw new NotFoundError("User data not found.");
-            }
-
-            let currentPeriodEnd: string | null = null;
-            try {
-              const subscriptionInfo =
-                await SubscriptionService.getUserSubscription(internalUserId);
-              currentPeriodEnd =
-                subscriptionInfo.subscription?.current_period_end ?? null;
-            } catch (subscriptionError) {
-              logger.warn(
-                {
-                  internalUserId,
-                  subscriptionError,
-                },
-                "[/api/user/me] Failed to resolve subscription period end, using fallback values",
-              );
             }
 
             return {
@@ -125,8 +111,6 @@ export const userRoutes = (app: Elysia) =>
               isProfileComplete: !!dbResult.date_of_birth,
               subscription: {
                 status: normalizeSubscriptionStatus(dbResult.subscription_status),
-                hasStripeCustomer: !!dbResult.stripe_customer_id,
-                currentPeriodEnd,
               },
             };
           } catch (error) {

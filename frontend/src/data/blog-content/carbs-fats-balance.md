@@ -309,8 +309,8 @@ Start with a balanced approach (40/30/30), track your response for two weeks, ad
 
 Your body will tell you what it needs—you just have to listen.
 
-[Start tracking your macros in MacroTrackr](https://macrotrackr.com/register) and find your optimal balance. Free tier includes everything you need to test and refine your approach.
+[Start tracking your macros in MacroTrackr](/register) and find your optimal balance. Free tier includes everything you need to test and refine your approach.
 
 — The MacroTrackr Team
 
-*Need help setting your targets? Email us at support@macrotrackr.com.*
+*Need help setting your targets? Email us at support@local.invalid.*

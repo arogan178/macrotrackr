@@ -2,6 +2,7 @@ import React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import LogoButton from "@/components/layout/LogoButton";
+import { APP_NAME, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
 const footerLinkClasses =
   "inline-flex min-h-11 items-center rounded-lg py-1 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
@@ -27,7 +28,7 @@ const Footer: React.FC = () => {
               do.
             </p>
             <p className="mt-3 text-xs text-muted">
-              &copy; {new Date().getFullYear()} MacroTrackr. All rights
+              &copy; {new Date().getFullYear()} {APP_NAME}. All rights
               reserved.
             </p>
           </div>
@@ -76,7 +77,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="mailto:contact@macrotrackr.com"
+                  href={SUPPORT_EMAIL_MAILTO}
                   className={footerLinkClasses}
                 >
                   Contact

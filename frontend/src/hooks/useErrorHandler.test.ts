@@ -1,6 +1,11 @@
-import { act,renderHook } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { useErrorHandler, useQueryErrorHandler } from "./useErrorHandler";
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
 
 describe("useErrorHandler", () => {
   describe("handleError", () => {
@@ -97,10 +102,14 @@ describe("useQueryErrorHandler", () => {
 
       result.current.handleQueryError(new Error("Query error"), queryKey);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Query error for key [users, 123]:",
-        expect.any(Error),
-      );
+      expect(consoleSpy).toHaveBeenNthCalledWith(1, "Error handled", {
+        message: "Query error",
+        name: "Error",
+      });
+      expect(consoleSpy).toHaveBeenNthCalledWith(2, "Query error", {
+        queryKey: "[REDACTED]",
+        error: {},
+      });
       consoleSpy.mockRestore();
     });
   });

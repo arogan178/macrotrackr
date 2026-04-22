@@ -1,9 +1,13 @@
-import { useAuth } from "@clerk/clerk-react";
 import { Navigate, useLocation } from "@tanstack/react-router";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
-import { buildRedirectFromLocation, resolveProfileCompletion } from "@/features/auth/utils/redirect";
+import { isClerkAuthMode } from "@/config/runtime";
+import {
+  buildRedirectFromLocation,
+  resolveProfileCompletion,
+} from "@/features/auth/utils/redirect";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
 /**
  * RequireCompleteProfile - Guard component that checks if user has completed their profile
@@ -27,8 +31,11 @@ export function RequireCompleteProfile({
   children,
 }: RequireCompleteProfileProps) {
   const location = useLocation();
-  const { isLoaded: isAuthLoaded, isSignedIn } = useAuth();
-  const { data: user, isLoading: isUserLoading } = useUser();
+  const { isLoaded: isAuthLoaded, isSignedIn } = useAppAuthState();
+  const shouldCheckProfileCompletion = isClerkAuthMode;
+  const { data: user, isLoading: isUserLoading } = useUser({
+    enabled: shouldCheckProfileCompletion && isAuthLoaded && isSignedIn,
+  });
 
   // Show loading while auth state is being determined
   if (!isAuthLoaded || isUserLoading) {
@@ -42,6 +49,11 @@ export function RequireCompleteProfile({
   // If not signed in, RequireAuth should handle this, but double-check
   if (!isSignedIn) {
     return <Navigate to="/login" search={{ returnTo: undefined }} />;
+  }
+
+  // Local auth mode does not use the Clerk onboarding/profile-setup flow.
+  if (!shouldCheckProfileCompletion) {
+    return children;
   }
 
   // If user is null, Clerk says we're signed in but backend auth isn't ready yet
@@ -74,7 +86,7 @@ export function RequireCompleteProfile({
   }
 
   // Profile is complete, render the protected content
-  return <>{children}</>;
+  return children;
 }
 
 export default RequireCompleteProfile;

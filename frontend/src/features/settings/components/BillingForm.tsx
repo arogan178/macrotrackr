@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { billingApi } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
 import { AwardIcon } from "@/components/ui";
+import { isLocalAuthMode } from "@/config/runtime";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
 import { cn } from "@/lib/classnameUtilities";
@@ -80,7 +81,7 @@ const BillingForm: React.FC = () => {
     }
   }, [subscriptionStatus, showNotification, handleMutationError]);
 
-  const isPro = subscriptionStatus === "pro";
+  const isPro = isLocalAuthMode || subscriptionStatus === "pro";
 
   return (
     <CardContainer className="p-6 sm:p-8">

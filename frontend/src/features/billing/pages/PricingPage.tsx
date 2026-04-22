@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -11,8 +10,10 @@ import { CircleQuestionMarkIcon } from "@/components/ui";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
 import { usePageMetadata } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { useStore } from "@/store/store";
+import { APP_ICON_URL, buildCanonicalUrl } from "@/utils/appConstants";
 
 // --- Static data hoisted outside component (vercel: rendering-hoist-jsx) ---
 
@@ -45,12 +46,12 @@ const PricingPage: React.FC = () => {
     title: "Pricing — MacroTrackr",
     description:
       "Compare plans and unlock Pro features on MacroTrackr — advanced insights, priority support, and unlimited tracking.",
-    canonical: "https://macrotrackr.com/pricing",
-    ogImage: "https://macrotrackr.com/icon.png",
+    canonical: buildCanonicalUrl("/pricing"),
+    ogImage: APP_ICON_URL,
   });
 
   const [openFaq, setOpenFaq] = useState<number | undefined>(0);
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAppAuthState();
   const navigate = useNavigate();
   const { showNotification } = useStore();
 

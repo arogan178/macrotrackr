@@ -9,10 +9,7 @@ import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { RadialProgress } from "@/components/ui/RadialProgress";
 
 import { MACRO_COLORS } from "../constants";
-import type {
-  AggregatedDataPoint,
-  UnifiedInsightsProps,
-} from "../types/insightsTypes";
+import type { UnifiedInsightsProps } from "../types/insightsTypes";
 import {
   calculateConsistencyScore,
   calculateDataQuality,

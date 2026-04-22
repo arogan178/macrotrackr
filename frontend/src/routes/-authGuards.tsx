@@ -1,12 +1,13 @@
 import React from "react";
-import { useAuth } from "@clerk/clerk-react";
 import { Navigate } from "@tanstack/react-router";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { isClerkAuthMode } from "@/config/runtime";
+import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { hasStatus } from "@/lib/queryClient";
 
 export function RequireAuth({ children }: { children: React.ReactNode }) {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded } = useAppAuthState();
 
   if (!isLoaded) {
     return (
@@ -20,11 +21,11 @@ export function RequireAuth({ children }: { children: React.ReactNode }) {
     return <Navigate to="/login" search={{ returnTo: undefined }} />;
   }
 
-  return <>{children}</>;
+  return children;
 }
 
 export function RequireUnauth({ children }: { children: React.ReactNode }) {
-  const { isSignedIn, isLoaded } = useAuth();
+  const { isSignedIn, isLoaded } = useAppAuthState();
 
   if (!isLoaded) {
     return (
@@ -35,10 +36,14 @@ export function RequireUnauth({ children }: { children: React.ReactNode }) {
   }
 
   if (isSignedIn) {
-    return <Navigate to="/auth-ready" search={{ redirectTo: "/home" }} />;
+    if (isClerkAuthMode) {
+      return <Navigate to="/auth-ready" search={{ redirectTo: "/home" }} />;
+    }
+
+    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
   }
 
-  return <>{children}</>;
+  return children;
 }
 
 export function LoadingFallback() {

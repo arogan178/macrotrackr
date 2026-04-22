@@ -4,6 +4,7 @@ import PageBackground from "@/components/layout/PageBackground";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import LegalHeader from "@/features/landing/components/LegalHeader";
+import { APP_URL, SUPPORT_EMAIL } from "@/utils/appConstants";
 
 const TermsAndConditionsPage: React.FC = () => {
   return (
@@ -163,8 +164,8 @@ const TermsAndConditionsPage: React.FC = () => {
                   13. Contact Information
                 </h2>
                 <div className="rounded-2xl border border-border/70 bg-surface/70 p-4 text-foreground backdrop-blur-sm">
-                  <p>Website: www.macrotrackr.com</p>
-                  <p>Email: contact@macrotrackr.com</p>
+                  <p>Website: {APP_URL}</p>
+                  <p>Email: {SUPPORT_EMAIL}</p>
                 </div>
               </section>
             </div>

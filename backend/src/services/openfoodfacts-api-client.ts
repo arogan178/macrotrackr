@@ -4,7 +4,7 @@ import { logger, loggerHelpers } from "../lib/observability/logger";
 
 // Use the search-a-licious API for full-text search
 const API_URL = "https://search.openfoodfacts.org/search";
-const USER_AGENT = "MacroTracker/1.0 (contact@example.com)";
+const USER_AGENT = "MacroTrackr/1.0 (contact: support@local.invalid)";
 
 // Configuration constants
 const MAX_RESULTS = 10;

@@ -8,12 +8,15 @@ export function usePrefersReducedMotion(): boolean {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    // Check if window is available (SSR safety)
-    if (globalThis.window === undefined) return;
+    const windowObject =
+      typeof globalThis !== "undefined" && "window" in globalThis
+        ? globalThis.window
+        : undefined;
+    if (!windowObject || typeof windowObject.matchMedia !== "function") {
+      return;
+    }
 
-    const mediaQuery = globalThis.window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    );
+    const mediaQuery = windowObject.matchMedia("(prefers-reduced-motion: reduce)");
 
     // Set initial value
     setPrefersReducedMotion(mediaQuery.matches);

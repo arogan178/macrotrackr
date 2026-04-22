@@ -1,10 +1,10 @@
-# robots.txt for MacroTrackr
+# robots.txt for Macro Tracker
 # Allow all crawlers to access the site
 User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://macrotrackr.com/sitemap.xml
+Sitemap: http://localhost:5173/sitemap.xml
 
 # (Optional) Cloudflare managed robots.txt can prepend AI-bot directives.
 # Enable in Cloudflare: Security > Settings > Manage AI bot traffic with robots.txt

@@ -4,6 +4,7 @@ import {
   buildRedirectFromLocation,
   isSafeAppRedirect,
   normalizeAuthRedirect,
+  resolveProfileSetupRedirect,
   shouldBypassSyncForRedirect,
 } from "./redirect";
 
@@ -25,11 +26,32 @@ describe("auth redirect helpers", () => {
     expect(normalizeAuthRedirect("/sso-callback?redirectTo=/home")).toBe(
       "/home",
     );
+    expect(normalizeAuthRedirect("/profile-setup?redirectTo=/home")).toBe(
+      "/home",
+    );
   });
 
   it("marks profile setup redirects to skip sync", () => {
     expect(shouldBypassSyncForRedirect("/profile-setup")).toBe(true);
+    expect(shouldBypassSyncForRedirect("/profile-setup?redirectTo=%2Fpricing")).toBe(
+      true,
+    );
     expect(shouldBypassSyncForRedirect("/home")).toBe(false);
+  });
+
+  it("extracts profile setup destination redirects", () => {
+    expect(
+      resolveProfileSetupRedirect("/profile-setup?redirectTo=%2Fpricing"),
+    ).toBe("/pricing");
+    expect(
+      resolveProfileSetupRedirect(
+        "/profile-setup?redirectTo=%2Fauth-ready%3FredirectTo%3D%252Fhome",
+      ),
+    ).toBe("/home");
+    expect(resolveProfileSetupRedirect("/profile-setup")).toBe("/home");
+    expect(resolveProfileSetupRedirect("/settings?tab=accounts")).toBe(
+      "/settings?tab=accounts",
+    );
   });
 
   it("preserves pathname and query string from router state", () => {
