@@ -31,7 +31,7 @@ jobs:
         id: backend-meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/macro-tracker-backend
+          images: ghcr.io/${{ github.repository_owner }}/macrotrackr-backend
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=short,prefix=sha-
@@ -66,7 +66,7 @@ jobs:
         id: frontend-meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/${{ github.repository_owner }}/macro-tracker-frontend
+          images: ghcr.io/${{ github.repository_owner }}/macrotrackr-frontend
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,format=short,prefix=sha-

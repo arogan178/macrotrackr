@@ -85,7 +85,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
               return true;
             },
           },
-          buster: "macro-tracker-v1",
+          buster: "macrotrackr-v1",
         }}
       >
         {isClerkAuthMode ? (

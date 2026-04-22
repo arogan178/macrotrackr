@@ -33,11 +33,11 @@ async function loadDbModule(configOverrides?: {
 
   vi.doMock("../../src/config", () => ({
     config: {
-      DATABASE_PATH: configOverrides?.DATABASE_PATH ?? "/tmp/macro-tracker.sqlite",
+      DATABASE_PATH: configOverrides?.DATABASE_PATH ?? "/tmp/macrotrackr.sqlite",
       NODE_ENV: configOverrides?.NODE_ENV ?? "test",
     },
     getConfig: () => ({
-      DATABASE_PATH: configOverrides?.DATABASE_PATH ?? "/tmp/macro-tracker.sqlite",
+      DATABASE_PATH: configOverrides?.DATABASE_PATH ?? "/tmp/macrotrackr.sqlite",
       NODE_ENV: configOverrides?.NODE_ENV ?? "test",
     }),
   }));
