@@ -1,12 +1,12 @@
 services:
   backend:
-    image: ${BACKEND_IMAGE:-ghcr.io/arogan178/macro-tracker-backend:latest}
+    image: ${BACKEND_IMAGE:-ghcr.io/arogan178/macrotrackr-backend:latest}
     env_file:
       - backend/.env.example
     volumes:
       - ./data:/data
     environment:
-      DATABASE_PATH: /data/macro_tracker.db
+      DATABASE_PATH: /data/macrotrackr.db
       APP_MODE: self-hosted
       AUTH_MODE: local
       BILLING_MODE: disabled
@@ -18,7 +18,7 @@ services:
       - "3000:3000"
 
   frontend:
-    image: ${FRONTEND_IMAGE:-ghcr.io/arogan178/macro-tracker-frontend:latest}
+    image: ${FRONTEND_IMAGE:-ghcr.io/arogan178/macrotrackr-frontend:latest}
     depends_on:
       - backend
     ports:

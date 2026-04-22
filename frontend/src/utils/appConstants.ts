@@ -20,7 +20,7 @@ function resolveExternalUrl(rawValue: string | undefined, fallback: string): str
 const rawAppUrl = import.meta.env.VITE_APP_URL ?? resolveFallbackAppUrl();
 const rawGitHubRepoUrl = resolveExternalUrl(
   import.meta.env.VITE_GITHUB_REPO_URL,
-  "https://github.com/arogan178/macro_tracker",
+  "https://github.com/arogan178/macrotrackr",
 );
 const rawDocumentationUrl = resolveExternalUrl(
   import.meta.env.VITE_DOCS_URL,
