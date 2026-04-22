@@ -20,6 +20,7 @@ import {
   getRelatedPosts,
   normalizeBlogFilter,
 } from "@/lib/blog";
+import { buildCanonicalUrl } from "@/utils/appConstants";
 
 interface CodeBlockProps {
   inline?: boolean;
@@ -257,7 +258,7 @@ const BlogArticlePage: React.FC = () => {
   usePageMetadata({
     title: post ? `${post.title} — MacroTrackr Blog` : "Blog — MacroTrackr",
     description: post?.excerpt ?? "Read the latest from MacroTrackr.",
-    canonical: `https://macrotrackr.com/blog/${slug}`,
+    canonical: buildCanonicalUrl(`/blog/${slug}`),
   });
 
   const relatedPosts = useMemo(() => getRelatedPosts(slug), [slug]);

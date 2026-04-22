@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import type { WeightGoalFormValues } from "@/types/goal";
+
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
   calculateWeeksToGoal,
-} from "@/features/goals/calculations";
-import type { WeightGoalFormValues } from "@/types/goal";
+} from "../utils/nutritionCalculations";
 
 import { apiClient } from "./core";
 import { goalsApi } from "./goals";

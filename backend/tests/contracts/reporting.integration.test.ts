@@ -9,7 +9,8 @@ mock.module("../../src/middleware/clerk-guards", () => {
     requireAuth: new Elysia({ name: "requireAuth" }).derive({ as: "scoped" }, () => ({
       authenticatedUser: {
         userId: 1,
-        clerkUserId: "test_clerk",
+        providerUserId: "test_clerk",
+        authProvider: "clerk",
         email: "test@example.com"
       }
     })),

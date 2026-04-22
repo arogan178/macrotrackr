@@ -1,4 +1,5 @@
 import { apiClient } from "@/api/core";
+import { isLocalAuthMode } from "@/config/runtime";
 import type { MealType } from "@/types/macro";
 
 export interface SavedMeal {
@@ -35,7 +36,16 @@ export const savedMealsApi = {
    * @throws {ApiError}
    */
   getAll: async (): Promise<SavedMealsResponse> => {
-    return apiClient.get<SavedMealsResponse>("/api/saved-meals");
+    const response = await apiClient.get<SavedMealsResponse>("/api/saved-meals");
+
+    if (isLocalAuthMode) {
+      return {
+        ...response,
+        isPro: true,
+      };
+    }
+
+    return response;
   },
 
   /**

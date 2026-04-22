@@ -29,21 +29,21 @@ function NumberField({
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (disabled) return;
 
-    const value_ = event.target.value;
+    const inputValue = event.target.value;
 
-    if (value_ === "") {
+    if (inputValue === "") {
       onChange(undefined);
 
       return;
     }
 
-    if (/^-?\d*\.?\d*$/.test(value_)) {
-      const digitsOnlyLength = value_.replaceAll(/\D/g, "").length;
+    if (/^-?\d*\.?\d*$/.test(inputValue)) {
+      const digitsOnlyLength = inputValue.replaceAll(/\D/g, "").length;
       if (maxDigits && digitsOnlyLength > maxDigits) {
         return;
       }
 
-      onChange(Number(value_));
+      onChange(Number(inputValue));
     }
   };
 

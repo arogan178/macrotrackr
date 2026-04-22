@@ -125,6 +125,30 @@ const SCHEMA_SQL = `
           received_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
 
+        -- Sessions Table (local auth mode)
+        CREATE TABLE IF NOT EXISTS sessions (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          secret_hash TEXT NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          expires_at DATETIME NOT NULL,
+          last_used_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          ip TEXT,
+          user_agent TEXT,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
+        -- Password Reset Tokens Table (preferred over inline user reset fields)
+        CREATE TABLE IF NOT EXISTS password_reset_tokens (
+          id TEXT PRIMARY KEY,
+          user_id INTEGER NOT NULL,
+          token_hash TEXT NOT NULL UNIQUE,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          expires_at DATETIME NOT NULL,
+          used_at DATETIME,
+          FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+        );
+
         -- Saved Meals Table (Pro Feature) --
         CREATE TABLE IF NOT EXISTS saved_meals (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -321,6 +345,11 @@ function createIndexes(db: Database) {
   db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions(status)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_subscriptions_active_until ON subscriptions(current_period_end)");
   db.exec("CREATE INDEX IF NOT EXISTS idx_saved_meals_user_created ON saved_meals(user_id, created_at DESC)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON sessions(user_id)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_sessions_expires_at ON sessions(expires_at)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_user_id ON password_reset_tokens(user_id)");
+  db.exec("CREATE UNIQUE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash)");
+  db.exec("CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires ON password_reset_tokens(expires_at)");
 }
 
 /**

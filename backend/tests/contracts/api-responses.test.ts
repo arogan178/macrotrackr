@@ -590,25 +590,13 @@ describe("UserProfileResponse Contract", () => {
     it("accepts valid subscription with all fields", () => {
       const validSubscription = {
         status: "pro",
-        hasStripeCustomer: true,
-        currentPeriodEnd: "2026-03-18T00:00:00Z",
       };
       expect(isValidUserSubscription(validSubscription)).toBe(true);
     });
 
-    it("accepts subscription with null currentPeriodEnd", () => {
+    it("accepts subscription object with only status", () => {
       const validSubscription = {
         status: "free",
-        hasStripeCustomer: false,
-        currentPeriodEnd: null,
-      };
-      expect(isValidUserSubscription(validSubscription)).toBe(true);
-    });
-
-    it("accepts subscription without currentPeriodEnd", () => {
-      const validSubscription = {
-        status: "free",
-        hasStripeCustomer: false,
       };
       expect(isValidUserSubscription(validSubscription)).toBe(true);
     });
@@ -616,15 +604,6 @@ describe("UserProfileResponse Contract", () => {
     it("rejects subscription with invalid status", () => {
       const invalidSubscription = {
         status: "premium",
-        hasStripeCustomer: true,
-      };
-      expect(isValidUserSubscription(invalidSubscription)).toBe(false);
-    });
-
-    it("rejects subscription with wrong hasStripeCustomer type", () => {
-      const invalidSubscription = {
-        status: "pro",
-        hasStripeCustomer: "yes",
       };
       expect(isValidUserSubscription(invalidSubscription)).toBe(false);
     });
@@ -646,8 +625,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: true,
         subscription: {
           status: "pro",
-          hasStripeCustomer: true,
-          currentPeriodEnd: "2026-03-18T00:00:00Z",
         },
       };
       expect(isValidUserProfileResponse(validResponse)).toBe(true);
@@ -668,7 +645,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(validResponse)).toBe(true);
@@ -689,7 +665,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: true,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(validResponse)).toBe(true);
@@ -710,7 +685,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(invalidResponse)).toBe(false);
@@ -731,7 +705,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(invalidResponse)).toBe(false);
@@ -752,7 +725,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: false,
         subscription: {
           status: "invalid_status", // invalid
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(invalidResponse)).toBe(false);
@@ -767,7 +739,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(invalidResponse)).toBe(false);
@@ -788,7 +759,6 @@ describe("UserProfileResponse Contract", () => {
         isProfileComplete: "yes", // should be boolean
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(invalidResponse)).toBe(false);
@@ -897,7 +867,6 @@ describe("Edge Cases and Boundary Tests", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(validResponse)).toBe(true);
@@ -918,7 +887,6 @@ describe("Edge Cases and Boundary Tests", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(validResponse)).toBe(true);
@@ -989,7 +957,6 @@ describe("Edge Cases and Boundary Tests", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
         },
       };
       expect(isValidUserProfileResponse(validResponse)).toBe(true);

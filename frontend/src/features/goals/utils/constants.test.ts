@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { CALORIE_ADJUSTMENT_FACTORS, DEFAULT_CALORIE_ADJUSTMENT } from "./constants";
+import { CALORIE_ADJUSTMENT_FACTORS } from "../constants";
 
 describe("goals constants", () => {
   it("has calorie adjustment factors", () => {
@@ -8,6 +8,6 @@ describe("goals constants", () => {
   });
 
   it("has default calorie adjustment", () => {
-    expect(typeof DEFAULT_CALORIE_ADJUSTMENT).toBe("number");
+    expect(CALORIE_ADJUSTMENT_FACTORS.maintain).toBe(0);
   });
 });

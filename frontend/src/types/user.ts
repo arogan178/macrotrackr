@@ -19,7 +19,5 @@ export interface UserSettings {
   gender: Gender | undefined;
   subscription?: {
     status: "free" | "pro" | "canceled";
-    hasStripeCustomer: boolean;
-    currentPeriodEnd: string | undefined;
   };
 }

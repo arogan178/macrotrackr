@@ -3,9 +3,13 @@ import { useAuth } from "@clerk/clerk-react";
 import { Navigate, useSearch } from "@tanstack/react-router";
 
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { isClerkAuthMode } from "@/config/runtime";
 import AuthPageShell from "@/features/auth/components/AuthPageShell";
 import { ProfileCreationForm } from "@/features/auth/components/ProfileCreationForm";
-import { normalizeAuthRedirect, resolveProfileCompletion } from "@/features/auth/utils/redirect";
+import {
+  normalizeAuthRedirect,
+  resolveProfileCompletion,
+} from "@/features/auth/utils/redirect";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 
 /**
@@ -14,6 +18,14 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
  * Collects additional profile information (DOB, height, weight, activity level)
  */
 export default function ProfileSetupPage() {
+  if (!isClerkAuthMode) {
+    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
+  }
+
+  return <ClerkProfileSetupPage />;
+}
+
+function ClerkProfileSetupPage() {
   const { isSignedIn, isLoaded } = useAuth();
   const search = useSearch({ from: "/profile-setup" }) as {
     redirectTo?: string;

@@ -18,27 +18,34 @@ import {
   configureEmailService,
   createEmailService,
 } from "./email-service";
+import { getConfig } from "../config";
 
 export interface RuntimeServices {
   db: Database;
   cacheService: CacheService;
   metrics: MetricsRegistry;
   alerting: AlertingService;
-  stripe: ReturnType<typeof getStripeClient>;
-  email: ReturnType<typeof createEmailService>;
+  stripe: ReturnType<typeof getStripeClient> | null;
+  email: ReturnType<typeof createEmailService> | null;
 }
 
 export function createRuntimeServices(db: Database): RuntimeServices {
+  const config = getConfig();
   const cacheService = createCacheService();
   const metrics = createMetricsRegistry();
   const alerting = createAlertingService();
-  const stripe = getStripeClient();
-  const email = createEmailService();
+  const stripe = config.BILLING_MODE === "managed" ? getStripeClient() : null;
+  const email =
+    config.EMAIL_MODE !== "disabled"
+      ? createEmailService()
+      : null;
 
   configureMetricsRegistry(metrics);
   configureAlertingService(alerting);
   configureSubscriptionService({ db, cacheService });
-  configureEmailService(email);
+  if (email) {
+    configureEmailService(email);
+  }
 
   return {
     db,

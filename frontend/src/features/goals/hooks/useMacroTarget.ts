@@ -10,33 +10,39 @@ export function useEditableMacroTarget(
   initialValues: MacroTargetState,
   onChange?: (target: MacroTargetState, shouldPersist?: boolean) => void,
 ) {
-  const hook = useMacroTargetCore(initialValues, onChange);
+  const {
+    target,
+    isAdjusting,
+    setTarget,
+    handleChange,
+    toggleLock,
+  } = useMacroTargetCore(initialValues, onChange);
 
   useEffect(() => {
-    if (!hook.isAdjusting) {
-      hook.setTarget(initialValues);
+    if (!isAdjusting) {
+      setTarget(initialValues);
     }
-  }, [initialValues, hook.isAdjusting, hook.setTarget]);
+  }, [initialValues, isAdjusting, setTarget]);
 
   useEffect(() => {
-    if (!hook.isAdjusting) {
+    if (!isAdjusting) {
       const sum =
-        hook.target.proteinPercentage +
-        hook.target.carbsPercentage +
-        hook.target.fatsPercentage;
+        target.proteinPercentage +
+        target.carbsPercentage +
+        target.fatsPercentage;
 
       if (sum !== 100) {
-        const adjusted = balanceMacroPercentages(hook.target);
-        hook.setTarget(adjusted);
+        const adjusted = balanceMacroPercentages(target);
+        setTarget(adjusted);
         onChange?.(adjusted, false);
       }
     }
-  }, [hook.isAdjusting, hook.target, hook.setTarget, onChange]);
+  }, [isAdjusting, target, setTarget, onChange]);
 
   return {
-    target: hook.target,
-    isAdjusting: hook.isAdjusting,
-    handleChange: hook.handleChange,
-    toggleLock: hook.toggleLock,
+    target,
+    isAdjusting,
+    handleChange,
+    toggleLock,
   };
 }

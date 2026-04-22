@@ -13,6 +13,7 @@ interface AuthPageShellProps {
   description: string;
   children: ReactNode;
   panelClassName?: string;
+  showBackToHome?: boolean;
 }
 
 export default function AuthPageShell({
@@ -21,6 +22,7 @@ export default function AuthPageShell({
   description,
   children,
   panelClassName = "max-w-md",
+  showBackToHome = true,
 }: AuthPageShellProps) {
   const navigate = useNavigate();
 
@@ -34,19 +36,21 @@ export default function AuthPageShell({
             onClick={() => navigate({ to: "/" })}
             ariaLabel="Home"
           />
-          <button
-            type="button"
-            onClick={() => navigate({ to: "/" })}
-            className={getButtonClasses(
-              "ghost",
-              "sm",
-              false,
-              "rounded-full font-medium text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
-            )}
-          >
-            <BackIcon />
-            <span>Back to home</span>
-          </button>
+          {showBackToHome ? (
+            <button
+              type="button"
+              onClick={() => navigate({ to: "/" })}
+              className={getButtonClasses(
+                "ghost",
+                "sm",
+                false,
+                "rounded-full font-medium text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+              )}
+            >
+              <BackIcon />
+              <span>Back to home</span>
+            </button>
+          ) : null}
         </div>
       </header>
 

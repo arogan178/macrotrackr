@@ -42,7 +42,15 @@ vi.stubGlobal("Bun", {
 
 // Set required environment variables before importing password module
 const mockEnv = {
-  JWT_SECRET: "this-is-a-32-character-secret-key!!",
+  APP_MODE: "self-hosted",
+  AUTH_MODE: "local",
+  BILLING_MODE: "disabled",
+  ANALYTICS_MODE: "disabled",
+  EMAIL_MODE: "disabled",
+  APP_URL: "http://localhost:5173",
+  PUBLIC_APP_NAME: "Macro Trackr",
+  SUPPORT_EMAIL: "support@local.invalid",
+  ENABLE_METRICS: "false",
   STRIPE_SECRET_KEY: "sk_test_123",
   STRIPE_WEBHOOK_SECRET: "test_webhook_secret_placeholder_local",
   STRIPE_PRICE_ID_MONTHLY: "price_monthly_123",
@@ -52,7 +60,15 @@ const mockEnv = {
   CLERK_SECRET_KEY: "sk_test_123",
 };
 
-vi.stubEnv("JWT_SECRET", mockEnv.JWT_SECRET);
+vi.stubEnv("APP_MODE", mockEnv.APP_MODE);
+vi.stubEnv("AUTH_MODE", mockEnv.AUTH_MODE);
+vi.stubEnv("BILLING_MODE", mockEnv.BILLING_MODE);
+vi.stubEnv("ANALYTICS_MODE", mockEnv.ANALYTICS_MODE);
+vi.stubEnv("EMAIL_MODE", mockEnv.EMAIL_MODE);
+vi.stubEnv("APP_URL", mockEnv.APP_URL);
+vi.stubEnv("PUBLIC_APP_NAME", mockEnv.PUBLIC_APP_NAME);
+vi.stubEnv("SUPPORT_EMAIL", mockEnv.SUPPORT_EMAIL);
+vi.stubEnv("ENABLE_METRICS", mockEnv.ENABLE_METRICS);
 vi.stubEnv("STRIPE_SECRET_KEY", mockEnv.STRIPE_SECRET_KEY);
 vi.stubEnv("STRIPE_WEBHOOK_SECRET", mockEnv.STRIPE_WEBHOOK_SECRET);
 vi.stubEnv("STRIPE_PRICE_ID_MONTHLY", mockEnv.STRIPE_PRICE_ID_MONTHLY);

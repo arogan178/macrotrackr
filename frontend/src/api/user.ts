@@ -17,8 +17,6 @@ export interface UserDetailsResponse {
   isProfileComplete: boolean;
   subscription: {
     status: "free" | "pro" | "canceled";
-    hasStripeCustomer: boolean;
-    currentPeriodEnd: string | undefined;
   };
 }
 
@@ -81,7 +79,7 @@ function normalizeUserDetailsResponse(value: unknown): UserDetailsResponse | nul
     subscription:
       typeof candidate.subscription === "object"
         ? (candidate.subscription as UserDetailsResponse["subscription"])
-        : { status: "free" as const, hasStripeCustomer: false, currentPeriodEnd: undefined },
+        : { status: "free" as const },
   };
 }
 

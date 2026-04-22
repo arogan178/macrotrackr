@@ -413,14 +413,14 @@ const EntryHistoryComponent = function EntryHistory({
             </div>
           </EntryHistoryContext.Provider>
 
-          {(hasMoreDates || hasMore || displayedDateCount > 5) && (
+          {((hasMoreDates ?? hasMore) || displayedDateCount > 5) && (
             <motion.div
               className="flex justify-center py-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
             >
-              {(hasMoreDates || hasMore) && (
+              {(hasMoreDates ?? hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
                   className={`flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
