@@ -1,15 +1,24 @@
 import { useEffect } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Navigate, useNavigate, useSearch } from "@tanstack/react-router";
 
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { isClerkAuthMode } from "@/config/runtime";
 import { useAuthReady } from "@/features/auth/hooks/useAuthReady";
-import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import { resolveProfileSetupRedirect } from "@/features/auth/utils/redirect";
 
 export default function AuthReadyPage() {
+  if (!isClerkAuthMode) {
+    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
+  }
+
+  return <ClerkAuthReadyPage />;
+}
+
+function ClerkAuthReadyPage() {
   const navigate = useNavigate();
   const search = useSearch({ from: "/auth-ready" }) as { redirectTo?: string };
-  const redirectTo = normalizeAuthRedirect(search.redirectTo);
+  const redirectTo = resolveProfileSetupRedirect(search.redirectTo);
   const { error, setupAuth } = useAuthReady(redirectTo);
 
   useEffect(() => {

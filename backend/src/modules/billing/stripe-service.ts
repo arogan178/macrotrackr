@@ -4,8 +4,24 @@ import { config } from "../../config";
 import { logger } from "../../lib/observability/logger";
 import { handleServiceError } from "../../lib/http/error-handler";
 
+function requireStripeSecretKey(): string {
+  if (!config.STRIPE_SECRET_KEY) {
+    throw new Error("Stripe is not configured: STRIPE_SECRET_KEY is missing");
+  }
+
+  return config.STRIPE_SECRET_KEY;
+}
+
+function requireStripeWebhookSecret(): string {
+  if (!config.STRIPE_WEBHOOK_SECRET) {
+    throw new Error("Stripe is not configured: STRIPE_WEBHOOK_SECRET is missing");
+  }
+
+  return config.STRIPE_WEBHOOK_SECRET;
+}
+
 function createStripeClient() {
-  return new Stripe(config.STRIPE_SECRET_KEY, {
+  return new Stripe(requireStripeSecretKey(), {
     apiVersion: "2025-08-27.basil",
     typescript: true,
   });
@@ -313,7 +329,7 @@ export class StripeService {
       const event = (await stripe.webhooks.constructEventAsync(
         payload,
         signature,
-        config.STRIPE_WEBHOOK_SECRET
+        requireStripeWebhookSecret(),
       )) as StripeWebhookEvent;
       const normalizedEvent = this.normalizeWebhookEvent(event);
       return normalizedEvent;

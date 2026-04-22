@@ -1,4 +1,4 @@
-import { apiClient, type ApiError } from "@/api/core";
+import { apiClient } from "@/api/core";
 
 export interface MacroDensitySummaryParameters {
   startDate?: string;

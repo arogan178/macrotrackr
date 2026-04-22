@@ -1,4 +1,4 @@
-/* eslint-disable react/prop-types */
+ 
 import { memo, useMemo } from "react";
 import { motion } from "motion/react";
 
@@ -198,8 +198,11 @@ const StatusBadge: React.FC<StatusBadgeProps> = memo(function StatusBadge({
     pulse &&
     (status === "active" || status === "error" || status === "warning");
 
-  const prefersReducedMotion =
+  const canUseMatchMedia =
     typeof globalThis !== "undefined" &&
+    typeof globalThis.matchMedia === "function";
+  const prefersReducedMotion =
+    canUseMatchMedia &&
     globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (

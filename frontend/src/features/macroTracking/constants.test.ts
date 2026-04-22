@@ -1,14 +1,14 @@
 import { describe, expect, it } from "vitest";
 
-import { MACRO_RATIOS,MEAL_TYPES } from "./constants";
+import { DEFAULT_MACRO_TOTALS, MEAL_TYPE_OPTIONS } from "./constants";
 
 describe("macroTracking constants", () => {
   it("has meal types", () => {
-    expect(MEAL_TYPES).toBeDefined();
-    expect(MEAL_TYPES.length).toBeGreaterThan(0);
+    expect(MEAL_TYPE_OPTIONS).toBeDefined();
+    expect(MEAL_TYPE_OPTIONS.length).toBeGreaterThan(0);
   });
 
   it("has macro ratios", () => {
-    expect(MACRO_RATIOS).toBeDefined();
+    expect(DEFAULT_MACRO_TOTALS).toBeDefined();
   });
 });

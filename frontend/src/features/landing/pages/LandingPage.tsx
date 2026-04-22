@@ -4,7 +4,14 @@ import { motion, useReducedMotion } from "motion/react";
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import { usePageMetadata } from "@/hooks";
-import { APP_ICON_URL, APP_URL, PRICING_URL, SCHEMA_ORG_CONTEXT } from "@/utils/appConstants";
+import {
+  APP_ICON_URL,
+  APP_NAME,
+  APP_URL,
+  buildCanonicalUrl,
+  PRICING_URL,
+  SCHEMA_ORG_CONTEXT,
+} from "@/utils/appConstants";
 
 import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
@@ -49,7 +56,7 @@ const LandingPage: React.FC = () => {
     title: "MacroTrackr — Macro Tracking That Fits Real Life",
     description:
       "Track your macros, stay consistent, and hit your nutrition goals with a clean app built for everyday use.",
-    canonical: `${APP_URL}/`,
+    canonical: buildCanonicalUrl("/"),
     ogImage: APP_ICON_URL,
   });
   const shouldReduceMotion = useReducedMotion();
@@ -96,7 +103,7 @@ const LandingPage: React.FC = () => {
     {
       "@context": "${SCHEMA_ORG_CONTEXT}",
       "@type": "SoftwareApplication",
-      "name": "MacroTrackr",
+      "name": "${APP_NAME}",
       "alternateName": "MacroTracker",
       "url": "${APP_URL}",
       "applicationCategory": "HealthApplication",

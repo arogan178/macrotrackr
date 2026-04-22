@@ -14,7 +14,8 @@ const PricingSection: React.FC = () => (
         </h2>
         <p className="mx-auto max-w-2xl text-lg text-balance text-muted">
           Start free, upgrade when you're ready for deeper insights. No hidden
-          fees, no long-term commitments.
+          fees, no long-term commitments. Prefer running it yourself? Explore
+          the self-hosted option below.
         </p>
       </div>
 

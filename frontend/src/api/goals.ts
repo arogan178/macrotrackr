@@ -42,7 +42,7 @@ export const goalsApi = {
   getWeightGoals: async (): Promise<SetWeightGoalPayload | undefined> => {
     const result = await apiClient.get<SetWeightGoalPayload | null>("/api/goals/weight");
 
-    return result === null ? undefined : result;
+    return result ?? undefined;
   },
 
   /**

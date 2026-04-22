@@ -5,7 +5,7 @@ import StatusBadge from "./StatusBadge";
 
 describe("StatusBadge", () => {
   it("renders without crashing", () => {
-    const { container } = render(<StatusBadge />);
+    const { container } = render(<StatusBadge status="neutral" />);
     expect(container).toBeDefined();
   });
 });
