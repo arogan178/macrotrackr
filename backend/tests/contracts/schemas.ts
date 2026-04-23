@@ -236,8 +236,6 @@ export type SubscriptionStatus = "free" | "pro" | "canceled";
 
 export interface UserSubscription {
   status: SubscriptionStatus;
-  hasStripeCustomer: boolean;
-  currentPeriodEnd?: string | null;
 }
 
 export interface UserProfileResponse {
@@ -267,13 +265,7 @@ export function isValidUserSubscription(data: unknown): data is UserSubscription
   if (typeof data !== "object" || data === null) return false;
   const obj = data as Record<string, unknown>;
   
-  return (
-    isValidSubscriptionStatus(obj.status) &&
-    typeof obj.hasStripeCustomer === "boolean" &&
-    (obj.currentPeriodEnd === undefined ||
-      obj.currentPeriodEnd === null ||
-      typeof obj.currentPeriodEnd === "string")
-  );
+  return isValidSubscriptionStatus(obj.status);
 }
 
 export function isValidUserProfileResponse(data: unknown): data is UserProfileResponse {

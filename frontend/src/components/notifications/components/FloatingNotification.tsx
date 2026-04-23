@@ -168,11 +168,7 @@ function FloatingNotification({
       role="alert"
       aria-live="assertive"
       aria-atomic="true"
-      style={
-        resolvedTop
-          ? ({ marginTop: resolvedTop } as React.CSSProperties)
-          : undefined
-      }
+      style={resolvedTop ? { marginTop: resolvedTop } : undefined}
     >
       <div
         className={`flex items-center rounded-lg shadow-modal backdrop-blur-md 

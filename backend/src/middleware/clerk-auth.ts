@@ -215,8 +215,7 @@ export const clerkAuthMiddleware = clerkPlugin({
       return {
         user: null,
         authenticatedUser: null,
-        clerkUserId: null,
-        internalUserId: null,
+        authProvider: "clerk" as const,
       };
     }
 
@@ -228,8 +227,7 @@ export const clerkAuthMiddleware = clerkPlugin({
         return {
           user: null,
           authenticatedUser: null,
-          clerkUserId: null,
-          internalUserId: null,
+          authProvider: "clerk" as const,
         };
       }
 
@@ -280,20 +278,19 @@ export const clerkAuthMiddleware = clerkPlugin({
 
       // Return user info for use in route handlers
       const authenticatedUser = {
-          userId: internalUserId,
-          id: userId,
-          clerkUserId: userId,
-          email,
-          firstName: clerkUser.firstName,
-          lastName: clerkUser.lastName,
-          imageUrl: clerkUser.imageUrl,
-        };
+        userId: internalUserId,
+        providerUserId: userId,
+        authProvider: "clerk" as const,
+        email,
+        firstName: clerkUser.firstName,
+        lastName: clerkUser.lastName,
+        imageUrl: clerkUser.imageUrl,
+      };
 
       return {
         user: authenticatedUser,
         authenticatedUser,
-        clerkUserId: userId,
-        internalUserId,
+        authProvider: "clerk" as const,
         clerkClient: clerk,
       };
     } catch (err) {
@@ -309,8 +306,11 @@ export const clerkAuthMiddleware = clerkPlugin({
   // Authentication guard - must be after the derive to check if user exists
   .onBeforeHandle({ as: "scoped" }, (context) => {
     const typedContext = context as {
-      user: ClerkAuthContext["user"];
-      internalUserId: number | null;
+      user: {
+        userId: number | null;
+        providerUserId: string;
+        authProvider: "clerk";
+      } | null;
       path?: string;
       set: {
         status?: number | string;
@@ -318,7 +318,7 @@ export const clerkAuthMiddleware = clerkPlugin({
       request?: Request;
     };
 
-    const { user, internalUserId, path, set } = typedContext;
+    const { user, path, set } = typedContext;
     const requestPath = getRequestPath(context);
     
     // Skip authentication for exempt paths
@@ -336,9 +336,9 @@ export const clerkAuthMiddleware = clerkPlugin({
       };
     }
 
-    if (!internalUserId && !isAllowedForUnlinkedUser(requestPath)) {
+    if (!user.userId && !isAllowedForUnlinkedUser(requestPath)) {
       logger.warn(
-        { path, requestPath, clerkUserId: user.clerkUserId },
+        { path, requestPath, clerkUserId: user.providerUserId },
         "Authenticated Clerk user is not linked to an internal account",
       );
       set.status = 409;
@@ -349,28 +349,3 @@ export const clerkAuthMiddleware = clerkPlugin({
       };
     }
   });
-
-// Export types
-export interface ClerkAuthContext {
-  user: {
-    userId?: number | null;
-    id: string;
-    clerkUserId: string;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    imageUrl?: string;
-  } | null;
-  authenticatedUser: {
-    userId?: number | null;
-    id: string;
-    clerkUserId: string;
-    email?: string;
-    firstName?: string;
-    lastName?: string;
-    imageUrl?: string;
-  } | null;
-  clerkUserId: string | null;
-  internalUserId: number | null;
-  clerkClient?: unknown;
-}

@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Navigate, useNavigate, useSearch } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
 import { ApiError } from "@/api/core";
 import { userApi } from "@/api/user";
 import PageBackground from "@/components/layout/PageBackground";
 import LoadingSpinner from "@/components/ui/LoadingSpinner";
+import { isClerkAuthMode } from "@/config/runtime";
 import { handleAccountCollision } from "@/features/auth/utils/handleAuthCollision";
 import {
   normalizeAuthRedirect,
@@ -35,6 +36,14 @@ import { logger } from "@/lib/logger";
  * 5. If new user or incomplete profile → /profile-setup
  */
 export default function SSOCallbackPage() {
+  if (!isClerkAuthMode) {
+    return <Navigate to="/home" search={{ limit: 20, offset: 0 }} />;
+  }
+
+  return <ClerkSsoCallbackPage />;
+}
+
+function ClerkSsoCallbackPage() {
   const { handleRedirectCallback, signOut } = useClerk();
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();

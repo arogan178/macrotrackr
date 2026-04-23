@@ -65,6 +65,10 @@ function calculateMacrosValue(
 // Domain-specific adapter functions
 
 export function calculateAge(birthDate: string): number {
+  if (!birthDate) {
+    return 0;
+  }
+
   return calculateAgeValue(new Date(birthDate));
 }
 /**

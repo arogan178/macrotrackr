@@ -2,12 +2,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { authApi as authApiClient } from "../../api/auth";
 import {
+  apiClient,
   ApiError,
-  getAuthToken,
-  getHeaders,
-  handleResponse,
-  setAuthToken,
-  setGetToken,
 } from "../../api/core";
 import { userApi } from "../../api/user";
 
@@ -80,8 +76,6 @@ describe("apiServices contracts", () => {
           isProfileComplete: true,
           subscription: {
             status: "pro",
-            hasStripeCustomer: true,
-            currentPeriodEnd: "2026-04-01T00:00:00.000Z",
           },
         }),
       );
@@ -100,8 +94,6 @@ describe("apiServices contracts", () => {
       isProfileComplete: true,
       subscription: {
         status: "pro",
-        hasStripeCustomer: true,
-        currentPeriodEnd: "2026-04-01T00:00:00.000Z",
       },
     });
 
@@ -126,7 +118,7 @@ describe("apiServices contracts", () => {
       }),
     );
 
-    await expect(authApiClient.syncUser("token-123")).resolves.toEqual({
+    await expect(authApiClient.syncUser({ token: "token-123" })).resolves.toEqual({
       user: {
         id: 12,
         clerkId: "user_456",

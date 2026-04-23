@@ -287,8 +287,6 @@ export const mockUserProfileComplete: UserProfileResponse = {
   isProfileComplete: true,
   subscription: {
     status: 'pro',
-    hasStripeCustomer: true,
-    currentPeriodEnd: '2026-03-18T00:00:00Z',
   },
 };
 
@@ -309,7 +307,6 @@ export const mockUserProfileIncomplete: UserProfileResponse = {
   isProfileComplete: false,
   subscription: {
     status: 'free',
-    hasStripeCustomer: false,
   },
 };
 
@@ -330,7 +327,6 @@ export const mockUserProfileFemale: UserProfileResponse = {
   isProfileComplete: true,
   subscription: {
     status: 'free',
-    hasStripeCustomer: false,
   },
 };
 

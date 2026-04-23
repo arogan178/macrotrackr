@@ -234,7 +234,7 @@ Setting and hitting your protein target is simple:
 3. **Review trends:** Check the weekly view to see your consistency
 4. **Use saved meals:** Build high-protein meals you enjoy and save them for quick logging
 
-[Create your free MacroTrackr account](https://macrotrackr.com/register) and start hitting your protein goals consistently.
+[Create your free MacroTrackr account](/register) and start hitting your protein goals consistently.
 
 ## Common Protein Myths
 
@@ -258,4 +258,4 @@ Don't overcomplicate it. Hit your daily target consistently, train hard, and the
 
 — The MacroTrackr Team
 
-*Track your protein intake effortlessly with MacroTrackr's free tier. [Sign up here](https://macrotrackr.com/register).*
+*Track your protein intake effortlessly with MacroTrackr's free tier. [Sign up here](/register).*

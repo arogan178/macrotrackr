@@ -1,7 +1,8 @@
 export interface AuthenticatedUser {
   userId: number | null;
-  id: string;
-  clerkUserId: string;
+  providerUserId: string;
+  authProvider: "clerk" | "local";
+  sessionId?: string;
   email?: string;
   firstName?: string;
   lastName?: string;
@@ -9,9 +10,9 @@ export interface AuthenticatedUser {
 }
 
 export interface AuthenticatedContext {
-  user: AuthenticatedUser;
-  clerkUserId: string | null;
-  internalUserId: number | null;
+  user: AuthenticatedUser | null;
+  authenticatedUser: AuthenticatedUser | null;
+  authProvider: "clerk" | "local";
   correlationId: string;
   request: Request;
   set: {
