@@ -147,9 +147,9 @@ docker compose up -d
 
 ## Deployment Notes
 
-- Managed deployment workflow docs: `.github/README_DEPLOY.md`
 - Frontend deployment guide: `frontend/docs/DEPLOYMENT.md`
-- Stripe webhook setup (managed only): `backend/docs/WEBHOOK_SETUP.md`
+- Self-hosted deployments should use the public Docker Compose flow described above.
+- Managed-hosting deployment infrastructure is operated from a private infrastructure repository and is not documented in this public repo.
 
 ## Project Layout
 
