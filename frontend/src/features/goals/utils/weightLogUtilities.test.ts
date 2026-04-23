@@ -62,7 +62,7 @@ describe("weightLogUtilities", () => {
         "2024-01-06",
       );
       expect(filtered).toHaveLength(2);
-      expect(filtered.map((e) => e.id)).toEqual(["1", "2"]);
+      expect(filtered.map((entry) => entry.id)).toEqual(["1", "2"]);
     });
 
     it("excludes entries outside date range", () => {

@@ -27,12 +27,11 @@ export interface MetricCardProps {
 
 type ColorClasses = Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>;
 
+const EMPTY_COLOR_CLASSES: ColorClasses = {};
+
 function useMetricCardColors(color: keyof typeof COLOR_MAP | undefined) {
   return useMemo(
-    () =>
-      color
-        ? COLOR_MAP[color]
-        : ({} as ColorClasses),
+    () => (color ? COLOR_MAP[color] : EMPTY_COLOR_CLASSES),
     [color],
   );
 }

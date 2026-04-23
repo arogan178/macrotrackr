@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { motion } from "motion/react";
 
+import { isLocalAuthMode } from "@/config/runtime";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
 import { useDeleteSavedMeal, useSavedMeals } from "@/hooks/queries/useSavedMeals";
 import { cn } from "@/lib/classnameUtilities";
@@ -25,7 +26,7 @@ const SavedMealsList = memo(({ onSelectMeal, className }: SavedMealsListProps) =
   const { data, isLoading } = useSavedMeals();
   const deleteMeal = useDeleteSavedMeal();
   const meals = data?.meals ?? [];
-  const isPro = data?.isPro ?? false;
+  const isPro = isLocalAuthMode || data?.isPro === true;
   const count = data?.count ?? 0;
   const limit = data?.limit ?? 5;
 

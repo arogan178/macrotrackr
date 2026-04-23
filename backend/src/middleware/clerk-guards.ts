@@ -2,10 +2,12 @@ import { Elysia } from "elysia";
 import { AuthenticationError, AuthorizationError } from "../lib/http/errors";
 import { logger } from "../lib/observability/logger";
 import { SubscriptionService } from "../modules/billing/subscription-service";
+import { getConfig } from "../config";
 
 export interface AuthenticatedUser {
   userId: number;
-  clerkUserId: string;
+  providerUserId: string;
+  authProvider: "clerk" | "local";
   email?: string;
   firstName?: string;
   lastName?: string;
@@ -14,22 +16,21 @@ export interface AuthenticatedUser {
 
 interface GuardsAuthenticatedContext {
   user: AuthenticatedUser | null;
-  internalUserId: number | null;
   path?: string;
 }
 
 export const requireAuth = new Elysia({ name: "requireAuth" })
   .derive({ as: "scoped" }, async (context): Promise<{ authenticatedUser: AuthenticatedUser }> => {
-    const { user, internalUserId } = context as unknown as GuardsAuthenticatedContext;
+    const { user } = context as unknown as GuardsAuthenticatedContext;
     
     if (!user) {
       logger.warn({ path: context.path }, "requireAuth: No user in context");
       throw new AuthenticationError("Authentication required. Please sign in.");
     }
     
-    if (!internalUserId) {
+    if (!user.userId) {
       logger.warn(
-        { path: context.path, clerkUserId: user.clerkUserId }, 
+        { path: context.path, clerkUserId: user.providerUserId }, 
         "requireAuth: No internalUserId - user may not be synced"
       );
       throw new AuthenticationError(
@@ -39,8 +40,9 @@ export const requireAuth = new Elysia({ name: "requireAuth" })
     
     return {
       authenticatedUser: {
-        userId: internalUserId,
-        clerkUserId: user.clerkUserId,
+        userId: user.userId,
+        providerUserId: user.providerUserId,
+        authProvider: user.authProvider || "clerk",
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -68,6 +70,10 @@ export interface FeatureLimitResult {
 }
 
 async function getRequiredProStatus(userId: number): Promise<boolean> {
+  if (getConfig().APP_MODE === "self-hosted") {
+    return true;
+  }
+
   try {
     return await SubscriptionService.hasActiveProSubscription(userId);
   } catch (error) {

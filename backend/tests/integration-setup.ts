@@ -9,7 +9,8 @@ mock.module("../src/middleware/clerk-guards", () => {
     return {
       authenticatedUser: {
         userId: 1, // matches our setup test db
-        clerkUserId: "test_clerk",
+        providerUserId: "test_clerk",
+        authProvider: "clerk",
         email: "test@example.com"
       }
     };

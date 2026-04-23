@@ -1,9 +1,9 @@
 import React, { useMemo } from "react";
-import { useAuth } from "@clerk/clerk-react";
 import { useLocation } from "@tanstack/react-router";
 
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import { useUser } from "@/hooks/auth/useAuthQueries";
+import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
 import Navbar from "./Navbar";
 
@@ -25,7 +25,7 @@ const NO_NAV_ROUTES = new Set([
 
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
-  const { isLoaded, isSignedIn } = useAuth();
+  const { isLoaded, isSignedIn } = useAppAuthState();
 
   // Use useMemo for route checking to avoid recreating array each render
   const isPublicRoute = useMemo(

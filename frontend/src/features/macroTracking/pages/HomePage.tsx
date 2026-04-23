@@ -72,7 +72,7 @@ export default function HomePage() {
   const createSavedMealMutation = useCreateSavedMeal();
   const deleteSavedMealMutation = useDeleteSavedMeal();
   const { data: savedMealsData } = useSavedMeals();
-  const savedMeals = savedMealsData?.meals ?? [];
+  const savedMeals = useMemo(() => savedMealsData?.meals ?? [], [savedMealsData]);
   const [isExportingHistory, setIsExportingHistory] = React.useState(false);
 
   const savedEntryIds = useMemo(() => {

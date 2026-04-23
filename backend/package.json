@@ -1,5 +1,5 @@
 {
-  "name": "macro-tracker-backend",
+  "name": "macrotrackr-backend",
   "version": "1.0.0",
   "description": "Backend API for Macro Trackr application",
   "module": "src/index.ts",
@@ -7,6 +7,7 @@
   "scripts": {
     "start": "if [ -f .env.production ]; then bunx dotenvx run --env-file .env.production -- bun run src/index.ts; elif [ -f .env ]; then bunx dotenvx run --env-file .env -- bun run src/index.ts; else bun run src/index.ts; fi",
     "dev": "if [ -f .env.development ]; then bunx dotenvx run --env-file .env.development -- bun --watch src/index.ts; elif [ -f .env ]; then bunx dotenvx run --env-file .env -- bun --watch src/index.ts; else bun --watch src/index.ts; fi",
+    "build": "bun build src/index.ts --target bun --outdir dist",
     "migrate:clerk:dev": "if [ -f .env.development ]; then bunx dotenvx run --env-file .env.development -- bun run scripts/migrate-dev-users-to-clerk.ts; elif [ -f .env ]; then bunx dotenvx run --env-file .env -- bun run scripts/migrate-dev-users-to-clerk.ts; else bun run scripts/migrate-dev-users-to-clerk.ts; fi",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
@@ -22,7 +23,7 @@
     "api"
   ],
   "author": "",
-  "license": "ISC",
+  "license": "AGPL-3.0-only",
   "devDependencies": {
     "@eslint/js": "^9.39.4",
     "@types/bun": "^1.3.12",

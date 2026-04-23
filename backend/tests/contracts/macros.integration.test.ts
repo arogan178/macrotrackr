@@ -8,7 +8,8 @@ vi.mock("../../src/middleware/clerk-guards", () => {
     requireAuth: new Elysia({ name: "requireAuth" }).derive({ as: "scoped" }, () => ({
       authenticatedUser: {
         userId: 1,
-        clerkUserId: "test_clerk",
+        providerUserId: "test_clerk",
+        authProvider: "clerk",
         email: "test@example.com"
       }
     })),
@@ -26,8 +27,6 @@ describe("Macros Module Integration", () => {
   let app: any;
 
   beforeAll(async () => {
-    vi.stubEnv("JWT_SECRET", "test-secret-that-is-at-least-32-chars");
-    
     db = new Database(":memory:");
     initializeSchema(db);
     

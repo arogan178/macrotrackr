@@ -308,8 +308,8 @@ Meal prep isn't about being obsessive—it's about being prepared. When you have
 
 Start small. Prep just lunches for one week. See how much easier your tracking becomes. Build from there.
 
-[Start tracking your prepped meals in MacroTrackr](https://macrotrackr.com/register) with our free tier—unlimited daily entries and 5 saved meals included.
+[Start tracking your prepped meals in MacroTrackr](/register) with our free tier—unlimited daily entries and 5 saved meals included.
 
 — The MacroTrackr Team
 
-*Questions about meal prep strategies? Email us at support@macrotrackr.com.*
+*Questions about meal prep strategies? Email us at support@local.invalid.*

@@ -8,6 +8,7 @@ import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { EmptyState } from "@/components/ui";
+import { isLocalAuthMode } from "@/config/runtime";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
 import {
@@ -35,7 +36,7 @@ export default function ReportingPage() {
 
   // Get subscription status from store
   const { subscriptionStatus } = useStore();
-  const isProUser = subscriptionStatus === "pro";
+  const isProUser = isLocalAuthMode || subscriptionStatus === "pro";
 
   // Primary date range state - used throughout the component
   const [dateRange, setDateRange] = useState<string>("week");

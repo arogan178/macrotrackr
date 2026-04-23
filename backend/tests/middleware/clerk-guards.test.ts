@@ -1,12 +1,36 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const hasActiveProSubscriptionMock = vi.fn();
+let appMode: "managed" | "self-hosted" = "managed";
 
 vi.mock("../../src/modules/billing/subscription-service", () => ({
   SubscriptionService: {
     hasActiveProSubscription: (...arguments_: unknown[]) =>
       hasActiveProSubscriptionMock(...arguments_),
   },
+}));
+
+vi.mock("../../src/config", () => ({
+  config: new Proxy(
+    {},
+    {
+      get: (_target, property) => {
+        if (property === "APP_MODE") {
+          return appMode;
+        }
+
+        if (property === "NODE_ENV") {
+          return "test";
+        }
+
+        return undefined;
+      },
+    },
+  ),
+  getConfig: () => ({
+    APP_MODE: appMode,
+    NODE_ENV: "test",
+  }),
 }));
 
 import {
@@ -20,6 +44,7 @@ import {
 describe("clerk-guards", () => {
   beforeEach(() => {
     hasActiveProSubscriptionMock.mockReset();
+    appMode = "managed";
   });
 
   describe("FREE_TIER_LIMITS", () => {
@@ -70,6 +95,13 @@ describe("clerk-guards", () => {
       const result = checkProStatus(1);
       expect(result).toBeInstanceOf(Promise);
     });
+
+    it("returns true in self-hosted mode", async () => {
+      appMode = "self-hosted";
+
+      await expect(checkProStatus(1)).resolves.toBe(true);
+      expect(hasActiveProSubscriptionMock).not.toHaveBeenCalled();
+    });
   });
 
   describe("checkFeatureLimit", () => {
@@ -107,6 +139,15 @@ describe("clerk-guards", () => {
       const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 100);
       expect(result.allowed).toBe(true);
       expect(result.isProUser).toBe(true);
+    });
+
+    it("bypasses feature limits in self-hosted mode", async () => {
+      appMode = "self-hosted";
+
+      const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 999);
+      expect(result.allowed).toBe(true);
+      expect(result.isProUser).toBe(true);
+      expect(hasActiveProSubscriptionMock).not.toHaveBeenCalled();
     });
   });
 });

@@ -3,36 +3,36 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "macro-tracker",
+      "name": "macrotrackr",
       "devDependencies": {
         "@types/react-syntax-highlighter": "^15.5.13",
         "typescript": "^5.9.3",
       },
     },
     "backend": {
-      "name": "macro-tracker-backend",
+      "name": "macrotrackr-backend",
       "version": "1.0.0",
       "dependencies": {
-        "@dotenvx/dotenvx": "^1.53.0",
+        "@dotenvx/dotenvx": "^1.61.0",
         "@elysiajs/cors": "^1.4.1",
         "@elysiajs/swagger": "^1.3.1",
-        "elysia": "^1.4.27",
+        "elysia": "^1.4.28",
         "elysia-clerk": "^0.13.2",
         "pino": "^9.14.0",
         "pino-pretty": "^13.1.3",
         "resend": "^4.8.0",
         "stripe": "^18.5.0",
-        "svix": "^1.65.0",
+        "svix": "^1.90.0",
         "zod": "^3.25.76",
       },
       "devDependencies": {
-        "@eslint/js": "^9.39.3",
-        "@types/bun": "^1.3.9",
+        "@eslint/js": "^9.39.4",
+        "@types/bun": "^1.3.12",
         "@vitest/coverage-v8": "^3.2.4",
-        "bun-types": "^1.3.9",
-        "eslint": "^9.39.3",
+        "bun-types": "^1.3.12",
+        "eslint": "^9.39.4",
         "globals": "^15.15.0",
-        "typescript-eslint": "^8.56.1",
+        "typescript-eslint": "^8.58.2",
         "vitest": "^3.2.4",
       },
       "peerDependencies": {
@@ -40,7 +40,7 @@
       },
     },
     "frontend": {
-      "name": "macro-tracker-frontend",
+      "name": "macrotrackr-frontend",
       "version": "0.0.0",
       "dependencies": {
         "@clerk/clerk-react": "^5.61.3",
@@ -1652,9 +1652,9 @@
 
     "lz-string": ["lz-string@1.5.0", "", { "bin": { "lz-string": "bin/bin.js" } }, "sha512-h5bgJWpxJNswbU7qCrV0tIKQCaS3blPDrqKWx+QxzuzL1zGUzij9XCWLrSLsJPu5t+eWA/ycetzYAO5IOMcWAQ=="],
 
-    "macro-tracker-backend": ["macro-tracker-backend@workspace:backend"],
+    "macrotrackr-backend": ["macrotrackr-backend@workspace:backend"],
 
-    "macro-tracker-frontend": ["macro-tracker-frontend@workspace:frontend"],
+    "macrotrackr-frontend": ["macrotrackr-frontend@workspace:frontend"],
 
     "magic-string": ["magic-string@0.30.21", "", { "dependencies": { "@jridgewell/sourcemap-codec": "^1.5.5" } }, "sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ=="],
 

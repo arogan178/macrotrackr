@@ -10,6 +10,7 @@ import {
 
 declare global {
   // Workbox injectManifest replaces this at build time.
+  // eslint-disable-next-line @typescript-eslint/naming-convention
   var __WB_MANIFEST: Array<string | PrecacheEntry>;
 }
 

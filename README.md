@@ -1,148 +1,160 @@
 # Macro Tracker
 
-A modern, full-stack nutrition and fitness tracking application.
+Macro Tracker is an AGPLv3 nutrition and macro tracking application with two runtime profiles:
 
-## 🏗️ Architecture & Stack
+- `managed`: Clerk authentication and managed billing
+- `self-hosted`: local authentication and billing disabled
 
-**Frontend:**
+The backend uses SQLite for this OSS release.
 
-- **Framework:** React 19, Vite, TypeScript
-- **Routing:** TanStack Router (file-based routing via `routeTree.gen.ts`)
-- **State & Data Fetching:** React Query, Zustand (for UI states like notifications)
-- **Styling:** Tailwind CSS, Framer Motion for animations
-- **Architecture:** Feature-sliced design (`frontend/src/features/`)
+## License
 
-**Backend:**
+This project is licensed under the GNU Affero General Public License v3.0.
+See `LICENSE`.
 
-- **Runtime:** Bun
-- **Framework:** Elysia.js (fast, type-safe REST APIs)
-- **Database:** SQLite (local/embedded)
-- **Architecture:** Modular domain-driven design (`backend/src/modules/`) with explicit bootstrap lifecycle in `backend/src/index.ts`
+## Runtime Profiles
 
-**Shared Infrastructure:**
+### Managed profile
 
-- **Authentication:** Clerk (integrated on both frontend via SDK and backend via Elysia middleware)
-- **Payments:** Stripe (via webhooks in `billing` module)
-- **External APIs:** OpenFoodFacts for food search/barcode scanning
+- `APP_MODE=managed`
+- `AUTH_MODE=clerk`
+- `BILLING_MODE=managed`
 
-## 🔁 Runtime Bootstrap Contracts
+Expected behavior:
 
-### Backend bootstrap flow (`backend/src/index.ts`)
+- Clerk auth middleware/routes mounted
+- Billing routes mounted
+- Billing UI visible
 
-The backend startup path is intentionally explicit and should be preserved when adding new runtime services:
+### Self-hosted profile
 
-1. Resolve runtime config and database path (`resolveDatabasePath`).
-2. Create and initialize SQLite (`createDatabase` → `initializeDatabase`).
-3. Wire runtime services from the initialized DB (`createRuntimeServices(db)`).
-4. Build the Elysia app (`new Elysia().use(createApp(db))`).
-5. Start listening only from `startServer()`.
+- `APP_MODE=self-hosted`
+- `AUTH_MODE=local`
+- `BILLING_MODE=disabled`
 
-If you add new singleton-style services, register them during runtime bootstrap (step 3) rather than relying on import-time side effects.
+Expected behavior:
 
-### Frontend bootstrap flow (`frontend/src/main.tsx`)
+- Local auth routes enabled (`/api/auth/*` local endpoints)
+- Session transport via `mt_session` secure cookie + DB-backed sessions
+- Billing routes unmounted (`404` by absence)
+- Billing UI hidden
 
-The frontend startup path establishes auth and provider ordering before routes mount:
+## Environment Contracts
 
-1. Validate required environment variables (for example, `VITE_CLERK_PUBLISHABLE_KEY`).
-2. Initialize auth token provider state early (`initializeAuthTokenProvider()`).
-3. Mount providers in this order:
-   - `PersistQueryClientProvider`
-   - `ClerkProvider` (+ `ClerkTokenSync`)
-   - optional `PostHogProvider`
-   - `AppRouter`
-4. Register service worker after root render (`registerServiceWorker()`).
+Backend canonical variables:
 
-Provider order is part of app contract; keep it stable unless there is a strong reason to change it.
+- `APP_MODE`, `AUTH_MODE`, `BILLING_MODE`, `ANALYTICS_MODE`, `EMAIL_MODE`
+- `APP_URL`, `PUBLIC_APP_NAME`, `SUPPORT_EMAIL`
+- `ENABLE_METRICS`
 
-## 📦 Dependency Governance
+Frontend optional branding/public link variables:
 
-Dependency/tooling policy for the workspace is documented in
-[`docs/DEPENDENCY_GOVERNANCE.md`](./docs/DEPENDENCY_GOVERNANCE.md).
-Use it when adding or updating dependencies to avoid cross-workspace drift.
+- `VITE_APP_URL`
+- `VITE_PUBLIC_APP_NAME`
+- `VITE_SUPPORT_EMAIL`
+- `VITE_GITHUB_REPO_URL`
+- `VITE_DOCS_URL`
 
-### Frontend feature/public-surface conventions
+Provider env vars are only required when corresponding modes are enabled:
 
-- Keep domain logic inside `frontend/src/features/<feature>/` and avoid cross-feature deep imports.
-- Prefer shared imports via `@/components`, `@/hooks`, `@/lib`, and `@/types`.
-- Expose feature-level entry points with `index.ts` where practical so route/pages import stable public surfaces instead of internal file paths.
-- Keep API callers on shared request contracts from `frontend/src/api/core.ts` (for example, common header-building and error-handling paths).
+- Clerk keys only when `AUTH_MODE=clerk`
+- Stripe keys only when `BILLING_MODE=managed`
+- PostHog keys only when `ANALYTICS_MODE=posthog`
+- Resend/SMTP keys only when `EMAIL_MODE=resend|smtp`
 
-## 📂 Workspace Layout
+Reference templates:
 
-```text
-macro_tracker/
-├── frontend/
-│   ├── src/
-│   │   ├── api/          # API clients matching backend modules
-│   │   ├── components/   # Shared generic UI (buttons, form fields, layout)
-│   │   ├── features/     # Domain-specific logic (macroTracking, goals, reporting, etc.)
-│   │   ├── hooks/        # Shared react-query hooks
-│   │   ├── routes/       # TanStack Router route definitions
-│   │   └── lib/          # Utilities, formatters, configurations
-│   └── (vite, eslint, playwright configs)
-├── backend/
-│   ├── src/
-│   │   ├── db/           # SQLite schema and setup
-│   │   ├── lib/          # Core utilities (errors, openfoodfacts, route-adapter)
-│   │   ├── middleware/   # Elysia plugins (Clerk auth, rate limiting)
-│   │   └── modules/      # Feature modules (auth, macros, goals, reporting, billing, user)
-│   └── tests/            # API integration and contract tests
-├── scripts/              # One-off maintenance/refactor helpers
-└── package.json          # Root monorepo scripts
-```
+- `backend/.env.example`
+- `frontend/.env.example`
 
-## 🚀 Development Guide
-
-### 1. Installation
+## Quick Start (Local Development)
 
 ```bash
 bun install
-```
-
-### 2. Environment Variables
-
-Ensure you have a `.env` file configured with your Clerk, Stripe, and base URL settings.
-
-Optional social-provider toggles for the login/register UI:
-
-- `VITE_SOCIAL_GOOGLE_ENABLED`
-- `VITE_SOCIAL_FACEBOOK_ENABLED`
-- `VITE_SOCIAL_APPLE_ENABLED`
-
-Set each to `true` or `false`. If omitted, the provider stays enabled by default.
-
-### 3. Running the App
-
-```bash
-# Run both frontend and backend concurrently
+cp backend/.env.example backend/.env.development
+cp frontend/.env.example frontend/.env.development
 bun run dev
 ```
 
-Useful workspace scripts:
+Useful scripts:
 
 ```bash
 bun run dev:backend
 bun run dev:frontend
-bun run build
-bun run build:backend
-bun run start
 bun run --cwd backend test
-bun run lint
+bun run --cwd frontend test
 bun run typecheck
+bun run lint
 ```
 
-### 5. Maintenance scripts
+## Self-Hosting with Docker Compose
 
-One-time helper scripts now live under `scripts/` at repository root.
-They are intentionally kept out of runtime paths and exist for targeted migration/refactor workflows.
+This repository includes a self-host starter compose stack.
 
-### 4. Where to add new features?
+```bash
+mkdir -p data
+docker compose pull
+docker compose up -d
+```
 
-- **Frontend:** Create a new folder inside `frontend/src/features/` if it's a distinct domain. Add API clients in `frontend/src/api/` and shared UI components to `frontend/src/components/ui/`.
-- **Backend:** Create a new module folder in `backend/src/modules/`. Expose its routes via a `routes.ts` file and register it in `backend/src/index.ts`. Use the `requireAuth` middleware for protected endpoints.
+The default compose file uses prebuilt GHCR images in local-auth mode (`VITE_AUTH_MODE=local`),
+so no Clerk publishable key is required for self-hosted deployments.
+It also uses same-origin API requests (`/api`) through nginx proxying, so clients do not
+need to reach backend on `localhost`.
 
-## 🧪 Testing
+Services:
 
-- **Frontend unit/integration:** `bun run test`
-- **Frontend e2e:** `bun run --cwd frontend test:e2e`
-- **Backend tests:** `bun run --cwd backend test`
+- frontend: `http://localhost:5173` (Mapped to internal container port 80)
+- backend API: `http://localhost:3000` (Direct access usually not needed since frontend proxies `/api`)
+
+The SQLite database is persisted at `./data/macrotrackr.db`.
+
+### Build from source instead of pulling images
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.build.yml up --build
+```
+
+This mode is useful for contributors and local image customization.
+
+### First-run bootstrap
+
+1. Start the stack.
+2. Open `http://localhost:5173/register`.
+3. Create the initial local user account.
+
+## Backup, Restore, and Upgrade (Self-host)
+
+### Backup
+
+```bash
+cp data/macrotrackr.db data/macrotrackr.db.backup
+```
+
+### Restore
+
+```bash
+cp data/macrotrackr.db.backup data/macrotrackr.db
+```
+
+### Upgrade
+
+```bash
+git pull
+docker compose pull
+docker compose up -d
+```
+
+## Deployment Notes
+
+- Managed deployment workflow docs: `.github/README_DEPLOY.md`
+- Frontend deployment guide: `frontend/docs/DEPLOYMENT.md`
+- Stripe webhook setup (managed only): `backend/docs/WEBHOOK_SETUP.md`
+
+## Project Layout
+
+```text
+backend/   Bun + Elysia API, SQLite schema, auth/billing modules
+frontend/  React + Vite app (mode-aware auth and billing UI)
+docs/      public project docs
+```

@@ -45,8 +45,6 @@ describe("userApi", () => {
         isProfileComplete: true,
         subscription: {
           status: "pro",
-          hasStripeCustomer: true,
-          currentPeriodEnd: "2026-05-01T00:00:00.000Z",
         },
       }),
     );
@@ -65,8 +63,6 @@ describe("userApi", () => {
       isProfileComplete: true,
       subscription: {
         status: "pro",
-        hasStripeCustomer: true,
-        currentPeriodEnd: "2026-05-01T00:00:00.000Z",
       },
     });
 
@@ -109,8 +105,6 @@ describe("userApi", () => {
         isProfileComplete: false,
         subscription: {
           status: "free",
-          hasStripeCustomer: false,
-          currentPeriodEnd: undefined,
         },
       }),
     );

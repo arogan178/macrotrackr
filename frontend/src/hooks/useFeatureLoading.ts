@@ -82,6 +82,8 @@ export function useFeatureLoading(feature: FeatureType) {
   };
 }
 
+type UseFeatureLoadingResult = ReturnType<typeof useFeatureLoading>;
+
 /**
  * Hook for checking loading state of specific queries within a feature
  */
@@ -126,9 +128,6 @@ export function useSpecificMutationLoading(mutationKey?: unknown[]) {
  * Hook for aggregating loading states of multiple features
  */
 export function useMultiFeatureLoading(requested: FeatureType[]) {
-  // Fixed ordered set of features to satisfy rules-of-hooks
-  const ordered: FeatureType[] = ["auth", "habits", "goals", "macros", "settings"];
-
   // For each known feature, compute keys and call query/mutation hooks in a fixed order
   const authKey = [...queryKeys.auth.all()];
   const authFetching = useIsFetching({ queryKey: authKey });
@@ -188,13 +187,16 @@ export function useMultiFeatureLoading(requested: FeatureType[]) {
     },
   } as const;
 
-  // Build featureStates for requested features only
-  const featureStates = {} as Record<FeatureType, ReturnType<typeof useFeatureLoading>>;
-  for (const f of ordered) {
-    featureStates[f] = perFeature[f];
-  }
+  const featureStates: Record<FeatureType, UseFeatureLoadingResult> = {
+    auth: perFeature.auth,
+    habits: perFeature.habits,
+    goals: perFeature.goals,
+    macros: perFeature.macros,
+    reports: perFeature.macros,
+    settings: perFeature.settings,
+  };
 
-  const filtered = requested.map((f) => perFeature[f]);
+  const filtered = requested.map((feature) => featureStates[feature]);
 
   const isAnyQueryLoading = filtered.some((s) => s.isQueryLoading);
   const isAnyMutationLoading = filtered.some((s) => s.isMutationLoading);

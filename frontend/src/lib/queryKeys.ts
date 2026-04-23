@@ -7,6 +7,7 @@ export const queryKeys = {
   auth: {
     all: () => ["auth"] as const,
     user: () => ["auth", "user"] as const,
+    session: () => ["auth", "session"] as const,
   },
 
   // Habits queries
