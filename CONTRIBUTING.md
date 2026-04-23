@@ -16,7 +16,7 @@ bun run dev
 - Managed profile: `APP_MODE=managed`, `AUTH_MODE=clerk`, `BILLING_MODE=managed`
 - Self-hosted profile: `APP_MODE=self-hosted`, `AUTH_MODE=local`, `BILLING_MODE=disabled`
 
-Please keep profile behavior consistent with `OSS_PLAN.md` when changing auth, billing, or config contracts.
+Please keep profile behavior consistent with the documented environment contracts in `README.md`, `backend/.env.example`, and `frontend/.env.example` when changing auth, billing, or config contracts.
 
 ## Before opening a PR
 
