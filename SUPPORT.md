@@ -3,7 +3,7 @@
 ## Community support
 
 - Open a GitHub issue for bug reports and feature requests.
-- Include runtime profile (`managed` or `self-hosted`) and environment details.
+- Include your runtime profile and environment details.
 
 ## Direct contact
 
