@@ -12,6 +12,7 @@ import {
   TabButton,
   UserIcon,
 } from "@/components/ui";
+import { isClerkAuthMode, isManagedBillingMode } from "@/config/runtime";
 import {
   BillingForm,
   ChangePasswordForm,
@@ -26,11 +27,14 @@ import { useStore } from "@/store/store";
 
 type TabType = "profile" | "billing" | "accounts" | "security";
 
+const BILLING_TAB_ENABLED = isManagedBillingMode;
+const ACCOUNTS_TAB_ENABLED = isClerkAuthMode;
+
 // Valid tab values for validation
 const VALID_TABS = new Set<TabType>([
   "profile",
-  "billing",
-  "accounts",
+  ...(BILLING_TAB_ENABLED ? (["billing"] as TabType[]) : []),
+  ...(ACCOUNTS_TAB_ENABLED ? (["accounts"] as TabType[]) : []),
   "security",
 ]);
 
@@ -97,6 +101,12 @@ export default function SettingsPage() {
       }
     }
   }, [search.tab, hasSettingsChanges, activeTab]);
+
+  useEffect(() => {
+    if (!VALID_TABS.has(activeTab)) {
+      setActiveTab("profile");
+    }
+  }, [activeTab]);
 
   // Initialize settings from query data on component mount
   useEffect(() => {
@@ -219,28 +229,32 @@ export default function SettingsPage() {
                 Profile
               </span>
             </TabButton>
-            <TabButton
-              active={activeTab === "billing"}
-              onClick={() => handleTabChange("billing")}
-              layoutId="settingsTabHighlight"
-              isMotion
-            >
-              <span className="relative z-10 flex items-center">
-                <AwardIcon size="sm" className="mr-1.5" />
-                Billing
-              </span>
-            </TabButton>
-            <TabButton
-              active={activeTab === "accounts"}
-              onClick={() => handleTabChange("accounts")}
-              layoutId="settingsTabHighlight"
-              isMotion
-            >
-              <span className="relative z-10 flex items-center">
-                <LinkIcon size="sm" className="mr-1.5" />
-                Accounts
-              </span>
-            </TabButton>
+            {BILLING_TAB_ENABLED && (
+              <TabButton
+                active={activeTab === "billing"}
+                onClick={() => handleTabChange("billing")}
+                layoutId="settingsTabHighlight"
+                isMotion
+              >
+                <span className="relative z-10 flex items-center">
+                  <AwardIcon size="sm" className="mr-1.5" />
+                  Billing
+                </span>
+              </TabButton>
+            )}
+            {ACCOUNTS_TAB_ENABLED && (
+              <TabButton
+                active={activeTab === "accounts"}
+                onClick={() => handleTabChange("accounts")}
+                layoutId="settingsTabHighlight"
+                isMotion
+              >
+                <span className="relative z-10 flex items-center">
+                  <LinkIcon size="sm" className="mr-1.5" />
+                  Accounts
+                </span>
+              </TabButton>
+            )}
             <TabButton
               active={activeTab === "security"}
               onClick={() => handleTabChange("security")}
@@ -283,7 +297,7 @@ export default function SettingsPage() {
                 />
               </motion.div>
             )}
-            {activeTab === "billing" && (
+            {BILLING_TAB_ENABLED && activeTab === "billing" && (
               <motion.div
                 key="billing"
                 initial={{ opacity: 0, y: 20 }}
@@ -294,7 +308,7 @@ export default function SettingsPage() {
                 <BillingForm />
               </motion.div>
             )}
-            {activeTab === "accounts" && (
+            {ACCOUNTS_TAB_ENABLED && activeTab === "accounts" && (
               <motion.div
                 key="accounts"
                 initial={{ opacity: 0, y: 20 }}

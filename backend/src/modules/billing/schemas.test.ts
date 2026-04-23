@@ -1,7 +1,26 @@
 import { Value } from "@sinclair/typebox/value";
+import { FormatRegistry } from "@sinclair/typebox";
 import { describe, expect, it } from "vitest";
 
 import { BillingSchemas } from "./schemas";
+
+const checkSchema = (schema: unknown, payload: unknown): boolean =>
+  Value.Check(schema as Parameters<typeof Value.Check>[0], payload);
+
+if (!FormatRegistry.Has("uri")) {
+  FormatRegistry.Set("uri", (value) => {
+    try {
+      const candidate = new URL(value);
+      return candidate.protocol === "http:" || candidate.protocol === "https:";
+    } catch {
+      return false;
+    }
+  });
+}
+
+if (!FormatRegistry.Has("date-time")) {
+  FormatRegistry.Set("date-time", (value) => !Number.isNaN(Date.parse(value)));
+}
 
 describe("BillingSchemas", () => {
   it("accepts a valid checkout session payload", () => {
@@ -13,7 +32,7 @@ describe("BillingSchemas", () => {
       },
     };
 
-    expect(Value.Check(BillingSchemas.createCheckoutSession, payload)).toBe(true);
+    expect(checkSchema(BillingSchemas.createCheckoutSession, payload)).toBe(true);
   });
 
   it("rejects checkout payloads that miss required urls", () => {
@@ -21,19 +40,19 @@ describe("BillingSchemas", () => {
       successUrl: "https://app.example.com/success",
     };
 
-    expect(Value.Check(BillingSchemas.createCheckoutSession, invalidPayload)).toBe(false);
+    expect(checkSchema(BillingSchemas.createCheckoutSession, invalidPayload)).toBe(false);
   });
 
   it("enforces subscription status literals", () => {
     expect(
-      Value.Check(BillingSchemas.subscriptionStatus, {
+      checkSchema(BillingSchemas.subscriptionStatus, {
         status: "active",
         currentPeriodEnd: "2026-05-01T00:00:00.000Z",
       }),
     ).toBe(true);
 
     expect(
-      Value.Check(BillingSchemas.subscriptionStatus, {
+      checkSchema(BillingSchemas.subscriptionStatus, {
         status: "paused",
         currentPeriodEnd: "2026-05-01T00:00:00.000Z",
       }),
@@ -56,7 +75,7 @@ describe("BillingSchemas", () => {
       interval: "weekly",
     };
 
-    expect(Value.Check(BillingSchemas.subscriptionPlan, validPlan)).toBe(true);
-    expect(Value.Check(BillingSchemas.subscriptionPlan, invalidPlan)).toBe(false);
+    expect(checkSchema(BillingSchemas.subscriptionPlan, validPlan)).toBe(true);
+    expect(checkSchema(BillingSchemas.subscriptionPlan, invalidPlan)).toBe(false);
   });
 });

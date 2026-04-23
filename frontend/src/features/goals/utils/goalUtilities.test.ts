@@ -59,7 +59,7 @@ describe("goalUtilities", () => {
         },
         175,
       );
-      expect(goals?.startingWeight).toBe(0);
+      expect(goals?.startingWeight).toBeUndefined();
     });
   });
 });

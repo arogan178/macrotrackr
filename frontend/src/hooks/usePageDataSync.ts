@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 
+import { isLocalAuthMode } from "@/config/runtime";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
@@ -15,6 +16,16 @@ export function usePageDataSync() {
   const { setSubscriptionStatus } = useStore();
 
   useEffect(() => {
+    if (isLocalAuthMode) {
+      setSubscriptionStatus("pro");
+    }
+  }, [setSubscriptionStatus]);
+
+  useEffect(() => {
+    if (isLocalAuthMode) {
+      return;
+    }
+
     if (
       user?.subscription &&
       typeof user.subscription.status === "string"

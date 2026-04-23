@@ -4,6 +4,7 @@ import PageBackground from "@/components/layout/PageBackground";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import LegalHeader from "@/features/landing/components/LegalHeader";
+import { SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
 const PrivacyPolicyPage: React.FC = () => {
   return (
@@ -96,10 +97,10 @@ const PrivacyPolicyPage: React.FC = () => {
                     If you have any questions about this Privacy Policy, please
                     contact us at{" "}
                     <a
-                      href="mailto:contact@macrotrackr.com"
+                      href={SUPPORT_EMAIL_MAILTO}
                       className="text-primary underline underline-offset-4 hover:text-primary"
                     >
-                      contact@macrotrackr.com
+                      {SUPPORT_EMAIL}
                     </a>
                     .
                   </p>

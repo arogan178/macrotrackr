@@ -59,9 +59,9 @@ export function startServer() {
   logger.info(
     `    API Docs: http://${app.server?.hostname}:${app.server?.port}/api/docs`
   );
-  logger.info(
-    `    Clerk Authentication: Enabled`
-  );
+  logger.info(`    App Mode: ${runtimeConfig.APP_MODE}`);
+  logger.info(`    Auth Mode: ${runtimeConfig.AUTH_MODE}`);
+  logger.info(`    Billing Mode: ${runtimeConfig.BILLING_MODE}`);
 
   return app;
 }
