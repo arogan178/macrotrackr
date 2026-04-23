@@ -2,8 +2,8 @@
 
 ## Supported profiles
 
-- `managed`: Clerk auth + managed billing
-- `self-hosted`: local auth + billing disabled
+- Public self-hosted profile: local auth + billing disabled
+- Managed hosting is operated separately and is not part of the public deployment surface
 
 ## Reporting vulnerabilities
 
@@ -13,7 +13,7 @@ Email: `support@local.invalid`
 
 Include:
 
-- affected component and profile (`managed` or `self-hosted`)
+- affected component and public runtime profile
 - reproduction steps
 - impact assessment
 - suggested mitigation (if available)

@@ -1,0 +1,40 @@
+name: Trigger Managed Deployment
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    uses: ./.github/workflows/quality-gate.yml
+
+  trigger:
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate dispatch source values
+        run: |
+          set -euo pipefail
+
+          if [ -z "${{ github.sha }}" ]; then
+            echo "Missing github.sha"
+            exit 1
+          fi
+
+          if [ "${{ github.repository }}" != "arogan178/macrotrackr" ]; then
+            echo "Unexpected repository: ${{ github.repository }}"
+            exit 1
+          fi
+
+      - name: Dispatch to private infra repo
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.PAT_REPO_DISPATCH }}
+          repository: arogan178/macrotrackr-infra
+          event-type: deploy-trigger
+          client-payload: >-
+            {"sha":"${{ github.sha }}","ref":"${{ github.ref }}","repository":"${{ github.repository }}","actor":"${{ github.actor }}"}

@@ -1,9 +1,6 @@
 # Frontend Deployment Guide
 
-This guide covers building and deploying the frontend in both runtime profiles:
-
-- `managed`: Clerk auth and managed billing UI enabled
-- `self-hosted`: local auth UI and billing surfaces disabled
+This guide covers building and serving the public frontend artifacts for self-hosted deployments.
 
 ## Build prerequisites
 
@@ -19,9 +16,6 @@ VITE_SUPPORT_EMAIL=support@local.invalid
 VITE_AUTH_MODE=local
 VITE_BILLING_MODE=disabled
 VITE_ANALYTICS_MODE=disabled
-
-# Required only when VITE_AUTH_MODE=clerk
-# VITE_CLERK_PUBLISHABLE_KEY=pk_test_replace_me
 
 # Required only when VITE_ANALYTICS_MODE=posthog
 # VITE_PUBLIC_POSTHOG_KEY=phc_replace_me
@@ -49,5 +43,5 @@ Recommended cache policy:
 ## Runtime notes
 
 - `VITE_APP_URL` controls generated canonical URLs and sitemap host defaults.
-- Billing pages/components should only be reachable in `managed` profile (`VITE_BILLING_MODE=managed`).
-- Clerk UI is mounted only in `clerk` mode (`VITE_AUTH_MODE=clerk`).
+- Self-hosted deployments should leave `VITE_AUTH_MODE=local` and `VITE_BILLING_MODE=disabled`.
+- Managed-hosting frontend build configuration is handled outside this public repo.
