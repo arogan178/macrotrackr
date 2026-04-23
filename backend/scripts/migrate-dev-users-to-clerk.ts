@@ -129,7 +129,7 @@ export function createDefaultLocalUserData(clerkUser: ClerkUserSummary) {
 
 export async function main() {
   const options = parseOptions(process.argv.slice(2));
-  const databasePath = process.env.DATABASE_PATH || "./macro_tracker.db";
+  const databasePath = process.env.DATABASE_PATH || "./macrotrackr.db";
   const secretKey = process.env.CLERK_SECRET_KEY;
 
   if (!secretKey) {

@@ -1,6 +1,8 @@
 import React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 
+import { PublicSelfHostedGate } from "@/routes/-PublicSelfHostedGate";
+
 const BlogIndexPage = React.lazy(() => import("@/features/landing/pages/BlogIndexPage"));
 
 export const Route = createFileRoute("/blog/")({
@@ -9,5 +11,9 @@ export const Route = createFileRoute("/blog/")({
     tag: search.tag as string | undefined,
     q: search.q as string | undefined,
   }),
-  component: BlogIndexPage,
+  component: () => (
+    <PublicSelfHostedGate>
+      <BlogIndexPage />
+    </PublicSelfHostedGate>
+  ),
 });

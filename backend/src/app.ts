@@ -4,6 +4,7 @@ import { swagger } from "@elysiajs/swagger";
 import type { Database } from "bun:sqlite";
 import { config } from "./config";
 import { clerkAuthMiddleware } from "./middleware/clerk-auth";
+import { localAuthMiddleware } from "./middleware/local-auth";
 import { rateLimiters } from "./middleware/rate-limit";
 import { requestLimitsMiddleware } from "./middleware/request-limits";
 import {
@@ -26,6 +27,14 @@ import { userRoutes } from "./modules/user";
 import { healthRoutes } from "./routes/health";
 import { metricsRoutes } from "./routes/metrics";
 import { recordRequest } from "./lib/observability/metrics";
+
+function isClerkAuthMode(): boolean {
+  return config.AUTH_MODE === "clerk";
+}
+
+function isManagedBillingMode(): boolean {
+  return config.BILLING_MODE === "managed";
+}
 
 interface TimingContext {
   requestStartTime?: number;
@@ -225,28 +234,43 @@ function handleGlobalError({ code, error, set, path }: ErrorHandlerContext) {
 }
 
 function registerCoreRoutes(app: Elysia, db: Database): void {
-  app
+  const withClerk = isClerkAuthMode();
+  const withManagedBilling = isManagedBillingMode();
+
+  const core = app
     // Context decorators (add early for webhook access)
-    .decorate("db", db)
+    .decorate("db", db);
 
+  if (withManagedBilling) {
     // Webhook routes (NO AUTH) - MUST be before middleware that consumes body
-    .use(webhookHandler)
+    core.use(webhookHandler);
+  }
 
+  if (withClerk) {
     // Clerk webhook handler (NO AUTH) - handles user sync from Clerk
-    .use(clerkWebhookHandler)
+    core.use(clerkWebhookHandler);
+  }
+
+  core
 
     // Apply middleware after webhook routes to avoid body consumption conflicts
     .use(correlationMiddleware)
     .use(enhancedApiLogging)
 
     // Apply rate limiting
-    .use(rateLimiters.api)
+    .use(rateLimiters.api);
 
+  if (withClerk) {
     // Apply Clerk auth middleware globally (it has path exemptions built-in)
     // This must run before routes that depend on Clerk user context (e.g. /api/auth/clerk-sync)
-    .use(clerkAuthMiddleware)
+    core.use(clerkAuthMiddleware);
+  } else {
+    // In local mode, use DB-backed sessions for protected routes.
+    core.use(localAuthMiddleware);
+  }
 
-    // Public auth routes (password reset + Clerk sync)
+  core
+    // Public auth routes
     .use(authRoutes)
 
     // All other routes
@@ -254,7 +278,6 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
     .use(macroRoutes)
     .use(goalRoutes)
     .use(habitRoutes)
-    .use(billingRoutes)
     .use(reportingRoutes)
     .use(savedMealRoutes)
 
@@ -263,6 +286,10 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
 
     // Metrics endpoint (public, no auth) - Prometheus-compatible
     .use(metricsRoutes);
+
+  if (withManagedBilling) {
+    core.use(billingRoutes);
+  }
 }
 
 export function createApp(db: Database) {

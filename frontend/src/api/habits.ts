@@ -1,4 +1,4 @@
-import { apiClient, type ApiError } from "@/api/core";
+import { apiClient } from "@/api/core";
 import type { HabitAccentColor } from "@/types/habit";
 
 export interface HabitGoalPayload {

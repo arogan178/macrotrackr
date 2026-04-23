@@ -36,8 +36,6 @@ export const UserSchemas = {
         t.Literal("pro"),
         t.Literal("canceled"),
       ]),
-      hasStripeCustomer: t.Boolean(),
-      currentPeriodEnd: t.Optional(t.Nullable(t.String())),
     }),
   }),
 

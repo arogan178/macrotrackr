@@ -131,6 +131,27 @@ export interface UserRow {
   created_at: string;
   password_reset_token?: string;
   password_reset_expires?: string | Date;
+  clerk_id?: string | null;
+}
+
+export interface SessionRow {
+  id: string;
+  user_id: number;
+  secret_hash: string;
+  created_at: string;
+  expires_at: string;
+  last_used_at: string;
+  ip: string | null;
+  user_agent: string | null;
+}
+
+export interface PasswordResetTokenRow {
+  id: string;
+  user_id: number;
+  token_hash: string;
+  created_at: string;
+  expires_at: string;
+  used_at: string | null;
 }
 
 export interface UserDetailsRow {

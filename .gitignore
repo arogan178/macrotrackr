@@ -30,6 +30,11 @@ dist/
 
 .env
 .env.*
+!.env.example
+!backend/.env.example
+!frontend/.env.example
+!backend/.env.*.example
+!frontend/.env.*.example
 *.db
 *.db-shm
 *.db-wal
@@ -44,7 +49,6 @@ frontend/.github/instructions/tanstack-react-router_api.instructions.md
 frontend/.github/instructions/tanstack-react-router_guide.instructions.md
 frontend/.github/instructions/tanstack-react-router_routing.instructions.md
 frontend/.github/instructions/tanstack-react-router_setup-and-architecture.instructions.md
-.github/README_DEPLOY.md
 frontend/test-results/
 .desloppify/
 .codex

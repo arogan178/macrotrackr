@@ -46,9 +46,11 @@ function TabButton({
   const motionBg = activeBg ?? "bg-surface-3"; // Darker, premium active state
   const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
 
-  // Check for reduced motion preference
-  const prefersReducedMotion =
+  const canUseMatchMedia =
     typeof globalThis !== "undefined" &&
+    typeof globalThis.matchMedia === "function";
+  const prefersReducedMotion =
+    canUseMatchMedia &&
     globalThis.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   return (

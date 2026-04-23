@@ -51,8 +51,8 @@ describe("dateUtilities", () => {
 
   describe("getReportingPeriod", () => {
     it("returns matching period", () => {
-      const result = getReportingPeriod("7d");
-      expect(result.value).toBe("7d");
+      const result = getReportingPeriod("week");
+      expect(result.value).toBe("week");
     });
 
     it("returns default for unknown value", () => {
@@ -63,15 +63,15 @@ describe("dateUtilities", () => {
 
   describe("mapDateRangeToNumeric", () => {
     it("maps 7d to 7", () => {
-      expect(mapDateRangeToNumeric("7d")).toBe(7);
+      expect(mapDateRangeToNumeric("week")).toBe(7);
     });
 
     it("maps 30d to 30", () => {
-      expect(mapDateRangeToNumeric("30d")).toBe(30);
+      expect(mapDateRangeToNumeric("month")).toBe(30);
     });
 
     it("maps 90d to 90", () => {
-      expect(mapDateRangeToNumeric("90d")).toBe(90);
+      expect(mapDateRangeToNumeric("3months")).toBe(90);
     });
   });
 });

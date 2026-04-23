@@ -14,7 +14,6 @@ Quick reference for AI agents working in this codebase.
 | ------------------------------------------- | -------------------------------------------------- |
 | [Backend Patterns](./backend-patterns.md)   | Route modules, error handling, logging, auth       |
 | [Frontend Patterns](./frontend-patterns.md) | Feature architecture, state management, components |
-| [Dev Commands](./dev-commands.md)           | Build, test, lint, and development workflows       |
 | [Design System](./design-system.md)         | UI styling, color palette, animation patterns      |
 
 ## Quick Start
@@ -28,7 +27,7 @@ bun run test         # Run frontend tests
 ## Architecture
 
 ```
-macro_tracker/
+macrotrackr/
 ├── frontend/     # React 19 + Vite + TanStack
 ├── backend/      # Elysia.js + Bun + SQLite
 └── .github/      # Documentation and AI instructions
@@ -377,4 +376,3 @@ Split dimensions across `desloppify-reviewer` calls (Copilot runs them concurren
 
 <!-- desloppify-overlay: copilot -->
 <!-- desloppify-end -->
-
