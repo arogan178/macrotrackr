@@ -140,3 +140,4 @@ frontend/  React + Vite app (local auth UI)
 docs/      public project docs
 ```
  
+ 
