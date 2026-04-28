@@ -1,32 +1,15 @@
 # Macro Tracker
 
-Macro Tracker is an AGPLv3 nutrition and macro tracking application with two runtime profiles:
+Macro Tracker is an AGPLv3 nutrition and macro tracking application designed for self-hosting.
 
-- `managed`: Clerk authentication and managed billing
-- `self-hosted`: local authentication and billing disabled
-
-The backend uses SQLite for this OSS release.
+The backend uses SQLite with local authentication and billing disabled by default.
 
 ## License
 
 This project is licensed under the GNU Affero General Public License v3.0.
 See `LICENSE`.
 
-## Runtime Profiles
-
-### Managed profile
-
-- `APP_MODE=managed`
-- `AUTH_MODE=clerk`
-- `BILLING_MODE=managed`
-
-Expected behavior:
-
-- Clerk auth middleware/routes mounted
-- Billing routes mounted
-- Billing UI visible
-
-### Self-hosted profile
+## Self-Hosted Mode
 
 - `APP_MODE=self-hosted`
 - `AUTH_MODE=local`
@@ -43,7 +26,7 @@ Expected behavior:
 
 Backend canonical variables:
 
-- `APP_MODE`, `AUTH_MODE`, `BILLING_MODE`, `ANALYTICS_MODE`, `EMAIL_MODE`
+- `ANALYTICS_MODE`, `EMAIL_MODE`
 - `APP_URL`, `PUBLIC_APP_NAME`, `SUPPORT_EMAIL`
 - `ENABLE_METRICS`
 
@@ -57,8 +40,6 @@ Frontend optional branding/public link variables:
 
 Provider env vars are only required when corresponding modes are enabled:
 
-- Clerk keys only when `AUTH_MODE=clerk`
-- Stripe keys only when `BILLING_MODE=managed`
 - PostHog keys only when `ANALYTICS_MODE=posthog`
 - Resend/SMTP keys only when `EMAIL_MODE=resend|smtp`
 
@@ -148,13 +129,13 @@ docker compose up -d
 ## Deployment Notes
 
 - Frontend deployment guide: `frontend/docs/DEPLOYMENT.md`
-- Self-hosted deployments should use the public Docker Compose flow described above.
-- Managed-hosting deployment infrastructure is operated from a private infrastructure repository and is not documented in this public repo.
+- This public repository focuses on self-hosted deployments.
+- Managed hosting infrastructure is maintained in a separate private repository.
 
 ## Project Layout
 
 ```text
-backend/   Bun + Elysia API, SQLite schema, auth/billing modules
-frontend/  React + Vite app (mode-aware auth and billing UI)
+backend/   Bun + Elysia API, SQLite schema, auth modules
+frontend/  React + Vite app (local auth UI)
 docs/      public project docs
 ```
