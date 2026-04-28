@@ -139,3 +139,4 @@ backend/   Bun + Elysia API, SQLite schema, auth modules
 frontend/  React + Vite app (local auth UI)
 docs/      public project docs
 ```
+ 
