@@ -3,7 +3,7 @@ export type BillingMode = "managed" | "disabled";
 export type AnalyticsMode = "posthog" | "disabled";
 
 function resolveAuthMode(rawValue: string | undefined): AuthMode {
-  return rawValue === "local" ? "local" : "clerk";
+  return rawValue === "clerk" ? "clerk" : "local";
 }
 
 function resolveBillingMode(rawValue: string | undefined, authMode: AuthMode): BillingMode {
