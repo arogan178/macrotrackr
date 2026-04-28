@@ -253,6 +253,12 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
 
   core
 
+    // Health check routes (public, no auth) - BEFORE auth middleware
+    .use(healthRoutes)
+
+    // Metrics endpoint (public, no auth) - Prometheus-compatible - BEFORE auth
+    .use(metricsRoutes)
+
     // Apply middleware after webhook routes to avoid body consumption conflicts
     .use(correlationMiddleware)
     .use(enhancedApiLogging)
@@ -279,13 +285,7 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
     .use(goalRoutes)
     .use(habitRoutes)
     .use(reportingRoutes)
-    .use(savedMealRoutes)
-
-    // Health check routes (public, no auth)
-    .use(healthRoutes)
-
-    // Metrics endpoint (public, no auth) - Prometheus-compatible
-    .use(metricsRoutes);
+    .use(savedMealRoutes);
 
   if (withManagedBilling) {
     core.use(billingRoutes);
