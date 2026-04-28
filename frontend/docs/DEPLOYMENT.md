@@ -44,4 +44,4 @@ Recommended cache policy:
 
 - `VITE_APP_URL` controls generated canonical URLs and sitemap host defaults.
 - Self-hosted deployments should leave `VITE_AUTH_MODE=local` and `VITE_BILLING_MODE=disabled`.
-- Managed-hosting frontend build configuration is handled outside this public repo.
+
