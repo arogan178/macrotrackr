@@ -14,6 +14,5 @@ Email: `support@local.invalid`
 When asking for help, include:
 
 - OS and container/runtime versions
-- your `APP_MODE`, `AUTH_MODE`, and `BILLING_MODE`
 - relevant backend/frontend logs
 - steps to reproduce from a fresh clone
