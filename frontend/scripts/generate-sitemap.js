@@ -38,7 +38,7 @@ function main() {
   const hostname =
     process.env.SITEMAP_HOSTNAME ||
     process.env.VITE_APP_URL ||
-    "http://localhost:5173";
+    "https://macrotrackr.com";
 
   const xml = buildSitemap(hostname);
 
