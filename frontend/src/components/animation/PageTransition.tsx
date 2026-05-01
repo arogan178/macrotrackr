@@ -12,7 +12,7 @@
  * </AnimatePresence>
  */
 import React from "react";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 
 import { usePrefersReducedMotion } from "@/hooks";
 
@@ -64,7 +64,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({
     : pageTransition;
 
   return (
-    <motion.div
+    <m.div
       initial="initial"
       animate="animate"
       exit="exit"
@@ -74,7 +74,7 @@ const PageTransition: React.FC<PageTransitionProps> = ({
       style={{ width: "100%", height: "100%" }}
     >
       {children}
-    </motion.div>
+    </m.div>
   );
 };
 

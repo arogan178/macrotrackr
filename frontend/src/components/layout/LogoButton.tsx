@@ -1,6 +1,6 @@
 import React from "react";
 
-import logoIcon from "/icon.png";
+import logoIcon from "/icon-ui.webp";
 
 interface LogoButtonProps {
   onClick?: () => void;
