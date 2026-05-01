@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { m } from "motion/react";
 
 import { getButtonClasses } from "@/components/ui/Button";
 
@@ -9,7 +9,7 @@ import { RemotionPlayer } from "./remotion/RemotionPlayer";
 const HeroSection: React.FC = () => (
   <section className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-24">
     <div className="mx-auto max-w-5xl text-center">
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
@@ -73,16 +73,16 @@ const HeroSection: React.FC = () => (
           </Link>
           .
         </p>
-      </motion.div>
+      </m.div>
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
         className="relative mx-auto mt-16 max-w-5xl"
       >
         <RemotionPlayer />
-      </motion.div>
+      </m.div>
     </div>
   </section>
 );

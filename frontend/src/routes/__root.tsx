@@ -5,7 +5,7 @@ import {
   Outlet,
   useLocation,
 } from "@tanstack/react-router";
-import { AnimatePresence } from "motion/react";
+import { AnimatePresence, LazyMotion } from "motion/react";
 
 import PageTransition from "@/components/animation/PageTransition";
 import MainLayout from "@/components/layout/MainLayout";
@@ -51,19 +51,21 @@ function RootComponent() {
 
   return (
     <ErrorBoundary>
-      <div id="app-root" className="relative min-h-screen">
-        <TopLoadingBar />
-        <GlobalLoadingOverlay />
-        <MainLayout>
-          <Suspense fallback={<LoadingFallback />}>
-            <AnimatePresence mode="wait">
-              <PageTransition key={location.pathname}>
-                <Outlet />
-              </PageTransition>
-            </AnimatePresence>
-          </Suspense>
-        </MainLayout>
-      </div>
+      <LazyMotion features={() => import("motion/react").then((mod) => mod.domAnimation)}>
+        <div id="app-root" className="relative min-h-screen">
+          <TopLoadingBar />
+          <GlobalLoadingOverlay />
+          <MainLayout>
+            <Suspense fallback={<LoadingFallback />}>
+              <AnimatePresence mode="wait">
+                <PageTransition key={location.pathname}>
+                  <Outlet />
+                </PageTransition>
+              </AnimatePresence>
+            </Suspense>
+          </MainLayout>
+        </div>
+      </LazyMotion>
     </ErrorBoundary>
   );
 }

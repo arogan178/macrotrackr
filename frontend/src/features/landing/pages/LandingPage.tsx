@@ -1,5 +1,5 @@
 import React, { Suspense, useEffect } from "react";
-import { motion, useReducedMotion } from "motion/react";
+import { m, useReducedMotion } from "motion/react";
 
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
@@ -131,7 +131,7 @@ const LandingPage: React.FC = () => {
       <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <HeroSection />
 
-        <motion.section
+        <m.section
           {...inViewRevealProps}
           variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
@@ -141,9 +141,9 @@ const LandingPage: React.FC = () => {
               <FeaturesSection />
             </Suspense>
           </ErrorBoundary>
-        </motion.section>
+        </m.section>
 
-        <motion.section
+        <m.section
           {...inViewRevealProps}
           variants={sectionRevealVariants}
           style={{ contentVisibility: "auto", containIntrinsicSize: "600px" }}
@@ -154,7 +154,7 @@ const LandingPage: React.FC = () => {
               <PricingSection />
             </Suspense>
           </ErrorBoundary>
-        </motion.section>
+        </m.section>
       </main>
 
       <Footer />

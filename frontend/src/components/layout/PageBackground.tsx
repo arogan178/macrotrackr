@@ -38,7 +38,7 @@ const PageBackground: React.FC<PageBackgroundProps> = ({
 
     {/* Noise texture (Logged-in views / Dashboard) */}
     {withNoise && (
-      <div className="pointer-events-none fixed inset-0 z-[-1] bg-[url('/noise.png')] opacity-30 mix-blend-overlay" />
+      <div className="pointer-events-none fixed inset-0 z-[-1] bg-[url('/noise.webp')] opacity-30 mix-blend-overlay" />
     )}
   </>
 );
