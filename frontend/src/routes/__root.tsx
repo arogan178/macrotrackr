@@ -51,7 +51,7 @@ function RootComponent() {
 
   return (
     <ErrorBoundary>
-      <LazyMotion features={() => import("motion/react").then((mod) => mod.domAnimation)}>
+      <LazyMotion features={() => import("motion/react").then((module_) => module_.domAnimation)}>
         <div id="app-root" className="relative min-h-screen">
           <TopLoadingBar />
           <GlobalLoadingOverlay />

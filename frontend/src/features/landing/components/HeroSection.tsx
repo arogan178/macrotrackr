@@ -1,10 +1,10 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Link } from "@tanstack/react-router";
 import { m } from "motion/react";
 
 import { getButtonClasses } from "@/components/ui/Button";
 
-import { RemotionPlayer } from "./remotion/RemotionPlayer";
+const RemotionPlayer = React.lazy(() => import("./remotion/RemotionPlayer").then(module => ({ default: module.RemotionPlayer })));
 
 const HeroSection: React.FC = () => (
   <section className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-24">
@@ -81,7 +81,20 @@ const HeroSection: React.FC = () => (
         transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
         className="relative mx-auto mt-16 max-w-5xl"
       >
-        <RemotionPlayer />
+        <Suspense fallback={
+          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-primary/10 shadow-2xl ring-1 ring-white/5">
+            <div className="absolute top-0 right-0 left-0 z-10 flex h-10 items-center gap-2 border-b border-border bg-surface-2 px-4">
+              <div className="h-3 w-3 rounded-full bg-error" />
+              <div className="h-3 w-3 rounded-full bg-warning" />
+              <div className="h-3 w-3 rounded-full bg-success" />
+            </div>
+            <div className="absolute top-10 right-0 bottom-0 left-0 flex items-center justify-center bg-surface-2">
+              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            </div>
+          </div>
+        }>
+          <RemotionPlayer />
+        </Suspense>
       </m.div>
     </div>
   </section>
