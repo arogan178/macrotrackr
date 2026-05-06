@@ -8,8 +8,16 @@ export function generateUUID(): string {
   return crypto.randomUUID();
 }
 
+let lastTimestamp = 0;
+let counter = 0;
+
 export function generateNumericId(): number {
   const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
-  return parseInt(`${timestamp}${random.toString().padStart(3, "0")}`);
+  if (timestamp === lastTimestamp) {
+    counter = (counter + 1) % 1000;
+  } else {
+    lastTimestamp = timestamp;
+    counter = Math.floor(Math.random() * 1000);
+  }
+  return parseInt(`${timestamp}${counter.toString().padStart(3, "0")}`);
 }
