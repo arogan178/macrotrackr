@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 
 interface SocialProfileData {
   firstName: string;
@@ -9,27 +10,18 @@ interface SocialProfileData {
 export function useSocialProfileData() {
   const [socialData, setSocialData] = useState<SocialProfileData | null>(null);
   const [dateOfBirth, setDateOfBirth] = useState("");
+  
+  const routerState = useRouterState();
+  const locationState = routerState.location.state as { socialProfileData?: SocialProfileData } | undefined;
 
   useEffect(() => {
-    const storedData = sessionStorage.getItem("socialProfileData");
-    if (storedData) {
-      try {
-        const parsed = JSON.parse(storedData) as SocialProfileData;
-        setSocialData(parsed);
-        if (parsed.dateOfBirth) {
-          setDateOfBirth(parsed.dateOfBirth);
-        }
-      } catch {
-        // Invalid JSON, ignore
+    if (locationState?.socialProfileData) {
+      setSocialData(locationState.socialProfileData);
+      if (locationState.socialProfileData.dateOfBirth) {
+        setDateOfBirth(locationState.socialProfileData.dateOfBirth);
       }
     }
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      sessionStorage.removeItem("socialProfileData");
-    };
-  }, []);
+  }, [locationState?.socialProfileData]);
 
   return { socialData, dateOfBirth, setDateOfBirth };
 }

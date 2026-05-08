@@ -28,9 +28,14 @@ export async function signInWithUI(page: Page, email: string, password: string):
   await waitForAnyVisible(page, ['input[name="email"]', 'input[type="email"]'])
   
   // Check if we're on the right page (not redirected to Google)
-  const url = page.url()
-  if (url.includes('accounts.google.com')) {
-    throw new Error('Redirected to Google OAuth. Please ensure the app allows email/password login.')
+  const urlString = page.url()
+  try {
+    const url = new URL(urlString)
+    if (url.hostname === 'accounts.google.com') {
+      throw new Error('Redirected to Google OAuth. Please ensure the app allows email/password login.')
+    }
+  } catch (e) {
+    // If URL parsing fails, ignore and proceed
   }
   
   // Fill in email - look for email input field

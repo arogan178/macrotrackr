@@ -199,10 +199,10 @@ function ClerkSsoCallbackPage() {
           dateOfBirth:
             (user!.unsafeMetadata.dateOfBirth as string | undefined) ?? "",
         };
-        sessionStorage.setItem("socialProfileData", JSON.stringify(socialData));
         navigate({
           to: "/profile-setup",
           search: { redirectTo: safeRedirectTo },
+          state: { socialProfileData: socialData },
         });
       } catch (error_) {
         logger.error("SSO callback routing error:", error_);
