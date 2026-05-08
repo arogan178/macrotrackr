@@ -45,12 +45,8 @@ frontend/.tanstack/tmp/*
 frontend/src/routeTree.*
 .roo/mcp.json
 .github/chatmodes/BeastMode.chatmode.md
-frontend/.github/instructions/tanstack-react-router_api.instructions.md
-frontend/.github/instructions/tanstack-react-router_guide.instructions.md
-frontend/.github/instructions/tanstack-react-router_routing.instructions.md
-frontend/.github/instructions/tanstack-react-router_setup-and-architecture.instructions.md
+**/.github/instructions/*.instructions.md
 frontend/test-results/
-.desloppify/
 .codex
 .opencode/
 holistic_context.json
