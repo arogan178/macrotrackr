@@ -10,15 +10,6 @@ import eslintPluginUnicorn from "eslint-plugin-unicorn";
 import globals from "globals";
 import tseslint from "typescript-eslint";
 import prettierConfig from "eslint-config-prettier";
-import pluginRouter from "@tanstack/eslint-plugin-router";
-
-function getTanStackRouterRules() {
-  const preset = pluginRouter.configs["flat/recommended"];
-  if (Array.isArray(preset)) {
-    return preset[0]?.rules ?? {};
-  }
-  return preset?.rules ?? {};
-}
 
 export default [
   {
@@ -42,11 +33,6 @@ export default [
     rules: {
       "unicorn/filename-case": "off",
     },
-  },
-  {
-    files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
-    plugins: { "@tanstack/router": pluginRouter },
-    rules: { ...getTanStackRouterRules() },
   },
   {
     files: ["src/**/*.{js,mjs,cjs,ts,jsx,tsx}"],
