@@ -139,5 +139,15 @@ backend/   Bun + Elysia API, SQLite schema, auth modules
 frontend/  React + Vite app (local auth UI)
 docs/      public project docs
 ```
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=arogan178%2Fmacrotrackr&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left" />
+ </picture>
+</a>
  
  
