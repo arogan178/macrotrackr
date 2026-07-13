@@ -2,18 +2,18 @@ services:
   backend:
     image: ${BACKEND_IMAGE:-ghcr.io/arogan178/macrotrackr-backend:latest}
     env_file:
-      - backend/.env.example
+      - backend/.env
     volumes:
       - ./data:/data
     environment:
       DATABASE_PATH: /data/macrotrackr.db
-      APP_MODE: self-hosted
-      AUTH_MODE: local
-      BILLING_MODE: disabled
-      ANALYTICS_MODE: disabled
-      EMAIL_MODE: disabled
-      APP_URL: http://localhost:5173
-      CORS_ORIGIN: http://localhost:5173
+      APP_MODE: ${APP_MODE:-self-hosted}
+      AUTH_MODE: ${AUTH_MODE:-local}
+      BILLING_MODE: ${BILLING_MODE:-disabled}
+      ANALYTICS_MODE: ${ANALYTICS_MODE:-disabled}
+      EMAIL_MODE: ${EMAIL_MODE:-disabled}
+      APP_URL: ${APP_URL:-http://localhost:5173}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
     ports:
       - "3000:3000"
 
