@@ -60,7 +60,7 @@ const BillingForm: React.FC = () => {
     setIsLoading(true);
     try {
       const returnUrl = globalThis.location.origin + "/settings";
-      const { url } = await billingApi.createPortalSession(returnUrl);
+      const { url } = await billingApi.createPortalSession({ returnUrl });
 
       // Validation for successful URL generation
       if (!url?.startsWith("https://")) {
