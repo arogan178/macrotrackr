@@ -9,7 +9,7 @@ type MockDatabaseInstance = {
 const databaseInstances: MockDatabaseInstance[] = [];
 const initializeSchema = vi.fn();
 
-const DatabaseMock = vi.fn((path: string, options: { create: boolean }) => {
+const DatabaseMock = vi.fn(function (path: string, options: { create: boolean }) {
   const instance: MockDatabaseInstance = {
     exec: vi.fn(),
     path,
