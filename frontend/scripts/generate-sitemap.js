@@ -6,6 +6,7 @@ import path from "path";
 // Edit this list as you add or remove public marketing pages.
 const routes = [
   { path: "/", changefreq: "weekly", priority: 0.8 },
+  { path: "/blog", changefreq: "weekly", priority: 0.7 },
   { path: "/login", changefreq: "monthly", priority: 0.5 },
   { path: "/register", changefreq: "monthly", priority: 0.5 },
   { path: "/reset-password", changefreq: "monthly", priority: 0.5 },
@@ -19,7 +20,28 @@ function formatDate(date) {
 
 function buildSitemap(hostname) {
   const lastmod = formatDate(new Date());
-  const urls = routes
+
+  // Dynamically resolve and read blog posts
+  const blogPostsPath = path.resolve(
+    new URL("../src/data/blog-posts.json", import.meta.url).pathname,
+  );
+  let blogPosts = [];
+  try {
+    const rawData = fs.readFileSync(blogPostsPath, "utf8");
+    blogPosts = JSON.parse(rawData);
+  } catch (err) {
+    console.error("Warning: Could not read blog-posts.json:", err.message);
+  }
+
+  const dynamicRoutes = blogPosts.map((post) => ({
+    path: `/blog/${post.slug}`,
+    changefreq: "weekly",
+    priority: 0.6,
+  }));
+
+  const allRoutes = [...routes, ...dynamicRoutes];
+
+  const urls = allRoutes
     .map((r) => {
       return `  <url>\n    <loc>${hostname}${r.path}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${r.changefreq}</changefreq>\n    <priority>${r.priority}</priority>\n  </url>`;
     })

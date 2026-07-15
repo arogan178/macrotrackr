@@ -20,7 +20,13 @@ import {
   getRelatedPosts,
   normalizeBlogFilter,
 } from "@/lib/blog";
-import { buildCanonicalUrl } from "@/utils/appConstants";
+import {
+  APP_ICON_URL,
+  APP_NAME,
+  APP_URL,
+  buildCanonicalUrl,
+  SCHEMA_ORG_CONTEXT,
+} from "@/utils/appConstants";
 
 interface CodeBlockProps {
   inline?: boolean;
@@ -261,6 +267,34 @@ const BlogArticlePage: React.FC = () => {
     canonical: buildCanonicalUrl(`/blog/${slug}`),
   });
 
+  const schemaScript = post
+    ? JSON.stringify({
+        "@context": SCHEMA_ORG_CONTEXT,
+        "@type": "BlogPosting",
+        "headline": post.title,
+        "description": post.excerpt,
+        "image": post.image,
+        "datePublished": post.date,
+        "author": {
+          "@type": "Organization",
+          "name": post.author || "MacroTrackr Team",
+          "url": APP_URL,
+        },
+        "publisher": {
+          "@type": "Organization",
+          "name": APP_NAME,
+          "logo": {
+            "@type": "ImageObject",
+            "url": APP_ICON_URL,
+          },
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": buildCanonicalUrl(`/blog/${slug}`),
+        },
+      })
+    : "";
+
   const relatedPosts = useMemo(() => getRelatedPosts(slug), [slug]);
 
   const handleCopyLink = useCallback(async () => {
@@ -281,6 +315,9 @@ const BlogArticlePage: React.FC = () => {
     <div
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
+      {schemaScript && (
+        <script type="application/ld+json">{schemaScript}</script>
+      )}
       <ReadingProgress />
       <Header />
 
