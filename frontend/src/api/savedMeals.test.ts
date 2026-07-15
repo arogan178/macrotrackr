@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+vi.mock("../config/runtime", () => ({
+  isLocalAuthMode: false,
+}));
+
 import { apiClient } from "./core";
 import { savedMealsApi } from "./savedMeals";
 
