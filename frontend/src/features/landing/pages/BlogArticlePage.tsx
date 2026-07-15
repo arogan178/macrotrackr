@@ -316,7 +316,10 @@ const BlogArticlePage: React.FC = () => {
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
       {schemaScript && (
-        <script type="application/ld+json">{schemaScript}</script>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: schemaScript }}
+        />
       )}
       <ReadingProgress />
       <Header />
