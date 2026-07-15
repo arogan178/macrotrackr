@@ -57,10 +57,11 @@ function writeSitemap(outputPath, content) {
 }
 
 function main() {
-  const hostname =
+  const hostname = (
     process.env.SITEMAP_HOSTNAME ||
     process.env.VITE_APP_URL ||
-    "https://macrotrackr.com";
+    "https://macrotrackr.com"
+  ).replace(/\/$/, "");
 
   const xml = buildSitemap(hostname);
 
@@ -78,11 +79,13 @@ function main() {
   writeSitemap(publicOutput, xml);
 
   // If a `dist/` folder exists (after build) also write there.
-  const distOutput = path.resolve(process.cwd(), "dist", "sitemap.xml");
-  try {
-    writeSitemap(distOutput, xml);
-  } catch (err) {
-    // ignore if dist doesn't exist yet
+  const distDir = path.resolve(process.cwd(), "dist");
+  if (fs.existsSync(distDir)) {
+    try {
+      writeSitemap(path.join(distDir, "sitemap.xml"), xml);
+    } catch (err) {
+      // ignore if dist is writable but fails for some reason
+    }
   }
 }
 
