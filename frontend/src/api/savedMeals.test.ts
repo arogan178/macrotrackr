@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { apiClient } from "./core";
+import { savedMealsApi } from "./savedMeals";
+
 vi.mock("../config/runtime", () => ({
   isLocalAuthMode: false,
 }));
-
-import { apiClient } from "./core";
-import { savedMealsApi } from "./savedMeals";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
