@@ -4,9 +4,16 @@ import PageBackground from "@/components/layout/PageBackground";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import LegalHeader from "@/features/landing/components/LegalHeader";
-import { APP_URL, SUPPORT_EMAIL } from "@/utils/appConstants";
+import { usePageMetadata } from "@/hooks";
+import { APP_URL, buildCanonicalUrl, SUPPORT_EMAIL } from "@/utils/appConstants";
 
 const TermsAndConditionsPage: React.FC = () => {
+  usePageMetadata({
+    title: "Terms and Conditions — MacroTrackr",
+    description: "Read the Terms and Conditions for using MacroTrackr, our fitness and nutrition tracking platform.",
+    canonical: buildCanonicalUrl("/terms"),
+  });
+
   return (
     <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
       <PageBackground />
