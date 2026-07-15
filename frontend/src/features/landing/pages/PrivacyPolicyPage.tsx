@@ -4,9 +4,16 @@ import PageBackground from "@/components/layout/PageBackground";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import LegalHeader from "@/features/landing/components/LegalHeader";
-import { SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
+import { usePageMetadata } from "@/hooks";
+import { buildCanonicalUrl, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
 const PrivacyPolicyPage: React.FC = () => {
+  usePageMetadata({
+    title: "Privacy Policy — MacroTrackr",
+    description: "Read the Privacy Policy for MacroTrackr, detailing how we securely collect, use, and store your nutritional tracking data.",
+    canonical: buildCanonicalUrl("/privacy"),
+  });
+
   return (
     <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
       <PageBackground />
