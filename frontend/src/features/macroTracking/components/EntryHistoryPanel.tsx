@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -67,6 +67,7 @@ const EntryHistoryComponent = function EntryHistory({
   isExportingCsv = false,
 }: EntryHistoryProps) {
   const [collapsedDates, setCollapsedDates] = useState<Set<string>>(new Set());
+  const initializedDatesReference = useRef<Set<string>>(new Set());
   const [displayedDateCount, setDisplayedDateCount] = useState(5);
 
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -188,24 +189,31 @@ const EntryHistoryComponent = function EntryHistory({
   useEffect(() => {
     setCollapsedDates((previous) => {
       const allDates = totalEntries.map((group) => group.date);
+      let changed = false;
+      const newSet = new Set(previous);
 
-      const newDatesToAdd = allDates.filter(
-        (date) => date !== todayFormatted && !previous.has(date),
-      );
+      for (const group of totalEntries) {
+        if (!initializedDatesReference.current.has(group.date)) {
+          initializedDatesReference.current.add(group.date);
+          const isTodayGroup =
+            group.date === todayFormatted ||
+            group.date === formatEntryDate(todayISO());
 
-      const datesToRemove = [...previous].filter(
-        (date) => !allDates.includes(date),
-      );
-
-      if (newDatesToAdd.length > 0 || datesToRemove.length > 0) {
-        const newSet = new Set(previous);
-        for (const date of newDatesToAdd) newSet.add(date);
-        for (const date of datesToRemove) newSet.delete(date);
-
-        return newSet;
+          if (!isTodayGroup) {
+            newSet.add(group.date);
+            changed = true;
+          }
+        }
       }
 
-      return previous;
+      for (const date of previous) {
+        if (!allDates.includes(date)) {
+          newSet.delete(date);
+          changed = true;
+        }
+      }
+
+      return changed ? newSet : previous;
     });
   }, [totalEntries, todayFormatted]);
 
