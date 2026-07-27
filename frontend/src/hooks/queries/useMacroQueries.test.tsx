@@ -149,6 +149,7 @@ describe("useMacroQueries", () => {
 
       // Verify Optimistic Update applied synchronously to the cache
       await waitFor(() => {
+        expect(macrosApi.updateEntry).toHaveBeenCalledWith(1, updatedEntry);
         const totalsDuringMutation = queryClient.getQueryData<any>(queryKeys.macros.dailyTotals(entryDate));
         expect(totalsDuringMutation?.protein).toBe(15);
         expect(totalsDuringMutation?.carbs).toBe(25);
@@ -216,6 +217,7 @@ describe("useMacroQueries", () => {
 
       // Verify Optimistic Update applied synchronously to the cache
       await waitFor(() => {
+        expect(macrosApi.deleteEntry).toHaveBeenCalledWith(1);
         const totalsDuringMutation = queryClient.getQueryData<any>(queryKeys.macros.dailyTotals(entryDate));
         expect(totalsDuringMutation?.protein).toBe(0);
       });

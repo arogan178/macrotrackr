@@ -183,9 +183,22 @@ export const macrosApi = {
   /**
    * @throws {ApiError}
    */
-  updateEntry: async ({ id, data }: { id: number; data: MacroEntryUpdatePayload }) => {
+  updateEntry: async (
+    idOrParams: number | { id: number; data: MacroEntryUpdatePayload },
+    dataPayload?: MacroEntryUpdatePayload,
+  ) => {
+    let id: number;
+    let entry: MacroEntryUpdatePayload;
+
+    if (typeof idOrParams === "object" && idOrParams !== null) {
+      id = idOrParams.id;
+      entry = idOrParams.data;
+    } else {
+      id = idOrParams;
+      entry = dataPayload ?? {};
+    }
+
     const payload: MacroEntryUpdatePayload = {};
-    const entry = data;
     if (entry.protein !== undefined) payload.protein = entry.protein;
     if (entry.carbs !== undefined) payload.carbs = entry.carbs;
     if (entry.fats !== undefined) payload.fats = entry.fats;
@@ -201,7 +214,10 @@ export const macrosApi = {
   /**
    * @throws {ApiError}
    */
-  deleteEntry: async ({ id }: { id: number }): Promise<MacroEntryDeleteResponse> => {
+  deleteEntry: async (
+    idOrParams: number | { id: number },
+  ): Promise<MacroEntryDeleteResponse> => {
+    const id = typeof idOrParams === "object" && idOrParams !== null ? idOrParams.id : idOrParams;
     return apiClient.del<MacroEntryDeleteResponse>(`/api/macros/${id}`);
   },
 

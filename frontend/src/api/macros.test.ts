@@ -111,4 +111,48 @@ describe("macrosApi", () => {
       macrosApi.saveMacroTargetPercentages({ macroTarget: undefined }),
     ).rejects.toThrow("Invalid payload: macroTarget object is required.");
   });
+
+  it("deletes a macro entry when passed primitive id or object parameter", async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(createJsonResponse({ success: true, id: 123 })),
+    );
+
+    await macrosApi.deleteEntry(123);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/macros/123",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+
+    await macrosApi.deleteEntry({ id: 456 });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/macros/456",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  it("updates a macro entry when passed positional arguments or object parameter", async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(createJsonResponse({ success: true })),
+    );
+
+    const updatePayload = { protein: 30, carbs: 40 };
+
+    await macrosApi.updateEntry(123, updatePayload);
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/macros/123",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify(updatePayload),
+      }),
+    );
+
+    await macrosApi.updateEntry({ id: 456, data: updatePayload });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/macros/456",
+      expect.objectContaining({
+        method: "PUT",
+        body: JSON.stringify(updatePayload),
+      }),
+    );
+  });
 });

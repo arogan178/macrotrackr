@@ -54,14 +54,31 @@ export const habitsApi = {
   /**
    * @throws {ApiError}
    */
-  updateHabit: async ({ id, data }: { id: string; data: HabitGoalUpdatePayload }): Promise<HabitGoalPayload> => {
+  updateHabit: async (
+    idOrParams: string | { id: string; data: HabitGoalUpdatePayload },
+    dataPayload?: HabitGoalUpdatePayload,
+  ): Promise<HabitGoalPayload> => {
+    let id: string;
+    let data: HabitGoalUpdatePayload;
+
+    if (typeof idOrParams === "object" && idOrParams !== null) {
+      id = idOrParams.id;
+      data = idOrParams.data;
+    } else {
+      id = idOrParams;
+      data = dataPayload!;
+    }
+
     return apiClient.put<HabitGoalPayload>(`/api/habits/${id}`, data);
   },
 
   /**
    * @throws {ApiError}
    */
-  deleteHabit: async ({ id }: { id: string }): Promise<{ success: boolean; id: string }> => {
+  deleteHabit: async (
+    idOrParams: string | { id: string },
+  ): Promise<{ success: boolean; id: string }> => {
+    const id = typeof idOrParams === "object" && idOrParams !== null ? idOrParams.id : idOrParams;
     return apiClient.del<{ success: boolean; id: string }>(`/api/habits/${id}`);
   },
 

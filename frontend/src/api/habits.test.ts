@@ -79,22 +79,32 @@ describe("habitsApi", () => {
   });
 
   it("supports deleting a single habit and resetting all habits", async () => {
-    fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, id: "habit-2" }));
-    fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, count: 3 }));
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(createJsonResponse({ success: true, id: "habit-2" })),
+    );
+
+    await expect(habitsApi.deleteHabit("habit-2")).resolves.toEqual({
+      success: true,
+      id: "habit-2",
+    });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/habits/habit-2",
+      expect.objectContaining({ method: "DELETE" }),
+    );
 
     await expect(habitsApi.deleteHabit({ id: "habit-2" })).resolves.toEqual({
       success: true,
       id: "habit-2",
     });
-    await expect(habitsApi.resetHabit()).resolves.toEqual({ success: true, count: 3 });
-
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      1,
+    expect(fetchMock).toHaveBeenLastCalledWith(
       "http://localhost:3000/api/habits/habit-2",
       expect.objectContaining({ method: "DELETE" }),
     );
-    expect(fetchMock).toHaveBeenNthCalledWith(
-      2,
+
+    fetchMock.mockResolvedValueOnce(createJsonResponse({ success: true, count: 3 }));
+    await expect(habitsApi.resetHabit()).resolves.toEqual({ success: true, count: 3 });
+
+    expect(fetchMock).toHaveBeenLastCalledWith(
       "http://localhost:3000/api/habits",
       expect.objectContaining({ method: "DELETE" }),
     );
