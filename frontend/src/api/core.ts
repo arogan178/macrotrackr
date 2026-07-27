@@ -170,6 +170,7 @@ export class ApiClient {
       method: "GET",
       headers,
       credentials: "include",
+      cache: "no-store",
     });
 
     return this.handleResponse(response) as Promise<T>;
