@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { todayISO } from "@/utils/dateUtilities";
@@ -51,5 +51,82 @@ describe("EntryHistoryHelpers & Panel", () => {
 
     expect(screen.getAllByText("Today").length).toBeGreaterThan(0);
     expect(screen.getAllByText("Chicken & Rice").length).toBeGreaterThan(0);
+  });
+
+  it("updates entry list dynamically when history prop changes without closing date tab", async () => {
+    const today = todayISO();
+    const entry1 = {
+      id: 101,
+      mealName: "Oatmeal",
+      mealType: "breakfast" as const,
+      protein: 15,
+      carbs: 50,
+      fats: 5,
+      entryDate: today,
+      entryTime: "08:00",
+      createdAt: new Date().toISOString(),
+    };
+
+    const entry2 = {
+      id: 102,
+      mealName: "Salmon Salad",
+      mealType: "lunch" as const,
+      protein: 35,
+      carbs: 10,
+      fats: 20,
+      entryDate: today,
+      entryTime: "12:00",
+      createdAt: new Date().toISOString(),
+    };
+
+    const queryClient = createQueryClient();
+
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <EntryHistoryPanel
+          history={[entry1]}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={false}
+          isEditing={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getAllByText("Oatmeal").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Salmon Salad")).toBeNull();
+
+    // Rerender with added entry
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <EntryHistoryPanel
+          history={[entry1, entry2]}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={false}
+          isEditing={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getAllByText("Salmon Salad").length).toBeGreaterThan(0);
+
+    // Rerender with deleted entry
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <EntryHistoryPanel
+          history={[entry2]}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={false}
+          isEditing={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    await waitFor(() => {
+      expect(screen.queryByText("Oatmeal")).toBeNull();
+    });
+    expect(screen.getAllByText("Salmon Salad").length).toBeGreaterThan(0);
   });
 });

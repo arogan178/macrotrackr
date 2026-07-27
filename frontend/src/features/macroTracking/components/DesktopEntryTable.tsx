@@ -1,4 +1,4 @@
-import React, { memo, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useMemo, useRef, useState } from "react";
 import {
   createColumnHelper,
   flexRender,
@@ -87,15 +87,6 @@ const DesktopEntryTable = memo(
 
       return data;
     }, [groupedEntries]);
-
-    const totalEntries = useMemo(() => {
-      return groupedEntries.reduce(
-        (sum, group) => sum + group.entries.length,
-        0,
-      );
-    }, [groupedEntries]);
-
-    const shouldVirtualize = totalEntries > 50;
 
     const columns = useMemo(
       () => [
@@ -324,12 +315,28 @@ const DesktopEntryTable = memo(
 
         return !isDateCollapsed(parentDate);
       });
-    }, [table, isDateCollapsed]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [table, tableData, isDateCollapsed]);
+
+    const shouldVirtualize = visibleTableRows.length > 50;
 
     const virtualizer = useVirtualizer({
       count: visibleTableRows.length,
       getScrollElement: () => tableContainerReference.current,
       estimateSize: () => 48,
+      getItemKey: useCallback(
+        (index: number) => {
+          const row = visibleTableRows[index];
+          if (!row) return index;
+          const data = row.original;
+          const parentDate = data.parentDate ?? data.date;
+
+          return data.isGroup
+            ? `group-${data.date}`
+            : `entry-${data.entries[0]?.id}-${parentDate}`;
+        },
+        [visibleTableRows],
+      ),
       overscan: 10,
     });
 
@@ -337,7 +344,11 @@ const DesktopEntryTable = memo(
       row: Row<TableRowData>,
       data: TableRowData,
       isVirtualized: boolean,
-      virtualRowProps?: { start: number; measureRef: (el: HTMLDivElement | null) => void },
+      virtualRowProps?: {
+        index: number;
+        start: number;
+        measureRef: (el: HTMLDivElement | null) => void;
+      },
     ) => {
       const isGroup = data.isGroup;
       const parentDate = data.parentDate ?? data.date;
@@ -368,6 +379,7 @@ const DesktopEntryTable = memo(
               transform: `translateY(${virtualRowProps?.start}px)`,
             },
             ref: virtualRowProps?.measureRef,
+            "data-index": virtualRowProps?.index,
           }
         : {
             initial: { height: 0, opacity: 0 },
@@ -423,21 +435,20 @@ const DesktopEntryTable = memo(
             width: "100%",
           }}
         >
-          <AnimatePresence initial={false}>
-            {virtualItems.map((virtualRow) => {
-              const row = visibleTableRows[virtualRow.index];
-              if (!row) {
-                return null;
-              }
+          {virtualItems.map((virtualRow) => {
+            const row = visibleTableRows[virtualRow.index];
+            if (!row) {
+              return null;
+            }
 
-              const data = row.original;
+            const data = row.original;
 
-              return renderRow(row, data, true, {
-                start: virtualRow.start,
-                measureRef: virtualizer.measureElement,
-              });
-            })}
-          </AnimatePresence>
+            return renderRow(row, data, true, {
+              index: virtualRow.index,
+              start: virtualRow.start,
+              measureRef: virtualizer.measureElement,
+            });
+          })}
         </div>
       );
     };
