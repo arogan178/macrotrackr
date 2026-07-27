@@ -97,9 +97,31 @@ function transformHistoryPages(
   queryClient: QueryClient,
   pageTransformer: (page: PaginatedMacroHistory, index: number) => PaginatedMacroHistory
 ) {
+  const snapshots = getMacroHistorySnapshots(queryClient);
+  if (snapshots.length === 0) {
+    queryClient.setQueryData(queryKeys.macros.historyInfinite(), {
+      pages: [
+        pageTransformer(
+          { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
+          0,
+        ),
+      ],
+      pageParams: [0],
+    });
+    return;
+  }
+
   updateMacroHistoryCaches(queryClient, (oldData) => {
     if (!oldData || oldData.pages.length === 0) {
-      return oldData;
+      return {
+        pages: [
+          pageTransformer(
+            { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
+            0,
+          ),
+        ],
+        pageParams: [0],
+      };
     }
 
     return {
