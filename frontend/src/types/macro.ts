@@ -66,6 +66,7 @@ export interface Ingredient {
 
 export interface MacroEntry {
   id: number;
+  clientId?: string;
   createdAt: string;
   protein: number;
   carbs: number;

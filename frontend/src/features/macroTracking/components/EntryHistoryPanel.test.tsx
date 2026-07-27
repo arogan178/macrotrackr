@@ -129,4 +129,56 @@ describe("EntryHistoryHelpers & Panel", () => {
     });
     expect(screen.getAllByText("Salmon Salad").length).toBeGreaterThan(0);
   });
+
+  it("maintains entry rendering when transitioning from optimistic temp ID to server ID with stable clientId", () => {
+    const today = todayISO();
+    const optimisticEntry = {
+      id: -12345,
+      clientId: "client_temp_123",
+      mealName: "Protein Shake",
+      mealType: "snack" as const,
+      protein: 25,
+      carbs: 5,
+      fats: 2,
+      entryDate: today,
+      entryTime: "15:00",
+      createdAt: new Date().toISOString(),
+    };
+
+    const serverEntry = {
+      ...optimisticEntry,
+      id: 555, // server assigned ID
+    };
+
+    const queryClient = createQueryClient();
+
+    const { rerender } = render(
+      <QueryClientProvider client={queryClient}>
+        <EntryHistoryPanel
+          history={[optimisticEntry]}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={false}
+          isEditing={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getAllByText("Protein Shake").length).toBeGreaterThan(0);
+
+    // Transition from optimistic entry to persisted server entry
+    rerender(
+      <QueryClientProvider client={queryClient}>
+        <EntryHistoryPanel
+          history={[serverEntry]}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={false}
+          isEditing={false}
+        />
+      </QueryClientProvider>,
+    );
+
+    expect(screen.getAllByText("Protein Shake").length).toBeGreaterThan(0);
+  });
 });
