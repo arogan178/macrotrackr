@@ -55,17 +55,17 @@ export const habitsApi = {
    * @throws {ApiError}
    */
   updateHabit: async (
-    idOrParams: string | { id: string; data: HabitGoalUpdatePayload },
+    idOrParameters: string | { id: string; data: HabitGoalUpdatePayload },
     dataPayload?: HabitGoalUpdatePayload,
   ): Promise<HabitGoalPayload> => {
     let id: string;
     let data: HabitGoalUpdatePayload;
 
-    if (typeof idOrParams === "object" && idOrParams !== null) {
-      id = idOrParams.id;
-      data = idOrParams.data;
+    if (typeof idOrParameters === "object" && idOrParameters !== null) {
+      id = idOrParameters.id;
+      data = idOrParameters.data;
     } else {
-      id = idOrParams;
+      id = idOrParameters;
       data = dataPayload!;
     }
 
@@ -76,9 +76,10 @@ export const habitsApi = {
    * @throws {ApiError}
    */
   deleteHabit: async (
-    idOrParams: string | { id: string },
+    idOrParameters: string | { id: string },
   ): Promise<{ success: boolean; id: string }> => {
-    const id = typeof idOrParams === "object" && idOrParams !== null ? idOrParams.id : idOrParams;
+    const id = typeof idOrParameters === "object" && idOrParameters !== null ? idOrParameters.id : idOrParameters;
+
     return apiClient.del<{ success: boolean; id: string }>(`/api/habits/${id}`);
   },
 

@@ -101,6 +101,7 @@ export const UnitConverter = {
           }
 
           const unit = unitMap[rawUnit] ?? "g";
+
           return { quantity, unit, original: input };
         }
       }
