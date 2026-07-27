@@ -97,45 +97,35 @@ function transformHistoryPages(
   queryClient: QueryClient,
   pageTransformer: (page: PaginatedMacroHistory, index: number) => PaginatedMacroHistory
 ) {
-  // 1. Synchronously update or initialize the primary historyInfinite(20) key
-  queryClient.setQueryData(
-    queryKeys.macros.historyInfinite(20),
-    (oldData: { pages: PaginatedMacroHistory[]; pageParams: number[] } | undefined) => {
-      if (!oldData || oldData.pages.length === 0) {
-        return {
-          pages: [
-            pageTransformer(
-              { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
-              0,
-            ),
-          ],
-          pageParams: [0],
-        };
-      }
-
-      return {
-        ...oldData,
-        pages: oldData.pages.map(pageTransformer),
-        pageParams: oldData.pageParams,
-      };
-    },
-  );
-
-  // 2. Also update all matching historyInfinite cache queries
   const snapshots = getMacroHistorySnapshots(queryClient);
-  if (snapshots.length > 0) {
-    updateMacroHistoryCaches(queryClient, (oldData) => {
-      if (!oldData || oldData.pages.length === 0) {
-        return oldData;
-      }
 
-      return {
-        ...oldData,
-        pages: oldData.pages.map(pageTransformer),
-        pageParams: oldData.pageParams,
-      };
-    });
+  if (snapshots.length === 0) {
+    queryClient.setQueryData(
+      queryKeys.macros.historyInfinite(20),
+      {
+        pages: [
+          pageTransformer(
+            { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
+            0,
+          ),
+        ],
+        pageParams: [0],
+      },
+    );
+    return;
   }
+
+  updateMacroHistoryCaches(queryClient, (oldData) => {
+    if (!oldData || oldData.pages.length === 0) {
+      return oldData;
+    }
+
+    return {
+      ...oldData,
+      pages: oldData.pages.map(pageTransformer),
+      pageParams: oldData.pageParams,
+    };
+  });
 }
 
 // --- Queries ---
