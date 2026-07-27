@@ -103,6 +103,42 @@ describe("useMacroQueries", () => {
       const historyAfterError = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20, undefined, undefined));
       expect(historyAfterError.pages[0].entries).toHaveLength(0);
     });
+
+    it("should initialize history list cache when adding entry if history cache was previously empty or undefined", async () => {
+      const { wrapper, queryClient } = createWrapper();
+
+      const entryDate = "2024-01-01";
+      const newEntry = {
+        foodName: "New Food Item",
+        protein: 20,
+        carbs: 30,
+        fats: 10,
+        mealType: "dinner" as const,
+        entryDate,
+        entryTime: "19:00",
+      };
+
+      (macrosApi.addEntry as any).mockResolvedValueOnce({
+        id: 999,
+        ...newEntry,
+        createdAt: "2024-01-01T19:00:00Z",
+      });
+
+      const { result } = renderHook(() => useAddMacroEntry(), { wrapper });
+
+      act(() => {
+        result.current.mutate(newEntry);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      const historyData = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite());
+      expect(historyData).toBeDefined();
+      expect(historyData.pages[0].entries[0].id).toBe(999);
+      expect(historyData.pages[0].entries[0].foodName).toBe("New Food Item");
+    });
   });
 
   describe("useUpdateMacroEntry", () => {
