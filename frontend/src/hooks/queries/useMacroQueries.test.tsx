@@ -242,5 +242,51 @@ describe("useMacroQueries", () => {
       const historyAfterError = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20, undefined, undefined));
       expect(historyAfterError.pages[0].entries).toHaveLength(1);
     });
+
+    it("should optimistically delete entry even if string ID is passed and invalidate all macro queries when settled", async () => {
+      const { wrapper, queryClient } = createWrapper();
+      const invalidateSpy = vi.spyOn(queryClient, "invalidateQueries");
+
+      const entryDate = "2024-01-01";
+      const existingEntry = {
+        id: 123,
+        foodName: "Test Food",
+        protein: 10,
+        carbs: 20,
+        fats: 5,
+        mealType: "lunch" as const,
+        entryDate,
+        entryTime: "12:00",
+      };
+
+      queryClient.setQueryData(queryKeys.macros.dailyTotals(entryDate), {
+        protein: 10, carbs: 20, fats: 5, calories: 165,
+      });
+      queryClient.setQueryData(queryKeys.macros.historyInfinite(20, undefined, undefined), {
+        pages: [{ entries: [existingEntry], hasMore: false, totalCount: 1 }],
+        pageParams: [0],
+      });
+
+      (macrosApi.deleteEntry as any).mockResolvedValueOnce({ success: true, id: 123 });
+
+      const { result } = renderHook(() => useDeleteMacroEntry(), { wrapper });
+
+      act(() => {
+        result.current.mutate("123" as any);
+      });
+
+      await waitFor(() => {
+        expect(result.current.isSuccess).toBe(true);
+      });
+
+      const historyAfterSuccess = queryClient.getQueryData<any>(
+        queryKeys.macros.historyInfinite(20, undefined, undefined),
+      );
+      expect(historyAfterSuccess.pages[0].entries).toHaveLength(0);
+
+      expect(invalidateSpy).toHaveBeenCalledWith({
+        queryKey: queryKeys.macros.all(),
+      });
+    });
   });
 });
