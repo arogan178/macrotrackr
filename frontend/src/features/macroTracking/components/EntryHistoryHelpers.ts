@@ -15,6 +15,7 @@ export const formatEntryDate = (dateString: string): string => {
       });
     }
   }
+
   return new Date(dateString).toLocaleDateString("en-UK", {
     year: "numeric",
     month: "short",
