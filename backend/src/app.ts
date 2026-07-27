@@ -260,6 +260,12 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
     .use(metricsRoutes)
 
     // Apply middleware after webhook routes to avoid body consumption conflicts
+    .onRequest(({ set }) => {
+      set.headers["Cache-Control"] =
+        "no-store, no-cache, must-revalidate, proxy-revalidate";
+      set.headers["Pragma"] = "no-cache";
+      set.headers["Expires"] = "0";
+    })
     .use(correlationMiddleware)
     .use(enhancedApiLogging)
 
