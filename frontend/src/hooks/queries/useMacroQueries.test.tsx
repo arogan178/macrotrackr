@@ -131,14 +131,24 @@ describe("useMacroQueries", () => {
         result.current.mutate(newEntry);
       });
 
+      let optimisticClientId: string | undefined;
+
       await waitFor(() => {
+        const historyDataDuring = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20));
+        if (historyDataDuring?.pages[0]?.entries[0]?.clientId) {
+          optimisticClientId = historyDataDuring.pages[0].entries[0].clientId;
+        }
         expect(result.current.isSuccess).toBe(true);
       });
+
+      expect(optimisticClientId).toBeDefined();
+      expect(optimisticClientId).toMatch(/^client_/);
 
       const historyData = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20));
       expect(historyData).toBeDefined();
       expect(historyData.pages[0].entries[0].id).toBe(999);
       expect(historyData.pages[0].entries[0].foodName).toBe("New Food Item");
+      expect(historyData.pages[0].entries[0].clientId).toBe(optimisticClientId);
     });
   });
 

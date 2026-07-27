@@ -331,9 +331,10 @@ const DesktopEntryTable = memo(
           const data = row.original;
           const parentDate = data.parentDate ?? data.date;
 
+          const entryKey = data.entries[0]?.clientId ?? data.entries[0]?.id;
           return data.isGroup
             ? `group-${data.date}`
-            : `entry-${data.entries[0]?.id}-${parentDate}`;
+            : `entry-${entryKey}-${parentDate}`;
         },
         [visibleTableRows],
       ),
@@ -352,9 +353,10 @@ const DesktopEntryTable = memo(
     ) => {
       const isGroup = data.isGroup;
       const parentDate = data.parentDate ?? data.date;
+      const entryKey = data.entries[0]?.clientId ?? data.entries[0]?.id;
       const animationKey = isGroup
         ? `group-${data.date}`
-        : `entry-${data.entries[0].id}-${parentDate}`;
+        : `entry-${entryKey}-${parentDate}`;
 
       const commonProps = {
         className: `flex w-full flex-col overflow-hidden ${
