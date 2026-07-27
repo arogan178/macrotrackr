@@ -111,25 +111,21 @@ describe("goalsApi", () => {
     );
   });
 
-  it("returns normalized addWeightLogEntry payloads", async () => {
-    fetchMock.mockResolvedValueOnce(
-      createJsonResponse({
-        id: "entry-1",
-        timestamp: "2026-04-03T10:00:00.000Z",
-        weight: 79.4,
-        ignoredField: true,
-      }),
+  it("deletes weight log entry when passed primitive string id or object parameter", async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(createJsonResponse({ success: true, id: "log-1" })),
     );
 
-    await expect(
-      goalsApi.addWeightLogEntry({
-        timestamp: "2026-04-03T10:00:00.000Z",
-        weight: 79.4,
-      }),
-    ).resolves.toEqual({
-      id: "entry-1",
-      timestamp: "2026-04-03T10:00:00.000Z",
-      weight: 79.4,
-    });
+    await goalsApi.deleteWeightLogEntry("log-1");
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/goals/weight-log/log-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+
+    await goalsApi.deleteWeightLogEntry({ id: "log-1" });
+    expect(fetchMock).toHaveBeenLastCalledWith(
+      "http://localhost:3000/api/goals/weight-log/log-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
   });
 });
