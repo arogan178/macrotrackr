@@ -83,6 +83,7 @@ describe("useMacroQueries", () => {
       });
 
       const historyDuringMutation = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20, undefined, undefined));
+      expect(historyDuringMutation.pages[0].entries).toHaveLength(1);
       expect(historyDuringMutation.pages[0].entries[0].foodName).toBe("Test Food");
       expect(historyDuringMutation.pages[0].entries[0].optimistic).toBe(true);
 
