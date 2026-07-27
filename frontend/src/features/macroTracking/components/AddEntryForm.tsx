@@ -148,48 +148,59 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         carbs: Number.parseFloat(c),
         fats: Number.parseFloat(f),
       };
-      setBaseMacros(per100g);
-      setBaseIngredients(undefined);
-      setMealName(name);
-      setQuantity(servingQuantity);
+
+      let targetQuantity = servingQuantity;
+      let targetUnit = servingUnit as UnitType;
 
       if (rawQuantity) {
         const parsed = UnitConverter.parseQuantity(rawQuantity);
-        setUnit(parsed.unit);
-        setQuantity(parsed.quantity);
-        setSearchResult(name);
-
-        return;
-      }
-
-      let displayUnit = servingUnit as UnitType;
-
-      const validUnits: UnitType[] = [
-        "g",
-        "kg",
-        "oz",
-        "lb",
-        "ml",
-        "L",
-        "cup",
-        "tbsp",
-        "tsp",
-        "pt",
-        "unit",
-      ];
-      if (!validUnits.includes(displayUnit)) {
-        displayUnit = "g";
-      }
-
-      if (displayUnit === "lb") {
-        const metric = UnitConverter.toMetric(servingQuantity, displayUnit);
-        setUnit(metric.unit);
-        setQuantity(metric.quantity);
+        targetUnit = parsed.unit;
+        targetQuantity = parsed.quantity;
       } else {
-        setUnit(displayUnit);
-        setQuantity(servingQuantity);
+        const validUnits: UnitType[] = [
+          "g",
+          "kg",
+          "oz",
+          "lb",
+          "ml",
+          "L",
+          "cup",
+          "tbsp",
+          "tsp",
+          "pt",
+          "unit",
+        ];
+        if (!validUnits.includes(targetUnit)) {
+          targetUnit = "g";
+        }
+
+        if (targetUnit === "lb") {
+          const metric = UnitConverter.toMetric(servingQuantity, targetUnit);
+          targetUnit = metric.unit;
+          targetQuantity = metric.quantity;
+        }
       }
+
+      setBaseMacros(per100g);
+      setBaseIngredients(undefined);
+      setMealName(name);
+      setUnit(targetUnit);
+      setQuantity(targetQuantity);
       setSearchResult(name);
+
+      let qtyInGrams: number;
+      if (UnitConverter.isWeightUnit(targetUnit)) {
+        qtyInGrams = UnitConverter.convert(targetQuantity, targetUnit, "g");
+      } else if (UnitConverter.isVolumeUnit(targetUnit)) {
+        qtyInGrams = UnitConverter.convert(targetQuantity, targetUnit, "ml");
+      } else {
+        qtyInGrams = targetQuantity * 100;
+      }
+
+      const factor = qtyInGrams / 100;
+      setProtein(Number((per100g.protein * factor).toFixed(1)));
+      setCarbs(Number((per100g.carbs * factor).toFixed(1)));
+      setFats(Number((per100g.fats * factor).toFixed(1)));
     },
     [],
   );
