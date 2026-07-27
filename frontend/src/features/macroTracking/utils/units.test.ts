@@ -95,6 +95,26 @@ describe("units", () => {
         expect(berries.quantity).toBe(140);
       });
 
+      it("extracts parenthetical portion weights/volumes", () => {
+        expect(UnitConverter.parseQuantity("1 container (170g)")).toEqual({
+          quantity: 170,
+          unit: "g",
+          original: "1 container (170g)",
+        });
+
+        expect(UnitConverter.parseQuantity("1 serving (30 g)")).toEqual({
+          quantity: 30,
+          unit: "g",
+          original: "1 serving (30 g)",
+        });
+
+        expect(UnitConverter.parseQuantity("1 bottle (250 ml)")).toEqual({
+          quantity: 250,
+          unit: "ml",
+          original: "1 bottle (250 ml)",
+        });
+      });
+
       it("falls back to defaults for invalid or empty inputs", () => {
         expect(UnitConverter.parseQuantity("")).toEqual({
           quantity: 100,

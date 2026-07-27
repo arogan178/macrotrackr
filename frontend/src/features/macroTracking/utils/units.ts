@@ -70,6 +70,42 @@ export const UnitConverter = {
       return { quantity: 1, unit: "unit", original: input };
     }
 
+    const parentheticalMatch = trimmed.match(/\(([^)]+)\)/);
+    if (parentheticalMatch?.[1]) {
+      const innerMeasurement = parentheticalMatch[1].trim();
+      const innerMatch = innerMeasurement.match(MEASUREMENT_PATTERN);
+      if (innerMatch?.[1] && innerMatch[2]) {
+        const quantity = Number.parseFloat(innerMatch[1].replace(",", "."));
+        if (!Number.isNaN(quantity) && quantity > 0) {
+          const rawUnit = innerMatch[2].replaceAll(/\s+/g, " ").trim();
+          const unitMap: Record<string, UnitType> = {
+            g: "g", gram: "g", grams: "g",
+            kg: "kg", kilogram: "kg", kilograms: "kg",
+            oz: "oz", ounce: "oz", ounces: "oz",
+            lb: "lb", lbs: "lb", pound: "lb", pounds: "lb",
+            ml: "ml", milliliter: "ml", milliliters: "ml",
+            l: "L", liter: "L", liters: "L",
+            cup: "cup", cups: "cup",
+            tbsp: "tbsp", tablespoon: "tbsp", tablespoons: "tbsp",
+            tsp: "tsp", teaspoon: "tsp", teaspoons: "tsp",
+            pt: "pt", pint: "pt", pints: "pt",
+            "fl oz": "ml",
+          };
+
+          if (rawUnit === "fl oz") {
+            return {
+              quantity: Math.round(quantity * 29.5735 * 100) / 100,
+              unit: "ml",
+              original: input,
+            };
+          }
+
+          const unit = unitMap[rawUnit] ?? "g";
+          return { quantity, unit, original: input };
+        }
+      }
+    }
+
     const countBasedMatch = trimmed.match(COUNT_BASED_QUANTITY_PATTERN);
     if (countBasedMatch?.[1]) {
       const count = Number.parseFloat(countBasedMatch[1].replace(",", "."));
