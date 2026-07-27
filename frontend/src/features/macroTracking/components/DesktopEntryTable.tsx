@@ -309,6 +309,8 @@ const DesktopEntryTable = memo(
       data: tableData,
       columns,
       getCoreRowModel: getCoreRowModel(),
+      getRowId: (row) =>
+        row.isGroup ? `group-${row.date}` : `entry-${row.entries[0]?.id}`,
     });
 
     const visibleTableRows = useMemo(() => {
