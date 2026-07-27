@@ -97,40 +97,45 @@ function transformHistoryPages(
   queryClient: QueryClient,
   pageTransformer: (page: PaginatedMacroHistory, index: number) => PaginatedMacroHistory
 ) {
-  const snapshots = getMacroHistorySnapshots(queryClient);
-  if (snapshots.length === 0) {
-    queryClient.setQueryData(queryKeys.macros.historyInfinite(20), {
-      pages: [
-        pageTransformer(
-          { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
-          0,
-        ),
-      ],
-      pageParams: [0],
-    });
+  // 1. Synchronously update or initialize the primary historyInfinite(20) key
+  queryClient.setQueryData(
+    queryKeys.macros.historyInfinite(20),
+    (oldData: { pages: PaginatedMacroHistory[]; pageParams: number[] } | undefined) => {
+      if (!oldData || oldData.pages.length === 0) {
+        return {
+          pages: [
+            pageTransformer(
+              { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
+              0,
+            ),
+          ],
+          pageParams: [0],
+        };
+      }
 
-    return;
-  }
-
-  updateMacroHistoryCaches(queryClient, (oldData) => {
-    if (!oldData || oldData.pages.length === 0) {
       return {
-        pages: [
-          pageTransformer(
-            { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
-            0,
-          ),
-        ],
-        pageParams: [0],
+        ...oldData,
+        pages: oldData.pages.map(pageTransformer),
+        pageParams: oldData.pageParams,
       };
-    }
+    },
+  );
 
-    return {
-      ...oldData,
-      pages: oldData.pages.map(pageTransformer),
-      pageParams: oldData.pageParams,
-    };
-  });
+  // 2. Also update all matching historyInfinite cache queries
+  const snapshots = getMacroHistorySnapshots(queryClient);
+  if (snapshots.length > 0) {
+    updateMacroHistoryCaches(queryClient, (oldData) => {
+      if (!oldData || oldData.pages.length === 0) {
+        return oldData;
+      }
+
+      return {
+        ...oldData,
+        pages: oldData.pages.map(pageTransformer),
+        pageParams: oldData.pageParams,
+      };
+    });
+  }
 }
 
 // --- Queries ---
@@ -250,24 +255,43 @@ export function useAddMacroEntry() {
       return (await macrosApi.addEntry(entry)) as MacroEntry;
     },
     onMutate: async (variables: MacroEntryCreatePayload) => {
-      const context = await prepareOptimisticUpdate(queryClient, variables.entryDate);
+      const contextPromise = prepareOptimisticUpdate(
+        queryClient,
+        variables.entryDate,
+      );
 
       const temporaryId = -Date.now();
+      const proteinNumber = Number(variables.protein ?? 0);
+      const carbsNumber = Number(variables.carbs ?? 0);
+      const fatsNumber = Number(variables.fats ?? 0);
+
       const optimisticEntry: OptimisticMacroEntry = {
         id: temporaryId,
         createdAt: new Date().toISOString(),
         ...variables,
+        protein: proteinNumber,
+        carbs: carbsNumber,
+        fats: fatsNumber,
         mealName: variables.mealName ?? "",
         optimistic: true,
       };
 
-      transformHistoryPages(queryClient, (page, index) => 
-        index === 0 ? { ...page, entries: [optimisticEntry, ...page.entries] } : page
+      transformHistoryPages(queryClient, (page, index) =>
+        index === 0
+          ? { ...page, entries: [optimisticEntry, ...page.entries] }
+          : page,
       );
 
       if (variables.entryDate) {
-        adjustDailyTotals(queryClient, variables.entryDate, variables, true);
+        adjustDailyTotals(
+          queryClient,
+          variables.entryDate,
+          { protein: proteinNumber, carbs: carbsNumber, fats: fatsNumber },
+          true,
+        );
       }
+
+      const context = await contextPromise;
 
       return { ...context, tempId: temporaryId };
     },
@@ -309,24 +333,60 @@ export function useUpdateMacroEntry() {
       return await macrosApi.updateEntry(id, entry);
     },
     onMutate: async ({ id, entry }) => {
-      const { entry: originalEntry, entryDate } = findEntryInHistory(queryClient, id);
-      const context = await prepareOptimisticUpdate(queryClient, entryDate);
+      const { entry: originalEntry, entryDate } = findEntryInHistory(
+        queryClient,
+        id,
+      );
+
+      const contextPromise = prepareOptimisticUpdate(queryClient, entryDate);
 
       transformHistoryPages(queryClient, (page) => ({
         ...page,
         entries: page.entries.map((entryItem) =>
-          Number(entryItem.id) === Number(id) ? { ...entryItem, ...entry } : entryItem,
+          Number(entryItem.id) === Number(id)
+            ? {
+                ...entryItem,
+                ...entry,
+                protein:
+                  entry.protein !== undefined
+                    ? Number(entry.protein)
+                    : entryItem.protein,
+                carbs:
+                  entry.carbs !== undefined
+                    ? Number(entry.carbs)
+                    : entryItem.carbs,
+                fats:
+                  entry.fats !== undefined
+                    ? Number(entry.fats)
+                    : entryItem.fats,
+              }
+            : entryItem,
         ),
       }));
 
       if (entryDate && originalEntry) {
-        const newProtein = entry.protein ?? originalEntry.protein;
-        const newCarbs = entry.carbs ?? originalEntry.carbs;
-        const newFats = entry.fats ?? originalEntry.fats;
-        
-        const newCalories = calculateCaloriesFromMacros(newProtein, newCarbs, newFats);
-        const oldCalories = calculateCaloriesFromMacros(originalEntry.protein, originalEntry.carbs, originalEntry.fats);
-        
+        const newProtein =
+          entry.protein !== undefined
+            ? Number(entry.protein)
+            : originalEntry.protein;
+        const newCarbs =
+          entry.carbs !== undefined
+            ? Number(entry.carbs)
+            : originalEntry.carbs;
+        const newFats =
+          entry.fats !== undefined ? Number(entry.fats) : originalEntry.fats;
+
+        const newCalories = calculateCaloriesFromMacros(
+          newProtein,
+          newCarbs,
+          newFats,
+        );
+        const oldCalories = calculateCaloriesFromMacros(
+          originalEntry.protein,
+          originalEntry.carbs,
+          originalEntry.fats,
+        );
+
         adjustDailyTotals(queryClient, entryDate, {
           protein: newProtein - originalEntry.protein,
           carbs: newCarbs - originalEntry.carbs,
@@ -334,6 +394,8 @@ export function useUpdateMacroEntry() {
           calories: newCalories - oldCalories,
         });
       }
+
+      const context = await contextPromise;
 
       return context;
     },
@@ -360,12 +422,18 @@ export function useDeleteMacroEntry() {
       return await macrosApi.deleteEntry(id);
     },
     onMutate: async (id: number) => {
-      const { entry: entryToDelete, entryDate } = findEntryInHistory(queryClient, id);
-      const context = await prepareOptimisticUpdate(queryClient, entryDate);
+      const { entry: entryToDelete, entryDate } = findEntryInHistory(
+        queryClient,
+        id,
+      );
+
+      const contextPromise = prepareOptimisticUpdate(queryClient, entryDate);
 
       transformHistoryPages(queryClient, (page) => ({
         ...page,
-        entries: page.entries.filter((entryItem) => Number(entryItem.id) !== Number(id)),
+        entries: page.entries.filter(
+          (entryItem) => Number(entryItem.id) !== Number(id),
+        ),
       }));
 
       if (entryDate && entryToDelete) {
@@ -375,6 +443,8 @@ export function useDeleteMacroEntry() {
           fats: -entryToDelete.fats,
         });
       }
+
+      const context = await contextPromise;
 
       return context;
     },

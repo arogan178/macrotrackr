@@ -19,17 +19,16 @@ export async function prepareOptimisticUpdate(
   queryClient: QueryClient,
   entryDate?: string,
 ): Promise<MacroOptimisticContext> {
-  await queryClient.cancelQueries({ queryKey: ["macros", "history-infinite"] });
+  const snapshot = entryDate
+    ? captureMacroHistorySnapshot(queryClient, entryDate)
+    : { previousHistoryData: getMacroHistorySnapshots(queryClient) };
 
-  if (!entryDate) {
-    return {
-      previousHistoryData: getMacroHistorySnapshots(queryClient),
-    };
+  await queryClient.cancelQueries({ queryKey: ["macros", "history-infinite"] });
+  if (entryDate) {
+    await queryClient.cancelQueries({ queryKey: queryKeys.macros.dailyTotals(entryDate) });
   }
 
-  await queryClient.cancelQueries({ queryKey: queryKeys.macros.dailyTotals(entryDate) });
-
-  return captureMacroHistorySnapshot(queryClient, entryDate);
+  return snapshot;
 }
 
 export function captureMacroHistorySnapshot(
