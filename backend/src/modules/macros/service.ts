@@ -86,6 +86,8 @@ export function normalizeMacroEntryRow(
       normalized.ingredients,
       "ingredients",
     );
+  } else if (!normalized.ingredients) {
+    normalized.ingredients = [];
   }
 
   return normalized as unknown as MacroEntryResponse;
