@@ -99,7 +99,7 @@ function transformHistoryPages(
 ) {
   const snapshots = getMacroHistorySnapshots(queryClient);
   if (snapshots.length === 0) {
-    queryClient.setQueryData(queryKeys.macros.historyInfinite(), {
+    queryClient.setQueryData(queryKeys.macros.historyInfinite(20), {
       pages: [
         pageTransformer(
           { entries: [], total: 0, limit: 20, offset: 0, hasMore: false },
