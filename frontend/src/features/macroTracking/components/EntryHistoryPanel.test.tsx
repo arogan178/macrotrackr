@@ -1,10 +1,11 @@
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-import EntryHistoryPanel from "./EntryHistoryPanel";
-import { formatEntryDate } from "./EntryHistoryHelpers";
 import { todayISO } from "@/utils/dateUtilities";
+
+import { formatEntryDate } from "./EntryHistoryHelpers";
+import EntryHistoryPanel from "./EntryHistoryPanel";
 
 const createQueryClient = () =>
   new QueryClient({
