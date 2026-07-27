@@ -16,6 +16,7 @@ import {
   PlusCircleIcon,
 } from "@/components/ui";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
+import { todayISO } from "@/utils/dateUtilities";
 
 import DesktopEntryTable from "./DesktopEntryTable";
 import { EntryHistoryContext } from "./EntryHistoryContext";
