@@ -14,6 +14,10 @@ export interface QuantityUnitFieldProps {
   unit: UnitType;
   onQuantityChange: (value: number | undefined) => void;
   onUnitChange: (value: UnitType) => void;
+  onQuantityUnitChange?: (
+    quantity: number | undefined,
+    unit: UnitType,
+  ) => void;
   disabled?: boolean;
   placeholder?: string;
   required?: boolean;
@@ -21,12 +25,71 @@ export interface QuantityUnitFieldProps {
   helperText?: string;
 }
 
+const getGramsEquivalent = (
+  quantity: number | undefined,
+  unit: string | undefined,
+): number => {
+  if (!quantity || quantity <= 0) return 0;
+  const unitString = unit ?? "g";
+
+  if (
+    unitString === "unit" ||
+    unitString === "pcs" ||
+    unitString === "pc" ||
+    unitString === "piece" ||
+    unitString === "pieces"
+  ) {
+    return quantity * 100;
+  }
+
+  if (UnitConverter.isWeightUnit(unitString as UnitType)) {
+    return UnitConverter.convert(quantity, unitString as UnitType, "g");
+  }
+
+  if (UnitConverter.isVolumeUnit(unitString as UnitType)) {
+    return UnitConverter.convert(quantity, unitString as UnitType, "ml");
+  }
+
+  return quantity * 100;
+};
+
+const convertQuantity = (
+  currentQty: number,
+  fromUnit: UnitType,
+  toUnit: UnitType,
+): number => {
+  if (fromUnit === toUnit) return currentQty;
+
+  const fromGrams = getGramsEquivalent(currentQty, fromUnit);
+  const isToPcs =
+    toUnit === "unit" ||
+    (toUnit as string) === "pcs" ||
+    (toUnit as string) === "pc" ||
+    (toUnit as string) === "piece" ||
+    (toUnit as string) === "pieces";
+
+  if (isToPcs) {
+    return Number((fromGrams / 100).toFixed(3));
+  }
+
+  if (UnitConverter.isWeightUnit(toUnit)) {
+    return Number(UnitConverter.convert(fromGrams, "g", toUnit).toFixed(3));
+  }
+
+  if (UnitConverter.isVolumeUnit(toUnit)) {
+    return Number(UnitConverter.convert(fromGrams, "ml", toUnit).toFixed(3));
+  }
+
+  return Number((fromGrams / 100).toFixed(3));
+};
+
 const QuantityUnitField = memo(function QuantityUnitField({
   label,
   quantity,
   unit,
   onQuantityChange,
   onUnitChange,
+  onQuantityUnitChange,
   disabled = false,
   placeholder = "100",
   required = false,
@@ -48,16 +111,25 @@ const QuantityUnitField = memo(function QuantityUnitField({
   ];
 
   const handleQuantityChange = (value: number | undefined) => {
-    onQuantityChange(value);
+    if (onQuantityUnitChange) {
+      onQuantityUnitChange(value, unit);
+    } else {
+      onQuantityChange(value);
+    }
   };
 
   const handleUnitChange = (value: string | number) => {
     const newUnit = value as UnitType;
 
-    // Convert quantity to the new unit if we have a valid quantity
     if (quantity && quantity > 0) {
-      const convertedQuantity = UnitConverter.convert(quantity, unit, newUnit);
-      onQuantityChange(Number(convertedQuantity.toFixed(3)));
+      const convertedQuantity = convertQuantity(quantity, unit, newUnit);
+      if (onQuantityUnitChange) {
+        onQuantityUnitChange(convertedQuantity, newUnit);
+
+        return;
+      }
+
+      onQuantityChange(convertedQuantity);
     }
 
     onUnitChange(newUnit);

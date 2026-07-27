@@ -1,16 +1,28 @@
 import NumberField from "@/components/form/NumberField";
+import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TextField from "@/components/form/TextField";
+import type { UnitType } from "@/features/macroTracking/utils/units";
 
 interface MealDetailsSectionProps {
   mealName: string;
   protein: number;
   carbs: number;
   fats: number;
+  quantity?: number;
+  unit?: string;
+  isMultiIngredient: boolean;
   onMealNameChange: (value: string) => void;
   onMacroChange: (
     field: "protein" | "carbs" | "fats",
     value: number | undefined,
   ) => void;
+  onQuantityChange?: (value: number | undefined) => void;
+  onUnitChange?: (value: UnitType) => void;
+  onQuantityUnitChange?: (
+    quantity: number | undefined,
+    unit: UnitType,
+  ) => void;
+  onAddIngredient?: () => void;
 }
 
 export default function MealDetailsSection({
@@ -18,8 +30,15 @@ export default function MealDetailsSection({
   protein,
   carbs,
   fats,
+  quantity,
+  unit = "g",
+  isMultiIngredient,
   onMealNameChange,
   onMacroChange,
+  onQuantityChange,
+  onUnitChange,
+  onQuantityUnitChange,
+  onAddIngredient,
 }: MealDetailsSectionProps) {
   const calories = Math.round(protein * 4 + carbs * 4 + fats * 9);
 
@@ -30,7 +49,9 @@ export default function MealDetailsSection({
           Meal Details
         </p>
         <p className="text-xs text-muted">
-          Totals update from ingredients below.
+          {isMultiIngredient
+            ? "Totals update from ingredients below."
+            : "Adjust quantity, unit, or macros directly."}
         </p>
       </div>
 
@@ -42,6 +63,17 @@ export default function MealDetailsSection({
         required
       />
 
+      {!isMultiIngredient && onQuantityChange && onUnitChange && (
+        <QuantityUnitField
+          label="Quantity & Unit"
+          quantity={quantity}
+          unit={(unit as UnitType) || "g"}
+          onQuantityChange={onQuantityChange}
+          onUnitChange={onUnitChange}
+          onQuantityUnitChange={onQuantityUnitChange}
+        />
+      )}
+
       <div className="grid gap-4 md:grid-cols-3">
         <NumberField
           label="Protein (g)"
@@ -49,6 +81,7 @@ export default function MealDetailsSection({
           onChange={(value) => onMacroChange("protein", value)}
           min={0}
           step={0.1}
+          disabled={isMultiIngredient}
         />
         <NumberField
           label="Carbs (g)"
@@ -56,6 +89,7 @@ export default function MealDetailsSection({
           onChange={(value) => onMacroChange("carbs", value)}
           min={0}
           step={0.1}
+          disabled={isMultiIngredient}
         />
         <NumberField
           label="Fats (g)"
@@ -63,6 +97,7 @@ export default function MealDetailsSection({
           onChange={(value) => onMacroChange("fats", value)}
           min={0}
           step={0.1}
+          disabled={isMultiIngredient}
         />
       </div>
 
@@ -100,6 +135,31 @@ export default function MealDetailsSection({
           </p>
         </div>
       </div>
+
+      {!isMultiIngredient && onAddIngredient && (
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={onAddIngredient}
+            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border/80 bg-surface-2/30 py-3 text-sm font-medium text-foreground transition-[background-color,border-color,color,transform] duration-200 hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none active:scale-[0.98]"
+          >
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 4v16m8-8H4"
+              />
+            </svg>
+            Add Ingredient (Convert to Multi-Ingredient Meal)
+          </button>
+        </div>
+      )}
     </section>
   );
 }

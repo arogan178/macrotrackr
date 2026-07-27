@@ -1,6 +1,6 @@
 {
   "name": "macrotrackr-backend",
-  "version": "1.0.0",
+  "version": "2.3.0",
   "description": "Backend API for Macro Trackr application",
   "module": "src/index.ts",
   "type": "module",
