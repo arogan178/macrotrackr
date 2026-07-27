@@ -38,7 +38,9 @@ export const EntryCard = memo(
     onToggleSelection,
   }: EntryCardProps) => {
     const [isExpanded, setIsExpanded] = useState(false);
-    const hasIngredients = entry.ingredients && entry.ingredients.length > 0;
+    const hasIngredients = Boolean(
+      entry.ingredients && entry.ingredients.length > 1,
+    );
 
     return (
       <motion.div

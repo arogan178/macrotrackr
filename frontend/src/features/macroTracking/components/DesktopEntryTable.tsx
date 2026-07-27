@@ -112,8 +112,9 @@ const DesktopEntryTable = memo(
               );
             } else {
               const entry = data.entries[0];
-              const hasIngredients =
-                entry.ingredients && entry.ingredients.length > 0;
+              const hasIngredients = Boolean(
+                entry.ingredients && entry.ingredients.length > 1,
+              );
 
               return (
                 <div className="flex items-center gap-2 pl-6 text-sm whitespace-nowrap text-foreground">
@@ -415,12 +416,14 @@ const DesktopEntryTable = memo(
             ))}
           </div>
           <AnimatePresence initial={false}>
-            {!isGroup && expandedEntries.has(data.entries[0].id) && (
-              <IngredientsList
-                ingredients={data.entries[0].ingredients ?? []}
-                calculateCalories={calculateCalories}
-              />
-            )}
+            {!isGroup &&
+              (data.entries[0].ingredients?.length ?? 0) > 1 &&
+              expandedEntries.has(data.entries[0].id) && (
+                <IngredientsList
+                  ingredients={data.entries[0].ingredients ?? []}
+                  calculateCalories={calculateCalories}
+                />
+              )}
           </AnimatePresence>
         </motion.div>
       );
