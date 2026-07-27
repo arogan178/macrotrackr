@@ -37,12 +37,16 @@ import { prepareOptimisticUpdate, rollbackOptimisticUpdate } from "./macro/optim
 function findEntryInHistory(queryClient: QueryClient, id: number) {
   const previousHistoryData = getMacroHistorySnapshots(queryClient);
   const historyData = previousHistoryData.find(([, data]) => {
-    return data?.pages.some((page) => page.entries.some((entry) => entry.id === id));
+    return data?.pages.some((page) =>
+      page.entries.some((entry) => Number(entry.id) === Number(id)),
+    );
   })?.[1];
 
   if (historyData?.pages) {
     for (const page of historyData.pages) {
-      const foundEntry = page.entries.find((entry) => entry.id === id);
+      const foundEntry = page.entries.find(
+        (entry) => Number(entry.id) === Number(id),
+      );
       if (foundEntry) {
         return { entry: foundEntry, entryDate: foundEntry.entryDate };
       }
@@ -267,6 +271,7 @@ export function useAddMacroEntry() {
       if (variables.entryDate) {
         queryClient.invalidateQueries({ queryKey: queryKeys.macros.dailyTotals(variables.entryDate) });
       }
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
     },
   });
 }
@@ -286,7 +291,9 @@ export function useUpdateMacroEntry() {
 
       transformHistoryPages(queryClient, (page) => ({
         ...page,
-        entries: page.entries.map((entryItem) => entryItem.id === id ? { ...entryItem, ...entry } : entryItem),
+        entries: page.entries.map((entryItem) =>
+          Number(entryItem.id) === Number(id) ? { ...entryItem, ...entry } : entryItem,
+        ),
       }));
 
       if (entryDate && originalEntry) {
@@ -315,6 +322,7 @@ export function useUpdateMacroEntry() {
       if (context?.entryDate) {
         queryClient.invalidateQueries({ queryKey: queryKeys.macros.dailyTotals(context.entryDate) });
       }
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
     },
   });
 }
@@ -334,7 +342,7 @@ export function useDeleteMacroEntry() {
 
       transformHistoryPages(queryClient, (page) => ({
         ...page,
-        entries: page.entries.filter((entryItem) => entryItem.id !== id),
+        entries: page.entries.filter((entryItem) => Number(entryItem.id) !== Number(id)),
       }));
 
       if (entryDate && entryToDelete) {
@@ -355,6 +363,7 @@ export function useDeleteMacroEntry() {
       if (context?.entryDate) {
         queryClient.invalidateQueries({ queryKey: queryKeys.macros.dailyTotals(context.entryDate) });
       }
+      queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
     },
   });
 }
