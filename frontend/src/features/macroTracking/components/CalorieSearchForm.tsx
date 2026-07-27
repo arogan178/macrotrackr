@@ -229,11 +229,13 @@ const CalorieSearch = memo(function CalorieSearch({
 
     if (UnitConverter.isWeightUnit(unit)) {
       const grams = UnitConverter.convert(qty, unit, "g");
+
       return grams / 100;
     }
 
     if (UnitConverter.isVolumeUnit(unit)) {
       const ml = UnitConverter.convert(qty, unit, "ml");
+
       return ml / 100;
     }
 
