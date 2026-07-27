@@ -132,9 +132,10 @@ export const goalsApi = {
   /**
    * @throws {ApiError}
    */
-  deleteWeightLogEntry: async ({
-    id,
-  }: { id: string }): Promise<{ success: boolean; id: string }> => {
+  deleteWeightLogEntry: async (
+    idOrParams: string | { id: string },
+  ): Promise<{ success: boolean; id: string }> => {
+    const id = typeof idOrParams === "object" && idOrParams !== null ? idOrParams.id : idOrParams;
     return apiClient.del<{ success: boolean; id: string }>(`/api/goals/weight-log/${id}`);
   },
 };
