@@ -152,17 +152,12 @@ const CalorieSearch = memo(function CalorieSearch({
     const quantity = parsedQuantity.quantity;
     const unit = hasSupportedUnit ? parsedUnit : defaultUnit;
 
-    const metric =
-      unit === "unit"
-        ? { quantity, unit }
-        : UnitConverter.toMetric(quantity, unit);
-
     return {
       protein: item.protein.toFixed(1),
       carbs: item.carbs.toFixed(1),
       fats: item.fats.toFixed(1),
       name: item.name,
-      servingQuantity: metric.quantity,
+      servingQuantity: quantity,
       servingUnit: unit,
       rawQuantity: item.rawQuantity,
     };
@@ -215,24 +210,63 @@ const CalorieSearch = memo(function CalorieSearch({
     return !(item.protein === 0 && item.carbs === 0 && item.fats === 0);
   }, []);
 
+  const getPortionFactor = useCallback((item: FoodSearchResult): number => {
+    const defaultUnit = (item.servingUnit || "g") as UnitType;
+    const parsed = item.rawQuantity
+      ? UnitConverter.parseQuantity(item.rawQuantity)
+      : {
+          quantity: item.servingQuantity || 100,
+          unit: defaultUnit,
+          original: "",
+        };
+
+    const qty = parsed.quantity;
+    const unit = parsed.unit as UnitType;
+
+    if (unit === "unit") {
+      return qty;
+    }
+
+    if (UnitConverter.isWeightUnit(unit)) {
+      const grams = UnitConverter.convert(qty, unit, "g");
+      return grams / 100;
+    }
+
+    if (UnitConverter.isVolumeUnit(unit)) {
+      const ml = UnitConverter.convert(qty, unit, "ml");
+      return ml / 100;
+    }
+
+    return 1;
+  }, []);
+
   const displayResults = useMemo(() => {
     if (activePanel !== "results" || results.length === 0) return [];
 
     return results
       .filter((item) => hasNutrients(item))
-      .map((item, index) => ({
-        item,
-        displayQuantity: getQuantityDisplay(item),
-        calories: calculateDisplayCalories(item),
-        hasNutrients: hasNutrients(item),
-        id: `${item.name}-${index}`,
-      }));
+      .map((item, index) => {
+        const factor = getPortionFactor(item);
+        const baseCalories = calculateDisplayCalories(item);
+
+        return {
+          item,
+          displayQuantity: getQuantityDisplay(item),
+          calories: baseCalories * factor,
+          protein: item.protein * factor,
+          carbs: item.carbs * factor,
+          fats: item.fats * factor,
+          hasNutrients: hasNutrients(item),
+          id: `${item.name}-${index}`,
+        };
+      });
   }, [
     activePanel,
     results,
     hasNutrients,
     getQuantityDisplay,
     calculateDisplayCalories,
+    getPortionFactor,
   ]);
 
   const searchErrorMessage = searchError
@@ -292,7 +326,8 @@ const CalorieSearch = memo(function CalorieSearch({
         <div className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
           <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
             {displayResults.map((resultData) => {
-              const { item, displayQuantity, calories } = resultData;
+              const { item, displayQuantity, calories, protein, carbs, fats } =
+                resultData;
 
               return (
                 <button
@@ -307,8 +342,8 @@ const CalorieSearch = memo(function CalorieSearch({
                   <div className="text-xs text-foreground">
                     {displayQuantity ? `${displayQuantity} | ` : ""}
                     Calories: {calories.toFixed(1)} kcal | Protein:{" "}
-                    {item.protein.toFixed(1)}g, Carbs: {item.carbs.toFixed(1)}
-                    g, Fats: {item.fats.toFixed(1)}g
+                    {protein.toFixed(1)}g, Carbs: {carbs.toFixed(1)}
+                    g, Fats: {fats.toFixed(1)}g
                   </div>
                   {item.categories && (
                     <div className="text-xs text-foreground">
