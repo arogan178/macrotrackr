@@ -251,12 +251,14 @@ export function useAddMacroEntry() {
       );
 
       const temporaryId = -Date.now();
+      const clientId = `client_${temporaryId}_${Math.random().toString(36).substring(2, 7)}`;
       const proteinNumber = Number(variables.protein ?? 0);
       const carbsNumber = Number(variables.carbs ?? 0);
       const fatsNumber = Number(variables.fats ?? 0);
 
       const optimisticEntry: OptimisticMacroEntry = {
         id: temporaryId,
+        clientId,
         createdAt: new Date().toISOString(),
         ...variables,
         protein: proteinNumber,
@@ -283,13 +285,17 @@ export function useAddMacroEntry() {
 
       const context = await contextPromise;
 
-      return { ...context, tempId: temporaryId };
+      return { ...context, tempId: temporaryId, clientId };
     },
     onError: (_error, _variables, context) => rollbackOptimisticUpdate(queryClient, context),
     onSuccess: (newEntryFromServer: MacroEntry, variables, context) => {
       transformHistoryPages(queryClient, (page) => ({
         ...page,
-        entries: page.entries.map((entry) => entry.id === context.tempId ? newEntryFromServer : entry),
+        entries: page.entries.map((entry) =>
+          entry.id === context.tempId
+            ? { ...newEntryFromServer, clientId: entry.clientId ?? context.clientId }
+            : entry,
+        ),
       }));
 
       if (variables.entryDate) {
@@ -308,7 +314,10 @@ export function useAddMacroEntry() {
       if (variables.entryDate) {
         queryClient.invalidateQueries({ queryKey: queryKeys.macros.dailyTotals(variables.entryDate) });
       }
-      queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
+      queryClient.invalidateQueries({
+        queryKey: ["macros", "history-infinite"],
+        refetchType: "none",
+      });
     },
   });
 }
