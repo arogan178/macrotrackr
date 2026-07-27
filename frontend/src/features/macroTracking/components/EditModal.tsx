@@ -28,24 +28,40 @@ const calculateTotalsFromIngredients = (ingredients: Ingredient[]) => {
     totalFats += ingredient.fats || 0;
   }
 
-  return { protein: totalProtein, carbs: totalCarbs, fats: totalFats };
+  return {
+    protein: Number(totalProtein.toFixed(1)),
+    carbs: Number(totalCarbs.toFixed(1)),
+    fats: Number(totalFats.toFixed(1)),
+  };
 };
 
 const roundValue = (value: number) => Number(value.toFixed(1));
 
-// Normalize quantity to comparable value (weight in grams, volume in ml, or unit)
-const normalizeQuantity = (quantity: number, unit: string): { value: number; type: 'weight' | 'volume' | 'unit' } => {
-  const normalizedUnit = unit === "l" ? "L" : unit;
-  const unitType = normalizedUnit as UnitType;
+const getGramsEquivalent = (
+  quantity: number | undefined,
+  unit: string | undefined,
+): number => {
+  if (!quantity || quantity <= 0) return 0;
+  const unitString =
+    unit === "l"
+      ? "L"
+      : unit === "pcs" || unit === "pc" || unit === "piece" || unit === "pieces"
+        ? "unit"
+        : unit ?? "g";
 
-  if (UnitConverter.isWeightUnit(unitType)) {
-    return { value: UnitConverter.convert(quantity, unitType, "g"), type: 'weight' };
-  }
-  if (UnitConverter.isVolumeUnit(unitType)) {
-    return { value: UnitConverter.convert(quantity, unitType, "ml"), type: 'volume' };
+  if (unitString === "unit") {
+    return quantity * 100;
   }
 
-  return { value: quantity, type: 'unit' };
+  if (UnitConverter.isWeightUnit(unitString as UnitType)) {
+    return UnitConverter.convert(quantity, unitString as UnitType, "g");
+  }
+
+  if (UnitConverter.isVolumeUnit(unitString as UnitType)) {
+    return UnitConverter.convert(quantity, unitString as UnitType, "ml");
+  }
+
+  return quantity * 100;
 };
 
 export default function EditModal({
@@ -58,27 +74,40 @@ export default function EditModal({
   const [editedEntry, setEditedEntry] = useState<MacroEntry | null>(null);
   const [originalEntry, setOriginalEntry] = useState<MacroEntry | null>(null);
   const [formValid, setFormValid] = useState(true);
-  const [showIngredients, setShowIngredients] = useState(false);
+  const [showIngredients, setShowIngredients] = useState(true);
   const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
-  const [baseIngredientsForScaling, setBaseIngredientsForScaling] = useState<Ingredient[] | null>(null);
+  const [baseIngredientsForScaling, setBaseIngredientsForScaling] = useState<
+    Ingredient[] | null
+  >(null);
   const [scaleFactor, setScaleFactor] = useState<number>(1);
 
-  // Update editedEntry when entry prop changes (to handle fresh data from cache)
+  // Single-item / manual entry scaling state
+  const [singleQuantity, setSingleQuantity] = useState<number | undefined>(100);
+  const [singleUnit, setSingleUnit] = useState<UnitType>("g");
+  const [singleBaseProtein, setSingleBaseProtein] = useState<number>(0);
+  const [singleBaseCarbs, setSingleBaseCarbs] = useState<number>(0);
+  const [singleBaseFats, setSingleBaseFats] = useState<number>(0);
+  const [singleBaseQuantity, setSingleBaseQuantity] = useState<number>(100);
+  const [singleBaseUnit, setSingleBaseUnit] = useState<UnitType>("g");
+
+  // Update editedEntry when entry prop changes
   useEffect(() => {
     if (entry) {
-      const ingredientsWithBase = entry.ingredients?.map(ing => ({
-        ...ing,
-        protein: roundValue(ing.protein),
-        carbs: roundValue(ing.carbs),
-        fats: roundValue(ing.fats),
-        quantity: ing.quantity === undefined ? undefined : roundValue(ing.quantity),
-        baseProtein: ing.baseProtein ?? ing.protein,
-        baseCarbs: ing.baseCarbs ?? ing.carbs,
-        baseFats: ing.baseFats ?? ing.fats,
-        baseQuantity: ing.baseQuantity ?? ing.quantity,
-        baseUnit: ing.baseUnit ?? ing.unit,
-      })) ?? [];
-      
+      const ingredientsWithBase =
+        entry.ingredients?.map((ing) => ({
+          ...ing,
+          protein: roundValue(ing.protein),
+          carbs: roundValue(ing.carbs),
+          fats: roundValue(ing.fats),
+          quantity:
+            ing.quantity === undefined ? undefined : roundValue(ing.quantity),
+          baseProtein: ing.baseProtein ?? ing.protein,
+          baseCarbs: ing.baseCarbs ?? ing.carbs,
+          baseFats: ing.baseFats ?? ing.fats,
+          baseQuantity: ing.baseQuantity ?? ing.quantity,
+          baseUnit: ing.baseUnit ?? ing.unit,
+        })) ?? [];
+
       const roundedEntry = {
         ...entry,
         protein: roundValue(entry.protein),
@@ -91,6 +120,18 @@ export default function EditModal({
       setOriginalEntry(roundedEntry);
       setBaseIngredientsForScaling(ingredientsWithBase);
       setScaleFactor(1);
+
+      const firstIng = ingredientsWithBase[0];
+      const initialQty = firstIng?.quantity ?? 100;
+      const initialUnit = (firstIng?.unit as UnitType) ?? "g";
+
+      setSingleQuantity(initialQty);
+      setSingleUnit(initialUnit);
+      setSingleBaseProtein(firstIng?.baseProtein ?? roundValue(entry.protein));
+      setSingleBaseCarbs(firstIng?.baseCarbs ?? roundValue(entry.carbs));
+      setSingleBaseFats(firstIng?.baseFats ?? roundValue(entry.fats));
+      setSingleBaseQuantity(firstIng?.baseQuantity ?? initialQty);
+      setSingleBaseUnit((firstIng?.baseUnit as UnitType) ?? initialUnit);
     }
   }, [entry]);
 
@@ -140,27 +181,176 @@ export default function EditModal({
       previous
         ? {
             ...previous,
-            [field]: field === "mealName" ? value : Number(value) || 0,
+            [field]: value,
           }
         : null,
     );
   };
 
-  const handleNumberChange = (
-    field: keyof MacroEntry,
+  const isMultiIngredient = Boolean(
+    editedEntry?.ingredients && editedEntry.ingredients.length > 1,
+  );
+
+  // Single-item / manual entry quantity and unit change
+  const handleSingleQuantityUnitChange = (
+    newQty: number | undefined,
+    newUnit: UnitType,
+  ) => {
+    setSingleQuantity(newQty);
+    setSingleUnit(newUnit);
+    if (!editedEntry) return;
+
+    const isPcsUnit = (u?: string) =>
+      u === "unit" ||
+      u === "pcs" ||
+      u === "pc" ||
+      u === "piece" ||
+      u === "pieces";
+
+    const qtyValue = newQty ?? (isPcsUnit(newUnit) ? 1 : 100);
+
+    const baseGrams = getGramsEquivalent(
+      singleBaseQuantity,
+      singleBaseUnit,
+    );
+    const targetGrams = getGramsEquivalent(qtyValue, newUnit);
+
+    let factor = 1;
+    if (baseGrams > 0) {
+      factor = targetGrams / baseGrams;
+    }
+
+    const newP = roundValue(singleBaseProtein * factor);
+    const newC = roundValue(singleBaseCarbs * factor);
+    const newF = roundValue(singleBaseFats * factor);
+
+    let updatedIngredients = editedEntry.ingredients;
+    if (editedEntry.ingredients?.length === 1) {
+      updatedIngredients = [
+        {
+          ...editedEntry.ingredients[0],
+          quantity: newQty,
+          unit: newUnit,
+          protein: newP,
+          carbs: newC,
+          fats: newF,
+        },
+      ];
+    }
+
+    setEditedEntry({
+      ...editedEntry,
+      protein: newP,
+      carbs: newC,
+      fats: newF,
+      ingredients: updatedIngredients,
+    });
+  };
+
+  const handleSingleQuantityChange = (newQty: number | undefined) => {
+    handleSingleQuantityUnitChange(newQty, singleUnit);
+  };
+
+  const handleSingleUnitChange = (newUnit: UnitType) => {
+    handleSingleQuantityUnitChange(singleQuantity, newUnit);
+  };
+
+  // Single-item / manual entry macro change
+  const handleSingleMacroChange = (
+    field: "protein" | "carbs" | "fats",
     value: number | undefined,
   ) => {
-    setEditedEntry((previous) =>
-      previous
-        ? {
-            ...previous,
-            [field]: roundValue(value ?? 0),
-          }
-        : null,
-    );
+    if (!editedEntry) return;
+    const numValue = roundValue(value ?? 0);
+
+    const updatedP = field === "protein" ? numValue : editedEntry.protein;
+    const updatedC = field === "carbs" ? numValue : editedEntry.carbs;
+    const updatedF = field === "fats" ? numValue : editedEntry.fats;
+
+    const currentQty = singleQuantity ?? 100;
+    const currentU = singleUnit;
+
+    setSingleBaseProtein(updatedP);
+    setSingleBaseCarbs(updatedC);
+    setSingleBaseFats(updatedF);
+    setSingleBaseQuantity(currentQty);
+    setSingleBaseUnit(currentU);
+
+    let updatedIngredients = editedEntry.ingredients;
+    if (editedEntry.ingredients?.length === 1) {
+      updatedIngredients = [
+        {
+          ...editedEntry.ingredients[0],
+          [field]: numValue,
+          baseProtein: updatedP,
+          baseCarbs: updatedC,
+          baseFats: updatedF,
+          baseQuantity: currentQty,
+          baseUnit: currentU,
+        },
+      ];
+    }
+
+    setEditedEntry({
+      ...editedEntry,
+      protein: updatedP,
+      carbs: updatedC,
+      fats: updatedF,
+      ingredients: updatedIngredients,
+    });
   };
 
-  // Reset the baseline only after persistence succeeds.
+  // Convert single item or manual entry to multi-ingredient meal
+  const handleConvertToMultiIngredient = () => {
+    if (!editedEntry) return;
+
+    let currentIngredients = editedEntry.ingredients ?? [];
+    if (currentIngredients.length === 0) {
+      const firstIng: Ingredient = {
+        name: editedEntry.mealName || "Ingredient 1",
+        protein: editedEntry.protein,
+        carbs: editedEntry.carbs,
+        fats: editedEntry.fats,
+        quantity: singleQuantity,
+        unit: singleUnit,
+        baseProtein: singleBaseProtein,
+        baseCarbs: singleBaseCarbs,
+        baseFats: singleBaseFats,
+        baseQuantity: singleBaseQuantity,
+        baseUnit: singleBaseUnit,
+      };
+      const secondIng: Ingredient = {
+        name: "",
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+      };
+      currentIngredients = [firstIng, secondIng];
+    } else if (currentIngredients.length === 1) {
+      const secondIng: Ingredient = {
+        name: "",
+        protein: 0,
+        carbs: 0,
+        fats: 0,
+      };
+      currentIngredients = [...currentIngredients, secondIng];
+    }
+
+    const totals = calculateTotalsFromIngredients(currentIngredients);
+    setBaseIngredientsForScaling(currentIngredients);
+    setScaleFactor(1);
+    setShowIngredients(true);
+
+    setEditedEntry({
+      ...editedEntry,
+      ingredients: currentIngredients,
+      protein: totals.protein,
+      carbs: totals.carbs,
+      fats: totals.fats,
+    });
+  };
+
+  // Reset baseline only after persistence succeeds
   const handleSaveWithReset = () => {
     if (!formValid || !editedEntry) return;
 
@@ -174,7 +364,7 @@ export default function EditModal({
       });
   };
 
-  // Ingredient management functions
+  // Multi-ingredient management functions
   const addIngredient = () => {
     if (!editedEntry) return;
     const newIngredient: Ingredient = {
@@ -201,8 +391,21 @@ export default function EditModal({
 
   const removeIngredient = (index: number) => {
     if (!editedEntry) return;
-    const updatedIngredients = editedEntry.ingredients?.filter((_, index_) => index_ !== index) ?? [];
+    const updatedIngredients =
+      editedEntry.ingredients?.filter((_, index_) => index_ !== index) ?? [];
     const totals = calculateTotalsFromIngredients(updatedIngredients);
+
+    if (updatedIngredients.length === 1) {
+      const remaining = updatedIngredients[0];
+      setSingleQuantity(remaining.quantity ?? 100);
+      setSingleUnit((remaining.unit as UnitType) ?? "g");
+      setSingleBaseProtein(remaining.baseProtein ?? remaining.protein);
+      setSingleBaseCarbs(remaining.baseCarbs ?? remaining.carbs);
+      setSingleBaseFats(remaining.baseFats ?? remaining.fats);
+      setSingleBaseQuantity(remaining.baseQuantity ?? remaining.quantity ?? 100);
+      setSingleBaseUnit((remaining.baseUnit as UnitType) ?? (remaining.unit as UnitType) ?? "g");
+    }
+
     setBaseIngredientsForScaling(updatedIngredients);
     setScaleFactor(1);
     setEditedEntry({
@@ -217,74 +420,87 @@ export default function EditModal({
   const updateIngredient = (
     index: number,
     field: keyof Ingredient,
-    value: string | number | undefined
+    value: string | number | undefined,
   ) => {
     if (!editedEntry) return;
 
-    const updatedIngredients = editedEntry.ingredients?.map((ing, index_) => {
-      if (index_ !== index) return ing;
+    const updatedIngredients =
+      editedEntry.ingredients?.map((ing, index_) => {
+        if (index_ !== index) return ing;
 
-      let updatedIng = { ...ing };
+        let updatedIng = { ...ing };
 
-      // Handle quantity or unit change - recalculate macros from base values
-      if (field === 'quantity' || field === 'unit') {
-        const newQuantity = field === 'quantity' 
-          ? (typeof value === 'number' ? value : (value ? Number(value) : undefined))
-          : ing.quantity;
-        const newUnit = field === 'unit' ? String(value) : ing.unit;
+        if (field === "quantity" || field === "unit") {
+          const isPcs = (unit_?: string) =>
+            unit_ === "unit" ||
+            unit_ === "pcs" ||
+            unit_ === "pc" ||
+            unit_ === "piece" ||
+            unit_ === "pieces";
+          const newQuantity =
+            field === "quantity"
+              ? typeof value === "number"
+                ? value
+                : value
+                  ? Number(value)
+                  : undefined
+              : ing.quantity;
+          const newUnit = field === "unit" ? String(value) : ing.unit;
 
-        // Get base values - use stored base or current as base if not set
-        const baseQty = ing.baseQuantity ?? ing.quantity ?? 100;
-        const baseU = ing.baseUnit ?? ing.unit ?? 'g';
-        const baseP = ing.baseProtein ?? ing.protein;
-        const baseC = ing.baseCarbs ?? ing.carbs;
-        const baseF = ing.baseFats ?? ing.fats;
+          const defaultBase = isPcs(ing.unit) ? 1 : 100;
+          const baseQty = ing.baseQuantity ?? ing.quantity ?? defaultBase;
+          const baseU = ing.baseUnit ?? ing.unit ?? "g";
+          const baseP = ing.baseProtein ?? ing.protein;
+          const baseC = ing.baseCarbs ?? ing.carbs;
+          const baseF = ing.baseFats ?? ing.fats;
 
-        // Calculate scaling factor
-        const baseNormalized = normalizeQuantity(baseQty, baseU);
-        const newNormalized = normalizeQuantity(newQuantity ?? 100, newUnit ?? 'g');
+          const baseGrams = getGramsEquivalent(baseQty, baseU);
+          const targetGrams = getGramsEquivalent(
+            newQuantity ?? (isPcs(newUnit) ? 1 : 100),
+            newUnit ?? "g",
+          );
 
-        let localScaleFactor = 1;
-        if (baseNormalized.type === newNormalized.type && baseNormalized.value > 0) {
-          localScaleFactor = newNormalized.value / baseNormalized.value;
-        }
+          let localScaleFactor = 1;
+          if (baseGrams > 0) {
+            localScaleFactor = targetGrams / baseGrams;
+          }
 
-        // Update the ingredient with recalculated macros
-        updatedIng = {
-          ...updatedIng,
-          quantity: newQuantity,
-          unit: newUnit,
-          protein: roundValue(baseP * localScaleFactor),
-          carbs: roundValue(baseC * localScaleFactor),
-          fats: roundValue(baseF * localScaleFactor),
-        };
-      } else {
-        // Regular field update (name, protein, carbs, fats)
-        const stringFields = ['name', 'unit'];
-        const isStringField = stringFields.includes(field as string);
-        
-        updatedIng = {
-          ...updatedIng,
-          [field]: isStringField ? value : roundValue(Number(value) || 0),
-        };
-        
-        // If macros changed directly, update base values to track new reference
-        if (field === 'protein' || field === 'carbs' || field === 'fats') {
-          const currentQty = ing.quantity ?? 100;
-          const currentUnit = ing.unit ?? 'g';
           updatedIng = {
             ...updatedIng,
-            baseProtein: field === 'protein' ? roundValue(Number(value)) : ing.protein,
-            baseCarbs: field === 'carbs' ? roundValue(Number(value)) : ing.carbs,
-            baseFats: field === 'fats' ? roundValue(Number(value)) : ing.fats,
-            baseQuantity: currentQty,
-            baseUnit: currentUnit,
+            quantity: newQuantity,
+            unit: newUnit,
+            protein: roundValue(baseP * localScaleFactor),
+            carbs: roundValue(baseC * localScaleFactor),
+            fats: roundValue(baseF * localScaleFactor),
           };
-        }
-      }
+        } else {
+          const stringFields = ["name", "unit"];
+          const isStringField = stringFields.includes(field as string);
 
-      return updatedIng;
-    }) ?? [];
+          updatedIng = {
+            ...updatedIng,
+            [field]: isStringField ? value : roundValue(Number(value) || 0),
+          };
+
+          if (field === "protein" || field === "carbs" || field === "fats") {
+            const currentQty = ing.quantity ?? 100;
+            const currentUnit = ing.unit ?? "g";
+            updatedIng = {
+              ...updatedIng,
+              baseProtein:
+                field === "protein" ? roundValue(Number(value)) : ing.protein,
+              baseCarbs:
+                field === "carbs" ? roundValue(Number(value)) : ing.carbs,
+              baseFats:
+                field === "fats" ? roundValue(Number(value)) : ing.fats,
+              baseQuantity: currentQty,
+              baseUnit: currentUnit,
+            };
+          }
+        }
+
+        return updatedIng;
+      }) ?? [];
 
     const totals = calculateTotalsFromIngredients(updatedIngredients);
     setBaseIngredientsForScaling(updatedIngredients);
@@ -298,11 +514,14 @@ export default function EditModal({
     });
   };
 
-  const hasIngredients = editedEntry?.ingredients && editedEntry.ingredients.length > 0;
-
   // Scale all ingredients by a factor
   const handleScaleIngredients = (newFactor: number) => {
-    if (!editedEntry || !baseIngredientsForScaling || baseIngredientsForScaling.length === 0) return;
+    if (
+      !editedEntry ||
+      !baseIngredientsForScaling ||
+      baseIngredientsForScaling.length === 0
+    )
+      return;
 
     setScaleFactor(newFactor);
     const scaledIngredients = baseIngredientsForScaling.map((ing) => ({
@@ -310,7 +529,9 @@ export default function EditModal({
       protein: roundValue(ing.protein * newFactor),
       carbs: roundValue(ing.carbs * newFactor),
       fats: roundValue(ing.fats * newFactor),
-      quantity: ing.quantity ? roundValue(ing.quantity * newFactor) : undefined,
+      quantity: ing.quantity
+        ? roundValue(ing.quantity * newFactor)
+        : undefined,
     }));
 
     const totals = calculateTotalsFromIngredients(scaledIngredients);
@@ -360,20 +581,42 @@ export default function EditModal({
             protein={editedEntry.protein}
             carbs={editedEntry.carbs}
             fats={editedEntry.fats}
+            quantity={singleQuantity}
+            unit={singleUnit}
+            isMultiIngredient={isMultiIngredient}
             onMealNameChange={(value) => handleInputChange("mealName", value)}
-            onMacroChange={handleNumberChange}
+            onMacroChange={
+              isMultiIngredient
+                ? () => {}
+                : handleSingleMacroChange
+            }
+            onQuantityChange={
+              isMultiIngredient ? undefined : handleSingleQuantityChange
+            }
+            onUnitChange={
+              isMultiIngredient ? undefined : handleSingleUnitChange
+            }
+            onQuantityUnitChange={
+              isMultiIngredient ? undefined : handleSingleQuantityUnitChange
+            }
+            onAddIngredient={
+              isMultiIngredient ? undefined : handleConvertToMultiIngredient
+            }
           />
-          <IngredientsPanel
-            ingredients={editedEntry.ingredients ?? []}
-            hasIngredients={Boolean(hasIngredients)}
-            showIngredients={showIngredients}
-            scaleFactor={scaleFactor}
-            onToggle={() => setShowIngredients(!showIngredients)}
-            onScale={handleScaleIngredients}
-            onUpdateIngredient={updateIngredient}
-            onRemoveIngredient={removeIngredient}
-            onAddIngredient={addIngredient}
-          />
+
+          {isMultiIngredient && (
+            <IngredientsPanel
+              ingredients={editedEntry.ingredients ?? []}
+              hasIngredients
+              showIngredients={showIngredients}
+              scaleFactor={scaleFactor}
+              onToggle={() => setShowIngredients(!showIngredients)}
+              onScale={handleScaleIngredients}
+              onUpdateIngredient={updateIngredient}
+              onRemoveIngredient={removeIngredient}
+              onAddIngredient={addIngredient}
+            />
+          )}
         </div>
       </Modal>
     </>
