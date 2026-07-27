@@ -134,7 +134,7 @@ describe("useMacroQueries", () => {
         expect(result.current.isSuccess).toBe(true);
       });
 
-      const historyData = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite());
+      const historyData = queryClient.getQueryData<any>(queryKeys.macros.historyInfinite(20));
       expect(historyData).toBeDefined();
       expect(historyData.pages[0].entries[0].id).toBe(999);
       expect(historyData.pages[0].entries[0].foodName).toBe("New Food Item");
