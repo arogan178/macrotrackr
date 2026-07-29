@@ -1,10 +1,19 @@
 import { useMemo } from "react";
-import { Flame, Target, TrendingUp, XCircle } from "lucide-react";
 import { motion } from "motion/react";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import CardContainer from "@/components/form/CardContainer";
-import { LoadingSpinner } from "@/components/ui";
+import {
+  CalorieIcon,
+  DropletIcon,
+  DrumstickIcon,
+  LightningIcon,
+  LoadingSpinner,
+  TargetIcon,
+  TrendingUpIcon,
+  WheatIcon,
+  XCircleIcon,
+} from "@/components/ui";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
 import { RadialProgress } from "@/components/ui/RadialProgress";
 
@@ -16,6 +25,7 @@ import {
   calculateMacroBalance,
   calculateMacroDensity,
   calculateTrend,
+  generateOverallTrendSummary,
 } from "../utils/insightsCalculations";
 import {
   getTextColorByScore,
@@ -55,6 +65,17 @@ function UnifiedInsights({
         ? dailySeriesForRange
         : aggregatedData;
 
+      const caloriesTrend = calculateTrend(aggregatedData, "calories");
+      const proteinTrend = calculateTrend(aggregatedData, "protein");
+      const carbsTrend = calculateTrend(aggregatedData, "carbs");
+      const fatsTrend = calculateTrend(aggregatedData, "fats");
+      const overallTrendMessage = generateOverallTrendSummary(
+        caloriesTrend,
+        proteinTrend,
+        carbsTrend,
+        fatsTrend,
+      );
+
       return {
         consistencyScore: calculateConsistencyScore(
           Array.isArray(dailySeriesForRange)
@@ -63,8 +84,11 @@ function UnifiedInsights({
           denominator,
         ),
         macroBalance: calculateMacroBalance(averages, macroTarget),
-        caloriesTrend: calculateTrend(aggregatedData, "calories"),
-        proteinTrend: calculateTrend(aggregatedData, "protein"),
+        caloriesTrend,
+        proteinTrend,
+        carbsTrend,
+        fatsTrend,
+        overallTrendMessage,
         dataQuality: calculateDataQuality(dataForQuality, denominator),
         macroDensity: calculateMacroDensity(averages),
       };
@@ -114,6 +138,9 @@ function UnifiedInsights({
     macroBalance,
     caloriesTrend,
     proteinTrend,
+    carbsTrend,
+    fatsTrend,
+    overallTrendMessage,
     dataQuality,
     macroDensity,
   } = insights;
@@ -122,19 +149,7 @@ function UnifiedInsights({
     <div className="flex flex-col gap-6">
       <div className="flex items-center space-x-3">
         <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-          <svg
-            className="h-4 w-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M13 10V3L4 14h7v7l9-11h-7z"
-            />
-          </svg>
+          <LightningIcon className="h-4 w-4" />
         </div>
         <h2 className="text-xl font-bold tracking-tight text-foreground/90">
           Insights
@@ -287,39 +302,40 @@ function UnifiedInsights({
               variant="interactive"
               className="flex h-full flex-col p-5"
             >
-              <div className="mb-4 flex items-center gap-2">
-                <h3 className="text-sm font-semibold tracking-tight text-foreground/90 uppercase">
-                  Tracking Analysis
-                </h3>
-                <InfoTooltip text="Evaluates how regularly and completely you log your meals over the selected period." />
-              </div>
-
-              {/* Days Tracked Header */}
-              <div className="mb-4 flex items-baseline gap-1">
-                <span className="text-3xl font-bold text-foreground">
-                  <AnimatedNumber
-                    value={
-                      typeof dataQuality.daysLogged === "number"
-                        ? dataQuality.daysLogged
-                        : 0
-                    }
-                    toFixedValue={0}
-                    duration={0.5}
-                  />
-                </span>
-                <span className="text-lg text-muted/40">/</span>
-                <span className="text-lg text-muted">
-                  <AnimatedNumber
-                    value={
-                      typeof dataQuality.totalDaysInPeriod === "number"
-                        ? dataQuality.totalDaysInPeriod
-                        : 0
-                    }
-                    toFixedValue={0}
-                    duration={0.5}
-                  />
-                </span>
-                <span className="ml-2 text-sm text-muted">days tracked</span>
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-sm font-semibold tracking-tight text-foreground/90 uppercase">
+                    Tracking Analysis
+                  </h3>
+                  <InfoTooltip text="Evaluates how regularly and completely you log your meals over the selected period." />
+                </div>
+                {/* Days Tracked Badge */}
+                <div className="flex items-center gap-1.5 rounded-md bg-surface-2/80 px-2.5 py-1 text-xs font-medium text-foreground">
+                  <span className="font-bold text-foreground">
+                    <AnimatedNumber
+                      value={
+                        typeof dataQuality.daysLogged === "number"
+                          ? dataQuality.daysLogged
+                          : 0
+                      }
+                      toFixedValue={0}
+                      duration={0.5}
+                    />
+                  </span>
+                  <span className="text-muted/50">/</span>
+                  <span className="text-muted">
+                    <AnimatedNumber
+                      value={
+                        typeof dataQuality.totalDaysInPeriod === "number"
+                          ? dataQuality.totalDaysInPeriod
+                          : 0
+                      }
+                      toFixedValue={0}
+                      duration={0.5}
+                    />
+                  </span>
+                  <span className="text-muted">tracked</span>
+                </div>
               </div>
 
               {/* Stats Grid 2x2 */}
@@ -327,7 +343,7 @@ function UnifiedInsights({
                 {/* Current Streak */}
                 <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/10">
-                    <Flame className="h-4 w-4 text-orange-500" />
+                    <CalorieIcon className="h-4 w-4 text-orange-500" />
                   </div>
                   <p className="text-2xl font-bold text-foreground">
                     <AnimatedNumber
@@ -344,7 +360,7 @@ function UnifiedInsights({
                 {/* Best Streak */}
                 <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/10">
-                    <TrendingUp className="h-4 w-4 text-success" />
+                    <TrendingUpIcon className="h-4 w-4 text-success" />
                   </div>
                   <p className="text-2xl font-bold text-foreground">
                     <AnimatedNumber
@@ -361,7 +377,7 @@ function UnifiedInsights({
                 {/* Missed Days */}
                 <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-error/10">
-                    <XCircle className="h-4 w-4 text-error" />
+                    <XCircleIcon className="h-4 w-4 text-error" />
                   </div>
                   <p className="text-2xl font-bold text-foreground">
                     <AnimatedNumber
@@ -378,7 +394,7 @@ function UnifiedInsights({
                 {/* Completion Rate */}
                 <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-                    <Target className="h-4 w-4 text-primary" />
+                    <TargetIcon className="h-4 w-4 text-primary" />
                   </div>
                   <p className="text-2xl font-bold text-foreground">
                     <AnimatedNumber
@@ -419,24 +435,60 @@ function UnifiedInsights({
           >
             <CardContainer
               variant="interactive"
-              className="flex h-full flex-col p-6"
+              className="flex h-full flex-col p-5"
             >
-              <h3 className="mb-6 text-sm font-semibold tracking-tight text-foreground/90 uppercase">
-                Trend Analysis
-              </h3>
-              <div className="flex flex-1 flex-col justify-center gap-5">
+              <div className="mb-4 flex items-center gap-2">
+                <h3 className="text-sm font-semibold tracking-tight text-foreground/90 uppercase">
+                  Trend Analysis
+                </h3>
+                <InfoTooltip text="Compares average intake in the initial part of the selected range against recent days to show trajectory." />
+              </div>
+
+              {/* 2x2 Grid of Trend Cards */}
+              <div className="grid flex-1 grid-cols-2 gap-3">
                 <TrendDisplay
                   label="Calories"
                   trend={caloriesTrend}
                   data={aggregatedData}
                   dataKey="calories"
+                  icon={<CalorieIcon className="h-4 w-4 text-orange-500" />}
+                  iconBgColor="bg-orange-500/10"
+                  unit="kcal"
                 />
                 <TrendDisplay
                   label="Protein"
                   trend={proteinTrend}
                   data={aggregatedData}
                   dataKey="protein"
+                  icon={<DrumstickIcon className="h-4 w-4 text-protein" />}
+                  iconBgColor="bg-protein/10"
+                  unit="g"
                 />
+                <TrendDisplay
+                  label="Carbs"
+                  trend={carbsTrend}
+                  data={aggregatedData}
+                  dataKey="carbs"
+                  icon={<WheatIcon className="h-4 w-4 text-carbs" />}
+                  iconBgColor="bg-carbs/10"
+                  unit="g"
+                />
+                <TrendDisplay
+                  label="Fats"
+                  trend={fatsTrend}
+                  data={aggregatedData}
+                  dataKey="fats"
+                  icon={<DropletIcon className="h-4 w-4 text-fats" />}
+                  iconBgColor="bg-fats/10"
+                  unit="g"
+                />
+              </div>
+
+              {/* Message Banner */}
+              <div className="mt-4 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+                <p className="text-xs leading-relaxed font-medium text-primary/90">
+                  {overallTrendMessage}
+                </p>
               </div>
             </CardContainer>
           </motion.div>

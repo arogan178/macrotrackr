@@ -112,6 +112,7 @@ function transformHistoryPages(
         pageParams: [0],
       },
     );
+
     return;
   }
 

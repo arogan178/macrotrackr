@@ -17,11 +17,14 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  CircleHelp,
   CircleQuestionMark,
   Clipboard,
   Coffee,
+  Copy,
   Download,
   Droplet,
+  Drumstick,
   Dumbbell,
   Edit,
   ExternalLink,
@@ -34,6 +37,7 @@ import {
   Info,
   Lightbulb,
   Link,
+  Link2,
   Loader,
   Lock,
   LogOut,
@@ -44,6 +48,8 @@ import {
   Minus,
   Moon,
   MoreVertical,
+  MoveLeft,
+  PieChart,
   Plus,
   PlusCircle,
   Ruler,
@@ -53,6 +59,7 @@ import {
   Settings,
   ShieldCheck,
   SmilePlus,
+  Sparkles,
   Star,
   Sun,
   Target,
@@ -61,7 +68,9 @@ import {
   TrendingUp,
   Unlock,
   User,
+  Wheat,
   X,
+  XCircle,
   Zap,
 } from "lucide-react";
 
@@ -176,6 +185,16 @@ export const ProteinIcon = createIcon(Beef);
 export const LinkIcon = createIcon(Link);
 export const ExternalLinkIcon = createIcon(ExternalLink);
 export const ShieldCheckIcon = createIcon(ShieldCheck);
+export const DrumstickIcon = createIcon(Drumstick);
+export const WheatIcon = createIcon(Wheat);
+export const CarbIcon = createIcon(Wheat);
+export const XCircleIcon = createIcon(XCircle);
+export const PieChartIcon = createIcon(PieChart);
+export const MoveLeftIcon = createIcon(MoveLeft);
+export const CircleHelpIcon = createIcon(CircleHelp);
+export const SparklesIcon = createIcon(Sparkles);
+export const CopyIcon = createIcon(Copy);
+export const Link2Icon = createIcon(Link2);
 
 // Social Provider Icons
 const GOOGLE_BRAND_COLORS = {

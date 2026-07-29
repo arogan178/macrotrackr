@@ -1,9 +1,10 @@
-import { useEffect,useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Info } from "lucide-react";
-import { AnimatePresence,motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 
 import { cn } from "@/lib/classnameUtilities";
+
+import { InfoIcon } from "./Icons";
 
 export function InfoTooltip({ text, className }: { text: string; className?: string }) {
   const [isVisible, setIsVisible] = useState(false);
@@ -31,7 +32,7 @@ export function InfoTooltip({ text, className }: { text: string; className?: str
         onMouseLeave={() => setIsVisible(false)}
         onClick={() => setIsVisible(!isVisible)}
       >
-        <Info className="h-4 w-4 cursor-pointer text-muted transition-colors hover:text-foreground" />
+        <InfoIcon className="h-4 w-4 cursor-pointer text-muted transition-colors hover:text-foreground" />
       </button>
 
       {globalThis.window !== undefined &&

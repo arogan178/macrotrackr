@@ -38,6 +38,10 @@ export interface TrendResult {
   direction: "up" | "down" | "stable" | "insufficient";
   percentage: number;
   message: string;
+  firstAvg?: number;
+  lastAvg?: number;
+  delta?: number;
+  unit?: string;
 }
 
 export interface DataQualityResult {
@@ -60,8 +64,11 @@ export interface InsightsData {
   macroBalance: MacroBalanceResult;
   caloriesTrend: TrendResult;
   proteinTrend: TrendResult;
+  carbsTrend: TrendResult;
+  fatsTrend: TrendResult;
   dataQuality: DataQualityResult;
   macroDensity: MacroDensityResult;
+  overallTrendMessage?: string;
 }
 
 export interface DailyAverageItem {
@@ -97,4 +104,7 @@ export interface TrendDisplayProps {
   trend: TrendResult;
   data?: Record<string, unknown>[];
   dataKey?: string;
+  icon?: React.ReactNode;
+  iconBgColor?: string;
+  unit?: string;
 }

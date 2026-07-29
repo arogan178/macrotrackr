@@ -45,10 +45,19 @@ function calculateMealTypeDistribution(
     ]),
   );
 
-  // Aggregate data by meal type
+  // Determine unique tracked days in entries
+  const uniqueDays = new Set(
+    entries
+      .map((entry) => entry.entryDate ?? entry.createdAt.split("T")[0])
+      .filter(Boolean),
+  ).size;
+  const trackedDays = uniqueDays > 0 ? uniqueDays : 1;
+
+  // Aggregate raw totals by meal type
   for (const entry of entries) {
     const mealType = entry.mealType;
     const group = groups[mealType];
+    if (!group) continue;
 
     group.protein += entry.protein || 0;
     group.carbs += entry.carbs || 0;
@@ -57,27 +66,32 @@ function calculateMealTypeDistribution(
     group.count += 1;
   }
 
-  // Convert to averages for calories
-  for (const group of Object.values(groups)) {
-    group.calories = group.count > 0 ? group.calories / group.count : 0;
-  }
+  // Calculate total across all meal types for percentage calculation
+  const totalPeriodStat = MEAL_TYPES.reduce((sum, type) => {
+    const group = groups[type];
+    if (selectedStat === "count") return sum + group.count;
 
-  // Calculate totals for percentages
-  const totals = { calories: 0, protein: 0, carbs: 0, fats: 0, count: 0 };
-  for (const group of Object.values(groups)) {
-    totals.calories += group.calories;
-    totals.protein += group.protein;
-    totals.carbs += group.carbs;
-    totals.fats += group.fats;
-    totals.count += group.count;
-  }
+    return sum + (group[selectedStat as keyof typeof group] || 0);
+  }, 0);
 
   // Format for chart
   return MEAL_TYPES.map((mealType) => {
     const group = groups[mealType];
-    const value = group[selectedStat as keyof typeof group];
-    const total = totals[selectedStat as keyof typeof totals];
-    const percentage = total > 0 ? Math.round((value / total) * 100) : 0;
+    const totalStatForMeal =
+      selectedStat === "count"
+        ? group.count
+        : group[selectedStat as keyof typeof group] || 0;
+
+    const percentage =
+      totalPeriodStat > 0
+        ? Math.round((totalStatForMeal / totalPeriodStat) * 100)
+        : 0;
+
+    // For count, value is raw count; for nutrients/calories, value is daily average
+    const value =
+      selectedStat === "count"
+        ? group.count
+        : Math.round(totalStatForMeal / trackedDays);
 
     return {
       name: formatMealType(mealType),

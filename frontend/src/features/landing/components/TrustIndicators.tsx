@@ -1,21 +1,22 @@
 import React from "react";
-import { CircleHelp, ShieldCheck, Sparkles } from "lucide-react";
+
+import { CircleHelpIcon, ShieldCheckIcon, SparklesIcon } from "@/components/ui";
 
 const indicators = [
   {
-    icon: <ShieldCheck className="h-6 w-6 text-success" aria-hidden="true" />,
+    icon: <ShieldCheckIcon className="h-6 w-6 text-success" aria-hidden="true" />,
     bg: "bg-success/10 border border-success/20",
     title: "Secure by Default",
     desc: "Your account and nutrition data stay protected.",
   },
   {
-    icon: <CircleHelp className="h-6 w-6 text-primary" aria-hidden="true" />,
+    icon: <CircleHelpIcon className="h-6 w-6 text-primary" aria-hidden="true" />,
     bg: "bg-primary/10 border border-primary/20",
     title: "Helpful Support",
     desc: "Get clear answers when you need them.",
   },
   {
-    icon: <Sparkles className="h-6 w-6 text-primary" aria-hidden="true" />,
+    icon: <SparklesIcon className="h-6 w-6 text-primary" aria-hidden="true" />,
     bg: "bg-primary/10 border border-primary/20",
     title: "Actively Improved",
     desc: "We ship practical updates based on real feedback.",
