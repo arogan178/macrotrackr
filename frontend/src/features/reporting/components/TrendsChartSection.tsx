@@ -1,9 +1,9 @@
 import { useMemo, useState } from "react";
-import { Flame, PieChart } from "lucide-react";
 
 import ChartCard from "@/components/chart/ChartCard";
 import type { ChartDataPoint, LineConfig } from "@/components/chart/ChartTypes";
 import LineChartComponent from "@/components/chart/LineChartComponent";
+import { CalorieIcon, PieChartIcon } from "@/components/ui";
 import TabBar from "@/components/ui/TabBar";
 
 interface TrendsChartSectionProps {
@@ -32,7 +32,7 @@ export default function TrendsChartSection({
         key: "calories",
         label: (
           <div className="flex items-center gap-1.5 px-1">
-            <Flame className="h-3.5 w-3.5 text-amber-500" />
+            <CalorieIcon className="h-3.5 w-3.5 text-amber-500" />
             <span>Calories</span>
           </div>
         ),
@@ -41,7 +41,7 @@ export default function TrendsChartSection({
         key: "macros",
         label: (
           <div className="flex items-center gap-1.5 px-1">
-            <PieChart className="h-3.5 w-3.5 text-blue-500" />
+            <PieChartIcon className="h-3.5 w-3.5 text-blue-500" />
             <span>Macros</span>
           </div>
         ),

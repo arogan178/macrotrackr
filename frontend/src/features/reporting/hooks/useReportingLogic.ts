@@ -186,27 +186,44 @@ export function useReportingLogic(
 
   const isHistoryReady = !isLoadingExternal;
 
-  const averages = useMemo(() => {
-    if (aggregatedData.length === 0) {
-      return { calories: 0, protein: 0, carbs: 0, fats: 0 };
+  const { averages, trackedDays, totalDays } = useMemo(() => {
+    const seriesTotalDays = dailySeries.length;
+    if (seriesTotalDays === 0) {
+      return {
+        averages: { calories: 0, protein: 0, carbs: 0, fats: 0 },
+        trackedDays: 0,
+        totalDays: 0,
+      };
     }
 
-    const totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    const tracked = dailySeries.filter(
+      (d) => d.calories > 0 || d.protein > 0 || d.carbs > 0 || d.fats > 0,
+    );
+    const trackedDaysCount = tracked.length;
 
-    for (const value of aggregatedData) {
+    const totals = { calories: 0, protein: 0, carbs: 0, fats: 0 };
+    const sourceSeries = trackedDaysCount > 0 ? tracked : dailySeries;
+
+    for (const value of sourceSeries) {
       totals.calories += value.calories;
       totals.protein += value.protein;
       totals.carbs += value.carbs;
       totals.fats += value.fats;
     }
 
+    const divisor = trackedDaysCount > 0 ? trackedDaysCount : seriesTotalDays;
+
     return {
-      calories: Math.round(totals.calories / aggregatedData.length),
-      protein: Math.round(totals.protein / aggregatedData.length),
-      carbs: Math.round(totals.carbs / aggregatedData.length),
-      fats: Math.round(totals.fats / aggregatedData.length),
+      averages: {
+        calories: Math.round(totals.calories / divisor),
+        protein: Math.round(totals.protein / divisor),
+        carbs: Math.round(totals.carbs / divisor),
+        fats: Math.round(totals.fats / divisor),
+      },
+      trackedDays: trackedDaysCount,
+      totalDays: seriesTotalDays,
     };
-  }, [aggregatedData]);
+  }, [dailySeries]);
 
   const handleDownloadCSV = useCallback(() => {
     if (aggregatedData.length === 0) {
@@ -237,6 +254,8 @@ export function useReportingLogic(
     aggregatedData,
     dailySeries,
     averages,
+    trackedDays,
+    totalDays,
     handleDownloadCSV,
     isHistoryReady,
   };

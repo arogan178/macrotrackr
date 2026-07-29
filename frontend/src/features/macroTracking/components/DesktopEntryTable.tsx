@@ -333,6 +333,7 @@ const DesktopEntryTable = memo(
           const parentDate = data.parentDate ?? data.date;
 
           const entryKey = data.entries[0]?.clientId ?? data.entries[0]?.id;
+
           return data.isGroup
             ? `group-${data.date}`
             : `entry-${entryKey}-${parentDate}`;

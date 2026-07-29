@@ -1,7 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { MoveLeft } from "lucide-react";
 
 import Button from "@/components/ui/Button";
+
+import { MoveLeftIcon } from "./Icons";
 
 export function NotFoundPage() {
   return (
@@ -17,7 +18,7 @@ export function NotFoundPage() {
       </p>
       <Link to="/">
         <Button size="lg" className="flex items-center gap-2">
-          <MoveLeft className="h-4 w-4" />
+          <MoveLeftIcon className="h-4 w-4" />
           Back to Home
         </Button>
       </Link>

@@ -19,31 +19,69 @@ interface MacroSummaryStatsProps {
     carbsPercentage: number;
     fatsPercentage: number;
   };
+  trackedDays?: number;
+  totalDays?: number;
+  averages?: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fats: number;
+  };
 }
 
-// Modified function to accept calorieTarget for percentage calculation
+// Modified function to accept calorieTarget and averages/trackedDays for percentage calculation
 function calculateAverageMacros(
   data: MacroSummaryStatsProps["data"],
   calorieTarget: number,
+  averagesFromProps?: MacroSummaryStatsProps["averages"],
+  trackedDaysCount?: number,
 ) {
-  if (data.length === 0) return;
-  const totalMacros = { protein: 0, carbs: 0, fats: 0, calories: 0 };
-  for (const entry of data) {
-    totalMacros.protein += entry.protein;
-    totalMacros.carbs += entry.carbs;
-    totalMacros.fats += entry.fats;
-    totalMacros.calories += entry.calories;
-  }
-  const numberDays = data.length;
-  const avgGrams = {
-    protein: totalMacros.protein / numberDays,
-    carbs: totalMacros.carbs / numberDays,
-    fats: totalMacros.fats / numberDays,
-  };
-  const avgConsumedCalories = totalMacros.calories / numberDays;
+  if (data.length === 0 && !averagesFromProps) return;
 
-  // Calculate percentages based on average grams relative to the calorie TARGET
-  const divisor = calorieTarget > 0 ? calorieTarget : 2000;
+  let avgGrams = { protein: 0, carbs: 0, fats: 0 };
+  let avgConsumedCalories = 0;
+
+  if (averagesFromProps) {
+    avgGrams = {
+      protein: averagesFromProps.protein,
+      carbs: averagesFromProps.carbs,
+      fats: averagesFromProps.fats,
+    };
+    avgConsumedCalories = averagesFromProps.calories;
+  } else {
+    const totalMacros = { protein: 0, carbs: 0, fats: 0, calories: 0 };
+    for (const entry of data) {
+      totalMacros.protein += entry.protein;
+      totalMacros.carbs += entry.carbs;
+      totalMacros.fats += entry.fats;
+      totalMacros.calories += entry.calories;
+    }
+    const numberDays =
+      trackedDaysCount && trackedDaysCount > 0
+        ? trackedDaysCount
+        : data.length > 0
+          ? data.length
+          : 1;
+    avgGrams = {
+      protein: totalMacros.protein / numberDays,
+      carbs: totalMacros.carbs / numberDays,
+      fats: totalMacros.fats / numberDays,
+    };
+    avgConsumedCalories = totalMacros.calories / numberDays;
+  }
+
+  // Calculate percentages based on average grams relative to consumed calories ratio
+  const totalMacroCalories =
+    avgGrams.protein * 4 + avgGrams.carbs * 4 + avgGrams.fats * 9;
+  const divisor =
+    avgConsumedCalories > 0
+      ? avgConsumedCalories
+      : totalMacroCalories > 0
+        ? totalMacroCalories
+        : calorieTarget > 0
+          ? calorieTarget
+          : 2000;
+
   const proteinPct = Math.round(((avgGrams.protein * 4) / divisor) * 100);
   const carbsPct = Math.round(((avgGrams.carbs * 4) / divisor) * 100);
   const fatsPct = Math.round(((avgGrams.fats * 9) / divisor) * 100);
@@ -182,6 +220,9 @@ export default function MacroSummaryStats({
   data,
   calorieTarget,
   macroTarget,
+  trackedDays,
+  _totalDays,
+  averages,
 }: MacroSummaryStatsProps) {
   const effectiveCalorieTarget = calorieTarget || 2000;
 
@@ -210,27 +251,29 @@ export default function MacroSummaryStats({
       carbs: carbsG,
       fats: fatsG,
     };
-    // Dependency updated
   }, [effectiveCalorieTarget, TARGET_MACROS]);
 
-  // Average calories over selected range (still based on actual consumption)
-  const avgCalories = useMemo(() => {
-    if (data.length === 0) return 0;
-    const total = data.reduce((accumulator, d) => accumulator + d.calories, 0);
-
-    return Math.round(total / data.length);
-  }, [data]);
-
   // Macro averages (main display) over selected range
-  // Pass effectiveCalorieTarget to the calculation function
   const macroAvg = useMemo(() => {
-    return calculateAverageMacros(data, effectiveCalorieTarget);
-    // Dependency updated
-  }, [data, effectiveCalorieTarget]);
+    return calculateAverageMacros(
+      data,
+      effectiveCalorieTarget,
+      averages,
+      trackedDays,
+    );
+  }, [data, effectiveCalorieTarget, averages, trackedDays]);
 
-  if (!macroAvg) return; // Updated early return condition
+  const avgCalories = macroAvg?.calories ?? 0;
 
-  const cardClasses = "px-4 py-3 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+  if (!macroAvg) return null;
+
+  const cardClasses =
+    "px-4 py-3 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+
+  const trackedSubtext =
+    trackedDays !== undefined
+      ? `Avg over ${trackedDays} tracked ${trackedDays === 1 ? "day" : "days"}`
+      : null;
 
   return (
     <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -241,6 +284,11 @@ export default function MacroSummaryStats({
             <span className="text-sm font-semibold text-foreground">
               Calories
             </span>
+            {trackedSubtext && (
+              <span className="text-[10px] text-muted-foreground">
+                {trackedSubtext}
+              </span>
+            )}
           </div>
           <div className="mb-2 space-y-1">
             <div className="flex items-baseline justify-between">
