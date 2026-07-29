@@ -1,13 +1,12 @@
 import React, { Suspense, useCallback, useMemo, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import { Link, useParams } from "@tanstack/react-router";
-import { ArrowLeft, Check, Copy, Link2 } from "lucide-react";
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 
-import { ContentImage } from "@/components/ui";
+import { BackIcon, CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
 import { MealGroupingFlow } from "@/features/landing/components/AnimatedUserFlow";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
@@ -110,12 +109,12 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
         >
           {copied ? (
             <>
-              <Check className="h-3.5 w-3.5 text-success" />
+              <CheckIcon className="h-3.5 w-3.5 text-success" />
               <span className="text-success">Copied!</span>
             </>
           ) : (
             <>
-              <Copy className="h-3.5 w-3.5" />
+              <CopyIcon className="h-3.5 w-3.5" />
               <span>Copy</span>
             </>
           )}
@@ -336,7 +335,7 @@ const BlogArticlePage: React.FC = () => {
                 search={{ category: undefined, tag: undefined, q: undefined }}
                 className="group inline-flex min-h-11 items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:border-primary/40 hover:bg-surface-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
               >
-                <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
+                <BackIcon className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
                 Back to the blog
               </Link>
             </motion.div>
@@ -371,9 +370,9 @@ const BlogArticlePage: React.FC = () => {
                 className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border/60 px-3 py-2 transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
               >
                 {copiedLink ? (
-                  <Check className="h-4 w-4 text-success" />
+                  <CheckIcon className="h-4 w-4 text-success" />
                 ) : (
-                  <Link2 className="h-4 w-4" />
+                  <Link2Icon className="h-4 w-4" />
                 )}
                 {copiedLink ? "Link copied" : "Copy article link"}
               </button>
