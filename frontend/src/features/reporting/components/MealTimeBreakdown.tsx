@@ -36,10 +36,12 @@ const CustomDonutTooltip = ({
 }) => {
   if (active && payload && payload.length > 0) {
     const data = payload[0].payload;
-    const value = data.value;
-    const unit =
-      selectedStat === "count" ? " meals" : ` ${getUnitForStat(selectedStat)}`;
-    const color = payload[0].payload.fill ?? payload[0].color;
+    const value = data.value as number;
+    const isCount = selectedStat === "count";
+    const unit = isCount
+      ? " meals"
+      : ` ${getUnitForStat(selectedStat)}/day`;
+    const color = (payload[0].payload.fill ?? payload[0].color) as string;
 
     return (
       <div className="rounded-lg border border-border/50 bg-surface-2 p-3 shadow-xl">
@@ -48,7 +50,7 @@ const CustomDonutTooltip = ({
             className="h-3 w-3 rounded-full"
             style={{ backgroundColor: color }}
           />
-          <p className="font-semibold text-foreground">{data.name}</p>
+          <p className="font-semibold text-foreground">{data.name as string}</p>
         </div>
         <div className="mt-2 flex flex-col gap-1">
           <p className="text-sm text-muted">
@@ -58,7 +60,7 @@ const CustomDonutTooltip = ({
             {unit}
           </p>
           <p className="text-xs text-muted/80">
-            {data.percentage}% of daily total
+            {data.percentage as number}% of total intake
           </p>
         </div>
       </div>

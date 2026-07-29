@@ -106,6 +106,8 @@ export default function ReportingPage() {
     dailySeries,
     isHistoryReady,
     averages,
+    trackedDays,
+    totalDays,
     handleDownloadCSV,
   } = useReportingLogic(history, dateRange, isHistoryLoading);
 
@@ -207,6 +209,9 @@ export default function ReportingPage() {
                             data={aggregatedData}
                             calorieTarget={calorieTarget}
                             macroTarget={macroTarget ?? undefined}
+                            trackedDays={trackedDays}
+                            totalDays={totalDays}
+                            averages={averages}
                           />
                         );
                       })()}

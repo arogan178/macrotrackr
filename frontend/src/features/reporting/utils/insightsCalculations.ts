@@ -72,12 +72,15 @@ export function calculateMacroBalance(
   averages: NutritionAverage,
   macroTarget?: MacroTargetSettings | undefined,
 ): MacroBalanceResult {
-  const total = averages.protein + averages.carbs + averages.fats;
+  const proteinCals = averages.protein * 4;
+  const carbsCals = averages.carbs * 4;
+  const fatsCals = averages.fats * 9;
+  const totalCals = proteinCals + carbsCals + fatsCals;
   const target = macroTarget ?? DEFAULT_MACRO_TARGET;
 
   const idealRatioString = `${target.proteinPercentage}/${target.carbsPercentage}/${target.fatsPercentage}`;
 
-  if (total === 0) {
+  if (totalCals === 0) {
     return {
       score: 0,
       idealRatio: idealRatioString,
@@ -88,9 +91,9 @@ export function calculateMacroBalance(
   }
 
   const [proteinPct, carbsPct, fatsPct] = [
-    Math.round((averages.protein / total) * 100),
-    Math.round((averages.carbs / total) * 100),
-    Math.round((averages.fats / total) * 100),
+    Math.round((proteinCals / totalCals) * 100),
+    Math.round((carbsCals / totalCals) * 100),
+    Math.round((fatsCals / totalCals) * 100),
   ];
 
   const [idealProtein, idealCarbs, idealFats] = [
@@ -155,28 +158,32 @@ export function calculateTrend(
   data: AggregatedDataPoint[],
   metric: keyof AggregatedDataPoint,
 ): TrendResult {
+  const unit = metric === "calories" ? "kcal" : "g";
+
   if (!data.length || data.length < TREND_DAYS_REQUIRED) {
     return {
       direction: "insufficient" as const,
       percentage: 0,
       message: `Need at least ${TREND_DAYS_REQUIRED} days of data to analyse trends.`,
+      unit,
     };
   }
 
   const firstDays = data
     .slice(0, TREND_AVG_DAYS)
     .map((d) => Number(d[metric]))
-    .filter(Boolean);
+    .filter((v) => !isNaN(v) && v > 0);
   const lastDays = data
     .slice(-TREND_AVG_DAYS)
     .map((d) => Number(d[metric]))
-    .filter(Boolean);
+    .filter((v) => !isNaN(v) && v > 0);
 
   if (firstDays.length === 0 || lastDays.length === 0) {
     return {
       direction: "insufficient" as const,
       percentage: 0,
       message: "Not enough data points to calculate trends.",
+      unit,
     };
   }
 
@@ -190,10 +197,12 @@ export function calculateTrend(
       direction: "insufficient" as const,
       percentage: 0,
       message: "Unable to calculate percentage change from zero baseline.",
+      unit,
     };
   }
 
-  const percentChange = ((lastAvg - firstAvg) / firstAvg) * 100;
+  const rawDelta = lastAvg - firstAvg;
+  const percentChange = (rawDelta / firstAvg) * 100;
   const direction =
     percentChange > TREND_THRESHOLD.up
       ? "up"
@@ -201,18 +210,80 @@ export function calculateTrend(
         ? "down"
         : "stable";
 
+  const roundedFirstAvg = Math.round(firstAvg);
+  const roundedLastAvg = Math.round(lastAvg);
+  const roundedDelta = Math.round(rawDelta);
+
+  const metricLabel = metric.charAt(0).toUpperCase() + metric.slice(1);
   const message =
     direction === "stable"
-      ? "Your intake has been stable."
-      : `Your ${metric} intake is ${
+      ? `${metricLabel} intake has been stable (${roundedLastAvg} ${unit}/day).`
+      : `${metricLabel} intake is ${
           direction === "up" ? "trending upward" : "trending downward"
-        }.`;
+        } (${roundedDelta > 0 ? "+" : ""}${roundedDelta} ${unit}/day).`;
 
   return {
     direction,
     percentage: Math.abs(Math.round(percentChange)),
     message,
+    firstAvg: roundedFirstAvg,
+    lastAvg: roundedLastAvg,
+    delta: roundedDelta,
+    unit,
   };
+}
+
+export function generateOverallTrendSummary(
+  caloriesTrend: TrendResult,
+  proteinTrend: TrendResult,
+  carbsTrend: TrendResult,
+  fatsTrend: TrendResult,
+): string {
+  if (
+    caloriesTrend.direction === "insufficient" ||
+    proteinTrend.direction === "insufficient"
+  ) {
+    return "Log your meals consistently across the selected period to unlock overall trend insights.";
+  }
+
+  if (
+    caloriesTrend.direction === "stable" &&
+    proteinTrend.direction === "stable" &&
+    carbsTrend.direction === "stable" &&
+    fatsTrend.direction === "stable"
+  ) {
+    return "Your daily calories and macro intake have stayed consistent across this period.";
+  }
+
+  const calText =
+    caloriesTrend.direction === "stable"
+      ? "Calories remain steady"
+      : `Calories are trending ${caloriesTrend.direction === "up" ? "upward" : "downward"} (${
+          caloriesTrend.delta && caloriesTrend.delta > 0 ? "+" : ""
+        }${caloriesTrend.delta} kcal/day)`;
+
+  const macroDrivers: string[] = [];
+  if (proteinTrend.direction !== "stable") {
+    macroDrivers.push(
+      `protein ${proteinTrend.direction === "up" ? "+" : ""}${proteinTrend.delta}g/day`,
+    );
+  }
+  if (carbsTrend.direction !== "stable") {
+    macroDrivers.push(
+      `carbs ${carbsTrend.direction === "up" ? "+" : ""}${carbsTrend.delta}g/day`,
+    );
+  }
+  if (fatsTrend.direction !== "stable") {
+    macroDrivers.push(
+      `fats ${fatsTrend.direction === "up" ? "+" : ""}${fatsTrend.delta}g/day`,
+    );
+  }
+
+  if (macroDrivers.length > 0) {
+    return `${calText}, influenced by changes in ${macroDrivers.join(", ")}.`;
+  }
+
+  return `${calText} while macronutrient distribution remains relatively stable.`;
 }
 
 function calculateStreaks(data: AggregatedDataPoint[]): {
@@ -224,13 +295,27 @@ function calculateStreaks(data: AggregatedDataPoint[]): {
   // Create array of booleans indicating if day has data (calories > 0)
   const hasDataArray = data.map((d) => d.calories > 0);
 
-  // Calculate current streak (consecutive days from the end)
+  // Calculate current streak (consecutive days from the end).
+  // If the last day (today) has no logs yet, but yesterday was logged,
+  // treat yesterday as the active streak anchor since today is in progress.
   let currentStreak = 0;
-  for (let index = hasDataArray.length - 1; index >= 0; index--) {
-    if (hasDataArray[index]) {
-      currentStreak++;
-    } else {
-      break;
+  const lastIndex = hasDataArray.length - 1;
+
+  if (hasDataArray[lastIndex]) {
+    for (let index = lastIndex; index >= 0; index--) {
+      if (hasDataArray[index]) {
+        currentStreak++;
+      } else {
+        break;
+      }
+    }
+  } else if (lastIndex > 0 && hasDataArray[lastIndex - 1]) {
+    for (let index = lastIndex - 1; index >= 0; index--) {
+      if (hasDataArray[index]) {
+        currentStreak++;
+      } else {
+        break;
+      }
     }
   }
 
