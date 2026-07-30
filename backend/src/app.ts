@@ -311,7 +311,24 @@ export function createApp(db: Database) {
     // Global middleware & plugins
     .use(
       cors({
-        origin: config.CORS_ORIGIN,
+        origin: (request: Request) => {
+          const requestOrigin = request.headers.get("origin");
+          if (!requestOrigin) return true;
+          if (
+            requestOrigin === "https://localhost" ||
+            requestOrigin === "capacitor://localhost" ||
+            requestOrigin === "http://localhost" ||
+            requestOrigin === "https://macrotrackr.com" ||
+            requestOrigin === "https://app.macrotrackr.com" ||
+            requestOrigin.endsWith(".macrotrackr.com")
+          ) {
+            return true;
+          }
+          const allowed = Array.isArray(config.CORS_ORIGIN)
+            ? config.CORS_ORIGIN
+            : [config.CORS_ORIGIN];
+          return allowed.includes(requestOrigin) || allowed.includes("*");
+        },
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"],
         methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
