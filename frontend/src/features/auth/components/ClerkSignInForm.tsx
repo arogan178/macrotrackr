@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
+import { Browser } from "@capacitor/browser";
 import { AnimatePresence, motion } from "motion/react";
 
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
+import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
 import {
   SocialAuthOptions,
   type SocialAuthStrategy,
@@ -17,6 +19,12 @@ import {
 } from "@/features/auth/utils/redirect";
 import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
+import { saveBiometricCredentials } from "@/services/biometrics";
+import {
+  exchangeNativeGoogleTokenWithClerk,
+  nativeGoogleSignIn,
+} from "@/services/native/googleAuth";
+import { isNativePlatform } from "@/services/native/platform";
 import { useStore } from "@/store/store";
 
 interface ClerkSignInFormProps {
@@ -50,6 +58,7 @@ export function ClerkSignInForm({
   redirectTo,
 }: ClerkSignInFormProps) {
   const navigate = useNavigate();
+  const clerk = useClerk();
   const { isLoaded, signIn, setActive } = useSignIn();
   const { isLoaded: isSignUpLoaded, signUp } = useSignUp();
   const { showNotification } = useStore();
@@ -57,6 +66,7 @@ export function ClerkSignInForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
   const [isEmailMode, setIsEmailMode] = useState(false);
   const [showLinkIntentBanner, setShowLinkIntentBanner] = useState(false);
 
@@ -74,23 +84,121 @@ export function ClerkSignInForm({
   // - new social account => continue to onboarding/profile setup
   // This keeps social auth consistent across the login and registration pages.
   const handleSocialSignIn = async (strategy: SocialAuthStrategy) => {
-    if (!isSignUpLoaded) {
+    if (!isLoaded || !isSignUpLoaded) {
       showNotification(AUTH_NOT_READY_MESSAGE, "error");
 
       return;
     }
 
+    setLoadingStrategy(strategy);
+
     try {
+      if (strategy === "oauth_google" && isNativePlatform()) {
+        logger.info("Initiating native Google Sign-In on mobile...");
+        let googleAuthRes = null;
+        try {
+          googleAuthRes = await Promise.race([
+            nativeGoogleSignIn(),
+            new Promise<null>((_, reject) =>
+              setTimeout(() => reject(new Error("Native Google Sign-In timed out")), 10000)
+            ),
+          ]);
+        } catch (nativeErr) {
+          logger.warn("Native Google Sign-In failed or timed out:", nativeErr);
+        }
+
+        if (googleAuthRes?.idToken) {
+          logger.info("Native Google Sign-In obtained idToken, exchanging with Clerk...");
+          const success = await exchangeNativeGoogleTokenWithClerk({
+            idToken: googleAuthRes.idToken,
+            clerk,
+            signIn,
+            signUp,
+            setActive,
+          });
+
+          if (success) {
+            showNotification("Signed in with Google successfully!", "success");
+            navigate({
+              to: "/auth-ready",
+              search: { redirectTo: normalizedRedirect },
+            });
+            return;
+          }
+          logger.warn("Native Google token exchange returned false.");
+          showNotification("Google sign-in could not be completed. Please try again in a moment.", "warning");
+          return;
+        } else {
+          logger.info("Native Google Sign-In returned no idToken or timed out, falling back to web OAuth...");
+        }
+      }
+
       const { redirectUrl, redirectUrlComplete } = buildSocialAuthRedirectUrls(
         normalizedRedirect,
-        "signup",
+        "signin",
       );
+
+      if (isNativePlatform()) {
+        let externalUrl: string | undefined;
+
+        try {
+          const res = await signIn.create({
+            strategy,
+            redirectUrl,
+            redirectUrlComplete,
+          });
+
+          externalUrl =
+            res.firstFactorVerification?.externalVerificationRedirectUrl?.toString() ||
+            (res as any)?.verifications?.externalVerificationRedirectUrl?.toString();
+        } catch (signInError) {
+          logger.warn(
+            "signIn.create externalUrl unavailable on sign-in, trying signUp.create:",
+            signInError,
+          );
+        }
+
+        if (!externalUrl) {
+          try {
+            const signUpRes = await signUp.create({
+              strategy,
+              redirectUrl,
+              redirectUrlComplete,
+            });
+
+            externalUrl =
+              signUpRes.verifications?.externalVerificationRedirectUrl?.toString() ||
+              (signUpRes as any)?.firstFactorVerification?.externalVerificationRedirectUrl?.toString();
+          } catch (signUpError) {
+            logger.warn(
+              "signUp.create externalUrl also unavailable on sign-in:",
+              signUpError,
+            );
+          }
+        }
+
+        if (externalUrl) {
+          await Browser.open({ url: externalUrl });
+
+          return;
+        }
+
+        // Fallback to standard Clerk redirect flow if externalUrl is not returned directly
+        await signUp.authenticateWithRedirect({
+          strategy,
+          redirectUrl,
+          redirectUrlComplete,
+        });
+        return;
+      }
+
       await signUp.authenticateWithRedirect({
         strategy,
         redirectUrl,
         redirectUrlComplete,
       });
     } catch (error) {
+      setLoadingStrategy(null);
       logger.error("Social sign-in error:", error);
 
       const resolution = resolveSocialAuthError(error, "signin");
@@ -110,6 +218,8 @@ export function ClerkSignInForm({
       }
 
       showNotification(resolution.message, resolution.tone);
+    } finally {
+      setLoadingStrategy(null);
     }
   };
 
@@ -147,6 +257,7 @@ export function ClerkSignInForm({
             return;
           }
           await setActive({ session: result.createdSessionId });
+          await saveBiometricCredentials(email.trim().toLowerCase(), password);
           showNotification("Signed in successfully!", "success");
           navigate({
             to: "/auth-ready",
@@ -247,6 +358,12 @@ export function ClerkSignInForm({
 
               break;
             }
+            case "authorization_invalid": {
+              errorMessage =
+                "Your session or request was unauthorized. Please sign out and try again.";
+
+              break;
+            }
             default: {
               if (firstError.message) {
                 errorMessage = firstError.message;
@@ -266,6 +383,19 @@ export function ClerkSignInForm({
 
   return (
     <div className="w-full">
+      {/* Clerk CAPTCHA element - required for bot protection */}
+      <div
+        id="clerk-captcha"
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          right: 0,
+          opacity: 0.001,
+          pointerEvents: "none",
+        }}
+      />
+
       {showLinkIntentBanner && (
         <div className="mb-4 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">
           This email already has an account. Sign in to link your social
@@ -359,9 +489,12 @@ export function ClerkSignInForm({
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.22, ease: "easeOut" }}
           >
+            <BiometricSignInButton redirectTo={redirectTo} />
+
             <SocialAuthOptions
               onProviderSelect={handleSocialSignIn}
               onContinueWithEmail={() => setIsEmailMode(true)}
+              loadingStrategy={loadingStrategy}
             />
           </motion.div>
         )}
