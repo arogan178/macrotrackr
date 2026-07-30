@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
+import { Browser } from "@capacitor/browser";
 import { AnimatePresence, motion } from "motion/react";
 
 import TextField from "@/components/form/TextField";
@@ -19,6 +20,11 @@ import {
 } from "@/features/auth/utils/redirect";
 import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
+import {
+  exchangeNativeGoogleTokenWithClerk,
+  nativeGoogleSignIn,
+} from "@/services/native/googleAuth";
+import { isNativePlatform } from "@/services/native/platform";
 import { useStore } from "@/store/store";
 
 interface ClerkSignUpFormProps {
@@ -31,6 +37,7 @@ export function ClerkSignUpForm({
   redirectTo,
 }: ClerkSignUpFormProps) {
   const navigate = useNavigate();
+  const clerk = useClerk();
   const { isLoaded, signUp, setActive } = useSignUp();
   const {
     isLoaded: isSignInLoaded,
@@ -44,6 +51,7 @@ export function ClerkSignUpForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStrategy, setLoadingStrategy] = useState<SocialAuthStrategy | null>(null);
   const [verifying, setVerifying] = useState(false);
   const [code, setCode] = useState("");
   const [isEmailMode, setIsEmailMode] = useState(false);
@@ -53,23 +61,121 @@ export function ClerkSignUpForm({
 
   // Handle social sign-up
   const handleSocialSignUp = async (strategy: SocialAuthStrategy) => {
-    if (!isLoaded) {
+    if (!isLoaded || !isSignInLoaded) {
       showNotification(AUTH_NOT_READY_MESSAGE, "error");
 
       return;
     }
 
+    setLoadingStrategy(strategy);
+
     try {
+      if (strategy === "oauth_google" && isNativePlatform()) {
+        logger.info("Initiating native Google Sign-In on mobile...");
+        let googleAuthRes = null;
+        try {
+          googleAuthRes = await Promise.race([
+            nativeGoogleSignIn(),
+            new Promise<null>((_, reject) =>
+              setTimeout(() => reject(new Error("Native Google Sign-In timed out")), 10000)
+            ),
+          ]);
+        } catch (nativeErr) {
+          logger.warn("Native Google Sign-In failed or timed out:", nativeErr);
+        }
+
+        if (googleAuthRes?.idToken) {
+          logger.info("Native Google Sign-In obtained idToken, exchanging with Clerk...");
+          const success = await exchangeNativeGoogleTokenWithClerk({
+            idToken: googleAuthRes.idToken,
+            clerk,
+            signIn,
+            signUp,
+            setActive,
+          });
+
+          if (success) {
+            showNotification("Signed in with Google successfully!", "success");
+            navigate({
+              to: "/auth-ready",
+              search: { redirectTo: normalizedRedirect },
+            });
+            return;
+          }
+          logger.warn("Native Google token exchange returned false.");
+          showNotification("Google sign-in could not be completed. Please try again in a moment.", "warning");
+          return;
+        } else {
+          logger.info("Native Google Sign-In returned no idToken or timed out, falling back to web OAuth...");
+        }
+      }
+
       const { redirectUrl, redirectUrlComplete } = buildSocialAuthRedirectUrls(
         normalizedRedirect,
         "signup",
       );
+
+      if (isNativePlatform()) {
+        let externalUrl: string | undefined;
+
+        try {
+          const res = await signUp.create({
+            strategy,
+            redirectUrl,
+            redirectUrlComplete,
+          });
+
+          externalUrl =
+            res.verifications?.externalVerificationRedirectUrl?.toString() ||
+            (res as any)?.firstFactorVerification?.externalVerificationRedirectUrl?.toString();
+        } catch (createError) {
+          logger.warn(
+            "signUp.create externalUrl unavailable, trying signIn.create fallback:",
+            createError,
+          );
+        }
+
+        if (!externalUrl) {
+          try {
+            const signInRes = await signIn.create({
+              strategy,
+              redirectUrl,
+              redirectUrlComplete,
+            });
+
+            externalUrl =
+              signInRes.firstFactorVerification?.externalVerificationRedirectUrl?.toString() ||
+              (signInRes as any)?.verifications?.externalVerificationRedirectUrl?.toString();
+          } catch (signInError) {
+            logger.warn(
+              "signIn.create externalUrl also unavailable on sign-up:",
+              signInError,
+            );
+          }
+        }
+
+        if (externalUrl) {
+          await Browser.open({ url: externalUrl });
+
+          return;
+        }
+
+        // Fallback to standard Clerk redirect flow if externalUrl is not returned directly
+        await signUp.authenticateWithRedirect({
+          strategy,
+          redirectUrl,
+          redirectUrlComplete,
+        });
+        return;
+      }
+
       await signUp.authenticateWithRedirect({
         strategy,
         redirectUrl,
         redirectUrlComplete,
       });
     } catch (error) {
+      setLoadingStrategy(null);
       logger.error("Social sign-up error:", error);
 
       const resolution = resolveSocialAuthError(error, "signup");
@@ -96,6 +202,8 @@ export function ClerkSignUpForm({
       }
 
       showNotification(resolution.message, resolution.tone);
+    } finally {
+      setLoadingStrategy(null);
     }
   };
 
@@ -303,6 +411,19 @@ export function ClerkSignUpForm({
 
   return (
     <div className="w-full">
+      {/* Clerk CAPTCHA element - required for bot protection */}
+      <div
+        id="clerk-captcha"
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          bottom: 0,
+          right: 0,
+          opacity: 0.001,
+          pointerEvents: "none",
+        }}
+      />
+
       <AnimatePresence mode="wait" initial={false}>
         {isEmailMode ? (
           <motion.div
@@ -384,9 +505,6 @@ export function ClerkSignUpForm({
                 ) : null}
               </AnimatePresence>
 
-              {/* Clerk CAPTCHA element - required for bot protection */}
-              <div id="clerk-captcha" className="hidden" />
-
               <Button
                 type="submit"
                 fullWidth
@@ -408,6 +526,7 @@ export function ClerkSignUpForm({
             <SocialAuthOptions
               onProviderSelect={handleSocialSignUp}
               onContinueWithEmail={() => setIsEmailMode(true)}
+              loadingStrategy={loadingStrategy}
             />
           </motion.div>
         )}
