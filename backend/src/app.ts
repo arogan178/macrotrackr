@@ -314,16 +314,36 @@ export function createApp(db: Database) {
         origin: (request: Request) => {
           const requestOrigin = request.headers.get("origin");
           if (!requestOrigin) return true;
-          if (
-            requestOrigin === "https://localhost" ||
-            requestOrigin === "capacitor://localhost" ||
-            requestOrigin === "http://localhost" ||
-            requestOrigin === "https://macrotrackr.com" ||
-            requestOrigin === "https://app.macrotrackr.com" ||
-            requestOrigin.endsWith(".macrotrackr.com")
-          ) {
-            return true;
+
+          try {
+            const url = new URL(requestOrigin);
+            const { protocol, hostname } = url;
+
+            if (
+              (protocol === "https:" && hostname === "localhost") ||
+              (protocol === "capacitor:" && hostname === "localhost")
+            ) {
+              return true;
+            }
+
+            if (
+              config.NODE_ENV !== "production" &&
+              protocol === "http:" &&
+              hostname === "localhost"
+            ) {
+              return true;
+            }
+
+            if (
+              hostname === "macrotrackr.com" ||
+              hostname.endsWith(".macrotrackr.com")
+            ) {
+              return true;
+            }
+          } catch {
+            return false;
           }
+
           const allowed = Array.isArray(config.CORS_ORIGIN)
             ? config.CORS_ORIGIN
             : [config.CORS_ORIGIN];
