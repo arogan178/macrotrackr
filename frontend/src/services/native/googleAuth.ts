@@ -1,6 +1,8 @@
 import { GoogleAuth } from "@codetrix-studio/capacitor-google-auth";
-import { isNativePlatform } from "./platform";
+
 import { logger } from "@/lib/logger";
+
+import { isNativePlatform } from "./platform";
 
 const GOOGLE_CLIENT_ID =
   "880247591600-g42kbb95b131mcjfrn838ruj89pe0mp5.apps.googleusercontent.com";
@@ -34,6 +36,7 @@ export async function nativeGoogleSignIn(): Promise<{ idToken: string; email?: s
       return { idToken, email: user.email };
     }
     logger.warn("Native GoogleAuth succeeded but no idToken returned:", user);
+
     return null;
   } catch (error: any) {
     const errString = String(error?.message || error || "");
@@ -44,9 +47,11 @@ export async function nativeGoogleSignIn(): Promise<{ idToken: string; email?: s
       error?.code === 12501
     ) {
       logger.info("Native GoogleAuth user cancelled sign-in");
+
       return null;
     }
     logger.warn("Native GoogleAuth signIn failed or cancelled:", error);
+
     return null;
   }
 }
@@ -78,18 +83,21 @@ export async function exchangeNativeGoogleTokenWithClerk({
       if (transferSessionId) {
         logger.info("[ClerkNativeAuth] signIn.create({ transfer: true }) succeeded!", transferSessionId);
         await setActive({ session: transferSessionId });
+
         return true;
       }
       if (transferRes?.status === "complete") {
         logger.info("[ClerkNativeAuth] signIn.create({ transfer: true }) status complete:", transferRes);
+
         return true;
       }
-    } catch (transferErr: any) {
-      const msg = transferErr?.errors
-        ? JSON.stringify(transferErr.errors)
-        : transferErr?.message || JSON.stringify(transferErr);
-      logger.warn(`[ClerkNativeAuth] transfer failed: ${msg}`);
+    } catch (transferError: any) {
+      const message = transferError?.errors
+        ? JSON.stringify(transferError.errors)
+        : transferError?.message || JSON.stringify(transferError);
+      logger.warn(`[ClerkNativeAuth] transfer failed: ${message}`);
     }
+
     return false;
   };
 
@@ -103,6 +111,7 @@ export async function exchangeNativeGoogleTokenWithClerk({
       if (createdSessionId) {
         logger.info("[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap succeeded!", createdSessionId);
         await setActive({ session: createdSessionId });
+
         return true;
       }
 
@@ -111,14 +120,16 @@ export async function exchangeNativeGoogleTokenWithClerk({
           await clerk.handleGoogleOneTapCallback(res, {
             signInFallbackRedirectUrl: "/sso-callback",
           });
+
           return true;
-        } catch (cbErr) {
-          logger.warn("[ClerkNativeAuth] handleGoogleOneTapCallback warning:", cbErr);
+        } catch (callbackError) {
+          logger.warn("[ClerkNativeAuth] handleGoogleOneTapCallback warning:", callbackError);
         }
       }
 
       if (res?.status === "complete") {
         logger.info("[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap complete:", res);
+
         return true;
       }
     } catch (err: any) {
@@ -126,13 +137,14 @@ export async function exchangeNativeGoogleTokenWithClerk({
       const isExternalAccountExists = err?.errors?.some(
         (e: any) => e?.code === "external_account_exists" || e?.code === "form_identifier_exists"
       );
-      const msg = err?.errors
+      const message = err?.errors
         ? JSON.stringify(err.errors)
         : err?.message || JSON.stringify(err);
-      logger.warn(`[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap failed: ${msg}`);
+      logger.warn(`[ClerkNativeAuth] clerk.authenticateWithGoogleOneTap failed: ${message}`);
 
       if (isTooManyRequests) {
         logger.warn("[ClerkNativeAuth] Rate limit reached on Clerk API.");
+
         return false;
       }
 
@@ -150,6 +162,7 @@ export async function exchangeNativeGoogleTokenWithClerk({
     const createdSessionId = getSessionId(res);
     if (createdSessionId) {
       await setActive({ session: createdSessionId });
+
       return true;
     }
   } catch (err: any) {
@@ -169,10 +182,11 @@ export async function exchangeNativeGoogleTokenWithClerk({
       const createdSessionId = getSessionId(signUpRes);
       if (createdSessionId) {
         await setActive({ session: createdSessionId });
+
         return true;
       }
-    } catch (signUpErr: any) {
-      const isTransferred = signUpErr?.errors?.some(
+    } catch (signUpError: any) {
+      const isTransferred = signUpError?.errors?.some(
         (e: any) => e?.code === "external_account_exists" || e?.code === "form_identifier_exists"
       );
       if (isTransferred) {

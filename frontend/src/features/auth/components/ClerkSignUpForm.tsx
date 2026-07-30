@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
+import { Browser } from "@capacitor/browser";
 import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
-import { Browser } from "@capacitor/browser";
 import { AnimatePresence, motion } from "motion/react";
 
 import TextField from "@/components/form/TextField";
@@ -80,8 +80,8 @@ export function ClerkSignUpForm({
               setTimeout(() => reject(new Error("Native Google Sign-In timed out")), 10000)
             ),
           ]);
-        } catch (nativeErr) {
-          logger.warn("Native Google Sign-In failed or timed out:", nativeErr);
+        } catch (nativeError) {
+          logger.warn("Native Google Sign-In failed or timed out:", nativeError);
         }
 
         if (googleAuthRes?.idToken) {
@@ -100,10 +100,12 @@ export function ClerkSignUpForm({
               to: "/auth-ready",
               search: { redirectTo: normalizedRedirect },
             });
+
             return;
           }
           logger.warn("Native Google token exchange returned false.");
           showNotification("Google sign-in could not be completed. Please try again in a moment.", "warning");
+
           return;
         } else {
           logger.info("Native Google Sign-In returned no idToken or timed out, falling back to web OAuth...");
@@ -166,6 +168,7 @@ export function ClerkSignUpForm({
           redirectUrl,
           redirectUrlComplete,
         });
+
         return;
       }
 
