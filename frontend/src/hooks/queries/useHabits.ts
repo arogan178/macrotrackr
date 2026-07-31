@@ -8,6 +8,7 @@ import {
   incrementHabitProgress,
   updateHabitFromForm,
 } from "@/features/goals/utils/habits";
+import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -43,6 +44,7 @@ export function useAddHabit() {
     onSuccess: () => {
       // Invalidate and refetch habits list
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
+      broadcastLocalDataChange("habits");
     },
     onError: logAddHabitError,
   });
@@ -90,6 +92,7 @@ export function useUpdateHabit() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
+      broadcastLocalDataChange("habits");
     },
     onError: logUpdateHabitError,
   });
@@ -136,6 +139,7 @@ export function useDeleteHabit() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
+      broadcastLocalDataChange("habits");
     },
   });
 }
@@ -193,8 +197,10 @@ export function useIncrementHabitProgress() {
       }
       logIncrementHabitError(error);
     },
-    // Don't invalidate queries - optimistic update already reflects the change in UI
-    // The server will eventually sync in the background
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
+      broadcastLocalDataChange("habits");
+    },
   });
 }
 
@@ -265,8 +271,10 @@ export function useCompleteHabit() {
       }
       logCompleteHabitError(error);
     },
-    // Don't invalidate queries - optimistic update already reflects the change in UI
-    // The server will eventually sync in the background
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
+      broadcastLocalDataChange("habits");
+    },
   });
 }
 
@@ -284,6 +292,7 @@ export function useResetHabits() {
       // Clear the habits cache and refetch
       queryClient.setQueryData<HabitGoal[]>(queryKeys.habits.list(), []);
       queryClient.invalidateQueries({ queryKey: queryKeys.habits.all() });
+      broadcastLocalDataChange("habits");
     },
     onError: logResetHabitsError,
   });

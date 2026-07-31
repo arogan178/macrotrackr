@@ -6,6 +6,7 @@ import {
   savedMealsApi,
   type SavedMealsResponse,
 } from "@/api/savedMeals";
+import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -35,6 +36,7 @@ export function useCreateSavedMeal() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.savedMeals.list(),
       });
+      broadcastLocalDataChange("saved-meals");
     },
     onError: logCreateSavedMealError,
   });
@@ -57,6 +59,7 @@ export function useDeleteSavedMeal() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.savedMeals.list(),
       });
+      broadcastLocalDataChange("saved-meals");
     },
     onError: logDeleteSavedMealError,
   });

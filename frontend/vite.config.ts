@@ -14,6 +14,7 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 export default defineConfig(({ command }) => {
   const isDevServer = command === "serve";
+  const isCapacitor = process.env.CAPACITOR === "true";
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   return {
     server: {
@@ -46,70 +47,70 @@ export default defineConfig(({ command }) => {
       react(),
       tailwindcss(),
       ...(isDevServer ? [checker({ typescript: true })] : []),
-      viteCompression(),
-      VitePWA({
-        injectRegister: null,
-        registerType: "autoUpdate",
-        devOptions: {
-          enabled: false,
-        },
-        manifest: {
-          name: "Macro Tracker",
-          short_name: "MacroTracker",
-          description: "Track your macronutrients and nutrition goals",
-          start_url: "/",
-          display: "standalone",
-          background_color: "#18181b",
-          theme_color: "#6366f1",
-          icons: [
-            // Ensure we reference existing PNG assets so installed app icons work
-            {
-              src: "/icon.png",
-              sizes: "192x192",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            {
-              src: "/icon.png",
-              sizes: "256x256",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            {
-              src: "/icon.png",
-              sizes: "384x384",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            {
-              src: "/icon.png",
-              sizes: "512x512",
-              type: "image/png",
-              purpose: "any maskable",
-            },
-            // Fallback favicon
-            {
-              src: "/favicon.ico",
-              sizes: "48x48",
-              type: "image/x-icon",
-              purpose: "any",
-            },
-          ],
-          categories: ["health", "fitness", "lifestyle"],
-          lang: "en",
-          orientation: "portrait-primary",
-        },
-        // Use custom service worker for better cache control
-        srcDir: "src",
-        filename: "service-worker.ts",
-        strategies: "injectManifest",
-        injectManifest: {
-          injectionPoint: "globalThis.__WB_MANIFEST",
-          globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-          // globDirectory removed - vite-plugin-pwa uses build.outDir automatically
-          maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
-        },
-      }),
+      ...(!isCapacitor ? [viteCompression()] : []),
+      ...(!isCapacitor
+        ? [
+            VitePWA({
+              injectRegister: null,
+              registerType: "autoUpdate",
+              devOptions: {
+                enabled: false,
+              },
+              manifest: {
+                name: "Macro Tracker",
+                short_name: "MacroTracker",
+                description: "Track your macronutrients and nutrition goals",
+                start_url: "/",
+                display: "standalone",
+                background_color: "#18181b",
+                theme_color: "#6366f1",
+                icons: [
+                  {
+                    src: "/icon.png",
+                    sizes: "192x192",
+                    type: "image/png",
+                    purpose: "any maskable",
+                  },
+                  {
+                    src: "/icon.png",
+                    sizes: "256x256",
+                    type: "image/png",
+                    purpose: "any maskable",
+                  },
+                  {
+                    src: "/icon.png",
+                    sizes: "384x384",
+                    type: "image/png",
+                    purpose: "any maskable",
+                  },
+                  {
+                    src: "/icon.png",
+                    sizes: "512x512",
+                    type: "image/png",
+                    purpose: "any maskable",
+                  },
+                  {
+                    src: "/favicon.ico",
+                    sizes: "48x48",
+                    type: "image/x-icon",
+                    purpose: "any",
+                  },
+                ],
+                categories: ["health", "fitness", "lifestyle"],
+                lang: "en",
+                orientation: "portrait-primary",
+              },
+              srcDir: "src",
+              filename: "service-worker.ts",
+              strategies: "injectManifest",
+              injectManifest: {
+                injectionPoint: "globalThis.__WB_MANIFEST",
+                globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
+                maximumFileSizeToCacheInBytes: 5 * 1024 * 1024, // 5MB
+              },
+            }),
+          ]
+        : []),
       tsconfigPaths(),
       // Bundle analyzer - generates stats.html in dist folder
       visualizer({

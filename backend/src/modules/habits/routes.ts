@@ -16,6 +16,7 @@ import {
 } from "../../lib/http/errors";
 import { checkFeatureLimit } from "../../middleware/clerk-guards";
 import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 
 type HabitsRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
@@ -164,6 +165,8 @@ export const habitRoutes = (app: Elysia) =>
             completedAt ?? null,
           ]);
 
+          publishUserSyncEvent(internalUserId, "habits");
+
           // Return properly typed response
           return {
             id,
@@ -262,6 +265,8 @@ export const habitRoutes = (app: Elysia) =>
             internalUserId,
           ]);
 
+          publishUserSyncEvent(internalUserId, "habits");
+
           return {
             id: habitId,
             title,
@@ -331,6 +336,8 @@ export const habitRoutes = (app: Elysia) =>
 
           safeExecute(db, deleteQuery, [habitId, internalUserId]);
 
+          publishUserSyncEvent(internalUserId, "habits");
+
           return mutationSuccessWithId(habitId);
         },
         {
@@ -356,6 +363,8 @@ export const habitRoutes = (app: Elysia) =>
           `;
 
           safeExecute(db, query, [internalUserId]);
+
+          publishUserSyncEvent(internalUserId, "habits");
 
           return { success: true, count: 0 };
         },

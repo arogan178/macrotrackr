@@ -1,3 +1,5 @@
+import { isNativePlatform } from "@/services/native/platform";
+
 const DEFAULT_AUTH_REDIRECT = "/home";
 
 function normalizeCandidate(value: string | undefined): string | null {
@@ -135,9 +137,25 @@ export function buildSocialAuthRedirectUrls(
 } {
   const encodedRedirect = encodeAuthRedirect(value);
 
+  if (isNativePlatform()) {
+    const scheme = "com.macrotrackr.app";
+
+    return {
+      redirectUrl: `${scheme}://sso-callback?flow=${flow}&redirectTo=${encodedRedirect}`,
+      redirectUrlComplete: `${scheme}://auth-ready?redirectTo=${encodedRedirect}`,
+    };
+  }
+
+  const origin =
+    typeof window !== "undefined" &&
+    window.location.origin &&
+    !window.location.origin.startsWith("file://")
+      ? window.location.origin
+      : "https://macrotrackr.com";
+
   return {
-    redirectUrl: `/sso-callback?flow=${flow}&redirectTo=${encodedRedirect}`,
-    redirectUrlComplete: `/auth-ready?redirectTo=${encodedRedirect}`,
+    redirectUrl: `${origin}/sso-callback?flow=${flow}&redirectTo=${encodedRedirect}`,
+    redirectUrlComplete: `${origin}/auth-ready?redirectTo=${encodedRedirect}`,
   };
 }
 

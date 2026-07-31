@@ -12,6 +12,8 @@ import MainLayout from "@/components/layout/MainLayout";
 import ErrorBoundary from "@/components/ui/ErrorBoundary";
 import GlobalLoadingOverlay from "@/components/ui/GlobalLoadingOverlay";
 import TopLoadingBar from "@/components/ui/TopLoadingBar";
+import { useAppAuthState } from "@/hooks/auth/useAuthState";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
 import { LoadingFallback } from "./-authGuards";
 
@@ -48,6 +50,8 @@ function NotFoundRouteComponent() {
 
 function RootComponent() {
   const location = useLocation();
+  const { isLoaded, isSignedIn } = useAppAuthState();
+  useRealtimeSync(isLoaded && isSignedIn);
 
   return (
     <ErrorBoundary>

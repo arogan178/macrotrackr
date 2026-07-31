@@ -23,6 +23,7 @@ import { habitRoutes } from "./modules/habits";
 import { macroRoutes } from "./modules/macros";
 import { reportingRoutes } from "./modules/reporting";
 import { savedMealRoutes } from "./modules/saved-meals";
+import { syncRoutes } from "./modules/sync/routes";
 import { userRoutes } from "./modules/user";
 import { healthRoutes } from "./routes/health";
 import { metricsRoutes } from "./routes/metrics";
@@ -291,7 +292,8 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
     .use(goalRoutes)
     .use(habitRoutes)
     .use(reportingRoutes)
-    .use(savedMealRoutes);
+    .use(savedMealRoutes)
+    .use(syncRoutes);
 
   if (withManagedBilling) {
     core.use(billingRoutes);

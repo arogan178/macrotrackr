@@ -1,17 +1,20 @@
 import React from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 import LogoButton from "@/components/layout/LogoButton";
 import { BackIcon } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
 
 const LegalHeader: React.FC = () => {
+  const navigate = useNavigate();
+
   return (
     <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
-        <LogoButton compact onClick={() => globalThis.location.assign("/")} />
+        <LogoButton compact onClick={() => navigate({ to: "/" })} />
 
-        <a
-          href="/"
+        <Link
+          to="/"
           className={getButtonClasses(
             "ghost",
             "sm",
@@ -21,7 +24,7 @@ const LegalHeader: React.FC = () => {
         >
           <BackIcon />
           <span>Back to home</span>
-        </a>
+        </Link>
       </div>
     </header>
   );

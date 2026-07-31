@@ -1,9 +1,14 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
+import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import { queryKeys } from "@/lib/queryKeys";
+import { saveBiometricCredentials } from "@/services/biometrics";
 import { useStore } from "@/store/store";
 
 interface LocalSignInFormProps {
@@ -15,6 +20,8 @@ export function LocalSignInForm({
   onSwitchToSignUp,
   redirectTo,
 }: LocalSignInFormProps) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showNotification } = useStore();
 
   const [email, setEmail] = useState("");
@@ -27,12 +34,31 @@ export function LocalSignInForm({
     setIsLoading(true);
 
     try {
+      const normalizedEmail = email.trim().toLowerCase();
       await authApi.login({
-        email: email.trim().toLowerCase(),
+        email: normalizedEmail,
         password,
       });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.auth.session(),
+      });
+      // Save credentials for Biometric sign-in on future app launches
+      await saveBiometricCredentials(normalizedEmail, password);
       showNotification("Signed in successfully!", "success");
-      globalThis.location.assign(normalizeAuthRedirect(redirectTo));
+
+      const destination = normalizeAuthRedirect(redirectTo);
+      if (destination === "/home") {
+        navigate({
+          to: "/home",
+          search: { limit: 20, offset: 0 },
+          replace: true,
+        });
+      } else {
+        navigate({
+          to: destination as any,
+          replace: true,
+        });
+      }
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Invalid email or password.";
@@ -73,6 +99,8 @@ export function LocalSignInForm({
 
   return (
     <div className="w-full">
+      <BiometricSignInButton redirectTo={redirectTo} />
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <TextField
           label="Email"

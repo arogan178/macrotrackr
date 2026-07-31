@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Macro Trackr</string>
+    <string name="title_activity_main">Macro Trackr</string>
+    <string name="package_name">com.macrotrackr.app</string>
+    <string name="custom_url_scheme">com.macrotrackr.app</string>
+    <string name="server_client_id">880247591600-g42kbb95b131mcjfrn838ruj89pe0mp5.apps.googleusercontent.com</string>
+</resources>

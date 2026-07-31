@@ -4,6 +4,7 @@ export const isNativePlatform = (): boolean => Capacitor.isNativePlatform();
 
 export const getPlatform = (): "ios" | "android" | "web" => {
   const p = Capacitor.getPlatform();
+
   return p === "ios" || p === "android" ? p : "web";
 };
 

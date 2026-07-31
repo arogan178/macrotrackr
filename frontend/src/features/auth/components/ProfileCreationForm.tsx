@@ -191,7 +191,10 @@ export function ProfileCreationForm() {
           replace: true,
         });
       } else {
-        globalThis.location.assign(postSetupRedirect);
+        navigate({
+          to: postSetupRedirect as any,
+          replace: true,
+        });
       }
     } catch (error) {
       logger.error("Profile creation error:", error);

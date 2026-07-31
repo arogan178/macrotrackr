@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { userApi, type UserDetailsResponse, type UserSettingsPayload } from "@/api/user";
+import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { hasStatus, queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -80,6 +81,7 @@ export function useSaveSettings() {
       queryClient.invalidateQueries({
         queryKey: queryKeys.auth.user(),
       });
+      broadcastLocalDataChange("user");
     },
     // Enhanced retry logic for settings
     retry: (failureCount, error) => {

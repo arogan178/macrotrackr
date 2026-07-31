@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   buildRedirectFromLocation,
+  buildSocialAuthRedirectUrls,
   isSafeAppRedirect,
   normalizeAuthRedirect,
   resolveProfileSetupRedirect,
@@ -14,6 +15,12 @@ describe("auth redirect helpers", () => {
     expect(normalizeAuthRedirect("/settings?tab=accounts")).toBe(
       "/settings?tab=accounts",
     );
+  });
+
+  it("builds social auth redirect urls for web", () => {
+    const urls = buildSocialAuthRedirectUrls("/settings", "signin");
+    expect(urls.redirectUrl).toContain("/sso-callback?flow=signin&redirectTo=%2Fsettings");
+    expect(urls.redirectUrlComplete).toContain("/auth-ready?redirectTo=%2Fsettings");
   });
 
   it("rejects external or auth-loop redirects", () => {
