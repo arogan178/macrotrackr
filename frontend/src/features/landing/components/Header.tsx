@@ -52,12 +52,12 @@ const Header: React.FC = () => {
     <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
       <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
         {/* Left: Brand */}
-        <div className="flex w-1/3 items-center justify-start">
+        <div className="flex shrink-0 items-center justify-start">
           <LogoButton compact onClick={() => navigate({ to: "/" })} />
         </div>
 
         {/* Center: Navigation (Desktop) */}
-        <nav className="hidden w-1/3 items-center justify-center gap-1 lg:flex">
+        <nav className="hidden items-center justify-center gap-1 lg:flex lg:flex-1">
           {isLandingPage ? (
             <>
               <a
@@ -109,11 +109,11 @@ const Header: React.FC = () => {
         </nav>
 
         {/* Right: Auth */}
-        <div className="flex w-1/3 items-center justify-end gap-3">
+        <div className="flex shrink-0 items-center justify-end gap-1.5 sm:gap-3">
           <Link
             to="/login"
             search={{ returnTo: undefined }}
-            className="hidden min-h-11 items-center rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none md:inline-flex"
+            className="inline-flex min-h-11 items-center whitespace-nowrap rounded-full px-2.5 py-2 text-xs font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:px-4 sm:text-sm"
           >
             Log In
           </Link>
@@ -124,7 +124,7 @@ const Header: React.FC = () => {
               "primary",
               "sm",
               false,
-              "rounded-full font-semibold",
+              "rounded-full px-3 text-xs font-semibold whitespace-nowrap sm:px-4 sm:text-sm",
             )}
           >
             Start Free

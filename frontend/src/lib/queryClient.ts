@@ -16,10 +16,10 @@ export function hasStatus(error: Error): error is ErrorWithStatus {
 const defaultQueryClientConfig: QueryClientConfig = {
   defaultOptions: {
     queries: {
-      staleTime: 5 * MINUTE,
+      staleTime: 30 * SECOND,
       gcTime: 30 * MINUTE,
       retry: 1,
-      refetchOnWindowFocus: false,
+      refetchOnWindowFocus: true,
       refetchOnReconnect: true,
       refetchInterval: false,
     },
@@ -52,33 +52,33 @@ export const queryClient = createAppQueryClient();
 
 export const queryConfigs = {
   auth: {
-    staleTime: 1 * MINUTE,
+    staleTime: 30 * SECOND,
     gcTime: 5 * MINUTE,
-    refetchInterval: 5 * MINUTE,
+    refetchInterval: 1 * MINUTE,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },
 
   longLived: {
-    staleTime: 5 * MINUTE,
+    staleTime: 30 * SECOND,
     gcTime: 10 * MINUTE,
-    refetchInterval: 10 * MINUTE,
-    refetchOnWindowFocus: false,
+    refetchInterval: 1 * MINUTE,
+    refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },
 
   macros: {
-    staleTime: 2 * MINUTE,
+    staleTime: 10 * SECOND,
     gcTime: 10 * MINUTE,
-    refetchInterval: 3 * MINUTE,
+    refetchInterval: 30 * SECOND,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },
 
   realTime: {
-    staleTime: 30 * SECOND,
+    staleTime: 5 * SECOND,
     gcTime: 2 * MINUTE,
-    refetchInterval: 1 * MINUTE,
+    refetchInterval: 15 * SECOND,
     refetchOnWindowFocus: true,
     refetchOnReconnect: true,
   },

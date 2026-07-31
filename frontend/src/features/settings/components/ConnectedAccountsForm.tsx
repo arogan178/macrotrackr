@@ -7,7 +7,6 @@ import {
   AppleIcon,
   CloseIcon,
   EmailIcon,
-  FacebookIcon,
   GoogleIcon,
   ShieldCheckIcon,
 } from "@/components/ui/Icons";
@@ -31,13 +30,7 @@ const PROVIDERS = {
     strategy: "oauth_google" as const,
     color: "text-[#4285F4]",
     bgColor: "bg-[#4285F4]/10",
-  },
-  facebook: {
-    name: "Facebook",
-    icon: FacebookIcon,
-    strategy: "oauth_facebook" as const,
-    color: "text-[#1877F2]",
-    bgColor: "bg-[#1877F2]/10",
+    enabled: true,
   },
   apple: {
     name: "Apple",
@@ -45,6 +38,8 @@ const PROVIDERS = {
     strategy: "oauth_apple" as const,
     color: "text-foreground",
     bgColor: "bg-foreground/10",
+    // Temporarily hidden
+    enabled: false,
   },
 } as const;
 
@@ -323,7 +318,7 @@ const ConnectedAccountsForm = () => {
 
   // Get list of providers that can be connected
   const availableProviders = (Object.keys(PROVIDERS) as ProviderKey[]).filter(
-    (key) => !connectedProviders.has(key),
+    (key) => PROVIDERS[key].enabled && !connectedProviders.has(key),
   );
 
   // Get all login emails for summary

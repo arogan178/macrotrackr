@@ -29,6 +29,8 @@
     line-height: 1.6;
     min-height: 100vh;
     font-variant-numeric: tabular-nums;
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
   }
 
   *,
@@ -84,9 +86,39 @@
   }
 }
 
-/* Floating notification offset */
+/* Safe area variables and mobile utilities */
 :root {
-  --floating-notification-top: 16px;
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --floating-notification-top: calc(16px + var(--sat));
+}
+
+.safe-area-pt {
+  padding-top: var(--sat);
+}
+
+.safe-area-pb {
+  padding-bottom: var(--sab);
+}
+
+.safe-area-px {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+
+.safe-area-py {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+}
+
+button,
+a,
+[role="button"] {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 /* Scrollbar styling for webkit */

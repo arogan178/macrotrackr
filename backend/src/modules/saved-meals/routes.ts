@@ -19,6 +19,7 @@ import {
   FREE_TIER_LIMITS,
 } from "../../middleware/clerk-guards";
 import { mutationSuccessWithId } from "../../lib/http/mutation-contract";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 
 // Saved meal row type
 interface SavedMealRow {
@@ -230,6 +231,8 @@ export const savedMealRoutes = (app: Elysia) =>
             throw new BadRequestError("Failed to create saved meal");
           }
 
+          publishUserSyncEvent(userId, "saved-meals");
+
           return normalizeSavedMealRow(result);
         },
         {
@@ -302,6 +305,8 @@ export const savedMealRoutes = (app: Elysia) =>
             );
           }
 
+          publishUserSyncEvent(userId, "saved-meals");
+
           return normalizeSavedMealRow(result);
         },
         {
@@ -345,6 +350,8 @@ export const savedMealRoutes = (app: Elysia) =>
               `Saved meal with ID ${mealId} not found or access denied.`
             );
           }
+
+          publishUserSyncEvent(userId, "saved-meals");
 
           return mutationSuccessWithId(Number(mealId));
         },

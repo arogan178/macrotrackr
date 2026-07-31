@@ -1,11 +1,14 @@
+import { Capacitor } from "@capacitor/core";
+
 import { isLocalAuthMode } from "./config/runtime";
 
 // Register the service worker in production builds with automatic updates
 export async function registerServiceWorker() {
-  if (import.meta.env.MODE !== "production") return;
   if (!("serviceWorker" in navigator)) return;
 
-  if (isLocalAuthMode) {
+  // On Capacitor native apps or local auth mode, PWA service workers must be unregistered
+  // to avoid caching stale index.html and chunk hashes that cause asset 404s.
+  if (Capacitor.isNativePlatform() || isLocalAuthMode) {
     try {
       const registrations = await navigator.serviceWorker.getRegistrations();
       await Promise.all(registrations.map((registration) => registration.unregister()));
@@ -18,6 +21,8 @@ export async function registerServiceWorker() {
 
     return;
   }
+
+  if (import.meta.env.MODE !== "production") return;
 
   try {
     let registration: ServiceWorkerRegistration | null = null;

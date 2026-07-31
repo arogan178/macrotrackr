@@ -3,6 +3,7 @@ import { queryOptions, useMutation, useQuery, useQueryClient } from "@tanstack/r
 import { type AddWeightLogPayload, goalsApi, type WeightLogEntry } from "@/api/goals";
 import type { WeightGoalsResponse } from "@/features/goals/types";
 import { normalizeWeightGoals } from "@/features/goals/utils/goalUtilities";
+import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -92,6 +93,7 @@ export function useCreateWeightGoal() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
+      broadcastLocalDataChange("goals");
     },
     onError: logCreateWeightGoalError,
   });
@@ -156,6 +158,7 @@ export function useDeleteWeightGoal() {
     onSettled: () => {
       // Always invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.all() });
+      broadcastLocalDataChange("goals");
     },
     onError: logDeleteWeightGoalError,
   });
@@ -307,6 +310,7 @@ export function useAddWeightLogEntry() {
       // Always refetch to ensure consistency
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weightLog() });
       queryClient.invalidateQueries({ queryKey: queryKeys.goals.weight() });
+      broadcastLocalDataChange("goals");
     },
   });
 }
@@ -362,6 +366,7 @@ export function useDeleteWeightLogEntry() {
       queryClient.refetchQueries({ queryKey: queryKeys.goals.weightLog() });
       // Also refetch weight goals to update current weight
       queryClient.refetchQueries({ queryKey: queryKeys.goals.weight() });
+      broadcastLocalDataChange("goals");
     },
   });
 }

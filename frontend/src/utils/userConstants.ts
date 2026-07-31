@@ -122,8 +122,8 @@ export function createNutritionProfile(
     settings.weight &&
     settings.height &&
     settings.dateOfBirth &&
-    settings.gender &&
-    settings.activityLevel
+    (settings.gender === "male" || settings.gender === "female") &&
+    settings.activityLevel != null
   ) {
     bmr = Math.round(
       calculateBMR(settings.weight, settings.height, age, settings.gender),

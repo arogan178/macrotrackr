@@ -69,6 +69,11 @@ export const validateSettingsComplete = (
   if (!settings.firstName) errors.firstName = "First name required";
   if (!settings.lastName) errors.lastName = "Last name required";
   if (!settings.email) errors.email = "Email required";
+  if (!settings.dateOfBirth) errors.dateOfBirth = "Date of birth required";
+  if (!settings.gender) errors.gender = "Gender required";
+  if (settings.height == null) errors.height = "Height required";
+  if (settings.weight == null) errors.weight = "Weight required";
+  if (settings.activityLevel == null) errors.activityLevel = "Activity level required";
 
   return errors;
 };

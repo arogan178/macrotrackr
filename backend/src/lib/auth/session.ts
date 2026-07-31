@@ -80,6 +80,19 @@ export function createExpiredSessionCookieValue(): string {
 }
 
 export function readSessionTokenFromRequest(request: Request): string | null {
+  const authHeader = request.headers.get("authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const bearerToken = authHeader.slice(7).trim();
+    if (bearerToken && !bearerToken.startsWith("pk_") && !bearerToken.startsWith("sess_")) {
+      return bearerToken;
+    }
+  }
+
+  const queryToken = new URL(request.url).searchParams.get("token");
+  if (queryToken && !queryToken.startsWith("pk_") && !queryToken.startsWith("sess_")) {
+    return queryToken;
+  }
+
   const cookies = parseCookieHeader(request.headers.get("cookie"));
   return cookies.get(SESSION_COOKIE_NAME) ?? null;
 }

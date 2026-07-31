@@ -1,19 +1,19 @@
 import Button from "@/components/ui/Button";
-import { AppleIcon, FacebookIcon, GoogleIcon } from "@/components/ui/Icons";
+import { AppleIcon, GoogleIcon } from "@/components/ui/Icons";
 
 export type SocialAuthStrategy =
   | "oauth_google"
-  | "oauth_facebook"
   | "oauth_apple";
 
 interface SocialAuthOptionsProps {
   onProviderSelect: (strategy: SocialAuthStrategy) => void;
   onContinueWithEmail: () => void;
+  loadingStrategy?: SocialAuthStrategy | null;
 }
 
 interface SocialAuthProviderConfig {
   strategy: SocialAuthStrategy;
-  label: "Google" | "Facebook" | "Apple";
+  label: "Google" | "Apple";
   Icon: typeof GoogleIcon;
   enabled: boolean;
 }
@@ -34,29 +34,29 @@ const SOCIAL_AUTH_PROVIDERS: SocialAuthProviderConfig[] = [
     enabled: parseFeatureFlag(import.meta.env.VITE_SOCIAL_GOOGLE_ENABLED),
   },
   {
-    strategy: "oauth_facebook" as const,
-    label: "Facebook",
-    Icon: FacebookIcon,
-    enabled: parseFeatureFlag(import.meta.env.VITE_SOCIAL_FACEBOOK_ENABLED),
-  },
-  {
     strategy: "oauth_apple" as const,
     label: "Apple",
     Icon: AppleIcon,
-    enabled: parseFeatureFlag(import.meta.env.VITE_SOCIAL_APPLE_ENABLED),
+    // Temporarily disabled / hidden
+    enabled: false,
   },
-];
+].filter((provider) => provider.enabled);
 
 export function SocialAuthOptions({
   onProviderSelect,
   onContinueWithEmail,
+  loadingStrategy,
 }: SocialAuthOptionsProps) {
   return (
     <>
       <div className="space-y-3">
         {SOCIAL_AUTH_PROVIDERS.map(({ strategy, label, Icon, enabled }) => {
-          const buttonLabel =
-            enabled ? `Continue with ${label}` : `${label} temporarily unavailable`;
+          const isLoading = loadingStrategy === strategy;
+          const buttonLabel = isLoading
+            ? `Connecting to ${label}...`
+            : enabled
+              ? `Continue with ${label}`
+              : `${label} temporarily unavailable`;
 
           return (
             <Button
@@ -64,13 +64,15 @@ export function SocialAuthOptions({
               type="button"
               variant="secondary"
               fullWidth
+              isLoading={isLoading}
+              loadingText={`Connecting to ${label}...`}
               onClick={() => {
-                if (enabled) {
+                if (enabled && !loadingStrategy) {
                   onProviderSelect(strategy);
                 }
               }}
               leftIcon={<Icon className="h-5 w-5" />}
-              disabled={!enabled}
+              disabled={!enabled || Boolean(loadingStrategy)}
             >
               {buttonLabel}
             </Button>

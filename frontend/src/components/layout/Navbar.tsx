@@ -177,7 +177,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-4 z-50 px-4 sm:px-6 lg:px-8">
+      <header className="fixed inset-x-0 z-50 px-4 sm:px-6 lg:px-8" style={{ top: "calc(1rem + var(--sat))" }}>
         <nav
           className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6"
           role="navigation"

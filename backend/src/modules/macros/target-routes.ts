@@ -4,6 +4,7 @@ import {
 } from "../../lib/data/database";
 import { BadRequestError, DatabaseError } from "../../lib/http/errors";
 import { loggerHelpers } from "../../lib/observability/logger";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { MacroSchemas } from "./schemas";
 import {
   parseJsonArrayField,
@@ -148,6 +149,8 @@ export const registerMacroTargetRoutes = (group: MacroRouteGroup) =>
         );
 
         loggerHelpers.dbQuery("UPSERT", "macro_targets", internalUserId ?? undefined, 1);
+
+        publishUserSyncEvent(internalUserId, "macros");
 
         return {
           macroTarget: {

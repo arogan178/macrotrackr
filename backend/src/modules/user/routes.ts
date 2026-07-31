@@ -16,6 +16,7 @@ import {
 } from "../../lib/http/errors";
 import { handleError } from "../../lib/http/responses";
 import { loggerHelpers, logger } from "../../lib/observability/logger";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { getConfig } from "../../config";
 
 type UserRouteContext =
@@ -278,6 +279,8 @@ export const userRoutes = (app: Elysia) =>
                 loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
               }
 
+              publishUserSyncEvent(internalUserId, "user");
+
               return {
                 success: true,
                 message: "Settings updated successfully",
@@ -376,6 +379,8 @@ export const userRoutes = (app: Elysia) =>
 
                 loggerHelpers.dbQuery("INSERT", "weight_log", internalUserId, 1);
               }
+
+              publishUserSyncEvent(internalUserId, "user");
 
               return {
                 success: true,

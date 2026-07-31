@@ -47,4 +47,20 @@ export const AuthSchemas = {
   }),
 
   successResponse: SuccessResponseSchema,
+
+  authResponse: t.Object({
+    success: t.Boolean(),
+    message: t.Optional(t.String()),
+    token: t.Optional(t.String()),
+    user: t.Optional(
+      t.Nullable(
+        t.Object({
+          id: t.Number(),
+          email: t.String(),
+          firstName: t.Optional(t.Nullable(t.String())),
+          lastName: t.Optional(t.Nullable(t.String())),
+        }),
+      ),
+    ),
+  }),
 };

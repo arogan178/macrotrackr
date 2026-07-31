@@ -1,4 +1,17 @@
-import { apiClient } from "@/api/core";
+import { apiClient, setAuthToken } from "@/api/core";
+import { removeToken, setToken } from "@/utils/tokenStorage";
+
+export interface AuthSuccessResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: {
+    id: number;
+    email: string;
+    firstName: string;
+    lastName: string;
+  } | null;
+}
 
 export interface AuthSyncResponse {
   user: unknown;
@@ -43,29 +56,57 @@ export interface LocalSessionResponse {
 
 export const authApi = {
   register: async (payload: RegisterPayload) => {
-    return apiClient.post<{ success: boolean; message?: string }>(
+    removeToken();
+    setAuthToken(null);
+    const res = await apiClient.post<AuthSuccessResponse>(
       "/api/auth/register",
       payload,
+      { headers: { includeAuth: false } },
     );
+    if (res.token) {
+      setToken(res.token);
+      setAuthToken(res.token);
+    }
+
+    return res;
   },
 
   login: async (payload: LoginPayload) => {
-    return apiClient.post<{ success: boolean; message?: string }>(
+    removeToken();
+    setAuthToken(null);
+    const res = await apiClient.post<AuthSuccessResponse>(
       "/api/auth/login",
       payload,
+      { headers: { includeAuth: false } },
     );
+    if (res.token) {
+      setToken(res.token);
+      setAuthToken(res.token);
+    }
+
+    return res;
   },
 
   logout: async () => {
-    return apiClient.post<{ success: boolean; message?: string }>(
-      "/api/auth/logout",
-    );
+    try {
+      return await apiClient.post<{ success: boolean; message?: string }>(
+        "/api/auth/logout",
+      );
+    } finally {
+      removeToken();
+      setAuthToken(null);
+    }
   },
 
   logoutAll: async () => {
-    return apiClient.post<{ success: boolean; message?: string }>(
-      "/api/auth/logout-all",
-    );
+    try {
+      return await apiClient.post<{ success: boolean; message?: string }>(
+        "/api/auth/logout-all",
+      );
+    } finally {
+      removeToken();
+      setAuthToken(null);
+    }
   },
 
   getSession: async (): Promise<LocalSessionResponse> => {
@@ -76,6 +117,7 @@ export const authApi = {
     return apiClient.post<{ success: boolean; message?: string }>(
       "/api/auth/forgot-password",
       { email },
+      { headers: { includeAuth: false } },
     );
   },
 
@@ -85,7 +127,8 @@ export const authApi = {
   resetPassword: async ({ token, newPassword }: ResetPasswordPayload) => {
     return apiClient.post<{ success: boolean; message?: string }>(
       "/api/auth/reset-password",
-      { token, newPassword }
+      { token, newPassword },
+      { headers: { includeAuth: false } },
     );
   },
 
