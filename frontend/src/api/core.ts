@@ -1,6 +1,16 @@
 // API Core utilities - authentication, headers, base URL, error handling
 
+import { getToken } from "@/utils/tokenStorage";
+
 export const API_BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+
+export function getFullUrl(path: string): string {
+  const base = API_BASE_URL.replace(/\/+$/, "");
+
+  return base.endsWith("/api") && path.startsWith("/api/")
+    ? `${base.slice(0, -4)}${path}`
+    : `${base}${path}`;
+}
 
 export class ApiError extends Error {
   status: number;
@@ -53,7 +63,7 @@ export class ApiClient {
     fallbackToken: string | null = null,
   ) {
     this.getClerkToken = provider;
-    this.staticAuthToken = fallbackToken;
+    this.staticAuthToken = fallbackToken ?? getToken() ?? null;
     this.authTokenProviderInitialized = true;
   }
 
@@ -166,7 +176,7 @@ export class ApiClient {
     options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
   ): Promise<T> {
     const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? false);
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(getFullUrl(url), {
       method: "GET",
       headers,
       credentials: "include",
@@ -182,7 +192,7 @@ export class ApiClient {
     options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
   ): Promise<T> {
     const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? true);
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(getFullUrl(url), {
       method: "POST",
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -198,7 +208,7 @@ export class ApiClient {
     options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
   ): Promise<T> {
     const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? true);
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(getFullUrl(url), {
       method: "PUT",
       headers,
       body: body !== undefined ? JSON.stringify(body) : undefined,
@@ -213,7 +223,7 @@ export class ApiClient {
     options: { headers?: GetHeadersOptions | boolean; customHeaders?: Record<string, string> } = {},
   ): Promise<T> {
     const headers = options.customHeaders ?? await this.getHeaders(options.headers ?? false);
-    const response = await fetch(`${API_BASE_URL}${url}`, {
+    const response = await fetch(getFullUrl(url), {
       method: "DELETE",
       headers,
       credentials: "include",

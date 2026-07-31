@@ -1,9 +1,12 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { normalizeAuthRedirect } from "@/features/auth/utils/redirect";
+import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
 
 interface LocalSignUpFormProps {
@@ -15,6 +18,8 @@ export function LocalSignUpForm({
   onSwitchToSignIn,
   redirectTo,
 }: LocalSignUpFormProps) {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { showNotification } = useStore();
 
   const [firstName, setFirstName] = useState("");
@@ -41,8 +46,24 @@ export function LocalSignUpForm({
         firstName: firstName.trim(),
         lastName: lastName.trim(),
       });
+      await queryClient.invalidateQueries({
+        queryKey: queryKeys.auth.session(),
+      });
       showNotification("Account created successfully!", "success");
-      globalThis.location.assign(normalizeAuthRedirect(redirectTo));
+
+      const destination = normalizeAuthRedirect(redirectTo);
+      if (destination === "/home") {
+        navigate({
+          to: "/home",
+          search: { limit: 20, offset: 0 },
+          replace: true,
+        });
+      } else {
+        navigate({
+          to: destination as any,
+          replace: true,
+        });
+      }
     } catch (error) {
       const message =
         error instanceof Error

@@ -27,6 +27,7 @@ import {
   deleteSession,
   readSessionTokenFromRequest,
 } from "../../lib/auth/session";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { emailService } from "../../services/email-service";
 import { generateId } from "../../utils/id-generator";
 import { getConfig } from "../../config";
@@ -274,11 +275,18 @@ export const authRoutes = (app: Elysia) =>
           return {
             success: true,
             message: "Account created successfully",
+            token,
+            user: {
+              id: userId,
+              email,
+              firstName: body.firstName,
+              lastName: body.lastName,
+            },
           };
         },
         {
           body: AuthSchemas.register,
-          response: AuthSchemas.successResponse,
+          response: AuthSchemas.authResponse,
           detail: {
             summary: "Register local account",
             tags: ["Auth"],
@@ -307,7 +315,7 @@ export const authRoutes = (app: Elysia) =>
           const email = body.email.trim().toLowerCase();
           const user = safeQuery<UserRow>(
             db,
-            "SELECT id, email, password FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
+            "SELECT id, email, first_name, last_name, password FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1",
             [email],
           );
 
@@ -322,8 +330,6 @@ export const authRoutes = (app: Elysia) =>
             throw new AuthenticationError("Invalid email or password.");
           }
 
-          deleteAllUserSessions(db, user.id);
-
           const { token } = createSession(db, user.id, {
             ip: getClientIp(request),
             userAgent: request.headers.get("user-agent"),
@@ -333,11 +339,18 @@ export const authRoutes = (app: Elysia) =>
           return {
             success: true,
             message: "Signed in successfully",
+            token,
+            user: {
+              id: user.id,
+              email: user.email,
+              firstName: user.first_name ?? "",
+              lastName: user.last_name ?? "",
+            },
           };
         },
         {
           body: AuthSchemas.login,
-          response: AuthSchemas.successResponse,
+          response: AuthSchemas.authResponse,
           detail: {
             summary: "Login local account",
             tags: ["Auth"],
@@ -381,6 +394,7 @@ export const authRoutes = (app: Elysia) =>
           }
 
           deleteAllUserSessions(db, auth.userId);
+          publishUserSyncEvent(auth.userId, "session_revoked");
           clearSessionCookie(context);
 
           return {
@@ -565,6 +579,8 @@ export const authRoutes = (app: Elysia) =>
             deleteAllUserSessions(db, tokenRecord.user_id);
           });
 
+          publishUserSyncEvent(tokenRecord.user_id, "session_revoked");
+
           return {
             success: true,
             message: "Password has been reset successfully.",
@@ -617,6 +633,8 @@ export const authRoutes = (app: Elysia) =>
             safeExecute(db, "UPDATE users SET password = ? WHERE id = ?", [nextPasswordHash, userId]);
             deleteAllUserSessions(db, userId);
           });
+
+          publishUserSyncEvent(userId, "session_revoked");
 
           const { token } = createSession(db, userId, {
             ip: getClientIp(request),

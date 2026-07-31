@@ -59,6 +59,19 @@ export function resolveSocialAuthError(
   const normalized = `${code ?? ""} ${message ?? ""}`.toLowerCase();
 
   if (
+    code === "authorization_invalid" ||
+    normalized.includes("authorization_invalid") ||
+    normalized.includes("unauthorized request") ||
+    normalized.includes("not authorized")
+  ) {
+    return {
+      message: "Your session has expired or is invalid. Please sign in again.",
+      action: "switch-to-signin",
+      tone: "warning",
+    };
+  }
+
+  if (
     code === "session_exists" ||
     normalized.includes("session exists") ||
     normalized.includes("already have an active session")

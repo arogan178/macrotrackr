@@ -26,7 +26,8 @@ describe("queryClient", () => {
     it("creates query client with default options", () => {
       expect(queryClient).toBeDefined();
       const defaults = queryClient.getDefaultOptions();
-      expect(defaults.queries?.staleTime).toBe(5 * 60 * 1000);
+      expect(defaults.queries?.staleTime).toBe(30 * 1000);
+      expect(defaults.queries?.refetchOnWindowFocus).toBe(true);
       expect(defaults.queries?.retry).toBe(1);
       expect(defaults.mutations?.retry).toBe(0);
     });
@@ -35,17 +36,20 @@ describe("queryClient", () => {
   describe("queryConfigs", () => {
     it("has auth config", () => {
       expect(queryConfigs.auth).toBeDefined();
-      expect(queryConfigs.auth.staleTime).toBe(60 * 1000);
+      expect(queryConfigs.auth.staleTime).toBe(30 * 1000);
+      expect(queryConfigs.auth.refetchOnWindowFocus).toBe(true);
     });
 
     it("has longLived config", () => {
       expect(queryConfigs.longLived).toBeDefined();
-      expect(queryConfigs.longLived.staleTime).toBe(5 * 60 * 1000);
+      expect(queryConfigs.longLived.staleTime).toBe(30 * 1000);
+      expect(queryConfigs.longLived.refetchOnWindowFocus).toBe(true);
     });
 
     it("has macros config", () => {
       expect(queryConfigs.macros).toBeDefined();
-      expect(queryConfigs.macros.staleTime).toBe(2 * 60 * 1000);
+      expect(queryConfigs.macros.staleTime).toBe(10 * 1000);
+      expect(queryConfigs.macros.refetchOnWindowFocus).toBe(true);
     });
   });
 });

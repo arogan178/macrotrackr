@@ -15,6 +15,16 @@ function isLikelyUserDetailsPayload(value: unknown): value is Record<string, unk
   return !!value && typeof value === "object" && Object.keys(value).length > 0;
 }
 
+function withTimeout<T>(promise: Promise<T>, ms: number, msg: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      const signal = AbortSignal.timeout(ms);
+      signal.addEventListener("abort", () => reject(new Error(msg)), { once: true });
+    }),
+  ]);
+}
+
 interface UseAuthReadyResult {
   error: string | null;
   setupAuth: () => Promise<void>;
@@ -47,7 +57,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
 
       if (!shouldBypassSync) {
         try {
-          await authApi.syncUser();
+          await withTimeout(authApi.syncUser(), 12000, "Account synchronization timed out");
         } catch (syncError: unknown) {
           if (
             syncError instanceof ApiError &&
@@ -85,7 +95,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
       let userDetails: Record<string, unknown> | null = null;
       for (let attempt = 0; attempt < 3; attempt += 1) {
         try {
-          const response = await userApi.getUserDetails();
+          const response = await withTimeout(userApi.getUserDetails(), 8000, "Fetching user details timed out");
           if (!isLikelyUserDetailsPayload(response)) {
             await new Promise((r) => setTimeout(r, 120));
             continue;
@@ -116,7 +126,7 @@ export function useAuthReady(redirectTo: string): UseAuthReadyResult {
       if (normalizedRedirectTo === "/home") {
         navigate({ to: "/home", search: { limit: 20, offset: 0 } });
       } else {
-        globalThis.location.assign(normalizedRedirectTo);
+        navigate({ to: normalizedRedirectTo as any });
 
         return;
       }

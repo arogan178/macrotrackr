@@ -15,6 +15,7 @@ import {
 import {
   mutationSuccessWithId,
 } from "../../lib/http/mutation-contract";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 import { checkProStatus, FREE_TIER_LIMITS } from "../../middleware/clerk-guards";
 import { MacroSchemas } from "./schemas";
 import {
@@ -275,6 +276,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
           throw new DatabaseError("Failed to create macro entry or retrieve confirmation.");
         }
 
+        publishUserSyncEvent(internalUserId, "macros");
+
         return normalizeMacroEntryRow(result);
       },
       {
@@ -308,6 +311,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
             `Macro entry with ID ${entryId} not found or access denied.`,
           );
         }
+
+        publishUserSyncEvent(internalUserId, "macros");
 
         return mutationSuccessWithId(Number(entryId));
       },
@@ -381,6 +386,8 @@ export const registerMacroEntryRoutes = (group: MacroRouteGroup) =>
 
           throw new DatabaseError("Failed to update macro entry (update returned no data).");
         }
+
+        publishUserSyncEvent(internalUserId, "macros");
 
         return normalizeMacroEntryRow(result);
       },

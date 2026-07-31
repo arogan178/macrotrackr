@@ -152,10 +152,11 @@ export default function ProfileForm({
             label="Activity Level"
             value={activityLevelValue ?? ""} // Use the converted numeric value
             onChange={(value) => {
-              updateSetting("activityLevel", Number(value));
-            }} // Ensure we store as number
+              updateSetting("activityLevel", value ? Number(value) : undefined);
+            }} // Ensure we store as number or undefined
             options={getActivityLevelOptions()}
             error={formErrors.activityLevel}
+            placeholder="Select activity level"
             required
           />
         </div>

@@ -401,7 +401,7 @@ describe("auth routes", () => {
   });
 
   describe("POST /api/auth/login", () => {
-    it("rotates sessions and sets a new cookie", async () => {
+    it("creates a new session and sets a new cookie without revoking other sessions", async () => {
       safeQueryMock.mockReturnValue({
         id: 5,
         email: "local@example.com",
@@ -416,7 +416,7 @@ describe("auth routes", () => {
 
       expect(response.status).toBe(200);
       expect(verifyPasswordMock).toHaveBeenCalledWith("secure-password", "stored-hash");
-      expect(deleteAllUserSessionsMock).toHaveBeenCalledWith(fakeDb, 5);
+      expect(deleteAllUserSessionsMock).not.toHaveBeenCalled();
       expect(createSessionMock).toHaveBeenCalledWith(
         fakeDb,
         5,

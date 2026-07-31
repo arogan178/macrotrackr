@@ -15,6 +15,7 @@ import { BadRequestError, ConflictError, NotFoundError } from "../../lib/http/er
 import { generateId } from "../../utils/id-generator";
 import { loggerHelpers } from "../../lib/observability/logger";
 import { mutationSuccess, mutationSuccessWithId } from "../../lib/http/mutation-contract";
+import { publishUserSyncEvent } from "../../lib/sync/eventBus";
 
 type GoalsRouteContext =
   AuthenticatedRouteContextWithUser<Record<string, unknown>>;
@@ -202,6 +203,8 @@ export const goalRoutes = (app: Elysia) =>
             savedGoal.starting_weight
           );
 
+          publishUserSyncEvent(internalUserId!, "goals");
+
           // Map response
           return {
             startingWeight: savedGoal.starting_weight,
@@ -337,6 +340,8 @@ export const goalRoutes = (app: Elysia) =>
             savedGoal.starting_weight
           );
 
+          publishUserSyncEvent(internalUserId!, "goals");
+
           // Map response
           return {
             startingWeight: savedGoal.starting_weight,
@@ -380,6 +385,8 @@ export const goalRoutes = (app: Elysia) =>
               internalUserId,
             ]);
           });
+
+          publishUserSyncEvent(internalUserId!, "goals");
 
           return mutationSuccess();
         },
@@ -455,6 +462,8 @@ export const goalRoutes = (app: Elysia) =>
               WHERE user_id = ?
             `;
             safeExecute(db, updateUserDetailQuery, [weight, internalUserId]);
+
+            publishUserSyncEvent(internalUserId!, "goals");
 
             return {
               id: newId,
@@ -538,6 +547,8 @@ export const goalRoutes = (app: Elysia) =>
                 internalUserId,
               ]);
             }
+
+            publishUserSyncEvent(internalUserId!, "goals");
 
             return mutationSuccessWithId(deletedEntry.id);
           });

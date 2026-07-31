@@ -13,6 +13,7 @@ import {
   macrosApi,
 } from "@/api/macros";
 import { calculateCaloriesFromMacros } from "@/features/macroTracking/calculations";
+import { broadcastLocalDataChange } from "@/hooks/useRealtimeSync";
 import { createMutationErrorLogger } from "@/lib/mutationErrorHandling";
 import { queryConfigs } from "@/lib/queryClient";
 import { queryKeys } from "@/lib/queryKeys";
@@ -319,6 +320,7 @@ export function useAddMacroEntry() {
         queryKey: ["macros", "history-infinite"],
         refetchType: "none",
       });
+      broadcastLocalDataChange("macros");
     },
   });
 }
@@ -408,6 +410,7 @@ export function useUpdateMacroEntry() {
         queryClient.invalidateQueries({ queryKey: queryKeys.macros.dailyTotals(context.entryDate) });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
+      broadcastLocalDataChange("macros");
     },
   });
 }
@@ -457,6 +460,7 @@ export function useDeleteMacroEntry() {
         queryClient.invalidateQueries({ queryKey: queryKeys.macros.dailyTotals(context.entryDate) });
       }
       queryClient.invalidateQueries({ queryKey: queryKeys.macros.all() });
+      broadcastLocalDataChange("macros");
     },
   });
 }
@@ -476,6 +480,7 @@ export function useUpdateMacroTarget() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.macros.targets() });
+      broadcastLocalDataChange("macros");
     },
     onError: logUpdateMacroTargetError,
   });
