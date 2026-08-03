@@ -181,4 +181,59 @@ describe("EntryHistoryHelpers & Panel", () => {
 
     expect(screen.getAllByText("Protein Shake").length).toBeGreaterThan(0);
   });
+
+  it("renders Load More Dates button and triggers onLoadMore when hasMore is true even if currently loaded dates count < 5", async () => {
+    const queryClient = createQueryClient();
+    let loadMoreCalled = false;
+
+    // Create entries for 2 distinct dates (fewer than displayedDateCount default of 5)
+    const entries = [
+      {
+        id: 1,
+        mealName: "Meal 1",
+        mealType: "lunch" as const,
+        protein: 20,
+        carbs: 30,
+        fats: 10,
+        entryDate: "2026-07-31",
+        entryTime: "12:00",
+        createdAt: new Date().toISOString(),
+      },
+      {
+        id: 2,
+        mealName: "Meal 2",
+        mealType: "dinner" as const,
+        protein: 25,
+        carbs: 35,
+        fats: 12,
+        entryDate: "2026-07-30",
+        entryTime: "19:00",
+        createdAt: new Date().toISOString(),
+      },
+    ];
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <EntryHistoryPanel
+          history={entries}
+          deleteEntry={() => {}}
+          onEdit={() => {}}
+          isDeleting={false}
+          isEditing={false}
+          hasMore
+          onLoadMore={() => {
+            loadMoreCalled = true;
+          }}
+        />
+      </QueryClientProvider>,
+    );
+
+    const loadMoreButton = screen.getByRole("button", { name: /load more dates/i });
+    expect(loadMoreButton).toBeDefined();
+
+    loadMoreButton.click();
+    await waitFor(() => {
+      expect(loadMoreCalled).toBe(true);
+    });
+  });
 });
