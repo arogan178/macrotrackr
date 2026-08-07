@@ -169,40 +169,4 @@ export function useCardGlare(config: CardGlareConfig = {}): CardGlareReturn {
   };
 }
 
-/**
- * Higher-order component wrapper for quick card glare effect.
- *
- * @example
- * function MyCard() {
- *   return (
- *     <CardGlareWrapper className="p-4 bg-surface-2 rounded-xl">
- *       Card content with glare effect
- *     </CardGlareWrapper>
- *   );
- * }
- */
-export function CardGlareWrapper({
-  children,
-  className = "",
-  config = {},
-}: {
-  children: React.ReactNode;
-  className?: string;
-  config?: CardGlareConfig;
-}) {
-  const { cardRef, cardStyle, glareStyle, handlers } = useCardGlare(config);
-
-  return (
-    <div
-      ref={cardRef}
-      style={cardStyle}
-      className={`relative overflow-hidden ${className}`}
-      {...handlers}
-    >
-      <div style={glareStyle} />
-      <div className="relative z-10">{children}</div>
-    </div>
-  );
-}
-
 export default useCardGlare;

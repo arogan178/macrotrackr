@@ -1,15 +1,9 @@
 export function generateId(prefix = "id"): string {
-  const timestamp = Date.now();
-  const randomPart = crypto.randomUUID().substring(0, 8);
-  return `${prefix}_${timestamp}_${randomPart}`;
+  return `${prefix}_${Date.now()}_${crypto.randomUUID().slice(0, 8)}`;
 }
 
-export function generateUUID(): string {
-  return crypto.randomUUID();
-}
+export const generateUUID = (): string => crypto.randomUUID();
 
 export function generateNumericId(): number {
-  const timestamp = Date.now();
-  const random = Math.floor(Math.random() * 1000);
-  return parseInt(`${timestamp}${random.toString().padStart(3, "0")}`);
+  return Number(`${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`);
 }
