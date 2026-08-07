@@ -120,14 +120,35 @@ export default function HomePage() {
 
   const handleSaveMeal = useCallback(
     async (entry: MacroEntry) => {
-      if (!entry.foodName && !entry.mealName) return;
+      const entryName = entry.foodName ?? entry.mealName;
+      if (!entryName) return;
+
+      const ingredients =
+        entry.ingredients && entry.ingredients.length > 0
+          ? entry.ingredients
+          : [
+              {
+                name: entryName,
+                protein: entry.protein,
+                carbs: entry.carbs,
+                fats: entry.fats,
+                quantity: 100,
+                unit: "g",
+                baseProtein: entry.protein,
+                baseCarbs: entry.carbs,
+                baseFats: entry.fats,
+                baseQuantity: 100,
+                baseUnit: "g",
+              },
+            ];
 
       await createSavedMealMutation.mutateAsync({
-        name: entry.foodName ?? entry.mealName,
+        name: entryName,
         protein: entry.protein,
         carbs: entry.carbs,
         fats: entry.fats,
         mealType: entry.mealType,
+        ingredients,
       });
     },
     [createSavedMealMutation],

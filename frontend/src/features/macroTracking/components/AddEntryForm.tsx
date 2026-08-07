@@ -235,15 +235,68 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       ingredients?: Ingredient[];
     }) => {
       if (meal.ingredients && meal.ingredients.length > 0) {
-        setBaseMacros({
-          protein: meal.protein,
-          carbs: meal.carbs,
-          fats: meal.fats,
-        });
         setBaseIngredients(meal.ingredients);
         setMealName(meal.name);
-        setQuantity(1);
-        setUnit("unit");
+        setProtein(meal.protein);
+        setCarbs(meal.carbs);
+        setFats(meal.fats);
+
+        if (meal.ingredients.length === 1) {
+          const ing = meal.ingredients[0];
+          let derivedBaseMacros:
+            | { protein: number; carbs: number; fats: number }
+            | undefined;
+
+          if (
+            typeof ing.baseProtein === "number" &&
+            typeof ing.baseCarbs === "number" &&
+            typeof ing.baseFats === "number"
+          ) {
+            derivedBaseMacros = {
+              protein: ing.baseProtein,
+              carbs: ing.baseCarbs,
+              fats: ing.baseFats,
+            };
+          } else if (typeof ing.quantity === "number" && ing.quantity > 0) {
+            const ingUnit = (ing.unit as UnitType) ?? "g";
+            if (ingUnit === "unit") {
+              derivedBaseMacros = {
+                protein: ing.protein / ing.quantity,
+                carbs: ing.carbs / ing.quantity,
+                fats: ing.fats / ing.quantity,
+              };
+            } else {
+              let qtyInGrams: number;
+              if (UnitConverter.isWeightUnit(ingUnit)) {
+                qtyInGrams = UnitConverter.convert(ing.quantity, ingUnit, "g");
+              } else if (UnitConverter.isVolumeUnit(ingUnit)) {
+                qtyInGrams = UnitConverter.convert(ing.quantity, ingUnit, "ml");
+              } else {
+                qtyInGrams = ing.quantity * 100;
+              }
+              const factor = qtyInGrams / 100;
+              if (factor > 0) {
+                derivedBaseMacros = {
+                  protein: ing.protein / factor,
+                  carbs: ing.carbs / factor,
+                  fats: ing.fats / factor,
+                };
+              }
+            }
+          }
+
+          setBaseMacros(derivedBaseMacros);
+          setQuantity(ing.quantity ?? 100);
+          setUnit((ing.unit as UnitType) ?? "g");
+        } else {
+          setBaseMacros({
+            protein: meal.protein,
+            carbs: meal.carbs,
+            fats: meal.fats,
+          });
+          setQuantity(1);
+          setUnit("unit");
+        }
       } else {
         setBaseMacros(undefined);
         setBaseIngredients(undefined);
@@ -288,16 +341,36 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
           factor = quantityInBaseUnit / 100;
         }
 
-        if (baseIngredients) {
-          finalIngredients = baseIngredients.map((ing) => ({
-            ...ing,
-            protein: Number((ing.protein * factor).toFixed(1)),
-            carbs: Number((ing.carbs * factor).toFixed(1)),
-            fats: Number((ing.fats * factor).toFixed(1)),
-            quantity: ing.quantity
-              ? Number((ing.quantity * factor).toFixed(1))
-              : undefined,
-          }));
+        if (baseIngredients && baseIngredients.length > 0) {
+          if (baseIngredients.length === 1) {
+            const ing = baseIngredients[0];
+            finalIngredients = [
+              {
+                ...ing,
+                name: ing.name || mealName,
+                protein: protein as number,
+                carbs: carbs as number,
+                fats: fats as number,
+                quantity: typeof quantity === "number" ? quantity : ing.quantity,
+                unit: unit || ing.unit,
+                baseProtein: baseMacros?.protein ?? ing.baseProtein,
+                baseCarbs: baseMacros?.carbs ?? ing.baseCarbs,
+                baseFats: baseMacros?.fats ?? ing.baseFats,
+                baseQuantity: ing.baseQuantity ?? (unit === "unit" ? 1 : 100),
+                baseUnit: ing.baseUnit ?? (unit === "unit" ? "unit" : unit),
+              },
+            ];
+          } else {
+            finalIngredients = baseIngredients.map((ing) => ({
+              ...ing,
+              protein: Number((ing.protein * factor).toFixed(1)),
+              carbs: Number((ing.carbs * factor).toFixed(1)),
+              fats: Number((ing.fats * factor).toFixed(1)),
+              quantity: ing.quantity
+                ? Number((ing.quantity * factor).toFixed(1))
+                : undefined,
+            }));
+          }
         } else if (baseMacros) {
           finalIngredients = [
             {

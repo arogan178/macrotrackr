@@ -4,7 +4,7 @@ import IconButton from "@/components/ui/IconButton";
 import { StarIcon } from "@/components/ui/Icons";
 import { useCreateSavedMeal } from "@/hooks/queries/useSavedMeals";
 import { useStore } from "@/store/store";
-import type { MealType } from "@/types/macro";
+import type { Ingredient, MealType } from "@/types/macro";
 import { handleApiError } from "@/utils/errorHandling";
 
 interface SavedMealButtonProps {
@@ -13,6 +13,7 @@ interface SavedMealButtonProps {
   carbs: number;
   fats: number;
   mealType?: MealType;
+  ingredients?: Ingredient[];
   ariaLabel?: string;
 }
 
@@ -22,6 +23,7 @@ export default function SavedMealButton({
   carbs,
   fats,
   mealType = "snack",
+  ingredients,
   ariaLabel = "Save meal for quick re-entry",
 }: SavedMealButtonProps) {
   const [isSaved, setIsSaved] = useState(false);
@@ -36,6 +38,7 @@ export default function SavedMealButton({
         carbs,
         fats,
         mealType,
+        ingredients,
       });
       setIsSaved(true);
       showNotification("Meal saved for quick re-entry", "success");

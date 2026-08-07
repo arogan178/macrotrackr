@@ -4,7 +4,13 @@ import { describe, expect, it, vi } from "vitest";
 import AddEntryForm from "./AddEntryForm";
 
 vi.mock("@/features/macroTracking/components/CalorieSearchForm", () => ({
-  default: ({ onResult }: { onResult: (value: unknown) => void }) => (
+  default: ({
+    onResult,
+    onSelectSavedMeal,
+  }: {
+    onResult: (value: unknown) => void;
+    onSelectSavedMeal: (meal: unknown) => void;
+  }) => (
     <div>
       <button
         type="button"
@@ -37,6 +43,67 @@ vi.mock("@/features/macroTracking/components/CalorieSearchForm", () => ({
         }
       >
         Select milk
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          onSelectSavedMeal({
+            name: "chia seeds",
+            protein: 6.8,
+            carbs: 12.8,
+            fats: 12.2,
+            mealType: "snack",
+            ingredients: [
+              {
+                name: "chia seeds",
+                protein: 6.8,
+                carbs: 12.8,
+                fats: 12.2,
+                quantity: 40,
+                unit: "g",
+                baseProtein: 17,
+                baseCarbs: 32,
+                baseFats: 30.5,
+                baseQuantity: 100,
+                baseUnit: "g",
+              },
+            ],
+          })
+        }
+      >
+        Select single saved meal
+      </button>
+      <button
+        type="button"
+        onClick={() =>
+          onSelectSavedMeal({
+            name: "Big Breakfast",
+            protein: 30,
+            carbs: 26,
+            fats: 20,
+            mealType: "breakfast",
+            ingredients: [
+              {
+                name: "Eggs",
+                protein: 24,
+                carbs: 1,
+                fats: 18,
+                quantity: 200,
+                unit: "g",
+              },
+              {
+                name: "Toast",
+                protein: 6,
+                carbs: 25,
+                fats: 2,
+                quantity: 50,
+                unit: "g",
+              },
+            ],
+          })
+        }
+      >
+        Select grouped saved meal
       </button>
     </div>
   ),
@@ -80,5 +147,39 @@ describe("AddEntryForm", () => {
     expect(proteinInput.value).toBe("10");
     expect(carbsInput.value).toBe("25");
     expect(fatsInput.value).toBe("1.3");
+  });
+
+  it("restores custom quantity and unit when reselecting single-ingredient saved meal", () => {
+    render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Select single saved meal" }));
+
+    const quantityInput = screen.getByPlaceholderText("100") as HTMLInputElement;
+    const unitSelect = screen.getByDisplayValue("g") as HTMLSelectElement;
+
+    expect(quantityInput.value).toBe("40");
+    expect(unitSelect.value).toBe("g");
+
+    const proteinInput = screen.getByLabelText("Protein") as HTMLInputElement;
+    expect(proteinInput.value).toBe("6.8");
+  });
+
+  it("submits individual ingredient breakdown for grouped saved meal", async () => {
+    const handleSubmit = vi.fn();
+    render(<AddEntryForm onSubmit={handleSubmit} isSaving={false} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Select grouped saved meal" }));
+
+    fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
+
+    expect(handleSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mealName: "Big Breakfast",
+        ingredients: [
+          expect.objectContaining({ name: "Eggs", quantity: 200, unit: "g", protein: 24 }),
+          expect.objectContaining({ name: "Toast", quantity: 50, unit: "g", protein: 6 }),
+        ],
+      }),
+    );
   });
 });
