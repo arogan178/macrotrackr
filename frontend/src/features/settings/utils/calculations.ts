@@ -9,8 +9,7 @@ import {
   calculateBMR as calculateBMRCore,
   calculateTDEE as calculateTDEECore,
 } from "@/utils/nutritionCalculations";
-
-import { ACTIVITY_LEVELS } from "./constants";
+import { ACTIVITY_LEVELS } from "@/utils/userConstants";
 
 // Pure calculation functions - independent of domain-specific types
 /**
