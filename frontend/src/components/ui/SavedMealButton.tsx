@@ -12,6 +12,7 @@ interface SavedMealButtonProps {
   carbs: number;
   fats: number;
   mealType?: "breakfast" | "lunch" | "dinner" | "snack";
+  ingredients?: unknown[];
   ariaLabel?: string;
 }
 
@@ -21,6 +22,7 @@ export default function SavedMealButton({
   carbs,
   fats,
   mealType = "snack",
+  ingredients,
   ariaLabel = "Save meal for quick re-entry",
 }: SavedMealButtonProps) {
   const [isSaved, setIsSaved] = useState(false);
@@ -35,6 +37,7 @@ export default function SavedMealButton({
         carbs,
         fats,
         mealType,
+        ingredients,
       });
       setIsSaved(true);
       showNotification("Meal saved for quick re-entry", "success");
