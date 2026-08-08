@@ -1,6 +1,5 @@
 import { Elysia } from "elysia";
-import { afterEach, beforeEach, describe, expect, it } from "bun:test";
-import { vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { config, getConfig, resetConfigCache } from "../../../src/config";
 
 const verifyWebhookMock = vi.fn();
@@ -135,7 +134,6 @@ describe("clerk webhook handler", () => {
   });
 
   it("returns 400 when Svix signature verification fails", async () => {
-    console.log("SECRET IN TEST 136:", JSON.stringify(process.env.CLERK_WEBHOOK_SECRET), "CONFIG SECRET:", JSON.stringify(config.CLERK_WEBHOOK_SECRET));
     verifyWebhookMock.mockImplementation(() => {
       throw new Error("invalid signature");
     });

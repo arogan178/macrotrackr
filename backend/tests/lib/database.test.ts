@@ -7,13 +7,6 @@ vi.mock("../../src/lib/observability/logger", () => ({
   loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
 
-import * as realQueryTracer from "../../src/lib/observability/query-tracer";
-
-// Mock the query-tracer
-vi.mock("../../src/lib/observability/query-tracer", () => ({
-  ...realQueryTracer,
-}));
-
 import { DatabaseError } from "../../src/lib/http/errors";
 import {
   safeExecute,
