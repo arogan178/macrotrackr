@@ -1,3 +1,5 @@
+import { motion } from "motion/react";
+
 import {
   Button,
   ExportIcon,
@@ -7,8 +9,6 @@ import {
 } from "@/components/ui";
 import { DATE_RANGE_OPTIONS } from "@/components/utils";
 import { isLocalAuthMode } from "@/config/runtime";
-
-import AnalyticsToolbar from "./AnalyticsToolbar";
 
 interface DateRangeSelectorProps {
   currentRange: string;
@@ -52,7 +52,11 @@ export default function DateRangeSelector({
   }));
 
   return (
-    <AnalyticsToolbar>
+    <motion.div
+      layout
+      className="sticky top-24 z-50 mb-6 rounded-xl border border-border/70 bg-surface/92 p-3 shadow-lg backdrop-blur-md"
+      style={{ position: "sticky" }}
+    >
       <div className="flex w-full flex-wrap items-center gap-4">
         <div className="flex items-center">
           <span className="mr-3 font-medium text-foreground">Time Period:</span>
@@ -96,6 +100,6 @@ export default function DateRangeSelector({
           </Button>
         </div>
       </div>
-    </AnalyticsToolbar>
+    </motion.div>
   );
 }

@@ -207,6 +207,7 @@ export function setConfigOverrides(overrides: Partial<Config> | null) {
 
 export function resetConfigCache() {
   cachedConfig = null;
+  configOverrides = null;
 }
 
 const configProxyTarget: Config = {

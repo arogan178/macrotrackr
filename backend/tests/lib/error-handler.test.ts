@@ -1,10 +1,15 @@
 import { describe, expect, it, vi, beforeEach } from "vitest";
 
-// Mock the logger module
+const mockLoggerError = vi.fn();
+
 vi.mock("../../src/lib/observability/logger", () => ({
   logger: {
-    error: vi.fn(),
+    error: (...args: unknown[]) => mockLoggerError(...args),
+    info: vi.fn(),
+    warn: vi.fn(),
+    debug: vi.fn(),
   },
+  loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
 
 import { logger } from "../../src/lib/observability/logger";
@@ -46,29 +51,23 @@ describe("error-handler", () => {
     });
 
     it("logs error with operation name", () => {
-      const loggerError = vi.fn();
-      vi.mocked(logger.error).mockImplementation(loggerError);
-
       try {
         handleServiceError(new Error("test"), "fetch_user");
       } catch {
         // Expected to throw
       }
 
-      expect(loggerError).toHaveBeenCalled();
+      expect(mockLoggerError).toHaveBeenCalled();
     });
 
     it("includes context in log", () => {
-      const loggerError = vi.fn();
-      vi.mocked(logger.error).mockImplementation(loggerError);
-
       try {
         handleServiceError(new Error("test"), "fetch_user", { userId: 123 });
       } catch {
         // Expected to throw
       }
 
-      expect(loggerError).toHaveBeenCalledWith(
+      expect(mockLoggerError).toHaveBeenCalledWith(
         expect.objectContaining({
           userId: 123,
         }),

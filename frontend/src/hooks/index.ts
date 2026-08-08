@@ -1,13 +1,6 @@
 export { useBeforeUnload } from "./useBeforeUnload";
 export { useDeferredVisibility } from "./useDeferredVisibility";
-export { useErrorHandler, useQueryErrorHandler } from "./useErrorHandler";
-export {
-  type FeatureType,
-  useFeatureLoading,
-  useMultiFeatureLoading,
-  useSpecificMutationLoading,
-  useSpecificQueryLoading,
-} from "./useFeatureLoading";
+export { useFeatureLoading } from "./useFeatureLoading";
 export { useCriticalLoading, useGlobalLoading } from "./useGlobalLoading";
 export {
   useMutationErrorHandler,

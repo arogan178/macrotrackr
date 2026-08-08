@@ -1,28 +1,27 @@
 import { describe, it, expect, mock } from "bun:test";
+import * as originalClerkGuards from "../../src/middleware/clerk-guards";
 
 // Mock clerk guards to bypass auth completely for the route integration tests
 mock.module("../../src/middleware/clerk-guards", () => {
   const { Elysia } = require("elysia");
-  // We need to construct the middleware chain such that `authenticatedUser` is merged into the context properly
-  const requireAuth = new Elysia({ name: "requireAuth" }).derive({ as: "scoped" }, () => {
-    return {
-      authenticatedUser: {
-        userId: 1,
-        providerUserId: "test_clerk",
-        authProvider: "clerk",
-        email: "test@example.com"
-      }
+  const requireAuth = new Elysia({ name: "requireAuth" }).derive({ as: "global" }, () => {
+    const user = {
+      userId: 1,
+      providerUserId: "test_clerk",
+      authProvider: "clerk" as const,
+      email: "test@example.com"
     };
+    return { user, authenticatedUser: user };
   });
 
   return {
+    ...originalClerkGuards,
     requireAuth,
-    checkProStatus: async () => true,
-    FREE_TIER_LIMITS: { DATA_RETENTION_DAYS: 60 }
   };
 });
 
 import { Elysia } from "elysia";
+import { requireAuth } from "../../src/middleware/clerk-guards";
 import { isValidMacroTargetResponse } from "./schemas";
 import { macroRoutes } from "../../src/modules/macros/routes";
 import { Database } from "bun:sqlite";
@@ -48,6 +47,7 @@ describe("Route Integration Test Patterns", () => {
     // The handler has `use(requireAuth)` directly in it, so mocking the module above bypasses it
     const testApp = new Elysia()
       .decorate("db", mockDb)
+      .use(requireAuth)
       .onError(({ error }) => {
         console.error("APP ERROR", error);
       })

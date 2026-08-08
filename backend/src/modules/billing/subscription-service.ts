@@ -306,33 +306,6 @@ export class SubscriptionService {
   }
 
   /**
-   * Get subscription by Stripe subscription ID
-   */
-  static async getSubscriptionByStripeId(
-    stripeSubscriptionId: string
-  ): Promise<SubscriptionRecord> {
-    const db = getDb();
-    try {
-      const subscription = safeQuery<SubscriptionRecord>(
-        db,
-        "SELECT * FROM subscriptions WHERE stripe_subscription_id = ?",
-        [stripeSubscriptionId]
-      );
-      if (!subscription) {
-        throw new NotFoundError("Subscription not found");
-      }
-      return subscription;
-    } catch (error) {
-      handleServiceError(
-        error,
-        "get_subscription_by_stripe_id",
-        { stripeSubscriptionId },
-        [NotFoundError]
-      );
-    }
-  }
-
-  /**
    * Check if user has active Pro subscription
    */
   static async hasActiveProSubscription(userId: number): Promise<boolean> {

@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 
 import type { MacroEntry } from "@/types/macro";
 
+import { addDaysISO, todayISO } from "../../../utils/dateUtilities";
+
 import { useReportingLogic } from "./useReportingLogic";
 
 describe("useReportingLogic", () => {
@@ -22,7 +24,9 @@ describe("useReportingLogic", () => {
   });
 
   it("calculates averages over tracked days when partially logged in week view", () => {
-    // Suppose user logged food on only 2 of 7 days: 2000 kcal on day 1, 2000 kcal on day 2
+    const today = todayISO();
+    const yesterday = addDaysISO(today, -1);
+
     const mockHistory: MacroEntry[] = [
       {
         id: 1,
@@ -30,8 +34,8 @@ describe("useReportingLogic", () => {
         carbs: 200,   // 800 kcal
         fats: 66.7,   // 600 kcal -> total 2000 kcal
         mealType: "lunch",
-        entryDate: "2026-07-27",
-        createdAt: "2026-07-27T12:00:00Z",
+        entryDate: yesterday,
+        createdAt: `${yesterday}T12:00:00Z`,
       },
       {
         id: 2,
@@ -39,8 +43,8 @@ describe("useReportingLogic", () => {
         carbs: 200,
         fats: 66.7,
         mealType: "dinner",
-        entryDate: "2026-07-28",
-        createdAt: "2026-07-28T18:00:00Z",
+        entryDate: today,
+        createdAt: `${today}T18:00:00Z`,
       },
     ];
 

@@ -137,11 +137,6 @@ export function getMetricsRegistry() {
   return metricsRef;
 }
 
-export function resetMetricsRegistry() {
-  metricsRef = null;
-  metricsConfiguredExplicitly = false;
-}
-
 // Helper functions
 export function recordRequest(method: string, path: string, status: number, durationMs: number): void {
   const metrics = getMetricsRegistry();

@@ -33,6 +33,4 @@ export const PLANS: Plan[] = [
     interval: "month",
     features: PRO_PLAN_DEFINITION.features,
   },
-] as const;
-
-export const getPlans = () => PLANS;
+];

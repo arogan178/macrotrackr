@@ -48,31 +48,7 @@ vi.mock("../../../src/services/email-service", () => ({
   },
 }));
 
-vi.mock("../../../src/config", () => ({
-  config: new Proxy(
-    {},
-    {
-      get: (_target, property) => {
-        if (property === "AUTH_MODE") {
-          return authMode;
-        }
-
-        if (property === "NODE_ENV") {
-          return "test";
-        }
-
-        if (property === "CORS_ORIGIN") {
-          return "http://localhost:5173";
-        }
-
-        return undefined;
-      },
-    },
-  ),
-  getConfig: () => ({
-    AUTH_MODE: authMode,
-  }),
-}));
+import { resetConfigCache } from "../../../src/config";
 
 import { authRoutes } from "../../../src/modules/auth/routes";
 
@@ -211,6 +187,10 @@ describe("auth routes", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
     authMode = "local";
+    process.env.APP_MODE = "self-hosted";
+    process.env.AUTH_MODE = "local";
+    process.env.BILLING_MODE = "disabled";
+    resetConfigCache();
 
     safeQueryMock.mockReset();
     safeExecuteMock.mockReset();
@@ -371,6 +351,10 @@ describe("auth routes", () => {
 
     it("returns 404 outside local auth mode", async () => {
       authMode = "clerk";
+      process.env.APP_MODE = "managed";
+      process.env.AUTH_MODE = "clerk";
+      process.env.BILLING_MODE = "managed";
+      resetConfigCache();
       const app = createAuthTestApp(fakeDb);
       const response = await postJson(app, "/api/auth/register", {
         email: "new@example.com",
@@ -443,6 +427,10 @@ describe("auth routes", () => {
 
     it("returns 404 outside local auth mode", async () => {
       authMode = "clerk";
+      process.env.APP_MODE = "managed";
+      process.env.AUTH_MODE = "clerk";
+      process.env.BILLING_MODE = "managed";
+      resetConfigCache();
 
       const app = createAuthTestApp(fakeDb);
       const response = await postJson(app, "/api/auth/login", {
@@ -529,6 +517,10 @@ describe("auth routes", () => {
 
     it("returns unauthenticated payload in clerk mode", async () => {
       authMode = "clerk";
+      process.env.APP_MODE = "managed";
+      process.env.AUTH_MODE = "clerk";
+      process.env.BILLING_MODE = "managed";
+      resetConfigCache();
       const app = createAuthTestApp(fakeDb);
 
       const response = await getRequest(app, "/api/auth/session");
@@ -576,6 +568,10 @@ describe("auth routes", () => {
 
     it("returns 404 outside local auth mode", async () => {
       authMode = "clerk";
+      process.env.APP_MODE = "managed";
+      process.env.AUTH_MODE = "clerk";
+      process.env.BILLING_MODE = "managed";
+      resetConfigCache();
       const app = createAuthTestApp(fakeDb);
       const response = await postJson(app, "/api/auth/forgot-password", {
         email: "local@example.com",
@@ -692,6 +688,10 @@ describe("auth routes", () => {
   describe("POST /api/auth/clerk-sync", () => {
     beforeEach(() => {
       authMode = "clerk";
+      process.env.APP_MODE = "managed";
+      process.env.AUTH_MODE = "clerk";
+      process.env.BILLING_MODE = "managed";
+      resetConfigCache();
     });
 
     it("creates a new user and default records for a fresh Clerk account", async () => {
@@ -985,6 +985,10 @@ describe("auth routes", () => {
 
     it("returns 404 when clerk sync route is called in local mode", async () => {
       authMode = "local";
+      process.env.APP_MODE = "self-hosted";
+      process.env.AUTH_MODE = "local";
+      process.env.BILLING_MODE = "disabled";
+      resetConfigCache();
       const app = createAuthTestApp(fakeDb);
 
       const response = await postJson(app, "/api/auth/clerk-sync", {});

@@ -1,10 +1,10 @@
 import { apiClient } from "@/api/core";
+import type { WeightGoalFormValues } from "@/features/goals/types";
 import {
   calculateCalorieTarget,
   calculateWeeklyChange,
   calculateWeeksToGoal,
-} from "@/features/goals/calculations";
-import type { WeightGoalFormValues } from "@/features/goals/types";
+} from "@/utils/nutritionCalculations";
 
 interface SetWeightGoalPayload {
   startingWeight: number;

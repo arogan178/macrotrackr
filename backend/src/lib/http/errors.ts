@@ -1,5 +1,3 @@
-import { loggerHelpers } from "../observability/logger";
-
 export class AppError extends Error {
   public readonly statusCode: number;
   public readonly code: string;
@@ -90,33 +88,4 @@ export class DatabaseError extends AppError {
 
 export function isAppError(error: unknown): error is AppError {
   return error instanceof AppError;
-}
-
-export function formatErrorResponse(error: unknown) {
-  if (isAppError(error)) {
-    return {
-      code: error.code,
-      message: error.message,
-      details: (error as ValidationError).details,
-    };
-  }
-
-  // Handle Elysia validation errors
-  if (error instanceof Error && error.message.includes("validation")) {
-    return {
-      code: "VALIDATION_ERROR",
-      message: "Input validation failed",
-      details: error.message,
-    };
-  }
-
-  // Generic error fallback
-  loggerHelpers.error(
-    error instanceof Error ? error : new Error(String(error)),
-    { type: "unexpected_error" }
-  );
-  return {
-    code: "INTERNAL_ERROR",
-    message: "An unexpected error occurred",
-  };
 }

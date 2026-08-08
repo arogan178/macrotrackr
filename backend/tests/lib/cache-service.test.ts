@@ -2,10 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the logger module
 vi.mock("../../src/lib/observability/logger", () => ({
-  loggerHelpers: {
-    performance: vi.fn(),
-    security: vi.fn(),
-  },
+  logger: new Proxy({}, { get: () => vi.fn() }),
+  loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
 
 import { createCacheService } from "../../src/services/cache-service";

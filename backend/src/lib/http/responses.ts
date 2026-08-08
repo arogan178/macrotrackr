@@ -27,20 +27,6 @@ function getErrorDetails(error: unknown): unknown {
   return undefined;
 }
 
-export function createSuccessResponse<T>(
-  data: T,
-  message?: string
-): SuccessResponse<T> {
-  const response: SuccessResponse<T> = {
-    success: true,
-    data,
-  };
-  if (message) {
-    response.message = message;
-  }
-  return response;
-}
-
 export function createErrorResponse(
   code: string,
   message: string,
@@ -93,26 +79,11 @@ export function handleError(
 export function withErrorHandling<T extends unknown[], R>(
   handler: (...args: T) => R | Promise<R>,
 ) {
-  return async (...args: T): Promise<R> => {
-    try {
-      const result = await handler(...args);
-      return result;
-    } catch (error) {
-      // Extract the 'set' parameter from args (typically the last context parameter)
-      const context = args[args.length - 1] as { set?: unknown } | undefined;
-      if (context?.set) {
-        throw error; // Let the global error handler deal with it
-      }
-      throw error;
-    }
-  };
+  return async (...args: T): Promise<R> => handler(...args);
 }
 
 export {
   toCamelCaseString,
-  toSnakeCaseString,
   transformKeysToCamel,
-  transformKeysToSnake,
   transformArrayToCamel,
-  transformArrayToSnake,
 } from "../mappers";

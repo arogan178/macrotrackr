@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 
 import {
   PLANS,
-  getPlans,
 } from "../../src/config/pricing";
 import {
   FREE_PLAN_DEFINITION,
@@ -37,9 +36,5 @@ describe("config/pricing", () => {
   it("reuses shared feature lists to avoid contract drift", () => {
     expect(PLANS[0]?.features).toBe(FREE_PLAN_DEFINITION.features);
     expect(PLANS[1]?.features).toBe(PRO_PLAN_DEFINITION.features);
-  });
-
-  it("returns the canonical plan list", () => {
-    expect(getPlans()).toBe(PLANS);
   });
 });

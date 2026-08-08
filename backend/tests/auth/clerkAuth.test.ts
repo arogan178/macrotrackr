@@ -1,21 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("elysia", () => ({
-  Elysia: class {
-    use() {
-      return this;
-    }
-
-    resolve() {
-      return this;
-    }
-
-    onBeforeHandle() {
-      return this;
-    }
-  },
-}));
-
 vi.mock("elysia-clerk", () => ({
   clerkPlugin: vi.fn(() => ({
     resolve: vi.fn(() => ({
@@ -25,20 +9,9 @@ vi.mock("elysia-clerk", () => ({
   verifyToken: vi.fn(),
 }));
 
-vi.mock("../../src/config", () => ({
-  config: {
-    CLERK_PUBLISHABLE_KEY: "pk_test_123",
-    CLERK_SECRET_KEY: "sk_test_123",
-    NODE_ENV: "test",
-  },
-}));
-
 vi.mock("../../src/lib/observability/logger", () => ({
-  logger: {
-    debug: vi.fn(),
-    warn: vi.fn(),
-    error: vi.fn(),
-  },
+  logger: new Proxy({}, { get: () => vi.fn() }),
+  loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
 
 vi.mock("../../src/lib/auth/clerk-utils", () => ({

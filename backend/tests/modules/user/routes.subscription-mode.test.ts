@@ -14,35 +14,14 @@ vi.mock("../../../src/lib/data/database", () => ({
     withTransactionAsyncMock(...arguments_),
 }));
 
-vi.mock("../../../src/config", () => ({
-  config: new Proxy(
-    {},
-    {
-      get: (_target, property) => {
-        if (property === "APP_MODE") {
-          return appMode;
-        }
-
-        if (property === "NODE_ENV") {
-          return "test";
-        }
-
-        return undefined;
-      },
-    },
-  ),
-  getConfig: () => ({
-    APP_MODE: appMode,
-    NODE_ENV: "test",
-  }),
-}));
+import { resetConfigCache } from "../../../src/config";
 
 import { userRoutes } from "../../../src/modules/user/routes";
 
 function createUserRoutesTestApp() {
   return new Elysia()
     .decorate("db", { kind: "test-db" })
-    .derive({ as: "scoped" }, () => ({
+    .derive({ as: "global" }, () => ({
       authenticatedUser: {
         userId: 7,
         providerUserId: "local-7",
@@ -59,6 +38,10 @@ function createUserRoutesTestApp() {
 describe("user routes subscription mode behavior", () => {
   beforeEach(() => {
     appMode = "managed";
+    process.env.APP_MODE = "managed";
+    process.env.AUTH_MODE = "clerk";
+    process.env.BILLING_MODE = "managed";
+    resetConfigCache();
     safeQueryMock.mockReset();
     safeExecuteMock.mockReset();
     withTransactionAsyncMock.mockReset();
@@ -92,6 +75,10 @@ describe("user routes subscription mode behavior", () => {
 
   it("returns pro status in self-hosted mode regardless of db status", async () => {
     appMode = "self-hosted";
+    process.env.APP_MODE = "self-hosted";
+    process.env.AUTH_MODE = "local";
+    process.env.BILLING_MODE = "disabled";
+    resetConfigCache();
     safeQueryMock.mockReturnValue({
       id: 7,
       email: "test@example.com",

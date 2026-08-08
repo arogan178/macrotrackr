@@ -3,18 +3,22 @@ import { describe, it, expect, beforeAll, afterAll, vi } from "vitest";
 // We mock requireAuth before we import any routes
 import { Elysia } from "elysia";
 
+import { Elysia } from "elysia";
+import { requireAuth } from "../../src/middleware/clerk-guards";
+import * as originalClerkGuards from "../../src/middleware/clerk-guards";
+
 vi.mock("../../src/middleware/clerk-guards", () => {
   return {
-    requireAuth: new Elysia({ name: "requireAuth" }).derive({ as: "scoped" }, () => ({
-      authenticatedUser: {
+    ...originalClerkGuards,
+    requireAuth: new Elysia({ name: "requireAuth" }).derive({ as: "global" }, () => {
+      const user = {
         userId: 1,
         providerUserId: "test_clerk",
-        authProvider: "clerk",
+        authProvider: "clerk" as const,
         email: "test@example.com"
-      }
-    })),
-    checkProStatus: async () => true,
-    FREE_TIER_LIMITS: { DATA_RETENTION_DAYS: 60, MAX_GOALS: 3, MAX_HABITS: 5, MAX_MACRO_ENTRIES_PER_DAY: 20 }
+      };
+      return { user, authenticatedUser: user };
+    }),
   };
 });
 
@@ -39,12 +43,15 @@ describe("Macros Module Integration", () => {
 
     app = new Elysia()
       .decorate("db", db)
+      .use(requireAuth)
       .use(macroRoutes);
   });
 
   afterAll(() => {
     db.close();
-    vi.unstubAllEnvs();
+    if (typeof vi.unstubAllEnvs === "function") {
+      vi.unstubAllEnvs();
+    }
   });
 
   it("GET /api/macros/target returns valid schema", async () => {
