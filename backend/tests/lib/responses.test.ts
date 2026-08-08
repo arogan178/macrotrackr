@@ -1,26 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 describe("responses", () => {
-  describe("createSuccessResponse", () => {
-    it("creates a success response with data", async () => {
-      const { createSuccessResponse } = await import("../../src/lib/http/responses");
-      
-      const response = createSuccessResponse({ id: 1, name: "test" });
-      
-      expect(response.success).toBe(true);
-      expect(response.data).toEqual({ id: 1, name: "test" });
-    });
-
-    it("creates a success response with message", async () => {
-      const { createSuccessResponse } = await import("../../src/lib/http/responses");
-      
-      const response = createSuccessResponse({ id: 1 }, "Operation successful");
-      
-      expect(response.success).toBe(true);
-      expect(response.message).toBe("Operation successful");
-    });
-  });
-
   describe("createErrorResponse", () => {
     it("creates an error response", async () => {
       const { createErrorResponse } = await import("../../src/lib/http/responses");

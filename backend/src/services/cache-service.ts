@@ -12,25 +12,16 @@ export class CacheService {
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key) as CacheEntry<T> | undefined;
-    if (!entry) {
-      return null;
-    }
-
-    const isExpired = Date.now() - entry.timestamp > CACHE_TTL;
-    if (isExpired) {
+    if (!entry) return null;
+    if (Date.now() - entry.timestamp > CACHE_TTL) {
       this.cache.delete(key);
       return null;
     }
-
     return entry.data;
   }
 
   set<T>(key: string, data: T) {
-    const entry: CacheEntry<T> = {
-      data,
-      timestamp: Date.now(),
-    };
-    this.cache.set(key, entry);
+    this.cache.set(key, { data, timestamp: Date.now() });
     loggerHelpers.performance("Cache SET", 0, { key });
   }
 
@@ -39,6 +30,4 @@ export class CacheService {
   }
 }
 
-export function createCacheService() {
-  return new CacheService();
-}
+export const createCacheService = () => new CacheService();

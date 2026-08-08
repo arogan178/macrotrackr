@@ -1,7 +1,6 @@
 import { memo, useCallback, useState } from "react";
 
 import InfoCard from "@/components/form/InfoCard";
-import MacroTargetBar from "@/components/macros/MacroTargetBar";
 import { InfoIcon } from "@/components/ui";
 import { useMacroTargetCore as useEditableMacroTargetCore } from "@/features/macroTracking/hooks/useMacroTargetCore";
 import type { MacroTargetState, MacroType } from "@/types/macro";
@@ -74,7 +73,29 @@ const MacroTarget = memo(
           </InfoCard>
         )}
 
-        <MacroTargetBar target={target} className="mb-6" />
+        <div className="relative mb-6 h-2 overflow-hidden rounded-full bg-surface/30">
+          <div
+            className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein/80 to-protein"
+            style={{ width: `${target.proteinPercentage}%` }}
+            aria-label={`Protein: ${target.proteinPercentage}%`}
+          />
+          <div
+            className="absolute top-0 h-2 bg-gradient-to-r from-carbs to-carbs/80"
+            style={{
+              width: `${target.carbsPercentage}%`,
+              left: `${target.proteinPercentage}%`,
+            }}
+            aria-label={`Carbs: ${target.carbsPercentage}%`}
+          />
+          <div
+            className="absolute top-0 h-2 bg-gradient-to-r from-fats to-fats/80"
+            style={{
+              width: `${target.fatsPercentage}%`,
+              left: `${target.proteinPercentage + target.carbsPercentage}%`,
+            }}
+            aria-label={`Fats: ${target.fatsPercentage}%`}
+          />
+        </div>
 
         <div className="space-y-6">
           <MacroSlider

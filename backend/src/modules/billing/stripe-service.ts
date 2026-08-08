@@ -34,10 +34,6 @@ export function getStripeClient() {
   return stripeClientRef;
 }
 
-export function resetStripeClient() {
-  stripeClientRef = null;
-}
-
 // Types for webhook event normalization
 export type ThinEventRelatedObjectType =
   | "billing.subscription"

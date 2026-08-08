@@ -1,10 +1,11 @@
 import type { HabitGoalUpdatePayload } from "@/api/habits";
 import { HabitGoal, HabitGoalFormValues } from "@/types/habit";
-import { generateId } from "@/utils/idGenerator";
 
 import { DEFAULT_HABIT_COLOR } from "../../constants/habits";
 
 import { calculateProgress, isHabitComplete } from "./calculations";
+
+const generateId = (): string => crypto.randomUUID();
 
 // Build update payload with required backend fields
 export const buildHabitUpdatePayload = (

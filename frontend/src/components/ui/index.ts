@@ -16,4 +16,3 @@ export { default as StatusBadge } from "./StatusBadge";
 export { default as StatusIndicator } from "./StatusIndicator";
 export { default as TabBar } from "./TabBar";
 export { default as TabButton, type TabButtonProps } from "./TabButton";
-export { VirtualList } from "./VirtualList";

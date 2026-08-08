@@ -19,6 +19,7 @@ import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
+import { getDateRangeData, mapDateRangeToDays } from "@/utils/dateUtilities";
 
 import {
   MacroDensityBreakdown,
@@ -29,7 +30,6 @@ import {
   UnifiedInsights,
 } from "../components";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
 
 export default function ReportingPage() {
   const queryClient = useQueryClient();
@@ -265,7 +265,7 @@ export default function ReportingPage() {
                           <div className="w-full">
                             <MacroDensityBreakdown
                               data={macroDensityData}
-                              selectedRange={mapDateRangeToNumeric(dateRange)}
+                              selectedRange={mapDateRangeToDays(dateRange)}
                               isLoading={isHistoryLoading}
                               isHistoryReady={isHistoryReady}
                             />
@@ -280,7 +280,7 @@ export default function ReportingPage() {
                           isLoading={isHistoryLoading}
                           showNoDataMessage={showNoDataMessage}
                           macroTarget={macroTarget ?? undefined}
-                          denominatorDays={mapDateRangeToNumeric(dateRange)}
+                          denominatorDays={mapDateRangeToDays(dateRange)}
                           dailySeriesForRange={dailySeries}
                         />
                       </ProFeature>

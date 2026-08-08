@@ -5,7 +5,7 @@ import { logger } from "../../lib/observability/logger";
 import { BadRequestError, NotFoundError } from "../../lib/http/errors";
 import { StripeService } from "./stripe-service";
 import { SubscriptionService } from "./subscription-service";
-import { getPlans } from "../../config/pricing";
+import { PLANS } from "../../config/pricing";
 import { t } from "elysia";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
 
@@ -376,7 +376,7 @@ export const billingRoutes = (app: Elysia) =>
         "/plans",
         async () => {
           try {
-            const plans = getPlans().map(plan => ({
+            const plans = PLANS.map(plan => ({
               ...plan,
               features: [...plan.features]
             }));

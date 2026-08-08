@@ -15,12 +15,12 @@ function isLikelyUserDetailsPayload(value: unknown): value is Record<string, unk
   return !!value && typeof value === "object" && Object.keys(value).length > 0;
 }
 
-function withTimeout<T>(promise: Promise<T>, ms: number, msg: string): Promise<T> {
+function withTimeout<T>(promise: Promise<T>, ms: number, message: string): Promise<T> {
   return Promise.race([
     promise,
     new Promise<never>((_, reject) => {
       const signal = AbortSignal.timeout(ms);
-      signal.addEventListener("abort", () => reject(new Error(msg)), { once: true });
+      signal.addEventListener("abort", () => reject(new Error(message)), { once: true });
     }),
   ]);
 }

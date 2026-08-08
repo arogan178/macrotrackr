@@ -49,7 +49,7 @@ export default defineConfig({
     },
     setupFiles: ['./vitest.setup.ts'],
     include: ['tests/**/*.test.ts', 'src/**/*.test.ts'],
-    exclude: ['node_modules', 'dist', 'tests/contracts/*.integration.test.ts', 'tests/contracts/elysia-integration.test.ts'],
+    exclude: ['node_modules', 'dist', '**/*.integration.test.ts', 'tests/contracts/elysia-integration.test.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

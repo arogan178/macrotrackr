@@ -44,7 +44,6 @@ export {
   WEIGHT_GOAL_OPTIONS,
   WEIGHT_VALIDATION,
 } from "./constants";
-export { useEditableMacroTarget } from "./hooks";
 export type {
   GoalsState,
   SetWeightGoalPayload,

@@ -3,21 +3,24 @@ import { describe, it, expect, beforeAll, afterAll } from "bun:test";
 // We mock requireAuth before we import any routes
 import { mock } from "bun:test";
 import { Elysia } from "elysia";
+import * as originalClerkGuards from "../../src/middleware/clerk-guards";
 
 mock.module("../../src/middleware/clerk-guards", () => {
   return {
-    requireAuth: new Elysia({ name: "requireAuth" }).derive({ as: "scoped" }, () => ({
-      authenticatedUser: {
+    ...originalClerkGuards,
+    requireAuth: new Elysia({ name: "requireAuth" }).derive({ as: "global" }, () => {
+      const user = {
         userId: 1,
         providerUserId: "test_clerk",
-        authProvider: "clerk",
+        authProvider: "clerk" as const,
         email: "test@example.com"
-      }
-    })),
-    checkProStatus: async () => true,
-    FREE_TIER_LIMITS: { DATA_RETENTION_DAYS: 60, MAX_GOALS: 3, MAX_HABITS: 5, MAX_MACRO_ENTRIES_PER_DAY: 20 }
+      };
+      return { user, authenticatedUser: user };
+    }),
   };
 });
+
+import { requireAuth } from "../../src/middleware/clerk-guards";
 
 import { goalRoutes } from "../../src/modules/goals/routes";
 import { Database } from "bun:sqlite";
@@ -47,6 +50,7 @@ describe("Goals Module Integration", () => {
 
     app = new Elysia()
       .decorate("db", db)
+      .use(requireAuth)
       .use(goalRoutes);
   });
 

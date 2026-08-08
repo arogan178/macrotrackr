@@ -10,29 +10,7 @@ vi.mock("../../src/modules/billing/subscription-service", () => ({
   },
 }));
 
-vi.mock("../../src/config", () => ({
-  config: new Proxy(
-    {},
-    {
-      get: (_target, property) => {
-        if (property === "APP_MODE") {
-          return appMode;
-        }
-
-        if (property === "NODE_ENV") {
-          return "test";
-        }
-
-        return undefined;
-      },
-    },
-  ),
-  getConfig: () => ({
-    APP_MODE: appMode,
-    NODE_ENV: "test",
-  }),
-}));
-
+import { resetConfigCache } from "../../src/config";
 import {
   requireAuth,
   FREE_TIER_LIMITS,
@@ -45,6 +23,16 @@ describe("clerk-guards", () => {
   beforeEach(() => {
     hasActiveProSubscriptionMock.mockReset();
     appMode = "managed";
+    process.env.APP_MODE = "managed";
+    process.env.AUTH_MODE = "clerk";
+    process.env.BILLING_MODE = "managed";
+    process.env.CLERK_PUBLISHABLE_KEY = "pk_test_123";
+    process.env.CLERK_SECRET_KEY = "sk_test_123";
+    process.env.STRIPE_SECRET_KEY = "sk_test_123";
+    process.env.STRIPE_WEBHOOK_SECRET = "whsec_test_123";
+    process.env.STRIPE_PRICE_ID_MONTHLY = "price_monthly_123";
+    process.env.STRIPE_PRICE_ID_YEARLY = "price_yearly_123";
+    resetConfigCache();
   });
 
   describe("FREE_TIER_LIMITS", () => {
@@ -98,6 +86,10 @@ describe("clerk-guards", () => {
 
     it("returns true in self-hosted mode", async () => {
       appMode = "self-hosted";
+      process.env.APP_MODE = "self-hosted";
+      process.env.AUTH_MODE = "local";
+      process.env.BILLING_MODE = "disabled";
+      resetConfigCache();
 
       await expect(checkProStatus(1)).resolves.toBe(true);
       expect(hasActiveProSubscriptionMock).not.toHaveBeenCalled();
@@ -143,6 +135,10 @@ describe("clerk-guards", () => {
 
     it("bypasses feature limits in self-hosted mode", async () => {
       appMode = "self-hosted";
+      process.env.APP_MODE = "self-hosted";
+      process.env.AUTH_MODE = "local";
+      process.env.BILLING_MODE = "disabled";
+      resetConfigCache();
 
       const result = await checkFeatureLimit(1, "MAX_GOALS" as FeatureLimitKey, 999);
       expect(result.allowed).toBe(true);

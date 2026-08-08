@@ -1,24 +1,25 @@
 import { mock } from "bun:test";
+import * as originalClerkGuards from "../src/middleware/clerk-guards";
 
-// We mock the clerk guards so we don't need actual JWTs or to hit Clerk APIs during integration tests.
-// The real file imports Elysia, so we need to mock it properly
+// We mock requireAuth so integration tests don't need actual JWTs or to hit Clerk APIs.
 mock.module("../src/middleware/clerk-guards", () => {
   const { Elysia } = require("elysia");
   
-  const requireAuth = new Elysia({ name: "requireAuth" }).derive({ as: "scoped" }, () => {
+  const requireAuth = new Elysia({ name: "requireAuth" }).derive({ as: "global" }, () => {
+    const authenticatedUser = {
+      userId: 1, // matches our setup test db
+      providerUserId: "test_clerk",
+      authProvider: "clerk" as const,
+      email: "test@example.com"
+    };
     return {
-      authenticatedUser: {
-        userId: 1, // matches our setup test db
-        providerUserId: "test_clerk",
-        authProvider: "clerk",
-        email: "test@example.com"
-      }
+      user: authenticatedUser,
+      authenticatedUser
     };
   });
 
   return {
+    ...originalClerkGuards,
     requireAuth,
-    checkProStatus: async () => true,
-    FREE_TIER_LIMITS: { DATA_RETENTION_DAYS: 60, MAX_GOALS: 3, MAX_HABITS: 5, MAX_MACRO_ENTRIES_PER_DAY: 20 }
   };
 });

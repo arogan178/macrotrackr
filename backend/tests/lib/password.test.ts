@@ -36,11 +36,6 @@ const bunPasswordMock = {
   ),
 };
 
-vi.stubGlobal("Bun", {
-  password: bunPasswordMock,
-});
-
-// Set required environment variables before importing password module
 const mockEnv = {
   APP_MODE: "self-hosted",
   AUTH_MODE: "local",
@@ -60,22 +55,15 @@ const mockEnv = {
   CLERK_SECRET_KEY: "sk_test_123",
 };
 
-vi.stubEnv("APP_MODE", mockEnv.APP_MODE);
-vi.stubEnv("AUTH_MODE", mockEnv.AUTH_MODE);
-vi.stubEnv("BILLING_MODE", mockEnv.BILLING_MODE);
-vi.stubEnv("ANALYTICS_MODE", mockEnv.ANALYTICS_MODE);
-vi.stubEnv("EMAIL_MODE", mockEnv.EMAIL_MODE);
-vi.stubEnv("APP_URL", mockEnv.APP_URL);
-vi.stubEnv("PUBLIC_APP_NAME", mockEnv.PUBLIC_APP_NAME);
-vi.stubEnv("SUPPORT_EMAIL", mockEnv.SUPPORT_EMAIL);
-vi.stubEnv("ENABLE_METRICS", mockEnv.ENABLE_METRICS);
-vi.stubEnv("STRIPE_SECRET_KEY", mockEnv.STRIPE_SECRET_KEY);
-vi.stubEnv("STRIPE_WEBHOOK_SECRET", mockEnv.STRIPE_WEBHOOK_SECRET);
-vi.stubEnv("STRIPE_PRICE_ID_MONTHLY", mockEnv.STRIPE_PRICE_ID_MONTHLY);
-vi.stubEnv("STRIPE_PRICE_ID_YEARLY", mockEnv.STRIPE_PRICE_ID_YEARLY);
-vi.stubEnv("RESEND_API_KEY", mockEnv.RESEND_API_KEY);
-vi.stubEnv("CLERK_PUBLISHABLE_KEY", mockEnv.CLERK_PUBLISHABLE_KEY);
-vi.stubEnv("CLERK_SECRET_KEY", mockEnv.CLERK_SECRET_KEY);
+if (typeof vi.stubGlobal === "function") {
+  vi.stubGlobal("Bun", {
+    password: bunPasswordMock,
+  });
+}
+
+for (const [key, val] of Object.entries(mockEnv)) {
+  process.env[key] = val;
+}
 
 describe("password", () => {
   describe("hashPassword", () => {

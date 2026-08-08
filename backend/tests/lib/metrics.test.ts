@@ -2,9 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Mock the logger before importing metrics
 vi.mock("../../src/lib/observability/logger", () => ({
-  loggerHelpers: {
-    performance: vi.fn(),
-  },
+  logger: new Proxy({}, { get: () => vi.fn() }),
+  loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
 
 // Test the MetricsRegistry class behavior
