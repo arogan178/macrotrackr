@@ -19,6 +19,7 @@ import { useMacroDensitySummary } from "@/hooks/queries/useReportingQueries";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { queryKeys } from "@/lib/queryKeys";
 import { useStore } from "@/store/store";
+import { getDateRangeData, mapDateRangeToDays } from "@/utils/dateUtilities";
 
 import {
   MacroDensityBreakdown,
@@ -29,7 +30,6 @@ import {
   UnifiedInsights,
 } from "../components";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { getDateRangeData, mapDateRangeToDays } from "@/utils/dateUtilities";
 
 export default function ReportingPage() {
   const queryClient = useQueryClient();

@@ -1,6 +1,6 @@
 import { MacroEntry } from "@/types/macro";
-
 import { isWithinDateRange } from "@/utils/dateUtilities";
+
 import { calculateDailyTotals } from "./macroCalculations";
 
 // Data processing types

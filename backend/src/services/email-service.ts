@@ -2,7 +2,7 @@ import { Resend } from "resend";
 import { config } from "../config";
 import { logger } from "../lib/observability/logger";
 
-interface EmailService {
+export interface EmailService {
   sendPasswordResetEmail: (to: string, token: string) => Promise<void>;
 }
 

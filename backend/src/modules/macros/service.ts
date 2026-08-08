@@ -1,7 +1,5 @@
 // src/modules/macros/service.ts
-import type { Database } from "bun:sqlite";
 import {
-  safeQueryAll,
   type MacroEntryRow,
 } from "../../lib/data/database";
 import { ValidationError } from "../../lib/http/errors";
@@ -9,7 +7,7 @@ import { transformKeysToCamel } from "../../lib/mappers";
 import type { FoodProductResult } from "../../services/openfoodfacts-api-client";
 import type { AuthenticatedRouteContextWithUser } from "../../types";
 
-interface MacroHistoryQuery {
+export interface MacroHistoryQuery {
   startDate?: string;
   endDate?: string;
   groupBy?: "day" | "week" | "month";

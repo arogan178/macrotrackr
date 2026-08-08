@@ -11,8 +11,8 @@ import NumberField from "@/components/form/NumberField";
 import { RangeSlider } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";
-
 import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
+
 import { CALORIE_RANGE_LABELS } from "../../constants";
 import { WeightGoalFormValues } from "../../types";
 

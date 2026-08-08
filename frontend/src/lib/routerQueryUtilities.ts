@@ -3,19 +3,19 @@ import type { QueryClient } from "@tanstack/react-query";
 export function ensureQueryData<T>(
   queryClient: QueryClient,
   queryKey: readonly unknown[],
-  queryFn: () => Promise<T>,
+  queryFunction: () => Promise<T>,
   options?: { staleTime?: number; gcTime?: number },
 ): Promise<T> {
-  return queryClient.ensureQueryData({ queryKey, queryFn, ...options });
+  return queryClient.ensureQueryData({ queryKey, queryFn: queryFunction, ...options });
 }
 
 export function prefetchQuery<T>(
   queryClient: QueryClient,
   queryKey: readonly unknown[],
-  queryFn: () => Promise<T>,
+  queryFunction: () => Promise<T>,
   options?: { staleTime?: number; gcTime?: number },
 ): Promise<void> {
-  return queryClient.prefetchQuery({ queryKey, queryFn, ...options });
+  return queryClient.prefetchQuery({ queryKey, queryFn: queryFunction, ...options });
 }
 
 export function invalidateQueries(

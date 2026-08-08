@@ -2,6 +2,7 @@ import { renderHook } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import type { MacroEntry } from "@/types/macro";
+
 import { addDaysISO, todayISO } from "../../../utils/dateUtilities";
 
 import { useReportingLogic } from "./useReportingLogic";
