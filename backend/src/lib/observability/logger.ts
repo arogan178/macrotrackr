@@ -182,30 +182,6 @@ export const loggerHelpers = {
     );
   },
 
-  // Authentication logging
-  auth: (
-    event: string,
-    userId?: number,
-    email?: string,
-    success: boolean = true
-  ) => {
-    const level = success ? "info" : "warn";
-    const sanitizedEmail = email
-      ? (sanitizeData({ email }) as { email?: string }).email
-      : undefined;
-
-    logger[level](
-      {
-        type: "auth_event",
-        event,
-        userId,
-        email: sanitizedEmail,
-        success,
-      },
-      `Auth: ${event} ${success ? "successful" : "failed"}`
-    );
-  },
-
   // Security event logging
   security: (
     event: string,

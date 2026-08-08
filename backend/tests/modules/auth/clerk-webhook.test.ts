@@ -1,6 +1,7 @@
 import { Elysia } from "elysia";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { resetConfigCache } from "../../../src/config";
+import { afterEach, beforeEach, describe, expect, it } from "bun:test";
+import { vi } from "vitest";
+import { config, getConfig, resetConfigCache } from "../../../src/config";
 
 const verifyWebhookMock = vi.fn();
 const safeQueryMock = vi.fn();
@@ -77,13 +78,20 @@ describe("clerk webhook handler", () => {
     safeQueryMock.mockReset();
     safeExecuteMock.mockReset();
 
-    vi.stubEnv("CLERK_WEBHOOK_SECRET", "test_webhook_secret_placeholder");
+    process.env.NODE_ENV = "test";
+    process.env.APP_MODE = "self-hosted";
+    process.env.AUTH_MODE = "local";
+    process.env.BILLING_MODE = "disabled";
+    process.env.APP_URL = "http://localhost:5173";
+    process.env.SUPPORT_EMAIL = "support@local.invalid";
+    process.env.CLERK_PUBLISHABLE_KEY = "pk_test_placeholder";
+    process.env.CLERK_SECRET_KEY = "sk_test_placeholder";
+    process.env.CLERK_WEBHOOK_SECRET = "test_webhook_secret_placeholder";
     resetConfigCache();
   });
 
   afterEach(() => {
     resetConfigCache();
-    vi.unstubAllEnvs();
   });
 
   it("returns 500 when database is missing from route context", async () => {
@@ -127,6 +135,7 @@ describe("clerk webhook handler", () => {
   });
 
   it("returns 400 when Svix signature verification fails", async () => {
+    console.log("SECRET IN TEST 136:", JSON.stringify(process.env.CLERK_WEBHOOK_SECRET), "CONFIG SECRET:", JSON.stringify(config.CLERK_WEBHOOK_SECRET));
     verifyWebhookMock.mockImplementation(() => {
       throw new Error("invalid signature");
     });

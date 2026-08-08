@@ -3,7 +3,3 @@ export function generateId(prefix = "id"): string {
 }
 
 export const generateUUID = (): string => crypto.randomUUID();
-
-export function generateNumericId(): number {
-  return Number(`${Date.now()}${Math.floor(Math.random() * 1000).toString().padStart(3, "0")}`);
-}

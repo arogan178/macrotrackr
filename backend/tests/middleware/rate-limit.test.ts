@@ -36,28 +36,8 @@ describe("rate-limit middleware", () => {
   });
 
   describe("rateLimiters", () => {
-    it("should have auth rate limiter", () => {
-      expect(rateLimiters.auth).toBeDefined();
-    });
-
     it("should have api rate limiter", () => {
       expect(rateLimiters.api).toBeDefined();
-    });
-
-    it("should have read rate limiter", () => {
-      expect(rateLimiters.read).toBeDefined();
-    });
-
-    it("auth should have stricter limits", () => {
-      expect(rateLimiters.auth).toBeDefined();
-    });
-
-    it("api should have moderate limits", () => {
-      expect(rateLimiters.api).toBeDefined();
-    });
-
-    it("read should have lenient limits", () => {
-      expect(rateLimiters.read).toBeDefined();
     });
   });
 });

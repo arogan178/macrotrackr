@@ -3,15 +3,15 @@ import { describe, expect, it, vi } from "vitest";
 
 // Mock the logger module
 vi.mock("../../src/lib/observability/logger", () => ({
-  loggerHelpers: {
-    error: vi.fn(),
-    dbQuery: vi.fn(),
-  },
+  logger: new Proxy({}, { get: () => vi.fn() }),
+  loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
+
+import * as realQueryTracer from "../../src/lib/observability/query-tracer";
 
 // Mock the query-tracer
 vi.mock("../../src/lib/observability/query-tracer", () => ({
-  traceQuerySync: vi.fn((_query: string, _params: unknown[], fn: () => unknown) => fn()),
+  ...realQueryTracer,
 }));
 
 import { DatabaseError } from "../../src/lib/http/errors";

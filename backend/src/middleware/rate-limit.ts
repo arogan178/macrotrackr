@@ -34,15 +34,6 @@ function startCleanupInterval() {
   }, 60000); // Clean up every minute
 }
 
-export function stopRateLimitCleanupForTests() {
-  if (!cleanupIntervalId) {
-    return;
-  }
-
-  clearInterval(cleanupIntervalId);
-  cleanupIntervalId = null;
-}
-
 export const rateLimit = (config: RateLimitConfig) => {
   startCleanupInterval();
 
@@ -120,24 +111,10 @@ export const rateLimit = (config: RateLimitConfig) => {
 
 // Pre-configured rate limiters for different endpoints
 export const rateLimiters = {
-  // Strict rate limiting for authentication endpoints
-  auth: rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 500, // 50 attempts per 15 minutes
-    message: "Too many authentication attempts, please try again in 15 minutes",
-  }),
-
   // Moderate rate limiting for API endpoints
   api: rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     maxRequests: 1000, // 1000 requests per 15 minutes
     message: "Too many API requests, please try again later",
-  }),
-
-  // Lenient rate limiting for read operations
-  read: rateLimit({
-    windowMs: 1 * 60 * 1000, // 1 minute
-    maxRequests: 600, // 60 requests per minute
-    message: "Too many requests, please slow down",
   }),
 };

@@ -2,9 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 // Mock the logger module
 vi.mock("../../src/lib/observability/logger", () => ({
-  loggerHelpers: {
-    error: vi.fn(),
-  },
+  logger: new Proxy({}, { get: () => vi.fn() }),
+  loggerHelpers: new Proxy({}, { get: () => vi.fn() }),
 }));
 
 import {
@@ -19,7 +18,6 @@ import {
   AccountNotSyncedError,
   DatabaseError,
   isAppError,
-  formatErrorResponse,
 } from "../../src/lib/http/errors";
 
 describe("errors", () => {
@@ -155,29 +153,6 @@ describe("errors", () => {
       expect(isAppError("string")).toBe(false);
       expect(isAppError(null)).toBe(false);
       expect(isAppError(undefined)).toBe(false);
-    });
-  });
-
-  describe("formatErrorResponse", () => {
-    it("formats AppError correctly", () => {
-      const error = new ValidationError("Invalid input", { field: "email" });
-      const response = formatErrorResponse(error);
-      expect(response.code).toBe("VALIDATION_ERROR");
-      expect(response.message).toBe("Invalid input");
-      expect(response.details).toEqual({ field: "email" });
-    });
-
-    it("formats regular Error with validation message", () => {
-      const error = new Error("validation failed: email is required");
-      const response = formatErrorResponse(error);
-      expect(response.code).toBe("VALIDATION_ERROR");
-      expect(response.message).toBe("Input validation failed");
-    });
-
-    it("formats unknown error as internal error", () => {
-      const response = formatErrorResponse("unknown error");
-      expect(response.code).toBe("INTERNAL_ERROR");
-      expect(response.message).toBe("An unexpected error occurred");
     });
   });
 });

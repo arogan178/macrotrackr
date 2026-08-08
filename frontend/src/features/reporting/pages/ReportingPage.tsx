@@ -29,7 +29,7 @@ import {
   UnifiedInsights,
 } from "../components";
 import { useReportingLogic } from "../hooks/useReportingLogic";
-import { getDateRangeData, mapDateRangeToNumeric } from "../utils";
+import { getDateRangeData, mapDateRangeToDays } from "@/utils/dateUtilities";
 
 export default function ReportingPage() {
   const queryClient = useQueryClient();
@@ -265,7 +265,7 @@ export default function ReportingPage() {
                           <div className="w-full">
                             <MacroDensityBreakdown
                               data={macroDensityData}
-                              selectedRange={mapDateRangeToNumeric(dateRange)}
+                              selectedRange={mapDateRangeToDays(dateRange)}
                               isLoading={isHistoryLoading}
                               isHistoryReady={isHistoryReady}
                             />
@@ -280,7 +280,7 @@ export default function ReportingPage() {
                           isLoading={isHistoryLoading}
                           showNoDataMessage={showNoDataMessage}
                           macroTarget={macroTarget ?? undefined}
-                          denominatorDays={mapDateRangeToNumeric(dateRange)}
+                          denominatorDays={mapDateRangeToDays(dateRange)}
                           dailySeriesForRange={dailySeries}
                         />
                       </ProFeature>

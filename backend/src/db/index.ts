@@ -25,7 +25,3 @@ export function initializeDatabase(database: Database, databasePath?: string) {
 
   return database;
 }
-
-export function createInitializedDatabase(databasePath: string) {
-  return initializeDatabase(createDatabase(databasePath), databasePath);
-}

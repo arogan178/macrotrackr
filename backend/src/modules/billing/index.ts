@@ -17,7 +17,6 @@ export {
 export {
   StripeService,
   getStripeClient,
-  resetStripeClient,
 } from "./stripe-service";
 export {
   SubscriptionService,

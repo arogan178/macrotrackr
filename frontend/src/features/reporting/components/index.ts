@@ -1,10 +1,8 @@
 export { default as ActionCard } from "./ActionCard";
-export { default as AtAGlanceSection } from "./AtAGlanceSection";
 export { default as MacroDensityBreakdown } from "./MacroDensityBreakdown";
 export { default as MacroSummaryStats } from "./MacroSummaryStat";
 export { default as MealTimeBreakdown } from "./MealTimeBreakdown";
 export { default as MetricCard } from "./MetricCard";
-export { default as NutritionInsights } from "./NutritionInsights";
 export { default as RecommendationsSection } from "./RecommendationsSection";
 export { default as ReportingPageSkeleton } from "./ReportingPageSkeleton";
 export { default as TrendDisplay } from "./TrendDisplay";

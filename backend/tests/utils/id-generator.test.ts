@@ -58,26 +58,4 @@ describe("id-generator", () => {
       expect(uuids.size).toBe(100);
     });
   });
-
-  describe("generateNumericId", () => {
-    it("generates a numeric id", async () => {
-      const { generateNumericId } = await import("../../src/utils/id-generator");
-      
-      const id = generateNumericId();
-      
-      expect(typeof id).toBe("number");
-    });
-
-    it("generates unique numeric ids", async () => {
-      const { generateNumericId } = await import("../../src/utils/id-generator");
-      
-      const ids = new Set();
-      for (let i = 0; i < 100; i++) {
-        ids.add(generateNumericId());
-      }
-      
-      // Allow for some collisions due to timestamp resolution
-      expect(ids.size).toBeGreaterThan(90);
-    });
-  });
 });

@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 
-import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const originalEnv = { ...process.env };
 
@@ -76,9 +76,16 @@ async function loadConfigModule(overrides: Record<string, string | undefined> = 
 	return configModule;
 }
 
+import { resetConfigCache } from "../src/config";
+
 describe("config", () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
+	});
+
+	afterEach(() => {
+		applyTestEnv();
+		resetConfigCache();
 	});
 
 	afterAll(() => {

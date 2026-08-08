@@ -5,7 +5,6 @@
 export { registerMacroEntryRoutes } from "./entry-routes";
 export { macroRoutes } from "./routes";
 export {
-  getMacroHistory,
   normalizeMacroEntryRow,
   parseJsonArrayField,
   type CacheService,

@@ -27,20 +27,6 @@ function getErrorDetails(error: unknown): unknown {
   return undefined;
 }
 
-export function createSuccessResponse<T>(
-  data: T,
-  message?: string
-): SuccessResponse<T> {
-  const response: SuccessResponse<T> = {
-    success: true,
-    data,
-  };
-  if (message) {
-    response.message = message;
-  }
-  return response;
-}
-
 export function createErrorResponse(
   code: string,
   message: string,
@@ -98,9 +84,6 @@ export function withErrorHandling<T extends unknown[], R>(
 
 export {
   toCamelCaseString,
-  toSnakeCaseString,
   transformKeysToCamel,
-  transformKeysToSnake,
   transformArrayToCamel,
-  transformArrayToSnake,
 } from "../mappers";

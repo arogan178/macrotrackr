@@ -3,7 +3,7 @@ import {
   calculateCalorieTarget,
   calculateWeeklyChange,
   calculateWeeksToGoal,
-} from "@/features/goals/calculations";
+} from "@/utils/nutritionCalculations";
 import type { WeightGoalFormValues } from "@/features/goals/types";
 
 interface SetWeightGoalPayload {

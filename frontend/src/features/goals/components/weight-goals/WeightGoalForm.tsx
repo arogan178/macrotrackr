@@ -12,7 +12,7 @@ import { RangeSlider } from "@/components/ui";
 import type { WeightGoals } from "@/types/goal";
 import { todayISO } from "@/utils/dateUtilities";
 
-import { generateWeightGoalCalculations } from "../../calculations";
+import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
 import { CALORIE_RANGE_LABELS } from "../../constants";
 import { WeightGoalFormValues } from "../../types";
 

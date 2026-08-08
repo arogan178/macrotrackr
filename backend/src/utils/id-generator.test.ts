@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { generateId, generateUUID, generateNumericId } from "./id-generator";
+import { generateId, generateUUID } from "./id-generator";
 
 describe("id-generator", () => {
   describe("generateId", () => {
@@ -31,19 +31,6 @@ describe("id-generator", () => {
       const uuid1 = generateUUID();
       const uuid2 = generateUUID();
       expect(uuid1).not.toBe(uuid2);
-    });
-  });
-
-  describe("generateNumericId", () => {
-    it("generates numeric IDs", () => {
-      const id = generateNumericId();
-      expect(typeof id).toBe("number");
-    });
-
-    it("generates unique numeric IDs", () => {
-      const id1 = generateNumericId();
-      const id2 = generateNumericId();
-      expect(id1).not.toBe(id2);
     });
   });
 });

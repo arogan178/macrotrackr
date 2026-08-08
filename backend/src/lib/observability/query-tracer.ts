@@ -19,44 +19,6 @@ const CRITICAL_QUERY_THRESHOLD_MS = 500;
 const recentTraces: QueryTrace[] = [];
 const MAX_TRACES = 1000;
 
-export function traceQuery<T>(
-  query: string,
-  params: unknown[] | undefined,
-  fn: () => Promise<T>
-): Promise<T> {
-  const start = Date.now();
-  
-  return fn().finally(() => {
-    const duration = Date.now() - start;
-    const threshold = duration >= CRITICAL_QUERY_THRESHOLD_MS
-      ? 'critical'
-      : duration >= SLOW_QUERY_THRESHOLD_MS
-        ? 'warning'
-        : 'ok';
-    
-    const trace: QueryTrace = {
-      query: query.substring(0, 200), // Truncate long queries
-      duration,
-      timestamp: new Date(),
-      params: params?.slice(0, 10), // Limit params
-      threshold,
-    };
-    
-    // Store trace
-    recentTraces.push(trace);
-    if (recentTraces.length > MAX_TRACES) {
-      recentTraces.shift();
-    }
-    
-    // Log slow queries
-    if (threshold === 'critical') {
-      logger.error({ query: trace.query, params: trace.params }, `CRITICAL SLOW QUERY (${duration}ms)`);
-    } else if (threshold === 'warning') {
-      logger.warn({ query: trace.query, params: trace.params }, `SLOW QUERY (${duration}ms)`);
-    }
-  });
-}
-
 /**
  * Synchronous version of traceQuery for synchronous database operations
  */
@@ -104,6 +66,10 @@ export function getRecentTraces(limit = 100): QueryTrace[] {
   return recentTraces.slice(-limit);
 }
 
+export function clearTraces(): void {
+  recentTraces.length = 0;
+}
+
 export function getSlowQueryStats(): {
   totalQueries: number;
   slowQueries: number;
@@ -129,8 +95,4 @@ export function getSlowQueryStats(): {
     averageDuration: Math.round(avg),
     p95Duration: p95,
   };
-}
-
-export function clearTraces(): void {
-  recentTraces.length = 0;
 }
