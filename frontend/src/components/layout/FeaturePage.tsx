@@ -15,10 +15,10 @@ function FeaturePageImpl({
   subtitle,
   headerChildren,
   children,
-  animateTitle = false,
+  animateTitle = true,
 }: FeaturePageProps) {
   return (
-    <div className="space-y-6">
+    <div className="space-y-3.5 sm:space-y-6">
       <PageHeader title={title} subtitle={subtitle} animateTitle={animateTitle}>
         {headerChildren}
       </PageHeader>

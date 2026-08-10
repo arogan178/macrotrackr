@@ -178,7 +178,7 @@ export default function ReportingPage() {
               {isHistoryLoading ? (
                 <ReportingPageSkeleton />
               ) : (
-                <div className="flex flex-col gap-6">
+                <div className="flex flex-col gap-3.5 sm:gap-6">
                   <DateRangeSelector
                     currentRange={dateRange}
                     onRangeChange={handleRangeChange}
@@ -226,7 +226,7 @@ export default function ReportingPage() {
                         />
                       </ProFeature>
 
-                      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                      <div className="grid grid-cols-1 gap-3.5 sm:gap-6 md:grid-cols-2">
                         <motion.div
                           className="flex w-full min-w-0"
                           initial={{ opacity: 0, y: 12 }}

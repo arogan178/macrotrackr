@@ -2,7 +2,6 @@ export { default as Button } from "./Button";
 export { default as ContentImage } from "./ContentImage";
 export { default as EmptyState } from "./EmptyState";
 export { default as ErrorBoundary } from "./ErrorBoundary";
-export * from "./hooks";
 export { default as IconButton } from "./IconButton";
 export { default as IconButtonGroup } from "./IconButtonGroup";
 export * from "./Icons";

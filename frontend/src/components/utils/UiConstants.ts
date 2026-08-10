@@ -166,10 +166,10 @@ export const ICON_BUTTON_SIZES = {
 
 // Button size mapping (rectangular, for text/icon buttons)
 export const BUTTON_SIZES = {
-  xs: "px-1 py-0 text-sm",
-  sm: "px-2 py-1 text-xs",
-  md: "px-3.5 py-2 text-md",
-  lg: "px-5 py-3 text-base",
+  xs: "px-1.5 py-0.5 text-xs",
+  sm: "px-2.5 py-1.5 text-xs",
+  md: "px-3.5 py-2 text-sm",
+  lg: "px-5 py-2.5 text-base",
 } as const;
 
 // Icon positions

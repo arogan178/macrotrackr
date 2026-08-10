@@ -237,26 +237,26 @@ function DailySummaryInner({
           />
         </CardContainer>
 
-        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3">
+        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-3 lg:flex lg:flex-1 lg:flex-col lg:gap-3">
           {macroData.map((macro) => (
             <CardContainer
               variant="interactive"
               key={macro.name}
-              className="group flex flex-1 flex-col justify-center bg-surface-2 p-2.5 sm:p-4"
+              className="group flex flex-1 flex-col justify-center bg-surface-2 p-3 sm:p-4"
             >
-              <div className="mb-3 flex items-center justify-between">
+              <div className="mb-2 sm:mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110`}
+                    className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110 shrink-0`}
                   />
                   <h3
-                    className={`${macro.textColor} text-sm font-medium tracking-wide`}
+                    className={`${macro.textColor} text-xs sm:text-sm font-medium tracking-wide`}
                   >
                     {macro.name}
                   </h3>
                 </div>
-                <div className="text-right">
-                  <span className="text-sm font-bold text-foreground">
+                <div className="text-left sm:text-right text-xs">
+                  <span className="font-bold text-foreground">
                     <AnimatedNumber
                       value={macro.grams}
                       toFixedValue={0}
@@ -264,7 +264,7 @@ function DailySummaryInner({
                       duration={0.7}
                     />
                   </span>
-                  <span className="ml-1 text-xs text-muted">
+                  <span className="ml-0.5 text-muted">
                     /
                     <AnimatedNumber
                       value={macro.targetGrams}
@@ -275,33 +275,31 @@ function DailySummaryInner({
                   </span>
                 </div>
               </div>
+
               <ProgressBar
                 progress={macro.completionPercent}
                 color={macro.name.toLowerCase() as "protein" | "carbs" | "fats"}
                 height="md"
                 className="mb-2"
               />
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs text-muted">
-                    <AnimatedNumber
-                      value={macro.calories}
-                      toFixedValue={0}
-                      suffix=" kcal"
-                      duration={0.6}
-                    />
-                  </span>
-                </div>
-                <div className="flex items-center text-xs">
-                  <span className={`text-xs ${macro.textColor} ml-1`}>
-                    <AnimatedNumber
-                      value={macro.completionPercent}
-                      toFixedValue={0}
-                      suffix="%"
-                      duration={0.5}
-                    />
-                  </span>
-                </div>
+
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-muted text-[11px] sm:text-xs">
+                  <AnimatedNumber
+                    value={macro.calories}
+                    toFixedValue={0}
+                    suffix=" kcal"
+                    duration={0.6}
+                  />
+                </span>
+                <span className={`font-medium ${macro.textColor} text-[11px] sm:text-xs`}>
+                  <AnimatedNumber
+                    value={macro.completionPercent}
+                    toFixedValue={0}
+                    suffix="%"
+                    duration={0.5}
+                  />
+                </span>
               </div>
             </CardContainer>
           ))}

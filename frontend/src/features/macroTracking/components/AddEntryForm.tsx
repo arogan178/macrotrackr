@@ -480,8 +480,8 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3.5 sm:gap-5 sm:grid-cols-3 sm:items-start">
-            <div className="sm:col-span-1">
+          <div className="mb-3.5 sm:mb-5 grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-5 sm:items-start">
+            <div className="col-span-1">
               <QuantityUnitField
                 label="Quantity/Unit"
                 quantity={quantity}
@@ -493,16 +493,16 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             </div>
             <div className="sm:col-span-2">
               <div className="space-y-2">
-                <div className="relative flex items-center justify-between">
+                <div className="relative flex h-6 items-center justify-between">
                   <label htmlFor="meal-name-input" className={formStyles.label}>
                     Meal Name
                   </label>
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-1.5 sm:gap-2">
                     <button
                       type="button"
                       onClick={() => setSaveAsMeal((previous) => !previous)}
                       className={cn(
-                        "flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
+                        "flex items-center gap-1 rounded-md px-1.5 sm:px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
                         saveAsMeal
                           ? "bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 dark:bg-amber-400/20 dark:text-amber-300"
                           : "text-muted hover:bg-muted/10 hover:text-foreground",
@@ -527,12 +527,12 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
                           transition={{ duration: 0.15 }}
-                          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
+                          className="flex items-center gap-1 rounded-md px-1.5 sm:px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
                           aria-label="Clear search"
                           title="Clear search result"
                         >
                           <TrashIcon className="h-3 w-3" />
-                          Clear
+                          <span className="hidden sm:inline">Clear</span>
                         </motion.button>
                       )}
                     </AnimatePresence>
@@ -551,7 +551,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             </div>
           </div>
 
-          <div className="mb-4 sm:mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
+          <div className="mb-3.5 sm:mb-5 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
             <DateField
               label="Date"
               value={entryDate}
@@ -609,42 +609,45 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="mt-5 flex flex-col items-center justify-between gap-4 sm:flex-row">
-            <div className="flex flex-col gap-1">
-              <div className="text-sm font-medium tracking-wide text-muted uppercase">
+          <div className="mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border/40 pt-3.5 sm:pt-4">
+            <div className="flex items-baseline gap-1.5 sm:gap-2 shrink-0 min-w-0">
+              <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted truncate">
                 Total Calories
-              </div>
-              <div className="text-2xl font-light tracking-tight text-foreground">
+              </span>
+              <span className="text-lg sm:text-2xl font-light tracking-tight text-foreground whitespace-nowrap">
                 {calories}
-              </div>
+                <span className="ml-1 text-xs font-normal text-muted">kcal</span>
+              </span>
             </div>
-            {allFieldsAreZero && (
-              <div className="mr-4 rounded-md bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning">
-                Macros must be greater than 0
-              </div>
-            )}
-            {!mealName.trim() && !anyFieldIsUndefined && (
-              <div className="mr-4 rounded-md bg-warning/10 px-3 py-1.5 text-xs font-medium text-warning">
-                Please provide a meal name
-              </div>
-            )}
-            <Button
-              type="submit"
-              disabled={!isFormValid || _isSaving}
-              isLoading={_isSaving}
-              text={_isSaving ? "Saving..." : "Add Entry"}
-              leftIcon={
-                <PlusIcon
-                  className={cn(
-                    "mr-2 h-4 w-4 transition-transform duration-300",
-                    isFormValid && !_isSaving ? "group-hover:rotate-90" : "",
-                  )}
-                />
-              }
-              buttonSize="lg"
-              variant="primary"
-              className="group min-w-40 font-medium transition-colors duration-200"
-            />
+            <div className="flex items-center gap-2 shrink-0">
+              {allFieldsAreZero && (
+                <div className="hidden sm:inline-block rounded-md bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
+                  Macros must be &gt; 0
+                </div>
+              )}
+              {!mealName.trim() && !anyFieldIsUndefined && (
+                <div className="hidden sm:inline-block rounded-md bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
+                  Provide meal name
+                </div>
+              )}
+              <Button
+                type="submit"
+                disabled={!isFormValid || _isSaving}
+                isLoading={_isSaving}
+                text={_isSaving ? "Saving..." : "Add Entry"}
+                leftIcon={
+                  <PlusIcon
+                    className={cn(
+                      "h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 shrink-0",
+                      isFormValid && !_isSaving ? "group-hover:rotate-90" : "",
+                    )}
+                  />
+                }
+                buttonSize="sm"
+                variant="primary"
+                className="group font-semibold text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2 shrink-0 whitespace-nowrap"
+              />
+            </div>
           </div>
         </form>
       </div>

@@ -18,39 +18,46 @@ export const PageHeader = ({
   subtitle,
   hasChanges = false,
   children,
-  animateTitle = false,
+  animateTitle = true,
 }: PageHeaderProps) => (
-  <div className="flex flex-col items-start justify-between gap-4 border-b border-border/60 pb-6 sm:flex-row sm:items-center">
-    {/* Left Side: Title and subtitle */}
-    <div>
-      <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
-        {animateTitle ? (
-          <TextGenerateEffect
-            text={title}
-            mode="word"
-            speed={0.1}
-            duration={0.5}
-            className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl"
-          />
-        ) : (
-          title
-        )}
-      </h1>
-      {subtitle && <p className="mt-1.5 max-w-2xl text-sm leading-relaxed text-muted sm:text-base">{subtitle}</p>}
-    </div>
-    {/* Right Side: Badges and Tabs */}
-    <div className="flex items-center gap-3">
-      {/* Badges */}
-      <div className="flex space-x-2">
-        {hasChanges && (
-          <span className="rounded-full border border-warning/30 bg-warning/10 px-3 py-1 text-sm font-medium text-warning">
-            Unsaved Changes
-          </span>
-        )}
+  <div className="border-b border-border/40 pb-3 sm:pb-6">
+    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
+      {/* Title */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          {animateTitle ? (
+            <TextGenerateEffect
+              text={title}
+              mode="word"
+              speed={0.1}
+              duration={0.5}
+              className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl"
+            />
+          ) : (
+            title
+          )}
+        </h1>
       </div>
-      {/* Render Tabs or other children */}
-      {children}
+
+      {/* Right Side: Badges and Tabs */}
+      {(hasChanges || children) && (
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {hasChanges && (
+            <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning sm:px-3 sm:py-1 sm:text-sm">
+              Unsaved Changes
+            </span>
+          )}
+          {children}
+        </div>
+      )}
     </div>
+
+    {/* Subtitle */}
+    {subtitle && (
+      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted sm:mt-1.5 sm:text-base">
+        {subtitle}
+      </p>
+    )}
   </div>
 );
 

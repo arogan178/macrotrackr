@@ -329,7 +329,7 @@ const ConnectedAccountsForm = () => {
 
   if (!isLoaded) {
     return (
-      <CardContainer className="p-6 sm:p-8">
+      <CardContainer className="p-3.5 sm:p-6">
         <div className="animate-pulse space-y-4">
           <div className="h-8 w-48 rounded bg-surface-3" />
           <div className="h-16 rounded-lg bg-surface-3" />
@@ -341,24 +341,7 @@ const ConnectedAccountsForm = () => {
 
   return (
     <>
-      <CardContainer className="p-6 sm:p-8">
-        {/* Header section */}
-        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div className="flex items-center">
-            <div className="mr-4 rounded-xl bg-success/10 p-3">
-              <ShieldCheckIcon className="h-7 w-7 shrink-0 text-success" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-semibold text-foreground">
-                Connected Accounts
-              </h3>
-              <p className="mt-1 text-sm text-muted">
-                Manage your sign-in methods and connected services
-              </p>
-            </div>
-          </div>
-        </div>
-
+      <CardContainer className="p-3.5 sm:p-6">
         {/* Login summary */}
         <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-start gap-3">
