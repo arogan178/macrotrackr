@@ -24,10 +24,10 @@ const NAV_ITEMS_CONFIG = [
 ] as const;
 
 const navButtonClasses =
-  "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const mobileMenuButtonClasses =
-  "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-2xl px-4 py-3 text-left text-sm font-medium transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "flex min-h-11 w-full cursor-pointer items-center gap-3 rounded-xl px-3.5 py-2.5 text-left text-sm font-medium transition-all duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const iconButtonClasses =
   "inline-flex min-h-11 min-w-11 cursor-pointer items-center justify-center rounded-full border border-border/60 bg-background/60 text-foreground transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
@@ -47,22 +47,46 @@ function NavItem({
   onClick,
   variant = "desktop",
 }: NavItemProps) {
-  const classes =
-    variant === "desktop" ? navButtonClasses : mobileMenuButtonClasses;
+  if (variant === "desktop") {
+    const activeClasses = "bg-surface-2 text-foreground font-semibold shadow-xs";
+    const inactiveClasses = "text-muted hover:bg-surface-2/60 hover:text-foreground";
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-current={isActive ? "page" : undefined}
+        className={`${navButtonClasses} ${isActive ? activeClasses : inactiveClasses}`}
+      >
+        <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-primary" : "text-muted"}`} />
+        <span>{label}</span>
+      </button>
+    );
+  }
+
+  const activeClasses =
+    "border border-primary/25 bg-primary/10 text-foreground font-semibold shadow-xs";
+  const inactiveClasses =
+    "border border-transparent text-muted hover:border-border/40 hover:bg-surface-2/50 hover:text-foreground";
 
   return (
     <button
       type="button"
       onClick={onClick}
       aria-current={isActive ? "page" : undefined}
-      className={`${classes} ${
-        isActive
-          ? "bg-surface text-foreground shadow-sm"
-          : "text-muted hover:bg-surface hover:text-foreground"
-      }`}
+      className={`group ${mobileMenuButtonClasses} ${isActive ? activeClasses : inactiveClasses}`}
     >
-      <Icon className={`h-4 w-4 ${variant === "mobile" ? "shrink-0" : ""}`} />
-      <span>{label}</span>
+      <div className="flex items-center gap-3 min-w-0">
+        <div
+          className={`flex h-7 w-7 items-center justify-center rounded-lg transition-colors duration-150 shrink-0 ${
+            isActive
+              ? "bg-primary/20 text-primary"
+              : "bg-surface-2/60 text-muted group-hover:bg-surface-2 group-hover:text-foreground"
+          }`}
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+        <span className="truncate text-sm">{label}</span>
+      </div>
     </button>
   );
 }
@@ -97,7 +121,7 @@ function MobileMenu({
       {isOpen && (
         <>
           <motion.div
-            className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+            className="fixed inset-0 z-60 bg-black/60 lg:hidden backdrop-blur-xs"
             onClick={onClose}
             aria-hidden="true"
             initial={shouldReduceMotion ? false : { opacity: 0 }}
@@ -108,7 +132,7 @@ function MobileMenu({
           />
 
           <motion.div
-            className="fixed inset-x-4 top-20 z-50 rounded-2xl border border-border bg-surface p-3 shadow-modal lg:hidden"
+            className="fixed inset-x-4 top-20 z-70 rounded-2xl border border-border/80 bg-surface/98 p-2.5 shadow-2xl backdrop-blur-xl lg:hidden"
             initial={shouldReduceMotion ? false : { opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
@@ -129,14 +153,16 @@ function MobileMenu({
                 />
               ))}
 
-              <div className="mt-2 border-t border-border pt-2">
+              <div className="mt-2 border-t border-border/50 pt-2">
                 <button
                   type="button"
                   onClick={onLogout}
                   disabled={isLoggingOut}
-                  className={`${mobileMenuButtonClasses} text-muted hover:bg-surface hover:text-foreground`}
+                  className={`${mobileMenuButtonClasses} border border-transparent text-rose-400/90 hover:border-rose-500/20 hover:bg-rose-500/10 hover:text-rose-400`}
                 >
-                  <LogoutIcon className="h-4 w-4 shrink-0" />
+                  <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400 shrink-0">
+                    <LogoutIcon className="h-4 w-4" />
+                  </div>
                   <span>Logout</span>
                 </button>
               </div>
@@ -177,7 +203,7 @@ const Navbar: React.FC = () => {
 
   return (
     <>
-      <header className="fixed inset-x-0 z-50 px-4 sm:px-6 lg:px-8" style={{ top: "calc(1rem + var(--sat))" }}>
+      <header className="fixed inset-x-0 z-70 px-4 sm:px-6 lg:px-8" style={{ top: "calc(1rem + var(--sat))" }}>
         <nav
           className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6"
           role="navigation"
@@ -231,7 +257,9 @@ const Navbar: React.FC = () => {
               whileTap={shouldReduceMotion ? undefined : { scale: 0.98 }}
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
-              className={`${iconButtonClasses} lg:hidden`}
+              className={`${iconButtonClasses} lg:hidden ${
+                isMobileMenuOpen ? "border-primary/40 bg-surface-2 text-foreground" : ""
+              }`}
             >
               {isMobileMenuOpen ? (
                 <CloseIcon className="h-5 w-5" />

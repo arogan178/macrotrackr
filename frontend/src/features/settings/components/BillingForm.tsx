@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 
 import { billingApi } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
-import { AwardIcon } from "@/components/ui";
 import { isLocalAuthMode } from "@/config/runtime";
 import { useFeatureLoading, useMutationErrorHandler } from "@/hooks";
 import { useBillingDetails } from "@/hooks/queries/useBilling";
@@ -84,27 +83,15 @@ const BillingForm: React.FC = () => {
   const isPro = isLocalAuthMode || subscriptionStatus === "pro";
 
   return (
-    <CardContainer className="p-6 sm:p-8">
-      {/* Enhanced responsive header with improved mobile layout */}
-      <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-        <div className="flex items-center">
-          <div className="mr-4 rounded-xl bg-warning/10 p-3">
-            <AwardIcon className="h-7 w-7 shrink-0 text-warning" />
-          </div>
-          <div className="min-w-0 flex-1">
-            <h3 className="truncate text-xl font-semibold text-foreground">
-              Subscription Plan
-            </h3>
-            <p className="mt-1 text-sm text-muted">
-              {isPro
-                ? "Pro features active • Full access"
-                : "Basic plan • Upgrade available"}
-            </p>
-          </div>
-        </div>
+    <CardContainer className="p-3.5 sm:p-6">
+      {/* Current plan status bar */}
+      <div className="mb-4 sm:mb-5 flex items-center justify-between border-b border-border/40 pb-3.5">
+        <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+          Current Plan Status
+        </span>
         <div
           className={cn(
-            "self-start rounded-full border px-4 py-2 text-sm font-semibold sm:self-auto",
+            "rounded-full border px-3 py-1 text-xs font-semibold",
             isPro
               ? "border-warning/30 bg-warning/10 text-warning"
               : "border-border bg-surface-2 text-muted",

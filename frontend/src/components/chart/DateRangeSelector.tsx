@@ -54,12 +54,12 @@ export default function DateRangeSelector({
   return (
     <motion.div
       layout
-      className="sticky top-24 z-50 mb-6 rounded-xl border border-border/70 bg-surface/92 p-3 shadow-lg backdrop-blur-md"
+      className="sticky top-24 z-30 mb-6 rounded-xl border border-border/70 bg-surface/92 p-3 shadow-lg backdrop-blur-md"
       style={{ position: "sticky" }}
     >
-      <div className="flex w-full flex-wrap items-center gap-4">
-        <div className="flex items-center">
-          <span className="mr-3 font-medium text-foreground">Time Period:</span>
+      <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
+          <span className="text-xs sm:text-sm font-medium text-foreground shrink-0">Time Period:</span>
           <TabBar
             items={items}
             activeKey={currentRange}
@@ -68,36 +68,36 @@ export default function DateRangeSelector({
             isMotion
             layoutId="activeRangeHighlight"
             size="sm"
-            className="border border-border bg-surface-2"
+            className="border border-border bg-surface-2 flex-nowrap shrink-0"
           />
           {!hasProAccess && (
-            <span className="ml-2 text-xs text-muted">
+            <span className="w-full text-xs text-muted sm:w-auto">
               Pro: Unlock 30 & 90 day views
             </span>
           )}
         </div>
 
-        {/* Mobile Export CSV IconButton aligned right */}
-        <div className="ml-auto flex lg:hidden">
-          <IconButton
-            variant="export"
-            ariaLabel="Export data as CSV file"
-            onClick={onExportClick}
-            disabled={isExportDisabled}
-          />
-        </div>
-
-        {/* Desktop Export CSV Button */}
-        <div className="ml-auto hidden lg:flex">
-          <Button
-            onClick={onExportClick}
-            disabled={isExportDisabled}
-            ariaLabel="Export data as CSV file"
-            className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
-            leftIcon={<ExportIcon />}
-          >
-            Export CSV
-          </Button>
+        {/* Export CSV Button aligned right on same line */}
+        <div className="shrink-0">
+          <div className="flex lg:hidden">
+            <IconButton
+              variant="export"
+              ariaLabel="Export data as CSV file"
+              onClick={onExportClick}
+              disabled={isExportDisabled}
+            />
+          </div>
+          <div className="hidden lg:flex">
+            <Button
+              onClick={onExportClick}
+              disabled={isExportDisabled}
+              ariaLabel="Export data as CSV file"
+              className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
+              leftIcon={<ExportIcon />}
+            >
+              Export CSV
+            </Button>
+          </div>
         </div>
       </div>
     </motion.div>

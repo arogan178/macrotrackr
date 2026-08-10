@@ -3,7 +3,7 @@ import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import TextField from "@/components/form/TextField";
-import { Button, UserIcon } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { type Gender, type UserSettings } from "@/types/user";
 import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
 
@@ -52,26 +52,9 @@ export default function ProfileForm({
   };
 
   return (
-    <CardContainer className="p-6 sm:p-8">
-      <form onSubmit={onSubmit} className="space-y-8">
-        {/* Header section to match BillingForm pattern */}
-        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div className="flex items-center">
-            <div className="mr-4 rounded-xl bg-primary/10 p-3">
-              <UserIcon className="h-7 w-7 shrink-0 text-primary" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-semibold text-foreground">
-                Profile Information
-              </h3>
-              <p className="mt-1 text-sm text-muted">
-                Update your personal details and preferences
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <CardContainer className="p-3.5 sm:p-6">
+      <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
+        <div className="grid grid-cols-1 gap-3.5 sm:gap-4 md:grid-cols-2">
           <TextField
             label="First Name"
             value={settings.firstName}
@@ -162,15 +145,15 @@ export default function ProfileForm({
         </div>
 
         {/* Submit button section */}
-        <div className="mt-8 flex justify-end">
+        <div className="mt-4 sm:mt-6 flex justify-end">
           <Button
             type="submit"
             isLoading={isSaving}
             disabled={!hasChanges || Object.keys(formErrors).length > 0}
             text="Save Changes"
-            buttonSize="lg"
+            buttonSize="md"
             variant="primary"
-            className="px-8 py-3 text-lg"
+            className="w-full sm:w-auto"
           />
         </div>
       </form>

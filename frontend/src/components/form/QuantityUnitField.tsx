@@ -136,12 +136,12 @@ const QuantityUnitField = memo(function QuantityUnitField({
   };
 
   return (
-    <div>
+    <div className="space-y-2">
       <label className={formStyles.label}>
         {label} {required && <span className="text-destructive">*</span>}
       </label>
-      <div className="flex space-x-2">
-        <div className="flex-1">
+      <div className="flex space-x-2 min-w-0">
+        <div className="flex-1 min-w-[3.5rem]">
           <NumberField
             value={quantity}
             onChange={handleQuantityChange}
@@ -153,7 +153,7 @@ const QuantityUnitField = memo(function QuantityUnitField({
             required={required}
           />
         </div>
-        <div className="w-20">
+        <div className="w-18 shrink-0">
           <Dropdown
             value={unit}
             onChange={handleUnitChange}

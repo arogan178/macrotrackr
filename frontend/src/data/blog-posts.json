@@ -1,5 +1,23 @@
 [
   {
+    "slug": "v2-5-mobile-ux-polish-and-responsive-density",
+    "title": "MacroTrackr v2.5: Compact Mobile Layouts, Sleeker Navigation, and Search Improvements",
+    "excerpt": "Version 2.5 brings a major mobile UX upgrade—reducing vertical scrolling by up to 50%, refining button layouts and form inputs, and polishing mobile navigation.",
+    "date": "2026-08-11",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "2 min",
+    "image": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80&w=1200",
+    "tags": [
+      "Product",
+      "Release Notes",
+      "Mobile UX",
+      "Design System",
+      "Performance"
+    ],
+    "featured": true
+  },
+  {
     "slug": "v2-launch-complete-ui-overhaul",
     "title": "MacroTrackr v2.0: Faster Search, Better Editing, Cleaner Reporting",
     "excerpt": "The 2.0 release tightens food search, quick-add saved meals, grouped meal editing, and reporting so tracking feels faster and more trustworthy.",
@@ -15,7 +33,7 @@
       "Meal Grouping",
       "Reporting"
     ],
-    "featured": true
+    "featured": false
   },
   {
     "slug": "how-to-estimate-restaurant-meals-without-guessing-blind",
