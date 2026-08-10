@@ -7,10 +7,12 @@ import {
   Button,
   ProgressiveBlur,
   SearchIcon,
+  TabBar,
 } from "@/components/ui";
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
-import type { Ingredient } from "@/types/macro";
+import { useMacroHistory } from "@/hooks/queries/useMacroQueries";
+import type { Ingredient, MacroEntry } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
 import { UnitConverter, type UnitType } from "../utils/units";
@@ -35,25 +37,49 @@ interface CalorieSearchProps {
     mealType: string;
     ingredients?: Ingredient[];
   }) => void;
+  recentEntries?: MacroEntry[];
 }
 
 type ActivePanel = "results" | "savedMeals" | null;
+type ActiveTab = "recents" | "savedMeals";
 
 const CalorieSearch = memo(function CalorieSearch({
   onResult,
   onSelectSavedMeal,
+  recentEntries,
 }: CalorieSearchProps) {
   const [query, setQuery] = useState("");
   const [submittedQuery, setSubmittedQuery] = useState("");
   const [activePanel, setActivePanel] = useState<ActivePanel>(null);
+  const [activeTab, setActiveTab] = useState<ActiveTab>("recents");
   const [isAtBottom, setIsAtBottom] = useState(false);
   const wrapperReference = useRef<HTMLDivElement>(null);
+
+  const { data: historyData, isLoading: isHistoryLoading } = useMacroHistory(
+    15,
+    0,
+  );
+
   const {
     data: results = [],
     isFetching: isSearching,
     isFetched,
     error: searchError,
   } = useFoodSearch(submittedQuery);
+
+  const rawRecents = recentEntries ?? historyData?.entries ?? [];
+  const displayRecents = useMemo(() => {
+    const seen = new Set<string>();
+    const unique: MacroEntry[] = [];
+    for (const item of rawRecents) {
+      const name = (item.foodName ?? item.mealName)?.trim();
+      if (name && !seen.has(name.toLowerCase())) {
+        seen.add(name.toLowerCase());
+        unique.push(item);
+      }
+    }
+    return unique.slice(0, 10);
+  }, [rawRecents]);
 
   const trimmedQuery = query.trim();
 
@@ -367,14 +393,94 @@ const CalorieSearch = memo(function CalorieSearch({
 
       {activePanel === "savedMeals" && query.length === 0 && (
         <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl">
-          <SavedMealsList
-            onSelectMeal={(meal) => {
-              onSelectSavedMeal(meal);
-              setSubmittedQuery("");
-              setQuery("");
-              setActivePanel(null);
-            }}
-          />
+          <div className="mb-3">
+            <TabBar
+              items={[
+                { key: "recents", label: "Recents" },
+                { key: "savedMeals", label: "Saved Meals" },
+              ]}
+              activeKey={activeTab}
+              onChange={(key) => setActiveTab(key as ActiveTab)}
+              size="sm"
+            />
+          </div>
+
+          {activeTab === "recents" && (
+            <div className="max-h-60 overflow-y-auto pr-1">
+              {isHistoryLoading && !recentEntries ? (
+                <div className="space-y-2 py-1">
+                  {[1, 2, 3].map((index) => (
+                    <div
+                      key={index}
+                      className="h-10 animate-pulse rounded-lg bg-surface-2"
+                    />
+                  ))}
+                </div>
+              ) : displayRecents.length === 0 ? (
+                <div className="py-4 text-center text-sm text-muted">
+                  No recent entries found.
+                </div>
+              ) : (
+                <div className="divide-y divide-border/40">
+                  {displayRecents.map((entry) => {
+                    const entryName = entry.foodName ?? entry.mealName;
+                    const cals = Math.round(
+                      calculateCaloriesFromMacros(
+                        entry.protein,
+                        entry.carbs,
+                        entry.fats,
+                      ),
+                    );
+
+                    return (
+                      <button
+                        key={entry.id}
+                        type="button"
+                        onClick={() => {
+                          onSelectSavedMeal({
+                            name: entryName,
+                            protein: entry.protein,
+                            carbs: entry.carbs,
+                            fats: entry.fats,
+                            mealType: entry.mealType,
+                            ingredients: entry.ingredients,
+                          });
+                          setSubmittedQuery("");
+                          setQuery("");
+                          setActivePanel(null);
+                        }}
+                        className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium text-foreground">
+                            {entryName}
+                          </span>
+                          <span className="text-xs text-muted capitalize">
+                            {entry.mealType}
+                          </span>
+                        </div>
+                        <div className="mt-0.5 text-xs text-muted">
+                          Calories: {cals} kcal | Protein: {entry.protein}g,
+                          Carbs: {entry.carbs}g, Fats: {entry.fats}g
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeTab === "savedMeals" && (
+            <SavedMealsList
+              onSelectMeal={(meal) => {
+                onSelectSavedMeal(meal);
+                setSubmittedQuery("");
+                setQuery("");
+                setActivePanel(null);
+              }}
+            />
+          )}
         </div>
       )}
 

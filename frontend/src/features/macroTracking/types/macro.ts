@@ -11,6 +11,7 @@ export interface MacroEntryInput {
   entryDate: string; // YYYY-MM-DD
   entryTime: string; // HH:mm
   ingredients?: Ingredient[];
+  saveAsMeal?: boolean;
 }
 
 export interface EditingEntry {
