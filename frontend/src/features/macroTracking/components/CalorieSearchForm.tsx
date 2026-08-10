@@ -1,4 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 import type { FoodSearchResult } from "@/api/macros";
 import TextField from "@/components/form/TextField";
@@ -350,139 +351,173 @@ const CalorieSearch = memo(function CalorieSearch({
         </div>
       </div>
 
-      {activePanel === "results" && displayResults.length > 0 && (
-        <div className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl">
-          <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
-            {displayResults.map((resultData) => {
-              const { item, displayQuantity, calories, protein, carbs, fats } =
-                resultData;
+      <AnimatePresence>
+        {activePanel === "results" && displayResults.length > 0 && (
+          <motion.div
+            key="search-results-overlay"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl"
+          >
+            <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
+              {displayResults.map((resultData) => {
+                const { item, displayQuantity, calories, protein, carbs, fats } =
+                  resultData;
 
-              return (
-                <button
-                  key={resultData.id}
-                  className={
-                    "w-full border-b border-border bg-surface px-4 py-3 text-left text-foreground transition-colors last:border-b-0 hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
-                  }
-                  onClick={() => handleSelect(item)}
-                  type="button"
-                >
-                  <div className="font-medium">{item.name}</div>
-                  <div className="text-xs text-foreground">
-                    {displayQuantity ? `${displayQuantity} | ` : ""}
-                    Calories: {calories.toFixed(1)} kcal | Protein:{" "}
-                    {protein.toFixed(1)}g, Carbs: {carbs.toFixed(1)}
-                    g, Fats: {fats.toFixed(1)}g
-                  </div>
-                  {item.categories && (
+                return (
+                  <button
+                    key={resultData.id}
+                    className={
+                      "w-full border-b border-border bg-surface px-4 py-3 text-left text-foreground transition-colors last:border-b-0 hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
+                    }
+                    onClick={() => handleSelect(item)}
+                    type="button"
+                  >
+                    <div className="font-medium">{item.name}</div>
                     <div className="text-xs text-foreground">
-                      {item.categories}
+                      {displayQuantity ? `${displayQuantity} | ` : ""}
+                      Calories: {calories.toFixed(1)} kcal | Protein:{" "}
+                      {protein.toFixed(1)}g, Carbs: {carbs.toFixed(1)}
+                      g, Fats: {fats.toFixed(1)}g
+                    </div>
+                    {item.categories && (
+                      <div className="text-xs text-foreground">
+                        {item.categories}
+                      </div>
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+            <ProgressiveBlur
+              direction="up"
+              intensity={0.2}
+              height="40px"
+              show={!isAtBottom}
+            />
+          </motion.div>
+        )}
+
+        {activePanel === "savedMeals" && query.length === 0 && (
+          <motion.div
+            key="saved-meals-overlay"
+            initial={{ opacity: 0, y: -8, scale: 0.98 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.98 }}
+            transition={{ duration: 0.15, ease: "easeOut" }}
+            className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl"
+          >
+            <div className="mb-3">
+              <TabBar
+                items={[
+                  { key: "recents", label: "Recents" },
+                  { key: "savedMeals", label: "Saved Meals" },
+                ]}
+                activeKey={activeTab}
+                onChange={(key) => setActiveTab(key as ActiveTab)}
+                layoutId="calorie-search-tabbar"
+                size="sm"
+              />
+            </div>
+
+            <AnimatePresence mode="wait">
+              {activeTab === "recents" && (
+                <motion.div
+                  key="tab-recents"
+                  initial={{ opacity: 0, x: -6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 6 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="max-h-60 overflow-y-auto pr-1"
+                >
+                  {isHistoryLoading && !recentEntries ? (
+                    <div className="space-y-2 py-1">
+                      {[1, 2, 3].map((index) => (
+                        <div
+                          key={index}
+                          className="h-10 animate-pulse rounded-lg bg-surface-2"
+                        />
+                      ))}
+                    </div>
+                  ) : displayRecents.length === 0 ? (
+                    <div className="py-4 text-center text-sm text-muted">
+                      No recent entries found.
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-border/40">
+                      {displayRecents.map((entry) => {
+                        const entryName = entry.foodName ?? entry.mealName;
+                        const cals = Math.round(
+                          calculateCaloriesFromMacros(
+                            entry.protein,
+                            entry.carbs,
+                            entry.fats,
+                          ),
+                        );
+
+                        return (
+                          <button
+                            key={entry.id}
+                            type="button"
+                            onClick={() => {
+                              onSelectSavedMeal({
+                                name: entryName,
+                                protein: entry.protein,
+                                carbs: entry.carbs,
+                                fats: entry.fats,
+                                mealType: entry.mealType,
+                                ingredients: entry.ingredients,
+                              });
+                              setSubmittedQuery("");
+                              setQuery("");
+                              setActivePanel(null);
+                            }}
+                            className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="font-medium text-foreground">
+                                {entryName}
+                              </span>
+                              <span className="text-xs text-muted capitalize">
+                                {entry.mealType}
+                              </span>
+                            </div>
+                            <div className="mt-0.5 text-xs text-muted">
+                              Calories: {cals} kcal | Protein: {entry.protein}g,
+                              Carbs: {entry.carbs}g, Fats: {entry.fats}g
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
-                </button>
-              );
-            })}
-          </div>
-          <ProgressiveBlur
-            direction="up"
-            intensity={0.2}
-            height="40px"
-            show={!isAtBottom}
-          />
-        </div>
-      )}
-
-      {activePanel === "savedMeals" && query.length === 0 && (
-        <div className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl">
-          <div className="mb-3">
-            <TabBar
-              items={[
-                { key: "recents", label: "Recents" },
-                { key: "savedMeals", label: "Saved Meals" },
-              ]}
-              activeKey={activeTab}
-              onChange={(key) => setActiveTab(key as ActiveTab)}
-              size="sm"
-            />
-          </div>
-
-          {activeTab === "recents" && (
-            <div className="max-h-60 overflow-y-auto pr-1">
-              {isHistoryLoading && !recentEntries ? (
-                <div className="space-y-2 py-1">
-                  {[1, 2, 3].map((index) => (
-                    <div
-                      key={index}
-                      className="h-10 animate-pulse rounded-lg bg-surface-2"
-                    />
-                  ))}
-                </div>
-              ) : displayRecents.length === 0 ? (
-                <div className="py-4 text-center text-sm text-muted">
-                  No recent entries found.
-                </div>
-              ) : (
-                <div className="divide-y divide-border/40">
-                  {displayRecents.map((entry) => {
-                    const entryName = entry.foodName ?? entry.mealName;
-                    const cals = Math.round(
-                      calculateCaloriesFromMacros(
-                        entry.protein,
-                        entry.carbs,
-                        entry.fats,
-                      ),
-                    );
-
-                    return (
-                      <button
-                        key={entry.id}
-                        type="button"
-                        onClick={() => {
-                          onSelectSavedMeal({
-                            name: entryName,
-                            protein: entry.protein,
-                            carbs: entry.carbs,
-                            fats: entry.fats,
-                            mealType: entry.mealType,
-                            ingredients: entry.ingredients,
-                          });
-                          setSubmittedQuery("");
-                          setQuery("");
-                          setActivePanel(null);
-                        }}
-                        className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-medium text-foreground">
-                            {entryName}
-                          </span>
-                          <span className="text-xs text-muted capitalize">
-                            {entry.mealType}
-                          </span>
-                        </div>
-                        <div className="mt-0.5 text-xs text-muted">
-                          Calories: {cals} kcal | Protein: {entry.protein}g,
-                          Carbs: {entry.carbs}g, Fats: {entry.fats}g
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
+                </motion.div>
               )}
-            </div>
-          )}
 
-          {activeTab === "savedMeals" && (
-            <SavedMealsList
-              onSelectMeal={(meal) => {
-                onSelectSavedMeal(meal);
-                setSubmittedQuery("");
-                setQuery("");
-                setActivePanel(null);
-              }}
-            />
-          )}
-        </div>
-      )}
+              {activeTab === "savedMeals" && (
+                <motion.div
+                  key="tab-saved-meals"
+                  initial={{ opacity: 0, x: 6 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                >
+                  <SavedMealsList
+                    onSelectMeal={(meal) => {
+                      onSelectSavedMeal(meal);
+                      setSubmittedQuery("");
+                      setQuery("");
+                      setActivePanel(null);
+                    }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {statusMessage && (
         <div>
