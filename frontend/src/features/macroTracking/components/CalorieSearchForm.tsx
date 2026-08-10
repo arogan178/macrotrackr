@@ -315,8 +315,8 @@ const CalorieSearch = memo(function CalorieSearch({
 
   return (
     <div className="relative flex flex-col gap-3" ref={wrapperReference}>
-      <div className="flex flex-col gap-3 sm:flex-row">
-        <div className="flex-1">
+      <div className="flex items-end gap-2 sm:gap-3">
+        <div className="flex-1 min-w-0">
           <TextField
             id="calorie-search-input"
             label="Search for food"
@@ -335,7 +335,7 @@ const CalorieSearch = memo(function CalorieSearch({
             maxLength={50}
           />
         </div>
-        <div className="flex items-end">
+        <div className="flex items-end shrink-0">
           <Button
             type="button"
             onClick={handleSearch}
@@ -346,7 +346,7 @@ const CalorieSearch = memo(function CalorieSearch({
             ariaLabel="Search for food"
             buttonSize="lg"
             variant="primary"
-            className="min-w-40 px-6 py-2.5"
+            className="px-4 sm:px-6 py-2.5 min-w-auto sm:min-w-40"
           />
         </div>
       </div>
