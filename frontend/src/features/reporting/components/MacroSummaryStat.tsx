@@ -127,11 +127,10 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
       </div>
       {/* Average Intake vs Target */}
       <div className="mb-2 space-y-1">
-        {" "}
         {/* Average Intake Display */}
-        <div className="flex items-baseline justify-between">
-          <span className="mr-1 text-xs text-muted">Average Intake:</span>
-          <div className="text-right">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="mr-1 text-xs text-muted shrink-0">Average Intake:</span>
+          <div className="text-right min-w-0">
             <span className="text-lg leading-none font-bold text-foreground">
               <AnimatedNumber
                 value={avgGrams}
@@ -140,7 +139,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
                 duration={0.8}
               />
             </span>
-            <span className="ml-1 text-xs text-muted">
+            <span className="ml-1 text-xs text-muted whitespace-nowrap">
               (
               <AnimatedNumber
                 value={avgPercentage}
@@ -151,11 +150,11 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
               )
             </span>
           </div>
-        </div>{" "}
+        </div>
         {/* Your Target Display */}
-        <div className="flex items-baseline justify-between">
-          <span className="mr-1 text-xs text-muted">Your Target:</span>
-          <div className="text-right">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="mr-1 text-xs text-muted shrink-0">Your Target:</span>
+          <div className="text-right min-w-0">
             <span className="text-sm font-medium text-foreground">
               <AnimatedNumber
                 value={targetGrams}
@@ -164,7 +163,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
                 duration={0.8}
               />
             </span>
-            <span className="ml-1 text-xs text-muted">
+            <span className="ml-1 text-xs text-muted whitespace-nowrap">
               (
               <AnimatedNumber
                 value={targetPercentage}
@@ -176,11 +175,11 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
             </span>
           </div>
         </div>
-      </div>{" "}
+      </div>
       {/* Difference from Target */}
-      <div className="mt-auto flex items-baseline justify-between border-t border-border pt-1">
-        <span className="mr-1.5 text-xs text-muted">Difference:</span>
-        <div className="text-right">
+      <div className="mt-auto flex items-baseline justify-between gap-2 border-t border-border pt-1">
+        <span className="mr-1.5 text-xs text-muted shrink-0">Difference:</span>
+        <div className="text-right min-w-0 whitespace-nowrap">
           <span
             className={`text-sm font-semibold ${
               gramDelta >= 0 ? "text-emerald-400" : "text-rose-400"
@@ -268,7 +267,7 @@ export default function MacroSummaryStats({
   if (!macroAvg) return null;
 
   const cardClasses =
-    "px-4 py-3 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+    "p-3.5 sm:p-4 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
 
   const trackedSubtext =
     trackedDays !== undefined
@@ -276,16 +275,16 @@ export default function MacroSummaryStats({
       : null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
       {/* Calories Card */}
       <CardContainer variant="interactive" className={cardClasses}>
         <div className="flex flex-1 flex-col justify-between">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="mb-2 flex flex-wrap items-baseline justify-between gap-1">
             <span className="text-sm font-semibold text-foreground">
               Calories
             </span>
             {trackedSubtext && (
-              <span className="text-[10px] text-muted-foreground">
+              <span className="text-[10px] text-muted-foreground shrink-0">
                 {trackedSubtext}
               </span>
             )}

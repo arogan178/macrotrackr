@@ -32,7 +32,7 @@ export default function TrendDisplay({
     <div className="flex flex-col justify-between rounded-xl bg-surface-2/40 p-3.5 border border-border/30 transition-colors hover:border-border/60">
       {/* Header: Icon + Title & Direction Badge */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0">
           {icon && (
             <div
               className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${iconBgColor}`}
@@ -40,14 +40,14 @@ export default function TrendDisplay({
               {icon}
             </div>
           )}
-          <span className="text-xs font-semibold tracking-tight text-foreground/90 uppercase">
+          <span className="text-xs font-semibold tracking-tight text-foreground/90 uppercase truncate">
             {label}
           </span>
         </div>
 
-        <div className="flex items-center gap-1 rounded-md border border-border/40 bg-surface-2/80 px-2 py-0.5 text-xs font-medium">
+        <div className="flex items-center gap-1 rounded-md border border-border/40 bg-surface-2/80 px-2 py-0.5 text-xs font-medium shrink-0 whitespace-nowrap">
           <TrendIcon direction={trend.direction} />
-          <span className="text-foreground">
+          <span className="text-foreground whitespace-nowrap">
             {trend.direction === "stable" ? (
               "Stable"
             ) : trend.direction === "insufficient" ? (
@@ -65,8 +65,8 @@ export default function TrendDisplay({
       </div>
 
       {/* Main Metric Value & Baseline Change */}
-      <div className="my-2.5 flex items-baseline justify-between">
-        <div>
+      <div className="my-2.5 flex items-baseline justify-between gap-2">
+        <div className="min-w-0">
           {hasStats ? (
             <div className="flex items-baseline gap-1">
               <span className="text-xl font-bold tracking-tight text-foreground">
@@ -81,7 +81,7 @@ export default function TrendDisplay({
               </span>
             </div>
           ) : (
-            <span className="text-xs text-muted leading-tight block max-w-[150px]">
+            <span className="text-xs text-muted leading-tight block">
               {trend.message}
             </span>
           )}

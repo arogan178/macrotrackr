@@ -445,7 +445,7 @@ function UnifiedInsights({
               </div>
 
               {/* 2x2 Grid of Trend Cards */}
-              <div className="grid flex-1 grid-cols-2 gap-3">
+              <div className="grid flex-1 grid-cols-1 gap-2.5 sm:grid-cols-2 sm:gap-3">
                 <TrendDisplay
                   label="Calories"
                   trend={caloriesTrend}

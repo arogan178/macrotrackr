@@ -2,7 +2,7 @@ import { useState } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
 import TextField from "@/components/form/TextField";
-import { Button, LockIcon } from "@/components/ui";
+import { Button } from "@/components/ui";
 import { useMutationErrorHandler } from "@/hooks";
 import { useChangePassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
@@ -95,32 +95,16 @@ const ChangePasswordForm = () => {
   };
 
   return (
-    <CardContainer className="p-6 sm:p-8">
-      <form onSubmit={handleSubmit} className="space-y-8">
-        <div className="mb-8 flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
-          <div className="flex items-center">
-            <div className="mr-4 rounded-xl bg-vibrant-accent/10 p-3">
-              <LockIcon className="h-7 w-7 shrink-0 text-vibrant-accent" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="truncate text-xl font-semibold text-foreground">
-                Security Settings
-              </h3>
-              <p className="mt-1 text-sm text-muted">
-                Update your password to keep your account secure
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-border/60 bg-surface-2 p-5">
-          <p className="text-sm text-muted">
+    <CardContainer className="p-3.5 sm:p-6">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+        <div className="rounded-2xl border border-border/60 bg-surface-2 p-3.5 sm:p-4">
+          <p className="text-xs sm:text-sm text-muted">
             <strong className="text-foreground">Security note:</strong> For your
             protection, enter your current password before setting a new one.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 gap-3.5 sm:gap-4">
           <TextField
             label="Current Password"
             type="password"
@@ -187,12 +171,12 @@ const ChangePasswordForm = () => {
         </div>
 
         {formError && !formError.includes("match") && (
-          <div className="rounded-2xl border border-error/30 bg-error/10 p-5">
-            <p className="text-sm text-error">{formError}</p>
+          <div className="rounded-2xl border border-error/30 bg-error/10 p-3.5 sm:p-4">
+            <p className="text-xs sm:text-sm text-error">{formError}</p>
           </div>
         )}
 
-        <div className="mt-8 flex justify-end">
+        <div className="mt-4 sm:mt-6 flex justify-end">
           <Button
             type="submit"
             isLoading={changePasswordMutation.isPending}
@@ -203,9 +187,9 @@ const ChangePasswordForm = () => {
               passwordStrength < 3
             }
             text="Change Password"
-            buttonSize="lg"
+            buttonSize="md"
             variant="primary"
-            className="px-8 py-3 text-lg"
+            className="w-full sm:w-auto"
           />
         </div>
       </form>

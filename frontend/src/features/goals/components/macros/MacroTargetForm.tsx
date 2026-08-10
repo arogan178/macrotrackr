@@ -118,22 +118,14 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-6">
         {/* Left side - Main content (4 cols) */}
         <div className="flex h-full flex-col lg:col-span-4">
-          <CardContainer className="h-full p-6">
-            <div className="mb-6 flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-semibold tracking-tight text-foreground/90">
-                  Macro Target Settings
-                </h3>
-                <p className="mt-1 text-sm text-muted">
-                  Adjust the sliders to set your preferred daily macronutrient
-                  percentages.
-                </p>
-              </div>
-              <div className="rounded-full border border-primary/20 bg-primary/10 px-3 py-1">
-                <span className="text-xs font-medium text-primary">
-                  Daily Target
-                </span>
-              </div>
+          <CardContainer className="h-full p-3.5 sm:p-6">
+            <div className="mb-4 sm:mb-6">
+              <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
+                Macro Target Settings
+              </h3>
+              <p className="mt-1 text-xs sm:text-sm text-muted">
+                Adjust sliders to set preferred daily macronutrient percentages.
+              </p>
             </div>
 
             {/* Show skeleton loader when loading or when we don't have valid values yet */}
@@ -243,7 +235,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
 
         {/* Right side - Info panel (2 cols) */}
         <div className="flex h-full flex-col lg:col-span-2">
-          <CardContainer className="h-full bg-surface-2 p-6">
+          <CardContainer className="h-full bg-surface-2 p-3.5 sm:p-6">
             <h3 className="mb-4 text-lg font-semibold tracking-tight text-foreground/90">
               Understanding Macros
             </h3>

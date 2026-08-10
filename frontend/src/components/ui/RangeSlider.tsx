@@ -25,7 +25,7 @@ export default function RangeSlider({
   step = 1,
   disabled = false,
   className = "",
-  trackColorClass = "bg-surface-2",
+  trackColorClass = "bg-foreground/10",
   showFillTrack = false,
   ariaLabel,
   ariaLabelledBy,
@@ -45,7 +45,7 @@ export default function RangeSlider({
   return (
     <div className={`relative flex h-4 items-center ${className}`}>
       {/* Background Track */}
-      <div className="absolute z-0 h-2 w-full rounded-lg bg-surface-2" />
+      <div className="absolute z-0 h-2 w-full rounded-lg bg-foreground/10" />
       
       {/* Filled Track (optional) */}
       {showFillTrack && (

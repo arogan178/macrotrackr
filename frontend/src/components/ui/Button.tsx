@@ -22,7 +22,7 @@ export function getButtonClasses(
   const sizeStyles = BUTTON_SIZES;
 
   const buttonBase = cn(
-    "inline-flex items-center justify-center gap-1.5 text-sm font-medium",
+    "inline-flex items-center justify-center gap-1.5 text-sm font-medium whitespace-nowrap",
     "transition-[background-color,border-color,color,box-shadow,transform,filter] duration-200",
     "ease-out",
     "focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none",
@@ -110,9 +110,9 @@ function ButtonBase({
   const renderContent = () => {
     if (finalIsLoading) {
       return (
-        <span className="flex items-center justify-center">
-          <LoadingSpinnerIcon className="mr-2 h-4 w-4 animate-spin" />
-          <span>{loadingText}</span>
+        <span className="flex items-center justify-center whitespace-nowrap">
+          <LoadingSpinnerIcon className={cn("h-4 w-4 animate-spin", loadingText ? "mr-2" : "")} />
+          {loadingText && <span className="whitespace-nowrap">{loadingText}</span>}
         </span>
       );
     }
@@ -120,15 +120,15 @@ function ButtonBase({
     const content = children ?? text;
 
     return (
-      <span className="flex items-center justify-center">
+      <span className="flex items-center justify-center whitespace-nowrap">
         {effectiveLeftIcon && (
-          <span className="mr-2 flex shrink-0 items-center">
+          <span className="mr-1.5 flex shrink-0 items-center">
             {effectiveLeftIcon}
           </span>
         )}
-        {content && <span>{content}</span>}
+        {content && <span className="whitespace-nowrap">{content}</span>}
         {effectiveRightIcon && (
-          <span className="ml-2 flex shrink-0 items-center">
+          <span className="ml-1.5 flex shrink-0 items-center">
             {effectiveRightIcon}
           </span>
         )}

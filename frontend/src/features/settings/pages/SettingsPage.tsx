@@ -211,10 +211,10 @@ export default function SettingsPage() {
     <DashboardPageContainer>
       <FeaturePage
         title="Settings"
-        subtitle={undefined}
+        subtitle="Manage your account preferences and profile details"
         headerChildren={
           <div
-            className="relative flex space-x-1 rounded-xl bg-surface p-1"
+            className="relative flex items-center space-x-0.5 rounded-xl bg-surface p-1 shadow-xs overflow-x-auto"
             role="tablist"
             aria-label="Settings Tabs"
           >
@@ -223,9 +223,10 @@ export default function SettingsPage() {
               onClick={() => handleTabChange("profile")}
               layoutId="settingsTabHighlight"
               isMotion
+              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
             >
-              <span className="relative z-10 flex items-center">
-                <UserIcon size="sm" className="mr-1.5" />
+              <span className="relative z-10 flex items-center text-xs sm:text-sm">
+                <UserIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Profile
               </span>
             </TabButton>
@@ -235,9 +236,10 @@ export default function SettingsPage() {
                 onClick={() => handleTabChange("billing")}
                 layoutId="settingsTabHighlight"
                 isMotion
+                className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
               >
-                <span className="relative z-10 flex items-center">
-                  <AwardIcon size="sm" className="mr-1.5" />
+                <span className="relative z-10 flex items-center text-xs sm:text-sm">
+                  <AwardIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Billing
                 </span>
               </TabButton>
@@ -248,9 +250,10 @@ export default function SettingsPage() {
                 onClick={() => handleTabChange("accounts")}
                 layoutId="settingsTabHighlight"
                 isMotion
+                className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
               >
-                <span className="relative z-10 flex items-center">
-                  <LinkIcon size="sm" className="mr-1.5" />
+                <span className="relative z-10 flex items-center text-xs sm:text-sm">
+                  <LinkIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                   Accounts
                 </span>
               </TabButton>
@@ -260,9 +263,10 @@ export default function SettingsPage() {
               onClick={() => handleTabChange("security")}
               layoutId="settingsTabHighlight"
               isMotion
+              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
             >
-              <span className="relative z-10 flex items-center">
-                <LockIcon size="sm" className="mr-1.5" />
+              <span className="relative z-10 flex items-center text-xs sm:text-sm">
+                <LockIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Security
               </span>
             </TabButton>

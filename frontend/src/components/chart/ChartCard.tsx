@@ -29,7 +29,7 @@ function ChartCard({
   minHeight = 150,
 }: ChartCardProps) {
   return (
-    <CardContainer className={`relative h-full p-5 ${className}`}>
+    <CardContainer className={`relative h-full p-3.5 sm:p-6 ${className}`}>
       <motion.div
         layout
         initial={{ opacity: 0 }}
@@ -39,9 +39,9 @@ function ChartCard({
       >
         {/* Header */}
         {(title ?? action) && (
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-3.5 sm:mb-4 flex items-center justify-between">
             {title && (
-              <h3 className="text-lg font-semibold tracking-tight text-foreground/90">
+              <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
                 {title}
               </h3>
             )}

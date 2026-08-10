@@ -127,36 +127,35 @@ export function MacroIndicator({
     : undefined;
 
   return (
-    <div className="flex flex-col">
-      <div className="mb-1 flex items-center gap-2">
-        <div className={`h-2 w-2 rounded-full ${colorClasses[color].dot}`} />
-        <span className="text-sm text-foreground">{name}</span>
-        {showPercentage && percentage !== undefined && (
-          <span className="ml-auto text-xs text-foreground">{percentage}%</span>
-        )}
-      </div>
+    <div className="flex flex-col min-w-0">
+      <div className="mb-1 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 min-w-0">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <div className={`h-2.5 w-2.5 rounded-full shrink-0 ${colorClasses[color].dot}`} />
+          <span className="text-xs sm:text-sm font-semibold text-foreground truncate">{name}</span>
+        </div>
 
-      <div className="mb-1 flex items-baseline gap-1.5">
-        <span className="text-sm font-semibold text-foreground">
-          {Math.round(value)}g
-        </span>
-        {target && <span className="text-xs text-foreground">/ {target}g</span>}
+        <div className="flex items-baseline gap-1 text-xs sm:text-sm shrink-0">
+          <span className="font-bold text-foreground">
+            {Math.round(value)}g
+          </span>
+          {target !== undefined && target > 0 && (
+            <span className="text-muted text-xs">/ {target}g</span>
+          )}
+          {showPercentage && percentage !== undefined && (
+            <span className="ml-1 text-[11px] font-medium text-muted-foreground">
+              ({percentage}%)
+            </span>
+          )}
+        </div>
       </div>
 
       {typeof percentage === "number" && (
-        // Reuse shared ProgressBar for consistent visuals
-        // Height matches previous ~6px track: use "md" (h-2) which is closest and visually consistent
-        <div className="mt-0.5">
-          {}
-          {/* Import placed at top of file; see import section */}
-          <ProgressBar
-            progress={percentage}
-            color={color}
-            height="md"
-            showPercentage={false}
-            className=""
-          />
-        </div>
+        <ProgressBar
+          progress={percentage}
+          color={color}
+          height="sm"
+          showPercentage={false}
+        />
       )}
     </div>
   );
