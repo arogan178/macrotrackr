@@ -89,4 +89,49 @@ describe("CalorieSearchForm", () => {
       }),
     );
   });
+
+  it("allows selecting a recent entry from Recents tab in search overlay", async () => {
+    const handleSelectSavedMeal = vi.fn();
+    const recentEntries = [
+      {
+        id: 1,
+        foodName: "Banana",
+        mealName: "Snack",
+        protein: 1.1,
+        carbs: 23,
+        fats: 0.3,
+        mealType: "snack" as const,
+        entryDate: "2026-08-10",
+        entryTime: "10:00",
+        createdAt: "2026-08-10T10:00:00Z",
+      },
+    ];
+
+    renderWithQueryClient(
+      <CalorieSearchForm
+        onResult={() => {}}
+        onSelectSavedMeal={handleSelectSavedMeal}
+        recentEntries={recentEntries}
+      />,
+    );
+
+    const input = screen.getByRole("textbox", { name: "Search for food" });
+    fireEvent.focus(input);
+
+    expect(screen.getByRole("tab", { name: "Recents" })).toBeInTheDocument();
+    expect(screen.getByText("Banana")).toBeInTheDocument();
+
+    const recentItemButton = screen.getByRole("button", { name: /Banana/i });
+    fireEvent.click(recentItemButton);
+
+    expect(handleSelectSavedMeal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: "Banana",
+        protein: 1.1,
+        carbs: 23,
+        fats: 0.3,
+        mealType: "snack",
+      }),
+    );
+  });
 });
