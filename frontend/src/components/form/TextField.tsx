@@ -58,7 +58,6 @@ function TextField({
     error ? formStyles.input.error : formStyles.input.normal,
     type === "password" && formStyles.input.withPassword,
     icon && formStyles.input.withIcon,
-    "placeholder:text-muted"
   );
 
   return (

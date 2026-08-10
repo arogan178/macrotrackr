@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import type { FoodSearchResult } from "@/api/macros";
-import TextField from "@/components/form/TextField";
+import { formStyles } from "@/components/form/FormStyles";
 import {
   ArrowRightIcon,
   Button,
@@ -13,6 +13,7 @@ import {
 import StatusIndicator from "@/components/ui/StatusIndicator";
 import { useFoodSearch } from "@/hooks/queries/useFoodSearch";
 import { useMacroHistory } from "@/hooks/queries/useMacroQueries";
+import { cn } from "@/lib/classnameUtilities";
 import type { Ingredient, MacroEntry } from "@/types/macro";
 
 import { calculateCaloriesFromMacros } from "../calculations";
@@ -112,7 +113,8 @@ const CalorieSearch = memo(function CalorieSearch({
     setActivePanel(null);
   }, [isSearching, results.length, submittedQuery]);
 
-  const handleQueryChange = useCallback((value: string) => {
+  const handleQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
     setQuery(value);
     setSubmittedQuery("");
 
@@ -315,39 +317,51 @@ const CalorieSearch = memo(function CalorieSearch({
 
   return (
     <div className="relative flex flex-col gap-3" ref={wrapperReference}>
-      <div className="flex items-end gap-2 sm:gap-3">
-        <div className="flex-1 min-w-0">
-          <TextField
-            id="calorie-search-input"
-            label="Search for food"
-            value={query}
-            onChange={handleQueryChange}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              if (query.trim().length === 0) {
-                setActivePanel("savedMeals");
-              } else if (results.length > 0) {
-                setActivePanel("results");
-              }
-            }}
-            placeholder="e.g. 1 apple, 100g chicken breast"
-            icon={<SearchIcon className="text-foreground!" />}
-            maxLength={50}
-          />
-        </div>
-        <div className="flex items-end shrink-0">
+      <div className="space-y-2">
+        <label htmlFor="calorie-search-input" className={formStyles.label}>
+          Search for food
+        </label>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <div className="relative flex-1 min-w-0">
+            <div className={formStyles.iconContainer}>
+              <SearchIcon className="text-foreground!" />
+            </div>
+            <input
+              id="calorie-search-input"
+              type="text"
+              value={query}
+              onChange={handleQueryChange}
+              onKeyDown={handleKeyDown}
+              onFocus={() => {
+                if (query.trim().length === 0) {
+                  setActivePanel("savedMeals");
+                } else if (results.length > 0) {
+                  setActivePanel("results");
+                }
+              }}
+              placeholder="e.g. 1 apple, 100g chicken breast"
+              maxLength={50}
+              className={cn(
+                formStyles.input.base,
+                searchError ? formStyles.input.error : formStyles.input.normal,
+                formStyles.input.withIcon,
+                "h-[42px] py-0"
+              )}
+            />
+          </div>
           <Button
             type="button"
             onClick={handleSearch}
             isLoading={isSearching}
             disabled={isSearching || trimmedQuery.length < 2}
-            text="Search"
-            rightIcon={<ArrowRightIcon className="ml-1 h-4 w-4" />}
             ariaLabel="Search for food"
-            buttonSize="lg"
+            buttonSize="md"
             variant="primary"
-            className="px-4 sm:px-6 py-2.5 min-w-auto sm:min-w-40"
-          />
+            rightIcon={<ArrowRightIcon className="h-4 w-4 shrink-0" />}
+            className="h-[42px] shrink-0 px-3 sm:px-5 font-semibold shadow-sm"
+          >
+            <span className="hidden sm:inline">Search</span>
+          </Button>
         </div>
       </div>
 

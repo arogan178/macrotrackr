@@ -1,5 +1,18 @@
 [
   {
+    "version": "2.5.0",
+    "date": "2026-08-11",
+    "title": "Mobile Layout Polish & Compact UX",
+    "type": "release",
+    "highlights": [
+      "Optimized mobile layout density across Goals, Analytics, and Settings pages",
+      "Compact 3-column mobile stats grid and daily macro breakdown",
+      "Refined form input ghost text, search buttons, and button scaling",
+      "Sleek mobile navigation menu with active page highlights",
+      "Automatic www domain redirect to main domain (301 Permanent Redirect)"
+    ]
+  },
+  {
     "version": "1.0.0",
     "date": "2026-03-01",
     "title": "MacroTrackr Launch",

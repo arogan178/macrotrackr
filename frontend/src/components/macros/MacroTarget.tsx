@@ -126,27 +126,6 @@ const MacroTarget = memo(
             disabled={isSliderDisabled("fats")}
           />
         </div>
-
-        <div className="grid grid-cols-3 gap-2 pt-5">
-          <MacroBadge
-            name="Protein"
-            value={target.proteinPercentage}
-            color="protein"
-            isLocked={isLocked("protein")}
-          />
-          <MacroBadge
-            name="Carbs"
-            value={target.carbsPercentage}
-            color="carbs"
-            isLocked={isLocked("carbs")}
-          />
-          <MacroBadge
-            name="Fats"
-            value={target.fatsPercentage}
-            color="fats"
-            isLocked={isLocked("fats")}
-          />
-        </div>
       </div>
     );
   },

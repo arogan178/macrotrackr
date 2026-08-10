@@ -80,36 +80,37 @@ const MobileEntryCards = memo(
 
     const renderDateHeader = (group: GroupedEntry) => (
       <motion.div
-        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-4 transition-colors duration-300 hover:bg-surface-2/60"
+        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-2.5 sm:p-4 transition-colors duration-300 hover:bg-surface-2/60"
         onClick={() => toggleDateCollapse(group.date)}
         whileHover={{ backgroundColor: "var(--color-surface-2)" }}
         transition={{ duration: 0.2 }}
       >
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 shrink-0">
           <motion.div
             animate={{
               rotate: isDateCollapsed(group.date) ? -90 : 0,
             }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="shrink-0"
           >
-            <ChevronDownIcon className=" text-foreground" />
+            <ChevronDownIcon className="text-foreground h-4 w-4" />
           </motion.div>
-          <h3 className="text-base font-semibold tracking-tight text-foreground">
+          <h3 className="text-xs sm:text-base font-semibold tracking-tight text-foreground whitespace-nowrap">
             {formatDate(group.date)}
           </h3>
         </div>
 
-        <div className="flex items-center gap-4 text-xs">
-          <span className="font-medium tracking-tight text-protein">
+        <div className="flex items-center gap-1.5 sm:gap-3 text-[11px] sm:text-xs">
+          <span className="font-medium tracking-tight text-protein whitespace-nowrap">
             {group.totals.protein}g P
           </span>
-          <span className="font-medium tracking-tight text-carbs">
+          <span className="font-medium tracking-tight text-carbs whitespace-nowrap">
             {group.totals.carbs}g C
           </span>
-          <span className="font-medium tracking-tight text-fats">
+          <span className="font-medium tracking-tight text-fats whitespace-nowrap">
             {group.totals.fats}g F
           </span>
-          <span className="font-medium tracking-tight text-foreground">
+          <span className="font-medium tracking-tight text-foreground whitespace-nowrap">
             {group.totals.calories} kcal
           </span>
           <IconButton

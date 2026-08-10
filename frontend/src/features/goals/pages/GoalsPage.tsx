@@ -58,7 +58,7 @@ export default function GoalsPage() {
         subtitle="Track your progress and stay motivated on your health journey"
         headerChildren={
           <div
-            className="relative flex space-x-1 rounded-xl bg-surface p-1"
+            className="relative flex items-center space-x-0.5 rounded-xl bg-surface p-1 shadow-xs"
             role="tablist"
             aria-label="Goals Tabs"
           >
@@ -67,9 +67,10 @@ export default function GoalsPage() {
               onClick={() => ui.setActiveTab("goals")}
               layoutId="goalsTabHighlight"
               isMotion
+              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
             >
-              <span className="relative z-10 flex items-center">
-                <GoalsIcon size="sm" className="mr-1.5" />
+              <span className="relative z-10 flex items-center text-xs sm:text-sm">
+                <GoalsIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Goals
               </span>
             </TabButton>
@@ -78,9 +79,10 @@ export default function GoalsPage() {
               onClick={() => ui.setActiveTab("macro targets")}
               layoutId="goalsTabHighlight"
               isMotion
+              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
             >
-              <span className="relative z-10 flex items-center">
-                <TargetIcon size="sm" className="mr-1.5" />
+              <span className="relative z-10 flex items-center text-xs sm:text-sm">
+                <TargetIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 Macro Targets
               </span>
             </TabButton>
