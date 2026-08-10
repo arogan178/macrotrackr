@@ -8,7 +8,7 @@ import { formStyles } from "@/components/form/FormStyles";
 import NumberField from "@/components/form/NumberField";
 import QuantityUnitField from "@/components/form/QuantityUnitField";
 import TimeField from "@/components/form/TimeField";
-import { Button, PlusIcon, TrashIcon } from "@/components/ui";
+import { Button, PlusIcon, StarIcon, TrashIcon } from "@/components/ui";
 import CalorieSearch from "@/features/macroTracking/components/CalorieSearchForm";
 import { cn } from "@/lib/classnameUtilities";
 import { type Ingredient, MealType } from "@/types/macro";
@@ -27,8 +27,26 @@ interface AddEntryProps {
     entryDate: string;
     entryTime: string;
     ingredients?: Ingredient[];
+    saveAsMeal?: boolean;
   }) => Promise<void>;
   isSaving: boolean;
+}
+
+function getFactor(
+  quantity: number | undefined,
+  unit: UnitType,
+): number | undefined {
+  if (typeof quantity !== "number" || quantity <= 0) return undefined;
+  if (unit === "unit") return quantity;
+  let qtyInGrams: number;
+  if (UnitConverter.isWeightUnit(unit)) {
+    qtyInGrams = UnitConverter.convert(quantity, unit, "g");
+  } else if (UnitConverter.isVolumeUnit(unit)) {
+    qtyInGrams = UnitConverter.convert(quantity, unit, "ml");
+  } else {
+    qtyInGrams = quantity * 100;
+  }
+  return qtyInGrams / 100;
 }
 
 function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
@@ -37,6 +55,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   const [fats, setFats] = useState<number | undefined>();
   const [quantity, setQuantity] = useState<number | undefined>(100);
   const [unit, setUnit] = useState<UnitType>("g");
+  const [saveAsMeal, setSaveAsMeal] = useState(false);
   const [baseMacros, setBaseMacros] = useState<
     | {
         protein: number;
@@ -97,18 +116,8 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   );
 
   useEffect(() => {
-    if (baseMacros && typeof quantity === "number" && quantity > 0) {
-      let quantityInGrams: number;
-
-      if (UnitConverter.isWeightUnit(unit)) {
-        quantityInGrams = UnitConverter.convert(quantity, unit, "g");
-      } else if (UnitConverter.isVolumeUnit(unit)) {
-        quantityInGrams = UnitConverter.convert(quantity, unit, "ml");
-      } else {
-        quantityInGrams = quantity * 100;
-      }
-
-      const factor = quantityInGrams / 100;
+    const factor = getFactor(quantity, unit);
+    if (baseMacros && factor !== undefined) {
       setProtein(Number((baseMacros.protein * factor).toFixed(1)));
       setCarbs(Number((baseMacros.carbs * factor).toFixed(1)));
       setFats(Number((baseMacros.fats * factor).toFixed(1)));
@@ -215,14 +224,40 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
     setFats(undefined);
     setQuantity(100);
     setUnit("g" as UnitType);
+    setSaveAsMeal(false);
   }, []);
 
   const handleManualMacroChange =
-    (setter: (value: number | undefined) => void) =>
+    (
+      setter: (value: number | undefined) => void,
+      field: "protein" | "carbs" | "fats",
+    ) =>
     (value: number | undefined) => {
       setter(value);
-      setBaseMacros(undefined);
       setBaseIngredients(undefined);
+
+      const currentValues = {
+        protein: field === "protein" ? value : protein,
+        carbs: field === "carbs" ? value : carbs,
+        fats: field === "fats" ? value : fats,
+      };
+
+      const factor = getFactor(quantity, unit);
+      if (
+        factor !== undefined &&
+        factor > 0 &&
+        currentValues.protein !== undefined &&
+        currentValues.carbs !== undefined &&
+        currentValues.fats !== undefined
+      ) {
+        setBaseMacros({
+          protein: currentValues.protein / factor,
+          carbs: currentValues.carbs / factor,
+          fats: currentValues.fats / factor,
+        });
+      } else {
+        setBaseMacros(undefined);
+      }
     };
 
   const handleSelectSavedMeal = useCallback(
@@ -325,76 +360,70 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       if (!isFormValid) return;
 
       let finalIngredients = baseIngredients;
-      if (typeof quantity === "number" && quantity > 0) {
-        let factor = 1;
-        if (unit === "unit") {
-          factor = quantity;
-        } else {
-          let quantityInBaseUnit: number;
-          if (UnitConverter.isWeightUnit(unit)) {
-            quantityInBaseUnit = UnitConverter.convert(quantity, unit, "g");
-          } else if (UnitConverter.isVolumeUnit(unit)) {
-            quantityInBaseUnit = UnitConverter.convert(quantity, unit, "ml");
-          } else {
-            quantityInBaseUnit = quantity * 100;
-          }
-          factor = quantityInBaseUnit / 100;
-        }
+      const factor = getFactor(quantity, unit) ?? 1;
 
-        if (baseIngredients && baseIngredients.length > 0) {
-          if (baseIngredients.length === 1) {
-            const ing = baseIngredients[0];
-            finalIngredients = [
-              {
-                ...ing,
-                name: ing.name || mealName,
-                protein: protein as number,
-                carbs: carbs as number,
-                fats: fats as number,
-                quantity: typeof quantity === "number" ? quantity : ing.quantity,
-                unit: unit || ing.unit,
-                baseProtein: baseMacros?.protein ?? ing.baseProtein,
-                baseCarbs: baseMacros?.carbs ?? ing.baseCarbs,
-                baseFats: baseMacros?.fats ?? ing.baseFats,
-                baseQuantity: ing.baseQuantity ?? (unit === "unit" ? 1 : 100),
-                baseUnit: ing.baseUnit ?? (unit === "unit" ? "unit" : unit),
-              },
-            ];
-          } else {
-            finalIngredients = baseIngredients.map((ing) => ({
-              ...ing,
-              protein: Number((ing.protein * factor).toFixed(1)),
-              carbs: Number((ing.carbs * factor).toFixed(1)),
-              fats: Number((ing.fats * factor).toFixed(1)),
-              quantity: ing.quantity
-                ? Number((ing.quantity * factor).toFixed(1))
-                : undefined,
-            }));
-          }
-        } else if (baseMacros) {
+      if (baseIngredients && baseIngredients.length > 0) {
+        if (baseIngredients.length === 1) {
+          const ing = baseIngredients[0];
           finalIngredients = [
             {
-              name: mealName,
+              ...ing,
+              name: ing.name || mealName,
               protein: protein as number,
               carbs: carbs as number,
               fats: fats as number,
-              quantity,
-              unit,
-              baseProtein: baseMacros.protein,
-              baseCarbs: baseMacros.carbs,
-              baseFats: baseMacros.fats,
-              baseQuantity: unit === "unit" ? 1 : 100,
-              baseUnit:
-                unit === "unit"
-                  ? "unit"
-                  : UnitConverter.isWeightUnit(unit)
-                    ? "g"
-                    : UnitConverter.isVolumeUnit(unit)
-                      ? "ml"
-                      : unit,
+              quantity: typeof quantity === "number" ? quantity : ing.quantity,
+              unit: unit || ing.unit,
+              baseProtein:
+                baseMacros?.protein ?? ing.baseProtein ?? (protein as number) / factor,
+              baseCarbs:
+                baseMacros?.carbs ?? ing.baseCarbs ?? (carbs as number) / factor,
+              baseFats:
+                baseMacros?.fats ?? ing.baseFats ?? (fats as number) / factor,
+              baseQuantity: ing.baseQuantity ?? (unit === "unit" ? 1 : 100),
+              baseUnit: ing.baseUnit ?? (unit === "unit" ? "unit" : unit),
             },
           ];
+        } else {
+          finalIngredients = baseIngredients.map((ing) => ({
+            ...ing,
+            protein: Number((ing.protein * factor).toFixed(1)),
+            carbs: Number((ing.carbs * factor).toFixed(1)),
+            fats: Number((ing.fats * factor).toFixed(1)),
+            quantity: ing.quantity
+              ? Number((ing.quantity * factor).toFixed(1))
+              : undefined,
+          }));
         }
+      } else {
+        const effectiveBaseMacros = baseMacros ?? {
+          protein: (protein as number) / factor,
+          carbs: (carbs as number) / factor,
+          fats: (fats as number) / factor,
+        };
+
+        finalIngredients = [
+          {
+            name: mealName,
+            protein: protein as number,
+            carbs: carbs as number,
+            fats: fats as number,
+            quantity: typeof quantity === "number" ? quantity : 100,
+            unit,
+            baseProtein: effectiveBaseMacros.protein,
+            baseCarbs: effectiveBaseMacros.carbs,
+            baseFats: effectiveBaseMacros.fats,
+            baseQuantity: unit === "unit" ? 1 : 100,
+            baseUnit:
+              unit === "unit"
+                ? "unit"
+                : UnitConverter.isWeightUnit(unit)
+                  ? "g"
+                  : UnitConverter.isVolumeUnit(unit)
+                    ? "ml"
+                    : unit,
+          },
+        ];
       }
 
       await onSubmit({
@@ -406,6 +435,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         entryDate,
         entryTime,
         ingredients: finalIngredients,
+        saveAsMeal,
       });
 
       handleClearSearch();
@@ -425,6 +455,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       baseIngredients,
       quantity,
       unit,
+      saveAsMeal,
     ],
   );
 
@@ -457,34 +488,55 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                 unit={unit}
                 onQuantityChange={setQuantity}
                 onUnitChange={setUnit}
-                disabled={!baseMacros}
                 placeholder="100"
               />
             </div>
             <div className="sm:col-span-2">
               <div className="space-y-2">
-                <div className="relative flex items-center">
+                <div className="relative flex items-center justify-between">
                   <label htmlFor="meal-name-input" className={formStyles.label}>
                     Meal Name
                   </label>
-                  <AnimatePresence>
-                    {(searchResult ?? mealName.length > 0) && (
-                      <motion.button
-                        type="button"
-                        onClick={handleClearSearch}
-                        initial={{ opacity: 0, scale: 0.8 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.8 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute right-0 flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
-                        aria-label="Clear search"
-                        title="Clear search result"
-                      >
-                        <TrashIcon className="h-3 w-3" />
-                        Clear
-                      </motion.button>
-                    )}
-                  </AnimatePresence>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSaveAsMeal((previous) => !previous)}
+                      className={cn(
+                        "flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
+                        saveAsMeal
+                          ? "bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 dark:bg-amber-400/20 dark:text-amber-300"
+                          : "text-muted hover:bg-muted/10 hover:text-foreground",
+                      )}
+                      aria-label="Save as Meal"
+                      title={saveAsMeal ? "Will save as reusable meal" : "Save as reusable meal"}
+                    >
+                      <StarIcon
+                        className={cn(
+                          "h-3.5 w-3.5 transition-colors",
+                          saveAsMeal ? "fill-current text-amber-500 dark:text-amber-300" : "",
+                        )}
+                      />
+                      <span>{saveAsMeal ? "Saved as Meal" : "Save as Meal"}</span>
+                    </button>
+                    <AnimatePresence>
+                      {(searchResult ?? mealName.length > 0) && (
+                        <motion.button
+                          type="button"
+                          onClick={handleClearSearch}
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{ duration: 0.15 }}
+                          className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
+                          aria-label="Clear search"
+                          title="Clear search result"
+                        >
+                          <TrashIcon className="h-3 w-3" />
+                          Clear
+                        </motion.button>
+                      )}
+                    </AnimatePresence>
+                  </div>
                 </div>
                 <input
                   id="meal-name-input"
@@ -529,7 +581,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             <NumberField
               label="Protein"
               value={protein}
-              onChange={handleManualMacroChange(setProtein)}
+              onChange={handleManualMacroChange(setProtein, "protein")}
               min={0}
               max={500}
               step={0.1}
@@ -538,7 +590,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             <NumberField
               label="Carbs"
               value={carbs}
-              onChange={handleManualMacroChange(setCarbs)}
+              onChange={handleManualMacroChange(setCarbs, "carbs")}
               min={0}
               max={500}
               step={0.1}
@@ -547,7 +599,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             <NumberField
               label="Fats"
               value={fats}
-              onChange={handleManualMacroChange(setFats)}
+              onChange={handleManualMacroChange(setFats, "fats")}
               min={0}
               max={500}
               step={0.1}

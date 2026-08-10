@@ -182,4 +182,77 @@ describe("AddEntryForm", () => {
       }),
     );
   });
+
+  it("allows editing quantity/unit for custom entries and scales macros on quantity change", async () => {
+    const handleSubmit = vi.fn();
+    render(<AddEntryForm onSubmit={handleSubmit} isSaving={false} />);
+
+    const mealNameInput = screen.getByPlaceholderText("e.g. Chicken Salad");
+    fireEvent.change(mealNameInput, { target: { value: "Custom Chicken" } });
+
+    const proteinInput = screen.getByLabelText("Protein");
+    const carbsInput = screen.getByLabelText("Carbs");
+    const fatsInput = screen.getByLabelText("Fats");
+
+    fireEvent.change(proteinInput, { target: { value: "20" } });
+    fireEvent.change(carbsInput, { target: { value: "10" } });
+    fireEvent.change(fatsInput, { target: { value: "5" } });
+
+    const quantityInput = screen.getByPlaceholderText("100") as HTMLInputElement;
+    expect(quantityInput.disabled).toBe(false);
+
+    // Double quantity from 100g to 200g
+    fireEvent.change(quantityInput, { target: { value: "200" } });
+
+    expect((proteinInput as HTMLInputElement).value).toBe("40");
+    expect((carbsInput as HTMLInputElement).value).toBe("20");
+    expect((fatsInput as HTMLInputElement).value).toBe("10");
+
+    fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
+
+    expect(handleSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mealName: "Custom Chicken",
+        protein: 40,
+        carbs: 20,
+        fats: 10,
+        ingredients: [
+          expect.objectContaining({
+            name: "Custom Chicken",
+            quantity: 200,
+            unit: "g",
+            baseProtein: 20,
+            baseCarbs: 10,
+            baseFats: 5,
+            baseQuantity: 100,
+            baseUnit: "g",
+          }),
+        ],
+      }),
+    );
+  });
+
+  it("submits saveAsMeal flag when Save as Meal button is toggled", async () => {
+    const handleSubmit = vi.fn();
+    render(<AddEntryForm onSubmit={handleSubmit} isSaving={false} />);
+
+    fireEvent.change(screen.getByPlaceholderText("e.g. Chicken Salad"), {
+      target: { value: "Oatmeal" },
+    });
+    fireEvent.change(screen.getByLabelText("Protein"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("Carbs"), { target: { value: "40" } });
+    fireEvent.change(screen.getByLabelText("Fats"), { target: { value: "5" } });
+
+    const saveAsMealButton = screen.getByRole("button", { name: /save as meal/i });
+    fireEvent.click(saveAsMealButton);
+
+    fireEvent.click(screen.getByRole("button", { name: /add entry/i }));
+
+    expect(handleSubmit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        mealName: "Oatmeal",
+        saveAsMeal: true,
+      }),
+    );
+  });
 });

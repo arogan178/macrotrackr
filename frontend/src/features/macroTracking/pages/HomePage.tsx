@@ -111,13 +111,6 @@ export default function HomePage() {
 
   const nutritionProfile = useNutritionProfile(nutritionProfileSource);
 
-  const handleAddEntry = useCallback(
-    async (entry: MacroEntryInput) => {
-      await addMacroEntryMutation.mutateAsync(entry);
-    },
-    [addMacroEntryMutation],
-  );
-
   const handleSaveMeal = useCallback(
     async (entry: MacroEntry) => {
       const entryName = entry.foodName ?? entry.mealName;
@@ -152,6 +145,24 @@ export default function HomePage() {
       });
     },
     [createSavedMealMutation],
+  );
+
+  const handleAddEntry = useCallback(
+    async (entry: MacroEntryInput) => {
+      const newEntry = await addMacroEntryMutation.mutateAsync(entry);
+      if (entry.saveAsMeal) {
+        await handleSaveMeal({
+          id: (newEntry as MacroEntry | undefined)?.id ?? 0,
+          protein: entry.protein,
+          carbs: entry.carbs,
+          fats: entry.fats,
+          mealType: entry.mealType,
+          mealName: entry.mealName,
+          ingredients: entry.ingredients,
+        } as MacroEntry);
+      }
+    },
+    [addMacroEntryMutation, handleSaveMeal],
   );
 
   const handleUnsaveMeal = useCallback(
