@@ -465,14 +465,14 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       className="relative flex h-full flex-col justify-between overflow-hidden"
     >
       <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50" />
-      <div className="relative z-10 p-5">
-        <div className="mb-5">
+      <div className="relative z-10 p-3.5 sm:p-5">
+        <div className="mb-4 sm:mb-5">
           <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
             Log a Meal
           </h2>
         </div>
 
-        <div className="mb-5">
+        <div className="mb-4 sm:mb-5">
           <CalorieSearch
             onResult={handleSearchResult}
             onSelectSavedMeal={handleSelectSavedMeal}
@@ -480,7 +480,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-3 sm:items-start">
+          <div className="mb-4 sm:mb-5 grid grid-cols-1 gap-3.5 sm:gap-5 sm:grid-cols-3 sm:items-start">
             <div className="sm:col-span-1">
               <QuantityUnitField
                 label="Quantity/Unit"
@@ -551,7 +551,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             </div>
           </div>
 
-          <div className="mb-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="mb-4 sm:mb-5 grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-5">
             <DateField
               label="Date"
               value={entryDate}
@@ -564,20 +564,22 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               onChange={setEntryTime}
               required
             />
-            <Dropdown
-              label="Meal Type"
-              options={MEAL_TYPE_OPTIONS.map((option) => ({
-                value: option.value,
-                label: option.display,
-              }))}
-              value={mealType}
-              onChange={(value: string | number | undefined) =>
-                setMealType(value as MealType)
-              }
-            />
+            <div className="col-span-2 sm:col-span-1">
+              <Dropdown
+                label="Meal Type"
+                options={MEAL_TYPE_OPTIONS.map((option) => ({
+                  value: option.value,
+                  label: option.display,
+                }))}
+                value={mealType}
+                onChange={(value: string | number | undefined) =>
+                  setMealType(value as MealType)
+                }
+              />
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
             <NumberField
               label="Protein"
               value={protein}

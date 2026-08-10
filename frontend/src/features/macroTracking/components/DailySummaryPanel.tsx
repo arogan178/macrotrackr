@@ -237,12 +237,12 @@ function DailySummaryInner({
           />
         </CardContainer>
 
-        <div className="flex flex-1 flex-col gap-3">
+        <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-3">
           {macroData.map((macro) => (
             <CardContainer
               variant="interactive"
               key={macro.name}
-              className="group flex flex-1 flex-col justify-center bg-surface-2 p-4"
+              className="group flex flex-1 flex-col justify-center bg-surface-2 p-2.5 sm:p-4"
             >
               <div className="mb-3 flex items-center justify-between">
                 <div className="flex items-center gap-2">
