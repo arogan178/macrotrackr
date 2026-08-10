@@ -44,7 +44,7 @@ export const EntryCard = memo(
 
     return (
       <motion.div
-        className="rounded-xl border border-border/60 bg-surface p-5 shadow-sm"
+        className="rounded-xl border border-border/60 bg-surface p-3.5 sm:p-5 shadow-sm"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}

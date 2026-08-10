@@ -325,9 +325,9 @@ export default function HomePage() {
   return (
     <DashboardPageContainer>
       <FeaturePage title={headerTitle} subtitle={headerSubtitle} animateTitle>
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 gap-5 lg:grid-cols-6">
-            <div className="flex h-full flex-col space-y-5 lg:col-span-4">
+        <div className="space-y-4 sm:space-y-6">
+          <div className="grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-6">
+            <div className="flex h-full flex-col space-y-4 sm:space-y-5 lg:col-span-4">
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
                 tdee={nutritionProfile?.tdee ?? 0}
@@ -359,7 +359,7 @@ export default function HomePage() {
           </div>
 
           <CardContainer variant="interactive" className="border-border/60">
-            <div className="p-5">
+            <div className="p-3.5 sm:p-5">
               {isLoading ? (
                 <HistoryLoadingSkeleton />
               ) : (
