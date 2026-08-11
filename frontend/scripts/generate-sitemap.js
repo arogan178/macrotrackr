@@ -7,6 +7,13 @@ import path from "path";
 const routes = [
   { path: "/", changefreq: "weekly", priority: 0.8 },
   { path: "/blog", changefreq: "weekly", priority: 0.7 },
+  { path: "/tools", changefreq: "monthly", priority: 0.7 },
+  { path: "/tools/tdee-calculator", changefreq: "monthly", priority: 0.6 },
+  { path: "/tools/bmr-calculator", changefreq: "monthly", priority: 0.6 },
+  { path: "/tools/macro-calculator", changefreq: "monthly", priority: 0.6 },
+  { path: "/tools/weight-loss-calculator", changefreq: "monthly", priority: 0.6 },
+  { path: "/tools/protein-calculator", changefreq: "monthly", priority: 0.6 },
+  { path: "/pricing", changefreq: "monthly", priority: 0.6 },
   { path: "/login", changefreq: "monthly", priority: 0.5 },
   { path: "/register", changefreq: "monthly", priority: 0.5 },
   { path: "/reset-password", changefreq: "monthly", priority: 0.5 },
@@ -14,14 +21,7 @@ const routes = [
   { path: "/terms", changefreq: "yearly", priority: 0.2 },
 ];
 
-function formatDate(date) {
-  return date.toISOString().split("T")[0];
-}
-
 function buildSitemap(hostname) {
-  const lastmod = formatDate(new Date());
-
-  // Dynamically resolve and read blog posts
   const blogPostsPath = path.resolve(
     new URL("../src/data/blog-posts.json", import.meta.url).pathname,
   );
@@ -33,17 +33,24 @@ function buildSitemap(hostname) {
     console.error("Warning: Could not read blog-posts.json:", err.message);
   }
 
-  const dynamicRoutes = blogPosts.map((post) => ({
-    path: `/blog/${post.slug}`,
-    changefreq: "weekly",
-    priority: 0.6,
-  }));
+  // Static pages share the newest post date as their lastmod (content freshness).
+  const newestPostDate =
+    blogPosts.map((post) => post.date).sort().at(-1) ??
+    new Date().toISOString().slice(0, 10);
 
-  const allRoutes = [...routes, ...dynamicRoutes];
+  const allRoutes = [
+    ...routes.map((r) => ({ ...r, lastmod: newestPostDate })),
+    ...blogPosts.map((post) => ({
+      path: `/blog/${post.slug}`,
+      changefreq: "weekly",
+      priority: 0.6,
+      lastmod: post.date || newestPostDate,
+    })),
+  ];
 
   const urls = allRoutes
     .map((r) => {
-      return `  <url>\n    <loc>${hostname}${r.path}</loc>\n    <lastmod>${lastmod}</lastmod>\n    <changefreq>${r.changefreq}</changefreq>\n    <priority>${r.priority}</priority>\n  </url>`;
+      return `  <url>\n    <loc>${hostname}${r.path}</loc>\n    <lastmod>${r.lastmod}</lastmod>\n    <changefreq>${r.changefreq}</changefreq>\n    <priority>${r.priority}</priority>\n  </url>`;
     })
     .join("\n");
 

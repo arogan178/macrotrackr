@@ -57,6 +57,11 @@ const Footer: React.FC = () => {
                   Blog
                 </Link>
               </li>
+              <li>
+                <Link to="/tools" className={footerLinkClasses}>
+                  Free Calculators
+                </Link>
+              </li>
             </ul>
           </div>
 
