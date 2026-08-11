@@ -1,3 +1,4 @@
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
@@ -16,7 +17,13 @@ export default defineConfig(({ command }) => {
   const isDevServer = command === "serve";
   const isCapacitor = process.env.CAPACITOR === "true";
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
+  // The landing hero announces the current version; read it from package.json
+  // so a release bump is the only place the number has to change.
+  const { version } = createRequire(import.meta.url)("./package.json");
   return {
+    define: {
+      __APP_VERSION__: JSON.stringify(version),
+    },
     server: {
       proxy: {
         "/api": {

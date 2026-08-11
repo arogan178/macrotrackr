@@ -16,6 +16,8 @@ interface ImportMetaEnvironment {
 	readonly VITE_ENABLE_POSTHOG?: "true" | "false";
 }
 
+declare const __APP_VERSION__: string;
+
 interface ImportMeta {
 	readonly env: ImportMetaEnvironment;
 }

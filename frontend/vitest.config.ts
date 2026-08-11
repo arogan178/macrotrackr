@@ -1,9 +1,15 @@
+import { createRequire } from 'node:module'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import tsconfigPaths from 'vite-tsconfig-paths'
 
+const { version } = createRequire(import.meta.url)('./package.json')
+
 export default defineConfig({
   plugins: [react(), tsconfigPaths()],
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   test: {
     globals: true,
     environment: 'jsdom',
