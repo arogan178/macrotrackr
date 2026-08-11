@@ -1,3 +1,5 @@
+
+
 # Macro Tracker
 
 Macro Tracker is an AGPLv3 nutrition and macro tracking application designed for self-hosting.
@@ -54,7 +56,7 @@ Reference templates:
 bun install
 cp backend/.env.example backend/.env.development
 cp frontend/.env.example frontend/.env.development
-bun run dev
+bun run dev # Starts both backend and frontend concurrently
 ```
 
 Useful scripts:
@@ -149,5 +151,3 @@ docs/      public project docs
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left" />
  </picture>
 </a>
- 
- 
