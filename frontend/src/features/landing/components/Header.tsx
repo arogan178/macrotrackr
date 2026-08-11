@@ -1,10 +1,14 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "@tanstack/react-router";
 import { usePostHog } from "posthog-js/react";
 
 import LogoButton from "@/components/layout/LogoButton";
-import { ExternalLinkIcon, GithubIcon } from "@/components/ui";
+import { ChevronDownIcon, ExternalLinkIcon, GithubIcon } from "@/components/ui";
 import { getButtonClasses } from "@/components/ui/Button";
+import {
+  CALCULATOR_TOOLS,
+  TOOLS_HUB_PATH,
+} from "@/features/landing/tools/toolsCatalog";
 import { DOCS_URL, GITHUB_REPO_URL } from "@/utils/appConstants";
 
 const navLinkClasses =
@@ -13,12 +17,102 @@ const navLinkClasses =
 const externalLinkClasses =
   "inline-flex min-h-11 items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
+const toolsPopoverItems = [
+  {
+    to: TOOLS_HUB_PATH,
+    label: "All free calculators",
+    description: "Browse the complete suite of nutrition tools",
+  },
+  ...CALCULATOR_TOOLS.map((tool) => ({
+    to: tool.path,
+    label: tool.navLabel ?? tool.title,
+    description: tool.tagline,
+  })),
+];
+
+interface ToolsDropdownProps {
+  isActive: boolean;
+  currentPath: string;
+}
+
+const ToolsDropdown: React.FC<ToolsDropdownProps> = ({
+  isActive,
+  currentPath,
+}) => {
+  const [open, setOpen] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+
+  // Close when the route changes, including on browser back/forward.
+  // jsdom has no popover API, hence the optional call.
+  const closePopover = () => popoverRef.current?.hidePopover?.();
+  useEffect(closePopover, [currentPath]);
+
+  return (
+    <>
+      {/* Light dismiss, Escape, and focus restoration come from the popover API. */}
+      <button
+        type="button"
+        popoverTarget="tools-popover"
+        className={`${navLinkClasses} gap-1.5 [anchor-name:--tools-trigger] ${isActive ? "bg-surface-2 text-foreground" : ""}`}
+      >
+        Tools
+        <ChevronDownIcon
+          className={`h-3.5 w-3.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden="true"
+        />
+      </button>
+      <div
+        ref={popoverRef}
+        id="tools-popover"
+        popover="auto"
+        onToggle={(event) => setOpen(event.newState === "open")}
+        className="w-80 rounded-2xl border border-border bg-surface p-2 shadow-modal [margin:0.5rem_0_0_0] [position-anchor:--tools-trigger] [position-area:bottom_span-right]"
+      >
+        <p
+          id="tools-popover-heading"
+          className="px-3 pt-1 pb-2 text-xs font-semibold uppercase tracking-wider text-muted"
+        >
+          Free calculators
+        </p>
+        <ul aria-labelledby="tools-popover-heading">
+          {toolsPopoverItems.map((tool) => {
+            const isCurrent = tool.to === currentPath;
+
+            return (
+              <li key={tool.to}>
+                <Link
+                  to={tool.to}
+                  onClick={closePopover}
+                  aria-current={isCurrent ? "page" : undefined}
+                  className={`block rounded-xl px-3 py-2.5 transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none ${
+                    isCurrent ? "bg-surface-2" : "hover:bg-surface-2"
+                  }`}
+                >
+                  <span
+                    className={`block text-sm font-medium ${isCurrent ? "text-primary" : "text-foreground"}`}
+                  >
+                    {tool.label}
+                  </span>
+                  <span className="block text-xs text-muted">
+                    {tool.description}
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </>
+  );
+};
+
 const Header: React.FC = () => {
   const posthog = usePostHog();
   const location = useLocation();
   const navigate = useNavigate();
   const isLandingPage = location.pathname === "/";
   const isBlogPage = location.pathname.startsWith("/blog");
+  const isToolsPage = location.pathname.startsWith("/tools");
 
   const captureNavigation = (source: string) => {
     posthog.capture("clicked_pricing_nav", {
@@ -76,6 +170,10 @@ const Header: React.FC = () => {
               </a>
             </>
           ) : null}
+          <ToolsDropdown
+            isActive={isToolsPage}
+            currentPath={location.pathname}
+          />
           <a
             href={DOCS_URL}
             target="_blank"
