@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Browser } from "@capacitor/browser";
-import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useClerk } from "@clerk/react";
+import { useSignIn, useSignUp } from "@clerk/react/legacy";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -309,6 +310,20 @@ export function ClerkSignInForm({
         case "needs_second_factor": {
           // 2FA required
           showNotification("Two-factor authentication required.", "info");
+
+          break;
+        }
+        case "needs_client_trust": {
+          // Device Trust: signing in from an unrecognised device, so Clerk
+          // wants a second factor before completing. Reached only when Device
+          // Trust is enabled on the instance. Completing the challenge needs a
+          // second-factor UI, which this form does not implement yet, so keep
+          // the user informed rather than dropping into the generic default.
+          logger.warn("Sign-in requires device trust verification");
+          showNotification(
+            "This device isn't recognised. Please verify it using another sign-in method.",
+            "info",
+          );
 
           break;
         }

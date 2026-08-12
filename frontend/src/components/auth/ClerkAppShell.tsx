@@ -1,5 +1,5 @@
 import { type ReactNode } from "react";
-import { ClerkProvider } from "@clerk/clerk-react";
+import { ClerkProvider } from "@clerk/react";
 
 import { clerkAppearance } from "@/lib/clerkAppearance";
 

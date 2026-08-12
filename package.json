@@ -27,9 +27,5 @@
   "devDependencies": {
     "@types/react-syntax-highlighter": "^15.5.13",
     "typescript": "^5.9.3"
-  },
-  "comment:overrides": "@clerk/shared 3.x is vulnerable at <=3.47.4 (GHSA-w24r-5266-9c3c, GHSA-vqx2-fgx2-5wq9). Pinned to the patched 3.x line: 4.x is a major bump that violates @clerk/clerk-react's own ^3.47.2 constraint.",
-  "overrides": {
-    "@clerk/shared": "^3.47.5"
   }
 }

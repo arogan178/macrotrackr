@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Browser } from "@capacitor/browser";
-import { useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useClerk } from "@clerk/react";
+import { useSignIn, useSignUp } from "@clerk/react/legacy";
 import { useNavigate } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "motion/react";
 

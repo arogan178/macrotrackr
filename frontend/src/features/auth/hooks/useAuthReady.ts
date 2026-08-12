@@ -1,5 +1,5 @@
 import { useCallback, useRef, useState } from "react";
-import { useAuth, useClerk } from "@clerk/clerk-react";
+import { useAuth, useClerk } from "@clerk/react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 
