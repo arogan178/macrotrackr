@@ -10,6 +10,7 @@ import { initializeAuthTokenProvider } from "./api/core";
 import { isClerkAuthMode, runtimeConfig } from "./config/runtime";
 import PostHogUserSync from "./lib/posthogIntegration";
 import { localStoragePersister, queryClient } from "./lib/queryClient";
+import { registerStaleChunkRecovery } from "./lib/staleChunkRecovery";
 import AppRouter from "./AppRouter";
 import { registerServiceWorker } from "./sw-register";
 
@@ -128,4 +129,7 @@ ReactDOM.createRoot(document.querySelector("#root")!).render(
   </React.StrictMode>,
 );
 
+// Registered before the worker so a stale chunk from a previous build can
+// recover even if service worker registration itself fails.
+registerStaleChunkRecovery();
 registerServiceWorker();
