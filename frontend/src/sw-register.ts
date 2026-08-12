@@ -41,24 +41,18 @@ export async function registerServiceWorker() {
       throw new Error("No service worker script found at /service-worker.js or /sw.js");
     }
 
-    // Listen for updates
-    registration.addEventListener("updatefound", () => {
-      const newWorker = registration.installing;
-      if (!newWorker) return;
-
-      newWorker.addEventListener("statechange", () => {
-        if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-          newWorker.postMessage({ type: "SKIP_WAITING" });
-        }
-      });
-    });
-
-    // Listen for messages from service worker
-    navigator.serviceWorker.addEventListener("message", (event) => {
-      if (event.data?.type === "SW_ACTIVATED") {
-        globalThis.location.reload();
-      }
-    });
+    // A newly installed worker is intentionally left in the waiting state.
+    //
+    // Previously this posted SKIP_WAITING as soon as an update installed and
+    // then reloaded the page on SW_ACTIVATED. That swapped the asset set under
+    // a running page: any lazy route imported afterwards requested a chunk the
+    // new worker had already purged and the deploy had removed, which surfaced
+    // as "error loading dynamically imported module" and hit the error
+    // boundary. The forced reload could also fire mid-sign-in and abandon the
+    // OAuth flow.
+    //
+    // The waiting worker now activates on the next load once no page is using
+    // the old build, so a session always sees one consistent build.
 
     // Check for updates periodically
     setInterval(() => {
