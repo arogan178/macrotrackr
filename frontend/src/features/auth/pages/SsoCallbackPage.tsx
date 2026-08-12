@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useAuth, useClerk, useUser } from "@clerk/clerk-react";
+import { useAuth, useClerk, useUser } from "@clerk/react";
 import { Navigate, useNavigate, useSearch } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
@@ -69,8 +69,8 @@ function ClerkSsoCallbackPage() {
 
     handleRedirectCallback({
       // We handle routing ourselves, so tell Clerk to stay on this page
-      afterSignInUrl: globalThis.location.href,
-      afterSignUpUrl: globalThis.location.href,
+      signInFallbackRedirectUrl: globalThis.location.href,
+      signUpFallbackRedirectUrl: globalThis.location.href,
     }).catch((error_) => {
       // Clerk may throw if the callback was already handled (e.g. page refresh)
       // This is safe to ignore if the user is already signed in

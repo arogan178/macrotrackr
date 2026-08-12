@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from "react";
-import { useAuth, useSession } from "@clerk/clerk-react";
+import { useAuth, useSession } from "@clerk/react";
 
 import { setAuthToken, setGetToken } from "@/api/core";
 

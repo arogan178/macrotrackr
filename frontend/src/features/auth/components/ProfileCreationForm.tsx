@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useAuth, useUser } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";

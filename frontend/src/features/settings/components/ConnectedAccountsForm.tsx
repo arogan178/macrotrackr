@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useReverification, useUser } from "@clerk/clerk-react";
+import { useReverification, useUser } from "@clerk/react";
 
 import CardContainer from "@/components/form/CardContainer";
 import Button from "@/components/ui/Button";
