@@ -22,10 +22,6 @@ interface EmptyStateProps {
   size?: "sm" | "md" | "lg";
 }
 
-function getButtonStyles(_variant: ActionProps["variant"] = "primary") {
-  return "";
-}
-
 function EmptyState({
   title,
   message,
@@ -100,7 +96,6 @@ function EmptyState({
                     ? "ghost"
                     : "primary"
               }
-              className={getButtonStyles(action.variant)}
               leftIcon={action.icon}
             >
               {action.label}
@@ -118,7 +113,6 @@ function EmptyState({
                     ? "ghost"
                     : "primary"
               }
-              className={getButtonStyles(secondaryAction.variant ?? "outline")}
               leftIcon={secondaryAction.icon}
             >
               {secondaryAction.label}

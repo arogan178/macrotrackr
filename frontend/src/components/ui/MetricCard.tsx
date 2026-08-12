@@ -1,7 +1,6 @@
 import { memo, useMemo } from "react";
 import { motion } from "motion/react";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { COLOR_MAP } from "@/components/utils";
 import { cn } from "@/lib/classnameUtilities";
 
@@ -124,12 +123,8 @@ function MetricCardInner(properties: MetricCardProps) {
               <span className="text-base text-muted">Complete profile</span>
             ) : (
               <span className="text-foreground">
-                <AnimatedNumber
-                  value={numericValue}
-                  toFixedValue={0}
-                  suffix={showKcalSuffix ? " kcal" : ""}
-                  duration={0.8}
-                />
+                {Math.round(numericValue)}
+                {showKcalSuffix ? " kcal" : ""}
               </span>
             )}
             {subtitle && (

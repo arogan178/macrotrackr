@@ -7,7 +7,6 @@ export interface FeaturePageProps {
   subtitle?: string;
   headerChildren?: ReactNode;
   children: ReactNode;
-  animateTitle?: boolean;
 }
 
 function FeaturePageImpl({
@@ -15,11 +14,10 @@ function FeaturePageImpl({
   subtitle,
   headerChildren,
   children,
-  animateTitle = true,
 }: FeaturePageProps) {
   return (
     <div className="space-y-3.5 sm:space-y-6">
-      <PageHeader title={title} subtitle={subtitle} animateTitle={animateTitle}>
+      <PageHeader title={title} subtitle={subtitle}>
         {headerChildren}
       </PageHeader>
       {children}

@@ -7,6 +7,7 @@ import {
   NutrientIcon,
   ProteinIcon,
 } from "@/components/ui";
+import { useUser } from "@/hooks/auth/useAuthQueries";
 
 import type { InsightsData, NutritionAverage } from "../types/insightsTypes";
 
@@ -17,23 +18,29 @@ interface RecommendationsSectionProps {
   averages: NutritionAverage;
 }
 
-function getProteinRecommendation(proteinAverage: number): string {
-  if (proteinAverage === 0) {
-    return "Ready to optimise your protein intake? Start tracking to get personalised muscle recovery recommendations!";
-  }
-  if (proteinAverage >= 120) {
-    return "Excellent protein intake! You're supporting optimal muscle recovery and growth.";
-  }
+/** Common evidence-based intake for people training regularly, in g per kg. */
+const PROTEIN_G_PER_KG = 1.6;
 
-  return "Great start! Consider boosting your protein to about 1.6g per kg of body weight for optimal muscle support.";
+function getProteinSuggestion(
+  proteinAverage: number,
+  bodyWeight: number | undefined,
+): string | undefined {
+  if (!proteinAverage || !bodyWeight) return undefined;
+
+  const target = Math.round(bodyWeight * PROTEIN_G_PER_KG);
+  const actual = Math.round(proteinAverage);
+  if (actual >= target) return undefined;
+
+  return `Protein averaged ${actual} g/day, ${target - actual} g under the ${target} g that ${PROTEIN_G_PER_KG} g/kg works out to at ${bodyWeight} kg.`;
 }
 
-function getNextStepsRecommendation(completionRate: number): string {
-  if (completionRate < 70) {
-    return "Keep building that tracking habit! More consistent logging will unlock deeper insights into your nutrition patterns.";
-  }
+function getTrackingSuggestion(
+  missedDays: number,
+  totalDays: number,
+): string | undefined {
+  if (missedDays === 0) return undefined;
 
-  return "You're doing great with consistency! Continue tracking and fine-tune your macro balance for optimal results.";
+  return `${missedDays} of ${totalDays} days have no entries. Gaps skew the averages above.`;
 }
 
 export default function RecommendationsSection({
@@ -41,6 +48,49 @@ export default function RecommendationsSection({
   averages,
 }: RecommendationsSectionProps) {
   const { macroBalance, macroDensity, dataQuality } = insights;
+  const { data: user } = useUser();
+
+  const protein = getProteinSuggestion(averages.protein, user?.weight);
+  const tracking = getTrackingSuggestion(
+    dataQuality.missedDays,
+    dataQuality.totalDaysInPeriod,
+  );
+
+  // Only surface a card when its underlying signal says something. Four fixed
+  // cards regardless of the data is filler, not advice.
+  const suggestions = [
+    macroBalance.currentRatio !== "0/0/0" && {
+      title: "Macro Split",
+      bgColor: "bg-purple-500/10 text-purple-400",
+      message: macroBalance.recommendations,
+      icon: <BalanceIcon className="h-5 w-5" />,
+    },
+    averages.calories > 0 && {
+      title: "Protein Share",
+      bgColor: "bg-primary/10 text-primary",
+      message: macroDensity.message,
+      icon: <NutrientIcon className="h-5 w-5" />,
+    },
+    protein && {
+      title: "Protein Intake",
+      bgColor: "bg-blue-500/10 text-blue-400",
+      message: protein,
+      icon: <ProteinIcon className="h-5 w-5" />,
+    },
+    tracking && {
+      title: "Tracking Gaps",
+      bgColor: "bg-emerald-500/10 text-emerald-400",
+      message: tracking,
+      icon: <ClipboardIcon className="h-5 w-5" />,
+    },
+  ].filter(Boolean) as {
+    title: string;
+    bgColor: string;
+    message: string;
+    icon: React.ReactNode;
+  }[];
+
+  if (suggestions.length === 0) return null;
 
   return (
     <motion.div
@@ -53,41 +103,19 @@ export default function RecommendationsSection({
         <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
           <LightningIcon className="h-5 w-5 text-primary" />
         </div>
-        <h3 className="text-xl font-bold tracking-tight">
-          Personalised Action Plan
-        </h3>
+        <h3 className="text-xl font-bold tracking-tight">Suggestions</h3>
       </div>
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <ActionCard
-          title="Macro Balance"
-          bgColor="bg-purple-500/10 text-purple-400"
-          message={macroBalance.recommendations}
-          icon={<BalanceIcon className="h-5 w-5" />}
-        />
-
-        <ActionCard
-          title="Food Quality"
-          bgColor="bg-primary/10 text-primary"
-          message={macroDensity.message}
-          icon={<NutrientIcon className="h-5 w-5" />}
-        />
-
-        {averages.protein < 100 && (
+        {suggestions.map((suggestion) => (
           <ActionCard
-            title="Protein Goals"
-            bgColor="bg-blue-500/10 text-blue-400"
-            message={getProteinRecommendation(averages.protein)}
-            icon={<ProteinIcon className="h-5 w-5" />}
+            key={suggestion.title}
+            title={suggestion.title}
+            bgColor={suggestion.bgColor}
+            message={suggestion.message}
+            icon={suggestion.icon}
           />
-        )}
-
-        <ActionCard
-          title="Next Steps"
-          bgColor="bg-emerald-500/10 text-emerald-400"
-          message={getNextStepsRecommendation(dataQuality.completionRate)}
-          icon={<ClipboardIcon className="h-5 w-5" />}
-        />
+        ))}
       </div>
     </motion.div>
   );

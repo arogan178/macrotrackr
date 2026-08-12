@@ -320,20 +320,15 @@ export default function HomePage() {
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
     user ?? undefined,
     isLoading,
+    history.length > 0,
   );
 
   return (
     <DashboardPageContainer>
-      <FeaturePage title={headerTitle} subtitle={headerSubtitle} animateTitle>
+      <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
         <div className="space-y-3.5 sm:space-y-6">
           <div className="grid grid-cols-1 gap-3.5 sm:gap-5 lg:grid-cols-6">
-            <div className="flex h-full flex-col space-y-3.5 sm:space-y-5 lg:col-span-4">
-              <UserMetricsPanel
-                bmr={nutritionProfile?.bmr ?? 0}
-                tdee={nutritionProfile?.tdee ?? 0}
-                isLoading={isLoading}
-              />
-
+            <div className="flex h-full flex-col lg:col-span-4">
               <div className="flex-1">
                 {isLoading ? (
                   <AddEntryLoadingSkeleton />
@@ -343,7 +338,9 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="flex h-full flex-col lg:col-span-2">
+            {/* BMR and TDEE are reference figures, not the day's work: they sit
+                below the summary rather than above the log form. */}
+            <div className="flex h-full flex-col space-y-3.5 sm:space-y-5 lg:col-span-2">
               {isLoading ? (
                 <DailySummaryLoadingSkeleton />
               ) : (
@@ -355,6 +352,12 @@ export default function HomePage() {
                   />
                 )
               )}
+
+              <UserMetricsPanel
+                bmr={nutritionProfile?.bmr ?? 0}
+                tdee={nutritionProfile?.tdee ?? 0}
+                isLoading={isLoading}
+              />
             </div>
           </div>
 
