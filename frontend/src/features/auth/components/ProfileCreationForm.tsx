@@ -43,30 +43,17 @@ const TOTAL_STEPS = 3;
 
 type WeightGoalChoice = "lose" | "maintain" | "gain";
 
-const GOAL_CHOICES: { value: WeightGoalChoice; label: string; hint: string }[] =
-  [
-    { value: "lose", label: "Lose weight", hint: "Eat below maintenance" },
-    { value: "maintain", label: "Maintain", hint: "Hold your current weight" },
-    { value: "gain", label: "Gain weight", hint: "Eat above maintenance" },
-  ];
+const GOAL_CHOICES: { value: WeightGoalChoice; label: string }[] = [
+  { value: "lose", label: "Lose weight" },
+  { value: "maintain", label: "Maintain" },
+  { value: "gain", label: "Gain weight" },
+];
 
 function StepIndicator({ step }: { step: number }) {
   return (
-    <div className="flex items-center gap-3">
-      <span className="text-xs font-medium tracking-wide text-muted uppercase">
-        Step {step} of {TOTAL_STEPS}
-      </span>
-      <div className="flex flex-1 gap-1.5" aria-hidden="true">
-        {Array.from({ length: TOTAL_STEPS }, (_, index) => (
-          <div
-            key={index}
-            className={`h-1 flex-1 rounded-full ${
-              index < step ? "bg-primary" : "bg-surface-2"
-            }`}
-          />
-        ))}
-      </div>
-    </div>
+    <p className="text-xs font-medium tracking-wide text-muted uppercase">
+      Step {step} of {TOTAL_STEPS}
+    </p>
   );
 }
 
@@ -227,22 +214,11 @@ export function ProfileCreationForm() {
       // Step 3: Record the weight goal so the dashboard opens with a real
       // calorie target instead of falling back to bare TDEE. A failure here
       // must not strand the user mid-onboarding — the goal is editable later.
-      if (weight && tdee && goalCalculations) {
+      if (goalCalculations) {
         try {
           await goalsApi.createWeightGoal({
             tdee,
-            goals: {
-              startingWeight: weight,
-              targetWeight:
-                weightGoal === "maintain" ? weight : (targetWeight ?? weight),
-              startDate: todayISO(),
-              targetDate: goalCalculations.targetDate,
-              calorieTarget: goalCalculations.calorieTarget,
-              weeklyChange: goalCalculations.weeklyChange,
-              calculatedWeeks: goalCalculations.calculatedWeeks,
-              dailyChange: goalCalculations.calorieTarget - tdee,
-              weightGoal: weightGoal === "" ? "maintain" : weightGoal,
-            },
+            goals: { ...goalCalculations, startDate: todayISO() },
           });
         } catch (goalError) {
           logger.error("Failed to create initial weight goal", goalError);
@@ -486,26 +462,15 @@ export function ProfileCreationForm() {
                 onClick={() => {
                   setWeightGoal(choice.value);
                   setErrors({});
-                  if (choice.value === "maintain") {
-                    setTargetWeight(null);
-                  } else if (targetWeight === null && weight) {
-                    setTargetWeight(
-                      choice.value === "lose" ? weight - 5 : weight + 5,
-                    );
-                  }
+                  if (choice.value === "maintain") setTargetWeight(null);
                 }}
-                className={`cursor-pointer rounded-lg border p-3 text-left transition-colors ${
+                className={`cursor-pointer rounded-lg border p-3 text-center font-medium transition-colors ${
                   isSelected
-                    ? "border-primary bg-primary/10"
-                    : "border-border bg-surface-2 hover:border-primary/40"
+                    ? "border-primary bg-primary/10 text-foreground"
+                    : "border-border bg-surface-2 text-muted hover:border-primary/40"
                 }`}
               >
-                <span className="block font-medium text-foreground">
-                  {choice.label}
-                </span>
-                <span className="mt-0.5 block text-xs text-muted">
-                  {choice.hint}
-                </span>
+                {choice.label}
               </button>
             );
           })}
@@ -541,16 +506,15 @@ export function ProfileCreationForm() {
                 {goalCalculations.calorieTarget} kcal
               </span>
             </div>
-            {weightGoal !== "maintain" &&
-              typeof goalCalculations.weeklyChange === "number" && (
-                <div className="mt-2 flex justify-between">
-                  <span className="text-muted">Expected change</span>
-                  <span className="font-medium">
-                    {Math.abs(goalCalculations.weeklyChange).toFixed(2)} kg per
-                    week
-                  </span>
-                </div>
-              )}
+            {weightGoal !== "maintain" && (
+              <div className="mt-2 flex justify-between">
+                <span className="text-muted">Expected change</span>
+                <span className="font-medium">
+                  {Math.abs(goalCalculations.weeklyChange).toFixed(2)} kg per
+                  week
+                </span>
+              </div>
+            )}
             <p className="mt-3 text-xs text-muted">
               You can change any of this later under Goals.
             </p>
