@@ -50,6 +50,12 @@ export default function RecommendationsSection({
   const { macroBalance, macroDensity, dataQuality } = insights;
   const { data: user } = useUser();
 
+  const protein = getProteinSuggestion(averages.protein, user?.weight);
+  const tracking = getTrackingSuggestion(
+    dataQuality.missedDays,
+    dataQuality.totalDaysInPeriod,
+  );
+
   // Only surface a card when its underlying signal says something. Four fixed
   // cards regardless of the data is filler, not advice.
   const suggestions = [
@@ -65,33 +71,18 @@ export default function RecommendationsSection({
       message: macroDensity.message,
       icon: <NutrientIcon className="h-5 w-5" />,
     },
-    (() => {
-      const message = getProteinSuggestion(averages.protein, user?.weight);
-
-      return (
-        message && {
-          title: "Protein Intake",
-          bgColor: "bg-blue-500/10 text-blue-400",
-          message,
-          icon: <ProteinIcon className="h-5 w-5" />,
-        }
-      );
-    })(),
-    (() => {
-      const message = getTrackingSuggestion(
-        dataQuality.missedDays,
-        dataQuality.totalDaysInPeriod,
-      );
-
-      return (
-        message && {
-          title: "Tracking Gaps",
-          bgColor: "bg-emerald-500/10 text-emerald-400",
-          message,
-          icon: <ClipboardIcon className="h-5 w-5" />,
-        }
-      );
-    })(),
+    protein && {
+      title: "Protein Intake",
+      bgColor: "bg-blue-500/10 text-blue-400",
+      message: protein,
+      icon: <ProteinIcon className="h-5 w-5" />,
+    },
+    tracking && {
+      title: "Tracking Gaps",
+      bgColor: "bg-emerald-500/10 text-emerald-400",
+      message: tracking,
+      icon: <ClipboardIcon className="h-5 w-5" />,
+    },
   ].filter(Boolean) as {
     title: string;
     bgColor: string;
