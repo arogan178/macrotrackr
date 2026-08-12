@@ -401,9 +401,19 @@ const EntryHistoryComponent = function EntryHistory({
       {history.length === 0 ? (
         <EmptyState
           title="No entries yet"
-          message="Get started by logging your first meal using the form above"
+          message="Your logged meals will show up here."
           icon={<PlusCircleIcon className="h-10 w-10 text-foreground" />}
           size="lg"
+          action={{
+            label: "Log a meal",
+            onClick: () => {
+              const input = document.querySelector<HTMLInputElement>(
+                "#meal-name-input",
+              );
+              input?.scrollIntoView({ behavior: "smooth", block: "center" });
+              input?.focus();
+            },
+          }}
         />
       ) : (
         <motion.div

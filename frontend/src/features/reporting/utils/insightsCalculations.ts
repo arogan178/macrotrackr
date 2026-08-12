@@ -24,12 +24,6 @@ const MACRO_BALANCE_TOLERANCE_MIN = 5;
 const MACRO_BALANCE_TOLERANCE_FACTOR = 0.2;
 const TREND_DAYS_REQUIRED = 5;
 const TREND_AVG_DAYS = 3;
-const DATA_QUALITY_OUTSTANDING = 90;
-const DATA_QUALITY_GREAT = 70;
-const DATA_QUALITY_GOOD = 50;
-const NUTRIENT_DENSITY_SCORE_MAX = 100;
-const NUTRIENT_DENSITY_SCORE_FACTOR = 3;
-const NUTRIENT_DENSITY_SCORE_PROTEIN_MULT = 100;
 const SCORE_COLOR_GREEN = 70;
 const SCORE_COLOR_YELLOW = 40;
 
@@ -85,8 +79,7 @@ export function calculateMacroBalance(
       score: 0,
       idealRatio: idealRatioString,
       currentRatio: "0/0/0",
-      recommendations:
-        "Start logging your meals to get personalised macro balance insights!",
+      recommendations: "No meals logged in this period.",
     };
   }
 
@@ -109,42 +102,33 @@ export function calculateMacroBalance(
 
   const score = Math.max(0, 100 - totalDiff * MACRO_BALANCE_DIFF_MULTIPLIER);
 
-  let recommendations = "Excellent! Your macro balance is right on target.";
+  // Name the gaps in points rather than prescribing foods: the app knows the
+  // split, not what is on the plate.
+  const gaps: string[] = [];
   if (totalDiff > 10) {
-    const suggestions = [];
-    const proteinTolerance = Math.max(
-      MACRO_BALANCE_TOLERANCE_MIN,
-      idealProtein * MACRO_BALANCE_TOLERANCE_FACTOR,
-    );
-    const carbsTolerance = Math.max(
-      MACRO_BALANCE_TOLERANCE_MIN,
-      idealCarbs * MACRO_BALANCE_TOLERANCE_FACTOR,
-    );
-    const fatsTolerance = Math.max(
-      MACRO_BALANCE_TOLERANCE_MIN,
-      idealFats * MACRO_BALANCE_TOLERANCE_FACTOR,
-    );
+    const tolerance = (ideal: number) =>
+      Math.max(MACRO_BALANCE_TOLERANCE_MIN, ideal * MACRO_BALANCE_TOLERANCE_FACTOR);
 
-    if (proteinPct < idealProtein - proteinTolerance)
-      suggestions.push("try adding more protein-rich foods");
-    if (proteinPct > idealProtein + proteinTolerance)
-      suggestions.push("consider balancing protein with other macros");
-    if (carbsPct < idealCarbs - carbsTolerance)
-      suggestions.push(
-        "include more healthy carbs like fruits and whole grains",
-      );
-    if (carbsPct > idealCarbs + carbsTolerance)
-      suggestions.push("balance carbs with more protein and healthy fats");
-    if (fatsPct < idealFats - fatsTolerance)
-      suggestions.push("add healthy fats like nuts, avocado, or olive oil");
-    if (fatsPct > idealFats + fatsTolerance)
-      suggestions.push("balance fats with lean proteins and complex carbs");
-
-    recommendations =
-      suggestions.length > 0
-        ? `To optimise your macro balance, ${suggestions.join(", and ")}.`
-        : "You're close to your target! Small adjustments will help you reach optimal balance.";
+    for (const [name, actual, ideal] of [
+      ["Protein", proteinPct, idealProtein],
+      ["Carbs", carbsPct, idealCarbs],
+      ["Fats", fatsPct, idealFats],
+    ] as const) {
+      const difference = actual - ideal;
+      if (Math.abs(difference) > tolerance(ideal)) {
+        gaps.push(
+          `${name} is ${Math.abs(difference)} points ${
+            difference > 0 ? "above" : "below"
+          } your ${ideal}% target`,
+        );
+      }
+    }
   }
+
+  const recommendations =
+    gaps.length > 0
+      ? `${gaps.join(". ")}.`
+      : `Your split is within ${Math.round(totalDiff)} points of your target.`;
 
   return {
     score: Math.round(score),
@@ -243,7 +227,7 @@ export function generateOverallTrendSummary(
     caloriesTrend.direction === "insufficient" ||
     proteinTrend.direction === "insufficient"
   ) {
-    return "Log your meals consistently across the selected period to unlock overall trend insights.";
+    return `Need at least ${TREND_DAYS_REQUIRED} logged days in this period to show a trend.`;
   }
 
   if (
@@ -346,8 +330,7 @@ export function calculateDataQuality(
       daysLogged: 0,
       totalDaysInPeriod,
       completionRate: 0,
-      message:
-        "Ready to start your nutrition journey? Begin logging your meals to track your progress!",
+      message: "No meals logged in this period.",
       currentStreak: 0,
       longestStreak: 0,
       missedDays: totalDaysInPeriod,
@@ -367,16 +350,15 @@ export function calculateDataQuality(
       ? Math.round((daysWithData / totalDaysInPeriod) * 100)
       : 0;
 
-  const message =
-    completionRate >= DATA_QUALITY_OUTSTANDING
-      ? "Excellent tracking habits! Keep it up."
-      : completionRate >= DATA_QUALITY_GREAT
-        ? "Great job keeping up with your tracking!"
-        : completionRate >= DATA_QUALITY_GOOD
-          ? "Good start! Log more consistently for better insights."
-          : "Log daily to unlock powerful nutrition insights.";
-
   const { currentStreak, longestStreak } = calculateStreaks(data);
+
+  const missedDays = totalDaysInPeriod - daysWithData;
+  const message =
+    missedDays > 0
+      ? `Logged ${daysWithData} of ${totalDaysInPeriod} days. ${missedDays} ${
+          missedDays === 1 ? "day" : "days"
+        } missed.`
+      : `Logged every day in this period (${daysWithData} of ${totalDaysInPeriod}).`;
 
   return {
     daysLogged: daysWithData,
@@ -385,41 +367,32 @@ export function calculateDataQuality(
     message,
     currentStreak,
     longestStreak,
-    missedDays: totalDaysInPeriod - daysWithData,
+    missedDays,
   };
 }
 
+/**
+ * Share of average daily calories coming from protein.
+ *
+ * This used to be dressed up as a 0-100 "nutrition quality score", but it only
+ * ever measured protein ratio scaled by two arbitrary constants. It now reports
+ * the ratio itself, which is the only thing the data supports.
+ */
 export function calculateMacroDensity(
   averages: NutritionAverage,
 ): MacroDensityResult {
   if (!averages.calories) {
-    return {
-      score: 0,
-      message:
-        "Start tracking your meals to discover your nutrition quality score!",
-    };
+    return { score: 0, message: "No meals logged in this period." };
   }
 
-  const proteinDensity = (averages.protein * 4) / averages.calories;
-  const score = Math.min(
-    NUTRIENT_DENSITY_SCORE_MAX,
-    Math.round(
-      proteinDensity *
-        NUTRIENT_DENSITY_SCORE_PROTEIN_MULT *
-        NUTRIENT_DENSITY_SCORE_FACTOR,
-    ),
-  );
+  const score = Math.round((averages.protein * 4 * 100) / averages.calories);
 
-  const message =
-    score >= 80
-      ? "Fantastic! Your diet has excellent protein quality and nutrient density."
-      : score >= 60
-        ? "Great work! You're maintaining good nutritional quality in your meals."
-        : score >= 40
-          ? "Consider adding more protein-rich foods to boost your nutrition quality."
-          : "Focus on nutrient-dense foods like lean proteins, vegetables, and whole grains for better nutrition quality.";
-
-  return { score, message };
+  return {
+    score,
+    message: `${score}% of your calories came from protein (${Math.round(
+      averages.protein,
+    )} g/day).`,
+  };
 }
 
 export function getScoreColor(score: number): string {

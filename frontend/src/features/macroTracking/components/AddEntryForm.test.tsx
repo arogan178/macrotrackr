@@ -117,6 +117,33 @@ describe("AddEntryForm", () => {
     expect(container).toBeDefined();
   });
 
+  it("explains why the submit button is disabled, at every breakpoint", () => {
+    render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
+
+    const submit = screen.getByRole("button", { name: /add entry/i });
+    expect(submit).toBeDisabled();
+
+    // The hint must not be hidden below the sm breakpoint: a disabled button
+    // with no visible reason is a dead end on mobile.
+    const hint = screen.getByText("Name this meal to save it");
+    expect(hint.className).not.toMatch(/hidden/);
+
+    fireEvent.click(screen.getByRole("button", { name: "Select milk" }));
+    expect(
+      screen.queryByText("Name this meal to save it"),
+    ).not.toBeInTheDocument();
+    expect(submit).toBeEnabled();
+  });
+
+  it("keeps date and time collapsed until asked for", () => {
+    render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
+
+    const disclosure = screen.getByText(/^Logged/).closest("details");
+    expect(disclosure).not.toBeNull();
+    expect(disclosure).not.toHaveAttribute("open");
+    expect(screen.getByText(/^Logged/).textContent).toContain("now");
+  });
+
   it("uses parsed serving units from selected food search results", () => {
     render(<AddEntryForm onSubmit={async () => {}} isSaving={false} />);
 

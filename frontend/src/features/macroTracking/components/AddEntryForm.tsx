@@ -104,16 +104,18 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   const [mealType, setMealType] = useState<MealType>(getDefaultMealType());
   const [mealName, setMealName] = useState<string>("");
 
-  const [entryDate, setEntryDate] = useState<string>(
-    new Date().toISOString().split("T")[0],
-  );
-  const [entryTime, setEntryTime] = useState<string>(
-    new Date().toLocaleTimeString([], {
+  const [loggedNow] = useState(() => ({
+    date: new Date().toISOString().split("T")[0],
+    time: new Date().toLocaleTimeString([], {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
     }),
-  );
+  }));
+  const [entryDate, setEntryDate] = useState<string>(loggedNow.date);
+  const [entryTime, setEntryTime] = useState<string>(loggedNow.time);
+  const isLoggedNow =
+    entryDate === loggedNow.date && entryTime === loggedNow.time;
 
   useEffect(() => {
     const factor = getFactor(quantity, unit);
@@ -133,6 +135,16 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
   const allFieldsAreZero = protein === 0 && carbs === 0 && fats === 0;
   const isFormValid =
     !anyFieldIsUndefined && !allFieldsAreZero && mealName.trim() !== "";
+
+  // Shown at every breakpoint: a disabled button with no reason is a dead end
+  // on mobile, where the old hints were hidden.
+  const validationHint = isFormValid
+    ? undefined
+    : mealName.trim() === ""
+      ? "Name this meal to save it"
+      : anyFieldIsUndefined
+        ? "Enter protein, carbs and fats"
+        : "Macros must add up to more than 0";
 
   const handleSearchResult = useCallback(
     ({
@@ -464,7 +476,6 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       variant="interactive"
       className="relative flex h-full flex-col justify-between overflow-hidden"
     >
-      <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50" />
       <div className="relative z-10 p-3.5 sm:p-5">
         <div className="mb-4 sm:mb-5">
           <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
@@ -551,33 +562,44 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             </div>
           </div>
 
-          <div className="mb-3.5 sm:mb-5 grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-5">
-            <DateField
-              label="Date"
-              value={entryDate}
-              onChange={setEntryDate}
-              required
+          <div className="mb-3.5 sm:mb-5">
+            <Dropdown
+              label="Meal Type"
+              options={MEAL_TYPE_OPTIONS.map((option) => ({
+                value: option.value,
+                label: option.display,
+              }))}
+              value={mealType}
+              onChange={(value: string | number | undefined) =>
+                setMealType(value as MealType)
+              }
             />
-            <TimeField
-              label="Time"
-              value={entryTime}
-              onChange={setEntryTime}
-              required
-            />
-            <div className="col-span-2 sm:col-span-1">
-              <Dropdown
-                label="Meal Type"
-                options={MEAL_TYPE_OPTIONS.map((option) => ({
-                  value: option.value,
-                  label: option.display,
-                }))}
-                value={mealType}
-                onChange={(value: string | number | undefined) =>
-                  setMealType(value as MealType)
-                }
+          </div>
+
+          {/* Date and time default to now and are rarely changed, so they stay
+              out of the way until asked for. */}
+          <details className="mb-3.5 sm:mb-5 group">
+            <summary className="cursor-pointer list-none text-xs text-muted transition-colors hover:text-foreground">
+              Logged {isLoggedNow ? "now" : `${entryDate} at ${entryTime}`}
+              <span className="ml-1.5 underline decoration-border underline-offset-4 group-open:hidden">
+                change
+              </span>
+            </summary>
+            <div className="mt-3 grid grid-cols-2 gap-3 sm:gap-5">
+              <DateField
+                label="Date"
+                value={entryDate}
+                onChange={setEntryDate}
+                required
+              />
+              <TimeField
+                label="Time"
+                value={entryTime}
+                onChange={setEntryTime}
+                required
               />
             </div>
-          </div>
+          </details>
 
           <div className="grid grid-cols-3 gap-2.5 sm:gap-5">
             <NumberField
@@ -620,15 +642,10 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0">
-              {allFieldsAreZero && (
-                <div className="hidden sm:inline-block rounded-md bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
-                  Macros must be &gt; 0
-                </div>
-              )}
-              {!mealName.trim() && !anyFieldIsUndefined && (
-                <div className="hidden sm:inline-block rounded-md bg-warning/10 px-2.5 py-1 text-xs font-medium text-warning">
-                  Provide meal name
-                </div>
+              {validationHint && (
+                <p className="text-right text-xs text-muted">
+                  {validationHint}
+                </p>
               )}
               <Button
                 type="submit"
@@ -636,16 +653,11 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                 isLoading={_isSaving}
                 text={_isSaving ? "Saving..." : "Add Entry"}
                 leftIcon={
-                  <PlusIcon
-                    className={cn(
-                      "h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 shrink-0",
-                      isFormValid && !_isSaving ? "group-hover:rotate-90" : "",
-                    )}
-                  />
+                  <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 }
                 buttonSize="sm"
                 variant="primary"
-                className="group font-semibold text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2 shrink-0 whitespace-nowrap"
+                className="font-semibold text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2 shrink-0 whitespace-nowrap"
               />
             </div>
           </div>

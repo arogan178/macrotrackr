@@ -62,7 +62,7 @@ function ClerkProfileSetupPage() {
     <AuthPageShell
       eyebrow="Profile Setup"
       title="Finish your setup"
-      description="Add a few details so we can personalize targets, calorie estimates, and progress tracking."
+      description="Three short steps to set your calorie baseline and daily target."
       panelClassName="max-w-lg"
     >
       <ProfileCreationForm />

@@ -1,6 +1,5 @@
 import { memo } from "react";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import { StarIcon, UserIcon } from "@/components/ui";
 import MetricCard from "@/components/ui/MetricCard";
 
@@ -75,11 +74,7 @@ function UserMetricsPanel({
               <span className="text-xs font-medium text-foreground">{label}</span>
             </div>
             <span className="text-xs font-semibold text-foreground whitespace-nowrap">
-              {value ? (
-                <AnimatedNumber value={value} toFixedValue={0} suffix=" kcal" duration={0.8} />
-              ) : (
-                "—"
-              )}
+              {value ? `${Math.round(value)} kcal` : "—"}
             </span>
           </div>
         ))}

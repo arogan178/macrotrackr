@@ -117,17 +117,14 @@ function UnifiedInsights({
   if (!insights || aggregatedData.length === 0 || showNoDataMessage) {
     return (
       <CardContainer className="flex min-h-[300px] items-center justify-center p-6 text-center">
-        <div className="space-y-3">
-          <div className="text-4xl">Insights</div>
-          <div>
-            <p className="mb-2 text-xl font-semibold text-foreground">
-              Ready for Insights
-            </p>
-            <p className="max-w-md text-muted">
-              Start logging your meals to unlock personalised nutrition
-              insights, trends, and recommendations tailored just for you.
-            </p>
-          </div>
+        <div>
+          <p className="mb-2 text-xl font-semibold text-foreground">
+            No data for this range
+          </p>
+          <p className="max-w-md text-muted">
+            Log a few meals and your averages, trends and streaks will appear
+            here.
+          </p>
         </div>
       </CardContainer>
     );
@@ -248,11 +245,11 @@ function UnifiedInsights({
             </MetricCard>
           </div>
 
-          {/* Nutrient Density */}
+          {/* Protein Share */}
           <div className="lg:col-span-1">
             <MetricCard
-              title="Nutrient Density"
-              tooltipText="Evaluates the quality of your macros based on your intake of essential nutrients."
+              title="Protein Share"
+              tooltipText="Share of your average daily calories that came from protein."
               score={macroDensity.score}
               delay={0.2}
               variant="custom"
@@ -262,10 +259,7 @@ function UnifiedInsights({
                   progress={macroDensity.score}
                   size={100}
                   strokeWidth={8}
-                  colorClass={getTextColorByScore(
-                    macroDensity.score,
-                    "density",
-                  )}
+                  colorClass="text-protein"
                   trackColorClass="text-surface border border-border/10 rounded-full"
                 >
                   <div className="flex flex-col items-center justify-center">
@@ -274,10 +268,11 @@ function UnifiedInsights({
                         value={macroDensity.score}
                         toFixedValue={0}
                         duration={0.8}
+                        suffix="%"
                       />
                     </span>
                     <span className="text-[10px] font-medium tracking-wider text-muted uppercase">
-                      quality
+                      of kcal
                     </span>
                   </div>
                 </RadialProgress>

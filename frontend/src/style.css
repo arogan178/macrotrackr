@@ -87,24 +87,3 @@ input:disabled {
   opacity: 0.5;
 }
 
-/* Marquee animation for stock ticker-style feature display */
-@keyframes marquee {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-100%, 0, 0);
-  }
-}
-
-.animate-marquee {
-  animation: marquee 50s linear infinite;
-  will-change: transform;
-}
-
-/* Respect reduced motion preference */
-@media (prefers-reduced-motion: reduce) {
-  .animate-marquee {
-    animation: none;
-  }
-}
