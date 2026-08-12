@@ -144,10 +144,9 @@ docs/      public project docs
 
 <a href="https://www.star-history.com/?repos=arogan178%2Fmacrotrackr&type=date&legend=top-left">
  <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&theme=dark&legend=top-left" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left" />
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&theme=dark&legend=top-left&sealed_token=8p5V61Qf5xP9miyv_oM22DfQxzPMX1C-MVFJ8QDQAEerJxGDgN5H5o1cuWktX9gWRZ1lS41s2b35_EbITfME0oQofLbSiCf0eOYS4VsZEJAOMm26qxnXp8K6bdkGdm9dmP66TB5bU6HW9SyShWwfqMTDgInPDrpH3iz_JkEkdribHGPXQd9YhHUI83i8" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left&sealed_token=8p5V61Qf5xP9miyv_oM22DfQxzPMX1C-MVFJ8QDQAEerJxGDgN5H5o1cuWktX9gWRZ1lS41s2b35_EbITfME0oQofLbSiCf0eOYS4VsZEJAOMm26qxnXp8K6bdkGdm9dmP66TB5bU6HW9SyShWwfqMTDgInPDrpH3iz_JkEkdribHGPXQd9YhHUI83i8" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=arogan178/macrotrackr&type=date&legend=top-left&sealed_token=8p5V61Qf5xP9miyv_oM22DfQxzPMX1C-MVFJ8QDQAEerJxGDgN5H5o1cuWktX9gWRZ1lS41s2b35_EbITfME0oQofLbSiCf0eOYS4VsZEJAOMm26qxnXp8K6bdkGdm9dmP66TB5bU6HW9SyShWwfqMTDgInPDrpH3iz_JkEkdribHGPXQd9YhHUI83i8" />
  </picture>
 </a>
- 
  
