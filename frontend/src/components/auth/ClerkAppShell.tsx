@@ -2,6 +2,7 @@ import { type ReactNode } from "react";
 import { ClerkProvider } from "@clerk/react";
 
 import { clerkAppearance } from "@/lib/clerkAppearance";
+import { navigateWithRouter } from "@/lib/clerkNavigation";
 
 import { ClerkTokenSync } from "./ClerkTokenSync";
 
@@ -17,6 +18,8 @@ export function ClerkAppShell({ publishableKey, children }: ClerkAppShellProps) 
       afterSignOutUrl="/"
       signInFallbackRedirectUrl="/home"
       signUpFallbackRedirectUrl="/home"
+      routerPush={(to) => navigateWithRouter(to, false)}
+      routerReplace={(to) => navigateWithRouter(to, true)}
       appearance={clerkAppearance}
     >
       <ClerkTokenSync />
