@@ -194,7 +194,7 @@ export default function ReportingPage() {
                     <div className="rounded-2xl border border-border/60 bg-surface/70 shadow-sm">
                       <EmptyState
                         title="No reporting data yet"
-                        message="Add a few meals to unlock analytics, macro trends, and meal timing insights for the selected range."
+                        message="No meals logged in this range. Add a few and your trends and meal timing will appear here."
                         size="md"
                       />
                     </div>
