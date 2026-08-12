@@ -53,7 +53,6 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
            version: "1.0.0",
            environment: config.NODE_ENV,
            database: "error",
-           error: error instanceof Error ? error.message : "Unknown error",
          };
        }
      },
@@ -86,7 +85,6 @@ export const healthRoutes = new Elysia({ name: "health-routes" })
         return {
           status: "not ready",
           reason: "database error",
-          error: error instanceof Error ? error.message : "Unknown error",
         };
       }
     },

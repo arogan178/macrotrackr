@@ -13,6 +13,10 @@ const config: CapacitorConfig = {
     hostname,
     androidScheme: "https",
     cleartext: isLocalDev,
+    // Every entry here is a host the webview may navigate to, so keep it to
+    // the sign-in flows that actually need it. Analytics never navigates, and
+    // a wildcard over a large provider surface (e.g. *.cloudflare.com) turns
+    // any open redirect on that surface into a webview navigation.
     allowNavigation: [
       "*.clerk.com",
       "*.clerk.accounts.dev",
@@ -21,10 +25,8 @@ const config: CapacitorConfig = {
       "*.macrotrackr.com",
       "accounts.google.com",
       "*.google.com",
-      "*.google-analytics.com",
       "appleid.apple.com",
-      "*.cloudflare.com",
-      "*.challenges.cloudflare.com",
+      "challenges.cloudflare.com",
     ],
   },
   plugins: {

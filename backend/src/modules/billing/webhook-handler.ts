@@ -76,9 +76,6 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
             hasRawBody: !!rawBodyText,
             rawBodyLength: rawBodyText?.length ?? 0,
             hasSignature: !!signature,
-            signature: signature ? signature.substring(0, 20) + "..." : "none",
-            rawBodyPreview:
-              rawBodyText ? rawBodyText.substring(0, 100) + "..." : "none",
           },
           "Received Stripe webhook request"
         );
@@ -140,7 +137,6 @@ export const webhookHandler = new Elysia({ name: "webhookHandler" })
             eventType: normalizedEvent.type,
             eventId: normalizedEvent.id,
             format: normalizedEvent.format,
-            payload: normalizedEvent,
           },
           `Processing Stripe webhook: ${normalizedEvent.type} (${normalizedEvent.format})`
         );

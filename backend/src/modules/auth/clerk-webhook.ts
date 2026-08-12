@@ -223,7 +223,6 @@ export const clerkWebhookHandler = (app: Elysia) =>
       try {
         event = verifyWebhookSignature(request, payload);
       } catch (error) {
-        console.error("VERIFY ERROR:", error);
         logger.warn({ error }, "Invalid Clerk webhook signature");
         context.set.status = 400;
         return {

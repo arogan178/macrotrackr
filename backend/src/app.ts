@@ -7,6 +7,7 @@ import { clerkAuthMiddleware } from "./middleware/clerk-auth";
 import { localAuthMiddleware } from "./middleware/local-auth";
 import { rateLimiters } from "./middleware/rate-limit";
 import { requestLimitsMiddleware } from "./middleware/request-limits";
+import { securityHeadersMiddleware } from "./middleware/security-headers";
 import {
   correlationMiddleware,
   enhancedApiLogging,
@@ -173,17 +174,21 @@ function buildUnexpectedErrorPayload(
   error: unknown,
   statusCode: number
 ): ErrorResponsePayload {
+  const isProduction = config.NODE_ENV === "production";
+
+  // Raw error messages from unhandled 5xx failures routinely carry internals
+  // (SQL fragments, file paths, upstream URLs). Only surface them off-prod.
+  const shouldRedactMessage = isProduction && statusCode >= 500;
+
   const base: ErrorResponsePayload = {
     code: code || "INTERNAL_ERROR",
     message:
-      error instanceof Error ? error.message : "An unexpected error occurred",
+      !shouldRedactMessage && error instanceof Error
+        ? error.message
+        : "An unexpected error occurred",
   };
 
-  if (
-    config.NODE_ENV !== "production" &&
-    statusCode >= 500 &&
-    error instanceof Error
-  ) {
+  if (!isProduction && statusCode >= 500 && error instanceof Error) {
     base.details = error.stack;
   }
 
@@ -270,7 +275,8 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
     .use(correlationMiddleware)
     .use(enhancedApiLogging)
 
-    // Apply rate limiting
+    // Apply rate limiting (strict bucket for credential endpoints first)
+    .use(rateLimiters.auth)
     .use(rateLimiters.api);
 
   if (withClerk) {
@@ -302,6 +308,9 @@ function registerCoreRoutes(app: Elysia, db: Database): void {
 
 export function createApp(db: Database) {
   const app = new Elysia()
+    // Baseline security response headers
+    .use(securityHeadersMiddleware)
+
     // Request size limits for security
     .use(requestLimitsMiddleware)
 
@@ -349,7 +358,15 @@ export function createApp(db: Database) {
           const allowed = Array.isArray(config.CORS_ORIGIN)
             ? config.CORS_ORIGIN
             : [config.CORS_ORIGIN];
-          return allowed.includes(requestOrigin) || allowed.includes("*");
+
+          // A wildcard is incompatible with credentialed requests: reflecting
+          // any origin back with Allow-Credentials lets any site read the API
+          // as the signed-in user. Only honour it outside production.
+          if (allowed.includes("*")) {
+            return config.NODE_ENV !== "production";
+          }
+
+          return allowed.includes(requestOrigin);
         },
         credentials: true,
         allowedHeaders: ["Content-Type", "Authorization"],

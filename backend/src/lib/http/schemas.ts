@@ -10,9 +10,12 @@ export const EmailSchema = t.String({
   error: "Invalid email format.",
 });
 
+// bcrypt only considers the first 72 bytes, so anything beyond that is a
+// silently ignored suffix as well as wasted hashing work on attacker input.
 export const PasswordSchema = t.String({
   minLength: 8,
-  error: "Password must be at least 8 characters long.",
+  maxLength: 72,
+  error: "Password must be between 8 and 72 characters long.",
 });
 
 export const RequiredStringSchema = t.String({

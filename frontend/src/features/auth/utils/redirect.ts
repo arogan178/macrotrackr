@@ -49,6 +49,15 @@ export function buildRedirectFromLocation(location: {
   return query ? `${pathname}?${query}` : pathname;
 }
 
+// Browsers normalize backslashes to forward slashes in URLs, so "/\evil.com"
+// and "/\\evil.com" resolve off-origin exactly like "//evil.com".
+const BACKSLASH_PATTERN = /\\/u;
+
+// Tabs, newlines and other control characters are stripped during URL parsing,
+// which lets "/\tevil.com" or "java\nscript:" slip past a naive prefix check.
+// eslint-disable-next-line no-control-regex
+const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001F\u007F]/u;
+
 export function isSafeAppRedirect(value: string | undefined): value is string {
   const candidate = normalizeCandidate(value);
 
@@ -56,6 +65,15 @@ export function isSafeAppRedirect(value: string | undefined): value is string {
     return false;
   }
 
+  if (
+    BACKSLASH_PATTERN.test(candidate) ||
+    CONTROL_CHARACTER_PATTERN.test(candidate)
+  ) {
+    return false;
+  }
+
+  // A single leading slash keeps the redirect on this origin; a second one
+  // (or a scheme) makes it protocol-relative and therefore off-site.
   return candidate.startsWith("/") && !candidate.startsWith("//");
 }
 

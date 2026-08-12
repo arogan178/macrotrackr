@@ -35,6 +35,14 @@ const BaseEnvSchema = z.object({
     .transform((value) => value === true || value === "true")
     .default(false),
 
+  // Only enable when the app sits behind a reverse proxy that overwrites
+  // X-Forwarded-For. When false, rate limiting keys on the socket address so
+  // clients cannot spoof their identity with a forged header.
+  TRUST_PROXY: z
+    .union([z.boolean(), z.literal("true"), z.literal("false")])
+    .transform((value) => value === true || value === "true")
+    .default(false),
+
   STRIPE_SECRET_KEY: z.string().optional(),
   STRIPE_WEBHOOK_SECRET: z.string().optional(),
   STRIPE_PRICE_ID_MONTHLY: z.string().optional(),
@@ -225,6 +233,7 @@ const configProxyTarget: Config = {
   PUBLIC_APP_NAME: "",
   SUPPORT_EMAIL: "",
   ENABLE_METRICS: false,
+  TRUST_PROXY: false,
   STRIPE_SECRET_KEY: "",
   STRIPE_WEBHOOK_SECRET: "",
   STRIPE_PRICE_ID_MONTHLY: "",
