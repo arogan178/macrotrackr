@@ -320,6 +320,7 @@ export default function HomePage() {
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
     user ?? undefined,
     isLoading,
+    history.length > 0,
   );
 
   return (

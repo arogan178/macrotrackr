@@ -36,10 +36,21 @@ export function useNutritionProfile(user: NutritionProfileSource | undefined) {
 export function useHomeHeader(
   user: { firstName?: string } | undefined,
   isLoading: boolean,
+  hasLoggedBefore = true,
 ) {
   const title = useMemo(() => {
-    return `Welcome back, ${isLoading ? "..." : user?.firstName ?? "User"}`;
-  }, [isLoading, user?.firstName]);
+    const name = user?.firstName?.trim();
+
+    if (isLoading) {
+      return "Today";
+    }
+
+    if (!hasLoggedBefore) {
+      return name ? `Let's log your first meal, ${name}` : "Log your first meal";
+    }
+
+    return name ? `Welcome back, ${name}` : "Today";
+  }, [isLoading, user?.firstName, hasLoggedBefore]);
 
   const subtitle = useMemo(() => getDisplayDate(new Date()), []);
 

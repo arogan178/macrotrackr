@@ -3,6 +3,7 @@ import { useAuth, useUser } from "@clerk/clerk-react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { authApi } from "@/api/auth";
+import { goalsApi } from "@/api/goals";
 import { userApi } from "@/api/user";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
@@ -13,6 +14,7 @@ import { CheckIcon, InfoIcon } from "@/components/ui/Icons";
 import { useSocialProfileData } from "@/features/auth/hooks/useSocialProfileData";
 import {
   getFirstErrorMessage,
+  validateGoalStep as checkGoalStep,
   validateStep1 as checkStep1,
   validateStep2 as checkStep2,
 } from "@/features/auth/utils/profileValidation";
@@ -29,7 +31,54 @@ import {
   USER_MINIMUM_HEIGHT,
   USER_MINIMUM_WEIGHT,
 } from "@/utils/constants";
-import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
+import { todayISO } from "@/utils/dateUtilities";
+import { generateWeightGoalCalculations } from "@/utils/nutritionCalculations";
+import {
+  ACTIVITY_LEVELS,
+  createNutritionProfile,
+  GENDER_OPTIONS,
+} from "@/utils/userConstants";
+
+const TOTAL_STEPS = 3;
+
+type WeightGoalChoice = "lose" | "maintain" | "gain";
+
+const GOAL_CHOICES: { value: WeightGoalChoice; label: string; hint: string }[] =
+  [
+    { value: "lose", label: "Lose weight", hint: "Eat below maintenance" },
+    { value: "maintain", label: "Maintain", hint: "Hold your current weight" },
+    { value: "gain", label: "Gain weight", hint: "Eat above maintenance" },
+  ];
+
+function StepIndicator({ step }: { step: number }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-xs font-medium tracking-wide text-muted uppercase">
+        Step {step} of {TOTAL_STEPS}
+      </span>
+      <div className="flex flex-1 gap-1.5" aria-hidden="true">
+        {Array.from({ length: TOTAL_STEPS }, (_, index) => (
+          <div
+            key={index}
+            className={`h-1 flex-1 rounded-full ${
+              index < step ? "bg-primary" : "bg-surface-2"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+
+  return (
+    <p role="alert" className="mt-1 text-sm text-error">
+      {message}
+    </p>
+  );
+}
 
 export function ProfileCreationForm() {
   const navigate = useNavigate();
@@ -52,6 +101,10 @@ export function ProfileCreationForm() {
   const [weight, setWeight] = useState<number | null>(null);
   const [activityLevel, setActivityLevel] = useState<number | null>(null);
 
+  // Goal data
+  const [weightGoal, setWeightGoal] = useState<WeightGoalChoice | "">("");
+  const [targetWeight, setTargetWeight] = useState<number | null>(null);
+
   // Validation errors
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -69,26 +122,38 @@ export function ProfileCreationForm() {
     return newErrors;
   };
 
+  const validateGoalStep = (): Record<string, string> => {
+    const newErrors = checkGoalStep(weightGoal, targetWeight, weight);
+    setErrors(newErrors);
+
+    return newErrors;
+  };
+
+  // Maintenance calories, derived from the details collected in steps 1 and 2.
+  const tdee =
+    gender === "male" || gender === "female"
+      ? createNutritionProfile({
+          id: 0,
+          weight: weight ?? undefined,
+          height: height ?? undefined,
+          dateOfBirth,
+          gender,
+          activityLevel: activityLevel ?? undefined,
+        }).tdee
+      : 0;
+
+  const goalCalculations =
+    tdee && weight && weightGoal
+      ? generateWeightGoalCalculations(
+          tdee,
+          weight,
+          weightGoal === "maintain" ? weight : (targetWeight ?? weight),
+        )
+      : undefined;
+
   const handleNext = () => {
-    if (step === 1) {
-      const stepErrors = validateStep1();
-      const firstError = getFirstErrorMessage(stepErrors);
-      if (firstError) {
-        showNotification(firstError, "error");
-
-        return;
-      }
-    }
-
-    if (step === 2) {
-      const stepErrors = validateStep2();
-      const firstError = getFirstErrorMessage(stepErrors);
-      if (firstError) {
-        showNotification(firstError, "error");
-
-        return;
-      }
-    }
+    if (step === 1 && getFirstErrorMessage(validateStep1())) return;
+    if (step === 2 && getFirstErrorMessage(validateStep2())) return;
 
     setErrors({});
     setStep((previousStep) => previousStep + 1);
@@ -100,13 +165,7 @@ export function ProfileCreationForm() {
   };
 
   const handleSubmit = async () => {
-    const stepErrors = validateStep2();
-    const firstError = getFirstErrorMessage(stepErrors);
-    if (firstError) {
-      showNotification(firstError, "error");
-
-      return;
-    }
+    if (getFirstErrorMessage(validateGoalStep())) return;
 
     // Wait for Clerk to be fully loaded
     if (!isAuthLoaded) {
@@ -165,6 +224,31 @@ export function ProfileCreationForm() {
         activityLevel: activityLevel ?? undefined,
       });
 
+      // Step 3: Record the weight goal so the dashboard opens with a real
+      // calorie target instead of falling back to bare TDEE. A failure here
+      // must not strand the user mid-onboarding — the goal is editable later.
+      if (weight && tdee && goalCalculations) {
+        try {
+          await goalsApi.createWeightGoal({
+            tdee,
+            goals: {
+              startingWeight: weight,
+              targetWeight:
+                weightGoal === "maintain" ? weight : (targetWeight ?? weight),
+              startDate: todayISO(),
+              targetDate: goalCalculations.targetDate,
+              calorieTarget: goalCalculations.calorieTarget,
+              weeklyChange: goalCalculations.weeklyChange,
+              calculatedWeeks: goalCalculations.calculatedWeeks,
+              dailyChange: goalCalculations.calorieTarget - tdee,
+              weightGoal: weightGoal === "" ? "maintain" : weightGoal,
+            },
+          });
+        } catch (goalError) {
+          logger.error("Failed to create initial weight goal", goalError);
+        }
+      }
+
       // Clear social data on success
       sessionStorage.removeItem("socialProfileData");
       sessionStorage.removeItem("postAuthRedirect");
@@ -179,9 +263,10 @@ export function ProfileCreationForm() {
         queryClient.invalidateQueries({
           queryKey: queryKeys.settings.user(),
         }),
+        queryClient.invalidateQueries({
+          queryKey: queryKeys.goals.all(),
+        }),
       ]);
-
-      showNotification("Profile created successfully!", "success");
 
       // Redirect to home with replace for a clean onboarding transition.
       if (postSetupRedirect === "/home") {
@@ -214,12 +299,13 @@ export function ProfileCreationForm() {
   if (step === 1) {
     return (
       <div className="space-y-6">
+        <StepIndicator step={1} />
         <div className="text-center">
           <h2 className="text-2xl font-bold text-foreground">
-            Create Your Profile
+            About you
           </h2>
           <p className="mt-2 text-muted">
-            Welcome, {displayName}! Let's set up your profile
+            Hi {displayName} — these details set your calorie baseline.
           </p>
           {socialData && (
             <p className="mt-1 text-sm text-success">
@@ -242,9 +328,7 @@ export function ProfileCreationForm() {
               required
               helperText={`Must be at least ${USER_MINIMUM_AGE} years old`}
             />
-            {errors.dateOfBirth && (
-              <p className="mt-1 text-sm text-error">{errors.dateOfBirth}</p>
-            )}
+            <FieldError message={errors.dateOfBirth} />
           </div>
 
           <div>
@@ -260,9 +344,7 @@ export function ProfileCreationForm() {
               options={GENDER_OPTIONS}
               required
             />
-            {errors.gender && (
-              <p className="mt-1 text-sm text-error">{errors.gender}</p>
-            )}
+            <FieldError message={errors.gender} />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -282,9 +364,7 @@ export function ProfileCreationForm() {
                 unit="cm"
                 required
               />
-              {errors.height && (
-                <p className="mt-1 text-sm text-error">{errors.height}</p>
-              )}
+              <FieldError message={errors.height} />
             </div>
 
             <div>
@@ -303,9 +383,7 @@ export function ProfileCreationForm() {
                 unit="kg"
                 required
               />
-              {errors.weight && (
-                <p className="mt-1 text-sm text-error">{errors.weight}</p>
-              )}
+              <FieldError message={errors.weight} />
             </div>
           </div>
         </div>
@@ -321,10 +399,11 @@ export function ProfileCreationForm() {
   if (step === 2) {
     return (
       <div className="space-y-6">
+        <StepIndicator step={2} />
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-foreground">Activity Level</h2>
+          <h2 className="text-2xl font-bold text-foreground">Activity level</h2>
           <p className="mt-2 text-muted">
-            This helps us calculate your daily energy requirements
+            This adjusts your daily calorie baseline.
           </p>
         </div>
 
@@ -351,14 +430,12 @@ export function ProfileCreationForm() {
               ]}
               required
             />
-            {errors.activityLevel && (
-              <p className="mt-1 text-sm text-error">{errors.activityLevel}</p>
-            )}
+            <FieldError message={errors.activityLevel} />
           </div>
 
           <InfoCard
-            title="Why This Matters"
-            description="Your activity level helps us calculate your daily energy requirements more accurately. We consider both structured exercise and everyday activities."
+            title="What counts as activity"
+            description="Include both structured exercise and everyday movement — a job on your feet counts."
             color="indigo"
             icon={<InfoIcon />}
           />
@@ -376,41 +453,109 @@ export function ProfileCreationForm() {
     );
   }
 
-  // Step 3: Review & Submit
+  // Step 3: Goal
   return (
     <div className="space-y-6">
+      <StepIndicator step={3} />
       <div className="text-center">
         <h2 className="text-2xl font-bold text-foreground">
-          Review Your Profile
+          What are you working toward?
         </h2>
         <p className="mt-2 text-muted">
-          Confirm your information before creating your profile
+          {tdee
+            ? `You burn about ${tdee} kcal a day. Your goal sets the target around it.`
+            : "Your goal sets the daily calorie target on your dashboard."}
         </p>
       </div>
 
-      <div className="space-y-3 rounded-lg border border-border bg-surface-2 p-4">
-        <div className="flex justify-between">
-          <span className="text-muted">Date of Birth</span>
-          <span className="font-medium">{dateOfBirth}</span>
+      <div className="space-y-4">
+        <div
+          className="grid grid-cols-1 gap-2 sm:grid-cols-3"
+          role="radiogroup"
+          aria-label="Weight goal"
+        >
+          {GOAL_CHOICES.map((choice) => {
+            const isSelected = weightGoal === choice.value;
+
+            return (
+              <button
+                key={choice.value}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                onClick={() => {
+                  setWeightGoal(choice.value);
+                  setErrors({});
+                  if (choice.value === "maintain") {
+                    setTargetWeight(null);
+                  } else if (targetWeight === null && weight) {
+                    setTargetWeight(
+                      choice.value === "lose" ? weight - 5 : weight + 5,
+                    );
+                  }
+                }}
+                className={`cursor-pointer rounded-lg border p-3 text-left transition-colors ${
+                  isSelected
+                    ? "border-primary bg-primary/10"
+                    : "border-border bg-surface-2 hover:border-primary/40"
+                }`}
+              >
+                <span className="block font-medium text-foreground">
+                  {choice.label}
+                </span>
+                <span className="mt-0.5 block text-xs text-muted">
+                  {choice.hint}
+                </span>
+              </button>
+            );
+          })}
         </div>
-        <div className="flex justify-between">
-          <span className="text-muted">Gender</span>
-          <span className="font-medium capitalize">{gender}</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted">Height</span>
-          <span className="font-medium">{height} cm</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted">Weight</span>
-          <span className="font-medium">{weight} kg</span>
-        </div>
-        <div className="flex justify-between">
-          <span className="text-muted">Activity Level</span>
-          <span className="text-right font-medium">
-            {activityLevel ? ACTIVITY_LEVELS[activityLevel].label : "-"}
-          </span>
-        </div>
+        <FieldError message={errors.weightGoal} />
+
+        {weightGoal !== "" && weightGoal !== "maintain" && (
+          <div>
+            <NumberField
+              label={`Target Weight (${USER_MINIMUM_WEIGHT}-${USER_MAXIMUM_WEIGHT} kg)`}
+              value={targetWeight ?? undefined}
+              onChange={(value: number | undefined) => {
+                setTargetWeight(value ?? null);
+                if (errors.targetWeight) {
+                  setErrors((previous) => ({ ...previous, targetWeight: "" }));
+                }
+              }}
+              min={USER_MINIMUM_WEIGHT}
+              max={USER_MAXIMUM_WEIGHT}
+              step={0.1}
+              unit="kg"
+              required
+            />
+            <FieldError message={errors.targetWeight} />
+          </div>
+        )}
+
+        {goalCalculations && !errors.targetWeight && (
+          <div className="rounded-lg border border-border bg-surface-2 p-4">
+            <div className="flex justify-between">
+              <span className="text-muted">Daily calorie target</span>
+              <span className="font-medium">
+                {goalCalculations.calorieTarget} kcal
+              </span>
+            </div>
+            {weightGoal !== "maintain" &&
+              typeof goalCalculations.weeklyChange === "number" && (
+                <div className="mt-2 flex justify-between">
+                  <span className="text-muted">Expected change</span>
+                  <span className="font-medium">
+                    {Math.abs(goalCalculations.weeklyChange).toFixed(2)} kg per
+                    week
+                  </span>
+                </div>
+              )}
+            <p className="mt-3 text-xs text-muted">
+              You can change any of this later under Goals.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex gap-3">
@@ -421,11 +566,11 @@ export function ProfileCreationForm() {
           onClick={handleSubmit}
           fullWidth
           isLoading={isLoading}
-          loadingText="Creating profile..."
+          loadingText="Setting up..."
           leftIcon={<CheckIcon />}
           className="w-2/3"
         >
-          Create Profile
+          Finish setup
         </Button>
       </div>
     </div>
