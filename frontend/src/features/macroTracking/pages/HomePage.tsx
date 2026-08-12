@@ -325,7 +325,7 @@ export default function HomePage() {
 
   return (
     <DashboardPageContainer>
-      <FeaturePage title={headerTitle} subtitle={headerSubtitle} animateTitle>
+      <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
         <div className="space-y-3.5 sm:space-y-6">
           <div className="grid grid-cols-1 gap-3.5 sm:gap-5 lg:grid-cols-6">
             <div className="flex h-full flex-col lg:col-span-4">

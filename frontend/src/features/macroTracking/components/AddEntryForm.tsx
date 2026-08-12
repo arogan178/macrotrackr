@@ -476,7 +476,6 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
       variant="interactive"
       className="relative flex h-full flex-col justify-between overflow-hidden"
     >
-      <div className="absolute inset-0 z-0 bg-linear-to-b from-surface to-surface-2 opacity-50" />
       <div className="relative z-10 p-3.5 sm:p-5">
         <div className="mb-4 sm:mb-5">
           <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
@@ -654,16 +653,11 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                 isLoading={_isSaving}
                 text={_isSaving ? "Saving..." : "Add Entry"}
                 leftIcon={
-                  <PlusIcon
-                    className={cn(
-                      "h-3.5 w-3.5 sm:h-4 sm:w-4 transition-transform duration-300 shrink-0",
-                      isFormValid && !_isSaving ? "group-hover:rotate-90" : "",
-                    )}
-                  />
+                  <PlusIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" />
                 }
                 buttonSize="sm"
                 variant="primary"
-                className="group font-semibold text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2 shrink-0 whitespace-nowrap"
+                className="font-semibold text-xs sm:text-sm px-3 py-1.5 sm:px-5 sm:py-2 shrink-0 whitespace-nowrap"
               />
             </div>
           </div>
