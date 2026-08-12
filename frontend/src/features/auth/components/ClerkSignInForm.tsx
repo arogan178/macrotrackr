@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "motion/react";
 import TextField from "@/components/form/TextField";
 import Button from "@/components/ui/Button";
 import { BiometricSignInButton } from "@/features/auth/components/BiometricSignInButton";
+import { SecondFactorChallenge } from "@/features/auth/components/SecondFactorChallenge";
 import {
   SocialAuthOptions,
   type SocialAuthStrategy,
@@ -18,6 +19,13 @@ import {
   buildSocialAuthRedirectUrls,
   normalizeAuthRedirect,
 } from "@/features/auth/utils/redirect";
+import {
+  buildPrepareParams,
+  parseSecondFactors,
+  type SecondFactorOption,
+  type SecondFactorStrategy,
+  selectPreferredSecondFactor,
+} from "@/features/auth/utils/secondFactor";
 import { resolveSocialAuthError } from "@/features/auth/utils/socialAuth";
 import { logger } from "@/lib/logger";
 import { saveBiometricCredentials } from "@/services/biometrics";
@@ -53,6 +61,42 @@ function getStrategies(
     .filter((strategy): strategy is string => strategy !== undefined);
 }
 
+/**
+ * Clerk reports a wrong or expired code as a 422 with an `errors` array. Map
+ * the common cases to something actionable, since the raw message is terse.
+ */
+function resolveSecondFactorErrorMessage(
+  error: unknown,
+  strategy: SecondFactorStrategy,
+): string {
+  const fallback =
+    strategy === "backup_code"
+      ? "That backup code isn't valid. Try another one."
+      : "That code isn't valid. Please check it and try again.";
+
+  if (!error || typeof error !== "object") {
+    return fallback;
+  }
+
+  const clerkErrors = (error as { errors?: Array<{ code?: string; message?: string }> })
+    .errors;
+  const first = clerkErrors?.[0];
+
+  if (!first) {
+    return fallback;
+  }
+
+  if (first.code === "verification_expired") {
+    return "That code has expired. Request a new one.";
+  }
+
+  if (first.code === "too_many_requests") {
+    return "Too many attempts. Please wait a moment before trying again.";
+  }
+
+  return first.message ?? fallback;
+}
+
 export function ClerkSignInForm({
   onSwitchToSignUp,
   onForgotPassword,
@@ -71,12 +115,181 @@ export function ClerkSignInForm({
   const [isEmailMode, setIsEmailMode] = useState(false);
   const [showLinkIntentBanner, setShowLinkIntentBanner] = useState(false);
 
+  // Second-factor challenge state, used for both MFA and Device Trust.
+  const [secondFactorOptions, setSecondFactorOptions] = useState<
+    SecondFactorOption[]
+  >([]);
+  const [activeSecondFactor, setActiveSecondFactor] =
+    useState<SecondFactorOption | null>(null);
+  const [isDeviceTrustChallenge, setIsDeviceTrustChallenge] = useState(false);
+  const [secondFactorCode, setSecondFactorCode] = useState("");
+  const [secondFactorError, setSecondFactorError] = useState<string | undefined>(
+    undefined,
+  );
+  const [isVerifyingSecondFactor, setIsVerifyingSecondFactor] = useState(false);
+  const [isResendingSecondFactor, setIsResendingSecondFactor] = useState(false);
+
   const showPasswordField = useMemo(() => email.trim().length > 0, [email]);
   const normalizedRedirect = normalizeAuthRedirect(redirectTo);
 
   useEffect(() => {
     setShowLinkIntentBanner(getAuthLinkIntent() !== null);
   }, []);
+
+  /**
+   * Shared completion path. Reached either straight from a password sign-in or
+   * after a second factor clears, so both routes save biometrics and land on
+   * /auth-ready identically.
+   */
+  const completeSignIn = async (createdSessionId: string | null) => {
+    if (!createdSessionId) {
+      logger.error("No session ID available despite complete sign-in status");
+      showNotification(
+        "Sign-in completed but session could not be created. Please try again.",
+        "error",
+      );
+
+      return;
+    }
+
+    await setActive({ session: createdSessionId });
+    await saveBiometricCredentials(email.trim().toLowerCase(), password);
+    showNotification("Signed in successfully!", "success");
+    navigate({
+      to: "/auth-ready",
+      search: { redirectTo: normalizedRedirect },
+    });
+  };
+
+  const resetSecondFactor = () => {
+    setSecondFactorOptions([]);
+    setActiveSecondFactor(null);
+    setIsDeviceTrustChallenge(false);
+    setSecondFactorCode("");
+    setSecondFactorError(undefined);
+  };
+
+  /**
+   * Dispatch the code (when the strategy needs one) and show the challenge.
+   * Shared by the initial transition and by switching strategy mid-challenge.
+   */
+  const prepareAndShowSecondFactor = async (option: SecondFactorOption) => {
+    const prepareParameters = buildPrepareParams(option);
+
+    if (prepareParameters) {
+      await signIn.prepareSecondFactor(prepareParameters);
+    }
+
+    setActiveSecondFactor(option);
+    setSecondFactorCode("");
+    setSecondFactorError(undefined);
+  };
+
+  const beginSecondFactor = async (
+    supportedSecondFactors: unknown[] | null | undefined,
+    isDeviceTrust: boolean,
+  ) => {
+    const options = parseSecondFactors(supportedSecondFactors);
+    const preferred = selectPreferredSecondFactor(options);
+
+    if (!preferred) {
+      logger.error("Sign-in needs a second factor but none are supported", {
+        isDeviceTrust,
+      });
+      showNotification(
+        "This account needs additional verification, but no verification method is available. Please contact support.",
+        "error",
+      );
+
+      return;
+    }
+
+    setSecondFactorOptions(options);
+    setIsDeviceTrustChallenge(isDeviceTrust);
+
+    try {
+      await prepareAndShowSecondFactor(preferred);
+    } catch (error) {
+      logger.error("Failed to start second factor verification:", error);
+      showNotification(
+        "We couldn't send a verification code. Please try again.",
+        "error",
+      );
+      resetSecondFactor();
+    }
+  };
+
+  const handleSecondFactorSubmit = async () => {
+    if (!activeSecondFactor || !isLoaded) {
+      return;
+    }
+
+    setIsVerifyingSecondFactor(true);
+    setSecondFactorError(undefined);
+
+    try {
+      const result = await signIn.attemptSecondFactor({
+        strategy: activeSecondFactor.strategy,
+        code: secondFactorCode.trim(),
+      } as Parameters<typeof signIn.attemptSecondFactor>[0]);
+
+      if (result.status === "complete") {
+        resetSecondFactor();
+        await completeSignIn(result.createdSessionId);
+
+        return;
+      }
+
+      logger.warn("Unexpected status after second factor:", result.status);
+      setSecondFactorError(
+        "That didn't complete the sign-in. Please try again.",
+      );
+    } catch (error) {
+      logger.error("Second factor verification failed:", error);
+      setSecondFactorError(
+        resolveSecondFactorErrorMessage(error, activeSecondFactor.strategy),
+      );
+    } finally {
+      setIsVerifyingSecondFactor(false);
+    }
+  };
+
+  const handleSecondFactorResend = async () => {
+    if (!activeSecondFactor) {
+      return;
+    }
+
+    setIsResendingSecondFactor(true);
+
+    try {
+      await prepareAndShowSecondFactor(activeSecondFactor);
+      showNotification("A new code is on its way.", "success");
+    } catch (error) {
+      logger.error("Failed to resend verification code:", error);
+      showNotification(
+        "We couldn't resend the code. Please try again.",
+        "error",
+      );
+    } finally {
+      setIsResendingSecondFactor(false);
+    }
+  };
+
+  const handleSelectSecondFactor = async (option: SecondFactorOption) => {
+    setIsResendingSecondFactor(true);
+
+    try {
+      await prepareAndShowSecondFactor(option);
+    } catch (error) {
+      logger.error("Failed to switch verification method:", error);
+      showNotification(
+        "We couldn't switch verification method. Please try again.",
+        "error",
+      );
+    } finally {
+      setIsResendingSecondFactor(false);
+    }
+  };
 
   // Handle social sign-in
   // We intentionally start OAuth via the sign-up resource because the callback
@@ -247,26 +460,7 @@ export function ClerkSignInForm({
 
       switch (result.status) {
         case "complete": {
-          // Sign-in complete, set session and redirect to auth-ready
-          // AuthReadyPage will set the token and then redirect to the intended destination
-          if (!result.createdSessionId) {
-            logger.error(
-              "No session ID available despite complete sign-in status",
-            );
-            showNotification(
-              "Sign-in completed but session could not be created. Please try again.",
-              "error",
-            );
-
-            return;
-          }
-          await setActive({ session: result.createdSessionId });
-          await saveBiometricCredentials(email.trim().toLowerCase(), password);
-          showNotification("Signed in successfully!", "success");
-          navigate({
-            to: "/auth-ready",
-            search: { redirectTo: normalizedRedirect },
-          });
+          await completeSignIn(result.createdSessionId);
 
           break;
         }
@@ -308,22 +502,16 @@ export function ClerkSignInForm({
           break;
         }
         case "needs_second_factor": {
-          // 2FA required
-          showNotification("Two-factor authentication required.", "info");
+          // The account has MFA enabled. MFA takes precedence over Device
+          // Trust, so this and needs_client_trust are mutually exclusive.
+          await beginSecondFactor(result.supportedSecondFactors, false);
 
           break;
         }
         case "needs_client_trust": {
-          // Device Trust: signing in from an unrecognised device, so Clerk
-          // wants a second factor before completing. Reached only when Device
-          // Trust is enabled on the instance. Completing the challenge needs a
-          // second-factor UI, which this form does not implement yet, so keep
-          // the user informed rather than dropping into the generic default.
-          logger.warn("Sign-in requires device trust verification");
-          showNotification(
-            "This device isn't recognised. Please verify it using another sign-in method.",
-            "info",
-          );
+          // Device Trust: no MFA on the account, but this device is new, so
+          // Clerk wants an email or SMS code before completing the sign-in.
+          await beginSecondFactor(result.supportedSecondFactors, true);
 
           break;
         }
@@ -422,7 +610,22 @@ export function ClerkSignInForm({
       )}
 
       <AnimatePresence mode="wait" initial={false}>
-        {isEmailMode ? (
+        {activeSecondFactor ? (
+          <SecondFactorChallenge
+            option={activeSecondFactor}
+            options={secondFactorOptions}
+            isDeviceTrust={isDeviceTrustChallenge}
+            code={secondFactorCode}
+            onCodeChange={setSecondFactorCode}
+            onSubmit={handleSecondFactorSubmit}
+            onResend={handleSecondFactorResend}
+            onSelectStrategy={handleSelectSecondFactor}
+            onCancel={resetSecondFactor}
+            isVerifying={isVerifyingSecondFactor}
+            isResending={isResendingSecondFactor}
+            error={secondFactorError}
+          />
+        ) : isEmailMode ? (
           <motion.div
             key="email-sign-in"
             initial={{ opacity: 0, y: 10 }}
