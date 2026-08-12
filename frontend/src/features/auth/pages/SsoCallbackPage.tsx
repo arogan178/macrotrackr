@@ -68,9 +68,15 @@ function ClerkSsoCallbackPage() {
     hasProcessedCallback.current = true;
 
     handleRedirectCallback({
-      // We handle routing ourselves, so tell Clerk to stay on this page
-      signInFallbackRedirectUrl: globalThis.location.href,
-      signUpFallbackRedirectUrl: globalThis.location.href,
+      // We handle routing ourselves (step 2 below), so tell Clerk to stay put.
+      //
+      // These must be the *force* variants. The fallback variants only apply
+      // "if there's no redirect_url in the path already" and otherwise default
+      // to "/", which sends the user to the landing page mid-sign-in. The
+      // Core 3 codemod rewrote the old afterSignInUrl/afterSignUpUrl props to
+      // the fallback variants, but those props had force semantics.
+      signInForceRedirectUrl: globalThis.location.href,
+      signUpForceRedirectUrl: globalThis.location.href,
     }).catch((error_) => {
       // Clerk may throw if the callback was already handled (e.g. page refresh)
       // This is safe to ignore if the user is already signed in
