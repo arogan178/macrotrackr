@@ -86,7 +86,10 @@ need to reach backend on `localhost`.
 Services:
 
 - frontend: `http://localhost:5173` (Mapped to internal container port 80)
-- backend API: `http://localhost:3000` (Direct access usually not needed since frontend proxies `/api`)
+- backend API: not published to the host. It is reachable only from the frontend container,
+  which proxies `/api`. Exposing it directly would let clients bypass nginx and forge the
+  `X-Real-IP` header that per-client rate limiting relies on (`TRUST_PROXY`). If you need
+  direct access, add a `ports` mapping and set `TRUST_PROXY=false`.
 
 The SQLite database is persisted at `./data/macrotrackr.db`.
 

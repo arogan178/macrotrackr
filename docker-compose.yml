@@ -14,8 +14,14 @@ services:
       EMAIL_MODE: ${EMAIL_MODE:-disabled}
       APP_URL: ${APP_URL:-http://localhost:5173}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:5173}
-    ports:
-      - "3000:3000"
+      # The bundled nginx overwrites X-Real-IP, so per-client rate limiting can
+      # trust it. Set to false if the backend is ever exposed without a proxy.
+      TRUST_PROXY: ${TRUST_PROXY:-true}
+    # Not published to the host: the frontend proxies /api/ to this service on
+    # the compose network. Publishing it would let clients reach the backend
+    # directly and forge the proxy headers that TRUST_PROXY tells it to honour.
+    expose:
+      - "3000"
 
   frontend:
     image: ${FRONTEND_IMAGE:-ghcr.io/arogan178/macrotrackr-frontend:latest}

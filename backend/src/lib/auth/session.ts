@@ -1,5 +1,5 @@
 import type { Database } from "bun:sqlite";
-import { randomBytes, createHash } from "node:crypto";
+import { randomBytes, createHash, timingSafeEqual } from "node:crypto";
 import { generateId } from "../../utils/id-generator";
 
 const SESSION_COOKIE_NAME = "mt_session";
@@ -27,6 +27,17 @@ export interface ResolvedSession {
 
 function hashSecret(secret: string): string {
   return createHash("sha256").update(secret).digest("hex");
+}
+
+function secretMatches(rawSecret: string, storedHash: string): boolean {
+  const candidate = Buffer.from(hashSecret(rawSecret), "hex");
+  const stored = Buffer.from(storedHash, "hex");
+
+  if (candidate.length !== stored.length) {
+    return false;
+  }
+
+  return timingSafeEqual(candidate, stored);
 }
 
 function createRawSecret(): string {
@@ -79,18 +90,35 @@ export function createExpiredSessionCookieValue(): string {
   return `${SESSION_COOKIE_NAME}=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0`;
 }
 
+/**
+ * Endpoints where the session token may travel in the query string.
+ *
+ * Query strings leak into proxy access logs, browser history and Referer
+ * headers, so this is limited to the SSE stream: EventSource cannot set an
+ * Authorization header, and cookies are unavailable on cross-origin native
+ * (Capacitor) builds.
+ */
+const QUERY_TOKEN_ALLOWED_PATHS = new Set(["/api/sync/events"]);
+
+function isClerkToken(token: string): boolean {
+  return token.startsWith("pk_") || token.startsWith("sess_");
+}
+
 export function readSessionTokenFromRequest(request: Request): string | null {
   const authHeader = request.headers.get("authorization");
   if (authHeader && authHeader.startsWith("Bearer ")) {
     const bearerToken = authHeader.slice(7).trim();
-    if (bearerToken && !bearerToken.startsWith("pk_") && !bearerToken.startsWith("sess_")) {
+    if (bearerToken && !isClerkToken(bearerToken)) {
       return bearerToken;
     }
   }
 
-  const queryToken = new URL(request.url).searchParams.get("token");
-  if (queryToken && !queryToken.startsWith("pk_") && !queryToken.startsWith("sess_")) {
-    return queryToken;
+  const url = new URL(request.url);
+  if (QUERY_TOKEN_ALLOWED_PATHS.has(url.pathname)) {
+    const queryToken = url.searchParams.get("token");
+    if (queryToken && !isClerkToken(queryToken)) {
+      return queryToken;
+    }
   }
 
   const cookies = parseCookieHeader(request.headers.get("cookie"));
@@ -173,7 +201,7 @@ export function resolveSession(
     return null;
   }
 
-  if (row.secret_hash !== hashSecret(rawSecret)) {
+  if (!secretMatches(rawSecret, row.secret_hash)) {
     return null;
   }
 

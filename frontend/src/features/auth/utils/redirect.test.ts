@@ -38,6 +38,19 @@ describe("auth redirect helpers", () => {
     );
   });
 
+  it("rejects redirects that browsers would resolve off-origin", () => {
+    // Backslashes are normalized to slashes during URL parsing, so these are
+    // equivalent to "//evil.example".
+    expect(isSafeAppRedirect("/\\evil.example")).toBe(false);
+    expect(isSafeAppRedirect("/\\\\evil.example")).toBe(false);
+    expect(normalizeAuthRedirect("/\\evil.example")).toBe("/home");
+
+    // Control characters are stripped, so these collapse to "//evil.example".
+    expect(isSafeAppRedirect("/\t/evil.example")).toBe(false);
+    expect(isSafeAppRedirect("/\n/evil.example")).toBe(false);
+    expect(normalizeAuthRedirect("/\t/evil.example")).toBe("/home");
+  });
+
   it("marks profile setup redirects to skip sync", () => {
     expect(shouldBypassSyncForRedirect("/profile-setup")).toBe(true);
     expect(shouldBypassSyncForRedirect("/profile-setup?redirectTo=%2Fpricing")).toBe(

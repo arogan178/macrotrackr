@@ -177,11 +177,43 @@ function getPrimaryClerkEmail(clerkUser: {
  * Clerk authentication middleware for Elysia
  * Validates Clerk JWT tokens and extracts user information
  */
+/**
+ * Origins allowed to present Clerk session tokens to this API.
+ *
+ * Without this, a session token minted for a different Clerk frontend can be
+ * replayed against our backend. Derived from the configured app URL and CORS
+ * allowlist so it tracks deployment config automatically.
+ */
+function getAuthorizedParties(): string[] | undefined {
+  const origins = new Set<string>();
+
+  const addOrigin = (value: string | undefined) => {
+    if (!value || value === "*") {
+      return;
+    }
+    try {
+      origins.add(new URL(value).origin);
+    } catch {
+      // Ignore entries that are not absolute URLs.
+    }
+  };
+
+  addOrigin(config.APP_URL);
+
+  const corsOrigins = Array.isArray(config.CORS_ORIGIN)
+    ? config.CORS_ORIGIN
+    : [config.CORS_ORIGIN];
+  for (const origin of corsOrigins) {
+    addOrigin(origin);
+  }
+
+  return origins.size > 0 ? [...origins] : undefined;
+}
+
 export const clerkAuthMiddleware = clerkPlugin({
   publishableKey: config.CLERK_PUBLISHABLE_KEY,
   secretKey: config.CLERK_SECRET_KEY,
-  // Optional: restrict authorized parties
-  // authorizedParties: [config.CORS_ORIGIN as string],
+  authorizedParties: getAuthorizedParties(),
 })
   .resolve(
     { as: "scoped" },

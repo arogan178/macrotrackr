@@ -33,7 +33,17 @@ function isDiagnosticsAuthorized(request: Request): boolean {
 }
 
 export const metricsRoutes = new Elysia()
-  .get("/metrics", () => {
+  .get("/metrics", ({ request, set }) => {
+    // The registry exposes the full route inventory and traffic volumes.
+    // Require the diagnostics key whenever one is configured.
+    if (config.METRICS_API_KEY?.trim() && !isDiagnosticsAuthorized(request)) {
+      set.status = 403;
+      return {
+        code: "FORBIDDEN",
+        message: "Metrics access denied",
+      };
+    }
+
     const metrics = getMetricsRegistry();
     const prometheusOutput = metrics.exportPrometheus();
     return new Response(prometheusOutput, {
