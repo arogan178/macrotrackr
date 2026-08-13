@@ -167,7 +167,7 @@ const BlogIndexPage: React.FC = () => {
                   className="group block h-full overflow-hidden rounded-card border border-border bg-surface transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                   <div className="grid h-full lg:grid-cols-[1.05fr_0.95fr]">
-                    <div className="relative min-h-70 overflow-hidden border-r border-border">
+                    <div className="relative hidden min-h-70 overflow-hidden border-r border-border sm:block">
                       {featuredPost.image ? (
                         <ContentImage
                           src={featuredPost.image}
@@ -238,7 +238,7 @@ const BlogIndexPage: React.FC = () => {
                       params={{ slug: post.slug }}
                       className="group flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
-                      <div className="relative aspect-16/10 overflow-hidden border-b border-border">
+                      <div className="relative hidden aspect-16/10 overflow-hidden border-b border-border sm:block">
                         {post.image ? (
                           <ContentImage
                             src={post.image}

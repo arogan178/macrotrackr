@@ -503,7 +503,10 @@ const EntryHistoryComponent = function EntryHistory({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="fixed bottom-6 left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 shadow-2xl md:gap-4 md:px-6 md:py-3.5"
+              // Sits above the tab bar and clear of the home indicator; it
+              // used to be pinned to bottom-6 with no safe-area padding.
+              style={{ bottom: "calc(5.5rem + var(--sab))" }}
+              className="fixed left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 md:gap-4 md:px-6 md:py-3.5 lg:bottom-6"
             >
               <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                 <span className="text-sm font-medium whitespace-nowrap text-foreground">

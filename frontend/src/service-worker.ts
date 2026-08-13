@@ -3,6 +3,7 @@
 
 import {
   cleanupOutdatedCaches,
+  matchPrecache,
   precacheAndRoute,
   type PrecacheEntry,
 } from "workbox-precaching";
@@ -22,6 +23,13 @@ interface ServiceWorkerRuntime {
     (
       type: "message",
       listener: (event: { data?: { type?: string } }) => void,
+    ): void;
+    (
+      type: "fetch",
+      listener: (event: {
+        request: Request;
+        respondWith: (response: Promise<Response> | Response) => void;
+      }) => void,
     ): void;
   };
   clients: {
@@ -70,6 +78,27 @@ sw.addEventListener("activate", (event) => {
           }
         });
       }),
+  );
+});
+
+// SPA navigations: precacheAndRoute only matches precached URLs, so offline a
+// refresh worked at / and nowhere else - /home, /goals and every article
+// 404'd. The _redirects SPA fallback lives on the server and needs the
+// network, which is exactly what is missing. Serve the precached shell for any
+// navigation instead, and let the router take it from there.
+sw.addEventListener("fetch", (event) => {
+  if (event.request.mode !== "navigate") return;
+
+  event.respondWith(
+    (async () => {
+      try {
+        return await fetch(event.request);
+      } catch {
+        const cachedShell = await matchPrecache("/index.html");
+
+        return cachedShell ?? Response.error();
+      }
+    })(),
   );
 });
 
