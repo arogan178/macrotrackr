@@ -164,12 +164,16 @@ export const ICON_BUTTON_SIZES = {
   "5xl": "p-7 w-18 h-18 aspect-square", // 72px
 } as const;
 
-// Button size mapping (rectangular, for text/icon buttons)
+// Button size mapping (rectangular, for text/icon buttons).
+// The 44px touch minimum lives here rather than being bolted on per call site:
+// `sm` used to render 30px tall, which is why a dozen callers hand-wrote
+// `min-h-11`. `xs` is deliberately smaller and is for non-touch affordances
+// inside a row, never for a primary action.
 export const BUTTON_SIZES = {
-  xs: "px-1.5 py-0.5 text-xs",
-  sm: "px-2.5 py-1.5 text-xs",
-  md: "px-3.5 py-2 text-sm",
-  lg: "px-5 py-2.5 text-base",
+  xs: "min-h-8 px-2.5 py-1 text-xs",
+  sm: "min-h-11 px-3.5 py-2 text-xs",
+  md: "min-h-11 px-4 py-2.5 text-sm",
+  lg: "min-h-12 px-5 py-3 text-base",
 } as const;
 
 // Icon positions

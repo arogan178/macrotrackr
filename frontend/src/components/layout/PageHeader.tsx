@@ -2,6 +2,8 @@
 
 import { ReactNode } from "react";
 
+import Heading from "@/components/ui/Heading";
+
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
@@ -17,18 +19,15 @@ export const PageHeader = ({
 }: PageHeaderProps) => (
   <div className="border-b border-border pb-3 sm:pb-6">
     <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
-      {/* Title */}
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-          {title}
-        </h1>
+        <Heading level="page">{title}</Heading>
       </div>
 
       {/* Right Side: Badges and Tabs */}
       {(hasChanges || children) && (
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex shrink-0 items-center gap-2 sm:gap-3">
           {hasChanges && (
-            <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning sm:px-3 sm:py-1 sm:text-sm">
+            <span className="rounded-full border border-warning/30 bg-warning/10 px-2.5 py-0.5 text-xs font-medium text-warning sm:px-3 sm:py-1">
               Unsaved Changes
             </span>
           )}
@@ -37,9 +36,8 @@ export const PageHeader = ({
       )}
     </div>
 
-    {/* Subtitle */}
     {subtitle && (
-      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted sm:mt-1.5 sm:text-base">
+      <p className="mt-1 max-w-2xl text-xs leading-relaxed text-muted sm:mt-1.5 sm:text-sm">
         {subtitle}
       </p>
     )}
