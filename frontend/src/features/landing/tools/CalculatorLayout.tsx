@@ -71,7 +71,7 @@ export default function CalculatorLayout({
               <li>
                 <Link
                   to={TOOLS_HUB_PATH}
-                  className="inline-flex min-h-8 items-center rounded-lg px-1 font-medium transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  className="inline-flex min-h-8 items-center rounded-control px-1 font-medium transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                   Free calculators
                 </Link>
@@ -114,7 +114,7 @@ export default function CalculatorLayout({
                 {faqs.map((faq) => (
                   <details
                     key={faq.question}
-                    className="group rounded-xl border border-border bg-surface-2/50 transition-colors hover:bg-surface-2"
+                    className="group rounded-control border border-border bg-surface-2 transition-colors hover:bg-surface-2"
                   >
                     <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-semibold text-foreground select-none">
                       <span>{faq.question}</span>

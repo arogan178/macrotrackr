@@ -9,87 +9,32 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
-import { Route as SettingsRouteImport } from './routes/settings'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as ReportingRouteImport } from './routes/reporting'
-import { Route as RegisterRouteImport } from './routes/register'
-import { Route as ProfileSetupRouteImport } from './routes/profile-setup'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PricingRouteImport } from './routes/pricing'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as HomeRouteImport } from './routes/home'
-import { Route as GoalsRouteImport } from './routes/goals'
-import { Route as AuthReadyRouteImport } from './routes/auth-ready'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as ToolsIndexRouteImport } from './routes/tools/index'
+import { Route as AuthReadyRouteImport } from './routes/auth-ready'
+import { Route as GoalsRouteImport } from './routes/goals'
+import { Route as HomeRouteImport } from './routes/home'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as PricingRouteImport } from './routes/pricing'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as ProfileSetupRouteImport } from './routes/profile-setup'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as ReportingRouteImport } from './routes/reporting'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
+import { Route as SettingsRouteImport } from './routes/settings'
+import { Route as SsoCallbackRouteImport } from './routes/sso-callback'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
-import { Route as ToolsWeightLossCalculatorRouteImport } from './routes/tools/weight-loss-calculator'
-import { Route as ToolsTdeeCalculatorRouteImport } from './routes/tools/tdee-calculator'
-import { Route as ToolsProteinCalculatorRouteImport } from './routes/tools/protein-calculator'
-import { Route as ToolsMacroCalculatorRouteImport } from './routes/tools/macro-calculator'
-import { Route as ToolsBmrCalculatorRouteImport } from './routes/tools/bmr-calculator'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as ToolsIndexRouteImport } from './routes/tools/index'
+import { Route as ToolsBmrCalculatorRouteImport } from './routes/tools/bmr-calculator'
+import { Route as ToolsMacroCalculatorRouteImport } from './routes/tools/macro-calculator'
+import { Route as ToolsProteinCalculatorRouteImport } from './routes/tools/protein-calculator'
+import { Route as ToolsTdeeCalculatorRouteImport } from './routes/tools/tdee-calculator'
+import { Route as ToolsWeightLossCalculatorRouteImport } from './routes/tools/weight-loss-calculator'
 
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SsoCallbackRoute = SsoCallbackRouteImport.update({
-  id: '/sso-callback',
-  path: '/sso-callback',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SettingsRoute = SettingsRouteImport.update({
-  id: '/settings',
-  path: '/settings',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ResetPasswordRoute = ResetPasswordRouteImport.update({
-  id: '/reset-password',
-  path: '/reset-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ReportingRoute = ReportingRouteImport.update({
-  id: '/reporting',
-  path: '/reporting',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const RegisterRoute = RegisterRouteImport.update({
-  id: '/register',
-  path: '/register',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ProfileSetupRoute = ProfileSetupRouteImport.update({
-  id: '/profile-setup',
-  path: '/profile-setup',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PricingRoute = PricingRouteImport.update({
-  id: '/pricing',
-  path: '/pricing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HomeRoute = HomeRouteImport.update({
-  id: '/home',
-  path: '/home',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GoalsRoute = GoalsRouteImport.update({
-  id: '/goals',
-  path: '/goals',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthReadyRoute = AuthReadyRouteImport.update({
@@ -97,9 +42,74 @@ const AuthReadyRoute = AuthReadyRouteImport.update({
   path: '/auth-ready',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const GoalsRoute = GoalsRouteImport.update({
+  id: '/goals',
+  path: '/goals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PricingRoute = PricingRouteImport.update({
+  id: '/pricing',
+  path: '/pricing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileSetupRoute = ProfileSetupRouteImport.update({
+  id: '/profile-setup',
+  path: '/profile-setup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ReportingRoute = ReportingRouteImport.update({
+  id: '/reporting',
+  path: '/reporting',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SsoCallbackRoute = SsoCallbackRouteImport.update({
+  id: '/sso-callback',
+  path: '/sso-callback',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogIndexRoute = BlogIndexRouteImport.update({
+  id: '/blog/',
+  path: '/blog/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BlogSlugRoute = BlogSlugRouteImport.update({
+  id: '/blog/$slug',
+  path: '/blog/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsIndexRoute = ToolsIndexRouteImport.update({
@@ -107,9 +117,24 @@ const ToolsIndexRoute = ToolsIndexRouteImport.update({
   path: '/tools/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const BlogIndexRoute = BlogIndexRouteImport.update({
-  id: '/blog/',
-  path: '/blog/',
+const ToolsBmrCalculatorRoute = ToolsBmrCalculatorRouteImport.update({
+  id: '/tools/bmr-calculator',
+  path: '/tools/bmr-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsMacroCalculatorRoute = ToolsMacroCalculatorRouteImport.update({
+  id: '/tools/macro-calculator',
+  path: '/tools/macro-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsProteinCalculatorRoute = ToolsProteinCalculatorRouteImport.update({
+  id: '/tools/protein-calculator',
+  path: '/tools/protein-calculator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ToolsTdeeCalculatorRoute = ToolsTdeeCalculatorRouteImport.update({
+  id: '/tools/tdee-calculator',
+  path: '/tools/tdee-calculator',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ToolsWeightLossCalculatorRoute =
@@ -118,31 +143,6 @@ const ToolsWeightLossCalculatorRoute =
     path: '/tools/weight-loss-calculator',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ToolsTdeeCalculatorRoute = ToolsTdeeCalculatorRouteImport.update({
-  id: '/tools/tdee-calculator',
-  path: '/tools/tdee-calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ToolsProteinCalculatorRoute = ToolsProteinCalculatorRouteImport.update({
-  id: '/tools/protein-calculator',
-  path: '/tools/protein-calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ToolsMacroCalculatorRoute = ToolsMacroCalculatorRouteImport.update({
-  id: '/tools/macro-calculator',
-  path: '/tools/macro-calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ToolsBmrCalculatorRoute = ToolsBmrCalculatorRouteImport.update({
-  id: '/tools/bmr-calculator',
-  path: '/tools/bmr-calculator',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BlogSlugRoute = BlogSlugRouteImport.update({
-  id: '/blog/$slug',
-  path: '/blog/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -319,88 +319,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sso-callback': {
-      id: '/sso-callback'
-      path: '/sso-callback'
-      fullPath: '/sso-callback'
-      preLoaderRoute: typeof SsoCallbackRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/settings': {
-      id: '/settings'
-      path: '/settings'
-      fullPath: '/settings'
-      preLoaderRoute: typeof SettingsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reporting': {
-      id: '/reporting'
-      path: '/reporting'
-      fullPath: '/reporting'
-      preLoaderRoute: typeof ReportingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/register': {
-      id: '/register'
-      path: '/register'
-      fullPath: '/register'
-      preLoaderRoute: typeof RegisterRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/profile-setup': {
-      id: '/profile-setup'
-      path: '/profile-setup'
-      fullPath: '/profile-setup'
-      preLoaderRoute: typeof ProfileSetupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/pricing': {
-      id: '/pricing'
-      path: '/pricing'
-      fullPath: '/pricing'
-      preLoaderRoute: typeof PricingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/home': {
-      id: '/home'
-      path: '/home'
-      fullPath: '/home'
-      preLoaderRoute: typeof HomeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/goals': {
-      id: '/goals'
-      path: '/goals'
-      fullPath: '/goals'
-      preLoaderRoute: typeof GoalsRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth-ready': {
@@ -410,18 +333,88 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthReadyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/goals': {
+      id: '/goals'
+      path: '/goals'
+      fullPath: '/goals'
+      preLoaderRoute: typeof GoalsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/': {
-      id: '/tools/'
-      path: '/tools'
-      fullPath: '/tools/'
-      preLoaderRoute: typeof ToolsIndexRouteImport
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pricing': {
+      id: '/pricing'
+      path: '/pricing'
+      fullPath: '/pricing'
+      preLoaderRoute: typeof PricingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile-setup': {
+      id: '/profile-setup'
+      path: '/profile-setup'
+      fullPath: '/profile-setup'
+      preLoaderRoute: typeof ProfileSetupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reporting': {
+      id: '/reporting'
+      path: '/reporting'
+      fullPath: '/reporting'
+      preLoaderRoute: typeof ReportingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sso-callback': {
+      id: '/sso-callback'
+      path: '/sso-callback'
+      fullPath: '/sso-callback'
+      preLoaderRoute: typeof SsoCallbackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/blog/': {
@@ -431,32 +424,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BlogIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/weight-loss-calculator': {
-      id: '/tools/weight-loss-calculator'
-      path: '/tools/weight-loss-calculator'
-      fullPath: '/tools/weight-loss-calculator'
-      preLoaderRoute: typeof ToolsWeightLossCalculatorRouteImport
+    '/blog/$slug': {
+      id: '/blog/$slug'
+      path: '/blog/$slug'
+      fullPath: '/blog/$slug'
+      preLoaderRoute: typeof BlogSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/tools/tdee-calculator': {
-      id: '/tools/tdee-calculator'
-      path: '/tools/tdee-calculator'
-      fullPath: '/tools/tdee-calculator'
-      preLoaderRoute: typeof ToolsTdeeCalculatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tools/protein-calculator': {
-      id: '/tools/protein-calculator'
-      path: '/tools/protein-calculator'
-      fullPath: '/tools/protein-calculator'
-      preLoaderRoute: typeof ToolsProteinCalculatorRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/tools/macro-calculator': {
-      id: '/tools/macro-calculator'
-      path: '/tools/macro-calculator'
-      fullPath: '/tools/macro-calculator'
-      preLoaderRoute: typeof ToolsMacroCalculatorRouteImport
+    '/tools/': {
+      id: '/tools/'
+      path: '/tools'
+      fullPath: '/tools/'
+      preLoaderRoute: typeof ToolsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tools/bmr-calculator': {
@@ -466,11 +445,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ToolsBmrCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/blog/$slug': {
-      id: '/blog/$slug'
-      path: '/blog/$slug'
-      fullPath: '/blog/$slug'
-      preLoaderRoute: typeof BlogSlugRouteImport
+    '/tools/macro-calculator': {
+      id: '/tools/macro-calculator'
+      path: '/tools/macro-calculator'
+      fullPath: '/tools/macro-calculator'
+      preLoaderRoute: typeof ToolsMacroCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/protein-calculator': {
+      id: '/tools/protein-calculator'
+      path: '/tools/protein-calculator'
+      fullPath: '/tools/protein-calculator'
+      preLoaderRoute: typeof ToolsProteinCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/tdee-calculator': {
+      id: '/tools/tdee-calculator'
+      path: '/tools/tdee-calculator'
+      fullPath: '/tools/tdee-calculator'
+      preLoaderRoute: typeof ToolsTdeeCalculatorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/tools/weight-loss-calculator': {
+      id: '/tools/weight-loss-calculator'
+      path: '/tools/weight-loss-calculator'
+      fullPath: '/tools/weight-loss-calculator'
+      preLoaderRoute: typeof ToolsWeightLossCalculatorRouteImport
       parentRoute: typeof rootRouteImport
     }
   }

@@ -36,8 +36,8 @@ export function getButtonClasses(
       "focus-visible:ring-primary active:bg-primary/90 disabled:hover:brightness-100",
     ),
     secondary: cn(
-      "border border-white/10 bg-surface-2 text-foreground shadow-sm",
-      "hover:border-white/20 hover:bg-surface-3",
+      "border border-border bg-surface-2 text-foreground shadow-sm",
+      "hover:border-border-2 hover:bg-surface-3",
       "focus-visible:ring-primary active:bg-surface-2 disabled:hover:bg-surface-2",
     ),
     neutral: cn(
@@ -57,13 +57,13 @@ export function getButtonClasses(
     ),
     ghost: cn(
       "bg-transparent text-muted",
-      "hover:bg-white/5 hover:text-foreground",
-      "focus-visible:ring-primary active:bg-white/10 disabled:hover:bg-transparent",
+      "hover:bg-surface-2 hover:text-foreground",
+      "focus-visible:ring-primary active:bg-surface-2 disabled:hover:bg-transparent",
     ),
     outline: cn(
-      "border border-white/10 bg-transparent text-foreground shadow-sm",
-      "hover:border-white/20 hover:bg-white/[0.02]",
-      "active:bg-white/10 disabled:hover:border-white/10 disabled:hover:bg-transparent",
+      "border border-border bg-transparent text-foreground shadow-sm",
+      "hover:border-border-2 hover:bg-white/[0.02]",
+      "active:bg-surface-2 disabled:hover:border-border disabled:hover:bg-transparent",
       "focus-visible:ring-primary",
     ),
   };

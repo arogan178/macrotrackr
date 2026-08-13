@@ -35,13 +35,13 @@ const sectionRevealVariants = {
 function ThemedFallback() {
   return (
     <div className="flex w-full items-center justify-center py-16">
-      <div className="rounded-xl border border-border bg-surface px-8 py-10">
-        <div className="mb-6 h-6 w-56 animate-pulse rounded bg-muted/40" />
-        <div className="mb-3 h-4 w-80 animate-pulse rounded bg-muted/30" />
-        <div className="mb-8 h-4 w-64 animate-pulse rounded bg-muted/30" />
+      <div className="rounded-control border border-border bg-surface px-8 py-10">
+        <div className="mb-6 h-6 w-56 animate-pulse rounded-control bg-muted/40" />
+        <div className="mb-3 h-4 w-80 animate-pulse rounded-control bg-muted/30" />
+        <div className="mb-8 h-4 w-64 animate-pulse rounded-control bg-muted/30" />
         <div className="flex items-center gap-3">
-          <div className="h-10 w-28 animate-pulse rounded-lg bg-primary/20" />
-          <div className="h-10 w-28 animate-pulse rounded-lg bg-muted/30" />
+          <div className="h-10 w-28 animate-pulse rounded-control bg-primary/20" />
+          <div className="h-10 w-28 animate-pulse rounded-control bg-muted/30" />
         </div>
         <div className="mt-6 flex items-center justify-center">
           <LoadingSpinner />

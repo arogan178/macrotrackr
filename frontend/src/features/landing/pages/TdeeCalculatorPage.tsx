@@ -145,10 +145,10 @@ export default function TdeeCalculatorPage() {
                       type="button"
                       onClick={() => setActivityLevel(level.value)}
                       aria-pressed={isSelected}
-                      className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
+                      className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-control border px-3 py-2.5 text-left text-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                         isSelected
                           ? "border-primary/30 bg-primary/10 font-semibold text-foreground"
-                          : "border-transparent text-muted hover:bg-surface-2/70 hover:text-foreground"
+                          : "border-transparent text-muted hover:bg-surface-2 hover:text-foreground"
                       }`}
                     >
                       <span className="leading-snug">{level.label}</span>
@@ -196,7 +196,7 @@ export default function TdeeCalculatorPage() {
                 <AnimatedNumber value={goal.calories} />{" "}
                 <span className="text-sm font-normal text-muted">kcal</span>
               </div>
-              <dl className="space-y-2 border-t border-border/60 pt-4 text-xs">
+              <dl className="space-y-2 border-t border-border pt-4 text-xs">
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
                     Protein · {GOAL_SPLIT.protein}%

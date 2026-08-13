@@ -603,7 +603,7 @@ export function ClerkSignInForm({
       />
 
       {showLinkIntentBanner && (
-        <div className="mb-4 rounded-xl border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">
+        <div className="mb-4 rounded-control border border-warning/40 bg-warning/10 px-4 py-3 text-sm text-foreground">
           This email already has an account. Sign in to link your social
           account.
         </div>
@@ -640,7 +640,7 @@ export function ClerkSignInForm({
               <button
                 type="button"
                 onClick={() => setIsEmailMode(false)}
-                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+                className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
               >
                 Back
               </button>
@@ -683,7 +683,7 @@ export function ClerkSignInForm({
                       <button
                         type="button"
                         onClick={onForgotPassword}
-                        className="inline-flex min-h-11 items-center rounded-md px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+                        className="inline-flex min-h-11 items-center rounded-control px-2 py-2 text-sm text-primary transition-colors duration-200 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
                       >
                         Forgot password?
                       </button>
@@ -726,7 +726,7 @@ export function ClerkSignInForm({
         <button
           type="button"
           onClick={onSwitchToSignUp}
-          className="inline-flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+          className="inline-flex min-h-11 items-center rounded-control px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
         >
           Sign up
         </button>

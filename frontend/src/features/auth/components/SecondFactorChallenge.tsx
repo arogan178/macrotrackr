@@ -77,7 +77,7 @@ export function SecondFactorChallenge({
         <button
           type="button"
           onClick={onCancel}
-          className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+          className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
         >
           Back
         </button>
@@ -116,14 +116,14 @@ export function SecondFactorChallenge({
           type="button"
           onClick={onResend}
           disabled={isResending}
-          className="mt-4 inline-flex min-h-11 items-center rounded-md px-1 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-60"
+          className="mt-4 inline-flex min-h-11 items-center rounded-control px-1 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-60"
         >
           {isResending ? "Sending..." : copy.resendLabel}
         </button>
       ) : null}
 
       {alternatives.length > 0 ? (
-        <div className="mt-5 border-t border-border/60 pt-4">
+        <div className="mt-5 border-t border-border pt-4">
           <p className="mb-2 text-xs font-semibold tracking-[0.18em] text-muted uppercase">
             Try another way
           </p>
@@ -134,7 +134,7 @@ export function SecondFactorChallenge({
                 type="button"
                 onClick={() => onSelectStrategy(alternative)}
                 disabled={isVerifying || isResending}
-                className="inline-flex min-h-11 items-center rounded-md px-1 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-60"
+                className="inline-flex min-h-11 items-center rounded-control px-1 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none disabled:opacity-60"
               >
                 {describeAlternativeStrategy(alternative.strategy)}
               </button>

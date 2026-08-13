@@ -44,7 +44,7 @@ export const EntryCard = memo(
 
     return (
       <motion.div
-        className="rounded-xl border border-border/60 bg-surface p-3.5 sm:p-5 shadow-sm"
+        className="rounded-control border border-border bg-surface p-3.5 sm:p-5 shadow-sm"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
@@ -56,7 +56,7 @@ export const EntryCard = memo(
             {isSelectionMode && (
               <input
                 type="checkbox"
-                className="h-5 w-5 rounded border-border text-primary focus:ring-primary/50"
+                className="h-5 w-5 rounded-control border-border text-primary focus:ring-primary/50"
                 checked={isSelected}
                 onChange={(event_) => {
                   event_.stopPropagation();
@@ -67,7 +67,7 @@ export const EntryCard = memo(
             {hasIngredients && (
               <button
                 type="button"
-                className="cursor-pointer rounded-md p-1 hover:bg-surface-3"
+                className="cursor-pointer rounded-control p-1 hover:bg-surface-3"
                 onClick={() => setIsExpanded(!isExpanded)}
                 aria-label="Toggle ingredients"
               >
@@ -83,7 +83,7 @@ export const EntryCard = memo(
             <span className="text-sm font-medium tracking-tight text-foreground">
               {formatTimeFromEntry(entry)}
             </span>
-            <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
+            <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
               {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
             </span>
           </div>
@@ -128,7 +128,7 @@ export const EntryCard = memo(
           ].map((macro) => (
             <div
               key={macro.label}
-              className={`flex flex-col items-center justify-center rounded-xl ${macro.bg} border border-border/40 p-3`}
+              className={`flex flex-col items-center justify-center rounded-control ${macro.bg} border border-border p-3`}
             >
               <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">
                 {macro.label}
@@ -136,7 +136,7 @@ export const EntryCard = memo(
               <MacroCell value={macro.value} suffix="g" color={macro.color} />
             </div>
           ))}
-          <div className="col-span-3 mt-1 flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-3.5">
+          <div className="col-span-3 mt-1 flex items-center justify-between rounded-control border border-border bg-surface-2 p-3.5">
             <span className="text-xs font-medium tracking-wider text-muted uppercase">
               Calories
             </span>
@@ -158,7 +158,7 @@ export const EntryCard = memo(
                 height: { duration: 0.3, ease: "easeInOut" },
                 opacity: { duration: 0.2 },
               }}
-              className="mt-4 overflow-hidden border-t border-border/40"
+              className="mt-4 overflow-hidden border-t border-border"
             >
               <div className="pt-4">
                 <h4 className="mb-3 text-xs font-semibold text-muted uppercase">
@@ -168,7 +168,7 @@ export const EntryCard = memo(
                   {entry.ingredients?.map((ing, index) => (
                     <div
                       key={index}
-                      className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3"
+                      className="flex flex-col gap-1 rounded-control bg-surface-2 p-3"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground">

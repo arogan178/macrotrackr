@@ -192,7 +192,7 @@ export default function ProteinCalculatorPage() {
         </p>
         <div className="-mx-1 overflow-x-auto px-1">
           <table className="w-full min-w-100 text-left text-xs text-muted">
-            <thead className="border-b border-border/60 uppercase tracking-wider text-foreground">
+            <thead className="border-b border-border uppercase tracking-wider text-foreground">
               <tr>
                 <th scope="col" className="px-3 py-2.5 font-semibold">
                   Food item
@@ -214,11 +214,11 @@ export default function ProteinCalculatorPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {HIGH_PROTEIN_FOODS.map((item) => (
                 <tr
                   key={item.name}
-                  className="transition-colors hover:bg-surface-2/40"
+                  className="transition-colors hover:bg-surface-2"
                 >
                   <th
                     scope="row"

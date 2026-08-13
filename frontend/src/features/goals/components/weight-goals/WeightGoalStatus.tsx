@@ -130,13 +130,13 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="rounded-2xl border border-border/40 bg-surface p-3.5 sm:p-6"
+      className="rounded-card border border-border bg-surface p-3.5 sm:p-6"
     >
       {/* Header */}
       <div className="mb-3.5 sm:mb-6 flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="flex items-center gap-2.5 min-w-0">
-            <div className={`rounded-xl p-2 sm:p-3 ${goalBgColorLight} shrink-0`}>
+            <div className={`rounded-control p-2 sm:p-3 ${goalBgColorLight} shrink-0`}>
               <WeightIcon className={`h-5 w-5 sm:h-7 sm:w-7 ${goalTextColor}`} />
             </div>
             <div className="min-w-0">
@@ -182,7 +182,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       </div>
 
       {/* Goal Progress Visual */}
-      <CardContainer className="mb-3.5 sm:mb-6 border-border/60 bg-surface-2 p-3 sm:p-5">
+      <CardContainer className="mb-3.5 sm:mb-6 border-border bg-surface-2 p-3 sm:p-5">
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-baseline space-x-1.5 min-w-0">
             <span className="text-lg sm:text-2xl font-bold text-foreground">
@@ -326,11 +326,11 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
       </div>
 
       {/* Nutrition section */}
-      <CardContainer className="border-border/60 bg-surface-2 p-3 sm:p-5">
+      <CardContainer className="border-border bg-surface-2 p-3 sm:p-5">
         <h3 className="mb-2.5 sm:mb-4 text-base sm:text-lg font-semibold tracking-tight text-foreground/90">
           Daily Nutrition Target
         </h3>
-        <div className="mb-2 sm:mb-3 rounded-xl border border-border/40 bg-surface p-2.5 sm:p-3.5">
+        <div className="mb-2 sm:mb-3 rounded-control border border-border bg-surface p-2.5 sm:p-3.5">
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
               <CalorieIcon className="h-4 w-4 text-vibrant-accent shrink-0" />

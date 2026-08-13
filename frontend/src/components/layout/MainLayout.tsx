@@ -60,7 +60,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen bg-background text-foreground">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-md focus:border focus:border-border-2 focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-control focus:border focus:border-border-2 focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground"
       >
         Skip to content
       </a>

@@ -121,7 +121,7 @@ const DesktopEntryTable = memo(
                   {isSelectionMode && (
                     <input
                       type="checkbox"
-                      className="mr-2 h-4 w-4 rounded border-border text-primary focus:ring-primary/50"
+                      className="mr-2 h-4 w-4 rounded-control border-border text-primary focus:ring-primary/50"
                       checked={isEntrySelected(entry.id)}
                       onChange={(event_) => {
                         event_.stopPropagation();
@@ -132,7 +132,7 @@ const DesktopEntryTable = memo(
                   {hasIngredients && (
                     <button
                       type="button"
-                      className="cursor-pointer rounded-md p-1 hover:bg-surface-3"
+                      className="cursor-pointer rounded-control p-1 hover:bg-surface-3"
                       onClick={(event_) => toggleEntryExpand(entry.id, event_)}
                       aria-label="Toggle ingredients"
                     >
@@ -163,7 +163,7 @@ const DesktopEntryTable = memo(
 
             return (
               <div className="flex flex-col items-center text-center text-sm text-foreground">
-                <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
+                <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
                   {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
                 </span>
                 {(entry.foodName ?? entry.mealName) && (
@@ -363,8 +363,8 @@ const DesktopEntryTable = memo(
       const commonProps = {
         className: `flex w-full flex-col overflow-hidden ${
           isGroup
-            ? "group cursor-pointer border-y border-border/60 bg-surface-2/30 transition-colors hover:bg-surface-2"
-            : "relative border-b border-border/40 transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2/60 hover:after:bg-primary/50"
+            ? "group cursor-pointer border-y border-border bg-surface-2 transition-colors hover:bg-surface-2"
+            : "relative border-b border-border transition-colors after:absolute after:inset-y-0 after:left-0 after:w-0.5 after:bg-transparent after:transition-colors hover:bg-surface-2 hover:after:bg-primary/50"
         }`,
         onClick: isGroup ? () => toggleDateCollapse(data.date) : undefined,
       };
@@ -475,11 +475,11 @@ const DesktopEntryTable = memo(
       <div className="hidden lg:block">
         <div
           ref={tableContainerReference}
-          className={`overflow-hidden rounded-xl border border-border/60 bg-surface shadow-xs ${shouldVirtualize ? "max-h-150 overflow-auto" : ""}`}
+          className={`overflow-hidden rounded-control border border-border bg-surface shadow-xs ${shouldVirtualize ? "max-h-150 overflow-auto" : ""}`}
         >
           <div className="flex w-full flex-col">
             <div
-              className={`flex w-full border-b border-border/60 bg-surface-2/80 ${
+              className={`flex w-full border-b border-border bg-surface-2 ${
                 shouldVirtualize ? "sticky top-0 z-10" : ""
               }`}
             >

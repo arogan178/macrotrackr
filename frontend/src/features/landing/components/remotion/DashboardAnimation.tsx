@@ -123,10 +123,10 @@ export const DashboardAnimation: React.FC = () => {
 
   return (
     <div className="flex h-full w-full flex-col bg-background font-sans text-foreground" style={{ opacity }}>
-      <div className="flex items-center justify-between border-b border-white/5 px-5 py-3">
+      <div className="flex items-center justify-between border-b border-border px-5 py-3">
         <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-primary/20" />
-          <div className="h-4 w-24 rounded bg-surface-3" />
+          <div className="h-8 w-8 rounded-control bg-primary/20" />
+          <div className="h-4 w-24 rounded-control bg-surface-3" />
         </div>
         <div className="flex items-center gap-2">
           <div className="h-7 w-7 rounded-full bg-surface-3" />
@@ -135,7 +135,7 @@ export const DashboardAnimation: React.FC = () => {
 
       <div className="flex flex-1 flex-col gap-4 overflow-hidden p-4">
         <div style={{ opacity: headerSpring, transform: `translateY(${interpolate(headerSpring, [0, 1], [8, 0])}px)` }}>
-          <div className="h-5 w-32 rounded bg-surface-3" />
+          <div className="h-5 w-32 rounded-control bg-surface-3" />
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-6">
@@ -144,20 +144,20 @@ export const DashboardAnimation: React.FC = () => {
               {[0, 1].map((index) => (
                 <div
                   key={index}
-                  className="rounded-xl border border-border bg-surface p-3"
+                  className="rounded-control border border-border bg-surface p-3"
                   style={{ opacity: metricsCardSpring, transform: `translateY(${interpolate(metricsCardSpring, [0, 1], [15, 0])}px)` }}
                 >
                   <div className="flex items-start gap-3">
-                    <div className="rounded-lg border border-primary/20 bg-primary/10 p-2">
-                      <div className="h-5 w-5 rounded bg-primary/30" />
+                    <div className="rounded-control border border-primary/20 bg-primary/10 p-2">
+                      <div className="h-5 w-5 rounded-control bg-primary/30" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="mb-0.5 flex items-baseline gap-1.5">
-                        <div className="h-3 w-24 rounded bg-surface-4" />
-                        <div className="h-2.5 w-8 rounded bg-surface-3" />
+                        <div className="h-3 w-24 rounded-control bg-surface-3" />
+                        <div className="h-2.5 w-8 rounded-control bg-surface-3" />
                       </div>
-                      <div className="h-5 w-16 rounded bg-foreground/20" />
-                      <div className="mt-0.5 h-2.5 w-10 rounded bg-surface-3" />
+                      <div className="h-5 w-16 rounded-control bg-foreground/20" />
+                      <div className="mt-0.5 h-2.5 w-10 rounded-control bg-surface-3" />
                     </div>
                   </div>
                 </div>
@@ -165,17 +165,17 @@ export const DashboardAnimation: React.FC = () => {
             </div>
 
             <div
-              className="flex-1 rounded-xl border border-border bg-surface p-4"
+              className="flex-1 rounded-control border border-border bg-surface p-4"
               style={{ opacity: addFormSpring, transform: `scale(${interpolate(addFormSpring, [0, 1], [0.96, 1])})` }}
             >
-              <div className="mb-3 h-4 w-32 rounded bg-surface-4" />
+              <div className="mb-3 h-4 w-32 rounded-control bg-surface-3" />
               
               <div className="mb-3 flex items-center gap-2">
-                <div className="flex flex-1 items-center gap-2 rounded-lg border border-border bg-surface-2 px-3 py-2">
-                  <div className="h-3.5 w-3.5 rounded bg-surface-4" />
+                <div className="flex flex-1 items-center gap-2 rounded-control border border-border bg-surface-2 px-3 py-2">
+                  <div className="h-3.5 w-3.5 rounded-control bg-surface-3" />
                   <div className="relative flex-1">
                     <div
-                      className="h-3.5 rounded"
+                      className="h-3.5 rounded-control"
                       style={{
                         width: `${Math.min(displayedText.length * 4.5 + 8, 50)}%`,
                         backgroundColor: displayedText.length > 0 ? 'var(--color-surface-3)' : 'transparent',
@@ -187,17 +187,17 @@ export const DashboardAnimation: React.FC = () => {
                   </div>
                 </div>
                 <div
-                  className="flex h-8 w-20 items-center justify-center rounded-lg"
+                  className="flex h-8 w-20 items-center justify-center rounded-control"
                   style={{ backgroundColor: '#1ed760', transform: `scale(${interpolate(searchButtonClick, [0, 0.5, 1], [1, 0.95, 1])})` }}
                 >
-                  <div className="h-3 w-12 rounded bg-white/30" />
+                  <div className="h-3 w-12 rounded-control bg-surface-3" />
                 </div>
               </div>
 
               <div className="relative mb-3" style={{ opacity: searchResultsFade, height: showSearchResults ? 100 : 0, overflow: 'hidden' }}>
                 {showSearchResults && (
                   <div
-                    className="overflow-hidden rounded-lg border border-border bg-surface"
+                    className="overflow-hidden rounded-control border border-border bg-surface"
                     style={{ opacity: searchResultsAppear, transform: `translateY(${interpolate(searchResultsAppear, [0, 1], [-10, 0])}px)` }}
                   >
                     {[0, 1, 2].map((index) => (
@@ -207,8 +207,8 @@ export const DashboardAnimation: React.FC = () => {
                         style={{ backgroundColor: index === 0 && itemSelected ? `rgba(30, 215, 96, ${interpolate(selectItemSpring, [0, 1], [0, 0.15])})` : 'transparent' }}
                       >
                         <div className="flex-1">
-                          <div className="h-3 w-28 rounded bg-surface-4" />
-                          <div className="mt-1 h-2 w-40 rounded bg-surface-3" />
+                          <div className="h-3 w-28 rounded-control bg-surface-3" />
+                          <div className="mt-1 h-2 w-40 rounded-control bg-surface-3" />
                         </div>
                       </div>
                     ))}
@@ -218,41 +218,41 @@ export const DashboardAnimation: React.FC = () => {
 
               <div className="mb-3 grid grid-cols-3 gap-3">
                 {[0, 1, 2].map((index) => (
-                  <div key={index} className="rounded-lg border border-border bg-surface-2 p-2">
-                    <div className="mb-1.5 h-2.5 w-12 rounded bg-surface-4" />
-                    <div className="h-6 w-full rounded" style={{ backgroundColor: itemSelected ? 'rgba(255,255,255,0.15)' : 'var(--color-surface-3)' }} />
+                  <div key={index} className="rounded-control border border-border bg-surface-2 p-2">
+                    <div className="mb-1.5 h-2.5 w-12 rounded-control bg-surface-3" />
+                    <div className="h-6 w-full rounded-control" style={{ backgroundColor: itemSelected ? 'rgba(255,255,255,0.15)' : 'var(--color-surface-3)' }} />
                   </div>
                 ))}
               </div>
 
               <div className="grid grid-cols-3 gap-3">
                 {["#1ed760", "#3b82f6", "#ef4444"].map((color, index) => (
-                  <div key={index} className="rounded-lg border border-border bg-surface-2 p-2">
+                  <div key={index} className="rounded-control border border-border bg-surface-2 p-2">
                     <div className="mb-1.5 flex items-center gap-1.5">
                       <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
-                      <div className="h-2.5 w-12 rounded bg-surface-4" />
+                      <div className="h-2.5 w-12 rounded-control bg-surface-3" />
                     </div>
                     <div
-                      className="flex h-6 w-full items-center justify-end rounded pr-2"
+                      className="flex h-6 w-full items-center justify-end rounded-control pr-2"
                       style={{
                         backgroundColor: itemSelected ? 'rgba(255,255,255,0.15)' : 'var(--color-surface-3)',
                         transform: `scale(${interpolate(macroFieldsFill, [0, 1], [0.9, 1])})`,
                         opacity: macroFieldsFill,
                       }}
                     >
-                      {itemSelected && <div className="h-3 w-8 rounded bg-white/20" />}
+                      {itemSelected && <div className="h-3 w-8 rounded-control bg-surface-3" />}
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="mt-3 flex items-center justify-between">
-                <div className="h-3 w-24 rounded bg-surface-4" />
+                <div className="h-3 w-24 rounded-control bg-surface-3" />
                 <div
-                  className="flex h-7 w-20 items-center justify-center rounded-lg"
+                  className="flex h-7 w-20 items-center justify-center rounded-control"
                   style={{ backgroundColor: '#1ed760', transform: `scale(${interpolate(addEntryClick, [0, 0.5, 1], [1, 0.95, 1])})` }}
                 >
-                  <div className="h-3 w-12 rounded bg-white/30" />
+                  <div className="h-3 w-12 rounded-control bg-surface-3" />
                 </div>
               </div>
             </div>
@@ -260,23 +260,23 @@ export const DashboardAnimation: React.FC = () => {
 
           <div className="flex h-full flex-col lg:col-span-2">
             <div
-              className="h-full rounded-xl border border-border bg-surface p-4"
+              className="h-full rounded-control border border-border bg-surface p-4"
               style={{ opacity: summaryCardSpring, transform: `translateX(${interpolate(summaryCardSpring, [0, 1], [15, 0])}px)` }}
             >
-              <div className="mb-3 rounded-lg bg-surface-2 p-3">
+              <div className="mb-3 rounded-control bg-surface-2 p-3">
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="h-3 w-20 rounded bg-surface-4" />
+                  <div className="h-3 w-20 rounded-control bg-surface-3" />
                   <div className="text-right">
-                    <div className="h-4 w-14 rounded bg-foreground/20" />
-                    <div className="mt-0.5 h-2.5 w-16 rounded bg-surface-3" />
+                    <div className="h-4 w-14 rounded-control bg-foreground/20" />
+                    <div className="mt-0.5 h-2.5 w-16 rounded-control bg-surface-3" />
                   </div>
                 </div>
 
-                <div className="mb-3 h-2.5 w-full overflow-hidden rounded-full bg-surface-4">
+                <div className="mb-3 h-2.5 w-full overflow-hidden rounded-full bg-surface-3">
                   <div className="h-full bg-vibrant-accent" style={{ width: `${calorieProgress * 76}%` }} />
                 </div>
 
-                <div className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-4">
+                <div className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
                   <div className="float-left h-full bg-protein" style={{ width: `${proteinProgress * 30}%` }} />
                   <div className="float-left h-full bg-carbs" style={{ width: `${carbsProgress * 40}%` }} />
                   <div className="float-left h-full bg-fats" style={{ width: `${fatsProgress * 30}%` }} />
@@ -286,7 +286,7 @@ export const DashboardAnimation: React.FC = () => {
                   {["protein", "carbs", "fats"].map((macro) => (
                     <div key={macro} className="flex items-center gap-1">
                       <div className={`bg- h-1.5 w-1.5 rounded-full${macro}`} />
-                      <div className="h-2.5 w-6 rounded bg-surface-4" />
+                      <div className="h-2.5 w-6 rounded-control bg-surface-3" />
                     </div>
                   ))}
                 </div>
@@ -298,23 +298,23 @@ export const DashboardAnimation: React.FC = () => {
                   { color: MACRO_COLORS.carbs, progress: carbsProgress, percent: 62 },
                   { color: MACRO_COLORS.fats, progress: fatsProgress, percent: 45 },
                 ].map((macro, index) => (
-                  <div key={index} className="rounded-lg border border-white/5 bg-surface-2/50 p-2.5">
+                  <div key={index} className="rounded-control border border-border bg-surface-2 p-2.5">
                     <div className="mb-1.5 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: macro.color }} />
-                        <div className="h-2.5 w-10 rounded bg-surface-4" />
+                        <div className="h-2.5 w-10 rounded-control bg-surface-3" />
                       </div>
                       <div className="flex items-center gap-1">
-                        <div className="h-3 w-8 rounded bg-foreground/15" />
-                        <div className="h-2.5 w-10 rounded bg-surface-4" />
+                        <div className="h-3 w-8 rounded-control bg-foreground/15" />
+                        <div className="h-2.5 w-10 rounded-control bg-surface-3" />
                       </div>
                     </div>
-                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-4">
+                    <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-3">
                       <div className="h-full" style={{ width: `${macro.progress * macro.percent}%`, backgroundColor: macro.color }} />
                     </div>
                     <div className="mt-1.5 flex items-center justify-between">
-                      <div className="h-2.5 w-12 rounded bg-surface-4" />
-                      <div className="h-2.5 w-6 rounded bg-surface-3" />
+                      <div className="h-2.5 w-12 rounded-control bg-surface-3" />
+                      <div className="h-2.5 w-6 rounded-control bg-surface-3" />
                     </div>
                   </div>
                 ))}
@@ -324,12 +324,12 @@ export const DashboardAnimation: React.FC = () => {
         </div>
 
         <div
-          className="rounded-xl border border-border bg-surface-2 p-4"
+          className="rounded-control border border-border bg-surface-2 p-4"
           style={{ opacity: historyPanelSpring, transform: `translateY(${interpolate(historyPanelSpring, [0, 1], [12, 0])}px)` }}
         >
           <div className="mb-3 flex items-center justify-between">
-            <div className="h-4 w-24 rounded bg-surface-4" />
-            <div className="h-6 w-20 rounded-lg bg-surface-3" />
+            <div className="h-4 w-24 rounded-control bg-surface-3" />
+            <div className="h-6 w-20 rounded-control bg-surface-3" />
           </div>
 
           <div className="space-y-2">
@@ -339,23 +339,23 @@ export const DashboardAnimation: React.FC = () => {
               return (
                 <div
                   key={index}
-                  className="flex items-center justify-between rounded-lg border border-white/5 bg-surface p-3"
+                  className="flex items-center justify-between rounded-control border border-border bg-surface p-3"
                   style={{ opacity: itemSpring, transform: `translateY(${interpolate(itemSpring, [0, 1], [12, 0])}px)` }}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-surface-3" />
+                    <div className="h-8 w-8 rounded-control bg-surface-3" />
                     <div className="flex flex-col gap-1.5">
-                      <div className="h-3 w-28 rounded bg-surface-4" />
-                      <div className="h-2.5 w-16 rounded bg-surface-3" />
+                      <div className="h-3 w-28 rounded-control bg-surface-3" />
+                      <div className="h-2.5 w-16 rounded-control bg-surface-3" />
                     </div>
                   </div>
                   <div className="flex items-center gap-4">
                     <div className="flex gap-2">
-                      <div className="h-3 w-10 rounded bg-protein/20" />
-                      <div className="h-3 w-10 rounded bg-carbs/20" />
-                      <div className="h-3 w-10 rounded bg-fats/20" />
+                      <div className="h-3 w-10 rounded-control bg-protein/20" />
+                      <div className="h-3 w-10 rounded-control bg-carbs/20" />
+                      <div className="h-3 w-10 rounded-control bg-fats/20" />
                     </div>
-                    <div className="h-4 w-12 rounded bg-surface-4" />
+                    <div className="h-4 w-12 rounded-control bg-surface-3" />
                   </div>
                 </div>
               );

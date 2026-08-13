@@ -89,7 +89,7 @@ const BlogIndexPage: React.FC = () => {
           </div>
         </section>
 
-        <section className="mb-12 border-b border-border/40 pb-6">
+        <section className="mb-12 border-b border-border pb-6">
           <div className="flex flex-wrap justify-center gap-2">
             <button
               type="button"
@@ -164,7 +164,7 @@ const BlogIndexPage: React.FC = () => {
                 <Link
                   to="/blog/$slug"
                   params={{ slug: featuredPost.slug }}
-                  className="group block h-full overflow-hidden rounded-lg border border-border bg-surface transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  className="group block h-full overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                   <div className="grid h-full lg:grid-cols-[1.05fr_0.95fr]">
                     <div className="relative min-h-70 overflow-hidden border-r border-border">
@@ -205,7 +205,7 @@ const BlogIndexPage: React.FC = () => {
                       key={post.slug}
                       to="/blog/$slug"
                       params={{ slug: post.slug }}
-                      className="group flex flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface p-5 transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                      className="group flex flex-1 flex-col overflow-hidden rounded-control border border-border bg-surface p-5 transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
                       <div className="text-muted flex items-center gap-2 text-xs font-medium">
                         <span className="text-primary">{post.category}</span>
@@ -236,7 +236,7 @@ const BlogIndexPage: React.FC = () => {
                       key={post.slug}
                       to="/blog/$slug"
                       params={{ slug: post.slug }}
-                      className="group flex h-full flex-col overflow-hidden rounded-lg border border-border bg-surface transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                      className="group flex h-full flex-col overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
                       <div className="relative aspect-16/10 overflow-hidden border-b border-border">
                         {post.image ? (
@@ -274,7 +274,7 @@ const BlogIndexPage: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="mt-10 rounded-lg border border-border bg-surface p-8">
+              <div className="mt-10 rounded-control border border-border bg-surface p-8">
                 <EmptyState
                   title="No articles match this topic"
                   message="Pick another topic or switch back to all blog entries."

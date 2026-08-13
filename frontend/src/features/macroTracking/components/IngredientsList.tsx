@@ -65,7 +65,7 @@ export function IngredientsList({
         height: { duration: 0.3, ease: "easeInOut" },
         opacity: { duration: 0.2 },
       }}
-      className="w-full overflow-hidden border-t border-border/40 bg-surface-2/40"
+      className="w-full overflow-hidden border-t border-border bg-surface-2"
     >
       <div className="flex flex-col gap-2 px-[10%] py-3">
         {ingredients.map((ing, index) => (

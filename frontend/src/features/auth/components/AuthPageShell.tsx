@@ -33,7 +33,7 @@ export default function AuthPageShell({
         className="fixed inset-x-0 z-50 px-4 sm:px-6 lg:px-8"
         style={{ top: "calc(1rem + var(--sat))" }}
       >
-        <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-2xl border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
+        <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between rounded-card border border-border bg-surface px-4 shadow-sm transition-colors duration-200 sm:px-6">
           <LogoButton
             compact
             onClick={() => navigate({ to: "/" })}

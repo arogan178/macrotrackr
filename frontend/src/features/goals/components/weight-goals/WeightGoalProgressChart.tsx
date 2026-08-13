@@ -27,7 +27,7 @@ function WeightCustomTooltip({
     const isValidDate = entryDate && isValid(entryDate);
 
     return (
-      <div className="rounded-lg border border-border bg-surface p-3">
+      <div className="rounded-control border border-border bg-surface p-3">
         <div className="mb-1 text-base font-medium text-foreground">
           {isValidDate
             ? format(entryDate, "EEE, MMM d, yyyy 'at' p")

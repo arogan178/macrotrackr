@@ -29,13 +29,13 @@ export default function TrendDisplay({
     typeof trend.firstAvg === "number";
 
   return (
-    <div className="flex flex-col justify-between rounded-xl bg-surface-2/40 p-3.5 border border-border/30 transition-colors hover:border-border/60">
+    <div className="flex flex-col justify-between rounded-control bg-surface-2 p-3.5 border border-border transition-colors hover:border-border">
       {/* Header: Icon + Title & Direction Badge */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2 min-w-0">
           {icon && (
             <div
-              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${iconBgColor}`}
+              className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-control ${iconBgColor}`}
             >
               {icon}
             </div>
@@ -45,7 +45,7 @@ export default function TrendDisplay({
           </span>
         </div>
 
-        <div className="flex items-center gap-1 rounded-md border border-border/40 bg-surface-2/80 px-2 py-0.5 text-xs font-medium shrink-0 whitespace-nowrap">
+        <div className="flex items-center gap-1 rounded-control border border-border bg-surface-2 px-2 py-0.5 text-xs font-medium shrink-0 whitespace-nowrap">
           <TrendIcon direction={trend.direction} />
           <span className="text-foreground whitespace-nowrap">
             {trend.direction === "stable" ? (
@@ -125,7 +125,7 @@ export default function TrendDisplay({
           </ResponsiveContainer>
         </div>
       ) : (
-        <div className="h-9 w-full flex items-center justify-center rounded bg-surface/20 text-[10px] text-muted/60">
+        <div className="h-9 w-full flex items-center justify-center rounded-control bg-surface text-[10px] text-muted/60">
           No sparkline
         </div>
       )}

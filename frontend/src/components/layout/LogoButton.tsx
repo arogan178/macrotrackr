@@ -19,7 +19,7 @@ const LogoButton: React.FC<LogoButtonProps> = ({
     type="button"
     onClick={onClick}
     aria-label={ariaLabel}
-    className={`hover:bg-surface-hover flex cursor-pointer items-center rounded font-light tracking-wide text-primary transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${compact ? "mr-0 h-auto p-0 sm:mr-0" : "mr-2 h-full px-2 sm:mr-4"} ${className}`}
+    className={`hover:bg-surface-hover flex cursor-pointer items-center rounded-control font-light tracking-wide text-primary transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${compact ? "mr-0 h-auto p-0 sm:mr-0" : "mr-2 h-full px-2 sm:mr-4"} ${className}`}
   >
     <span className="relative flex items-center">
       {/* Icon */}

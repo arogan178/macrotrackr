@@ -4,10 +4,10 @@
  * brand green for live values and primary actions.
  */
 export const calculatorCardClass =
-  "rounded-2xl border border-border bg-surface p-5 sm:p-6";
+  "rounded-card border border-border bg-surface p-5 sm:p-6";
 
 export const calculatorResultCardClass =
-  "rounded-2xl border border-primary/30 bg-gradient-to-b from-primary/[0.08] via-surface to-surface p-5 sm:p-6";
+  "rounded-card border border-primary/30 bg-gradient-to-b from-primary/[0.08] via-surface to-surface p-5 sm:p-6";
 
 export const calculatorEyebrowClass =
   "text-xs font-semibold uppercase tracking-wider text-muted";

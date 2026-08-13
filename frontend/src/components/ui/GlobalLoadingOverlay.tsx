@@ -40,7 +40,7 @@ function GlobalLoadingOverlay() {
         pointerEvents: "auto",
       }}
     >
-      <div className="rounded-xl border border-border/60 bg-surface/90 px-6 py-5 shadow-modal">
+      <div className="rounded-control border border-border bg-surface px-6 py-5 shadow-modal">
         <LoadingSpinner size="lg" />
       </div>
     </div>

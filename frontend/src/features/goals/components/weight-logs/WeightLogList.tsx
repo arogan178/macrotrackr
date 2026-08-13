@@ -152,7 +152,7 @@ function WeightLogList({
               return (
                 <li
                   key={entry.id}
-                  className="group/item flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-4 transition-colors duration-200 hover:border-white/20"
+                  className="group/item flex items-center justify-between rounded-control border border-border bg-surface-2 p-4 transition-colors duration-200 hover:border-border-2"
                 >
                   <div className="flex max-w-55 min-w-50 flex-col">
                     <span className="block w-full truncate text-sm font-medium text-muted">

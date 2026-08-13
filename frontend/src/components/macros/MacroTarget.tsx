@@ -73,7 +73,7 @@ const MacroTarget = memo(
           </InfoCard>
         )}
 
-        <div className="relative mb-6 h-2 overflow-hidden rounded-full bg-surface/30">
+        <div className="relative mb-6 h-2 overflow-hidden rounded-full bg-surface">
           <div
             className="absolute top-0 left-0 h-2 bg-gradient-to-r from-protein/80 to-protein"
             style={{ width: `${target.proteinPercentage}%` }}
