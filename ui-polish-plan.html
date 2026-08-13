@@ -238,6 +238,26 @@ table.t tr:hover td{background:#121417}
   border-radius:13px;padding:7px 10px;min-height:38px}
 .px-div{height:1px;background:var(--line)}
 
+/* identity helpers */
+.voice{display:grid;grid-template-columns:1fr 1fr;gap:0;border:1px solid var(--doc-line);border-radius:12px;overflow:hidden;margin:0 0 22px}
+@media (max-width:820px){.voice{grid-template-columns:1fr}}
+.voice > div{padding:13px 15px;border-bottom:1px solid var(--doc-line)}
+.voice > div:nth-child(odd){border-right:1px solid var(--doc-line);background:#0e0f11}
+.voice h5{margin:0 0 6px;font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--doc-dim);font-weight:700}
+.voice > div:nth-child(odd) h5{color:#ff8a92}
+.voice > div:nth-child(even) h5{color:var(--brand)}
+.voice > div h5.k{color:var(--doc-dim)}
+.voice p{margin:0;font-size:13px;color:#cfd4db}
+.voice p + p{margin-top:6px;color:var(--doc-dim);font-size:12.5px}
+.marks{display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;margin:12px 0 0}
+.marks figure{margin:0;text-align:center}
+.marks figcaption{font-size:10px;color:#6e6e6e;margin-top:6px}
+.tile{background:#0f0f0f;border:1px solid var(--line);border-radius:14px;display:grid;place-items:center}
+.rule{display:flex;gap:9px;align-items:flex-start;font-size:13px;color:#cfd4db;margin:0 0 9px}
+.rule > i{flex:0 0 auto;width:16px;height:16px;border-radius:5px;display:grid;place-items:center;font-size:10px;font-style:normal;font-weight:700;margin-top:2px}
+.rule > i.y{background:rgba(30,215,96,.14);color:var(--brand)}
+.rule > i.n{background:rgba(233,20,41,.14);color:#ff8a92}
+
 /* swatch strip */
 .sw{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px}
 .sw > div{border:1px solid var(--doc-line);border-radius:9px;padding:9px 11px;font-size:11px;min-width:104px}
@@ -251,11 +271,12 @@ table.t tr:hover td{background:#121417}
   <div class="doc-inner">
     <div class="doc-title">
       <h1>MacroTrackr — UI Consistency &amp; Polish Plan</h1>
-      <span>current vs. proposed, page by page</span>
-      <span class="stamp">planning artefact · not committed · no app code changed</span>
+      <span>current vs. proposed, page by page <span style="color:#4d545d">· ← → to move between tabs</span></span>
+      <span class="stamp">v2 · living document · planning only, no app code changed</span>
     </div>
     <nav class="tabs" role="tablist" id="tabnav">
       <button role="tab" data-t="overview" aria-selected="true">Overview</button>
+      <button role="tab" data-t="identity">Identity</button>
       <button role="tab" data-t="tokens">Design tokens</button>
       <button role="tab" data-t="surfaces">Why flat</button>
       <button role="tab" data-t="primitives">Primitives</button>
@@ -278,6 +299,7 @@ table.t tr:hover td{background:#121417}
       <button role="tab" data-t="pwa">PWA &amp; installed</button>
       <button role="tab" data-t="states">States</button>
       <button role="tab" data-t="backlog">Backlog</button>
+      <button role="tab" data-t="evolve">How it grows</button>
     </nav>
   </div>
 </header>
@@ -291,6 +313,9 @@ table.t tr:hover td{background:#121417}
     <p>A walk through every rendered surface in <code>frontend/src</code>, comparing what ships today against a
        proposal that makes the whole product read as one system. Each tab shows a faithful mock of the
        <b>current</b> layout beside the <b>proposed</b> one, then lists what is wrong and what changes.</p>
+    <p>Two of these tabs are not about consistency. <b>Identity</b> asks what the product looks like when it is not
+       being measured against the app it started as an alternative to. <b>How it grows</b> is the mechanism that
+       keeps this from being a one-off cleanup that drifts back within a quarter.</p>
     <p>Numbers below are counted from the source, not estimated.</p>
   </div>
 
@@ -339,6 +364,16 @@ table.t tr:hover td{background:#121417}
       <tr><td class="k">No bottom nav; no primary action</td>
           <td>On a phone, all four destinations sit behind a top-right hamburger — the least reachable point one-handed — and logging a meal needs a scroll. History rows are ~200px each, so ~3 fit per screen.</td>
           <td>A bottom tab bar with a Log sheet, and swipe actions on rows. See <b>Mobile · app</b>.</td></tr>
+      <tr><td class="k">One green, four meanings<br><small class="mut">primary · protein · success · vibrant-accent</small></td>
+          <td><code>--color-primary</code>, <code>--color-protein</code>, <code>--color-success</code> and
+              <code>--color-vibrant-accent</code> are all <code>#1ed760</code> — which is Spotify's exact brand green,
+              as <code>style.css</code> says in its own comment. A colour that means four things means nothing.</td>
+          <td>Green is reserved for the product: primary action, the live value, confirmation. Macros get their own
+              hues. See <b>Identity</b>.</td></tr>
+      <tr><td class="k">3 spellings of the product name</td>
+          <td><code>&lt;title&gt;MacroTrackr</code>, <code>APP_NAME = "Macro Tracker"</code>, README "Macro Tracker" —
+              and <code>VITE_PUBLIC_APP_NAME</code> lets a self-hoster replace all of it anyway.</td>
+          <td>One spelling in this deployment; an identity that survives the word being swapped. See <b>Identity</b>.</td></tr>
       <tr><td class="k">4 conflicting "app colours"</td>
           <td><span class="sev bug">bug</span> The installed app tints its status bar indigo (<code>#6366f1</code>), flashes <code>#18181b</code>, splashes <code>#09090b</code>, then paints <code>#000000</code>.</td>
           <td>One chrome colour, <code>#000000</code>, across manifest, meta and Capacitor.</td></tr>
@@ -373,6 +408,441 @@ table.t tr:hover td{background:#121417}
         <li>No routing or data-layer changes, except the two shell fixes flagged as bugs.</li>
         <li>Existing tests reference <code>Button</code>, <code>IconButtonGroup</code>, <code>StatusBadge</code>, <code>Icons</code> and <code>FormStyles</code> — those get extended, not replaced.</li>
         <li><code>tailwind.config.js</code> is inert (v4 project, empty <code>extend</code>). Delete it so it stops implying a second source of truth.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════ IDENTITY ══════════════════════════════ -->
+<section class="tab" id="t-identity" hidden>
+  <div class="lede">
+    <h2>Identity — what this is when it isn't "an alternative to"</h2>
+    <p>The product started as a free answer to a paid macro tracker. That framing is visible in the source: a
+       borrowed palette, a comparison-shaped feature grid, and a hero that promises the category's benefits rather
+       than this product's. It has since grown things the thing it was compared against does not have — it is open
+       source, self-hostable, has five no-account calculators, a blog, and an export-or-delete promise it can keep.</p>
+    <p>This tab proposes the identity it can hold on its own. Nothing here is a rebrand: the palette stays dark and
+       green, the mark stays a pea pod, the voice stays plain. Each move is <b>one token or one component</b>, and
+       each is listed with the way back.</p>
+  </div>
+
+  <!-- ── positioning ─────────────────────────────────────────────── -->
+  <table class="t">
+    <thead><tr>
+      <th style="width:26%">Inherited from being an alternative</th>
+      <th style="width:32%">What the product actually is now</th>
+      <th>What that means on screen</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="k">Spotify's palette, borrowed whole<br><small class="mut"><code>/* Brand palette - Modern / Spotify Inspired */</code></small></td>
+          <td>A tracker whose entire interface is numbers on black. The palette is right; the specific green is
+              someone else's, and it is doing four jobs at once.</td>
+          <td>One green with one meaning, macros in their own hues, and a <b>green budget</b> per screen.</td></tr>
+      <tr><td class="k">A feature list shaped by comparison</td>
+          <td>The workflow is the product: log in seconds, see the day, adjust the week.</td>
+          <td>Home leads with the day, not with a form. The landing page shows the real Home panel — see <b>Landing</b>.</td></tr>
+      <tr><td class="k">"Free" as the whole pitch</td>
+          <td>Free <i>and</i> yours: AGPL, self-hostable, local auth, billing disabled by default, export or delete
+              on demand. <code>PublicSelfHostedGate</code> already ships.</td>
+          <td>Ownership stated once, plainly, where it reassures — under the CTA and in Settings. Not a badge farm.</td></tr>
+      <tr><td class="k">Black-box "adaptive" maths</td>
+          <td>Five calculators that show their formula and need no account.</td>
+          <td>Tools is a first-class destination, and the strongest no-signup entry point the product has.</td></tr>
+      <tr><td class="k">Coach-shaped prescription</td>
+          <td>A log, not a coach. It records what happened and shows the gap.</td>
+          <td>Over target is <b>stated</b>, never scolded: white numerals and a muted target, not red. No streaks,
+              no confetti, no flames.</td></tr>
+    </tbody>
+  </table>
+
+  <!-- ── green ───────────────────────────────────────────────────── -->
+  <div class="split">
+    <figure class="pane cur">
+      <figcaption><span class="tag">current</span> green as rendered <em>style.css · LogoButton.tsx</em></figcaption>
+      <div class="frame">
+        <div class="mk-h3" style="margin-bottom:8px">Four tokens, one hex</div>
+        <div class="sw">
+          <div><i style="background:#1ed760"></i><code>--primary</code><br><span class="dim">#1ed760</span></div>
+          <div><i style="background:#1ed760"></i><code>--protein</code><br><span class="dim">#1ed760</span></div>
+          <div><i style="background:#1ed760"></i><code>--success</code><br><span class="dim">#1ed760</span></div>
+          <div><i style="background:#1ed760"></i><code>--vibrant-accent</code><br><span class="dim">#1ed760</span></div>
+          <div><i style="background:#1db954"></i><code>--secondary</code><br><span class="dim">#1db954</span></div>
+        </div>
+        <p class="mk-sub" style="margin:0 0 12px">
+          <code>#1ed760</code> is Spotify's brand green; <code>#1db954</code> is the one it replaced.</p>
+        <div class="mk-divider"></div>
+        <div class="mk-note" data-n="!">
+          <div class="mk-card" style="border-color:rgba(233,20,41,.3)">
+            <div class="mk-h3" style="color:#ff8a92">One screen, green meaning five things</div>
+            <div style="display:grid;gap:9px;margin-top:11px">
+              <div class="mk-row between"><small class="mut">the wordmark</small><small style="color:#1ed760;font-weight:300;letter-spacing:.03em">MacroTrackr</small></div>
+              <div class="mk-row between"><small class="mut">the primary button</small><span class="mk-btn sm">Add entry</span></div>
+              <div class="mk-row between"><small class="mut">calories consumed</small><small style="color:#1ed760">1,847</small></div>
+              <div class="mk-row between"><small class="mut">protein</small><small style="color:#1ed760">142g</small></div>
+              <div class="mk-row between"><small class="mut">saved</small><small style="color:#1ed760">✓ Saved</small></div>
+            </div>
+            <p class="mk-sub" style="margin-top:11px">The eye cannot rank five equally-green things, so the primary
+              action stops being primary. <code>LogoButton</code> also renders the whole wordmark in
+              <code>text-primary</code> at <code>font-light</code> with a <code>drop-shadow-md</code> — in a system
+              whose shadow tokens are all <code>none</code>.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="pane pro">
+      <figcaption><span class="tag">proposed</span> green means the product <em>one hue, one job</em></figcaption>
+      <div class="frame">
+        <div class="mk-h3" style="margin-bottom:8px">Product green — ours, not borrowed</div>
+        <div class="sw">
+          <div><i style="background:#22e07a"></i><code>--primary</code><br><span class="dim">#22e07a · 12.0:1</span></div>
+          <div><i style="background:#1ed760"></i><code>was</code><br><span class="dim">#1ed760 · 10.9:1</span></div>
+        </div>
+        <p class="mk-sub" style="margin:0 0 12px">A half-step cooler and brighter. Close enough that nothing already
+          drawn looks foreign; far enough that it is not a copy. Also raises contrast on black from 10.9:1 to 12.0:1.
+          <span class="dim">One token. Reverting is the same edit backwards.</span></p>
+        <div class="mk-h3" style="margin-bottom:8px">Macros — no macro is green</div>
+        <div class="sw">
+          <div><i style="background:#a78bfa"></i><code>--protein</code><br><span class="dim">#a78bfa · 7.7:1</span></div>
+          <div><i style="background:#60a5fa"></i><code>--carbs</code><br><span class="dim">#60a5fa · 8.3:1</span></div>
+          <div><i style="background:#f97316"></i><code>--fats</code><br><span class="dim">#f97316 · 7.5:1</span></div>
+        </div>
+        <p class="mk-sub" style="margin:0 0 12px">Green is the product, not a nutrient. Fats also stop sharing a hue
+          with <code>--error</code> <code>#e91429</code> — a macronutrient should not look like a failure.
+          Carbs moves from <code>#3b82f6</code> (5.7:1, under AA for small text) to its lighter step for text and dots,
+          keeping <code>#3b82f6</code> for fills.</p>
+        <div class="mk-divider"></div>
+        <div class="mk-note" data-n="✓">
+          <div class="mk-card">
+            <div class="mk-h3 brand">The green budget</div>
+            <p class="mk-sub" style="margin-top:6px">At most <b>three</b> green marks in a viewport, drawn from:
+              one primary action · one live value · one confirmation. The wordmark does not count as green because
+              it stops being green.</p>
+            <div style="display:grid;gap:9px;margin-top:11px">
+              <div class="mk-row between"><small class="mut">the wordmark</small><small style="font-weight:600;letter-spacing:-.02em">MacroTrackr</small></div>
+              <div class="mk-row between"><small class="mut">the primary button</small><span class="mk-btn sm">Add entry</span></div>
+              <div class="mk-row between"><small class="mut">calories consumed</small><small class="brand">1,847</small></div>
+              <div class="mk-row between"><small class="mut">protein</small><small style="color:#a78bfa">142g</small></div>
+              <div class="mk-row between"><small class="mut">saved</small><small class="mut">Saved · 19:42</small></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="notes">
+    <div class="note bad">
+      <h4>Problems</h4>
+      <ol>
+        <li><span class="sev hi">high</span><b>Four tokens resolve to the same hex.</b> <code>--color-primary</code>,
+          <code>--color-protein</code>, <code>--color-success</code> and <code>--color-vibrant-accent</code> are all
+          <code>#1ed760</code>, and <code>--color-secondary</code> <code>#1db954</code> is the green it replaced.
+          <span class="why">Consequence: the design principle "green means live value or primary action" cannot be
+          held while protein and success are also green.</span></li>
+        <li><span class="sev hi">high</span><b>The wordmark is entirely green</b> and set in <code>font-light
+          tracking-wide</code> — a fifth green thing, and the only place in the product using that weight for text.
+          <span class="why"><code>LogoButton.tsx</code> also carries <code>drop-shadow-md</code> and a comment citing
+          a "Memoria Design System" that exists nowhere in this repo.</span></li>
+        <li><span class="sev hi">high</span><b>The mark cannot render small.</b> <code>icon.png</code> is a 2048px,
+          583 KB gradient on a diagonal axis, preloaded for a 40px slot. At 16px the pod, the peas and the ascending
+          bars all collapse into a green smear.<span class="why">The concept is good and worth keeping — a pod whose
+          peas rise like a bar chart. The execution is a gradient PNG in a system that bans gradients.</span></li>
+        <li><span class="sev lo">low</span><b>Three names.</b> <code>&lt;title&gt;MacroTrackr</code>,
+          <code>APP_NAME = "Macro Tracker"</code>, README "Macro Tracker".</li>
+        <li><span class="sev lo">low</span><b>The identity is stored in a string that users can replace.</b>
+          <code>VITE_PUBLIC_APP_NAME</code> is a supported branding hook, so any self-hoster's build says something
+          else entirely.</li>
+      </ol>
+    </div>
+    <div class="note good">
+      <h4>Changes</h4>
+      <ol>
+        <li><b>Green becomes the product's colour, exclusively.</b> <code>--primary</code> to <code>#22e07a</code>;
+          <code>--success</code> aliases it; <code>--secondary</code> and <code>--vibrant-accent</code> are deleted
+          (4 call sites).<span class="why">Whether to shift the hex at all is a one-line decision — the split above
+          exists so it can be judged rather than argued.</span></li>
+        <li><b>Macros get their own hues</b> — violet, blue, orange. No nutrient is ever the brand colour.</li>
+        <li><b>Redraw the mark as flat SVG</b>, keeping the pod-and-rising-peas idea, tuned to read at 16px and to
+          survive a maskable crop. Below.</li>
+        <li><b>The wordmark stops being green</b> and becomes foreground text at the panel-title weight, with the mark
+          carrying the colour. It then also survives <code>PUBLIC_APP_NAME</code> being overridden.</li>
+        <li><b>"MacroTrackr", one word, everywhere</b> in this deployment — title, manifest, README, <code>APP_NAME</code>
+          default.</li>
+      </ol>
+    </div>
+  </div>
+
+  <!-- ── the mark ────────────────────────────────────────────────── -->
+  <div class="split">
+    <figure class="pane cur">
+      <figcaption><span class="tag">current</span> the mark as shipped <em>icon.png · icon-ui.webp · favicon.ico</em></figcaption>
+      <div class="frame">
+        <div class="marks">
+          <figure>
+            <div class="tile" style="width:64px;height:64px">
+              <svg width="46" height="46" viewBox="0 0 32 32" aria-hidden="true">
+                <defs><linearGradient id="og" x1="0" y1="1" x2="1" y2="0">
+                  <stop offset="0" stop-color="#0b7a45"/><stop offset="1" stop-color="#7fd07f"/></linearGradient></defs>
+                <g transform="rotate(-20 16 16)">
+                  <path d="M3 20 C7 11 22 8 29 12 C25 21 10 24 3 20 Z" fill="none" stroke="url(#og)" stroke-width="2.6"/>
+                  <rect x="10" y="16" width="3" height="4" rx="1.5" fill="url(#og)"/>
+                  <rect x="14.5" y="14.5" width="3" height="5.5" rx="1.5" fill="url(#og)"/>
+                  <rect x="19" y="13" width="3" height="7" rx="1.5" fill="url(#og)"/>
+                </g>
+              </svg>
+            </div><figcaption>64px</figcaption>
+          </figure>
+          <figure>
+            <div class="tile" style="width:32px;height:32px">
+              <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+                <g transform="rotate(-20 16 16)">
+                  <path d="M3 20 C7 11 22 8 29 12 C25 21 10 24 3 20 Z" fill="none" stroke="#2f9e5e" stroke-width="2.6"/>
+                  <rect x="10" y="16" width="3" height="4" rx="1.5" fill="#2f9e5e"/>
+                  <rect x="14.5" y="14.5" width="3" height="5.5" rx="1.5" fill="#2f9e5e"/>
+                  <rect x="19" y="13" width="3" height="7" rx="1.5" fill="#2f9e5e"/>
+                </g>
+              </svg>
+            </div><figcaption>32px</figcaption>
+          </figure>
+          <figure>
+            <div class="tile" style="width:20px;height:20px">
+              <svg width="16" height="16" viewBox="0 0 32 32" aria-hidden="true">
+                <g transform="rotate(-20 16 16)">
+                  <path d="M3 20 C7 11 22 8 29 12 C25 21 10 24 3 20 Z" fill="none" stroke="#2f9e5e" stroke-width="2.6"/>
+                  <rect x="10" y="16" width="3" height="4" rx="1.5" fill="#2f9e5e"/>
+                  <rect x="14.5" y="14.5" width="3" height="5.5" rx="1.5" fill="#2f9e5e"/>
+                  <rect x="19" y="13" width="3" height="7" rx="1.5" fill="#2f9e5e"/>
+                </g>
+              </svg>
+            </div><figcaption>16px — favicon</figcaption>
+          </figure>
+        </div>
+        <p class="mk-sub" style="margin-top:12px">Diagonal axis, gradient fill, ~35% of the canvas empty, three
+          asset formats that do not match each other. <code>icon.png</code> is <b>583 KB</b> and
+          <code>fetchPriority="high"</code>.</p>
+        <div class="mk-divider"></div>
+        <div class="mk-note" data-n="!">
+          <div class="mk-card" style="border-color:rgba(233,20,41,.3)">
+            <div class="mk-h3" style="color:#ff8a92">Lockup as rendered</div>
+            <div class="mk-row" style="margin-top:11px;gap:6px">
+              <svg width="28" height="28" viewBox="0 0 32 32" aria-hidden="true">
+                <g transform="rotate(-20 16 16)">
+                  <path d="M3 20 C7 11 22 8 29 12 C25 21 10 24 3 20 Z" fill="none" stroke="#2f9e5e" stroke-width="2.6"/>
+                  <rect x="10" y="16" width="3" height="4" rx="1.5" fill="#2f9e5e"/>
+                  <rect x="14.5" y="14.5" width="3" height="5.5" rx="1.5" fill="#2f9e5e"/>
+                  <rect x="19" y="13" width="3" height="7" rx="1.5" fill="#2f9e5e"/>
+                </g>
+              </svg>
+              <span style="color:#1ed760;font-weight:300;font-size:19px;letter-spacing:.03em">MacroTrackr</span>
+            </div>
+            <p class="mk-sub" style="margin-top:10px">Green mark beside green text at a weight used nowhere else,
+              on a page where the primary button is also green.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+
+    <figure class="pane pro">
+      <figcaption><span class="tag">proposed</span> same idea, drawn to survive <em>one SVG, ~1 KB</em></figcaption>
+      <div class="frame">
+        <div class="marks">
+          <figure>
+            <div class="tile" style="width:64px;height:64px">
+              <svg width="46" height="46" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M4 22 C6 12 18 8 28 10 C26 20 14 24 4 22 Z" fill="none" stroke="#22e07a" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M28 10 L30.5 6" stroke="#22e07a" stroke-width="2.2" stroke-linecap="round"/>
+                <rect x="9" y="16.5" width="3.2" height="4.6" rx="1.6" fill="#22e07a"/>
+                <rect x="13.8" y="14.6" width="3.2" height="6" rx="1.6" fill="#22e07a"/>
+                <rect x="18.6" y="12.6" width="3.2" height="7.4" rx="1.6" fill="#22e07a"/>
+              </svg>
+            </div><figcaption>64px</figcaption>
+          </figure>
+          <figure>
+            <div class="tile" style="width:32px;height:32px">
+              <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M4 22 C6 12 18 8 28 10 C26 20 14 24 4 22 Z" fill="none" stroke="#22e07a" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M28 10 L30.5 6" stroke="#22e07a" stroke-width="2.2" stroke-linecap="round"/>
+                <rect x="9" y="16.5" width="3.2" height="4.6" rx="1.6" fill="#22e07a"/>
+                <rect x="13.8" y="14.6" width="3.2" height="6" rx="1.6" fill="#22e07a"/>
+                <rect x="18.6" y="12.6" width="3.2" height="7.4" rx="1.6" fill="#22e07a"/>
+              </svg>
+            </div><figcaption>32px</figcaption>
+          </figure>
+          <figure>
+            <div class="tile" style="width:20px;height:20px">
+              <svg width="16" height="16" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M4 22 C6 12 18 8 28 10 C26 20 14 24 4 22 Z" fill="none" stroke="#22e07a" stroke-width="2.6" stroke-linejoin="round"/>
+                <path d="M28 10 L30.5 6" stroke="#22e07a" stroke-width="2.6" stroke-linecap="round"/>
+                <rect x="9" y="16.5" width="3.2" height="4.6" rx="1.6" fill="#22e07a"/>
+                <rect x="13.8" y="14.6" width="3.2" height="6" rx="1.6" fill="#22e07a"/>
+                <rect x="18.6" y="12.6" width="3.2" height="7.4" rx="1.6" fill="#22e07a"/>
+              </svg>
+            </div><figcaption>16px — favicon</figcaption>
+          </figure>
+          <figure>
+            <div class="tile" style="width:64px;height:64px;background:#22e07a;border-color:#22e07a;border-radius:14px">
+              <svg width="40" height="40" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M4 22 C6 12 18 8 28 10 C26 20 14 24 4 22 Z" fill="none" stroke="#000" stroke-width="2.2" stroke-linejoin="round"/>
+                <path d="M28 10 L30.5 6" stroke="#000" stroke-width="2.2" stroke-linecap="round"/>
+                <rect x="9" y="16.5" width="3.2" height="4.6" rx="1.6" fill="#000"/>
+                <rect x="13.8" y="14.6" width="3.2" height="6" rx="1.6" fill="#000"/>
+                <rect x="18.6" y="12.6" width="3.2" height="7.4" rx="1.6" fill="#000"/>
+              </svg>
+            </div><figcaption>maskable · 20% safe pad</figcaption>
+          </figure>
+        </div>
+        <p class="mk-sub" style="margin-top:12px">Same pod, same rising peas, redrawn: flat single-colour fill, a
+          shallower tilt, a stem so the silhouette can only be read one way, and the artwork filling its canvas
+          instead of sitting in a diagonal band. One file serves favicon, app icon, splash and the empty-state
+          watermark. The three peas are the same three bars the macro row draws — the mark is the interface,
+          compressed.</p>
+        <div class="mk-divider"></div>
+        <div class="mk-note" data-n="✓">
+          <div class="mk-card">
+            <div class="mk-h3 brand">Lockup</div>
+            <div class="mk-row" style="margin-top:11px;gap:8px">
+              <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+                <path d="M4 22 C6 12 18 8 28 10 C26 20 14 24 4 22 Z" fill="none" stroke="#22e07a" stroke-width="2.4" stroke-linejoin="round"/>
+                <path d="M28 10 L30.5 6" stroke="#22e07a" stroke-width="2.4" stroke-linecap="round"/>
+                <rect x="9" y="16.5" width="3.2" height="4.6" rx="1.6" fill="#22e07a"/>
+                <rect x="13.8" y="14.6" width="3.2" height="6" rx="1.6" fill="#22e07a"/>
+                <rect x="18.6" y="12.6" width="3.2" height="7.4" rx="1.6" fill="#22e07a"/>
+              </svg>
+              <span style="font-weight:600;font-size:17px;letter-spacing:-.02em">MacroTrackr</span>
+            </div>
+            <div class="mk-divider"></div>
+            <div class="rule"><i class="y">✓</i><span>Mark carries the colour; the word is foreground. Works when
+              <code>PUBLIC_APP_NAME</code> is something else entirely.</span></div>
+            <div class="rule"><i class="y">✓</i><span>Mark-only below <code>sm</code>, in the tab bar, and as the
+              empty-state watermark at 8% opacity.</span></div>
+            <div class="rule"><i class="n">✕</i><span>Never gradient, never rotated, never re-coloured per page,
+              never with a shadow.</span></div>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </div>
+
+  <!-- ── numbers ─────────────────────────────────────────────────── -->
+  <div class="split">
+    <figure class="pane cur">
+      <figcaption><span class="tag">current</span> how a value is set <em>varies by page</em></figcaption>
+      <div class="frame">
+        <div class="mk-card">
+          <div class="mk-h3" style="margin-bottom:11px">The same number, four ways</div>
+          <div style="display:grid;gap:12px">
+            <div><small class="dim">Home summary</small><div style="font-size:26px;font-weight:700;color:#1ed760">1847</div></div>
+            <div><small class="dim">Analytics stat</small><div style="font-size:19px;font-weight:600">1,847 kcal</div></div>
+            <div><small class="dim">Calculator result</small><div style="font-size:22px;font-weight:700;color:#1ed760">1847.0<span style="font-size:12px"> calories</span></div></div>
+            <div><small class="dim">Entry row</small><div style="font-size:13px">1847 Cal</div></div>
+          </div>
+          <div class="mk-divider"></div>
+          <p class="mk-sub">Four weights, three unit spellings, thousands separator present or not, one decimal
+            place that no one needs, and the value tinted the same green as the button beside it.</p>
+        </div>
+      </div>
+    </figure>
+    <figure class="pane pro">
+      <figcaption><span class="tag">proposed</span> numbers are the identity <em>one <code>&lt;Value&gt;</code></em></figcaption>
+      <div class="frame">
+        <div class="mk-card">
+          <div class="mk-h3" style="margin-bottom:11px">One treatment, three sizes</div>
+          <div style="display:grid;gap:12px">
+            <div><small class="dim">hero — one per screen</small>
+              <div><span class="mk-hero-num">1,847</span> <small class="mut">kcal</small>
+                <small style="color:#a1a1a1"> · of 2,200</small></div></div>
+            <div><small class="dim">stat</small>
+              <div style="font-size:19px;font-weight:400;letter-spacing:-.02em">2,041 <small class="mut" style="font-weight:400">kcal</small>
+                <small class="mut" style="font-size:11px">avg</small></div></div>
+            <div><small class="dim">inline</small>
+              <div style="font-size:13px">1,847 <span class="mut">kcal</span></div></div>
+            <div><small class="dim">delta — always signed, never red</small>
+              <div style="font-size:13px">+353 <span class="mut">kcal over</span></div></div>
+          </div>
+          <div class="mk-divider"></div>
+          <div class="rule"><i class="y">✓</i><span>Light weight at display size, regular below. Tabular figures
+            everywhere, so columns and counting-up numbers never reflow.</span></div>
+          <div class="rule"><i class="y">✓</i><span>Unit always adjacent, always muted, always the same spelling:
+            <code>kcal</code>, <code>g</code>, <code>kg</code>.</span></div>
+          <div class="rule"><i class="y">✓</i><span>Grams are whole numbers; kcal are whole numbers; weight gets one
+            decimal. Decided once, in the component.</span></div>
+          <div class="rule"><i class="n">✕</i><span>The value is not green because it is a value. Green marks the
+            <i>live</i> one — today's total, the thing that moves.</span></div>
+        </div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="note" style="margin:0 0 26px">
+    <h4>Why numbers, and not something more decorative</h4>
+    <p style="margin:0;font-size:13.5px;color:#cfd4db">A tracker is read at a glance, twenty times a day, usually
+      one-handed and mid-meal. The only thing on screen that the user actually came for is a number. Making the
+      numerals the most considered object in the system — one weight ramp, one unit style, one rounding rule, tabular
+      by default — is both the cheapest identity available and the one that survives every layout change in this
+      document. It is also the part that no competitor's screenshot can be mistaken for, because everyone else
+      decorates around the number instead.</p>
+  </div>
+
+  <!-- ── voice ───────────────────────────────────────────────────── -->
+  <h3 style="font-size:15px;margin:0 0 10px;letter-spacing:-.01em">Voice — plain, second person, never scolding</h3>
+  <p class="lede" style="margin-bottom:14px"><span style="color:var(--doc-muted);font-size:14px">Two commits already
+    moved this way — <code>8fbebc4e</code> set the tone and <code>b122ddab</code> removed claims the app could not
+    back. The strings below are the ones still carrying the old register.</span></p>
+
+  <div class="voice">
+    <div><h5>today</h5><p>"Master your macros. Reach your goals."</p><p>Aspiration, imperative, and true of every app in the category. <code>HeroSection.tsx</code></p></div>
+    <div><h5>proposed</h5><p>"Know what you ate. Without the admin."</p><p>States the outcome and the cost it removes. Only this product's promise.</p></div>
+    <div><h5>today</h5><p>"…brings food logging, custom goals, and privacy-first tracking into one calm daily routine."</p><p>Brochure nouns. "Calm daily routine" is a mood, not a feature. <code>ToolsHubPage.tsx</code></p></div>
+    <div><h5>proposed</h5><p>"Log a meal, set a target, see where the week went."</p><p>Three verbs, three things the app does.</p></div>
+    <div><h5>today</h5><p>"Visualize your progress instantly, and build lasting habits with less friction."</p><p>Two claims the page then never demonstrates.</p></div>
+    <div><h5>proposed</h5><p>Show the real Home panel at real values.</p><p>The claim and the proof are the same component, so it cannot go stale. See <b>Landing</b>.</p></div>
+    <div><h5 class="k">keep</h5><p>"Run MacroTrackr on your own infrastructure for free."</p><p>Concrete, checkable, and no one else in the category can write it. <code>CustomPricingCards.tsx</code></p></div>
+    <div><h5 class="k">keep</h5><p>"No card. Export or delete your data any time."</p><p>Reassurance as a statement of fact, not a legal caveat.</p></div>
+  </div>
+
+  <div class="notes">
+    <div class="note good">
+      <h4>Rules that make the voice repeatable</h4>
+      <ul>
+        <li><b>Second person, present tense, verbs first.</b><span class="why">"Log a meal", not "Meal logging".</span></li>
+        <li><b>A number beats an adjective.</b><span class="why">"5 of 7 days tracked", not "great consistency".</span></li>
+        <li><b>Never <i>just</i>, <i>simply</i>, <i>effortlessly</i>, <i>seamlessly</i>, <i>powerful</i>.</b><span class="why">They all describe the writer's hopes for the feature.</span></li>
+        <li><b>No exclamation marks anywhere in the product.</b></li>
+        <li><b>Errors say what happened, then the next action.</b><span class="why">"Couldn't save that entry — check your connection and try again", not "Something went wrong!".</span></li>
+        <li><b>Empty states name the action, not the absence.</b><span class="why">"Log your first meal" with the button, not "No entries found".</span></li>
+        <li><b>Never scold.</b><span class="why">Over target is a number and a muted target. No red, no warning icon, no streak broken.</span></li>
+      </ul>
+    </div>
+    <div class="note">
+      <h4>The anti-identity — what this product does not do</h4>
+      <ul>
+        <li><b>No streaks, flames or confetti.</b> The value is the record, not the ritual. A missed day is data, not a failure.</li>
+        <li><b>No coach persona.</b> No first-person "I noticed you…". The app has no opinions about the user.</li>
+        <li><b>No black-box maths.</b> If a number is calculated, the formula is reachable — that is what the calculators are for.</li>
+        <li><b>No dark patterns on Pro.</b> Gated things are shown as gated and are never fake-clickable (see <b>Analytics</b>).</li>
+        <li><b>No illustration set.</b> Empty states use the mark and one sentence. Illustrations are a maintenance surface with no payoff at this size.</li>
+        <li><b>No second brand for the marketing site.</b> Same header, same panel, same numerals — that is the whole point of the rest of this document.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="notes" style="margin-bottom:0">
+    <div class="note good">
+      <h4>What identity costs here</h4>
+      <ul>
+        <li><b>Green shift:</b> one token, plus regenerating the icon set. Every screenshot, OG image and blog asset showing the old green looks marginally off until replaced — they are already stale for other reasons.</li>
+        <li><b>Macro re-colour:</b> three tokens, but charts, legends and the Remotion hero hardcode approximations (<code>ReportingPage.tsx</code> has a <code>// vibrant-accent approx</code> comment). Those need finding — grep for the hexes.</li>
+        <li><b>New mark:</b> favicon, <code>icon.png</code>, <code>icon-ui.webp</code>, manifest icons, apple-touch icon, splash. All of it is already on the list as backlog 4.3 and 4.6.</li>
+        <li><b>Voice pass:</b> copy only, no code risk, and the smallest item here — but it is the one users notice first.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h4>Deliberately left open</h4>
+      <ul>
+        <li><b>A typeface of its own.</b> Inter is right for a numbers-first interface and self-hosting it is already backlog 4.3. Buying a display face is an identity move to revisit once the system holds.</li>
+        <li><b>A generated "day card" for sharing.</b> The mark plus one day's numbers, rendered server-side — identity and distribution in one artefact. Listed under horizons in <b>How it grows</b>, not proposed now.</li>
+        <li><b>The name itself.</b> "MacroTrackr" is descriptive and slightly generic. The proposal is to stop spelling it three ways, not to change it — and the mark-carries-the-colour lockup means a future rename costs one string.</li>
       </ul>
     </div>
   </div>
@@ -4459,6 +4929,37 @@ table.t tr:hover td{background:#121417}
       <tr><td class="k">5.9</td><td><b>Selection bar above the tab bar</b></td>
         <td class="k"><code>EntryHistoryPanel</code></td><td><span class="sev lo">low</span></td>
         <td><code>fixed bottom-6</code> with no <code>--sab</code> padding sits on the home indicator.</td></tr>
+
+      <tr><td class="k">6.1</td><td><b>One name, one lockup</b></td>
+        <td class="k"><code>index.html</code>, <code>appConstants.ts</code>, <code>README.md</code>, <code>LogoButton.tsx</code>, manifest</td>
+        <td><span class="sev lo">low</span></td>
+        <td>Three spellings ship today. The wordmark also stops being green and drops <code>drop-shadow-md</code>, so the primary action is the only green control in the header.</td></tr>
+      <tr><td class="k">6.2</td><td><b>Redraw the mark as flat SVG</b></td>
+        <td class="k"><code>public/</code> icon set, <code>LogoButton.tsx</code>, <code>vite.config.ts</code> manifest</td>
+        <td><span class="sev hi">high</span></td>
+        <td>Keeps the pod-and-rising-peas idea, drops the gradient and the 583 KB PNG, adds a maskable icon. Do it with 4.3/4.6 — same files.</td></tr>
+      <tr><td class="k">6.3</td><td><b>Split the green</b></td>
+        <td class="k"><code>style.css</code>, <code>UiConstants.ts</code>, <code>ReportingPage.tsx</code>, chart configs, <code>DashboardAnimation.tsx</code></td>
+        <td><span class="sev hi">high</span></td>
+        <td>Protein, success, accent and primary are one hex today, so "green means primary" cannot hold. Macros move to violet/blue/orange; <code>--secondary</code> and <code>--vibrant-accent</code> are deleted.</td></tr>
+      <tr><td class="k">6.4</td><td><b>Product green <code>#22e07a</code></b></td>
+        <td class="k"><code>style.css</code> (one token) + icon regeneration</td><td><span class="sev lo">low</span></td>
+        <td>Optional and reversible in one line. Stops the palette being Spotify's exact green and gains a contrast step. Land after 6.3, never with it — one variable at a time.</td></tr>
+      <tr><td class="k">6.5</td><td><b><code>&lt;Value&gt;</code> — one number treatment</b></td>
+        <td class="k">new; consumed by <code>DailySummaryPanel</code>, <code>MacroSummaryStat</code>, <code>MetricCard</code>, <code>EntryCard</code>, calculators</td>
+        <td><span class="sev hi">high</span></td>
+        <td>Four weights, three unit spellings and inconsistent rounding for the same figure. Rounding and separators get decided once. Depends on 1.1.</td></tr>
+      <tr><td class="k">6.6</td><td><b>Voice pass</b></td>
+        <td class="k"><code>HeroSection</code>, <code>ToolsHubPage</code>, <code>EmptyState</code> strings, error copy</td>
+        <td><span class="sev lo">low</span></td>
+        <td>Copy only, no code risk, and the change users register first. Pairs with 3.5.</td></tr>
+
+      <tr><td class="k">7.1</td><td><b>UI budgets in CI</b></td>
+        <td class="k">new <code>ui-budgets.json</code> + a lint step</td><td><span class="sev hi">high</span></td>
+        <td>The only item here that prevents the rest from being re-done in a year. Counts radii, surface variants, heading class strings, <code>sm:</code> usage; fails when a number goes up.</td></tr>
+      <tr><td class="k">7.2</td><td><b><code>docs/ui-changelog.md</code> + this document as the living copy</b></td>
+        <td class="k"><code>docs/</code>, <code>ui-polish-plan.html</code></td><td><span class="sev lo">low</span></td>
+        <td>Each phase ticks a row and updates the mock it changed, so the "current" column stays honest instead of becoming a museum of decisions already shipped.</td></tr>
     </tbody>
   </table>
 
@@ -4485,6 +4986,142 @@ table.t tr:hover td{background:#121417}
   </div>
 </section>
 
+<!-- ══════════════════════════════ HOW IT GROWS ══════════════════════════════ -->
+<section class="tab" id="t-evolve" hidden>
+  <div class="lede">
+    <h2>How it grows — keeping this from being a one-off</h2>
+    <p>Everything in this document describes drift that took a year to accumulate: 7 radii, 20 surface variants,
+       18 heading class strings, 3 top bars. None of it was a bad decision at the time. Each was a reasonable local
+       choice made because the system did not have an obvious place to put the thing.</p>
+    <p>So the last proposal is the one that keeps the others true: make the system the cheapest place to add
+       something, and put a number on the drift so it is visible before it is expensive.</p>
+  </div>
+
+  <!-- growth loop -->
+  <table class="t">
+    <thead><tr>
+      <th style="width:16%">Level</th><th style="width:30%">Enter here when…</th><th>Rule</th>
+    </tr></thead>
+    <tbody>
+      <tr><td class="k"><b>Token</b><br><small class="mut">style.css</small></td>
+          <td>Never, in normal work. A new token is a design decision, not an implementation detail.</td>
+          <td>Adding one requires deleting one, or a written reason in the PR. The set is closed at four surfaces,
+              two lines, three radii, six type steps, one ring, five meanings.</td></tr>
+      <tr><td class="k"><b>Primitive</b><br><small class="mut">components/ui</small></td>
+          <td>A primitive nearly does the job and needs one more variant.</td>
+          <td>Extend the primitive, add the variant to its test, and delete the call-site override that motivated it.
+              Variants are one-in-one-out: a fifth button variant means one of the four earns its removal.</td></tr>
+      <tr><td class="k"><b>Pattern</b><br><small class="mut">shared composition</small></td>
+          <td>The same arrangement of primitives appears a <b>third</b> time.</td>
+          <td>Rule of three. Two copies is a coincidence; three is a pattern, and it gets a name and a home before the
+              fourth. This is exactly how two <code>MetricCard</code> components and four page transitions happened.</td></tr>
+      <tr><td class="k"><b>Page</b><br><small class="mut">features/*</small></td>
+          <td>Always. This is where new work starts.</td>
+          <td>A page composes; it does not declare style. If a page needs a class string that is not layout, the
+              need belongs one level down.</td></tr>
+    </tbody>
+  </table>
+
+  <div class="split">
+    <figure class="pane cur">
+      <figcaption><span class="tag">how it drifted</span> the path of least resistance <em>observed, not hypothetical</em></figcaption>
+      <div class="frame">
+        <div style="display:grid;gap:11px">
+          <div class="mk-card"><div class="mk-h3">1 · Page needs a card that is slightly tighter</div>
+            <p class="mk-sub" style="margin-top:6px">The primitive is 24px padding. The fastest fix is
+              <code>className="p-4"</code> at the call site.</p></div>
+          <div class="mk-card"><div class="mk-h3">2 · The next page copies the call site</div>
+            <p class="mk-sub" style="margin-top:6px">Now two truths exist and neither is wrong.</p></div>
+          <div class="mk-card"><div class="mk-h3">3 · Someone needs a tone the tokens do not name</div>
+            <p class="mk-sub" style="margin-top:6px"><code>bg-surface/70</code> is one keystroke and always works.
+              Twenty of these is the current state.</p></div>
+          <div class="mk-card" style="border-color:rgba(233,20,41,.3)"><div class="mk-h3" style="color:#ff8a92">4 · The system is now a suggestion</div>
+            <p class="mk-sub" style="margin-top:6px">The next person reads the call sites, not the primitive,
+              because the call sites are what they can see working.</p></div>
+        </div>
+      </div>
+    </figure>
+    <figure class="pane pro">
+      <figcaption><span class="tag">the guard</span> counted, in CI <em>ui-budgets.json</em></figcaption>
+      <div class="frame">
+        <div class="mk-card">
+          <div class="mk-h3" style="margin-bottom:11px">Budgets that fail the build when they rise</div>
+          <div style="display:grid;gap:8px">
+            <div class="mk-row between"><small class="mut">border radii in use</small><small><span class="brand">3</span> <span class="dim">/ was 7</span></small></div>
+            <div class="mk-row between"><small class="mut">surface fills in use</small><small><span class="brand">4</span> <span class="dim">/ was ~20</span></small></div>
+            <div class="mk-row between"><small class="mut">hairline colours</small><small><span class="brand">2</span> <span class="dim">/ was 12</span></small></div>
+            <div class="mk-row between"><small class="mut">distinct heading class strings</small><small><span class="brand">1</span> <span class="dim">/ was 18</span></small></div>
+            <div class="mk-row between"><small class="mut">undefined token references</small><small><span class="brand">0</span> <span class="dim">/ was 6</span></small></div>
+            <div class="mk-row between"><small class="mut">files importing <code>motion/react</code></small><small><span class="brand">≤ 20</span> <span class="dim">/ was 45</span></small></div>
+            <div class="mk-row between"><small class="mut"><code>sm:</code> occurrences</small><small><span class="brand">ratchet</span> <span class="dim">/ 328 today</span></small></div>
+            <div class="mk-row between"><small class="mut">hand-written <code>min-h-11</code></small><small><span class="brand">0</span> <span class="dim">/ 12 today</span></small></div>
+          </div>
+          <div class="mk-divider"></div>
+          <p class="mk-sub">A ratchet, not a gate: the number may fall freely and may never rise without editing the
+            budget file in the same PR — which makes the decision visible in review rather than invisible in a diff.
+            It is a grep and a JSON file; no new dependency.</p>
+        </div>
+        <div class="mk-note" data-n="✓" style="margin-top:12px">
+          <div class="mk-card">
+            <div class="mk-h3 brand">Why counting works here</div>
+            <p class="mk-sub" style="margin-top:6px">Every symptom in the Overview table was found by counting, not by
+              looking. The same counts run in CI turn this document from a review into a regression test — and they
+              are the reason the next pass can be small.</p>
+          </div>
+        </div>
+      </div>
+    </figure>
+  </div>
+
+  <div class="notes">
+    <div class="note good">
+      <h4>Definition of done for any UI change</h4>
+      <ul>
+        <li><b>Tokens only.</b> No raw hex, no alpha on a surface, no radius outside the three.</li>
+        <li><b>Every interactive target ≥44px</b> without a per-call override.</li>
+        <li><b>Seen at 390×844</b> before it is seen at 1440. That is where the product is used.</li>
+        <li><b>Loading, empty and error all exist</b> and use <code>StateCard</code>/<code>Skeleton</code> — the skeleton matches the loaded height.</li>
+        <li><b>Keyboard reachable, focus visible</b> using the one ring token.</li>
+        <li><b>Motion is opacity and ≤2% scale</b>, respects <code>prefers-reduced-motion</code> (the hook already exists), and never reflows layout.</li>
+        <li><b>Copy passes the voice rules</b> in <b>Identity</b> — verbs, numbers, no exclamation, no scolding.</li>
+        <li><b>Budgets unchanged</b>, or changed deliberately in the same PR.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h4>Cadence — how this lands without a freeze</h4>
+      <ul>
+        <li><b>Phase 0 immediately.</b> Six bug fixes, config and find-and-replace, no visual risk. Nothing else depends on a decision.</li>
+        <li><b>Phase 1 as one PR.</b> Tokens and panels together — flattening without the type scale reads as unfinished (see <b>Why flat</b>). This is the only large one.</li>
+        <li><b>Then one small pass at a time,</b> page by page, in the order of the backlog. Each pass updates its mock in this document and adds a line to <code>docs/ui-changelog.md</code>.</li>
+        <li><b>Identity (phase 6) after the system holds,</b> not before. A new green over an inconsistent system just makes the inconsistency newer.</li>
+        <li><b>Re-read this document each quarter</b> against the live app. Where "current" now matches "proposed", replace the pane with the shipped state and pick the next thing.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="notes" style="margin-bottom:0">
+    <div class="note good">
+      <h4>Horizons — the next document, not this one</h4>
+      <ul>
+        <li><b>A charts identity pass.</b> Analytics currently inherits library defaults. Axis type, gridline weight, empty-range behaviour and the macro hues from phase 6.3 want deciding as one set.</li>
+        <li><b>The shareable day card.</b> Server-rendered: the mark, one day's numbers, the week strip. Identity and distribution in one artefact, and it reuses <code>&lt;Value&gt;</code>.</li>
+        <li><b>Onboarding as a first-run of the real UI,</b> not a separate flow — set a target, log one thing, see the day.</li>
+        <li><b>Home-screen shortcuts and widgets</b> once the manifest is complete (4.6) and the Log sheet exists (5.1). "Log breakfast" from the launcher is the shortest path the product can offer.</li>
+        <li><b>Density preference.</b> Comfortable and compact, once density lives in the primitives (4.2) rather than in 328 responsive overrides.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h4>Still not proposed, and why</h4>
+      <ul>
+        <li><b>A light theme.</b> Unchanged from the Backlog tab: <code>color-scheme: dark</code> is a product decision. Revisit only if support asks for it, never because a screenshot looked bright.</li>
+        <li><b>A design-system package.</b> The primitives are fine. Extracting them would add a release step to a one-app repo.</li>
+        <li><b>Figma as the source of truth.</b> <code>style.css</code> is the source of truth, and it is the file that ships. A second one drifts by definition — which is what <code>tailwind.config.js</code> already demonstrated.</li>
+        <li><b>Redesigning anything that works.</b> Tools, the calculators and the entry form are the strongest surfaces in the app; they mostly need the shared panel and then to be left alone.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
 <!--END-->
 </main>
 
@@ -4502,6 +5139,16 @@ table.t tr:hover td{background:#121417}
   }
   nav.addEventListener('click',function(e){
     var b=e.target.closest('button[data-t]'); if(b) show(b.dataset.t);
+  });
+  // ← / → step through tabs; the document is long enough that reaching for the nav is a real cost
+  document.addEventListener('keydown',function(e){
+    if(e.metaKey||e.ctrlKey||e.altKey) return;
+    if(e.key!=='ArrowLeft'&&e.key!=='ArrowRight') return;
+    var t=e.target.tagName; if(t==='INPUT'||t==='TEXTAREA') return;
+    var i=btns.findIndex(function(b){return b.getAttribute('aria-selected')==='true';});
+    if(i<0) return;
+    var n=(i+(e.key==='ArrowRight'?1:-1)+btns.length)%btns.length;
+    show(btns[n].dataset.t); btns[n].scrollIntoView({block:'nearest',inline:'center'});
   });
   var initial=location.hash.slice(1);
   show(document.getElementById('t-'+initial)?initial:'overview');
