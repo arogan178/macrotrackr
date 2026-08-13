@@ -247,7 +247,7 @@ function DailySummaryInner({
               <div className="mb-2 sm:mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0">
                 <div className="flex items-center gap-2">
                   <div
-                    className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110 shrink-0`}
+                    className={`h-2.5 w-2.5 rounded-full ${macro.color} transition-transform duration-300 group-hover:scale-110 shrink-0`}
                   />
                   <h3
                     className={`${macro.textColor} text-xs sm:text-sm font-medium tracking-wide`}

@@ -40,7 +40,7 @@ class QueryErrorBoundaryInner extends Component<
 
       return (
         <div className="flex min-h-50 items-center justify-center p-4">
-          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6 shadow-primary">
+          <div className="w-full max-w-md rounded-xl border border-border bg-surface p-6">
             <div className="mb-4 text-error">
               <WarningIcon className="mx-auto mb-3 h-8 w-8" />
               <h3 className="mb-2 text-center text-lg font-semibold text-foreground">

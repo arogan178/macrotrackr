@@ -2,7 +2,7 @@
 export const COLOR_MAP = {
   green: {
     bg: "bg-surface-2",
-    border: "border-success-500/20",
+    border: "border-success/20",
     text: "text-success",
     dot: "bg-success",
     iconColor: "text-success",
@@ -11,16 +11,16 @@ export const COLOR_MAP = {
   },
   blue: {
     bg: "bg-surface-2",
-    border: "border-blue/20",
-    text: "text-blue",
-    dot: "bg-blue",
-    iconColor: "text-blue",
+    border: "border-carbs/20",
+    text: "text-carbs",
+    dot: "bg-carbs",
+    iconColor: "text-carbs",
     acronym: "text-muted/80",
     gradient: "bg-surface-2",
   },
   red: {
     bg: "bg-surface-2",
-    border: "border-error-500/20",
+    border: "border-error/20",
     text: "text-error",
     dot: "bg-error",
     iconColor: "text-error",

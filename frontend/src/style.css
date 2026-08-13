@@ -40,13 +40,8 @@
   --color-warning: #f59e0b;
   --color-error: #e91429;
 
-  /* Shadows – Minimalist */
-  --shadow-surface: none;
-  --shadow-primary: none;
+  /* Shadows – only the modal casts one; nothing is darker than the page */
   --shadow-modal: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-border: none;
 
   /* Neutral opacity backgrounds for depth */
   --color-neutral-950-80: rgba(0, 0, 0, 0.8);

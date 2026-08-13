@@ -142,7 +142,7 @@ export function MacroIndicator({
             <span className="text-muted text-xs">/ {target}g</span>
           )}
           {showPercentage && percentage !== undefined && (
-            <span className="ml-1 text-[11px] font-medium text-muted-foreground">
+            <span className="ml-1 text-[11px] font-medium text-muted">
               ({percentage}%)
             </span>
           )}

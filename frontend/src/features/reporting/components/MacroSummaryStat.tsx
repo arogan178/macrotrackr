@@ -284,7 +284,7 @@ export default function MacroSummaryStats({
               Calories
             </span>
             {trackedSubtext && (
-              <span className="text-[10px] text-muted-foreground shrink-0">
+              <span className="text-[10px] text-muted shrink-0">
                 {trackedSubtext}
               </span>
             )}

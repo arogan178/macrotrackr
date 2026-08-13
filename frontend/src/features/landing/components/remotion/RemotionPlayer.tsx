@@ -5,7 +5,7 @@ import { DashboardAnimation } from "./DashboardAnimation";
 
 export const RemotionPlayer: React.FC = () => {
   return (
-    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-primary/10 shadow-2xl ring-1 ring-white/5">
+    <div className="relative aspect-[16/9] w-full overflow-hidden rounded-2xl border border-white/10 bg-surface shadow-2xl ring-1 ring-white/5">
       <div className="absolute top-0 right-0 left-0 z-10 flex h-10 items-center gap-2 border-b border-border bg-surface-2 px-4">
         <div className="h-3 w-3 rounded-full bg-error" />
         <div className="h-3 w-3 rounded-full bg-warning" />
