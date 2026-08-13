@@ -1,7 +1,6 @@
 import React from "react";
 
 import AppHeader from "@/components/layout/AppHeader";
-import PageBackground from "@/components/layout/PageBackground";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -16,7 +15,6 @@ const TermsAndConditionsPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
-      <PageBackground />
       <AppHeader mode="minimal" />
 
       <main className="relative z-10 px-4 pt-[var(--header-offset)] pb-14 sm:px-6 lg:px-8">

@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 import { billingApi } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
+import AppHeader from "@/components/layout/AppHeader";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import Accordion from "@/components/ui/Accordion";
@@ -57,18 +58,14 @@ const PricingPage: React.FC = () => {
   useUser();
   usePageDataSync();
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    if (!isSignedIn) {
-      try {
-        navigate({ to: "/login", search: { returnTo: "/pricing" } });
-      } catch {
-        globalThis.location.href = "/login?returnTo=/pricing";
-      }
-    }
-  }, [isLoaded, isSignedIn, navigate]);
-
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
+    // Signed out, the upgrade path is sign-up: checkout needs an account.
+    if (isLoaded && !isSignedIn) {
+      navigate({ to: "/register", search: { returnTo: "/pricing" } });
+
+      return;
+    }
+
     try {
       const { url } = await billingApi.createCheckoutSession({
         successUrl: globalThis.location.origin + "/settings?upgraded=true",
@@ -84,39 +81,45 @@ const PricingPage: React.FC = () => {
     }
   };
 
-  return (
-    <DashboardPageContainer>
-      <FeaturePage
-        title="Pricing"
-        subtitle="Upgrade to Pro for advanced insights, unlimited tracking, and premium tools."
-      >
-        <div className="space-y-12">
-          {/* Card-based pricing — matches landing page */}
-          <CustomPricingCards onUpgrade={handleUpgrade} showUpgradeButtons />
+  const isSignedOut = isLoaded && !isSignedIn;
 
-          {/* FAQ Section */}
-          <CardContainer className="p-6 sm:p-8">
-            <div className="mb-8 text-center">
-              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-                Frequently Asked Questions
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-sm text-muted">
-                Everything you need to know about our plans
-              </p>
-            </div>
-            <Accordion
-              className="mx-auto max-w-3xl"
-              defaultOpenFirst
-              items={faqs.map((faq) => ({
-                id: faq.question,
-                question: faq.question,
-                answer: faq.answer,
-              }))}
-            />
-          </CardContainer>
-        </div>
-      </FeaturePage>
-    </DashboardPageContainer>
+  return (
+    <>
+      {/* Signed in, MainLayout already renders the app header. */}
+      {isSignedOut ? <AppHeader mode="public" /> : null}
+      <DashboardPageContainer>
+        <FeaturePage
+          title="Pricing"
+          subtitle="Upgrade to Pro for advanced insights, unlimited tracking, and premium tools."
+        >
+          <div className="space-y-12">
+            {/* Card-based pricing — matches landing page */}
+            <CustomPricingCards onUpgrade={handleUpgrade} showUpgradeButtons />
+
+            {/* FAQ Section */}
+            <CardContainer className="p-6 sm:p-8">
+              <div className="mb-8 text-center">
+                <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+                  Frequently Asked Questions
+                </h2>
+                <p className="mx-auto mt-2 max-w-xl text-sm text-muted">
+                  Everything you need to know about our plans
+                </p>
+              </div>
+              <Accordion
+                className="mx-auto max-w-3xl"
+                defaultOpenFirst
+                items={faqs.map((faq) => ({
+                  id: faq.question,
+                  question: faq.question,
+                  answer: faq.answer,
+                }))}
+              />
+            </CardContainer>
+          </div>
+        </FeaturePage>
+      </DashboardPageContainer>
+    </>
   );
 };
 

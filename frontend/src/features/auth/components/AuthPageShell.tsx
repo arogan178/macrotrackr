@@ -2,7 +2,6 @@ import type { ReactNode } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
 import AppHeader from "@/components/layout/AppHeader";
-import PageBackground from "@/components/layout/PageBackground";
 
 interface AuthPageShellProps {
   eyebrow: string;
@@ -23,7 +22,6 @@ export default function AuthPageShell({
 }: AuthPageShellProps) {
   return (
     <div className="relative flex min-h-screen flex-col overflow-hidden text-foreground">
-      <PageBackground />
       <AppHeader mode="minimal" showBackToHome={showBackToHome} />
 
       <main className="relative z-10 flex flex-1 items-center justify-center px-4 pt-[var(--header-offset)] pb-[calc(3rem+var(--sab))] sm:px-6 lg:px-8">

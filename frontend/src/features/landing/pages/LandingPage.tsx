@@ -2,7 +2,6 @@ import React, { Suspense, useEffect } from "react";
 import { m, useReducedMotion } from "motion/react";
 
 import AppHeader from "@/components/layout/AppHeader";
-import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import { usePageMetadata } from "@/hooks";
 import {
@@ -122,7 +121,6 @@ const LandingPage: React.FC = () => {
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
       <script type="application/ld+json">{schemaScript}</script>
-      <PageBackground />
 
       <div>
         <AppHeader mode="public" />

@@ -2,7 +2,6 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
-import PageBackground from "@/components/layout/PageBackground";
 import { ChevronRightIcon } from "@/components/ui";
 import Accordion from "@/components/ui/Accordion";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
@@ -55,7 +54,6 @@ export default function CalculatorLayout({
 
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
-      <PageBackground />
       {schemaScript && (
         <script
           type="application/ld+json"

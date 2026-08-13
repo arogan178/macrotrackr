@@ -96,8 +96,8 @@ const BlogIndexPage: React.FC = () => {
               onClick={() => handleCategorySelection(undefined)}
               className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                 activeCategory === "all"
-                  ? "text-background scale-105 bg-primary"
-                  : "text-muted bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
+                  ? "bg-primary text-background"
+                  : "bg-surface text-muted hover:bg-surface-2 hover:text-foreground"
               }`}
             >
               All
@@ -114,8 +114,8 @@ const BlogIndexPage: React.FC = () => {
                   }
                   className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                     isActive
-                      ? "text-background scale-105 bg-primary"
-                      : "text-muted bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
+                      ? "bg-primary text-background"
+                      : "bg-surface text-muted hover:bg-surface-2 hover:text-foreground"
                   }`}
                 >
                   {cat.name}
@@ -164,7 +164,7 @@ const BlogIndexPage: React.FC = () => {
                 <Link
                   to="/blog/$slug"
                   params={{ slug: featuredPost.slug }}
-                  className="group block h-full overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-lg focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  className="group block h-full overflow-hidden rounded-card border border-border bg-surface transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                   <div className="grid h-full lg:grid-cols-[1.05fr_0.95fr]">
                     <div className="relative min-h-70 overflow-hidden border-r border-border">
@@ -188,7 +188,7 @@ const BlogIndexPage: React.FC = () => {
                           <span>·</span>
                           <span>{featuredPost.readingTime}</span>
                         </div>
-                        <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        <h2 className="mt-4 text-2xl font-bold tracking-tight">
                           {featuredPost.title}
                         </h2>
                         <p className="text-muted mt-3 text-base">
@@ -205,14 +205,14 @@ const BlogIndexPage: React.FC = () => {
                       key={post.slug}
                       to="/blog/$slug"
                       params={{ slug: post.slug }}
-                      className="group flex flex-1 flex-col overflow-hidden rounded-control border border-border bg-surface p-5 transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                      className="group flex flex-1 flex-col overflow-hidden rounded-card border border-border bg-surface p-5 transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
                       <div className="text-muted flex items-center gap-2 text-xs font-medium">
                         <span className="text-primary">{post.category}</span>
                         <span>·</span>
                         <span>{post.readingTime}</span>
                       </div>
-                      <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                      <h3 className="mt-3 text-base font-semibold tracking-tight">
                         {post.title}
                       </h3>
                       <p className="text-muted mt-2 line-clamp-2 flex-1 text-sm">
@@ -236,7 +236,7 @@ const BlogIndexPage: React.FC = () => {
                       key={post.slug}
                       to="/blog/$slug"
                       params={{ slug: post.slug }}
-                      className="group flex h-full flex-col overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                      className="group flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
                       <div className="relative aspect-16/10 overflow-hidden border-b border-border">
                         {post.image ? (
@@ -255,7 +255,7 @@ const BlogIndexPage: React.FC = () => {
                           <span>·</span>
                           <span>{post.readingTime}</span>
                         </div>
-                        <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        <h3 className="mt-3 text-base font-semibold tracking-tight">
                           {post.title}
                         </h3>
                         <p className="text-muted mt-2 flex-1 text-sm">
@@ -274,7 +274,7 @@ const BlogIndexPage: React.FC = () => {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
             >
-              <div className="mt-10 rounded-control border border-border bg-surface p-8">
+              <div className="mt-10 rounded-card border border-border bg-surface p-8">
                 <StateCard
                   title="No articles match this topic"
                   message="Pick another topic or switch back to all blog entries."

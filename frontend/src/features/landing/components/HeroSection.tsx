@@ -1,36 +1,53 @@
-import React, { Suspense } from "react";
+import React from "react";
 import { Link } from "@tanstack/react-router";
 import { m } from "motion/react";
 
 import { getButtonClasses } from "@/components/ui/Button";
+import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
+import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
 
-const RemotionPlayer = React.lazy(() => import("./remotion/RemotionPlayer").then(module => ({ default: module.RemotionPlayer })));
+/** A representative day. The panel is the app's own component, so this proof
+ *  cannot drift from the product the way a screenshot or a video does. */
+const SAMPLE_TOTALS = {
+  protein: 142,
+  carbs: 218,
+  fats: 45,
+  calories: 1847,
+};
+
+const SAMPLE_TARGET = {
+  proteinPercentage: 30,
+  carbsPercentage: 45,
+  fatsPercentage: 25,
+};
 
 const HeroSection: React.FC = () => (
   <section className="relative z-10 pt-[var(--header-offset)] pb-16 sm:pb-24">
     <div className="mx-auto max-w-5xl text-center">
       <m.div
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, ease: "easeOut" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.4, ease: "easeOut" }}
         className="flex flex-col items-center"
       >
-        <span className="mb-6 flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-foreground transition-colors hover:bg-surface-3">
+        <span className="mb-6 flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-medium text-foreground">
           <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-          Free to use — no card required
+          Free · no card · open source
         </span>
-        <h1 className="mb-6 max-w-4xl text-5xl font-bold tracking-tighter text-balance text-foreground sm:text-6xl lg:text-[5rem] lg:leading-[1.1]">
-          Master your macros.
-          <span className="text-muted"> Reach your goals.</span>
+
+        <h1 className="mb-6 max-w-4xl text-5xl font-bold tracking-tighter text-balance sm:text-6xl lg:text-[5rem] lg:leading-[1.1]">
+          Know what you ate.
+          <span className="text-muted"> Without the admin.</span>
         </h1>
 
-        <p className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-balance text-muted sm:text-xl">
-          MacroTrackr is a web app for tracking calories and macronutrients.
-          Log meals in seconds, visualize your progress instantly, and build
-          lasting habits with less friction and more clarity.
+        <p className="mx-auto mb-10 max-w-xl text-lg leading-relaxed text-balance text-muted">
+          Log meals in seconds, set a macro split, and see where the week
+          actually went.
         </p>
 
-        <div className="mb-14 flex flex-col items-center justify-center gap-4 sm:flex-row">
+        {/* One primary action, and one genuinely secondary path — the
+            calculators are the strongest no-signup entry point we have. */}
+        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
           <Link
             to="/register"
             search={{ returnTo: undefined }}
@@ -38,63 +55,45 @@ const HeroSection: React.FC = () => (
               "primary",
               "lg",
               false,
-              "px-8 py-3.5 text-base font-semibold rounded-full",
+              "rounded-full px-8 font-semibold",
             )}
           >
-            Start for Free
+            Start free
           </Link>
-          <a
-            href="#features"
+          <Link
+            to={TOOLS_HUB_PATH}
             className={getButtonClasses(
-              "outline",
+              "secondary",
               "lg",
               false,
-              "px-8 py-3.5 text-base font-semibold rounded-full bg-surface hover:bg-surface-2 transition-colors",
+              "rounded-full px-8 font-semibold",
             )}
           >
-            Explore Features
-          </a>
+            Try a calculator
+          </Link>
         </div>
 
-        <p className="text-sm text-muted">
-          Review our{" "}
-          <Link
-            to="/privacy"
-            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary"
-          >
-            Privacy Policy
-          </Link>{" "}
-          and{" "}
-          <Link
-            to="/terms"
-            className="font-medium text-foreground underline decoration-border underline-offset-4 transition-colors hover:text-primary"
-          >
-            Terms of Service
-          </Link>
-          .
+        <p className="mt-4 text-sm text-muted">
+          No card. Export or delete your data any time.
         </p>
       </m.div>
 
+      {/* The product, at real values, rather than a lazily-loaded player whose
+          fallback is a spinner in fake browser chrome. */}
       <m.div
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, delay: 0.2, ease: "easeOut" }}
-        className="relative mx-auto mt-16 max-w-5xl"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+        className="relative mx-auto mt-14 max-w-md text-left"
       >
-        <Suspense fallback={
-          <div className="relative aspect-[16/9] w-full overflow-hidden rounded-card border border-border bg-surface shadow-2xl ring-1 ring-white/5">
-            <div className="absolute top-0 right-0 left-0 z-10 flex h-10 items-center gap-2 border-b border-border bg-surface-2 px-4">
-              <div className="h-3 w-3 rounded-full bg-error" />
-              <div className="h-3 w-3 rounded-full bg-warning" />
-              <div className="h-3 w-3 rounded-full bg-success" />
-            </div>
-            <div className="absolute top-10 right-0 bottom-0 left-0 flex items-center justify-center bg-surface-2">
-              <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-            </div>
-          </div>
-        }>
-          <RemotionPlayer />
-        </Suspense>
+        <DailySummaryPanel
+          macroDailyTotals={SAMPLE_TOTALS}
+          macroTarget={SAMPLE_TARGET}
+          calorieTarget={2200}
+        />
+        <p className="mt-3 text-center text-xs text-muted">
+          The Home summary, exactly as the app renders it.
+        </p>
       </m.div>
     </div>
   </section>

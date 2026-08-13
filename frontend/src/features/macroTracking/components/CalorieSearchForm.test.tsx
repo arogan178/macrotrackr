@@ -121,7 +121,7 @@ describe("CalorieSearchForm", () => {
     expect(screen.getByRole("tab", { name: "Recents" })).toBeInTheDocument();
     expect(screen.getByText("Banana")).toBeInTheDocument();
 
-    const recentItemButton = screen.getByRole("button", { name: /Banana/i });
+    const recentItemButton = screen.getByRole("button", { name: /banana/i });
     fireEvent.click(recentItemButton);
 
     expect(handleSelectSavedMeal).toHaveBeenCalledWith(
