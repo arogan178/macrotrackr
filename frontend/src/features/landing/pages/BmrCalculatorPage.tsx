@@ -55,9 +55,9 @@ export default function BmrCalculatorPage() {
       description="Free Basal Metabolic Rate (BMR) calculator using the Mifflin-St Jeor equation. Calculate your baseline calories burned at rest."
       faqs={FAQS}
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}
-        <div className={`lg:col-span-7 ${calculatorCardClass}`}>
+        <div className={`md:col-span-7 ${calculatorCardClass}`}>
           <h2 className={calculatorSectionTitleClass}>Your Body Stats</h2>
           <p className={`${calculatorSectionDescriptionClass} mb-5`}>
             We use the Mifflin-St Jeor equation for this estimate.

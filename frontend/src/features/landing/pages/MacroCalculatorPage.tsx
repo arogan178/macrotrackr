@@ -139,9 +139,9 @@ export default function MacroCalculatorPage() {
       description="Free Flexible Macro Calculator. Customize your protein, carbohydrate, and fat percentage splits to hit your fitness goals."
       faqs={FAQS}
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Left Inputs */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="md:col-span-7 space-y-6">
           <div className={calculatorCardClass}>
             <h2 className={calculatorSectionTitleClass}>Body Stats & Goal</h2>
             <p className={`${calculatorSectionDescriptionClass} mb-5`}>
