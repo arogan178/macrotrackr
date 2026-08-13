@@ -182,7 +182,7 @@ export default function ReportingPage() {
                   />
 
                   {showNoDataMessage ? (
-                    <div className="rounded-card border border-border bg-surface shadow-sm">
+                    <div className="rounded-card border border-border bg-surface">
                       <StateCard
                         title="No reporting data yet"
                         message="No meals logged in this range. Add a few and your trends and meal timing will appear here."

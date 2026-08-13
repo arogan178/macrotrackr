@@ -281,7 +281,7 @@ function ClerkSsoCallbackPage() {
   if (error) {
     return (
       <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-background p-4 text-foreground">
-        <div className="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-8 text-center shadow-sm">
+        <div className="relative z-10 w-full max-w-md rounded-card border border-border bg-surface p-8 text-center">
           <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-error/10">
             <svg
               className="h-8 w-8 text-error"

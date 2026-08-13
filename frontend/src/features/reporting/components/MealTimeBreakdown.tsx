@@ -44,7 +44,7 @@ const CustomDonutTooltip = ({
     const color = (payload[0].payload.fill ?? payload[0].color) as string;
 
     return (
-      <div className="rounded-control border border-border bg-surface-2 p-3 shadow-xl">
+      <div className="rounded-control border border-border bg-surface-2 p-3">
         <div className="flex items-center gap-2">
           <div
             className="h-3 w-3 rounded-full"

@@ -9,7 +9,7 @@
     "postbuild": "bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js",
     "preview": "bunx vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src && node ./scripts/check-ui-budgets.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test --config ./playwright.config.ts",
     "test:e2e:ui": "playwright test --config ./playwright.config.ts --ui",
@@ -23,7 +23,8 @@
     "cap:run:ios": "bunx cap run ios",
     "cap:run:android": "bunx cap run android",
     "build:analyze": "bunx vite build --mode analyze",
-    "bundle:size": "node scripts/analyze-bundle.js"
+    "bundle:size": "node scripts/analyze-bundle.js",
+    "ui:budgets": "node ./scripts/check-ui-budgets.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",

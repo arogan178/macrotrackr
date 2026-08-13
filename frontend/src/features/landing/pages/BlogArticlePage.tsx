@@ -419,7 +419,7 @@ const BlogArticlePage: React.FC = () => {
             transition={{ duration: 0.45, delay: 0.1 }}
             className="mt-12"
           >
-            <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-surface px-6 py-8 shadow-sm sm:px-10 sm:py-10">
+            <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-surface px-6 py-8 sm:px-10 sm:py-10">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
@@ -433,7 +433,7 @@ const BlogArticlePage: React.FC = () => {
             </div>
 
             {post.slug === "v2-launch-complete-ui-overhaul" && (
-              <div className="not-prose mt-12 rounded-card border border-border bg-surface p-6 shadow-sm">
+              <div className="not-prose mt-12 rounded-card border border-border bg-surface p-6">
                 <h3 className="text-center text-2xl font-semibold tracking-tight text-foreground">
                   See grouped meals in action
                 </h3>

@@ -32,16 +32,16 @@ export function getButtonClasses(
 
   const buttonVariants: Record<string, string> = {
     primary: cn(
-      "bg-primary font-semibold text-black shadow-sm",
+      "bg-primary font-semibold text-black",
       "focus-visible:ring-primary active:bg-primary/90 disabled:hover:brightness-100",
     ),
     secondary: cn(
-      "border border-border bg-surface-2 text-foreground shadow-sm",
+      "border border-border bg-surface-2 text-foreground",
       "hover:border-border-2 hover:bg-surface-3",
       "focus-visible:ring-primary active:bg-surface-2 disabled:hover:bg-surface-2",
     ),
     neutral: cn(
-      "border border-neutral-700/50 bg-neutral-800 text-white shadow-sm",
+      "border border-neutral-700/50 bg-neutral-800 text-white",
       "hover:border-neutral-500 hover:bg-neutral-700",
       "focus-visible:ring-neutral-500 active:bg-neutral-600",
     ),
@@ -61,7 +61,7 @@ export function getButtonClasses(
       "focus-visible:ring-primary active:bg-surface-2 disabled:hover:bg-transparent",
     ),
     outline: cn(
-      "border border-border bg-transparent text-foreground shadow-sm",
+      "border border-border bg-transparent text-foreground",
       "hover:border-border-2 hover:bg-white/[0.02]",
       "active:bg-surface-2 disabled:hover:border-border disabled:hover:bg-transparent",
       "focus-visible:ring-primary",

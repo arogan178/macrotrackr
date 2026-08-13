@@ -70,7 +70,7 @@ export function createMarkdownComponents({ CodeBlock }: MarkdownComponentsOption
       <strong className="font-semibold text-foreground">{children}</strong>
     ),
     blockquote: ({ children }: { children?: React.ReactNode }) => (
-      <blockquote className="my-10 rounded-card border border-primary/20 bg-primary/6 px-6 py-5 text-lg leading-8 text-foreground/82 italic shadow-sm">
+      <blockquote className="my-10 rounded-card border border-primary/20 bg-primary/6 px-6 py-5 text-lg leading-8 text-foreground/82 italic">
         {children}
       </blockquote>
     ),
@@ -91,7 +91,7 @@ export function createMarkdownComponents({ CodeBlock }: MarkdownComponentsOption
       <ContentImage
         src={src}
         alt={alt ?? ""}
-        containerClassName="my-10 overflow-hidden rounded-card shadow-xl ring-1 ring-border/50"
+        containerClassName="my-10 overflow-hidden rounded-card ring-1 ring-border/50"
         className="w-full rounded-control"
         loading="lazy"
       />

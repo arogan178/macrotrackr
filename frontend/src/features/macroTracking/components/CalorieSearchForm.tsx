@@ -80,6 +80,7 @@ const CalorieSearch = memo(function CalorieSearch({
         unique.push(item);
       }
     }
+
     return unique.slice(0, 10);
   }, [rawRecents]);
 
@@ -358,7 +359,7 @@ const CalorieSearch = memo(function CalorieSearch({
             buttonSize="md"
             variant="primary"
             rightIcon={<ArrowRightIcon className="h-4 w-4 shrink-0" />}
-            className="h-[42px] shrink-0 px-3 sm:px-5 font-semibold shadow-sm"
+            className="h-[42px] shrink-0 px-3 sm:px-5 font-semibold"
           >
             <span className="hidden sm:inline">Search</span>
           </Button>
@@ -373,7 +374,7 @@ const CalorieSearch = memo(function CalorieSearch({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-control border border-border bg-surface shadow-xl"
+            className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-control border border-border bg-surface"
           >
             <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
               {displayResults.map((resultData) => {
@@ -421,7 +422,7 @@ const CalorieSearch = memo(function CalorieSearch({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-control border border-border bg-surface p-4 shadow-xl"
+            className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-control border border-border bg-surface p-4"
           >
             <div className="mb-3">
               <TabBar

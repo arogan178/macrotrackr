@@ -272,7 +272,7 @@ table.t tr:hover td{background:#121417}
     <div class="doc-title">
       <h1>MacroTrackr — UI Consistency &amp; Polish Plan</h1>
       <span>current vs. proposed, page by page <span style="color:#4d545d">· ← → to move between tabs</span></span>
-      <span class="stamp">v2 · living document · planning only, no app code changed</span>
+      <span class="stamp">v3 · phases 0–7 implemented on <code style="font-size:10px;padding:0 3px">t3code/ui-polish-phase-0</code></span>
     </div>
     <nav class="tabs" role="tablist" id="tabnav">
       <button role="tab" data-t="overview" aria-selected="true">Overview</button>
@@ -313,6 +313,12 @@ table.t tr:hover td{background:#121417}
     <p>A walk through every rendered surface in <code>frontend/src</code>, comparing what ships today against a
        proposal that makes the whole product read as one system. Each tab shows a faithful mock of the
        <b>current</b> layout beside the <b>proposed</b> one, then lists what is wrong and what changes.</p>
+    <p><b>Status:</b> every phase in the backlog has been implemented on the
+       working branch, with tests, and each is described in
+       <code>docs/ui-changelog.md</code>. The "current" panes below therefore
+       describe the state this work started from — they are the before, not the
+       live app. The counts that drove them are now enforced by
+       <code>bun run ui:budgets</code>.</p>
     <p>Two of these tabs are not about consistency. <b>Identity</b> asks what the product looks like when it is not
        being measured against the app it started as an alternative to. <b>How it grows</b> is the mechanism that
        keeps this from being a one-off cleanup that drifts back within a quarter.</p>

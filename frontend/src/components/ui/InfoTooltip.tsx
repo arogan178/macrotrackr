@@ -50,7 +50,7 @@ export function InfoTooltip({ text, className }: { text: string; className?: str
                   left: position.left,
                   transform: "translate(-50%, -100%)",
                 }}
-                className="pointer-events-none z-[9999] w-48 rounded-control border border-border bg-surface-3 p-2 text-center text-xs text-foreground shadow-xl"
+                className="pointer-events-none z-[9999] w-48 rounded-control border border-border bg-surface-3 p-2 text-center text-xs text-foreground"
               >
                 {text}
                 <div className="absolute top-full left-1/2 -mt-[1px] -translate-x-1/2 border-[5px] border-transparent border-t-border/50" />
