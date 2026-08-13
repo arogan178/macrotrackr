@@ -13,7 +13,7 @@ export function NotFoundPage() {
       <h2 className="text-2xl font-medium text-foreground mb-6">
         Page not found
       </h2>
-      <p className="text-muted-foreground mb-8 max-w-md">
+      <p className="text-muted mb-8 max-w-md">
         Sorry, we couldn't find the page you're looking for. The page might have been removed, had its name changed, or is temporarily unavailable.
       </p>
       <Link to="/">

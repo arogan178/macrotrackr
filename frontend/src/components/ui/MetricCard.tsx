@@ -10,7 +10,6 @@ export interface MetricCardProps {
   value: number | string | undefined;
   acronym?: string;
   subtitle?: string;
-  score?: number;
   color?: keyof typeof COLOR_MAP;
   bgGradient?: string;
   borderColor?: string;
@@ -49,7 +48,6 @@ function MetricCardInner(properties: MetricCardProps) {
     value,
     acronym,
     subtitle,
-    score,
     color,
     bgGradient,
     borderColor,
@@ -133,10 +131,6 @@ function MetricCardInner(properties: MetricCardProps) {
           </p>
         </div>
       </div>
-
-      {score !== undefined && (
-        <div className="relative z-10 mb-2 flex items-center justify-between" />
-      )}
 
       {children && (
         <div className="relative z-10 flex flex-1 flex-col justify-between">

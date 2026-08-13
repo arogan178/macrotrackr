@@ -69,8 +69,8 @@ export default defineConfig(({ command }) => {
                 description: "Track your macronutrients and nutrition goals",
                 start_url: "/",
                 display: "standalone",
-                background_color: "#18181b",
-                theme_color: "#6366f1",
+                background_color: "#000000",
+                theme_color: "#000000",
                 icons: [
                   {
                     src: "/icon.png",

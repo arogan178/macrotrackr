@@ -29,7 +29,7 @@ export const ProFeature: React.FC<{ children: React.ReactNode }> = ({
     >
       {/* ProBadge in top right, overlapping */}
       <div className="pointer-events-none absolute top-0 right-0 z-20 translate-x-1/4 -translate-y-1/4">
-        <ProBadge className="rounded-full p-1 shadow-primary" />
+        <ProBadge className="rounded-full p-1" />
       </div>
       <div className="pointer-events-none opacity-20">{children}</div>
       <UpgradeModal

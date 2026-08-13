@@ -135,10 +135,10 @@ const getVariantClasses = (
         glass: "bg-surface-2/40 border-white/5",
       },
       info: {
-        bg: "bg-blue/20",
-        text: "text-blue",
-        border: "border-blue/40",
-        glass: "bg-blue/10 border-blue/20",
+        bg: "bg-carbs/20",
+        text: "text-carbs",
+        border: "border-carbs/40",
+        glass: "bg-carbs/10 border-carbs/20",
       },
     };
 

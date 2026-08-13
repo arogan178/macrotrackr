@@ -17,11 +17,21 @@ const PUBLIC_ROUTES = new Set([
   "/reset-password",
 ]);
 
+// Route trees that render their own public header (features/landing). Without
+// these a signed-in user gets two stacked fixed bars on /tools/* and /blog/*.
+const PUBLIC_ROUTE_PREFIXES = ["/tools", "/blog"];
+
 const NO_NAV_ROUTES = new Set([
   "/profile-setup",
   "/auth-ready",
   "/sso-callback",
 ]);
+
+export const isPublicPathname = (pathname: string): boolean =>
+  PUBLIC_ROUTES.has(pathname) ||
+  PUBLIC_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
 
 const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
@@ -29,7 +39,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   // Use useMemo for route checking to avoid recreating array each render
   const isPublicRoute = useMemo(
-    () => PUBLIC_ROUTES.has(location.pathname),
+    () => isPublicPathname(location.pathname),
     [location.pathname],
   );
   const isNoNavRoute = useMemo(
@@ -50,7 +60,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     <div className="min-h-screen bg-background text-foreground">
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground focus:shadow-primary"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-md focus:border focus:border-border-2 focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground"
       >
         Skip to content
       </a>

@@ -222,7 +222,7 @@ function HabitForm({
               type="button"
               className={`h-8 w-8 rounded-full ${color.class} ${
                 values.accentColor === color.value
-                  ? "ring-opacity-60 ring-2 ring-white"
+                  ? "ring-2 ring-white/60"
                   : "opacity-70 hover:opacity-100"
               }`}
               onClick={() => handleChange("accentColor", color.value)}

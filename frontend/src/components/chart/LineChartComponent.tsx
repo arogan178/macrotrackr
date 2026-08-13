@@ -179,7 +179,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             transition={{ duration: 0.3 }}
             className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
-            <div className="flex flex-col items-center rounded-lg border border-red-700/50 bg-error/30 p-6 text-center shadow-primary">
+            <div className="flex flex-col items-center rounded-lg border border-red-700/50 bg-error/30 p-6 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="mb-3 h-10 w-10 text-error"

@@ -75,7 +75,7 @@ const BlogIndexPage: React.FC = () => {
               <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
                 Blog
               </h1>
-              <p className="text-muted-foreground mt-4 text-xl">
+              <p className="text-muted mt-4 text-xl">
                 Nutrition writing, product updates, and advice for tracking
                 macros.
               </p>
@@ -96,8 +96,8 @@ const BlogIndexPage: React.FC = () => {
               onClick={() => handleCategorySelection(undefined)}
               className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                 activeCategory === "all"
-                  ? "text-primary-foreground scale-105 bg-primary"
-                  : "text-muted-foreground bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
+                  ? "text-background scale-105 bg-primary"
+                  : "text-muted bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
               }`}
             >
               All
@@ -114,8 +114,8 @@ const BlogIndexPage: React.FC = () => {
                   }
                   className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                     isActive
-                      ? "text-primary-foreground scale-105 bg-primary"
-                      : "text-muted-foreground bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
+                      ? "text-background scale-105 bg-primary"
+                      : "text-muted bg-surface hover:scale-105 hover:bg-surface-2 hover:text-foreground active:scale-95"
                   }`}
                 >
                   {cat.name}
@@ -181,7 +181,7 @@ const BlogIndexPage: React.FC = () => {
                     </div>
                     <div className="flex flex-col justify-between p-6">
                       <div>
-                        <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
+                        <div className="text-muted flex items-center gap-2 text-xs font-medium">
                           <span className="font-semibold text-primary">
                             {featuredPost.category}
                           </span>
@@ -191,7 +191,7 @@ const BlogIndexPage: React.FC = () => {
                         <h2 className="mt-4 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {featuredPost.title}
                         </h2>
-                        <p className="text-muted-foreground mt-3 text-base">
+                        <p className="text-muted mt-3 text-base">
                           {featuredPost.excerpt}
                         </p>
                       </div>
@@ -207,7 +207,7 @@ const BlogIndexPage: React.FC = () => {
                       params={{ slug: post.slug }}
                       className="group flex flex-1 flex-col overflow-hidden rounded-lg border border-border bg-surface p-5 transition-[background-color,border-color,box-shadow] duration-200 hover:border-primary/40 hover:bg-surface-2 hover:shadow-md focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                     >
-                      <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
+                      <div className="text-muted flex items-center gap-2 text-xs font-medium">
                         <span className="text-primary">{post.category}</span>
                         <span>·</span>
                         <span>{post.readingTime}</span>
@@ -215,7 +215,7 @@ const BlogIndexPage: React.FC = () => {
                       <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                         {post.title}
                       </h3>
-                      <p className="text-muted-foreground mt-2 line-clamp-2 flex-1 text-sm">
+                      <p className="text-muted mt-2 line-clamp-2 flex-1 text-sm">
                         {post.excerpt}
                       </p>
                     </Link>
@@ -250,7 +250,7 @@ const BlogIndexPage: React.FC = () => {
                         )}
                       </div>
                       <div className="flex flex-1 flex-col p-5">
-                        <div className="text-muted-foreground flex items-center gap-2 text-xs font-medium">
+                        <div className="text-muted flex items-center gap-2 text-xs font-medium">
                           <span className="text-primary">{post.category}</span>
                           <span>·</span>
                           <span>{post.readingTime}</span>
@@ -258,7 +258,7 @@ const BlogIndexPage: React.FC = () => {
                         <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {post.title}
                         </h3>
-                        <p className="text-muted-foreground mt-2 flex-1 text-sm">
+                        <p className="text-muted mt-2 flex-1 text-sm">
                           {post.excerpt}
                         </p>
                       </div>
