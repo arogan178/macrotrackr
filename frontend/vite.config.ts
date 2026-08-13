@@ -64,11 +64,27 @@ export default defineConfig(({ command }) => {
                 enabled: false,
               },
               manifest: {
-                name: "Macro Tracker",
-                short_name: "MacroTracker",
-                description: "Track your macronutrients and nutrition goals",
+                id: "/",
+                name: "MacroTrackr",
+                short_name: "MacroTrackr",
+                description:
+                  "Log meals in seconds, set a macro split, and see where the week actually went.",
                 start_url: "/",
                 display: "standalone",
+                // Shortcuts put the two things people open the app for on the
+                // launcher's long-press menu.
+                shortcuts: [
+                  {
+                    name: "Log a meal",
+                    short_name: "Log",
+                    url: "/home?log=1",
+                  },
+                  {
+                    name: "This week",
+                    short_name: "Week",
+                    url: "/reporting",
+                  },
+                ],
                 background_color: "#000000",
                 theme_color: "#000000",
                 icons: [
@@ -105,7 +121,6 @@ export default defineConfig(({ command }) => {
                 ],
                 categories: ["health", "fitness", "lifestyle"],
                 lang: "en",
-                orientation: "portrait-primary",
               },
               srcDir: "src",
               filename: "service-worker.ts",

@@ -32,4 +32,4 @@ export const calculatorStatValueClass =
  * people fill the calculator in, and moves to a sticky right rail on desktop.
  */
 export const calculatorResultColumnClass =
-  "lg:col-span-5 lg:sticky lg:top-24 lg:self-start";
+  "md:col-span-5 md:sticky md:top-[var(--header-offset)] md:self-start";

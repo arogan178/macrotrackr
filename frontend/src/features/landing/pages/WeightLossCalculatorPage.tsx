@@ -108,9 +108,9 @@ export default function WeightLossCalculatorPage() {
       description="Free Weight Loss Timeline Calculator. Estimate daily calorie deficit, weekly progress, and completion date for your target weight."
       faqs={FAQS}
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="md:col-span-7 space-y-6">
           <div className={calculatorCardClass}>
             <h2 className={calculatorSectionTitleClass}>
               Current Stats & Activity

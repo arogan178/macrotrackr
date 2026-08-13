@@ -48,7 +48,11 @@ const config: CapacitorConfig = {
       backgroundColor: "#000000",
     },
     Keyboard: {
-      resize: "body",
+      // `body` resizes the document itself, which moves a position: fixed
+      // header up with the keyboard and makes the bar jump on the Add-entry
+      // form. `native` leaves the layout viewport alone and lets the webview
+      // scroll the focused field into view instead.
+      resize: "native",
       style: "DARK",
       resizeOnFullScreen: true,
     },

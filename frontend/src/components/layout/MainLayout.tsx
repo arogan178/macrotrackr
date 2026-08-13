@@ -6,7 +6,9 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
 import AppHeader from "./AppHeader";
+import OfflineBar from "./OfflineBar";
 import PageBackground from "./PageBackground";
+import UpdatePrompt from "./UpdatePrompt";
 
 // Static route configuration - defined outside component to avoid recreation
 const PUBLIC_ROUTES = new Set([
@@ -72,6 +74,8 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       <main id="main-content" className="relative min-h-screen">
         {children}
       </main>
+      <OfflineBar />
+      <UpdatePrompt />
       <NotificationManager />
     </div>
   );

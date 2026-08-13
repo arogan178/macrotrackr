@@ -275,7 +275,7 @@ export default function MacroSummaryStats({
       : null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+    <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
       {/* Calories Card */}
       <CardContainer variant="interactive" className={cardClasses}>
         <div className="flex flex-1 flex-col justify-between">
