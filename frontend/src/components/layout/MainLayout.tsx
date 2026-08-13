@@ -5,7 +5,7 @@ import NotificationManager from "@/components/notifications/components/Notificat
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
-import Navbar from "./Navbar";
+import AppHeader from "./AppHeader";
 
 // Static route configuration - defined outside component to avoid recreation
 const PUBLIC_ROUTES = new Set([
@@ -64,7 +64,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       >
         Skip to content
       </a>
-      {isAuthenticated && <Navbar />}
+      {isAuthenticated && <AppHeader mode="app" />}
       <main id="main-content" className="relative min-h-screen">
         {children}
       </main>

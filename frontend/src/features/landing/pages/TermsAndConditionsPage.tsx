@@ -1,9 +1,9 @@
 import React from "react";
 
+import AppHeader from "@/components/layout/AppHeader";
 import PageBackground from "@/components/layout/PageBackground";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import LegalHeader from "@/features/landing/components/LegalHeader";
 import { usePageMetadata } from "@/hooks";
 import { APP_URL, buildCanonicalUrl, SUPPORT_EMAIL } from "@/utils/appConstants";
 
@@ -17,9 +17,9 @@ const TermsAndConditionsPage: React.FC = () => {
   return (
     <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
       <PageBackground />
-      <LegalHeader />
+      <AppHeader mode="minimal" />
 
-      <main className="relative z-10 px-4 pt-24 pb-14 sm:px-6 sm:pt-28 lg:px-8">
+      <main className="relative z-10 px-4 pt-[var(--header-offset)] pb-14 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="rounded-card border border-border bg-background p-8 lg:p-12">
             <h1 className="mb-8 text-4xl font-bold text-foreground">

@@ -1,24 +1,24 @@
 import { ReactNode } from "react";
 
-import PageBackground from "@/components/layout/PageBackground";
+import PageShell, { type PageWidth } from "@/components/layout/PageShell";
 
 interface DashboardPageContainerProps {
   children: ReactNode;
+  width?: PageWidth;
 }
 
+/**
+ * The signed-in pages' entry point into `PageShell`. Kept as a named surface
+ * because five pages compose against it; it owns no layout of its own.
+ */
 export function DashboardPageContainer({
   children,
+  width = "app",
 }: DashboardPageContainerProps) {
   return (
-    <div className="relative min-h-screen text-foreground">
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <PageBackground />
-      </div>
-      {/* Page content */}
-      <div className="relative mx-auto max-w-7xl px-4 pt-4 pb-12 sm:px-6 sm:pt-6 lg:px-8">
-        {children}
-      </div>
-    </div>
+    <PageShell width={width} as="div">
+      {children}
+    </PageShell>
   );
 }
 

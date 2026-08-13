@@ -1,6 +1,7 @@
 import React, { Suspense, useEffect } from "react";
 import { m, useReducedMotion } from "motion/react";
 
+import AppHeader from "@/components/layout/AppHeader";
 import PageBackground from "@/components/layout/PageBackground";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import { usePageMetadata } from "@/hooks";
@@ -15,7 +16,6 @@ import {
 
 import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
 
 const FeaturesSection = React.lazy(
@@ -125,7 +125,7 @@ const LandingPage: React.FC = () => {
       <PageBackground />
 
       <div>
-        <Header />
+        <AppHeader mode="public" />
       </div>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

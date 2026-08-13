@@ -2,10 +2,10 @@ import React, { useCallback, useMemo } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
+import AppHeader from "@/components/layout/AppHeader";
 import { ContentImage, EmptyState } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import Header from "@/features/landing/components/Header";
 import { usePageMetadata } from "@/hooks";
 import { filterPosts, getBlogCategories } from "@/lib/blog";
 import { buildCanonicalUrl } from "@/utils/appConstants";
@@ -67,8 +67,8 @@ const BlogIndexPage: React.FC = () => {
     <div
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
-      <Header />
-      <main className="relative z-10 mx-auto max-w-5xl px-4 pt-32 pb-24 sm:px-6 lg:px-8">
+      <AppHeader mode="public" />
+      <main className="relative z-10 mx-auto max-w-5xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
         <section className="mb-16">
           <div className="flex items-start justify-between">
             <div className="max-w-3xl">
