@@ -79,7 +79,7 @@ function TabButton({
       {active && (
         <motion.div
           layoutId={layoutId}
-          className={cn("absolute inset-0 z-0 border border-border shadow-sm", baseRounded, motionBg)}
+          className={cn("absolute inset-0 z-0 border border-border", baseRounded, motionBg)}
           initial={isMotion && !prefersReducedMotion ? false : { opacity: 1 }}
           transition={{
             type: "spring",

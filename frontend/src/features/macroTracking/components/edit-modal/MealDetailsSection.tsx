@@ -43,7 +43,7 @@ export default function MealDetailsSection({
   const calories = Math.round(protein * 4 + carbs * 4 + fats * 9);
 
   return (
-    <section className="space-y-4 rounded-card border border-border bg-surface p-5 shadow-sm md:p-6">
+    <section className="space-y-4 rounded-card border border-border bg-surface p-5 md:p-6">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
           Meal Details

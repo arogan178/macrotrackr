@@ -31,7 +31,7 @@ export default function IngredientCard({
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, height: 0, scale: 0.95 }}
       transition={{ duration: 0.2, delay: index * 0.03 }}
-      className="group rounded-card border border-border bg-surface p-4 shadow-sm transition-[background-color,border-color,box-shadow] duration-200 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20 hover:border-border hover:shadow-md"
+      className="group rounded-card border border-border bg-surface p-4 transition-[background-color,border-color,box-shadow] duration-200 focus-within:border-primary/30 focus-within:ring-1 focus-within:ring-primary/20 hover:border-border hover:"
     >
       <div className="mb-3 flex items-start gap-3">
         <div className="flex-1">
