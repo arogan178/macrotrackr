@@ -22,7 +22,10 @@ const PADDING: Record<PanelPadding, string> = {
   regular: "p-4 sm:p-6",
 };
 
-interface PanelProps extends React.HTMLAttributes<HTMLDivElement> {
+interface PanelProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+  /** Rendered as the panel heading, so it takes a node rather than the string
+   *  the DOM `title` attribute would allow. */
   title?: React.ReactNode;
   description?: React.ReactNode;
   /** Trailing content in the header row: a filter, a link, a badge. */
