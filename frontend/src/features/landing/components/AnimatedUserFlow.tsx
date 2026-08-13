@@ -235,7 +235,7 @@ export const MealGroupingFlow: React.FC = () => {
     {
       title: "Expand for Details",
       description:
-        "Need to see what went into that meal? Simply tap to expand. The accordion reveals every ingredient with its macros.",
+        "Tap a meal to expand it: every ingredient, with its macros.",
       visual: (
         <div className="w-full max-w-60 space-y-1 overflow-hidden rounded-control bg-surface ring-1 ring-border">
           <div className="flex items-center gap-3 bg-surface-2 p-3">

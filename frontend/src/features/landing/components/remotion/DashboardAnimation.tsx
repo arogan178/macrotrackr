@@ -273,7 +273,7 @@ export const DashboardAnimation: React.FC = () => {
                 </div>
 
                 <div className="mb-3 h-2.5 w-full overflow-hidden rounded-full bg-surface-3">
-                  <div className="h-full bg-vibrant-accent" style={{ width: `${calorieProgress * 76}%` }} />
+                  <div className="h-full bg-primary" style={{ width: `${calorieProgress * 76}%` }} />
                 </div>
 
                 <div className="mb-1.5 h-1.5 w-full overflow-hidden rounded-full bg-surface-3">

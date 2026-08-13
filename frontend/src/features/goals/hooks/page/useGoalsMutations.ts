@@ -32,7 +32,7 @@ export function useGoalsMutations() {
     try {
       if (mode === "edit" && habitId) {
         await updateHabitMutation.mutateAsync({ id: habitId, values });
-        handleMutationSuccess("Habit updated successfully!");
+        handleMutationSuccess("Habit updated");
       } else {
         await addHabitMutation.mutateAsync(values);
         handleMutationSuccess("Habit added successfully!");

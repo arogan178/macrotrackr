@@ -128,7 +128,7 @@ export default function ReportingPage() {
         name: "Calories",
         color: "hsl(231, 77%, 66%)",
         isArea: true,
-      }, // vibrant-accent approx
+      }, // primary approx
     ],
     [],
   );

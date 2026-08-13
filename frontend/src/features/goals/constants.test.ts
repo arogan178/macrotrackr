@@ -110,7 +110,7 @@ describe("goals constants", () => {
 
   describe("SUCCESS_MESSAGES", () => {
     it("should have goal created message", () => {
-      expect(SUCCESS_MESSAGES.goalCreated).toBe("Weight goal created successfully!");
+      expect(SUCCESS_MESSAGES.goalCreated).toBe("Weight goal created");
     });
   });
 

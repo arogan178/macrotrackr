@@ -1,6 +1,8 @@
 import React from "react";
 
-import logoIcon from "/icon-ui.webp";
+import { APP_NAME } from "@/utils/appConstants";
+
+import BrandMark from "./BrandMark";
 
 interface LogoButtonProps {
   onClick?: () => void;
@@ -9,6 +11,14 @@ interface LogoButtonProps {
   compact?: boolean;
 }
 
+/**
+ * The mark carries the colour; the word is foreground text at the panel weight.
+ * The wordmark used to be entirely green at font-light with a drop shadow — a
+ * fifth green thing on a page whose primary button is also green, in a system
+ * whose shadow tokens are all `none`. Keeping the colour in the mark also means
+ * the lockup still works when a self-hoster replaces the name via
+ * VITE_PUBLIC_APP_NAME.
+ */
 const LogoButton: React.FC<LogoButtonProps> = ({
   onClick,
   className = "",
@@ -19,25 +29,13 @@ const LogoButton: React.FC<LogoButtonProps> = ({
     type="button"
     onClick={onClick}
     aria-label={ariaLabel}
-    className={`hover:bg-surface-hover flex cursor-pointer items-center rounded-control font-light tracking-wide text-primary transition-colors duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background ${compact ? "mr-0 h-auto p-0 sm:mr-0" : "mr-2 h-full px-2 sm:mr-4"} ${className}`}
+    className={`flex min-h-11 cursor-pointer items-center gap-2 rounded-control transition-colors duration-150 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
+      compact ? "px-0" : "px-2"
+    } ${className}`}
   >
-    <span className="relative flex items-center">
-      {/* Icon */}
-      <img
-        src={logoIcon}
-        alt="" // decorative icon
-        className="inline-block h-8 w-8 drop-shadow-md sm:h-10 sm:w-10"
-        aria-hidden="true"
-        width={40}
-        height={40}
-        loading="eager"
-        decoding="async"
-        fetchPriority="high"
-      />
-      {/* Logo Text - solid color per Memoria Design System (no gradients) */}
-      <span className="relative z-10 ml-1 text-xl leading-none transition-shadow duration-300 sm:text-2xl">
-        <span className="text-primary">MacroTrackr</span>
-      </span>
+    <BrandMark className="h-7 w-7 shrink-0 text-primary sm:h-8 sm:w-8" />
+    <span className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
+      {APP_NAME}
     </span>
   </button>
 );

@@ -57,8 +57,8 @@ function getGradientClass(color: string | undefined) {
     red: "from-red-500/20 to-red-500/5",
     pink: "from-pink-500/20 to-pink-500/5",
     purple: "from-purple-500/20 to-purple-500/5",
-    "vibrant-accent": "from-vibrant-accent/20 to-vibrant-accent/5",
-    accent: "from-vibrant-accent/20 to-vibrant-accent/5",
+    "primary": "from-primary/20 to-primary/5",
+    accent: "from-primary/20 to-primary/5",
   } as const;
   const key = (color as keyof typeof gradients) ?? "indigo";
 
@@ -78,8 +78,8 @@ function getAccentClass(color: string | undefined) {
     red: "text-red-500 bg-red-500/10",
     pink: "text-pink-500 bg-pink-500/10",
     purple: "text-purple-500 bg-purple-500/10",
-    "vibrant-accent": "text-vibrant-accent bg-vibrant-accent/10",
-    accent: "text-vibrant-accent bg-vibrant-accent/10",
+    "primary": "text-primary bg-primary/10",
+    accent: "text-primary bg-primary/10",
   } as const;
 
   return colors[(color as keyof typeof colors) ?? "indigo"] ?? colors.indigo;
@@ -99,8 +99,8 @@ function getBarFillClass(color: string | undefined): string {
     red: "bg-red-500",
     pink: "bg-pink-500",
     purple: "bg-purple-500",
-    "vibrant-accent": "bg-vibrant-accent",
-    accent: "bg-vibrant-accent",
+    "primary": "bg-primary",
+    accent: "bg-primary",
   } as const;
 
   return fills[(color as keyof typeof fills) ?? "indigo"] ?? fills.indigo;
@@ -125,7 +125,7 @@ export default function HabitCard({
     current,
     target,
     progress: progressValue,
-    accentColor = "vibrant-accent",
+    accentColor = "primary",
     isComplete = false,
   } = habit;
 

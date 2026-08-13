@@ -50,8 +50,8 @@ function WeightGoalModal({
       // Show success notification
       showNotification(
         hasExistingGoal
-          ? "Weight goal updated successfully!"
-          : "Weight goal created successfully!",
+          ? "Weight goal updated"
+          : "Weight goal created",
         "success",
       );
 

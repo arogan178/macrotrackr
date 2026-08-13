@@ -131,7 +131,7 @@ function FloatingNotification({
       bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
       border: "border-red-500/40",
       icon: "text-error",
-      progress: "bg-vibrant-accent",
+      progress: "bg-primary",
       component: <CloseIcon className="" />,
     },
     warning: {
