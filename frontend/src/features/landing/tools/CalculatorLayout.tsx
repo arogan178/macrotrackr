@@ -3,7 +3,8 @@ import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
 import PageBackground from "@/components/layout/PageBackground";
-import { ChevronDownIcon, ChevronRightIcon } from "@/components/ui";
+import { ChevronRightIcon } from "@/components/ui";
+import Accordion from "@/components/ui/Accordion";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -111,20 +112,13 @@ export default function CalculatorLayout({
                 Frequently Asked Questions
               </h2>
               <div className="space-y-3">
-                {faqs.map((faq) => (
-                  <details
-                    key={faq.question}
-                    className="group rounded-control border border-border bg-surface-2 transition-colors hover:bg-surface-2"
-                  >
-                    <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-semibold text-foreground select-none">
-                      <span>{faq.question}</span>
-                      <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180" />
-                    </summary>
-                    <div className="border-t border-border px-4 pt-3 pb-4 text-sm leading-relaxed text-muted">
-                      {faq.answer}
-                    </div>
-                  </details>
-                ))}
+                <Accordion
+                  items={faqs.map((faq) => ({
+                    id: faq.question,
+                    question: faq.question,
+                    answer: faq.answer,
+                  }))}
+                />
               </div>
             </div>
           )}

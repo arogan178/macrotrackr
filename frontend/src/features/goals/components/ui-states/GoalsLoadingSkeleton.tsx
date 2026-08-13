@@ -1,38 +1,42 @@
+import Panel from "@/components/ui/Panel";
+import Skeleton from "@/components/ui/Skeleton";
+
 export default function GoalsLoadingSkeleton() {
   return (
-    <div className="animate-pulse space-y-6">
-      {/* WeightGoalStatus Card */}
-      <div className="rounded-card border border-border bg-surface p-6">
+    <div className="space-y-6">
+      <Panel>
         <div className="mb-8 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div className="flex items-center">
-            <div className="mr-4 h-14 w-14 rounded-control bg-surface-2" />
-            <div>
-              <div className="mb-2 h-6 w-32 rounded-control bg-surface-2" />
-              <div className="h-4 w-40 rounded-control bg-surface-2" />
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-14 w-14" rounded="card" />
+            <div className="space-y-2">
+              <Skeleton className="h-6 w-32" />
+              <Skeleton className="h-4 w-40" />
             </div>
           </div>
           <div className="flex gap-2">
-            <div className="h-10 w-32 rounded-control bg-surface-2" />
-            <div className="h-10 w-10 rounded-control bg-surface-2" />
+            <Skeleton className="h-11 w-32" rounded="full" />
+            <Skeleton className="h-11 w-11" rounded="full" />
           </div>
         </div>
-        
-        <div className="mb-8 h-24 rounded-card bg-surface-2" />
-        
+
+        <Skeleton className="mb-8 h-24" rounded="card" />
+
         <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="h-24 rounded-card bg-surface-2" />
-          <div className="h-24 rounded-card bg-surface-2" />
-          <div className="h-24 rounded-card bg-surface-2" />
+          <Skeleton className="h-24" rounded="card" />
+          <Skeleton className="h-24" rounded="card" />
+          <Skeleton className="h-24" rounded="card" />
         </div>
-        
-        <div className="h-40 rounded-card bg-surface-2" />
-      </div>
 
-      {/* WeightProgressTabs Card */}
-      <div className="h-80 rounded-card border border-border bg-surface" />
+        <Skeleton className="h-40" rounded="card" />
+      </Panel>
 
-      {/* HabitTracker Card */}
-      <div className="h-64 rounded-card border border-border bg-surface" />
+      <Panel padding="none">
+        <Skeleton className="h-80" rounded="card" />
+      </Panel>
+
+      <Panel padding="none">
+        <Skeleton className="h-64" rounded="card" />
+      </Panel>
     </div>
   );
 }

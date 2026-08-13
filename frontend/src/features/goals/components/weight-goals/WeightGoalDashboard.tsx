@@ -1,7 +1,7 @@
 import { memo } from "react";
 
 import CardContainer from "@/components/form/CardContainer";
-import { EmptyState, TargetIcon } from "@/components/ui/";
+import { StateCard, TargetIcon } from "@/components/ui/";
 import { computeEffectiveTargetCalories } from "@/features/goals/utils/calorie";
 import { useFeatureLoading } from "@/hooks";
 import { useStore } from "@/store/store";
@@ -70,7 +70,7 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   if (!weightGoals) {
     return (
       <CardContainer className={className}>
-        <EmptyState
+        <StateCard
           title="Set Your Weight Goal"
           message="Define your target weight and let us help you calculate the right calorie intake to reach it."
           icon={<TargetIcon className="h-14 w-14 text-primary" />}

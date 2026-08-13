@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useSearch } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 
+import PageTransition from "@/components/animation/PageTransition";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import {
@@ -9,7 +10,7 @@ import {
   LinkIcon,
   LockIcon,
   Modal,
-  TabButton,
+  TabBar,
   UserIcon,
 } from "@/components/ui";
 import { isClerkAuthMode, isManagedBillingMode } from "@/config/runtime";
@@ -213,64 +214,60 @@ export default function SettingsPage() {
         title="Settings"
         subtitle="Manage your account preferences and profile details"
         headerChildren={
-          <div
-            className="relative flex items-center space-x-0.5 rounded-control bg-surface p-1 shadow-xs overflow-x-auto"
-            role="tablist"
-            aria-label="Settings Tabs"
-          >
-            <TabButton
-              active={activeTab === "profile"}
-              onClick={() => handleTabChange("profile")}
-              layoutId="settingsTabHighlight"
-              isMotion
-              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
-            >
-              <span className="relative z-10 flex items-center text-xs sm:text-sm">
-                <UserIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Profile
-              </span>
-            </TabButton>
-            {BILLING_TAB_ENABLED && (
-              <TabButton
-                active={activeTab === "billing"}
-                onClick={() => handleTabChange("billing")}
-                layoutId="settingsTabHighlight"
-                isMotion
-                className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
-              >
-                <span className="relative z-10 flex items-center text-xs sm:text-sm">
-                  <AwardIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Billing
-                </span>
-              </TabButton>
-            )}
-            {ACCOUNTS_TAB_ENABLED && (
-              <TabButton
-                active={activeTab === "accounts"}
-                onClick={() => handleTabChange("accounts")}
-                layoutId="settingsTabHighlight"
-                isMotion
-                className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
-              >
-                <span className="relative z-10 flex items-center text-xs sm:text-sm">
-                  <LinkIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                  Accounts
-                </span>
-              </TabButton>
-            )}
-            <TabButton
-              active={activeTab === "security"}
-              onClick={() => handleTabChange("security")}
-              layoutId="settingsTabHighlight"
-              isMotion
-              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
-            >
-              <span className="relative z-10 flex items-center text-xs sm:text-sm">
-                <LockIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Security
-              </span>
-            </TabButton>
-          </div>
+          <TabBar
+            items={[
+              {
+                key: "profile",
+                label: (
+                  <>
+                    <UserIcon className="h-4 w-4" />
+                    Profile
+                  </>
+                ),
+              },
+              ...(BILLING_TAB_ENABLED
+                ? [
+                    {
+                      key: "billing",
+                      label: (
+                        <>
+                          <AwardIcon className="h-4 w-4" />
+                          Billing
+                        </>
+                      ),
+                    },
+                  ]
+                : []),
+              ...(ACCOUNTS_TAB_ENABLED
+                ? [
+                    {
+                      key: "accounts",
+                      label: (
+                        <>
+                          <LinkIcon className="h-4 w-4" />
+                          Accounts
+                        </>
+                      ),
+                    },
+                  ]
+                : []),
+              {
+                key: "security",
+                label: (
+                  <>
+                    <LockIcon className="h-4 w-4" />
+                    Security
+                  </>
+                ),
+              },
+            ]}
+            activeKey={activeTab}
+            onChange={(key) => handleTabChange(key as typeof activeTab)}
+            layoutId="settingsTabHighlight"
+            ariaLabel="Settings Tabs"
+            size="sm"
+            fullWidth
+          />
         }
       >
         {isSettingsLoading ? (
@@ -284,13 +281,7 @@ export default function SettingsPage() {
         ) : settings ? (
           <AnimatePresence mode="wait">
             {activeTab === "profile" && (
-              <motion.div
-                key="profile"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
+              <PageTransition key="profile">
                 <ProfileForm
                   settings={settings}
                   updateSetting={updateSetting}
@@ -299,40 +290,22 @@ export default function SettingsPage() {
                   isSaving={isSaving}
                   hasChanges={hasSettingsChanges}
                 />
-              </motion.div>
+              </PageTransition>
             )}
             {BILLING_TAB_ENABLED && activeTab === "billing" && (
-              <motion.div
-                key="billing"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
+              <PageTransition key="billing">
                 <BillingForm />
-              </motion.div>
+              </PageTransition>
             )}
             {ACCOUNTS_TAB_ENABLED && activeTab === "accounts" && (
-              <motion.div
-                key="accounts"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
+              <PageTransition key="accounts">
                 <ConnectedAccountsForm />
-              </motion.div>
+              </PageTransition>
             )}
             {activeTab === "security" && (
-              <motion.div
-                key="security"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              >
+              <PageTransition key="security">
                 <ChangePasswordForm />
-              </motion.div>
+              </PageTransition>
             )}
           </AnimatePresence>
         ) : (

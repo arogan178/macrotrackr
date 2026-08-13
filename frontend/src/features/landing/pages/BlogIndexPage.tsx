@@ -3,7 +3,7 @@ import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { ContentImage, EmptyState } from "@/components/ui";
+import { ContentImage, StateCard } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
 import { usePageMetadata } from "@/hooks";
@@ -275,7 +275,7 @@ const BlogIndexPage: React.FC = () => {
               transition={{ duration: 0.3 }}
             >
               <div className="mt-10 rounded-control border border-border bg-surface p-8">
-                <EmptyState
+                <StateCard
                   title="No articles match this topic"
                   message="Pick another topic or switch back to all blog entries."
                   size="md"

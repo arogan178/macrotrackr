@@ -15,6 +15,7 @@ import {
   XCircleIcon,
 } from "@/components/ui";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import MetricCard from "@/components/ui/MetricCard";
 import { RadialProgress } from "@/components/ui/RadialProgress";
 
 import { MACRO_COLORS } from "../constants";
@@ -34,7 +35,6 @@ import {
   TRANSITIONS,
 } from "../utils/unifiedInsightsUtilities";
 
-import MetricCard from "./MetricCard";
 import RecommendationsSection from "./RecommendationsSection";
 import TrendDisplay from "./TrendDisplay";
 
@@ -163,7 +163,6 @@ function UnifiedInsights({
               tooltipText="Measures how consistently you track meals and hit your targets over time."
               score={consistencyScore}
               delay={0}
-              variant="custom"
             >
               <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
                 <RadialProgress
@@ -200,7 +199,6 @@ function UnifiedInsights({
               tooltipText="Shows how close your current intake of Protein, Carbs, and Fats aligns with your set targets."
               score={macroBalance.score}
               delay={0.1}
-              variant="custom"
             >
               <div className="flex h-full flex-col justify-center pt-2">
                 <div className="flex justify-around px-1 md:px-6">
@@ -252,7 +250,6 @@ function UnifiedInsights({
               tooltipText="Share of your average daily calories that came from protein."
               score={macroDensity.score}
               delay={0.2}
-              variant="custom"
             >
               <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
                 <RadialProgress

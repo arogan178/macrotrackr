@@ -1,69 +1,58 @@
-import CardContainer from "@/components/form/CardContainer";
+import Panel from "@/components/ui/Panel";
+import Skeleton from "@/components/ui/Skeleton";
 
 export const AddEntryLoadingSkeleton = () => (
-  <CardContainer className="flex h-full flex-col justify-between rounded-card border-border">
-    <div className="animate-pulse p-5">
-      <div className="mb-5 flex items-center justify-between">
-        <div className="h-6 w-1/3 rounded-control bg-surface-2" />
-      </div>
-      <div className="mb-5 h-11 w-full rounded-control bg-surface-2" />
-      <div className="mb-5 grid grid-cols-3 gap-5">
-        <div className="col-span-1 h-10 rounded-control bg-surface-2" />
-        <div className="col-span-2 h-10 rounded-control bg-surface-2" />
-      </div>
-      <div className="mb-5 grid grid-cols-3 gap-5">
-        {[0, 1, 2].map((index) => (
-          <div key={index} className="h-10 rounded-control bg-surface-2" />
-        ))}
-      </div>
-      <div className="grid grid-cols-3 gap-5">
-        {[0, 1, 2].map((index) => (
-          <div key={index} className="h-10 rounded-control bg-surface-2" />
-        ))}
-      </div>
+  <Panel className="flex h-full flex-col justify-between">
+    <div className="mb-5 flex items-center justify-between">
+      <Skeleton className="h-6 w-1/3" />
     </div>
-  </CardContainer>
+    <Skeleton className="mb-5 h-11 w-full" />
+    <div className="mb-5 grid grid-cols-3 gap-5">
+      <Skeleton className="col-span-1 h-11" />
+      <Skeleton className="col-span-2 h-11" />
+    </div>
+    <div className="mb-5 grid grid-cols-3 gap-5">
+      {[0, 1, 2].map((index) => (
+        <Skeleton key={index} className="h-11" />
+      ))}
+    </div>
+    <div className="grid grid-cols-3 gap-5">
+      {[0, 1, 2].map((index) => (
+        <Skeleton key={index} className="h-11" />
+      ))}
+    </div>
+  </Panel>
 );
 
 export const DailySummaryLoadingSkeleton = () => (
-  <CardContainer className="h-full rounded-card border-border">
-    <div className="flex h-full animate-pulse flex-col gap-3 p-3">
-      <div className="rounded-card border border-border bg-surface-2 p-4">
-        <div className="mb-6 flex items-center justify-between">
-          <div className="h-6 w-1/3 rounded-control bg-surface-3" />
-          <div className="h-8 w-1/4 rounded-control bg-surface-3" />
-        </div>
-        <div className="mb-2 h-4 w-full rounded-control bg-surface-3" />
-      </div>
-      <div className="flex flex-1 flex-col gap-3">
-        {[0, 1, 2].map((index) => (
-          <div
-            key={index}
-            className="flex flex-1 flex-col justify-center rounded-card border border-border bg-surface-2 p-4"
-          >
-            <div className="mb-2 h-4 w-1/4 rounded-control bg-surface-3" />
-            <div className="h-3 w-full rounded-control bg-surface-3" />
-          </div>
-        ))}
-      </div>
+  <Panel className="h-full">
+    <div className="mb-6 flex items-center justify-between">
+      <Skeleton className="h-6 w-1/3" />
+      <Skeleton className="h-8 w-1/4" />
     </div>
-  </CardContainer>
-);
-
-export const HistoryLoadingSkeleton = () => (
-  <div className="rounded-card border border-border bg-surface p-5">
-    <div className="animate-pulse space-y-4">
-      <div className="mb-5 h-6 w-1/4 rounded-control bg-surface-2" />
-      <div className="mb-6 h-4 w-1/6 rounded-control bg-surface-2" />
-      {[0, 1].map((index) => (
-        <div
-          key={index}
-          className="space-y-2 rounded-card border border-border bg-surface p-5"
-        >
-          <div className="h-4 w-1/5 rounded-control bg-surface-2" />
-          <div className="h-10 rounded-control bg-surface-2" />
+    <Skeleton className="mb-6 h-4 w-full" rounded="full" />
+    <div className="space-y-3">
+      {[0, 1, 2].map((index) => (
+        <div key={index} className="space-y-2 border-t border-border pt-3">
+          <Skeleton className="h-4 w-1/4" />
+          <Skeleton className="h-3 w-full" rounded="full" />
         </div>
       ))}
     </div>
-  </div>
+  </Panel>
+);
+
+export const HistoryLoadingSkeleton = () => (
+  <Panel padding="none">
+    <div className="p-4 sm:p-6">
+      <Skeleton className="mb-3 h-6 w-1/4" />
+      <Skeleton className="h-4 w-1/6" />
+    </div>
+    {[0, 1, 2].map((index) => (
+      <div key={index} className="space-y-2 border-t border-border p-4 sm:p-6">
+        <Skeleton className="h-4 w-1/5" />
+        <Skeleton className="h-10" />
+      </div>
+    ))}
+  </Panel>
 );

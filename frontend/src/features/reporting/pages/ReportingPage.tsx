@@ -1,13 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 
 import { macrosApi } from "@/api/macros";
 import ProFeature from "@/components/billing/ProFeature";
 import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { EmptyState } from "@/components/ui";
+import { StateCard } from "@/components/ui";
 import { isLocalAuthMode } from "@/config/runtime";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
@@ -166,15 +166,6 @@ export default function ReportingPage() {
   return (
     <DashboardPageContainer>
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
-        <AnimatePresence mode="wait">
-          {
-            <motion.div
-              key="reporting-main-content"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
               {isHistoryLoading ? (
                 <ReportingPageSkeleton />
               ) : (
@@ -192,7 +183,7 @@ export default function ReportingPage() {
 
                   {showNoDataMessage ? (
                     <div className="rounded-card border border-border bg-surface shadow-sm">
-                      <EmptyState
+                      <StateCard
                         title="No reporting data yet"
                         message="No meals logged in this range. Add a few and your trends and meal timing will appear here."
                         size="md"
@@ -288,9 +279,6 @@ export default function ReportingPage() {
                   )}
                 </div>
               )}
-            </motion.div>
-          }
-        </AnimatePresence>
       </FeaturePage>
     </DashboardPageContainer>
   );

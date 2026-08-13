@@ -1,7 +1,7 @@
 import { ProFeature } from "@/components/billing/ProFeature";
 import CardContainer from "@/components/form/CardContainer";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
-import EmptyState from "@/components/ui/EmptyState";
+import StateCard from "@/components/ui/StateCard";
 import { isLocalAuthMode } from "@/config/runtime";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { HabitGoal } from "@/types/habit";
@@ -79,8 +79,7 @@ function HabitTracker({
             ))}
           </div>
         ) : habits.length === 0 ? (
-          // Use EmptyState component
-          <EmptyState
+          <StateCard
             title="Start Building Habits"
             message="Add your first habit goal to begin tracking your progress."
             icon={

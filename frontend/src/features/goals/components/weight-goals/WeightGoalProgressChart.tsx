@@ -8,7 +8,7 @@ import {
 
 import type { ChartDataPoint } from "@/components/chart/chartTypes";
 import LineChartComponent from "@/components/chart/LineChartComponent";
-import { BarChartIcon, EmptyState } from "@/components/ui";
+import { BarChartIcon, StateCard } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";
 import { useWeightGoals, useWeightLog } from "@/hooks/queries/useGoals";
 
@@ -212,7 +212,7 @@ function WeightGoalProgressChart() {
   };
 
   const emptyStateComponent = (
-    <EmptyState
+    <StateCard
       title="Track Your Progress"
       message="Start logging your weight to see your progress charted over time."
       icon={<BarChartIcon className="h-14 w-14 text-primary" strokeWidth={1} />}
@@ -221,7 +221,7 @@ function WeightGoalProgressChart() {
         onClick: () => {
           // TODO: Implement modal opening logic, likely via parent state/context
         },
-        variant: "outline",
+        variant: "ghost",
       }}
       className="h-full"
     />
