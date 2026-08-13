@@ -1,7 +1,6 @@
 import { memo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros/MacroComponents";
 import { ChevronDownIcon, IconButtonGroup } from "@/components/ui";
 import type { MacroEntry } from "@/types/macro";
 
@@ -44,14 +43,14 @@ export const EntryCard = memo(
 
     return (
       <motion.div
-        className="rounded-control border border-border bg-surface p-3.5 sm:p-5 shadow-sm"
+        className="rounded-card border border-border bg-surface p-3 sm:p-4"
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -12 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
         layout
       >
-        <div className="mb-3 flex items-center justify-between">
+        <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             {isSelectionMode && (
               <input
@@ -98,54 +97,30 @@ export const EntryCard = memo(
         </div>
 
         {(entry.foodName ?? entry.mealName) && (
-          <div className="mb-3">
-            <span className="text-sm text-muted">
-              {entry.foodName ?? entry.mealName}
-            </span>
-          </div>
+          <p className="mb-2 truncate text-sm text-muted">
+            {entry.foodName ?? entry.mealName}
+          </p>
         )}
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {[
-            {
-              label: "Protein",
-              value: entry.protein,
-              color: "text-protein",
-              bg: "bg-surface-2",
-            },
-            {
-              label: "Carbs",
-              value: entry.carbs,
-              color: "text-carbs",
-              bg: "bg-surface-2",
-            },
-            {
-              label: "Fats",
-              value: entry.fats,
-              color: "text-fats",
-              bg: "bg-surface-2",
-            },
-          ].map((macro) => (
-            <div
-              key={macro.label}
-              className={`flex flex-col items-center justify-center rounded-control ${macro.bg} border border-border p-3`}
-            >
-              <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">
-                {macro.label}
-              </span>
-              <MacroCell value={macro.value} suffix="g" color={macro.color} />
-            </div>
-          ))}
-          <div className="col-span-3 mt-1 flex items-center justify-between rounded-control border border-border bg-surface-2 p-3.5">
-            <span className="text-xs font-medium tracking-wider text-muted uppercase">
-              Calories
-            </span>
-            <MacroCell
-              value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
-              suffix=" kcal"
-              color="text-foreground"
-            />
-          </div>
+        {/* One line of values instead of four bordered boxes: a row was ~200px
+            tall, which fit roughly three entries on a phone screen. */}
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm tabular-nums">
+          <span className="font-medium">
+            {calculateCalories(entry.protein, entry.carbs, entry.fats)}
+            <span className="ml-1 text-xs text-muted">kcal</span>
+          </span>
+          <span className="text-protein">
+            {entry.protein}
+            <span className="ml-0.5 text-xs text-muted">g P</span>
+          </span>
+          <span className="text-carbs">
+            {entry.carbs}
+            <span className="ml-0.5 text-xs text-muted">g C</span>
+          </span>
+          <span className="text-fats">
+            {entry.fats}
+            <span className="ml-0.5 text-xs text-muted">g F</span>
+          </span>
         </div>
 
         <AnimatePresence>

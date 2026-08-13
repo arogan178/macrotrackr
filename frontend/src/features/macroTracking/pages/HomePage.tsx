@@ -4,6 +4,7 @@ import { macrosApi } from "@/api/macros";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
+import Modal from "@/components/ui/Modal";
 import Panel from "@/components/ui/Panel";
 import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
 import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
@@ -40,6 +41,7 @@ import {
 } from "@/hooks/queries/useSavedMeals";
 import { usePageDataSync } from "@/hooks/usePageDataSync";
 import { logger } from "@/lib/logger";
+import { useLogSheet } from "@/lib/logSheet";
 import { useStore } from "@/store/store";
 import type { MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
@@ -317,6 +319,8 @@ export default function HomePage() {
   const effectiveCalorieTarget =
     weightGoals?.calorieTarget ?? nutritionProfile?.tdee;
 
+  const [isLogOpen, setLogOpen] = useLogSheet();
+
   const { title: headerTitle, subtitle: headerSubtitle } = useHomeHeader(
     user ?? undefined,
     isLoading,
@@ -351,7 +355,9 @@ export default function HomePage() {
               />
             </div>
 
-            <div className="flex h-full flex-col md:order-1 md:col-span-4">
+            {/* Below md the form lives in the Log sheet, reached from the tab
+                bar's primary action, so the day is what Home opens on. */}
+            <div className="hidden h-full flex-col md:order-1 md:col-span-4 md:flex">
               <div className="flex-1">
                 {isLoading ? (
                   <AddEntryLoadingSkeleton />
@@ -385,6 +391,23 @@ export default function HomePage() {
                 />
               )}
           </Panel>
+
+          <Modal
+            isOpen={isLogOpen}
+            onClose={() => setLogOpen(false)}
+            title="Log a meal"
+            size="lg"
+            variant="form"
+            hideDefaultButtons
+          >
+            <AddEntryForm
+              onSubmit={async (entry) => {
+                await handleAddEntry(entry);
+                setLogOpen(false);
+              }}
+              isSaving={isSaving}
+            />
+          </Modal>
 
           <EditModal
             entry={editingEntry}

@@ -7,6 +7,7 @@ let pathname = "/home";
 
 vi.mock("@tanstack/react-router", () => ({
   useLocation: () => ({ pathname }),
+  useNavigate: () => vi.fn(),
 }));
 
 vi.mock("@/components/notifications/components/NotificationManager", () => ({
@@ -19,6 +20,10 @@ vi.mock("@/hooks/auth/useAuthQueries", () => ({
 
 vi.mock("@/hooks/auth/useAuthState", () => ({
   useAppAuthState: () => ({ isLoaded: true, isSignedIn: true }),
+}));
+
+vi.mock("./MobileTabBar", () => ({
+  default: () => <nav data-testid="mobile-tab-bar" />,
 }));
 
 vi.mock("./AppHeader", () => ({
@@ -66,6 +71,14 @@ describe("MainLayout", () => {
       "data-mode",
       "app",
     );
+  });
+
+  it("gives the signed-in app a bottom tab bar for the four destinations", () => {
+    render(<MainLayout>
+      <div />
+    </MainLayout>);
+
+    expect(screen.getByTestId("mobile-tab-bar")).toBeInTheDocument();
   });
 
   it("renders exactly one navigation bar on pages that own their header", () => {

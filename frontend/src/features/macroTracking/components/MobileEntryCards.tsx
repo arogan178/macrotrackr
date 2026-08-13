@@ -73,7 +73,8 @@ const MobileEntryCards = memo(
         const item = virtualItems[index];
         if (item.type === "header") return 60;
 
-        return 200;
+        // A compact row: time, name, then one line of values.
+        return 116;
       },
       overscan: 5,
     });

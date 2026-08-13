@@ -29,7 +29,9 @@ export const calculatorStatValueClass =
 
 /**
  * The result column follows the inputs on small screens, matching the order
- * people fill the calculator in, and moves to a sticky right rail on desktop.
+ * people fill the calculator in, and moves to a sticky right rail from md.
+ * Below md it docks to the bottom of the viewport instead: the answer used to
+ * scroll away behind the keyboard while the inputs were still being typed.
  */
 export const calculatorResultColumnClass =
-  "md:col-span-5 md:sticky md:top-[var(--header-offset)] md:self-start";
+  "sticky bottom-[var(--sab)] z-20 md:col-span-5 md:bottom-auto md:top-[var(--header-offset)] md:self-start";

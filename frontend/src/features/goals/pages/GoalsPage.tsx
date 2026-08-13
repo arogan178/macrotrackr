@@ -84,6 +84,7 @@ export default function GoalsPage() {
             layoutId="goalsTabHighlight"
             ariaLabel="Goals Tabs"
             size="sm"
+            fullWidth
           />
         }
       >

@@ -4,8 +4,11 @@ import { useLocation } from "@tanstack/react-router";
 import NotificationManager from "@/components/notifications/components/NotificationManager";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
+import { openLogSheet } from "@/lib/logSheet";
 
 import AppHeader from "./AppHeader";
+import InstallPrompt from "./InstallPrompt";
+import MobileTabBar from "./MobileTabBar";
 import OfflineBar from "./OfflineBar";
 import PageBackground from "./PageBackground";
 import UpdatePrompt from "./UpdatePrompt";
@@ -71,10 +74,17 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         Skip to content
       </a>
       {isAuthenticated && <AppHeader mode="app" />}
-      <main id="main-content" className="relative min-h-screen">
+      <main
+        id="main-content"
+        className={`relative min-h-screen ${
+          isAuthenticated ? "pb-[calc(4.5rem+var(--sab))] lg:pb-0" : ""
+        }`}
+      >
         {children}
       </main>
+      {isAuthenticated && <MobileTabBar onLog={openLogSheet} />}
       <OfflineBar />
+      <InstallPrompt />
       <UpdatePrompt />
       <NotificationManager />
     </div>
