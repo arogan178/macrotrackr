@@ -54,7 +54,25 @@ const measurements = {
   surfaceAlpha: countMatches(/\bbg-(?:surface|surface-2|surface-3)\/\d+\b/g),
   // Two hairlines.
   hairlineAlpha: countMatches(/\bborder-(?:border|border-2|white)\/\d+\b/g),
-  // Motion: the fix is using less of it, not swapping the library.
+  // Motion. The first version of this budget counted files importing
+  // motion/react and asked for 20. That measured the wrong thing: it is
+  // satisfied by deleting motion that was doing its job, and violated by a
+  // system with perfect motion spread across many components. Every other
+  // budget here counts *distinct values*, because inventing a value at a call
+  // site is the drift. Motion gets measured the same way.
+  //
+  // Seconds-scale only — `duration: 8000` is a toast timer, not an animation.
+  motionDurations: countDistinct(
+    /\bduration: (?:[0-4](?:\.\d+)?)\b/g,
+  ),
+  motionEasings: countDistinct(/\bease: (?:"[a-zA-Z]+"|\[[\d.,\s]+\])/g),
+  // A call site declaring its own initial/animate is how 23 durations happened.
+  // Intent belongs in <Reveal>; numbers belong in DURATIONS/EASINGS.
+  motionCallSites: countFiles("initial={{"),
+  // `layout`/`layoutId` re-measure on every render and reflow the content being
+  // read. Never inside a virtualized list, which measures rows itself.
+  layoutProjection: countMatches(/\blayoutId=|^\s+layout$/gm),
+  // Loose backstop only. Not the headline.
   motionFiles: countFiles("motion/react"),
   // One breakpoint was doing all the work; this should keep falling as density
   // moves into the primitives.
