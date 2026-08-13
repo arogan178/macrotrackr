@@ -21,8 +21,10 @@ vi.mock("@/hooks/auth/useAuthState", () => ({
   useAppAuthState: () => ({ isLoaded: true, isSignedIn: true }),
 }));
 
-vi.mock("./Navbar", () => ({
-  default: () => <nav data-testid="app-navbar" />,
+vi.mock("./AppHeader", () => ({
+  default: ({ mode }: { mode: string }) => (
+    <nav data-testid="app-navbar" data-mode={mode} />
+  ),
 }));
 
 describe("isPublicPathname", () => {
@@ -55,12 +57,15 @@ describe("MainLayout", () => {
     pathname = "/home";
   });
 
-  it("renders the app navbar for a signed-in user on an app route", () => {
+  it("renders the app header for a signed-in user on an app route", () => {
     render(<MainLayout>
       <div />
     </MainLayout>);
 
-    expect(screen.getByTestId("app-navbar")).toBeInTheDocument();
+    expect(screen.getByTestId("app-navbar")).toHaveAttribute(
+      "data-mode",
+      "app",
+    );
   });
 
   it("renders exactly one navigation bar on pages that own their header", () => {

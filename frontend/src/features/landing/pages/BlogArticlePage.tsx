@@ -6,12 +6,12 @@ import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeSlug from "rehype-slug";
 import remarkGfm from "remark-gfm";
 
+import AppHeader from "@/components/layout/AppHeader";
 import { BackIcon, CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
 import { MealGroupingFlow } from "@/features/landing/components/AnimatedUserFlow";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
 import Footer from "@/features/landing/components/Footer";
-import Header from "@/features/landing/components/Header";
 import { usePageMetadata } from "@/hooks";
 import {
   formatDate,
@@ -321,9 +321,9 @@ const BlogArticlePage: React.FC = () => {
         />
       )}
       <ReadingProgress />
-      <Header />
+      <AppHeader mode="public" />
 
-      <main className="relative z-10 mx-auto max-w-6xl px-4 pt-24 pb-24 sm:px-6 lg:px-8">
+      <main className="relative z-10 mx-auto max-w-6xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
         <div className="mx-auto max-w-4xl">
           <div className="mb-16 flex items-start justify-end">
             <motion.div

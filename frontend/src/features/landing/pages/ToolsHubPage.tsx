@@ -1,10 +1,10 @@
 import { Link } from "@tanstack/react-router";
 
+import AppHeader from "@/components/layout/AppHeader";
 import PageBackground from "@/components/layout/PageBackground";
 import { ArrowRightIcon } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import Header from "@/features/landing/components/Header";
 import { usePageMetadata } from "@/hooks";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
@@ -40,9 +40,9 @@ export default function ToolsHubPage() {
         />
       )}
 
-      <Header />
+      <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-24 pb-16 sm:pt-28">
+      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-10 text-center sm:mb-12">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-foreground">

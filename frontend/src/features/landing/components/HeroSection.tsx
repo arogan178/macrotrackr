@@ -7,7 +7,7 @@ import { getButtonClasses } from "@/components/ui/Button";
 const RemotionPlayer = React.lazy(() => import("./remotion/RemotionPlayer").then(module => ({ default: module.RemotionPlayer })));
 
 const HeroSection: React.FC = () => (
-  <section className="relative z-10 pt-32 pb-16 sm:pt-40 sm:pb-24">
+  <section className="relative z-10 pt-[var(--header-offset)] pb-16 sm:pb-24">
     <div className="mx-auto max-w-5xl text-center">
       <m.div
         initial={{ opacity: 0, y: 16 }}
