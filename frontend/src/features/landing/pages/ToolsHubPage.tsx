@@ -44,7 +44,7 @@ export default function ToolsHubPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-10 text-center sm:mb-12">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-vibrant-accent" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               100% Free & No Sign-up Required
             </span>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
@@ -102,7 +102,7 @@ export default function ToolsHubPage() {
 
           <ToolsCtaBanner
             heading="Know your target? Make it a habit."
-            body="MacroTrackr brings food logging, custom goals, and privacy-first tracking into one calm daily routine."
+            body="Log a meal, set a target, and see where the week went."
           />
         </div>
       </main>

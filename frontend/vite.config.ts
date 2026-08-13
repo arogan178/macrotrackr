@@ -87,30 +87,27 @@ export default defineConfig(({ command }) => {
                 ],
                 background_color: "#000000",
                 theme_color: "#000000",
+                // `any` and `maskable` are different drawings, not the same
+                // file declared twice: a maskable icon is cropped to a circle
+                // or squircle, so it needs its own safe padding.
                 icons: [
                   {
-                    src: "/icon.png",
-                    sizes: "192x192",
-                    type: "image/png",
-                    purpose: "any maskable",
-                  },
-                  {
-                    src: "/icon.png",
-                    sizes: "256x256",
-                    type: "image/png",
-                    purpose: "any maskable",
-                  },
-                  {
-                    src: "/icon.png",
-                    sizes: "384x384",
-                    type: "image/png",
-                    purpose: "any maskable",
+                    src: "/mark.svg",
+                    sizes: "any",
+                    type: "image/svg+xml",
+                    purpose: "any",
                   },
                   {
                     src: "/icon.png",
                     sizes: "512x512",
                     type: "image/png",
-                    purpose: "any maskable",
+                    purpose: "any",
+                  },
+                  {
+                    src: "/icon-maskable.png",
+                    sizes: "512x512",
+                    type: "image/png",
+                    purpose: "maskable",
                   },
                   {
                     src: "/favicon.ico",

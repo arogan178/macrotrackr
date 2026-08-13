@@ -110,7 +110,7 @@ function HabitActions({
         <button
           onClick={handleDelete}
           disabled={isActionInProgress}
-          className="rounded-full p-1.5 text-vibrant-accent hover:bg-vibrant-accent/10"
+          className="rounded-full p-1.5 text-primary hover:bg-primary/10"
           title="Delete habit"
         >
           <TrashIcon size="sm" />

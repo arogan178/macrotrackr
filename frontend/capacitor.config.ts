@@ -5,7 +5,7 @@ const isLocalDev = hostname === "localhost" || hostname.startsWith("192.168.");
 
 const config: CapacitorConfig = {
   appId: "com.macrotrackr.app",
-  appName: "Macro Trackr",
+  appName: "MacroTrackr",
   webDir: "dist",
   overrideUserAgent:
     "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",

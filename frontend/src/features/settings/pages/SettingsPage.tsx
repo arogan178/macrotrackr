@@ -188,8 +188,8 @@ export default function SettingsPage() {
         // Update the store to reflect successful save
         const updatedSettings = structuredClone(settings);
         initializeSettings({ settings: updatedSettings });
-        showNotification("Settings saved successfully!", "success");
-        handleMutationSuccess("Settings saved successfully!");
+        showNotification("Settings saved", "success");
+        handleMutationSuccess("Settings saved");
       } catch (error) {
         const errorMessage =
           error instanceof Error ? error.message : "Unknown error";

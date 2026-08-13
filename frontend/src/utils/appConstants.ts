@@ -28,7 +28,9 @@ const rawDocumentationUrl = resolveExternalUrl(
 );
 
 export const APP_URL = trimTrailingSlash(rawAppUrl);
-export const APP_NAME = import.meta.env.VITE_PUBLIC_APP_NAME ?? "Macro Tracker";
+// One spelling in this deployment: the title, the manifest and the README
+// disagreed ("MacroTrackr", "Macro Tracker", "MacroTracker").
+export const APP_NAME = import.meta.env.VITE_PUBLIC_APP_NAME ?? "MacroTrackr";
 export const SUPPORT_EMAIL = import.meta.env.VITE_SUPPORT_EMAIL ?? "support@local.invalid";
 export const SUPPORT_EMAIL_MAILTO = `mailto:${SUPPORT_EMAIL}`;
 export const GITHUB_REPO_URL = rawGitHubRepoUrl;

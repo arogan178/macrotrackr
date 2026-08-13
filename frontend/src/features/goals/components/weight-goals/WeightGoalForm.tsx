@@ -391,7 +391,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               max={maxCalorieIntake}
               step={50}
               showFillTrack
-              trackColorClass="bg-vibrant-accent"
+              trackColorClass="bg-primary"
               ariaLabelledBy="calorie-intake-range"
               unit="calories"
             />

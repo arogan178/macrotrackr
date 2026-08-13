@@ -76,9 +76,9 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
   // Map to token names used across the design system
   const goalStyles = isWeightLoss
     ? {
-        text: "text-vibrant-accent",
-        bgLight: "bg-vibrant-accent/10",
-        border: "border-vibrant-accent/30",
+        text: "text-primary",
+        bgLight: "bg-primary/10",
+        border: "border-primary/30",
       }
     : isWeightGain
       ? {
@@ -333,7 +333,7 @@ const WeightGoalStatus = memo(function WeightGoalStatus({
         <div className="mb-2 sm:mb-3 rounded-control border border-border bg-surface p-2.5 sm:p-3.5">
           <div className="mb-1.5 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <CalorieIcon className="h-4 w-4 text-vibrant-accent shrink-0" />
+              <CalorieIcon className="h-4 w-4 text-primary shrink-0" />
               <span className="text-xs sm:text-sm font-semibold text-foreground">
                 Calories
               </span>

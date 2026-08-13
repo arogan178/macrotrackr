@@ -88,7 +88,7 @@ export default function CalculatorLayout({
           <div className="mb-8 text-center sm:mb-10">
             {badge ? (
               <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-vibrant-accent" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 {badge}
               </span>
             ) : null}

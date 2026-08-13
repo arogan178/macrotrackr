@@ -60,7 +60,7 @@ export default function TdeeCalculatorPage() {
     {
       key: "lose",
       label: "Fat Loss",
-      accentClass: "text-vibrant-accent",
+      accentClass: "text-primary",
       delta: "-500 kcal/day",
       calories: Math.max(1200, tdee - 500),
     },

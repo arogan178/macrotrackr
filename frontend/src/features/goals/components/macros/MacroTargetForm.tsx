@@ -261,7 +261,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
               <InfoCard
                 title="Tips"
                 color="indigo"
-                icon={<InfoIcon className="h-4 w-4 text-vibrant-accent" />}
+                icon={<InfoIcon className="h-4 w-4 text-primary" />}
               >
                 <ul className="mt-2 space-y-2 text-sm text-muted">
                   <li>• For muscle growth keep protein between 20-35% </li>

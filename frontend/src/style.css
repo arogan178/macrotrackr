@@ -9,9 +9,10 @@
      an unnamed shade over an opaque page, which is how ~20 of them appeared.
      ──────────────────────────────────────────────────────────────────────── */
 
-  /* Brand */
+  /* Brand — green means the product: primary action, live value, confirmation.
+     It was also protein, success and "vibrant accent", i.e. four meanings and
+     therefore none. */
   --color-primary: #1ed760;
-  --color-vibrant-accent: #1ed760;
 
   /* Surfaces – four opaque steps, each meaning one thing */
   --color-background: #000000; /* page — recedes */
@@ -38,12 +39,14 @@
   --text-muted: #b3b3b3;
   --text-hint: rgba(255, 255, 255, 0.35);
 
-  /* Macro colors */
-  --color-protein: #1ed760;
-  --color-carbs: #3b82f6;
-  --color-fats: #ef4444;
+  /* Macros — no macro is green, and none of them is the error red either:
+     a macronutrient should not look like a failure. Contrast on #000:
+     violet 7.7:1, blue 8.3:1, orange 7.5:1. */
+  --color-protein: #a78bfa;
+  --color-carbs: #60a5fa;
+  --color-fats: #f97316;
 
-  /* Feedback */
+  /* Feedback — success is the brand green, deliberately: one green. */
   --color-success: #1ed760;
   --color-warning: #f59e0b;
   --color-error: #e91429;

@@ -20,7 +20,7 @@ const statusConfig = {
     Icon: CheckIcon,
   },
   error: {
-    color: "text-vibrant-accent",
+    color: "text-primary",
     Icon: CloseIcon,
   },
   warning: {

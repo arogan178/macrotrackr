@@ -1,6 +1,5 @@
 import { memo, useMemo } from "react";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import {
   MacroDistributionBar,
   MacroTargetLegend,
@@ -8,6 +7,7 @@ import {
 import Heading from "@/components/ui/Heading";
 import Panel from "@/components/ui/Panel";
 import ProgressBar from "@/components/ui/ProgressBar";
+import Value from "@/components/ui/Value";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
 import {
@@ -184,20 +184,15 @@ function DailySummaryInner({
           </span>
         </div>
 
-        <p className="mt-3 flex items-baseline gap-1.5">
-          {/* The one animated number on the page: the value that moves. */}
-          <span className="text-4xl font-light tracking-tight tabular-nums">
-            <AnimatedNumber
-              value={macroCalories.total}
-              toFixedValue={0}
-              duration={0.8}
-            />
-          </span>
-          <span className="text-sm text-muted">kcal</span>
-          <span className="text-sm text-muted">
-            of {Math.round(dailyCalorieTarget).toLocaleString()}
-          </span>
-        </p>
+        {/* The one animated number on the page: the value that moves. */}
+        <Value
+          className="mt-3"
+          size="hero"
+          unit="kcal"
+          animate
+          value={macroCalories.total}
+          suffix={`of ${Math.round(dailyCalorieTarget).toLocaleString()}`}
+        />
 
         <ProgressBar
           progress={completionPercentages.calories}
@@ -236,13 +231,11 @@ function DailySummaryInner({
                 <span className={`h-2 w-2 shrink-0 rounded-full ${macro.color}`} />
                 <span className="text-sm font-medium">{macro.name}</span>
               </span>
-              <span className="text-sm tabular-nums">
-                {macro.grams}
-                <span className="text-muted">
-                  {" / "}
-                  {macro.targetGrams}g
-                </span>
-              </span>
+              <Value
+                value={macro.grams}
+                unit="g"
+                suffix={`of ${macro.targetGrams}`}
+              />
             </div>
 
             <ProgressBar
@@ -253,10 +246,8 @@ function DailySummaryInner({
             />
 
             <div className="mt-1.5 flex items-center justify-between text-xs text-muted">
-              <span className="tabular-nums">
-                {Math.round(macro.calories).toLocaleString()} kcal
-              </span>
-              <span className="tabular-nums">{macro.completionPercent}%</span>
+              <Value value={macro.calories} unit="kcal" />
+              <Value value={macro.completionPercent} unit="%" />
             </div>
           </div>
         ))}

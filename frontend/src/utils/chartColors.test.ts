@@ -11,7 +11,7 @@ describe("chartColors", () => {
   describe("MACRO_COLORS", () => {
     it("should have protein color defined", () => {
       expect(MACRO_COLORS.protein).toBeDefined();
-      expect(MACRO_COLORS.protein.base).toBe("#34d399");
+      expect(MACRO_COLORS.protein.base).toBe("#a78bfa");
     });
 
     it("should have carbs color defined", () => {
@@ -21,7 +21,7 @@ describe("chartColors", () => {
 
     it("should have fats color defined", () => {
       expect(MACRO_COLORS.fats).toBeDefined();
-      expect(MACRO_COLORS.fats.base).toBe("#f87171");
+      expect(MACRO_COLORS.fats.base).toBe("#f97316");
     });
   });
 
@@ -49,7 +49,7 @@ describe("chartColors", () => {
     });
 
     it("should have protein color defined", () => {
-      expect(STAT_COLORS.protein).toBe("bg-primary");
+      expect(STAT_COLORS.protein).toBe("bg-protein");
     });
   });
 
