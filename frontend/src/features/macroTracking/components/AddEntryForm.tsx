@@ -46,6 +46,7 @@ function getFactor(
   } else {
     qtyInGrams = quantity * 100;
   }
+
   return qtyInGrams / 100;
 }
 

@@ -7,13 +7,13 @@ import { ProFeature } from "@/components/billing/ProFeature";
 import {
   Button,
   ChevronDownIcon,
-  EmptyState,
   ExportIcon,
   IconButton,
   LoadingSpinner,
   LockIcon,
   Modal,
   PlusCircleIcon,
+  StateCard,
 } from "@/components/ui";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
@@ -399,7 +399,7 @@ const EntryHistoryComponent = function EntryHistory({
       </div>
 
       {history.length === 0 ? (
-        <EmptyState
+        <StateCard
           title="No entries yet"
           message="Your logged meals will show up here."
           icon={<PlusCircleIcon className="h-10 w-10 text-foreground" />}

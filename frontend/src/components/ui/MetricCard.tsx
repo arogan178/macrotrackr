@@ -1,142 +1,136 @@
 import { memo, useMemo } from "react";
 import { motion } from "motion/react";
 
-import { COLOR_MAP } from "@/components/utils";
+import AnimatedNumber from "@/components/animation/AnimatedNumber";
+import Heading from "@/components/ui/Heading";
+import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import Panel from "@/components/ui/Panel";
 import { cn } from "@/lib/classnameUtilities";
 
+/**
+ * Five real meanings, each mapping to a declared token. This replaces
+ * COLOR_MAP, whose ten entries were identical apart from an icon tint and
+ * half of whose borders pointed at tokens that did not exist.
+ */
+export type MetricTone = "neutral" | "primary" | "protein" | "carbs" | "fats";
+
+const TONE_TEXT: Record<MetricTone, string> = {
+  neutral: "text-muted",
+  primary: "text-primary",
+  protein: "text-protein",
+  carbs: "text-carbs",
+  fats: "text-fats",
+};
+
 export interface MetricCardProps {
-  icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   title: string;
-  value: number | string | undefined;
+  value?: number | string;
+  /** Always adjacent to the value, always muted, always the same spelling. */
+  unit?: string;
+  icon?: React.FC<React.SVGProps<SVGSVGElement>>;
   acronym?: string;
   subtitle?: string;
-  color?: keyof typeof COLOR_MAP;
-  bgGradient?: string;
-  borderColor?: string;
-  textColor?: string;
+  tooltipText?: string;
+  tone?: MetricTone;
+  /** 0–100. Renders the dot Analytics uses to grade a metric. */
+  score?: number;
+  /** Count the value up on mount. One per screen, at most. */
+  animateValue?: boolean;
   delay?: number;
-  children?: React.ReactNode;
   className?: string;
-  showKcalSuffix?: boolean;
+  children?: React.ReactNode;
 }
 
-type ColorClasses = Partial<(typeof COLOR_MAP)[keyof typeof COLOR_MAP]>;
+const scoreToneClass = (score: number): string => {
+  if (score >= 80) return "bg-primary";
+  if (score >= 50) return "bg-warning";
 
-const EMPTY_COLOR_CLASSES: ColorClasses = {};
+  return "bg-error";
+};
 
-function useMetricCardColors(color: keyof typeof COLOR_MAP | undefined) {
-  return useMemo(
-    () => (color ? COLOR_MAP[color] : EMPTY_COLOR_CLASSES),
-    [color],
-  );
-}
-
-function useNumericValue(value: number | string | undefined) {
-  return useMemo(() => {
+function MetricCardInner({
+  title,
+  value,
+  unit,
+  icon: Icon,
+  acronym,
+  subtitle,
+  tooltipText,
+  tone = "neutral",
+  score,
+  animateValue = false,
+  delay = 0,
+  className,
+  children,
+}: MetricCardProps) {
+  const numericValue = useMemo(() => {
     if (value === undefined) return undefined;
 
-    return typeof value === "number"
-      ? value
-      : Number.parseFloat(value.toString());
+    return typeof value === "number" ? value : Number.parseFloat(value);
   }, [value]);
-}
-
-function MetricCardInner(properties: MetricCardProps) {
-  const {
-    icon: Icon,
-    title,
-    value,
-    acronym,
-    subtitle,
-    color,
-    bgGradient,
-    borderColor,
-    textColor,
-    delay = 0,
-    children,
-    className = "",
-    showKcalSuffix = false,
-  } = properties;
-
-  const colorClasses = useMetricCardColors(color);
-  const numericValue = useNumericValue(value);
-
-  const baseClasses = cn(
-    "group relative flex flex-col transition-colors duration-200 ease-in-out",
-    "overflow-hidden rounded-card border border-border bg-surface p-5",
-    "hover:border-border-2",
-    bgGradient,
-    borderColor,
-    className,
-  );
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay }}
-      className={baseClasses}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2, delay }}
+      className={cn("h-full", className)}
     >
-      <div className="relative z-10 flex items-start gap-4">
-        {Icon && (
-          <div
-            className={cn(
-              "rounded-control border border-border bg-surface-2 p-2.5 sm:p-3.5 shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0",
-              colorClasses.gradient,
-              colorClasses.border ?? borderColor,
-            )}
-          >
-            <Icon
-              className={cn(
-                "h-5 w-5 sm:h-6 sm:w-6",
-                colorClasses.text ?? textColor ?? "text-foreground/80",
-              )}
-              strokeWidth={1.5}
-            />
-          </div>
-        )}
-        <div className="min-w-0 flex-1">
-          <div className="mb-1 flex items-baseline gap-1.5">
-            <h3
-              className={cn(
-                "truncate text-xs sm:text-sm font-medium text-foreground",
-                textColor,
-              )}
-            >
+      <Panel className="flex h-full flex-col">
+        <div className="mb-2 flex items-start justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <Heading level="panel" as="h3" className="truncate text-sm">
               {title}
-            </h3>
-            {acronym && (
-              <span
-                className={cn(
-                  "text-xs whitespace-nowrap sm:inline hidden",
-                  colorClasses.acronym ?? textColor,
-                )}
-              >
+            </Heading>
+            {acronym ? (
+              <span className="hidden text-xs text-muted sm:inline">
                 ({acronym})
               </span>
+            ) : null}
+            {tooltipText ? <InfoTooltip text={tooltipText} /> : null}
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
+            {Icon ? (
+              <Icon
+                className={cn("h-4 w-4", TONE_TEXT[tone])}
+                strokeWidth={1.5}
+              />
+            ) : null}
+            {score === undefined ? null : (
+              <span
+                aria-hidden="true"
+                className={cn("h-2.5 w-2.5 rounded-full", scoreToneClass(score))}
+              />
             )}
           </div>
-          <p className="text-xl sm:text-3xl font-light tracking-tight text-foreground">
-            {numericValue === undefined ? (
-              <span className="text-base text-muted">Complete profile</span>
-            ) : (
-              <span className="text-foreground">
-                {Math.round(numericValue)}
-                {showKcalSuffix ? " kcal" : ""}
-              </span>
-            )}
-            {subtitle && (
-              <span className={cn("ml-2 text-xs", textColor)}>{subtitle}</span>
-            )}
-          </p>
         </div>
-      </div>
 
-      {children && (
-        <div className="relative z-10 flex flex-1 flex-col justify-between">
-          {children}
-        </div>
-      )}
+        {numericValue === undefined ? (
+          children ? null : <p className="text-sm text-muted">Complete profile</p>
+        ) : (
+          <p className="flex items-baseline gap-1.5">
+            <span className="text-3xl font-light tracking-tight tabular-nums">
+              {animateValue ? (
+                <AnimatedNumber
+                  value={numericValue}
+                  toFixedValue={0}
+                  duration={0.8}
+                />
+              ) : (
+                Math.round(numericValue).toLocaleString()
+              )}
+            </span>
+            {unit ? <span className="text-sm text-muted">{unit}</span> : null}
+            {subtitle ? (
+              <span className="ml-auto text-xs text-muted">{subtitle}</span>
+            ) : null}
+          </p>
+        )}
+
+        {children ? (
+          <div className="flex flex-1 flex-col justify-between">{children}</div>
+        ) : null}
+      </Panel>
     </motion.div>
   );
 }

@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { AnimatePresence, motion } from "motion/react";
 
 import { billingApi } from "@/api/billing";
 import CardContainer from "@/components/form/CardContainer";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { CircleQuestionMarkIcon } from "@/components/ui";
+import Accordion from "@/components/ui/Accordion";
 import CustomPricingCards from "@/features/landing/components/CustomPricingCards";
 import { usePageMetadata } from "@/hooks";
 import { useUser } from "@/hooks/auth/useAuthQueries";
@@ -50,7 +49,6 @@ const PricingPage: React.FC = () => {
     ogImage: APP_ICON_URL,
   });
 
-  const [openFaq, setOpenFaq] = useState<number | undefined>(0);
   const { isLoaded, isSignedIn } = useAppAuthState();
   const navigate = useNavigate();
   const { showNotification } = useStore();
@@ -69,10 +67,6 @@ const PricingPage: React.FC = () => {
       }
     }
   }, [isLoaded, isSignedIn, navigate]);
-
-  const toggleFaq = (index: number) => {
-    setOpenFaq((previous) => (previous === index ? undefined : index));
-  };
 
   const handleUpgrade = async (plan: "monthly" | "yearly") => {
     try {
@@ -110,60 +104,15 @@ const PricingPage: React.FC = () => {
                 Everything you need to know about our plans
               </p>
             </div>
-            <div className="mx-auto max-w-3xl space-y-4">
-              {faqs.map((faq, index) => {
-                const isOpen = openFaq === index;
-
-                return (
-                  <div
-                    key={index}
-                    className={`group rounded-control border bg-surface-2 px-5 py-4 transition-colors ${
-                      isOpen
-                        ? "border-primary/60"
-                        : "border-border hover:border-primary/40"
-                    }`}
-                  >
-                    <button
-                      type="button"
-                      className="flex min-h-11 w-full items-start justify-between gap-4 rounded-control text-left transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
-                      aria-expanded={isOpen}
-                      onClick={() => toggleFaq(index)}
-                    >
-                      <span className="flex items-start text-base leading-tight font-semibold text-foreground">
-                        <CircleQuestionMarkIcon className="mt-0.5 mr-2 h-5 w-5 shrink-0 text-primary" />
-                        {faq.question}
-                      </span>
-                      <span
-                        className={`mt-0.5 inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-border text-[10px] font-bold transition-[background-color,color,transform] duration-200 ${
-                          isOpen
-                            ? "rotate-45 bg-primary/10 text-primary"
-                            : "group-hover:bg-primary/10 group-hover:text-primary"
-                        }`}
-                        aria-hidden="true"
-                      >
-                        +
-                      </span>
-                    </button>
-                    <AnimatePresence initial={false}>
-                      {isOpen ? (
-                        <motion.div
-                          key="content"
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: "easeInOut" }}
-                          className="overflow-hidden"
-                        >
-                          <p className="pt-3 pr-2 pl-7 text-sm leading-relaxed text-muted">
-                            {faq.answer}
-                          </p>
-                        </motion.div>
-                      ) : null}
-                    </AnimatePresence>
-                  </div>
-                );
-              })}
-            </div>
+            <Accordion
+              className="mx-auto max-w-3xl"
+              defaultOpenFirst
+              items={faqs.map((faq) => ({
+                id: faq.question,
+                question: faq.question,
+                answer: faq.answer,
+              }))}
+            />
           </CardContainer>
         </div>
       </FeaturePage>

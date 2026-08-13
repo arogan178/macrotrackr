@@ -86,16 +86,16 @@ function UserMetricsPanel({
           title="Basal Metabolic Rate"
           acronym="BMR"
           value={formatOrUndefined(bmr)}
-          color="primary"
-          showKcalSuffix
+          tone="primary"
+          unit="kcal"
         />
         <MetricCard
           icon={StarIcon}
           title="Total Daily Energy"
           acronym="TDEE"
           value={formatOrUndefined(tdee)}
-          color="primary"
-          showKcalSuffix
+          tone="primary"
+          unit="kcal"
         />
       </div>
     </>
