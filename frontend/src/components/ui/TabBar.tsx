@@ -31,7 +31,7 @@ function TabBar({
   onChange,
   layoutId = "tabbar-highlight",
   isMotion = true,
-  rounded = "rounded-xl",
+  rounded = "rounded-card",
   className = "",
   size = "md",
 }: TabBarProps) {
@@ -40,7 +40,7 @@ function TabBar({
       role="tablist"
       className={cn(
         "relative inline-flex flex-wrap items-center gap-1 p-1",
-        "border border-white/5 bg-surface-2/80 backdrop-blur-md",
+        "border border-border bg-surface-2",
         rounded,
         className
       )}
@@ -52,7 +52,7 @@ function TabBar({
           onClick={() => onChange(item.key)}
           layoutId={layoutId}
           isMotion={isMotion}
-          rounded="rounded-lg" // Inner tabs should be slightly less rounded than the container usually
+          rounded="rounded-control"
           activeBg={item.activeBg}
           disabled={item.disabled}
           aria-selected={activeKey === item.key}

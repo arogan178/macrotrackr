@@ -183,7 +183,7 @@ function HabitForm({
               <button
                 key={key}
                 type="button"
-                className={`flex items-center justify-center rounded-lg p-3 transition-colors ${
+                className={`flex items-center justify-center rounded-control p-3 transition-colors ${
                   isSelected
                     ? `${grad.chip} border ${colorRing}`
                     : "bg-surface-2 hover:bg-surface-3"

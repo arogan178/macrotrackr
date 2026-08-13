@@ -100,7 +100,7 @@ export default function RecommendationsSection({
       className="flex flex-col gap-6"
     >
       <div className="flex items-center text-foreground/90">
-        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-control bg-primary/10">
           <LightningIcon className="h-5 w-5 text-primary" />
         </div>
         <h3 className="text-xl font-bold tracking-tight">Suggestions</h3>

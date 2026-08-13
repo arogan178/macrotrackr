@@ -93,12 +93,12 @@ export default function BmrCalculatorPage() {
               {Object.values(ACTIVITY_LEVELS).map((level) => (
                 <li
                   key={level.value}
-                  className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-2/50 px-3 py-2.5 text-xs"
+                  className="flex items-center justify-between gap-3 rounded-control border border-border bg-surface-2 px-3 py-2.5 text-xs"
                 >
                   <span className="truncate font-medium text-muted">
                     {level.label}
                   </span>
-                  <span className="whitespace-nowrap rounded-lg border border-border bg-surface px-2 py-1 font-semibold text-foreground tabular-nums">
+                  <span className="whitespace-nowrap rounded-control border border-border bg-surface px-2 py-1 font-semibold text-foreground tabular-nums">
                     {Math.round(bmr * level.multiplier)} kcal
                   </span>
                 </li>
@@ -106,7 +106,7 @@ export default function BmrCalculatorPage() {
             </ul>
             <Link
               to="/tools/tdee-calculator"
-              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-lg text-xs font-semibold text-primary transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+              className="mt-4 inline-flex min-h-11 items-center gap-1.5 rounded-control text-xs font-semibold text-primary transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
             >
               Get a full TDEE breakdown
               <ArrowRightIcon className="h-3.5 w-3.5" aria-hidden="true" />

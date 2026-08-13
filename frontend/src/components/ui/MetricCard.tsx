@@ -63,8 +63,8 @@ function MetricCardInner(properties: MetricCardProps) {
 
   const baseClasses = cn(
     "group relative flex flex-col transition-colors duration-200 ease-in-out",
-    "overflow-hidden rounded-2xl border border-border/60 bg-surface p-5",
-    "hover:border-white/20",
+    "overflow-hidden rounded-card border border-border bg-surface p-5",
+    "hover:border-border-2",
     bgGradient,
     borderColor,
     className,
@@ -81,7 +81,7 @@ function MetricCardInner(properties: MetricCardProps) {
         {Icon && (
           <div
             className={cn(
-              "rounded-xl border border-border/40 bg-surface-2 p-2.5 sm:p-3.5 shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0",
+              "rounded-control border border-border bg-surface-2 p-2.5 sm:p-3.5 shadow-sm transition-transform duration-300 group-hover:scale-105 shrink-0",
               colorClasses.gradient,
               colorClasses.border ?? borderColor,
             )}

@@ -214,7 +214,7 @@ export default function SettingsPage() {
         subtitle="Manage your account preferences and profile details"
         headerChildren={
           <div
-            className="relative flex items-center space-x-0.5 rounded-xl bg-surface p-1 shadow-xs overflow-x-auto"
+            className="relative flex items-center space-x-0.5 rounded-control bg-surface p-1 shadow-xs overflow-x-auto"
             role="tablist"
             aria-label="Settings Tabs"
           >

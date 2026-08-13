@@ -39,7 +39,7 @@ interface LazyCodeHighlighterProps {
 }
 
 const interactiveChipClasses =
-  "inline-flex min-h-11 items-center justify-center rounded-md border border-border/60 px-3 py-2 text-xs font-medium tracking-[0.14em] text-muted uppercase transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex min-h-11 items-center justify-center rounded-control border border-border px-3 py-2 text-xs font-medium tracking-[0.14em] text-muted uppercase transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const codeBlockClassName =
   "overflow-x-auto p-5 font-mono text-sm leading-7 text-white";
@@ -89,22 +89,22 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
 
   if (inline) {
     return (
-      <code className="rounded bg-surface-2 px-1.5 py-0.5 font-mono text-sm text-primary">
+      <code className="rounded-control bg-surface-2 px-1.5 py-0.5 font-mono text-sm text-primary">
         {children}
       </code>
     );
   }
 
   return (
-    <div className="group relative my-6 overflow-hidden rounded-lg bg-[#1e1e1e] shadow-xl ring-1 ring-white/10">
-      <div className="flex items-center justify-between border-b border-white/10 bg-black/30 px-4 py-2">
+    <div className="group relative my-6 overflow-hidden rounded-control bg-[#1e1e1e] shadow-xl ring-1 ring-white/10">
+      <div className="flex items-center justify-between border-b border-border bg-black/30 px-4 py-2">
         <span className="text-xs font-medium text-white/60 uppercase">
           {language || "text"}
         </span>
         <button
           type="button"
           onClick={handleCopy}
-          className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs text-white/60 transition-colors hover:bg-white/10 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
+          className="flex items-center gap-1.5 rounded-control px-2 py-1 text-xs text-white/60 transition-colors hover:bg-surface-2 hover:text-white focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:outline-none"
           aria-label={copied ? "Copied!" : "Copy code"}
         >
           {copied ? (
@@ -192,7 +192,7 @@ const markdownComponents = {
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
-    <blockquote className="my-10 rounded-3xl border border-primary/20 bg-primary/6 px-6 py-5 text-lg leading-8 text-foreground/82 italic shadow-sm">
+    <blockquote className="my-10 rounded-card border border-primary/20 bg-primary/6 px-6 py-5 text-lg leading-8 text-foreground/82 italic shadow-sm">
       {children}
     </blockquote>
   ),
@@ -213,13 +213,13 @@ const markdownComponents = {
     <ContentImage
       src={src}
       alt={alt ?? ""}
-      containerClassName="my-10 overflow-hidden rounded-3xl shadow-xl ring-1 ring-border/50"
-      className="w-full rounded-lg"
+      containerClassName="my-10 overflow-hidden rounded-card shadow-xl ring-1 ring-border/50"
+      className="w-full rounded-control"
       loading="lazy"
     />
   ),
   table: ({ children }: { children?: React.ReactNode }) => (
-    <div className="my-6 overflow-x-auto rounded-lg border border-border/60">
+    <div className="my-6 overflow-x-auto rounded-control border border-border">
       <table className="w-full border-collapse text-sm">{children}</table>
     </div>
   ),
@@ -367,7 +367,7 @@ const BlogArticlePage: React.FC = () => {
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="inline-flex min-h-11 items-center gap-2 rounded-md border border-border/60 px-3 py-2 transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                className="inline-flex min-h-11 items-center gap-2 rounded-control border border-border px-3 py-2 transition-colors duration-200 hover:bg-surface hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
               >
                 {copiedLink ? (
                   <CheckIcon className="h-4 w-4 text-success" />
@@ -399,7 +399,7 @@ const BlogArticlePage: React.FC = () => {
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.05 }}
-            className="relative mt-10 aspect-video overflow-hidden rounded-3xl border border-border bg-surface shadow-xl"
+            className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface shadow-xl"
           >
             {post.image ? (
               <ContentImage
@@ -419,7 +419,7 @@ const BlogArticlePage: React.FC = () => {
             transition={{ duration: 0.45, delay: 0.1 }}
             className="mt-12"
           >
-            <div className="mx-auto max-w-3xl rounded-4xl border border-border/60 bg-surface/70 px-6 py-8 shadow-sm backdrop-blur-sm sm:px-10 sm:py-10">
+            <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-surface px-6 py-8 shadow-sm sm:px-10 sm:py-10">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
@@ -433,7 +433,7 @@ const BlogArticlePage: React.FC = () => {
             </div>
 
             {post.slug === "v2-launch-complete-ui-overhaul" && (
-              <div className="not-prose mt-12 rounded-3xl border border-border bg-surface p-6 shadow-sm">
+              <div className="not-prose mt-12 rounded-card border border-border bg-surface p-6 shadow-sm">
                 <h3 className="text-center text-2xl font-semibold tracking-tight text-foreground">
                   See grouped meals in action
                 </h3>
@@ -462,7 +462,7 @@ const BlogArticlePage: React.FC = () => {
                     tag: undefined,
                     q: undefined,
                   }}
-                  className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm font-medium text-primary transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm font-medium text-primary transition-colors duration-200 hover:text-primary/80 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                   View all posts
                 </Link>
@@ -473,7 +473,7 @@ const BlogArticlePage: React.FC = () => {
                     key={relatedPost.slug}
                     to="/blog/$slug"
                     params={{ slug: relatedPost.slug }}
-                    className="group overflow-hidden rounded-lg border border-border bg-surface transition-[background-color,border-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                    className="group overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                   >
                     <div className="relative aspect-16/10 overflow-hidden">
                       {relatedPost.image ? (

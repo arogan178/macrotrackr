@@ -58,7 +58,7 @@ export default function GoalsPage() {
         subtitle="Track your progress and stay motivated on your health journey"
         headerChildren={
           <div
-            className="relative flex items-center space-x-0.5 rounded-xl bg-surface p-1 shadow-xs"
+            className="relative flex items-center space-x-0.5 rounded-control bg-surface p-1 shadow-xs"
             role="tablist"
             aria-label="Goals Tabs"
           >

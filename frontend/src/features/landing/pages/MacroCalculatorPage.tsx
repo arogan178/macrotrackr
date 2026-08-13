@@ -169,7 +169,7 @@ export default function MacroCalculatorPage() {
                   maxDigits={5}
                 />
               ) : (
-                <p className="rounded-xl border border-border bg-surface-2/50 px-3 py-2.5 text-xs leading-relaxed text-muted">
+                <p className="rounded-control border border-border bg-surface-2 px-3 py-2.5 text-xs leading-relaxed text-muted">
                   Based on your maintenance estimate of{" "}
                   <strong className="font-semibold text-foreground tabular-nums">
                     {tdee} kcal
@@ -186,7 +186,7 @@ export default function MacroCalculatorPage() {
               <h2 className={calculatorSectionTitleClass}>
                 Macro Distribution Split
               </h2>
-              <span className="rounded-full border border-border bg-surface-2/60 px-2.5 py-1 text-xs font-medium text-muted tabular-nums">
+              <span className="rounded-full border border-border bg-surface-2 px-2.5 py-1 text-xs font-medium text-muted tabular-nums">
                 Total 100%
               </span>
             </div>
@@ -238,7 +238,7 @@ export default function MacroCalculatorPage() {
             {macroRows.map((row) => (
               <li
                 key={row.macro}
-                className="rounded-xl border border-border bg-surface-2/50 p-3"
+                className="rounded-control border border-border bg-surface-2 p-3"
               >
                 <div className="mb-1 flex items-center justify-between gap-2 text-xs">
                   <span className="flex items-center gap-2 font-bold text-foreground">

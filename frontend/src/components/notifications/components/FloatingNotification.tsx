@@ -171,7 +171,7 @@ function FloatingNotification({
       style={resolvedTop ? { marginTop: resolvedTop } : undefined}
     >
       <div
-        className={`flex items-center rounded-lg shadow-modal backdrop-blur-md 
+        className={`flex items-center rounded-control shadow-modal 
                      ${bg} border ${border}
                      overflow-hidden`}
       >
@@ -195,7 +195,7 @@ function FloatingNotification({
             variant="close"
             onClick={handleClose}
             ariaLabel="Close notification"
-            className="bg-transparent text-foreground/60 hover:bg-surface/10 hover:text-foreground"
+            className="bg-transparent text-foreground/60 hover:bg-surface hover:text-foreground"
           />
         </div>
 

@@ -117,7 +117,7 @@ const PricingPage: React.FC = () => {
                 return (
                   <div
                     key={index}
-                    className={`group rounded-xl border bg-surface-2 px-5 py-4 transition-colors ${
+                    className={`group rounded-control border bg-surface-2 px-5 py-4 transition-colors ${
                       isOpen
                         ? "border-primary/60"
                         : "border-border hover:border-primary/40"
@@ -125,7 +125,7 @@ const PricingPage: React.FC = () => {
                   >
                     <button
                       type="button"
-                      className="flex min-h-11 w-full items-start justify-between gap-4 rounded-xl text-left transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+                      className="flex min-h-11 w-full items-start justify-between gap-4 rounded-control text-left transition-colors duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
                       aria-expanded={isOpen}
                       onClick={() => toggleFaq(index)}
                     >

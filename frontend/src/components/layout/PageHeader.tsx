@@ -15,7 +15,7 @@ export const PageHeader = ({
   hasChanges = false,
   children,
 }: PageHeaderProps) => (
-  <div className="border-b border-border/40 pb-3 sm:pb-6">
+  <div className="border-b border-border pb-3 sm:pb-6">
     <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4">
       {/* Title */}
       <div>

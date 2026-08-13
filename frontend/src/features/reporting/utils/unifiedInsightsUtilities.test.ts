@@ -26,7 +26,7 @@ describe("unifiedInsightsUtilities", () => {
 
   describe("CARD_BASE_CLASSES", () => {
     it("has base card classes", () => {
-      expect(CARD_BASE_CLASSES).toContain("rounded-2xl");
+      expect(CARD_BASE_CLASSES).toContain("rounded-card");
       expect(CARD_BASE_CLASSES).toContain("bg-surface");
     });
   });

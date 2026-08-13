@@ -47,7 +47,7 @@ const PricingCard: React.FC<PricingCardProps> = ({
   <div
     role="region"
     aria-label={`${title} pricing plan`}
-    className={`group relative flex h-full flex-col rounded-3xl border p-8 transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out sm:p-10 ${focusRingColor} ${cardClassName}`}
+    className={`group relative flex h-full flex-col rounded-card border p-8 transition-[background-color,border-color,box-shadow,transform] duration-200 ease-out sm:p-10 ${focusRingColor} ${cardClassName}`}
   >
     {isPopular && (
       <div className="absolute -top-3 left-1/2 -translate-x-1/2">

@@ -362,7 +362,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
           </div>
         </div>
         {!tdee && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
+          <div className="rounded-control border border-amber-500/30 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
             <p className="text-sm font-semibold">Profile Details Incomplete</p>
             <p className="mt-1 text-xs">
               Please complete your profile details (Date of Birth, Gender, Height, Weight, and Activity Level) in Settings to calculate your BMR and TDEE before setting a weight goal.
@@ -402,7 +402,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
             </div>
 
             {!isMaintenance && (
-              <div className="rounded-lg bg-surface p-3">
+              <div className="rounded-control bg-surface p-3">
                 <p className="text-sm text-foreground">
                   <span className="font-medium">
                     Estimated completion:{" "}
@@ -453,7 +453,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
             )}
 
             {isMaintenance && (
-              <div className="rounded-lg bg-surface p-3">
+              <div className="rounded-control bg-surface p-3">
                 <p className="text-sm text-foreground">
                   <span className="font-medium">Maintenance Goal</span>
                 </p>

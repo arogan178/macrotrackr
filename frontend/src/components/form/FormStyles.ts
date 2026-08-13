@@ -10,16 +10,16 @@ export const formStyles = {
 
   // Input styles
   input: {
-    base: "w-full px-3 sm:px-3.5 py-2 sm:py-2.5 bg-surface-2/80 backdrop-blur-sm border rounded-xl text-xs sm:text-sm text-foreground placeholder:text-xs sm:placeholder:text-sm placeholder:text-muted/70 focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-200 shadow-sm",
+    base: "w-full px-3 sm:px-3.5 py-2 sm:py-2.5 bg-surface-2 border rounded-control text-xs sm:text-sm text-foreground placeholder:text-xs sm:placeholder:text-sm placeholder:text-muted/70 focus:border-primary focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-primary transition-colors duration-200 shadow-sm",
     error: "border-error",
-    normal: "border-white/10 hover:border-white/20",
+    normal: "border-border hover:border-border-2",
     withIcon: "pl-9 sm:pl-10",
     withUnit: "pr-9 sm:pr-10",
     withPassword: "pr-9 sm:pr-10",
     numberInput:
       "[&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield]",
     disabled:
-      "bg-surface border-white/5 text-muted cursor-not-allowed opacity-50",
+      "bg-surface border-border text-muted cursor-not-allowed opacity-50",
   },
 
   // Error and helper text
@@ -40,6 +40,6 @@ export const formStyles = {
   // Card container
   card: {
     container:
-      "bg-surface/80 backdrop-blur-md rounded-2xl border border-white/5 overflow-hidden shadow-sm",
+      "bg-surface rounded-card border border-border overflow-hidden shadow-sm",
   },
 };

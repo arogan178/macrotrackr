@@ -361,7 +361,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <CardContainer variant="interactive" className="border-border/60">
+          <CardContainer variant="interactive" className="border-border">
             <div className="p-3.5 sm:p-5">
               {isLoading ? (
                 <HistoryLoadingSkeleton />

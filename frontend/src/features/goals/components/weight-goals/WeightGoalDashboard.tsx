@@ -59,9 +59,9 @@ const WeightGoalDashboard = memo(function WeightGoalDashboard({
   if (isLoading) {
     return (
       <div
-        className={`flex h-60 animate-pulse items-center justify-center rounded-2xl bg-surface ${className}`}
+        className={`flex h-60 animate-pulse items-center justify-center rounded-card bg-surface ${className}`}
       >
-        <div className="h-full w-full rounded-2xl bg-surface" />
+        <div className="h-full w-full rounded-card bg-surface" />
       </div>
     );
   }

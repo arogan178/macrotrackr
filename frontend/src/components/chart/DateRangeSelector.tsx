@@ -54,7 +54,7 @@ export default function DateRangeSelector({
   return (
     <motion.div
       layout
-      className="sticky top-24 z-30 mb-6 rounded-xl border border-border/70 bg-surface/92 p-3 shadow-lg backdrop-blur-md"
+      className="sticky top-24 z-30 mb-6 rounded-control border border-border bg-surface p-3 shadow-lg"
       style={{ position: "sticky" }}
     >
       <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
@@ -64,7 +64,7 @@ export default function DateRangeSelector({
             items={items}
             activeKey={currentRange}
             onChange={handleRangeChange}
-            rounded="rounded-lg"
+            rounded-control="rounded-control"
             isMotion
             layoutId="activeRangeHighlight"
             size="sm"
@@ -92,7 +92,7 @@ export default function DateRangeSelector({
               onClick={onExportClick}
               disabled={isExportDisabled}
               ariaLabel="Export data as CSV file"
-              className="flex items-center rounded-lg border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
+              className="flex items-center rounded-control border border-primary/30 bg-primary/60 font-medium text-foreground transition-colors duration-200 hover:bg-primary/80 disabled:opacity-50"
               leftIcon={<ExportIcon />}
             >
               Export CSV

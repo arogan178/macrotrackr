@@ -71,7 +71,7 @@ function EmptyState({
     >
       <div className="mb-4 text-muted">
         {icon ?? (
-          <div className="inline-flex items-center justify-center rounded-full border border-white/5 bg-surface-2/50 p-4 shadow-sm backdrop-blur-sm">
+          <div className="inline-flex items-center justify-center rounded-full border border-border bg-surface-2 p-4 shadow-sm">
             {defaultIcon}
           </div>
         )}

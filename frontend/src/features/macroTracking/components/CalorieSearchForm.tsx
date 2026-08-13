@@ -373,7 +373,7 @@ const CalorieSearch = memo(function CalorieSearch({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-xl border border-border bg-surface shadow-xl"
+            className="absolute top-full left-0 z-50 mt-2 h-64 w-full overflow-hidden rounded-control border border-border bg-surface shadow-xl"
           >
             <div className="h-full overflow-y-auto pr-2" onScroll={handleScroll}>
               {displayResults.map((resultData) => {
@@ -421,7 +421,7 @@ const CalorieSearch = memo(function CalorieSearch({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -8, scale: 0.98 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-xl border border-border bg-surface p-4 shadow-xl"
+            className="absolute top-full left-0 z-50 mt-2 w-full overflow-hidden rounded-control border border-border bg-surface p-4 shadow-xl"
           >
             <div className="mb-3">
               <TabBar
@@ -451,7 +451,7 @@ const CalorieSearch = memo(function CalorieSearch({
                       {[1, 2, 3].map((index) => (
                         <div
                           key={index}
-                          className="h-10 animate-pulse rounded-lg bg-surface-2"
+                          className="h-10 animate-pulse rounded-control bg-surface-2"
                         />
                       ))}
                     </div>
@@ -460,7 +460,7 @@ const CalorieSearch = memo(function CalorieSearch({
                       No recent entries found.
                     </div>
                   ) : (
-                    <div className="divide-y divide-border/40">
+                    <div className="divide-y divide-border">
                       {displayRecents.map((entry) => {
                         const entryName = entry.foodName ?? entry.mealName;
                         const cals = Math.round(
@@ -488,7 +488,7 @@ const CalorieSearch = memo(function CalorieSearch({
                               setQuery("");
                               setActivePanel(null);
                             }}
-                            className="w-full rounded-lg px-3 py-2.5 text-left transition-colors hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
+                            className="w-full rounded-control px-3 py-2.5 text-left transition-colors hover:bg-surface-2 focus:bg-surface-2 focus:outline-none"
                           >
                             <div className="flex items-center justify-between">
                               <span className="font-medium text-foreground">

@@ -165,7 +165,7 @@ export default function HabitCard({
   const iconWrapperPadding = variant === "sm" ? "p-1.5" : "p-2";
 
   return (
-    <CardContainer variant="interactive" className="overflow-hidden bg-surface-2/60 p-0">
+    <CardContainer variant="interactive" className="overflow-hidden bg-surface-2 p-0">
       <div
         className={cn(
           "bg-gradient-to-r",
@@ -177,7 +177,7 @@ export default function HabitCard({
           <div className="flex items-center">
             <div
               className={cn(
-                "mr-3 rounded-xl",
+                "mr-3 rounded-control",
                 iconWrapperPadding,
                 getAccentClass(accentColor)
               )}

@@ -63,7 +63,7 @@ export class ErrorBoundary extends Component<
       return (
         this.props.fallback ?? (
           <div className="flex min-h-screen items-center justify-center bg-surface p-4">
-            <div className="w-full max-w-lg rounded-xl border border-border bg-surface p-6 shadow-modal">
+            <div className="w-full max-w-lg rounded-control border border-border bg-surface p-6 shadow-modal">
               <div className="mb-4 text-error">
                 <WarningIcon className="mx-auto mb-3 h-12 w-12" />
                 <h2 className="mb-1 text-center text-xl font-bold text-foreground">
@@ -92,7 +92,7 @@ export class ErrorBoundary extends Component<
                   }}
                   ariaLabel="Try again"
                   variant="secondary"
-                  className="rounded-lg bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
+                  className="rounded-control bg-surface px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-surface"
                 >
                   Try Again
                 </Button>
@@ -100,7 +100,7 @@ export class ErrorBoundary extends Component<
                   onClick={() => globalThis.location.reload()}
                   ariaLabel="Reload page"
                   variant="primary"
-                  className="rounded-lg bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
+                  className="rounded-control bg-primary px-4 py-2 font-medium text-foreground transition-colors duration-200 hover:bg-primary"
                 >
                   Reload page
                 </Button>

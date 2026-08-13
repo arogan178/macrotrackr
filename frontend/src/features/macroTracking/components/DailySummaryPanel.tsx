@@ -174,7 +174,7 @@ function DailySummaryInner({
   return (
     <CardContainer className="h-full">
       <div className="flex h-full flex-col gap-3 p-3">
-        <CardContainer className="border-border/60 bg-surface-2 p-4">
+        <CardContainer className="border-border bg-surface-2 p-4">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
               Today's Summary

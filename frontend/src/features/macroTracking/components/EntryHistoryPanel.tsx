@@ -417,7 +417,7 @@ const EntryHistoryComponent = function EntryHistory({
         />
       ) : (
         <motion.div
-          className="overflow-hidden rounded-xl border border-border bg-transparent"
+          className="overflow-hidden rounded-control border border-border bg-transparent"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3, ease: "easeOut" }}
@@ -442,7 +442,7 @@ const EntryHistoryComponent = function EntryHistory({
               {(hasMoreDates || hasMore) && (
                 <motion.button
                   onClick={loadMoreDates}
-                  className={`flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
+                  className={`flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
                     isLoadingMore ? "cursor-not-allowed opacity-60" : ""
                   }`}
                   disabled={isLoadingMore}
@@ -456,7 +456,7 @@ const EntryHistoryComponent = function EntryHistory({
               {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
                 <motion.button
                   onClick={showLessDates}
-                  className="flex items-center gap-2 rounded-lg border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
+                  className="flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
                 >
                   <AnimatePresence mode="wait">
                     <motion.span
@@ -478,7 +478,7 @@ const EntryHistoryComponent = function EntryHistory({
           {/* Free tier upgrade prompt for older entries */}
           {limits?.isRestricted && limits.upgradePrompt && (
             <motion.div
-              className="border-t border-border bg-surface-2/50 py-4"
+              className="border-t border-border bg-surface-2 py-4"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3, delay: 0.2 }}
@@ -503,7 +503,7 @@ const EntryHistoryComponent = function EntryHistory({
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 50, scale: 0.95 }}
               transition={{ type: "spring", stiffness: 400, damping: 30 }}
-              className="fixed bottom-6 left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border/50 bg-surface/90 px-4 py-3 shadow-2xl backdrop-blur-xl md:gap-4 md:px-6 md:py-3.5"
+              className="fixed bottom-6 left-1/2 z-100 flex -translate-x-1/2 items-center gap-3 rounded-full border border-border bg-surface px-4 py-3 shadow-2xl md:gap-4 md:px-6 md:py-3.5"
             >
               <div className="flex flex-col gap-1 md:flex-row md:items-center md:gap-3">
                 <span className="text-sm font-medium whitespace-nowrap text-foreground">
@@ -587,7 +587,7 @@ const EntryHistoryComponent = function EntryHistory({
               value={groupMealName}
               onChange={(event) => setGroupMealName(event.target.value)}
               placeholder="e.g., Chicken Salad Bowl"
-              className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
+              className="w-full rounded-control border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/50 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
             />
           </div>
           <div>
@@ -601,7 +601,7 @@ const EntryHistoryComponent = function EntryHistory({
               id="groupMealType"
               value={groupMealType}
               onChange={(event) => setGroupMealType(event.target.value)}
-              className="w-full rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
+              className="w-full rounded-control border border-border bg-surface px-4 py-3 text-sm text-foreground focus:border-primary/50 focus:ring-2 focus:ring-primary/20 focus:outline-hidden"
             >
               <option value="breakfast">Breakfast</option>
               <option value="lunch">Lunch</option>

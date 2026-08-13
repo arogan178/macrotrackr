@@ -97,7 +97,7 @@ const ChangePasswordForm = () => {
   return (
     <CardContainer className="p-3.5 sm:p-6">
       <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-        <div className="rounded-2xl border border-border/60 bg-surface-2 p-3.5 sm:p-4">
+        <div className="rounded-card border border-border bg-surface-2 p-3.5 sm:p-4">
           <p className="text-xs sm:text-sm text-muted">
             <strong className="text-foreground">Security note:</strong> For your
             protection, enter your current password before setting a new one.
@@ -171,7 +171,7 @@ const ChangePasswordForm = () => {
         </div>
 
         {formError && !formError.includes("match") && (
-          <div className="rounded-2xl border border-error/30 bg-error/10 p-3.5 sm:p-4">
+          <div className="rounded-card border border-error/30 bg-error/10 p-3.5 sm:p-4">
             <p className="text-xs sm:text-sm text-error">{formError}</p>
           </div>
         )}

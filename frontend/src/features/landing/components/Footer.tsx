@@ -5,13 +5,13 @@ import LogoButton from "@/components/layout/LogoButton";
 import { APP_NAME, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
 const footerLinkClasses =
-  "inline-flex min-h-11 items-center rounded-lg py-1 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
+  "inline-flex min-h-11 items-center rounded-control py-1 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none";
 
 const Footer: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <footer className="relative z-10 border-t border-border/70 bg-background/90 px-6 py-8 backdrop-blur-sm lg:px-8">
+    <footer className="relative z-10 border-t border-border bg-background px-6 py-8 lg:px-8">
       <div className="mx-auto max-w-7xl">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.2fr)_repeat(2,minmax(0,0.7fr))] md:items-start md:gap-6">
           <div>

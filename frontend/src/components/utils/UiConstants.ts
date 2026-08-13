@@ -38,7 +38,7 @@ export const COLOR_MAP = {
   },
   primary: {
     bg: "bg-surface-2",
-    border: "border-border/20",
+    border: "border-border",
     text: "text-primary",
     dot: "bg-primary",
     iconColor: "text-primary",

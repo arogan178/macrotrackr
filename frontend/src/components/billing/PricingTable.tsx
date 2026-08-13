@@ -97,7 +97,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
         header: () => {
           return (
             <div className="flex min-h-18 flex-col items-center justify-center bg-transparent px-5 py-4 text-center text-base font-semibold text-foreground">
-              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-secondary/30 px-3 py-1 text-xs font-semibold tracking-wide text-foreground">
+              <span className="inline-flex items-center gap-2 rounded-full border border-border bg-surface-2 px-3 py-1 text-xs font-semibold tracking-wide text-foreground">
                 PRO
               </span>
               <span
@@ -165,19 +165,19 @@ const PricingTable: React.FC<PricingTableProps> = ({
         />
       </div>
 
-      <div className="relative w-full overflow-x-auto rounded-xl border border-border bg-surface-2">
+      <div className="relative w-full overflow-x-auto rounded-control border border-border bg-surface-2">
         <table className="w-full min-w-[680px] border-separate border-spacing-0 text-sm">
           <thead>
             {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id} className="border-b border-border/60">
+              <tr key={headerGroup.id} className="border-b border-border">
                 {headerGroup.headers.map((header) => (
                   <th
                     key={header.id}
                     className={
                       header.index === 0
-                        ? "border-b border-border/60 bg-transparent px-5 py-4 text-left text-base font-semibold text-foreground"
+                        ? "border-b border-border bg-transparent px-5 py-4 text-left text-base font-semibold text-foreground"
                         : header.index === 1
-                          ? "border-b border-border/60 bg-transparent px-5 py-4 text-base font-semibold text-foreground"
+                          ? "border-b border-border bg-transparent px-5 py-4 text-base font-semibold text-foreground"
                           : "relative border-b border-warning/30 bg-warning/10 px-5 py-4 text-base font-semibold text-foreground"
                     }
                   >
@@ -211,13 +211,13 @@ const PricingTable: React.FC<PricingTableProps> = ({
                         ? `px-5 py-3 text-left font-medium text-foreground${
                             index === data.length - 1
                               ? ""
-                              : " border-b border-border/60"
+                              : " border-b border-border"
                           }`
                         : cell.column.id === "free"
                           ? `px-5 py-3 text-center${
                               row.index === data.length - 1
                                 ? ""
-                                : " border-b border-border/60"
+                                : " border-b border-border"
                             }`
                           : `bg-warning/5 px-5 py-3 text-center ${
                               row.index === data.length - 1
@@ -238,7 +238,7 @@ const PricingTable: React.FC<PricingTableProps> = ({
       {showProButton && (
         <div className="mt-5 flex flex-col items-center">
           <Button
-            className="mb-2 w-full max-w-xs rounded-xl bg-warning px-10 py-4 text-lg font-semibold text-black hover:bg-warning/90"
+            className="mb-2 w-full max-w-xs rounded-control bg-warning px-10 py-4 text-lg font-semibold text-black hover:bg-warning/90"
             onClick={() => onUpgrade?.(selectedPlan)}
             ariaLabel="Upgrade to Pro"
           >

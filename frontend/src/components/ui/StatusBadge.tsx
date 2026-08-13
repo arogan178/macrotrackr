@@ -131,8 +131,8 @@ const getVariantClasses = (
       neutral: {
         bg: "bg-surface-3",
         text: "text-foreground",
-        border: "border-border/40",
-        glass: "bg-surface-2/40 border-white/5",
+        border: "border-border",
+        glass: "bg-surface-2 border-border",
       },
       info: {
         bg: "bg-carbs/20",
@@ -155,7 +155,7 @@ const getVariantClasses = (
       return cn(`${colors.bg}/50`, colors.text, "border border-transparent");
     }
     case "glass": {
-      return cn(colors.glass, colors.text, "border backdrop-blur-md");
+      return cn(colors.glass, colors.text, "border");
     }
     default: {
       return cn(colors.bg, colors.text, "border", colors.border);

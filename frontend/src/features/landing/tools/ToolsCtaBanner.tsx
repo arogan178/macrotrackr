@@ -14,7 +14,7 @@ interface ToolsCtaBannerProps {
  */
 function ToolsCtaBanner({ heading, body }: ToolsCtaBannerProps) {
   return (
-    <section className="mt-12 rounded-2xl border border-primary/30 bg-surface p-6 text-center sm:p-8">
+    <section className="mt-12 rounded-card border border-primary/30 bg-surface p-6 text-center sm:p-8">
       <h2 className="text-xl font-bold text-foreground sm:text-2xl">
         {heading}
       </h2>

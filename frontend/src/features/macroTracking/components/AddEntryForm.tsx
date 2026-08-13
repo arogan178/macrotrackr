@@ -513,7 +513,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                       type="button"
                       onClick={() => setSaveAsMeal((previous) => !previous)}
                       className={cn(
-                        "flex items-center gap-1 rounded-md px-1.5 sm:px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
+                        "flex items-center gap-1 rounded-control px-1.5 sm:px-2 py-0.5 text-xs font-medium transition-colors cursor-pointer",
                         saveAsMeal
                           ? "bg-amber-500/15 text-amber-500 hover:bg-amber-500/25 dark:bg-amber-400/20 dark:text-amber-300"
                           : "text-muted hover:bg-muted/10 hover:text-foreground",
@@ -538,7 +538,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
                           animate={{ opacity: 1, scale: 1 }}
                           exit={{ opacity: 0, scale: 0.8 }}
                           transition={{ duration: 0.15 }}
-                          className="flex items-center gap-1 rounded-md px-1.5 sm:px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
+                          className="flex items-center gap-1 rounded-control px-1.5 sm:px-2 py-0.5 text-xs text-muted transition-colors hover:bg-error/10 hover:text-error"
                           aria-label="Clear search"
                           title="Clear search result"
                         >
@@ -631,7 +631,7 @@ function AddEntry({ onSubmit, isSaving: _isSaving }: AddEntryProps) {
             />
           </div>
 
-          <div className="mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border/40 pt-3.5 sm:pt-4">
+          <div className="mt-4 sm:mt-5 flex flex-row items-center justify-between gap-2 sm:gap-3 border-t border-border pt-3.5 sm:pt-4">
             <div className="flex items-baseline gap-1.5 sm:gap-2 shrink-0 min-w-0">
               <span className="text-[10px] sm:text-xs font-semibold uppercase tracking-wider text-muted truncate">
                 Total Calories

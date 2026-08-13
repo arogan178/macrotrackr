@@ -267,7 +267,7 @@ export default function MacroSummaryStats({
   if (!macroAvg) return null;
 
   const cardClasses =
-    "p-3.5 sm:p-4 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+    "p-3.5 sm:p-4 border border-border bg-surface transition-colors duration-200 hover:border-border-2";
 
   const trackedSubtext =
     trackedDays !== undefined

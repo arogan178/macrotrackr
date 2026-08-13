@@ -3,21 +3,29 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand palette - Modern / Spotify Inspired */
+  /* ── The closed token set ────────────────────────────────────────────────
+     Four surfaces, two hairlines, three radii, six type steps, one ring.
+     Anything outside this set is a bug: alpha variants of a surface produce
+     an unnamed shade over an opaque page, which is how ~20 of them appeared.
+     ──────────────────────────────────────────────────────────────────────── */
+
+  /* Brand */
   --color-primary: #1ed760;
-  --color-secondary: #1db954;
   --color-vibrant-accent: #1ed760;
 
-  /* Surfaces – Modern contrast hierarchy */
-  --color-background: #000000;
-  --color-surface: #121212;
-  --color-surface-2: #181818;
-  --color-surface-3: #282828;
-  --color-surface-4: #333333;
+  /* Surfaces – four opaque steps, each meaning one thing */
+  --color-background: #000000; /* page — recedes */
+  --color-surface: #121212; /* panels, bars */
+  --color-surface-2: #181818; /* rows, inputs — interactive */
+  --color-surface-3: #282828; /* active control — selected */
 
-  /* Borders */
+  /* Hairlines – resting and strong (hover / focus / selected) */
   --color-border: #282828;
   --color-border-2: #333333;
+
+  /* Radii – controls, cards, and `rounded-full` for pills */
+  --radius-control: 10px;
+  --radius-card: 16px;
 
   /* Text */
   --color-foreground: #ffffff;
@@ -43,12 +51,6 @@
   /* Shadows – only the modal casts one; nothing is darker than the page */
   --shadow-modal: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 
-  /* Neutral opacity backgrounds for depth */
-  --color-neutral-950-80: rgba(0, 0, 0, 0.8);
-  --color-neutral-950-90: rgba(0, 0, 0, 0.9);
-  --color-neutral-900-50: rgba(18, 18, 18, 0.5);
-  --color-neutral-900-80: rgba(18, 18, 18, 0.8);
-
   /* Design system easing curves */
   --ease-modal: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
@@ -66,9 +68,6 @@
 }
 .bg-surface-3 {
   background-color: var(--color-surface-3);
-}
-.bg-surface-4 {
-  background-color: var(--color-surface-4);
 }
 .border-surface-2,
 .border-border-2 {
