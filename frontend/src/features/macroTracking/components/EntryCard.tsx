@@ -2,6 +2,7 @@ import { memo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 import { ChevronDownIcon, IconButtonGroup } from "@/components/ui";
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import type { MacroEntry } from "@/types/macro";
 
 interface EntryCardProps {
@@ -41,15 +42,12 @@ export const EntryCard = memo(
       entry.ingredients && entry.ingredients.length > 1,
     );
 
+    // No enter animation and no `layout`: these rows are virtualized, so motion
+    // projection was re-measuring rows the virtualizer had already measured,
+    // and a row fading up 12px while the list scrolls under it reads as jitter
+    // rather than arrival.
     return (
-      <motion.div
-        className="rounded-card border border-border bg-surface p-3 sm:p-4"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -12 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        layout
-      >
+      <div className="rounded-card border border-border bg-surface p-3 sm:p-4">
         <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             {isSelectionMode && (
@@ -73,7 +71,7 @@ export const EntryCard = memo(
                 <motion.div
                   initial={false}
                   animate={{ rotate: isExpanded ? -180 : 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: DURATIONS.instant }}
                 >
                   <ChevronDownIcon className="h-4 w-4" />
                 </motion.div>
@@ -130,8 +128,8 @@ export const EntryCard = memo(
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{
-                height: { duration: 0.3, ease: "easeInOut" },
-                opacity: { duration: 0.2 },
+                height: { duration: DURATIONS.base, ease: EASINGS.out },
+                opacity: { duration: DURATIONS.base },
               }}
               className="mt-4 overflow-hidden border-t border-border"
             >
@@ -168,7 +166,7 @@ export const EntryCard = memo(
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     );
   },
 );

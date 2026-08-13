@@ -15,6 +15,7 @@ import {
   PlusCircleIcon,
   StateCard,
 } from "@/components/ui";
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import { HistoryLimits, MacroEntry } from "@/types/macro";
 import { todayISO } from "@/utils/dateUtilities";
 
@@ -318,12 +319,11 @@ const EntryHistoryComponent = function EntryHistory({
     setDateToDelete(undefined);
   }, []);
 
+  // No enter animation on this panel. It sits inside PageTransition, which
+  // already cross-fades the page, and the AnimatedNumber counts in the header
+  // are the only motion here that carries information.
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-    >
+    <div>
       <div className="mb-5 flex items-center justify-between gap-4 lg:hidden">
         <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
@@ -360,11 +360,7 @@ const EntryHistoryComponent = function EntryHistory({
       </div>
 
       <div className="mb-6 hidden flex-row items-center justify-between gap-4 lg:flex">
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1, duration: 0.3 }}
-        >
+        <div>
           <h2 className="text-xl font-semibold tracking-tight text-foreground">
             Entry History
           </h2>{" "}
@@ -374,7 +370,7 @@ const EntryHistoryComponent = function EntryHistory({
             <AnimatedNumber value={totalEntries.length} />{" "}
             {totalEntries.length === 1 ? "day" : "days"}
           </p>
-        </motion.div>
+        </div>
         <div className="flex gap-2">
           {history.length > 0 && (
             <Button
@@ -416,12 +412,7 @@ const EntryHistoryComponent = function EntryHistory({
           }}
         />
       ) : (
-        <motion.div
-          className="overflow-hidden rounded-control border border-border bg-transparent"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3, ease: "easeOut" }}
-        >
+        <div className="overflow-hidden rounded-control border border-border bg-transparent">
           <EntryHistoryContext.Provider value={controller}>
             <div className="hidden lg:block">
               <DesktopEntryTable groupedEntries={displayedEntries} />
@@ -433,14 +424,10 @@ const EntryHistoryComponent = function EntryHistory({
           </EntryHistoryContext.Provider>
 
           {((hasMoreDates || hasMore) || displayedDateCount > 5) && (
-            <motion.div
-              className="flex justify-center py-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+            <div className="flex justify-center py-4">
               {(hasMoreDates || hasMore) && (
-                <motion.button
+                <button
+                  type="button"
                   onClick={loadMoreDates}
                   className={`flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground ${
                     isLoadingMore ? "cursor-not-allowed opacity-60" : ""
@@ -450,48 +437,34 @@ const EntryHistoryComponent = function EntryHistory({
                   {isLoadingMore && <LoadingSpinner />}
                   <span>Load More Dates</span>
                   <ChevronDownIcon className="h-4 w-4 text-foreground" />
-                </motion.button>
+                </button>
               )}
 
               {!hasMoreDates && !hasMore && displayedDateCount > 5 && (
-                <motion.button
+                <button
+                  type="button"
                   onClick={showLessDates}
                   className="flex items-center gap-2 rounded-control border border-border bg-transparent px-4 py-2 text-sm text-muted transition-colors hover:bg-surface hover:text-foreground"
                 >
-                  <AnimatePresence mode="wait">
-                    <motion.span
-                      key="show-less"
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      Show Less
-                    </motion.span>
-                  </AnimatePresence>
+                  <span>Show Less</span>
                   <ChevronDownIcon className="h-4 w-4 rotate-180" />
-                </motion.button>
+                </button>
               )}
-            </motion.div>
+            </div>
           )}
 
           {/* Free tier upgrade prompt for older entries */}
           {limits?.isRestricted && limits.upgradePrompt && (
-            <motion.div
-              className="border-t border-border bg-surface-2 py-4"
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-            >
+            <div className="border-t border-border bg-surface-2 py-4">
               <ProFeature>
                 <div className="flex items-center justify-center gap-2 px-4 text-sm text-muted">
                   <LockIcon className="h-4 w-4 text-primary" />
                   <span>{limits.upgradePrompt}</span>
                 </div>
               </ProFeature>
-            </motion.div>
+            </div>
           )}
-        </motion.div>
+        </div>
       )}
 
       {/* Floating Action Bar for Meal Grouping - Portalled to body */}
@@ -499,10 +472,14 @@ const EntryHistoryComponent = function EntryHistory({
         createPortal(
           <AnimatePresence>
             <motion.div
-              initial={{ opacity: 0, y: 50, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 50, scale: 0.95 }}
-              transition={{ type: "spring", stiffness: 400, damping: 30 }}
+              // The one place travel is right: a fixed overlay sliding up from
+              // the edge it belongs to, on the same curve as the bottom sheet.
+              // It is position-fixed, so nothing reflows behind it. The scale
+              // that used to ride along was doing no work the slide wasn't.
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 24 }}
+              transition={{ duration: DURATIONS.base, ease: EASINGS.modal }}
               // Sits above the tab bar and clear of the home indicator; it
               // used to be pinned to bottom-6 with no safe-area padding.
               style={{ bottom: "calc(5.5rem + var(--sab))" }}
@@ -627,7 +604,7 @@ const EntryHistoryComponent = function EntryHistory({
           </div>
         </div>
       </Modal>
-    </motion.div>
+    </div>
   );
 };
 

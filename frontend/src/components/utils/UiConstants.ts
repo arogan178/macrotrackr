@@ -176,6 +176,28 @@ export const BUTTON_SIZES = {
   lg: "min-h-12 px-5 py-3 text-base",
 } as const;
 
+// Motion. Three durations and two curves, because 23 durations and 9 ease
+// spellings is the same failure as 20 surface fills: call sites inventing a
+// value because the system named none.
+//
+// This product is numbers in, numbers out, read at arm's length mid-meal. The
+// only thing motion has to say is "that number changed" — which is `value`,
+// and which `AnimatedNumber` owns. `instant` is for a control already under the
+// finger. `base` is for something the user asked to appear. Nothing else gets a
+// duration, and nothing animates position: travel reflows the text being read.
+export const DURATIONS = {
+  instant: 0.12,
+  base: 0.2,
+  value: 0.45,
+} as const;
+
+// Mirrors --ease-out / --ease-modal in style.css. `modal` is the sheet curve
+// and belongs to the sheet; everything else entering uses `out`.
+export const EASINGS = {
+  out: [0.16, 1, 0.3, 1],
+  modal: [0.32, 0.72, 0, 1],
+} as const;
+
 // Icon positions
 export const ICON_POSITIONS = {
   LEFT: "left",

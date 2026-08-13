@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { motion } from "motion/react";
 
 import { macrosApi } from "@/api/macros";
 import ProFeature from "@/components/billing/ProFeature";
@@ -218,14 +217,7 @@ export default function ReportingPage() {
                       </ProFeature>
 
                       <div className="grid grid-cols-1 gap-3.5 sm:gap-6 md:grid-cols-2">
-                        <motion.div
-                          className="flex w-full min-w-0"
-                          initial={{ opacity: 0, y: 12 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -12 }}
-                          transition={{ duration: 0.25, ease: "easeOut" }}
-                          layout
-                        >
+                        <div className="flex w-full min-w-0">
                           {(() => {
                             const { startDate: rangeStart, endDate: rangeEnd } =
                               getDateRangeData(dateRange);
@@ -240,19 +232,8 @@ export default function ReportingPage() {
                               </div>
                             );
                           })()}
-                        </motion.div>
-                        <motion.div
-                          className="flex w-full min-w-0"
-                          initial={{ opacity: 0, y: 12 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -12 }}
-                          transition={{
-                            duration: 0.25,
-                            ease: "easeOut",
-                            delay: 0.05,
-                          }}
-                          layout
-                        >
+                        </div>
+                        <div className="flex w-full min-w-0">
                           <div className="w-full">
                             <MacroDensityBreakdown
                               data={macroDensityData}
@@ -261,7 +242,7 @@ export default function ReportingPage() {
                               isHistoryReady={isHistoryReady}
                             />
                           </div>
-                        </motion.div>
+                        </div>
                       </div>
 
                       <ProFeature>
