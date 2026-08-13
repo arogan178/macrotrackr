@@ -6,6 +6,7 @@ import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 
 import AppHeader from "./AppHeader";
+import PageBackground from "./PageBackground";
 
 // Static route configuration - defined outside component to avoid recreation
 const PUBLIC_ROUTES = new Set([
@@ -58,6 +59,9 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background text-foreground">
+      {/* One instance for the app, rather than a full-viewport mix-blend-overlay
+          that re-mounts on every navigation. */}
+      <PageBackground />
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-60 focus:rounded-control focus:border focus:border-border-2 focus:bg-surface focus:px-3 focus:py-2 focus:text-sm focus:text-foreground"

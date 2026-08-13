@@ -1,6 +1,5 @@
 import React from "react";
 
-import PageBackground from "@/components/layout/PageBackground";
 import { cn } from "@/lib/classnameUtilities";
 
 /**
@@ -29,7 +28,6 @@ interface PageShellProps {
   offsetHeader?: boolean;
   /** Vertical rhythm below the content, before the safe area. */
   className?: string;
-  background?: boolean;
   as?: "main" | "div";
   id?: string;
 }
@@ -39,16 +37,10 @@ const PageShell: React.FC<PageShellProps> = ({
   width = "app",
   offsetHeader = true,
   className,
-  background = true,
   as: Element = "main",
   id,
 }) => (
   <div className="relative min-h-screen text-foreground">
-    {background ? (
-      <div className="pointer-events-none absolute inset-0" aria-hidden="true">
-        <PageBackground />
-      </div>
-    ) : null}
     <Element
       id={id}
       className={cn(

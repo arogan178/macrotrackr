@@ -1,9 +1,9 @@
-import CardContainer from "@/components/form/CardContainer";
 import DateField from "@/components/form/DateField";
 import Dropdown from "@/components/form/Dropdown";
 import NumberField from "@/components/form/NumberField";
 import TextField from "@/components/form/TextField";
 import { Button } from "@/components/ui";
+import Panel from "@/components/ui/Panel";
 import { type Gender, type UserSettings } from "@/types/user";
 import { ACTIVITY_LEVELS, GENDER_OPTIONS } from "@/utils/userConstants";
 
@@ -52,8 +52,9 @@ export default function ProfileForm({
   };
 
   return (
-    <CardContainer className="p-3.5 sm:p-6">
-      <form onSubmit={onSubmit} className="space-y-4 sm:space-y-5">
+    <Panel padding="none">
+      <form onSubmit={onSubmit}>
+        <div className="space-y-4 p-4 sm:space-y-5 sm:p-6">
         <div className="grid grid-cols-1 gap-3.5 sm:gap-4 md:grid-cols-2">
           <TextField
             label="First Name"
@@ -144,19 +145,25 @@ export default function ProfileForm({
           />
         </div>
 
-        {/* Submit button section */}
-        <div className="mt-4 sm:mt-6 flex justify-end">
+        </div>
+
+        {/* The unsaved indicator and the save action are the same object, and
+            it stays reachable: on a phone the button used to be off-screen
+            from the badge that told you there was something to save. */}
+        <div className="sticky bottom-0 z-20 flex items-center justify-between gap-3 border-t border-border bg-surface-2 px-4 py-3 pb-[calc(0.75rem+var(--sab))] sm:px-6">
+          <span className="text-xs text-muted" aria-live="polite">
+            {hasChanges ? "Unsaved changes" : "All changes saved"}
+          </span>
           <Button
             type="submit"
             isLoading={isSaving}
             disabled={!hasChanges || Object.keys(formErrors).length > 0}
-            text="Save Changes"
+            text="Save changes"
             buttonSize="md"
             variant="primary"
-            className="w-full sm:w-auto"
           />
         </div>
       </form>
-    </CardContainer>
+    </Panel>
   );
 }

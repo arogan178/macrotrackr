@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { motion } from "motion/react";
 
+import UpgradeModal from "@/components/billing/UpgradeModal";
 import {
   Button,
   ExportIcon,
@@ -28,11 +30,15 @@ export default function DateRangeSelector({
   isPro = false,
 }: DateRangeSelectorProps) {
   const hasProAccess = isLocalAuthMode || isPro;
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
-  // Handle range change with free tier restrictions
+  // A locked range used to look clickable and then do nothing at all. It now
+  // says what it is and offers the one thing that unlocks it.
   const handleRangeChange = (range: string) => {
     if (disabledRanges.includes(range)) {
-      return; // Don't allow selection of disabled ranges
+      setUpgradeOpen(true);
+
+      return;
     }
     onRangeChange(range);
   };
@@ -44,18 +50,17 @@ export default function DateRangeSelector({
       <span className="flex items-center gap-1">
         {option.label}
         {disabledRanges.includes(option.value) && (
-          <LockIcon className="h-3 w-3 text-muted" />
+          <LockIcon className="h-3 w-3 text-muted" aria-label="Pro only" />
         )}
       </span>
     ),
-    disabled: disabledRanges.includes(option.value),
   }));
 
   return (
     <motion.div
       layout
-      className="sticky top-24 z-30 mb-6 rounded-control border border-border bg-surface p-3 shadow-lg"
-      style={{ position: "sticky" }}
+      className="sticky z-30 mb-6 rounded-card border border-border bg-surface p-3"
+      style={{ top: "var(--header-offset)" }}
     >
       <div className="flex w-full items-center justify-between gap-2 sm:gap-4">
         <div className="flex flex-wrap items-center gap-2 sm:gap-3 min-w-0">
@@ -64,7 +69,6 @@ export default function DateRangeSelector({
             items={items}
             activeKey={currentRange}
             onChange={handleRangeChange}
-            rounded-control="rounded-control"
             isMotion
             layoutId="activeRangeHighlight"
             size="sm"
@@ -72,7 +76,7 @@ export default function DateRangeSelector({
           />
           {!hasProAccess && (
             <span className="w-full text-xs text-muted sm:w-auto">
-              Pro: Unlock 30 & 90 day views
+              30 and 90 day views are Pro
             </span>
           )}
         </div>
@@ -100,6 +104,14 @@ export default function DateRangeSelector({
           </div>
         </div>
       </div>
+      <UpgradeModal
+        open={upgradeOpen}
+        onClose={() => setUpgradeOpen(false)}
+        onUpgrade={() => {
+          setUpgradeOpen(false);
+          globalThis.location.href = "/pricing";
+        }}
+      />
     </motion.div>
   );
 }

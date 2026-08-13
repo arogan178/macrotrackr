@@ -96,7 +96,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
   }
 
   return (
-    <div className="group relative my-6 overflow-hidden rounded-control bg-[#1e1e1e] shadow-xl ring-1 ring-white/10">
+    <div className="group relative my-6 overflow-hidden rounded-control bg-[#1e1e1e] border border-border-2">
       <div className="flex items-center justify-between border-b border-border bg-black/30 px-4 py-2">
         <span className="text-xs font-medium text-white/60 uppercase">
           {language || "text"}
@@ -192,7 +192,7 @@ const markdownComponents = {
     <strong className="font-semibold text-foreground">{children}</strong>
   ),
   blockquote: ({ children }: { children?: React.ReactNode }) => (
-    <blockquote className="my-10 rounded-card border border-primary/20 bg-primary/6 px-6 py-5 text-lg leading-8 text-foreground/82 italic shadow-sm">
+    <blockquote className="my-10 rounded-card border-l-2 border-primary bg-surface-2 px-6 py-5 text-lg leading-8 italic">
       {children}
     </blockquote>
   ),
@@ -213,7 +213,7 @@ const markdownComponents = {
     <ContentImage
       src={src}
       alt={alt ?? ""}
-      containerClassName="my-10 overflow-hidden rounded-card shadow-xl ring-1 ring-border/50"
+      containerClassName="my-10 overflow-hidden rounded-card border border-border"
       className="w-full rounded-control"
       loading="lazy"
     />
@@ -399,7 +399,7 @@ const BlogArticlePage: React.FC = () => {
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45, delay: 0.05 }}
-            className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface shadow-xl"
+            className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface"
           >
             {post.image ? (
               <ContentImage

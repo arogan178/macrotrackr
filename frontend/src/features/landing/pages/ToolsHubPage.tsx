@@ -1,7 +1,6 @@
 import { Link } from "@tanstack/react-router";
 
 import AppHeader from "@/components/layout/AppHeader";
-import PageBackground from "@/components/layout/PageBackground";
 import { ArrowRightIcon } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
@@ -32,7 +31,6 @@ export default function ToolsHubPage() {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
-      <PageBackground />
       {schemaScript && (
         <script
           type="application/ld+json"
