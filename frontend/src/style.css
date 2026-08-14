@@ -11,18 +11,36 @@
 
   /* Brand — green means the product: primary action, live value, confirmation.
      It was also protein, success and "vibrant accent", i.e. four meanings and
-     therefore none. */
-  --color-primary: #1ed760;
+     therefore none.
 
-  /* Surfaces – four opaque steps, each meaning one thing */
-  --color-background: #000000; /* page — recedes */
-  --color-surface: #121212; /* panels, bars */
-  --color-surface-2: #181818; /* rows, inputs — interactive */
-  --color-surface-3: #282828; /* active control — selected */
+     The green was #1ed760 and the surfaces below it were #121212 / #181818 /
+     #282828 with #b3b3b3 text. That is not a palette resembling Spotify's, it
+     is Spotify's, value for value. Green is right here — a saturated accent
+     earns its keep on a near-black page, which is why it was reached for — so
+     the hue moves rather than the decision.
 
-  /* Hairlines – resting and strong (hover / focus / selected) */
-  --color-border: #282828;
-  --color-border-2: #333333;
+     #1ed760 sits at hue 141°: a mint, leaning blue. This sits at 112°:
+     chlorophyll, the colour of the food rather than of an app. Luminance is
+     matched deliberately (10.8:1 on black against the old 10.9:1) so it carries
+     the same weight in the same places, and black text on it clears 4.5:1 for
+     the same reason. */
+  --color-primary: #4ad435;
+
+  /* Surfaces – four opaque steps, each meaning one thing.
+     Warmed off neutral by a few points of red: against a yellow-green accent a
+     cold grey reads as screen, a warm one reads as printed stock. The step
+     sizes are unchanged, so every contrast decision built on them still holds. */
+  --color-background: #000000; /* page — recedes, and OLED-black on a phone */
+  --color-surface: #141211; /* panels, bars */
+  --color-surface-2: #1b1917; /* rows, inputs — interactive */
+  --color-surface-3: #2b2724; /* active control — selected */
+
+  /* Hairlines – resting and strong (hover / focus / selected), and now also the
+     two rule weights a panel divides itself with. The strong one was #3b3733,
+     which at 2px on #141211 was invisible: the grade existed in the code and
+     not on the screen. Checked at 390px before this value was picked. */
+  --color-border: #2b2724;
+  --color-border-2: #55504a;
 
   /* Radii – controls, cards, and `rounded-full` for pills */
   --radius-control: 10px;
@@ -30,13 +48,13 @@
 
   /* Text */
   --color-foreground: #ffffff;
-  --color-muted: #b3b3b3;
+  --color-muted: #aba49c; /* warm grey, 8.5:1 on black */
 
   /* Text opacity hierarchy */
   --text-primary: rgba(255, 255, 255, 1);
   --text-secondary: rgba(255, 255, 255, 0.85);
   --text-body: rgba(255, 255, 255, 0.7);
-  --text-muted: #b3b3b3;
+  --text-muted: #aba49c;
   --text-hint: rgba(255, 255, 255, 0.35);
 
   /* Macros — no macro is green, and none of them is the error red either:
@@ -47,7 +65,7 @@
   --color-fats: #f97316;
 
   /* Feedback — success is the brand green, deliberately: one green. */
-  --color-success: #1ed760;
+  --color-success: #4ad435;
   --color-warning: #f59e0b;
   --color-error: #e91429;
 

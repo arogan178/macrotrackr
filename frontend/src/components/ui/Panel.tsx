@@ -10,7 +10,16 @@ import { cn } from "@/lib/classnameUtilities";
  * shadow (nothing is darker than #000) and never from a box inside a box.
  * Sections within a panel are separated by dividers, which say "same group";
  * a border would say "different thing".
+ *
+ * The dividers are graded, and the grade is information. A nutrition panel
+ * separates its major blocks with a heavy rule and its sub-rows with a
+ * hairline, so you can see the structure before you have read a word of it.
+ * Here: `RULE_SECTION` (2px, strong hairline) divides a panel from its header
+ * and footer; `RULE_HAIRLINE` (1px, resting) divides rows inside the body.
+ * Two weights, and the heavier one always means the larger division.
  */
+export const RULE_SECTION = "border-border-2";
+export const RULE_HAIRLINE = "border-border";
 export const PANEL_CLASS =
   "rounded-card border border-border bg-surface overflow-hidden";
 
@@ -66,7 +75,8 @@ const Panel: React.FC<PanelProps> = ({
       {hasHeader && (
         <div
           className={cn(
-            "flex flex-wrap items-start justify-between gap-3 border-b border-border",
+            "flex flex-wrap items-start justify-between gap-3 border-b-2",
+            RULE_SECTION,
             padding === "none" ? "p-4 sm:p-6" : PADDING[padding],
           )}
         >
@@ -87,7 +97,8 @@ const Panel: React.FC<PanelProps> = ({
       {footer ? (
         <div
           className={cn(
-            "border-t border-border bg-surface-2",
+            "border-t-2 bg-surface-2",
+            RULE_SECTION,
             padding === "none" ? "p-4 sm:p-6" : PADDING[padding],
           )}
         >
