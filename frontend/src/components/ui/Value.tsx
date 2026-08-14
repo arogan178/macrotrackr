@@ -6,15 +6,19 @@ import { cn } from "@/lib/classnameUtilities";
 export type ValueSize = "hero" | "stat" | "inline";
 export type ValueUnit = "kcal" | "g" | "kg" | "lb" | "%" | "";
 
+// The figures are the product, so this is where the width axis earns the font
+// file. `hero` runs condensed and heavier than it did: a nutrition panel sets
+// its calorie count narrow and bold, not light and wide, because the number has
+// to survive being read from across a kitchen. `inline` stays at normal width —
+// it sits inside sentences, where condensed type only costs legibility.
 const SIZE_CLASS: Record<ValueSize, string> = {
-  // Light weight at display size, regular below.
-  hero: "text-4xl font-light tracking-tight",
-  stat: "text-xl font-normal tracking-tight",
+  hero: "font-stretch-condensed text-5xl font-bold tracking-tight",
+  stat: "font-stretch-condensed text-2xl font-semibold tracking-tight",
   inline: "text-sm",
 };
 
 const UNIT_CLASS: Record<ValueSize, string> = {
-  hero: "text-sm",
+  hero: "text-base",
   stat: "text-xs",
   inline: "text-xs",
 };

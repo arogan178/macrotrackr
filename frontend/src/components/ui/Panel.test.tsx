@@ -19,14 +19,17 @@ describe("Panel", () => {
   it("omits the header row entirely when there is nothing to put in it", () => {
     const { container } = render(<Panel>content</Panel>);
 
-    expect(container.querySelectorAll(".border-b")).toHaveLength(0);
+    expect(container.querySelectorAll(".border-b-2")).toHaveLength(0);
   });
 
-  it("separates the footer with a divider rather than a nested box", () => {
+  it("separates the footer with a section rule rather than a nested box", () => {
     const { container } = render(<Panel footer={<span>Save</span>}>body</Panel>);
 
+    // The heavier of the two rule weights: a footer is a major division, and
+    // the grade is what says so before the content is read.
     const footer = screen.getByText("Save").parentElement;
-    expect(footer).toHaveClass("border-t");
+    expect(footer).toHaveClass("border-t-2");
+    expect(footer).toHaveClass("border-border-2");
     expect(container.querySelectorAll(".rounded-card")).toHaveLength(1);
   });
 
@@ -64,7 +67,7 @@ describe("Heading", () => {
     );
 
     expect(screen.getByRole("heading", { level: 2 })).toHaveClass(
-      "text-2xl",
+      "text-[1.75rem]",
     );
   });
 });

@@ -15,9 +15,9 @@ export default function TrendDisplay({
   unit = "g",
 }: TrendDisplayProps) {
   const colorMap: Record<string, string> = {
-    up: "var(--color-success, #1ed760)",
+    up: "var(--color-success, #4ad435)",
     down: "var(--color-error, #e91429)",
-    stable: "var(--text-muted, #b3b3b3)",
+    stable: "var(--text-muted, #aba49c)",
   };
   const strokeColor = colorMap[trend.direction] ?? colorMap.stable;
 

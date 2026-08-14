@@ -93,6 +93,50 @@ them rises.
   The numbers may fall freely; raising one requires editing the budget file in
   the same change, which puts the trade-off in the diff.
 
+## Phase 8 — motion, measured
+
+- The motion budget counted files importing `motion/react` and asked for 20.
+  Wrong instrument: every other budget counts *distinct values*, because a call
+  site inventing a value is the drift. Counted directly, motion had 23
+  durations, 9 ease spellings, 55 hand-written `initial`/`animate` triples
+  across 27 files, `scale` from 0.8 to 1.5 against a documented 2% ceiling, and
+  2 of 43 files honouring `prefers-reduced-motion`.
+- Proof the old budget was blind: removing ten hand-written animations moved
+  `motionFiles` from 43 to 43.
+- `DURATIONS` and `EASINGS` join the other tokens — three durations, two curves.
+  `<Reveal>` gives call sites a named intent instead of numbers, opacity-only,
+  with stagger as an ordinal step.
+- Deleted the two animations phase 2 asked for and never got: `ReportingPage`'s
+  per-card travel plus `layout`, and `EntryCard`'s `layout` inside the
+  virtualized list. `EntryHistoryPanel` went from seven declarations to one.
+- New budgets: `motionDurations`, `motionEasings`, `motionCallSites`,
+  `layoutProjection`. `motionFiles` stays as a loose backstop only.
+
+## Phase 9 — an identity of its own
+
+- The palette was Spotify's, value for value: `#1ed760` over `#121212` /
+  `#181818` / `#282828` with `#b3b3b3` text. Phase 6.4 spotted the green,
+  called it "optional and reversible in one line", and never shipped; the
+  green was never the main problem, the whole ramp was lifted.
+- Green stays — a saturated accent earns its keep on a near-black page, which
+  is why it was reached for. The hue moves: `#4ad435`, hue 112° against
+  Spotify's 141°, luminance matched (10.8:1 vs 10.9:1) so it carries the same
+  weight in the same places. Surfaces warm a few points off neutral so a
+  yellow-green accent reads as printed stock rather than screen grey.
+- Inter out, **Archivo** in — one variable file, but carrying a width axis.
+  The product is a nutrition panel: four numbers converging on four targets,
+  read at arm's length. Panels solve that with condensed grotesque figures,
+  which is a measurement decision before a stylistic one — condensed digits fit
+  more significant places in the same column, and at 390px three macro values
+  share ~108px each. Display, page and micro steps run condensed; body copy
+  does not. Costs 42 KB over Inter, precached.
+- Panel dividers are graded, and the grade is information: 2px strong rule for
+  header/footer divisions, 1px hairline for rows inside. Checked at 390px —
+  the first value for the strong rule was invisible, so `--color-border-2`
+  moved from `#3b3733` to `#55504a`.
+- Icons regenerated in the new green; `mark.svg`, chart constants, the Remotion
+  hero and `TrendDisplay` no longer carry hardcoded old hexes.
+
 ## Next
 
 Horizons from the plan's "How it grows" tab, deliberately not started: a charts
