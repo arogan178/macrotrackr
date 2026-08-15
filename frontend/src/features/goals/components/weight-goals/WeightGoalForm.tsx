@@ -330,7 +330,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               disabled={Boolean(weightGoals)}
             />
             {fieldErrors.startingWeight && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-sm text-error">
                 {fieldErrors.startingWeight}
               </p>
             )}
@@ -355,7 +355,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               required
             />
             {fieldErrors.targetWeight && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-sm text-error">
                 {fieldErrors.targetWeight}
               </p>
             )}

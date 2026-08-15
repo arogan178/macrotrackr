@@ -122,14 +122,14 @@ function FloatingNotification({
   const styles = {
     success: {
       bg: "bg-gradient-to-r from-green-900/95 to-green-800/95",
-      border: "border-green-500/40",
+      border: "border-success/40",
       icon: "text-success",
       progress: "bg-success",
       component: <CheckIcon className="" />,
     },
     error: {
       bg: "bg-gradient-to-r from-red-900/95 to-red-800/95",
-      border: "border-red-500/40",
+      border: "border-error/40",
       icon: "text-error",
       progress: "bg-primary",
       component: <CloseIcon className="" />,

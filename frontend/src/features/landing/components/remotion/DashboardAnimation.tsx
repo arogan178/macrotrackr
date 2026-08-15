@@ -12,7 +12,7 @@ const POSITIONS = {
 const MACRO_COLORS = {
   protein: "#10b981",
   carbs: "#3b82f6",
-  fats: "#f59e0b",
+  fats: "#facc15",
 } as const;
 
 const CURSOR_EASE = Easing.out(Easing.quad);
@@ -188,7 +188,7 @@ export const DashboardAnimation: React.FC = () => {
                 </div>
                 <div
                   className="flex h-8 w-20 items-center justify-center rounded-control"
-                  style={{ backgroundColor: '#4ad435', transform: `scale(${interpolate(searchButtonClick, [0, 0.5, 1], [1, 0.95, 1])})` }}
+                  style={{ backgroundColor: '#57c04a', transform: `scale(${interpolate(searchButtonClick, [0, 0.5, 1], [1, 0.95, 1])})` }}
                 >
                   <div className="h-3 w-12 rounded-control bg-surface-3" />
                 </div>
@@ -226,7 +226,7 @@ export const DashboardAnimation: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-3">
-                {["#4ad435", "#3b82f6", "#ef4444"].map((color, index) => (
+                {["#57c04a", "#3b82f6", "#ef4444"].map((color, index) => (
                   <div key={index} className="rounded-control border border-border bg-surface-2 p-2">
                     <div className="mb-1.5 flex items-center gap-1.5">
                       <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: color }} />
@@ -250,7 +250,7 @@ export const DashboardAnimation: React.FC = () => {
                 <div className="h-3 w-24 rounded-control bg-surface-3" />
                 <div
                   className="flex h-7 w-20 items-center justify-center rounded-control"
-                  style={{ backgroundColor: '#4ad435', transform: `scale(${interpolate(addEntryClick, [0, 0.5, 1], [1, 0.95, 1])})` }}
+                  style={{ backgroundColor: '#57c04a', transform: `scale(${interpolate(addEntryClick, [0, 0.5, 1], [1, 0.95, 1])})` }}
                 >
                   <div className="h-3 w-12 rounded-control bg-surface-3" />
                 </div>

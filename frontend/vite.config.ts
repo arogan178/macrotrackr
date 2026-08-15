@@ -85,8 +85,8 @@ export default defineConfig(({ command }) => {
                     url: "/reporting",
                   },
                 ],
-                background_color: "#000000",
-                theme_color: "#000000",
+                background_color: "#0c0a09",
+                theme_color: "#0c0a09",
                 // `any` and `maskable` are different drawings, not the same
                 // file declared twice: a maskable icon is cropped to a circle
                 // or squircle, so it needs its own safe padding.

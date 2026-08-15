@@ -77,7 +77,7 @@ function ResetPasswordForm() {
         />
 
         {confirmPassword.length > 0 && !passwordsMatch && (
-          <p className="text-sm text-red-500">Passwords do not match</p>
+          <p className="text-sm text-error">Passwords do not match</p>
         )}
 
         <Button
