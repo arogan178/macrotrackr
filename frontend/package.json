@@ -1,7 +1,7 @@
 {
   "name": "macrotrackr-frontend",
   "private": true,
-  "version": "2.6.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "bunx vite",
@@ -24,7 +24,8 @@
     "cap:run:android": "bunx cap run android",
     "build:analyze": "bunx vite build --mode analyze",
     "bundle:size": "node scripts/analyze-bundle.js",
-    "ui:budgets": "node ./scripts/check-ui-budgets.mjs"
+    "ui:budgets": "node ./scripts/check-ui-budgets.mjs",
+    "release:blog": "node ./scripts/release-note-to-blog.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
