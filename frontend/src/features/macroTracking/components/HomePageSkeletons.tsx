@@ -2,7 +2,7 @@ import Panel from "@/components/ui/Panel";
 import Skeleton from "@/components/ui/Skeleton";
 
 export const AddEntryLoadingSkeleton = () => (
-  <Panel className="flex h-full flex-col justify-between">
+  <Panel className="flex flex-col">
     <div className="mb-5 flex items-center justify-between">
       <Skeleton className="h-6 w-1/3" />
     </div>
