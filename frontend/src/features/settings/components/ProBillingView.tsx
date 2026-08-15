@@ -9,7 +9,6 @@ import {
   Modal,
   WarningIcon,
 } from "@/components/ui";
-import StatusBadge from "@/components/ui/StatusBadge";
 import { useStore } from "@/store/store";
 
 const ProBillingView: React.FC<{
@@ -33,6 +32,22 @@ const ProBillingView: React.FC<{
   const status = billingDetails?.subscription?.status ?? "unknown";
   const isCanceled = status === "canceled";
   const isActionRequired = status === "past_due" || status === "unpaid";
+  const statusLabel =
+    status === "active"
+      ? "Active"
+      : status === "past_due"
+        ? "Past Due"
+        : status === "canceled"
+          ? "Canceled"
+          : status === "unpaid"
+            ? "Unpaid"
+            : status;
+  const statusTone =
+    status === "active"
+      ? "border-success/30 bg-success/20 text-success"
+      : status === "past_due" || status === "unpaid"
+        ? "border-warning/30 bg-warning/20 text-warning"
+        : "border-border bg-surface-2 text-muted";
 
   return (
     <>
@@ -62,7 +77,11 @@ const ProBillingView: React.FC<{
                 <div className="mt-1 flex items-center" />
               </div>
             </div>
-            <StatusBadge status={status} />
+            <span
+              className={`inline-flex items-center rounded-control border px-2.5 py-1 text-xs font-semibold ${statusTone}`}
+            >
+              {statusLabel}
+            </span>
           </div>
 
           {/* Subscription details in clean grid */}
