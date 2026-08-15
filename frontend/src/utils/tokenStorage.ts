@@ -1,28 +1,15 @@
 /**
  * Secure token storage utilities
- *
- * This module provides methods to securely store and retrieve
- * authentication tokens. It uses a combination of approaches depending
- * on the environment's capabilities.
  */
 
-const isWebCryptoSupported =
-  typeof globalThis.crypto?.subtle === "object";
-
 export function securelyStoreToken(token: string, expiresAt?: number): void {
-  if (isWebCryptoSupported) {
-    localStorage.setItem("token", token);
-    if (expiresAt) {
-      localStorage.setItem("token_exp", String(expiresAt));
-    }
-    localStorage.setItem("token_stored_at", Date.now().toString());
-  } else {
-    localStorage.setItem("token", token);
-    if (expiresAt) {
-      localStorage.setItem("token_exp", String(expiresAt));
-    }
-    localStorage.setItem("token_stored_at", Date.now().toString());
+  if (!isLocalStorageAvailable()) return;
+
+  localStorage.setItem("token", token);
+  if (expiresAt) {
+    localStorage.setItem("token_exp", String(expiresAt));
   }
+  localStorage.setItem("token_stored_at", Date.now().toString());
 }
 
 export function getToken(): string | undefined {

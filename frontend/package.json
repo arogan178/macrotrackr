@@ -41,7 +41,6 @@
     "@capgo/capacitor-native-biometric": "^8.6.2",
     "@clerk/react": "^6.14.1",
     "@codetrix-studio/capacitor-google-auth": "^3.4.0-rc.4",
-    "@remotion/player": "^4.0.448",
     "@tanstack/query-async-storage-persister": "^5.99.0",
     "@tanstack/react-query": "^5.99.0",
     "@tanstack/react-query-persist-client": "^5.99.0",
@@ -60,7 +59,6 @@
     "rehype-autolink-headings": "^7.1.0",
     "rehype-slug": "^6.0.0",
     "remark-gfm": "^4.0.1",
-    "remotion": "^4.0.448",
     "tailwind-merge": "^3.5.0",
     "workbox-routing": "^7.4.1",
     "zustand": "^5.0.12"
