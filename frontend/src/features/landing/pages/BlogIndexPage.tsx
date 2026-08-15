@@ -158,7 +158,7 @@ const BlogIndexPage: React.FC = () => {
 
                     <span className="flex shrink-0 items-baseline gap-4 text-xs text-muted sm:w-44 sm:justify-end">
                       <span>{post.category}</span>
-                      <span className="tabular-nums">{post.readingTime}</span>
+                      <span className="tabular-nums">{post.readingTime} read</span>
                     </span>
                   </Link>
                 </li>

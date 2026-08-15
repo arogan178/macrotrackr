@@ -363,7 +363,7 @@ const BlogArticlePage: React.FC = () => {
             <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-y border-border py-3 text-xs text-muted">
               <span className="text-foreground">{post.category}</span>
               <span className="tabular-nums">{formatDate(post.date)}</span>
-              <span className="tabular-nums">{post.readingTime}</span>
+              <span className="tabular-nums">{post.readingTime} read</span>
             </div>
 
             <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted">
@@ -400,23 +400,21 @@ const BlogArticlePage: React.FC = () => {
             </div>
           </motion.header>
 
-          <motion.div
-            initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45, delay: 0.05 }}
-            className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface"
-          >
-            {post.image ? (
+          {post.image && (
+            <motion.div
+              initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.45, delay: 0.05 }}
+              className="relative mt-10 aspect-video overflow-hidden rounded-card border border-border bg-surface"
+            >
               <ContentImage
                 src={post.image}
                 alt={post.title}
                 loading="eager"
                 fetchPriority="high"
               />
-            ) : (
-              <div className="h-full w-full bg-muted/20" />
-            )}
-          </motion.div>
+            </motion.div>
+          )}
 
           <motion.article
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
@@ -507,22 +505,20 @@ const BlogArticlePage: React.FC = () => {
                     params={{ slug: relatedPost.slug }}
                     className="group overflow-hidden rounded-control border border-border bg-surface transition-[background-color,border-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                   >
-                    <div className="relative aspect-16/10 overflow-hidden">
-                      {relatedPost.image ? (
+                    {relatedPost.image && (
+                      <div className="relative aspect-16/10 overflow-hidden">
                         <ContentImage
                           src={relatedPost.image}
                           alt={relatedPost.title}
                           className="transition-opacity duration-200 group-hover:opacity-90"
                         />
-                      ) : (
-                        <div className="h-full w-full bg-muted/20" />
-                      )}
-                    </div>
+                      </div>
+                    )}
                     <div className="p-5">
                       <div className="flex items-center gap-2 text-[11px] font-semibold text-muted">
                         <span>{relatedPost.category}</span>
                         <span>·</span>
-                        <span>{relatedPost.readingTime}</span>
+                        <span>{relatedPost.readingTime} read</span>
                       </div>
                       <h3 className="mt-3 text-xl font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
                         {relatedPost.title}
