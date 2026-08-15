@@ -16,7 +16,7 @@ export default function AuthReadyPage() {
 
 function ClerkAuthReadyPage() {
   const navigate = useNavigate();
-  const search = useSearch({ from: "/auth-ready" }) as { redirectTo?: string };
+  const search = (useSearch({ strict: false }) ?? {}) as { redirectTo?: string };
   const redirectTo = resolveProfileSetupRedirect(search.redirectTo);
   const { error, setupAuth } = useAuthReady(redirectTo);
 
