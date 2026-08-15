@@ -1,10 +1,10 @@
 import React, { useCallback, useMemo } from "react";
 
 import { macrosApi } from "@/api/macros";
-import CardContainer from "@/components/form/CardContainer";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import UserMetricsPanel from "@/components/metrics/UserMetricsPanel";
+import Panel from "@/components/ui/Panel";
 import AddEntryForm from "@/features/macroTracking/components/AddEntryForm";
 import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
 import EditModal from "@/features/macroTracking/components/EditModal";
@@ -327,20 +327,10 @@ export default function HomePage() {
     <DashboardPageContainer>
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
         <div className="space-y-3.5 sm:space-y-6">
-          <div className="grid grid-cols-1 gap-3.5 sm:gap-5 lg:grid-cols-6">
-            <div className="flex h-full flex-col lg:col-span-4">
-              <div className="flex-1">
-                {isLoading ? (
-                  <AddEntryLoadingSkeleton />
-                ) : (
-                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
-                )}
-              </div>
-            </div>
-
-            {/* BMR and TDEE are reference figures, not the day's work: they sit
-                below the summary rather than above the log form. */}
-            <div className="flex h-full flex-col space-y-3.5 sm:space-y-5 lg:col-span-2">
+          {/* The day comes first. On a phone the summary is what the user
+              opened the app to see; the form used to push it below the fold. */}
+          <div className="grid grid-cols-1 gap-3.5 sm:gap-5 md:grid-cols-6">
+            <div className="flex h-full flex-col space-y-3.5 sm:space-y-5 md:order-2 md:col-span-2">
               {isLoading ? (
                 <DailySummaryLoadingSkeleton />
               ) : (
@@ -353,16 +343,28 @@ export default function HomePage() {
                 )
               )}
 
+              {/* BMR and TDEE are reference figures, not the day's work. */}
               <UserMetricsPanel
                 bmr={nutritionProfile?.bmr ?? 0}
                 tdee={nutritionProfile?.tdee ?? 0}
                 isLoading={isLoading}
               />
             </div>
+
+            {/* Below md the form lives in the Log sheet, reached from the tab
+                bar's primary action, so the day is what Home opens on. */}
+            <div className="hidden h-full flex-col md:order-1 md:col-span-4 md:flex">
+              <div className="flex-1">
+                {isLoading ? (
+                  <AddEntryLoadingSkeleton />
+                ) : (
+                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
+                )}
+              </div>
+            </div>
           </div>
 
-          <CardContainer variant="interactive" className="border-border/60">
-            <div className="p-3.5 sm:p-5">
+          <Panel padding="regular">
               {isLoading ? (
                 <HistoryLoadingSkeleton />
               ) : (
@@ -384,8 +386,7 @@ export default function HomePage() {
                   isExportingCsv={isExportingHistory}
                 />
               )}
-            </div>
-          </CardContainer>
+          </Panel>
 
           <EditModal
             entry={editingEntry}

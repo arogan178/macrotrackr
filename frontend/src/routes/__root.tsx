@@ -35,7 +35,7 @@ function NotFoundRouteComponent() {
       <h2 className="mb-6 text-2xl font-medium text-foreground">
         Page not found
       </h2>
-      <p className="mb-8 max-w-md text-muted-foreground">
+      <p className="mb-8 max-w-md text-muted">
         Sorry, we could not find the page you are looking for.
       </p>
       <Link

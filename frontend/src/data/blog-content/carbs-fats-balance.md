@@ -4,9 +4,9 @@ The internet loves a good macro war.
 
 Team Keto says carbs are the enemy. Team High-Carb says fat is outdated. Meanwhile, the average person just wants to know: *How much of each should I actually eat?*
 
-The answer is frustrating but true: **it depends.** Your optimal carb-to-fat ratio depends on your goals, activity level, training style, and—most importantly—what you can actually stick with long-term.
+The answer is frustrating but true: **it depends.** Your optimal carb-to-fat ratio depends on your goals, activity level, training style, and, most importantly, what you can actually stick with long-term.
 
-This guide will help you find your personal sweet spot.
+This guide will help you find your personal sweet spot. To skip to a starting split, the [macro calculator](/tools/macro-calculator) gives you one from your weight, activity and goal.
 
 ## Understanding the Roles
 
@@ -54,7 +54,7 @@ If you're unsure where to begin, start here:
 - Protein: 150g (600 calories)
 - Fat: 67g (600 calories)
 
-This isn't magical—it's just a reasonable starting point that works for many people. From here, you adjust based on your response.
+This is not magical. It is a reasonable starting point that works for many people. From here, you adjust based on your response.
 
 ## Finding Your Optimal Ratio: The Testing Method
 
@@ -307,10 +307,10 @@ There's no single "best" macro ratio. There's only the ratio that:
 
 Start with a balanced approach (40/30/30), track your response for two weeks, adjust by 10%, and repeat until you find what works.
 
-Your body will tell you what it needs—you just have to listen.
+Your body will tell you what it needs. You just have to listen.
 
 [Start tracking your macros in MacroTrackr](/register) and find your optimal balance. Free tier includes everything you need to test and refine your approach.
 
-— The MacroTrackr Team
+The MacroTrackr Team
 
 *Need help setting your targets? Email us at support@local.invalid.*

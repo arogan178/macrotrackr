@@ -61,25 +61,25 @@ export default function RecommendationsSection({
   const suggestions = [
     macroBalance.currentRatio !== "0/0/0" && {
       title: "Macro Split",
-      bgColor: "bg-purple-500/10 text-purple-400",
+      bgColor: "bg-surface-2 text-foreground",
       message: macroBalance.recommendations,
       icon: <BalanceIcon className="h-5 w-5" />,
     },
     averages.calories > 0 && {
       title: "Protein Share",
-      bgColor: "bg-primary/10 text-primary",
+      bgColor: "bg-surface-2 text-foreground",
       message: macroDensity.message,
       icon: <NutrientIcon className="h-5 w-5" />,
     },
     protein && {
       title: "Protein Intake",
-      bgColor: "bg-blue-500/10 text-blue-400",
+      bgColor: "bg-surface-2 text-foreground",
       message: protein,
       icon: <ProteinIcon className="h-5 w-5" />,
     },
     tracking && {
       title: "Tracking Gaps",
-      bgColor: "bg-emerald-500/10 text-emerald-400",
+      bgColor: "bg-surface-2 text-foreground",
       message: tracking,
       icon: <ClipboardIcon className="h-5 w-5" />,
     },
@@ -100,7 +100,7 @@ export default function RecommendationsSection({
       className="flex flex-col gap-6"
     >
       <div className="flex items-center text-foreground/90">
-        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+        <div className="mr-3 flex h-10 w-10 items-center justify-center rounded-control bg-primary/10">
           <LightningIcon className="h-5 w-5 text-primary" />
         </div>
         <h3 className="text-xl font-bold tracking-tight">Suggestions</h3>

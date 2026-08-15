@@ -60,7 +60,7 @@ export default function TdeeCalculatorPage() {
     {
       key: "lose",
       label: "Fat Loss",
-      accentClass: "text-vibrant-accent",
+      accentClass: "text-primary",
       delta: "-500 kcal/day",
       calories: Math.max(1200, tdee - 500),
     },
@@ -96,10 +96,18 @@ export default function TdeeCalculatorPage() {
       canonicalPath="/tools/tdee-calculator"
       description="Free TDEE Calculator (Total Daily Energy Expenditure). Estimate your daily maintenance calories and macro splits accurately."
       faqs={FAQS}
+      ctaResult={
+        statsReady
+          ? {
+              label: "Your TDEE",
+              value: `${Math.round(tdee).toLocaleString()} kcal / day`,
+            }
+          : undefined
+      }
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}
-        <div className={`lg:col-span-7 ${calculatorCardClass}`}>
+        <div className={`md:col-span-7 ${calculatorCardClass}`}>
           <h2 className={calculatorSectionTitleClass}>
             Your Body Stats & Activity
           </h2>
@@ -145,10 +153,10 @@ export default function TdeeCalculatorPage() {
                       type="button"
                       onClick={() => setActivityLevel(level.value)}
                       aria-pressed={isSelected}
-                      className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-xl border px-3 py-2.5 text-left text-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
+                      className={`grid w-full cursor-pointer grid-cols-[minmax(0,1fr)_auto] items-center gap-3 rounded-control border px-3 py-2.5 text-left text-xs transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
                         isSelected
                           ? "border-primary/30 bg-primary/10 font-semibold text-foreground"
-                          : "border-transparent text-muted hover:bg-surface-2/70 hover:text-foreground"
+                          : "border-transparent text-muted hover:bg-surface-2 hover:text-foreground"
                       }`}
                     >
                       <span className="leading-snug">{level.label}</span>
@@ -196,7 +204,7 @@ export default function TdeeCalculatorPage() {
                 <AnimatedNumber value={goal.calories} />{" "}
                 <span className="text-sm font-normal text-muted">kcal</span>
               </div>
-              <dl className="space-y-2 border-t border-border/60 pt-4 text-xs">
+              <dl className="space-y-2 border-t border-border pt-4 text-xs">
                 <div className={calculatorStatRowClass}>
                   <dt className={calculatorStatLabelClass}>
                     Protein · {GOAL_SPLIT.protein}%

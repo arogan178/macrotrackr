@@ -6,7 +6,7 @@ const VISIBILITY_OFFSET = 480;
 const REMAINING_PAGE_THRESHOLD = 0.4;
 
 const buttonClasses =
-  "fixed right-6 bottom-36 z-40 inline-flex items-center gap-2 rounded-full border border-border/70 bg-surface/92 px-3 py-3 text-sm font-medium text-foreground shadow-lg backdrop-blur-md transition-[background-color,border-color,color,box-shadow,transform] duration-200 hover:border-primary/40 hover:bg-surface hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:right-8 sm:bottom-32 sm:px-4";
+  "fixed right-6 bottom-36 z-40 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-3 py-3 text-sm font-medium text-foreground transition-[background-color,border-color,color,box-shadow,transform] duration-200 hover:border-primary/40 hover:bg-surface hover:text-primary focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:right-8 sm:bottom-32 sm:px-4";
 
 const buttonVariants = {
   hidden: { opacity: 0, y: 14, scale: 0.96 },

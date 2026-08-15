@@ -73,14 +73,15 @@ const MobileEntryCards = memo(
         const item = virtualItems[index];
         if (item.type === "header") return 60;
 
-        return 200;
+        // A compact row: time, name, then one line of values.
+        return 116;
       },
       overscan: 5,
     });
 
     const renderDateHeader = (group: GroupedEntry) => (
       <motion.div
-        className="flex cursor-pointer items-center justify-between border-b border-border/40 bg-surface-2/30 p-2.5 sm:p-4 transition-colors duration-300 hover:bg-surface-2/60"
+        className="flex cursor-pointer items-center justify-between border-b border-border bg-surface-2 p-2.5 sm:p-4 transition-colors duration-300 hover:bg-surface-2"
         onClick={() => toggleDateCollapse(group.date)}
         whileHover={{ backgroundColor: "var(--color-surface-2)" }}
         transition={{ duration: 0.2 }}
@@ -193,7 +194,7 @@ const MobileEntryCards = memo(
                   }}
                 >
                   {item.type === "header" ? (
-                    <div className="border-b border-border/40">
+                    <div className="border-b border-border">
                       {renderDateHeader(item.group)}
                     </div>
                   ) : (
@@ -215,7 +216,7 @@ const MobileEntryCards = memo(
           {groupedEntries.map((group) => (
             <motion.div
               key={group.date}
-              className="border-b border-border/40 last:border-b-0"
+              className="border-b border-border last:border-b-0"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}

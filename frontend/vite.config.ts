@@ -64,37 +64,50 @@ export default defineConfig(({ command }) => {
                 enabled: false,
               },
               manifest: {
-                name: "Macro Tracker",
-                short_name: "MacroTracker",
-                description: "Track your macronutrients and nutrition goals",
+                id: "/",
+                name: "MacroTrackr",
+                short_name: "MacroTrackr",
+                description:
+                  "Log meals in seconds, set a macro split, and see where the week actually went.",
                 start_url: "/",
                 display: "standalone",
-                background_color: "#18181b",
-                theme_color: "#6366f1",
+                // Shortcuts put the two things people open the app for on the
+                // launcher's long-press menu.
+                shortcuts: [
+                  {
+                    name: "Log a meal",
+                    short_name: "Log",
+                    url: "/home?log=1",
+                  },
+                  {
+                    name: "This week",
+                    short_name: "Week",
+                    url: "/reporting",
+                  },
+                ],
+                background_color: "#0c0a09",
+                theme_color: "#0c0a09",
+                // `any` and `maskable` are different drawings, not the same
+                // file declared twice: a maskable icon is cropped to a circle
+                // or squircle, so it needs its own safe padding.
                 icons: [
                   {
-                    src: "/icon.png",
-                    sizes: "192x192",
-                    type: "image/png",
-                    purpose: "any maskable",
-                  },
-                  {
-                    src: "/icon.png",
-                    sizes: "256x256",
-                    type: "image/png",
-                    purpose: "any maskable",
-                  },
-                  {
-                    src: "/icon.png",
-                    sizes: "384x384",
-                    type: "image/png",
-                    purpose: "any maskable",
+                    src: "/mark.svg",
+                    sizes: "any",
+                    type: "image/svg+xml",
+                    purpose: "any",
                   },
                   {
                     src: "/icon.png",
                     sizes: "512x512",
                     type: "image/png",
-                    purpose: "any maskable",
+                    purpose: "any",
+                  },
+                  {
+                    src: "/icon-maskable.png",
+                    sizes: "512x512",
+                    type: "image/png",
+                    purpose: "maskable",
                   },
                   {
                     src: "/favicon.ico",
@@ -105,7 +118,6 @@ export default defineConfig(({ command }) => {
                 ],
                 categories: ["health", "fitness", "lifestyle"],
                 lang: "en",
-                orientation: "portrait-primary",
               },
               srcDir: "src",
               filename: "service-worker.ts",

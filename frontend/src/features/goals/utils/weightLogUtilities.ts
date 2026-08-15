@@ -64,7 +64,7 @@ export function calculateWeightTrend(
   }
 
   const latest = recent[0].weight;
-  const oldest = recent.at(-1).weight;
+  const oldest = recent.at(-1)?.weight ?? latest;
   const change = latest - oldest;
   const averageChange = change / (recent.length - 1);
 

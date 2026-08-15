@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { BarChartIcon, BookIcon, IconButton } from "@/components/ui";
+import { BarChartIcon, BookIcon, IconButton, TabBar } from "@/components/ui";
 import { useWeightLog } from "@/hooks/queries/useGoals";
 
 import WeightGoalProgressChart from "../weight-goals/WeightGoalProgressChart";
@@ -27,33 +27,27 @@ function WeightProgressTabs() {
   // Removed unused handleBulkConfirm placeholder to satisfy no-unused-vars
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-border/40 bg-surface">
-      {/* Tab Navigation + Delete All Button */}
-      <div className="flex items-center border-b border-border pt-3 pr-8 pl-1">
-        <div className="flex">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`relative flex items-center px-4 py-3 text-sm font-medium transition-colors duration-200 ease-out focus:outline-none ${
-                activeTab === tab.id
-                  ? "text-primary"
-                  : "text-foreground hover:text-foreground"
-              }`}
-            >
-              <tab.icon className="mr-2 " />
-              {tab.label}
-              {activeTab === tab.id && (
-                <motion.div
-                  className="absolute right-0 bottom-0 left-0 h-0.5 bg-primary"
-                  layoutId="underline"
-                  transition={{ type: "spring", stiffness: 350, damping: 30 }}
-                />
-              )}
-            </button>
-          ))}
-        </div>
-        {/* Spacer */}
+    <div className="overflow-hidden rounded-card border border-border bg-surface">
+      {/* The shared TabBar, not a bespoke green-underline set. This was the last
+          tab strip in the app still drawing its own active state, so Goals had
+          two different-looking tab controls stacked on one page. */}
+      <div className="flex items-center gap-3 border-b border-border p-3">
+        <TabBar
+          items={tabs.map((tab) => ({
+            key: tab.id,
+            label: (
+              <span className="flex items-center gap-2">
+                <tab.icon className="h-4 w-4" />
+                {tab.label}
+              </span>
+            ),
+          }))}
+          activeKey={activeTab}
+          onChange={(key) => setActiveTab(key as TabId)}
+          isMotion
+          layoutId="weightProgressTab"
+          size="sm"
+        />
         <div className="flex-1" />
         {/* Delete All Button */}
         {activeTab === "list" && weightLog.length > 1 && (
@@ -62,8 +56,7 @@ function WeightProgressTabs() {
             ariaLabel="Delete all weight log entries"
             onClick={handleBulkDelete}
             disabled={isLoading}
-            tooltip="Delete All"
-            className="pl-4"
+            tooltip="Delete all"
           />
         )}
       </div>

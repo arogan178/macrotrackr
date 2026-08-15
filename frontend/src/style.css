@@ -3,56 +3,102 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brand palette - Modern / Spotify Inspired */
-  --color-primary: #1ed760;
-  --color-secondary: #1db954;
-  --color-vibrant-accent: #1ed760;
+  /* ── The closed token set ────────────────────────────────────────────────
+     Four surfaces, two hairlines, three radii, six type steps, one ring.
+     Anything outside this set is a bug: alpha variants of a surface produce
+     an unnamed shade over an opaque page, which is how ~20 of them appeared.
+     ──────────────────────────────────────────────────────────────────────── */
 
-  /* Surfaces – Modern contrast hierarchy */
-  --color-background: #000000;
-  --color-surface: #121212;
-  --color-surface-2: #181818;
-  --color-surface-3: #282828;
-  --color-surface-4: #333333;
+  /* Brand — green means the product: primary action, live value, confirmation.
+     It was also protein, success and "vibrant accent", i.e. four meanings and
+     therefore none.
 
-  /* Borders */
-  --color-border: #282828;
-  --color-border-2: #333333;
+     The green was #1ed760 and the surfaces below it were #121212 / #181818 /
+     #282828 with #b3b3b3 text. That is not a palette resembling Spotify's, it
+     is Spotify's, value for value. Green is right here — a saturated accent
+     earns its keep on a near-black page, which is why it was reached for — so
+     the hue moves rather than the decision.
+
+     #1ed760 sits at hue 141°: a mint, leaning blue. This sits at 113°:
+     chlorophyll, the colour of the food rather than of an app.
+
+     Saturation came down from 65% to 48%, toward the 41% of the logo artwork,
+     which is the only place the brand was ever actually drawn. Two reasons.
+     The artwork and the interface disagreed by 24 points, and the artwork wins
+     that argument. And a fully saturated green on a pure black page is the
+     single most common look in generated design; it was a default wearing the
+     costume of a decision. Hue is unchanged, because moving it toward the
+     logo's 140° would sit 17° from the protein green and the two would fight.
+
+     Black text on it clears 9:1, so primary buttons keep their contrast. */
+  --color-primary: #57c04a;
+
+  /* Surfaces – four opaque steps, each meaning one thing.
+     Warmed off neutral by a few points of red: against a yellow-green accent a
+     cold grey reads as screen, a warm one reads as printed stock. The step
+     sizes are unchanged, so every contrast decision built on them still holds. */
+  /* Warm near-black rather than #000. The surfaces below were already warmed
+     on the argument that a cold grey reads as screen and a warm one reads as
+     printed stock, and then the page those panels sit on was left pure
+     neutral. This continues the same ramp downward at the same hue. White on
+     it is 19.8:1, so nothing that was legible stops being legible. */
+  --color-background: #0c0a09;
+  --color-surface: #141211; /* panels, bars */
+  --color-surface-2: #1b1917; /* rows, inputs — interactive */
+  --color-surface-3: #2b2724; /* active control — selected */
+
+  /* Hairlines – resting and strong (hover / focus / selected), and now also the
+     two rule weights a panel divides itself with. The strong one was #3b3733,
+     which at 2px on #141211 was invisible: the grade existed in the code and
+     not on the screen. Checked at 390px before this value was picked. */
+  --color-border: #2b2724;
+  --color-border-2: #55504a;
+
+  /* Radii – controls, cards, and `rounded-full` for pills */
+  --radius-control: 10px;
+  --radius-card: 16px;
 
   /* Text */
   --color-foreground: #ffffff;
-  --color-muted: #b3b3b3;
+  --color-muted: #aba49c; /* warm grey, 8.5:1 on black */
 
   /* Text opacity hierarchy */
   --text-primary: rgba(255, 255, 255, 1);
   --text-secondary: rgba(255, 255, 255, 0.85);
   --text-body: rgba(255, 255, 255, 0.7);
-  --text-muted: #b3b3b3;
+  --text-muted: #aba49c;
   --text-hint: rgba(255, 255, 255, 0.35);
 
-  /* Macro colors */
-  --color-protein: #1ed760;
-  --color-carbs: #3b82f6;
-  --color-fats: #ef4444;
+  /* Macros — the two collisions worth breaking, and no more.
+     Protein was #1ed760 (byte-identical to the brand green) and fats was
+     #ef4444 (byte-identical to the error red), so protein read as "primary
+     action" and fats read as "something is wrong". Eating fat is not an error.
 
-  /* Feedback */
-  --color-success: #1ed760;
-  --color-warning: #f59e0b;
+     Protein stays green, because that is what a decade of trackers has taught
+     people to read — but emerald at 158° rather than the brand's yellow-green
+     at 112°, which is 46° of separation and legible side by side. Carbs stay
+     blue.
+
+     Fats are yellow, not orange and not red. Yellow is the older and more
+     literal convention — butter, oil, egg yolk — and it puts 54° between fats
+     and the error red, where orange left only 31°. It also reads as a distinct
+     third hue at a 6px dot, which orange beside a green did not.
+     Contrast on #000: emerald 10.9:1, blue 8.3:1, yellow 13.7:1. */
+  --color-protein: #34d399;
+  --color-carbs: #60a5fa;
+  --color-fats: #facc15;
+
+  /* Feedback — success is the brand green, deliberately: one green. */
+  --color-success: #57c04a;
+  /* Warning moves to orange so it is not 10° from the fats yellow. Fats is on
+     every macro row and every chart; warning appears in a handful of transient
+     states — so the frequent one keeps the conventional hue and the rare one
+     moves. */
+  --color-warning: #f97316;
   --color-error: #e91429;
 
-  /* Shadows – Minimalist */
-  --shadow-surface: none;
-  --shadow-primary: none;
+  /* Shadows – only the modal casts one; nothing is darker than the page */
   --shadow-modal: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
-  --shadow-card: none;
-  --shadow-card-hover: none;
-  --shadow-border: none;
-
-  /* Neutral opacity backgrounds for depth */
-  --color-neutral-950-80: rgba(0, 0, 0, 0.8);
-  --color-neutral-950-90: rgba(0, 0, 0, 0.9);
-  --color-neutral-900-50: rgba(18, 18, 18, 0.5);
-  --color-neutral-900-80: rgba(18, 18, 18, 0.8);
 
   /* Design system easing curves */
   --ease-modal: cubic-bezier(0.32, 0.72, 0, 1);
@@ -71,9 +117,6 @@
 }
 .bg-surface-3 {
   background-color: var(--color-surface-3);
-}
-.bg-surface-4 {
-  background-color: var(--color-surface-4);
 }
 .border-surface-2,
 .border-border-2 {

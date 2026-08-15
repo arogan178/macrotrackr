@@ -1,12 +1,13 @@
 import { memo, useMemo } from "react";
 
-import AnimatedNumber from "@/components/animation/AnimatedNumber";
-import CardContainer from "@/components/form/CardContainer";
 import {
   MacroDistributionBar,
   MacroTargetLegend,
 } from "@/components/macros/MacroComponents";
+import Heading from "@/components/ui/Heading";
+import Panel from "@/components/ui/Panel";
 import ProgressBar from "@/components/ui/ProgressBar";
+import Value from "@/components/ui/Value";
 import { MacroDailyTotals, MacroTargetSettings } from "@/types/macro";
 
 import {
@@ -172,140 +173,86 @@ function DailySummaryInner({
   );
 
   return (
-    <CardContainer className="h-full">
-      <div className="flex h-full flex-col gap-3 p-3">
-        <CardContainer className="border-border/60 bg-surface-2 p-4">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold tracking-tight text-foreground/90">
-              Today's Summary
-            </h2>
-            <div className="text-right">
-              <div className="text-3xl font-light tracking-tight text-foreground">
-                <AnimatedNumber
-                  value={macroCalories.total}
-                  toFixedValue={0}
-                  duration={0.8}
-                />
-              </div>
-              <div className="mt-1 text-sm text-muted">
-                <span>of </span>
-                <span className="font-medium text-foreground/80">
-                  <AnimatedNumber
-                    value={dailyCalorieTarget}
-                    toFixedValue={0}
-                    duration={0.6}
-                  />
-                </span>
-                <span> kcal</span>
+    <Panel padding="none" className="flex h-full flex-col">
+      {/* One idea — calories, then its macro breakdown — so one panel, split by
+          dividers. It used to be six bordered boxes. */}
+      <div className="p-4 sm:p-6">
+        <div className="flex items-start justify-between gap-3">
+          <Heading level="panel">Today</Heading>
+          <span className="text-xs text-muted">
+            {completionPercentages.calories}% of target
+          </span>
+        </div>
 
-                <span className="ml-1.5 font-medium text-primary">
-                  (
-                  <AnimatedNumber
-                    value={completionPercentages.calories}
-                    toFixedValue={0}
-                    suffix="%"
-                    duration={0.5}
-                  />
-                  )
-                </span>
-              </div>
+        {/* The one animated number on the page: the value that moves. */}
+        <Value
+          className="mt-3"
+          size="hero"
+          unit="kcal"
+          animate
+          value={macroCalories.total}
+          suffix={`of ${Math.round(dailyCalorieTarget).toLocaleString()}`}
+        />
+
+        <ProgressBar
+          progress={completionPercentages.calories}
+          color="accent"
+          height="lg"
+          className="mt-4"
+        />
+
+        <MacroDistributionBar
+          macros={{
+            protein: macroCalories.protein,
+            carbs: macroCalories.carbs,
+            fats: macroCalories.fats,
+          }}
+          className="mt-3"
+        />
+
+        <MacroTargetLegend
+          macros={{
+            protein: safeTotal.protein,
+            carbs: safeTotal.carbs,
+            fats: safeTotal.fats,
+          }}
+          className="mt-2"
+        />
+      </div>
+
+      <div className="flex flex-1 flex-col justify-end">
+        {macroData.map((macro) => (
+          <div
+            key={macro.name}
+            className="border-t border-border px-4 py-3 sm:px-6"
+          >
+            <div className="flex items-baseline justify-between gap-3">
+              <span className="flex items-center gap-2">
+                <span className={`h-2 w-2 shrink-0 rounded-full ${macro.color}`} />
+                <span className="text-sm font-medium">{macro.name}</span>
+              </span>
+              <Value
+                value={macro.grams}
+                unit="g"
+                suffix={`of ${macro.targetGrams}`}
+              />
+            </div>
+
+            <ProgressBar
+              progress={macro.completionPercent}
+              color={macro.name.toLowerCase() as "protein" | "carbs" | "fats"}
+              height="sm"
+              className="mt-2"
+            />
+
+            <div className="mt-1.5 flex items-center justify-between text-xs text-muted">
+              <Value value={macro.calories} unit="kcal" />
+              <Value value={macro.completionPercent} unit="%" />
             </div>
           </div>
-
-          <ProgressBar
-            progress={completionPercentages.calories}
-            color="accent"
-            height="lg"
-            className="mb-4"
-          />
-
-          <MacroDistributionBar
-            macros={{
-              protein: macroCalories.protein,
-              carbs: macroCalories.carbs,
-              fats: macroCalories.fats,
-            }}
-          />
-
-          <MacroTargetLegend
-            macros={{
-              protein: safeTotal.protein,
-              carbs: safeTotal.carbs,
-              fats: safeTotal.fats,
-            }}
-            className="mt-2"
-          />
-        </CardContainer>
-
-        <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-3 lg:flex lg:flex-1 lg:flex-col lg:gap-3">
-          {macroData.map((macro) => (
-            <CardContainer
-              variant="interactive"
-              key={macro.name}
-              className="group flex flex-1 flex-col justify-center bg-surface-2 p-3 sm:p-4"
-            >
-              <div className="mb-2 sm:mb-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1 sm:gap-0">
-                <div className="flex items-center gap-2">
-                  <div
-                    className={`h-2.5 w-2.5 rounded-full ${macro.color} shadow-[0_0_8px_rgba(var(--${macro.name.toLowerCase()}),0.6)] transition-transform duration-300 group-hover:scale-110 shrink-0`}
-                  />
-                  <h3
-                    className={`${macro.textColor} text-xs sm:text-sm font-medium tracking-wide`}
-                  >
-                    {macro.name}
-                  </h3>
-                </div>
-                <div className="text-left sm:text-right text-xs">
-                  <span className="font-bold text-foreground">
-                    <AnimatedNumber
-                      value={macro.grams}
-                      toFixedValue={0}
-                      suffix="g"
-                      duration={0.7}
-                    />
-                  </span>
-                  <span className="ml-0.5 text-muted">
-                    /
-                    <AnimatedNumber
-                      value={macro.targetGrams}
-                      toFixedValue={0}
-                      suffix="g"
-                      duration={0.5}
-                    />
-                  </span>
-                </div>
-              </div>
-
-              <ProgressBar
-                progress={macro.completionPercent}
-                color={macro.name.toLowerCase() as "protein" | "carbs" | "fats"}
-                height="md"
-                className="mb-2"
-              />
-
-              <div className="flex items-center justify-between text-xs">
-                <span className="text-muted text-[11px] sm:text-xs">
-                  <AnimatedNumber
-                    value={macro.calories}
-                    toFixedValue={0}
-                    suffix=" kcal"
-                    duration={0.6}
-                  />
-                </span>
-                <span className={`font-medium ${macro.textColor} text-[11px] sm:text-xs`}>
-                  <AnimatedNumber
-                    value={macro.completionPercent}
-                    toFixedValue={0}
-                    suffix="%"
-                    duration={0.5}
-                  />
-                </span>
-              </div>
-            </CardContainer>
-          ))}
-        </div>
+        ))}
       </div>
-    </CardContainer>
+    </Panel>
   );
 }
 

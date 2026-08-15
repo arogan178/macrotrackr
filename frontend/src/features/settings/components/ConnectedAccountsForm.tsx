@@ -252,11 +252,11 @@ const ConnectedAccountsForm = () => {
     return (
       <div
         key={account.provider}
-        className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20"
+        className="rounded-card border border-border bg-surface-2 p-5 transition-colors duration-200 hover:border-border-2"
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`rounded-lg p-2 ${provider.bgColor}`}>
+            <div className={`rounded-control p-2 ${provider.bgColor}`}>
               <ProviderIcon className={`h-5 w-5 ${provider.color}`} />
             </div>
             <div>
@@ -276,7 +276,7 @@ const ConnectedAccountsForm = () => {
             <CloseIcon size="sm" />
           </Button>
         </div>
-        <div className="mt-3 rounded-md bg-surface-3 px-3 py-2">
+        <div className="mt-3 rounded-control bg-surface-3 px-3 py-2">
           <p className="text-xs text-muted">
             <span className="font-medium text-foreground">
               Sign in with {provider.name}:
@@ -331,9 +331,9 @@ const ConnectedAccountsForm = () => {
     return (
       <CardContainer className="p-3.5 sm:p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 w-48 rounded bg-surface-3" />
-          <div className="h-16 rounded-lg bg-surface-3" />
-          <div className="h-16 rounded-lg bg-surface-3" />
+          <div className="h-8 w-48 rounded-control bg-surface-3" />
+          <div className="h-16 rounded-control bg-surface-3" />
+          <div className="h-16 rounded-control bg-surface-3" />
         </div>
       </CardContainer>
     );
@@ -343,7 +343,7 @@ const ConnectedAccountsForm = () => {
     <>
       <CardContainer className="p-3.5 sm:p-6">
         {/* Login summary */}
-        <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5">
+        <div className="mb-6 rounded-card border border-primary/20 bg-primary/5 p-5">
           <div className="flex items-start gap-3">
             <EmailIcon className="mt-0.5 h-5 w-5 shrink-0 text-primary" />
             <div>
@@ -374,10 +374,10 @@ const ConnectedAccountsForm = () => {
             <h4 className="mb-3 text-sm font-semibold tracking-wide text-muted uppercase">
               Email & Password
             </h4>
-            <div className="rounded-2xl border border-border/60 bg-surface-2 p-5 transition-colors duration-200 hover:border-white/20">
+            <div className="rounded-card border border-border bg-surface-2 p-5 transition-colors duration-200 hover:border-border-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="rounded-lg bg-primary/10 p-2">
+                  <div className="rounded-control bg-primary/10 p-2">
                     <ShieldCheckIcon className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -394,7 +394,7 @@ const ConnectedAccountsForm = () => {
                   Active
                 </span>
               </div>
-              <div className="mt-3 rounded-md bg-surface-3 px-3 py-2">
+              <div className="mt-3 rounded-control bg-surface-3 px-3 py-2">
                 <p className="text-xs text-muted">
                   <span className="font-medium text-foreground">
                     Sign in with password:
@@ -433,7 +433,7 @@ const ConnectedAccountsForm = () => {
               Connect More Accounts
             </h4>
             {showLinkIntentHint && (
-              <div className="mb-3 rounded-xl border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
+              <div className="mb-3 rounded-control border border-primary/40 bg-primary/10 px-4 py-3 text-sm text-foreground">
                 Sign in completed. Connect your social account below to finish
                 linking.
               </div>
@@ -448,7 +448,7 @@ const ConnectedAccountsForm = () => {
 
         {/* No accounts message */}
         {!hasPassword && externalAccounts.length === 0 && (
-          <div className="rounded-2xl border border-warning/30 bg-warning/10 p-5">
+          <div className="rounded-card border border-warning/30 bg-warning/10 p-5">
             <p className="text-sm text-warning">
               You don&apos;t have any sign-in methods configured. Please add at
               least one method to secure your account.

@@ -77,3 +77,5 @@ People who stay consistent are rarely the ones who never eat out. They are the o
 If the meal was hard to track but easy to enjoy, log it honestly and move on.
 
 Macro tracking works when it helps you notice patterns, not when it turns every dinner into a courtroom cross-examination. Use the same estimation framework every time and two things usually happen at once: your data gets cleaner, and your stress drops.
+
+Once you have a number you trust, the [macro calculator](/tools/macro-calculator) will tell you what the rest of your day has room for.

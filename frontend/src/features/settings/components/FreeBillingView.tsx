@@ -8,7 +8,7 @@ const FreeBillingView: React.FC<{
   isLoading: boolean;
 }> = ({ onUpgrade, isLoading }) => (
   <div className="space-y-6 text-center">
-    <CardContainer className="relative bg-surface-2/50 p-6">
+    <CardContainer className="relative bg-surface-2 p-6">
       <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border border-warning/20 bg-warning/10">
         <StarIcon className="h-8 w-8 text-warning" />
       </div>
@@ -29,7 +29,7 @@ const FreeBillingView: React.FC<{
         fullWidth
         variant="primary"
         className="bg-warning py-4 text-lg font-bold text-black hover:bg-warning/90"
-        icon={<StarIcon className="" />}
+        leftIcon={<StarIcon className="" />}
         ariaLabel="Upgrade to Pro"
       >
         Upgrade to Pro

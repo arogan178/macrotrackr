@@ -1,12 +1,13 @@
 import { useCallback, useMemo } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence } from "motion/react";
 
+import PageTransition from "@/components/animation/PageTransition";
 import DashboardPageContainer from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
 import { GoalsIcon, TargetIcon } from "@/components/ui/Icons";
 import Modal from "@/components/ui/Modal";
-import TabButton from "@/components/ui/TabButton";
+import TabBar from "@/components/ui/TabBar";
 import HabitModal from "@/features/goals/components/habits/HabitModal";
 import HabitTracker from "@/features/goals/components/habits/HabitTracker";
 import MacroTargetForm from "@/features/goals/components/macros/MacroTargetForm";
@@ -57,36 +58,34 @@ export default function GoalsPage() {
         title="Your Goals"
         subtitle="Track your progress and stay motivated on your health journey"
         headerChildren={
-          <div
-            className="relative flex items-center space-x-0.5 rounded-xl bg-surface p-1 shadow-xs"
-            role="tablist"
-            aria-label="Goals Tabs"
-          >
-            <TabButton
-              active={ui.activeTab === "goals"}
-              onClick={() => ui.setActiveTab("goals")}
-              layoutId="goalsTabHighlight"
-              isMotion
-              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
-            >
-              <span className="relative z-10 flex items-center text-xs sm:text-sm">
-                <GoalsIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Goals
-              </span>
-            </TabButton>
-            <TabButton
-              active={ui.activeTab === "macro targets"}
-              onClick={() => ui.setActiveTab("macro targets")}
-              layoutId="goalsTabHighlight"
-              isMotion
-              className="px-2.5 py-1.5 text-xs sm:px-3.5 sm:py-2 sm:text-sm"
-            >
-              <span className="relative z-10 flex items-center text-xs sm:text-sm">
-                <TargetIcon className="mr-1.5 h-3.5 w-3.5 sm:h-4 sm:w-4" />
-                Macro Targets
-              </span>
-            </TabButton>
-          </div>
+          <TabBar
+            items={[
+              {
+                key: "goals",
+                label: (
+                  <>
+                    <GoalsIcon className="h-4 w-4" />
+                    Goals
+                  </>
+                ),
+              },
+              {
+                key: "macro targets",
+                label: (
+                  <>
+                    <TargetIcon className="h-4 w-4" />
+                    Macro Targets
+                  </>
+                ),
+              },
+            ]}
+            activeKey={ui.activeTab}
+            onChange={(key) => ui.setActiveTab(key as typeof ui.activeTab)}
+            layoutId="goalsTabHighlight"
+            ariaLabel="Goals Tabs"
+            size="sm"
+            fullWidth
+          />
         }
       >
         <Modal
@@ -142,13 +141,7 @@ export default function GoalsPage() {
           ) : user ? (
             <AnimatePresence mode="wait">
               {ui.activeTab === "goals" ? (
-                <motion.div
-                  key="goals"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
+                <PageTransition key="goals">
                   <div className="space-y-6">
                     {data.safeUserSettings && (
                       <WeightGoalDashboard
@@ -173,19 +166,13 @@ export default function GoalsPage() {
                       onDeleteHabit={actions.deleteHabit}
                     />
                   </div>
-                </motion.div>
+                </PageTransition>
               ) : (
-                <motion.div
-                  key="macro-targets"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                >
+                <PageTransition key="macro-targets">
                   <div className="space-y-6">
                     <MacroTargetForm macroTarget={macroTarget ?? null} />
                   </div>
-                </motion.div>
+                </PageTransition>
               )}
             </AnimatePresence>
           ) : (

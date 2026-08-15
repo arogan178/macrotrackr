@@ -42,7 +42,7 @@ function TabButton({
   fullWidth = false,
   ...rest
 }: ExtendedTabButtonProps) {
-  const baseRounded = rounded ?? "rounded-lg";
+  const baseRounded = rounded ?? "rounded-control";
   const motionBg = activeBg ?? "bg-surface-3"; // Darker, premium active state
   const sizeClasses = BUTTON_SIZES[size as ButtonSizeKey];
 
@@ -67,7 +67,7 @@ function TabButton({
         sizeClasses,
         baseRounded,
         fullWidth ? "w-full flex-1" : "",
-        active ? "text-foreground" : "text-muted hover:bg-surface-2/50 hover:text-foreground",
+        active ? "text-foreground" : "text-muted hover:bg-surface-2 hover:text-foreground",
         "disabled:hover:bg-transparent disabled:hover:text-muted",
         className
       )}
@@ -79,7 +79,7 @@ function TabButton({
       {active && (
         <motion.div
           layoutId={layoutId}
-          className={cn("absolute inset-0 z-0 border border-border/50 shadow-sm", baseRounded, motionBg)}
+          className={cn("absolute inset-0 z-0 border border-border", baseRounded, motionBg)}
           initial={isMotion && !prefersReducedMotion ? false : { opacity: 1 }}
           transition={{
             type: "spring",

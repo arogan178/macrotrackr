@@ -50,8 +50,8 @@ function WeightGoalModal({
       // Show success notification
       showNotification(
         hasExistingGoal
-          ? "Weight goal updated successfully!"
-          : "Weight goal created successfully!",
+          ? "Weight goal updated"
+          : "Weight goal created",
         "success",
       );
 
@@ -91,7 +91,7 @@ function WeightGoalModal({
       size="lg"
     >
       {errorMessage && (
-        <div className="mb-4 rounded-md bg-red-50 p-3 text-sm text-red-600">
+        <div className="mb-4 rounded-control bg-red-50 p-3 text-sm text-error">
           {errorMessage}
         </div>
       )}

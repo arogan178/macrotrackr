@@ -33,7 +33,6 @@ export {
   SavedMealButton,
   SavedMealsList,
 } from "./components";
-export { useHomePage } from "./hooks";
 export type { MacroDailyTotals, MacroEntry, MealType } from "./types";
 export type {
   AddEntryPayload,

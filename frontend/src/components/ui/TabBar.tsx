@@ -23,6 +23,9 @@ export interface TabBarProps {
   rounded?: string;
   className?: string;
   size?: ButtonSizeKey; // aligns TabBar with BUTTON_SIZES
+  ariaLabel?: string;
+  /** Below `sm`, spread the tabs across the full width instead of scrolling. */
+  fullWidth?: boolean;
 }
 
 function TabBar({
@@ -31,18 +34,21 @@ function TabBar({
   onChange,
   layoutId = "tabbar-highlight",
   isMotion = true,
-  rounded = "rounded-xl",
+  rounded = "rounded-card",
   className = "",
   size = "md",
+  ariaLabel,
+  fullWidth = false,
 }: TabBarProps) {
   return (
     <div
       role="tablist"
+      aria-label={ariaLabel}
       className={cn(
-        "relative inline-flex flex-wrap items-center gap-1 p-1",
-        "border border-white/5 bg-surface-2/80 backdrop-blur-md",
+        "relative items-center gap-1 border border-border bg-surface-2 p-1",
         rounded,
-        className
+        fullWidth ? "flex w-full sm:inline-flex sm:w-auto" : "inline-flex flex-wrap",
+        className,
       )}
     >
       {items.map((item) => (
@@ -52,12 +58,13 @@ function TabBar({
           onClick={() => onChange(item.key)}
           layoutId={layoutId}
           isMotion={isMotion}
-          rounded="rounded-lg" // Inner tabs should be slightly less rounded than the container usually
+          rounded="rounded-control"
           activeBg={item.activeBg}
           disabled={item.disabled}
           aria-selected={activeKey === item.key}
           role="tab"
           size={size}
+          fullWidth={fullWidth}
         >
           {item.label}
         </TabButton>

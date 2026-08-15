@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect } from "react";
 import { m, useReducedMotion } from "motion/react";
 
-import PageBackground from "@/components/layout/PageBackground";
+import AppHeader from "@/components/layout/AppHeader";
 import { ErrorBoundary, LoadingSpinner } from "@/components/ui";
 import { usePageMetadata } from "@/hooks";
 import {
@@ -15,7 +15,6 @@ import {
 
 import BackToTopButton from "../components/BackToTopButton";
 import Footer from "../components/Footer";
-import Header from "../components/Header";
 import HeroSection from "../components/HeroSection";
 
 const FeaturesSection = React.lazy(
@@ -35,13 +34,13 @@ const sectionRevealVariants = {
 function ThemedFallback() {
   return (
     <div className="flex w-full items-center justify-center py-16">
-      <div className="rounded-xl border border-border bg-surface px-8 py-10">
-        <div className="mb-6 h-6 w-56 animate-pulse rounded bg-muted/40" />
-        <div className="mb-3 h-4 w-80 animate-pulse rounded bg-muted/30" />
-        <div className="mb-8 h-4 w-64 animate-pulse rounded bg-muted/30" />
+      <div className="rounded-control border border-border bg-surface px-8 py-10">
+        <div className="mb-6 h-6 w-56 animate-pulse rounded-control bg-muted/40" />
+        <div className="mb-3 h-4 w-80 animate-pulse rounded-control bg-muted/30" />
+        <div className="mb-8 h-4 w-64 animate-pulse rounded-control bg-muted/30" />
         <div className="flex items-center gap-3">
-          <div className="h-10 w-28 animate-pulse rounded-lg bg-primary/20" />
-          <div className="h-10 w-28 animate-pulse rounded-lg bg-muted/30" />
+          <div className="h-10 w-28 animate-pulse rounded-control bg-primary/20" />
+          <div className="h-10 w-28 animate-pulse rounded-control bg-muted/30" />
         </div>
         <div className="mt-6 flex items-center justify-center">
           <LoadingSpinner />
@@ -122,10 +121,9 @@ const LandingPage: React.FC = () => {
       className={`relative min-h-screen bg-background text-foreground ${shouldReduceMotion ? "" : "scroll-smooth"}`}
     >
       <script type="application/ld+json">{schemaScript}</script>
-      <PageBackground />
 
       <div>
-        <Header />
+        <AppHeader mode="public" />
       </div>
 
       <main className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">

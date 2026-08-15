@@ -100,7 +100,7 @@ const AnimatedUserFlow: React.FC<AnimatedUserFlowProps> = ({
           initial={shouldReduceMotion ? false : { opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.4 }}
-          className="flex items-center justify-center rounded-xl bg-surface-2 p-4"
+          className="flex items-center justify-center rounded-control bg-surface-2 p-4"
         >
           {steps[currentStep].visual}
         </motion.div>
@@ -119,38 +119,38 @@ export const MealGroupingFlow: React.FC = () => {
         "Browse your recent food history and tap to select multiple items that make up a meal you eat regularly.",
       visual: (
         <div className="w-full max-w-60 space-y-2">
-          <div className="rounded-lg bg-surface p-3 ring-1 ring-border">
+          <div className="rounded-control bg-surface p-3 ring-1 ring-border">
             <div className="flex items-center gap-3">
               <motion.div
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ repeat: Infinity, duration: 2 }}
-                className="h-5 w-5 rounded border-2 border-primary bg-primary"
+                className="h-5 w-5 rounded-control border-2 border-primary bg-primary"
               />
               <div className="flex-1">
-                <div className="h-2 w-20 rounded bg-foreground/60" />
-                <div className="mt-1 h-1.5 w-12 rounded bg-muted" />
+                <div className="h-2 w-20 rounded-control bg-foreground/60" />
+                <div className="mt-1 h-1.5 w-12 rounded-control bg-muted" />
               </div>
             </div>
           </div>
-          <div className="rounded-lg bg-surface p-3 ring-1 ring-border">
+          <div className="rounded-control bg-surface p-3 ring-1 ring-border">
             <div className="flex items-center gap-3">
               <motion.div
                 animate={{ scale: 1.05 }}
                 transition={{ duration: 0.25, delay: 0.1 }}
-                className="h-5 w-5 rounded border-2 border-primary bg-primary"
+                className="h-5 w-5 rounded-control border-2 border-primary bg-primary"
               />
               <div className="flex-1">
-                <div className="h-2 w-24 rounded bg-foreground/60" />
-                <div className="mt-1 h-1.5 w-10 rounded bg-muted" />
+                <div className="h-2 w-24 rounded-control bg-foreground/60" />
+                <div className="mt-1 h-1.5 w-10 rounded-control bg-muted" />
               </div>
             </div>
           </div>
-          <div className="rounded-lg bg-surface p-3 ring-1 ring-border">
+          <div className="rounded-control bg-surface p-3 ring-1 ring-border">
             <div className="flex items-center gap-3">
-              <div className="h-5 w-5 rounded border-2 border-border" />
+              <div className="h-5 w-5 rounded-control border-2 border-border" />
               <div className="flex-1">
-                <div className="h-2 w-16 rounded bg-foreground/60" />
-                <div className="mt-1 h-1.5 w-14 rounded bg-muted" />
+                <div className="h-2 w-16 rounded-control bg-foreground/60" />
+                <div className="mt-1 h-1.5 w-14 rounded-control bg-muted" />
               </div>
             </div>
           </div>
@@ -163,16 +163,16 @@ export const MealGroupingFlow: React.FC = () => {
         'Give your meal a name—like "Post-Workout Shake" or "Mom\'s Lasagna." The meal is instantly saved to your personal library.',
       visual: (
         <div className="w-full max-w-60 space-y-3">
-          <div className="rounded-lg bg-surface p-4 ring-1 ring-primary/50">
-            <div className="mb-3 h-2 w-16 rounded bg-muted" />
+          <div className="rounded-control bg-surface p-4 ring-1 ring-primary/50">
+            <div className="mb-3 h-2 w-16 rounded-control bg-muted" />
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: "100%" }}
               transition={{ duration: 0.8, ease: "easeOut" }}
-              className="h-8 overflow-hidden rounded bg-surface-2"
+              className="h-8 overflow-hidden rounded-control bg-surface-2"
             >
               <div className="flex h-full items-center px-3">
-                <div className="h-3 w-32 rounded bg-primary/30" />
+                <div className="h-3 w-32 rounded-control bg-primary/30" />
               </div>
             </motion.div>
           </div>
@@ -180,7 +180,7 @@ export const MealGroupingFlow: React.FC = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.25 }}
-            className="rounded-lg bg-primary p-3 text-center text-sm font-semibold text-black"
+            className="rounded-control bg-primary p-3 text-center text-sm font-semibold text-black"
           >
             Save Meal
           </motion.div>
@@ -196,7 +196,7 @@ export const MealGroupingFlow: React.FC = () => {
           <motion.div
             whileHover={{ scale: 1.01 }}
             transition={{ duration: 0.2 }}
-            className="rounded-lg bg-primary/10 p-3 ring-1 ring-primary"
+            className="rounded-control bg-primary/10 p-3 ring-1 ring-primary"
           >
             <div className="flex items-center gap-3">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-black">
@@ -215,17 +215,17 @@ export const MealGroupingFlow: React.FC = () => {
                 </svg>
               </div>
               <div className="flex-1">
-                <div className="h-2.5 w-28 rounded bg-foreground" />
-                <div className="mt-1.5 h-1.5 w-16 rounded bg-muted" />
+                <div className="h-2.5 w-28 rounded-control bg-foreground" />
+                <div className="mt-1.5 h-1.5 w-16 rounded-control bg-muted" />
               </div>
             </div>
           </motion.div>
-          <div className="rounded-lg bg-surface p-3 ring-1 ring-border">
+          <div className="rounded-control bg-surface p-3 ring-1 ring-border">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-full bg-surface-2" />
               <div className="flex-1">
-                <div className="h-2.5 w-24 rounded bg-foreground/60" />
-                <div className="mt-1.5 h-1.5 w-12 rounded bg-muted" />
+                <div className="h-2.5 w-24 rounded-control bg-foreground/60" />
+                <div className="mt-1.5 h-1.5 w-12 rounded-control bg-muted" />
               </div>
             </div>
           </div>
@@ -235,10 +235,10 @@ export const MealGroupingFlow: React.FC = () => {
     {
       title: "Expand for Details",
       description:
-        "Need to see what went into that meal? Simply tap to expand. The accordion reveals every ingredient with its macros.",
+        "Tap a meal to expand it: every ingredient, with its macros.",
       visual: (
-        <div className="w-full max-w-60 space-y-1 overflow-hidden rounded-lg bg-surface ring-1 ring-border">
-          <div className="flex items-center gap-3 bg-surface-2/50 p-3">
+        <div className="w-full max-w-60 space-y-1 overflow-hidden rounded-control bg-surface ring-1 ring-border">
+          <div className="flex items-center gap-3 bg-surface-2 p-3">
             <motion.div
               animate={{ rotate: 90 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
@@ -257,7 +257,7 @@ export const MealGroupingFlow: React.FC = () => {
                 />
               </svg>
             </motion.div>
-            <div className="h-2.5 w-24 rounded bg-foreground" />
+            <div className="h-2.5 w-24 rounded-control bg-foreground" />
           </div>
           <motion.div
             initial={{ height: 0 }}
@@ -266,17 +266,17 @@ export const MealGroupingFlow: React.FC = () => {
             className="overflow-hidden"
           >
             <div className="space-y-2 p-3 pt-0">
-              <div className="flex justify-between rounded bg-surface-2/30 px-2 py-1.5">
-                <div className="h-2 w-16 rounded bg-foreground/60" />
-                <div className="bg-chart-2 h-2 w-10 rounded" />
+              <div className="flex justify-between rounded-control bg-surface-2 px-2 py-1.5">
+                <div className="h-2 w-16 rounded-control bg-foreground/60" />
+                <div className="bg-chart-2 h-2 w-10 rounded-control" />
               </div>
-              <div className="flex justify-between rounded bg-surface-2/30 px-2 py-1.5">
-                <div className="h-2 w-14 rounded bg-foreground/60" />
-                <div className="bg-chart-4 h-2 w-8 rounded" />
+              <div className="flex justify-between rounded-control bg-surface-2 px-2 py-1.5">
+                <div className="h-2 w-14 rounded-control bg-foreground/60" />
+                <div className="bg-chart-4 h-2 w-8 rounded-control" />
               </div>
-              <div className="flex justify-between rounded bg-surface-2/30 px-2 py-1.5">
-                <div className="h-2 w-18 rounded bg-foreground/60" />
-                <div className="h-2 w-12 rounded bg-primary" />
+              <div className="flex justify-between rounded-control bg-surface-2 px-2 py-1.5">
+                <div className="h-2 w-18 rounded-control bg-foreground/60" />
+                <div className="h-2 w-12 rounded-control bg-primary" />
               </div>
             </div>
           </motion.div>

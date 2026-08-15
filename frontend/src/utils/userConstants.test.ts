@@ -23,12 +23,14 @@ describe("userConstants", () => {
       expect(Object.keys(ACTIVITY_LEVELS)).toHaveLength(5);
     });
 
-    it("has correct multiplier for sedentary", () => {
-      expect(ACTIVITY_LEVELS[1].multiplier).toBe(1);
+    it("never lets a sedentary day equal the resting burn", () => {
+      // A multiplier of 1 made TDEE identical to BMR, which is not a thing a
+      // body does: digestion and incidental movement are ~20% on their own.
+      expect(ACTIVITY_LEVELS[1].multiplier).toBe(1.2);
     });
 
     it("has correct multiplier for athlete", () => {
-      expect(ACTIVITY_LEVELS[5].multiplier).toBe(1.75);
+      expect(ACTIVITY_LEVELS[5].multiplier).toBe(1.9);
     });
   });
 
@@ -50,11 +52,11 @@ describe("userConstants", () => {
 
   describe("getActivityLevelMultiplier", () => {
     it("returns multiplier for valid level", () => {
-      expect(getActivityLevelMultiplier(1)).toBe(1);
+      expect(getActivityLevelMultiplier(1)).toBe(1.2);
     });
 
-    it("returns 1 for invalid level", () => {
-      expect(getActivityLevelMultiplier(99)).toBe(1);
+    it("falls back to the sedentary floor, not to 1", () => {
+      expect(getActivityLevelMultiplier(99)).toBe(1.2);
     });
   });
 });

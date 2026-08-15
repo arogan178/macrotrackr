@@ -13,17 +13,20 @@ import type {
   ModalProps,
 } from "./UiTypes";
 
+// Below md this is a bottom sheet: a centred dialog puts its actions and its
+// close button at the least reachable part of a phone screen, and the keyboard
+// covers the middle of the viewport exactly where the dialog sits.
 const CONTAINER_CLASS =
-  "fixed inset-0 z-100 flex items-center justify-center p-4 sm:p-6";
+  "fixed inset-0 z-100 flex items-end justify-center md:items-center md:p-6";
 const CONTENT_CLASS =
-  "relative flex max-h-[calc(100dvh-2rem)] flex-col overflow-hidden rounded-2xl border border-white/10 bg-surface/95 shadow-2xl ring-1 ring-black/5 backdrop-blur-xl sm:max-h-[calc(100dvh-3rem)]";
-const SURFACE_CLASS = "bg-surface/80 backdrop-blur-md";
+  "relative flex max-h-[85dvh] w-full flex-col overflow-hidden rounded-t-card border border-border bg-surface pb-[var(--sab)] md:max-h-[calc(100dvh-3rem)] md:rounded-card md:pb-0";
+const SURFACE_CLASS = "bg-surface";
 const SIZE_CLASS_MAP = {
-  sm: "max-w-sm w-full",
-  md: "max-w-md w-full",
-  lg: "max-w-lg w-full",
-  xl: "max-w-xl w-full",
-  "2xl": "max-w-2xl w-full",
+  sm: "md:max-w-sm md:w-full",
+  md: "md:max-w-md md:w-full",
+  lg: "md:max-w-lg md:w-full",
+  xl: "md:max-w-xl md:w-full",
+  "2xl": "md:max-w-2xl md:w-full",
 } as const;
 
 const modalVariants = {
@@ -75,7 +78,7 @@ function renderConfirmationFooter(
   return (
     <div
       className={cn(
-        "flex gap-3 border-t border-white/5 px-6 py-4",
+        "flex gap-3 border-t border-border px-6 py-4",
         hideCancelButton ? "justify-center" : "justify-end",
         SURFACE_CLASS,
       )}
@@ -86,7 +89,7 @@ function renderConfirmationFooter(
           ariaLabel={cancelLabel}
           variant="secondary"
           buttonSize={buttonSize}
-          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
+          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-surface-2 hover:text-foreground"
         >
           {cancelLabel}
         </Button>
@@ -120,7 +123,7 @@ function renderFormFooter(
   return (
     <div
       className={cn(
-        "flex gap-3 border-t border-white/5 px-6 py-4",
+        "flex gap-3 border-t border-border px-6 py-4",
         hideCancelButton ? "justify-center" : "justify-end",
         SURFACE_CLASS,
       )}
@@ -131,7 +134,7 @@ function renderFormFooter(
           ariaLabel={cancelLabel}
           variant="secondary"
           buttonSize={buttonSize}
-          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-white/5 hover:text-foreground"
+          className="border-none bg-transparent font-medium text-muted shadow-none transition-colors hover:bg-surface-2 hover:text-foreground"
         >
           {cancelLabel}
         </Button>
@@ -226,7 +229,7 @@ function Modal(properties: ModalProps) {
             {!hideClose && (
               <div
                 className={cn(
-                  "flex items-center justify-between border-b border-white/5 px-6 py-5",
+                  "flex items-center justify-between border-b border-border px-6 py-5",
                   SURFACE_CLASS,
                 )}
               >
@@ -242,7 +245,7 @@ function Modal(properties: ModalProps) {
                   buttonSize={buttonSize}
                   onClick={onClose}
                   ariaLabel="Close modal"
-                  className="text-muted transition-colors hover:bg-white/5 hover:text-foreground"
+                  className="text-muted transition-colors hover:bg-surface-2 hover:text-foreground"
                 />
               </div>
             )}

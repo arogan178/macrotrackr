@@ -37,9 +37,9 @@ const ProBillingView: React.FC<{
   return (
     <>
       {isActionRequired && (
-        <div className="mb-6 rounded-2xl border border-warning/30 bg-warning/10 p-5">
+        <div className="mb-6 rounded-card border border-warning/30 bg-warning/10 p-5">
           <p className="flex items-center text-sm text-warning">
-            <span className="mr-2 rounded bg-warning/20 p-1">
+            <span className="mr-2 rounded-control bg-warning/20 p-1">
               <WarningIcon className="h-4 w-4 text-warning" />
             </span>
             <span>
@@ -50,7 +50,7 @@ const ProBillingView: React.FC<{
           </p>
         </div>
       )}
-      <div className="relative mb-6 overflow-hidden rounded-2xl border border-success/30 bg-success/10 p-6">
+      <div className="relative mb-6 overflow-hidden rounded-card border border-success/30 bg-success/10 p-6">
         <div className="relative">
           {/* Header with status */}
           <div className="mb-4 flex items-center justify-between">
@@ -68,7 +68,7 @@ const ProBillingView: React.FC<{
           {/* Subscription details in clean grid */}
           <CardContainer
             variant="transparent"
-            className="mb-4 bg-surface-2/40 p-5"
+            className="mb-4 bg-surface-2 p-5"
           >
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
               <div className="text-center sm:text-left">
@@ -111,7 +111,7 @@ const ProBillingView: React.FC<{
           fullWidth
           variant="primary"
           className={isActionRequired ? "animate-pulse" : ""}
-          icon={<ExternalLinkIcon />}
+          leftIcon={<ExternalLinkIcon />}
           ariaLabel="Manage your Pro subscription"
         >
           {isActionRequired ? "Fix Payment Issue" : "Manage Subscription"}
@@ -139,7 +139,7 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="rounded-lg bg-error/10 p-2">
+            <div className="rounded-control bg-error/10 p-2">
               <WarningIcon className="h-6 w-6 shrink-0 text-error" />
             </div>
             <div>
@@ -192,7 +192,7 @@ const ProBillingView: React.FC<{
       >
         <div className="space-y-6">
           <div className="flex items-start space-x-4">
-            <div className="rounded-lg bg-primary/10 p-2">
+            <div className="rounded-control bg-primary/10 p-2">
               <InfoIcon className="h-6 w-6 shrink-0 text-primary" />
             </div>
             <div>
@@ -223,9 +223,9 @@ const ProBillingView: React.FC<{
               </ul>
             </div>
           </div>
-          <div className="rounded-lg border border-warning/30 bg-warning/10 p-4">
+          <div className="rounded-control border border-warning/30 bg-warning/10 p-4">
             <p className="flex items-center text-sm text-warning">
-              <span className="mr-2 rounded bg-warning/20 p-1">
+              <span className="mr-2 rounded-control bg-warning/20 p-1">
                 <WarningIcon className="h-3 w-3 text-warning" />
               </span>
               This will open in a new tab. Your current session will remain
@@ -247,7 +247,7 @@ const ProBillingView: React.FC<{
               }}
               variant="primary"
               className="flex-1"
-              icon={<ExternalLinkIcon className="h-4 w-4" />}
+              leftIcon={<ExternalLinkIcon className="h-4 w-4" />}
             >
               Continue to Portal
             </Button>

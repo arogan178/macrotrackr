@@ -1,5 +1,33 @@
 /* src/styles/global.css */
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+
+/* Self-hosted: the Google Fonts @import was render-blocking, added a
+   third-party connection to every page load, and left the app in a fallback
+   face when offline — which an installed PWA is, routinely. One variable file,
+   latin subset, precached by the existing woff2 glob in the service worker.
+
+   Archivo, not Inter, and carrying a width axis (62–125) as well as weight.
+   This product is a nutrition panel: four numbers converging on four targets,
+   read at arm's length. The panel on the back of a packet has been solving
+   exactly that for forty years, and it solves it with condensed grotesque
+   figures — which are not a stylistic reference but a measurement one, because
+   condensed digits fit more significant places in the same column. At 390px
+   three macro values share ~108px each, and that is where the product lives.
+
+   The width axis is why this is one file and not two: `font-stretch-condensed`
+   gives the display cut without a second family. It costs 42 KB over Inter,
+   paid once, precached, offline thereafter. */
+@font-face {
+  font-family: "Archivo";
+  font-style: normal;
+  font-weight: 100 900;
+  font-stretch: 62% 125%;
+  font-display: swap;
+  src: url("/fonts/archivo-latin-variable.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
 
 @layer base {
   html {
@@ -21,13 +49,15 @@
   body {
     @apply bg-background text-foreground;
     font-family:
-      "Inter",
+      "Archivo",
       system-ui,
       -apple-system,
       sans-serif;
     font-size: 16px;
     line-height: 1.6;
-    min-height: 100vh;
+    /* Modal already uses dvh; body did not, so the last row of a page sat
+       under the mobile browser's collapsing toolbar. */
+    min-height: 100dvh;
     font-variant-numeric: tabular-nums;
     -webkit-tap-highlight-color: transparent;
     overscroll-behavior-y: none;
@@ -74,6 +104,17 @@
   }
 }
 
+/* Drives the progress hairline under the active product-preview tab. Keyed on
+   the slide index in React, so it restarts with each advance. */
+@keyframes carousel-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -92,7 +133,18 @@
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
-  --floating-notification-top: calc(16px + var(--sat));
+  /* One number for the fixed AppHeader: its top inset (1rem) + its height
+     (min-h-14 = 3.5rem) + the gap below it. PageShell is the only consumer. */
+  --header-height: 3.5rem;
+  --header-offset: calc(1rem + var(--sat) + var(--header-height) + 1.5rem);
+
+  /* Toasts clear the header rather than sharing its band. This was
+     `calc(16px + var(--sat))` — the header's own top inset — so every
+     notification rendered behind the bar it was aligned with. Declared after
+     --header-height because it reads it. */
+  --floating-notification-top: calc(
+    1rem + var(--sat) + var(--header-height) + 0.75rem
+  );
 }
 
 .safe-area-pt {
@@ -113,12 +165,16 @@
   padding-bottom: var(--sab);
 }
 
-button,
-a,
-[role="button"] {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  user-select: none;
+/* Suppressing selection on every button and link is right for a touch target
+   and hostile on desktop, where people copy label text. Scope it to coarse
+   pointers. */
+@media (pointer: coarse) {
+  button,
+  [role="button"] {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+  }
 }
 
 /* Scrollbar styling for webkit */

@@ -8,19 +8,26 @@ export interface ColorPalette {
   [key: string]: ColorGradient;
 }
 
-// Macro color palette
+// Macro color palette — the same three hues the tokens declare, so a chart
+// series and its legend chip cannot drift apart.
+//
+// Protein is green because that is what every tracker's users already read it
+// as, but it is emerald (158°) rather than the brand's yellow-green (112°): the
+// two collisions worth breaking were protein being byte-identical to the brand
+// green and fats being byte-identical to the error red. Convention is kept; the
+// double meanings are not.
 export const MACRO_COLORS: ColorPalette = {
   protein: {
-    base: "#34d399", // green-400
+    base: "#34d399", // --color-protein
     gradient: ["#10b981", "#34d399"],
   },
   carbs: {
-    base: "#60a5fa", // blue-400
+    base: "#60a5fa", // --color-carbs
     gradient: ["#3b82f6", "#60a5fa"],
   },
   fats: {
-    base: "#f87171", // red-400
-    gradient: ["#ef4444", "#f87171"],
+    base: "#facc15", // --color-fats
+    gradient: ["#eab308", "#facc15"],
   },
 };
 
@@ -39,18 +46,20 @@ export const MEAL_COLORS: ColorPalette = {
     gradient: ["#ef4444", "#f87171"],
   },
   snack: {
-    base: "#a78bfa", // purple-400
+    base: "#a78bfa", // purple-400 — a meal type, unrelated to the macro tokens
     gradient: ["#8b5cf6", "#a78bfa"],
   },
 };
 
 // Stat type color mapping
+// Five identical greens told the reader nothing. Calories are the live value,
+// so they keep the brand colour; the macros carry their own.
 export const STAT_COLORS = {
   calories: "bg-primary",
-  protein: "bg-primary",
-  carbs: "bg-primary",
-  fats: "bg-primary",
-  count: "bg-primary",
+  protein: "bg-protein",
+  carbs: "bg-carbs",
+  fats: "bg-fats",
+  count: "bg-surface-3",
 };
 
 // Get unit based on stat type

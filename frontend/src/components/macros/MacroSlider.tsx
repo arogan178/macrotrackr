@@ -160,7 +160,7 @@ export function MacroBadge({
   } = useMemo(() => COLOR_MAP[color], [color]);
 
   return (
-    <div className={`rounded-lg border bg-surface-2 p-3 ${border}`}>
+    <div className={`rounded-control border bg-surface-2 p-3 ${border}`}>
       <div className="flex items-center gap-1.5">
         <div className={`h-2 w-2 rounded-full ${badgeDot}`} />
         <span className="text-xs text-foreground">{name}</span>

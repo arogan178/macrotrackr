@@ -38,30 +38,35 @@ export const ACTIVITY_LEVELS: Record<
     multiplier: number;
   }
 > = {
+  // The standard Mifflin-St Jeor activity factors. These were 1 / 1.2 / 1.35 /
+  // 1.5 / 1.75 — every level roughly one step low, and sedentary at 1.0, which
+  // says a sedentary person's daily burn equals their resting burn. Nobody's
+  // does: digesting food and incidental movement account for ~20% before any
+  // exercise, which is exactly what the 1.2 floor represents.
   1: {
     label: "Sedentary (little or no exercise)",
     value: "sedentary",
-    multiplier: 1,
+    multiplier: 1.2,
   },
   2: {
     label: "Lightly active (light exercise 1-3 days/week)",
     value: "low",
-    multiplier: 1.2,
+    multiplier: 1.375,
   },
   3: {
     label: "Moderately active (moderate exercise 3-5 days/week)",
     value: "medium",
-    multiplier: 1.35,
+    multiplier: 1.55,
   },
   4: {
     label: "Very active (hard exercise 6-7 days/week)",
     value: "high",
-    multiplier: 1.5,
+    multiplier: 1.725,
   },
   5: {
     label: "Extremely active (very hard exercise & physical job)",
     value: "athlete",
-    multiplier: 1.75,
+    multiplier: 1.9,
   },
 };
 
@@ -81,7 +86,10 @@ export function getActivityLevelValue(level: number): ActivityLevel {
 export function getActivityLevelMultiplier(level: number): number {
   const activity = ACTIVITY_LEVELS[level];
 
-  return activity ? activity.multiplier : 1;
+  // Falling back to 1 had the same effect as the old sedentary value: a user
+  // with no activity level set was told their daily burn was their resting
+  // burn. The sedentary floor is the conservative answer, not 1.
+  return activity ? activity.multiplier : ACTIVITY_LEVELS[1].multiplier;
 }
 
 export function getActivityLevelFromString(value: ActivityLevel): number {

@@ -168,7 +168,6 @@ export function ProfileCreationForm() {
     if (!isSignedIn) {
       logger.error("Profile creation attempted without authentication:", {
         isSignedIn,
-        hasGetToken: !!getToken,
       });
       showNotification(
         "Authentication required. Please sign in again.",
@@ -464,7 +463,7 @@ export function ProfileCreationForm() {
                   setErrors({});
                   if (choice.value === "maintain") setTargetWeight(null);
                 }}
-                className={`cursor-pointer rounded-lg border p-3 text-center font-medium transition-colors ${
+                className={`cursor-pointer rounded-control border p-3 text-center font-medium transition-colors ${
                   isSelected
                     ? "border-primary bg-primary/10 text-foreground"
                     : "border-border bg-surface-2 text-muted hover:border-primary/40"
@@ -499,7 +498,7 @@ export function ProfileCreationForm() {
         )}
 
         {goalCalculations && !errors.targetWeight && (
-          <div className="rounded-lg border border-border bg-surface-2 p-4">
+          <div className="rounded-control border border-border bg-surface-2 p-4">
             <div className="flex justify-between">
               <span className="text-muted">Daily calorie target</span>
               <span className="font-medium">

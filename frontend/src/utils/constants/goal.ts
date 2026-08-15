@@ -9,7 +9,7 @@ export const CALORIE_ADJUSTMENT_FACTORS = {
 } as const;
 
 export const WEIGHT_GOAL_OPTIONS = [
-  { value: "lose", label: "Lose Weight", color: "text-vibrant-accent" },
+  { value: "lose", label: "Lose Weight", color: "text-primary" },
   { value: "maintain", label: "Maintain Weight", color: "text-primary" },
   { value: "gain", label: "Gain Weight", color: "text-success" },
 ] as const;

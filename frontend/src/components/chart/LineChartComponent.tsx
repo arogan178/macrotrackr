@@ -18,6 +18,7 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import type { ContentType } from "recharts/types/component/Tooltip";
 
 import { LoadingSpinner } from "@/components/ui";
 
@@ -156,7 +157,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
-            className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-surface backdrop-blur-sm "
+            className="absolute inset-0 z-10 flex items-center justify-center rounded-control bg-surface "
           >
             <div className="flex flex-col items-center">
               <LoadingSpinner size="md" />
@@ -179,7 +180,7 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             transition={{ duration: 0.3 }}
             className="absolute inset-0 z-0 flex items-center justify-center p-4"
           >
-            <div className="flex flex-col items-center rounded-lg border border-red-700/50 bg-error/30 p-6 text-center shadow-primary">
+            <div className="flex flex-col items-center rounded-control border border-red-700/50 bg-error/30 p-6 text-center">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 className="mb-3 h-10 w-10 text-error"
@@ -278,9 +279,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             <XAxis {...defaultXAxisProps} />
             <YAxis {...defaultYAxisProps} />
             <Tooltip
-              // Pass the component/element directly to the content prop
-              // Cast to any to accommodate both element and function content types across Recharts generics
-              content={TooltipContent as React.ComponentType<Record<string, unknown>>}
+              // ContentType is what the prop declares; the previous cast to
+              // ComponentType<Record<string, unknown>> was not assignable to it.
+              content={
+                TooltipContent as ContentType<ValueType, NameType>
+              }
               cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
             />
             {showLegend && (
@@ -328,6 +331,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                     )
                   }
                   connectNulls={line.connectNulls ?? false}
+                  isAnimationActive={line.isAnimationActive ?? false}
+                  animationDuration={line.animationDuration ?? 900}
                 />
               ) : (
                 <Line
@@ -347,6 +352,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                     )
                   }
                   connectNulls={line.connectNulls ?? false}
+                  isAnimationActive={line.isAnimationActive ?? false}
+                  animationDuration={line.animationDuration ?? 900}
                 />
               );
             })}

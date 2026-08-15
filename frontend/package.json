@@ -1,15 +1,15 @@
 {
   "name": "macrotrackr-frontend",
   "private": true,
-  "version": "2.6.0",
+  "version": "3.0.0",
   "type": "module",
   "scripts": {
     "dev": "bunx vite",
     "build": "bunx vite build",
     "postbuild": "bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js",
     "preview": "bunx vite preview",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
+    "lint": "eslint src && node ./scripts/check-ui-budgets.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test --config ./playwright.config.ts",
     "test:e2e:ui": "playwright test --config ./playwright.config.ts --ui",
@@ -23,7 +23,9 @@
     "cap:run:ios": "bunx cap run ios",
     "cap:run:android": "bunx cap run android",
     "build:analyze": "bunx vite build --mode analyze",
-    "bundle:size": "node scripts/analyze-bundle.js"
+    "bundle:size": "node scripts/analyze-bundle.js",
+    "ui:budgets": "node ./scripts/check-ui-budgets.mjs",
+    "release:blog": "node ./scripts/release-note-to-blog.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
@@ -60,6 +62,7 @@
     "remark-gfm": "^4.0.1",
     "remotion": "^4.0.448",
     "tailwind-merge": "^3.5.0",
+    "workbox-routing": "^7.4.1",
     "zustand": "^5.0.12"
   },
   "devDependencies": {

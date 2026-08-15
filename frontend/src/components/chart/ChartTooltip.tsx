@@ -107,7 +107,7 @@ function ChartTooltip({
   const unit = getUnitForStat(selectedStat);
 
   return (
-    <div className="rounded-md border border-border bg-surface-2 p-2 text-sm shadow-modal">
+    <div className="rounded-control border border-border bg-surface-2 p-2 text-sm shadow-modal">
       <p className="font-medium text-foreground">{label}</p>
       <p className="text-foreground">
         <span className="font-medium">
@@ -168,7 +168,7 @@ export function BarValueTooltip({
   const unit = getUnitForStat(selectedStat);
 
   return (
-    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
+    <div className="rounded-control border border-border bg-surface p-2 text-sm shadow-modal">
       <p className="font-medium text-foreground">{data.name}</p>
       <p className="text-foreground">
         <span className="font-medium">
@@ -240,7 +240,7 @@ export function StackedBarPercentageTooltip({
   const macroKeys = ["protein", "carbs", "fats"] as const;
 
   return (
-    <div className="rounded-md border border-border bg-surface p-2 text-sm shadow-modal">
+    <div className="rounded-control border border-border bg-surface p-2 text-sm shadow-modal">
       <p className="mb-1 font-medium text-foreground">
         {String(data[labelKey] ?? "")}
       </p>

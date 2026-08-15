@@ -16,10 +16,10 @@ export const DATE_RANGE_MAPPING = {
 
 // Chart configuration constants
 export const CHART_COLORS = {
-  calories: "#f59e0b", // amber-500
-  protein: "#10b981", // emerald-500
-  carbs: "#3b82f6", // blue-500
-  fats: "#ef4444", // red-500
+  calories: "#57c04a", // --color-primary: calories are the live value
+  protein: "#34d399", // --color-protein
+  carbs: "#60a5fa", // --color-carbs
+  fats: "#facc15", // --color-fats
 } as const;
 
 export const CHART_DEFAULTS = {

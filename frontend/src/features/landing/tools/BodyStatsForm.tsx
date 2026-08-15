@@ -53,38 +53,38 @@ export default function BodyStatsForm({
   return (
     <div className="space-y-4">
       {/* Unit System Toggle */}
-      <div className="flex items-center justify-between gap-3 rounded-xl border border-border bg-surface-2/60 p-2 text-xs">
+      <div className="flex items-center justify-between gap-3 rounded-control border border-border bg-surface-2 p-2 text-xs">
         <span id={unitSystemLabelId} className="pl-1 font-medium text-muted">
           Units
         </span>
         <div
           role="group"
           aria-labelledby={unitSystemLabelId}
-          className="flex items-center gap-1 rounded-lg bg-surface p-1"
+          className="flex items-center gap-1 rounded-control bg-surface p-1"
         >
-          <button
-            type="button"
-            onClick={() => setUnitSystem("imperial")}
-            aria-pressed={unitSystem === "imperial"}
-            className={`min-h-8 cursor-pointer rounded-md px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
-              unitSystem === "imperial"
-                ? "bg-primary font-semibold text-black"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            Imperial<span className="hidden sm:inline"> (lb, ft)</span>
-          </button>
           <button
             type="button"
             onClick={() => setUnitSystem("metric")}
             aria-pressed={unitSystem === "metric"}
-            className={`min-h-8 cursor-pointer rounded-md px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
+            className={`min-h-8 cursor-pointer rounded-control px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
               unitSystem === "metric"
                 ? "bg-primary font-semibold text-black"
                 : "text-muted hover:text-foreground"
             }`}
           >
             Metric<span className="hidden sm:inline"> (kg, cm)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setUnitSystem("imperial")}
+            aria-pressed={unitSystem === "imperial"}
+            className={`min-h-8 cursor-pointer rounded-control px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
+              unitSystem === "imperial"
+                ? "bg-primary font-semibold text-black"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            Imperial<span className="hidden sm:inline"> (lb, ft)</span>
           </button>
         </div>
       </div>

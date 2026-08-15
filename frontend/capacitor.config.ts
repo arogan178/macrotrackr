@@ -5,7 +5,7 @@ const isLocalDev = hostname === "localhost" || hostname.startsWith("192.168.");
 
 const config: CapacitorConfig = {
   appId: "com.macrotrackr.app",
-  appName: "Macro Trackr",
+  appName: "MacroTrackr",
   webDir: "dist",
   overrideUserAgent:
     "Mozilla/5.0 (Linux; Android 14; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Mobile Safari/537.36",
@@ -38,17 +38,21 @@ const config: CapacitorConfig = {
     SplashScreen: {
       launchShowDuration: 1500,
       launchAutoHide: true,
-      backgroundColor: "#09090b",
+      backgroundColor: "#000000",
       androidSplashResourceName: "splash",
       androidScaleType: "CENTER_CROP",
       showSpinner: false,
     },
     StatusBar: {
       style: "DARK",
-      backgroundColor: "#09090b",
+      backgroundColor: "#000000",
     },
     Keyboard: {
-      resize: "body",
+      // `body` resizes the document itself, which moves a position: fixed
+      // header up with the keyboard and makes the bar jump on the Add-entry
+      // form. `native` leaves the layout viewport alone and lets the webview
+      // scroll the focused field into view instead.
+      resize: "native",
       style: "DARK",
       resizeOnFullScreen: true,
     },

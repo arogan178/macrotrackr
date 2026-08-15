@@ -160,7 +160,7 @@ const CustomPricingCards: React.FC<CustomPricingCardsProps> = ({
 
       <section
         id="self-hosted"
-        className="mt-10 rounded-3xl border border-border bg-surface/80 p-6 sm:p-8"
+        className="mt-10 rounded-card border border-border bg-surface p-6 sm:p-8"
       >
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="max-w-2xl">

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none" role="img" aria-label="MacroTrackr">
+  <path d="M4 22C6 12 18 8 28 10C26 20 14 24 4 22Z" fill="none" stroke="#4ad435" stroke-width="2.2" stroke-linejoin="round"/>
+  <path d="M28 10L30.5 6" stroke="#4ad435" stroke-width="2.2" stroke-linecap="round"/>
+  <rect x="9" y="16.5" width="3.2" height="4.6" rx="1.6" fill="#4ad435"/>
+  <rect x="13.8" y="14.6" width="3.2" height="6" rx="1.6" fill="#4ad435"/>
+  <rect x="18.6" y="12.6" width="3.2" height="7.4" rx="1.6" fill="#4ad435"/>
+</svg>

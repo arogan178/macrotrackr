@@ -2,11 +2,11 @@ import { useCallback, useMemo, useState } from "react";
 import { format, isValid, parseISO } from "date-fns"; // Import isValid and parseISO
 
 import {
-  EmptyState,
   IconButton,
   LoadingSpinner,
   Modal,
   ProgressiveBlur,
+  StateCard,
   TrashIcon,
 } from "@/components/ui";
 import {
@@ -126,7 +126,7 @@ function WeightLogList({
   if (!isLoading && sortedLog.length === 0) {
     return (
       <div className="h-60">
-        <EmptyState
+        <StateCard
           title="No Weight Logged Yet"
           message="Your recorded weights will appear here."
           icon={<TrashIcon className="h-12 w-12 text-foreground" />} // Placeholder icon
@@ -152,7 +152,7 @@ function WeightLogList({
               return (
                 <li
                   key={entry.id}
-                  className="group/item flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-4 transition-colors duration-200 hover:border-white/20"
+                  className="group/item flex items-center justify-between rounded-control border border-border bg-surface-2 p-4 transition-colors duration-200 hover:border-border-2"
                 >
                   <div className="flex max-w-55 min-w-50 flex-col">
                     <span className="block w-full truncate text-sm font-medium text-muted">
