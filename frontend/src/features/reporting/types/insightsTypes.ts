@@ -88,7 +88,7 @@ export interface ActionCardProps {
 export interface TrendDisplayProps {
   label: string;
   trend: TrendResult;
-  data?: Record<string, unknown>[];
+  data?: AggregatedDataPoint[];
   dataKey?: string;
   icon?: React.ReactNode;
   iconBgColor?: string;

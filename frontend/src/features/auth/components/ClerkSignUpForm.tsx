@@ -125,12 +125,12 @@ export function ClerkSignUpForm({
           const res = await signUp.create({
             strategy,
             redirectUrl,
-            redirectUrlComplete,
+            actionCompleteRedirectUrl: redirectUrlComplete,
           });
 
           externalUrl =
-            res.verifications?.externalVerificationRedirectUrl?.toString() ||
-            (res as any)?.firstFactorVerification?.externalVerificationRedirectUrl?.toString();
+            res.verifications?.externalAccount?.externalVerificationRedirectURL?.toString() ||
+            (res as any)?.firstFactorVerification?.externalVerificationRedirectURL?.toString();
         } catch (createError) {
           logger.warn(
             "signUp.create externalUrl unavailable, trying signIn.create fallback:",
@@ -143,12 +143,12 @@ export function ClerkSignUpForm({
             const signInRes = await signIn.create({
               strategy,
               redirectUrl,
-              redirectUrlComplete,
+              actionCompleteRedirectUrl: redirectUrlComplete,
             });
 
             externalUrl =
-              signInRes.firstFactorVerification?.externalVerificationRedirectUrl?.toString() ||
-              (signInRes as any)?.verifications?.externalVerificationRedirectUrl?.toString();
+              signInRes.firstFactorVerification?.externalVerificationRedirectURL?.toString() ||
+              (signInRes as any)?.verifications?.externalVerificationRedirectURL?.toString();
           } catch (signInError) {
             logger.warn(
               "signIn.create externalUrl also unavailable on sign-up:",

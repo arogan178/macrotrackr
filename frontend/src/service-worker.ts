@@ -3,10 +3,11 @@
 
 import {
   cleanupOutdatedCaches,
-  matchPrecache,
+  createHandlerBoundToURL,
   precacheAndRoute,
   type PrecacheEntry,
 } from "workbox-precaching";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 
 declare global {
   // Workbox injectManifest replaces this at build time.
@@ -58,6 +59,20 @@ const sw = globalThis as unknown as ServiceWorkerRuntime;
 const injectedManifest = globalThis.__WB_MANIFEST;
 precacheAndRoute(injectedManifest);
 
+// Serve the cached shell for any navigation the precache does not match.
+//
+// `_redirects` gives the SPA fallback (`/* /index.html 200`), but that is the
+// host's job and the host needs the network. Offline, `precacheAndRoute` only
+// matched precached URLs — `/` resolved via Workbox's `directoryIndex`, so a
+// cold launch at `start_url` worked and a refresh on /home or /goals did not.
+// The API routes are excluded: those should fail as requests rather than be
+// answered with an HTML document.
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL("index.html"), {
+    denylist: [/^\/api\//],
+  }),
+);
+
 sw.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -88,18 +103,6 @@ sw.addEventListener("activate", (event) => {
 // navigation instead, and let the router take it from there.
 sw.addEventListener("fetch", (event) => {
   if (event.request.mode !== "navigate") return;
-
-  event.respondWith(
-    (async () => {
-      try {
-        return await fetch(event.request);
-      } catch {
-        const cachedShell = await matchPrecache("/index.html");
-
-        return cachedShell ?? Response.error();
-      }
-    })(),
-  );
 });
 
 // Handle messages from the main thread

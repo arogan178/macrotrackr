@@ -67,18 +67,29 @@ const KEYWORDS = new Set([
   "auto",
 ]);
 
-const readTokens = (): Set<string> => {
+const readTokens = (): { colors: Set<string>; shadows: Set<string> } => {
   const css = readFileSync(STYLE_SHEET, "utf8");
-  const tokens = new Set<string>();
-  for (const match of css.matchAll(/--color-([\da-z-]+):/g)) {
-    tokens.add(match[1]);
-  }
-  for (const match of css.matchAll(/--shadow-([\da-z-]+):/g)) {
-    tokens.add(match[1]);
-  }
+  const colors = new Set<string>();
+  const shadows = new Set<string>();
+  for (const match of css.matchAll(/--color-([\da-z-]+):/g)) colors.add(match[1]);
+  for (const match of css.matchAll(/--shadow-([\da-z-]+):/g)) shadows.add(match[1]);
 
-  return tokens;
+  return { colors, shadows };
 };
+
+// Names that are unmistakably design tokens rather than layout keywords. A bare
+// one of these that is not declared emits nothing at all — which is how
+// `bg-secondary` and `shadow-success` survived: neither is a palette family,
+// neither is shaded, and neither ends in `-foreground`, so the three shape
+// rules below never looked at them.
+const SEMANTIC_NAMES = new Set([
+  "primary", "secondary", "tertiary", "accent", "brand",
+  "success", "warning", "error", "danger", "info",
+  "surface", "surface-2", "surface-3", "surface-4",
+  "background", "foreground", "muted", "subtle", "hint",
+  "border", "border-2", "protein", "carbs", "fats",
+  "vibrant-accent",
+]);
 
 const listSourceFiles = (directory: string): string[] => {
   const entries = readdirSync(directory);
@@ -120,6 +131,7 @@ const looksLikeColourUsage = (
   // palette family (invalid without a shade) or a name that collides with a
   // declared token namespace (`*-foreground`, `*-500`, ...).
   if (isColourLike(value, tokens)) return false;
+  if (SEMANTIC_NAMES.has(value)) return true;
   if (PALETTE_FAMILIES.has(value)) return true;
 
   const shaded = /^([a-z-]+)-\d{2,3}$/.exec(value);
@@ -129,12 +141,28 @@ const looksLikeColourUsage = (
 };
 
 describe("colour tokens", () => {
-  const tokens = readTokens();
+  const { colors, shadows } = readTokens();
+  const tokens = colors;
 
   it("declares the tokens the app actually uses", () => {
     expect(tokens.has("primary")).toBe(true);
     expect(tokens.has("surface")).toBe(true);
     expect(tokens.has("muted")).toBe(true);
+  });
+
+  it("resolves shadow utilities against the shadow namespace, not the colours", () => {
+    // `shadow-success` passed for months because `--color-success` exists.
+    const offenders: string[] = [];
+    for (const file of listSourceFiles(SOURCE_ROOT)) {
+      const source = readFileSync(file, "utf8");
+      for (const [, value] of source.matchAll(/\bshadow-([a-z][\da-z-]*)\b/g)) {
+        if (["sm", "md", "lg", "xl", "2xl", "inner", "none", "xs"].includes(value)) continue;
+        if (!shadows.has(value)) {
+          offenders.push(`${path.relative(SOURCE_ROOT, file)}: shadow-${value}`);
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
   });
 
   it("has no utility class pointing at an undefined colour token", () => {

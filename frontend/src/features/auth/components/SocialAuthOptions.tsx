@@ -1,3 +1,5 @@
+import type React from "react";
+
 import Button from "@/components/ui/Button";
 import { AppleIcon, GoogleIcon } from "@/components/ui/Icons";
 
@@ -13,8 +15,8 @@ interface SocialAuthOptionsProps {
 
 interface SocialAuthProviderConfig {
   strategy: SocialAuthStrategy;
-  label: "Google" | "Apple";
-  Icon: typeof GoogleIcon;
+  label: string;
+  Icon: React.FC<{ className?: string }>;
   enabled: boolean;
 }
 

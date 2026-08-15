@@ -134,10 +134,8 @@ export default function SettingsPage() {
   }, [settingsData, initializeSettings]);
 
   // Warn user before leaving page with unsaved changes
-  useBeforeUnload(
-    hasSettingsChanges,
-    "You have unsaved changes. Are you sure you want to leave?",
-  );
+  // Browsers show their own wording here; a custom message is ignored.
+  useBeforeUnload(hasSettingsChanges);
 
   const handleTabChange = useCallback(
     (tab: TabType) => {

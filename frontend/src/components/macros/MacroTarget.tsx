@@ -6,7 +6,7 @@ import { useMacroTargetCore as useEditableMacroTargetCore } from "@/features/mac
 import type { MacroTargetState, MacroType } from "@/types/macro";
 import { DEFAULT_MACRO_TARGET } from "@/utils/constants/macro";
 
-import MacroSlider, { MacroBadge } from "./MacroSlider";
+import MacroSlider from "./MacroSlider";
 
 interface MacroTargetProps {
   initialValues?: MacroTargetState;

@@ -6,7 +6,7 @@ import {
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
 
-import type { ChartDataPoint } from "@/components/chart/chartTypes";
+import type { ChartDataPoint } from "@/components/chart/ChartTypes";
 import LineChartComponent from "@/components/chart/LineChartComponent";
 import { BarChartIcon, StateCard } from "@/components/ui";
 import { getChartDomain } from "@/features/goals/utils/progressAnalytics";

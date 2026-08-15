@@ -1,6 +1,6 @@
 import { apiClient } from "@/api/core";
 import { isLocalAuthMode } from "@/config/runtime";
-import type { MealType } from "@/types/macro";
+import type { Ingredient, MealType } from "@/types/macro";
 
 export interface SavedMeal {
   id: number;
@@ -10,7 +10,7 @@ export interface SavedMeal {
   carbs: number;
   fats: number;
   calories: number;
-  ingredients: unknown[];
+  ingredients: Ingredient[];
   createdAt: string;
   updatedAt?: string;
 }

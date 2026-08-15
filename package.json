@@ -15,7 +15,7 @@
     "start": "bun run --cwd backend start",
     "test": "bun run --cwd frontend test",
     "lint": "bun run --cwd frontend lint",
-    "typecheck": "bun run --cwd backend typecheck & bun run --cwd frontend typecheck",
+    "typecheck": "bun run --cwd backend typecheck && bun run --cwd frontend typecheck",
     "cap:sync": "bun run --cwd frontend cap:sync",
     "cap:sync:local": "bun run --cwd frontend cap:sync:local",
     "cap:sync:prod": "bun run --cwd frontend cap:sync:prod",

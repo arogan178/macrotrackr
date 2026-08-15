@@ -13,9 +13,10 @@ export function initNativeGoogleAuth(): void {
   if (!isNativePlatform() || isInitialized) return;
 
   try {
+    // serverClientId is a plugin-config option, not an initialize() one; it is
+    // already set under GoogleAuth in capacitor.config.ts.
     GoogleAuth.initialize({
       clientId: GOOGLE_CLIENT_ID,
-      serverClientId: GOOGLE_CLIENT_ID,
       scopes: ["profile", "email"],
       grantOfflineAccess: true,
     });
@@ -31,7 +32,9 @@ export async function nativeGoogleSignIn(): Promise<{ idToken: string; email?: s
   try {
     initNativeGoogleAuth();
     const user = await GoogleAuth.signIn();
-    const idToken = user?.authentication?.idToken || user?.idToken;
+    // The token only ever hangs off `authentication`; the old `user.idToken`
+    // fallback read a property the plugin does not define.
+    const idToken = user?.authentication?.idToken;
     if (idToken) {
       return { idToken, email: user.email };
     }
