@@ -41,7 +41,7 @@ export default function TrendsChartSection({
         key: "macros",
         label: (
           <div className="flex items-center gap-1.5 px-1">
-            <PieChartIcon className="h-3.5 w-3.5 text-blue-500" />
+            <PieChartIcon className="h-3.5 w-3.5 text-muted" />
             <span>Macros</span>
           </div>
         ),

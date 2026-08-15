@@ -14,7 +14,7 @@ export const clerkAppearance = {
     colorBorder: "#27272a",
     colorBorderSecondary: "#3f3f46",
     colorSuccess: "#22c55e",
-    colorWarning: "#f59e0b",
+    colorWarning: "#f97316",
     colorError: "#ef4444",
     colorInputBackground: "#1a1a22",
     colorInputBorder: "#27272a",
@@ -53,7 +53,7 @@ export const clerkAppearance = {
     // Badges
     badge: "rounded-full px-3 py-1 text-xs font-medium",
     badgeSuccess: "bg-[#22c55e]/20! text-[#22c55e]!",
-    badgeWarning: "bg-[#f59e0b]/20! text-[#f59e0b]!",
+    badgeWarning: "bg-[#f97316]/20! text-[#f97316]!",
     badgeDanger: "bg-[#ef4444]/20! text-[#ef4444]!",
     badgeNeutral: "bg-[#27272a]! text-[#a1a1aa]!",
     // Avatar

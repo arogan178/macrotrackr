@@ -5,7 +5,7 @@ const PROGRESS_BAR_COLORS = {
   green: "bg-success",
   red: "bg-error",
   accent: "bg-primary",
-  purple: "bg-secondary",
+  purple: "bg-protein",
   protein: "bg-protein",
   carbs: "bg-carbs",
   fats: "bg-fats",

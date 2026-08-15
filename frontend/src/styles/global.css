@@ -104,6 +104,17 @@
   }
 }
 
+/* Drives the progress hairline under the active product-preview tab. Keyed on
+   the slide index in React, so it restarts with each advance. */
+@keyframes carousel-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* Respect reduced motion */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -122,12 +133,18 @@
   --sab: env(safe-area-inset-bottom, 0px);
   --sal: env(safe-area-inset-left, 0px);
   --sar: env(safe-area-inset-right, 0px);
-  --floating-notification-top: calc(16px + var(--sat));
-
   /* One number for the fixed AppHeader: its top inset (1rem) + its height
      (min-h-14 = 3.5rem) + the gap below it. PageShell is the only consumer. */
   --header-height: 3.5rem;
   --header-offset: calc(1rem + var(--sat) + var(--header-height) + 1.5rem);
+
+  /* Toasts clear the header rather than sharing its band. This was
+     `calc(16px + var(--sat))` — the header's own top inset — so every
+     notification rendered behind the bar it was aligned with. Declared after
+     --header-height because it reads it. */
+  --floating-notification-top: calc(
+    1rem + var(--sat) + var(--header-height) + 0.75rem
+  );
 }
 
 .safe-area-pt {

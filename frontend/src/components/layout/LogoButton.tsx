@@ -33,7 +33,10 @@ const LogoButton: React.FC<LogoButtonProps> = ({
       compact ? "px-0" : "px-2"
     } ${className}`}
   >
-    <BrandMark className="h-7 w-7 shrink-0 text-primary sm:h-8 sm:w-8" />
+    {/* The mark is 1.59:1, so it is sized by height and left to find its own
+        width. Forcing it into a square box letterboxed it and made it read
+        smaller than the word beside it. */}
+    <BrandMark className="h-6 w-auto shrink-0 text-primary sm:h-7" />
     <span className="text-lg font-semibold tracking-tight text-foreground sm:text-xl">
       {APP_NAME}
     </span>

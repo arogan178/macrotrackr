@@ -97,7 +97,7 @@ export function SecondFactorChallenge({
         />
 
         {error ? (
-          <p role="alert" className="text-sm text-danger">
+          <p role="alert" className="text-sm text-error">
             {error}
           </p>
         ) : null}
