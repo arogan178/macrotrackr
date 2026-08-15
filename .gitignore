@@ -63,3 +63,6 @@ rewrite.ts
 scorecard.png
 .serena
 .tokensave
+
+# Agent worktrees: these are full checkouts, not project files
+.claude/
