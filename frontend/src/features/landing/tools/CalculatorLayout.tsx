@@ -24,6 +24,8 @@ interface CalculatorLayoutProps {
   metaTitle?: string;
   badge?: string;
   faqs?: FaqItem[];
+  /** The figure this calculator produced, carried into the closing CTA. */
+  ctaResult?: { label: string; value: string };
   children: React.ReactNode;
 }
 
@@ -35,6 +37,7 @@ export default function CalculatorLayout({
   metaTitle,
   badge,
   faqs = [],
+  ctaResult,
   children,
 }: CalculatorLayoutProps) {
   const canonicalUrl = buildCanonicalUrl(canonicalPath);
@@ -103,6 +106,19 @@ export default function CalculatorLayout({
           {/* Calculator main content */}
           <div className="space-y-8">{children}</div>
 
+          {/* Directly under the result: this is the one moment the reader has a
+              number they care about, and it used to sit below the FAQ and the
+              related tools, where almost nobody scrolls. */}
+          <ToolsCtaBanner
+            heading={
+              ctaResult
+                ? "Now make it a number you actually hit"
+                : "Ready to put your target into practice?"
+            }
+            body="Log meals against this target, see your progress, and adjust as real life changes."
+            result={ctaResult}
+          />
+
           {/* FAQ Section if present */}
           {faqs.length > 0 && (
             <div className={`mt-12 ${calculatorCardClass}`}>
@@ -123,10 +139,6 @@ export default function CalculatorLayout({
 
           <RelatedTools currentPath={canonicalPath} />
 
-          <ToolsCtaBanner
-            heading="Ready to put your target into practice?"
-            body="Log meals against this target, see your progress, and adjust your plan as real life changes."
-          />
         </div>
       </main>
 

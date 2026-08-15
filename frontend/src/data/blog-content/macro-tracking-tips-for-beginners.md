@@ -1,6 +1,6 @@
 # The Beginner's Guide to Macro Tracking: Start Simple, Stay Consistent
 
-Macro tracking can feel overwhelming at first. The numbers, the ratios, the fear of getting it "wrong"—it's enough to make many people quit before they start seeing results.
+Macro tracking can feel overwhelming at first. The numbers, the ratios, the fear of getting it "wrong". It is enough to make many people quit before they start seeing results.
 
 But here's the truth: you don't need to be perfect. You need to be consistent.
 
@@ -117,7 +117,7 @@ Eating out doesn't have to derail your tracking:
 
 You log perfectly Monday through Thursday. Friday night, you have pizza and beer. You decide the week is ruined and binge all weekend.
 
-**The fix:** One meal doesn't define a week. One day doesn't define a month. Get back on track at the next meal—not Monday.
+**The fix:** One meal doesn't define a week. One day doesn't define a month. Get back on track at the next meal, not Monday.
 
 ### Mistake 2: Setting Aggressive Deficits
 
@@ -177,16 +177,20 @@ After tracking consistently for two weeks, ask:
 - Gaining faster? You're adding unnecessary fat. Reduce calories.
 - Not gaining? Add 100-200 calories.
 
-**Important:** Give each adjustment 2 weeks before changing again. Weight fluctuates daily—look for trends.
+**Important:** Give each adjustment 2 weeks before changing again. Weight fluctuates daily, so look for trends.
+
+## Work Out Your Numbers First
+
+Before tracking anything, you need a target. The [TDEE calculator](/tools/tdee-calculator) estimates what you burn in a day, and the [macro calculator](/tools/macro-calculator) turns that into a protein, carb and fat split. Both are free and neither asks for an account.
 
 ## Tools That Help
 
 Beyond MacroTrackr, consider:
 
-- **Digital food scale** ($15-30) — Essential for accuracy
-- **Meal prep containers** — Portion control made easy
-- **Water bottle with time markers** — Hydration affects hunger
-- **Notepad for meal ideas** — When you're stuck, reference it
+- **Digital food scale** ($15-30): essential for accuracy
+- **Meal prep containers**: portion control made easy
+- **Water bottle with time markers**: hydration affects hunger
+- **Notepad for meal ideas**: when you are stuck, reference it
 
 ## Start Today
 
@@ -201,6 +205,6 @@ That's it. Start simple. Stay consistent. The results will come.
 
 [Start your free MacroTrackr account](/register) and make today Day 1.
 
-— The MacroTrackr Team
+The MacroTrackr Team
 
-*Questions about getting started? Email us at support@local.invalid—we read every message.*
+*Questions about getting started? Email us at support@local.invalid. We read every message.*

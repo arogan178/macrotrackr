@@ -8,10 +8,13 @@ import remarkGfm from "remark-gfm";
 
 import AppHeader from "@/components/layout/AppHeader";
 import { BackIcon, CheckIcon, ContentImage, CopyIcon, Link2Icon } from "@/components/ui";
+import { getButtonClasses } from "@/components/ui/Button";
+import Panel from "@/components/ui/Panel";
 import { MealGroupingFlow } from "@/features/landing/components/AnimatedUserFlow";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import { BlogNotFound } from "@/features/landing/components/BlogNotFound";
 import Footer from "@/features/landing/components/Footer";
+import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
 import { usePageMetadata } from "@/hooks";
 import {
   formatDate,
@@ -345,23 +348,25 @@ const BlogArticlePage: React.FC = () => {
             initial={shouldReduceMotion ? false : { opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.45 }}
-            className="text-center"
+            className="mx-auto max-w-3xl"
           >
-            <div className="text-muted flex flex-wrap items-center justify-center gap-2 text-xs font-medium tracking-[0.16em] uppercase">
-              <span className="font-semibold text-primary">
-                {post.category}
-              </span>
-              <span>{formatDate(post.date)}</span>
-              <span>·</span>
-              <span>{post.readingTime}</span>
-            </div>
-            <h1 className="mx-auto mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-foreground sm:text-5xl lg:text-6xl lg:leading-[1.05]">
+            {/* Left aligned and ruled, like the index it came from. The centred
+                version used a fifth page-title scale (larger than anything else
+                in the app) and a tracking value that existed only here. */}
+            <h1 className="text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
               {post.title}
             </h1>
-            <p className="mx-auto mt-6 max-w-3xl text-xl leading-9 text-muted">
+            <p className="mt-4 text-lg leading-relaxed text-muted">
               {post.excerpt}
             </p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-sm text-muted">
+
+            <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2 border-y border-border py-3 text-xs text-muted">
+              <span className="text-foreground">{post.category}</span>
+              <span className="tabular-nums">{formatDate(post.date)}</span>
+              <span className="tabular-nums">{post.readingTime}</span>
+            </div>
+
+            <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-muted">
               <span>By {post.author}</span>
               <span>·</span>
               <button
@@ -419,7 +424,7 @@ const BlogArticlePage: React.FC = () => {
             transition={{ duration: 0.45, delay: 0.1 }}
             className="mt-12"
           >
-            <div className="mx-auto max-w-3xl rounded-4xl border border-border bg-surface px-6 py-8 sm:px-10 sm:py-10">
+            <div className="mx-auto max-w-3xl">
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 rehypePlugins={[
@@ -448,6 +453,33 @@ const BlogArticlePage: React.FC = () => {
               </div>
             )}
           </motion.article>
+
+          {/* Someone who has read to the end of an article on nutrition is the
+              warmest traffic this site gets, and until now the page offered
+              them nothing to do next. Placed before the related posts, which
+              are the alternative — keep reading — rather than the action. */}
+          <Panel
+            className="mt-16"
+            padding="regular"
+            title="Put this into practice"
+            description="MacroTrackr turns the targets in this article into a daily log you can actually keep. Free, no card, and your data stays exportable."
+          >
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <Link
+                to="/register"
+                search={{ returnTo: undefined }}
+                className={getButtonClasses("primary", "lg", false, "px-6")}
+              >
+                Start tracking free
+              </Link>
+              <Link
+                to={TOOLS_HUB_PATH}
+                className={getButtonClasses("secondary", "lg", false, "px-6")}
+              >
+                Work out your numbers
+              </Link>
+            </div>
+          </Panel>
 
           {relatedPosts.length > 0 && (
             <section className="mt-14">
@@ -480,7 +512,7 @@ const BlogArticlePage: React.FC = () => {
                         <ContentImage
                           src={relatedPost.image}
                           alt={relatedPost.title}
-                          className="transition-transform duration-700 group-hover:scale-105"
+                          className="transition-opacity duration-200 group-hover:opacity-90"
                         />
                       ) : (
                         <div className="h-full w-full bg-muted/20" />

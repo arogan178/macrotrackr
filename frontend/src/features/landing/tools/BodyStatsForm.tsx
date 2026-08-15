@@ -64,18 +64,6 @@ export default function BodyStatsForm({
         >
           <button
             type="button"
-            onClick={() => setUnitSystem("imperial")}
-            aria-pressed={unitSystem === "imperial"}
-            className={`min-h-8 cursor-pointer rounded-control px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
-              unitSystem === "imperial"
-                ? "bg-primary font-semibold text-black"
-                : "text-muted hover:text-foreground"
-            }`}
-          >
-            Imperial<span className="hidden sm:inline"> (lb, ft)</span>
-          </button>
-          <button
-            type="button"
             onClick={() => setUnitSystem("metric")}
             aria-pressed={unitSystem === "metric"}
             className={`min-h-8 cursor-pointer rounded-control px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
@@ -85,6 +73,18 @@ export default function BodyStatsForm({
             }`}
           >
             Metric<span className="hidden sm:inline"> (kg, cm)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setUnitSystem("imperial")}
+            aria-pressed={unitSystem === "imperial"}
+            className={`min-h-8 cursor-pointer rounded-control px-2.5 py-1 font-medium transition-colors focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none ${
+              unitSystem === "imperial"
+                ? "bg-primary font-semibold text-black"
+                : "text-muted hover:text-foreground"
+            }`}
+          >
+            Imperial<span className="hidden sm:inline"> (lb, ft)</span>
           </button>
         </div>
       </div>

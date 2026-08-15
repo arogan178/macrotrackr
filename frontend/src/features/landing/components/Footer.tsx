@@ -2,6 +2,8 @@ import React from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
 
 import LogoButton from "@/components/layout/LogoButton";
+import { getButtonClasses } from "@/components/ui/Button";
+import { cn } from "@/lib/classnameUtilities";
 import { APP_NAME, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
 const footerLinkClasses =
@@ -13,6 +15,31 @@ const Footer: React.FC = () => {
   return (
     <footer className="relative z-10 border-t border-border bg-background px-6 py-8 lg:px-8">
       <div className="mx-auto max-w-7xl">
+        {/* The footer reaches every public page and, until now, offered nothing
+            to do on any of them. One row, stated plainly, no second action
+            competing with it. */}
+        <div className="mb-10 flex flex-wrap items-center justify-between gap-4 rounded-card border border-border bg-surface p-6">
+          <div>
+            <p className="text-base font-semibold text-foreground">
+              Start tracking today
+            </p>
+            <p className="mt-1 text-sm text-muted">
+              Free, no card, and you can export or delete everything whenever
+              you like.
+            </p>
+          </div>
+          <Link
+            to="/register"
+            search={{ returnTo: undefined }}
+            className={cn(
+              getButtonClasses("primary", "lg", false, "px-6"),
+              "shrink-0",
+            )}
+          >
+            Create an account
+          </Link>
+        </div>
+
         <div className="grid grid-cols-1 gap-8 md:grid-cols-[minmax(0,1.2fr)_repeat(2,minmax(0,0.7fr))] md:items-start md:gap-6">
           <div>
             <div className="mb-3 -ml-2">

@@ -1,25 +1,11 @@
-import React from "react";
+import React, { Suspense } from "react";
 import { Link } from "@tanstack/react-router";
 import { m } from "motion/react";
 
 import { getButtonClasses } from "@/components/ui/Button";
 import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
-import DailySummaryPanel from "@/features/macroTracking/components/DailySummaryPanel";
 
-/** A representative day. The panel is the app's own component, so this proof
- *  cannot drift from the product the way a screenshot or a video does. */
-const SAMPLE_TOTALS = {
-  protein: 142,
-  carbs: 218,
-  fats: 45,
-  calories: 1847,
-};
-
-const SAMPLE_TARGET = {
-  proteinPercentage: 30,
-  carbsPercentage: 45,
-  fatsPercentage: 25,
-};
+const ProductPreview = React.lazy(() => import("./ProductPreview"));
 
 const HeroSection: React.FC = () => (
   <section className="relative z-10 pt-[var(--header-offset)] pb-16 sm:pb-24">
@@ -78,22 +64,28 @@ const HeroSection: React.FC = () => (
         </p>
       </m.div>
 
-      {/* The product, at real values, rather than a lazily-loaded player whose
-          fallback is a spinner in fake browser chrome. */}
+      {/* The product demonstrating itself, rather than a player whose fallback
+          was a spinner in fake browser chrome. Lazy, with a fallback shaped like
+          the thing it replaces, so the fold never reflows. */}
       <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-        className="relative mx-auto mt-14 max-w-md text-left"
+        className="relative mx-auto mt-14 w-full text-left"
       >
-        <DailySummaryPanel
-          macroDailyTotals={SAMPLE_TOTALS}
-          macroTarget={SAMPLE_TARGET}
-          calorieTarget={2200}
-        />
-        <p className="mt-3 text-center text-xs text-muted">
-          The Home summary, exactly as the app renders it.
-        </p>
+        <Suspense
+          fallback={
+            <div
+              aria-hidden="true"
+              className="mx-auto grid w-full max-w-4xl gap-4 md:grid-cols-[1.1fr_0.9fr]"
+            >
+              <div className="h-64 rounded-card border border-border bg-surface" />
+              <div className="h-64 rounded-card border border-border bg-surface" />
+            </div>
+          }
+        >
+          <ProductPreview />
+        </Suspense>
       </m.div>
     </div>
   </section>

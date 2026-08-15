@@ -1,6 +1,6 @@
 # MacroTrackr v2.5: Compact Mobile Layouts, Sleeker Navigation, and Search Improvements
 
-MacroTrackr v2.5 delivers a major mobile UX upgrade—reducing vertical scrolling by up to 50% across key screens, refining form inputs, polishing navigation, and ensuring seamless infrastructure routing.
+MacroTrackr v2.5 delivers a major mobile UX upgrade, reducing vertical scrolling by up to 50% across key screens, refining form inputs, polishing navigation, and ensuring seamless infrastructure routing.
 
 ## What's New in v2.5
 
@@ -14,7 +14,7 @@ In v2.5, we optimized layout density:
 
 ### 2. Refined Form Inputs & Search Experience
 Logging meals and searching for food is faster and cleaner:
-- **Search Button**: Configured food search with responsive sizing—showing a compact icon button on mobile and full "Search →" button on desktop.
+- **Search Button**: Configured food search with responsive sizing: a compact icon button on mobile and full "Search →" button on desktop.
 - **Ghost Input Text**: Inputs and placeholders use subtle, responsive font sizing (`text-xs sm:text-sm`), giving form fields a clean, unobtrusive feel.
 - **Log Entry Button**: The "Add Entry" submit button uses single-line whitespace preservation and compact padding for touch screens.
 
