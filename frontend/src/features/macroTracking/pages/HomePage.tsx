@@ -353,14 +353,12 @@ export default function HomePage() {
 
             {/* Below md the form lives in the Log sheet, reached from the tab
                 bar's primary action, so the day is what Home opens on. */}
-            <div className="hidden h-full flex-col md:order-1 md:col-span-4 md:flex">
-              <div className="flex-1">
-                {isLoading ? (
-                  <AddEntryLoadingSkeleton />
-                ) : (
-                  <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
-                )}
-              </div>
+            <div className="hidden md:order-1 md:col-span-4 md:block">
+              {isLoading ? (
+                <AddEntryLoadingSkeleton />
+              ) : (
+                <AddEntryForm onSubmit={handleAddEntry} isSaving={isSaving} />
+              )}
             </div>
           </div>
 
