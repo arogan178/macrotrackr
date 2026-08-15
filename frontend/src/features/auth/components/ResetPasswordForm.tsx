@@ -9,7 +9,7 @@ import { useResetPassword } from "@/hooks/auth/useAuthQueries";
 import { useStore } from "@/store/store";
 
 function ResetPasswordForm() {
-  const search = useSearch({ from: "/reset-password" });
+  const search = (useSearch({ strict: false }) ?? {}) as { token?: string };
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const { showNotification } = useStore();

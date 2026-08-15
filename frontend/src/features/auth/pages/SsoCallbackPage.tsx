@@ -47,7 +47,7 @@ function ClerkSsoCallbackPage() {
   const { isLoaded: authLoaded, isSignedIn } = useAuth();
   const { user, isLoaded: userLoaded } = useUser();
   const navigate = useNavigate();
-  const search = useSearch({ from: "/sso-callback" }) as {
+  const search = (useSearch({ strict: false }) ?? {}) as {
     redirectTo?: string;
     flow?: string;
   };
