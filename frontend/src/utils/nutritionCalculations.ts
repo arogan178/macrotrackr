@@ -5,6 +5,7 @@ import {
   MIN_WEEKLY_WEIGHT_LOSS,
 } from "@/features/goals/constants";
 import type { ActivityLevel, Gender } from "@/types/activity";
+import type { WeightGoal } from "@/types/goal";
 import type { MacroDailyTotals, MacroEntry } from "@/types/macro";
 import {
   CALORIES_PER_GRAM,
@@ -292,7 +293,7 @@ export function generateWeightGoalCalculations(
     customCalorieIntake ??
     calculateCalorieTarget(tdee, startingWeight, targetWeight);
 
-  const weightGoal =
+  const weightGoal: WeightGoal =
     startingWeight > targetWeight
       ? "lose"
       : startingWeight < targetWeight
