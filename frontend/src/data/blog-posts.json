@@ -1,5 +1,61 @@
 [
   {
+    "slug": "v0-8-0",
+    "title": "MacroTrackr 0.8.0: Core Features Complete",
+    "excerpt": "Calorie and macro tracking",
+    "date": "2026-01-20",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "1 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "v0-9-0",
+    "title": "MacroTrackr 0.9.0: Beta Release",
+    "excerpt": "Private beta with 50+ testers",
+    "date": "2026-02-15",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "1 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "v1-0-0",
+    "title": "MacroTrackr 1.0.0: MacroTrackr Launch",
+    "excerpt": "Clean, distraction-free macro tracking",
+    "date": "2026-03-01",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "1 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
+    "slug": "v2-6-0",
+    "title": "MacroTrackr 2.6.0: Free Nutrition Calculators & Organic Discovery",
+    "excerpt": "Five free calculators at /tools: TDEE, BMR, macro split, weight loss timeline, and protein intake",
+    "date": "2026-08-11",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "1 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
     "slug": "v3-0-0",
     "title": "MacroTrackr 3.0.0: One Design System, End to End",
     "excerpt": "Version 3 closes a design system that had drifted into twenty surface fills, seven corner radii and three separate page headers, and fixes a long list of things that were quietly not working underneath it.",

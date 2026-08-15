@@ -46,7 +46,9 @@ describe("release note to blog", () => {
   });
 
   it("still catches a release that shipped with no post at all", () => {
-    expect(hasPostFor("2.6.0", posts)).toBe(false);
+    // Against a fixture, not the live archive: this asserted on a real gap and
+    // broke the moment that gap was filled.
+    expect(hasPostFor("4.1.0", [{ slug: "v3-0-0" }])).toBe(false);
   });
 
   it("recognises the post it just generated for this release", () => {
