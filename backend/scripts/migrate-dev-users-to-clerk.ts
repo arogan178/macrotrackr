@@ -134,7 +134,7 @@ export async function main() {
 
   if (!secretKey) {
     throw new Error(
-      "Missing CLERK_SECRET_KEY. Run with backend env loaded (e.g. dotenvx + .env.development)."
+      "Missing CLERK_SECRET_KEY. Run with backend env loaded (e.g. bun --env-file=.env.development ...)."
     );
   }
 

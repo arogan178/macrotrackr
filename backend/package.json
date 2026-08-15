@@ -5,10 +5,10 @@
   "module": "src/index.ts",
   "type": "module",
   "scripts": {
-    "start": "if [ -f .env.production ]; then bunx dotenvx run --env-file .env.production -- bun run src/index.ts; elif [ -f .env ]; then bunx dotenvx run --env-file .env -- bun run src/index.ts; else bun run src/index.ts; fi",
-    "dev": "if [ -f .env.development ]; then bunx dotenvx run --env-file .env.development -- bun --watch src/index.ts; elif [ -f .env ]; then bunx dotenvx run --env-file .env -- bun --watch src/index.ts; else bun --watch src/index.ts; fi",
+    "start": "if [ -f .env.production ]; then bun --env-file .env.production run src/index.ts; else bun run src/index.ts; fi",
+    "dev": "if [ -f .env.development ]; then bun --env-file .env.development --watch src/index.ts; else bun --watch src/index.ts; fi",
     "build": "bun build src/index.ts --target bun --outdir dist",
-    "migrate:clerk:dev": "if [ -f .env.development ]; then bunx dotenvx run --env-file .env.development -- bun run scripts/migrate-dev-users-to-clerk.ts; elif [ -f .env ]; then bunx dotenvx run --env-file .env -- bun run scripts/migrate-dev-users-to-clerk.ts; else bun run scripts/migrate-dev-users-to-clerk.ts; fi",
+    "migrate:clerk:dev": "if [ -f .env.development ]; then bun --env-file .env.development run scripts/migrate-dev-users-to-clerk.ts; else bun run scripts/migrate-dev-users-to-clerk.ts; fi",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
@@ -38,7 +38,6 @@
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@dotenvx/dotenvx": "^1.61.0",
     "@elysiajs/cors": "^1.4.1",
     "@elysiajs/swagger": "^1.3.1",
     "elysia": "^1.4.28",

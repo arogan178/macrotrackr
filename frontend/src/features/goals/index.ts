@@ -62,16 +62,12 @@ export {
 } from "./utils/goalUtilities";
 export {
   buildHabitUpdatePayload,
-  calculateCompletionRate,
   calculateProgress,
   calculateRemainingToTarget,
-  calculateStreakDays,
   completeHabit,
   createNewHabit,
   filterHabitsByCompletion,
-  getHabitProgressColor,
   getHabitsStats,
-  getProgressBarColor,
   incrementHabitProgress,
   isHabitComplete,
   isValidHabitForm,
