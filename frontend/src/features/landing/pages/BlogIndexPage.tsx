@@ -20,8 +20,8 @@ interface BlogIndexSearch {
 
 const BlogIndexPage: React.FC = () => {
   const shouldReduceMotion = useReducedMotion();
-  const navigate = useNavigate({ from: "/blog/" });
-  const search = useSearch({ from: "/blog/" }) as BlogIndexSearch;
+  const navigate = useNavigate();
+  const search = (useSearch({ strict: false }) ?? {}) as BlogIndexSearch;
 
   usePageMetadata({
     title: "Blog — MacroTrackr",

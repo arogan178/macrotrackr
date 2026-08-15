@@ -13,8 +13,8 @@ import { resolveAuthReturnTo } from "@/features/auth/utils/redirect";
  */
 export default function SignUpPage() {
   const navigate = useNavigate();
-  const search = useSearch({ from: "/register" });
-  const returnTo = search.returnTo as string | undefined;
+  const search = (useSearch({ strict: false }) ?? {}) as { returnTo?: string };
+  const returnTo = search.returnTo;
   const returnToSearch = { returnTo: resolveAuthReturnTo(returnTo) };
 
   return (
