@@ -66,3 +66,6 @@ scorecard.png
 
 # Agent worktrees: these are full checkouts, not project files
 .claude/
+
+# Planning artefact, superseded by the shipped work
+ui-polish-plan.html
