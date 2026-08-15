@@ -43,7 +43,7 @@ export default function MealDetailsSection({
   const calories = Math.round(protein * 4 + carbs * 4 + fats * 9);
 
   return (
-    <section className="space-y-4 rounded-3xl border border-border/60 bg-surface/80 p-5 shadow-sm md:p-6">
+    <section className="space-y-4 rounded-card border border-border bg-surface p-5 md:p-6">
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-semibold tracking-[0.18em] text-muted uppercase">
           Meal Details
@@ -102,7 +102,7 @@ export default function MealDetailsSection({
       </div>
 
       <div className="grid gap-3 sm:grid-cols-4">
-        <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
+        <div className="rounded-card border border-border bg-surface-2 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-muted uppercase">
             Calories
           </p>
@@ -110,7 +110,7 @@ export default function MealDetailsSection({
             {calories}
           </p>
         </div>
-        <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
+        <div className="rounded-card border border-border bg-surface-2 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-protein uppercase">
             Protein
           </p>
@@ -118,7 +118,7 @@ export default function MealDetailsSection({
             {protein.toFixed(1)}g
           </p>
         </div>
-        <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
+        <div className="rounded-card border border-border bg-surface-2 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-carbs uppercase">
             Carbs
           </p>
@@ -126,7 +126,7 @@ export default function MealDetailsSection({
             {carbs.toFixed(1)}g
           </p>
         </div>
-        <div className="rounded-2xl border border-border/50 bg-surface-2/70 p-4">
+        <div className="rounded-card border border-border bg-surface-2 p-4">
           <p className="text-[11px] font-semibold tracking-[0.16em] text-fats uppercase">
             Fats
           </p>
@@ -141,7 +141,7 @@ export default function MealDetailsSection({
           <button
             type="button"
             onClick={onAddIngredient}
-            className="flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border/80 bg-surface-2/30 py-3 text-sm font-medium text-foreground transition-[background-color,border-color,color,transform] duration-200 hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none active:scale-[0.98]"
+            className="flex w-full items-center justify-center gap-2 rounded-card border border-dashed border-border bg-surface-2 py-3 text-sm font-medium text-foreground transition-[background-color,border-color,color,transform] duration-200 hover:border-primary/40 hover:bg-primary/5 hover:text-primary focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none active:scale-[0.98]"
           >
             <svg
               className="h-4 w-4"

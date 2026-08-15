@@ -3,24 +3,24 @@ export const PRICING = {
   yearly: 29.99,
 } as const;
 
+// Written as what the reader gets, not as the mechanism that provides it.
+// "7-Day Reporting View" and "Save up to 5 Meals" named internal limits and
+// listed them as though they were features of the free plan; they are its
+// boundary, which is a different thing and the reason anyone upgrades.
 export const FREE_PLAN_FEATURES = [
-  "Macro Tracking",
-  "Meal Types & Time Logging",
-  "Weight Logging",
-  "Basic Goal Setting",
-  "7-Day Reporting View",
-  "60-Day Entry History",
-  "Save up to 5 Meals",
+  "Log meals, macros and calories, with no daily cap",
+  "Set macro targets and a weight goal",
+  "Track your weight over time",
+  "See the last 7 days of progress",
+  "Keep 5 saved meals for quick logging",
 ] as const;
 
 export const PRO_PLAN_FEATURES = [
-  "Everything in Free, plus:",
-  "Unlimited Habit Tracking",
-  "Unlimited Meal Saver",
-  "30 & 90-Day Reporting",
-  "Unlimited Entry History",
-  "Advanced Analytics & Insights",
-  "CSV Data Export",
+  "See 30 and 90 days, not just the last 7",
+  "Trends and insights across the whole range",
+  "Unlimited saved meals and habits",
+  "Your full history, however far back it goes",
+  "Export everything to CSV whenever you want",
 ] as const;
 
 export interface SharedPlanDefinition {
@@ -33,14 +33,14 @@ export interface SharedPlanDefinition {
 export const FREE_PLAN_DEFINITION: SharedPlanDefinition = {
   id: "free",
   name: "Free",
-  description: "Perfect for getting started",
+  description: "Everything you need to track a day",
   features: FREE_PLAN_FEATURES,
 };
 
 export const PRO_PLAN_DEFINITION: SharedPlanDefinition = {
   id: "pro",
   name: "Pro",
-  description: "Unlock your full potential",
+  description: "For when a week is not a long enough view",
   features: PRO_PLAN_FEATURES,
 };
 

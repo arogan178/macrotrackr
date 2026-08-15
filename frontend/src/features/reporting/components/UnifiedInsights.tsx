@@ -15,6 +15,7 @@ import {
   XCircleIcon,
 } from "@/components/ui";
 import { InfoTooltip } from "@/components/ui/InfoTooltip";
+import MetricCard from "@/components/ui/MetricCard";
 import { RadialProgress } from "@/components/ui/RadialProgress";
 
 import { MACRO_COLORS } from "../constants";
@@ -34,7 +35,6 @@ import {
   TRANSITIONS,
 } from "../utils/unifiedInsightsUtilities";
 
-import MetricCard from "./MetricCard";
 import RecommendationsSection from "./RecommendationsSection";
 import TrendDisplay from "./TrendDisplay";
 
@@ -145,7 +145,7 @@ function UnifiedInsights({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex items-center space-x-3">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
+        <div className="flex h-8 w-8 items-center justify-center rounded-control bg-primary/10 text-primary">
           <LightningIcon className="h-4 w-4" />
         </div>
         <h2 className="text-xl font-bold tracking-tight text-foreground/90">
@@ -163,7 +163,6 @@ function UnifiedInsights({
               tooltipText="Measures how consistently you track meals and hit your targets over time."
               score={consistencyScore}
               delay={0}
-              variant="custom"
             >
               <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
                 <RadialProgress
@@ -174,7 +173,7 @@ function UnifiedInsights({
                     consistencyScore,
                     "consistency",
                   )}
-                  trackColorClass="text-surface border border-border/10 rounded-full"
+                  trackColorClass="text-surface border border-border rounded-full"
                 >
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold tracking-tight text-foreground">
@@ -200,7 +199,6 @@ function UnifiedInsights({
               tooltipText="Shows how close your current intake of Protein, Carbs, and Fats aligns with your set targets."
               score={macroBalance.score}
               delay={0.1}
-              variant="custom"
             >
               <div className="flex h-full flex-col justify-center pt-2">
                 <div className="flex justify-around px-1 md:px-6">
@@ -225,7 +223,7 @@ function UnifiedInsights({
                           size={80}
                           strokeWidth={6}
                           colorClass={colors[index]}
-                          trackColorClass="text-surface border border-border/10 rounded-full"
+                          trackColorClass="text-surface border border-border rounded-full"
                         >
                           <span className="text-xl font-bold text-foreground">
                             {pct}%
@@ -252,7 +250,6 @@ function UnifiedInsights({
               tooltipText="Share of your average daily calories that came from protein."
               score={macroDensity.score}
               delay={0.2}
-              variant="custom"
             >
               <div className="flex h-full flex-col items-center justify-center pt-4 pb-2">
                 <RadialProgress
@@ -260,7 +257,7 @@ function UnifiedInsights({
                   size={100}
                   strokeWidth={8}
                   colorClass="text-protein"
-                  trackColorClass="text-surface border border-border/10 rounded-full"
+                  trackColorClass="text-surface border border-border rounded-full"
                 >
                   <div className="flex flex-col items-center justify-center">
                     <span className="text-3xl font-bold tracking-tight text-foreground">
@@ -305,7 +302,7 @@ function UnifiedInsights({
                   <InfoTooltip text="Evaluates how regularly and completely you log your meals over the selected period." />
                 </div>
                 {/* Days Tracked Badge */}
-                <div className="flex items-center gap-1.5 rounded-md bg-surface-2/80 px-2.5 py-1 text-xs font-medium text-foreground">
+                <div className="flex items-center gap-1.5 rounded-control bg-surface-2 px-2.5 py-1 text-xs font-medium text-foreground">
                   <span className="font-bold text-foreground">
                     <AnimatedNumber
                       value={
@@ -336,7 +333,7 @@ function UnifiedInsights({
               {/* Stats Grid 2x2 */}
               <div className="grid flex-1 grid-cols-2 gap-3">
                 {/* Current Streak */}
-                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                <div className="flex flex-col items-center justify-center gap-1 rounded-control bg-surface-2 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-orange-500/10">
                     <CalorieIcon className="h-4 w-4 text-orange-500" />
                   </div>
@@ -353,7 +350,7 @@ function UnifiedInsights({
                 </div>
 
                 {/* Best Streak */}
-                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                <div className="flex flex-col items-center justify-center gap-1 rounded-control bg-surface-2 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-success/10">
                     <TrendingUpIcon className="h-4 w-4 text-success" />
                   </div>
@@ -370,7 +367,7 @@ function UnifiedInsights({
                 </div>
 
                 {/* Missed Days */}
-                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                <div className="flex flex-col items-center justify-center gap-1 rounded-control bg-surface-2 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-error/10">
                     <XCircleIcon className="h-4 w-4 text-error" />
                   </div>
@@ -387,7 +384,7 @@ function UnifiedInsights({
                 </div>
 
                 {/* Completion Rate */}
-                <div className="flex flex-col items-center justify-center gap-1 rounded-lg bg-surface-2/50 p-3">
+                <div className="flex flex-col items-center justify-center gap-1 rounded-control bg-surface-2 p-3">
                   <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
                     <TargetIcon className="h-4 w-4 text-primary" />
                   </div>
@@ -410,7 +407,7 @@ function UnifiedInsights({
               </div>
 
               {/* Message Banner */}
-              <div className="mt-4 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+              <div className="mt-4 rounded-control border border-primary/20 bg-primary/5 px-3 py-2">
                 <p className="text-xs leading-relaxed font-medium text-primary/90">
                   {dataQuality.message}
                 </p>
@@ -480,7 +477,7 @@ function UnifiedInsights({
               </div>
 
               {/* Message Banner */}
-              <div className="mt-4 rounded-md border border-primary/20 bg-primary/5 px-3 py-2">
+              <div className="mt-4 rounded-control border border-primary/20 bg-primary/5 px-3 py-2">
                 <p className="text-xs leading-relaxed font-medium text-primary/90">
                   {overallTrendMessage}
                 </p>

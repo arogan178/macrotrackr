@@ -14,7 +14,7 @@ export const clerkAppearance = {
     colorBorder: "#27272a",
     colorBorderSecondary: "#3f3f46",
     colorSuccess: "#22c55e",
-    colorWarning: "#f59e0b",
+    colorWarning: "#f97316",
     colorError: "#ef4444",
     colorInputBackground: "#1a1a22",
     colorInputBorder: "#27272a",
@@ -23,12 +23,12 @@ export const clerkAppearance = {
   },
   elements: {
     rootBox: "clerk-root-box",
-    card: "bg-[#121218]! border border-[#27272a]! rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
+    card: "bg-[#121218]! border border-[#27272a]! rounded-control shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
     header: "bg-[#121218]! border-b border-[#27272a]!",
     headerTitle: "text-[#fafafa]! font-semibold text-xl",
     headerSubtitle: "text-[#a1a1aa]!",
     navbar: "bg-[#1a1a22]! border-r border-[#27272a]!",
-    navbarButton: "text-[#a1a1aa]! hover:text-[#fafafa]! hover:bg-[#22222c]! rounded-lg transition-colors",
+    navbarButton: "text-[#a1a1aa]! hover:text-[#fafafa]! hover:bg-[#22222c]! rounded-control transition-colors",
     navbarButtonActive: "text-[#fafafa]! bg-[#22222c]!",
     navbarButtonIcon: "text-[#22c55e]!",
     main: "bg-[#121218]!",
@@ -39,21 +39,21 @@ export const clerkAppearance = {
     textCaption: "text-[#71717a]!",
     // Form elements
     formFieldLabel: "text-[#fafafa]! font-medium",
-    formFieldInput: "bg-[#1a1a22]! border-[#27272a]! text-[#fafafa]! rounded-lg focus:border-[#22c55e]! focus:ring-[#22c55e]/20",
+    formFieldInput: "bg-[#1a1a22]! border-[#27272a]! text-[#fafafa]! rounded-control focus:border-[#22c55e]! focus:ring-[#22c55e]/20",
     formFieldInputError: "border-[#ef4444]! focus:border-[#ef4444]!",
     formFieldErrorText: "text-[#ef4444]!",
     formFieldHelperText: "text-[#a1a1aa]!",
     formHeaderTitle: "text-[#fafafa]!",
     formHeaderSubtitle: "text-[#a1a1aa]!",
     // Buttons
-    formButtonPrimary: "bg-[#22c55e]! text-[#09090b]! font-medium rounded-lg hover:bg-[#22c55e]/90 transition-colors",
+    formButtonPrimary: "bg-[#22c55e]! text-[#09090b]! font-medium rounded-control hover:bg-[#22c55e]/90 transition-colors",
     formButtonPrimaryDisabled: "opacity-50 cursor-not-allowed",
-    formButtonSecondary: "bg-[#1a1a22]! text-[#fafafa]! border border-[#27272a]! rounded-lg hover:bg-[#22222c]! transition-colors",
-    button: "rounded-lg font-medium transition-colors",
+    formButtonSecondary: "bg-[#1a1a22]! text-[#fafafa]! border border-[#27272a]! rounded-control hover:bg-[#22222c]! transition-colors",
+    button: "rounded-control font-medium transition-colors",
     // Badges
     badge: "rounded-full px-3 py-1 text-xs font-medium",
     badgeSuccess: "bg-[#22c55e]/20! text-[#22c55e]!",
-    badgeWarning: "bg-[#f59e0b]/20! text-[#f59e0b]!",
+    badgeWarning: "bg-[#f97316]/20! text-[#f97316]!",
     badgeDanger: "bg-[#ef4444]/20! text-[#ef4444]!",
     badgeNeutral: "bg-[#27272a]! text-[#a1a1aa]!",
     // Avatar
@@ -61,8 +61,8 @@ export const clerkAppearance = {
     avatarImage: "rounded-full",
     // User button
     userButtonTrigger: "rounded-full hover:opacity-80 transition-opacity",
-    userButtonPopoverCard: "bg-[#121218]! border border-[#27272a]! rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
-    userButtonPopoverActionButton: "text-[#fafafa]! hover:bg-[#1a1a22]! rounded-lg transition-colors",
+    userButtonPopoverCard: "bg-[#121218]! border border-[#27272a]! rounded-control shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
+    userButtonPopoverActionButton: "text-[#fafafa]! hover:bg-[#1a1a22]! rounded-control transition-colors",
     userButtonPopoverActionButtonIcon: "text-[#a1a1aa]!",
     userButtonPopoverFooter: "border-t border-[#27272a]!",
     // Profile sections
@@ -70,21 +70,21 @@ export const clerkAppearance = {
     profileSectionTitle: "text-[#fafafa]! font-semibold",
     profileSectionContent: "text-[#a1a1aa]!",
     // Connected accounts
-    connectedAccount: "bg-[#1a1a22]! border border-[#27272a]! rounded-lg hover:border-[#3f3f46]! transition-colors",
+    connectedAccount: "bg-[#1a1a22]! border border-[#27272a]! rounded-control hover:border-[#3f3f46]! transition-colors",
     connectedAccountIcon: "text-[#22c55e]!",
     connectedAccountName: "text-[#fafafa]! font-medium",
     connectedAccountDescription: "text-[#a1a1aa]!",
     // Social buttons
-    socialButtonsBlockButton: "bg-[#1a1a22]! border border-[#27272a]! text-[#fafafa]! rounded-lg hover:bg-[#22222c]! transition-colors",
+    socialButtonsBlockButton: "bg-[#1a1a22]! border border-[#27272a]! text-[#fafafa]! rounded-control hover:bg-[#22222c]! transition-colors",
     socialButtonsBlockButtonText: "font-medium",
-    socialButtonsIconButton: "bg-[#1a1a22]! border border-[#27272a]! rounded-lg hover:bg-[#22222c]!",
+    socialButtonsIconButton: "bg-[#1a1a22]! border border-[#27272a]! rounded-control hover:bg-[#22222c]!",
     // Dividers
     dividerLine: "bg-[#27272a]!",
     dividerText: "text-[#71717a]!",
     // Modals
-    modal: "bg-[#121218]! border border-[#27272a]! rounded-xl shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
+    modal: "bg-[#121218]! border border-[#27272a]! rounded-control shadow-[0_25px_50px_-12px_rgba(0,0,0,0.25)]",
     modalContent: "bg-[#121218]!",
-    modalCloseButton: "text-[#a1a1aa]! hover:text-[#fafafa]! hover:bg-[#1a1a22]! rounded-lg transition-colors",
+    modalCloseButton: "text-[#a1a1aa]! hover:text-[#fafafa]! hover:bg-[#1a1a22]! rounded-control transition-colors",
     modalBackdrop: "bg-black/70 backdrop-blur-[2px]",
     // Accordion
     accordionTrigger: "text-[#fafafa]! hover:text-[#22c55e]!",
@@ -93,7 +93,7 @@ export const clerkAppearance = {
     pages: {
       user: {
         profileSection: {
-          card: "bg-[#1a1a22]! border border-[#27272a]! rounded-xl",
+          card: "bg-[#1a1a22]! border border-[#27272a]! rounded-control",
         },
       },
     },

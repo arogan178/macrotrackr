@@ -125,12 +125,12 @@ export function ClerkSignUpForm({
           const res = await signUp.create({
             strategy,
             redirectUrl,
-            redirectUrlComplete,
+            actionCompleteRedirectUrl: redirectUrlComplete,
           });
 
           externalUrl =
-            res.verifications?.externalVerificationRedirectUrl?.toString() ||
-            (res as any)?.firstFactorVerification?.externalVerificationRedirectUrl?.toString();
+            res.verifications?.externalAccount?.externalVerificationRedirectURL?.toString() ||
+            (res as any)?.firstFactorVerification?.externalVerificationRedirectURL?.toString();
         } catch (createError) {
           logger.warn(
             "signUp.create externalUrl unavailable, trying signIn.create fallback:",
@@ -143,12 +143,12 @@ export function ClerkSignUpForm({
             const signInRes = await signIn.create({
               strategy,
               redirectUrl,
-              redirectUrlComplete,
+              actionCompleteRedirectUrl: redirectUrlComplete,
             });
 
             externalUrl =
-              signInRes.firstFactorVerification?.externalVerificationRedirectUrl?.toString() ||
-              (signInRes as any)?.verifications?.externalVerificationRedirectUrl?.toString();
+              signInRes.firstFactorVerification?.externalVerificationRedirectURL?.toString() ||
+              (signInRes as any)?.verifications?.externalVerificationRedirectURL?.toString();
           } catch (signInError) {
             logger.warn(
               "signIn.create externalUrl also unavailable on sign-up:",
@@ -404,7 +404,7 @@ export function ClerkSignUpForm({
           <button
             type="button"
             onClick={() => setVerifying(false)}
-            className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+            className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
           >
             Back to sign up
           </button>
@@ -444,7 +444,7 @@ export function ClerkSignUpForm({
               <button
                 type="button"
                 onClick={() => setIsEmailMode(false)}
-                className="inline-flex min-h-11 items-center rounded-md px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+                className="inline-flex min-h-11 items-center rounded-control px-3 py-2 text-sm text-muted transition-colors duration-200 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
               >
                 Back
               </button>
@@ -541,7 +541,7 @@ export function ClerkSignUpForm({
         <button
           type="button"
           onClick={onSwitchToSignIn}
-          className="inline-flex min-h-11 items-center rounded-md px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
+          className="inline-flex min-h-11 items-center rounded-control px-3 py-2 font-medium text-primary transition-colors duration-200 hover:underline focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-surface focus-visible:outline-none"
         >
           Sign in
         </button>

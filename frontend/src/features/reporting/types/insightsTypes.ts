@@ -78,20 +78,6 @@ export interface DailyAverageItem {
   color: string;
 }
 
-export interface MetricCardProps {
-  title: string;
-  tooltipText?: string;
-  value?: string | number;
-  subtitle?: string;
-  score: number;
-  bgGradient?: string;
-  borderColor?: string;
-  textColor?: string;
-  delay?: number;
-  variant?: "default" | "custom";
-  children?: React.ReactNode;
-}
-
 export interface ActionCardProps {
   title: string;
   icon: React.ReactNode;
@@ -102,7 +88,7 @@ export interface ActionCardProps {
 export interface TrendDisplayProps {
   label: string;
   trend: TrendResult;
-  data?: Record<string, unknown>[];
+  data?: AggregatedDataPoint[];
   dataKey?: string;
   icon?: React.ReactNode;
   iconBgColor?: string;

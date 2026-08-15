@@ -330,7 +330,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               disabled={Boolean(weightGoals)}
             />
             {fieldErrors.startingWeight && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-sm text-error">
                 {fieldErrors.startingWeight}
               </p>
             )}
@@ -355,14 +355,14 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               required
             />
             {fieldErrors.targetWeight && (
-              <p className="mt-1 text-sm text-red-500">
+              <p className="mt-1 text-sm text-error">
                 {fieldErrors.targetWeight}
               </p>
             )}
           </div>
         </div>
         {!tdee && (
-          <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
+          <div className="rounded-control border border-amber-500/30 bg-amber-500/10 p-4 text-amber-600 dark:text-amber-400">
             <p className="text-sm font-semibold">Profile Details Incomplete</p>
             <p className="mt-1 text-xs">
               Please complete your profile details (Date of Birth, Gender, Height, Weight, and Activity Level) in Settings to calculate your BMR and TDEE before setting a weight goal.
@@ -391,7 +391,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
               max={maxCalorieIntake}
               step={50}
               showFillTrack
-              trackColorClass="bg-vibrant-accent"
+              trackColorClass="bg-primary"
               ariaLabelledBy="calorie-intake-range"
               unit="calories"
             />
@@ -402,7 +402,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
             </div>
 
             {!isMaintenance && (
-              <div className="rounded-lg bg-surface p-3">
+              <div className="rounded-control bg-surface p-3">
                 <p className="text-sm text-foreground">
                   <span className="font-medium">
                     Estimated completion:{" "}
@@ -453,7 +453,7 @@ const WeightGoalForm = forwardRef<WeightGoalFormHandle, WeightGoalFormProps>(
             )}
 
             {isMaintenance && (
-              <div className="rounded-lg bg-surface p-3">
+              <div className="rounded-control bg-surface p-3">
                 <p className="text-sm text-foreground">
                   <span className="font-medium">Maintenance Goal</span>
                 </p>

@@ -44,7 +44,7 @@ vi.mock("motion/react", () => {
 
         const Component = ({
           children,
-          ...props
+          ...properties
         }: React.PropsWithChildren<Record<string, unknown>>) => {
           const {
             initial: _initial,
@@ -52,7 +52,7 @@ vi.mock("motion/react", () => {
             exit: _exit,
             transition: _transition,
             ...domProps
-          } = props;
+          } = properties;
 
           return <div {...domProps}>{children}</div>;
         };
@@ -170,7 +170,7 @@ describe("ClerkSignInForm device trust", () => {
     });
 
     expect(await screen.findByText("Verify this device")).toBeInTheDocument();
-    expect(screen.getByText(/u\*\*\*\*@example\.com/)).toBeInTheDocument();
+    expect(screen.getByText(/u\*{4}@example\.com/)).toBeInTheDocument();
   });
 
   it("completes the sign-in once the code verifies", async () => {

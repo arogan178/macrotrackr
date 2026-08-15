@@ -99,6 +99,28 @@ export function resolveSocialAuthError(
     };
   }
 
+  // Clerk's account-linking failures surface to the user as "we are unable to
+  // link that account", which is meaningless to someone who has never had an
+  // account to link. It means one of two things — the provider's email is not
+  // verified, or the instance is not accepting this sign-up — and neither is
+  // something the reader can act on from that sentence.
+  if (
+    code === "external_account_not_found" ||
+    code === "external_account_exists" ||
+    code === "identification_claimed" ||
+    normalized.includes("unable to link") ||
+    normalized.includes("external account")
+  ) {
+    return {
+      message:
+        intent === "signup"
+          ? "We couldn't finish signing you up with that provider. Create an account with your email instead — you can connect the provider afterwards from Settings."
+          : "That provider isn't connected to an account yet. Sign up first, or use the email you registered with.",
+      action: "show-email",
+      tone: "warning",
+    };
+  }
+
   if (
     code === "oauth_access_denied" ||
     normalized.includes("access denied") ||

@@ -1,7 +1,7 @@
 import { ProFeature } from "@/components/billing/ProFeature";
 import CardContainer from "@/components/form/CardContainer";
 import { Button, CheckCircleIcon, PlusIcon } from "@/components/ui";
-import EmptyState from "@/components/ui/EmptyState";
+import StateCard from "@/components/ui/StateCard";
 import { isLocalAuthMode } from "@/config/runtime";
 import { useSubscriptionStatus } from "@/hooks/useSubscriptionStatus";
 import { HabitGoal } from "@/types/habit";
@@ -62,16 +62,16 @@ function HabitTracker({
             {[1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="overflow-hidden rounded-2xl bg-surface-2"
+                className="overflow-hidden rounded-card bg-surface-2"
               >
                 <div className="p-4">
                   <div className="mb-4 flex items-center">
-                    <div className="mr-3 h-10 w-10 animate-pulse rounded-xl bg-surface-3" />
-                    <div className="h-5 w-24 animate-pulse rounded bg-surface-3" />
+                    <div className="mr-3 h-10 w-10 animate-pulse rounded-control bg-surface-3" />
+                    <div className="h-5 w-24 animate-pulse rounded-control bg-surface-3" />
                   </div>
                   <div className="mb-2 flex items-center justify-between">
-                    <div className="h-6 w-16 animate-pulse rounded bg-surface-3" />
-                    <div className="h-4 w-8 animate-pulse rounded bg-surface-3" />
+                    <div className="h-6 w-16 animate-pulse rounded-control bg-surface-3" />
+                    <div className="h-4 w-8 animate-pulse rounded-control bg-surface-3" />
                   </div>
                   <div className="h-2 animate-pulse rounded-full bg-surface-3" />
                 </div>
@@ -79,12 +79,11 @@ function HabitTracker({
             ))}
           </div>
         ) : habits.length === 0 ? (
-          // Use EmptyState component
-          <EmptyState
+          <StateCard
             title="Start Building Habits"
             message="Add your first habit goal to begin tracking your progress."
             icon={
-              <div className="inline-block rounded-2xl bg-surface p-4">
+              <div className="inline-block rounded-card bg-surface p-4">
                 <CheckCircleIcon className="h-10 w-10 text-foreground" />
               </div>
             }
@@ -99,7 +98,7 @@ function HabitTracker({
                 : undefined
             }
             size="md"
-            className="rounded-2xl border border-border/60 bg-surface-2"
+            className="rounded-card border border-border bg-surface-2"
           />
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">

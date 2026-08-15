@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "@tanstack/react-router";
 
-import PageBackground from "@/components/layout/PageBackground";
-import { ChevronDownIcon, ChevronRightIcon } from "@/components/ui";
+import AppHeader from "@/components/layout/AppHeader";
+import { ChevronRightIcon } from "@/components/ui";
+import Accordion from "@/components/ui/Accordion";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import Header from "@/features/landing/components/Header";
 import { usePageMetadata } from "@/hooks";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
@@ -24,6 +24,8 @@ interface CalculatorLayoutProps {
   metaTitle?: string;
   badge?: string;
   faqs?: FaqItem[];
+  /** The figure this calculator produced, carried into the closing CTA. */
+  ctaResult?: { label: string; value: string };
   children: React.ReactNode;
 }
 
@@ -35,6 +37,7 @@ export default function CalculatorLayout({
   metaTitle,
   badge,
   faqs = [],
+  ctaResult,
   children,
 }: CalculatorLayoutProps) {
   const canonicalUrl = buildCanonicalUrl(canonicalPath);
@@ -54,7 +57,6 @@ export default function CalculatorLayout({
 
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
-      <PageBackground />
       {schemaScript && (
         <script
           type="application/ld+json"
@@ -62,16 +64,16 @@ export default function CalculatorLayout({
         />
       )}
 
-      <Header />
+      <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-24 pb-16 sm:pt-28">
+      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <nav aria-label="Breadcrumb" className="mb-6">
             <ol className="flex items-center gap-1 text-xs text-muted">
               <li>
                 <Link
                   to={TOOLS_HUB_PATH}
-                  className="inline-flex min-h-8 items-center rounded-lg px-1 font-medium transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+                  className="inline-flex min-h-8 items-center rounded-control px-1 font-medium transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
                 >
                   Free calculators
                 </Link>
@@ -89,7 +91,7 @@ export default function CalculatorLayout({
           <div className="mb-8 text-center sm:mb-10">
             {badge ? (
               <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-foreground">
-                <span className="h-1.5 w-1.5 rounded-full bg-vibrant-accent" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary" />
                 {badge}
               </span>
             ) : null}
@@ -104,6 +106,19 @@ export default function CalculatorLayout({
           {/* Calculator main content */}
           <div className="space-y-8">{children}</div>
 
+          {/* Directly under the result: this is the one moment the reader has a
+              number they care about, and it used to sit below the FAQ and the
+              related tools, where almost nobody scrolls. */}
+          <ToolsCtaBanner
+            heading={
+              ctaResult
+                ? "Now make it a number you actually hit"
+                : "Ready to put your target into practice?"
+            }
+            body="Log meals against this target, see your progress, and adjust as real life changes."
+            result={ctaResult}
+          />
+
           {/* FAQ Section if present */}
           {faqs.length > 0 && (
             <div className={`mt-12 ${calculatorCardClass}`}>
@@ -111,30 +126,19 @@ export default function CalculatorLayout({
                 Frequently Asked Questions
               </h2>
               <div className="space-y-3">
-                {faqs.map((faq) => (
-                  <details
-                    key={faq.question}
-                    className="group rounded-xl border border-border bg-surface-2/50 transition-colors hover:bg-surface-2"
-                  >
-                    <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-4 px-4 py-3 text-sm font-semibold text-foreground select-none">
-                      <span>{faq.question}</span>
-                      <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted transition-transform duration-200 group-open:rotate-180" />
-                    </summary>
-                    <div className="border-t border-border px-4 pt-3 pb-4 text-sm leading-relaxed text-muted">
-                      {faq.answer}
-                    </div>
-                  </details>
-                ))}
+                <Accordion
+                  items={faqs.map((faq) => ({
+                    id: faq.question,
+                    question: faq.question,
+                    answer: faq.answer,
+                  }))}
+                />
               </div>
             </div>
           )}
 
           <RelatedTools currentPath={canonicalPath} />
 
-          <ToolsCtaBanner
-            heading="Ready to put your target into practice?"
-            body="Log meals against this target, see your progress, and adjust your plan as real life changes."
-          />
         </div>
       </main>
 

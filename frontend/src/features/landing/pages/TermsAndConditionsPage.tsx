@@ -1,9 +1,9 @@
 import React from "react";
 
-import PageBackground from "@/components/layout/PageBackground";
+import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import LegalHeader from "@/features/landing/components/LegalHeader";
 import { usePageMetadata } from "@/hooks";
 import { APP_URL, buildCanonicalUrl, SUPPORT_EMAIL } from "@/utils/appConstants";
 
@@ -16,12 +16,11 @@ const TermsAndConditionsPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
-      <PageBackground />
-      <LegalHeader />
+      <AppHeader mode="minimal" />
 
-      <main className="relative z-10 px-4 pt-24 pb-14 sm:px-6 sm:pt-28 lg:px-8">
-        <div className="mx-auto max-w-4xl">
-          <div className="rounded-3xl border border-border/70 bg-background/70 p-8 shadow-2xl shadow-black/10 backdrop-blur-sm lg:p-12">
+      <PageShell width="prose">
+        <div>
+          <div className="rounded-card border border-border bg-background p-8 lg:p-12">
             <h1 className="mb-8 text-4xl font-bold text-foreground">
               Terms and Conditions
             </h1>
@@ -170,7 +169,7 @@ const TermsAndConditionsPage: React.FC = () => {
                 <h2 className="mb-3 text-2xl font-semibold text-foreground">
                   13. Contact Information
                 </h2>
-                <div className="rounded-2xl border border-border/70 bg-surface/70 p-4 text-foreground backdrop-blur-sm">
+                <div className="rounded-card border border-border bg-surface p-4 text-foreground">
                   <p>Website: {APP_URL}</p>
                   <p>Email: {SUPPORT_EMAIL}</p>
                 </div>
@@ -178,7 +177,7 @@ const TermsAndConditionsPage: React.FC = () => {
             </div>
           </div>
         </div>
-      </main>
+      </PageShell>
 
       <Footer />
       <BackToTopButton label="Back to top" className="bottom-32 sm:bottom-28" />

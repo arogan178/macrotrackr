@@ -72,7 +72,7 @@ export interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement>
 export interface InfoCardProps {
   title: string;
   description?: string;
-  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent" | "protein" | "carbs" | "fats" | "vibrant-accent";
+  color?: "green" | "blue" | "red" | "indigo" | "purple" | "accent" | "protein" | "carbs" | "fats" | "primary";
   icon?: ReactNode;
   children?: ReactNode;
 }

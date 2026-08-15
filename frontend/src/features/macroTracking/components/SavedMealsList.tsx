@@ -42,7 +42,7 @@ const SavedMealsList = memo(
             {[1, 2, 3].map((index) => (
               <div
                 key={index}
-                className="h-10 w-24 animate-pulse rounded-lg bg-surface-2"
+                className="h-10 w-24 animate-pulse rounded-control bg-surface-2"
               />
             ))}
           </div>
@@ -77,7 +77,7 @@ const SavedMealsList = memo(
             return (
               <motion.div
                 key={meal.id}
-                className="group flex items-center gap-1 rounded-lg border border-border bg-surface py-1 pr-1 pl-3 transition-[background-color,border-color] duration-200 hover:border-primary/30 hover:bg-surface-2"
+                className="group flex items-center gap-1 rounded-control border border-border bg-surface py-1 pr-1 pl-3 transition-[background-color,border-color] duration-200 hover:border-primary/30 hover:bg-surface-2"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
@@ -98,7 +98,7 @@ const SavedMealsList = memo(
                     deleteMeal.mutate(meal.id);
                   }}
                   disabled={deleteMeal.isPending}
-                  className="rounded-md p-1.5 text-muted opacity-0 transition-[opacity,background-color,color] duration-200 group-hover:opacity-100 hover:bg-error/10 hover:text-error disabled:opacity-50"
+                  className="rounded-control p-1.5 text-muted opacity-0 transition-[opacity,background-color,color] duration-200 group-hover:opacity-100 hover:bg-error/10 hover:text-error disabled:opacity-50"
                   title="Delete saved meal"
                   aria-label={`Delete ${meal.name}`}
                 >

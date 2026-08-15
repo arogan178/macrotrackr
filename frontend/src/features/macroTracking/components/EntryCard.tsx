@@ -1,8 +1,8 @@
 import { memo, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-import { MacroCell } from "@/components/macros/MacroComponents";
 import { ChevronDownIcon, IconButtonGroup } from "@/components/ui";
+import { DURATIONS, EASINGS } from "@/components/utils/UiConstants";
 import type { MacroEntry } from "@/types/macro";
 
 interface EntryCardProps {
@@ -42,21 +42,18 @@ export const EntryCard = memo(
       entry.ingredients && entry.ingredients.length > 1,
     );
 
+    // No enter animation and no `layout`: these rows are virtualized, so motion
+    // projection was re-measuring rows the virtualizer had already measured,
+    // and a row fading up 12px while the list scrolls under it reads as jitter
+    // rather than arrival.
     return (
-      <motion.div
-        className="rounded-xl border border-border/60 bg-surface p-3.5 sm:p-5 shadow-sm"
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -12 }}
-        transition={{ duration: 0.25, ease: "easeOut" }}
-        layout
-      >
-        <div className="mb-3 flex items-center justify-between">
+      <div className="rounded-card border border-border bg-surface p-3 sm:p-4">
+        <div className="mb-2 flex items-center justify-between gap-2">
           <div className="flex items-center gap-3">
             {isSelectionMode && (
               <input
                 type="checkbox"
-                className="h-5 w-5 rounded border-border text-primary focus:ring-primary/50"
+                className="h-5 w-5 rounded-control border-border text-primary focus:ring-primary/50"
                 checked={isSelected}
                 onChange={(event_) => {
                   event_.stopPropagation();
@@ -67,14 +64,14 @@ export const EntryCard = memo(
             {hasIngredients && (
               <button
                 type="button"
-                className="cursor-pointer rounded-md p-1 hover:bg-surface-3"
+                className="cursor-pointer rounded-control p-1 hover:bg-surface-3"
                 onClick={() => setIsExpanded(!isExpanded)}
                 aria-label="Toggle ingredients"
               >
                 <motion.div
                   initial={false}
                   animate={{ rotate: isExpanded ? -180 : 0 }}
-                  transition={{ duration: 0.2 }}
+                  transition={{ duration: DURATIONS.instant }}
                 >
                   <ChevronDownIcon className="h-4 w-4" />
                 </motion.div>
@@ -83,7 +80,7 @@ export const EntryCard = memo(
             <span className="text-sm font-medium tracking-tight text-foreground">
               {formatTimeFromEntry(entry)}
             </span>
-            <span className="rounded-full border border-border/50 bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
+            <span className="rounded-full border border-border bg-surface-2 px-2 py-0.5 text-[10px] font-medium tracking-wider text-muted uppercase">
               {entry.mealType ? capitalizeFirstLetter(entry.mealType) : ""}
             </span>
           </div>
@@ -98,54 +95,30 @@ export const EntryCard = memo(
         </div>
 
         {(entry.foodName ?? entry.mealName) && (
-          <div className="mb-3">
-            <span className="text-sm text-muted">
-              {entry.foodName ?? entry.mealName}
-            </span>
-          </div>
+          <p className="mb-2 truncate text-sm text-muted">
+            {entry.foodName ?? entry.mealName}
+          </p>
         )}
 
-        <div className="mt-4 grid grid-cols-3 gap-3">
-          {[
-            {
-              label: "Protein",
-              value: entry.protein,
-              color: "text-protein",
-              bg: "bg-surface-2",
-            },
-            {
-              label: "Carbs",
-              value: entry.carbs,
-              color: "text-carbs",
-              bg: "bg-surface-2",
-            },
-            {
-              label: "Fats",
-              value: entry.fats,
-              color: "text-fats",
-              bg: "bg-surface-2",
-            },
-          ].map((macro) => (
-            <div
-              key={macro.label}
-              className={`flex flex-col items-center justify-center rounded-xl ${macro.bg} border border-border/40 p-3`}
-            >
-              <span className="mb-1 text-[10px] tracking-wider text-muted uppercase">
-                {macro.label}
-              </span>
-              <MacroCell value={macro.value} suffix="g" color={macro.color} />
-            </div>
-          ))}
-          <div className="col-span-3 mt-1 flex items-center justify-between rounded-xl border border-border/40 bg-surface-2 p-3.5">
-            <span className="text-xs font-medium tracking-wider text-muted uppercase">
-              Calories
-            </span>
-            <MacroCell
-              value={calculateCalories(entry.protein, entry.carbs, entry.fats)}
-              suffix=" kcal"
-              color="text-foreground"
-            />
-          </div>
+        {/* One line of values instead of four bordered boxes: a row was ~200px
+            tall, which fit roughly three entries on a phone screen. */}
+        <div className="flex flex-wrap items-baseline gap-x-4 gap-y-1 text-sm tabular-nums">
+          <span className="font-medium">
+            {calculateCalories(entry.protein, entry.carbs, entry.fats)}
+            <span className="ml-1 text-xs text-muted">kcal</span>
+          </span>
+          <span className="text-protein">
+            {entry.protein}
+            <span className="ml-0.5 text-xs text-muted">g P</span>
+          </span>
+          <span className="text-carbs">
+            {entry.carbs}
+            <span className="ml-0.5 text-xs text-muted">g C</span>
+          </span>
+          <span className="text-fats">
+            {entry.fats}
+            <span className="ml-0.5 text-xs text-muted">g F</span>
+          </span>
         </div>
 
         <AnimatePresence>
@@ -155,10 +128,10 @@ export const EntryCard = memo(
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               transition={{
-                height: { duration: 0.3, ease: "easeInOut" },
-                opacity: { duration: 0.2 },
+                height: { duration: DURATIONS.base, ease: EASINGS.out },
+                opacity: { duration: DURATIONS.base },
               }}
-              className="mt-4 overflow-hidden border-t border-border/40"
+              className="mt-4 overflow-hidden border-t border-border"
             >
               <div className="pt-4">
                 <h4 className="mb-3 text-xs font-semibold text-muted uppercase">
@@ -168,7 +141,7 @@ export const EntryCard = memo(
                   {entry.ingredients?.map((ing, index) => (
                     <div
                       key={index}
-                      className="flex flex-col gap-1 rounded-lg bg-surface-2/50 p-3"
+                      className="flex flex-col gap-1 rounded-control bg-surface-2 p-3"
                     >
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium text-foreground">
@@ -193,7 +166,7 @@ export const EntryCard = memo(
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.div>
+      </div>
     );
   },
 );

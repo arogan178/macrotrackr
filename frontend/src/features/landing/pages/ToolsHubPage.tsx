@@ -1,10 +1,9 @@
 import { Link } from "@tanstack/react-router";
 
-import PageBackground from "@/components/layout/PageBackground";
+import AppHeader from "@/components/layout/AppHeader";
 import { ArrowRightIcon } from "@/components/ui";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import Header from "@/features/landing/components/Header";
 import { usePageMetadata } from "@/hooks";
 import { buildCanonicalUrl } from "@/utils/appConstants";
 
@@ -32,7 +31,6 @@ export default function ToolsHubPage() {
 
   return (
     <div className="relative min-h-screen bg-background text-foreground antialiased selection:bg-foreground selection:text-background">
-      <PageBackground />
       {schemaScript && (
         <script
           type="application/ld+json"
@@ -40,13 +38,13 @@ export default function ToolsHubPage() {
         />
       )}
 
-      <Header />
+      <AppHeader mode="public" />
 
-      <main className="relative z-10 pt-24 pb-16 sm:pt-28">
+      <main className="relative z-10 pt-[var(--header-offset)] pb-16">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
           <div className="mb-10 text-center sm:mb-12">
             <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-border bg-surface px-3 py-1 text-xs font-medium text-foreground">
-              <span className="h-1.5 w-1.5 rounded-full bg-vibrant-accent" />
+              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
               100% Free & No Sign-up Required
             </span>
             <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
@@ -104,7 +102,7 @@ export default function ToolsHubPage() {
 
           <ToolsCtaBanner
             heading="Know your target? Make it a habit."
-            body="MacroTrackr brings food logging, custom goals, and privacy-first tracking into one calm daily routine."
+            body="Log a meal, set a target, and see where the week went."
           />
         </div>
       </main>

@@ -9,6 +9,8 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
+import type { NameType, ValueType } from "recharts/types/component/DefaultTooltipContent";
+import type { ContentType } from "recharts/types/component/Tooltip";
 
 import AnimatedNumber from "@/components/animation/AnimatedNumber";
 import ChartCard from "@/components/chart/ChartCard";
@@ -62,7 +64,7 @@ const PercentageLabel = (properties: PercentageLabelProps) => {
     >
       <div className="flex h-full w-full items-center justify-center overflow-visible">
         <span
-          className="rounded-sm bg-black/60 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-white"
+          className="rounded-control bg-black/60 px-1.5 py-0.5 text-[13px] font-bold whitespace-nowrap text-white"
           style={{
             textShadow: "0 1px 2px rgba(0,0,0,0.8)",
           }}
@@ -134,17 +136,21 @@ const MacroDensityBreakdown = ({
             />
             <Tooltip
               // Use standardized stacked bar tooltip with color mapping and macro dots
-              content={(properties: Record<string, unknown>) => (
-                <StackedBarPercentageTooltip
-                  {...properties}
-                  colors={{
-                    protein: MACRO_COLORS.protein.base,
-                    carbs: MACRO_COLORS.carbs.base,
-                    fats: MACRO_COLORS.fats.base,
-                  }}
-                  labelKey="period"
-                />
-              )}
+              // The render function takes a plain record; Recharts declares
+              // `content` as ContentType, hence the cast at the boundary.
+              content={
+                ((properties: Record<string, unknown>) => (
+                  <StackedBarPercentageTooltip
+                    {...properties}
+                    colors={{
+                      protein: MACRO_COLORS.protein.base,
+                      carbs: MACRO_COLORS.carbs.base,
+                      fats: MACRO_COLORS.fats.base,
+                    }}
+                    labelKey="period"
+                  />
+                )) as unknown as ContentType<ValueType, NameType>
+              }
               cursor={{ fill: "rgba(110,118,145,0.1)" }}
               wrapperStyle={{ outline: "none" }}
             />

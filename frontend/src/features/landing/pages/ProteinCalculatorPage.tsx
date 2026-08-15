@@ -106,9 +106,9 @@ export default function ProteinCalculatorPage() {
       description="Free Protein Intake Calculator. Calculate exact daily grams of protein and per-meal targets tailored to your weight and fitness goals."
       faqs={FAQS}
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="md:col-span-7 space-y-6">
           <div className={calculatorCardClass}>
             <h2 className={calculatorSectionTitleClass}>
               Body Stats & Fitness Goal
@@ -192,7 +192,7 @@ export default function ProteinCalculatorPage() {
         </p>
         <div className="-mx-1 overflow-x-auto px-1">
           <table className="w-full min-w-100 text-left text-xs text-muted">
-            <thead className="border-b border-border/60 uppercase tracking-wider text-foreground">
+            <thead className="border-b border-border uppercase tracking-wider text-foreground">
               <tr>
                 <th scope="col" className="px-3 py-2.5 font-semibold">
                   Food item
@@ -214,11 +214,11 @@ export default function ProteinCalculatorPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/40">
+            <tbody className="divide-y divide-border">
               {HIGH_PROTEIN_FOODS.map((item) => (
                 <tr
                   key={item.name}
-                  className="transition-colors hover:bg-surface-2/40"
+                  className="transition-colors hover:bg-surface-2"
                 >
                   <th
                     scope="row"

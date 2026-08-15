@@ -2,7 +2,7 @@
 
 Here's a truth most macro trackers eventually face: the days you hit your targets perfectly are usually the days you prepared your food in advance. The days you miss? Those are the days you were "winging it."
 
-Meal prep isn't just about convenience—it's about accuracy. When you weigh and portion food in advance, you remove the guesswork from your tracking.
+Meal prep is not just about convenience. It is about accuracy. When you weigh and portion food in advance, you remove the guesswork from your tracking.
 
 This guide will show you how to build a meal prep system that makes macro tracking automatic.
 
@@ -277,7 +277,7 @@ This gives you structure without rigidity. If a friend invites you to lunch, go.
 - Add sauces when reheating, not when prepping
 - Keep a bottle of hot sauce, soy sauce, or dressing at work
 - Prep different seasonings on proteins
-- Don't overcook—slightly undercook knowing you'll reheat
+- Do not overcook. Slightly undercook, knowing you will reheat
 
 ### "I get tired of eating the same thing."
 
@@ -285,7 +285,7 @@ This gives you structure without rigidity. If a friend invites you to lunch, go.
 - Prep components, not full meals (protein, carbs, veg separately)
 - Mix and match throughout the week
 - Prep 2 different meal options
-- Use the 80% rule—allow 1-2 spontaneous meals per week
+- Use the 80% rule: allow 1-2 spontaneous meals per week
 
 ### "I don't have 3 hours on Sunday."
 
@@ -304,12 +304,12 @@ This gives you structure without rigidity. If a friend invites you to lunch, go.
 
 ## The Bottom Line
 
-Meal prep isn't about being obsessive—it's about being prepared. When you have accurate, pre-portioned meals ready to go, hitting your macros becomes automatic.
+Meal prep is not about being obsessive. It is about being prepared. When you have accurate, pre-portioned meals ready to go, hitting your macros becomes automatic.
 
 Start small. Prep just lunches for one week. See how much easier your tracking becomes. Build from there.
 
-[Start tracking your prepped meals in MacroTrackr](/register) with our free tier—unlimited daily entries and 5 saved meals included.
+[Start tracking your prepped meals in MacroTrackr](/register) with our free tier: unlimited daily entries and 5 saved meals included.
 
-— The MacroTrackr Team
+The MacroTrackr Team
 
 *Questions about meal prep strategies? Email us at support@local.invalid.*

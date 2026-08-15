@@ -1,13 +1,12 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { AnimatePresence, motion } from "motion/react";
 
 import { macrosApi } from "@/api/macros";
 import ProFeature from "@/components/billing/ProFeature";
 import DateRangeSelector from "@/components/chart/DateRangeSelector";
 import { DashboardPageContainer } from "@/components/layout/DashboardPageContainer";
 import FeaturePage from "@/components/layout/FeaturePage";
-import { EmptyState } from "@/components/ui";
+import { StateCard } from "@/components/ui";
 import { isLocalAuthMode } from "@/config/runtime";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useWeightGoals } from "@/hooks/queries/useGoals";
@@ -128,7 +127,7 @@ export default function ReportingPage() {
         name: "Calories",
         color: "hsl(231, 77%, 66%)",
         isArea: true,
-      }, // vibrant-accent approx
+      }, // primary approx
     ],
     [],
   );
@@ -166,15 +165,6 @@ export default function ReportingPage() {
   return (
     <DashboardPageContainer>
       <FeaturePage title={headerTitle} subtitle={headerSubtitle}>
-        <AnimatePresence mode="wait">
-          {
-            <motion.div
-              key="reporting-main-content"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-            >
               {isHistoryLoading ? (
                 <ReportingPageSkeleton />
               ) : (
@@ -191,8 +181,8 @@ export default function ReportingPage() {
                   />
 
                   {showNoDataMessage ? (
-                    <div className="rounded-2xl border border-border/60 bg-surface/70 shadow-sm">
-                      <EmptyState
+                    <div className="rounded-card border border-border bg-surface">
+                      <StateCard
                         title="No reporting data yet"
                         message="No meals logged in this range. Add a few and your trends and meal timing will appear here."
                         size="md"
@@ -227,14 +217,7 @@ export default function ReportingPage() {
                       </ProFeature>
 
                       <div className="grid grid-cols-1 gap-3.5 sm:gap-6 md:grid-cols-2">
-                        <motion.div
-                          className="flex w-full min-w-0"
-                          initial={{ opacity: 0, y: 12 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -12 }}
-                          transition={{ duration: 0.25, ease: "easeOut" }}
-                          layout
-                        >
+                        <div className="flex w-full min-w-0">
                           {(() => {
                             const { startDate: rangeStart, endDate: rangeEnd } =
                               getDateRangeData(dateRange);
@@ -249,19 +232,8 @@ export default function ReportingPage() {
                               </div>
                             );
                           })()}
-                        </motion.div>
-                        <motion.div
-                          className="flex w-full min-w-0"
-                          initial={{ opacity: 0, y: 12 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          exit={{ opacity: 0, y: -12 }}
-                          transition={{
-                            duration: 0.25,
-                            ease: "easeOut",
-                            delay: 0.05,
-                          }}
-                          layout
-                        >
+                        </div>
+                        <div className="flex w-full min-w-0">
                           <div className="w-full">
                             <MacroDensityBreakdown
                               data={macroDensityData}
@@ -270,7 +242,7 @@ export default function ReportingPage() {
                               isHistoryReady={isHistoryReady}
                             />
                           </div>
-                        </motion.div>
+                        </div>
                       </div>
 
                       <ProFeature>
@@ -288,9 +260,6 @@ export default function ReportingPage() {
                   )}
                 </div>
               )}
-            </motion.div>
-          }
-        </AnimatePresence>
       </FeaturePage>
     </DashboardPageContainer>
   );

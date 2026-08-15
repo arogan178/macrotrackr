@@ -122,9 +122,9 @@ export const ANIMATION_DELAYS = {
 
 // Success messages
 export const SUCCESS_MESSAGES = {
-  created: "Habit created successfully!",
-  updated: "Habit updated successfully!",
-  deleted: "Habit deleted successfully!",
+  created: "Habit created",
+  updated: "Habit updated",
+  deleted: "Habit deleted",
   completed: "Congratulations! Habit completed!",
   progress: "Progress updated!",
   reset: "Habits reset successfully!",

@@ -108,9 +108,9 @@ export default function WeightLossCalculatorPage() {
       description="Free Weight Loss Timeline Calculator. Estimate daily calorie deficit, weekly progress, and completion date for your target weight."
       faqs={FAQS}
     >
-      <div className="grid grid-cols-1 gap-8 lg:grid-cols-12">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}
-        <div className="lg:col-span-7 space-y-6">
+        <div className="md:col-span-7 space-y-6">
           <div className={calculatorCardClass}>
             <h2 className={calculatorSectionTitleClass}>
               Current Stats & Activity
@@ -175,7 +175,7 @@ export default function WeightLossCalculatorPage() {
           {isTooAggressive && (
             <p
               role="status"
-              className="mt-4 rounded-xl border border-error/30 bg-error/10 p-3 text-sm leading-relaxed text-error"
+              className="mt-4 rounded-control border border-error/30 bg-error/10 p-3 text-sm leading-relaxed text-error"
             >
               This target is below the usual minimum of {minSafeCalories}{" "}
               kcal/day. Consider choosing a slower weekly pace.
@@ -218,7 +218,7 @@ export default function WeightLossCalculatorPage() {
             </div>
           </dl>
 
-          <div className="mt-6 rounded-xl border border-primary/25 bg-primary/10 p-4 text-center">
+          <div className="mt-6 rounded-control border border-primary/25 bg-primary/10 p-4 text-center">
             <span className="block text-xs font-medium text-muted">
               {estimatedWeeks > 0 ? "Estimated goal date" : "Goal status"}
             </span>

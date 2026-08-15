@@ -1,5 +1,19 @@
 [
   {
+    "slug": "v3-0-0",
+    "title": "MacroTrackr 3.0.0: One Design System, End to End",
+    "excerpt": "Version 3 closes a design system that had drifted into twenty surface fills, seven corner radii and three separate page headers, and fixes a long list of things that were quietly not working underneath it.",
+    "date": "2026-08-15",
+    "category": "Releases",
+    "author": "MacroTrackr Team",
+    "readingTime": "1 min",
+    "tags": [
+      "Product",
+      "Release Notes"
+    ],
+    "featured": false
+  },
+  {
     "slug": "v2-5-mobile-ux-polish-and-responsive-density",
     "title": "MacroTrackr v2.5: Compact Mobile Layouts, Sleeker Navigation, and Search Improvements",
     "excerpt": "Version 2.5 brings a major mobile UX upgrade—reducing vertical scrolling by up to 50%, refining button layouts and form inputs, and polishing mobile navigation.",
@@ -44,7 +58,12 @@
     "author": "MacroTrackr Team",
     "readingTime": "3 min",
     "image": "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Eating Out", "Consistency", "Calories", "Protein"]
+    "tags": [
+      "Eating Out",
+      "Consistency",
+      "Calories",
+      "Protein"
+    ]
   },
   {
     "slug": "why-weekly-averages-beat-perfect-days",
@@ -55,7 +74,12 @@
     "author": "MacroTrackr Team",
     "readingTime": "3 min",
     "image": "https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Mindset", "Fat Loss", "Consistency", "Analytics"]
+    "tags": [
+      "Mindset",
+      "Fat Loss",
+      "Consistency",
+      "Analytics"
+    ]
   },
   {
     "slug": "macro-tracking-tips-for-beginners",
@@ -66,7 +90,12 @@
     "author": "MacroTrackr Team",
     "readingTime": "4 min",
     "image": "https://images.unsplash.com/photo-1493770348161-369560ae357d?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Beginners", "Habits", "Meal Prep", "Tracking Basics"]
+    "tags": [
+      "Beginners",
+      "Habits",
+      "Meal Prep",
+      "Tracking Basics"
+    ]
   },
   {
     "slug": "understanding-protein-intake",
@@ -77,7 +106,12 @@
     "author": "MacroTrackr Team",
     "readingTime": "6 min",
     "image": "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Protein", "Recovery", "Muscle Gain", "Nutrition Basics"]
+    "tags": [
+      "Protein",
+      "Recovery",
+      "Muscle Gain",
+      "Nutrition Basics"
+    ]
   },
   {
     "slug": "meal-prep-for-macro-tracking",
@@ -88,7 +122,12 @@
     "author": "MacroTrackr Team",
     "readingTime": "6 min",
     "image": "https://images.unsplash.com/photo-1543339308-43e59d6b73a6?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Meal Prep", "Batch Cooking", "Planning", "Food Scale"]
+    "tags": [
+      "Meal Prep",
+      "Batch Cooking",
+      "Planning",
+      "Food Scale"
+    ]
   },
   {
     "slug": "carbs-fats-balance",
@@ -99,6 +138,11 @@
     "author": "MacroTrackr Team",
     "readingTime": "6 min",
     "image": "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&q=80&w=1200",
-    "tags": ["Carbs", "Fats", "Performance", "Personalization"]
+    "tags": [
+      "Carbs",
+      "Fats",
+      "Performance",
+      "Personalization"
+    ]
   }
 ]

@@ -45,12 +45,12 @@ export default function RangeSlider({
   return (
     <div className={`relative flex h-4 items-center ${className}`}>
       {/* Background Track */}
-      <div className="absolute z-0 h-2 w-full rounded-lg bg-foreground/10" />
+      <div className="absolute z-0 h-2 w-full rounded-control bg-foreground/10" />
       
       {/* Filled Track (optional) */}
       {showFillTrack && (
         <div
-          className={`absolute z-0 h-2 rounded-lg ${trackColorClass}`}
+          className={`absolute z-0 h-2 rounded-control ${trackColorClass}`}
           style={{ width: `${percentage}%` }}
         />
       )}
@@ -74,11 +74,11 @@ export default function RangeSlider({
           "relative z-10 h-4 w-full appearance-none bg-transparent focus:outline-none",
           disabled ? "" : "cursor-pointer",
           // Thumb base [Firefox]
-          "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-transparent [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:shadow-black/20",
-          "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-lg [&::-moz-range-track]:bg-transparent",
+          "[&::-moz-range-thumb]:h-4 [&::-moz-range-thumb]:w-4 [&::-moz-range-thumb]:appearance-none [&::-moz-range-thumb]:rounded-full [&::-moz-range-thumb]:border [&::-moz-range-thumb]:border-transparent [&::-moz-range-thumb]:bg-white [&::-moz-range-thumb]:shadow [&::-moz-range-thumb]:",
+          "[&::-moz-range-track]:h-2 [&::-moz-range-track]:rounded-control [&::-moz-range-track]:bg-transparent",
           // Thumb base [WebKit]
-          "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-lg [&::-webkit-slider-runnable-track]:bg-transparent",
-          "[&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-transparent [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:shadow-black/20",
+          "[&::-webkit-slider-runnable-track]:h-2 [&::-webkit-slider-runnable-track]:rounded-control [&::-webkit-slider-runnable-track]:bg-transparent",
+          "[&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:border [&::-webkit-slider-thumb]:border-transparent [&::-webkit-slider-thumb]:bg-white [&::-webkit-slider-thumb]:shadow [&::-webkit-slider-thumb]:",
           // Hover/focus only when interactive
           disabled
             ? ""

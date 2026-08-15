@@ -26,7 +26,7 @@ function RelatedTools({ currentPath }: RelatedToolsProps) {
         </h2>
         <Link
           to={TOOLS_HUB_PATH}
-          className="inline-flex items-center gap-1 rounded-lg text-sm font-medium text-muted transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+          className="inline-flex items-center gap-1 rounded-control text-sm font-medium text-muted transition-colors hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
         >
           View all
           <ArrowRightIcon className="h-3.5 w-3.5" aria-hidden="true" />
@@ -38,7 +38,7 @@ function RelatedTools({ currentPath }: RelatedToolsProps) {
           <li key={tool.path}>
             <Link
               to={tool.path}
-              className="group flex h-full min-h-16 items-center justify-between gap-3 rounded-xl border border-border bg-surface px-4 py-3 transition-[border-color,background-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
+              className="group flex h-full min-h-16 items-center justify-between gap-3 rounded-control border border-border bg-surface px-4 py-3 transition-[border-color,background-color] duration-200 hover:border-primary/40 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
             >
               <span className="min-w-0">
                 <span className="block text-sm font-semibold text-foreground">

@@ -1,14 +1,14 @@
 import { Link } from "@tanstack/react-router";
 
+import AppHeader from "@/components/layout/AppHeader";
 import { BackIcon } from "@/components/ui";
 import Footer from "@/features/landing/components/Footer";
-import Header from "@/features/landing/components/Header";
 
 export function BlogNotFound() {
   return (
     <div className="relative flex min-h-screen flex-col bg-background text-foreground">
-      <Header />
-      <main className="relative z-10 mx-auto flex max-w-7xl flex-1 flex-col items-center justify-center px-4 pt-32 pb-24 sm:px-6 lg:px-8">
+      <AppHeader mode="public" />
+      <main className="relative z-10 mx-auto flex max-w-7xl flex-1 flex-col items-center justify-center px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
         <div className="space-y-6 text-center">
           <h1 className="text-4xl font-semibold tracking-tight">
             Article not found

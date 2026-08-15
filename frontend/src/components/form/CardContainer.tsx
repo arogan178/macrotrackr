@@ -7,16 +7,16 @@ import { cn } from "@/lib/classnameUtilities";
 const cardVariants = {
   default: formStyles.card.container,
   transparent: cn(
-    "rounded-xl border border-border",
+    "rounded-control border border-border",
     "bg-transparent p-4",
-    "hover:border-white/20",
+    "hover:border-border-2",
     "transition-colors duration-150",
   ),
   interactive: cn(
     formStyles.card.container,
     "group cursor-pointer",
     "transition-colors duration-300 ease-out",
-    "hover:border-white/20"
+    "hover:border-border-2"
   )
 };
 

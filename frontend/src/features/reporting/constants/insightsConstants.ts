@@ -7,17 +7,17 @@ export const SCORE_COLORS = {
 export const METRIC_CARD_CONFIGS = {
   consistency: {
     bgGradient: "bg-surface-2",
-    borderColor: "border border-border/40",
+    borderColor: "border border-border",
     textColor: "text-foreground/90",
   },
   macroBalance: {
     bgGradient: "bg-surface-2",
-    borderColor: "border border-border/40",
+    borderColor: "border border-border",
     textColor: "text-foreground/90",
   },
   macroDensity: {
     bgGradient: "bg-surface-2",
-    borderColor: "border border-border/40",
+    borderColor: "border border-border",
     textColor: "text-foreground/90",
   },
 } as const;

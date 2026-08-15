@@ -40,11 +40,12 @@ const CustomDonutTooltip = ({
     const isCount = selectedStat === "count";
     const unit = isCount
       ? " meals"
-      : ` ${getUnitForStat(selectedStat)}/day`;
-    const color = (payload[0].payload.fill ?? payload[0].color) as string;
+      : ` ${getUnitForStat(selectedStat ?? "calories")}/day`;
+    const entry = payload[0] as { payload?: Record<string, unknown>; color?: string };
+    const color = (entry.payload?.fill ?? entry.color ?? "var(--color-primary)") as string;
 
     return (
-      <div className="rounded-lg border border-border/50 bg-surface-2 p-3 shadow-xl">
+      <div className="rounded-control border border-border bg-surface-2 p-3">
         <div className="flex items-center gap-2">
           <div
             className="h-3 w-3 rounded-full"

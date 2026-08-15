@@ -31,4 +31,4 @@ export interface UserNutritionalProfile {
   tdee: number;
 }
 
-export {type ActivityLevel} from "@/utils/userConstants";
+export { type ActivityLevel } from "@/types/activity";

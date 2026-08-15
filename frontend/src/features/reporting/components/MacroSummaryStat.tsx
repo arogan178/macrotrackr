@@ -182,7 +182,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         <div className="text-right min-w-0 whitespace-nowrap">
           <span
             className={`text-sm font-semibold ${
-              gramDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+              gramDelta >= 0 ? "text-success" : "text-error"
             }`}
           >
             <AnimatedNumber
@@ -195,7 +195,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
           </span>
           <span
             className={`ml-1.5 text-xs ${
-              percentageDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+              percentageDelta >= 0 ? "text-success" : "text-error"
             }`}
           >
             (
@@ -220,7 +220,6 @@ export default function MacroSummaryStats({
   calorieTarget,
   macroTarget,
   trackedDays,
-  _totalDays,
   averages,
 }: MacroSummaryStatsProps) {
   const effectiveCalorieTarget = calorieTarget || 2000;
@@ -267,7 +266,7 @@ export default function MacroSummaryStats({
   if (!macroAvg) return null;
 
   const cardClasses =
-    "p-3.5 sm:p-4 border border-border/40 bg-surface transition-colors duration-200 hover:border-white/20";
+    "p-3.5 sm:p-4 border border-border bg-surface transition-colors duration-200 hover:border-border-2";
 
   const trackedSubtext =
     trackedDays !== undefined
@@ -275,7 +274,7 @@ export default function MacroSummaryStats({
       : null;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4 lg:grid-cols-4">
+    <div className="mb-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
       {/* Calories Card */}
       <CardContainer variant="interactive" className={cardClasses}>
         <div className="flex flex-1 flex-col justify-between">
@@ -284,7 +283,7 @@ export default function MacroSummaryStats({
               Calories
             </span>
             {trackedSubtext && (
-              <span className="text-[10px] text-muted-foreground shrink-0">
+              <span className="text-[10px] text-muted shrink-0">
                 {trackedSubtext}
               </span>
             )}
@@ -318,8 +317,8 @@ export default function MacroSummaryStats({
             <span
               className={`text-sm font-semibold ${
                 avgCalories - effectiveCalorieTarget >= 0
-                  ? "text-emerald-400"
-                  : "text-rose-400"
+                  ? "text-success"
+                  : "text-error"
               }`}
             >
               <AnimatedNumber

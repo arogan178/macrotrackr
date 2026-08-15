@@ -1,9 +1,9 @@
 import React from "react";
 
-import PageBackground from "@/components/layout/PageBackground";
+import AppHeader from "@/components/layout/AppHeader";
+import PageShell from "@/components/layout/PageShell";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
-import LegalHeader from "@/features/landing/components/LegalHeader";
 import { usePageMetadata } from "@/hooks";
 import { buildCanonicalUrl, SUPPORT_EMAIL, SUPPORT_EMAIL_MAILTO } from "@/utils/appConstants";
 
@@ -16,13 +16,11 @@ const PrivacyPolicyPage: React.FC = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden text-foreground selection:bg-primary/30">
-      <PageBackground />
-      <LegalHeader />
+      <AppHeader mode="minimal" />
 
-      <main className="relative z-10 px-4 pt-24 pb-14 sm:px-6 sm:pt-28 lg:px-8">
-        <section>
-          <div className="mx-auto max-w-4xl">
-            <div className="rounded-3xl border border-border/70 bg-background/70 p-8 shadow-2xl shadow-black/10 backdrop-blur-sm lg:p-10">
+      <PageShell width="prose">
+        <div>
+            <div className="rounded-card border border-border bg-background p-8 lg:p-10">
               <h1 className="mb-6 text-4xl font-bold text-foreground">
                 Privacy Policy
               </h1>
@@ -115,8 +113,7 @@ const PrivacyPolicyPage: React.FC = () => {
               </div>
             </div>
           </div>
-        </section>
-      </main>
+      </PageShell>
 
       <Footer />
       <BackToTopButton label="Back to top" className="bottom-32 sm:bottom-28" />

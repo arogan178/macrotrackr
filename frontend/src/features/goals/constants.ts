@@ -46,7 +46,7 @@ export const DEFAULT_TARGET_WEEKS = 12;
 
 // Weight goal options (semantic values only)
 export const WEIGHT_GOAL_OPTIONS = [
-  { value: "lose", label: "Lose Weight", color: "text-vibrant-accent" },
+  { value: "lose", label: "Lose Weight", color: "text-primary" },
   { value: "maintain", label: "Maintain Weight", color: "text-primary" },
   { value: "gain", label: "Gain Weight", color: "text-success" },
 ] as const;
@@ -73,11 +73,11 @@ export const WEIGHT_VALIDATION = {
  * Success and error messages
  */
 export const SUCCESS_MESSAGES = {
-  goalCreated: "Weight goal created successfully!",
-  goalUpdated: "Weight goal updated successfully!",
-  goalDeleted: "Weight goal deleted successfully!",
-  weightLogged: "Weight logged successfully!",
-  weightDeleted: "Weight entry deleted successfully!",
+  goalCreated: "Weight goal created",
+  goalUpdated: "Weight goal updated",
+  goalDeleted: "Weight goal deleted",
+  weightLogged: "Weight logged",
+  weightDeleted: "Weight entry deleted",
 } as const;
 
 export const ERROR_MESSAGES = {

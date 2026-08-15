@@ -116,7 +116,7 @@ export function useRealtimeSync(isAuthenticated: boolean) {
 
     let eventSource: EventSource | null = null;
     let isCancelled = false;
-    let reconnectTimeout: Timer | null = null;
+    let reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
     let retryCount = 0;
 
     function cleanupSSE() {

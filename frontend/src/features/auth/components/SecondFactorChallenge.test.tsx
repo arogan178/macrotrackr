@@ -15,7 +15,7 @@ const totpFactor: SecondFactorOption = { strategy: "totp" };
 const backupFactor: SecondFactorOption = { strategy: "backup_code" };
 
 function renderChallenge(overrides: Partial<Parameters<typeof SecondFactorChallenge>[0]> = {}) {
-  const props = {
+  const properties = {
     option: emailFactor,
     options: [emailFactor],
     isDeviceTrust: true,
@@ -30,9 +30,9 @@ function renderChallenge(overrides: Partial<Parameters<typeof SecondFactorChalle
     ...overrides,
   };
 
-  render(<SecondFactorChallenge {...props} />);
+  render(<SecondFactorChallenge {...properties} />);
 
-  return props;
+  return properties;
 }
 
 describe("SecondFactorChallenge", () => {
@@ -40,16 +40,16 @@ describe("SecondFactorChallenge", () => {
     renderChallenge();
 
     expect(screen.getByText("Verify this device")).toBeInTheDocument();
-    expect(screen.getByText(/j\*\*\*\*@example\.com/)).toBeInTheDocument();
+    expect(screen.getByText(/j\*{4}@example\.com/)).toBeInTheDocument();
   });
 
   it("submits the entered code", async () => {
     const user = userEvent.setup();
-    const props = renderChallenge({ code: "123456" });
+    const properties = renderChallenge({ code: "123456" });
 
     await user.click(screen.getByRole("button", { name: "Verify" }));
 
-    expect(props.onSubmit).toHaveBeenCalledOnce();
+    expect(properties.onSubmit).toHaveBeenCalledOnce();
   });
 
   it("blocks submission until a code is entered", () => {
@@ -84,7 +84,7 @@ describe("SecondFactorChallenge", () => {
 
   it("lets the user switch to another available factor", async () => {
     const user = userEvent.setup();
-    const props = renderChallenge({
+    const properties = renderChallenge({
       option: totpFactor,
       options: [totpFactor, backupFactor],
       isDeviceTrust: false,
@@ -92,7 +92,7 @@ describe("SecondFactorChallenge", () => {
 
     await user.click(screen.getByRole("button", { name: "Use a backup code" }));
 
-    expect(props.onSelectStrategy).toHaveBeenCalledWith(backupFactor);
+    expect(properties.onSelectStrategy).toHaveBeenCalledWith(backupFactor);
   });
 
   it("does not offer the factor already in use as an alternative", () => {
@@ -111,10 +111,10 @@ describe("SecondFactorChallenge", () => {
 
   it("can be abandoned", async () => {
     const user = userEvent.setup();
-    const props = renderChallenge();
+    const properties = renderChallenge();
 
     await user.click(screen.getByRole("button", { name: "Back" }));
 
-    expect(props.onCancel).toHaveBeenCalledOnce();
+    expect(properties.onCancel).toHaveBeenCalledOnce();
   });
 });

@@ -16,10 +16,10 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
         {[0, 1].map((index) => (
           <div
             key={index}
-            className="flex flex-1 h-8 animate-pulse items-center justify-between rounded-full border border-border/60 bg-surface px-3 py-1.5"
+            className="flex flex-1 h-8 animate-pulse items-center justify-between rounded-full border border-border bg-surface px-3 py-1.5"
           >
-            <div className="h-3 w-10 rounded bg-surface-2" />
-            <div className="h-3 w-12 rounded bg-surface-2" />
+            <div className="h-3 w-10 rounded-control bg-surface-2" />
+            <div className="h-3 w-12 rounded-control bg-surface-2" />
           </div>
         ))}
       </div>
@@ -27,15 +27,13 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
         {[0, 1].map((index) => (
           <div
             key={index}
-            className="flex h-40 animate-pulse flex-col justify-between rounded-2xl border border-border/60 bg-surface p-5"
+            className="animate-pulse rounded-card border border-border bg-surface p-5"
           >
             <div className="flex items-start gap-4">
-              <div className="rounded-2xl border border-border/40 bg-surface-2 p-3.5">
-                <div className="h-6 w-6 rounded bg-surface-3" />
-              </div>
+              <div className="h-11 w-11 shrink-0 rounded-card bg-surface-2" />
               <div className="min-w-0 flex-1">
-                <div className="mb-2 h-4 w-3/4 rounded bg-surface-2" />
-                <div className="h-8 w-2/5 rounded bg-surface-2" />
+                <div className="mb-2 h-4 w-16 rounded-control bg-surface-2" />
+                <div className="h-8 w-2/5 rounded-control bg-surface-2" />
               </div>
             </div>
           </div>
@@ -45,10 +43,6 @@ const LoadingSkeleton = memo(function LoadingSkeleton() {
   );
 });
 
-function formatOrUndefined(n?: number) {
-  return n ?? undefined;
-}
-
 function UserMetricsPanel({
   bmr,
   tdee,
@@ -57,8 +51,20 @@ function UserMetricsPanel({
   if (isLoading) return <LoadingSkeleton />;
 
   const metrics = [
-    { label: "BMR", value: bmr, icon: UserIcon, iconClass: "text-primary" },
-    { label: "TDEE", value: tdee, icon: StarIcon, iconClass: "text-primary" },
+    {
+      label: "BMR",
+      meaning: "at rest",
+      value: bmr,
+      icon: UserIcon,
+      iconClass: "text-primary",
+    },
+    {
+      label: "TDEE",
+      meaning: "with activity",
+      value: tdee,
+      icon: StarIcon,
+      iconClass: "text-primary",
+    },
   ];
 
   return (
@@ -67,7 +73,7 @@ function UserMetricsPanel({
         {metrics.map(({ label, value, icon: Icon, iconClass }) => (
           <div
             key={label}
-            className="flex flex-1 items-center justify-between gap-2 rounded-full border border-border/60 bg-surface px-3.5 py-1.5 shadow-xs"
+            className="flex flex-1 items-center justify-between gap-2 rounded-full border border-border bg-surface px-3.5 py-1.5 shadow-xs"
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <Icon className={`h-3.5 w-3.5 shrink-0 ${iconClass}`} strokeWidth={1.5} />
@@ -80,23 +86,22 @@ function UserMetricsPanel({
         ))}
       </div>
 
+      {/* Two cards, as before. What truncated was never the layout — it was
+          spelling out "Basal Metabolic Rate (BMR)" in a third-width column.
+          The acronyms are the names people actually use for these, and the
+          subtitle says what they mean without competing for the line. */}
       <div className="hidden sm:grid sm:grid-cols-2 sm:gap-4">
-        <MetricCard
-          icon={UserIcon}
-          title="Basal Metabolic Rate"
-          acronym="BMR"
-          value={formatOrUndefined(bmr)}
-          color="primary"
-          showKcalSuffix
-        />
-        <MetricCard
-          icon={StarIcon}
-          title="Total Daily Energy"
-          acronym="TDEE"
-          value={formatOrUndefined(tdee)}
-          color="primary"
-          showKcalSuffix
-        />
+        {metrics.map(({ label, meaning, value, icon }) => (
+          <MetricCard
+            key={label}
+            icon={icon}
+            title={label}
+            subtitle={meaning}
+            value={value || undefined}
+            tone="primary"
+            unit="kcal"
+          />
+        ))}
       </div>
     </>
   );

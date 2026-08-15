@@ -3,9 +3,11 @@
 
 import {
   cleanupOutdatedCaches,
+  createHandlerBoundToURL,
   precacheAndRoute,
   type PrecacheEntry,
 } from "workbox-precaching";
+import { NavigationRoute, registerRoute } from "workbox-routing";
 
 declare global {
   // Workbox injectManifest replaces this at build time.
@@ -22,6 +24,13 @@ interface ServiceWorkerRuntime {
     (
       type: "message",
       listener: (event: { data?: { type?: string } }) => void,
+    ): void;
+    (
+      type: "fetch",
+      listener: (event: {
+        request: Request;
+        respondWith: (response: Promise<Response> | Response) => void;
+      }) => void,
     ): void;
   };
   clients: {
@@ -50,6 +59,20 @@ const sw = globalThis as unknown as ServiceWorkerRuntime;
 const injectedManifest = globalThis.__WB_MANIFEST;
 precacheAndRoute(injectedManifest);
 
+// Serve the cached shell for any navigation the precache does not match.
+//
+// `_redirects` gives the SPA fallback (`/* /index.html 200`), but that is the
+// host's job and the host needs the network. Offline, `precacheAndRoute` only
+// matched precached URLs — `/` resolved via Workbox's `directoryIndex`, so a
+// cold launch at `start_url` worked and a refresh on /home or /goals did not.
+// The API routes are excluded: those should fail as requests rather than be
+// answered with an HTML document.
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL("index.html"), {
+    denylist: [/^\/api\//],
+  }),
+);
+
 sw.addEventListener("activate", (event) => {
   event.waitUntil(
     caches
@@ -71,6 +94,15 @@ sw.addEventListener("activate", (event) => {
         });
       }),
   );
+});
+
+// SPA navigations: precacheAndRoute only matches precached URLs, so offline a
+// refresh worked at / and nowhere else - /home, /goals and every article
+// 404'd. The _redirects SPA fallback lives on the server and needs the
+// network, which is exactly what is missing. Serve the precached shell for any
+// navigation instead, and let the router take it from there.
+sw.addEventListener("fetch", (event) => {
+  if (event.request.mode !== "navigate") return;
 });
 
 // Handle messages from the main thread

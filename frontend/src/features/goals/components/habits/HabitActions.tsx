@@ -110,7 +110,7 @@ function HabitActions({
         <button
           onClick={handleDelete}
           disabled={isActionInProgress}
-          className="rounded-full p-1.5 text-vibrant-accent hover:bg-vibrant-accent/10"
+          className="rounded-full p-1.5 text-primary hover:bg-primary/10"
           title="Delete habit"
         >
           <TrashIcon size="sm" />
@@ -128,7 +128,7 @@ function HabitActions({
       )}{" "}
       {/* Dropdown menu - Smaller card and text */}
       {isMenuOpen && (
-        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-xl border border-border bg-surface py-0.5 text-xs">
+        <div className="absolute top-full right-0 z-50 mt-1 w-32 rounded-control border border-border bg-surface py-0.5 text-xs">
           {onEdit && (
             <button
               onClick={handleEdit}

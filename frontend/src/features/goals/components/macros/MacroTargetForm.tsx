@@ -129,7 +129,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
             </div>
 
             {/* Show skeleton loader when loading or when we don't have valid values yet */}
-            <div className="rounded-2xl border border-border/60 bg-surface-2 p-5">
+            <div className="rounded-card border border-border bg-surface-2 p-5">
               {hasValidValues ? (
                 <MacroTarget
                   initialValues={displayValues}
@@ -145,8 +145,8 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                     {/* Protein slider skeleton */}
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <div className="h-4 w-20 animate-pulse rounded bg-surface" />
-                        <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                        <div className="h-4 w-20 animate-pulse rounded-control bg-surface" />
+                        <div className="h-4 w-12 animate-pulse rounded-control bg-surface" />
                       </div>
                       <div className="h-2 animate-pulse rounded-full bg-surface" />
                     </div>
@@ -154,8 +154,8 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                     {/* Carbs slider skeleton */}
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <div className="h-4 w-20 animate-pulse rounded bg-surface" />
-                        <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                        <div className="h-4 w-20 animate-pulse rounded-control bg-surface" />
+                        <div className="h-4 w-12 animate-pulse rounded-control bg-surface" />
                       </div>
                       <div className="h-2 animate-pulse rounded-full bg-surface" />
                     </div>
@@ -163,8 +163,8 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
                     {/* Fats slider skeleton */}
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <div className="h-4 w-20 animate-pulse rounded bg-surface" />
-                        <div className="h-4 w-12 animate-pulse rounded bg-surface" />
+                        <div className="h-4 w-20 animate-pulse rounded-control bg-surface" />
+                        <div className="h-4 w-12 animate-pulse rounded-control bg-surface" />
                       </div>
                       <div className="h-2 animate-pulse rounded-full bg-surface" />
                     </div>
@@ -172,9 +172,9 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
 
                   {/* Skeleton for badges */}
                   <div className="grid grid-cols-3 gap-2 pt-5">
-                    <div className="h-10 animate-pulse rounded bg-surface" />
-                    <div className="h-10 animate-pulse rounded bg-surface" />
-                    <div className="h-10 animate-pulse rounded bg-surface" />
+                    <div className="h-10 animate-pulse rounded-control bg-surface" />
+                    <div className="h-10 animate-pulse rounded-control bg-surface" />
+                    <div className="h-10 animate-pulse rounded-control bg-surface" />
                   </div>
                 </div>
               )}
@@ -261,7 +261,7 @@ function MacroTargetForm({ macroTarget }: MacroTargetFormProps) {
               <InfoCard
                 title="Tips"
                 color="indigo"
-                icon={<InfoIcon className="h-4 w-4 text-vibrant-accent" />}
+                icon={<InfoIcon className="h-4 w-4 text-primary" />}
               >
                 <ul className="mt-2 space-y-2 text-sm text-muted">
                   <li>• For muscle growth keep protein between 20-35% </li>

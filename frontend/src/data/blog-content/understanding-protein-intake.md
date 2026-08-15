@@ -1,6 +1,6 @@
 # The Complete Guide to Protein Intake: How Much, What Kind, and When
 
-Protein is the most discussed macronutrient in fitness—and for good reason. It's the building block of muscle, essential for recovery, and the most satiating nutrient you can eat.
+Protein is the most discussed macronutrient in fitness, and for good reason. It's the building block of muscle, essential for recovery, and the most satiating nutrient you can eat.
 
 But walk into any gym or scroll through fitness forums and you'll hear conflicting advice:
 - "You need 2g per pound of body weight!"
@@ -15,7 +15,7 @@ Before diving into numbers, understand what protein actually does in your body:
 
 **Muscle Protein Synthesis (MPS):** Protein provides amino acids that build and repair muscle tissue. Without adequate protein, you can't recover from training or build new muscle.
 
-**Satiety:** Protein is the most filling macronutrient. Eat 200 calories of chicken breast versus 200 calories of bread—the chicken keeps you full longer.
+**Satiety:** Protein is the most filling macronutrient. Eat 200 calories of chicken breast versus 200 calories of bread. The chicken keeps you full longer.
 
 **Thermic Effect:** Your body burns 20-30% of protein calories just digesting it. For carbs and fats, it's 5-10%.
 
@@ -23,7 +23,7 @@ Before diving into numbers, understand what protein actually does in your body:
 
 ## How Much Protein Do You Actually Need?
 
-The answer depends on your goals, activity level, and body composition.
+The answer depends on your goals, activity level, and body composition. If you would rather not do the arithmetic, the [protein calculator](/tools/protein-calculator) works it out from your weight and training load, and needs no account.
 
 ### The Bare Minimum (RDA)
 
@@ -61,9 +61,9 @@ When eating fewer calories, protein needs increase to preserve muscle: **0.8-1.2
 
 You'll hear people claim you "can't absorb more than 30g of protein per meal." This is misinformation.
 
-**What the 30g number actually refers to:** Research suggests that 20-40g of high-quality protein maximally stimulates muscle protein synthesis (MPS) in a single sitting. This doesn't mean excess protein is wasted—it just means the *rate* of muscle building may not increase beyond that point.
+**What the 30g number actually refers to:** Research suggests that 20-40g of high-quality protein maximally stimulates muscle protein synthesis (MPS) in a single sitting. This doesn't mean excess protein is wasted. It just means the *rate* of muscle building may not increase beyond that point.
 
-**What actually happens:** Your body absorbs what you eat. Eat 60g of protein in a meal, and you'll absorb 60g. Some will be used for MPS, some for other bodily functions, and yes, excess can be converted to glucose or fat—but this is true of any macronutrient in excess.
+**What actually happens:** Your body absorbs what you eat. Eat 60g of protein in a meal, and you'll absorb 60g. Some will be used for MPS, some for other bodily functions, and yes, excess can be converted to glucose or fat, but this is true of any macronutrient in excess.
 
 **Practical takeaway:** Distribute protein across 3-5 meals for optimal MPS, but don't stress if one meal is protein-heavy.
 
@@ -73,7 +73,7 @@ You'll hear people claim you "can't absorb more than 30g of protein per meal." T
 
 Old school bodybuilding said you needed protein within 30 minutes post-workout or the session was "wasted."
 
-**Current research shows:** The anabolic window is much wider—possibly up to 24 hours. Total daily protein intake matters far more than timing.
+**Current research shows:** The anabolic window is much wider, possibly up to 24 hours. Total daily protein intake matters far more than timing.
 
 ### Optimal Distribution
 
@@ -129,7 +129,7 @@ More than 40g? You're not getting extra MPS benefit, but the protein isn't waste
 | Tofu | 8g | Good | Vegetarian/vegan |
 | Eggs | 13g | Excellent | Any meal |
 
-**The fix for plant proteins:** Combine complementary sources throughout the day. You don't need them in the same meal—just within the same 24-hour period.
+**The fix for plant proteins:** Combine complementary sources throughout the day. You don't need them in the same meal, just within the same 24-hour period.
 
 **Classic combinations:**
 - Rice + beans
@@ -256,6 +256,6 @@ Protein is the most important macronutrient for anyone training regularly. Set y
 
 Don't overcomplicate it. Hit your daily target consistently, train hard, and the results will follow.
 
-— The MacroTrackr Team
+The MacroTrackr Team
 
 *Track your protein intake effortlessly with MacroTrackr's free tier. [Sign up here](/register).*
