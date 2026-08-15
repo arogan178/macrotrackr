@@ -8,7 +8,7 @@
     "build": "bunx vite build",
     "postbuild": "bun ./scripts/generate-sitemap.js || node ./scripts/generate-sitemap.js",
     "preview": "bunx vite preview",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "eslint src && node ./scripts/check-ui-budgets.mjs",
     "test": "vitest run",
     "test:e2e": "playwright test --config ./playwright.config.ts",
@@ -61,6 +61,7 @@
     "remark-gfm": "^4.0.1",
     "remotion": "^4.0.448",
     "tailwind-merge": "^3.5.0",
+    "workbox-routing": "^7.4.1",
     "zustand": "^5.0.12"
   },
   "devDependencies": {

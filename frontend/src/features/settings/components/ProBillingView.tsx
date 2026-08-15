@@ -111,7 +111,7 @@ const ProBillingView: React.FC<{
           fullWidth
           variant="primary"
           className={isActionRequired ? "animate-pulse" : ""}
-          icon={<ExternalLinkIcon />}
+          leftIcon={<ExternalLinkIcon />}
           ariaLabel="Manage your Pro subscription"
         >
           {isActionRequired ? "Fix Payment Issue" : "Manage Subscription"}
@@ -247,7 +247,7 @@ const ProBillingView: React.FC<{
               }}
               variant="primary"
               className="flex-1"
-              icon={<ExternalLinkIcon className="h-4 w-4" />}
+              leftIcon={<ExternalLinkIcon className="h-4 w-4" />}
             >
               Continue to Portal
             </Button>

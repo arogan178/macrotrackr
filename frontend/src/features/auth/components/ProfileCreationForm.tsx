@@ -168,7 +168,6 @@ export function ProfileCreationForm() {
     if (!isSignedIn) {
       logger.error("Profile creation attempted without authentication:", {
         isSignedIn,
-        hasGetToken: !!getToken,
       });
       showNotification(
         "Authentication required. Please sign in again.",

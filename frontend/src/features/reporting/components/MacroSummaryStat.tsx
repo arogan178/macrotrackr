@@ -182,7 +182,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
         <div className="text-right min-w-0 whitespace-nowrap">
           <span
             className={`text-sm font-semibold ${
-              gramDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+              gramDelta >= 0 ? "text-success" : "text-error"
             }`}
           >
             <AnimatedNumber
@@ -195,7 +195,7 @@ const MacroSummaryItem = React.memo(function MacroSummaryItem({
           </span>
           <span
             className={`ml-1.5 text-xs ${
-              percentageDelta >= 0 ? "text-emerald-400" : "text-rose-400"
+              percentageDelta >= 0 ? "text-success" : "text-error"
             }`}
           >
             (
@@ -220,7 +220,6 @@ export default function MacroSummaryStats({
   calorieTarget,
   macroTarget,
   trackedDays,
-  _totalDays,
   averages,
 }: MacroSummaryStatsProps) {
   const effectiveCalorieTarget = calorieTarget || 2000;
@@ -318,8 +317,8 @@ export default function MacroSummaryStats({
             <span
               className={`text-sm font-semibold ${
                 avgCalories - effectiveCalorieTarget >= 0
-                  ? "text-emerald-400"
-                  : "text-rose-400"
+                  ? "text-success"
+                  : "text-error"
               }`}
             >
               <AnimatedNumber

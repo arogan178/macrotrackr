@@ -29,7 +29,7 @@ const FreeBillingView: React.FC<{
         fullWidth
         variant="primary"
         className="bg-warning py-4 text-lg font-bold text-black hover:bg-warning/90"
-        icon={<StarIcon className="" />}
+        leftIcon={<StarIcon className="" />}
         ariaLabel="Upgrade to Pro"
       >
         Upgrade to Pro

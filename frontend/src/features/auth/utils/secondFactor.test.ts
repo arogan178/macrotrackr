@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  buildPrepareParams,
+  buildPrepareParams as buildPrepareParameters,
   describeSecondFactor,
   isNumericCode,
   parseSecondFactors,
@@ -108,23 +108,23 @@ describe("requiresCodeDelivery", () => {
 describe("buildPrepareParams", () => {
   it("passes the address id through when Clerk supplied one", () => {
     expect(
-      buildPrepareParams({ strategy: "email_code", emailAddressId: "idn_1" }),
+      buildPrepareParameters({ strategy: "email_code", emailAddressId: "idn_1" }),
     ).toEqual({ strategy: "email_code", emailAddressId: "idn_1" });
 
     expect(
-      buildPrepareParams({ strategy: "phone_code", phoneNumberId: "idn_2" }),
+      buildPrepareParameters({ strategy: "phone_code", phoneNumberId: "idn_2" }),
     ).toEqual({ strategy: "phone_code", phoneNumberId: "idn_2" });
   });
 
   it("omits the id when absent so Clerk picks the default destination", () => {
-    expect(buildPrepareParams({ strategy: "email_code" })).toEqual({
+    expect(buildPrepareParameters({ strategy: "email_code" })).toEqual({
       strategy: "email_code",
     });
   });
 
   it("returns null for strategies that need no preparation", () => {
-    expect(buildPrepareParams({ strategy: "totp" })).toBeNull();
-    expect(buildPrepareParams({ strategy: "backup_code" })).toBeNull();
+    expect(buildPrepareParameters({ strategy: "totp" })).toBeNull();
+    expect(buildPrepareParameters({ strategy: "backup_code" })).toBeNull();
   });
 });
 

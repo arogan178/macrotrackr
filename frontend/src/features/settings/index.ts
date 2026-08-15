@@ -21,6 +21,5 @@ export {
   createNutritionProfile,
   createUserSettings,
 } from "./utils/calculations";
-export * from "./utils/constants";
 export { default as parseBillingError } from "./utils/parseBillingError";
 export * from "./utils/validation";

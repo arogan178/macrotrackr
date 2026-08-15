@@ -152,6 +152,12 @@ export function ClerkSignInForm({
       return;
     }
 
+    if (!setActive) {
+      showNotification(AUTH_NOT_READY_MESSAGE, "error");
+
+      return;
+    }
+
     await setActive({ session: createdSessionId });
     await saveBiometricCredentials(email.trim().toLowerCase(), password);
     showNotification("Signed in successfully!", "success");
@@ -176,7 +182,7 @@ export function ClerkSignInForm({
   const prepareAndShowSecondFactor = async (option: SecondFactorOption) => {
     const prepareParameters = buildPrepareParams(option);
 
-    if (prepareParameters) {
+    if (prepareParameters && signIn) {
       await signIn.prepareSecondFactor(prepareParameters);
     }
 
@@ -361,12 +367,12 @@ export function ClerkSignInForm({
           const res = await signIn.create({
             strategy,
             redirectUrl,
-            redirectUrlComplete,
+            actionCompleteRedirectUrl: redirectUrlComplete,
           });
 
           externalUrl =
-            res.firstFactorVerification?.externalVerificationRedirectUrl?.toString() ||
-            (res as any)?.verifications?.externalVerificationRedirectUrl?.toString();
+            res.firstFactorVerification?.externalVerificationRedirectURL?.toString() ||
+            (res as any)?.verifications?.externalVerificationRedirectURL?.toString();
         } catch (signInError) {
           logger.warn(
             "signIn.create externalUrl unavailable on sign-in, trying signUp.create:",
@@ -379,12 +385,12 @@ export function ClerkSignInForm({
             const signUpRes = await signUp.create({
               strategy,
               redirectUrl,
-              redirectUrlComplete,
+              actionCompleteRedirectUrl: redirectUrlComplete,
             });
 
             externalUrl =
-              signUpRes.verifications?.externalVerificationRedirectUrl?.toString() ||
-              (signUpRes as any)?.firstFactorVerification?.externalVerificationRedirectUrl?.toString();
+              signUpRes.verifications?.externalAccount?.externalVerificationRedirectURL?.toString() ||
+              (signUpRes as any)?.firstFactorVerification?.externalVerificationRedirectURL?.toString();
           } catch (signUpError) {
             logger.warn(
               "signUp.create externalUrl also unavailable on sign-in:",

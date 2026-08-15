@@ -18,6 +18,37 @@ describe("resolveSocialAuthError", () => {
     });
   });
 
+  it("does not tell a first-time user we cannot link their account", () => {
+    // Signing in with Google when no account exists produced Clerk's raw
+    // "unable to link that account", which describes an operation the reader
+    // never asked for.
+    const resolution = resolveSocialAuthError(
+      {
+        errors: [
+          {
+            code: "external_account_not_found",
+            message: "We are unable to link that account",
+          },
+        ],
+      },
+      "signin",
+    );
+
+    expect(resolution.message).not.toMatch(/link/i);
+    expect(resolution.message).toMatch(/sign up first/i);
+    expect(resolution.action).toBe("show-email");
+  });
+
+  it("points a blocked social sign-up at email, not at nothing", () => {
+    const resolution = resolveSocialAuthError(
+      { errors: [{ code: "external_account_exists" }] },
+      "signup",
+    );
+
+    expect(resolution.message).toMatch(/email instead/i);
+    expect(resolution.action).toBe("show-email");
+  });
+
   it("surfaces provider configuration problems as email fallback", () => {
     expect(
       resolveSocialAuthError(

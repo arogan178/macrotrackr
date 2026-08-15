@@ -15,7 +15,7 @@ export default function TrendDisplay({
   unit = "g",
 }: TrendDisplayProps) {
   const colorMap: Record<string, string> = {
-    up: "var(--color-success, #4ad435)",
+    up: "var(--color-success, #57c04a)",
     down: "var(--color-error, #e91429)",
     stable: "var(--text-muted, #aba49c)",
   };
