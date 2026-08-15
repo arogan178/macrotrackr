@@ -1,11 +1,13 @@
 import React, { useCallback, useMemo } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { useReducedMotion } from "motion/react";
 
 import AppHeader from "@/components/layout/AppHeader";
-import { ContentImage, StateCard } from "@/components/ui";
+import { StateCard, TabBar } from "@/components/ui";
+import { getButtonClasses } from "@/components/ui/Button";
 import BackToTopButton from "@/features/landing/components/BackToTopButton";
 import Footer from "@/features/landing/components/Footer";
+import { TOOLS_HUB_PATH } from "@/features/landing/tools/toolsCatalog";
 import { usePageMetadata } from "@/hooks";
 import { filterPosts, getBlogCategories } from "@/lib/blog";
 import { buildCanonicalUrl } from "@/utils/appConstants";
@@ -42,8 +44,6 @@ const BlogIndexPage: React.FC = () => {
     [search.category, search.q, search.tag],
   );
 
-  const featuredPost = filteredPosts[0];
-  const remainingPosts = filteredPosts.slice(1);
 
   const handleCategorySelection = useCallback(
     (category?: string) => {
@@ -69,221 +69,124 @@ const BlogIndexPage: React.FC = () => {
     >
       <AppHeader mode="public" />
       <main className="relative z-10 mx-auto max-w-5xl px-4 pt-[var(--header-offset)] pb-24 sm:px-6 lg:px-8">
-        <section className="mb-16">
-          <div className="flex items-start justify-between">
-            <div className="max-w-3xl">
-              <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-5xl">
-                Blog
-              </h1>
-              <p className="text-muted mt-4 text-xl">
-                Nutrition writing, product updates, and advice for tracking
-                macros.
-              </p>
-            </div>
-            <Link
-              to="/"
-              className="hidden min-h-11 items-center rounded-full border border-border bg-surface px-4 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:border-primary/40 hover:bg-surface-2 hover:text-foreground focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none sm:inline-flex"
-            >
-              ← Back to Home
-            </Link>
-          </div>
+        {/* The header the calculators use, not a fourth page-title treatment.
+            The "Back to Home" pill it replaced existed nowhere else in the app,
+            and the header logo already goes home. */}
+        <section className="mb-12 text-center">
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
+            Writing
+          </h1>
+          <p className="mx-auto mt-3 max-w-2xl text-base leading-relaxed text-muted sm:text-lg">
+            How to set a target, how to hit it, and what the numbers actually
+            mean. No product announcements.
+          </p>
         </section>
 
+        {/* The shared TabBar, not two hand-rolled chip styles. These were the
+            last filter controls in the app drawing their own active state, and
+            an active chip was solid brand green — the same green as the primary
+            action, on a control that selects rather than commits. */}
         <section className="mb-12 border-b border-border pb-6">
-          <div className="flex flex-wrap justify-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleCategorySelection(undefined)}
-              className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
-                activeCategory === "all"
-                  ? "bg-primary text-background"
-                  : "bg-surface text-muted hover:bg-surface-2 hover:text-foreground"
-              }`}
-            >
-              All
-            </button>
-            {categories.map((cat) => {
-              const isActive = activeCategory === cat.slug;
-
-              return (
-                <button
-                  key={cat.slug}
-                  type="button"
-                  onClick={() =>
-                    handleCategorySelection(isActive ? undefined : cat.slug)
-                  }
-                  className={`inline-flex min-h-11 cursor-pointer items-center justify-center rounded-full px-4 py-2 text-sm font-medium transition-[color,background-color,transform] duration-200 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none ${
-                    isActive
-                      ? "bg-primary text-background"
-                      : "bg-surface text-muted hover:bg-surface-2 hover:text-foreground"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              );
-            })}
-          </div>
+          <TabBar
+            items={[
+              { key: "all", label: "All" },
+              ...categories.map((cat) => ({ key: cat.slug, label: cat.name })),
+            ]}
+            activeKey={activeCategory}
+            onChange={(key) =>
+              handleCategorySelection(key === "all" ? undefined : key)
+            }
+            isMotion={false}
+            size="sm"
+            className="mx-auto flex-wrap justify-center"
+          />
         </section>
 
+        {/* A ruled index rather than a card grid.
+            The rest of this site takes its identity from a nutrition panel:
+            dense, ruled, figures aligned in a column. The blog was image-led
+            cards with 280px photos, which read as a different product and put
+            one article on the first screen. This puts the writing first and
+            aligns the metadata the way every other number in the app is
+            aligned. */}
         <section id="blog-posts" className="scroll-mt-32">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-[11px] font-semibold tracking-[0.18em] text-primary uppercase">
-                {activeCategory === "all" ? "Recent" : "Showing"}
-              </p>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight text-foreground">
-                {activeCategory === "all"
-                  ? "All Articles"
-                   : categories.find((c) => c.slug === activeCategory)?.name ??
-                    activeCategory}
-              </h2>
-            </div>
-            <p className="text-sm text-muted">
+          <div className="flex items-baseline justify-between border-b border-border pb-3">
+            <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
+              {activeCategory === "all"
+                ? "All writing"
+                : (categories.find((c) => c.slug === activeCategory)?.name ??
+                  activeCategory)}
+            </h2>
+            <p className="text-sm text-muted tabular-nums">
               {filteredPosts.length}{" "}
               {filteredPosts.length === 1 ? "article" : "articles"}
             </p>
           </div>
+
+          {filteredPosts.length === 0 ? (
+            <div className="py-16">
+              <StateCard
+                tone="empty"
+                title="No articles match this topic"
+                message="Pick another topic or switch back to all writing."
+              />
+            </div>
+          ) : (
+            <ol>
+              {filteredPosts.map((post, index) => (
+                <li key={post.slug}>
+                  <Link
+                    to="/blog/$slug"
+                    params={{ slug: post.slug }}
+                    className="group flex flex-col gap-2 border-b border-border py-6 transition-colors hover:bg-surface focus-visible:ring-2 focus-visible:ring-primary focus-visible:outline-none sm:flex-row sm:items-baseline sm:gap-8"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="hidden w-8 shrink-0 text-sm text-muted tabular-nums sm:block"
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-lg font-semibold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        {post.title}
+                      </span>
+                      <span className="mt-1 block text-sm leading-relaxed text-muted">
+                        {post.excerpt}
+                      </span>
+                    </span>
+
+                    <span className="flex shrink-0 items-baseline gap-4 text-xs text-muted sm:w-44 sm:justify-end">
+                      <span>{post.category}</span>
+                      <span className="tabular-nums">{post.readingTime}</span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ol>
+          )}
         </section>
 
-        <AnimatePresence mode="wait">
-          {featuredPost ? (
-            <motion.div
-              key={`articles-${activeCategory}-${search.tag ?? "all-tags"}-${search.q ?? "all-query"}`}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              {/* Featured + Sidebar */}
-              <motion.div
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, ease: "easeOut" }}
-                className="mt-8 grid h-full gap-8 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)]"
-              >
-                <Link
-                  to="/blog/$slug"
-                  params={{ slug: featuredPost.slug }}
-                  className="group block h-full overflow-hidden rounded-card border border-border bg-surface transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-                >
-                  <div className="grid h-full lg:grid-cols-[1.05fr_0.95fr]">
-                    <div className="relative hidden min-h-70 overflow-hidden border-r border-border sm:block">
-                      {featuredPost.image ? (
-                        <ContentImage
-                          src={featuredPost.image}
-                          alt={featuredPost.title}
-                          containerClassName="h-full"
-                          className="object-cover"
-                        />
-                      ) : (
-                        <div className="h-full w-full bg-muted/20" />
-                      )}
-                    </div>
-                    <div className="flex flex-col justify-between p-6">
-                      <div>
-                        <div className="text-muted flex items-center gap-2 text-xs font-medium">
-                          <span className="font-semibold text-primary">
-                            {featuredPost.category}
-                          </span>
-                          <span>·</span>
-                          <span>{featuredPost.readingTime}</span>
-                        </div>
-                        <h2 className="mt-4 text-2xl font-bold tracking-tight">
-                          {featuredPost.title}
-                        </h2>
-                        <p className="text-muted mt-3 text-base">
-                          {featuredPost.excerpt}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-
-                <div className="flex h-full flex-col gap-5">
-                  {remainingPosts.slice(0, 2).map((post) => (
-                    <Link
-                      key={post.slug}
-                      to="/blog/$slug"
-                      params={{ slug: post.slug }}
-                      className="group flex flex-1 flex-col overflow-hidden rounded-card border border-border bg-surface p-5 transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-                    >
-                      <div className="text-muted flex items-center gap-2 text-xs font-medium">
-                        <span className="text-primary">{post.category}</span>
-                        <span>·</span>
-                        <span>{post.readingTime}</span>
-                      </div>
-                      <h3 className="mt-3 text-base font-semibold tracking-tight">
-                        {post.title}
-                      </h3>
-                      <p className="text-muted mt-2 line-clamp-2 flex-1 text-sm">
-                        {post.excerpt}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* Grid Articles */}
-              {remainingPosts.length > 2 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1, ease: "easeOut" }}
-                  className="mt-10 grid gap-6 sm:grid-cols-2 xl:grid-cols-3"
-                >
-                  {remainingPosts.slice(2).map((post) => (
-                    <Link
-                      key={post.slug}
-                      to="/blog/$slug"
-                      params={{ slug: post.slug }}
-                      className="group flex h-full flex-col overflow-hidden rounded-card border border-border bg-surface transition-colors duration-200 hover:border-border-2 hover:bg-surface-2 focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background focus-visible:outline-none"
-                    >
-                      <div className="relative hidden aspect-16/10 overflow-hidden border-b border-border sm:block">
-                        {post.image ? (
-                          <ContentImage
-                            src={post.image}
-                            alt={post.title}
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="h-full w-full bg-muted/20" />
-                        )}
-                      </div>
-                      <div className="flex flex-1 flex-col p-5">
-                        <div className="text-muted flex items-center gap-2 text-xs font-medium">
-                          <span className="text-primary">{post.category}</span>
-                          <span>·</span>
-                          <span>{post.readingTime}</span>
-                        </div>
-                        <h3 className="mt-3 text-base font-semibold tracking-tight">
-                          {post.title}
-                        </h3>
-                        <p className="text-muted mt-2 flex-1 text-sm">
-                          {post.excerpt}
-                        </p>
-                      </div>
-                    </Link>
-                  ))}
-                </motion.div>
-              )}
-            </motion.div>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3 }}
-            >
-              <div className="mt-10 rounded-card border border-border bg-surface p-8">
-                <StateCard
-                  title="No articles match this topic"
-                  message="Pick another topic or switch back to all blog entries."
-                  size="md"
-                />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Someone browsing the archive is reading about targets. The
+            calculators answer that in one screen and need no account, so they
+            are the honest next step here rather than a sign-up wall. */}
+        <section className="mt-16 flex flex-wrap items-center justify-between gap-4 rounded-card border border-border bg-surface p-6">
+          <div>
+            <h2 className="text-base font-semibold text-foreground">
+              Work out your own numbers
+            </h2>
+            <p className="mt-1 text-sm text-muted">
+              Five free calculators for calories, macros and protein. No account
+              needed.
+            </p>
+          </div>
+          <Link
+            to={TOOLS_HUB_PATH}
+            className={getButtonClasses("primary", "lg", false, "px-6")}
+          >
+            Open the calculators
+          </Link>
+        </section>
       </main>
       <Footer />
       <BackToTopButton label="Back to top" />

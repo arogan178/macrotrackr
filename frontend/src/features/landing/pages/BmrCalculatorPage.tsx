@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
 import { ArrowRightIcon } from "@/components/ui";
@@ -54,6 +53,14 @@ export default function BmrCalculatorPage() {
       canonicalPath="/tools/bmr-calculator"
       description="Free Basal Metabolic Rate (BMR) calculator using the Mifflin-St Jeor equation. Calculate your baseline calories burned at rest."
       faqs={FAQS}
+      ctaResult={
+        statsReady
+          ? {
+              label: "Your BMR",
+              value: `${Math.round(bmr).toLocaleString()} kcal / day`,
+            }
+          : undefined
+      }
     >
       <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}

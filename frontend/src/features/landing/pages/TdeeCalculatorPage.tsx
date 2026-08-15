@@ -96,6 +96,14 @@ export default function TdeeCalculatorPage() {
       canonicalPath="/tools/tdee-calculator"
       description="Free TDEE Calculator (Total Daily Energy Expenditure). Estimate your daily maintenance calories and macro splits accurately."
       faqs={FAQS}
+      ctaResult={
+        statsReady
+          ? {
+              label: "Your TDEE",
+              value: `${Math.round(tdee).toLocaleString()} kcal / day`,
+            }
+          : undefined
+      }
     >
       <div className="grid grid-cols-1 gap-8 md:grid-cols-12">
         {/* Form Inputs */}

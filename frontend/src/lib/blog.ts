@@ -8,6 +8,15 @@ const contentModules = import.meta.glob("../data/blog-content/*.md", {
   eager: true,
 });
 
+/**
+ * Release notes are posts, and should stay posts: automating the changelog then
+ * means appending JSON rather than building a second content system. They just
+ * do not belong in the default feed, where two build announcements sat between
+ * articles on protein and meal prep. Filtering to the category still shows
+ * them, and a direct link still resolves.
+ */
+export const RELEASE_CATEGORY = "Releases";
+
 function slugify(value: string) {
   return value.toLowerCase().replaceAll(/[^\da-z]+/g, "-").replaceAll(/^-|-$/g, "");
 }
@@ -78,10 +87,18 @@ export function filterPosts({
   const normalizedQuery = query?.trim().toLowerCase();
 
   return normalizedPosts.filter((post) => {
+    const isRelease = post.category === RELEASE_CATEGORY;
+    const browsingEverything =
+      !normalizedCategory || normalizedCategory === "all";
+
+    // Releases are opt-in: reachable by filter, search or direct link, but not
+    // mixed into the article feed.
+    if (isRelease && browsingEverything && !normalizedTag && !normalizedQuery) {
+      return false;
+    }
+
     const matchesCategory =
-      !normalizedCategory ||
-      normalizedCategory === "all" ||
-      slugify(post.category) === normalizedCategory;
+      browsingEverything || slugify(post.category) === normalizedCategory;
 
     const matchesTag =
       !normalizedTag ||

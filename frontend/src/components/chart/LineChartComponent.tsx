@@ -18,6 +18,7 @@ import {
   NameType,
   ValueType,
 } from "recharts/types/component/DefaultTooltipContent";
+import type { ContentType } from "recharts/types/component/Tooltip";
 
 import { LoadingSpinner } from "@/components/ui";
 
@@ -278,9 +279,11 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
             <XAxis {...defaultXAxisProps} />
             <YAxis {...defaultYAxisProps} />
             <Tooltip
-              // Pass the component/element directly to the content prop
-              // Cast to any to accommodate both element and function content types across Recharts generics
-              content={TooltipContent as React.ComponentType<Record<string, unknown>>}
+              // ContentType is what the prop declares; the previous cast to
+              // ComponentType<Record<string, unknown>> was not assignable to it.
+              content={
+                TooltipContent as ContentType<ValueType, NameType>
+              }
               cursor={{ fill: "rgba(110, 118, 145, 0.1)" }}
             />
             {showLegend && (
@@ -328,6 +331,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                     )
                   }
                   connectNulls={line.connectNulls ?? false}
+                  isAnimationActive={line.isAnimationActive ?? false}
+                  animationDuration={line.animationDuration ?? 900}
                 />
               ) : (
                 <Line
@@ -347,6 +352,8 @@ const LineChartComponent: React.FC<LineChartComponentProps> = ({
                     )
                   }
                   connectNulls={line.connectNulls ?? false}
+                  isAnimationActive={line.isAnimationActive ?? false}
+                  animationDuration={line.animationDuration ?? 900}
                 />
               );
             })}

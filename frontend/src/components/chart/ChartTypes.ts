@@ -23,6 +23,10 @@ export interface LineConfig {
   type?: "monotone" | "linear" | "step" | "stepBefore" | "stepAfter";
   connectNulls?: boolean;
   isArea?: boolean;
+  /** Recharts animates on mount. Off by default in the app, where a chart
+   *  redrawing itself every time a filter changes is noise. */
+  isAnimationActive?: boolean;
+  animationDuration?: number;
 }
 
 export interface NutritionAverage {
