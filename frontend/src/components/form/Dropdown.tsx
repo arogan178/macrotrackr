@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import { formStyles } from "@/components/form/FormStyles";
 import type { DropdownProps } from "@/components/form/FormTypes";
+import { ChevronDownIcon } from "@/components/ui/Icons";
 
 import { cn } from "../../lib/classnameUtilities";
 
@@ -62,6 +63,10 @@ function Dropdown({
             </option>
           ))}
         </select>
+        <ChevronDownIcon
+          className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted"
+          aria-hidden="true"
+        />
       </div>
 
       {helperText && !error ? (

@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { useLocation } from "@tanstack/react-router";
 
 import NotificationManager from "@/components/notifications/components/NotificationManager";
+import LogSheet from "@/features/macroTracking/components/LogSheet";
 import { useUser } from "@/hooks/auth/useAuthQueries";
 import { useAppAuthState } from "@/hooks/auth/useAuthState";
 import { openLogSheet } from "@/lib/logSheet";
@@ -83,6 +84,7 @@ const MainLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
         {children}
       </main>
       {isAuthenticated && <MobileTabBar onLog={openLogSheet} />}
+      {isAuthenticated && <LogSheet />}
       <OfflineBar />
       <InstallPrompt />
       <UpdatePrompt />

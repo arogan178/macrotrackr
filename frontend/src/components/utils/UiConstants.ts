@@ -56,10 +56,10 @@ export const COLOR_MAP = {
   },
   purple: {
     bg: "bg-surface-2",
-    border: "border-purple-500/20",
-    text: "text-purple-400",
-    dot: "bg-purple-500",
-    iconColor: "text-purple-400",
+    border: "border-protein/20",
+    text: "text-protein",
+    dot: "bg-protein",
+    iconColor: "text-protein",
     acronym: "text-muted/80",
     gradient: "bg-surface-2",
   },
@@ -98,7 +98,7 @@ export const PROGRESS_BAR_COLORS = {
   green: "bg-success",
   red: "bg-error",
   accent: "bg-primary",
-  purple: "bg-secondary",
+  purple: "bg-protein",
   protein: "bg-protein",
   carbs: "bg-carbs",
   fats: "bg-fats",
@@ -152,16 +152,20 @@ export const BUTTON_VARIANTS = {
   OUTLINE: "outline",
 } as const;
 
-// Icon button size mapping (square, for icon-only buttons)
+// Icon button size mapping (square, for icon-only buttons).
+//
+// `min-h-*`/`min-w-*` are not decoration: IconButton renders through Button,
+// which contributes `min-h-11` from BUTTON_SIZES. `min-height` and `height` are
+// different properties, so tailwind-merge cannot collapse them and `h-9` lost
+// to `min-h-11` — every icon button computed 36w x 44h and `rounded-full` drew
+// that as a vertical ellipse. Pinning both axes keeps a circle a circle.
+//
+// `md` is the default and therefore meets the same 44px touch floor as
+// BUTTON_SIZES. `sm` is the dense in-row exception, never a primary action.
 export const ICON_BUTTON_SIZES = {
-  sm: "p-1.5 w-8 h-8 aspect-square", // 32px
-  md: "p-2 w-9 h-9 aspect-square", // 36px
-  lg: "p-2.5 w-10 h-10 aspect-square", // 40px
-  xl: "p-3 w-11 h-11 aspect-square", // 44px
-  "2xl": "p-4 w-12 h-12 aspect-square", // 48px
-  "3xl": "p-5 w-14 h-14 aspect-square", // 56px
-  "4xl": "p-6 w-16 h-16 aspect-square", // 64px
-  "5xl": "p-7 w-18 h-18 aspect-square", // 72px
+  sm: "p-2 w-9 h-9 min-w-9 min-h-9", // 36px
+  md: "p-2.5 w-11 h-11 min-w-11 min-h-11", // 44px
+  lg: "p-3 w-12 h-12 min-w-12 min-h-12", // 48px
 } as const;
 
 // Button size mapping (rectangular, for text/icon buttons).

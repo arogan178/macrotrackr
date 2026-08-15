@@ -28,7 +28,6 @@ export interface MetricCardProps {
   /** Always adjacent to the value, always muted, always the same spelling. */
   unit?: string;
   icon?: React.FC<React.SVGProps<SVGSVGElement>>;
-  acronym?: string;
   subtitle?: string;
   tooltipText?: string;
   tone?: MetricTone;
@@ -53,7 +52,6 @@ function MetricCardInner({
   value,
   unit,
   icon: Icon,
-  acronym,
   subtitle,
   tooltipText,
   tone = "neutral",
@@ -82,11 +80,6 @@ function MetricCardInner({
             <Heading level="panel" as="h3" className="truncate text-sm">
               {title}
             </Heading>
-            {acronym ? (
-              <span className="hidden text-xs text-muted sm:inline">
-                ({acronym})
-              </span>
-            ) : null}
             {tooltipText ? <InfoTooltip text={tooltipText} /> : null}
           </div>
           <div className="flex shrink-0 items-center gap-2">
@@ -121,11 +114,15 @@ function MetricCardInner({
               )}
             </span>
             {unit ? <span className="text-sm text-muted">{unit}</span> : null}
-            {subtitle ? (
-              <span className="ml-auto text-xs text-muted">{subtitle}</span>
-            ) : null}
           </p>
         )}
+
+        {/* The subtitle used to sit on the value's own line with `ml-auto`,
+            which pushed it hard right and wrapped it to two ragged lines in a
+            narrow card. It qualifies the number, so it belongs under it. */}
+        {subtitle && numericValue !== undefined ? (
+          <p className="mt-1 text-xs text-muted">{subtitle}</p>
+        ) : null}
 
         {children ? (
           <div className="flex flex-1 flex-col justify-between">{children}</div>

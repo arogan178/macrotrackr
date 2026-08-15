@@ -53,6 +53,19 @@ describe("MobileTabBar", () => {
     expect(navigateMock).toHaveBeenCalledWith({ to: "/goals" });
   });
 
+  it("opens the sheet in place, without navigating away", async () => {
+    // The sheet is mounted by the layout, so logging from Goals must not throw
+    // away whatever the user was doing there.
+    pathname = "/goals";
+    const onLog = vi.fn();
+    render(<MobileTabBar onLog={onLog} />);
+
+    await userEvent.click(screen.getByRole("button", { name: "Log a meal" }));
+
+    expect(onLog).toHaveBeenCalledTimes(1);
+    expect(navigateMock).not.toHaveBeenCalled();
+  });
+
   it("clears the home indicator", () => {
     render(<MobileTabBar onLog={vi.fn()} />);
 

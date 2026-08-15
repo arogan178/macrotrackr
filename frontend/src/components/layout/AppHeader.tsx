@@ -157,6 +157,18 @@ const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
   const closePopover = () => popoverRef.current?.hidePopover?.();
   React.useEffect(closePopover, [currentPath]);
 
+  // Listened for on the element rather than via an onToggle prop: React 18
+  // declares onToggle only on <details>, so a popover div cannot take one.
+  React.useEffect(() => {
+    const element = popoverRef.current;
+    if (!element) return;
+
+    const sync = () => setOpen(element.matches(":popover-open"));
+    element.addEventListener("toggle", sync);
+
+    return () => element.removeEventListener("toggle", sync);
+  }, []);
+
   const toolsPopoverItems = useMemo(
     () => [
       {
@@ -191,7 +203,6 @@ const ToolsDropdown: React.FC<{ isActive: boolean; currentPath: string }> = ({
         ref={popoverRef}
         id="tools-popover"
         popover="auto"
-        onToggle={(event) => setOpen(event.newState === "open")}
         className="w-80 rounded-card border border-border bg-surface p-2 shadow-modal [margin:0.5rem_0_0_0] [position-anchor:--tools-trigger] [position-area:bottom_span-right]"
       >
         <p
