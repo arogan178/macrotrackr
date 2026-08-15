@@ -218,41 +218,7 @@ export function resetConfigCache() {
   configOverrides = null;
 }
 
-const configProxyTarget: Config = {
-  PORT: 0,
-  HOST: "",
-  DATABASE_PATH: "",
-  CORS_ORIGIN: "",
-  NODE_ENV: "development",
-  APP_MODE: "self-hosted",
-  AUTH_MODE: "local",
-  BILLING_MODE: "disabled",
-  ANALYTICS_MODE: "disabled",
-  EMAIL_MODE: "disabled",
-  APP_URL: "",
-  PUBLIC_APP_NAME: "",
-  SUPPORT_EMAIL: "",
-  ENABLE_METRICS: false,
-  TRUST_PROXY: false,
-  STRIPE_SECRET_KEY: "",
-  STRIPE_WEBHOOK_SECRET: "",
-  STRIPE_PRICE_ID_MONTHLY: "",
-  STRIPE_PRICE_ID_YEARLY: "",
-  RESEND_API_KEY: "",
-  CLERK_PUBLISHABLE_KEY: "",
-  CLERK_SECRET_KEY: "",
-  CLERK_WEBHOOK_SECRET: "",
-  POSTHOG_KEY: "",
-  POSTHOG_HOST: "",
-  SMTP_HOST: "",
-  SMTP_PORT: 0,
-  SMTP_USER: "",
-  SMTP_PASS: "",
-  SMTP_FROM: "",
-  METRICS_API_KEY: "",
-};
-
-export const config: Config = new Proxy(configProxyTarget, {
+export const config: Config = new Proxy({} as Config, {
   get(_target, property: keyof Config) {
     return getConfig()[property];
   },

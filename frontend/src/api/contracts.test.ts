@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { authApi as authApiClient } from "../../api/auth";
+import { authApi as authApiClient } from "./auth";
 import {
   apiClient,
   ApiError,
-} from "../../api/core";
-import { userApi } from "../../api/user";
+} from "./core";
+import { userApi } from "./user";
 
 function createJsonResponse(body: unknown, init?: ResponseInit) {
   return new Response(JSON.stringify(body), {
